@@ -1,5 +1,6 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
+// System variables for Angular Material: https://angular-material.dev/articles/angular-material-theming-css-vars
 @use 'sass:map';
 @use '@angular/material' as mat;
 
@@ -73,5 +74,14 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 :root {
-  --md-sys-color-error: #df4646; // Example color
+  --md-sys-color-error: #df4646;
+}
+a {
+  color: var(--md-sys-color-primary);
+  &:hover {
+    color: var(--md-sys-color-primary-hover);
+  }
+  &:visited {
+    color: var(--md-sys-color-primary-visited);
+  }
 }

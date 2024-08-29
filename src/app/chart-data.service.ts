@@ -54,10 +54,10 @@ export interface ChartDataResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class ChartDataService {
   constructor(private apollo: Apollo) {}
 
-  fetchData(ticker: string | null | undefined): Observable<ChartData> {
+  fetchChartData(ticker: string | null | undefined): Observable<ChartData> {
     if (ticker === null || ticker === undefined) {
       return throwError(() => new Error('Ticker is required'));
     }

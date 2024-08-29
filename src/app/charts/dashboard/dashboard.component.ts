@@ -2,7 +2,7 @@ import { Component, TemplateRef, ViewChild, OnDestroy, AfterViewInit } from '@an
 import { AuthService } from '../../auth.service';
 import { MatButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
-import { ChartData } from '../../data.service';
+import { ChartData } from '../../chart-data.service';
 import { ControlComponent } from '../control/control.component';
 import { EarningsTableComponent } from '../earnings-table/earnings-table.component';
 import { CandlestickComponent } from '../candlestick/candlestick.component';

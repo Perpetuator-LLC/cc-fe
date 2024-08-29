@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subscription, throwError } from 'rxjs';
-import { ChartData, DataService } from '../../data.service';
+import { ChartData, ChartDataService } from '../../chart-data.service';
 import { ControlComponent } from './control.component';
 import { CandlestickComponent } from '../candlestick/candlestick.component';
 import { MatInput } from '@angular/material/input';
@@ -12,7 +12,7 @@ import { Apollo } from 'apollo-angular';
 describe('ControlComponent', () => {
   let component: ControlComponent;
   let fixture: ComponentFixture<ControlComponent>;
-  let dataServiceMock: jasmine.SpyObj<DataService>;
+  let dataServiceMock: jasmine.SpyObj<ChartDataService>;
   let snackBarMock: jasmine.SpyObj<MatSnackBar>;
   let apolloMock: jasmine.SpyObj<Apollo>;
 
@@ -24,7 +24,7 @@ describe('ControlComponent', () => {
     await TestBed.configureTestingModule({
       imports: [NoopAnimationsModule, ReactiveFormsModule, ControlComponent, CandlestickComponent, MatInput],
       providers: [
-        { provide: DataService, useValue: dataServiceMock },
+        { provide: ChartDataService, useValue: dataServiceMock },
         { provide: MatSnackBar, useValue: snackBarMock },
         { provide: Apollo, useValue: apolloMock },
       ],
@@ -38,26 +38,26 @@ describe('ControlComponent', () => {
   it('should call getIt with uppercase ticker on handleSelection', () => {
     spyOn(component, 'getIt').and.callThrough();
     const mockChartData: ChartData = { ticker: 'XYZ', data: { loading: false } };
-    dataServiceMock.fetchData.and.returnValue(of(mockChartData));
+    dataServiceMock.fetchChartData.and.returnValue(of(mockChartData));
 
     component.handleSelection('abc');
     expect(component.getIt).toHaveBeenCalledWith('abc');
-    expect(dataServiceMock.fetchData).toHaveBeenCalledWith('ABC');
+    expect(dataServiceMock.fetchChartData).toHaveBeenCalledWith('ABC');
   });
 
   it('should call getIt with uppercase ticker on handleSubmit', () => {
     spyOn(component, 'getIt').and.callThrough();
     const mockChartData: ChartData = { ticker: 'XYZ', data: { loading: false } };
-    dataServiceMock.fetchData.and.returnValue(of(mockChartData));
+    dataServiceMock.fetchChartData.and.returnValue(of(mockChartData));
 
     component.handleSubmit('xyz');
     expect(component.getIt).toHaveBeenCalledWith('xyz');
-    expect(dataServiceMock.fetchData).toHaveBeenCalledWith('XYZ');
+    expect(dataServiceMock.fetchChartData).toHaveBeenCalledWith('XYZ');
   });
 
   it('should emit data on successful fetch', () => {
     const mockChartData: ChartData = { ticker: 'XYZ', data: { loading: false } };
-    dataServiceMock.fetchData.and.returnValue(of(mockChartData));
+    dataServiceMock.fetchChartData.and.returnValue(of(mockChartData));
     spyOn(component.dataEmitter, 'emit');
 
     component.getIt('xyz');
@@ -66,7 +66,7 @@ describe('ControlComponent', () => {
 
   it('should handle errors from data fetch', () => {
     const errorResponse = { message: 'Error fetching data' };
-    dataServiceMock.fetchData.and.returnValue(throwError(() => errorResponse));
+    dataServiceMock.fetchChartData.and.returnValue(throwError(() => errorResponse));
     spyOn(component.dataEmitter, 'emit');
 
     component.getIt('error');

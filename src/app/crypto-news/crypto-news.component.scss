@@ -1,0 +1,63 @@
+.crypto-news-container {
+  align-items: left;
+}
+
+.filter-form-field {
+  width: 100%;
+  margin-top: 3rem;
+  margin-left: 1rem;
+}
+
+mat-list-item {
+}
+
+mat-card-content {
+  overflow: auto; // Ensures content does not overflow
+}
+
+mat-card-header {
+  //display: flex;
+  //align-items: left;
+  flex-direction: row-reverse; // Reverse the order of flex items
+  align-self: start;
+
+  //mat-checkbox {
+  //  margin-right: auto; // Pushes the checkbox to the far left
+  //}
+}
+
+.news-published {
+  margin-left: auto; // Pushes the date to the far right
+}
+
+.news-item {
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  height: auto;
+}
+mat-card-content p {
+  white-space: normal; // Allow text to wrap
+  overflow-wrap: break-word; // Ensures long words do not cause layout issues
+}
+//.news-description {
+//  margin: 0;
+//  //height: auto;
+//}
+
+.news-item h3 {
+  margin: 0 0 1rem 0;
+}
+
+.news-item p {
+  margin: 0;
+}
+
+.filter-form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+mat-card {
+  width: 100%;
+}

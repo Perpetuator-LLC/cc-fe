@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ChartData, DataService } from './data.service';
+import { ChartData, ChartDataService } from './chart-data.service';
 import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';
 import { gql } from 'apollo-angular';
 import { ApolloQueryResult } from '@apollo/client/core';
 
-describe('DataService', () => {
-  let service: DataService;
+describe('ChartDataService', () => {
+  let service: ChartDataService;
   let apolloSpy: jasmine.SpyObj<Apollo>;
 
   beforeEach(() => {
@@ -42,10 +42,10 @@ describe('DataService', () => {
     );
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [DataService, { provide: Apollo, useValue: apolloSpy }],
+      providers: [ChartDataService, { provide: Apollo, useValue: apolloSpy }],
     });
 
-    service = TestBed.inject(DataService);
+    service = TestBed.inject(ChartDataService);
   });
 
   it('should fetch data for a given ticker', () => {
@@ -70,7 +70,7 @@ describe('DataService', () => {
       ticker: 'AAPL',
     };
 
-    service.fetchData(mockTicker).subscribe((response) => {
+    service.fetchChartData(mockTicker).subscribe((response) => {
       expect(response).toEqual(expectedResponse);
     });
 

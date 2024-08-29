@@ -1,3 +1,8 @@
+# GPT
+
+To assist in development of this project I created:
+https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
+
 # Capital Copilot Front-End
 
 - [x] Check-in these changes, review, etc.
@@ -22,6 +27,7 @@
 - [x] Verify email before access
 - [ ] Switch to new inject syntax
 - [x] On landing but login required add a next query param to redirect to after login
+- [ ] Consider ad supported free version? where products are part of outputs
 
 [ANGULAR.md](notes%2FANGULAR.md)
 [APEXCHARTS.md](notes%2FAPEXCHARTS.md)

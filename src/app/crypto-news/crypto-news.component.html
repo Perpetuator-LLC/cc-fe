@@ -1,0 +1,40 @@
+<ng-template #toolbarTemplate>
+  <h1>Crypto News</h1>
+  <mat-form-field appearance="outline" class="filter-form-field">
+    <mat-label>Filter news</mat-label>
+    <input matInput (input)="applyFilter($event.target || null)" placeholder="Enter a keyword" />
+  </mat-form-field>
+</ng-template>
+<app-message></app-message>
+@if (newsData) {
+  <div class="crypto-news-container">
+    <p>Showing {{ filteredNews.length }} of {{ newsData.results.length }} with {{ selectedNews.size }} selected.</p>
+    <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
+    <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
+    <mat-list>
+      @for (news of filteredNews; track news.url) {
+        <mat-list-item class="news-item">
+          <mat-card>
+            <mat-card-header>
+              <mat-checkbox (change)="toggleSelection(news)" [checked]="isSelected(news)"></mat-checkbox>
+              <mat-card-title
+                ><a [href]="news.url" target="_blank">{{ news.title }}</a></mat-card-title
+              >
+            </mat-card-header>
+            <mat-card-content>
+              <p class="news-description">{{ news.description }}</p>
+              <p><strong>Source:</strong> {{ news.source }}</p>
+              <p class="news-published"><strong>Published at:</strong> {{ news.publishedAt | date: 'short' }}</p>
+            </mat-card-content>
+          </mat-card>
+        </mat-list-item>
+      } @empty {
+        <mat-card>
+          <mat-card-header>
+            <p>No news available at the moment.</p>
+          </mat-card-header>
+        </mat-card>
+      }
+    </mat-list>
+  </div>
+}

@@ -72,6 +72,11 @@ export const routes: Routes = [
     loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',
   },
+  {
+    path: 'crypto-news',
+    loadComponent: () => import('./crypto-news/crypto-news.component').then((c) => c.CryptoNewsComponent),
+    title: 'Crypto News',
+  },
 ];
 
 export class AppRoutingModule {}

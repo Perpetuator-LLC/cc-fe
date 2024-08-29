@@ -1,16 +1,17 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { ChartData, DataService } from '../../data.service';
+import { ChartData, ChartDataService } from '../../chart-data.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CandlestickComponent } from '../candlestick/candlestick.component';
 import { Subscription } from 'rxjs';
 import { MatInput } from '@angular/material/input';
 import { AutocompleteComponent } from '../../autocomplete/autocomplete.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from '../../message.service';
+import { MessageComponent } from '../../message/message.component';
 
 @Component({
   selector: 'app-charts-control',
   standalone: true,
-  imports: [CandlestickComponent, MatInput, AutocompleteComponent, ReactiveFormsModule],
+  imports: [CandlestickComponent, MatInput, AutocompleteComponent, ReactiveFormsModule, MessageComponent],
   templateUrl: './control.component.html',
   styleUrl: './control.component.scss',
 })
@@ -21,8 +22,8 @@ export class ControlComponent implements OnDestroy, OnInit {
   private subscription: Subscription | undefined;
 
   constructor(
-    private dataService: DataService,
-    private snackBar: MatSnackBar,
+    private chartDataService: ChartDataService,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
@@ -55,14 +56,16 @@ export class ControlComponent implements OnDestroy, OnInit {
     // TODO: It appears that GraphQL has a very similar structure of 'data' with 'loading' and 'error' properties.
     //     This could be a good candidate for a shared interface. Let's see if we can refactor this to use that.
     this.dataEmitter.emit({ ticker: ticker, data: { loading: true } });
-    this.subscription = this.dataService.fetchData(ticker).subscribe({
+    this.subscription = this.chartDataService.fetchChartData(ticker).subscribe({
       next: (data: ChartData) => {
         this.dataEmitter.emit(data);
       },
       error: (err: { message: string }) => {
-        // TODO: Decide which of these to use:
-        this.openSnackBar(`Error: ${err.message}`, 'Close');
-        this.error = err.message;
+        this.messageService.addMessage({
+          type: 'error',
+          text: `Error: ${err.message}`,
+          dismissible: true,
+        });
         this.dataEmitter.emit({ ticker: ticker, data: { error: err.message } });
       },
       complete: () => {
@@ -70,10 +73,6 @@ export class ControlComponent implements OnDestroy, OnInit {
         this.focusInput();
       },
     });
-  }
-
-  openSnackBar(message: string, action: string) {
-    this.snackBar.open(message, action);
   }
 
   ngOnDestroy() {

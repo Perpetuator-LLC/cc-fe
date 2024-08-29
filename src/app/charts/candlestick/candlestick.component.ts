@@ -27,7 +27,7 @@ import {
   ApexGrid,
 } from 'ng-apexcharts';
 import { JsonPipe } from '@angular/common';
-import { ChartData, OHLC, Squeeze } from '../../data.service';
+import { ChartData, OHLC, Squeeze } from '../../chart-data.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface ChartOptions {

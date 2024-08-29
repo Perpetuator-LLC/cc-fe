@@ -4,7 +4,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ChartData, EarningsData } from '../../data.service';
+import { ChartData, EarningsData } from '../../chart-data.service';
 
 @Component({
   selector: 'app-charts-earnings-table',
