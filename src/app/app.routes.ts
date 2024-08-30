@@ -18,18 +18,18 @@ export const routes: Routes = [
     title: 'Charts',
     canActivate: [AuthGuard],
   },
-  {
-    path: 'times',
-    loadComponent: () => import('./times/times.component').then((c) => c.TimesComponent),
-    title: 'Times',
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'valuation',
-    loadComponent: () => import('./valuation/valuation.component').then((c) => c.ValuationComponent),
-    title: 'Valuation',
-    canActivate: [AuthGuard],
-  },
+  // {
+  //   path: 'times',
+  //   loadComponent: () => import('./times/times.component').then((c) => c.TimesComponent),
+  //   title: 'Times',
+  //   canActivate: [AuthGuard],
+  // },
+  // {
+  //   path: 'valuation',
+  //   loadComponent: () => import('./valuation/valuation.component').then((c) => c.ValuationComponent),
+  //   title: 'Valuation',
+  //   canActivate: [AuthGuard],
+  // },
   // {
   //   path: 'privacy-policy',
   //   loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
@@ -76,6 +76,16 @@ export const routes: Routes = [
     path: 'crypto-news',
     loadComponent: () => import('./crypto-news/crypto-news.component').then((c) => c.CryptoNewsComponent),
     title: 'Crypto News',
+  },
+  {
+    path: 'crypto-article/:id',
+    loadComponent: () => import('./article-detail/article-detail.component').then((c) => c.ArticleDetailComponent),
+    title: 'Crypto Article',
+  },
+  {
+    path: 'crypto-articles',
+    loadComponent: () => import('./articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
+    title: 'Crypto Articles',
   },
 ];
 

@@ -1,0 +1,28 @@
+<ng-template #toolbarTemplate>
+  <h1>Crypto Article Details</h1>
+</ng-template>
+<app-message></app-message>
+<mat-card>
+  <mat-card-content class="form-container">
+    <mat-form-field class="full-width article-content">
+      <mat-label>Content</mat-label>
+      <textarea matInput [(ngModel)]="updatedContent"></textarea>
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="updateArticle()">Update</button>
+    <button mat-raised-button color="primary" disabled>Generate Audio</button>
+    <button mat-raised-button color="primary" disabled>Publish</button>
+  </mat-card-content>
+
+  <mat-divider></mat-divider>
+
+  <h3>Related Articles</h3>
+  <mat-list>
+    @for (relatedArticle of linkedArticles; track relatedArticle.id) {
+      <mat-list-item>
+        <a matLine href="{{ relatedArticle.url }}" target="_blank">
+          {{ relatedArticle.summary }}
+        </a>
+      </mat-list-item>
+    }
+  </mat-list>
+</mat-card>

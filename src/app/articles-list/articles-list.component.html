@@ -1,0 +1,15 @@
+<ng-template #toolbarTemplate>
+  <h1>Crypto Articles</h1>
+</ng-template>
+<app-message></app-message>
+<mat-card>
+  <mat-list>
+    @for (article of articles; track article.id) {
+      <mat-list-item>
+        <mat-icon matListIcon>article</mat-icon>
+        <a matLine [routerLink]="['/crypto-article', article.id]">{{ article.content | slice: 0 : 100 }}...</a>
+        <mat-divider></mat-divider>
+      </mat-list-item>
+    }
+  </mat-list>
+</mat-card>
