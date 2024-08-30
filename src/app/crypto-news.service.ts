@@ -17,7 +17,7 @@ export class CryptoNewsService {
 
   fetchCryptoNews(): Observable<CryptoNewsData> {
     const FETCH_CRYPTO_NEWS_DATA = gql`
-      query FetchCryptoNewsData {
+      mutation FetchCryptoNewsData {
         fetchCryptoNewsData {
           success
           message
@@ -88,8 +88,8 @@ export class CryptoNewsService {
 
   summarizeCryptoNews(ids: number[]): Observable<CryptoNewsData> {
     const SUMMARIZE_CRYPTO_NEWS_DATA = gql`
-      query SummarizeCryptoNewsData {
-        summarizeCryptoNewsData(ids: "${ids}") {
+      mutation SummarizeCryptoNewsData {
+        summarizeCryptoNewsData(ids: [${ids.join(' ')}]) {
           success
           message
         }

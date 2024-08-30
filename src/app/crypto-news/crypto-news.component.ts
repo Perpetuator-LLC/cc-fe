@@ -79,32 +79,35 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         dismissible: true,
       });
       return;
+    } else {
+      this.messageService.addMessage({
+        type: 'info',
+        text: 'Summarizing crypto news data (this may take awhile)...',
+        dismissible: true,
+      });
     }
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
-    this.messageService.addMessage({
-      type: 'info',
-      text: `Selected IDs are: ${newsIds}`,
-      dismissible: true,
+    this.subscription = this.cryptoNewsService.summarizeCryptoNews(newsIds).subscribe({
+      next: () => {
+        this.messageService.clearMessages();
+        this.messageService.addMessage({
+          type: 'success',
+          text: 'Crypto news data summarized successfully.',
+          dismissible: true,
+        });
+      },
+      error: (err: { message: string }) => {
+        this.messageService.clearMessages();
+        this.messageService.addMessage({
+          type: 'error',
+          text: `Failed to summarize crypto news data: ${err.message}`,
+          dismissible: true,
+        });
+      },
+      complete: () => {
+        console.log('News data summarize complete');
+      },
     });
-    // this.subscription = this.cryptoNewsService.summarizeCryptoNews(newsIds).subscribe({
-    //   next: () => {
-    //     this.messageService.addMessage({
-    //       type: 'success',
-    //       text: 'Crypto news data fetched successfully.',
-    //       dismissible: true,
-    //     });
-    //   },
-    //   error: (err: { message: string }) => {
-    //     this.messageService.addMessage({
-    //       type: 'error',
-    //       text: `Failed to fetch crypto news data: ${err.message}`,
-    //       dismissible: true,
-    //     });
-    //   },
-    //   complete: () => {
-    //     console.log('News data fetch complete');
-    //   },
-    // });
   }
 
   fetchNews() {
@@ -140,7 +143,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
       error: (err: { message: string }) => {
         this.messageService.addMessage({
           type: 'error',
-          text: `Failed to fetch crypto news data: ${err.message}`,
+          text: `Failed to get crypto news data: ${err.message}`,
           dismissible: true,
         });
       },

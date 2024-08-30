@@ -6,11 +6,13 @@
   </mat-form-field>
 </ng-template>
 <app-message></app-message>
-@if (newsData) {
-  <div class="crypto-news-container">
-    <p>Showing {{ filteredNews.length }} of {{ newsData.results.length }} with {{ selectedNews.size }} selected.</p>
-    <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
-    <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
+<div class="crypto-news-container">
+  <p>
+    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected.
+  </p>
+  <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
+  <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
+  @if (newsData) {
     <mat-list>
       @for (news of filteredNews; track news.url) {
         <mat-list-item class="news-item">
@@ -36,5 +38,5 @@
         </mat-card>
       }
     </mat-list>
-  </div>
-}
+  }
+</div>
