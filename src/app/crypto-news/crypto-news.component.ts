@@ -66,6 +66,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.messageService.clearMessages();
     this.getNews();
     this.filteredNews = this.newsData?.results || [];
   }
@@ -97,7 +98,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         });
       },
       error: (err: { message: string }) => {
-        this.messageService.clearMessages();
+        // this.messageService.clearMessages(); // leave for debug?
         this.messageService.addMessage({
           type: 'error',
           text: `Failed to summarize crypto news data: ${err.message}`,
@@ -112,8 +113,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
 
   fetchNews() {
     this.messageService.clearMessages();
+    this.messageService.addMessage({
+      type: 'info',
+      text: 'Fetching crypto news data...',
+      dismissible: true,
+    });
     this.subscription = this.cryptoNewsService.fetchCryptoNews().subscribe({
       next: () => {
+        this.messageService.clearMessages();
         this.messageService.addMessage({
           type: 'success',
           text: 'Crypto news data fetched successfully.',
@@ -121,6 +128,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         });
       },
       error: (err: { message: string }) => {
+        // this.messageService.clearMessages(); // leave for debug?
         this.messageService.addMessage({
           type: 'error',
           text: `Failed to fetch crypto news data: ${err.message}`,
@@ -128,15 +136,21 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         });
       },
       complete: () => {
-        console.log('News data fetch complete');
+        console.debug('News data fetch complete');
+        this.getNews();
       },
     });
   }
 
   getNews() {
-    this.messageService.clearMessages();
+    // this.messageService.addMessage({
+    //   type: 'info',
+    //   text: 'Loading crypto news data...',
+    //   dismissible: true,
+    // });
     this.subscription = this.cryptoNewsService.getCryptoNews().subscribe({
       next: (data: CryptoNewsData) => {
+        // this.messageService.clearMessages();
         this.newsData = data;
         this.filteredNews = this.newsData?.results || [];
       },
@@ -148,7 +162,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         });
       },
       complete: () => {
-        console.log('News data fetch complete');
+        console.debug('News data fetch complete');
       },
     });
   }

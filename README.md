@@ -5,6 +5,11 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
+- [ ] debug fetch news
+- [ ] on summarize create article
+- [ ] display article
+- [ ] add audio conversion
+
 - [x] Check-in these changes, review, etc.
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
   - [ ] Add changelog script and CHANGELOG
