@@ -112,7 +112,7 @@ export class ChartDataService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to fetch chart data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
     // TODO: Consider adding watchQuery to update data in real-time... e.g.

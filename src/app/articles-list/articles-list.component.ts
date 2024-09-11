@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatIcon } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { CryptoArticleService } from '../crypto-article.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-articles-list',
@@ -35,8 +36,9 @@ import { CryptoArticleService } from '../crypto-article.service';
   templateUrl: './articles-list.component.html',
   styleUrl: './articles-list.component.scss',
 })
-export class ArticlesListComponent implements OnInit {
+export class ArticlesListComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  private subscription: Subscription | undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Input() articles: any[] = [];
 
@@ -52,15 +54,47 @@ export class ArticlesListComponent implements OnInit {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.articleService.getCryptoArticles().subscribe((response: any) => {
-      if (response.success) {
-        this.articles = response.results;
-      }
+    this.subscription = this.articleService.getCryptoArticles().subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (response: any) => {
+        this.messageService.clearMessages();
+        if (response.success) {
+          this.articles = response.results;
+        } else {
+          this.messageService.addMessage({
+            type: 'error',
+            text: 'No crypto articles were returned.',
+            dismissible: true,
+          });
+        }
+      },
+      error: (err: { message: string }) => {
+        this.messageService.clearMessages();
+        this.messageService.addMessage({
+          type: 'error',
+          text: `Failed to retrieve crypto articles data: ${err.message}`,
+          dismissible: true,
+        });
+      },
+      complete: () => {
+        console.log('Retrieve crypto articles complete');
+      },
     });
+    // this.subscription = this.articleService.getCryptoArticles().subscribe({ (response: any) => {
+    //   if (response.success) {
+    //     this.articles = response.results;
+    //   }
+    // });
   }
 
   viewArticle(id: string) {
     this.router.navigate(['/crypto-article', id]);
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.toolbarService.clearToolbarComponent();
   }
 }

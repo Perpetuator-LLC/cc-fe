@@ -8,10 +8,38 @@
 
 .sidenav .mat-toolbar {
   background: inherit;
+  padding: 0;
 }
 
 .mat-toolbar.mat-primary {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 1;
+  padding-right: 60px;
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+  padding: 0;
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+}
+
+.website-icon {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  margin-right: 0;
+}
+
+.website-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  white-space: nowrap;
 }

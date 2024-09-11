@@ -8,9 +8,11 @@
 } @else if (!earningsData || earningsData.length === 0) {
   <div>
     <mat-panel-title>
-      <table mat-table [dataSource]="[earningsData[0]]" class="mat-elevation-z8">
-        <td mat-cell matTooltip="No earnings data.">No earnings data for symbol.</td>
-      </table>
+      <mat-card class="mat-elevation-z8">
+        <mat-card-content>
+          <p>No earnings data for symbol.</p>
+        </mat-card-content>
+      </mat-card>
     </mat-panel-title>
   </div>
 } @else {

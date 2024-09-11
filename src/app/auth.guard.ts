@@ -19,7 +19,8 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   static getAuthRequiredRoutes(): string[] {
-    return ['logout', 'charts', 'times', 'valuation', 'crypto-news', 'crypto-articles'];
+    return ['logout', 'crypto-news', 'crypto-articles'];
+    // return ['logout', 'charts', 'times', 'valuation', 'crypto-news', 'crypto-articles'];
   }
 
   static getLoggedOutRoutes(): string[] {

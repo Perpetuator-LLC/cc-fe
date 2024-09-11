@@ -128,7 +128,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         });
       },
       error: (err: { message: string }) => {
-        // this.messageService.clearMessages(); // leave for debug?
+        this.messageService.clearMessages();
         this.messageService.addMessage({
           type: 'error',
           text: `Failed to fetch crypto news data: ${err.message}`,

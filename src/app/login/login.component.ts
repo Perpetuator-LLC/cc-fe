@@ -69,7 +69,7 @@ export class LoginComponent implements AfterViewInit {
     this.authService.login(this.loginForm.value.email as string, this.loginForm.value.password as string).subscribe({
       next: () => {
         if (this.messageService.messageCount === 0) {
-          this.router.navigate(['/charts']);
+          this.router.navigate(['/']);
         } else {
           this.messageService.addMessage({
             type: 'error',

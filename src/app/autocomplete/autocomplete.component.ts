@@ -83,6 +83,12 @@ export class AutocompleteComponent {
     );
   }
 
+  focusInput() {
+    if (this.input) {
+      this.input.nativeElement.focus();
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onOptionSelected(event: any) {
     this.optionSelected.emit(event.option.value);

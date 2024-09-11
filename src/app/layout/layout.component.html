@@ -8,11 +8,11 @@
     [mode]="(isHandset$ | async) ? 'over' : 'side'"
     [opened]="(isHandset$ | async) === false"
   >
-    <mat-toolbar>
+    <mat-toolbar class="sidenav-header">
       <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-        <mat-icon aria-label="Collapse nav icon">menu_open</mat-icon>
-        Capital Copilot
+        <mat-icon aria-label="Collapse nav icon" class="material-symbols-outlined">menu_open</mat-icon>
       </button>
+      <span class="website-title">Capital Copilot</span>
     </mat-toolbar>
     <mat-nav-list>
       @for (item of rootRoutes; track item.path) {
@@ -53,11 +53,17 @@
   <mat-sidenav-content>
     <mat-toolbar color="primary">
       @if (!drawer.opened) {
-        <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
-          <img src="Capital_Copilot_Logo_Slanted.png" aria-label="Side nav toggle icon" alt="Capital Copilot" />
+        <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
+          <mat-icon aria-label="Collapse nav icon" class="material-symbols-outlined">menu_close</mat-icon>
         </button>
       }
       <ng-container #toolbarContainer></ng-container>
+      <img
+        src="Capital_Copilot_Logo_Slanted.png"
+        aria-label="Side nav toggle icon"
+        alt="Capital Copilot"
+        class="website-icon"
+      />
     </mat-toolbar>
     <div class="sidenav-scroll-wrapper">
       <div class="sidenav-content">

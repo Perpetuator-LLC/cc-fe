@@ -60,7 +60,7 @@ export class CryptoArticleService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to get crypto articles data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
@@ -105,7 +105,7 @@ export class CryptoArticleService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to get crypto articles data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
@@ -150,7 +150,7 @@ export class CryptoArticleService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to update crypto articles data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }

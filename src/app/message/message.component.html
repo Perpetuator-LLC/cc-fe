@@ -2,23 +2,27 @@
   <link rel="stylesheet" href="message.component.scss" />
   <div class="message-container">
     @for (message of messages; track message; let index = $index) {
-      <mat-card>
+      <mat-card class="message-card">
+        <button class="close-button" mat-icon-button (click)="removeMessage(index)" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
         <mat-card-content [ngClass]="message.type">
-          @if (message.type === 'error') {
-            <mat-icon color="warn">error</mat-icon>
-          } @else if (message.type === 'info') {
-            <mat-icon color="primary">info</mat-icon>
-          } @else if (message.type === 'success') {
-            <mat-icon color="primary">check_circle</mat-icon>
-          } @else if (message.type === 'warning') {
-            <mat-icon color="warn">warning</mat-icon>
-          }
-          {{ message.text }}
-          @if (message.dismissible !== false) {
-            <button mat-icon-button (click)="removeMessage(index)" aria-label="Close">
-              <mat-icon>close</mat-icon>
-            </button>
-          }
+          <div class="message-content">
+            <div class="message-icon">
+              @if (message.type === 'error') {
+                <mat-icon color="warn">error</mat-icon>
+              } @else if (message.type === 'info') {
+                <mat-icon color="primary">info</mat-icon>
+              } @else if (message.type === 'success') {
+                <mat-icon color="primary">check_circle</mat-icon>
+              } @else if (message.type === 'warning') {
+                <mat-icon color="warn">warning</mat-icon>
+              }
+            </div>
+            <div class="message-text">
+              {{ message.text }}
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
     }

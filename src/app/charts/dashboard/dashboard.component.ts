@@ -9,7 +9,6 @@ import { CandlestickComponent } from '../candlestick/candlestick.component';
 import { LayoutComponent } from '../../layout/layout.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ToolbarService } from '../../toolbar.service';
-import dataSource from './mock-data.json';
 
 @Component({
   selector: 'app-charts-dashboard',
@@ -27,7 +26,7 @@ import dataSource from './mock-data.json';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements AfterViewInit, OnDestroy {
-  dataSource: ChartData = dataSource;
+  dataSource: ChartData = {};
   isLoggedIn = this.authService.isLoggedIn;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 

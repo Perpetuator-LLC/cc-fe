@@ -4,11 +4,12 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { NgClass } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
+import { MatRow, MatTextColumn } from '@angular/material/table';
 
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [MatIcon, MatCard, MatCardContent, NgClass, MatIconButton],
+  imports: [MatIcon, MatCard, MatCardContent, NgClass, MatIconButton, MatRow, MatTextColumn],
   templateUrl: './message.component.html',
   styleUrl: './message.component.scss',
 })

@@ -1,13 +1,19 @@
 <form class="ticker-form">
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Symbol</mat-label>
-    <input id="ticker" type="text" placeholder="Enter the symbol" matInput
-           class="mat-autocomplete-panel"
-           [formControl]="tickerControl"
-           [matAutocomplete]="auto"
-           (keydown)="onKeydown($event)">
+    <input
+      #input
+      id="ticker"
+      type="text"
+      placeholder="Enter the symbol"
+      matInput
+      class="mat-autocomplete-panel"
+      [formControl]="tickerControl"
+      [matAutocomplete]="auto"
+      (keydown)="onKeydown($event)"
+    />
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-      @for (option of filteredOptions | async; track option) {
+      @for (option of filteredOptions | async; track option.symbol) {
         <mat-option [value]="option.symbol">
           <mat-card matTooltip="{{ option.cik }}">
             <mat-card-header>

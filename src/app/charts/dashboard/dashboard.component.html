@@ -3,7 +3,7 @@
     <app-charts-control (dataEmitter)="handleData($event)"></app-charts-control>
   }
 </ng-template>
-@if (isLoggedIn()) {
+@if (isLoggedIn() && dataSource) {
   <app-charts-earnings-table [dataSource]="dataSource"></app-charts-earnings-table>
   <app-charts-candlestick [dataSource]="dataSource"></app-charts-candlestick>
 } @else {

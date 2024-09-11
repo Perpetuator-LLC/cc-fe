@@ -4,6 +4,8 @@
 
 - https://fonts.google.com/icons
 
+- https://fonts.google.com/icons?icon.set=Material+Symbols&selected=Material+Symbols+Outlined:dark_mode:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=dark&icon.size=24&icon.color=%23e8eaed
+
 # Angular Material Schematics to Generate Components
 
 See:

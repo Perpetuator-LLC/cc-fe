@@ -18,7 +18,7 @@ import { CookieBannerComponent } from '../cookie-banner/cookie-banner.component'
 import { ControlComponent } from '../charts/control/control.component';
 import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
-import { MatFooterCell, MatFooterRow } from '@angular/material/table';
+import { MatFooterCell, MatFooterRow, MatHeaderCell, MatHeaderRow } from '@angular/material/table';
 
 @Component({
   selector: 'app-layout',
@@ -42,6 +42,8 @@ import { MatFooterCell, MatFooterRow } from '@angular/material/table';
     NgTemplateOutlet,
     RouterLink,
     RouterLinkActive,
+    MatHeaderCell,
+    MatHeaderRow,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit {

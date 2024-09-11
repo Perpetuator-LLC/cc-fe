@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { ChartData, ChartDataService } from '../../chart-data.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CandlestickComponent } from '../candlestick/candlestick.component';
@@ -7,15 +7,23 @@ import { MatInput } from '@angular/material/input';
 import { AutocompleteComponent } from '../../autocomplete/autocomplete.component';
 import { MessageService } from '../../message.service';
 import { MessageComponent } from '../../message/message.component';
+import { MatAutocomplete } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-charts-control',
   standalone: true,
-  imports: [CandlestickComponent, MatInput, AutocompleteComponent, ReactiveFormsModule, MessageComponent],
+  imports: [
+    CandlestickComponent,
+    MatInput,
+    MatAutocomplete,
+    AutocompleteComponent,
+    ReactiveFormsModule,
+    MessageComponent,
+  ],
   templateUrl: './control.component.html',
   styleUrl: './control.component.scss',
 })
-export class ControlComponent implements OnDestroy, OnInit {
+export class ControlComponent implements OnDestroy, AfterViewInit {
   @ViewChild(AutocompleteComponent) autocomplete!: AutocompleteComponent;
   @Output() dataEmitter = new EventEmitter<ChartData>();
   error: string | null = null;
@@ -26,15 +34,8 @@ export class ControlComponent implements OnDestroy, OnInit {
     private messageService: MessageService,
   ) {}
 
-  ngOnInit(): void {
-    this.focusInput();
-  }
-
-  private focusInput() {
-    const input = document.querySelector<HTMLInputElement>('#ticker');
-    if (input) {
-      input.focus();
-    }
+  ngAfterViewInit() {
+    this.autocomplete.focusInput();
   }
 
   handleSelection(value: string) {
@@ -70,7 +71,8 @@ export class ControlComponent implements OnDestroy, OnInit {
       },
       complete: () => {
         console.log('Data fetch complete');
-        this.focusInput();
+        this.autocomplete.focusInput();
+        // this.focusInput();
       },
     });
   }

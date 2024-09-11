@@ -41,7 +41,7 @@ export class CryptoNewsService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to fetch crypto news data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
@@ -81,7 +81,7 @@ export class CryptoNewsService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to fetch crypto news data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
@@ -112,7 +112,7 @@ export class CryptoNewsService {
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error('Failed to fetch crypto news data: ' + error.message));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
