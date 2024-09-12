@@ -17,6 +17,7 @@ import { MatIcon } from '@angular/material/icon';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
+import { ThemeService } from '../theme.service';
 
 @Component({
   selector: 'app-login',
@@ -56,6 +57,7 @@ export class LoginComponent implements AfterViewInit {
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
+    private themeService: ThemeService,
   ) {}
 
   ngAfterViewInit() {
@@ -69,6 +71,7 @@ export class LoginComponent implements AfterViewInit {
     this.authService.login(this.loginForm.value.email as string, this.loginForm.value.password as string).subscribe({
       next: () => {
         if (this.messageService.messageCount === 0) {
+          this.themeService.loadTheme();
           this.router.navigate(['/']);
         } else {
           this.messageService.addMessage({

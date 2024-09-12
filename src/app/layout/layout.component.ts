@@ -50,7 +50,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
   rootRoutes = routes.filter((r) => r.path);
   private breakpointObserver = inject(BreakpointObserver);
-  protected currentTheme: Theme;
+  protected currentTheme = this.themeService.theme;
   isLoggedIn = this.authService.isLoggedIn;
   private authRequiredRoutes = AuthGuard.getAuthRequiredRoutes();
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
@@ -62,9 +62,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
     protected authService: AuthService,
     private toolbarService: ToolbarService,
     private router: Router,
-  ) {
-    this.currentTheme = this.themeService.currentTheme;
-  }
+  ) {}
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
@@ -99,6 +97,5 @@ export class LayoutComponent implements OnDestroy, OnInit {
 
   switchTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
-    this.currentTheme = theme;
   }
 }
