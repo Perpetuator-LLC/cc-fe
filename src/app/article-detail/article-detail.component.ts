@@ -38,6 +38,11 @@ export interface UpdateCryptoArticleData {
   message: string;
 }
 
+export interface UpdateCryptoArticleAudio {
+  success: boolean;
+  message: string;
+}
+
 @Component({
   selector: 'app-article-detail',
   standalone: true,
@@ -69,6 +74,7 @@ export class ArticleDetailComponent implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   linkedArticles: any[] = [];
   updatedContent = '';
+  audioSrc: string | null = null; // Add audioSrc to store the audio URL
 
   constructor(
     private route: ActivatedRoute,
@@ -96,16 +102,49 @@ export class ArticleDetailComponent implements OnInit {
       this.article = response.results[0];
       this.updatedContent = this.article.content;
       this.linkedArticles = this.article.newsSummaries;
+
+      if (this.article.audio) {
+        this.prepareAudioPlayer(this.article.audio);
+      }
+    });
+  }
+
+  prepareAudioPlayer(base64Audio: string): void {
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+    this.audioSrc = URL.createObjectURL(blob);
+  }
+
+  generateAudio(): void {
+    this.articleService.generateAudio(this.article.id).subscribe(() => {
+      this.messageService.clearMessages();
+      this.messageService.addMessage({
+        type: 'success',
+        text: 'Audio file generated successfully.',
+        dismissible: true,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.articleService.getCryptoArticleById(this.article.id).subscribe((response: any) => {
+        if (response.success && response.results[0].audio) {
+          this.prepareAudioPlayer(response.results[0].audio);
+        }
+      });
     });
   }
 
   updateArticle(): void {
     this.articleService.updateArticle(this.article.id, this.updatedContent).subscribe(() => {
-      // this.messageService.addMessage({
-      //   type: 'success',
-      //   text: 'Article updated successfully.',
-      //   dismissible: true,
-      // });
+      this.messageService.clearMessages();
+      this.messageService.addMessage({
+        type: 'success',
+        text: 'Article updated successfully.',
+        dismissible: true,
+      });
     });
   }
 

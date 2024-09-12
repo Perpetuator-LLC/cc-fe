@@ -1,9 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { CryptoArticlesData, UpdateCryptoArticleData } from './article-detail/article-detail.component';
+import {
+  CryptoArticlesData,
+  UpdateCryptoArticleAudio,
+  UpdateCryptoArticleData,
+} from './article-detail/article-detail.component';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { MessageService } from './message.service';
+
+export interface UpdateCryptoArticleAudioResponse {
+  errors?: [{ message: string }];
+  data?: { updateCryptoArticleAudio: UpdateCryptoArticleAudio };
+}
 
 export interface UpdateCryptoArticleResponse {
   errors?: [{ message: string }];
@@ -76,6 +85,7 @@ export class CryptoArticleService {
             id
             date
             content
+            audio
             newsSummaries {
               id
               url
@@ -147,6 +157,46 @@ export class CryptoArticleService {
             dismissible: true,
           });
           return result.data?.updateCryptoArticleData || { success: false, message: 'No data available', results: [] };
+        }),
+        catchError((error) => {
+          console.error('GraphQL query error:', error);
+          return throwError(() => new Error(error.message));
+        }),
+      );
+  }
+
+  generateAudio(id: string): Observable<UpdateCryptoArticleAudio> {
+    if (id === null) return throwError(() => new Error('Article ID is required'));
+
+    const UPDATE_CRYPTO_ARTICLES_AUDIO = gql`
+      mutation UpdateCryptoArticlesAudio {
+        updateCryptoArticleAudio(id: "${id}") {
+          success
+          message
+        }
+      }
+    `;
+
+    this.messageService.clearMessages();
+    this.messageService.addMessage({
+      type: 'info',
+      text: 'Crypto article audio generating...',
+      dismissible: true,
+    });
+
+    return this.apollo
+      .mutate<UpdateCryptoArticleAudioResponse>({
+        mutation: UPDATE_CRYPTO_ARTICLES_AUDIO,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => {
+          if (result.errors) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          }
+          return result.data?.updateCryptoArticleAudio || { success: false, message: 'No data available', results: [] };
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
