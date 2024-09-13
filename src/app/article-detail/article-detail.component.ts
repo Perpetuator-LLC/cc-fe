@@ -43,6 +43,11 @@ export interface UpdateCryptoArticleAudio {
   message: string;
 }
 
+export interface PublishCryptoArticleAudio {
+  success: boolean;
+  message: string;
+}
+
 @Component({
   selector: 'app-article-detail',
   standalone: true,
@@ -75,6 +80,7 @@ export class ArticleDetailComponent implements OnInit {
   linkedArticles: any[] = [];
   updatedContent = '';
   audioSrc: string | null = null; // Add audioSrc to store the audio URL
+  downloadLink: string | null = null; // Add downloadLink to store the download URL
 
   constructor(
     private route: ActivatedRoute,
@@ -110,6 +116,7 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   prepareAudioPlayer(base64Audio: string): void {
+    // Decode the base64 audio and create a Blob
     const byteCharacters = atob(base64Audio);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
@@ -117,7 +124,30 @@ export class ArticleDetailComponent implements OnInit {
     }
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+
+    // Create a URL for the Blob and set it to the audio source
     this.audioSrc = URL.createObjectURL(blob);
+    this.downloadLink = this.audioSrc; // Also enable the download link
+  }
+
+  publishAudio(): void {
+    this.articleService.publishAudio(this.article.id).subscribe(() => {
+      this.messageService.clearMessages();
+      this.messageService.addMessage({
+        type: 'success',
+        text: 'Audio file published successfully.',
+        dismissible: true,
+      });
+    });
+  }
+
+  downloadAudio(): void {
+    if (this.downloadLink) {
+      const a = document.createElement('a');
+      a.href = this.downloadLink;
+      a.download = `crypto_article_${this.article.id}.mp3`; // Set the download file name
+      a.click(); // Programmatically trigger the download
+    }
   }
 
   generateAudio(): void {
@@ -128,10 +158,12 @@ export class ArticleDetailComponent implements OnInit {
         text: 'Audio file generated successfully.',
         dismissible: true,
       });
+
+      // After generating, we need to fetch the article again to get the audio field
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.articleService.getCryptoArticleById(this.article.id).subscribe((response: any) => {
         if (response.success && response.results[0].audio) {
-          this.prepareAudioPlayer(response.results[0].audio);
+          this.prepareAudioPlayer(response.results[0].audio); // Update audio player with the newly generated audio
         }
       });
     });

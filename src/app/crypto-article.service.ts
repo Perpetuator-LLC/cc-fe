@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import {
   CryptoArticlesData,
+  PublishCryptoArticleAudio,
   UpdateCryptoArticleAudio,
   UpdateCryptoArticleData,
 } from './article-detail/article-detail.component';
@@ -12,6 +13,11 @@ import { MessageService } from './message.service';
 export interface UpdateCryptoArticleAudioResponse {
   errors?: [{ message: string }];
   data?: { updateCryptoArticleAudio: UpdateCryptoArticleAudio };
+}
+
+export interface PublishCryptoArticleAudioResponse {
+  errors?: [{ message: string }];
+  data?: { publishCryptoArticleAudio: PublishCryptoArticleAudio };
 }
 
 export interface UpdateCryptoArticleResponse {
@@ -197,6 +203,48 @@ export class CryptoArticleService {
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
           }
           return result.data?.updateCryptoArticleAudio || { success: false, message: 'No data available', results: [] };
+        }),
+        catchError((error) => {
+          console.error('GraphQL query error:', error);
+          return throwError(() => new Error(error.message));
+        }),
+      );
+  }
+
+  publishAudio(id: string): Observable<PublishCryptoArticleAudio> {
+    if (id === null) return throwError(() => new Error('Article ID is required'));
+
+    const PUBLISH_CRYPTO_ARTICLE_AUDIO = gql`
+      mutation UpdateCryptoArticleAudio {
+        publishCryptoArticleAudio(id: "${id}") {
+          success
+          message
+        }
+      }
+    `;
+
+    this.messageService.clearMessages();
+    this.messageService.addMessage({
+      type: 'info',
+      text: 'Crypto article audio publishing...',
+      dismissible: true,
+    });
+
+    return this.apollo
+      .mutate<PublishCryptoArticleAudioResponse>({
+        mutation: PUBLISH_CRYPTO_ARTICLE_AUDIO,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => {
+          if (result.errors) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          }
+          return (
+            result.data?.publishCryptoArticleAudio || { success: false, message: 'No data available', results: [] }
+          );
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);

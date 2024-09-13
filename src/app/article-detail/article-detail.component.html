@@ -5,11 +5,14 @@
 <mat-card>
   <mat-card-content class="form-container">
     @if (audioSrc) {
+      <button mat-raised-button color="primary" class="article-control" (click)="publishAudio()">Publish</button>
       <audio controls [src]="audioSrc"></audio>
     }
     <button mat-raised-button color="primary" class="article-control" (click)="updateArticle()">Update</button>
     <button mat-raised-button color="primary" class="article-control" (click)="generateAudio()">Generate Audio</button>
-    <button mat-raised-button color="primary" class="article-control" disabled>Publish</button>
+    @if (downloadLink) {
+      <button mat-raised-button color="primary" class="article-control" (click)="downloadAudio()">Download MP3</button>
+    }
     <mat-form-field class="full-width article-content">
       <mat-label>Content</mat-label>
       <textarea matInput [(ngModel)]="updatedContent"></textarea>
