@@ -2,6 +2,7 @@ import { Injectable, Renderer2, RendererFactory2, signal, WritableSignal, OnDest
 
 import { UserPreferenceService } from './user-preference.service';
 import { Subscription } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export type Theme = 'light' | 'dark';
 
@@ -24,6 +25,7 @@ export class ThemeService implements OnDestroy {
   constructor(
     rendererFactory: RendererFactory2,
     private userPreferenceService: UserPreferenceService,
+    private authService: AuthService,
   ) {
     this.renderer = rendererFactory.createRenderer(null, null);
     const localTheme = this.loadThemeFromLocalStorage();
@@ -51,7 +53,10 @@ export class ThemeService implements OnDestroy {
     this.currentThemeSignal.set(theme);
     this.saveThemeToLocalStorage(theme);
     this.applyTheme();
-    // Update the theme in user preferences
+    if (!this.authService.isLoggedIn()) {
+      console.log('User not logged in, skipping user preferences update');
+      return;
+    }
     this.subscription = this.userPreferenceService
       .updateUserPreference('dark_mode', theme === 'dark' ? 'true' : 'false')
       .subscribe({
@@ -69,7 +74,12 @@ export class ThemeService implements OnDestroy {
   }
 
   loadTheme(): void {
-    // Fetch the user's preference for dark mode
+    if (!this.authService.isLoggedIn()) {
+      console.log('User not logged in, loading theme from local storage');
+      const localTheme = this.loadThemeFromLocalStorage();
+      this.setTheme(localTheme);
+      return;
+    }
     this.subscription = this.userPreferenceService.getUserPreferences(['dark_mode']).subscribe({
       next: (data) => {
         const darkModePreference = data.results.find((pref) => pref.key === 'dark_mode');
@@ -80,7 +90,7 @@ export class ThemeService implements OnDestroy {
       error: () => {
         // console.error(`Failed to fetch user preferences: ${data}`);
         const localTheme = this.loadThemeFromLocalStorage();
-        console.log('User preferences load failed, but revert to local storage loaded');
+        console.log('User preferences load failed, reverting to local storage loaded');
         this.setTheme(localTheme);
       },
     });
