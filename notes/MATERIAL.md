@@ -3,8 +3,36 @@
 # Angular Material Icons
 
 - https://fonts.google.com/icons
+- New
+  - https://fonts.google.com/icons?icon.set=Material+Symbols
+  - https://fonts.google.com/icons?icon.set=Material+Symbols&selected=Material+Symbols+Outlined:dark_mode:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=dark&icon.size=24&icon.color=%23e8eaed
 
-- https://fonts.google.com/icons?icon.set=Material+Symbols&selected=Material+Symbols+Outlined:dark_mode:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=dark&icon.size=24&icon.color=%23e8eaed
+To use the new icons must add:
+```angular17html
+<mat-icon fontSet="material-symbols-outlined">dark_mode</mat-icon>
+```
+
+Instead of doing this for every icon, the default for `fontSet` is defined in the `app.config.ts` file:
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [
+    ...
+    importProvidersFrom(MatIconModule),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (iconRegistry: MatIconRegistry) => () => {
+        iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
+      },
+      deps: [MatIconRegistry],
+      multi: true,
+    },
+  ],
+};
+```
+
+- Old and Deprecated??
+  - https://fonts.google.com/icons?icon.set=Material+Icons&icon.style=Filled
+
 
 # Angular Material Schematics to Generate Components
 

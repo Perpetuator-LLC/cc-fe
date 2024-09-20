@@ -75,7 +75,7 @@ export class AuthService {
         Object.keys(error.error).forEach((key) => {
           this.messageService.addMessage({
             type: 'error',
-            text: `Login error (${key}): ${error.error[key]}`,
+            text: `Login error: ${error.error[key]}`,
             dismissible: true,
           });
         });

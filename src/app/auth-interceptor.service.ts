@@ -19,11 +19,17 @@ export class AuthInterceptorService implements HttpInterceptor {
       return next.handle(req);
     }
 
+    // TODO: Consider if we really need this... it redirects to the login page any time any API call is made
+    // without a valid token, which can interrupt some API calls in a confusing way... but these calls should
+    // not happen and should be guarded by the AuthGuard instead.
     if (this.authService.isRefreshTokenExpired()) {
-      this.authService.logout();
-      console.debug('AuthInterceptor: Redirecting to login page (refresh token expired)');
-      this.router.navigate(['/login']);
-      return new Observable<HttpEvent<unknown>>();
+      console.debug(
+        'AuthInterceptor: COULD_HAVE_BUT_SKIPPED Redirecting to login page (refresh token expired, ' +
+          'perhaps guard API call with isLoggedIn?)',
+      );
+      //   this.authService.logout();
+      //   this.router.navigate(['/login']);
+      //   return new Observable<HttpEvent<unknown>>();
     }
 
     return from(this.authService.getTokenObservable()).pipe(

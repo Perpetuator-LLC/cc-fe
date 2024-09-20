@@ -76,6 +76,8 @@ export class CryptoNewsService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (!result.data?.getCryptoNewsData.success) {
+            throw new Error(result.data?.getCryptoNewsData.message);
           }
           return result.data?.getCryptoNewsData || { success: false, message: 'No data available', results: [] };
         }),

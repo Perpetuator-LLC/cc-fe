@@ -70,6 +70,8 @@ export class CryptoArticleService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (!result.data?.getCryptoArticlesData.success) {
+            throw new Error(result.data?.getCryptoArticlesData.message);
           }
           return result.data?.getCryptoArticlesData || { success: false, message: 'No data available', results: [] };
         }),
@@ -113,6 +115,8 @@ export class CryptoArticleService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (!result.data?.getCryptoArticleData.success) {
+            throw new Error(result.data?.getCryptoArticleData.message);
           }
           if (!result.data || result.data.getCryptoArticleData.results.length === 0) {
             return { success: false, message: 'No data available', results: [] };
@@ -156,6 +160,8 @@ export class CryptoArticleService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (!result.data?.updateCryptoArticleData.success) {
+            throw new Error(result.data?.updateCryptoArticleData.message);
           }
           this.messageService.addMessage({
             type: 'success',
@@ -201,6 +207,8 @@ export class CryptoArticleService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (result.data?.updateCryptoArticleAudio.success !== true) {
+            throw new Error(result.data?.updateCryptoArticleAudio.message);
           }
           return result.data?.updateCryptoArticleAudio || { success: false, message: 'No data available', results: [] };
         }),
@@ -241,6 +249,8 @@ export class CryptoArticleService {
           if (result.errors) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          } else if (!result.data?.publishCryptoArticleAudio.success) {
+            throw new Error(result.data?.publishCryptoArticleAudio.message);
           }
           return (
             result.data?.publishCryptoArticleAudio || { success: false, message: 'No data available', results: [] }

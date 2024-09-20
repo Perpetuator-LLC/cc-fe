@@ -3,46 +3,46 @@ import { Apollo } from 'apollo-angular';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import gql from 'graphql-tag';
 
-export interface UserPreferencesResult {
+export interface UserSettingsResult {
   key: string;
   value: string;
 }
 
-export interface UserPreferencesData {
+export interface UserSettingsData {
   success: boolean;
   message: string;
-  results: UserPreferencesResult[];
+  results: UserSettingsResult[];
 }
 
-export interface UserPreferencesResponse {
+export interface UserSettingsResponse {
   errors?: [{ message: string }];
   data?: {
-    getUserPreferences: UserPreferencesData;
+    getUserSettings: UserSettingsData;
   };
 }
 
-export interface UpdateUserPreferenceData {
+export interface UpdateUserSettingData {
   success: boolean;
   message: string;
 }
 
-export interface UpdateUserPreferenceResponse {
+export interface UpdateUserSettingResponse {
   errors?: [{ message: string }];
   data?: {
-    updateUserPreference: UpdateUserPreferenceData;
+    updateUserSetting: UpdateUserSettingData;
   };
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class UserPreferenceService {
+export class UserSettingService {
   constructor(private apollo: Apollo) {}
 
-  getUserPreferences(keys: string[]): Observable<UserPreferencesData> {
-    const GET_USER_PREFERENCES = gql`
-      query GetUserPreferences {
-        getUserPreferences(keys: ["${keys}"]) {
+  getUserSettings(keys: string[]): Observable<UserSettingsData> {
+    const GET_USER_SETTINGS = gql`
+      query GetUserSettings {
+        getUserSettings(keys: ["${keys}"]) {
           success
           message
           results {
@@ -54,15 +54,15 @@ export class UserPreferenceService {
     `;
 
     return this.apollo
-      .query<UserPreferencesResponse>({
-        query: GET_USER_PREFERENCES,
+      .query<UserSettingsResponse>({
+        query: GET_USER_SETTINGS,
         fetchPolicy: 'network-only',
       })
       .pipe(
         map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (result: any) => {
-            return result.data?.getUserPreferences || { success: false, message: 'No data available', results: [] };
+            return result.data?.getUserSettings || { success: false, message: 'No data available', results: [] };
           },
         ),
         catchError((error) => {
@@ -72,10 +72,10 @@ export class UserPreferenceService {
       );
   }
 
-  updateUserPreference(key: string, value: string): Observable<UpdateUserPreferenceData> {
-    const UPDATE_USER_PREFERENCE = gql`
-      mutation UpdateUserPreference($key: String!, $value: String!) {
-        updateUserPreference(key: $key, value: $value) {
+  updateUserSetting(key: string, value: string): Observable<UpdateUserSettingData> {
+    const UPDATE_USER_SETTING = gql`
+      mutation UpdateUserSetting($key: String!, $value: String!) {
+        updateUserSetting(key: $key, value: $value) {
           success
           message
         }
@@ -83,16 +83,15 @@ export class UserPreferenceService {
     `;
 
     return this.apollo
-      .mutate<UpdateUserPreferenceResponse>({
-        mutation: UPDATE_USER_PREFERENCE,
+      .mutate<UpdateUserSettingResponse>({
+        mutation: UPDATE_USER_SETTING,
         variables: { key, value },
         fetchPolicy: 'network-only',
       })
       .pipe(
         map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) =>
-            result.data?.updateUserPreference || { success: false, message: 'Failed to update preference' },
+          (result: any) => result.data?.updateUserSetting || { success: false, message: 'Failed to update setting' },
         ),
         catchError((error) => {
           console.error('GraphQL query error:', error);

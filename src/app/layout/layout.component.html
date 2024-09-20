@@ -10,7 +10,7 @@
   >
     <mat-toolbar class="sidenav-header">
       <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-        <mat-icon aria-label="Collapse nav icon" class="material-symbols-outlined">menu_open</mat-icon>
+        <mat-icon aria-label="Collapse nav icon">menu_open</mat-icon>
       </button>
       <span class="website-title">Capital Copilot</span>
     </mat-toolbar>
@@ -54,12 +54,12 @@
     <mat-toolbar color="primary">
       @if (!drawer.opened) {
         <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-          <mat-icon aria-label="Collapse nav icon" class="material-symbols-outlined">menu_close</mat-icon>
+          <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
         </button>
       }
       <ng-container #toolbarContainer></ng-container>
       <img
-        src="Capital_Copilot_Logo_Slanted.png"
+        src="Capital_Copilot_Logo_Slanted.svg"
         aria-label="Side nav toggle icon"
         alt="Capital Copilot"
         class="website-icon"
@@ -71,7 +71,7 @@
       </div>
     </div>
     <p>
-      &copy; 2024 Perpetuator LLC. - By using Capitol Copilot AI, you agree to our
+      &copy; 2024 Perpetuator LLC. By using Capitol Copilot AI, you agree to our
       <a tabindex="0" target="_blank" href="terms-and-conditions.html"> Terms and Conditions </a>
       and
       <a tabindex="0" target="_blank" href="privacy-policy.html"> Privacy Policy </a>

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,6 +18,8 @@ import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { ThemeService } from '../theme.service';
+import { CookieConsentService } from '../cookie-consent.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -44,7 +46,8 @@ import { ThemeService } from '../theme.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements AfterViewInit, OnDestroy {
+  private subscription: Subscription | undefined;
   loginForm = new FormGroup({
     // TODO: Add validation equivalent to back-end
     password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(5)]),
@@ -58,6 +61,7 @@ export class LoginComponent implements AfterViewInit {
     private toolbarService: ToolbarService,
     private messageService: MessageService,
     private themeService: ThemeService,
+    private cookieConsentService: CookieConsentService,
   ) {}
 
   ngAfterViewInit() {
@@ -68,27 +72,36 @@ export class LoginComponent implements AfterViewInit {
 
   onSubmit() {
     this.messageService.clearMessages();
-    this.authService.login(this.loginForm.value.email as string, this.loginForm.value.password as string).subscribe({
-      next: () => {
-        if (this.messageService.messageCount === 0) {
-          this.themeService.loadTheme();
-          this.router.navigate(['/']);
-        } else {
+    this.subscription = this.authService
+      .login(this.loginForm.value.email as string, this.loginForm.value.password as string)
+      .subscribe({
+        next: () => {
+          if (this.messageService.messageCount === 0) {
+            this.router.navigate(['/']);
+            this.themeService.loadTheme();
+            this.cookieConsentService.loadCookieConsent();
+          } else {
+            this.messageService.addMessage({
+              type: 'error',
+              text: 'Login failed. Please try again.',
+              dismissible: true,
+            });
+          }
+        },
+        error: (error) => {
           this.messageService.addMessage({
             type: 'error',
-            text: 'Login failed. Please try again.',
+            text: 'Login failed: ' + error.toString(),
             dismissible: true,
           });
-        }
-      },
-      error: (error) => {
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Login failed: ' + error.toString(),
-          dismissible: true,
-        });
-        console.error('Login failed', error);
-      },
-    });
+          console.error('Login failed', error);
+        },
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

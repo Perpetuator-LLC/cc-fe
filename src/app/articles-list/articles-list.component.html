@@ -6,8 +6,10 @@
   <mat-list>
     @for (article of articles; track article.id) {
       <mat-list-item>
-        <mat-icon matListIcon>article</mat-icon>
-        <a matLine [routerLink]="['/crypto-article', article.id]">{{ article.content | slice: 0 : 100 }}...</a>
+        <a matLine [routerLink]="['/crypto-article', article.id]">
+          <mat-icon matListIcon>article</mat-icon>
+          {{ article.content | slice: 0 : 100 }}...
+        </a>
         <mat-divider></mat-divider>
       </mat-list-item>
     }

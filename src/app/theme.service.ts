@@ -1,6 +1,6 @@
 import { Injectable, Renderer2, RendererFactory2, signal, WritableSignal, OnDestroy } from '@angular/core';
 
-import { UserPreferenceService } from './user-preference.service';
+import { UserSettingService } from './user-setting.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth.service';
 
@@ -11,7 +11,7 @@ export type Theme = 'light' | 'dark';
 })
 export class ThemeService implements OnDestroy {
   private renderer: Renderer2;
-  private subscription: Subscription | undefined;
+  private subscriptions = new Subscription();
   private currentThemeSignal: WritableSignal<Theme> = signal('dark');
 
   get theme(): WritableSignal<Theme> {
@@ -24,7 +24,7 @@ export class ThemeService implements OnDestroy {
 
   constructor(
     rendererFactory: RendererFactory2,
-    private userPreferenceService: UserPreferenceService,
+    private userSettingService: UserSettingService,
     private authService: AuthService,
   ) {
     this.renderer = rendererFactory.createRenderer(null, null);
@@ -57,9 +57,8 @@ export class ThemeService implements OnDestroy {
       console.log('User not logged in, skipping user preferences update');
       return;
     }
-    this.subscription = this.userPreferenceService
-      .updateUserPreference('dark_mode', theme === 'dark' ? 'true' : 'false')
-      .subscribe({
+    this.subscriptions.add(
+      this.userSettingService.updateUserSetting('theme', theme).subscribe({
         next: (data) => {
           if (data.success) {
             console.log('User preferences updated');
@@ -70,7 +69,8 @@ export class ThemeService implements OnDestroy {
         error: () => {
           // console.error(`Failed to update user preferences (error): ${data}`);
         },
-      });
+      }),
+    );
   }
 
   loadTheme(): void {
@@ -80,25 +80,29 @@ export class ThemeService implements OnDestroy {
       this.setTheme(localTheme);
       return;
     }
-    this.subscription = this.userPreferenceService.getUserPreferences(['dark_mode']).subscribe({
-      next: (data) => {
-        const darkModePreference = data.results.find((pref) => pref.key === 'dark_mode');
-        const theme: Theme = darkModePreference?.value.toLowerCase() === 'true' ? 'dark' : 'light';
-        console.log('User preferences loaded');
-        this.setTheme(theme);
-      },
-      error: () => {
-        // console.error(`Failed to fetch user preferences: ${data}`);
-        const localTheme = this.loadThemeFromLocalStorage();
-        console.log('User preferences load failed, reverting to local storage loaded');
-        this.setTheme(localTheme);
-      },
-    });
+    this.subscriptions.add(
+      this.userSettingService.getUserSettings(['theme']).subscribe({
+        next: (data) => {
+          const themeSetting = data.results.find((setting) => setting.key === 'theme');
+          const theme: string | undefined = themeSetting?.value.toLowerCase();
+          if (theme !== 'light' && theme !== 'dark') {
+            console.error('Invalid theme setting:', theme);
+            return;
+          }
+          console.log('User preferences loaded');
+          this.setTheme(theme);
+        },
+        error: () => {
+          // console.error(`Failed to fetch user preferences: ${data}`);
+          const localTheme = this.loadThemeFromLocalStorage();
+          console.log('User preferences load failed, reverting to local storage loaded');
+          this.setTheme(localTheme);
+        },
+      }),
+    );
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscriptions.unsubscribe();
   }
 }

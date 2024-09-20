@@ -5,3 +5,17 @@
 ```shell
 ng add apollo-angular
 ```
+
+# GraphQL Design
+
+?? TODO: All queries and mutations are defined in the `*.graphql` files. The `*.graphql` files are then imported into the Angular services.
+
+All GraphQL queries and mutations should return 200 status codes. If there is an error, the error should be returned in the response body.
+Non-200 errors indicate that the GraphQL server is down or there is a network issue (possible HTTPS, etc. issues).
+
+The back-end is designed such that it should never return an error field in the response body.
+- If this is seen then it means that an unexpected error occurred on the back-end.
+- The front-end should handle this error gracefully and log the error to the console.
+
+If the back-end has an issues with a business rule (data doesn't fit or a computation did not work, etc.), then the back-end should return a 200 status code 
+with success = false and the reason in the message field.

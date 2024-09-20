@@ -151,21 +151,42 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   generateAudio(): void {
-    this.articleService.generateAudio(this.article.id).subscribe(() => {
-      this.messageService.clearMessages();
-      this.messageService.addMessage({
-        type: 'success',
-        text: 'Audio file generated successfully.',
-        dismissible: true,
-      });
+    this.articleService.generateAudio(this.article.id).subscribe({
+      next: () => {
+        this.messageService.clearMessages();
+        this.messageService.addMessage({
+          type: 'success',
+          text: 'Audio file generated successfully.',
+          dismissible: true,
+        });
 
-      // After generating, we need to fetch the article again to get the audio field
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.articleService.getCryptoArticleById(this.article.id).subscribe((response: any) => {
-        if (response.success && response.results[0].audio) {
-          this.prepareAudioPlayer(response.results[0].audio); // Update audio player with the newly generated audio
-        }
-      });
+        // After generating, we need to fetch the article again to get the audio field
+
+        this.articleService.getCryptoArticleById(this.article.id).subscribe({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          next: (response: any) => {
+            if (response.success && response.results[0].audio) {
+              this.prepareAudioPlayer(response.results[0].audio); // Update audio player with the newly generated audio
+            }
+          },
+          error: (err) => {
+            this.messageService.clearMessages();
+            this.messageService.addMessage({
+              type: 'error',
+              text: `Failed to fetch updated audio for article: ${err.message}`,
+              dismissible: true,
+            });
+          },
+        });
+      },
+      error: (err) => {
+        this.messageService.clearMessages();
+        this.messageService.addMessage({
+          type: 'error',
+          text: `Failed to generate audio: ${err.message}`,
+          dismissible: true,
+        });
+      },
     });
   }
 
