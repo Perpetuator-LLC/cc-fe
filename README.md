@@ -5,21 +5,21 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
-- [ ] debug fetch news
-- [ ] on summarize create article
-- [ ] display article
-- [ ] add audio conversion
-
+- [ ] Paginate News
+- [x] Debug fetch news
+- [x] On summarize create article
+- [x] Display article
+- [x] Add audio conversion
 - [x] Check-in these changes, review, etc.
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
   - [ ] Add changelog script and CHANGELOG
   - [ ] Add copyright check script
   - [ ] Add 90% coverage
-- [ ] Hide Forgot Password link and add to login page
-- [ ] Add a forgot password page
+- [x] Hide Forgot Password link and add to login page
+- [x] Add a forgot password page
 - [ ] Edit user info
-- [ ] Finish switching all GQL calls to Apollo
-- [ ] Add a stored value for the user to accept the terms and privacy policy
+- [x] Finish switching all GQL calls to Apollo
+- [x] Add a stored value for the user to accept the terms and privacy policy
 - [ ] Remove jest if possible
 - [ ] Then add posthog
 - [x] Create existing user error is not displayed
@@ -81,8 +81,9 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Ex-All
   - [ ] FED Events
 
-I want pot odds on my dashboard
+Pot odds on dashboard
 - This strat that is triggering has a X% of winning
+- What is this setups edge?
 
 - AI is where the money is because it is where all of these companies can insert suggestions and make money off of it.
   - If they suggest AI solutions on their own platform, they can make money off of it.

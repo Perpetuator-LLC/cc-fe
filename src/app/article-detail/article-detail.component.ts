@@ -14,23 +14,28 @@ import { of } from 'rxjs';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
+import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
 
-export interface CryptoNewsSummaryData {
-  summary: string;
+export interface CryptoArticleResult {
   id: string;
-  url: string;
-}
-
-export interface CryptoArticleData {
   date: string;
+  title: string;
   content: string;
-  news_summaries: CryptoNewsSummaryData[];
+  audio: string;
+  newsSummaries: CryptoNewsResult[];
+  // newsSummaries: CryptoNewsSummary[];
 }
 
 export interface CryptoArticlesData {
   success: boolean;
   message: string;
-  results: CryptoArticleData[];
+  results: CryptoArticleResult[];
+}
+
+export interface CryptoArticleData {
+  success: boolean;
+  message: string;
+  results: CryptoArticleResult;
 }
 
 export interface UpdateCryptoArticleData {
@@ -74,10 +79,9 @@ export interface PublishCryptoArticleAudio {
 })
 export class ArticleDetailComponent implements OnInit {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  article: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  linkedArticles: any[] = [];
+  article: CryptoArticleResult = { id: '', title: '', content: '', date: '', audio: '', newsSummaries: [] };
+  linkedArticles: CryptoNewsResult[] = [];
+  updatedTitle = '';
   updatedContent = '';
   audioSrc: string | null = null; // Add audioSrc to store the audio URL
   downloadLink: string | null = null; // Add downloadLink to store the download URL
@@ -95,17 +99,17 @@ export class ArticleDetailComponent implements OnInit {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     const articleId = this.route.snapshot.paramMap.get('id');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.articleService.getCryptoArticleById(articleId).subscribe((response: any) => {
-      if (!response.success) {
+    this.articleService.getCryptoArticleById(articleId).subscribe((data: CryptoArticleData) => {
+      if (!data.success) {
         this.messageService.addMessage({
           type: 'error',
-          text: response.message,
+          text: data.message,
           dismissible: true,
         });
         return;
       }
-      this.article = response.results[0];
+      this.article = data.results;
+      this.updatedTitle = this.article.title;
       this.updatedContent = this.article.content;
       this.linkedArticles = this.article.newsSummaries;
 
@@ -165,8 +169,8 @@ export class ArticleDetailComponent implements OnInit {
         this.articleService.getCryptoArticleById(this.article.id).subscribe({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           next: (response: any) => {
-            if (response.success && response.results[0].audio) {
-              this.prepareAudioPlayer(response.results[0].audio); // Update audio player with the newly generated audio
+            if (response.success && response.results.audio) {
+              this.prepareAudioPlayer(response.results.audio); // Update audio player with the newly generated audio
             }
           },
           error: (err) => {
@@ -191,7 +195,7 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   updateArticle(): void {
-    this.articleService.updateArticle(this.article.id, this.updatedContent).subscribe(() => {
+    this.articleService.updateArticle(this.article.id, this.updatedTitle, this.updatedContent).subscribe(() => {
       this.messageService.clearMessages();
       this.messageService.addMessage({
         type: 'success',

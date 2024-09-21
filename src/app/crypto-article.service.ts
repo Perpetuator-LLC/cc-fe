@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import {
+  CryptoArticleData,
   CryptoArticlesData,
   PublishCryptoArticleAudio,
   UpdateCryptoArticleAudio,
@@ -48,10 +49,12 @@ export class CryptoArticleService {
           results {
             id
             date
+            title
             content
             newsSummaries {
               id
               url
+              title
               summary
             }
           }
@@ -82,7 +85,7 @@ export class CryptoArticleService {
       );
   }
 
-  getCryptoArticleById(id: string | null): Observable<CryptoArticlesData> {
+  getCryptoArticleById(id: string | null): Observable<CryptoArticleData> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     const GET_CRYPTO_ARTICLE_DATA = gql`
       query GetCryptoArticleData {
@@ -92,11 +95,13 @@ export class CryptoArticleService {
           results {
             id
             date
+            title
             content
             audio
             newsSummaries {
               id
               url
+              title
               summary
             }
           }
@@ -118,7 +123,7 @@ export class CryptoArticleService {
           } else if (!result.data?.getCryptoArticleData.success) {
             throw new Error(result.data?.getCryptoArticleData.message);
           }
-          if (!result.data || result.data.getCryptoArticleData.results.length === 0) {
+          if (!result.data || !result.data.getCryptoArticleData.results) {
             return { success: false, message: 'No data available', results: [] };
           }
           return result.data.getCryptoArticleData;
@@ -130,8 +135,13 @@ export class CryptoArticleService {
       );
   }
 
-  updateArticle(id: string | null, updatedContent: string | null): Observable<UpdateCryptoArticleData> {
+  updateArticle(
+    id: string | null,
+    updatedTitle: string | null,
+    updatedContent: string | null,
+  ): Observable<UpdateCryptoArticleData> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
+    if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
 
     const escapedContent = updatedContent
@@ -142,7 +152,7 @@ export class CryptoArticleService {
 
     const UPDATE_CRYPTO_ARTICLES_DATA = gql`
       mutation UpdateCryptoArticlesData {
-        updateCryptoArticleData(id: "${id}", content: "${escapedContent}") {
+        updateCryptoArticleData(id: "${id}", title: "${updatedTitle}", content: "${escapedContent}") {
           success
           message
         }

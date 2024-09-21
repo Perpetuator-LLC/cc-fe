@@ -61,3 +61,13 @@ mat-card-content p {
 mat-card {
   width: 100%;
 }
+
+::ng-deep .news-description img {
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  float: left; // This makes the image float to the left, allowing text to wrap around
+  margin-right: 10px; // Adds some space between the image and the text on the right
+  margin-bottom: 10px; // Adds some space below the image for better spacing with the text
+}

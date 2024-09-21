@@ -14,6 +14,10 @@
       <button mat-raised-button color="primary" class="article-control" (click)="downloadAudio()">Download MP3</button>
     }
     <mat-form-field class="full-width article-content">
+      <mat-label>Title</mat-label>
+      <input matInput [(ngModel)]="updatedTitle" />
+    </mat-form-field>
+    <mat-form-field class="full-width article-content">
       <mat-label>Content</mat-label>
       <textarea matInput [(ngModel)]="updatedContent"></textarea>
     </mat-form-field>
@@ -26,7 +30,7 @@
     @for (relatedArticle of linkedArticles; track relatedArticle.id) {
       <mat-list-item>
         <a matLine href="{{ relatedArticle.url }}" target="_blank">
-          {{ relatedArticle.summary }}
+          {{ relatedArticle.title }}
         </a>
       </mat-list-item>
     }

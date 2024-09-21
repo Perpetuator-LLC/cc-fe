@@ -3,15 +3,19 @@
 </ng-template>
 <app-message></app-message>
 <mat-card>
-  <mat-list>
-    @for (article of articles; track article.id) {
-      <mat-list-item>
-        <a matLine [routerLink]="['/crypto-article', article.id]">
-          <mat-icon matListIcon>article</mat-icon>
-          {{ article.content | slice: 0 : 100 }}...
-        </a>
-        <mat-divider></mat-divider>
-      </mat-list-item>
-    }
-  </mat-list>
+  @if (articles.length === 0) {
+    <mat-spinner></mat-spinner>
+  } @else {
+    <mat-list>
+      @for (article of articles; track article.id) {
+        <mat-list-item>
+          <a matLine [routerLink]="['/crypto-article', article.id]">
+            <mat-icon matListIcon>article</mat-icon>
+            {{ article.date | date: 'short' : 'local' }} - {{ article.title | slice: 0 : 100 }}...
+          </a>
+          <mat-divider></mat-divider>
+        </mat-list-item>
+      }
+    </mat-list>
+  }
 </mat-card>

@@ -11,6 +11,7 @@ import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface CryptoNewsResult {
   id: string;
@@ -45,6 +46,7 @@ export interface CryptoNewsData {
     MatInput,
     MessageComponent,
     MatButton,
+    MatProgressSpinner,
   ],
   templateUrl: './crypto-news.component.html',
   styleUrl: './crypto-news.component.scss',

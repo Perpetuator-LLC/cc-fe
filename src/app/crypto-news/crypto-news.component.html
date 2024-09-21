@@ -8,7 +8,8 @@
 <app-message></app-message>
 <div class="crypto-news-container">
   <p>
-    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected.
+    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
+    (limited to last 24 hours of fetched news).
   </p>
   <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
   <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
@@ -24,7 +25,7 @@
               >
             </mat-card-header>
             <mat-card-content>
-              <p class="news-description">{{ news.description }}</p>
+              <p class="news-description" [innerHTML]="news.description"></p>
               <p><strong>Source:</strong> {{ news.source }}</p>
               <p class="news-published"><strong>Published at:</strong> {{ news.publishedAt | date: 'short' }}</p>
             </mat-card-content>
@@ -33,10 +34,12 @@
       } @empty {
         <mat-card>
           <mat-card-header>
-            <p>No news available at the moment.</p>
+            <p>No news articles exist within the last 24 hours, perhaps try "Fetch News" to get the latest updates.</p>
           </mat-card-header>
         </mat-card>
       }
     </mat-list>
+  } @else {
+    <mat-spinner></mat-spinner>
   }
 </div>
