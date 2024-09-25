@@ -31,6 +31,11 @@ export interface CryptoArticlesResponse {
   data?: { getCryptoArticlesData: CryptoArticlesData };
 }
 
+export interface CryptoArticleResponse {
+  errors?: [{ message: string }];
+  data?: { getCryptoArticleData: CryptoArticleData };
+}
+
 @Injectable({
   providedIn: 'root',
 })

@@ -14,7 +14,11 @@
     (limited to last 24 hours of fetched news).
   </p>
   <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
+  <button mat-flat-button color="primary" type="button" (click)="extractSelectedNews()">Extract Selected</button>
   <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
+  <button mat-flat-button color="primary" type="button" (click)="createArticleFromSelected()">Create Article</button>
+  <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
+  <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
 
   @if (newsData) {
     <mat-list>
@@ -39,15 +43,22 @@
                     </p>
                     @if (news.summary) {
                       <p>&nbsp;(AI Summary Generated)</p>
+                    } @else if (news.content) {
+                      <p>&nbsp;(No AI Summary)</p>
                     }
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <p class="news-description" [innerHTML]="news.description"></p>
                 <p><strong>Source:</strong> {{ news.source }}</p>
-                @if (news.summary.length > 0) {
+                @if (news.summary) {
                   <p><strong>Summary:</strong> {{ news.summary }}</p>
                 } @else {
                   <p><strong>Summary:</strong> No AI summary available</p>
+                }
+                @if (news.content) {
+                  <p><strong>Content:</strong> {{ news.content }}</p>
+                } @else {
+                  <p><strong>Content:</strong> No news content available</p>
                 }
               </mat-expansion-panel>
             </mat-card-content>
