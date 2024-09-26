@@ -19,6 +19,7 @@
   <button mat-flat-button color="primary" type="button" (click)="createArticleFromSelected()">Create Article</button>
   <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
   <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
+  <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
 
   @if (newsData) {
     <mat-list>
@@ -40,6 +41,7 @@
                       <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
                         {{ news.publishedAt | date: 'short' }}
                       </span>
+                      - <strong>Source:</strong> {{ news.source }}
                     </p>
                     @if (news.summary) {
                       <p>&nbsp;(AI Summary Generated)</p>
@@ -49,7 +51,6 @@
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <p class="news-description" [innerHTML]="news.description"></p>
-                <p><strong>Source:</strong> {{ news.source }}</p>
                 @if (news.summary) {
                   <p><strong>Summary:</strong> {{ news.summary }}</p>
                 } @else {
