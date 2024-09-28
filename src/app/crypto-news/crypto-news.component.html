@@ -13,7 +13,7 @@
     Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
     (limited to last 24 hours of fetched news).
   </p>
-  <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
+  <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
   <button
     mat-flat-button
     color="primary"
@@ -81,14 +81,8 @@
                 ></p>
                 <mat-divider></mat-divider>
                 <h3>AI Summary</h3>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="regenerateSummary(news.id)"
-                  [disabled]="news.summary"
-                >
-                  Regenerate Summary
+                <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
+                  {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
                 </button>
                 <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
                 <mat-divider></mat-divider>
@@ -101,7 +95,7 @@
       } @empty {
         <mat-card>
           <mat-card-header>
-            <p>No news articles exist within the last 24 hours, perhaps try "Fetch News" to get the latest updates.</p>
+            <p>No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.</p>
           </mat-card-header>
         </mat-card>
       }

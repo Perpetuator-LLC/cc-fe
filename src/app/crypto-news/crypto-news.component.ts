@@ -241,7 +241,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         error: (err: { message: string }) => {
           this.messageService.addMessage({
             type: 'error',
-            text: `Failed to create crypto article: ${err.message}`,
+            text: err.message,
             dismissible: true,
           });
         },
