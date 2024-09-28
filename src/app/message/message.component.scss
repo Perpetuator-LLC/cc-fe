@@ -8,13 +8,16 @@
   border-radius: 10px;
 }
 
+.mat-mdc-card.message-card {
+  background-color: #3b3a43;
+}
+
 .message-card {
   position: relative;
   padding-top: 30px;
   margin-bottom: 5px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #3b3a43;
 }
 
 .close-button {

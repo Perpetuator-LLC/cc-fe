@@ -190,6 +190,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
             text: `Failed to summarize news data: ${err.message}`,
             dismissible: true,
           });
+          this.getNews(); // reload partial data
         },
         complete: () => {
           console.debug('News summarize complete');
@@ -221,14 +222,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.messageService.clearMessages();
           if (data.success) {
+            const newArticleUrl = `/crypto-article/${data.results.id}`;
             this.messageService.addMessage({
               type: 'success',
-              text: data.message,
+              text: data.message + ` Article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`,
               dismissible: true,
             });
-            this.router.navigate(['/crypto-article', data.results.id]);
-            // Optionally handle the article data
-            console.log('Article Data:', data.results);
+            // this.router.navigate(['/crypto-article', data.results.id]);
+            // console.log('Article Data:', data.results);
           } else {
             this.messageService.addMessage({
               type: 'error',
