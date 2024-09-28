@@ -27,13 +27,11 @@ mat-form-field {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: var(--background-color);
-  filter: brightness(150%);
 }
 
-.disclaimers {
-  filter: brightness(110%);
-}
+//.disclaimers {
+//  //filter: brightness(110%);
+//}
 
 .error-container {
   min-width: 300px;

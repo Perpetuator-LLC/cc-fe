@@ -2,14 +2,16 @@
 // For more information: https://material.angular.io/guide/theming
 // System variables for Angular Material: https://angular-material.dev/articles/angular-material-theming-css-vars
 @use 'sass:map';
+@use 'sass:color';
 @use '@angular/material' as mat;
 
 // Import MD3 variables
-//@use '@angular/material/core/theming/palette' as matPalette;
+//@use '@angular/material/core/theming/palettes' as matPalette;
 //@use '@angular/material/core/theming/palette-md' as mdPalette;
 
 // Plus imports for other components in your app.
 //@use 'invest-theme/m3-theme';
+//@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
@@ -28,7 +30,7 @@ $dark-theme: mat.define-theme(
       theme-type: dark,
       primary: mat.$orange-palette,
       tertiary: mat.$violet-palette,
-      //use-system-variables: true
+      //use-system-variables: true,
     ),
     density: (
       scale: 0,
@@ -43,7 +45,7 @@ $light-theme: mat.define-theme(
       theme-type: light,
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
-      //use-system-variables: true
+      //use-system-variables: true,
     ),
     density: (
       scale: 0,
@@ -57,12 +59,43 @@ $light-theme: mat.define-theme(
 // Supposedly we can use: @include mat.all-component-colors($dark-theme); but it doesn't work
 mat.$theme-ignore-duplication-warnings: true;
 
+//@mixin custom-card-theme($theme) {
+//  $color-config: map.get($theme, color);
+//  $is-dark-theme: map.get($color-config, 'theme-type') == 'dark';
+//  $background: map.get($color-config, 'background');
+//
+//  .mat-mdc-card {
+//    @if $is-dark-theme {
+//      background-color: mix(#ffffff, map.get($background, 'background'), 5%);
+//    } @else {
+//      background-color: mix(#000000, map.get($background, 'background'), 5%);
+//    }
+//  }
+//}
+//
+//// Apply the custom theme
+//@include custom-card-theme($dark-theme);
+//@include custom-card-theme($light-theme);
+
+// Keep your existing theme applications
 body.dark {
   @include mat.all-component-themes($dark-theme);
+  //@include mat.all-component-densities($dark-theme);
+  //@include mat.all-component-bases($dark-theme);
+  .mat-mdc-card {
+    background-color: rgba(111, 111, 111, 0.1);
+    //background-color: var(--mdc-outlined-card-outline-color);
+  }
 }
 
 body.light {
   @include mat.all-component-themes($light-theme);
+  //@include mat.all-component-densities($light-theme);
+  //@include mat.all-component-bases($light-theme);
+  .mat-mdc-card {
+    background-color: rgba(111, 111, 111, 0.1);
+    //background-color: var(--mdc-outlined-card-outline-color);
+  }
 }
 
 html,
@@ -85,3 +118,58 @@ a {
     color: var(--md-sys-color-primary-visited);
   }
 }
+
+// Now, debug the theme map
+//@function print-map($map, $indent: '') {
+//  @each $key, $value in $map {
+//    @if type-of($value) == 'map' {
+//      @debug $indent + '#{$key}:';
+//      @debug $indent + '{';
+//      @debug print-map($value, $indent + '  ');
+//      @debug $indent + '}';
+//    } @else {
+//      @debug $indent + '#{$key}: #{$value}';
+//    }
+//  }
+//  @return null;
+//}
+//@function print-keys($map, $indent: '') {
+//  @each $key, $value in $map {
+//    @if type-of($value) == 'map' {
+//      @debug $indent + '#{$key}:';
+//    } @else {
+//      @debug $indent + '#{$key}';
+//    }
+//  }
+//  @return null;
+//}
+//@function print-simple($map, $indent: '') {
+//  $matint: map.get($map, '_mat-theming-internals-do-not-access');
+//  //$root: map.get($matint, 'theme-type');
+//  //$root: map.get($matint, 'palettes');
+//  $root: map.get($matint, 'color-tokens');
+//  //$root: map.get($matint, 'base-tokens');
+//  @debug print-keys($root);
+//  $color: map.get($root, 'theme');
+//  @debug 'Keys:';
+//  @debug print-keys($color);
+//  //@debug 'Color Tokens:';
+//  //@debug $color;
+//  //$color-config: map.get($theme, color);
+//  //$is-dark-theme: map.get($color-config, 'theme-type') == 'dark';
+//  //$background: map.get($color-config, 'background');
+//  //
+//  //.mat-mdc-card {
+//  //  @if $is-dark-theme {
+//  //    background-color: mix(#ffffff, map.get($background, 'background'), 5%);
+//  //  } @else {
+//  //    background-color: mix(#000000, map.get($background, 'background'), 5%);
+//  //  }
+//  //}
+//  @return null;
+//}
+
+//@debug 'Map Contents:';
+//@debug print-map($dark-theme);
+//@debug print-simple($dark-theme);
+//@debug 'Dark Theme Keys:', map.keys(matPalette.$orange-palette);

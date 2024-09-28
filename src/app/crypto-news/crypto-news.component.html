@@ -14,13 +14,36 @@
     (limited to last 24 hours of fetched news).
   </p>
   <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch News</button>
-  <button mat-flat-button color="primary" type="button" (click)="extractSelectedNews()">Extract Selected</button>
-  <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()">Summarize Selected</button>
-  <button mat-flat-button color="primary" type="button" (click)="createArticleFromSelected()">Create Article</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="extractSelectedNews()"
+    [disabled]="selectedNews.size == 0"
+  >
+    Retrieve
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="summarizeSelected()"
+    [disabled]="selectedNews.size == 0"
+  >
+    Summarize
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="createArticleFromSelected()"
+    [disabled]="selectedNews.size == 0"
+  >
+    Create Article
+  </button>
   <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
   <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
   <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
-
   @if (newsData) {
     <mat-list>
       @for (news of filteredNews; track news.url) {
@@ -50,17 +73,27 @@
                     }
                   </mat-panel-title>
                 </mat-expansion-panel-header>
-                <p class="news-description" [innerHTML]="news.description"></p>
-                @if (news.summary) {
-                  <p><strong>Summary:</strong> {{ news.summary }}</p>
-                } @else {
-                  <p><strong>Summary:</strong> No AI summary available</p>
-                }
-                @if (news.content) {
-                  <p><strong>Content:</strong> {{ news.content }}</p>
-                } @else {
-                  <p><strong>Content:</strong> No news content available</p>
-                }
+                <mat-divider></mat-divider>
+                <h3>RSS Description</h3>
+                <p
+                  class="news-details news-description"
+                  [innerHTML]="news.description || 'No description provided'"
+                ></p>
+                <mat-divider></mat-divider>
+                <h3>AI Summary</h3>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="regenerateSummary(news.id)"
+                  [disabled]="news.summary"
+                >
+                  Regenerate Summary
+                </button>
+                <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
+                <mat-divider></mat-divider>
+                <h3>Site Content</h3>
+                <p class="news-details">{{ news.content || 'No news content available' }}</p>
               </mat-expansion-panel>
             </mat-card-content>
           </mat-card>

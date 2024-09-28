@@ -124,10 +124,10 @@ export class CryptoNewsService {
       );
   }
 
-  summarizeCryptoNews(ids: number[]): Observable<CryptoNewsData> {
+  summarizeCryptoNews(ids: number[], force = false): Observable<CryptoNewsData> {
     const SUMMARIZE_CRYPTO_NEWS_DATA = gql`
       mutation {
-        summarizeCryptoNewsData(ids: [${ids.join(' ')}]) {
+        summarizeCryptoNewsData(ids: [${ids.join(' ')}], force: ${force}) {
           success
           message
         }

@@ -27,14 +27,15 @@ mat-card-header {
 }
 
 .news-item {
-  border-bottom: 1px solid #ccc;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
+  margin-bottom: 2px;
+  padding-bottom: 2px;
   height: auto;
 }
+
 mat-card-content p {
   white-space: normal; // Allow text to wrap
   overflow-wrap: break-word; // Ensures long words do not cause layout issues
+  //margin-bottom: 5px;
 }
 //.news-description {
 //  margin: 0;
@@ -42,16 +43,24 @@ mat-card-content p {
 //}
 
 .news-item h3 {
-  margin: 0 0 1rem 0;
+  //margin: 0 0 1rem 0;
 }
 
 .news-item p {
   margin: 0;
 }
 
+.news-item p.news-details {
+  margin-bottom: 10px;
+}
+
 .filter-form-field {
   width: 100%;
   margin-bottom: 1rem;
+}
+
+mat-expansion-panel h3 {
+  margin: 0;
 }
 
 mat-card {

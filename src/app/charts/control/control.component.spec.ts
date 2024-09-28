@@ -91,7 +91,7 @@ describe('ControlComponent', () => {
       Object.assign({ focus: focusSpy }, {}) as unknown as HTMLInputElement,
     );
 
-    component.ngOnInit();
+    // component.ngOnInit();
 
     expect(document.querySelector).toHaveBeenCalledWith('#ticker');
     expect(focusSpy).toHaveBeenCalled();

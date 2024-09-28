@@ -1,65 +1,79 @@
-//.toolbar {
-//  display: flex;
-//  justify-content: center;
-//  font-size: 24px;
-//  font-weight: bold;
-//}
-//
-//.home-container {
-//  padding: 20px;
-//  display: flex;
-//  flex-direction: column;
-//  align-items: center;
-//}
-//
-//.hero-card {
-//  width: 100%;
-//  max-width: 900px;
-//  margin-bottom: 40px;
-//  text-align: center;
-//}
-//
-//.hero-card h1 {
-//  font-size: 36px;
-//  margin-bottom: 16px;
-//}
-//
-//.hero-card p {
-//  font-size: 18px;
-//}
-//
-//.feature-section {
-//  display: flex;
-//  flex-wrap: wrap;
-//  justify-content: space-around;
-//  width: 100%;
-//  max-width: 1200px;
-//  margin-top: 40px;
-//}
-//
-//.feature-card {
-//  width: 100%;
-//  max-width: 300px;
-//  margin-bottom: 20px;
-//}
-//
-//.feature-card p {
-//  font-size: 16px;
-//}
-//
-//.cta-section {
-//  margin-top: 40px;
-//  width: 100%;
-//  max-width: 900px;
-//  text-align: center;
-//}
-//
-//.cta-card h2 {
-//  font-size: 28px;
-//  margin-bottom: 16px;
-//}
-//
-//.cta-card p {
-//  font-size: 18px;
-//  margin-bottom: 20px;
-//}
+.home-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-section {
+  //margin-top: 40px;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+.hero-card {
+  width: 100%;
+  max-width: 900px;
+  //margin-bottom: 40px;
+  text-align: center;
+}
+
+.hero-card h1 {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.hero-card p {
+  font-size: 18px;
+}
+
+.hero-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto; /* Center the list */
+  max-width: 600px;
+}
+
+.hero-card li {
+  margin-bottom: 10px; /* Optional: Add some space between list items */
+}
+
+.feature-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 10px;
+}
+
+.feature-card {
+  padding: 1em;
+  width: 100%;
+  max-width: 430px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  padding-top: 10px;
+  font-size: 16px;
+}
+
+.cta-section {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+.cta-card h2 {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.cta-card p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}

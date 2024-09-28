@@ -15,6 +15,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
+import { MatDivider } from '@angular/material/divider';
 
 export interface CryptoNewsResult {
   id: string;
@@ -55,6 +56,7 @@ export interface CryptoNewsData {
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatTooltip,
+    MatDivider,
   ],
   templateUrl: './crypto-news.component.html',
   styleUrl: './crypto-news.component.scss',
@@ -124,6 +126,10 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
             dismissible: true,
           });
         },
+        complete: () => {
+          console.debug('News extracting complete');
+          this.getNews();
+        },
       }),
     );
   }
@@ -145,8 +151,23 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
     });
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    this.summarizeNews(newsIds);
+  }
+
+  regenerateSummary(id: string) {
+    this.messageService.clearMessages();
+    this.messageService.addMessage({
+      type: 'info',
+      text: 'Summarizing content of news (this may take a while)...',
+      dismissible: true,
+    });
+
+    this.summarizeNews([Number(id)], true);
+  }
+
+  private summarizeNews(newsIds: number[], force = false) {
     this.subscriptions.add(
-      this.cryptoNewsService.summarizeCryptoNews(newsIds).subscribe({
+      this.cryptoNewsService.summarizeCryptoNews(newsIds, force).subscribe({
         next: (data) => {
           this.messageService.clearMessages();
           if (data.success) {
@@ -169,6 +190,10 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
             text: `Failed to summarize news data: ${err.message}`,
             dismissible: true,
           });
+        },
+        complete: () => {
+          console.debug('News summarize complete');
+          this.getNews();
         },
       }),
     );
@@ -201,7 +226,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
               text: data.message,
               dismissible: true,
             });
-            this.router.navigate(['/article-detail', data.results.id]);
+            this.router.navigate(['/crypto-article', data.results.id]);
             // Optionally handle the article data
             console.log('Article Data:', data.results);
           } else {
@@ -222,84 +247,6 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
       }),
     );
   }
-
-  // Update summarizeSelected to chain the new APIs if needed
-  // summarizeSelected() {
-  //   this.messageService.clearMessages();
-  //   if (this.selectedNews.size === 0) {
-  //     this.messageService.addMessage({
-  //       type: 'warning',
-  //       text: 'No news items selected.',
-  //       dismissible: true,
-  //     });
-  //     return;
-  //   }
-  //
-  //   this.messageService.addMessage({
-  //     type: 'info',
-  //     text: 'Processing selected news items (this may take a while)...',
-  //     dismissible: true,
-  //   });
-  //
-  //   const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
-  //
-  //   this.subscriptions.add(
-  //     this.cryptoNewsService
-  //       .extractCryptoNews(newsIds)
-  //       .pipe(
-  //         switchMap((extractData) => {
-  //           this.messageService.clearMessages();
-  //           if (!extractData.success) {
-  //             throw new Error(extractData.message);
-  //           }
-  //           this.messageService.addMessage({
-  //             type: 'success',
-  //             text: extractData.message,
-  //             dismissible: true,
-  //           });
-  //           return this.cryptoNewsService.summarizeCryptoNews(newsIds);
-  //         }),
-  //         switchMap((summarizeData) => {
-  //           if (!summarizeData.success) {
-  //             throw new Error(summarizeData.message);
-  //           }
-  //           this.messageService.addMessage({
-  //             type: 'success',
-  //             text: summarizeData.message,
-  //             dismissible: true,
-  //           });
-  //           return this.cryptoNewsService.createCryptoArticle(newsIds);
-  //         }),
-  //       )
-  //       .subscribe({
-  //         next: (createArticleData) => {
-  //           this.messageService.clearMessages();
-  //           if (createArticleData.success) {
-  //             this.messageService.addMessage({
-  //               type: 'success',
-  //               text: 'Crypto news summarized successfully.',
-  //               dismissible: true,
-  //             });
-  //             // Optionally handle the article data
-  //             console.log('Article Data:', createArticleData.results);
-  //           } else {
-  //             this.messageService.addMessage({
-  //               type: 'error',
-  //               text: createArticleData.message,
-  //               dismissible: true,
-  //             });
-  //           }
-  //         },
-  //         error: (err: { message: string }) => {
-  //           this.messageService.addMessage({
-  //             type: 'error',
-  //             text: `Failed to process news data: ${err.message}`,
-  //             dismissible: true,
-  //           });
-  //         },
-  //       }),
-  //   );
-  // }
 
   fetchNews() {
     this.messageService.clearMessages();
@@ -340,12 +287,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
     //   text: 'Loading crypto news data...',
     //   dismissible: true,
     // });
+    const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
       this.cryptoNewsService.getCryptoNews().subscribe({
         next: (data: CryptoNewsData) => {
           // this.messageService.clearMessages();
           this.newsData = data;
           this.filteredNews = this.newsData?.results || [];
+          this.reapplySelection(selectedNewsIds);
         },
         error: (err: { message: string }) => {
           this.messageService.addMessage({
@@ -359,6 +308,19 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  private getSelectedNewsIds(): number[] {
+    return [...this.selectedNews].map((entry) => Number(entry.id));
+  }
+
+  private reapplySelection(selectedNewsIds: number[]): void {
+    this.selectedNews.clear();
+    this.filteredNews.forEach((news) => {
+      if (selectedNewsIds.includes(Number(news.id))) {
+        this.selectedNews.add(news);
+      }
+    });
   }
 
   selectLast12Hours() {

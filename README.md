@@ -33,6 +33,14 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Switch to new inject syntax
 - [x] On landing but login required add a next query param to redirect to after login
 - [ ] Consider ad supported free version? where products are part of outputs
+- [ ] Determine if this code is needed in the `angular.json` file:
+```
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            },
+```
 
 [ANGULAR.md](notes%2FANGULAR.md)
 [APEXCHARTS.md](notes%2FAPEXCHARTS.md)
