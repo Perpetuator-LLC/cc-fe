@@ -3,15 +3,25 @@
 </ng-template>
 <app-message></app-message>
 <mat-card>
-  @if (articles.length === 0) {
+  @if (loading) {
     <mat-spinner></mat-spinner>
+  } @else if (articles.length === 0) {
+    <h1>No articles found.</h1>
+    <mat-divider></mat-divider>
+    <h3>
+      If you would like to create an article, then visit the <a routerLink="/crypto-news">Crypto News</a> page. From
+      within the Crypto News page, you can select news pages and create articles from them.
+    </h3>
   } @else {
     <mat-list>
       @for (article of articles; track article.id) {
         <mat-list-item>
           <a matLine [routerLink]="['/crypto-article', article.id]">
             <mat-icon matListIcon>article</mat-icon>
-            {{ article.date | date: 'short' : 'local' }} - {{ article.title | slice: 0 : 100 }}...
+            <span [matTooltip]="article.date | date: 'z'" matTooltipPosition="above">
+              {{ article.date | date: 'short' : 'local' }}
+            </span>
+            - {{ article.title | slice: 0 : 100 }}...
           </a>
           <mat-divider></mat-divider>
         </mat-list-item>

@@ -99,23 +99,32 @@ export class ArticleDetailComponent implements OnInit {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     const articleId = this.route.snapshot.paramMap.get('id');
-    this.articleService.getCryptoArticleById(articleId).subscribe((data: CryptoArticleData) => {
-      if (!data.success) {
+    this.articleService.getCryptoArticleById(articleId).subscribe({
+      next: (data: CryptoArticleData) => {
+        if (!data.success) {
+          this.messageService.addMessage({
+            type: 'error',
+            text: data.message,
+            dismissible: true,
+          });
+          return;
+        }
+        this.article = data.results;
+        this.updatedTitle = this.article.title;
+        this.updatedContent = this.article.content;
+        this.linkedArticles = this.article.newsSummaries;
+
+        if (this.article.audio) {
+          this.prepareAudioPlayer(this.article.audio);
+        }
+      },
+      error: (err) => {
         this.messageService.addMessage({
           type: 'error',
-          text: data.message,
+          text: `Failed to fetch article: ${err.message}`,
           dismissible: true,
         });
-        return;
-      }
-      this.article = data.results;
-      this.updatedTitle = this.article.title;
-      this.updatedContent = this.article.content;
-      this.linkedArticles = this.article.newsSummaries;
-
-      if (this.article.audio) {
-        this.prepareAudioPlayer(this.article.audio);
-      }
+      },
     });
   }
 
@@ -187,7 +196,7 @@ export class ArticleDetailComponent implements OnInit {
         this.messageService.clearMessages();
         this.messageService.addMessage({
           type: 'error',
-          text: `Failed to generate audio: ${err.message}`,
+          text: err.message,
           dismissible: true,
         });
       },

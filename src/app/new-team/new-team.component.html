@@ -1,0 +1,13 @@
+<ng-template #toolbarTemplate>
+  <span>New Team</span>
+</ng-template>
+<app-message></app-message>
+
+<form [formGroup]="teamForm" (ngSubmit)="createTeam()">
+  <mat-form-field>
+    <mat-label>Team Name</mat-label>
+    <input matInput formControlName="name" />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit">Save</button>
+</form>

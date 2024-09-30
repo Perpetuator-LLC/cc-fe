@@ -1,0 +1,27 @@
+<ng-template #toolbarTemplate>
+  <span>Update Team</span>
+</ng-template>
+<app-message></app-message>
+@if (loading) {
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+}
+
+<form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
+  <mat-form-field>
+    <mat-label>Team Name</mat-label>
+    <input matInput formControlName="name" />
+  </mat-form-field>
+
+  <div formArrayName="members">
+    @for (member of members.controls; track $index) {
+      <mat-form-field>
+        <mat-label>Member {{ $index + 1 }}</mat-label>
+        <input matInput [formControlName]="$index" />
+      </mat-form-field>
+    }
+  </div>
+
+  <button mat-raised-button color="primary" type="submit">Save</button>
+</form>

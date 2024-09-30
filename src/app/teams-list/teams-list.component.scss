@@ -1,0 +1,21 @@
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.teams-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.team-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.secondary {
+  color: var(--md-sys-color-secondary);
+}

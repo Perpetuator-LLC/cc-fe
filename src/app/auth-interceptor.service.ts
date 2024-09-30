@@ -25,7 +25,10 @@ export class AuthInterceptorService implements HttpInterceptor {
     if (this.authService.isRefreshTokenExpired()) {
       console.debug(
         'AuthInterceptor: COULD_HAVE_BUT_SKIPPED Redirecting to login page (refresh token expired, ' +
-          'perhaps guard API call with isLoggedIn?)',
+          'perhaps guard API call with isLoggedIn?). Current URL: ' +
+          this.router.url +
+          ' Next URL: ' +
+          req.url,
       );
       //   this.authService.logout();
       //   this.router.navigate(['/login']);

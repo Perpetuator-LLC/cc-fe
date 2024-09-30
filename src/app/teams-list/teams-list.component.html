@@ -1,0 +1,36 @@
+<ng-template #toolbarTemplate>
+  <span>My Teams</span>
+</ng-template>
+<app-message></app-message>
+<button mat-flat-button color="primary" type="button" (click)="createTeam()">Create Team</button>
+@if (loading) {
+  <div class="loading-spinner">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+} @else if (teams.length === 0) {
+  <h2>No teams found.</h2>
+} @else {
+  <div class="teams-container">
+    @for (team of teams; track team.id) {
+      <mat-card class="team-card">
+        <mat-card-header>
+          <mat-card-title>{{ team.name }}</mat-card-title>
+        </mat-card-header>
+        <!--        <mat-card-content>-->
+        <!--          <mat-list>-->
+        <!--            @for (member of team.members; track $index) {-->
+        <!--              <mat-list-item>-->
+        <!--                <mat-icon mat-list-icon>person</mat-icon>-->
+        <!--                <div mat-line>{{ member.user.username }}</div>-->
+        <!--                <div mat-line class="secondary">Role: {{ member.role }}</div>-->
+        <!--              </mat-list-item>-->
+        <!--            }-->
+        <!--          </mat-list>-->
+        <!--        </mat-card-content>-->
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="viewTeam(team.id)">View Details</button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}

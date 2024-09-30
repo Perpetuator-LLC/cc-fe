@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -53,16 +53,20 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(5)]),
     email: new FormControl(environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]),
   });
+  returnUrl = '';
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private authService: AuthService,
+    private route: ActivatedRoute,
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
     private themeService: ThemeService,
     private cookieConsentService: CookieConsentService,
-  ) {}
+  ) {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/crypto-news';
+  }
 
   ngAfterViewInit() {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
@@ -77,7 +81,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       .subscribe({
         next: () => {
           if (this.messageService.messageCount === 0) {
-            this.router.navigate(['/']);
+            this.router.navigateByUrl(this.returnUrl);
             this.themeService.loadTheme();
             this.cookieConsentService.loadCookieConsent();
           } else {
