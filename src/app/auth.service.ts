@@ -124,7 +124,7 @@ export class AuthService {
 
   register(email: string, password: string): Observable<Token | null> {
     this.messageService.clearMessages();
-    const username = email;
+    const username = 'User' + Math.floor(Math.random() * 1000000);
     const password1 = password;
     const password2 = password;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -81,7 +81,7 @@ export const routes: Routes = [
   {
     path: 'team/new',
     loadComponent: () => import('./new-team/new-team.component').then((c) => c.NewTeamComponent),
-    title: 'Team',
+    title: 'Create Team',
     canActivate: [AuthGuard],
   },
   {

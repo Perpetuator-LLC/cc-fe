@@ -8,20 +8,59 @@
   </div>
 }
 
+<form [formGroup]="newUserForm" (ngSubmit)="addUserToTeam()">
+  <div class="member-row">
+    <app-user-autocomplete (userSelected)="onUserSelected($event)"></app-user-autocomplete>
+    <!--  <mat-form-field>-->
+    <!--    <mat-label>User ID</mat-label>-->
+    <!--    <input matInput formControlName="userId" />-->
+    <!--  </mat-form-field>-->
+    <mat-form-field>
+      <mat-label>Role</mat-label>
+      <mat-select formControlName="role">
+        @for (role of supportedRoles; track role) {
+          <mat-option [value]="role">{{ role }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit">Add or Update User</button>
+  </div>
+</form>
+
+<mat-divider></mat-divider>
+
 <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
-  <mat-form-field>
-    <mat-label>Team Name</mat-label>
-    <input matInput formControlName="name" />
-  </mat-form-field>
+  <div class="member-row">
+    <mat-form-field>
+      <mat-label>Team Name</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit">Save</button>
+  </div>
+
+  <mat-divider></mat-divider>
 
   <div formArrayName="members">
     @for (member of members.controls; track $index) {
-      <mat-form-field>
-        <mat-label>Member {{ $index + 1 }}</mat-label>
-        <input matInput [formControlName]="$index" />
-      </mat-form-field>
+      <div [formGroupName]="$index" class="member-row">
+        <div formGroupName="user">
+          <mat-form-field>
+            <mat-label>Username</mat-label>
+            <input matInput formControlName="username" />
+          </mat-form-field>
+        </div>
+        <mat-form-field>
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @for (role of supportedRoles; track role) {
+              <mat-option [value]="role">{{ role }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button color="warn" type="button" (click)="removeUserFromTeam(member.get('user.id')?.value)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
     }
   </div>
-
-  <button mat-raised-button color="primary" type="submit">Save</button>
 </form>

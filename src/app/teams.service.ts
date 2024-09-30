@@ -151,4 +151,102 @@ export class TeamsService {
         }),
       );
   }
+
+  upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {
+    const UPSERT_USER_TO_TEAM = gql`
+      mutation UpsertUserToTeam($teamId: ID!, $userId: ID!, $role: String!) {
+        upsertUserToTeam(teamId: $teamId, userId: $userId, role: $role) {
+          success
+          message
+          team {
+            id
+            name
+            members {
+              user {
+                id
+                username
+              }
+              role
+            }
+          }
+        }
+      }
+    `;
+    return this.apollo
+      .mutate({
+        mutation: UPSERT_USER_TO_TEAM,
+        variables: { teamId, userId, role },
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => result.data.upsertUserToTeam.team),
+        catchError((error) => {
+          console.error('GraphQL mutation error:', error);
+          return throwError(() => new Error(error.message));
+        }),
+      );
+  }
+
+  removeUserFromTeam(teamId: string, userId: string): Observable<TeamsResult> {
+    const REMOVE_USER_FROM_TEAM = gql`
+      mutation RemoveUserFromTeam($teamId: ID!, $userId: ID!) {
+        removeUserFromTeam(teamId: $teamId, userId: $userId) {
+          success
+          message
+          team {
+            id
+            name
+            members {
+              user {
+                id
+                username
+              }
+              role
+            }
+          }
+        }
+      }
+    `;
+    return this.apollo
+      .mutate({
+        mutation: REMOVE_USER_FROM_TEAM,
+        variables: { teamId, userId },
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => result.data.removeUserFromTeam.team),
+        catchError((error) => {
+          console.error('GraphQL mutation error:', error);
+          return throwError(() => new Error(error.message));
+        }),
+      );
+  }
+
+  getUserAutocomplete(query: string): Observable<{ id: string; username: string }[]> {
+    const GET_USER_AUTOCOMPLETE = gql`
+      query GetUserAutocomplete($query: String!) {
+        getUserAutocomplete(query: $query) {
+          success
+          message
+          results {
+            id
+            username
+          }
+        }
+      }
+    `;
+    return this.apollo
+      .query({
+        query: GET_USER_AUTOCOMPLETE,
+        variables: { query },
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => result.data.getUserAutocomplete.results),
+        catchError((error) => {
+          console.error('GraphQL query error:', error);
+          return throwError(() => new Error(error.message));
+        }),
+      );
+  }
 }
