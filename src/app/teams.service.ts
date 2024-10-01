@@ -4,13 +4,6 @@ import { Observable, throwError } from 'rxjs';
 import { TeamsResult } from './teams-list/teams-list.component';
 import { catchError, map } from 'rxjs/operators';
 
-// export interface TeamsResponse<T> extends ApolloQueryResult<T> {
-//   errors?: [{ message: string }];
-//   data: T;
-//   loading: boolean;
-//   networkStatus: NetworkStatus;
-// }
-
 @Injectable({
   providedIn: 'root',
 })
@@ -37,18 +30,37 @@ export class TeamsService {
         }
       }
     `;
+
+    interface CreateTeamData {
+      createTeam: {
+        success: boolean;
+        message: string;
+        team: TeamsResult;
+      };
+    }
+
+    // interface CreateTeamResponse {
+    //   data?: CreateTeamData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .mutate({
+      .mutate<CreateTeamData>({
         mutation: CREATE_TEAM,
-        variables: { name: name },
+        variables: { name },
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => result.data.createTeam),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.createTeam.success) {
+            throw new Error(result.data?.createTeam.message);
+          }
+          return result.data.createTeam;
+        }),
         catchError((error) => {
           console.error('GraphQL mutation error:', error);
-          console.error('Full error response:', error.networkError?.error.errors);
-          return throwError(() => new Error(error.networkError?.error.errors));
+          return throwError(() => new Error(error.message));
         }),
       );
   }
@@ -73,17 +85,36 @@ export class TeamsService {
         }
       }
     `;
+
+    interface UpdateTeamData {
+      updateTeam: {
+        success: boolean;
+        message: string;
+        team: TeamsResult;
+      };
+    }
+
+    // interface UpdateTeamResponse {
+    //   data?: UpdateTeamData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .mutate({
+      .mutate<UpdateTeamData>({
         mutation: UPDATE_TEAM,
         variables: { id, name },
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => result.data.updateTeam),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.updateTeam.success) {
+            throw new Error(result.data?.updateTeam.message);
+          }
+          return result.data.updateTeam;
+        }),
         catchError((error) => {
-          console.error('GraphQL query error:', error);
-          console.error('Full error response:', error.networkError?.error.errors);
+          console.error('GraphQL mutation error:', error);
           return throwError(() => new Error(error.message));
         }),
       );
@@ -106,14 +137,30 @@ export class TeamsService {
       }
     `;
 
+    interface GetTeamByIdData {
+      team: TeamsResult;
+    }
+
+    // interface GetTeamByIdResponse {
+    //   data?: GetTeamByIdData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .watchQuery<{ team: TeamsResult }>({
+      .watchQuery<GetTeamByIdData>({
         query: GET_TEAM_BY_ID,
         variables: { id },
         fetchPolicy: 'network-only',
       })
       .valueChanges.pipe(
-        map((result) => result.data.team),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.team) {
+            throw new Error('Team data is missing');
+          }
+          return result.data.team;
+        }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
           return throwError(() => new Error(error.message));
@@ -138,13 +185,29 @@ export class TeamsService {
       }
     `;
 
+    interface GetMyTeamsData {
+      myTeams: TeamsResult[];
+    }
+
+    // interface GetMyTeamsResponse {
+    //   data?: GetMyTeamsData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .watchQuery<{ myTeams: TeamsResult[] }>({
+      .watchQuery<GetMyTeamsData>({
         query: GET_MY_TEAMS,
         fetchPolicy: 'network-only',
       })
       .valueChanges.pipe(
-        map((result) => result.data.myTeams),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.myTeams) {
+            throw new Error('Teams data is missing');
+          }
+          return result.data.myTeams;
+        }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
           return throwError(() => new Error(error.message));
@@ -172,14 +235,34 @@ export class TeamsService {
         }
       }
     `;
+
+    interface UpsertUserToTeamData {
+      upsertUserToTeam: {
+        success: boolean;
+        message: string;
+        team: TeamsResult;
+      };
+    }
+
+    // interface UpsertUserToTeamResponse {
+    //   data?: UpsertUserToTeamData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .mutate({
+      .mutate<UpsertUserToTeamData>({
         mutation: UPSERT_USER_TO_TEAM,
         variables: { teamId, userId, role },
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => result.data.upsertUserToTeam.team),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.upsertUserToTeam.success) {
+            throw new Error(result.data?.upsertUserToTeam.message);
+          }
+          return result.data.upsertUserToTeam.team;
+        }),
         catchError((error) => {
           console.error('GraphQL mutation error:', error);
           return throwError(() => new Error(error.message));
@@ -207,14 +290,34 @@ export class TeamsService {
         }
       }
     `;
+
+    interface RemoveUserFromTeamData {
+      removeUserFromTeam: {
+        success: boolean;
+        message: string;
+        team: TeamsResult;
+      };
+    }
+
+    // interface RemoveUserFromTeamResponse {
+    //   data?: RemoveUserFromTeamData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .mutate({
+      .mutate<RemoveUserFromTeamData>({
         mutation: REMOVE_USER_FROM_TEAM,
         variables: { teamId, userId },
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => result.data.removeUserFromTeam.team),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.removeUserFromTeam.success) {
+            throw new Error(result.data?.removeUserFromTeam.message);
+          }
+          return result.data.removeUserFromTeam.team;
+        }),
         catchError((error) => {
           console.error('GraphQL mutation error:', error);
           return throwError(() => new Error(error.message));
@@ -235,14 +338,34 @@ export class TeamsService {
         }
       }
     `;
+
+    interface GetUserAutocompleteData {
+      getUserAutocomplete: {
+        success: boolean;
+        message: string;
+        results: { id: string; username: string }[];
+      };
+    }
+
+    // interface GetUserAutocompleteResponse {
+    //   data?: GetUserAutocompleteData;
+    //   errors?: { message: string }[];
+    // }
+
     return this.apollo
-      .query({
+      .query<GetUserAutocompleteData>({
         query: GET_USER_AUTOCOMPLETE,
         variables: { query },
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => result.data.getUserAutocomplete.results),
+        map((result) => {
+          if (result.errors) {
+            throw new Error(result.errors.map((e) => e.message).join(', '));
+          } else if (!result.data?.getUserAutocomplete.success) {
+            throw new Error(result.data?.getUserAutocomplete.message);
+          }
+          return result.data.getUserAutocomplete.results;
+        }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
           return throwError(() => new Error(error.message));

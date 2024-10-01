@@ -33,7 +33,7 @@ export interface TeamsResult {
   members: MemberResult[];
 }
 
-// export interface MyTeamsData {
+// export interface TeamsData {
 //   success: boolean;
 //   message: string;
 //   results: TeamsResult[];
@@ -62,6 +62,7 @@ export interface TeamsResult {
     MatTooltip,
     MatCardContent,
     MatCardActions,
+    MatLabel,
   ],
   templateUrl: './teams-list.component.html',
   styleUrls: ['./teams-list.component.scss'],
