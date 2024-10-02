@@ -157,10 +157,10 @@ export class CryptoNewsService {
       );
   }
 
-  createCryptoArticle(ids: number[]): Observable<CryptoArticleData> {
+  createCryptoArticle(ids: number[], teamId: number): Observable<CryptoArticleData> {
     const CREATE_CRYPTO_ARTICLE_DATA = gql`
       mutation {
-        createCryptoArticleData(ids: [${ids.join(' ')}]) {
+        createCryptoArticleData(ids: [${ids.join(' ')}], teamId: ${teamId}) {
           success
           message
           results {

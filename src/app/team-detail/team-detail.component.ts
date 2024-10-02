@@ -30,6 +30,8 @@ import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MemberResult } from '../teams-list/teams-list.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-team-detail',
@@ -82,6 +84,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private teamsService: TeamsService,
     private toolbarService: ToolbarService,
+    private dialog: MatDialog,
   ) {}
 
   displayedColumns: string[] = ['username', 'role', 'actions'];
@@ -155,23 +158,23 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.messageService.clearMessages();
     if (this.newUserForm.valid) {
       const { userId, role } = this.newUserForm.value;
-      const teamId = this.teamForm.get('id')?.value;
-      this.subscriptions.add(
-        this.teamsService.upsertUserToTeam(teamId, userId, role).subscribe({
-          next: (team) => {
-            this.teamForm.patchValue(team);
-            this.setMembers(team.members);
-            this.newUserForm.reset();
+      const teamId: string = this.teamForm.get('id')?.value;
+      if (role === 'owner') {
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+          data: {
+            message:
+              '<h3>Assigning this user as an owner will give them management permissions (they can remove you).</h3>' +
+              'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
           },
-          error: (err) => {
-            this.messageService.addMessage({
-              type: 'error',
-              text: `Failed to update user: ${err.message}`,
-              dismissible: true,
-            });
-          },
-        }),
-      );
+        });
+        dialogRef.afterClosed().subscribe((confirmed) => {
+          if (confirmed) {
+            this.upsertUserToTeam(teamId, userId, role);
+          }
+        });
+      } else {
+        this.upsertUserToTeam(teamId, userId, role);
+      }
     } else {
       this.messageService.addMessage({
         type: 'error',
@@ -181,9 +184,50 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  private upsertUserToTeam(teamId: string, userId: string, role: string) {
+    this.subscriptions.add(
+      this.teamsService.upsertUserToTeam(teamId, userId, role).subscribe({
+        next: (team) => {
+          this.teamForm.patchValue(team);
+          this.setMembers(team.members);
+          this.newUserForm.reset();
+        },
+        error: (err) => {
+          this.messageService.addMessage({
+            type: 'error',
+            text: `Failed to update user: ${err.message}`,
+            dismissible: true,
+          });
+        },
+      }),
+    );
+  }
+
   removeUserFromTeam(userId: string) {
     this.messageService.clearMessages();
     const teamId = this.teamForm.get('id')?.value;
+    const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
+    const role = user?.get('role')?.value;
+
+    if (role === 'owner') {
+      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+        data: {
+          message:
+            '<h3>Removing this owner will remove their management permissions and access to this team.</h3>' +
+            'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
+        },
+      });
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteUserFromTeam(teamId, userId);
+        }
+      });
+    } else {
+      this.deleteUserFromTeam(teamId, userId);
+    }
+  }
+
+  private deleteUserFromTeam(teamId: string, userId: string) {
     this.subscriptions.add(
       this.teamsService.removeUserFromTeam(teamId, userId).subscribe({
         next: (team) => {

@@ -41,6 +41,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
               ]
             },
 ```
+- [ ] Determine if Telegram has monitized API
 
 [ANGULAR.md](notes%2FANGULAR.md)
 [APEXCHARTS.md](notes%2FAPEXCHARTS.md)

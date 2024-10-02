@@ -16,6 +16,9 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { MatDivider } from '@angular/material/divider';
+import { TeamsService } from '../teams.service';
+import { TeamsResult } from '../teams-list/teams-list.component';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 export interface CryptoNewsResult {
   id: string;
@@ -57,6 +60,8 @@ export interface CryptoNewsData {
     MatExpansionPanelTitle,
     MatTooltip,
     MatDivider,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './crypto-news.component.html',
   styleUrl: './crypto-news.component.scss',
@@ -66,12 +71,15 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   filteredNews: CryptoNewsResult[] = [];
   selectedNews = new Set<CryptoNewsResult>();
+  teams: TeamsResult[] = [];
+  selectedTeamId: number | null = null;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private cryptoNewsService: CryptoNewsService,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
+    private teamsService: TeamsService,
     private router: Router,
   ) {}
 
@@ -82,6 +90,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
     this.messageService.clearMessages();
     this.getNews();
     this.filteredNews = this.newsData?.results || [];
+    this.teamsService.getMyTeams().subscribe((teams) => {
+      this.teams = teams.filter((team) =>
+        team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+      );
+      if (this.teams.length > 0) {
+        this.selectedTeamId = this.teams[0].id;
+      }
+    });
   }
 
   extractSelectedNews() {
@@ -210,6 +226,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
       });
       return;
     }
+    if (this.selectedTeamId === null) {
+      this.messageService.addMessage({
+        type: 'warning',
+        text: 'No team selected.',
+        dismissible: true,
+      });
+      return;
+    }
     this.messageService.addMessage({
       type: 'info',
       text: 'Creating crypto article from selected news items (this may take a while)...',
@@ -218,9 +242,8 @@ export class CryptoNewsComponent implements OnInit, OnDestroy {
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.cryptoNewsService.createCryptoArticle(newsIds).subscribe({
+      this.cryptoNewsService.createCryptoArticle(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
-          this.messageService.clearMessages();
           if (data.success) {
             const newArticleUrl = `/crypto-article/${data.results.id}`;
             this.messageService.addMessage({

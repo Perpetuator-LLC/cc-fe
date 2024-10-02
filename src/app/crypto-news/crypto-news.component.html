@@ -19,7 +19,7 @@
     color="primary"
     type="button"
     (click)="extractSelectedNews()"
-    [disabled]="selectedNews.size == 0"
+    [disabled]="selectedNews.size === 0"
   >
     Retrieve
   </button>
@@ -28,7 +28,7 @@
     color="primary"
     type="button"
     (click)="summarizeSelected()"
-    [disabled]="selectedNews.size == 0"
+    [disabled]="selectedNews.size === 0"
   >
     Summarize
   </button>
@@ -37,10 +37,18 @@
     color="primary"
     type="button"
     (click)="createArticleFromSelected()"
-    [disabled]="selectedNews.size == 0"
+    [disabled]="selectedNews.size === 0"
   >
     Create Article
   </button>
+  <mat-form-field>
+    <mat-label>Select Team</mat-label>
+    <mat-select [(value)]="selectedTeamId">
+      @for (team of teams; track team.id) {
+        <mat-option [value]="team.id">{{ team.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
   <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
   <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
   <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
