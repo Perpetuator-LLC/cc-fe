@@ -21,18 +21,25 @@
       <mat-label>Content</mat-label>
       <textarea matInput [(ngModel)]="updatedContent"></textarea>
     </mat-form-field>
+
+    Generated on:
+    <span [matTooltip]="article.date | date: 'z'" matTooltipPosition="above">
+      {{ article.date | date: 'short' : 'local' }}
+    </span>
+    <br />
+    <br />
+
+    <mat-divider></mat-divider>
+
+    <h3>Related Articles</h3>
+    <mat-list>
+      @for (relatedArticle of linkedArticles; track relatedArticle.id) {
+        <mat-list-item>
+          <a matLine href="{{ relatedArticle.url }}" target="_blank">
+            {{ relatedArticle.title }}
+          </a>
+        </mat-list-item>
+      }
+    </mat-list>
   </mat-card-content>
-
-  <mat-divider></mat-divider>
-
-  <h3>Related Articles</h3>
-  <mat-list>
-    @for (relatedArticle of linkedArticles; track relatedArticle.id) {
-      <mat-list-item>
-        <a matLine href="{{ relatedArticle.url }}" target="_blank">
-          {{ relatedArticle.title }}
-        </a>
-      </mat-list-item>
-    }
-  </mat-list>
 </mat-card>

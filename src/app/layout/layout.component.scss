@@ -3,7 +3,7 @@
 }
 
 .sidenav {
-  width: 225px;
+  width: 250px;
 }
 
 .sidenav .mat-toolbar {
@@ -31,12 +31,47 @@
 .website-icon {
   width: 40px;
   height: 40px;
-  position: absolute;
-  top: 50%;
+  //position: absolute;
+  //top: 50%;
   right: 8px;
-  transform: translateY(-50%);
-  margin-right: 0;
+  //transform: translateY(-50%);
+  //margin-right: 0;
+  margin: 5px;
 }
+
+.user-card {
+  margin-left: auto; /* Pushes the user card to the right */
+  padding: 0 16px; /* Adds some padding */
+  display: flex;
+  align-items: center;
+  max-width: 200px; /* Adjust this value as needed */
+}
+
+.user {
+  white-space: nowrap; /* Prevents the email from wrapping */
+  overflow: hidden; /* Ensures the email doesn't overflow */
+  text-overflow: ellipsis; /* Adds ellipsis if the email is too long */
+}
+
+.user {
+  margin-left: auto; /* Pushes the user email to the right */
+  padding-right: 16px; /* Adds some padding to the right */
+  white-space: nowrap; /* Prevents the email from wrapping */
+  overflow: hidden; /* Ensures the email doesn't overflow */
+  text-overflow: ellipsis; /* Adds ellipsis if the email is too long */
+}
+
+//.user {
+//  //width: 40px;
+//  width: auto;
+//  //height: 40px;
+//  position: absolute;
+//  top: 50%;
+//  right: 8px;
+//  transform: translateY(-50%);
+//  margin-right: 0;
+//  //margin: 5px;
+//}
 
 .website-title {
   font-size: 1.5rem;

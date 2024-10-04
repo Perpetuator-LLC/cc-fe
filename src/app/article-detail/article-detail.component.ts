@@ -9,12 +9,13 @@ import { MatButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatLine } from '@angular/material/core';
-import { SlicePipe } from '@angular/common';
+import { DatePipe, SlicePipe } from '@angular/common';
 import { of } from 'rxjs';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
+import { MatTooltip } from '@angular/material/tooltip';
 
 export interface CryptoArticleResult {
   id: string;
@@ -73,6 +74,8 @@ export interface PublishCryptoArticleAudio {
     SlicePipe,
     MessageComponent,
     MatCardContent,
+    DatePipe,
+    MatTooltip,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',

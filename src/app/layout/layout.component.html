@@ -9,10 +9,16 @@
     [opened]="(isHandset$ | async) === false"
   >
     <mat-toolbar class="sidenav-header">
+      <img
+        src="Capital_Copilot_Logo_Slanted.svg"
+        aria-label="Side nav toggle icon"
+        alt="Capital Copilot"
+        class="website-icon"
+      />
+      <span class="website-title">Capital Copilot</span>
       <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
         <mat-icon aria-label="Collapse nav icon">menu_open</mat-icon>
       </button>
-      <span class="website-title">Capital Copilot</span>
     </mat-toolbar>
     <mat-nav-list>
       @for (item of rootRoutes; track item.path) {
@@ -56,14 +62,22 @@
         <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
           <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
         </button>
+        <img
+          src="Capital_Copilot_Logo_Slanted.svg"
+          aria-label="Side nav toggle icon"
+          alt="Capital Copilot"
+          class="website-icon"
+        />
       }
       <ng-container #toolbarContainer></ng-container>
-      <img
-        src="Capital_Copilot_Logo_Slanted.svg"
-        aria-label="Side nav toggle icon"
-        alt="Capital Copilot"
-        class="website-icon"
-      />
+      @if (user) {
+        <span class="spacer"></span>
+        <span class="user">
+          <a matLine [routerLink]="['/profile']">
+            {{ user }}
+          </a>
+        </span>
+      }
     </mat-toolbar>
     <div class="sidenav-scroll-wrapper">
       <div class="sidenav-content">

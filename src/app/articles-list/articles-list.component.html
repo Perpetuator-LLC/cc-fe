@@ -23,7 +23,8 @@
             </span>
             - {{ article.title | slice: 0 : 100 }}...
           </a>
-          <mat-divider></mat-divider>
+          &nbsp;
+          <mat-chip color="primary" selected>{{ article.team.name }}</mat-chip>
         </mat-list-item>
       }
     </mat-list>

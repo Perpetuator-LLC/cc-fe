@@ -1,5 +1,15 @@
 .crypto-news-container {
-  align-items: left;
+  //align-items: left;
+  //display: flex;
+  //gap: 16px; /* Adjust the gap as needed */
+}
+
+.sub-menu {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1em;
+  align-items: stretch;
 }
 
 .filter-form-field {

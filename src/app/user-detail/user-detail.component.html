@@ -1,0 +1,43 @@
+<ng-template #toolbarTemplate>
+  <h1>Profile</h1>
+</ng-template>
+<app-message></app-message>
+<mat-card>
+  <form [formGroup]="userDetailForm" (ngSubmit)="onSubmitUserDetails()">
+    <mat-form-field appearance="fill">
+      <mat-label>Username</mat-label>
+      <input matInput formControlName="username" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" required />
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">Update</button>
+  </form>
+</mat-card>
+
+<mat-card>
+  <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitPasswordChange()">
+    <input type="text" formControlName="email" autocomplete="email" hidden />
+
+    <mat-form-field appearance="fill">
+      <mat-label>New Password</mat-label>
+      <input matInput type="password" formControlName="newPassword" autocomplete="new-password" required />
+      @if (changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched) {
+        <mat-error>Password is required and must be at least 8 characters long.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Confirm Password</mat-label>
+      <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" required />
+      @if (changePasswordForm.hasError('mismatch')) {
+        <mat-error>Passwords do not match.</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">Change Password</button>
+  </form>
+</mat-card>

@@ -73,6 +73,12 @@ export const routes: Routes = [
     title: 'Reset Password',
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./user-detail/user-detail.component').then((c) => c.UserDetailComponent),
+    title: 'Profile',
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'teams',
     loadComponent: () => import('./teams-list/teams-list.component').then((c) => c.TeamsListComponent),
     title: 'Teams',

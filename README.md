@@ -89,6 +89,9 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Ex-Acquisitions
   - [ ] Ex-All
   - [ ] FED Events
+- [ ] Stock Revenue is down, why?
+  - [ ] Perform the fundamental analysis to show (revenue, earnings, etc.)
+  - [ ] Then analyze stock news around this to figure out why
 
 Pot odds on dashboard
 - This strat that is triggering has a X% of winning

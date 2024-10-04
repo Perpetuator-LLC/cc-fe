@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 import { CryptoArticlesData } from '../article-detail/article-detail.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatChip, MatChipListbox } from '@angular/material/chips';
 
 @Component({
   selector: 'app-articles-list',
@@ -38,6 +39,8 @@ import { MatTooltip } from '@angular/material/tooltip';
     DatePipe,
     MatProgressSpinner,
     MatTooltip,
+    MatChip,
+    MatChipListbox,
   ],
   templateUrl: './articles-list.component.html',
   styleUrl: './articles-list.component.scss',

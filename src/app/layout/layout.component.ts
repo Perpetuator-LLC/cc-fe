@@ -19,6 +19,8 @@ import { ControlComponent } from '../charts/control/control.component';
 import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
 import { MatFooterCell, MatFooterRow, MatHeaderCell, MatHeaderRow } from '@angular/material/table';
+import { UserSettingService } from '../user-setting.service';
+import { MatLine } from '@angular/material/core';
 
 @Component({
   selector: 'app-layout',
@@ -44,6 +46,7 @@ import { MatFooterCell, MatFooterRow, MatHeaderCell, MatHeaderRow } from '@angul
     RouterLinkActive,
     MatHeaderCell,
     MatHeaderRow,
+    MatLine,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit {
@@ -54,6 +57,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
   isLoggedIn = this.authService.isLoggedIn;
   private authRequiredRoutes = AuthGuard.getAuthRequiredRoutes();
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
+  user: string | null = null;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -62,10 +66,12 @@ export class LayoutComponent implements OnDestroy, OnInit {
     protected authService: AuthService,
     private toolbarService: ToolbarService,
     private router: Router,
+    private userSettingService: UserSettingService,
   ) {}
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
+    this.loadUserDetails();
   }
 
   ngOnDestroy() {
@@ -97,5 +103,16 @@ export class LayoutComponent implements OnDestroy, OnInit {
 
   switchTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
+  }
+
+  private loadUserDetails(): void {
+    this.userSettingService.getUserDetails().subscribe({
+      next: (userDetails) => {
+        this.user = userDetails.username;
+      },
+      error: (err) => {
+        console.error('Failed to load user details:', err);
+      },
+    });
   }
 }

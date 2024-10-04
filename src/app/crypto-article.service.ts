@@ -54,6 +54,9 @@ export class CryptoArticleService {
           results {
             id
             date
+            team {
+              name
+            }
             title
             content
             newsSummaries {

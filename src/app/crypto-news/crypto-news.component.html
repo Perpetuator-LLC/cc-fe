@@ -13,45 +13,47 @@
     Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
     (limited to last 24 hours of fetched news).
   </p>
-  <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
-  <button
-    mat-flat-button
-    color="primary"
-    type="button"
-    (click)="extractSelectedNews()"
-    [disabled]="selectedNews.size === 0"
-  >
-    Retrieve
-  </button>
-  <button
-    mat-flat-button
-    color="primary"
-    type="button"
-    (click)="summarizeSelected()"
-    [disabled]="selectedNews.size === 0"
-  >
-    Summarize
-  </button>
-  <button
-    mat-flat-button
-    color="primary"
-    type="button"
-    (click)="createArticleFromSelected()"
-    [disabled]="selectedNews.size === 0"
-  >
-    Create Article
-  </button>
-  <mat-form-field>
-    <mat-label>Select Team</mat-label>
-    <mat-select [(value)]="selectedTeamId">
-      @for (team of teams; track team.id) {
-        <mat-option [value]="team.id">{{ team.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
-  <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
-  <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
+  <div class="sub-menu">
+    <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="extractSelectedNews()"
+      [disabled]="selectedNews.size === 0"
+    >
+      Retrieve
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="summarizeSelected()"
+      [disabled]="selectedNews.size === 0"
+    >
+      Summarize
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="createArticleFromSelected()"
+      [disabled]="selectedNews.size === 0"
+    >
+      Create Article
+    </button>
+    <mat-form-field>
+      <mat-label>Select Team</mat-label>
+      <mat-select [(value)]="selectedTeamId">
+        @for (team of teams; track team.id) {
+          <mat-option [value]="team.id">{{ team.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
+    <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
+    <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
+  </div>
   @if (newsData) {
     <mat-list>
       @for (news of filteredNews; track news.url) {
