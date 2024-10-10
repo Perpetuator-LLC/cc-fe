@@ -16,6 +16,7 @@ import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
 import { MatTooltip } from '@angular/material/tooltip';
+import { TeamsResult } from '../teams-list/teams-list.component';
 
 export interface CryptoArticleResult {
   id: string;
@@ -24,6 +25,7 @@ export interface CryptoArticleResult {
   content: string;
   audio: string;
   newsSummaries: CryptoNewsResult[];
+  team: TeamsResult;
   // newsSummaries: CryptoNewsSummary[];
 }
 
@@ -82,7 +84,16 @@ export interface PublishCryptoArticleAudio {
 })
 export class ArticleDetailComponent implements OnInit {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  article: CryptoArticleResult = { id: '', title: '', content: '', date: '', audio: '', newsSummaries: [] };
+  article: CryptoArticleResult = {
+    id: '',
+    title: '',
+    content: '',
+    date: '',
+    audio: '',
+    newsSummaries: [],
+    team: { id: 0, name: '', members: [] },
+  };
+  team: TeamsResult = { id: 0, name: '', members: [] };
   linkedArticles: CryptoNewsResult[] = [];
   updatedTitle = '';
   updatedContent = '';
@@ -116,6 +127,8 @@ export class ArticleDetailComponent implements OnInit {
         this.updatedTitle = this.article.title;
         this.updatedContent = this.article.content;
         this.linkedArticles = this.article.newsSummaries;
+        this.team.name = this.article.team.name;
+        this.team.id = Number(this.article.team.id);
 
         if (this.article.audio) {
           this.prepareAudioPlayer(this.article.audio);
@@ -144,6 +157,19 @@ export class ArticleDetailComponent implements OnInit {
     // Create a URL for the Blob and set it to the audio source
     this.audioSrc = URL.createObjectURL(blob);
     this.downloadLink = this.audioSrc; // Also enable the download link
+  }
+
+  requestPublishFeedback(): void {
+    this.messageService.clearMessages();
+    this.messageService.addMessage({
+      type: 'info',
+      text:
+        'We do not currently support publishing. Please write an email to ' +
+        '<a href="mailto:support@perpetuator.com?subject=Publishing%20Request&body=' +
+        'Please%20explain%20where%20you%20would%20like%20to%20publish%20this%20audio.">our support email</a> ' +
+        'explaining where you would like to publish this audio as we are currently integrating new systems.',
+      dismissible: true,
+    });
   }
 
   publishAudio(): void {

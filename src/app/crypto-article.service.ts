@@ -106,6 +106,17 @@ export class CryptoArticleService {
             title
             content
             audio
+            team {
+              id
+              name
+              members {
+                role
+                user {
+                  id
+                  username
+                }
+              }
+            }
             newsSummaries {
               id
               url

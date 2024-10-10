@@ -4,8 +4,23 @@
 <app-message></app-message>
 <mat-card>
   <mat-card-content class="form-container">
-    @if (audioSrc) {
+    @if (team && team.id === 1 && audioSrc) {
       <button mat-raised-button color="primary" class="article-control" (click)="publishAudio()">Publish</button>
+    }
+    @if (team && team.id !== 1 && audioSrc) {
+      <button
+        mat-raised-button
+        color="primary"
+        class="article-control"
+        (click)="requestPublishFeedback()"
+        matTooltip="We do not currently support publishing. Please write an email to support@perpetuator.com explaining where you would like to publish this audio as we are currently integrating new systems."
+        matTooltipShowDelay="0"
+        matTooltipHideDelay="1000"
+      >
+        Publish
+      </button>
+    }
+    @if (audioSrc) {
       <audio controls [src]="audioSrc"></audio>
     }
     <button mat-raised-button color="primary" class="article-control" (click)="updateArticle()">Update</button>
