@@ -20,6 +20,7 @@ import { MessageComponent } from '../message/message.component';
 import { ThemeService } from '../theme.service';
 import { CookieConsentService } from '../cookie-consent.service';
 import { Subscription } from 'rxjs';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-login',
@@ -63,6 +64,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private toolbarService: ToolbarService,
     private messageService: MessageService,
     private themeService: ThemeService,
+    private userService: UserService,
     private cookieConsentService: CookieConsentService,
   ) {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/crypto-news';
@@ -83,6 +85,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           if (this.messageService.messageCount === 0) {
             this.router.navigateByUrl(this.returnUrl);
             this.themeService.loadTheme();
+            this.userService.loadUserDetails();
             this.cookieConsentService.loadCookieConsent();
           } else {
             this.messageService.addMessage({

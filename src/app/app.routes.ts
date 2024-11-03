@@ -68,6 +68,11 @@ export const routes: Routes = [
     title: 'Resend Verification',
   },
   {
+    path: 'change-email',
+    loadComponent: () => import('./change-email/change-email.component').then((c) => c.ChangeEmailComponent),
+    title: 'Change Email',
+  },
+  {
     path: 'reset',
     loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',

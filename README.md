@@ -5,7 +5,37 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
-- [ ] Paginate News
+- [ ] RSS Podcast feed
+  - [ ] Add to Apple
+  - [ ] Add to Spotify
+  - [ ] Add to Google
+- [ ] Add a podcast page
+
+- [ ] Add delete account 
+- [x] Fix on fetch clears summary
+- [x] On logout and email change, update toolbar (username goes stale)
+- [x] Allow for a user to change their email (need to determine new verify flow through APIs)
+- [ ] Paginate News - get filtered news to reduce load on server
+- [ ] No personal info in name, no email check, add warning for publicly visible
+- [ ] Allow user to remove self from team
+- [ ] Disable trash icons if not owner and not self
+- [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
+- [ ] Add foul language check for names, and articles?
+- [ ] Add team to article detail page
+- [ ] On Article list page add a team filter
+- [ ] Add multiple channel publishing on TG to team
+- [ ] Add ElevenLabs API Key to team
+- [ ] Move all news summary error handling to news summary 
+- [x] Remove description logic from article summary
+- [ ] Add job scheduling with time based jobs
+- [ ] Code only (friends) invites, build graph of users and their invites
+- [ ] Can we move OpenBB to a separate service/end-point?
+- [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
+- [ ] Add custom URL (to scrape) but scoped to this user only
+- [x] Password reset link is wrong in email... how'd that break?
+- [ ] Forgot password page autocomplete is wrong - it thinks it is current-password not new-password
+- [ ] Add team Member Username is auto completing with email
+- [x] Login form says username but it is email
 - [x] Debug fetch news
 - [x] On summarize create article
 - [x] Display article
@@ -17,7 +47,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Add 90% coverage
 - [x] Hide Forgot Password link and add to login page
 - [x] Add a forgot password page
-- [ ] Edit user info
+- [x] Edit user info
 - [x] Finish switching all GQL calls to Apollo
 - [x] Add a stored value for the user to accept the terms and privacy policy
 - [ ] Remove jest if possible

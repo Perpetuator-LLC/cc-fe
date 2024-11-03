@@ -6,6 +6,7 @@ import { JWT, Token } from './types';
 import { decodeJWT } from './jwt';
 import { environment } from '../environments/environment';
 import { MessageService } from './message.service';
+import { UserService } from './user.service';
 
 export interface RegisterError {
   messages: string[];
@@ -36,6 +37,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private messageService: MessageService,
+    private userSettingService: UserService,
   ) {}
 
   forgot(email: string): Observable<RegisterResponse | null> {
@@ -67,9 +69,10 @@ export class AuthService {
 
     return this.http.post<Token>(AuthUrls.login, { email, password }).pipe(
       tap((response) => {
-        // console.debug('Login response:', response);
         this.setSession(response);
+        this.userSettingService.loadUserDetails();
       }),
+
       catchError((error) => {
         console.error('Login error:', error);
         Object.keys(error.error).forEach((key) => {
@@ -212,6 +215,7 @@ export class AuthService {
     localStorage.removeItem('refresh_expires_at');
     this.loggedInSignal.set(false);
     this.tokenSubject.next(null);
+    this.userSettingService.clearUserDetails();
   }
 
   get isLoggedIn(): WritableSignal<boolean> {

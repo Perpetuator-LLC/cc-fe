@@ -59,9 +59,6 @@
   <mat-sidenav-content>
     <mat-toolbar color="primary">
       @if (!drawer.opened) {
-        <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-          <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
-        </button>
         <img
           src="Capital_Copilot_Logo_Slanted.svg"
           aria-label="Side nav toggle icon"
@@ -70,17 +67,22 @@
         />
       }
       <ng-container #toolbarContainer></ng-container>
-      @if (user) {
+      @if (this.authService.isLoggedIn()) {
         <span class="spacer"></span>
         <span class="user">
           <a matLine [routerLink]="['/profile']">
-            {{ user }}
+            {{ this.userService.userDetails()?.username }}
           </a>
         </span>
       }
     </mat-toolbar>
     <div class="sidenav-scroll-wrapper">
       <div class="sidenav-content">
+        @if (!drawer.opened) {
+          <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
+            <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
+          </button>
+        }
         <ng-content></ng-content>
       </div>
     </div>

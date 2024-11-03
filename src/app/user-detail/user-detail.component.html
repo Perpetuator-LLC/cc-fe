@@ -2,6 +2,15 @@
   <h1>Profile</h1>
 </ng-template>
 <app-message></app-message>
+
+@if (emailChangePending) {
+  <mat-card class="email-change-notification">
+    <p>Your email change to {{ emailChangePending.newEmail }} is pending verification.</p>
+    <button mat-raised-button color="primary" (click)="resendEmailChange()">Resend Verification Email</button>
+    <button mat-button color="accent" (click)="cancelEmailChange()">Cancel Email Change</button>
+  </mat-card>
+}
+
 <mat-card>
   <form [formGroup]="userDetailForm" (ngSubmit)="onSubmitUserDetails()">
     <mat-form-field appearance="fill">
@@ -20,8 +29,6 @@
 
 <mat-card>
   <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitPasswordChange()">
-    <input type="text" formControlName="email" autocomplete="email" hidden />
-
     <mat-form-field appearance="fill">
       <mat-label>New Password</mat-label>
       <input matInput type="password" formControlName="newPassword" autocomplete="new-password" required />

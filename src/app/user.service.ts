@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import gql from 'graphql-tag';
 
 export interface UserSettingsResult {
@@ -21,7 +21,7 @@ export interface UserSettingsResponse {
   };
 }
 
-export interface UpdateUserSettingData {
+export interface StatusAndMessageData {
   success: boolean;
   message: string;
 }
@@ -29,7 +29,21 @@ export interface UpdateUserSettingData {
 export interface UpdateUserSettingResponse {
   errors?: [{ message: string }];
   data?: {
-    updateUserSetting: UpdateUserSettingData;
+    updateUserSetting: StatusAndMessageData;
+  };
+}
+
+export interface CancelEmailChangeResponse {
+  errors?: [{ message: string }];
+  data?: {
+    cancelEmailChange: StatusAndMessageData;
+  };
+}
+
+export interface ResendEmailChangeResponse {
+  errors?: [{ message: string }];
+  data?: {
+    resendEmailChange: StatusAndMessageData;
   };
 }
 
@@ -40,6 +54,7 @@ export interface UserDetails {
 }
 
 export interface UserDetailsResponse {
+  errors?: [{ message: string }];
   data?: {
     getUserDetails: UserDetails;
   };
@@ -47,7 +62,7 @@ export interface UserDetailsResponse {
 
 export interface UpdateUserDetailsResponse {
   data?: {
-    updateUserDetails: UpdateUserSettingData;
+    updateUserDetails: StatusAndMessageData;
   };
 }
 
@@ -59,14 +74,17 @@ export interface ChangePasswordData {
 export interface ChangePasswordResponse {
   errors?: [{ message: string }];
   data?: {
-    updateUserSetting: UpdateUserSettingData;
+    updateUserSetting: StatusAndMessageData;
   };
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class UserSettingService {
+export class UserService {
+  private userDetailsSignal: WritableSignal<{ username: string; email: string } | null> = signal(null);
+  private emailChangePending: { newEmail: string } | null = null;
+
   constructor(private apollo: Apollo) {}
 
   getUserSettings(keys: string[]): Observable<UserSettingsData> {
@@ -102,7 +120,7 @@ export class UserSettingService {
       );
   }
 
-  updateUserSetting(key: string, value: string): Observable<UpdateUserSettingData> {
+  updateUserSetting(key: string, value: string): Observable<StatusAndMessageData> {
     const UPDATE_USER_SETTING = gql`
       mutation UpdateUserSetting($key: String!, $value: String!) {
         updateUserSetting(key: $key, value: $value) {
@@ -158,7 +176,16 @@ export class UserSettingService {
       );
   }
 
-  getUserDetails(): Observable<UserDetails> {
+  get userDetails(): WritableSignal<{ username: string; email: string } | null> {
+    return this.userDetailsSignal;
+  }
+
+  get emailChangePendingDetails(): { newEmail: string } | null {
+    return this.emailChangePending;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  loadUserDetails(callback?: any): void {
     const GET_USER_DETAILS = gql`
       query GetUserDetails {
         getUserDetails {
@@ -169,24 +196,123 @@ export class UserSettingService {
       }
     `;
 
-    return this.apollo
-      .query<UserDetailsResponse>({
+    this.apollo
+      .query<{ getUserDetails: { username: string; email: string } }>({
         query: GET_USER_DETAILS,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data?.getUserDetails || null),
+        catchError((error) => {
+          console.error('Failed to load user details:', error);
+          return of(null);
+        }),
+      )
+      .subscribe({
+        next: (userDetails) => {
+          console.log('userDetails', userDetails);
+          this.userDetailsSignal.set(userDetails);
+          if (callback) callback(userDetails);
+        },
+        error: (err) => {
+          console.error('Failed to load user details:', err);
+        },
+      });
+  }
+
+  loadUserEmailChangePending(): Observable<{ newEmail: string } | null> {
+    const GQL = gql`
+      query GetEmailChangePending {
+        getEmailChangePending {
+          newEmail
+        }
+      }
+    `;
+
+    return this.apollo
+      .query<{ getEmailChangePending: { newEmail: string } }>({
+        query: GQL,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data?.getEmailChangePending || null),
+        catchError((error) => {
+          console.error('Failed to load email change pending:', error);
+          return of(null);
+        }),
+      );
+    // .subscribe({
+    //   next: (emailChangePendingDetails) => {
+    //     console.log('emailChangePendingDetails', emailChangePendingDetails);
+    //     this.emailChangePending = emailChangePendingDetails;
+    //   },
+    //   error: (err) => {
+    //     console.error('Failed to load email change pending:', err);
+    //   },
+    // });
+  }
+
+  cancelEmailChange(): Observable<null> {
+    const CANCEL_EMAIL_CHANGE = gql`
+      mutation CancelEmailChange {
+        cancelEmailChange {
+          success
+          message
+        }
+      }
+    `;
+
+    return this.apollo
+      .mutate<CancelEmailChangeResponse>({
+        mutation: CANCEL_EMAIL_CHANGE,
         fetchPolicy: 'network-only',
       })
       .pipe(
         map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.data?.getUserDetails || { id: '', email: '', username: '' },
+          (result: any) =>
+            result.data?.resendEmailChange || { success: false, message: 'Failed to resend email change' },
         ),
         catchError((error) => {
           console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Error: ${error.message}`));
+          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
         }),
       );
   }
 
-  updateUserDetails(username: string, email: string): Observable<UpdateUserSettingData> {
+  resendEmailChange(): Observable<null> {
+    const RESEND_EMAIL_CHANGE = gql`
+      mutation ResendEmailChange {
+        resendEmailChange {
+          success
+          message
+        }
+      }
+    `;
+
+    return this.apollo
+      .mutate<ResendEmailChangeResponse>({
+        mutation: RESEND_EMAIL_CHANGE,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (result: any) =>
+            result.data?.resendEmailChange || { success: false, message: 'Failed to resend email change' },
+        ),
+        catchError((error) => {
+          console.error('GraphQL query error:', error);
+          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
+        }),
+      );
+  }
+
+  clearUserDetails(): void {
+    this.userDetailsSignal.set(null);
+  }
+
+  updateUserDetails(username: string, email: string): Observable<StatusAndMessageData> {
     const UPDATE_USER_DETAILS = gql`
       mutation UpdateUserDetails($username: String!, $email: String!) {
         updateUserDetails(username: $username, email: $email) {
@@ -209,6 +335,9 @@ export class UserSettingService {
         ),
         catchError((error) => {
           console.error('GraphQL query error:', error);
+          if (error.cause?.error?.errors) {
+            throw new Error(error.cause.error.errors.map((e: { message: string }) => e.message).join(', '));
+          }
           return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
         }),
       );

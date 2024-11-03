@@ -1,6 +1,6 @@
 import { Injectable, Renderer2, RendererFactory2, signal, WritableSignal, OnDestroy } from '@angular/core';
 
-import { UserSettingService } from './user-setting.service';
+import { UserService } from './user.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth.service';
 
@@ -24,7 +24,7 @@ export class ThemeService implements OnDestroy {
 
   constructor(
     rendererFactory: RendererFactory2,
-    private userSettingService: UserSettingService,
+    private userSettingService: UserService,
     private authService: AuthService,
   ) {
     this.renderer = rendererFactory.createRenderer(null, null);
