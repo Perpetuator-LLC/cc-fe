@@ -11,28 +11,52 @@ development, but you must be able to run any code generation or manipulation fro
 
 ## Generating new Versions
 
-Update version in pyproject.toml.
+### Process
+
+1. Commit changes
+2. Make new release commit(s)
+    1. Update the version in the `project.json` file
+    2. Run the changelog script
+
+### Example
+
+Commit all changes.
 
 ```shell
-sed -i '' 's/^version = ".*"/version = "50.1.0"/' ./package.json
-grep '^version = ' ./package.json
+git add .
+git commit -m "Add new feature A" 
 ```
 
-Update the changelog:
+Check the last version:
 
 ```shell
-./scripts/update_changelog.py stage 
+git tag --sort=-creatordate | head -n 3
+grep '"version":' ./package.json
+```
+ 
+Update version in `package.json`:
+
+```shell
+sed -i '' 's/"version": ".*"/"version" = "0.9.0"/' ./package.json
+grep '"version":' ./package.json
 ```
 
-_NOTE: The `stage` argument is used to access AI to summarize changes. It has no effect on the changelog._
+Update the changelog by running the script in the back-end repository:
+
+```shell
+cd ~/projects/capital-copilot-be
+python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.8.0' 'v0.9.0'
+```
+
+Review and update the new changelog entry to make sure it is correct.
 
 Add the Git tag and push it to the repository.
 
 ```shell
-git commit -m "Bump version to 50.1.0"
+git commit -m "Bump version to 0.9.0"
 git push origin feat/new-feature
-git tag -a v50.1.0 -m "Adds new feature A and new feature B. Fixes bug C."
-git push origin v50.1.0
+git tag -a v0.9.0 -m "Adds new feature A and new feature B. Fixes bug C."
+git push origin v0.9.0
 ```
 
 Now open a pull request to merge it.

@@ -1,0 +1,148 @@
+# Changelog from v0.8.0 to v0.9.0
+
+This update brings a host of new features and improvements to the application. The user interface has been enhanced with the addition of a profile page, allowing users to update and view their information. Team functionality has been expanded, with the ability to add teams to articles, select teams during article generation, and display team members in a collapsed table format. A dialog for adding and removing owners has also been introduced. 
+
+## Enhancements
+- Added support for email changes.
+- Implemented a feature to send support email destination requests for publishing until per teams telegram bots are supported.
+- Introduced a profile page for updating and viewing user information.
+- Added the ability to add teams to articles.
+- Included team selection in the article generation process.
+- Displayed team members as a collapsed table.
+- Added a dialog for adding and removing owners.
+- Introduced upsert, remove user from team, and user autocomplete features.
+- Added Read, Create, and Update Teams functionalities.
+- Rerouted after login and fixed article list spinner.
+- Provided a link instead of routing to an article and fixed the message bar.
+- Implemented news regeneration and redirection on articles.
+- Changed the card background.
+- Added a 12-hour select feature and made summarize do only that.
+- Added a not search feature.
+- Broke the summary into three pieces: extract, summarize, and create an article.
+- Added a news summary display in the expansion panel.
+
+## Cleanups
+- Fixed the regenerate button for news.
+
+
+# Changelog from v0.7.0 to v0.8.0
+
+The new version v0.8.0 brings a number of enhancements and fixes to improve the user experience and functionality of the financial research web application. 
+
+## Enhancements
+
+- Article titles have been updated and now show news images, providing a more engaging and informative user experience.
+- New material icons have been added, along with error handling for audio and articles, new settings, and cookies consent.
+- A feature to publish crypto news articles has been introduced.
+- Support for generating audio, playback, and downloading has been added, enhancing the accessibility and usability of the application.
+- The theme is now a signal which is loaded from user preferences, and a user preference service has been added.
+- Articles and clean messages have been added, charts have been hidden, focus has been moved to autocomplete, and the icon has been moved to the top right.
+- Article list and detail components have been added, along with article updating.
+- Crypto news fetch, get, and summarize features have been added, expanding the range of financial news available to users.
+
+## Cleanups
+
+- The 'forgot password' feature no longer redirects to login via the theme preference endpoint, improving the user experience during password recovery.
+- News is now reloaded after fetch, ensuring users always see the most recent news.
+- Fetch and summarize have been converted to mutations, improving the efficiency and performance of these operations.
+
+
+# Changelog from v0.6.0 to v0.7.0
+
+In this update, we've made several enhancements and cleanups to improve the functionality and security of our financial research web application.
+
+## Enhancements
+- A new feature has been added to synchronize authentication interceptor URLs with the authentication service. This enhancement will ensure that the application's security is always in sync with the authentication service.
+- We've also added new authentication components to further strengthen the security of the application.
+- A new message service has been introduced. This service will improve the communication within the application, making it more efficient and user-friendly.
+- The email now pulls through on reset forms, providing a more seamless user experience during password resets.
+
+## Cleanups
+- We've updated the dependencies for axios to version ^1.7.4 to address the security vulnerability CVE-2024-39338. This cleanup will ensure that the application is protected against this specific security threat.
+- We've added an activated route mock to tests. This cleanup will improve the accuracy of our testing and ensure that the application's routing is functioning as expected.
+
+
+# Changelog from v0.5.0 to v0.6.0
+
+In this update, we have made several enhancements and cleanups to improve the functionality and performance of our financial research web application.
+
+## Enhancements
+
+- We have improved the routing mechanism after password reset. Now, users will be directed to the login page after resetting their password, providing a smoother user experience.
+- We have also enhanced the registration response by adding access and refresh back. This will ensure a more secure and efficient user registration process.
+- The 'forgot password' component has been updated to no longer route to the login page for 'forgot' APIs. Additionally, the 'forgot password' link has been relocated for better accessibility.
+
+## Cleanups
+
+- We have removed the hardcoded localhost and switched to a URL for the API. This change will enhance the flexibility and scalability of the application.
+- The production environment file replacement has been disabled, and the production environment file has been removed. This will help in maintaining the integrity of the production environment.
+- We have increased the bundle size for the initial deployment. This will help in improving the performance of the application during the initial deployment.
+
+
+# Changelog from v0.4.0 to v0.5.0
+
+This update brings a host of new features, enhancements, and cleanups to the financial research web application. The application now includes a forgot password component, disclaimers to register and footer, and a register feature. The Dashboard has been renamed to Charts and support for autocomplete to submit raw value has been added. The application now also includes a privacy policy, terms and conditions views, and a cookie banner. The toolbar service has been added and component references in the toolbar service are now supported. The application now uses Material Design 3 themes and displays earnings data in an accordion. The update also includes a number of fixes and cleanups.
+
+## Enhancements
+- Added forgot password component
+- Added disclaimers to register and footer
+- Added register feature
+- Renamed Dashboard to Charts
+- Added support for autocomplete to submit raw value
+- Added privacy policy and terms and conditions views
+- Added cookie banner
+- Added toolbar service and support for component references in the toolbar service
+- Added Material Design 3 themes and display of earnings data in an accordion
+- Added future earnings table to the landing
+
+## Cleanups
+- Moved init from view to OnInit
+- Fixed remaining broken tests and refactored some code to support them
+- Upgraded axios for CVE-2024-39338
+- Fixed several tests for pre-commits and updated husky scripts
+- Moved all template code to HTML files
+- Removed the npm (package-lock.json) file in favor of yarn
+- Upgraded dependencies to deal with vulnerabilities
+- Removed angular/http dependency as it is not used anymore
+- Switched to yarn
+
+
+
+# Changelog from v0.3.0 to v0.4.0
+
+In this update, we have made several enhancements to our financial research web application, focusing on improving the functionality and user experience of our charting features. 
+
+## Enhancements
+- **Support for Keltner Channels**: We have added support for Keltner Channels, a popular volatility indicator used in technical analysis of stock prices. This will provide users with more tools to analyze market trends and make informed trading decisions.
+- **Hist Colors to Squeeze**: We have added hist colors to the squeeze indicator, making it easier for users to visualize and interpret the data.
+- **Scroll Zoom and Grouped Axes**: We have added a scroll zoom feature and grouped the axes on the candle chart. This will allow users to zoom in and out of the chart and view different sections more easily. We have also added a horizontal line to the candle chart for better data visualization.
+- **Scrollbar and Zoom Link Between Charts**: We have added a scrollbar and a zoom link between charts, allowing users to navigate through different charts more efficiently. This will enhance the user experience by making it easier to compare and analyze data from different charts.
+
+## Cleanups
+- **Squeeze Indicator Cleanup**: We have cleaned up the squeeze indicator, fixing minor issues and improving its overall performance. This will ensure that the squeeze indicator works smoothly and provides accurate data.
+
+
+# Changelog from v0.3.0 to v0.4.0
+
+In this update, we've made several enhancements to our financial research web application, focusing on improving the functionality and user experience of our charting features. 
+
+## Enhancements
+- **Support for Keltner Channels**: We've added support for Keltner Channels, a popular volatility indicator used in technical analysis of stock prices. This will provide users with more tools to analyze market trends and make informed decisions.
+- **Hist Colors to Squeeze**: To improve the visual representation of the squeeze indicator, we've added hist colors. This will make it easier for users to interpret the squeeze indicator.
+- **Scroll Zoom and Grouped Axes**: We've added a scroll zoom feature to the candle chart, and grouped the axes for better readability and navigation. We've also added a horizontal line to the candle chart for better visualization.
+- **Scrollbar and Zoom Link Between Charts**: To enhance navigation, we've added a scrollbar and a zoom link between charts. This will allow users to easily compare different charts and indicators.
+- **Clean Up Squeeze Indicator**: We've cleaned up the squeeze indicator, making it more streamlined and user-friendly. We've also added fixed (2) points for squeeze for better accuracy.
+
+## Cleanups
+- **Squeeze Indicator**: We've made some cleanups to the squeeze indicator, improving its functionality and user interface. This includes adding fixed (2) points for squeeze, which will provide more accurate and reliable readings.
+
+
+# Changelog from v0.2.0 to v0.3.0
+
+In this update, we have made significant improvements to our financial research web application. The primary change is the addition of the squeeze data feature, which is a crucial indicator used in technical analysis of stock prices. This new feature will enhance the user's ability to make informed decisions based on the latest market trends.
+
+## Enhancements
+- Added squeeze data feature for improved technical analysis of stock prices.
+
+## Cleanups
+- No cleanup changes were made in this version.
