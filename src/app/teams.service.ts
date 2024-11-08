@@ -4,6 +4,11 @@ import { Observable, throwError } from 'rxjs';
 import { TeamsResult } from './teams-list/teams-list.component';
 import { catchError, map } from 'rxjs/operators';
 
+export interface User {
+  id: string;
+  username: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -325,10 +330,53 @@ export class TeamsService {
       );
   }
 
-  getUserAutocomplete(query: string): Observable<{ id: string; username: string }[]> {
-    const GET_USER_AUTOCOMPLETE = gql`
-      query GetUserAutocomplete($query: String!) {
-        getUserAutocomplete(query: $query) {
+  // getUserAutocomplete(query: string): Observable<{ id: string; username: string }[]> {
+  //   const GET_USER_AUTOCOMPLETE = gql`
+  //     query GetUserAutocomplete($query: String!) {
+  //       getUserAutocomplete(query: $query) {
+  //         success
+  //         message
+  //         results {
+  //           id
+  //           username
+  //         }
+  //       }
+  //     }
+  //   `;
+  //
+  //   interface GetUserAutocompleteData {
+  //     getUserAutocomplete: {
+  //       success: boolean;
+  //       message: string;
+  //       results: { id: string; username: string }[];
+  //     };
+  //   }
+  //
+  //   return this.apollo
+  //     .query<GetUserAutocompleteData>({
+  //       query: GET_USER_AUTOCOMPLETE,
+  //       variables: { query },
+  //     })
+  //     .pipe(
+  //       map((result) => {
+  //         if (result.errors) {
+  //           throw new Error(result.errors.map((e) => e.message).join(', '));
+  //         } else if (!result.data?.getUserAutocomplete.success) {
+  //           throw new Error(result.data?.getUserAutocomplete.message);
+  //         }
+  //         return result.data.getUserAutocomplete.results;
+  //       }),
+  //       catchError((error) => {
+  //         console.error('GraphQL query error:', error);
+  //         return throwError(() => new Error(error.message));
+  //       }),
+  //     );
+  // }
+
+  getAllUsers(): Observable<User[]> {
+    const GET_ALL_USERS = gql`
+      query GetAllUsers {
+        getAllUsers {
           success
           message
           results {
@@ -339,32 +387,26 @@ export class TeamsService {
       }
     `;
 
-    interface GetUserAutocompleteData {
-      getUserAutocomplete: {
+    interface GetAllUsersData {
+      getAllUsers: {
         success: boolean;
         message: string;
-        results: { id: string; username: string }[];
+        results: User[];
       };
     }
 
-    // interface GetUserAutocompleteResponse {
-    //   data?: GetUserAutocompleteData;
-    //   errors?: { message: string }[];
-    // }
-
     return this.apollo
-      .query<GetUserAutocompleteData>({
-        query: GET_USER_AUTOCOMPLETE,
-        variables: { query },
+      .query<GetAllUsersData>({
+        query: GET_ALL_USERS,
       })
       .pipe(
         map((result) => {
           if (result.errors) {
             throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.getUserAutocomplete.success) {
-            throw new Error(result.data?.getUserAutocomplete.message);
+          } else if (!result.data?.getAllUsers.success) {
+            throw new Error(result.data?.getAllUsers.message);
           }
-          return result.data.getUserAutocomplete.results;
+          return result.data.getAllUsers.results;
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);

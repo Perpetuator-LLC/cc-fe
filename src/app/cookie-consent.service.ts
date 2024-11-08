@@ -37,6 +37,10 @@ export class CookieConsentService implements OnDestroy {
     private apollo: Apollo,
     private authService: AuthService,
   ) {
+    const localConsent = this.loadConsentFromLocalStorage();
+    if (localConsent) {
+      this.cookieConsentSignal.set(localConsent);
+    }
     this.loadCookieConsent();
   }
 
@@ -58,6 +62,19 @@ export class CookieConsentService implements OnDestroy {
       }
     }
   `;
+
+  private loadConsentFromLocalStorage(): CookieConsent | null {
+    const storedConsent = localStorage.getItem('cookieConsent');
+    return storedConsent ? JSON.parse(storedConsent) : null;
+  }
+
+  private saveConsentToLocalStorage(consent: CookieConsent | null): void {
+    if (consent) {
+      localStorage.setItem('cookieConsent', JSON.stringify(consent));
+    } else {
+      localStorage.removeItem('cookieConsent');
+    }
+  }
 
   loadCookieConsent(): void {
     if (!this.authService.isLoggedIn()) {
@@ -82,15 +99,18 @@ export class CookieConsentService implements OnDestroy {
             if (consents && consents.length > 0) {
               const latestConsent = consents.find((consent) => consent.version === this.COOKIE_CONSENT_VERSION);
               this.cookieConsentSignal.set(latestConsent || null);
+              this.saveConsentToLocalStorage(latestConsent || null);
               console.log('User cookie consent loaded:', latestConsent);
             } else {
               console.log('No cookie consent found');
               this.cookieConsentSignal.set(null);
+              this.saveConsentToLocalStorage(null);
             }
           },
           error: (err) => {
             console.error('Failed to load cookie consent:', err);
             this.cookieConsentSignal.set(null);
+            this.saveConsentToLocalStorage(null);
           },
         }),
     );
@@ -119,16 +139,20 @@ export class CookieConsentService implements OnDestroy {
   }
 
   setCookieConsent(accepted: boolean): void {
+    const version = this.COOKIE_CONSENT_VERSION;
+    const updatedConsent = { version, accepted, date: new Date().toISOString() };
     if (!this.authService.isLoggedIn()) {
-      console.log('User not logged in, skipping cookie consent update');
+      this.cookieConsentSignal.set(updatedConsent);
+      this.saveConsentToLocalStorage(updatedConsent);
+      console.log('User not logged in, skipping cookie consent update in DB');
       return;
     }
-    const version = this.COOKIE_CONSENT_VERSION;
     this.subscriptions.add(
       this.updateCookieConsent(version, accepted).subscribe({
         next: (result) => {
           if (result.success) {
-            this.cookieConsentSignal.set({ version, accepted, date: new Date().toISOString() });
+            this.cookieConsentSignal.set(updatedConsent);
+            this.saveConsentToLocalStorage(updatedConsent);
             console.log('Cookie consent updated successfully');
           } else {
             console.error('Failed to update cookie consent:', result.message);

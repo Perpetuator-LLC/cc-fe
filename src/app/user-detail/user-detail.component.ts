@@ -1,8 +1,8 @@
-import { Component, effect, OnInit, TemplateRef, ViewChild } from '@angular/core'; // Add WritableSignal import
+import { Component, effect, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../user.service';
 import { MatCard } from '@angular/material/card';
-import { MatError, MatFormField } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
@@ -12,7 +12,17 @@ import { ToolbarService } from '../toolbar.service';
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [MatCard, ReactiveFormsModule, MatFormField, MatInput, MatButton, MatLabel, MessageComponent, MatError],
+  imports: [
+    MatCard,
+    ReactiveFormsModule,
+    MatFormField,
+    MatInput,
+    MatButton,
+    MatLabel,
+    MessageComponent,
+    MatError,
+    MatHint,
+  ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
 })
@@ -48,6 +58,10 @@ export class UserDetailComponent implements OnInit {
         email: userData?.email || '',
       });
     });
+
+    this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
+      this.changePasswordForm.updateValueAndValidity();
+    });
   }
 
   ngOnInit(): void {
@@ -75,7 +89,16 @@ export class UserDetailComponent implements OnInit {
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
-    return formGroup.get('newPassword')?.value === formGroup.get('confirmPassword')?.value ? null : { mismatch: true };
+    const newPassword = formGroup.get('newPassword');
+    const confirmPassword = formGroup.get('confirmPassword');
+
+    let validationError = null;
+    if (newPassword && confirmPassword) {
+      const mismatch = newPassword.value !== confirmPassword.value;
+      validationError = mismatch ? { mismatch: true } : null;
+      confirmPassword.setErrors(validationError);
+    }
+    return validationError;
   }
 
   cancelEmailChange(): void {
@@ -176,6 +199,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   onSubmitPasswordChange(): void {
+    this.messageService.clearMessages();
     if (this.changePasswordForm.valid) {
       const newPassword = this.changePasswordForm.get('newPassword')?.value;
       const confirmPassword = this.changePasswordForm.get('confirmPassword')?.value;
@@ -206,6 +230,12 @@ export class UserDetailComponent implements OnInit {
             dismissible: true,
           });
         },
+      });
+    } else {
+      this.messageService.addMessage({
+        type: 'error',
+        text: 'Please enter valid password details.',
+        dismissible: true,
       });
     }
   }

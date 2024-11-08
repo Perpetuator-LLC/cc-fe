@@ -5,6 +5,7 @@
     #auto="matAutocomplete"
     (optionSelected)="onOptionSelected($event.option.value)"
     [displayWith]="displayFn"
+    autoActiveFirstOption
   >
     @for (user of filteredUsers$ | async; track user.id) {
       <mat-option [value]="user">{{ user.username }}</mat-option>

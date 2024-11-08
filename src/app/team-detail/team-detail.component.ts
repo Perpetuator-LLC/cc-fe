@@ -3,11 +3,11 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
-import { TeamsService } from '../teams.service';
+import { TeamsService, User } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatCard } from '@angular/material/card';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatFormField } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -67,10 +67,15 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     MatInput,
     MatIconButton,
     MatHeaderRowDef,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
+  @ViewChild('autocomplete') autoComplete!: UserAutocompleteComponent;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  allUsers: User[] = [];
   teamForm!: FormGroup;
   newUserForm!: FormGroup;
   private subscriptions = new Subscription();
@@ -111,6 +116,11 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       throw new Error('Failed to get Team ID for updating Team');
     }
     this.loading = true;
+    this.subscriptions.add(
+      this.teamsService.getAllUsers().subscribe((users) => {
+        this.allUsers = users;
+      }),
+    );
     this.subscriptions.add(
       this.teamsService.getTeamById(teamId).subscribe({
         next: (team) => {
@@ -191,6 +201,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
           this.newUserForm.reset();
+          this.autoComplete.clearInput();
         },
         error: (err) => {
           this.messageService.addMessage({

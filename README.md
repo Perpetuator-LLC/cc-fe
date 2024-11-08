@@ -12,11 +12,14 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Add a podcast page
 
 - [ ] Add delete account 
+- [ ] Add delete team
+- [ ] Paginate Articles
+- [x] Password change fields don't match there isn't an error in JS 
 - [x] Fix on fetch clears summary
 - [x] On logout and email change, update toolbar (username goes stale)
 - [x] Allow for a user to change their email (need to determine new verify flow through APIs)
-- [ ] Paginate News - get filtered news to reduce load on server
-- [ ] No personal info in name, no email check, add warning for publicly visible
+- [x] Paginate News - get filtered news to reduce load on server
+- [x] No personal info in name, no email check, add warning for publicly visible
 - [ ] Allow user to remove self from team
 - [ ] Disable trash icons if not owner and not self
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
@@ -42,7 +45,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [x] Add audio conversion
 - [x] Check-in these changes, review, etc.
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
-  - [ ] Add changelog script and CHANGELOG
+  - [x] Add changelog script and CHANGELOG
   - [ ] Add copyright check script
   - [ ] Add 90% coverage
 - [x] Hide Forgot Password link and add to login page

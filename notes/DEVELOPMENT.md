@@ -54,7 +54,7 @@ Add the Git tag and push it to the repository.
 
 ```shell
 git commit -m "Bump version to 0.9.0"
-git push origin feat/new-feature
+git push origin main
 git tag -a v0.9.0 -m "Adds new feature A and new feature B. Fixes bug C."
 git push origin v0.9.0
 ```
