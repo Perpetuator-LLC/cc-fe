@@ -9,62 +9,37 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Add to Apple
   - [ ] Add to Spotify
   - [ ] Add to Google
+- [ ] Add intro, outro, and prompt to Team
+- [ ] Add multiple channel publishing on TG to team
 - [ ] Add a podcast page
+- [ ] Publish debounce
+- [ ] After job updates reload content or control subcomponent rerender
+- [ ] Add Job Table with URL query params that update as table is filtered
+- [ ] Add job status as banner component with pagination
+- [ ] Move all news summary error handling to news summary
+- [ ] Add job scheduling with time based jobs
 
-- [ ] Add delete account 
-- [ ] Add delete team
-- [ ] Paginate Articles
-- [x] Password change fields don't match there isn't an error in JS 
-- [x] Fix on fetch clears summary
-- [x] On logout and email change, update toolbar (username goes stale)
-- [x] Allow for a user to change their email (need to determine new verify flow through APIs)
-- [x] Paginate News - get filtered news to reduce load on server
-- [x] No personal info in name, no email check, add warning for publicly visible
-- [ ] Allow user to remove self from team
-- [ ] Disable trash icons if not owner and not self
-- [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
-- [ ] Add foul language check for names, and articles?
 - [ ] Add team to article detail page
 - [ ] On Article list page add a team filter
-- [ ] Add multiple channel publishing on TG to team
-- [ ] Add ElevenLabs API Key to team
-- [ ] Move all news summary error handling to news summary 
-- [x] Remove description logic from article summary
-- [ ] Add job scheduling with time based jobs
+- [ ] Paginate Jobs
+- [ ] Paginate Articles
+- [ ] Allow user to remove self from team
+- [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
+- [ ] Disable trash icons if not owner and not self
+- [ ] Add delete account 
+- [ ] Add delete team
 - [ ] Code only (friends) invites, build graph of users and their invites
-- [ ] Can we move OpenBB to a separate service/end-point?
+
+- [ ] Add foul language check for names, and articles?
+- [ ] Add ElevenLabs API Key to team
 - [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
 - [ ] Add custom URL (to scrape) but scoped to this user only
-- [x] Password reset link is wrong in email... how'd that break?
-- [ ] Forgot password page autocomplete is wrong - it thinks it is current-password not new-password
-- [ ] Add team Member Username is auto completing with email
-- [x] Login form says username but it is email
-- [x] Debug fetch news
-- [x] On summarize create article
-- [x] Display article
-- [x] Add audio conversion
-- [x] Check-in these changes, review, etc.
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
-  - [x] Add changelog script and CHANGELOG
   - [ ] Add copyright check script
   - [ ] Add 90% coverage
-- [x] Hide Forgot Password link and add to login page
-- [x] Add a forgot password page
-- [x] Edit user info
-- [x] Finish switching all GQL calls to Apollo
-- [x] Add a stored value for the user to accept the terms and privacy policy
 - [ ] Remove jest if possible
 - [ ] Then add posthog
-- [x] Create existing user error is not displayed
-- [x] Create user with existing email is allowed, need to block
-- [x] Format register
-- [x] Add link to terms and privacy policy
-- [x] Add checkmark to record if they accept on account create
-- [x] Delete user and make sure the API stops working
-- [x] Add env support, and switch testing users to come from env
-- [x] Verify email before access
-- [ ] Switch to new inject syntax
-- [x] On landing but login required add a next query param to redirect to after login
+- [ ] Switch to new inject syntax and try to remove all usages of `rxjs`
 - [ ] Consider ad supported free version? where products are part of outputs
 - [ ] Determine if this code is needed in the `angular.json` file:
 ```
@@ -76,6 +51,39 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 ```
 - [ ] Determine if Telegram has monitized API
 
+- [x] Create existing user error is not displayed
+- [x] Create user with existing email is allowed, need to block
+- [x] Format register
+- [x] Add link to terms and privacy policy
+- [x] Add checkmark to record if they accept on account create
+- [x] Delete user and make sure the API stops working
+- [x] Add env support, and switch testing users to come from env
+- [x] Verify email before access
+- [x] On landing but login required add a next query param to redirect to after login
+- [x] Password change fields don't match there isn't an error in JS
+- [x] Fix on fetch clears summary
+- [x] On logout and email change, update toolbar (username goes stale)
+- [x] Allow for a user to change their email (need to determine new verify flow through APIs)
+- [x] Paginate News - get filtered news to reduce load on server
+- [x] No personal info in name, no email check, add warning for publicly visible
+- [x] Hide Forgot Password link and add to login page
+- [x] Add a forgot password page
+- [x] Edit user info
+- [x] Finish switching all GQL calls to Apollo
+- [x] Add a stored value for the user to accept the terms and privacy policy
+- [x] Password reset link is wrong in email... how'd that break?
+- [x] Forgot password page autocomplete is wrong - it thinks it is current-password not new-password
+- [x] Add team Member Username is auto completing with email
+- [x] Login form says username but it is email
+- [x] Debug fetch news
+- [x] On summarize create article
+- [x] Display article
+- [x] Add audio conversion
+- [x] Check-in these changes, review, etc.
+- [x] Add changelog script and CHANGELOG
+- [x] Remove description logic from article summary
+- [x] Can we move OpenBB to a separate service/end-point? (disabled for now)
+
 [ANGULAR.md](notes%2FANGULAR.md)
 [APEXCHARTS.md](notes%2FAPEXCHARTS.md)
 [APOLLO_ANGULAR.md](notes%2FAPOLLO_ANGULAR.md)
@@ -85,7 +93,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 [MATERIAL.md](notes%2FMATERIAL.md)
 [PROMT.md](notes%2FPROMT.md)
 
-# TODO
+# TODO: Finance
 - [x] Squeeze Indicator
   - [x] Momentum Histogram
   - [x] Setting Up Squeeze Indicator

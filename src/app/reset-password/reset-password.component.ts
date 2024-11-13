@@ -68,11 +68,26 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
-    return formGroup.get('newPassword')?.value === formGroup.get('confirmPassword')?.value ? null : { mismatch: true };
+    const newPassword = formGroup.get('newPassword');
+    const confirmPassword = formGroup.get('confirmPassword');
+
+    let validationError = null;
+    if (newPassword && confirmPassword) {
+      const mismatch = newPassword.value !== confirmPassword.value;
+      validationError = mismatch ? { mismatch: true } : null;
+      confirmPassword.setErrors(validationError);
+    }
+    return validationError;
   }
 
   onSubmit(): void {
+    this.messageService.clearMessages();
     if (this.resetPasswordForm.invalid) {
+      this.messageService.addMessage({
+        type: 'error',
+        text: 'Please enter valid password details.',
+        dismissible: true,
+      });
       return;
     }
 

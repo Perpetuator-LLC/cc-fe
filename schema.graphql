@@ -1,0 +1,248 @@
+type Query {
+  getCryptoNewsData(ids: [Int]): CryptoNewsData
+  getCryptoArticlesData(orderBy: String = "date", direction: String = "DESC"): CryptoArticlesData
+  getCryptoArticleData(id: ID!): CryptoArticleData
+  getUserSettings(keys: [String]!): UserSettingsData
+  getAllUsers: UserList
+  getUserCookieConsents: [UserCookieConsentType]
+  myTeams: [TeamType]
+  team(id: ID!): TeamType
+  getUserDetails: UserDetails
+  getEmailChangePending: EmailChangeRequestType
+  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int): PaginatedJobStatus
+}
+
+type CryptoNewsData {
+  success: Boolean
+  message: String
+  results: [CryptoNewsResult]
+}
+
+type CryptoNewsResult {
+  id: ID
+  title: String
+  description: String
+  url: String
+  publishedAt: DateTime
+  source: String
+  summary: String
+  content: String
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type CryptoArticlesData {
+  success: Boolean
+  message: String
+  results: [CryptoArticleResult]
+}
+
+type CryptoArticleResult {
+  id: ID
+  newsSummaries: [CryptoNewsResult]
+  title: String
+  content: String
+  date: DateTime
+  audio: String
+  team: TeamType
+}
+
+type TeamType {
+  id: ID
+  name: String
+  members: [TeamMembershipType]
+}
+
+type TeamMembershipType {
+  user: UserType
+  role: String
+}
+
+type UserType {
+  id: ID
+  username: String
+}
+
+type CryptoArticleData {
+  success: Boolean
+  message: String
+  results: CryptoArticleResult
+}
+
+type UserSettingsData {
+  success: Boolean
+  message: String
+  results: [UserSettingData]
+}
+
+type UserSettingData {
+  key: String
+  value: String
+}
+
+type UserList {
+  success: Boolean
+  message: String
+  results: [UserType]
+}
+
+type UserCookieConsentType {
+  version: String
+  accepted: Boolean
+  date: DateTime
+}
+
+type UserDetails {
+  id: ID
+  username: String
+  email: String
+}
+
+type EmailChangeRequestType {
+  newEmail: String
+  verified: Boolean
+}
+
+type PaginatedJobStatus {
+  success: Boolean
+  message: String
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  jobs: [JobStatus]
+}
+
+type JobStatus {
+  id: UUID
+  jobType: String
+  status: String
+  error: String
+  result: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+type Mutation {
+  fetchCryptoNewsData: SubmitJobData
+  extractCryptoNewsData(ids: [Int]!): GraphQLData
+  summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): GraphQLData
+  createCryptoArticleData(ids: [Int]!, teamId: ID!): CryptoArticleData
+  updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
+  updateCryptoArticleAudio(id: ID!): GraphQLData
+  publishCryptoArticleAudio(id: ID!): GraphQLData
+  updateUserSetting(key: String!, value: String!): GraphQLData
+  retryJobs(ids: [UUID]!): RetryJobs
+  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
+  updateUserDetails(email: String!, username: String!): UpdateUserDetails
+  changePassword(password: String!): ChangePassword
+  createTeam(name: String!): CreateTeam
+  updateTeam(id: ID!, name: String!): UpdateTeam
+  destroyTeam(teamId: ID!): DestroyTeam
+  upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
+  removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
+  resendEmailChange: ResendEmailChange
+  cancelEmailChange: CancelEmailChange
+  updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
+  createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
+}
+
+type SubmitJobData {
+  success: Boolean
+  message: String
+  job: JobStatus
+}
+
+type GraphQLData {
+  success: Boolean
+  message: String
+}
+
+type RetryJobs {
+  success: Boolean
+  message: String
+  jobs: [JobStatus]
+}
+
+type UpdateCookieConsent {
+  success: Boolean
+  message: String
+}
+
+type UpdateUserDetails {
+  success: Boolean
+  message: String
+}
+
+type ChangePassword {
+  success: Boolean
+  message: String
+}
+
+type CreateTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type UpdateTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type DestroyTeam {
+  success: Boolean
+  message: String
+}
+
+type UpsertUserToTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type RemoveUserFromTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type ResendEmailChange {
+  success: Boolean
+  message: String
+}
+
+type CancelEmailChange {
+  success: Boolean
+  message: String
+}
+
+type UpdateScheduleMutation {
+  success: Boolean
+  message: String
+}
+
+type CreateScheduleMutation {
+  success: Boolean
+  message: String
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString

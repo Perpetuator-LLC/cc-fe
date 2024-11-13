@@ -8,7 +8,13 @@ ng add apollo-angular
 
 # GraphQL Design
 
-?? TODO: All queries and mutations are defined in the `*.graphql` files. The `*.graphql` files are then imported into the Angular services.
+All queries and mutations are defined in the `schema.graphql` file.
+
+The schema is updated by running a back-end project command. First get the back-end project, then run:
+```shell
+python manage.py export_schema --out=schema.graphql --format=sdl
+```
+Then move the `schema.graphql` file to the front-end project.
 
 All GraphQL queries and mutations should return 200 status codes. If there is an error, the error should be returned in the response body.
 Non-200 errors indicate that the GraphQL server is down or there is a network issue (possible HTTPS, etc. issues).

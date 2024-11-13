@@ -1,4 +1,4 @@
-<ng-template #toolbarTemplate>
+<ng-template #toolbarTemplate xmlns:mat-accordion="http://www.w3.org/1999/html">
   <h1>Crypto News</h1>
   <mat-form-field appearance="outline" class="filter-form-field">
     <mat-label>Filter news</mat-label>
@@ -6,13 +6,58 @@
   </mat-form-field>
 </ng-template>
 
+<ng-template #tooltipTemplate>
+  <app-custom-tooltip [text]="'This is a custom tooltip with\nmultiple lines of text.'"></app-custom-tooltip>
+</ng-template>
+
 <app-message></app-message>
 
 <div class="crypto-news-container">
-  <p>
-    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
-    (limited to last 24 hours of fetched news).
-  </p>
+  @if (jobs.length > 0) {
+    <div class="jobs-container">
+      <!--      <h2>Jobs</h2>-->
+      <mat-list>
+        @for (job of jobs; track job.id) {
+          <!--          <mat-list-item [matTooltip]="tooltipTemplate">-->
+          <mat-list-item matTooltip="ID: {{ job.id }}" class="job-cards">
+            <mat-card class="job-card {{ job.status }}">
+              <mat-accordion>
+                <mat-expansion-panel [expanded]="data.panelOpenState">
+                  <mat-expansion-panel-header>
+                    <mat-card-header>
+                      <div class="job-header">
+                        <div class="job-type">
+                          <mat-card-title>{{ jobTypeToString(job.jobType) }}</mat-card-title>
+                        </div>
+                        <div class="job-status">
+                          <mat-card-subtitle>{{ job.status.toUpperCase() }}</mat-card-subtitle>
+                        </div>
+                      </div>
+                      @if (job.status === 'running') {
+                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                      }
+                    </mat-card-header>
+                  </mat-expansion-panel-header>
+                  @if (job.status === 'failed' || job.status === 'pending') {
+                    <button mat-flat-button color="primary" type="button" (click)="retryJob(job.id)">Retry</button>
+                  }
+                  @if (job.error) {
+                    <p class="error">Error: {{ job.error }}</p>
+                  }
+                  @if (job.result) {
+                    <p class="result">Result: {{ job.result }}</p>
+                  }
+                  <p><strong>Created At:</strong> {{ job.createdAt | date: 'short' }}</p>
+                  <p><strong>Updated At:</strong> {{ job.updatedAt | date: 'short' }}</p>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </mat-card>
+          </mat-list-item>
+        }
+      </mat-list>
+    </div>
+  }
+
   <div class="sub-menu">
     <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
     <button
@@ -54,62 +99,72 @@
     <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
     <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
   </div>
+
+  <p>
+    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
+    (limited to last 24 hours of fetched news).
+  </p>
+
   @if (newsData) {
-    <mat-list>
-      @for (news of filteredNews; track news.url) {
-        <mat-list-item class="news-item">
+    <div class="news-container">
+      <mat-list>
+        @for (news of filteredNews; track news.url) {
+          <mat-list-item class="news-item">
+            <mat-card>
+              <mat-card-header>
+                <mat-checkbox (change)="toggleSelection(news)" [checked]="isSelected(news)"></mat-checkbox>
+                <mat-card-title>
+                  <a [href]="news.url" target="_blank">{{ news.title }}</a>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-expansion-panel>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <p>
+                        <strong>Published at:</strong>
+                        <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
+                          {{ news.publishedAt | date: 'short' }}
+                        </span>
+                        - <strong>Source:</strong> {{ news.source }}
+                      </p>
+                      @if (news.summary) {
+                        <p>&nbsp;(AI Summary Generated)</p>
+                      } @else if (news.content) {
+                        <p>&nbsp;(No AI Summary)</p>
+                      }
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <mat-divider></mat-divider>
+                  <h3>RSS Description</h3>
+                  <p
+                    class="news-details news-description"
+                    [innerHTML]="news.description || 'No description provided'"
+                  ></p>
+                  <mat-divider></mat-divider>
+                  <h3>AI Summary</h3>
+                  <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
+                    {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+                  </button>
+                  <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
+                  <mat-divider></mat-divider>
+                  <h3>Site Content</h3>
+                  <p class="news-details">{{ news.content || 'No news content available' }}</p>
+                </mat-expansion-panel>
+              </mat-card-content>
+            </mat-card>
+          </mat-list-item>
+        } @empty {
           <mat-card>
             <mat-card-header>
-              <mat-checkbox (change)="toggleSelection(news)" [checked]="isSelected(news)"></mat-checkbox>
-              <mat-card-title>
-                <a [href]="news.url" target="_blank">{{ news.title }}</a>
-              </mat-card-title>
+              <p>
+                No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.
+              </p>
             </mat-card-header>
-            <mat-card-content>
-              <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    <p>
-                      <strong>Published at:</strong>
-                      <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
-                        {{ news.publishedAt | date: 'short' }}
-                      </span>
-                      - <strong>Source:</strong> {{ news.source }}
-                    </p>
-                    @if (news.summary) {
-                      <p>&nbsp;(AI Summary Generated)</p>
-                    } @else if (news.content) {
-                      <p>&nbsp;(No AI Summary)</p>
-                    }
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <mat-divider></mat-divider>
-                <h3>RSS Description</h3>
-                <p
-                  class="news-details news-description"
-                  [innerHTML]="news.description || 'No description provided'"
-                ></p>
-                <mat-divider></mat-divider>
-                <h3>AI Summary</h3>
-                <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
-                  {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
-                </button>
-                <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
-                <mat-divider></mat-divider>
-                <h3>Site Content</h3>
-                <p class="news-details">{{ news.content || 'No news content available' }}</p>
-              </mat-expansion-panel>
-            </mat-card-content>
           </mat-card>
-        </mat-list-item>
-      } @empty {
-        <mat-card>
-          <mat-card-header>
-            <p>No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.</p>
-          </mat-card-header>
-        </mat-card>
-      }
-    </mat-list>
+        }
+      </mat-list>
+    </div>
   } @else {
     <mat-spinner></mat-spinner>
   }

@@ -119,6 +119,12 @@ export const routes: Routes = [
     title: 'Crypto Articles',
     canActivate: [AuthGuard],
   },
+  {
+    path: 'jobs',
+    loadComponent: () => import('./jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
+    title: 'Jobs',
+    canActivate: [AuthGuard],
+  },
 ];
 
 export class AppRoutingModule {}
