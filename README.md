@@ -5,6 +5,10 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
+- [ ] Go make sure that all subscriptions are unsubscribed
+- [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
+- [ ] Replace all messages with new messaging infrastructure and remove clears
+- [ ] Search for throwError or .apollo. and use new Apollo
 - [ ] RSS Podcast feed
   - [ ] Add to Apple
   - [ ] Add to Spotify

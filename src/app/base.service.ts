@@ -33,7 +33,7 @@ export abstract class BaseService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutation: any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables: any,
+    variables: any = {},
   ): Observable<T> {
     return this.apollo.mutate<T>({ mutation, variables }).pipe(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -194,11 +194,6 @@ export class TeamsService {
       myTeams: TeamsResult[];
     }
 
-    // interface GetMyTeamsResponse {
-    //   data?: GetMyTeamsData;
-    //   errors?: { message: string }[];
-    // }
-
     return this.apollo
       .watchQuery<GetMyTeamsData>({
         query: GET_MY_TEAMS,
@@ -248,11 +243,6 @@ export class TeamsService {
         team: TeamsResult;
       };
     }
-
-    // interface UpsertUserToTeamResponse {
-    //   data?: UpsertUserToTeamData;
-    //   errors?: { message: string }[];
-    // }
 
     return this.apollo
       .mutate<UpsertUserToTeamData>({
@@ -304,11 +294,6 @@ export class TeamsService {
       };
     }
 
-    // interface RemoveUserFromTeamResponse {
-    //   data?: RemoveUserFromTeamData;
-    //   errors?: { message: string }[];
-    // }
-
     return this.apollo
       .mutate<RemoveUserFromTeamData>({
         mutation: REMOVE_USER_FROM_TEAM,
@@ -329,49 +314,6 @@ export class TeamsService {
         }),
       );
   }
-
-  // getUserAutocomplete(query: string): Observable<{ id: string; username: string }[]> {
-  //   const GET_USER_AUTOCOMPLETE = gql`
-  //     query GetUserAutocomplete($query: String!) {
-  //       getUserAutocomplete(query: $query) {
-  //         success
-  //         message
-  //         results {
-  //           id
-  //           username
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface GetUserAutocompleteData {
-  //     getUserAutocomplete: {
-  //       success: boolean;
-  //       message: string;
-  //       results: { id: string; username: string }[];
-  //     };
-  //   }
-  //
-  //   return this.apollo
-  //     .query<GetUserAutocompleteData>({
-  //       query: GET_USER_AUTOCOMPLETE,
-  //       variables: { query },
-  //     })
-  //     .pipe(
-  //       map((result) => {
-  //         if (result.errors) {
-  //           throw new Error(result.errors.map((e) => e.message).join(', '));
-  //         } else if (!result.data?.getUserAutocomplete.success) {
-  //           throw new Error(result.data?.getUserAutocomplete.message);
-  //         }
-  //         return result.data.getUserAutocomplete.results;
-  //       }),
-  //       catchError((error) => {
-  //         console.error('GraphQL query error:', error);
-  //         return throwError(() => new Error(error.message));
-  //       }),
-  //     );
-  // }
 
   getAllUsers(): Observable<User[]> {
     const GET_ALL_USERS = gql`

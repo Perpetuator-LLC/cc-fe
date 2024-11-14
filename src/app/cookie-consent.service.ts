@@ -38,7 +38,7 @@ export class CookieConsentService implements OnDestroy {
     private authService: AuthService,
   ) {
     const localConsent = this.loadConsentFromLocalStorage();
-    if (localConsent) {
+    if (localConsent && localConsent.version === this.COOKIE_CONSENT_VERSION) {
       this.cookieConsentSignal.set(localConsent);
     }
     this.loadCookieConsent();
@@ -98,19 +98,25 @@ export class CookieConsentService implements OnDestroy {
           next: (consents) => {
             if (consents && consents.length > 0) {
               const latestConsent = consents.find((consent) => consent.version === this.COOKIE_CONSENT_VERSION);
-              this.cookieConsentSignal.set(latestConsent || null);
-              this.saveConsentToLocalStorage(latestConsent || null);
+              if (latestConsent === undefined) {
+                console.warn('User has not signed latest cookie consent, clearing...');
+                this.cookieConsentSignal.set(null);
+                this.saveConsentToLocalStorage(null);
+                return;
+              }
+              this.cookieConsentSignal.set(latestConsent);
+              this.saveConsentToLocalStorage(latestConsent);
               console.log('User cookie consent loaded:', latestConsent);
             } else {
               console.log('No cookie consent found');
-              this.cookieConsentSignal.set(null);
-              this.saveConsentToLocalStorage(null);
+              // this.cookieConsentSignal.set(null);
+              // this.saveConsentToLocalStorage(null);
             }
           },
           error: (err) => {
             console.error('Failed to load cookie consent:', err);
-            this.cookieConsentSignal.set(null);
-            this.saveConsentToLocalStorage(null);
+            // this.cookieConsentSignal.set(null);
+            // this.saveConsentToLocalStorage(null);
           },
         }),
     );

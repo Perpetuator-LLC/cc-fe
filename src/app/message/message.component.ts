@@ -19,6 +19,17 @@ export class MessageComponent {
   constructor(private messageService: MessageService) {
     this.messageService.messages$.subscribe((messages) => {
       this.messages = messages;
+      this.setAutoDismiss(messages);
+    });
+  }
+
+  setAutoDismiss(messages: Message[]): void {
+    messages.forEach((message, index) => {
+      if (message.timeout) {
+        setTimeout(() => {
+          this.removeMessage(index);
+        }, message.timeout);
+      }
     });
   }
 

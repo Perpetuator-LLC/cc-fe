@@ -140,76 +140,7 @@ export class JobService extends BaseService {
           throw new Error(data.retryJobs.message);
         }
         return data.retryJobs.jobs;
-        // if (result.errors) {
-        //   throw new Error(result.errors.map((e) => e.message).join(', '));
-        // } else if (!result.data.retryJobs.success) {
-        //   throw new Error(result.data.retryJobs.message);
-        // }
-        // return result.data.retryJobs.jobs;
       }),
-      // catchError((error) => {
-      //   console.error('GraphQL query error:', error);
-      //   if (error.cause?.error?.errors) {
-      //     return throwError(() => {
-      //       const errors = error.cause.error.errors.map((e: { message: string }) => e.message).join(', ');
-      //       console.error('GraphQL query errors:', errors);
-      //       return new Error(errors);
-      //       // new Error(error.cause.error.errors.map((e: { message: string }) => e.message).join(', '));
-      //     });
-      //   }
-      //   return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-      //   // console.error('GraphQL query error:', error);
-      //   // return throwError(() => new Error(error.message));
-      // }),
     );
-  }
-
-  fetchCryptoNewsData() {
-    const FETCH_CRYPTO_NEWS_DATA = gql`
-      mutation {
-        fetchCryptoNewsData {
-          success
-          message
-          job {
-            id
-            jobType
-            status
-            error
-            result
-            createdAt
-            updatedAt
-          }
-        }
-      }
-    `;
-
-    interface FetchCryptoNewsDataResponse {
-      fetchCryptoNewsData: {
-        success: boolean;
-        message: string;
-        job: Job;
-      };
-    }
-
-    return this.apollo
-      .mutate<FetchCryptoNewsDataResponse>({
-        mutation: FETCH_CRYPTO_NEWS_DATA,
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.fetchCryptoNewsData.success) {
-            throw new Error(result.data?.fetchCryptoNewsData.message);
-          }
-          return result.data?.fetchCryptoNewsData.job;
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
   }
 }

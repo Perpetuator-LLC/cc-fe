@@ -5,6 +5,8 @@ import { catchError, map } from 'rxjs/operators';
 import { CryptoNewsData } from './crypto-news/crypto-news.component';
 import { CryptoArticleResponse } from './crypto-article.service';
 import { CryptoArticleData } from './article-detail/article-detail.component';
+import { Job } from './job.service';
+import { BaseService } from './base.service';
 
 export interface CryptoNewsResponse {
   errors?: [{ message: string }];
@@ -14,38 +16,47 @@ export interface CryptoNewsResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class CryptoNewsService {
-  constructor(private apollo: Apollo) {}
+export class CryptoNewsService extends BaseService {
+  constructor(apollo: Apollo) {
+    super(apollo);
+  }
 
-  fetchCryptoNews(): Observable<CryptoNewsData> {
+  fetchCryptoNewsData() {
     const FETCH_CRYPTO_NEWS_DATA = gql`
-      mutation FetchCryptoNewsData {
+      mutation {
         fetchCryptoNewsData {
           success
           message
+          job {
+            id
+            jobType
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
         }
       }
     `;
 
-    return this.apollo
-      .mutate<CryptoNewsResponse>({
-        mutation: FETCH_CRYPTO_NEWS_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          }
-          return result.data?.getCryptoNewsData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface FetchCryptoNewsDataResponse {
+      fetchCryptoNewsData: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<FetchCryptoNewsDataResponse>(FETCH_CRYPTO_NEWS_DATA).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((data: any) => {
+        if (!data.fetchCryptoNewsData.success) {
+          throw new Error(data.fetchCryptoNewsData.message);
+        }
+        return data.fetchCryptoNewsData.job;
+      }),
+    );
   }
 
   getCryptoNews(): Observable<CryptoNewsData> {

@@ -1,11 +1,14 @@
+<script src="message.component.ts"></script>
 @if (messages.length > 0) {
   <link rel="stylesheet" href="message.component.scss" />
   <div class="message-container">
     @for (message of messages; track message; let index = $index) {
       <mat-card class="message-card">
-        <button class="close-button" mat-icon-button (click)="removeMessage(index)" aria-label="Close">
-          <mat-icon>close</mat-icon>
-        </button>
+        @if (message.dismissible) {
+          <button class="close-button" mat-icon-button (click)="removeMessage(index)" aria-label="Close">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
         <mat-card-content [ngClass]="message.type">
           <div class="message-content">
             <div class="message-icon">
