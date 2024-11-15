@@ -11,12 +11,18 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./home/home.component').then((c) => c.HomeComponent),
     title: 'Home',
+    data: {
+      icon: 'home',
+    },
   },
   {
     path: 'charts',
     loadComponent: () => import('./charts/dashboard/dashboard.component').then((c) => c.DashboardComponent),
     title: 'Charts',
     canActivate: [AuthGuard],
+    data: {
+      icon: 'home',
+    },
   },
   // {
   //   path: 'times',
@@ -45,11 +51,17 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./register/register.component').then((c) => c.RegisterComponent),
     title: 'Register',
+    data: {
+      icon: 'person_add',
+    },
   },
   {
     path: 'login',
     loadComponent: () => import('./login/login.component').then((c) => c.LoginComponent),
     title: 'Login',
+    data: {
+      icon: 'login',
+    },
   },
   {
     path: 'forgot',
@@ -88,6 +100,9 @@ export const routes: Routes = [
     loadComponent: () => import('./teams-list/teams-list.component').then((c) => c.TeamsListComponent),
     title: 'Teams',
     canActivate: [AuthGuard],
+    data: {
+      icon: 'groups',
+    },
   },
   {
     path: 'team/new',
@@ -106,6 +121,9 @@ export const routes: Routes = [
     loadComponent: () => import('./crypto-news/crypto-news.component').then((c) => c.CryptoNewsComponent),
     title: 'Crypto News',
     canActivate: [AuthGuard],
+    data: {
+      icon: 'breaking_news',
+    },
   },
   {
     path: 'crypto-article/:id',
@@ -118,12 +136,18 @@ export const routes: Routes = [
     loadComponent: () => import('./articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
     title: 'Crypto Articles',
     canActivate: [AuthGuard],
+    data: {
+      icon: 'contextual_token',
+    },
   },
   {
     path: 'jobs',
     loadComponent: () => import('./jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
     title: 'Jobs',
     canActivate: [AuthGuard],
+    data: {
+      icon: 'work',
+    },
   },
 ];
 

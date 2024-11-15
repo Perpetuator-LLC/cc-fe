@@ -1,6 +1,16 @@
-import { Component, inject, OnInit, ViewChild, OnDestroy, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+  ViewContainerRef,
+  AfterViewInit,
+  ElementRef,
+  Renderer2,
+} from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -15,12 +25,10 @@ import { AuthService } from '../auth.service';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { CookieBannerComponent } from '../cookie-banner/cookie-banner.component';
-import { ControlComponent } from '../charts/control/control.component';
 import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
-import { MatFooterCell, MatFooterRow, MatHeaderCell, MatHeaderRow } from '@angular/material/table';
 import { UserService } from '../user.service';
-import { MatLine } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-layout',
@@ -29,27 +37,23 @@ import { MatLine } from '@angular/material/core';
   standalone: true,
   imports: [
     AsyncPipe,
-    ControlComponent,
     CookieBannerComponent,
     FormsModule,
     MatButtonModule,
     MatButtonToggle,
     MatButtonToggleGroup,
-    MatFooterCell,
-    MatFooterRow,
     MatIconModule,
     MatListModule,
     MatSidenavModule,
     MatToolbarModule,
-    NgTemplateOutlet,
     RouterLink,
     RouterLinkActive,
-    MatHeaderCell,
-    MatHeaderRow,
-    MatLine,
+    MatTooltip,
+    NgClass,
   ],
 })
-export class LayoutComponent implements OnDestroy, OnInit {
+export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
+  @ViewChild('toolbar', { read: ElementRef }) toolbar!: ElementRef;
   @ViewChild('drawer') drawer!: MatSidenav;
   rootRoutes = routes.filter((r) => r.path);
   private breakpointObserver = inject(BreakpointObserver);
@@ -58,6 +62,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
   protected user = this.userService.userDetails;
   private authRequiredRoutes = AuthGuard.getAuthRequiredRoutes();
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
+  private isMinimized = false;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -67,6 +72,8 @@ export class LayoutComponent implements OnDestroy, OnInit {
     private toolbarService: ToolbarService,
     private router: Router,
     protected userService: UserService,
+    private renderer: Renderer2,
+    // private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -78,6 +85,27 @@ export class LayoutComponent implements OnDestroy, OnInit {
 
   ngOnDestroy() {
     this.toolbarService.clearToolbarComponent();
+  }
+
+  ngAfterViewInit() {
+    const resizeObserver = new ResizeObserver(() => {
+      const toolbarHeight = this.toolbar.nativeElement.offsetHeight;
+      const fillSideElement = document.querySelector('.fill-side');
+      if (fillSideElement) {
+        this.renderer.setStyle(fillSideElement, 'height', `calc(100vh - ${toolbarHeight}px - 16px)`);
+      }
+    });
+
+    resizeObserver.observe(this.toolbar.nativeElement);
+  }
+
+  toggleMinimized() {
+    this.isMinimized = !this.isMinimized;
+    // this.renderer.?
+    // this.cdr.detectChanges(); // Force change detection
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize')); // Trigger a resize event
+    }, 0);
   }
 
   shouldShow(item: Route): boolean {
@@ -98,6 +126,10 @@ export class LayoutComponent implements OnDestroy, OnInit {
     map((result) => result.matches),
     shareReplay(),
   );
+
+  get minimized(): boolean {
+    return this.drawer?.mode === 'side' ? this.isMinimized : false;
+  }
 
   get drawerOpened(): boolean {
     return this.drawer && this.drawer.opened;

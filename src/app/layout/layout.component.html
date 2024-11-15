@@ -2,58 +2,111 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
     #drawer
-    class="sidenav"
+    class="sidenav sidenav-bottom"
     fixedInViewport
     [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
     [mode]="(isHandset$ | async) ? 'over' : 'side'"
     [opened]="(isHandset$ | async) === false"
+    autosize
   >
-    <mat-toolbar class="sidenav-header">
+    <mat-toolbar class="sidenav-header" color="primary" #toolbar>
       <img
         src="Capital_Copilot_Logo_Slanted.svg"
         aria-label="Side nav toggle icon"
         alt="Capital Copilot"
         class="website-icon"
+        matTooltip="Capital Copilot"
       />
-      <span class="website-title">Capital Copilot</span>
-      <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-        <mat-icon aria-label="Collapse nav icon">menu_open</mat-icon>
-      </button>
+      @if (!this.minimized) {
+        <span class="website-title">Capital Copilot</span>
+      }
     </mat-toolbar>
-    <mat-nav-list>
-      @for (item of rootRoutes; track item.path) {
-        @if (shouldShow(item)) {
-          <a
-            mat-list-item
-            [routerLink]="item.path"
-            #link="routerLinkActive"
-            routerLinkActive
-            [activated]="link.isActive"
-          >
-            {{ item.title }}
-          </a>
+    <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
+      <div class="keep-up">
+        @for (item of rootRoutes; track item.path) {
+          @if (shouldShow(item)) {
+            <mat-list-item
+              [routerLink]="item.path"
+              #link="routerLinkActive"
+              routerLinkActive
+              [activated]="link.isActive"
+            >
+              <div class="route-link">
+                @if (item.data && item.data['icon']) {
+                  <mat-icon matTooltip="{{ item.title }}">{{ item.data['icon'] }}</mat-icon>
+                }
+                @if (!this.minimized) {
+                  <div class="route-title">
+                    {{ item.title }}
+                  </div>
+                }
+              </div>
+            </mat-list-item>
+          }
         }
-      }
-      @if (this.authService.isLoggedIn()) {
-        <a mat-list-item tabindex="0" (click)="logout()" (keydown.enter)="logout()" (keydown.space)="logout()">
-          Logout
+      </div>
+      <div class="push-down">
+        @if (!this.minimized) {
+          <div>
+            <mat-button-toggle-group
+              #group="matButtonToggleGroup"
+              [(ngModel)]="currentTheme"
+              (change)="switchTheme(group.value)"
+              aria-label="Theme Toggle"
+            >
+              <mat-button-toggle value="dark" matTooltip="Dark Theme">
+                <mat-icon>dark_mode</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="light" matTooltip="Light Theme">
+                <mat-icon>light_mode</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        }
+        @if (this.authService.isLoggedIn()) {
+          <mat-list-item tabindex="0" (click)="logout()" (keydown.enter)="logout()" (keydown.space)="logout()">
+            <div class="route-link">
+              <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
+              @if (!this.minimized) {
+                <div class="route-title">Logout</div>
+              }
+            </div>
+          </mat-list-item>
+        }
+        <a mat-list-item tabindex="0" target="_blank" href="privacy-policy.html">
+          <div class="route-link">
+            <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
+            @if (!this.minimized) {
+              <div class="route-title">Privacy Policy</div>
+            }
+          </div>
         </a>
-      }
-      <mat-button-toggle-group
-        #group="matButtonToggleGroup"
-        [(ngModel)]="currentTheme"
-        (change)="switchTheme(group.value)"
-        aria-label="Theme Toggle"
-      >
-        <mat-button-toggle value="dark">
-          <mat-icon>dark_mode</mat-icon>
-        </mat-button-toggle>
-        <mat-button-toggle value="light">
-          <mat-icon>light_mode</mat-icon>
-        </mat-button-toggle>
-      </mat-button-toggle-group>
-      <a mat-list-item tabindex="0" target="_blank" href="privacy-policy.html"> Privacy Policy </a>
-      <a mat-list-item tabindex="0" target="_blank" href="terms-and-conditions.html"> Terms and Conditions </a>
+        <a mat-list-item tabindex="0" target="_blank" href="terms-and-conditions.html">
+          <div class="route-link">
+            <mat-icon matTooltip="Terms and Conditions">gavel</mat-icon>
+            @if (!this.minimized) {
+              <div class="route-title">Terms and Conditions</div>
+            }
+          </div>
+        </a>
+        @if (drawer.mode === 'side') {
+          <button type="button" aria-label="Minimize sidenav" mat-fab (click)="this.toggleMinimized()">
+            @if (this.minimized) {
+              <mat-icon aria-label="Minimize menu" matTooltip="Minimize menu">arrow_menu_open</mat-icon>
+            } @else {
+              <mat-icon aria-label="Expand menu">arrow_menu_close</mat-icon>
+            }
+          </button>
+        } @else {
+          <button type="button" aria-label="Hide sidenav" matTooltip="" mat-fab (click)="drawer.toggle()">
+            @if (drawer.opened) {
+              <mat-icon aria-label="Open menu">menu_open</mat-icon>
+            } @else {
+              <mat-icon aria-label="Close menu">menu_close</mat-icon>
+            }
+          </button>
+        }
+      </div>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -68,29 +121,35 @@
       }
       <ng-container #toolbarContainer></ng-container>
       @if (this.authService.isLoggedIn()) {
-        <span class="spacer"></span>
-        <span class="user">
-          <a matLine [routerLink]="['/profile']">
+        <span class="push-right">
+          <button mat-button [routerLink]="['/profile']">
+            <mat-icon>account_circle</mat-icon>
             {{ this.userService.userDetails()?.username }}
-          </a>
+          </button>
         </span>
       }
     </mat-toolbar>
-    <div class="sidenav-scroll-wrapper">
-      <div class="sidenav-content">
-        @if (!drawer.opened) {
-          <button type="button" aria-label="Collapse sidenav" mat-icon-button (click)="drawer.toggle()">
-            <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
-          </button>
-        }
-        <ng-content></ng-content>
+    @if (!drawer.opened) {
+      <div class="floating-button">
+        <button type="button" aria-label="Collapse sidenav" mat-fab (click)="drawer.toggle()">
+          <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
+        </button>
+      </div>
+    }
+    <div class="content-area">
+      <div class="sidenav-scroll-wrapper">
+        <div class="sidenav-content">
+          <ng-content></ng-content>
+        </div>
       </div>
     </div>
-    <p>
-      &copy; 2024 Perpetuator LLC. By using Capitol Copilot AI, you agree to our
-      <a tabindex="0" target="_blank" href="terms-and-conditions.html">Terms and Conditions</a>
-      and
-      <a tabindex="0" target="_blank" href="privacy-policy.html">Privacy Policy</a>
-    </p>
+    <mat-toolbar color="primary" class="footer">
+      <p>
+        &copy; 2024 Perpetuator LLC. By using Capitol Copilot, you agree to our
+        <a tabindex="0" target="_blank" href="terms-and-conditions.html">Terms and Conditions</a>
+        and
+        <a tabindex="0" target="_blank" href="privacy-policy.html">Privacy Policy</a>.
+      </p>
+    </mat-toolbar>
   </mat-sidenav-content>
 </mat-sidenav-container>

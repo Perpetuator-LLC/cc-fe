@@ -1,80 +1,96 @@
-.sidenav-container {
-  height: 100%;
+.sidenav {
+  padding: 0 5px;
+}
+
+mat-nav-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.minimized {
+  width: 56px; // 40px for the icon + 16px for the padding
+}
+
+.fill-side {
+  //height: calc(100vh - 64px - 16px); /* Adjust the height to account for the header */
+  transition: width 0.3s ease; /* Smoothly adjust the width */
+}
+
+.push-down {
+  margin-top: auto;
 }
 
 .sidenav {
-  width: 250px;
+  width: auto;
+  max-width: 100%; /* Ensure it doesn't exceed the viewport width */
 }
 
-.sidenav .mat-toolbar {
-  background: inherit;
-  padding: 0;
-}
-
-.mat-toolbar.mat-primary {
-  position: relative;
-  top: 0;
-  z-index: 1;
-  padding-right: 60px;
-}
-
-.mat-toolbar-row,
-.mat-toolbar-single-row {
-  padding: 0;
-}
-
-.sidenav-header {
-  display: flex;
-  align-items: center;
+.footer {
+  position: static;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
 }
 
 .website-icon {
   width: 40px;
   height: 40px;
-  //position: absolute;
-  //top: 50%;
   right: 8px;
-  //transform: translateY(-50%);
-  //margin-right: 0;
-  margin: 5px;
 }
 
-.user-card {
-  margin-left: auto; /* Pushes the user card to the right */
-  padding: 0 16px; /* Adds some padding */
-  display: flex;
-  align-items: center;
-  max-width: 200px; /* Adjust this value as needed */
+.floating-button {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1000;
 }
 
-.user {
+.push-right {
   white-space: nowrap; /* Prevents the email from wrapping */
-  overflow: hidden; /* Ensures the email doesn't overflow */
-  text-overflow: ellipsis; /* Adds ellipsis if the email is too long */
-}
-
-.user {
+  overflow: visible;
+  text-overflow: fade;
   margin-left: auto; /* Pushes the user email to the right */
   padding-right: 16px; /* Adds some padding to the right */
-  white-space: nowrap; /* Prevents the email from wrapping */
-  overflow: hidden; /* Ensures the email doesn't overflow */
-  text-overflow: ellipsis; /* Adds ellipsis if the email is too long */
 }
-
-//.user {
-//  //width: 40px;
-//  width: auto;
-//  //height: 40px;
-//  position: absolute;
-//  top: 50%;
-//  right: 8px;
-//  transform: translateY(-50%);
-//  margin-right: 0;
-//  //margin: 5px;
-//}
 
 .website-title {
   font-size: 1.5rem;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.route-title {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+
+  .mat-icon {
+    margin-right: 16px;
+  }
+
+  .nav-item-title {
+    line-height: 24px; // Adjust this value to match your icon size
+  }
+}
+
+.route-link {
+  display: flex !important;
+  align-items: center !important;
+  width: auto; /* Adjust width to fit content */
+  //padding: 0 16px !important;
+
+  .mat-icon {
+    width: 24px; /* Set the width of the icon */
+    height: 24px; /* Set the height of the icon */
+    //margin-right: 16px; /* Space between icon and text */
+  }
+
+  .nav-item-title {
+    line-height: 24px; /* Adjust this value to match your icon size */
+    margin-left: 16px;
+  }
+}
+
+.active-link {
+  background-color: rgba(0, 0, 0, 0.1);
 }
