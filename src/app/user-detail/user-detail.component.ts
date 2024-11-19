@@ -1,6 +1,6 @@
 import { Component, effect, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UserService } from '../user.service';
+import { UserDetails, UserService } from '../user.service';
 import { MatCard } from '@angular/material/card';
 import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
@@ -72,9 +72,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   private loadUserDetails() {
-    this.userService.loadUserDetails((userDetails: { username: string; email: string }) => {
-      console.debug('User details:', userDetails);
-    });
+    this.userService.loadUserDetails();
     this.userService.loadUserEmailChangePending().subscribe({
       next: (emailChangePendingDetails) => {
         this.emailChangePending = emailChangePendingDetails;
@@ -158,11 +156,13 @@ export class UserDetailComponent implements OnInit {
               text: 'User details updated successfully.',
               dismissible: true,
             });
-            this.userService.loadUserDetails((userDetails: { username: string; email: string }) => {
-              this.userDetailForm.patchValue({
-                username: userDetails.username,
-                email: userDetails.email,
-              });
+            this.userService.loadUserDetails().subscribe({
+              next: (userDetails: UserDetails) => {
+                this.userDetailForm.patchValue({
+                  username: userDetails.username,
+                  email: userDetails.email,
+                });
+              },
             });
             this.userService.loadUserEmailChangePending().subscribe({
               next: (emailChangePendingDetails) => {

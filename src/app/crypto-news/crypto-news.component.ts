@@ -20,6 +20,7 @@ import { TeamsResult } from '../teams-list/teams-list.component';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { CustomTooltipComponent } from '../custom-tooltip/custom-tooltip.component';
 import { JobStatusBarComponent } from './job-status-bar/job-status-bar.component';
+import { UserService } from '../user.service';
 
 export interface CryptoNewsResult {
   id: string;
@@ -90,6 +91,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private teamsService: TeamsService,
+    protected userService: UserService,
   ) {}
 
   ngOnInit(): void {

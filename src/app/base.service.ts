@@ -1,27 +1,34 @@
-// src/app/services/base.service.ts
-import { Apollo } from 'apollo-angular';
 import { catchError, map } from 'rxjs/operators';
 import { handleApolloError } from './utils/error-handler';
 import { Observable } from 'rxjs';
-// import { DocumentNode } from 'graphql/language';
-// import { TypedDocumentNode } from '@apollo/client';
-// import { EmptyObject } from 'apollo-angular/types';
+import { GraphQLFormattedError } from 'graphql/error';
+import { Apollo } from 'apollo-angular';
+import { FetchResult, MutationOptions, QueryOptions } from '@apollo/client';
+import { ApolloQueryResult } from '@apollo/client/core';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MutationResult<TData = any> = FetchResult<TData> & {
+  loading?: boolean;
+};
+
+export interface BaseResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface CommonResponse<T> extends BaseResponse {
+  results: T;
+}
 
 export abstract class BaseService {
-  constructor(protected apollo: Apollo) {}
+  protected constructor(protected apollo: Apollo) {}
 
-  protected query<T>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables: any,
-  ): Observable<T> {
-    return this.apollo.query<T>({ query, variables }).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((result: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected query<T>(options: QueryOptions<any, T>): Observable<T> {
+    return this.apollo.query<T>(options).pipe(
+      map((result: ApolloQueryResult<T>) => {
         if (result.errors) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          throw new Error(result.errors.map((e) => e.message).join(', '));
         }
         return result.data;
       }),
@@ -29,18 +36,24 @@ export abstract class BaseService {
     );
   }
 
-  protected mutate<T>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutation: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables: any = {},
-  ): Observable<T> {
-    return this.apollo.mutate<T>({ mutation, variables }).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((result: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected watchQuery<T>(options: QueryOptions<any, T>): Observable<T> {
+    return this.apollo.watchQuery<T>(options).valueChanges.pipe(
+      map((result: ApolloQueryResult<T>) => {
         if (result.errors) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          throw new Error(result.errors.map((e: any) => e.message).join(', '));
+          throw new Error(result.errors.map((e) => e.message).join(', '));
+        }
+        return result.data;
+      }),
+      catchError(handleApolloError),
+    );
+  }
+
+  protected mutate<T>(options: MutationOptions<T>): Observable<T> {
+    return this.apollo.mutate<T>(options).pipe(
+      map((result: MutationResult<T>) => {
+        if (result.errors) {
+          throw new Error(result.errors.map((e: GraphQLFormattedError) => e.message).join(', '));
         }
         if (result.data === null || result.data === undefined) {
           throw new Error('No data returned from the mutation');

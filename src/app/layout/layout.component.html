@@ -44,8 +44,16 @@
             </mat-list-item>
           }
         }
-      </div>
-      <div class="push-down">
+        @if (this.authService.isLoggedIn()) {
+          <mat-list-item tabindex="0" (click)="logout()" (keydown.enter)="logout()" (keydown.space)="logout()">
+            <div class="route-link">
+              <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
+              @if (!this.minimized) {
+                <div class="route-title">Logout</div>
+              }
+            </div>
+          </mat-list-item>
+        }
         @if (!this.minimized) {
           <div>
             <mat-button-toggle-group
@@ -63,16 +71,8 @@
             </mat-button-toggle-group>
           </div>
         }
-        @if (this.authService.isLoggedIn()) {
-          <mat-list-item tabindex="0" (click)="logout()" (keydown.enter)="logout()" (keydown.space)="logout()">
-            <div class="route-link">
-              <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
-              @if (!this.minimized) {
-                <div class="route-title">Logout</div>
-              }
-            </div>
-          </mat-list-item>
-        }
+      </div>
+      <div class="push-down">
         <a mat-list-item tabindex="0" target="_blank" href="privacy-policy.html">
           <div class="route-link">
             <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
@@ -90,19 +90,19 @@
           </div>
         </a>
         @if (drawer.mode === 'side') {
-          <button type="button" aria-label="Minimize sidenav" mat-fab (click)="this.toggleMinimized()">
+          <button type="button" aria-label="Hide expansion" mat-fab (click)="this.toggleMinimized()">
             @if (this.minimized) {
-              <mat-icon aria-label="Minimize menu" matTooltip="Minimize menu">arrow_menu_open</mat-icon>
+              <mat-icon aria-label="Expand menu" matTooltip="Expand Menu">arrow_menu_open</mat-icon>
             } @else {
-              <mat-icon aria-label="Expand menu">arrow_menu_close</mat-icon>
+              <mat-icon aria-label="Collapse menu" matTooltip="Collapse Menu">arrow_menu_close</mat-icon>
             }
           </button>
         } @else {
-          <button type="button" aria-label="Hide sidenav" matTooltip="" mat-fab (click)="drawer.toggle()">
+          <button type="button" aria-label="Hide sidenav" mat-fab (click)="drawer.toggle()">
             @if (drawer.opened) {
-              <mat-icon aria-label="Open menu">menu_open</mat-icon>
+              <mat-icon aria-label="Close menu" matTooltip="Close Menu">menu_open</mat-icon>
             } @else {
-              <mat-icon aria-label="Close menu">menu_close</mat-icon>
+              <mat-icon aria-label="Open menu" matTooltip="Open Menu">menu_close</mat-icon>
             }
           </button>
         }

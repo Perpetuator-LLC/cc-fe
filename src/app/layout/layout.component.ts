@@ -78,9 +78,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
-    this.userService.loadUserDetails((userDetails: { username: string; email: string }) => {
-      console.debug('User details loaded:', userDetails);
-    });
+    this.userService.loadUserDetails();
   }
 
   ngOnDestroy() {

@@ -1,5 +1,25 @@
-.sidenav {
-  padding: 0 5px;
+mat-sidenav-content mat-toolbar {
+  height: auto;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.toolbar-container {
+  padding-left: 10px;
+  padding-top: 20px;
+  display: flex;
+  gap: 16px; /* Optional: Add some space between elements */
+  align-items: center;
+
+  h1 {
+    flex: 1 1 auto; /* Allow the h1 to grow and shrink */
+    margin: 0; /* Remove default margin */
+  }
+}
+
+.filter {
+  padding-left: 10px;
+  padding-top: 20px;
 }
 
 mat-nav-list {
@@ -12,6 +32,7 @@ mat-nav-list {
 }
 
 .fill-side {
+  height: calc(100vh - 16px);
   //height: calc(100vh - 64px - 16px); /* Adjust the height to account for the header */
   transition: width 0.3s ease; /* Smoothly adjust the width */
 }
@@ -21,6 +42,7 @@ mat-nav-list {
 }
 
 .sidenav {
+  padding: 0 5px;
   width: auto;
   max-width: 100%; /* Ensure it doesn't exceed the viewport width */
 }
@@ -30,6 +52,10 @@ mat-nav-list {
   bottom: 0;
   width: 100%;
   text-align: center;
+
+  p {
+    font-size: 15px;
+  }
 }
 
 .website-icon {

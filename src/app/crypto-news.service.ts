@@ -17,7 +17,7 @@ export interface CryptoNewsResponse {
   providedIn: 'root',
 })
 export class CryptoNewsService extends BaseService {
-  constructor(apollo: Apollo) {
+  constructor(protected override apollo: Apollo) {
     super(apollo);
   }
 
@@ -48,7 +48,9 @@ export class CryptoNewsService extends BaseService {
       };
     }
 
-    return this.mutate<FetchCryptoNewsDataResponse>(FETCH_CRYPTO_NEWS_DATA).pipe(
+    return this.mutate<FetchCryptoNewsDataResponse>({
+      mutation: FETCH_CRYPTO_NEWS_DATA,
+    }).pipe(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((data: any) => {
         if (!data.fetchCryptoNewsData.success) {

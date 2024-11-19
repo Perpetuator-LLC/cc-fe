@@ -7,13 +7,6 @@ import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } 
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
@@ -34,11 +27,6 @@ import { MessageComponent } from '../message/message.component';
     MatCardActions,
     MatInput,
     MatButton,
-    MatAccordion,
-    MatExpansionPanel,
-    MatExpansionPanelTitle,
-    MatExpansionPanelHeader,
-    MatIcon,
     MatCheckbox,
     MessageComponent,
     RouterLink,

@@ -1,36 +1,30 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal, OnDestroy } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, of, Subscription, throwError } from 'rxjs';
 import gql from 'graphql-tag';
+import { BaseResponse, BaseService, CommonResponse } from './base.service';
 
-export interface UserSettingsResult {
+export interface UserDetails {
+  id: string;
+  email: string;
+  username: string;
+  permissions: string[];
+}
+
+export interface UpdateUserDetailsResponse {
+  data?: {
+    updateUserDetails: StatusAndMessageData;
+  };
+}
+
+export interface UserSetting {
   key: string;
   value: string;
-}
-
-export interface UserSettingsData {
-  success: boolean;
-  message: string;
-  results: UserSettingsResult[];
-}
-
-export interface UserSettingsResponse {
-  errors?: [{ message: string }];
-  data?: {
-    getUserSettings: UserSettingsData;
-  };
 }
 
 export interface StatusAndMessageData {
   success: boolean;
   message: string;
-}
-
-export interface UpdateUserSettingResponse {
-  errors?: [{ message: string }];
-  data?: {
-    updateUserSetting: StatusAndMessageData;
-  };
 }
 
 export interface CancelEmailChangeResponse {
@@ -44,25 +38,6 @@ export interface ResendEmailChangeResponse {
   errors?: [{ message: string }];
   data?: {
     resendEmailChange: StatusAndMessageData;
-  };
-}
-
-export interface UserDetails {
-  id: string;
-  email: string;
-  username: string;
-}
-
-export interface UserDetailsResponse {
-  errors?: [{ message: string }];
-  data?: {
-    getUserDetails: UserDetails;
-  };
-}
-
-export interface UpdateUserDetailsResponse {
-  data?: {
-    updateUserDetails: StatusAndMessageData;
   };
 }
 
@@ -81,13 +56,16 @@ export interface ChangePasswordResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class UserService {
-  private userDetailsSignal: WritableSignal<{ username: string; email: string } | null> = signal(null);
+export class UserService extends BaseService implements OnDestroy {
+  private subscriptions = new Subscription();
+  private userDetailsSignal: WritableSignal<UserDetails | null> = signal(null);
   private emailChangePending: { newEmail: string } | null = null;
 
-  constructor(private apollo: Apollo) {}
+  constructor(protected override apollo: Apollo) {
+    super(apollo);
+  }
 
-  getUserSettings(keys: string[]): Observable<UserSettingsData> {
+  getUserSettings(keys: string[]): Observable<UserSetting[]> {
     const GET_USER_SETTINGS = gql`
       query GetUserSettings {
         getUserSettings(keys: ["${keys}"]) {
@@ -101,26 +79,29 @@ export class UserService {
       }
     `;
 
-    return this.apollo
-      .query<UserSettingsResponse>({
-        query: GET_USER_SETTINGS,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => {
-            return result.data?.getUserSettings || { success: false, message: 'No data available', results: [] };
-          },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Error: ${error.message}`));
-        }),
-      );
+    interface Response {
+      getUserSettings: CommonResponse<UserSetting[]>;
+    }
+
+    return this.query<Response>({
+      query: GET_USER_SETTINGS,
+      variables: { keys },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        const response = data?.getUserSettings;
+        if (!response) {
+          return [];
+        }
+        if (!response || !response.success) {
+          throw new Error(response?.message);
+        }
+        return data.getUserSettings.results;
+      }),
+    );
   }
 
-  updateUserSetting(key: string, value: string): Observable<StatusAndMessageData> {
+  updateUserSetting(key: string, value: string): void {
     const UPDATE_USER_SETTING = gql`
       mutation UpdateUserSetting($key: String!, $value: String!) {
         updateUserSetting(key: $key, value: $value) {
@@ -130,25 +111,20 @@ export class UserService {
       }
     `;
 
-    return this.apollo
-      .mutate<UpdateUserSettingResponse>({
-        mutation: UPDATE_USER_SETTING,
-        variables: { key, value },
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.data?.updateUserSetting || { success: false, message: 'Failed to update setting' },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-        }),
-      );
+    this.mutate<BaseResponse>({
+      mutation: UPDATE_USER_SETTING,
+      variables: { key, value },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+      }),
+    );
   }
 
-  changePassword(password: string): Observable<ChangePasswordData> {
+  changePassword(password: string): Observable<null> {
     const CHANGE_PASSWORD = gql`
       mutation ChangePassword($password: String!) {
         changePassword(password: $password) {
@@ -158,25 +134,21 @@ export class UserService {
       }
     `;
 
-    return this.apollo
-      .mutate<ChangePasswordResponse>({
-        mutation: CHANGE_PASSWORD,
-        variables: { password },
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.data?.changePassword || { success: false, message: 'Failed to update password' },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-        }),
-      );
+    return this.mutate<BaseResponse>({
+      mutation: CHANGE_PASSWORD,
+      variables: { password },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+        return null; // Success, null is returned. All errors were already handled and no new data to return.
+      }),
+    );
   }
 
-  get userDetails(): WritableSignal<{ username: string; email: string } | null> {
+  get userDetails(): WritableSignal<UserDetails | null> {
     return this.userDetailsSignal;
   }
 
@@ -184,40 +156,36 @@ export class UserService {
     return this.emailChangePending;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  loadUserDetails(callback?: any): void {
+  loadUserDetails(): Observable<UserDetails> {
     const GET_USER_DETAILS = gql`
       query GetUserDetails {
         getUserDetails {
           id
           email
           username
+          permissions
         }
       }
     `;
 
-    this.apollo
-      .query<{ getUserDetails: { username: string; email: string } }>({
-        query: GET_USER_DETAILS,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map((result) => result.data?.getUserDetails || null),
-        catchError((error) => {
-          console.error('Failed to load user details:', error);
-          return of(null);
-        }),
-      )
-      .subscribe({
-        next: (userDetails) => {
-          console.log('userDetails', userDetails);
-          this.userDetailsSignal.set(userDetails);
-          if (callback) callback(userDetails);
-        },
-        error: (err) => {
-          console.error('Failed to load user details:', err);
-        },
-      });
+    interface Response {
+      getUserDetails: UserDetails;
+    }
+
+    const observable = this.watchQuery<Response>({
+      query: GET_USER_DETAILS,
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data?.getUserDetails || null));
+    observable.subscribe({
+      next: (userDetails) => {
+        console.log('userDetails', userDetails);
+        this.userDetailsSignal.set(userDetails);
+      },
+      error: (err) => {
+        console.error('Failed to load user details:', err);
+      },
+    });
+    return observable;
   }
 
   loadUserEmailChangePending(): Observable<{ newEmail: string } | null> {
@@ -341,5 +309,9 @@ export class UserService {
           return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
         }),
       );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 }

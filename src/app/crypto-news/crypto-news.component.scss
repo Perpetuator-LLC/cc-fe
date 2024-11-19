@@ -1,19 +1,43 @@
-.crypto-news-container {
-  .sub-menu {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    gap: 1em;
-    align-items: stretch;
-  }
+.toolbar-container {
+  display: flex;
 
   .filter-form-field {
-    width: 100%;
-    margin-top: 3rem;
-    margin-left: 1rem;
+    flex: 1 1 auto; /* Allow the form field to grow and shrink */
+    padding-top: 8px;
+    min-width: 200px; /* Set a minimum width for the form field */
+  }
+}
+
+.crypto-news-container {
+  mat-form-field {
+    margin: 0 4px;
+    margin-left: 4px;
+  }
+
+  .form-container button {
+    margin: 4px;
+  }
+  .form-container mat-select {
+    margin-left: 4px;
+  }
+
+  .sub-menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px; /* Optional: Add some space between buttons */
+  }
+
+  .sub-menu button {
+    white-space: normal; /* Allow text to wrap inside buttons */
   }
 
   mat-list-item {
+    padding: 0;
+  }
+
+  mat-card.toolbar {
+    width: auto;
   }
 
   mat-card-content {
@@ -43,11 +67,6 @@
 
   .news-item p.news-details {
     margin-bottom: 10px;
-  }
-
-  .filter-form-field {
-    width: 100%;
-    margin-bottom: 1rem;
   }
 
   mat-expansion-panel h3 {

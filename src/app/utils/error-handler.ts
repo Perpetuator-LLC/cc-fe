@@ -1,7 +1,16 @@
 // src/app/utils/error-handler.ts
 import { throwError } from 'rxjs';
 
-export function handleApolloError(data: { message: string; cause: { error: { errors: { message: string }[] } } }) {
+interface ApolloErrorParams {
+  message: string;
+  cause: {
+    error: {
+      errors: { message: string }[];
+    };
+  };
+}
+
+export function handleApolloError(data: ApolloErrorParams) {
   console.error('GraphQL query error:', data);
   if (data.cause?.error?.errors) {
     const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(', ');

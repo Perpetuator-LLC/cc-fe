@@ -7,8 +7,11 @@
   <form [formGroup]="teamForm" (ngSubmit)="createTeam()">
     <mat-form-field>
       <mat-label>Team Name</mat-label>
-      <input matInput formControlName="name" />
+      <input matInput formControlName="name" required />
+      @if (nameError) {
+        <mat-error>{{ nameError }}.</mat-error>
+      }
     </mat-form-field>
-    <button mat-flat-button color="primary" type="submit">Save</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="!teamForm.valid">Save</button>
   </form>
 </mat-card>

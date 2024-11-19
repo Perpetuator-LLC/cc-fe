@@ -52,7 +52,7 @@ export interface Job {
   providedIn: 'root',
 })
 export class JobService extends BaseService {
-  constructor(apollo: Apollo) {
+  constructor(protected override apollo: Apollo) {
     super(apollo);
   }
 
@@ -90,12 +90,8 @@ export class JobService extends BaseService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data.getUserJobs.success) {
+        map((result) => {
+          if (!result.data.getUserJobs.success) {
             throw new Error(result.data.getUserJobs.message);
           }
           return result.data.getUserJobs.jobs;
@@ -134,7 +130,11 @@ export class JobService extends BaseService {
       };
     }
 
-    return this.mutate<RetryJobsResponse>(RETRY_JOBS, { ids }).pipe(
+    return this.mutate<RetryJobsResponse>({
+      mutation: RETRY_JOBS,
+      variables: { ids },
+      fetchPolicy: 'network-only',
+    }).pipe(
       map((data) => {
         if (!data.retryJobs.success) {
           throw new Error(data.retryJobs.message);

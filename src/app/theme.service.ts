@@ -57,20 +57,7 @@ export class ThemeService implements OnDestroy {
       console.log('User not logged in, skipping user preferences update');
       return;
     }
-    this.subscriptions.add(
-      this.userSettingService.updateUserSetting('theme', theme).subscribe({
-        next: (data) => {
-          if (data.success) {
-            console.log('User preferences updated');
-          } else {
-            // console.error('Failed to update user preferences');
-          }
-        },
-        error: () => {
-          // console.error(`Failed to update user preferences (error): ${data}`);
-        },
-      }),
-    );
+    this.userSettingService.updateUserSetting('theme', theme);
   }
 
   loadTheme(): void {
@@ -82,8 +69,8 @@ export class ThemeService implements OnDestroy {
     }
     this.subscriptions.add(
       this.userSettingService.getUserSettings(['theme']).subscribe({
-        next: (data) => {
-          const themeSetting = data.results.find((setting) => setting.key === 'theme');
+        next: (results) => {
+          const themeSetting = results.find((setting) => setting.key === 'theme');
           const theme: string | undefined = themeSetting?.value.toLowerCase();
           if (theme !== 'light' && theme !== 'dark') {
             console.error('Invalid theme setting:', theme);

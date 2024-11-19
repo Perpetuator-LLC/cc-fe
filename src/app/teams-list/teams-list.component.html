@@ -2,7 +2,11 @@
   <span>My Teams</span>
 </ng-template>
 <app-message></app-message>
-<button mat-flat-button color="primary" type="button" (click)="createTeam()">Create Team</button>
+<mat-card>
+  <mat-card-content>
+    <button mat-flat-button color="primary" type="button" (click)="createTeam()">Create Team</button>
+  </mat-card-content>
+</mat-card>
 @if (loading) {
   <div class="loading-spinner">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>

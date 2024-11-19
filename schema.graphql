@@ -101,6 +101,7 @@ type UserDetails {
   id: ID
   username: String
   email: String
+  permissions: [String]
 }
 
 type EmailChangeRequestType {

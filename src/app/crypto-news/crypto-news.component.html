@@ -1,9 +1,7 @@
 <ng-template #toolbarTemplate xmlns:mat-accordion="http://www.w3.org/1999/html">
-  <h1>Crypto News</h1>
-  <mat-form-field appearance="outline" class="filter-form-field">
-    <mat-label>Filter news</mat-label>
-    <input matInput (input)="applyFilter($event.target || null)" placeholder="Enter a keyword" />
-  </mat-form-field>
+  <div class="toolbar-container">
+    <h1>Crypto News</h1>
+  </div>
 </ng-template>
 
 <ng-template #tooltipTemplate>
@@ -14,53 +12,60 @@
 
 <div class="crypto-news-container">
   <app-job-status-bar />
-
-  <div class="sub-menu">
-    <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="extractSelectedNews()"
-      [disabled]="selectedNews.size === 0"
-    >
-      Retrieve
-    </button>
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="summarizeSelected()"
-      [disabled]="selectedNews.size === 0"
-    >
-      Summarize
-    </button>
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="createArticleFromSelected()"
-      [disabled]="selectedNews.size === 0"
-    >
-      Create Article
-    </button>
-    <mat-form-field>
-      <mat-label>Select Team</mat-label>
-      <mat-select [(value)]="selectedTeamId">
-        @for (team of teams; track team.id) {
-          <mat-option [value]="team.id">{{ team.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <button mat-button color="primary" type="button" (click)="selectAll()">Select All</button>
-    <button mat-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
-    <button mat-button color="primary" type="button" (click)="selectLast12Hours()">Select Last 12 Hours</button>
-  </div>
-
-  <p>
-    Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
-    (limited to last 24 hours of fetched news).
-  </p>
+  <mat-card class="toolbar">
+    <mat-card-content class="form-container">
+      <mat-form-field>
+        <mat-label>Select Team</mat-label>
+        <mat-select [(value)]="selectedTeamId">
+          @for (team of teams; track team.id) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="extractSelectedNews()"
+        [disabled]="selectedNews.size === 0"
+      >
+        Retrieve
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="summarizeSelected()"
+        [disabled]="selectedNews.size === 0"
+      >
+        Summarize
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="createArticleFromSelected()"
+        [disabled]="selectedNews.size === 0"
+      >
+        Create Article
+      </button>
+      <br />
+      <mat-form-field appearance="outline" class="filter-form-field">
+        <mat-label>Filter news</mat-label>
+        <input matInput (input)="applyFilter($event.target || null)" placeholder="Enter a keyword" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="button" (click)="selectAll()">Select All</button>
+      <button mat-raised-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
+      <button mat-raised-button color="primary" type="button" (click)="selectLast12Hours()">
+        Select Last 12 Hours
+      </button>
+      <p>
+        Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
+        (limited to last 24 hours of fetched news).
+      </p>
+    </mat-card-content>
+  </mat-card>
 
   @if (newsData) {
     <div class="news-container">
@@ -100,13 +105,15 @@
                   ></p>
                   <mat-divider></mat-divider>
                   <h3>AI Summary</h3>
-                  <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
-                    {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
-                  </button>
                   <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
-                  <mat-divider></mat-divider>
-                  <h3>Site Content</h3>
-                  <p class="news-details">{{ news.content || 'No news content available' }}</p>
+                  @if (this.userService.userDetails()?.permissions?.includes('api.change_cryptonews')) {
+                    <mat-divider></mat-divider>
+                    <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
+                      {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+                    </button>
+                    <h3>Site Content</h3>
+                    <p class="news-details">{{ news.content || 'No news content available' }}</p>
+                  }
                 </mat-expansion-panel>
               </mat-card-content>
             </mat-card>
@@ -115,7 +122,11 @@
           <mat-card>
             <mat-card-header>
               <p>
-                No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.
+                @if (newsData.results.length) {
+                  No news articles match the filter criteria.
+                } @else {
+                  No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.
+                }
               </p>
             </mat-card-header>
           </mat-card>
