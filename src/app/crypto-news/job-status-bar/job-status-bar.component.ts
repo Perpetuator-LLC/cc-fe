@@ -63,8 +63,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
       this.jobService.getUserJobs(['pending', 'running'], ['fetch_crypto_news'], currentJobIds).subscribe((jobs) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        jobs.forEach((job: any) => {
+        jobs.forEach((job: Job) => {
           const existingJob = this.jobs.find((j) => j.id === job.id);
           if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
             this.jobCompleted$.next(job);

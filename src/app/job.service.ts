@@ -20,7 +20,7 @@ export enum JobType {
 //   }
 // };
 //
-// convert the enum to a human readable string
+// convert the enum to a human-readable string
 export const jobTypeToString = (jobType: string) => {
   switch (jobType) {
     case JobType.FETCH_CRYPTO_NEWS:

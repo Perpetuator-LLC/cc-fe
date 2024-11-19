@@ -1,1 +1,42 @@
-<p>jobs-list works!</p>
+<ng-template #toolbarTemplate>
+  <div class="toolbar-container">
+    <h1>Jobs</h1>
+  </div>
+</ng-template>
+
+@if (jobs.length > 0) {
+  <div class="jobs-container">
+    <mat-list>
+      @for (job of jobs; track job.id) {
+        <mat-list-item matTooltip="ID: {{ job.id }}" class="job-cards">
+          <mat-card class="job-card {{ job.status }}">
+            <mat-card-header>
+              <div class="job-header">
+                <div class="job-type">
+                  <mat-card-title>{{ jobTypeToString(job.jobType) }}</mat-card-title>
+                </div>
+                <div class="job-status">
+                  <mat-card-subtitle>{{ job.status.toUpperCase() }}</mat-card-subtitle>
+                </div>
+              </div>
+              @if (job.status === 'running') {
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              }
+            </mat-card-header>
+            @if (job.status === 'failed' || job.status === 'pending') {
+              <button mat-flat-button color="primary" type="button" (click)="retryJob(job.id)">Retry</button>
+            }
+            @if (job.error) {
+              <p class="error">Error: {{ job.error }}</p>
+            }
+            @if (job.result) {
+              <p class="result">Result: {{ job.result }}</p>
+            }
+            <p><strong>Created At:</strong> {{ job.createdAt | date: 'short' }}</p>
+            <p><strong>Updated At:</strong> {{ job.updatedAt | date: 'short' }}</p>
+          </mat-card>
+        </mat-list-item>
+      }
+    </mat-list>
+  </div>
+}
