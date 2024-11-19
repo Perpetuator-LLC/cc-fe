@@ -56,10 +56,10 @@ export class JobService extends BaseService {
     super(apollo);
   }
 
-  getUserJobs(statuses: string[] = [], jobTypes: string[] = [], ids: string[] = []) {
+  getUserJobs(statuses: string[] = [], jobTypes: string[] = [], ids: string[] = [], page = 1, pageSize = 10) {
     const FETCH_USER_JOBS = gql`
-      query GetUserJobs($statuses: [String!]!, $jobTypes: [String!], $ids: [UUID!]) {
-        getUserJobs(statuses: $statuses, jobTypes: $jobTypes, ids: $ids) {
+      query GetUserJobs($statuses: [String!]!, $jobTypes: [String!], $ids: [UUID!], $page: Int!, $pageSize: Int!) {
+        getUserJobs(statuses: $statuses, jobTypes: $jobTypes, ids: $ids, page: $page, pageSize: $pageSize) {
           success
           message
           jobs {
@@ -86,7 +86,7 @@ export class JobService extends BaseService {
     return this.apollo
       .query<GetUserJobsResponse>({
         query: FETCH_USER_JOBS,
-        variables: { statuses, jobTypes, ids },
+        variables: { statuses, jobTypes, ids, page, pageSize },
         fetchPolicy: 'network-only',
       })
       .pipe(
