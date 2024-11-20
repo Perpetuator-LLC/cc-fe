@@ -9,7 +9,7 @@ type Query {
   team(id: ID!): TeamType
   getUserDetails: UserDetails
   getEmailChangePending: EmailChangeRequestType
-  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int): PaginatedJobStatus
+  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String): PaginatedJobStatus
 }
 
 type CryptoNewsData {
@@ -112,6 +112,7 @@ type EmailChangeRequestType {
 type PaginatedJobStatus {
   success: Boolean
   message: String
+  totalRecords: Int
   totalPages: Int
   currentPage: Int
   hasNext: Boolean

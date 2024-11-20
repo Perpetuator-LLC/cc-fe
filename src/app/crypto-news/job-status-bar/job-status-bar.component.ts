@@ -62,7 +62,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     // collect the currently loaded job ids, so that if one transitions to complete we still display it...
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
-      this.jobService.getUserJobs(['pending', 'running'], ['fetch_crypto_news'], currentJobIds).subscribe((jobs) => {
+      this.jobService.getUserJobs(['pending', 'running'], ['fetch_crypto_news'], currentJobIds).subscribe((result) => {
+        const jobs = result.jobs;
         jobs.forEach((job: Job) => {
           const existingJob = this.jobs.find((j) => j.id === job.id);
           if (existingJob && existingJob.status !== job.status && job.status === 'completed') {

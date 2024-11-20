@@ -2,27 +2,42 @@ import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/c
 import { interval, Subject, Subscription } from 'rxjs';
 import { Job, JobService, jobTypeToString } from '../job.service';
 import { DatePipe } from '@angular/common';
-import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
-import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatButton } from '@angular/material/button';
 import { ToolbarService } from '../toolbar.service';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+  MatTableDataSource,
+} from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-jobs-list',
   standalone: true,
   imports: [
     DatePipe,
-    MatCardTitle,
-    MatCardHeader,
-    MatList,
-    MatListItem,
-    MatCard,
     MatTooltip,
-    MatCardSubtitle,
-    MatProgressBar,
-    MatButton,
+    MatTable,
+    MatSort,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatCellDef,
+    MatHeaderCellDef,
+    MatHeaderRowDef,
+    MatRow,
+    MatHeaderRow,
+    MatRowDef,
+    MatPaginator,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -32,7 +47,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private pollingSubscription: Subscription = new Subscription();
   jobCompleted$ = new Subject<Job>();
   jobs: Job[] = [];
+  dataSource = new MatTableDataSource<Job>(this.jobs);
+  displayedColumns: string[] = ['jobType', 'status', 'message', 'createdAt', 'updatedAt'];
+  totalJobs = 0;
+  pageSize = 10;
+  currentPage = 0;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
@@ -55,35 +77,27 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   loadJobs() {
     this.subscriptions.add(
-      this.jobService.getUserJobs().subscribe((jobs) => {
-        jobs.forEach((job: Job) => {
-          const existingJob = this.jobs.find((j) => j.id === job.id);
-          if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
-            this.jobCompleted$.next(job);
-          }
-        });
-        this.jobs = jobs;
+      this.jobService.getUserJobs([], [], [], this.currentPage + 1, this.pageSize).subscribe((result) => {
+        this.jobs = result.jobs;
+        this.dataSource.data = this.jobs;
+        this.totalJobs = result.totalRecords;
         this.setupPolling();
       }),
     );
   }
 
-  addJob(job: Job) {
-    this.jobs.push(job);
+  onPageChange(event: PageEvent) {
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    this.loadJobs();
   }
-
-  // updateJob(updatedJob: Job) {
-  //   const index = this.jobs.findIndex((job) => job.id === updatedJob.id);
-  //   if (index !== -1) {
-  //     this.jobs[index] = updatedJob;
-  //   }
-  // }
 
   retryJob(id: string) {
     this.subscriptions.add(
       this.jobService.retryJobs([id]).subscribe({
         next: (jobs: Job[]) => {
           this.jobs = [...jobs, ...this.jobs.filter((job) => job.id !== id)];
+          this.dataSource.data = this.jobs;
         },
         error: (err: { message: string }) => {
           console.error(`Failed to retry job: ${err.message}`);
@@ -107,7 +121,6 @@ export class JobsListComponent implements OnInit, OnDestroy {
   }
 
   getPollingInterval(): number {
-    // 3s when there are active jobs, 10s when there are none
     return this.hasActiveJobs() ? 3000 : 10000;
   }
 

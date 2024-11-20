@@ -5,6 +5,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
+- [ ] Make `npm run generate` work to convert schema to types
 - [ ] Go make sure that all subscriptions are unsubscribed
 - [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
 - [ ] Replace all messages with new messaging infrastructure and remove clears

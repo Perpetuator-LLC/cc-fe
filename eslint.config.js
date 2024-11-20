@@ -7,6 +7,7 @@ const eslintPluginPrettier = require('eslint-plugin-prettier');
 module.exports = tseslint.config(
   {
     files: ['**/*.ts'],
+    ignores: ['src/app/graphql-types.ts'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,

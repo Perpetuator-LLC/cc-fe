@@ -8,6 +8,8 @@ ng add apollo-angular
 
 # GraphQL Design
 
+## Schema
+
 All queries and mutations are defined in the `schema.graphql` file.
 
 The schema is updated by running a back-end project command. First get the back-end project, then run:
@@ -25,3 +27,16 @@ The back-end is designed such that it should never return an error field in the 
 
 If the back-end has an issues with a business rule (data doesn't fit or a computation did not work, etc.), then the back-end should return a 200 status code 
 with success = false and the reason in the message field.
+
+## Types - WIP
+
+The types that we use in the front-end are defined in the `schema.graphql` file, but must be converted into TypeScript types.
+
+This is done by running the following command:
+```shell
+npm run generate
+# AI suggested this, what is it?
+# apollo client:codegen --target=typescript --outputFlat --includes=src/**/*.ts --localSchemaFile=schema.graphql
+```
+
+This will generate TypeScript types in the `src/__generated__` folder.

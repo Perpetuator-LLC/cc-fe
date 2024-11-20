@@ -62,6 +62,11 @@ export class JobService extends BaseService {
         getUserJobs(statuses: $statuses, jobTypes: $jobTypes, ids: $ids, page: $page, pageSize: $pageSize) {
           success
           message
+          totalRecords
+          totalPages
+          currentPage
+          hasNext
+          hasPrevious
           jobs {
             id
             jobType
@@ -79,6 +84,11 @@ export class JobService extends BaseService {
       getUserJobs: {
         success: boolean;
         message: string;
+        totalRecords: number;
+        totalPages: number;
+        currentPage: number;
+        hasNext: boolean;
+        hasPrevious: boolean;
         jobs: Job[];
       };
     }
@@ -94,7 +104,7 @@ export class JobService extends BaseService {
           if (!result.data.getUserJobs.success) {
             throw new Error(result.data.getUserJobs.message);
           }
-          return result.data.getUserJobs.jobs;
+          return result.data.getUserJobs;
         }),
         catchError((error) => {
           console.error('GraphQL query error:', error);
