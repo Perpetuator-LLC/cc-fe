@@ -24,16 +24,16 @@ export class MessageComponent {
   }
 
   setAutoDismiss(messages: Message[]): void {
-    messages.forEach((message, index) => {
+    messages.forEach((message) => {
       if (message.timeout) {
         setTimeout(() => {
-          this.removeMessage(index);
+          this.removeMessage(message.timestamp);
         }, message.timeout);
       }
     });
   }
 
-  removeMessage(index: number) {
-    this.messageService.removeMessage(index);
+  removeMessage(timeout: number) {
+    this.messageService.removeMessage(timeout);
   }
 }

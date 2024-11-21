@@ -9,6 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
 import { SidePanelAccordianData } from '../crypto-news.component';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-job-status-bar',
@@ -36,7 +37,10 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   private pollingSubscription: Subscription = new Subscription();
   jobCompleted$ = new Subject<Job>();
   jobs: Job[] = [];
-  constructor(private jobService: JobService) {}
+  constructor(
+    private jobService: JobService,
+    private messageService: MessageService,
+  ) {}
 
   @Input() data: SidePanelAccordianData = {
     title: '',
@@ -68,6 +72,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           const existingJob = this.jobs.find((j) => j.id === job.id);
           if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
             this.jobCompleted$.next(job);
+            this.messageService.success(`Job ${jobTypeToString(job.jobType)} completed`);
           }
         });
         // now filter any completed jobs over 10s old

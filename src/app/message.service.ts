@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface Message {
+export interface Message extends NewMessage {
+  timestamp: number;
+}
+
+export interface NewMessage {
   type: 'error' | 'warning' | 'info' | 'success';
   text: string;
   dismissible?: boolean;
@@ -31,13 +35,22 @@ export class MessageService {
     this.addMessage({ type: 'success', text, dismissible, timeout });
   }
 
-  addMessage(message: Message) {
+  addMessage(message: NewMessage) {
     const currentMessages = this.messagesSubject.value;
-    this.messagesSubject.next([...currentMessages, message]);
+    let timestamp = Date.now(); // make sure it is unique else add 1ms
+    while (currentMessages.some((m) => m.timestamp === timestamp)) {
+      timestamp += 1;
+    }
+    const internalMessage: Message = { ...message, timestamp };
+    this.messagesSubject.next([...currentMessages, internalMessage]);
   }
 
-  removeMessage(index: number) {
+  removeMessage(timestamp: number) {
     const currentMessages = this.messagesSubject.value;
+    const index = currentMessages.findIndex((message) => message.timestamp === timestamp);
+    if (index === -1) {
+      return; // message not found
+    }
     currentMessages.splice(index, 1);
     this.messagesSubject.next([...currentMessages]);
   }

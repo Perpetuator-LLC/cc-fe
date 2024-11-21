@@ -1,6 +1,6 @@
 type Query {
   getCryptoNewsData(ids: [Int]): CryptoNewsData
-  getCryptoArticlesData(orderBy: String = "date", direction: String = "DESC"): CryptoArticlesData
+  getCryptoArticlesData(orderBy: String = "date", direction: SortDirection = ASC): CryptoArticlesData
   getCryptoArticleData(id: ID!): CryptoArticleData
   getUserSettings(keys: [String]!): UserSettingsData
   getAllUsers: UserList
@@ -9,7 +9,7 @@ type Query {
   team(id: ID!): TeamType
   getUserDetails: UserDetails
   getEmailChangePending: EmailChangeRequestType
-  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String): PaginatedJobStatus
+  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String, direction: SortDirection): PaginatedJobStatus
 }
 
 type CryptoNewsData {
@@ -66,6 +66,11 @@ type TeamMembershipType {
 type UserType {
   id: ID
   username: String
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type CryptoArticleData {

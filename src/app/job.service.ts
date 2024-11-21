@@ -56,10 +56,34 @@ export class JobService extends BaseService {
     super(apollo);
   }
 
-  getUserJobs(statuses: string[] = [], jobTypes: string[] = [], ids: string[] = [], page = 1, pageSize = 10) {
+  getUserJobs(
+    statuses: string[] = [],
+    jobTypes: string[] = [],
+    ids: string[] = [],
+    page = 1,
+    pageSize = 10,
+    orderBy = 'createdAt',
+    direction = 'DESC',
+  ) {
     const FETCH_USER_JOBS = gql`
-      query GetUserJobs($statuses: [String!]!, $jobTypes: [String!], $ids: [UUID!], $page: Int!, $pageSize: Int!) {
-        getUserJobs(statuses: $statuses, jobTypes: $jobTypes, ids: $ids, page: $page, pageSize: $pageSize) {
+      query GetUserJobs(
+        $statuses: [String!]!
+        $jobTypes: [String!]
+        $ids: [UUID!]
+        $page: Int!
+        $pageSize: Int!
+        $orderBy: String
+        $direction: SortDirection
+      ) {
+        getUserJobs(
+          statuses: $statuses
+          jobTypes: $jobTypes
+          ids: $ids
+          page: $page
+          pageSize: $pageSize
+          orderBy: $orderBy
+          direction: $direction
+        ) {
           success
           message
           totalRecords
@@ -96,7 +120,7 @@ export class JobService extends BaseService {
     return this.apollo
       .query<GetUserJobsResponse>({
         query: FETCH_USER_JOBS,
-        variables: { statuses, jobTypes, ids, page, pageSize },
+        variables: { statuses, jobTypes, ids, page, pageSize, orderBy, direction },
         fetchPolicy: 'network-only',
       })
       .pipe(

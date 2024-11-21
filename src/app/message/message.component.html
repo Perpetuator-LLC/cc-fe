@@ -5,7 +5,7 @@
     @for (message of messages; track message; let index = $index) {
       <mat-card class="message-card">
         @if (message.dismissible) {
-          <button class="close-button" mat-icon-button (click)="removeMessage(index)" aria-label="Close">
+          <button class="close-button" mat-icon-button (click)="removeMessage(message.timestamp)" aria-label="Close">
             <mat-icon>close</mat-icon>
           </button>
         }
