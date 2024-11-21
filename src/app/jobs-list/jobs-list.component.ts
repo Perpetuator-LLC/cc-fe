@@ -20,6 +20,8 @@ import {
 } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MessageService } from '../message.service';
+import { MessageComponent } from '../message/message.component';
 
 @Component({
   selector: 'app-jobs-list',
@@ -42,6 +44,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
     MatHeaderRow,
     MatRowDef,
     MatPaginator,
+    MessageComponent,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -63,6 +66,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   constructor(
     private jobService: JobService,
     private toolbarService: ToolbarService,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
@@ -87,10 +91,15 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.jobService
         .getUserJobs([], [], [], this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
-        .subscribe((result) => {
-          this.jobs = result.jobs;
-          this.dataSource.data = this.jobs;
-          this.totalJobs = result.totalRecords;
+        .subscribe({
+          next: (result) => {
+            this.jobs = result.jobs;
+            this.dataSource.data = this.jobs;
+            this.totalJobs = result.totalRecords;
+          },
+          error: (error) => {
+            this.messageService.error('Failed to load jobs: ' + error.toString());
+          },
         }),
     );
   }

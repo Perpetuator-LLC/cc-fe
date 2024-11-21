@@ -16,8 +16,8 @@ export function handleApolloError(data: ApolloErrorParams) {
     const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(', ');
     return throwError(() => new Error(errors));
   } else if (data.message) {
-    return throwError(() => new Error(`GraphQL Error: ${data.message}`));
+    return throwError(() => new Error(data.message));
   } else {
-    return throwError(() => new Error('GraphQL Error: Unknown error'));
+    return throwError(() => new Error('Unknown error'));
   }
 }

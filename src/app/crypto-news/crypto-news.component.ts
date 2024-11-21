@@ -121,6 +121,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  fetchNews() {
+    this.subscriptions.add(
+      this.cryptoNewsService.fetchCryptoNewsData().subscribe((result) => {
+        this.jobStatusBar.addJob(result.job);
+      }),
+    );
+  }
+
   extractSelectedNews() {
     if (this.selectedNews.size === 0) {
       this.messageService.warning('No news items selected.');
@@ -131,19 +139,11 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
       this.cryptoNewsService.extractCryptoNews(newsIds).subscribe({
-        next: (data) => {
-          if (data.success) {
-            this.messageService.success(data.message);
-          } else {
-            this.messageService.error(data.message);
-          }
+        next: (result) => {
+          this.jobStatusBar.addJob(result.job);
         },
-        error: (err: { message: string }) => {
-          this.messageService.error(`Failed to extract news data: ${err.message}`);
-        },
-        complete: () => {
-          console.debug('News extracting complete');
-          this.getNews();
+        error: (error) => {
+          this.messageService.error(`Failed to extract news data: ${error.message}`);
         },
       }),
     );
@@ -215,12 +215,6 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         },
       }),
     );
-  }
-
-  fetchNews() {
-    this.cryptoNewsService.fetchCryptoNewsData().subscribe((job) => {
-      this.jobStatusBar.addJob(job);
-    });
   }
 
   getNews() {

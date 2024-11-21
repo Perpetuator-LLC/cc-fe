@@ -96,12 +96,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           }
         },
         error: (error) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: 'Login failed: ' + error.toString(),
-            dismissible: true,
-          });
-          console.error('Login failed', error);
+          this.messageService.error('Login failed: ' + error.toString());
         },
       });
   }

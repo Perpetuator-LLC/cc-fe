@@ -66,27 +66,29 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     // collect the currently loaded job ids, so that if one transitions to complete we still display it...
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
-      this.jobService.getUserJobs(['pending', 'running'], ['fetch_crypto_news'], currentJobIds).subscribe((result) => {
-        const jobs = result.jobs;
-        jobs.forEach((job: Job) => {
-          const existingJob = this.jobs.find((j) => j.id === job.id);
-          if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
-            this.jobCompleted$.next(job);
-            this.messageService.success(`Job ${jobTypeToString(job.jobType)} completed`);
-          }
-        });
-        // now filter any completed jobs over 10s old
-        const now = new Date();
-        const tenSecondsAgo = new Date(now.getTime() - 10 * 1000); // 10 seconds ago
-        this.jobs = jobs.filter((job: Job) => {
-          if (job.status === 'completed') {
-            const updatedAt = new Date(job.updatedAt);
-            return updatedAt >= tenSecondsAgo;
-          }
-          return true;
-        });
-        this.setupPolling();
-      }),
+      this.jobService
+        .getUserJobs(['pending', 'running'], ['fetch_crypto_news', 'extract_crypto_news'], currentJobIds)
+        .subscribe((result) => {
+          const jobs = result.jobs;
+          jobs.forEach((job: Job) => {
+            const existingJob = this.jobs.find((j) => j.id === job.id);
+            if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
+              this.jobCompleted$.next(job);
+              this.messageService.success(`Job ${jobTypeToString(job.jobType)} completed`);
+            }
+          });
+          // now filter any completed jobs over 10s old
+          const now = new Date();
+          const tenSecondsAgo = new Date(now.getTime() - 10 * 1000); // 10 seconds ago
+          this.jobs = jobs.filter((job: Job) => {
+            if (job.status === 'completed') {
+              const updatedAt = new Date(job.updatedAt);
+              return updatedAt >= tenSecondsAgo;
+            }
+            return true;
+          });
+          this.setupPolling();
+        }),
     );
   }
 

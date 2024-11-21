@@ -3,15 +3,9 @@ import { Apollo, gql } from 'apollo-angular';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { CryptoNewsData } from './crypto-news/crypto-news.component';
-import { CryptoArticleResponse } from './crypto-article.service';
-import { CryptoArticleData } from './article-detail/article-detail.component';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
-
-export interface CryptoNewsResponse {
-  errors?: [{ message: string }];
-  data?: { getCryptoNewsData: CryptoNewsData };
-}
+import { CryptoArticleData } from './article-detail/article-detail.component';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +34,7 @@ export class CryptoNewsService extends BaseService {
       }
     `;
 
-    interface FetchCryptoNewsDataResponse {
+    interface Response {
       fetchCryptoNewsData: {
         success: boolean;
         message: string;
@@ -48,15 +42,14 @@ export class CryptoNewsService extends BaseService {
       };
     }
 
-    return this.mutate<FetchCryptoNewsDataResponse>({
+    return this.mutate<Response>({
       mutation: FETCH_CRYPTO_NEWS_DATA,
     }).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((data: any) => {
+      map((data) => {
         if (!data.fetchCryptoNewsData.success) {
           throw new Error(data.fetchCryptoNewsData.message);
         }
-        return data.fetchCryptoNewsData.job;
+        return data.fetchCryptoNewsData;
       }),
     );
   }
@@ -81,60 +74,65 @@ export class CryptoNewsService extends BaseService {
       }
     `;
 
-    return this.apollo
-      .query<CryptoNewsResponse>({
-        query: GET_CRYPTO_NEWS_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.getCryptoNewsData.success) {
-            throw new Error(result.data?.getCryptoNewsData.message);
-          }
-          return result.data?.getCryptoNewsData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface Response {
+      getCryptoNewsData: CryptoNewsData;
+    }
+
+    return this.query<Response>({
+      query: GET_CRYPTO_NEWS_DATA,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.getCryptoNewsData.success) {
+          throw new Error(data.getCryptoNewsData.message);
+        }
+        return data.getCryptoNewsData || { success: false, message: 'No data available', results: [] };
+      }),
+      catchError((error) => {
+        console.error('GraphQL query error:', error);
+        return throwError(() => new Error(error.message));
+      }),
+    );
   }
 
-  extractCryptoNews(ids: number[]): Observable<CryptoNewsData> {
+  extractCryptoNews(ids: number[]) {
     const EXTRACT_CRYPTO_NEWS_DATA = gql`
       mutation {
         extractCryptoNewsData(ids: [${ids.join(' ')}]) {
           success
           message
+          job {
+            id
+            jobType
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
         }
       }
     `;
 
-    return this.apollo
-      .mutate<{ extractCryptoNewsData: CryptoNewsResponse }>({
-        mutation: EXTRACT_CRYPTO_NEWS_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.extractCryptoNewsData.success) {
-            throw new Error(result.data?.extractCryptoNewsData.message);
-          }
-          return result.data?.extractCryptoNewsData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface Response {
+      extractCryptoNewsData: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: EXTRACT_CRYPTO_NEWS_DATA,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.extractCryptoNewsData.success) {
+          throw new Error(data.extractCryptoNewsData.message);
+        }
+        return data.extractCryptoNewsData || { success: false, message: 'No data available', results: [] };
+      }),
+    );
   }
 
   summarizeCryptoNews(ids: number[], force = false): Observable<CryptoNewsData> {
@@ -147,33 +145,27 @@ export class CryptoNewsService extends BaseService {
       }
     `;
 
-    return this.apollo
-      .mutate<{ summarizeCryptoNewsData: CryptoNewsResponse }>({
-        mutation: SUMMARIZE_CRYPTO_NEWS_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.summarizeCryptoNewsData.success) {
-            throw new Error(result.data?.summarizeCryptoNewsData.message);
-          }
-          return result.data?.summarizeCryptoNewsData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface Response {
+      summarizeCryptoNewsData: CryptoNewsData;
+    }
+
+    return this.mutate<Response>({
+      mutation: SUMMARIZE_CRYPTO_NEWS_DATA,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.summarizeCryptoNewsData.success) {
+          throw new Error(data.summarizeCryptoNewsData.message);
+        }
+        return data.summarizeCryptoNewsData || { success: false, message: 'No data available', results: [] };
+      }),
+    );
   }
 
   createCryptoArticle(ids: number[], teamId: number): Observable<CryptoArticleData> {
     const CREATE_CRYPTO_ARTICLE_DATA = gql`
       mutation {
-        createCryptoArticleData(ids: [${ids.join(' ')}], teamId: ${teamId}) {
+        createCryptoArticleData(ids: [${ids.join(' ')}], teamId: ${teamId!}) {
           success
           message
           results {
@@ -193,26 +185,25 @@ export class CryptoNewsService extends BaseService {
       }
     `;
 
-    return this.apollo
-      .mutate<{ createCryptoArticleData: CryptoArticleResponse }>({
-        mutation: CREATE_CRYPTO_ARTICLE_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.createCryptoArticleData.success) {
-            throw new Error(result.data?.createCryptoArticleData.message);
-          }
-          return result.data?.createCryptoArticleData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface Response {
+      createCryptoArticleData: CryptoArticleData;
+    }
+
+    return this.mutate<Response>({
+      mutation: CREATE_CRYPTO_ARTICLE_DATA,
+      variables: { ids, teamId },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.createCryptoArticleData.success) {
+          throw new Error(data.createCryptoArticleData.message);
+        }
+        return data.createCryptoArticleData || { success: false, message: 'No data available', results: [] };
+      }),
+      catchError((error) => {
+        console.error('GraphQL mutation error:', error);
+        return throwError(() => new Error(error.message));
+      }),
+    );
   }
 }

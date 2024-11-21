@@ -122,12 +122,13 @@ type PaginatedJobStatus {
   currentPage: Int
   hasNext: Boolean
   hasPrevious: Boolean
-  jobs: [JobStatus]
+  jobs: [JobData]
 }
 
-type JobStatus {
+type JobData {
   id: UUID
   jobType: String
+  args: JSONString
   status: String
   error: String
   result: String
@@ -141,9 +142,17 @@ in fields, resolvers and input.
 """
 scalar UUID
 
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
 type Mutation {
   fetchCryptoNewsData: SubmitJobData
-  extractCryptoNewsData(ids: [Int]!): GraphQLData
+  extractCryptoNewsData(ids: [Int]!): SubmitJobData
   summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): GraphQLData
   createCryptoArticleData(ids: [Int]!, teamId: ID!): CryptoArticleData
   updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
@@ -168,7 +177,7 @@ type Mutation {
 type SubmitJobData {
   success: Boolean
   message: String
-  job: JobStatus
+  job: JobData
 }
 
 type GraphQLData {
@@ -179,7 +188,7 @@ type GraphQLData {
 type RetryJobs {
   success: Boolean
   message: String
-  jobs: [JobStatus]
+  jobs: [JobData]
 }
 
 type UpdateCookieConsent {
@@ -245,11 +254,3 @@ type CreateScheduleMutation {
   success: Boolean
   message: String
 }
-
-"""
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
-"""
-scalar JSONString

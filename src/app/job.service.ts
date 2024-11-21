@@ -8,6 +8,7 @@ import { Apollo } from 'apollo-angular';
 // create an enum of jobTypes
 export enum JobType {
   FETCH_CRYPTO_NEWS = 'fetch_crypto_news',
+  EXTRACT_CRYPTO_NEWS = 'extract_crypto_news',
 }
 
 // // convert string to enum
@@ -25,6 +26,8 @@ export const jobTypeToString = (jobType: string) => {
   switch (jobType) {
     case JobType.FETCH_CRYPTO_NEWS:
       return 'Fetch Crypto News';
+    case JobType.EXTRACT_CRYPTO_NEWS:
+      return 'Extract Crypto News';
     default:
       return '';
   }
@@ -104,7 +107,7 @@ export class JobService extends BaseService {
       }
     `;
 
-    interface GetUserJobsResponse {
+    interface Response {
       getUserJobs: {
         success: boolean;
         message: string;
@@ -117,24 +120,22 @@ export class JobService extends BaseService {
       };
     }
 
-    return this.apollo
-      .query<GetUserJobsResponse>({
-        query: FETCH_USER_JOBS,
-        variables: { statuses, jobTypes, ids, page, pageSize, orderBy, direction },
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map((result) => {
-          if (!result.data.getUserJobs.success) {
-            throw new Error(result.data.getUserJobs.message);
-          }
-          return result.data.getUserJobs;
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.query<Response>({
+      query: FETCH_USER_JOBS,
+      variables: { statuses, jobTypes, ids, page, pageSize, orderBy, direction },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.getUserJobs.success) {
+          throw new Error(data.getUserJobs.message);
+        }
+        return data.getUserJobs;
+      }),
+      catchError((error) => {
+        console.error('GraphQL query error:', error);
+        return throwError(() => new Error(error.message));
+      }),
+    );
   }
 
   retryJobs(ids: string[] = []) {
