@@ -67,7 +67,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
       this.jobService
-        .getUserJobs(['pending', 'running'], ['fetch_crypto_news', 'extract_crypto_news'], currentJobIds)
+        .getUserJobs(
+          ['pending', 'running'],
+          ['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news'],
+          currentJobIds,
+        )
         .subscribe((result) => {
           const jobs = result.jobs;
           jobs.forEach((job: Job) => {

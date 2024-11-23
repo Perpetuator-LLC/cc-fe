@@ -9,6 +9,7 @@ import { Apollo } from 'apollo-angular';
 export enum JobType {
   FETCH_CRYPTO_NEWS = 'fetch_crypto_news',
   EXTRACT_CRYPTO_NEWS = 'extract_crypto_news',
+  SUMMARIZE_CRYPTO_NEWS = 'summarize_crypto_news',
 }
 
 // // convert string to enum
@@ -28,6 +29,8 @@ export const jobTypeToString = (jobType: string) => {
       return 'Fetch Crypto News';
     case JobType.EXTRACT_CRYPTO_NEWS:
       return 'Extract Crypto News';
+    case JobType.SUMMARIZE_CRYPTO_NEWS:
+      return 'Summarize Crypto News';
     default:
       return '';
   }

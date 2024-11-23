@@ -167,20 +167,15 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   private summarizeNews(newsIds: number[], force = false) {
     this.subscriptions.add(
       this.cryptoNewsService.summarizeCryptoNews(newsIds, force).subscribe({
-        next: (data) => {
-          if (data.success) {
-            this.messageService.success(data.message);
-          } else {
-            this.messageService.error(data.message);
+        next: (result) => {
+          if (!result.job) {
+            this.messageService.error('Failed to summarize news data: No job returned');
+            return;
           }
+          this.jobStatusBar.addJob(result.job);
         },
-        error: (err: { message: string }) => {
-          this.messageService.error(`Failed to summarize news data: ${err.message}`);
-          this.getNews(); // reload partial data
-        },
-        complete: () => {
-          console.debug('News summarize complete');
-          this.getNews();
+        error: (error) => {
+          this.messageService.error(`Failed to summarize news data: ${error.message}`);
         },
       }),
     );

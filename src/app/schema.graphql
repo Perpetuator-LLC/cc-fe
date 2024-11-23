@@ -153,7 +153,7 @@ scalar JSONString
 type Mutation {
   fetchCryptoNewsData: SubmitJobData
   extractCryptoNewsData(ids: [Int]!): SubmitJobData
-  summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): GraphQLData
+  summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
   createCryptoArticleData(ids: [Int]!, teamId: ID!): CryptoArticleData
   updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
   updateCryptoArticleAudio(id: ID!): GraphQLData
