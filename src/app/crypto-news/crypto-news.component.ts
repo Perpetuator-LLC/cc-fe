@@ -19,8 +19,8 @@ import { TeamsService } from '../teams.service';
 import { TeamsResult } from '../teams-list/teams-list.component';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { CustomTooltipComponent } from '../custom-tooltip/custom-tooltip.component';
-import { JobStatusBarComponent } from './job-status-bar/job-status-bar.component';
 import { UserService } from '../user.service';
+import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 
 export interface CryptoNewsResult {
   id: string;
@@ -115,16 +115,21 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     this.subscriptions.add(
-      this.jobStatusBar.jobCompleted$.subscribe(() => {
-        this.getNews();
+      this.jobStatusBar.jobCompleted$.subscribe((job) => {
+        if (['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news'].includes(job.jobType)) {
+          this.getNews();
+        } else if (['create_crypto_article'].includes(job.jobType)) {
+          const newArticleUrl = `/crypto-article/${job.result}`;
+          this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
+        }
       }),
     );
   }
 
   fetchNews() {
     this.subscriptions.add(
-      this.cryptoNewsService.fetchCryptoNewsData().subscribe((result) => {
-        this.jobStatusBar.addJob(result.job);
+      this.cryptoNewsService.fetchCryptoNewsData().subscribe((data) => {
+        this.jobStatusBar.addJob(data.job);
       }),
     );
   }
@@ -139,11 +144,15 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
       this.cryptoNewsService.extractCryptoNews(newsIds).subscribe({
-        next: (result) => {
-          this.jobStatusBar.addJob(result.job);
+        next: (data) => {
+          if (!data.job) {
+            this.messageService.error('Failed to extract news: No job returned');
+            return;
+          }
+          this.jobStatusBar.addJob(data.job);
         },
         error: (error) => {
-          this.messageService.error(`Failed to extract news data: ${error.message}`);
+          this.messageService.error(`Failed to extract news: ${error.message}`);
         },
       }),
     );
@@ -167,12 +176,12 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   private summarizeNews(newsIds: number[], force = false) {
     this.subscriptions.add(
       this.cryptoNewsService.summarizeCryptoNews(newsIds, force).subscribe({
-        next: (result) => {
-          if (!result.job) {
+        next: (data) => {
+          if (!data.job) {
             this.messageService.error('Failed to summarize news data: No job returned');
             return;
           }
-          this.jobStatusBar.addJob(result.job);
+          this.jobStatusBar.addJob(data.job);
         },
         error: (error) => {
           this.messageService.error(`Failed to summarize news data: ${error.message}`);
@@ -196,14 +205,11 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.add(
       this.cryptoNewsService.createCryptoArticle(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
-          if (data.success) {
-            const newArticleUrl = `/crypto-article/${data.results.id}`;
-            this.messageService.success(data.message + ` Article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`);
-            // this.router.navigate(['/crypto-article', data.results.id]);
-            // console.log('Article Data:', data.results);
-          } else {
-            this.messageService.error(data.message);
+          if (!data.job) {
+            this.messageService.error('Failed to create article: No job returned');
+            return;
           }
+          this.jobStatusBar.addJob(data.job);
         },
         error: (err: { message: string }) => {
           this.messageService.error(err.message);

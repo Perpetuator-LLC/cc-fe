@@ -9,7 +9,7 @@ export interface NewMessage {
   type: 'error' | 'warning' | 'info' | 'success';
   text: string;
   dismissible?: boolean;
-  timeout?: number;
+  timeout?: number | null;
 }
 
 @Injectable({
@@ -19,19 +19,19 @@ export class MessageService {
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   messages$ = this.messagesSubject.asObservable();
 
-  error(text: string, timeout = undefined, dismissible = true) {
+  error(text: string, timeout: number | undefined | null = undefined, dismissible = true) {
     this.addMessage({ type: 'error', text, dismissible, timeout });
   }
 
-  warning(text: string, timeout = 8000, dismissible = true) {
+  warning(text: string, timeout: number | undefined | null = 8000, dismissible = true) {
     this.addMessage({ type: 'warning', text, dismissible, timeout });
   }
 
-  success(text: string, timeout = 5000, dismissible = false) {
+  success(text: string, timeout: number | undefined | null = 5000, dismissible = false) {
     this.addMessage({ type: 'success', text, dismissible, timeout });
   }
 
-  info(text: string, timeout = 3000, dismissible = false) {
+  info(text: string, timeout: number | undefined | null = 3000, dismissible = false) {
     this.addMessage({ type: 'info', text, dismissible, timeout });
   }
 

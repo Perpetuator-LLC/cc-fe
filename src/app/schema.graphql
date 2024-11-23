@@ -154,7 +154,7 @@ type Mutation {
   fetchCryptoNewsData: SubmitJobData
   extractCryptoNewsData(ids: [Int]!): SubmitJobData
   summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
-  createCryptoArticleData(ids: [Int]!, teamId: ID!): CryptoArticleData
+  createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
   updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
   updateCryptoArticleAudio(id: ID!): GraphQLData
   publishCryptoArticleAudio(id: ID!): GraphQLData

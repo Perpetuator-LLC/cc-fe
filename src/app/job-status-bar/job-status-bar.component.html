@@ -1,9 +1,7 @@
 @if (jobs.length > 0) {
   <div class="jobs-container">
-    <!--      <h2>Jobs</h2>-->
     <mat-list>
       @for (job of jobs; track job.id) {
-        <!--          <mat-list-item [matTooltip]="tooltipTemplate">-->
         <mat-list-item matTooltip="ID: {{ job.id }}" class="job-cards">
           <mat-card class="job-card {{ job.status }}">
             <mat-accordion>

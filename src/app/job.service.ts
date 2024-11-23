@@ -10,6 +10,7 @@ export enum JobType {
   FETCH_CRYPTO_NEWS = 'fetch_crypto_news',
   EXTRACT_CRYPTO_NEWS = 'extract_crypto_news',
   SUMMARIZE_CRYPTO_NEWS = 'summarize_crypto_news',
+  CREATE_CRYPTO_ARTICLE = 'create_crypto_article',
 }
 
 // // convert string to enum
@@ -31,6 +32,8 @@ export const jobTypeToString = (jobType: string) => {
       return 'Extract Crypto News';
     case JobType.SUMMARIZE_CRYPTO_NEWS:
       return 'Summarize Crypto News';
+    case JobType.CREATE_CRYPTO_ARTICLE:
+      return 'Create Crypto Article';
     default:
       return '';
   }

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Job, JobService, jobTypeToString } from '../../job.service';
 import { interval, Subject, Subscription } from 'rxjs';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -8,8 +7,9 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
-import { SidePanelAccordianData } from '../crypto-news.component';
-import { MessageService } from '../../message.service';
+import { Job, JobService, jobTypeToString } from '../job.service';
+import { MessageService } from '../message.service';
+import { SidePanelAccordianData } from '../crypto-news/crypto-news.component';
 
 @Component({
   selector: 'app-job-status-bar',
@@ -36,7 +36,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   private pollingSubscription: Subscription = new Subscription();
   jobCompleted$ = new Subject<Job>();
-  jobs: Job[] = [];
+  protected jobs: Job[] = [];
   constructor(
     private jobService: JobService,
     private messageService: MessageService,
@@ -69,7 +69,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
       this.jobService
         .getUserJobs(
           ['pending', 'running'],
-          ['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news'],
+          ['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news', 'create_crypto_article'],
           currentJobIds,
         )
         .subscribe((result) => {
@@ -81,13 +81,13 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
               this.messageService.success(`Job ${jobTypeToString(job.jobType)} completed`);
             }
           });
-          // now filter any completed jobs over 10s old
+          // now filter any completed jobs over X seconds old
           const now = new Date();
-          const tenSecondsAgo = new Date(now.getTime() - 10 * 1000); // 10 seconds ago
+          const xSecondsAgo = new Date(now.getTime() - 15 * 1000); // X seconds ago
           this.jobs = jobs.filter((job: Job) => {
             if (job.status === 'completed') {
               const updatedAt = new Date(job.updatedAt);
-              return updatedAt >= tenSecondsAgo;
+              return updatedAt >= xSecondsAgo;
             }
             return true;
           });
@@ -97,7 +97,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   }
 
   addJob(job: Job) {
-    this.jobs.push(job);
+    this.jobs = [job, ...this.jobs];
+    this.setupPolling();
   }
 
   // updateJob(updatedJob: Job) {
@@ -137,8 +138,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   }
 
   getPollingInterval(): number {
-    // 3s when there are active jobs, 10s when there are none
-    return this.hasActiveJobs() ? 3000 : 10000;
+    // 3s when there are active jobs, 8s when there are none
+    return this.hasActiveJobs() ? 3000 : 8000;
   }
 
   hasActiveJobs(): boolean {
