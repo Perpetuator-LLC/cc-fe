@@ -31,21 +31,21 @@ Check the last version:
 
 ```shell
 git tag --sort=-creatordate | head -n 3
-grep '"version":' ./package.json
+grep '"version":' ../package.json
 ```
  
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version" = "0.9.0"/' ./package.json
-grep '"version":' ./package.json
+sed -i '' 's/"version": ".*"/"version": "0.10.0"/' ../package.json
+grep '"version":' ../package.json
 ```
 
 Update the changelog by running the script in the back-end repository:
 
 ```shell
-cd ~/projects/capital-copilot-be
-python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.8.0' 'v0.9.0'
+cd ~/projects/capital-copilot-be-private
+python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.10.0' 'v0.9.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -53,9 +53,9 @@ Review and update the new changelog entry to make sure it is correct.
 Add the Git tag and push it to the repository.
 
 ```shell
-git commit -m "Bump version to 0.9.0"
+git commit -m "chore: bump version to 0.10.0"
 git push origin main
-git tag -a v0.9.0 -m "Adds new feature A and new feature B. Fixes bug C."
+git tag -a v0.10.0 -m "Adds new feature A and new feature B. Fixes bug C."
 git push origin v0.9.0
 ```
 

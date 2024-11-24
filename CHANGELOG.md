@@ -1,3 +1,22 @@
+# Changelog from v0.9.0 to v0.10.0
+
+This update brings a number of enhancements and fixes to the financial research web application. The main focus of this update is the integration of a new jobs infrastructure, which has been applied to various features such as the creation of crypto articles, extraction of news, adn summarization of news. User permissions have been improved, and the user interface has been refined with the addition of sorting and pagination to a new jobs table. Several bugs have also been addressed in this update.
+
+## Enhancements
+- Added a new feature for creating a chain of Jobs (e.g. one click to create new crypto articles).
+- Converted the creation of crypto articles, the extraction of news, and summarize news to use the jobs infrastructure.
+- Added Jobs page with table that has sorting functionality and pagination.
+- Added user permissions from Django user info and switched the user to use the base service.
+- Moved more Apollo calls to using base service for more consistent errors and reduced code duplication.
+- Added the Job Status Bar, job complete hook, and job polling.
+- Added tool generated schema.graphql from back-end schema to improve the front-end types.
+
+## Cleanups
+- Fixed an issue with the bottom sidenav where the mode over was not using the expanded the menu.
+- Addressed an issue with cookie consent local storage getting cleared after logged out.
+- Fixed issues with team detail user autocomplete, password change error messages, and reset password validation messages.
+
+
 # Changelog from v0.8.0 to v0.9.0
 
 This update brings a host of new features and improvements to the application. The user interface has been enhanced with the addition of a profile page, allowing users to update and view their information. Team functionality has been expanded, with the ability to add teams to articles, select teams during article generation, and display team members in a collapsed table format. A dialog for adding and removing owners has also been introduced. 
