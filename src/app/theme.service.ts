@@ -46,7 +46,10 @@ export class ThemeService implements OnDestroy {
 
   private loadThemeFromLocalStorage(): Theme {
     const storedTheme = localStorage.getItem('theme') as Theme;
-    return storedTheme || this.theme();
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme;
+    } // localStorage is empty or invalid, default to current theme
+    return this.theme();
   }
 
   setTheme(theme: Theme): void {

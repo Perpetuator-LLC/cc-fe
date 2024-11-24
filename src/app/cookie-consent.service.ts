@@ -65,7 +65,16 @@ export class CookieConsentService implements OnDestroy {
 
   private loadConsentFromLocalStorage(): CookieConsent | null {
     const storedConsent = localStorage.getItem('cookieConsent');
-    return storedConsent ? JSON.parse(storedConsent) : null;
+    if (!storedConsent) {
+      return null;
+    }
+    try {
+      return JSON.parse(storedConsent);
+    } catch (e) {
+      console.error('Invalid JSON stored in localStorage:', e);
+      localStorage.removeItem('cookieConsent');
+      return null;
+    }
   }
 
   private saveConsentToLocalStorage(consent: CookieConsent | null): void {

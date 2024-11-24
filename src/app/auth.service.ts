@@ -150,7 +150,7 @@ export class AuthService {
   }
 
   refreshToken(): Observable<Token | null> {
-    const refreshToken = this.getRefreshToken();
+    const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken || this.isRefreshTokenExpired()) {
       this.logout();
       return of(null);
@@ -223,6 +223,7 @@ export class AuthService {
   }
 
   public getToken(): string | null {
+    // Tokens are not parsed here, but are sent to the back-end and if invalid, logout is called and tokens are cleared
     return localStorage.getItem('id_token');
   }
 
@@ -239,19 +240,29 @@ export class AuthService {
 
   private isTokenExpired(): boolean {
     const expiration = localStorage.getItem('expires_at');
-    return expiration === null || expiration === undefined || new Date().getTime() >= JSON.parse(expiration);
+    if (expiration === null || expiration === undefined) {
+      return true;
+    }
+    try {
+      return new Date().getTime() >= JSON.parse(expiration);
+    } catch (e) {
+      console.error('Failed to parse expiration, invalid JSON:', e);
+      this.logout();
+    }
+    return false;
   }
 
   public isRefreshTokenExpired(): boolean {
     const refreshExpiration = localStorage.getItem('refresh_expires_at');
-    return (
-      refreshExpiration === null ||
-      refreshExpiration === undefined ||
-      new Date().getTime() >= JSON.parse(refreshExpiration)
-    );
-  }
-
-  private getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    if (refreshExpiration === null || refreshExpiration === undefined) {
+      return true;
+    }
+    try {
+      return new Date().getTime() >= JSON.parse(refreshExpiration);
+    } catch (e) {
+      console.error('Failed to parse refresh expiration, invalid JSON:', e);
+      this.logout();
+    }
+    return false;
   }
 }
