@@ -85,7 +85,7 @@ export class CryptoNewsService extends BaseService {
         if (!data.getCryptoNewsData.success) {
           throw new Error(data.getCryptoNewsData.message);
         }
-        return data.getCryptoNewsData || { success: false, message: 'No data available', results: [] };
+        return data.getCryptoNewsData;
       }),
       catchError((error) => {
         console.error('GraphQL query error:', error);
@@ -129,7 +129,7 @@ export class CryptoNewsService extends BaseService {
         if (!data.extractCryptoNewsData.success) {
           throw new Error(data.extractCryptoNewsData.message);
         }
-        return data.extractCryptoNewsData || { success: false, message: 'No data available', results: [] };
+        return data.extractCryptoNewsData;
       }),
     );
   }
@@ -212,6 +212,47 @@ export class CryptoNewsService extends BaseService {
           throw new Error(data.createCryptoArticleData.message);
         }
         return data.createCryptoArticleData;
+      }),
+    );
+  }
+
+  createCryptoArticleChain(newsIds: number[], teamId: number) {
+    const CREATE_CRYPTO_ARTICLE_CHAIN = gql`
+      mutation CreateCryptoArticleChain($newsIds: [ID!]!, $teamId: ID!) {
+        createCryptoArticleChain(newsIds: $newsIds, teamId: $teamId) {
+          success
+          message
+          jobs {
+            id
+            jobType
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      createCryptoArticleChain: {
+        success: boolean;
+        message: string;
+        jobs: Job[];
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: CREATE_CRYPTO_ARTICLE_CHAIN,
+      variables: { newsIds, teamId },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.createCryptoArticleChain.success) {
+          throw new Error(data.createCryptoArticleChain.message);
+        }
+        return data.createCryptoArticleChain;
       }),
     );
   }

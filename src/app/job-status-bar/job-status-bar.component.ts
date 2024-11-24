@@ -96,6 +96,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     );
   }
 
+  addJobs(jobs: Job[]) {
+    this.jobs = [...jobs, ...this.jobs];
+    this.setupPolling();
+  }
+
   addJob(job: Job) {
     this.jobs = [job, ...this.jobs];
     this.setupPolling();
