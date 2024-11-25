@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CryptoArticleService } from '../crypto-article.service';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatLine } from '@angular/material/core';
-import { DatePipe, SlicePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
@@ -61,8 +61,6 @@ export interface PublishCryptoArticleAudio {
   standalone: true,
   imports: [
     MatCard,
-    MatCardHeader,
-    MatCardTitle,
     MatFormField,
     MatLabel,
     FormsModule,
@@ -72,8 +70,6 @@ export interface PublishCryptoArticleAudio {
     MatList,
     MatListItem,
     MatLine,
-    RouterLink,
-    SlicePipe,
     MessageComponent,
     MatCardContent,
     DatePipe,
@@ -91,9 +87,9 @@ export class ArticleDetailComponent implements OnInit {
     date: '',
     audio: '',
     newsSummaries: [],
-    team: { id: 0, name: '', members: [] },
+    team: { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] },
   };
-  team: TeamsResult = { id: 0, name: '', members: [] };
+  team: TeamsResult = { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] };
   linkedArticles: CryptoNewsResult[] = [];
   updatedTitle = '';
   updatedContent = '';

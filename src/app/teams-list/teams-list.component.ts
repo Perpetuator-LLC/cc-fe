@@ -1,20 +1,13 @@
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { MatList, MatListItem } from '@angular/material/list';
 import { MatIcon } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
-import { MatLine } from '@angular/material/core';
-import { MatDivider } from '@angular/material/divider';
-import { DatePipe } from '@angular/common';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { TeamsService } from '../teams.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 
 export interface UserResult {
@@ -30,14 +23,11 @@ export interface MemberResult {
 export interface TeamsResult {
   id: number;
   name: string;
+  podcastUrl: string;
+  podcastEnabled: boolean;
+  podcastSlug: string;
   members: MemberResult[];
 }
-
-// export interface TeamsData {
-//   success: boolean;
-//   message: string;
-//   results: TeamsResult[];
-// }
 
 @Component({
   selector: 'app-teams-list',
@@ -47,22 +37,11 @@ export interface TeamsResult {
     MatCard,
     MatCardTitle,
     MatCardHeader,
-    MatList,
-    MatListItem,
     MatIcon,
-    RouterLink,
-    MatLine,
-    MatDivider,
-    MatFormField,
-    MatInput,
-    MatLabel,
     MessageComponent,
-    DatePipe,
     MatProgressSpinner,
-    MatTooltip,
     MatCardContent,
     MatCardActions,
-    MatLabel,
   ],
   templateUrl: './teams-list.component.html',
   styleUrls: ['./teams-list.component.scss'],

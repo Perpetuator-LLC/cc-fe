@@ -9,8 +9,7 @@ import { MessageComponent } from '../message/message.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatFormField } from '@angular/material/form-field';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
 import {
   MatCell,
   MatCellDef,
@@ -25,13 +24,14 @@ import {
 } from '@angular/material/table';
 import { UserAutocompleteComponent } from '../user-autocomplete/user-autocomplete.component';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MemberResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-team-detail',
@@ -45,9 +45,6 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     ReactiveFormsModule,
     MatFormField,
     MatButton,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
     MatTable,
     MatHeaderCell,
     MatCell,
@@ -57,7 +54,6 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     UserAutocompleteComponent,
     MatSelect,
     MatOption,
-    MatDivider,
     MatHeaderRow,
     MatRow,
     MatRowDef,
@@ -70,6 +66,8 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     MatCardHeader,
     MatCardTitle,
     MatCardContent,
+    MatFabButton,
+    MatCheckbox,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -81,6 +79,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
+  protected initialFormValues = {};
+  protected showPodcastFields = false;
+  protected isFormChanged = false;
 
   constructor(
     private fb: FormBuilder,
@@ -90,6 +91,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     private teamsService: TeamsService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
+    private clipboard: Clipboard,
   ) {}
 
   displayedColumns: string[] = ['username', 'role', 'actions'];
@@ -103,6 +105,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: ['', Validators.required],
+      podcastEnabled: [false],
+      podcastSlug: [''],
+      podcastUrl: [''],
       members: this.fb.array([]),
     });
 
@@ -126,7 +131,10 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
+          this.initialFormValues = this.teamForm.getRawValue();
+          this.showPodcastFields = team.podcastEnabled;
           this.loading = false;
+          this.checkIfFormChanged();
         },
         error: (err) => {
           this.loading = false;
@@ -142,6 +150,16 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+    this.subscriptions.add(
+      this.teamForm.valueChanges.subscribe(() => {
+        this.checkIfFormChanged();
+      }),
+    );
+  }
+
+  checkIfFormChanged() {
+    const currentFormValues = this.teamForm.getRawValue();
+    this.isFormChanged = JSON.stringify(currentFormValues) !== JSON.stringify(this.initialFormValues);
   }
 
   get members(): FormArray {
@@ -246,11 +264,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           this.setMembers(team.members);
         },
         error: (err) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: err.message,
-            dismissible: true,
-          });
+          this.messageService.error(`Failed to remove user: ${err.message}`);
         },
       }),
     );
@@ -263,27 +277,21 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   saveTeam() {
     this.messageService.clearMessages();
     if (this.teamForm.valid) {
-      const { id, name } = this.teamForm.getRawValue();
-      const saveObservable = id ? this.teamsService.updateTeam(id, name) : this.teamsService.createTeam(name);
+      const { id, name, podcastEnabled, podcastSlug } = this.teamForm.getRawValue();
+      const saveObservable = id
+        ? this.teamsService.updateTeam(id, name, podcastEnabled, podcastSlug)
+        : this.teamsService.createTeam(name);
 
       this.subscriptions.add(
         saveObservable.subscribe({
           next: () => {
-            this.messageService.addMessage({
-              type: 'success',
-              text: `Team ${id ? 'updated' : 'created'} successfully`,
-              dismissible: true,
-            });
+            this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
             if (!id) {
               this.router.navigate(['/teams']);
             }
           },
           error: (err) => {
-            this.messageService.addMessage({
-              type: 'error',
-              text: `Failed to ${id ? 'update' : 'create'} team: ${err.message}`,
-              dismissible: true,
-            });
+            this.messageService.error(`Failed to ${id ? 'update' : 'create'} team: ${err.message}`);
           },
         }),
       );
@@ -293,5 +301,18 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
+  }
+
+  copyPodcastUrl() {
+    const podcastUrl = this.teamForm.get('podcastUrl')?.value;
+    if (!podcastUrl || podcastUrl === '') {
+      this.messageService.error('Podcast URL is empty');
+      return;
+    }
+    if (this.clipboard.copy(podcastUrl)) {
+      this.messageService.success('Podcast URL copied to clipboard!');
+    } else {
+      this.messageService.error('Failed to copy podcast URL');
+    }
   }
 }

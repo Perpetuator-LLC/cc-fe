@@ -36,6 +36,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   private pollingSubscription: Subscription = new Subscription();
   jobCompleted$ = new Subject<Job>();
+  jobFailed$ = new Subject<Job>();
   protected jobs: Job[] = [];
   constructor(
     private jobService: JobService,
@@ -76,9 +77,16 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           const jobs = result.jobs;
           jobs.forEach((job: Job) => {
             const existingJob = this.jobs.find((j) => j.id === job.id);
-            if (existingJob && existingJob.status !== job.status && job.status === 'completed') {
+            const jobStatusChanged = existingJob !== undefined && existingJob.status !== job.status;
+            if (!jobStatusChanged) {
+              return;
+            }
+            if (job.status === 'completed') {
               this.jobCompleted$.next(job);
-              this.messageService.success(`Job ${jobTypeToString(job.jobType)} completed`);
+              this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
+            } else if (job.status === 'failed') {
+              this.jobFailed$.next(job);
+              this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
             }
           });
           // now filter any completed jobs over X seconds old

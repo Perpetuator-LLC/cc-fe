@@ -23,33 +23,35 @@
         </mat-select>
       </mat-form-field>
       <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="extractSelectedNews()"
-        [disabled]="selectedNews.size === 0"
-      >
-        Retrieve
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="summarizeSelected()"
-        [disabled]="selectedNews.size === 0"
-      >
-        Summarize
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="createArticleFromSelected()"
-        [disabled]="selectedNews.size === 0"
-      >
-        Create Article
-      </button>
+      @if (showMicroJobButtons) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="extractSelectedNews()"
+          [disabled]="selectedNews.size === 0"
+        >
+          Retrieve (Task)
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="summarizeSelected()"
+          [disabled]="selectedNews.size === 0"
+        >
+          Summarize (Task)
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="createArticleFromSelected()"
+          [disabled]="selectedNews.size === 0"
+        >
+          Create Article (Task)
+        </button>
+      }
       <button
         mat-flat-button
         color="primary"
@@ -57,7 +59,7 @@
         (click)="createArticleChainFromSelected()"
         [disabled]="selectedNews.size === 0"
       >
-        Create Article Chain
+        Create Article
       </button>
       <br />
       <mat-form-field appearance="outline" class="filter-form-field">

@@ -85,6 +85,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
+  protected showMicroJobButtons = false;
 
   constructor(
     private cryptoNewsService: CryptoNewsService,
@@ -122,6 +123,11 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
           const newArticleUrl = `/crypto-article/${job.result}`;
           this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
         }
+      }),
+    );
+    this.subscriptions.add(
+      this.jobStatusBar.jobFailed$.subscribe(() => {
+        this.showMicroJobButtons = true;
       }),
     );
   }

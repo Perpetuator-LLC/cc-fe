@@ -1,3 +1,17 @@
+# Changelog from v0.10.0 to v0.10.1
+
+This update primarily focuses on improving the stability of the application by addressing an issue related to invalid local storage values. 
+
+## Enhancements
+No new enhancements were introduced in this version.
+
+## Fixes
+- Invalid local storage values are now handled properly through a sanitization process, ensuring the application's performance and reliability.
+
+## Cleanups
+- Version bump to v0.10.1.
+
+
 # Changelog from v0.9.0 to v0.10.0
 
 This update brings a number of enhancements and fixes to the financial research web application. The main focus of this update is the integration of a new jobs infrastructure, which has been applied to various features such as the creation of crypto articles, extraction of news, adn summarization of news. User permissions have been improved, and the user interface has been refined with the addition of sorting and pagination to a new jobs table. Several bugs have also been addressed in this update.

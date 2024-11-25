@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { TeamsResult } from './teams-list/teams-list.component';
-import { catchError, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { BaseService } from './base.service';
 
 export interface User {
   id: string;
@@ -12,8 +13,10 @@ export interface User {
 @Injectable({
   providedIn: 'root',
 })
-export class TeamsService {
-  constructor(private apollo: Apollo) {}
+export class TeamsService extends BaseService {
+  constructor(protected override apollo: Apollo) {
+    super(apollo);
+  }
 
   createTeam(name: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const CREATE_TEAM = gql`
@@ -44,41 +47,36 @@ export class TeamsService {
       };
     }
 
-    // interface CreateTeamResponse {
-    //   data?: CreateTeamData;
-    //   errors?: { message: string }[];
-    // }
-
-    return this.apollo
-      .mutate<CreateTeamData>({
-        mutation: CREATE_TEAM,
-        variables: { name },
-      })
-      .pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.createTeam.success) {
-            throw new Error(result.data?.createTeam.message);
-          }
-          return result.data.createTeam;
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<CreateTeamData>({
+      mutation: CREATE_TEAM,
+      variables: { name },
+    }).pipe(
+      map((data) => {
+        if (!data.createTeam.success) {
+          throw new Error(data.createTeam.message);
+        }
+        return data.createTeam;
+      }),
+    );
   }
 
-  updateTeam(id: string, name: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
+  updateTeam(
+    id: string,
+    name: string | null = null,
+    podcastEnabled: boolean | null = null,
+    podcastSlug: string | null = null,
+  ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const UPDATE_TEAM = gql`
-      mutation UpdateTeam($id: ID!, $name: String!) {
-        updateTeam(id: $id, name: $name) {
+      mutation UpdateTeam($id: ID!, $name: String!, $podcastEnabled: Boolean, $podcastSlug: String) {
+        updateTeam(id: $id, name: $name, podcastEnabled: $podcastEnabled, podcastSlug: $podcastSlug) {
           success
           message
           team {
             id
             name
+            podcastEnabled
+            podcastSlug
+            podcastUrl
             members {
               user {
                 id
@@ -104,25 +102,17 @@ export class TeamsService {
     //   errors?: { message: string }[];
     // }
 
-    return this.apollo
-      .mutate<UpdateTeamData>({
-        mutation: UPDATE_TEAM,
-        variables: { id, name },
-      })
-      .pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.updateTeam.success) {
-            throw new Error(result.data?.updateTeam.message);
-          }
-          return result.data.updateTeam;
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<UpdateTeamData>({
+      mutation: UPDATE_TEAM,
+      variables: { id, name, podcastEnabled, podcastSlug },
+    }).pipe(
+      map((data) => {
+        if (!data.updateTeam.success) {
+          throw new Error(data.updateTeam.message);
+        }
+        return data.updateTeam;
+      }),
+    );
   }
 
   getTeamById(id: string): Observable<TeamsResult> {
@@ -131,6 +121,9 @@ export class TeamsService {
         team(id: $id) {
           id
           name
+          podcastEnabled
+          podcastSlug
+          podcastUrl
           members {
             user {
               id
@@ -146,31 +139,18 @@ export class TeamsService {
       team: TeamsResult;
     }
 
-    // interface GetTeamByIdResponse {
-    //   data?: GetTeamByIdData;
-    //   errors?: { message: string }[];
-    // }
-
-    return this.apollo
-      .watchQuery<GetTeamByIdData>({
-        query: GET_TEAM_BY_ID,
-        variables: { id },
-        fetchPolicy: 'network-only',
-      })
-      .valueChanges.pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.team) {
-            throw new Error('Team data is missing');
-          }
-          return result.data.team;
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.watchQuery<GetTeamByIdData>({
+      query: GET_TEAM_BY_ID,
+      variables: { id },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.team) {
+          throw new Error('Team data is missing');
+        }
+        return data.team;
+      }),
+    );
   }
 
   getMyTeams(): Observable<TeamsResult[]> {
@@ -194,25 +174,17 @@ export class TeamsService {
       myTeams: TeamsResult[];
     }
 
-    return this.apollo
-      .watchQuery<GetMyTeamsData>({
-        query: GET_MY_TEAMS,
-        fetchPolicy: 'network-only',
-      })
-      .valueChanges.pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.myTeams) {
-            throw new Error('Teams data is missing');
-          }
-          return result.data.myTeams;
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.watchQuery<GetMyTeamsData>({
+      query: GET_MY_TEAMS,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.myTeams) {
+          throw new Error('Teams data is missing');
+        }
+        return data.myTeams;
+      }),
+    );
   }
 
   upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {
@@ -244,25 +216,17 @@ export class TeamsService {
       };
     }
 
-    return this.apollo
-      .mutate<UpsertUserToTeamData>({
-        mutation: UPSERT_USER_TO_TEAM,
-        variables: { teamId, userId, role },
-      })
-      .pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.upsertUserToTeam.success) {
-            throw new Error(result.data?.upsertUserToTeam.message);
-          }
-          return result.data.upsertUserToTeam.team;
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<UpsertUserToTeamData>({
+      mutation: UPSERT_USER_TO_TEAM,
+      variables: { teamId, userId, role },
+    }).pipe(
+      map((data) => {
+        if (!data.upsertUserToTeam.success) {
+          throw new Error(data.upsertUserToTeam.message);
+        }
+        return data.upsertUserToTeam.team;
+      }),
+    );
   }
 
   removeUserFromTeam(teamId: string, userId: string): Observable<TeamsResult> {
@@ -294,25 +258,17 @@ export class TeamsService {
       };
     }
 
-    return this.apollo
-      .mutate<RemoveUserFromTeamData>({
-        mutation: REMOVE_USER_FROM_TEAM,
-        variables: { teamId, userId },
-      })
-      .pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.removeUserFromTeam.success) {
-            throw new Error(result.data?.removeUserFromTeam.message);
-          }
-          return result.data.removeUserFromTeam.team;
-        }),
-        catchError((error) => {
-          console.error('GraphQL mutation error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<RemoveUserFromTeamData>({
+      mutation: REMOVE_USER_FROM_TEAM,
+      variables: { teamId, userId },
+    }).pipe(
+      map((data) => {
+        if (!data.removeUserFromTeam.success) {
+          throw new Error(data.removeUserFromTeam.message);
+        }
+        return data.removeUserFromTeam.team;
+      }),
+    );
   }
 
   getAllUsers(): Observable<User[]> {
@@ -337,23 +293,15 @@ export class TeamsService {
       };
     }
 
-    return this.apollo
-      .query<GetAllUsersData>({
-        query: GET_ALL_USERS,
-      })
-      .pipe(
-        map((result) => {
-          if (result.errors) {
-            throw new Error(result.errors.map((e) => e.message).join(', '));
-          } else if (!result.data?.getAllUsers.success) {
-            throw new Error(result.data?.getAllUsers.message);
-          }
-          return result.data.getAllUsers.results;
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.query<GetAllUsersData>({
+      query: GET_ALL_USERS,
+    }).pipe(
+      map((data) => {
+        if (!data.getAllUsers.success) {
+          throw new Error(data.getAllUsers.message);
+        }
+        return data.getAllUsers.results;
+      }),
+    );
   }
 }

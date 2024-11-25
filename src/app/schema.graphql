@@ -49,6 +49,7 @@ type CryptoArticleResult {
   content: String
   date: DateTime
   audio: String
+  audioUrl: String
   team: TeamType
 }
 
@@ -56,6 +57,9 @@ type TeamType {
   id: ID
   name: String
   members: [TeamMembershipType]
+  podcastUrl: String
+  podcastEnabled: Boolean
+  podcastSlug: String
 }
 
 type TeamMembershipType {
@@ -165,7 +169,7 @@ type Mutation {
   updateUserDetails(email: String!, username: String!): UpdateUserDetails
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, name: String!): UpdateTeam
+  updateTeam(id: ID!, name: String, podcastEnabled: Boolean, podcastSlug: String): UpdateTeam
   destroyTeam(teamId: ID!): DestroyTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam

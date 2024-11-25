@@ -18,7 +18,22 @@
         <mat-label>Team Name</mat-label>
         <input matInput formControlName="name" />
       </mat-form-field>
-      <button mat-flat-button color="primary" type="submit">Update Name</button>
+      <mat-checkbox formControlName="podcastEnabled">Enable Podcast</mat-checkbox>
+    </div>
+    @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Podcast Slug</mat-label>
+          <input matInput formControlName="podcastSlug" />
+        </mat-form-field>
+        <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
+          <mat-icon>content_copy</mat-icon>
+          Copy Team Podcast (RSS) URL
+        </button>
+      </div>
+    }
+    <div class="member-row">
+      <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Update Team Settings</button>
     </div>
   </form>
 
