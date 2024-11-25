@@ -1,3 +1,16 @@
+# Changelog from v0.10.1 to v0.11.0
+
+In this update, we have introduced the concept of podcast feeds which are owned by teams and can be subscribed to by
+users. This feature allows audio generation to automatically be served to users who have subscribed to a podcast feed.
+
+## Enhancements
+- Podcast RSS Feed Support: Added the ability to create podcast feeds that are owned by teams and can be subscribed to
+  by users.
+
+## Cleanups
+No cleanup changes were made in this update.
+
+
 # Changelog from v0.10.0 to v0.10.1
 
 This update primarily focuses on improving the stability of the application by addressing an issue related to invalid local storage values. 

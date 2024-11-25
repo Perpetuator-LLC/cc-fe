@@ -37,7 +37,7 @@ grep '"version":' ../package.json
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.10.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.11.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -45,7 +45,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be-private
-python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.10.0' 'v0.9.0'
+python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.10.1' 'v0.11.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
