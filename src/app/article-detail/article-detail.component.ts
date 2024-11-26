@@ -17,6 +17,7 @@ import { ToolbarService } from '../toolbar.service';
 import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TeamsResult } from '../teams-list/teams-list.component';
+import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 
 export interface CryptoArticleResult {
   id: string;
@@ -74,6 +75,7 @@ export interface PublishCryptoArticleAudio {
     MatCardContent,
     DatePipe,
     MatTooltip,
+    JobStatusBarComponent,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',

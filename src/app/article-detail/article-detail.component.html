@@ -1,7 +1,11 @@
 <ng-template #toolbarTemplate>
   <h1>Crypto Article Details</h1>
 </ng-template>
+
 <app-message></app-message>
+
+<app-job-status-bar />
+
 <mat-card>
   <mat-card-content class="form-container">
     @if (team && team.id === 1 && audioSrc) {

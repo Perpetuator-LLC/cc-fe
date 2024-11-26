@@ -23,6 +23,7 @@
                 </mat-expansion-panel-header>
                 @if (job.status === 'failed' || job.status === 'pending') {
                   <button mat-flat-button color="primary" type="button" (click)="retryJob(job.id)">Retry</button>
+                  <button mat-flat-button color="primary" type="button" (click)="deleteJob(job.id)">Delete</button>
                 }
                 @if (job.error) {
                   <p class="error">Error: {{ job.error }}</p>

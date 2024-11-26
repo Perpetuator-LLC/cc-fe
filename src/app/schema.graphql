@@ -161,10 +161,11 @@ type Mutation {
   createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
   createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleChain
   updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
-  updateCryptoArticleAudio(id: ID!): GraphQLData
+  updateCryptoArticleAudio(id: ID!): UpdateCryptoArticleAudio
   publishCryptoArticleAudio(id: ID!): GraphQLData
   updateUserSetting(key: String!, value: String!): GraphQLData
   retryJobs(ids: [UUID]!): RetryJobs
+  deleteJobs(ids: [UUID]!): DeleteJobs
   updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
   updateUserDetails(email: String!, username: String!): UpdateUserDetails
   changePassword(password: String!): ChangePassword
@@ -191,12 +192,24 @@ type CreateCryptoArticleChain {
   jobs: [JobData]
 }
 
+type UpdateCryptoArticleAudio {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
 type GraphQLData {
   success: Boolean
   message: String
 }
 
 type RetryJobs {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type DeleteJobs {
   success: Boolean
   message: String
   jobs: [JobData]

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import gql from 'graphql-tag';
-import { catchError, map } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { Apollo } from 'apollo-angular';
 
@@ -11,29 +10,21 @@ export enum JobType {
   EXTRACT_CRYPTO_NEWS = 'extract_crypto_news',
   SUMMARIZE_CRYPTO_NEWS = 'summarize_crypto_news',
   CREATE_CRYPTO_ARTICLE = 'create_crypto_article',
+  UPDATE_CRYPTO_ARTICLE_AUDIO = 'update_crypto_article_audio',
 }
 
-// // convert string to enum
-// export const stringToJobType = (jobType: string) => {
-//   switch (jobType) {
-//     case 'fetch_crypto_news':
-//       return JobType.FETCH_CRYPTO_NEWS;
-//     default:
-//       return null;
-//   }
-// };
-//
-// convert the enum to a human-readable string
 export const jobTypeToString = (jobType: string) => {
   switch (jobType) {
     case JobType.FETCH_CRYPTO_NEWS:
       return 'Fetch Crypto News';
     case JobType.EXTRACT_CRYPTO_NEWS:
-      return 'Extract Crypto News';
+      return 'Extract News';
     case JobType.SUMMARIZE_CRYPTO_NEWS:
-      return 'Summarize Crypto News';
+      return 'Summarize News';
     case JobType.CREATE_CRYPTO_ARTICLE:
-      return 'Create Crypto Article';
+      return 'Create Article';
+    case JobType.UPDATE_CRYPTO_ARTICLE_AUDIO:
+      return 'Update Article Audio';
     default:
       return '';
   }
@@ -137,10 +128,6 @@ export class JobService extends BaseService {
         }
         return data.getUserJobs;
       }),
-      catchError((error) => {
-        console.error('GraphQL query error:', error);
-        return throwError(() => new Error(error.message));
-      }),
     );
   }
 
@@ -163,7 +150,7 @@ export class JobService extends BaseService {
       }
     `;
 
-    interface RetryJobsResponse {
+    interface Response {
       retryJobs: {
         success: boolean;
         message: string;
@@ -171,7 +158,7 @@ export class JobService extends BaseService {
       };
     }
 
-    return this.mutate<RetryJobsResponse>({
+    return this.mutate<Response>({
       mutation: RETRY_JOBS,
       variables: { ids },
       fetchPolicy: 'network-only',
@@ -180,7 +167,38 @@ export class JobService extends BaseService {
         if (!data.retryJobs.success) {
           throw new Error(data.retryJobs.message);
         }
-        return data.retryJobs.jobs;
+        return data.retryJobs;
+      }),
+    );
+  }
+
+  deleteJobs(ids: string[] = []) {
+    const GQL = gql`
+      mutation DeleteJobs($ids: [UUID]!) {
+        deleteJobs(ids: $ids) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      deleteJobs: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { ids },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.deleteJobs.success) {
+          throw new Error(data.deleteJobs.message);
+        }
+        return data.deleteJobs;
       }),
     );
   }

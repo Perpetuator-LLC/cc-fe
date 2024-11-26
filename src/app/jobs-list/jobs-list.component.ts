@@ -113,8 +113,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
   retryJob(id: string) {
     this.subscriptions.add(
       this.jobService.retryJobs([id]).subscribe({
-        next: (jobs: Job[]) => {
-          this.jobs = [...jobs, ...this.jobs.filter((job) => job.id !== id)];
+        next: (data) => {
+          this.jobs = [...data.jobs, ...this.jobs.filter((job) => job.id !== id)];
           this.dataSource.data = this.jobs;
         },
         error: (err: { message: string }) => {

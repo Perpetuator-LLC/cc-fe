@@ -7,7 +7,7 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
-import { Job, JobService, jobTypeToString } from '../job.service';
+import { Job, JobService, JobType, jobTypeToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../crypto-news/crypto-news.component';
 
@@ -70,7 +70,13 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
       this.jobService
         .getUserJobs(
           ['pending', 'running'],
-          ['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news', 'create_crypto_article'],
+          [
+            JobType.SUMMARIZE_CRYPTO_NEWS,
+            JobType.FETCH_CRYPTO_NEWS,
+            JobType.EXTRACT_CRYPTO_NEWS,
+            JobType.CREATE_CRYPTO_ARTICLE,
+            JobType.UPDATE_CRYPTO_ARTICLE_AUDIO,
+          ],
           currentJobIds,
         )
         .subscribe((result) => {
@@ -121,11 +127,25 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   //   }
   // }
 
+  deleteJob(id: string) {
+    this.subscriptions.add(
+      this.jobService.deleteJobs([id]).subscribe({
+        next: () => {
+          this.jobs = this.jobs.filter((job) => job.id !== id);
+          this.messageService.success('Job deleted.');
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to delete job: ${err.message}`);
+        },
+      }),
+    );
+  }
+
   retryJob(id: string) {
     this.subscriptions.add(
       this.jobService.retryJobs([id]).subscribe({
-        next: (jobs: Job[]) => {
-          this.jobs = [...jobs, ...this.jobs.filter((job) => job.id !== id)];
+        next: (data) => {
+          this.jobs = [...data.jobs, ...this.jobs.filter((job) => job.id !== id)];
         },
         error: (err: { message: string }) => {
           console.error(`Failed to retry job: ${err.message}`);

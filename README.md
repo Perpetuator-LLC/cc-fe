@@ -5,37 +5,41 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
-- [ ] On news list update filter is no longer applied
-- [ ] Make `npm run generate` work to convert schema to types
-- [ ] Go make sure that all subscriptions are unsubscribed
-- [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
-- [ ] Replace all messages with new messaging infrastructure and remove clears
-- [ ] Search for throwError or .apollo. and use new Apollo
-- [ ] RSS Podcast feed
-  - [ ] Add to Apple
-  - [ ] Add to Spotify
-  - [ ] Add to Google
-- [ ] Add intro, outro, and prompt to Team
-- [ ] Add multiple channel publishing on TG to team
-- [ ] Add a podcast page
-- [ ] Publish debounce
-- [ ] After job updates reload content or control subcomponent rerender
-- [ ] Add Job Table with URL query params that update as table is filtered
-- [ ] Add job status as banner component with pagination
-- [ ] Move all news summary error handling to news summary
-- [ ] Add job scheduling with time based jobs
+## Fixes
 
-- [ ] Add team to article detail page
-- [ ] On Article list page add a team filter
-- [ ] Paginate Jobs
+- [ ] Cancel Pending Jobs
+- [ ] Publish & email debounce
+- [ ] On news list update filter is no longer applied
 - [ ] Paginate Articles
+- [ ] Audio generation to jobs infra (pass in article ID)
 - [ ] Allow user to remove self from team
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
+  - [ ] Disable team name editing and podcast control if not owner
 - [ ] Disable trash icons if not owner and not self
-- [ ] Add delete account 
+- [ ] Add delete account
 - [ ] Add delete team
-- [ ] Code only (friends) invites, build graph of users and their invites
 
+## Refactoring
+
+- [ ] Go make sure that all subscriptions are unsubscribed
+- [ ] Replace all messages with new messaging infrastructure and remove clears
+- [ ] Search for throwError or .apollo. and use new Apollo
+- [ ] Add Job Table with URL query params that update as table is filtered
+- [ ] Move all news summary error handling to news summary function instead of returning Blocked
+- [ ] Add job scheduling with time based jobs
+
+## Ideal Enhancements
+
+- [ ] Add intro, outro, and prompt to Team
+- [ ] Add multiple channel publishing on TG to team
+- [ ] Add team to article detail page
+- [ ] On Article list page add a team filter
+
+## Possible Enhancements
+
+- [ ] Code only (friends) invites, build graph of users and their invites
+- [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
+- [ ] Make `npm run generate` work to convert schema to types, or find a way to use them from the schema directly!?
 - [ ] Add foul language check for names, and articles?
 - [ ] Add ElevenLabs API Key to team
 - [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
@@ -57,6 +61,19 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 ```
 - [ ] Determine if Telegram has monitized API
 
+## Testing
+
+- [x] RSS Podcast feed
+  - [ ] Add to Apple
+  - [ ] Add to Spotify
+  - [ ] Add to Google
+
+## Done
+
+- [x] Add a podcast page (added to team page)
+- [x] After job updates reload content or control subcomponent rerender
+- [x] Add job status as banner component
+- [x] Paginate Jobs
 - [x] Create existing user error is not displayed
 - [x] Create user with existing email is allowed, need to block
 - [x] Format register
@@ -100,6 +117,11 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 [PROMT.md](notes%2FPROMT.md)
 
 # TODO: Finance
+- [ ] Watchlists
+  - [ ] Auto add on view
+  - [ ] Collaboration on watchlists, and due diligence
+  - [ ] Alert on watchlist, TSLA crossed 200 day moving average and this has a 70% win rate
+  - [ ] This should feel like they just got alerted "You looked at TSLA and it just...", but use normal watchlist alerts
 - [x] Squeeze Indicator
   - [x] Momentum Histogram
   - [x] Setting Up Squeeze Indicator
@@ -148,4 +170,4 @@ Pot odds on dashboard
   - If they suggest AI solutions on their own platform, they can make money off of it.
 
 # TODO After Alpha
-- [ ] Look at DXCharts
+- [ ] Look at DXCharts or the new Apache one!
