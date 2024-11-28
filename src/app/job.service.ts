@@ -132,7 +132,7 @@ export class JobService extends BaseService {
   }
 
   retryJobs(ids: string[] = []) {
-    const RETRY_JOBS = gql`
+    const GQL = gql`
       mutation RetryJobs($ids: [UUID]!) {
         retryJobs(ids: $ids) {
           success
@@ -159,7 +159,7 @@ export class JobService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: RETRY_JOBS,
+      mutation: GQL,
       variables: { ids },
       fetchPolicy: 'network-only',
     }).pipe(

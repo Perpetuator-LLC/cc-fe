@@ -10,8 +10,8 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Cancel Pending Jobs
 - [ ] Publish & email debounce
 - [ ] On news list update filter is no longer applied
-- [ ] Paginate Articles
-- [ ] Audio generation to jobs infra (pass in article ID)
+- [x] Paginate Articles
+- [x] Audio generation to jobs infra (pass in article ID)
 - [ ] Allow user to remove self from team
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
   - [ ] Disable team name editing and podcast control if not owner

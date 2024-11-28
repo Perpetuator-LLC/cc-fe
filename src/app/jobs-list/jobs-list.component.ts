@@ -60,6 +60,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   sortDirection = 'DESC';
   sortActive = 'createdAt';
 
+  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
@@ -76,13 +77,6 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.loadJobs();
   }
 
-  sortChange(sortState: Sort) {
-    console.log(sortState);
-    this.sortDirection = sortState.direction.toUpperCase();
-    this.sortActive = sortState.active;
-    this.loadJobs();
-  }
-
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
@@ -92,16 +86,23 @@ export class JobsListComponent implements OnInit, OnDestroy {
       this.jobService
         .getUserJobs([], [], [], this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
         .subscribe({
-          next: (result) => {
-            this.jobs = result.jobs;
+          next: (data) => {
+            this.jobs = data.jobs;
             this.dataSource.data = this.jobs;
-            this.totalJobs = result.totalRecords;
+            this.totalJobs = data.totalRecords;
           },
           error: (error) => {
             this.messageService.error('Failed to load jobs: ' + error.toString());
           },
         }),
     );
+  }
+
+  sortChange(sortState: Sort) {
+    console.log(sortState);
+    this.sortDirection = sortState.direction.toUpperCase();
+    this.sortActive = sortState.active;
+    this.loadJobs();
   }
 
   onPageChange(event: PageEvent) {

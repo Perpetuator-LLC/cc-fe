@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import {
-  CryptoArticleData,
-  CryptoArticlesData,
   PublishCryptoArticleAudio,
   UpdateCryptoArticleAudio,
   UpdateCryptoArticleData,
@@ -11,6 +9,8 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { MessageService } from './message.service';
 import { BaseService } from './base.service';
+import { TeamsResult } from './teams-list/teams-list.component';
+import { CryptoNewsResult } from './crypto-news/crypto-news.component';
 
 export interface UpdateCryptoArticleAudioResponse {
   errors?: [{ message: string }];
@@ -22,9 +22,32 @@ export interface PublishCryptoArticleAudioResponse {
   data?: { publishCryptoArticleAudio: PublishCryptoArticleAudio };
 }
 
-export interface UpdateCryptoArticleResponse {
-  errors?: [{ message: string }];
-  data?: { updateCryptoArticleData: UpdateCryptoArticleData };
+export interface Article {
+  id: string;
+  date: string;
+  title: string;
+  content: string;
+  audio: string;
+  newsSummaries: CryptoNewsResult[];
+  team: TeamsResult;
+  // newsSummaries: CryptoNewsSummary[];
+}
+
+export interface CryptoArticlesData {
+  success: boolean;
+  message: string;
+  totalRecords: number;
+  totalPages: number;
+  currentPage: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  articles: Article[];
+}
+
+export interface CryptoArticleData {
+  success: boolean;
+  message: string;
+  results: Article;
 }
 
 export interface CryptoArticlesResponse {
@@ -48,13 +71,18 @@ export class CryptoArticleService extends BaseService {
     super(apollo);
   }
 
-  getCryptoArticles(orderBy = 'date', direction = 'DESC') {
-    const GET_CRYPTO_ARTICLES_DATA = gql`
-      query GetCryptoArticlesData($orderBy: String!, $direction: SortDirection!) {
-        getCryptoArticlesData(orderBy: $orderBy, direction: $direction) {
+  getCryptoArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC') {
+    const GQL = gql`
+      query GetCryptoArticlesData($page: Int!, $pageSize: Int!, $orderBy: String!, $direction: SortDirection!) {
+        getCryptoArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
           success
           message
-          results {
+          totalRecords
+          totalPages
+          currentPage
+          hasNext
+          hasPrevious
+          articles {
             id
             date
             team {
@@ -74,19 +102,19 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      getCryptoArticlesData: CryptoArticlesData;
+      getCryptoArticles: CryptoArticlesData;
     }
 
     return this.query<Response>({
-      query: GET_CRYPTO_ARTICLES_DATA,
-      variables: { orderBy, direction },
+      query: GQL,
+      variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getCryptoArticlesData.success) {
-          throw new Error(data.getCryptoArticlesData.message);
+        if (!data.getCryptoArticles.success) {
+          throw new Error(data.getCryptoArticles.message);
         }
-        return data.getCryptoArticlesData || { success: false, message: 'No data available', results: [] };
+        return data.getCryptoArticles;
       }),
       catchError((error) => {
         console.error('GraphQL query error:', error);
@@ -97,7 +125,7 @@ export class CryptoArticleService extends BaseService {
 
   getCryptoArticleById(id: string | null) {
     if (id === null) return throwError(() => new Error('Article ID is required'));
-    const GET_CRYPTO_ARTICLE_DATA = gql`
+    const GQL = gql`
       query GetCryptoArticleData($id: ID!) {
         getCryptoArticleData(id: $id) {
           success
@@ -135,7 +163,7 @@ export class CryptoArticleService extends BaseService {
     }
 
     return this.query<Response>({
-      query: GET_CRYPTO_ARTICLE_DATA,
+      query: GQL,
       variables: { id },
       fetchPolicy: 'network-only',
     }).pipe(
@@ -144,10 +172,6 @@ export class CryptoArticleService extends BaseService {
           throw new Error(data.getCryptoArticleData.message);
         }
         return data.getCryptoArticleData;
-      }),
-      catchError((error) => {
-        console.error('GraphQL query error:', error);
-        return throwError(() => new Error(error.message));
       }),
     );
   }
@@ -167,41 +191,35 @@ export class CryptoArticleService extends BaseService {
       .replace(/\n/g, '\\n') // Escape new lines
       .replace(/\r/g, '\\r'); // Escape carriage returns
 
-    const UPDATE_CRYPTO_ARTICLES_DATA = gql`
-      mutation UpdateCryptoArticlesData {
-        updateCryptoArticleData(id: "${id}", title: "${updatedTitle}", content: "${escapedContent}") {
+    const GQL = gql`
+      mutation UpdateCryptoArticlesData($id: ID!, $title: String!, $content: String!) {
+        updateCryptoArticleData(id: $id, title: $title, content: $content) {
           success
           message
         }
       }
     `;
 
-    return this.apollo
-      .mutate<UpdateCryptoArticleResponse>({
-        mutation: UPDATE_CRYPTO_ARTICLES_DATA,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.updateCryptoArticleData.success) {
-            throw new Error(result.data?.updateCryptoArticleData.message);
-          }
-          this.messageService.addMessage({
-            type: 'success',
-            text: 'Crypto article updated successfully.',
-            dismissible: true,
-          });
-          return result.data?.updateCryptoArticleData || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    interface Response {
+      updateCryptoArticle: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { id, title: updatedTitle, content: escapedContent },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.updateCryptoArticle.success) {
+          throw new Error(data.updateCryptoArticle.message);
+        }
+        this.messageService.success('Crypto article updated successfully.');
+        return data.updateCryptoArticle;
+      }),
+    );
   }
 
   generateAudio(id: string): Observable<UpdateCryptoArticleAudio> {

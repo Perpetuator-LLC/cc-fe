@@ -1,32 +1,62 @@
 <ng-template #toolbarTemplate>
   <h1>Crypto Articles</h1>
 </ng-template>
+
 <app-message></app-message>
+
 <mat-card>
-  @if (loading) {
+  <div [hidden]="!loading">
     <mat-spinner></mat-spinner>
-  } @else if (articles.length === 0) {
+  </div>
+
+  <div [hidden]="articles.length !== 0">
     <h1>No articles found.</h1>
     <mat-divider></mat-divider>
     <h3>
       If you would like to create an article, then visit the <a routerLink="/crypto-news">Crypto News</a> page. From
       within the Crypto News page, you can select news pages and create articles from them.
     </h3>
-  } @else {
-    <mat-list>
-      @for (article of articles; track article.id) {
-        <mat-list-item>
-          <a matLine [routerLink]="['/crypto-article', article.id]">
-            <mat-icon matListIcon>article</mat-icon>
-            <span [matTooltip]="article.date | date: 'z'" matTooltipPosition="above">
-              {{ article.date | date: 'short' : 'local' }}
-            </span>
-            - {{ article.title | slice: 0 : 100 }}...
-          </a>
-          &nbsp;
-          <mat-chip color="primary" selected>{{ article.team.name }}</mat-chip>
-        </mat-list-item>
-      }
-    </mat-list>
-  }
+  </div>
+
+  <div [hidden]="articles.length === 0">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      (matSortChange)="sortChange($event)"
+      matSort
+      matSortActive="date"
+      matSortDirection="desc"
+      matSortDisableClear
+    >
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+        <td mat-cell *matCellDef="let article">
+          {{ article.date | date: 'short' : 'local' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let article">
+          <a matLine [routerLink]="['/crypto-article', article.id]"> {{ article.title | slice: 0 : 100 }}... </a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="team">
+        <th mat-header-cell *matHeaderCellDef>Team</th>
+        <td mat-cell *matCellDef="let article">{{ article.team.name }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalArticles"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+    >
+    </mat-paginator>
+  </div>
 </mat-card>

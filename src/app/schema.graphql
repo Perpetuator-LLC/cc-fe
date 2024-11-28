@@ -1,6 +1,6 @@
 type Query {
   getCryptoNewsData(ids: [Int]): CryptoNewsData
-  getCryptoArticlesData(orderBy: String = "date", direction: SortDirection = ASC): CryptoArticlesData
+  getCryptoArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCryptoArticles
   getCryptoArticleData(id: ID!): CryptoArticleData
   getUserSettings(keys: [String]!): UserSettingsData
   getAllUsers: UserList
@@ -9,7 +9,7 @@ type Query {
   team(id: ID!): TeamType
   getUserDetails: UserDetails
   getEmailChangePending: EmailChangeRequestType
-  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String, direction: SortDirection): PaginatedJobStatus
+  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
 }
 
 type CryptoNewsData {
@@ -36,10 +36,15 @@ value as specified by
 """
 scalar DateTime
 
-type CryptoArticlesData {
+type PaginatedCryptoArticles {
   success: Boolean
   message: String
-  results: [CryptoArticleResult]
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  articles: [CryptoArticleResult]
 }
 
 type CryptoArticleResult {

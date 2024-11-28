@@ -1,46 +1,22 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { CryptoArticleService } from '../crypto-article.service';
-import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatFormField } from '@angular/material/form-field';
-import { MatInput, MatLabel } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatDivider } from '@angular/material/divider';
-import { MatList, MatListItem } from '@angular/material/list';
-import { MatLine } from '@angular/material/core';
-import { DatePipe } from '@angular/common';
-import { of } from 'rxjs';
-import { MessageComponent } from '../message/message.component';
+import { CryptoArticleData, Article, CryptoArticleService } from '../crypto-article.service';
+import { TeamsResult } from '../teams-list/teams-list.component';
+import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
+import { ActivatedRoute } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
-import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { TeamsResult } from '../teams-list/teams-list.component';
+import { MatList, MatListItem } from '@angular/material/list';
+import { MessageComponent } from '../message/message.component';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
-
-export interface CryptoArticleResult {
-  id: string;
-  date: string;
-  title: string;
-  content: string;
-  audio: string;
-  newsSummaries: CryptoNewsResult[];
-  team: TeamsResult;
-  // newsSummaries: CryptoNewsSummary[];
-}
-
-export interface CryptoArticlesData {
-  success: boolean;
-  message: string;
-  results: CryptoArticleResult[];
-}
-
-export interface CryptoArticleData {
-  success: boolean;
-  message: string;
-  results: CryptoArticleResult;
-}
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatLine } from '@angular/material/core';
+import { DatePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
 
 export interface UpdateCryptoArticleData {
   success: boolean;
@@ -61,28 +37,27 @@ export interface PublishCryptoArticleAudio {
   selector: 'app-article-detail',
   standalone: true,
   imports: [
-    MatCard,
-    MatFormField,
-    MatLabel,
     FormsModule,
-    MatButton,
-    MatInput,
-    MatDivider,
-    MatList,
     MatListItem,
-    MatLine,
     MessageComponent,
+    MatList,
+    JobStatusBarComponent,
     MatCardContent,
+    MatCard,
+    MatDivider,
+    MatLabel,
+    MatFormField,
+    MatLine,
     DatePipe,
     MatTooltip,
-    JobStatusBarComponent,
+    MatButton,
+    MatInput,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
 })
 export class ArticleDetailComponent implements OnInit {
-  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  article: CryptoArticleResult = {
+  article: Article = {
     id: '',
     title: '',
     content: '',
@@ -97,6 +72,8 @@ export class ArticleDetailComponent implements OnInit {
   updatedContent = '';
   audioSrc: string | null = null; // Add audioSrc to store the audio URL
   downloadLink: string | null = null; // Add downloadLink to store the download URL
+
+  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private route: ActivatedRoute,
@@ -240,6 +217,4 @@ export class ArticleDetailComponent implements OnInit {
       });
     });
   }
-
-  protected readonly of = of;
 }
