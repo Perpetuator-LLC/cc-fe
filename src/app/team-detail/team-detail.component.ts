@@ -27,11 +27,12 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MemberResult } from '../teams-list/teams-list.component';
+import { MemberResult, TeamsResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
   selector: 'app-team-detail',
@@ -68,6 +69,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
     MatCardContent,
     MatFabButton,
     MatCheckbox,
+    MatDivider,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -79,7 +81,17 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
-  protected initialFormValues = {};
+  protected initialFormValues: TeamsResult = {
+    id: 0,
+    name: '',
+    podcastUrl: '',
+    podcastEnabled: false,
+    podcastSlug: '',
+    intro: '',
+    prompt: '',
+    outro: '',
+    members: [],
+  };
   protected showPodcastFields = false;
   protected isFormChanged = false;
 
@@ -104,10 +116,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
-      name: ['', Validators.required],
+      name: [''],
       podcastEnabled: [false],
       podcastSlug: [''],
       podcastUrl: [''],
+      intro: [''],
+      prompt: [''],
+      outro: [''],
       members: this.fb.array([]),
     });
 
@@ -138,11 +153,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.loading = false;
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Failed to retrieve team data: ${err.message}`,
-            dismissible: true,
-          });
+          this.messageService.error(`Failed to retrieve team data: ${err.message}`);
         },
         complete: () => {
           this.loading = false;
@@ -158,8 +169,30 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   checkIfFormChanged() {
-    const currentFormValues = this.teamForm.getRawValue();
-    this.isFormChanged = JSON.stringify(currentFormValues) !== JSON.stringify(this.initialFormValues);
+    const currentFormValues = this.teamForm.getRawValue() as TeamsResult;
+    const changedFields = Object.keys(currentFormValues).filter((key) => {
+      const typedKey = key as keyof TeamsResult;
+      if (typedKey === 'members') {
+        return false;
+      }
+      // console.log('Checking if field has changed:', typedKey);
+      // console.log('Current value:', currentFormValues[typedKey]);
+      // console.log('Initial value:', this.initialFormValues[typedKey]);
+      // console.log('Is equal:', currentFormValues[typedKey] === this.initialFormValues[typedKey]);
+      return currentFormValues[typedKey] !== this.initialFormValues[typedKey];
+    });
+
+    if (changedFields.length > 0) {
+      // console.log('The following fields have changed:');
+      changedFields.forEach((field) => {
+        const typedField = field as keyof TeamsResult;
+        console.log(`${field}: ${currentFormValues[typedField]}`);
+      });
+      this.isFormChanged = true;
+    } else {
+      // console.log('No fields have changed.');
+      this.isFormChanged = false;
+    }
   }
 
   get members(): FormArray {
@@ -204,11 +237,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         this.upsertUserToTeam(teamId, userId, role);
       }
     } else {
-      this.messageService.addMessage({
-        type: 'error',
-        text: 'Please select a user and role',
-        dismissible: true,
-      });
+      this.messageService.error('Please select a user and role');
     }
   }
 
@@ -275,11 +304,10 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   saveTeam() {
-    this.messageService.clearMessages();
     if (this.teamForm.valid) {
-      const { id, name, podcastEnabled, podcastSlug } = this.teamForm.getRawValue();
+      const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro } = this.teamForm.getRawValue();
       const saveObservable = id
-        ? this.teamsService.updateTeam(id, name, podcastEnabled, podcastSlug)
+        ? this.teamsService.updateTeam(id, name, podcastEnabled, podcastSlug, intro, prompt, outro)
         : this.teamsService.createTeam(name);
 
       this.subscriptions.add(
@@ -288,6 +316,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
             if (!id) {
               this.router.navigate(['/teams']);
+            } else {
+              this.initialFormValues = this.teamForm.getRawValue();
+              this.checkIfFormChanged();
             }
           },
           error: (err) => {

@@ -65,6 +65,9 @@ type TeamType {
   podcastUrl: String
   podcastEnabled: Boolean
   podcastSlug: String
+  intro: String
+  prompt: String
+  outro: String
 }
 
 type TeamMembershipType {

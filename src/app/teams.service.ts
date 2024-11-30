@@ -65,10 +65,29 @@ export class TeamsService extends BaseService {
     name: string | null = null,
     podcastEnabled: boolean | null = null,
     podcastSlug: string | null = null,
+    intro: string | null = null,
+    prompt: string | null = null,
+    outro: string | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const UPDATE_TEAM = gql`
-      mutation UpdateTeam($id: ID!, $name: String!, $podcastEnabled: Boolean, $podcastSlug: String) {
-        updateTeam(id: $id, name: $name, podcastEnabled: $podcastEnabled, podcastSlug: $podcastSlug) {
+      mutation UpdateTeam(
+        $id: ID!
+        $name: String!
+        $podcastEnabled: Boolean
+        $podcastSlug: String
+        $intro: String
+        $prompt: String
+        $outro: String
+      ) {
+        updateTeam(
+          id: $id
+          name: $name
+          podcastEnabled: $podcastEnabled
+          podcastSlug: $podcastSlug
+          intro: $intro
+          prompt: $prompt
+          outro: $outro
+        ) {
           success
           message
           team {
@@ -104,7 +123,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<UpdateTeamData>({
       mutation: UPDATE_TEAM,
-      variables: { id, name, podcastEnabled, podcastSlug },
+      variables: { id, name, podcastEnabled, podcastSlug, intro, prompt, outro },
     }).pipe(
       map((data) => {
         if (!data.updateTeam.success) {
@@ -124,6 +143,9 @@ export class TeamsService extends BaseService {
           podcastEnabled
           podcastSlug
           podcastUrl
+          intro
+          prompt
+          outro
           members {
             user {
               id

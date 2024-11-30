@@ -26,6 +26,9 @@ export interface TeamsResult {
   podcastUrl: string;
   podcastEnabled: boolean;
   podcastSlug: string;
+  intro: string;
+  prompt: string;
+  outro: string;
   members: MemberResult[];
 }
 

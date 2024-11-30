@@ -1,9 +1,15 @@
 .member-row {
   display: flex;
-  align-items: center;
-  gap: 16px; /* Adjust the gap as needed */
-}
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
 
+  mat-form-field,
+  mat-checkbox,
+  button {
+    flex: 1 1 100%;
+  }
+}
 mat-divider {
   margin: 10px 0;
 }
@@ -14,4 +20,17 @@ mat-divider {
   form {
     margin-bottom: 1em;
   }
+}
+.textarea-small {
+  min-height: 2em;
+  max-height: 10em;
+  height: auto;
+  overflow: auto;
+}
+
+.textarea-large {
+  min-height: 15em;
+  max-height: 30em;
+  height: auto;
+  overflow: auto;
 }

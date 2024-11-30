@@ -1,7 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CryptoArticleData, Article, CryptoArticleService } from '../crypto-article.service';
-import { TeamsResult } from '../teams-list/teams-list.component';
 import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from '../message.service';
@@ -64,9 +63,19 @@ export class ArticleDetailComponent implements OnInit {
     date: '',
     audio: '',
     newsSummaries: [],
-    team: { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] },
+    team: {
+      id: 0,
+      name: '',
+      podcastEnabled: false,
+      podcastUrl: '',
+      podcastSlug: '',
+      members: [],
+      intro: '',
+      prompt: '',
+      outro: '',
+    },
   };
-  team: TeamsResult = { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] };
+  team = { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] };
   linkedArticles: CryptoNewsResult[] = [];
   updatedTitle = '';
   updatedContent = '';

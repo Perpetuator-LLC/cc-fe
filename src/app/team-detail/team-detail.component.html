@@ -3,13 +3,13 @@
 </ng-template>
 <app-message></app-message>
 
-@if (loading) {
+<div [hidden]="!loading">
   <mat-card class="container-card">
     <div class="loading-spinner">
       <mat-spinner></mat-spinner>
     </div>
   </mat-card>
-}
+</div>
 
 <mat-card class="container-card">
   <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
@@ -18,41 +18,75 @@
         <mat-label>Team Name</mat-label>
         <input matInput formControlName="name" />
       </mat-form-field>
-      <mat-checkbox formControlName="podcastEnabled">Enable Podcast</mat-checkbox>
     </div>
-    @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Podcast Slug</mat-label>
-          <input matInput formControlName="podcastSlug" />
-        </mat-form-field>
-        <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
-          <mat-icon>content_copy</mat-icon>
-          Copy Team Podcast (RSS) URL
-        </button>
-      </div>
-    }
     <div class="member-row">
-      <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Update Team Settings</button>
+      <mat-form-field appearance="fill">
+        <mat-label>Intro</mat-label>
+        <textarea matInput formControlName="intro" class="textarea-small"></textarea>
+      </mat-form-field>
+    </div>
+    <div class="member-row">
+      <mat-form-field appearance="fill">
+        <mat-label>Prompt</mat-label>
+        <textarea matInput formControlName="prompt" class="textarea-large"></textarea>
+      </mat-form-field>
+    </div>
+    <div class="member-row">
+      <mat-form-field appearance="fill">
+        <mat-label>Outro</mat-label>
+        <textarea matInput formControlName="outro" class="textarea-small"></textarea>
+      </mat-form-field>
+    </div>
+    <div class="member-row">
+      <div>
+        <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
+      </div>
+      @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Podcast Slug</mat-label>
+            <input matInput formControlName="podcastSlug" />
+          </mat-form-field>
+        </div>
+        <div>
+          <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
+            <mat-icon>content_copy</mat-icon>
+            Copy Team Podcast (RSS) URL
+          </button>
+        </div>
+      }
+    </div>
+    <div class="member-row">
+      <div>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Save Team Settings</button>
+      </div>
     </div>
   </form>
 
+  <mat-divider></mat-divider>
+
   <form [formGroup]="newUserForm" (ngSubmit)="addOrUpdateUserInTeam()">
     <div class="member-row">
-      <app-user-autocomplete
-        #autocomplete
-        [users]="allUsers"
-        (userSelected)="onUserSelected($event)"
-      ></app-user-autocomplete>
-      <mat-form-field>
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role">
-          @for (role of supportedRoles; track role) {
-            <mat-option value="{{ role }}">{{ role | titlecase }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button color="primary" type="submit">Add or Update User</button>
+      <div>
+        <app-user-autocomplete
+          #autocomplete
+          [users]="allUsers"
+          (userSelected)="onUserSelected($event)"
+        ></app-user-autocomplete>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @for (role of supportedRoles; track role) {
+              <mat-option value="{{ role }}">{{ role | titlecase }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div>
+        <button mat-flat-button color="primary" type="submit">Add or Update User</button>
+      </div>
     </div>
   </form>
 

@@ -7,7 +7,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
-- [ ] Cancel Pending Jobs
+- [x] Cancel Pending Jobs
 - [ ] Publish & email debounce
 - [ ] On news list update filter is no longer applied
 - [x] Paginate Articles
