@@ -37,7 +37,7 @@ grep '"version":' ../package.json
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.11.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.12.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -45,7 +45,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be-private
-python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.10.1' 'v0.11.0'
+python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.11.0' 'v0.12.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -53,10 +53,11 @@ Review and update the new changelog entry to make sure it is correct.
 Add the Git tag and push it to the repository.
 
 ```shell
-git commit -m "chore: bump version to 0.10.0"
-git push origin main
-git tag -a v0.10.0 -m "Adds new feature A and new feature B. Fixes bug C."
-git push origin v0.9.0
+git add .. && \
+git commit -m "chore: bump version to 0.12.0" && \
+git push origin main && \
+git tag -a v0.12.0 -m "In this update, we've exposed the intro, prompt, and outro to teams. We've also added pagination support to crypto articles along with jobs infrastructure support for article audio generation." && \
+git push origin v0.12.0
 ```
 
 Now open a pull request to merge it.

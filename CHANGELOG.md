@@ -1,3 +1,17 @@
+# Changelog from v0.11.0 to v0.12.0
+
+In this update, we've exposed the intro, prompt, and outro to teams. We've also added pagination support to crypto articles along with jobs infrastructure support for article audio generation.
+
+## Enhancements
+- Article Detail Update: We have added a feature that refreshes article audio toolbar once a job is completed.
+- Teams Introduction and Outro: We have introduced a new feature that adds an introduction, prompt, and outro to teams.
+- Crypto Articles Pagination: To improve the user experience and reduce server load, we have added pagination support to crypto articles.
+- Crypto Article Audio Generation: We have converted the crypto article audio generation to use jobs infrastructure.
+
+## Cleanups
+No significant cleanups were made in this update.
+
+
 # Changelog from v0.10.1 to v0.11.0
 
 In this update, we have introduced the concept of podcast feeds which are owned by teams and can be subscribed to by

@@ -9,7 +9,7 @@
     <mat-spinner></mat-spinner>
   </div>
 
-  <div [hidden]="articles.length !== 0">
+  <div [hidden]="articles.length !== 0 || loading">
     <h1>No articles found.</h1>
     <mat-divider></mat-divider>
     <h3>
@@ -18,7 +18,7 @@
     </h3>
   </div>
 
-  <div [hidden]="articles.length === 0">
+  <div [hidden]="articles.length === 0 || loading">
     <table
       mat-table
       [dataSource]="dataSource"
