@@ -13,6 +13,24 @@ export enum JobType {
   UPDATE_CRYPTO_ARTICLE_AUDIO = 'update_crypto_article_audio',
 }
 
+// create a function to convert string to jobType
+export const stringToJobType = (jobType: string) => {
+  switch (jobType) {
+    case 'fetch_crypto_news':
+      return JobType.FETCH_CRYPTO_NEWS;
+    case 'extract_crypto_news':
+      return JobType.EXTRACT_CRYPTO_NEWS;
+    case 'summarize_crypto_news':
+      return JobType.SUMMARIZE_CRYPTO_NEWS;
+    case 'create_crypto_article':
+      return JobType.CREATE_CRYPTO_ARTICLE;
+    case 'update_crypto_article_audio':
+      return JobType.UPDATE_CRYPTO_ARTICLE_AUDIO;
+    default:
+      throw new Error('Invalid job type');
+  }
+};
+
 export const jobTypeToString = (jobType: string) => {
   switch (jobType) {
     case JobType.FETCH_CRYPTO_NEWS:

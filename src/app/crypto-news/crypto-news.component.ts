@@ -21,6 +21,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { CustomTooltipComponent } from '../custom-tooltip/custom-tooltip.component';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
+import { JobType, stringToJobType } from '../job.service';
 
 export interface CryptoNewsResult {
   id: string;
@@ -117,9 +118,13 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     this.subscriptions.add(
       this.jobStatusBar.jobCompleted$.subscribe((job) => {
-        if (['fetch_crypto_news', 'extract_crypto_news', 'summarize_crypto_news'].includes(job.jobType)) {
+        if (
+          [JobType.FETCH_CRYPTO_NEWS, JobType.EXTRACT_CRYPTO_NEWS, JobType.SUMMARIZE_CRYPTO_NEWS].includes(
+            stringToJobType(job.jobType),
+          )
+        ) {
           this.getNews();
-        } else if (['create_crypto_article'].includes(job.jobType)) {
+        } else if ([JobType.CREATE_CRYPTO_ARTICLE].includes(stringToJobType(job.jobType))) {
           const newArticleUrl = `/crypto-article/${job.result}`;
           this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
         }

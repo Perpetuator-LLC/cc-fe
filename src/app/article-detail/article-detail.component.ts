@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CryptoArticleData, Article, CryptoArticleService } from '../crypto-article.service';
 import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
@@ -16,6 +16,8 @@ import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
+import { Subscription } from 'rxjs';
+import { JobType, stringToJobType } from '../job.service';
 
 export interface UpdateCryptoArticleData {
   success: boolean;
@@ -55,7 +57,8 @@ export interface PublishCryptoArticleAudio {
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
 })
-export class ArticleDetailComponent implements OnInit {
+export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+  private subscriptions: Subscription = new Subscription();
   article: Article = {
     id: '',
     title: '',
@@ -83,6 +86,7 @@ export class ArticleDetailComponent implements OnInit {
   downloadLink: string | null = null; // Add downloadLink to store the download URL
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -92,7 +96,6 @@ export class ArticleDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.messageService.clearMessages();
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
@@ -100,11 +103,7 @@ export class ArticleDetailComponent implements OnInit {
     this.articleService.getCryptoArticleById(articleId).subscribe({
       next: (data: CryptoArticleData) => {
         if (!data.success) {
-          this.messageService.addMessage({
-            type: 'error',
-            text: data.message,
-            dismissible: true,
-          });
+          this.messageService.error(data.message);
           return;
         }
         this.article = data.results;
@@ -119,13 +118,37 @@ export class ArticleDetailComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.messageService.addMessage({
-          type: 'error',
-          text: `Failed to fetch article: ${err.message}`,
-          dismissible: true,
-        });
+        this.messageService.error(`Failed to fetch article: ${err.message}`);
       },
     });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    this.toolbarService.clearToolbarComponent();
+  }
+
+  ngAfterViewInit() {
+    this.subscriptions.add(
+      this.jobStatusBar.jobCompleted$.subscribe((job) => {
+        if ([JobType.UPDATE_CRYPTO_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
+          this.articleService.getCryptoArticleById(this.article.id).subscribe({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            next: (response: any) => {
+              if (response.success && response.results.audio) {
+                this.prepareAudioPlayer(response.results.audio); // Update audio player with the newly generated audio
+              }
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
+            },
+          });
+        } else if ([JobType.CREATE_CRYPTO_ARTICLE].includes(stringToJobType(job.jobType))) {
+          const newArticleUrl = `/crypto-article/${job.result}`;
+          this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
+        }
+      }),
+    );
   }
 
   prepareAudioPlayer(base64Audio: string): void {
@@ -144,26 +167,17 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   requestPublishFeedback(): void {
-    this.messageService.clearMessages();
-    this.messageService.addMessage({
-      type: 'info',
-      text:
-        'We do not currently support publishing. Please write an email to ' +
-        '<a href="mailto:support@perpetuator.com?subject=Publishing%20Request&body=' +
-        'Please%20explain%20where%20you%20would%20like%20to%20publish%20this%20audio.">our support email</a> ' +
-        'explaining where you would like to publish this audio as we are currently integrating new systems.',
-      dismissible: true,
-    });
+    const message =
+      'We do not currently support publishing. Please write an email to ' +
+      '<a href="mailto:support@perpetuator.com?subject=Publishing%20Request&body=' +
+      'Please%20explain%20where%20you%20would%20like%20to%20publish%20this%20audio.">our support email</a> ' +
+      'explaining where you would like to publish this audio as we are currently integrating new systems.';
+    this.messageService.info(message, null, true);
   }
 
   publishAudio(): void {
     this.articleService.publishAudio(this.article.id).subscribe(() => {
-      this.messageService.clearMessages();
-      this.messageService.addMessage({
-        type: 'success',
-        text: 'Audio file published successfully.',
-        dismissible: true,
-      });
+      this.messageService.success('Audio file published successfully.');
     });
   }
 
@@ -179,15 +193,7 @@ export class ArticleDetailComponent implements OnInit {
   generateAudio(): void {
     this.articleService.generateAudio(this.article.id).subscribe({
       next: () => {
-        this.messageService.clearMessages();
-        this.messageService.addMessage({
-          type: 'success',
-          text: 'Audio file generated successfully.',
-          dismissible: true,
-        });
-
-        // After generating, we need to fetch the article again to get the audio field
-
+        this.messageService.success('Audio file generated successfully.');
         this.articleService.getCryptoArticleById(this.article.id).subscribe({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           next: (response: any) => {
@@ -196,34 +202,19 @@ export class ArticleDetailComponent implements OnInit {
             }
           },
           error: (err) => {
-            this.messageService.clearMessages();
-            this.messageService.addMessage({
-              type: 'error',
-              text: `Failed to fetch updated audio for article: ${err.message}`,
-              dismissible: true,
-            });
+            this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
           },
         });
       },
       error: (err) => {
-        this.messageService.clearMessages();
-        this.messageService.addMessage({
-          type: 'error',
-          text: err.message,
-          dismissible: true,
-        });
+        this.messageService.error(`Failed to generate audio for article: ${err.message}`);
       },
     });
   }
 
   updateArticle(): void {
     this.articleService.updateArticle(this.article.id, this.updatedTitle, this.updatedContent).subscribe(() => {
-      this.messageService.clearMessages();
-      this.messageService.addMessage({
-        type: 'success',
-        text: 'Article updated successfully.',
-        dismissible: true,
-      });
+      this.messageService.success('Article updated successfully.');
     });
   }
 }
