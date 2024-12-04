@@ -185,12 +185,6 @@ export class CryptoArticleService extends BaseService {
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
 
-    const escapedContent = updatedContent
-      .replace(/\\/g, '\\\\') // Escape backslashes
-      .replace(/"/g, '\\"') // Escape double quotes
-      .replace(/\n/g, '\\n') // Escape new lines
-      .replace(/\r/g, '\\r'); // Escape carriage returns
-
     const GQL = gql`
       mutation UpdateCryptoArticlesData($id: ID!, $title: String!, $content: String!) {
         updateCryptoArticleData(id: $id, title: $title, content: $content) {
@@ -209,7 +203,7 @@ export class CryptoArticleService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id, title: updatedTitle, content: escapedContent },
+      variables: { id, title: updatedTitle, content: updatedContent },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
