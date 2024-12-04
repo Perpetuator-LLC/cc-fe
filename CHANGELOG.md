@@ -1,3 +1,14 @@
+# Changelog from v0.12.0 to v0.12.1
+
+This update primarily focuses on fixing issues related to the audio generation on the article page and the replacement of special characters during article updates.
+
+## Enhancements
+- The audio generation on the article page has been improved. Previously, it was only using the chain infrastructure. Now, it has been fixed to utilize the jobs infrastructure, which should enhance the overall performance and reliability of the audio generation process.
+
+## Cleanups
+- An issue where special characters were being replaced during article updates has been resolved. This fix ensures that the content integrity is maintained during the update process, allowing special characters to be preserved as intended.
+
+
 # Changelog from v0.11.0 to v0.12.0
 
 In this update, we've exposed the intro, prompt, and outro to teams. We've also added pagination support to crypto articles along with jobs infrastructure support for article audio generation.
