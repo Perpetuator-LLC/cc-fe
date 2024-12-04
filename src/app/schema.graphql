@@ -88,7 +88,7 @@ enum SortDirection {
 type CryptoArticleData {
   success: Boolean
   message: String
-  results: CryptoArticleResult
+  article: CryptoArticleResult
 }
 
 type UserSettingsData {
@@ -167,8 +167,8 @@ type Mutation {
   extractCryptoNewsData(ids: [Int]!): SubmitJobData
   summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
   createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
-  createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleChain
-  updateCryptoArticleData(id: ID!, title: String!, content: String!): CryptoArticleData
+  createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleAudioChain
+  updateCryptoArticle(content: String, id: ID!, title: String): UpdateCryptoArticle
   updateCryptoArticleAudio(id: ID!): UpdateCryptoArticleAudio
   publishCryptoArticleAudio(id: ID!): GraphQLData
   updateUserSetting(key: String!, value: String!): GraphQLData
@@ -178,7 +178,7 @@ type Mutation {
   updateUserDetails(email: String!, username: String!): UpdateUserDetails
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, name: String, podcastEnabled: Boolean, podcastSlug: String): UpdateTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String): UpdateTeam
   destroyTeam(teamId: ID!): DestroyTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
@@ -194,10 +194,16 @@ type SubmitJobData {
   job: JobData
 }
 
-type CreateCryptoArticleChain {
+type CreateCryptoArticleAudioChain {
   success: Boolean
   message: String
   jobs: [JobData]
+}
+
+type UpdateCryptoArticle {
+  success: Boolean
+  message: String
+  article: CryptoArticleResult
 }
 
 type UpdateCryptoArticleAudio {

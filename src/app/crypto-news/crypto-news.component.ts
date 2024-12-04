@@ -238,16 +238,20 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messageService.warning('No team selected.');
       return;
     }
-    this.messageService.info('Creating crypto article from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
       this.cryptoNewsService.createCryptoArticle(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
+          if (!data.success) {
+            this.messageService.error(data.message);
+            return;
+          }
           if (!data.job) {
             this.messageService.error('Failed to create article: No job returned');
             return;
           }
+          this.messageService.info('Creating crypto article from selected news items (this may take a while)...');
           this.jobStatusBar.addJob(data.job);
         },
         error: (err: { message: string }) => {

@@ -100,27 +100,29 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     const articleId = this.route.snapshot.paramMap.get('id');
-    this.articleService.getCryptoArticleById(articleId).subscribe({
-      next: (data: CryptoArticleData) => {
-        if (!data.success) {
-          this.messageService.error(data.message);
-          return;
-        }
-        this.article = data.results;
-        this.updatedTitle = this.article.title;
-        this.updatedContent = this.article.content;
-        this.linkedArticles = this.article.newsSummaries;
-        this.team.name = this.article.team.name;
-        this.team.id = Number(this.article.team.id);
+    this.subscriptions.add(
+      this.articleService.getCryptoArticleById(articleId).subscribe({
+        next: (data: CryptoArticleData) => {
+          if (!data.success) {
+            this.messageService.error(data.message);
+            return;
+          }
+          this.article = data.article;
+          this.updatedTitle = this.article.title;
+          this.updatedContent = this.article.content;
+          this.linkedArticles = this.article.newsSummaries;
+          this.team.name = this.article.team.name;
+          this.team.id = Number(this.article.team.id);
 
-        if (this.article.audio) {
-          this.prepareAudioPlayer(this.article.audio);
-        }
-      },
-      error: (err) => {
-        this.messageService.error(`Failed to fetch article: ${err.message}`);
-      },
-    });
+          if (this.article.audio) {
+            this.prepareAudioPlayer(this.article.audio);
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to fetch article: ${err.message}`);
+        },
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -132,17 +134,18 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     this.subscriptions.add(
       this.jobStatusBar.jobCompleted$.subscribe((job) => {
         if ([JobType.UPDATE_CRYPTO_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
-          this.articleService.getCryptoArticleById(this.article.id).subscribe({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: (response: any) => {
-              if (response.success && response.results.audio) {
-                this.prepareAudioPlayer(response.results.audio); // Update audio player with the newly generated audio
-              }
-            },
-            error: (err) => {
-              this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
-            },
-          });
+          this.subscriptions.add(
+            this.articleService.getCryptoArticleById(this.article.id).subscribe({
+              next: (data) => {
+                if (data.success && data.article.audio) {
+                  this.prepareAudioPlayer(data.article.audio); // Update audio player with the newly generated audio
+                }
+              },
+              error: (err) => {
+                this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
+              },
+            }),
+          );
         } else if ([JobType.CREATE_CRYPTO_ARTICLE].includes(stringToJobType(job.jobType))) {
           const newArticleUrl = `/crypto-article/${job.result}`;
           this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
@@ -176,9 +179,11 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   publishAudio(): void {
-    this.articleService.publishAudio(this.article.id).subscribe(() => {
-      this.messageService.success('Audio file published successfully.');
-    });
+    this.subscriptions.add(
+      this.articleService.publishAudio(this.article.id).subscribe(() => {
+        this.messageService.success('Audio file published successfully.');
+      }),
+    );
   }
 
   downloadAudio(): void {
@@ -191,30 +196,45 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   generateAudio(): void {
-    this.articleService.generateAudio(this.article.id).subscribe({
-      next: () => {
-        this.messageService.success('Audio file generated successfully.');
-        this.articleService.getCryptoArticleById(this.article.id).subscribe({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          next: (response: any) => {
-            if (response.success && response.results.audio) {
-              this.prepareAudioPlayer(response.results.audio); // Update audio player with the newly generated audio
-            }
-          },
-          error: (err) => {
-            this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
-          },
-        });
-      },
-      error: (err) => {
-        this.messageService.error(`Failed to generate audio for article: ${err.message}`);
-      },
-    });
+    if (!this.article.id || this.article.id === '') {
+      this.messageService.warning('No article provided for audio generation.');
+      return;
+    }
+    this.subscriptions.add(
+      this.articleService.generateAudio(this.article.id).subscribe({
+        next: (data) => {
+          if (!data.success) {
+            this.messageService.error(data.message);
+            return;
+          }
+          if (!data.job) {
+            this.messageService.error('No job returned for audio generation.');
+            return;
+          }
+          this.messageService.info('Generating audio file...');
+          this.jobStatusBar.addJob(data.job);
+        },
+        error: (err) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
   }
 
   updateArticle(): void {
-    this.articleService.updateArticle(this.article.id, this.updatedTitle, this.updatedContent).subscribe(() => {
-      this.messageService.success('Article updated successfully.');
-    });
+    this.subscriptions.add(
+      this.articleService.updateArticle(this.article.id, this.updatedTitle, this.updatedContent).subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.messageService.error(response.message);
+            return;
+          }
+          this.messageService.success('Article updated successfully.');
+        },
+        error: (err) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
   }
 }

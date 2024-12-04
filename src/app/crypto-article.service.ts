@@ -1,26 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import {
-  PublishCryptoArticleAudio,
-  UpdateCryptoArticleAudio,
-  UpdateCryptoArticleData,
-} from './article-detail/article-detail.component';
+import { PublishCryptoArticleAudio, UpdateCryptoArticleData } from './article-detail/article-detail.component';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { MessageService } from './message.service';
+import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { TeamsResult } from './teams-list/teams-list.component';
 import { CryptoNewsResult } from './crypto-news/crypto-news.component';
-
-export interface UpdateCryptoArticleAudioResponse {
-  errors?: [{ message: string }];
-  data?: { updateCryptoArticleAudio: UpdateCryptoArticleAudio };
-}
-
-export interface PublishCryptoArticleAudioResponse {
-  errors?: [{ message: string }];
-  data?: { publishCryptoArticleAudio: PublishCryptoArticleAudio };
-}
+import { Job } from './job.service';
 
 export interface Article {
   id: string;
@@ -47,7 +33,7 @@ export interface CryptoArticlesData {
 export interface CryptoArticleData {
   success: boolean;
   message: string;
-  results: Article;
+  article: Article;
 }
 
 export interface CryptoArticlesResponse {
@@ -64,10 +50,7 @@ export interface CryptoArticleResponse {
   providedIn: 'root',
 })
 export class CryptoArticleService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    private messageService: MessageService,
-  ) {
+  constructor(protected override apollo: Apollo) {
     super(apollo);
   }
 
@@ -116,10 +99,6 @@ export class CryptoArticleService extends BaseService {
         }
         return data.getCryptoArticles;
       }),
-      catchError((error) => {
-        console.error('GraphQL query error:', error);
-        return throwError(() => new Error(error.message));
-      }),
     );
   }
 
@@ -130,7 +109,7 @@ export class CryptoArticleService extends BaseService {
         getCryptoArticleData(id: $id) {
           success
           message
-          results {
+          article {
             id
             date
             title
@@ -186,8 +165,8 @@ export class CryptoArticleService extends BaseService {
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
 
     const GQL = gql`
-      mutation UpdateCryptoArticlesData($id: ID!, $title: String!, $content: String!) {
-        updateCryptoArticleData(id: $id, title: $title, content: $content) {
+      mutation UpdateCryptoArticles($id: ID!, $title: String!, $content: String!) {
+        updateCryptoArticle(id: $id, title: $title, content: $content) {
           success
           message
         }
@@ -210,58 +189,57 @@ export class CryptoArticleService extends BaseService {
         if (!data.updateCryptoArticle.success) {
           throw new Error(data.updateCryptoArticle.message);
         }
-        this.messageService.success('Crypto article updated successfully.');
         return data.updateCryptoArticle;
       }),
     );
   }
 
-  generateAudio(id: string): Observable<UpdateCryptoArticleAudio> {
+  generateAudio(id: string) {
     if (id === null) return throwError(() => new Error('Article ID is required'));
 
-    const UPDATE_CRYPTO_ARTICLES_AUDIO = gql`
+    const GQL = gql`
       mutation UpdateCryptoArticlesAudio {
         updateCryptoArticleAudio(id: "${id}") {
           success
           message
+          job {
+            id
+            jobType
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
         }
       }
     `;
 
-    this.messageService.clearMessages();
-    this.messageService.addMessage({
-      type: 'info',
-      text: 'Crypto article audio generating...',
-      dismissible: true,
-    });
+    interface Response {
+      updateCryptoArticleAudio: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
 
-    return this.apollo
-      .mutate<UpdateCryptoArticleAudioResponse>({
-        mutation: UPDATE_CRYPTO_ARTICLES_AUDIO,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (result.data?.updateCryptoArticleAudio.success !== true) {
-            throw new Error(result.data?.updateCryptoArticleAudio.message);
-          }
-          return result.data?.updateCryptoArticleAudio || { success: false, message: 'No data available', results: [] };
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<Response>({
+      mutation: GQL,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.updateCryptoArticleAudio.success) {
+          throw new Error(data.updateCryptoArticleAudio.message);
+        }
+        return data.updateCryptoArticleAudio;
+      }),
+    );
   }
 
   publishAudio(id: string): Observable<PublishCryptoArticleAudio> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
 
-    const PUBLISH_CRYPTO_ARTICLE_AUDIO = gql`
+    const GQL = gql`
       mutation UpdateCryptoArticleAudio {
         publishCryptoArticleAudio(id: "${id}") {
           success
@@ -270,35 +248,23 @@ export class CryptoArticleService extends BaseService {
       }
     `;
 
-    this.messageService.clearMessages();
-    this.messageService.addMessage({
-      type: 'info',
-      text: 'Crypto article audio publishing...',
-      dismissible: true,
-    });
+    interface Response {
+      publishCryptoArticleAudio: {
+        success: boolean;
+        message: string;
+      };
+    }
 
-    return this.apollo
-      .mutate<PublishCryptoArticleAudioResponse>({
-        mutation: PUBLISH_CRYPTO_ARTICLE_AUDIO,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (result.errors) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            throw new Error(result.errors.map((e: any) => e.message).join(', '));
-          } else if (!result.data?.publishCryptoArticleAudio.success) {
-            throw new Error(result.data?.publishCryptoArticleAudio.message);
-          }
-          return (
-            result.data?.publishCryptoArticleAudio || { success: false, message: 'No data available', results: [] }
-          );
-        }),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(error.message));
-        }),
-      );
+    return this.mutate<Response>({
+      mutation: GQL,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.publishCryptoArticleAudio.success) {
+          throw new Error(data.publishCryptoArticleAudio.message);
+        }
+        return data.publishCryptoArticleAudio;
+      }),
+    );
   }
 }

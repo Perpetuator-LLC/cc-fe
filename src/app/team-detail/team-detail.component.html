@@ -37,25 +37,32 @@
         <textarea matInput formControlName="outro" class="textarea-small"></textarea>
       </mat-form-field>
     </div>
-    <div class="member-row">
-      <div>
-        <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
-      </div>
-      @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
-        <div>
-          <mat-form-field appearance="fill">
-            <mat-label>Podcast Slug</mat-label>
-            <input matInput formControlName="podcastSlug" />
-          </mat-form-field>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Podcast Settings</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="member-row">
+          <div>
+            <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
+          </div>
+          @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
+            <div>
+              <mat-form-field appearance="fill">
+                <mat-label>Podcast Slug</mat-label>
+                <input matInput formControlName="podcastSlug" />
+              </mat-form-field>
+            </div>
+            <div>
+              <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
+                <mat-icon>content_copy</mat-icon>
+                Copy Team Podcast (RSS) URL
+              </button>
+            </div>
+          }
         </div>
-        <div>
-          <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
-            <mat-icon>content_copy</mat-icon>
-            Copy Team Podcast (RSS) URL
-          </button>
-        </div>
-      }
-    </div>
+      </mat-card-content>
+    </mat-card>
     <div class="member-row">
       <div>
         <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Save Team Settings</button>

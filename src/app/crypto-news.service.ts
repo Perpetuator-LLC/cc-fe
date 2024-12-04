@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CryptoNewsData } from './crypto-news/crypto-news.component';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
@@ -86,10 +86,6 @@ export class CryptoNewsService extends BaseService {
           throw new Error(data.getCryptoNewsData.message);
         }
         return data.getCryptoNewsData;
-      }),
-      catchError((error) => {
-        console.error('GraphQL query error:', error);
-        return throwError(() => new Error(error.message));
       }),
     );
   }
