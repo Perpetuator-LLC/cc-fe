@@ -33,7 +33,6 @@ export class EarningsTableComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataSource']) {
-      console.log('Data Source changed:', this.dataSource);
       this.updateEarnings();
     }
   }

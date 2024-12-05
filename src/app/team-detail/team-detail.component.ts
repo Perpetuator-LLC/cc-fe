@@ -157,7 +157,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.loading = false;
-          console.log('Retrieve team complete');
         },
       }),
     );
@@ -173,24 +172,14 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     const changedFields = Object.keys(currentFormValues).filter((key) => {
       const typedKey = key as keyof TeamsResult;
       if (typedKey === 'members') {
-        return false;
+        return false; // Don't update based on members, that is handled separately
       }
-      // console.log('Checking if field has changed:', typedKey);
-      // console.log('Current value:', currentFormValues[typedKey]);
-      // console.log('Initial value:', this.initialFormValues[typedKey]);
-      // console.log('Is equal:', currentFormValues[typedKey] === this.initialFormValues[typedKey]);
       return currentFormValues[typedKey] !== this.initialFormValues[typedKey];
     });
 
     if (changedFields.length > 0) {
-      // console.log('The following fields have changed:');
-      changedFields.forEach((field) => {
-        const typedField = field as keyof TeamsResult;
-        console.log(`${field}: ${currentFormValues[typedField]}`);
-      });
       this.isFormChanged = true;
     } else {
-      // console.log('No fields have changed.');
       this.isFormChanged = false;
     }
   }

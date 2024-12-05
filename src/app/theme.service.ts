@@ -57,15 +57,14 @@ export class ThemeService implements OnDestroy {
     this.saveThemeToLocalStorage(theme);
     this.applyTheme();
     if (!this.authService.isLoggedIn()) {
-      console.log('User not logged in, skipping user preferences update');
-      return;
+      return; // User not logged in, skipping user preferences update
     }
     this.userSettingService.updateUserSetting('theme', theme);
   }
 
   loadTheme(): void {
     if (!this.authService.isLoggedIn()) {
-      console.log('User not logged in, loading theme from local storage');
+      // User not logged in, loading theme from local storage
       const localTheme = this.loadThemeFromLocalStorage();
       this.setTheme(localTheme);
       return;
@@ -79,13 +78,11 @@ export class ThemeService implements OnDestroy {
             console.error('Invalid theme setting:', theme);
             return;
           }
-          console.log('User preferences loaded');
           this.setTheme(theme);
         },
         error: () => {
-          // console.error(`Failed to fetch user preferences: ${data}`);
+          // User preferences load failed, reverting to local storage loaded
           const localTheme = this.loadThemeFromLocalStorage();
-          console.log('User preferences load failed, reverting to local storage loaded');
           this.setTheme(localTheme);
         },
       }),

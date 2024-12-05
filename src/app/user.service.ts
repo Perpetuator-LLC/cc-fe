@@ -178,7 +178,6 @@ export class UserService extends BaseService implements OnDestroy {
     }).pipe(map((data) => data?.getUserDetails || null));
     observable.subscribe({
       next: (userDetails) => {
-        console.log('userDetails', userDetails);
         this.userDetailsSignal.set(userDetails);
       },
       error: (err) => {
@@ -209,15 +208,6 @@ export class UserService extends BaseService implements OnDestroy {
           return of(null);
         }),
       );
-    // .subscribe({
-    //   next: (emailChangePendingDetails) => {
-    //     console.log('emailChangePendingDetails', emailChangePendingDetails);
-    //     this.emailChangePending = emailChangePendingDetails;
-    //   },
-    //   error: (err) => {
-    //     console.error('Failed to load email change pending:', err);
-    //   },
-    // });
   }
 
   cancelEmailChange(): Observable<null> {

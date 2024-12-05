@@ -113,7 +113,6 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   }
 
   sortChange(sortState: Sort) {
-    console.log(sortState);
     this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
     this.loadArticles();

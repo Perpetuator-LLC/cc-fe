@@ -338,7 +338,6 @@ export class CandlestickComponent implements OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataSource']) {
-      console.log('Data Source changed:', this.dataSource);
       this.setDateRange();
       this.updatePriceData();
       this.updateVolumeData();

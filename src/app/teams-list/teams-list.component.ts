@@ -87,7 +87,6 @@ export class TeamsListComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.loading = false;
-          console.log('Retrieve teams complete');
         },
       }),
     );

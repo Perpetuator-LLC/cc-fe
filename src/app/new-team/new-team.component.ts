@@ -86,7 +86,6 @@ export class NewTeamComponent implements OnInit, OnDestroy {
   createTeam() {
     if (this.teamForm.valid) {
       const { name } = this.teamForm.getRawValue();
-      console.log('Creating team:', { name }); // Add this line
       this.subscriptions.add(
         this.teamsService.createTeam(name).subscribe({
           next: (created) => {

@@ -87,8 +87,7 @@ export class CookieConsentService implements OnDestroy {
 
   loadCookieConsent(): void {
     if (!this.authService.isLoggedIn()) {
-      console.log('User not logged in, not loading cookie consent');
-      return;
+      return; // User not logged in, not loading cookie consent
     }
     this.subscriptions.add(
       this.apollo
@@ -115,17 +114,10 @@ export class CookieConsentService implements OnDestroy {
               }
               this.cookieConsentSignal.set(latestConsent);
               this.saveConsentToLocalStorage(latestConsent);
-              console.log('User cookie consent loaded:', latestConsent);
-            } else {
-              console.log('No cookie consent found');
-              // this.cookieConsentSignal.set(null);
-              // this.saveConsentToLocalStorage(null);
             }
           },
           error: (err) => {
             console.error('Failed to load cookie consent:', err);
-            // this.cookieConsentSignal.set(null);
-            // this.saveConsentToLocalStorage(null);
           },
         }),
     );
@@ -159,8 +151,7 @@ export class CookieConsentService implements OnDestroy {
     if (!this.authService.isLoggedIn()) {
       this.cookieConsentSignal.set(updatedConsent);
       this.saveConsentToLocalStorage(updatedConsent);
-      console.log('User not logged in, skipping cookie consent update in DB');
-      return;
+      return; // User not logged in, skipping cookie consent update in DB
     }
     this.subscriptions.add(
       this.updateCookieConsent(version, accepted).subscribe({
@@ -168,7 +159,6 @@ export class CookieConsentService implements OnDestroy {
           if (result.success) {
             this.cookieConsentSignal.set(updatedConsent);
             this.saveConsentToLocalStorage(updatedConsent);
-            console.log('Cookie consent updated successfully');
           } else {
             console.error('Failed to update cookie consent:', result.message);
           }

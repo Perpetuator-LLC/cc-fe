@@ -102,8 +102,7 @@ export class UserDetailComponent implements OnInit {
   cancelEmailChange(): void {
     this.messageService.clearMessages();
     this.userService.cancelEmailChange().subscribe({
-      next: (response) => {
-        console.log('Email change cancel:', response);
+      next: () => {
         this.loadUserDetails();
         this.messageService.addMessage({
           type: 'success',
@@ -124,8 +123,7 @@ export class UserDetailComponent implements OnInit {
 
   resendEmailChange(): void {
     this.userService.resendEmailChange().subscribe({
-      next: (response) => {
-        console.log('Email change reset:', response);
+      next: () => {
         this.messageService.addMessage({
           type: 'success',
           text: 'Email change request resent',
@@ -147,7 +145,6 @@ export class UserDetailComponent implements OnInit {
     this.messageService.clearMessages();
     if (this.userDetailForm.valid) {
       const { username, email } = this.userDetailForm.value;
-      console.log('Updating user details:', username, email);
       this.userService.updateUserDetails(username, email).subscribe({
         next: (response) => {
           if (response.success) {
@@ -167,7 +164,6 @@ export class UserDetailComponent implements OnInit {
             this.userService.loadUserEmailChangePending().subscribe({
               next: (emailChangePendingDetails) => {
                 this.emailChangePending = emailChangePendingDetails;
-                console.log('Email change pending:', this.emailChangePending);
               },
               error: (err) => {
                 console.error('Failed to load email change pending:', err);
@@ -214,8 +210,7 @@ export class UserDetailComponent implements OnInit {
       }
 
       this.userService.changePassword(newPassword).subscribe({
-        next: (response) => {
-          console.log('Password changed successfully:', response);
+        next: () => {
           this.messageService.addMessage({
             type: 'success',
             text: 'Password changed successfully.',

@@ -39,12 +39,10 @@ export class ControlComponent implements OnDestroy, AfterViewInit {
   }
 
   handleSelection(value: string) {
-    console.log('Option Selected:', value);
     this.getIt(value);
   }
 
   handleSubmit(value: string) {
-    console.log('Value Submitted:', value);
     this.getIt(value);
   }
 
@@ -70,9 +68,7 @@ export class ControlComponent implements OnDestroy, AfterViewInit {
         this.dataEmitter.emit({ ticker: ticker, data: { error: err.message } });
       },
       complete: () => {
-        console.log('Data fetch complete');
         this.autocomplete.focusInput();
-        // this.focusInput();
       },
     });
   }
