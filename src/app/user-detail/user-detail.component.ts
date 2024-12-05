@@ -100,23 +100,14 @@ export class UserDetailComponent implements OnInit {
   }
 
   cancelEmailChange(): void {
-    this.messageService.clearMessages();
     this.userService.cancelEmailChange().subscribe({
       next: () => {
         this.loadUserDetails();
-        this.messageService.addMessage({
-          type: 'success',
-          text: 'Email change cancelled.',
-          dismissible: true,
-        });
+        this.messageService.success('Email change cancelled.');
       },
       error: (err) => {
         console.error('Failed to cancel email change:', err);
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Failed to cancel email change request. Please try again.',
-          dismissible: true,
-        });
+        this.messageService.error('Failed to cancel email change request. Please try again.');
       },
     });
   }
@@ -124,35 +115,22 @@ export class UserDetailComponent implements OnInit {
   resendEmailChange(): void {
     this.userService.resendEmailChange().subscribe({
       next: () => {
-        this.messageService.addMessage({
-          type: 'success',
-          text: 'Email change request resent',
-          dismissible: true,
-        });
+        this.messageService.success('Email change request resent');
       },
       error: (err) => {
         console.error('Failed to reset email change:', err);
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Failed to reset email change request. Please try again.',
-          dismissible: true,
-        });
+        this.messageService.error('Failed to reset email change request. Please try again.');
       },
     });
   }
 
   onSubmitUserDetails(): void {
-    this.messageService.clearMessages();
     if (this.userDetailForm.valid) {
       const { username, email } = this.userDetailForm.value;
       this.userService.updateUserDetails(username, email).subscribe({
         next: (response) => {
           if (response.success) {
-            this.messageService.addMessage({
-              type: 'success',
-              text: 'User details updated successfully.',
-              dismissible: true,
-            });
+            this.messageService.success('User details updated successfully.');
             this.userService.loadUserDetails().subscribe({
               next: (userDetails: UserDetails) => {
                 this.userDetailForm.patchValue({
@@ -170,68 +148,40 @@ export class UserDetailComponent implements OnInit {
               },
             });
           } else {
-            this.messageService.addMessage({
-              type: 'error',
-              text: `Failed to update user details: ${response.message}`,
-              dismissible: true,
-            });
+            this.messageService.error(`Failed to update user details: ${response.message}`);
           }
         },
         error: (err) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Error updating user details. ${err.message}`,
-            dismissible: true,
-          });
+          console.error('Failed to update user details:', err);
+          this.messageService.error('Failed to update user details. Please try again.');
         },
       });
     } else {
-      this.messageService.addMessage({
-        type: 'error',
-        text: 'Please enter valid user details.',
-        dismissible: true,
-      });
+      this.messageService.error('Please enter valid user details.');
     }
   }
 
   onSubmitPasswordChange(): void {
-    this.messageService.clearMessages();
     if (this.changePasswordForm.valid) {
       const newPassword = this.changePasswordForm.get('newPassword')?.value;
       const confirmPassword = this.changePasswordForm.get('confirmPassword')?.value;
 
       if (newPassword !== confirmPassword) {
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Passwords do not match.',
-          dismissible: true,
-        });
+        this.messageService.error('Passwords do not match.');
         return;
       }
 
       this.userService.changePassword(newPassword).subscribe({
         next: () => {
-          this.messageService.addMessage({
-            type: 'success',
-            text: 'Password changed successfully.',
-            dismissible: true,
-          });
+          this.messageService.success('Password changed successfully.');
         },
         error: (err) => {
           console.error('Failed to change password:', err);
-          this.messageService.addMessage({
-            type: 'error',
-            text: 'Failed to change password. Please try again.',
-            dismissible: true,
-          });
+          this.messageService.error('Failed to change password. Please try again.');
         },
       });
     } else {
-      this.messageService.addMessage({
-        type: 'error',
-        text: 'Please enter valid password details.',
-        dismissible: true,
-      });
+      this.messageService.error('Please enter valid password details.');
     }
   }
 }
