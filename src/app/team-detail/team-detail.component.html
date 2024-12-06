@@ -11,129 +11,147 @@
   </mat-card>
 </div>
 
-<mat-card class="container-card">
-  <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
-    <div class="member-row">
-      <mat-form-field appearance="fill">
-        <mat-label>Team Name</mat-label>
-        <input matInput formControlName="name" />
-      </mat-form-field>
-    </div>
-    <div class="member-row">
-      <mat-form-field appearance="fill">
-        <mat-label>Intro</mat-label>
-        <textarea matInput formControlName="intro" class="textarea-small"></textarea>
-      </mat-form-field>
-    </div>
-    <div class="member-row">
-      <mat-form-field appearance="fill">
-        <mat-label>Prompt</mat-label>
-        <textarea matInput formControlName="prompt" class="textarea-large"></textarea>
-      </mat-form-field>
-    </div>
-    <div class="member-row">
-      <mat-form-field appearance="fill">
-        <mat-label>Outro</mat-label>
-        <textarea matInput formControlName="outro" class="textarea-small"></textarea>
-      </mat-form-field>
-    </div>
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Podcast Settings</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="member-row">
-          <div>
-            <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
-          </div>
-          @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
-            <div>
-              <mat-form-field appearance="fill">
-                <mat-label>Podcast Slug</mat-label>
-                <input matInput formControlName="podcastSlug" />
-              </mat-form-field>
-            </div>
-            <div>
-              <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
-                <mat-icon>content_copy</mat-icon>
-                Copy Team Podcast (RSS) URL
-              </button>
-            </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
-    <div class="member-row">
-      <div>
-        <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Save Team Settings</button>
-      </div>
-    </div>
-  </form>
-
-  <mat-divider></mat-divider>
-
-  <form [formGroup]="newUserForm" (ngSubmit)="addOrUpdateUserInTeam()">
-    <div class="member-row">
-      <div>
-        <app-user-autocomplete
-          #autocomplete
-          [users]="allUsers"
-          (userSelected)="onUserSelected($event)"
-        ></app-user-autocomplete>
-      </div>
-      <div>
-        <mat-form-field>
-          <mat-label>Role</mat-label>
-          <mat-select formControlName="role">
-            @for (role of supportedRoles; track role) {
-              <mat-option value="{{ role }}">{{ role | titlecase }}</mat-option>
-            }
-          </mat-select>
+<mat-card class="team-card">
+  <mat-card-content>
+    <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Team Name</mat-label>
+          <input matInput formControlName="name" />
         </mat-form-field>
       </div>
-      <div>
-        <button mat-flat-button color="primary" type="submit">Add or Update User</button>
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Intro</mat-label>
+          <textarea matInput formControlName="intro" class="textarea-small"></textarea>
+        </mat-form-field>
       </div>
-    </div>
-  </form>
-
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title> Members </mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-      <mat-table [dataSource]="teamForm.get('members')?.value || []">
-        <!-- Username Column -->
-        <ng-container matColumnDef="username">
-          <mat-header-cell *matHeaderCellDef> Username </mat-header-cell>
-          <mat-cell *matCellDef="let member">
-            {{ member.user.username }}
-          </mat-cell>
-        </ng-container>
-
-        <!-- Role Column -->
-        <ng-container matColumnDef="role">
-          <mat-header-cell *matHeaderCellDef> Role </mat-header-cell>
-          <mat-cell *matCellDef="let member">
-            {{ member.role | titlecase }}
-          </mat-cell>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
-          <mat-cell *matCellDef="let member">
-            <button mat-icon-button color="warn" type="button" (click)="removeUserFromTeam(member.user.id)">
-              <mat-icon>delete</mat-icon>
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Prompt</mat-label>
+          <textarea matInput formControlName="prompt" class="textarea-large"></textarea>
+        </mat-form-field>
+      </div>
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Outro</mat-label>
+          <textarea matInput formControlName="outro" class="textarea-small"></textarea>
+        </mat-form-field>
+      </div>
+      <div class="member-row">
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Telegram Bot Token</mat-label>
+            <input matInput formControlName="tgBotToken" />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Telegram Channel ID</mat-label>
+            <input matInput formControlName="tgChannelId" />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Telegram Response</mat-label>
+            <input matInput formControlName="tgResponse" readonly />
+          </mat-form-field>
+        </div>
+        <div>
+          Go get Telegram data! To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot and a
+          channel. See:
+          <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
+        </div>
+      </div>
+      <div class="member-row">
+        <div>
+          <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
+        </div>
+        @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
+          <div>
+            <mat-form-field appearance="fill">
+              <mat-label>Podcast Slug</mat-label>
+              <input matInput formControlName="podcastSlug" />
+            </mat-form-field>
+          </div>
+          <div>
+            <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
+              <mat-icon>content_copy</mat-icon>
+              Copy Team Podcast (RSS) URL
             </button>
-          </mat-cell>
-        </ng-container>
+          </div>
+        }
+      </div>
+      <div class="member-row">
+        <div>
+          <button mat-flat-button color="primary" type="submit" [disabled]="!isFormChanged">Save Team Settings</button>
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-        <!-- Header and Row Declarations -->
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-      </mat-table>
-    </mat-card-content>
-  </mat-card>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title> Members </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="newUserForm" (ngSubmit)="addOrUpdateUserInTeam()">
+      <div class="member-row">
+        <div>
+          <app-user-autocomplete
+            #autocomplete
+            [users]="allUsers"
+            (userSelected)="onUserSelected($event)"
+          ></app-user-autocomplete>
+        </div>
+        <div>
+          <mat-form-field>
+            <mat-label>Role</mat-label>
+            <mat-select formControlName="role">
+              @for (role of supportedRoles; track role) {
+                <mat-option value="{{ role }}">{{ role | titlecase }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <button mat-flat-button color="primary" type="submit">Add or Update User</button>
+        </div>
+      </div>
+    </form>
+
+    <mat-table [dataSource]="teamForm.get('members')?.value || []">
+      <!-- Username Column -->
+      <ng-container matColumnDef="username">
+        <mat-header-cell *matHeaderCellDef> Username </mat-header-cell>
+        <mat-cell *matCellDef="let member">
+          {{ member.user.username }}
+        </mat-cell>
+      </ng-container>
+
+      <!-- Role Column -->
+      <ng-container matColumnDef="role">
+        <mat-header-cell *matHeaderCellDef> Role </mat-header-cell>
+        <mat-cell *matCellDef="let member">
+          {{ member.role | titlecase }}
+        </mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+        <mat-cell *matCellDef="let member">
+          <button mat-icon-button color="warn" type="button" (click)="removeUserFromTeam(member.user.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Header and Row Declarations -->
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+  </mat-card-content>
 </mat-card>

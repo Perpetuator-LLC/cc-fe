@@ -18,10 +18,11 @@
 // Be sure that you only ever include this mixin once!
 @include mat.core();
 
-$typography: (
-  brand-family: 'roboto, sans-serif',
-  bold-weight: 900,
-);
+//$typography: (
+//  brand-family: 'lexend, sans-serif',
+//  //brand-family: 'roboto, sans-serif',
+//  bold-weight: 900,
+//);
 
 //$dark-color-scheme: (
 //  theme-type: dark,
@@ -92,6 +93,15 @@ $dark-theme: mat.define-theme(
       //warning: mat.$yellow-palette,
       //background: mat.$m2-gray-palette,
     ),
+    typography: (
+      //brand-family: 'Open Sans',
+      plain-family: 'Lexend',
+      brand-family: 'Lexend',
+      //plain-family: 'Open Sans',
+      bold-weight: 900,
+      medium-weight: 500,
+      regular-weight: 300,
+    ),
     density: (
       scale: 0,
     ),
@@ -120,7 +130,7 @@ $light-theme: mat.define-theme(
   )
 );
 
-@include mat.all-component-typographies($typography);
+//@include mat.all-component-typographies($typography);
 
 // ignore-duplication-warnings: true is used to suppress warnings about duplicate styles
 // Supposedly we can use: @include mat.all-component-colors($dark-theme); but it doesn't work
@@ -153,6 +163,10 @@ body.dark {
     background-color: rgba(111, 111, 111, 0.1);
     //background-color: var(--mdc-outlined-card-outline-color);
   }
+  //font-family: "Lexend", sans-serif;
+  //font-optical-sizing: auto;
+  //font-weight: 400;
+  //font-style: normal;
 }
 
 body.light {
@@ -189,12 +203,20 @@ body.light {
 html,
 body {
   height: 100%;
-}
-body {
+  //font-family: var(--md-typography-brand-font-family);
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: 'Lexend', sans-serif;
+  //font-optical-sizing: auto;
+  //font-weight: 400;
+  //font-style: normal;
+  //font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 :root {
+  //.mat-toolbar, .mat-toolbar h1, .mat-toolbar h2, .mat-toolbar h3, .mat-toolbar h4, .mat-toolbar h5, .mat-toolbar h6 {
+  //  font-family: var(--mat-toolbar-title-text-font, var(--mat-app-title-large-font));
+  //--mat-toolbar-title-text-font: 'Lexend', sans-serif;
+  //--md-sys-typography-font-family: 'Lexend', sans-serif;
+  //--md-toolbar-title-text-font: 'Lexend', sans-serif;
   --md-sys-color-primary: #2196f3;
   --md-sys-color-secondary: #ff0000;
   --md-sys-color-tertiary: #9e9e9e;

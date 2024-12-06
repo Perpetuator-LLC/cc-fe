@@ -32,7 +32,10 @@
     @if (downloadLink) {
       <button mat-raised-button color="primary" class="article-control" (click)="downloadAudio()">Download MP3</button>
     }
-    <h2>Team: {{ article.team.name }}</h2>
+    <button mat-fab extended disabled>
+      <mat-icon>group</mat-icon>
+      Team: {{ article.team.name }}
+    </button>
     <mat-form-field class="full-width article-content">
       <mat-label>Title</mat-label>
       <input matInput [(ngModel)]="updatedTitle" />

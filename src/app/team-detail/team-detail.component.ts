@@ -109,7 +109,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['username', 'role', 'actions'];
 
   ngOnInit(): void {
-    this.messageService.clearMessages();
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
@@ -124,6 +123,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       prompt: [''],
       outro: [''],
       members: this.fb.array([]),
+      tgBotToken: [''],
+      tgChannelId: [''],
+      tgResponse: [''],
     });
 
     this.newUserForm = this.fb.group({
@@ -205,7 +207,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   addOrUpdateUserInTeam() {
-    this.messageService.clearMessages();
     if (this.newUserForm.valid) {
       const { userId, role } = this.newUserForm.value;
       const teamId: string = this.teamForm.get('id')?.value;
@@ -240,18 +241,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           this.autoComplete.clearInput();
         },
         error: (err) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Failed to update user: ${err.message}`,
-            dismissible: true,
-          });
+          this.messageService.error(`Failed to add user: ${err.message}`);
         },
       }),
     );
   }
 
   removeUserFromTeam(userId: string) {
-    this.messageService.clearMessages();
     const teamId = this.teamForm.get('id')?.value;
     const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
     const role = user?.get('role')?.value;
@@ -294,9 +290,20 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
   saveTeam() {
     if (this.teamForm.valid) {
-      const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro } = this.teamForm.getRawValue();
+      const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId } =
+        this.teamForm.getRawValue();
       const saveObservable = id
-        ? this.teamsService.updateTeam(id, name, podcastEnabled, podcastSlug, intro, prompt, outro)
+        ? this.teamsService.updateTeam(
+            id,
+            name,
+            podcastEnabled,
+            podcastSlug,
+            intro,
+            prompt,
+            outro,
+            tgBotToken,
+            tgChannelId,
+          )
         : this.teamsService.createTeam(name);
 
       this.subscriptions.add(

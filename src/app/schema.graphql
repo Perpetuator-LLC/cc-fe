@@ -55,6 +55,9 @@ type CryptoArticleResult {
   date: DateTime
   audio: String
   audioUrl: String
+  isLive: Boolean
+  podcastDate: DateTime
+  telegramDate: DateTime
   team: TeamType
 }
 
@@ -68,6 +71,8 @@ type TeamType {
   intro: String
   prompt: String
   outro: String
+  tgBotToken: String
+  tgChannelId: String
 }
 
 type TeamMembershipType {
@@ -168,9 +173,9 @@ type Mutation {
   summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
   createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
   createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleAudioChain
-  updateCryptoArticle(content: String, id: ID!, title: String): UpdateCryptoArticle
+  updateCryptoArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateCryptoArticle
   updateCryptoArticleAudio(id: ID!): UpdateCryptoArticleAudio
-  publishCryptoArticleAudio(id: ID!): GraphQLData
+  publishCryptoArticleAudio(id: ID!): PublishCryptoArticleAudio
   updateUserSetting(key: String!, value: String!): GraphQLData
   retryJobs(ids: [UUID]!): RetryJobs
   deleteJobs(ids: [UUID]!): DeleteJobs
@@ -178,7 +183,7 @@ type Mutation {
   updateUserDetails(email: String!, username: String!): UpdateUserDetails
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String): UpdateTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, tgBotToken: String, tgChannelId: String): UpdateTeam
   destroyTeam(teamId: ID!): DestroyTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
@@ -210,6 +215,11 @@ type UpdateCryptoArticleAudio {
   success: Boolean
   message: String
   job: JobData
+}
+
+type PublishCryptoArticleAudio {
+  success: Boolean
+  message: String
 }
 
 type GraphQLData {

@@ -19,7 +19,7 @@ export class TeamsService extends BaseService {
   }
 
   createTeam(name: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
-    const CREATE_TEAM = gql`
+    const GQL = gql`
       mutation CreateTeam($name: String!) {
         createTeam(name: $name) {
           success
@@ -39,7 +39,7 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface CreateTeamData {
+    interface Response {
       createTeam: {
         success: boolean;
         message: string;
@@ -47,8 +47,8 @@ export class TeamsService extends BaseService {
       };
     }
 
-    return this.mutate<CreateTeamData>({
-      mutation: CREATE_TEAM,
+    return this.mutate<Response>({
+      mutation: GQL,
       variables: { name },
     }).pipe(
       map((data) => {
@@ -68,8 +68,10 @@ export class TeamsService extends BaseService {
     intro: string | null = null,
     prompt: string | null = null,
     outro: string | null = null,
+    tgBotToken: string | null = null,
+    tgChannelId: string | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
-    const UPDATE_TEAM = gql`
+    const GQL = gql`
       mutation UpdateTeam(
         $id: ID!
         $name: String!
@@ -78,6 +80,8 @@ export class TeamsService extends BaseService {
         $intro: String
         $prompt: String
         $outro: String
+        $tgBotToken: String
+        $tgChannelId: String
       ) {
         updateTeam(
           id: $id
@@ -87,6 +91,8 @@ export class TeamsService extends BaseService {
           intro: $intro
           prompt: $prompt
           outro: $outro
+          tgBotToken: $tgBotToken
+          tgChannelId: $tgChannelId
         ) {
           success
           message
@@ -96,6 +102,12 @@ export class TeamsService extends BaseService {
             podcastEnabled
             podcastSlug
             podcastUrl
+            intro
+            prompt
+            outro
+            tgBotToken
+            tgChannelId
+            tgResponse
             members {
               user {
                 id
@@ -108,7 +120,7 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface UpdateTeamData {
+    interface Response {
       updateTeam: {
         success: boolean;
         message: string;
@@ -116,14 +128,9 @@ export class TeamsService extends BaseService {
       };
     }
 
-    // interface UpdateTeamResponse {
-    //   data?: UpdateTeamData;
-    //   errors?: { message: string }[];
-    // }
-
-    return this.mutate<UpdateTeamData>({
-      mutation: UPDATE_TEAM,
-      variables: { id, name, podcastEnabled, podcastSlug, intro, prompt, outro },
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId },
     }).pipe(
       map((data) => {
         if (!data.updateTeam.success) {
@@ -135,7 +142,7 @@ export class TeamsService extends BaseService {
   }
 
   getTeamById(id: string): Observable<TeamsResult> {
-    const GET_TEAM_BY_ID = gql`
+    const GQL = gql`
       query GetTeamById($id: ID!) {
         team(id: $id) {
           id
@@ -146,6 +153,8 @@ export class TeamsService extends BaseService {
           intro
           prompt
           outro
+          tgBotToken
+          tgChannelId
           members {
             user {
               id
@@ -157,12 +166,12 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface GetTeamByIdData {
+    interface Response {
       team: TeamsResult;
     }
 
-    return this.watchQuery<GetTeamByIdData>({
-      query: GET_TEAM_BY_ID,
+    return this.watchQuery<Response>({
+      query: GQL,
       variables: { id },
       fetchPolicy: 'network-only',
     }).pipe(
@@ -176,7 +185,7 @@ export class TeamsService extends BaseService {
   }
 
   getMyTeams(): Observable<TeamsResult[]> {
-    const GET_MY_TEAMS = gql`
+    const GQL = gql`
       query GetMyTeams {
         myTeams {
           id
@@ -192,12 +201,12 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface GetMyTeamsData {
+    interface Response {
       myTeams: TeamsResult[];
     }
 
-    return this.watchQuery<GetMyTeamsData>({
-      query: GET_MY_TEAMS,
+    return this.watchQuery<Response>({
+      query: GQL,
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -210,7 +219,7 @@ export class TeamsService extends BaseService {
   }
 
   upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {
-    const UPSERT_USER_TO_TEAM = gql`
+    const GQL = gql`
       mutation UpsertUserToTeam($teamId: ID!, $userId: ID!, $role: String!) {
         upsertUserToTeam(teamId: $teamId, userId: $userId, role: $role) {
           success
@@ -230,7 +239,7 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface UpsertUserToTeamData {
+    interface Response {
       upsertUserToTeam: {
         success: boolean;
         message: string;
@@ -238,8 +247,8 @@ export class TeamsService extends BaseService {
       };
     }
 
-    return this.mutate<UpsertUserToTeamData>({
-      mutation: UPSERT_USER_TO_TEAM,
+    return this.mutate<Response>({
+      mutation: GQL,
       variables: { teamId, userId, role },
     }).pipe(
       map((data) => {
@@ -294,7 +303,7 @@ export class TeamsService extends BaseService {
   }
 
   getAllUsers(): Observable<User[]> {
-    const GET_ALL_USERS = gql`
+    const GQL = gql`
       query GetAllUsers {
         getAllUsers {
           success
@@ -307,7 +316,7 @@ export class TeamsService extends BaseService {
       }
     `;
 
-    interface GetAllUsersData {
+    interface Response {
       getAllUsers: {
         success: boolean;
         message: string;
@@ -315,8 +324,8 @@ export class TeamsService extends BaseService {
       };
     }
 
-    return this.query<GetAllUsersData>({
-      query: GET_ALL_USERS,
+    return this.query<Response>({
+      query: GQL,
     }).pipe(
       map((data) => {
         if (!data.getAllUsers.success) {

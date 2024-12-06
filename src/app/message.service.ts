@@ -19,7 +19,7 @@ export class MessageService {
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   messages$ = this.messagesSubject.asObservable();
 
-  error(text: string, timeout: number | undefined | null = undefined, dismissible = true) {
+  error(text: string, timeout: number | undefined | null = 15000, dismissible = true) {
     this.addMessage({ type: 'error', text, dismissible, timeout });
   }
 

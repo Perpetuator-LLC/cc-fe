@@ -7,7 +7,7 @@
     <mat-card class="hero-card">
       <mat-card-header>
         <mat-card-subtitle>
-          <h1>Your Research Hub for Educated and Collaborative Investing</h1>
+          <h1>Democratizing Investing</h1>
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
@@ -26,6 +26,22 @@
       </mat-card-content>
     </mat-card>
   </div>
+
+  @if (!this.authService.isLoggedIn()) {
+    <div class="cta-section">
+      <mat-card class="cta-card">
+        <mat-card-content>
+          <h2>Become Part of Our Investment Community</h2>
+          <p>
+            Whether you're a beginner eager to learn or a seasoned professional looking to share insights, Capitol
+            Copilot AI is the place to be. Join today and take the next step in growing your expertise while
+            contributing to a community built on trust and shared knowledge.
+          </p>
+          <button mat-raised-button color="accent" routerLink="/register">Join Us</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 
   <div class="feature-section">
     <mat-card class="feature-card">
@@ -69,20 +85,6 @@
           tools bring together valuable resources from experts, researchers, and our community, ensuring you're always
           equipped with the knowledge to succeed.
         </p>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <div class="cta-section">
-    <mat-card class="cta-card">
-      <mat-card-content>
-        <h2>Become Part of Our Investment Community</h2>
-        <p>
-          Whether you're a beginner eager to learn or a seasoned professional looking to share insights, Capitol Copilot
-          AI is the place to be. Join today and take the next step in growing your expertise while contributing to a
-          community built on trust and shared knowledge.
-        </p>
-        <button mat-raised-button color="accent" routerLink="/register">Join Us</button>
       </mat-card-content>
     </mat-card>
   </div>

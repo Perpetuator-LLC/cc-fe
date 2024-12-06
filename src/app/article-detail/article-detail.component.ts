@@ -14,10 +14,11 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatLine } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatFabButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { JobType, stringToJobType } from '../job.service';
+import { MatIcon } from '@angular/material/icon';
 
 export interface UpdateCryptoArticleData {
   success: boolean;
@@ -53,6 +54,8 @@ export interface PublishCryptoArticleAudio {
     MatTooltip,
     MatButton,
     MatInput,
+    MatIcon,
+    MatFabButton,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',

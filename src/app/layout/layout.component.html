@@ -18,7 +18,9 @@
         matTooltip="Capital Copilot"
       />
       @if (!this.minimized) {
-        <span class="website-title">Capital Copilot</span>
+        <div class="title-container">
+          <span class="website-title">Capital Copilot</span>
+        </div>
       }
     </mat-toolbar>
     <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
