@@ -14,11 +14,12 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatLine } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { JobType, stringToJobType } from '../job.service';
 import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 export interface UpdateCryptoArticleData {
   success: boolean;
@@ -55,7 +56,8 @@ export interface PublishCryptoArticleAudio {
     MatButton,
     MatInput,
     MatIcon,
-    MatFabButton,
+    MatIconButton,
+    MatCheckbox,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
@@ -67,7 +69,10 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     title: '',
     content: '',
     date: '',
-    audio: '',
+    audioBase64: '',
+    isLive: false,
+    podcastDate: '',
+    telegramDate: '',
     newsSummaries: [],
     team: {
       id: 0,
@@ -79,12 +84,15 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
       intro: '',
       prompt: '',
       outro: '',
+      tgChannelId: '',
+      tgResponse: '',
     },
   };
   team = { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] };
   linkedArticles: CryptoNewsResult[] = [];
   updatedTitle = '';
   updatedContent = '';
+  isLive = false;
   audioSrc: string | null = null; // Add audioSrc to store the audio URL
   downloadLink: string | null = null; // Add downloadLink to store the download URL
 
@@ -113,12 +121,13 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
           this.article = data.article;
           this.updatedTitle = this.article.title;
           this.updatedContent = this.article.content;
+          this.isLive = this.article.isLive;
           this.linkedArticles = this.article.newsSummaries;
           this.team.name = this.article.team.name;
           this.team.id = Number(this.article.team.id);
 
-          if (this.article.audio) {
-            this.prepareAudioPlayer(this.article.audio);
+          if (this.article.audioBase64) {
+            this.prepareAudioPlayer(this.article.audioBase64); // Prepare the audio player with the base64 audio
           }
         },
         error: (err) => {
@@ -140,8 +149,8 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
           this.subscriptions.add(
             this.articleService.getCryptoArticleById(this.article.id).subscribe({
               next: (data) => {
-                if (data.success && data.article.audio) {
-                  this.prepareAudioPlayer(data.article.audio); // Update audio player with the newly generated audio
+                if (data.success && data.article.audioBase64) {
+                  this.prepareAudioPlayer(data.article.audioBase64);
                 }
               },
               error: (err) => {
@@ -172,21 +181,22 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     this.downloadLink = this.audioSrc; // Also enable the download link
   }
 
-  requestPublishFeedback(): void {
-    const message =
-      'We do not currently support publishing. Please write an email to ' +
-      '<a href="mailto:support@perpetuator.com?subject=Publishing%20Request&body=' +
-      'Please%20explain%20where%20you%20would%20like%20to%20publish%20this%20audio.">our support email</a> ' +
-      'explaining where you would like to publish this audio as we are currently integrating new systems.';
-    this.messageService.info(message, null, true);
-  }
-
   publishAudio(): void {
     this.subscriptions.add(
-      this.articleService.publishAudio(this.article.id).subscribe(() => {
-        this.messageService.success('Audio file published successfully.');
+      this.articleService.publishAudio(this.article.id).subscribe({
+        next: () => {
+          this.messageService.success('Audio file published successfully.');
+        },
+        error: (err) => {
+          this.messageService.error(err.message);
+        },
       }),
     );
+  }
+
+  onIsLiveChange(isLive: boolean) {
+    this.isLive = isLive;
+    this.updateArticle();
   }
 
   downloadAudio(): void {
@@ -226,18 +236,20 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
   updateArticle(): void {
     this.subscriptions.add(
-      this.articleService.updateArticle(this.article.id, this.updatedTitle, this.updatedContent).subscribe({
-        next: (response) => {
-          if (!response.success) {
-            this.messageService.error(response.message);
-            return;
-          }
-          this.messageService.success('Article updated successfully.');
-        },
-        error: (err) => {
-          this.messageService.error(err.message);
-        },
-      }),
+      this.articleService
+        .updateArticle(this.article.id, this.updatedTitle, this.updatedContent, this.isLive)
+        .subscribe({
+          next: (response) => {
+            if (!response.success) {
+              this.messageService.error(response.message);
+              return;
+            }
+            this.messageService.success('Article updated successfully.');
+          },
+          error: (err) => {
+            this.messageService.error(err.message);
+          },
+        }),
     );
   }
 }

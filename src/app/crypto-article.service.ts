@@ -13,10 +13,12 @@ export interface Article {
   date: string;
   title: string;
   content: string;
-  audio: string;
+  audioBase64: string;
+  isLive: boolean;
+  podcastDate: string;
+  telegramDate: string;
   newsSummaries: CryptoNewsResult[];
   team: TeamsResult;
-  // newsSummaries: CryptoNewsSummary[];
 }
 
 export interface CryptoArticlesData {
@@ -34,16 +36,6 @@ export interface CryptoArticleData {
   success: boolean;
   message: string;
   article: Article;
-}
-
-export interface CryptoArticlesResponse {
-  errors?: [{ message: string }];
-  data?: { getCryptoArticlesData: CryptoArticlesData };
-}
-
-export interface CryptoArticleResponse {
-  errors?: [{ message: string }];
-  data?: { getCryptoArticleData: CryptoArticleData };
 }
 
 @Injectable({
@@ -114,7 +106,10 @@ export class CryptoArticleService extends BaseService {
             date
             title
             content
-            audio
+            audioBase64
+            isLive
+            podcastDate
+            telegramDate
             team {
               id
               name
@@ -159,14 +154,16 @@ export class CryptoArticleService extends BaseService {
     id: string | null,
     updatedTitle: string | null,
     updatedContent: string | null,
+    isLive: boolean | null,
   ): Observable<UpdateCryptoArticleData> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
+    if (isLive === null) return throwError(() => new Error('Updated is live is required'));
 
     const GQL = gql`
-      mutation UpdateCryptoArticles($id: ID!, $title: String!, $content: String!) {
-        updateCryptoArticle(id: $id, title: $title, content: $content) {
+      mutation UpdateCryptoArticles($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
+        updateCryptoArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
           success
           message
         }
@@ -182,7 +179,7 @@ export class CryptoArticleService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id, title: updatedTitle, content: updatedContent },
+      variables: { id, title: updatedTitle, content: updatedContent, isLive: isLive },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -199,7 +196,7 @@ export class CryptoArticleService extends BaseService {
 
     const GQL = gql`
       mutation UpdateCryptoArticlesAudio {
-        updateCryptoArticleAudio(id: "${id}") {
+        updateCryptoArticleAudio(articleId: "${id}") {
           success
           message
           job {
@@ -236,12 +233,12 @@ export class CryptoArticleService extends BaseService {
     );
   }
 
-  publishAudio(id: string): Observable<PublishCryptoArticleAudio> {
-    if (id === null) return throwError(() => new Error('Article ID is required'));
+  publishAudio(articleId: string): Observable<PublishCryptoArticleAudio> {
+    if (articleId === null) return throwError(() => new Error('Article ID is required'));
 
     const GQL = gql`
-      mutation UpdateCryptoArticleAudio {
-        publishCryptoArticleAudio(id: "${id}") {
+      mutation PublishCryptoArticleAudio($id: ID!) {
+        publishCryptoArticleAudio(articleId: $id) {
           success
           message
         }
@@ -257,6 +254,7 @@ export class CryptoArticleService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
+      variables: { id: articleId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {

@@ -38,42 +38,65 @@
           <textarea matInput formControlName="outro" class="textarea-small"></textarea>
         </mat-form-field>
       </div>
+      <div>
+        To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot and a channel. See:
+        <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
+      </div>
       <div class="member-row">
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field
+            appearance="fill"
+            matTooltip="Bot Token is not readable for security reasons. To update it, just provide it."
+          >
             <mat-label>Telegram Bot Token</mat-label>
             <input matInput formControlName="tgBotToken" />
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field
+            appearance="fill"
+            matTooltip="Channel IDs must prefix '-100', if it is not provided it will be automatically added."
+          >
             <mat-label>Telegram Channel ID</mat-label>
             <input matInput formControlName="tgChannelId" />
           </mat-form-field>
         </div>
-        <div>
+        <div class="expand-width">
           <mat-form-field appearance="fill">
             <mat-label>Telegram Response</mat-label>
-            <input matInput formControlName="tgResponse" readonly />
+            <div class="input-with-button">
+              <input
+                matInput
+                formControlName="tgResponse"
+                readonly
+                matTooltip="{{ teamForm.get('tgResponse')?.value }}"
+              />
+              <button
+                mat-icon-button
+                color="primary"
+                type="button"
+                (click)="refreshTelegram()"
+                matTooltip="Connect to Telegram to check Bot Token and Channel ID."
+              >
+                <mat-icon>refresh</mat-icon>
+              </button>
+            </div>
           </mat-form-field>
-        </div>
-        <div>
-          Go get Telegram data! To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot and a
-          channel. See:
-          <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
         </div>
       </div>
       <div class="member-row">
         <div>
           <mat-checkbox formControlName="podcastEnabled">Podcast Enabled</mat-checkbox>
         </div>
-        @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
+        @if (teamForm.get('podcastSlug')?.value || teamForm.get('podcastEnabled')?.value) {
           <div>
             <mat-form-field appearance="fill">
               <mat-label>Podcast Slug</mat-label>
               <input matInput formControlName="podcastSlug" />
             </mat-form-field>
           </div>
+        }
+        @if (teamForm.get('podcastSlug')?.value && teamForm.get('podcastEnabled')?.value) {
           <div>
             <button mat-fab color="primary" type="button" extended (click)="copyPodcastUrl()">
               <mat-icon>content_copy</mat-icon>

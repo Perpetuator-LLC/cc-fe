@@ -39,3 +39,25 @@ mat-divider {
   height: auto;
   overflow: auto;
 }
+
+.expand-width {
+  flex-grow: 1;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.input-with-button {
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1 1 auto;
+  }
+
+  button {
+    flex: 0 0 auto;
+    margin-left: 8px;
+  }
+}

@@ -8,20 +8,12 @@
 
 <mat-card>
   <mat-card-content class="form-container">
-    @if (team && team.id === 1 && audioSrc) {
-      <button mat-raised-button color="primary" class="article-control" (click)="publishAudio()">Publish</button>
-    }
-    @if (team && team.id !== 1 && audioSrc) {
-      <button
-        mat-raised-button
-        color="primary"
-        class="article-control"
-        (click)="requestPublishFeedback()"
-        matTooltip="We do not currently support publishing. Please write an email to support@perpetuator.com explaining where you would like to publish this audio as we are currently integrating new systems."
-        matTooltipShowDelay="0"
-        matTooltipHideDelay="1000"
-      >
-        Publish
+    @if (audioSrc) {
+      <mat-checkbox [(ngModel)]="isLive" (change)="onIsLiveChange($event.checked)">
+        Add to RSS for Podcast
+      </mat-checkbox>
+      <button mat-raised-button color="primary" class="article-control" (click)="publishAudio()">
+        Publish to Telegram
       </button>
     }
     @if (audioSrc) {
@@ -32,10 +24,12 @@
     @if (downloadLink) {
       <button mat-raised-button color="primary" class="article-control" (click)="downloadAudio()">Download MP3</button>
     }
-    <button mat-fab extended disabled>
-      <mat-icon>group</mat-icon>
-      Team: {{ article.team.name }}
-    </button>
+    <div class="team-name">
+      <button mat-icon-button disabled>
+        <mat-icon>group</mat-icon>
+        Team: {{ article.team.name }}
+      </button>
+    </div>
     <mat-form-field class="full-width article-content">
       <mat-label>Title</mat-label>
       <input matInput [(ngModel)]="updatedTitle" />
@@ -49,6 +43,19 @@
     <span [matTooltip]="article.date | date: 'z'" matTooltipPosition="above">
       {{ article.date | date: 'short' : 'local' }}
     </span>
+    @if (article.podcastDate) {
+      | Published to Podcast on:
+      <span [matTooltip]="article.podcastDate | date: 'z'" matTooltipPosition="above">
+        {{ article.podcastDate | date: 'short' : 'local' }}
+      </span>
+    }
+    @if (article.telegramDate) {
+      | Published to Telegram on:
+      <span [matTooltip]="article.telegramDate | date: 'z'" matTooltipPosition="above">
+        {{ article.telegramDate | date: 'short' : 'local' }}
+      </span>
+    }
+
     <br />
     <br />
 

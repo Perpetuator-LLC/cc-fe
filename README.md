@@ -7,17 +7,15 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
-- [x] Cancel Pending Jobs
-- [ ] Publish & email debounce
+- [ ] Email debounce
 - [ ] On news list update filter is no longer applied
-- [x] Paginate Articles
-- [x] Audio generation to jobs infra (pass in article ID)
 - [ ] Allow user to remove self from team
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
   - [ ] Disable team name editing and podcast control if not owner
 - [ ] Disable trash icons if not owner and not self
 - [ ] Add delete account
 - [ ] Add delete team
+- [ ] All calls to services should handle errors so that they propagate to the user through messageService, unless we want services to handle them
 
 ## Refactoring
 
@@ -30,9 +28,6 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Ideal Enhancements
 
-- [ ] Add intro, outro, and prompt to Team
-- [ ] Add multiple channel publishing on TG to team
-- [ ] Add team to article detail page
 - [ ] On Article list page add a team filter
 
 ## Possible Enhancements
@@ -41,7 +36,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
 - [ ] Make `npm run generate` work to convert schema to types, or find a way to use them from the schema directly!?
 - [ ] Add foul language check for names, and articles?
-- [ ] Add ElevenLabs API Key to team
+- [ ] Add ElevenLabs API Key to team, or make upgrade feature?
 - [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
 - [ ] Add custom URL (to scrape) but scoped to this user only
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
@@ -59,10 +54,11 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
               ]
             },
 ```
-- [ ] Determine if Telegram has monitized API
+- [ ] Determine if Telegram has monetized API
 
 ## Testing
 
+- [x] Add multiple channel publishing on TG to team
 - [x] RSS Podcast feed
   - [ ] Add to Apple
   - [ ] Add to Spotify
@@ -70,6 +66,12 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Done
 
+- [x] Add intro, outro, and prompt to Team
+- [x] Add team to article detail page
+- [x] Cancel Pending Jobs
+- [x] Publish debounce
+- [x] Paginate Articles
+- [x] Audio generation to jobs infra (pass in article ID)
 - [x] Add a podcast page (added to team page)
 - [x] After job updates reload content or control subcomponent rerender
 - [x] Add job status as banner component

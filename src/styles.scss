@@ -94,13 +94,11 @@ $dark-theme: mat.define-theme(
       //background: mat.$m2-gray-palette,
     ),
     typography: (
-      //brand-family: 'Open Sans',
-      plain-family: 'Lexend',
       brand-family: 'Lexend',
-      //plain-family: 'Open Sans',
+      plain-family: 'Open Sans',
       bold-weight: 900,
-      medium-weight: 500,
-      regular-weight: 300,
+      medium-weight: 700,
+      regular-weight: 500,
     ),
     density: (
       scale: 0,
@@ -123,6 +121,13 @@ $light-theme: mat.define-theme(
       //success: mat.$green-palette,
       //warning: mat.$yellow-palette,
       //background: mat.$m2-gray-palette
+    ),
+    typography: (
+      brand-family: 'Lexend',
+      plain-family: 'Open Sans',
+      bold-weight: 900,
+      medium-weight: 700,
+      regular-weight: 500,
     ),
     density: (
       scale: 0,

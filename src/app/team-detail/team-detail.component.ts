@@ -32,7 +32,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatDivider } from '@angular/material/divider';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-team-detail',
@@ -69,7 +69,7 @@ import { MatDivider } from '@angular/material/divider';
     MatCardContent,
     MatFabButton,
     MatCheckbox,
-    MatDivider,
+    MatTooltip,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -90,6 +90,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     intro: '',
     prompt: '',
     outro: '',
+    tgChannelId: '',
+    tgResponse: '',
     members: [],
   };
   protected showPodcastFields = false;
@@ -288,41 +290,56 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.newUserForm.patchValue({ userId: user.id });
   }
 
-  saveTeam() {
-    if (this.teamForm.valid) {
-      const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId } =
-        this.teamForm.getRawValue();
-      const saveObservable = id
-        ? this.teamsService.updateTeam(
-            id,
-            name,
-            podcastEnabled,
-            podcastSlug,
-            intro,
-            prompt,
-            outro,
-            tgBotToken,
-            tgChannelId,
-          )
-        : this.teamsService.createTeam(name);
+  refreshTelegram() {
+    const { id } = this.teamForm.getRawValue();
+    this.teamsService.refreshTgResponse(id).subscribe({
+      next: () => {
+        this.messageService.success(`Team Telegram response refreshed successfully`);
+        this.initialFormValues = this.teamForm.getRawValue();
+        this.checkIfFormChanged();
+      },
+      error: (err) => {
+        this.messageService.error(`Failed to refresh Telegram response: ${err.message}`);
+      },
+    });
+  }
 
-      this.subscriptions.add(
-        saveObservable.subscribe({
-          next: () => {
-            this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
-            if (!id) {
-              this.router.navigate(['/teams']);
-            } else {
-              this.initialFormValues = this.teamForm.getRawValue();
-              this.checkIfFormChanged();
-            }
-          },
-          error: (err) => {
-            this.messageService.error(`Failed to ${id ? 'update' : 'create'} team: ${err.message}`);
-          },
-        }),
-      );
+  saveTeam() {
+    if (!this.teamForm.valid) {
+      return;
     }
+    const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId } =
+      this.teamForm.getRawValue();
+    const saveObservable = id
+      ? this.teamsService.updateTeam(
+          id,
+          name,
+          podcastEnabled,
+          podcastSlug,
+          intro,
+          prompt,
+          outro,
+          tgBotToken,
+          tgChannelId,
+        )
+      : this.teamsService.createTeam(name);
+
+    this.subscriptions.add(
+      saveObservable.subscribe({
+        next: () => {
+          this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
+          if (!id) {
+            this.router.navigate(['/teams']);
+          } else {
+            this.initialFormValues = this.teamForm.getRawValue();
+            this.checkIfFormChanged();
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to ${id ? 'update' : 'create'} team: ${err.message}`);
+        },
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -337,7 +354,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       return;
     }
     if (this.clipboard.copy(podcastUrl)) {
-      this.messageService.success('Podcast URL copied to clipboard!');
+      this.messageService.success('Podcast URL copied to clipboard');
     } else {
       this.messageService.error('Failed to copy podcast URL');
     }

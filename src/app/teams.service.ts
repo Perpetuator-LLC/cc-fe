@@ -60,6 +60,60 @@ export class TeamsService extends BaseService {
     );
   }
 
+  refreshTgResponse(id: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
+    const GQL = gql`
+      mutation UpdateTeam($id: ID!, $refreshTgResponse: Boolean) {
+        updateTeam(id: $id, refreshTgResponse: $refreshTgResponse) {
+          success
+          message
+          team {
+            id
+            name
+            podcastEnabled
+            podcastSlug
+            podcastUrl
+            intro
+            prompt
+            outro
+            tgChannelId
+            tgResponse
+            members {
+              user {
+                id
+                username
+              }
+              role
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      updateTeam: {
+        success: boolean;
+        message: string;
+        team: TeamsResult;
+      };
+    }
+
+    const refreshTgResponse = true;
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        id,
+        refreshTgResponse,
+      },
+    }).pipe(
+      map((data) => {
+        if (!data.updateTeam.success) {
+          throw new Error(data.updateTeam.message);
+        }
+        return data.updateTeam;
+      }),
+    );
+  }
+
   updateTeam(
     id: string,
     name: string | null = null,
@@ -70,6 +124,7 @@ export class TeamsService extends BaseService {
     outro: string | null = null,
     tgBotToken: string | null = null,
     tgChannelId: string | null = null,
+    refreshTgResponse: boolean | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const GQL = gql`
       mutation UpdateTeam(
@@ -82,6 +137,7 @@ export class TeamsService extends BaseService {
         $outro: String
         $tgBotToken: String
         $tgChannelId: String
+        $refreshTgResponse: Boolean
       ) {
         updateTeam(
           id: $id
@@ -93,6 +149,7 @@ export class TeamsService extends BaseService {
           outro: $outro
           tgBotToken: $tgBotToken
           tgChannelId: $tgChannelId
+          refreshTgResponse: $refreshTgResponse
         ) {
           success
           message
@@ -105,7 +162,6 @@ export class TeamsService extends BaseService {
             intro
             prompt
             outro
-            tgBotToken
             tgChannelId
             tgResponse
             members {
@@ -130,7 +186,18 @@ export class TeamsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId },
+      variables: {
+        id,
+        name,
+        podcastEnabled,
+        podcastSlug,
+        intro,
+        prompt,
+        outro,
+        tgBotToken,
+        tgChannelId,
+        refreshTgResponse,
+      },
     }).pipe(
       map((data) => {
         if (!data.updateTeam.success) {
@@ -153,8 +220,8 @@ export class TeamsService extends BaseService {
           intro
           prompt
           outro
-          tgBotToken
           tgChannelId
+          tgResponse
           members {
             user {
               id

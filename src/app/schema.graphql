@@ -53,7 +53,7 @@ type CryptoArticleResult {
   title: String
   content: String
   date: DateTime
-  audio: String
+  audioBase64: String
   audioUrl: String
   isLive: Boolean
   podcastDate: DateTime
@@ -71,8 +71,8 @@ type TeamType {
   intro: String
   prompt: String
   outro: String
-  tgBotToken: String
   tgChannelId: String
+  tgResponse: String
 }
 
 type TeamMembershipType {
@@ -174,8 +174,8 @@ type Mutation {
   createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
   createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleAudioChain
   updateCryptoArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateCryptoArticle
-  updateCryptoArticleAudio(id: ID!): UpdateCryptoArticleAudio
-  publishCryptoArticleAudio(id: ID!): PublishCryptoArticleAudio
+  updateCryptoArticleAudio(articleId: ID!): UpdateCryptoArticleAudio
+  publishCryptoArticleAudio(articleId: ID!): PublishCryptoArticleAudio
   updateUserSetting(key: String!, value: String!): GraphQLData
   retryJobs(ids: [UUID]!): RetryJobs
   deleteJobs(ids: [UUID]!): DeleteJobs
@@ -183,7 +183,7 @@ type Mutation {
   updateUserDetails(email: String!, username: String!): UpdateUserDetails
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, tgBotToken: String, tgChannelId: String): UpdateTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
   destroyTeam(teamId: ID!): DestroyTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam

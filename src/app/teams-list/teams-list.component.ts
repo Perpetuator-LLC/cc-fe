@@ -29,6 +29,8 @@ export interface TeamsResult {
   intro: string;
   prompt: string;
   outro: string;
+  tgChannelId: string;
+  tgResponse: string;
   members: MemberResult[];
 }
 
