@@ -4,72 +4,98 @@
 
 <app-message></app-message>
 
-<app-job-status-bar />
-
-<mat-card>
-  <mat-card-content class="form-container">
-    @if (audioSrc) {
-      <mat-checkbox [(ngModel)]="isLive" (change)="onIsLiveChange($event.checked)">
-        Add to RSS for Podcast
-      </mat-checkbox>
-      <button mat-raised-button color="primary" class="article-control" (click)="publishAudio()">
-        Publish to Telegram
-      </button>
-    }
-    @if (audioSrc) {
-      <audio controls [src]="audioSrc"></audio>
-    }
-    <button mat-raised-button color="primary" class="article-control" (click)="updateArticle()">Update</button>
-    <button mat-raised-button color="primary" class="article-control" (click)="generateAudio()">Generate Audio</button>
-    @if (downloadLink) {
-      <button mat-raised-button color="primary" class="article-control" (click)="downloadAudio()">Download MP3</button>
-    }
-    <div class="team-name">
-      <button mat-icon-button disabled>
-        <mat-icon>group</mat-icon>
-        Team: {{ article.team.name }}
-      </button>
-    </div>
-    <mat-form-field class="full-width article-content">
-      <mat-label>Title</mat-label>
-      <input matInput [(ngModel)]="updatedTitle" />
-    </mat-form-field>
-    <mat-form-field class="full-width article-content">
-      <mat-label>Content</mat-label>
-      <textarea matInput [(ngModel)]="updatedContent"></textarea>
-    </mat-form-field>
-
-    Generated on:
-    <span [matTooltip]="article.date | date: 'z'" matTooltipPosition="above">
-      {{ article.date | date: 'short' : 'local' }}
-    </span>
-    @if (article.podcastDate) {
-      | Published to Podcast on:
-      <span [matTooltip]="article.podcastDate | date: 'z'" matTooltipPosition="above">
-        {{ article.podcastDate | date: 'short' : 'local' }}
-      </span>
-    }
-    @if (article.telegramDate) {
-      | Published to Telegram on:
-      <span [matTooltip]="article.telegramDate | date: 'z'" matTooltipPosition="above">
-        {{ article.telegramDate | date: 'short' : 'local' }}
-      </span>
-    }
-
-    <br />
-    <br />
-
-    <mat-divider></mat-divider>
-
-    <h3>Related Articles</h3>
-    <mat-list>
-      @for (relatedArticle of linkedArticles; track relatedArticle.id) {
-        <mat-list-item>
-          <a matLine href="{{ relatedArticle.url }}" target="_blank">
-            {{ relatedArticle.title }}
+<div class="crypto-article-container">
+  <app-job-status-bar />
+  <mat-card>
+    <mat-card-content class="form-container">
+      <form [formGroup]="articleForm" (ngSubmit)="updateArticle()">
+        <div class="audio-container">
+          <a mat-button [routerLink]="['/team', articleForm.get('team.id')?.value]">
+            <mat-icon>group</mat-icon>
+            {{ articleForm.get('team.name')?.value }}
           </a>
-        </mat-list-item>
-      }
-    </mat-list>
-  </mat-card-content>
-</mat-card>
+          <button mat-raised-button color="primary" class="article-control">
+            <mat-icon>save</mat-icon>
+            Update
+          </button>
+          <button mat-raised-button color="primary" type="button" class="article-control" (click)="generateAudio()">
+            <mat-icon>mic</mat-icon>
+            Generate Audio
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            class="article-control"
+            [hidden]="!downloadLink"
+            (click)="downloadAudio()"
+          >
+            <mat-icon>download</mat-icon>
+            Download MP3
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            class="article-control"
+            [hidden]="!audioSrc"
+            (click)="publishAudio()"
+          >
+            <mat-icon>publish</mat-icon>
+            Publish to Telegram
+          </button>
+          @if (audioSrc) {
+            <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
+              Live on Podcast
+            </mat-checkbox>
+          }
+          <br />
+          @if (audioSrc) {
+            <audio controls [src]="audioSrc"></audio>
+          }
+        </div>
+        <mat-form-field class="full-width article-content">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" />
+        </mat-form-field>
+        <mat-form-field class="full-width article-content">
+          <mat-label>Content</mat-label>
+          <textarea matInput formControlName="content"></textarea>
+        </mat-form-field>
+
+        Generated on:
+        <span [matTooltip]="articleForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
+          {{ articleForm.get('date')?.value | date: 'short' : 'local' }}
+        </span>
+        @if (articleForm.get('podcastDate')?.value) {
+          | Published to Podcast on:
+          <span [matTooltip]="articleForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+            {{ articleForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+          </span>
+        }
+        @if (articleForm.get('telegramDate')?.value) {
+          | Published to Telegram on:
+          <span [matTooltip]="articleForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+            {{ articleForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+          </span>
+        }
+
+        <br />
+        <br />
+
+        <mat-divider></mat-divider>
+
+        <h3>Related Articles</h3>
+        <mat-list>
+          @for (relatedArticle of articleForm.get('newsSummaries')?.value; track relatedArticle.id) {
+            <mat-list-item>
+              <a matLine href="{{ relatedArticle.url }}" target="_blank">
+                {{ relatedArticle.title }}
+              </a>
+            </mat-list-item>
+          }
+        </mat-list>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

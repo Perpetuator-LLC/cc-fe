@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { PublishCryptoArticleAudio, UpdateCryptoArticleData } from './article-detail/article-detail.component';
 import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
@@ -46,10 +45,16 @@ export class CryptoArticleService extends BaseService {
     super(apollo);
   }
 
-  getCryptoArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC') {
+  getCryptoArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', teamId: string | null = null) {
     const GQL = gql`
-      query GetCryptoArticlesData($page: Int!, $pageSize: Int!, $orderBy: String!, $direction: SortDirection!) {
-        getCryptoArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
+      query GetCryptoArticlesData(
+        $page: Int!
+        $pageSize: Int!
+        $orderBy: String!
+        $direction: SortDirection!
+        $teamId: ID
+      ) {
+        getCryptoArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, teamId: $teamId) {
           success
           message
           totalRecords
@@ -82,7 +87,7 @@ export class CryptoArticleService extends BaseService {
 
     return this.query<Response>({
       query: GQL,
-      variables: { page, pageSize, orderBy, direction },
+      variables: { page, pageSize, orderBy, direction, teamId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -155,7 +160,7 @@ export class CryptoArticleService extends BaseService {
     updatedTitle: string | null,
     updatedContent: string | null,
     isLive: boolean | null,
-  ): Observable<UpdateCryptoArticleData> {
+  ): Observable<CryptoArticleData> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
@@ -171,10 +176,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      updateCryptoArticle: {
-        success: boolean;
-        message: string;
-      };
+      updateCryptoArticle: CryptoArticleData;
     }
 
     return this.mutate<Response>({
@@ -233,7 +235,7 @@ export class CryptoArticleService extends BaseService {
     );
   }
 
-  publishAudio(articleId: string): Observable<PublishCryptoArticleAudio> {
+  publishAudio(articleId: string) {
     if (articleId === null) return throwError(() => new Error('Article ID is required'));
 
     const GQL = gql`
@@ -241,6 +243,16 @@ export class CryptoArticleService extends BaseService {
         publishCryptoArticleAudio(articleId: $id) {
           success
           message
+          article {
+            id
+            date
+            title
+            content
+            audioBase64
+            isLive
+            podcastDate
+            telegramDate
+          }
         }
       }
     `;
@@ -249,6 +261,7 @@ export class CryptoArticleService extends BaseService {
       publishCryptoArticleAudio: {
         success: boolean;
         message: string;
+        article: Article;
       };
     }
 

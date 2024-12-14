@@ -6,54 +6,58 @@
 
 <app-message />
 
-<div class="jobs-container">
-  @if (jobs.length > 0) {
-    <table
-      mat-table
-      [dataSource]="dataSource"
-      (matSortChange)="sortChange($event)"
-      matSort
-      matSortActive="createdAt"
-      matSortDirection="desc"
-      matSortDisableClear
-    >
-      <ng-container matColumnDef="jobType">
-        <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let job">{{ jobTypeToString(job.jobType) }}</td>
-      </ng-container>
+<mat-card>
+  <mat-card-content>
+    <div class="jobs-container">
+      @if (jobs.length > 0) {
+        <table
+          mat-table
+          [dataSource]="dataSource"
+          (matSortChange)="sortChange($event)"
+          matSort
+          matSortActive="createdAt"
+          matSortDirection="desc"
+          matSortDisableClear
+        >
+          <ng-container matColumnDef="jobType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let job">{{ jobTypeToString(job.jobType) }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let job">{{ job.status.toUpperCase() }}</td>
-      </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let job">{{ job.status.toUpperCase() }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="message">
-        <th mat-header-cell *matHeaderCellDef>Message</th>
-        <td mat-cell *matCellDef="let job">{{ job.error || job.result }}</td>
-      </ng-container>
+          <ng-container matColumnDef="message">
+            <th mat-header-cell *matHeaderCellDef>Message</th>
+            <td mat-cell *matCellDef="let job">{{ job.error || job.result }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
-        <td mat-cell *matCellDef="let job">{{ job.createdAt | date: 'short' : 'local' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
+            <td mat-cell *matCellDef="let job">{{ job.createdAt | date: 'short' : 'local' }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="updatedAt">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</th>
-        <td mat-cell *matCellDef="let job">{{ job.updatedAt | date: 'short' : 'local' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="updatedAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</th>
+            <td mat-cell *matCellDef="let job">{{ job.updatedAt | date: 'short' : 'local' }}</td>
+          </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns" matTooltip="ID: {{ row.id }}"></tr>
-    </table>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" matTooltip="ID: {{ row.id }}"></tr>
+        </table>
 
-    <mat-paginator
-      [length]="totalJobs"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="onPageChange($event)"
-    >
-    </mat-paginator>
-  } @else {
-    <p>No jobs found.</p>
-  }
-</div>
+        <mat-paginator
+          [length]="totalJobs"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 20]"
+          (page)="onPageChange($event)"
+        >
+        </mat-paginator>
+      } @else {
+        <p>No jobs found.</p>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

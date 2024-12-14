@@ -29,3 +29,22 @@
     width: auto;
   }
 }
+
+.crypto-article-container {
+  .form-container button {
+    margin: 4px;
+  }
+  .form-container mat-checkbox {
+    margin: 4px;
+  }
+  .form-container mat-select {
+    margin-left: 4px;
+  }
+}
+
+.audio-container {
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+  margin-bottom: 1rem;
+}

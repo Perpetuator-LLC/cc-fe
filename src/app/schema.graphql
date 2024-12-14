@@ -1,6 +1,6 @@
 type Query {
   getCryptoNewsData(ids: [Int]): CryptoNewsData
-  getCryptoArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCryptoArticles
+  getCryptoArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedCryptoArticles
   getCryptoArticleData(id: ID!): CryptoArticleData
   getUserSettings(keys: [String]!): UserSettingsData
   getAllUsers: UserList
@@ -220,6 +220,7 @@ type UpdateCryptoArticleAudio {
 type PublishCryptoArticleAudio {
   success: Boolean
   message: String
+  article: CryptoArticleResult
 }
 
 type GraphQLData {

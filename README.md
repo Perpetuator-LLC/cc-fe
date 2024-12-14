@@ -32,6 +32,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Possible Enhancements
 
+- [ ] Adopt this menu: https://m3.material.io/get-started
 - [ ] Code only (friends) invites, build graph of users and their invites
 - [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
 - [ ] Make `npm run generate` work to convert schema to types, or find a way to use them from the schema directly!?

@@ -3,10 +3,11 @@ import { MatFormField } from '@angular/material/form-field';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
 import { Observable } from 'rxjs';
-import { TeamsService, User } from '../teams.service';
+import { TeamsService } from '../teams.service';
 import { map, startWith } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
+import { User } from '../types';
 
 @Component({
   selector: 'app-user-autocomplete',

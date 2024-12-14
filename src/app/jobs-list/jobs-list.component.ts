@@ -22,6 +22,7 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
+import { MatCard, MatCardContent } from '@angular/material/card';
 
 @Component({
   selector: 'app-jobs-list',
@@ -45,6 +46,8 @@ import { MessageComponent } from '../message/message.component';
     MatRowDef,
     MatPaginator,
     MessageComponent,
+    MatCard,
+    MatCardContent,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',

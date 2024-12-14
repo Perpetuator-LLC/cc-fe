@@ -1,8 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CryptoArticleData, Article, CryptoArticleService } from '../crypto-article.service';
-import { CryptoNewsResult } from '../crypto-news/crypto-news.component';
-import { ActivatedRoute } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Article, CryptoArticleData, CryptoArticleService } from '../crypto-article.service';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { MatList, MatListItem } from '@angular/material/list';
@@ -14,7 +13,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatLine } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatAnchor, MatButton, MatIconAnchor, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { JobType, stringToJobType } from '../job.service';
@@ -24,16 +23,13 @@ import { MatCheckbox } from '@angular/material/checkbox';
 export interface UpdateCryptoArticleData {
   success: boolean;
   message: string;
-}
-
-export interface UpdateCryptoArticleAudio {
-  success: boolean;
-  message: string;
+  article: CryptoArticleData;
 }
 
 export interface PublishCryptoArticleAudio {
   success: boolean;
   message: string;
+  article: CryptoArticleData;
 }
 
 @Component({
@@ -58,76 +54,79 @@ export interface PublishCryptoArticleAudio {
     MatIcon,
     MatIconButton,
     MatCheckbox,
+    ReactiveFormsModule,
+    MatIconAnchor,
+    RouterLink,
+    MatAnchor,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
 })
 export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  article: Article = {
-    id: '',
-    title: '',
-    content: '',
-    date: '',
-    audioBase64: '',
-    isLive: false,
-    podcastDate: '',
-    telegramDate: '',
-    newsSummaries: [],
-    team: {
-      id: 0,
-      name: '',
-      podcastEnabled: false,
-      podcastUrl: '',
-      podcastSlug: '',
-      members: [],
-      intro: '',
-      prompt: '',
-      outro: '',
-      tgChannelId: '',
-      tgResponse: '',
-    },
-  };
-  team = { id: 0, name: '', podcastEnabled: false, podcastUrl: '', podcastSlug: '', members: [] };
-  linkedArticles: CryptoNewsResult[] = [];
-  updatedTitle = '';
-  updatedContent = '';
-  isLive = false;
-  audioSrc: string | null = null; // Add audioSrc to store the audio URL
-  downloadLink: string | null = null; // Add downloadLink to store the download URL
+  articleForm: FormGroup;
+  audioSrc: string | null = null;
+  downloadLink: string | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
+  private articleId: string;
 
   constructor(
+    private fb: FormBuilder,
     private route: ActivatedRoute,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private articleService: CryptoArticleService,
-  ) {}
+  ) {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      throw new Error('Failed to get Article ID from route.');
+    }
+    this.articleId = id;
+    this.articleForm = this.fb.group({
+      id: [{ value: '', disabled: true }, Validators.required],
+      isLive: [false, Validators.required],
+      title: ['', Validators.required],
+      content: ['', Validators.required],
+      date: ['', Validators.required],
+      audioBase64: ['', Validators.required],
+      podcastDate: ['', Validators.required],
+      telegramDate: ['', Validators.required],
+      newsSummaries: this.fb.array([
+        this.fb.group({
+          id: [{ value: '', disabled: true }],
+          url: [{ value: '', disabled: true }],
+          title: [{ value: '', disabled: true }],
+        }),
+      ]),
+      team: this.fb.group({
+        id: [{ value: '', disabled: true }],
+        name: [{ value: '', disabled: true }],
+      }),
+    });
+  }
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    const articleId = this.route.snapshot.paramMap.get('id');
+
     this.subscriptions.add(
-      this.articleService.getCryptoArticleById(articleId).subscribe({
-        next: (data: CryptoArticleData) => {
+      this.articleService.getCryptoArticleById(this.articleId).subscribe({
+        next: (data) => {
           if (!data.success) {
             this.messageService.error(data.message);
             return;
           }
-          this.article = data.article;
-          this.updatedTitle = this.article.title;
-          this.updatedContent = this.article.content;
-          this.isLive = this.article.isLive;
-          this.linkedArticles = this.article.newsSummaries;
-          this.team.name = this.article.team.name;
-          this.team.id = Number(this.article.team.id);
+          this.articleForm.patchValue(data.article);
 
-          if (this.article.audioBase64) {
-            this.prepareAudioPlayer(this.article.audioBase64); // Prepare the audio player with the base64 audio
+          for (const newsSummary of data.article.newsSummaries) {
+            (this.articleForm.get('newsSummaries') as FormArray).push(this.fb.group(newsSummary));
+          }
+
+          if (this.articleForm.value.audioBase64) {
+            this.prepareAudioPlayer(this.articleForm.value.audioBase64);
           }
         },
         error: (err) => {
@@ -147,7 +146,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
       this.jobStatusBar.jobCompleted$.subscribe((job) => {
         if ([JobType.UPDATE_CRYPTO_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
           this.subscriptions.add(
-            this.articleService.getCryptoArticleById(this.article.id).subscribe({
+            this.articleService.getCryptoArticleById(this.articleId).subscribe({
               next: (data) => {
                 if (data.success && data.article.audioBase64) {
                   this.prepareAudioPlayer(data.article.audioBase64);
@@ -182,10 +181,12 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   publishAudio(): void {
+    this.messageService.info('Audio file publishing...');
     this.subscriptions.add(
-      this.articleService.publishAudio(this.article.id).subscribe({
-        next: () => {
+      this.articleService.publishAudio(this.articleId).subscribe({
+        next: (response) => {
           this.messageService.success('Audio file published successfully.');
+          this.articleForm.patchValue(response.article);
         },
         error: (err) => {
           this.messageService.error(err.message);
@@ -195,7 +196,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   onIsLiveChange(isLive: boolean) {
-    this.isLive = isLive;
+    this.articleForm.value.isLive = isLive;
     this.updateArticle();
   }
 
@@ -203,18 +204,14 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.downloadLink) {
       const a = document.createElement('a');
       a.href = this.downloadLink;
-      a.download = `crypto_article_${this.article.id}.mp3`; // Set the download file name
+      a.download = `crypto_article_${this.articleId}.mp3`; // Set the download file name
       a.click(); // Programmatically trigger the download
     }
   }
 
   generateAudio(): void {
-    if (!this.article.id || this.article.id === '') {
-      this.messageService.warning('No article provided for audio generation.');
-      return;
-    }
     this.subscriptions.add(
-      this.articleService.generateAudio(this.article.id).subscribe({
+      this.articleService.generateAudio(this.articleId).subscribe({
         next: (data) => {
           if (!data.success) {
             this.messageService.error(data.message);
@@ -235,9 +232,10 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   updateArticle(): void {
+    const formValues = this.articleForm.getRawValue() as Article;
     this.subscriptions.add(
       this.articleService
-        .updateArticle(this.article.id, this.updatedTitle, this.updatedContent, this.isLive)
+        .updateArticle(formValues.id, formValues.title, formValues.content, formValues.isLive)
         .subscribe({
           next: (response) => {
             if (!response.success) {
@@ -245,6 +243,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
               return;
             }
             this.messageService.success('Article updated successfully.');
+            this.articleForm.patchValue(response.article);
           },
           error: (err) => {
             this.messageService.error(err.message);

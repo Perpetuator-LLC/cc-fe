@@ -22,15 +22,15 @@ export interface MemberResult {
 
 export interface TeamsResult {
   id: number;
-  name: string;
-  podcastUrl: string;
+  name: string | null;
+  podcastUrl: string | null;
   podcastEnabled: boolean;
-  podcastSlug: string;
-  intro: string;
-  prompt: string;
-  outro: string;
-  tgChannelId: string;
-  tgResponse: string;
+  podcastSlug: string | null;
+  intro: string | null;
+  prompt: string | null;
+  outro: string | null;
+  tgChannelId: string | null;
+  tgResponse: string | null;
   members: MemberResult[];
 }
 

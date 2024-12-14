@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { MatCard } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
-import { MatLine } from '@angular/material/core';
+import { MatLine, MatOption } from '@angular/material/core';
 import { DatePipe, SlicePipe } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
@@ -25,7 +25,11 @@ import {
   MatTableModule,
 } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
 import { MatDivider } from '@angular/material/divider';
+import { TeamsService } from '../teams.service';
+import { TeamsResult } from '../teams-list/teams-list.component';
 
 @Component({
   selector: 'app-articles-list',
@@ -34,7 +38,7 @@ import { MatDivider } from '@angular/material/divider';
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    MatDivider,
+    MatLabel,
     MatCard,
     RouterLink,
     MatLine,
@@ -54,6 +58,11 @@ import { MatDivider } from '@angular/material/divider';
     MatRowDef,
     MatPaginator,
     MessageComponent,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatDivider,
+    MatCardContent,
   ],
   templateUrl: './articles-list.component.html',
   styleUrl: './articles-list.component.scss',
@@ -68,7 +77,10 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   currentPage = 0;
   sortDirection = 'DESC';
   sortActive = 'date';
-  loading = false;
+  loadingArticles = false;
+  loadingTeams = false;
+  selectedTeam: string | null = null;
+  teams: TeamsResult[] = [];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -79,6 +91,7 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private articleService: CryptoArticleService,
+    private teamsService: TeamsService,
   ) {}
 
   ngOnInit(): void {
@@ -86,6 +99,7 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadArticles();
+    this.loadTeams();
   }
 
   ngOnDestroy() {
@@ -93,22 +107,42 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   }
 
   loadArticles() {
-    this.loading = true;
+    this.loadingArticles = true;
     this.subscriptions.add(
       this.articleService
-        .getCryptoArticles(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
+        .getCryptoArticles(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedTeam)
         .subscribe({
           next: (data) => {
             this.articles = data.articles;
             this.dataSource.data = this.articles;
             this.totalArticles = data.totalRecords;
-            this.loading = false;
+            this.loadingArticles = false;
           },
           error: (error) => {
             this.messageService.error('Failed to load articles: ' + error.toString());
-            this.loading = false;
+            this.loadingArticles = false;
           },
         }),
+    );
+  }
+
+  loadTeams() {
+    this.loadingTeams = true;
+
+    this.subscriptions.add(
+      this.teamsService.getMyTeams().subscribe({
+        next: (teams: TeamsResult[]) => {
+          this.teams = teams;
+          this.loadingTeams = false;
+        },
+        error: (err: { message: string }) => {
+          this.loadingTeams = false;
+          this.messageService.error(`Failed to retrieve teams data: ${err.message}`);
+        },
+        complete: () => {
+          this.loadingTeams = false;
+        },
+      }),
     );
   }
 

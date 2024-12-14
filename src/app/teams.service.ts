@@ -4,11 +4,7 @@ import { Observable } from 'rxjs';
 import { TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
-
-export interface User {
-  id: string;
-  username: string;
-}
+import { User } from './types';
 
 @Injectable({
   providedIn: 'root',

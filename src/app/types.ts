@@ -13,3 +13,8 @@ export interface AutocompleteResult {
   name: string;
   cik: string;
 }
+
+export interface User {
+  id: string;
+  username: string;
+}

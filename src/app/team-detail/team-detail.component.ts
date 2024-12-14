@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
-import { TeamsService, User } from '../teams.service';
+import { TeamsService } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -33,6 +33,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
+import { User } from '../types';
 
 @Component({
   selector: 'app-team-detail',
@@ -76,26 +77,27 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   @ViewChild('autocomplete') autoComplete!: UserAutocompleteComponent;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   allUsers: User[] = [];
-  teamForm!: FormGroup;
-  newUserForm!: FormGroup;
+  teamForm: FormGroup;
+  newUserForm: FormGroup;
   private subscriptions = new Subscription();
   protected loading = false;
   supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
   protected initialFormValues: TeamsResult = {
     id: 0,
-    name: '',
-    podcastUrl: '',
+    name: null,
+    podcastUrl: null,
     podcastEnabled: false,
-    podcastSlug: '',
-    intro: '',
-    prompt: '',
-    outro: '',
-    tgChannelId: '',
-    tgResponse: '',
+    podcastSlug: null,
+    intro: null,
+    prompt: null,
+    outro: null,
+    tgChannelId: null,
+    tgResponse: null,
     members: [],
   };
   protected showPodcastFields = false;
   protected isFormChanged = false;
+  private teamId: string;
 
   constructor(
     private fb: FormBuilder,
@@ -106,7 +108,42 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
     private clipboard: Clipboard,
-  ) {}
+  ) {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      throw new Error('Failed to get Team ID from route.');
+    }
+    this.teamId = id;
+
+    this.teamForm = this.fb.group({
+      id: [{ value: '', disabled: true }],
+      name: [''],
+      podcastEnabled: [false],
+      podcastSlug: [{ value: '', disabled: true }],
+      podcastUrl: [''],
+      intro: [''],
+      prompt: [''],
+      outro: [''],
+      members: this.fb.array([]),
+      tgBotToken: [null],
+      tgChannelId: [null],
+      tgResponse: [null],
+    });
+
+    this.teamForm.get('podcastEnabled')?.valueChanges.subscribe((enabled) => {
+      const podcastSlugControl = this.teamForm.get('podcastSlug');
+      if (enabled) {
+        podcastSlugControl?.enable();
+      } else {
+        podcastSlugControl?.disable();
+      }
+    });
+
+    this.newUserForm = this.fb.group({
+      userId: ['', Validators.required],
+      role: ['', Validators.required],
+    });
+  }
 
   displayedColumns: string[] = ['username', 'role', 'actions'];
 
@@ -115,30 +152,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
-    this.teamForm = this.fb.group({
-      id: [{ value: '', disabled: true }],
-      name: [''],
-      podcastEnabled: [false],
-      podcastSlug: [''],
-      podcastUrl: [''],
-      intro: [''],
-      prompt: [''],
-      outro: [''],
-      members: this.fb.array([]),
-      tgBotToken: [''],
-      tgChannelId: [''],
-      tgResponse: [''],
-    });
-
-    this.newUserForm = this.fb.group({
-      userId: ['', Validators.required],
-      role: ['', Validators.required],
-    });
-
-    const teamId = this.route.snapshot.paramMap.get('id');
-    if (!teamId) {
-      throw new Error('Failed to get Team ID for updating Team');
-    }
     this.loading = true;
     this.subscriptions.add(
       this.teamsService.getAllUsers().subscribe((users) => {
@@ -146,21 +159,18 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       }),
     );
     this.subscriptions.add(
-      this.teamsService.getTeamById(teamId).subscribe({
+      this.teamsService.getTeamById(this.teamId).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
           this.initialFormValues = this.teamForm.getRawValue();
           this.showPodcastFields = team.podcastEnabled;
-          this.loading = false;
           this.checkIfFormChanged();
+          this.loading = false;
         },
         error: (err) => {
           this.loading = false;
           this.messageService.error(`Failed to retrieve team data: ${err.message}`);
-        },
-        complete: () => {
-          this.loading = false;
         },
       }),
     );
@@ -310,6 +320,10 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     }
     const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId } =
       this.teamForm.getRawValue();
+    if (podcastEnabled && !podcastSlug) {
+      this.messageService.error('Podcast slug is required when podcast is enabled');
+      return;
+    }
     const saveObservable = id
       ? this.teamsService.updateTeam(
           id,
@@ -326,12 +340,16 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       saveObservable.subscribe({
-        next: () => {
+        next: (data) => {
+          if (!data.success) {
+            this.messageService.error(data.message);
+            return;
+          }
           this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
           if (!id) {
             this.router.navigate(['/teams']);
           } else {
-            this.initialFormValues = this.teamForm.getRawValue();
+            this.initialFormValues = data ? data.team : this.teamForm.getRawValue();
             this.checkIfFormChanged();
           }
         },
