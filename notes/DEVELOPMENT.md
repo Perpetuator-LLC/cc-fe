@@ -7,6 +7,31 @@
 This project uses a CLI first approach. The CLI is the primary interface for the user. After that IDEs etc. are used for
 development, but you must be able to run any code generation or manipulation from the CLI.
 
+# Git Merge
+
+We are not currently paying for GitHub teams, so we are not enforcing rules on the repository. However, we should follow
+the following rules:
+
+- Only Linear History is allowed.
+- Do not merge your own pull requests.
+
+To merge for now we will use the following process:
+
+1. Create a new branch from `main`.
+2. Make your changes.
+3. Push your branch to the repository.
+4. Open a pull request.
+5. Wait for a review.
+
+When ready to merge:
+
+```shell
+git checkout main
+git pull origin main
+git merge --ff-only feature-branch
+git push origin main
+```
+
 # Git Commits
 
 ## Generating new Versions

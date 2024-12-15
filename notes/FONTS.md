@@ -1,6 +1,8 @@
-# Which Fonts
+# Fonts
 
-We use Dyslexic Fonts and Roboto.
+We use Dyslexia-friendly Fonts:
+- Lexend
+- Open Sans
 
 ## Adding Fonts
 
@@ -24,7 +26,7 @@ To add a Google Font to your Angular application, follow these steps:
    <head>
      <meta charset="UTF-8">
      <title>My Angular App</title>
-     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" />
    </head>
    <body>
      <app-root></app-root>
@@ -36,11 +38,11 @@ To add a Google Font to your Angular application, follow these steps:
   - Open your `src/styles.scss` file.
   - Add the font-family to your CSS.
 
-   ```scss
-   // src/styles.scss
-   body {
-     font-family: 'Roboto', sans-serif;
-   }
-   ```
+  ```scss
+  // src/styles.scss
+  body {
+    font-family: 'Roboto', sans-serif;
+  }
+  ```
 
 By following these steps, you will have integrated a Google Font into your Angular application.
