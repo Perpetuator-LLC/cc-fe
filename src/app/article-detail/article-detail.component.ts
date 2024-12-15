@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Article, CryptoArticleData, CryptoArticleService } from '../crypto-article.service';
+import { Article, CryptoArticleService } from '../crypto-article.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
@@ -13,24 +13,12 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatLine } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatAnchor, MatButton, MatIconAnchor, MatIconButton } from '@angular/material/button';
+import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { JobType, stringToJobType } from '../job.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
-
-export interface UpdateCryptoArticleData {
-  success: boolean;
-  message: string;
-  article: CryptoArticleData;
-}
-
-export interface PublishCryptoArticleAudio {
-  success: boolean;
-  message: string;
-  article: CryptoArticleData;
-}
 
 @Component({
   selector: 'app-article-detail',
@@ -52,10 +40,8 @@ export interface PublishCryptoArticleAudio {
     MatButton,
     MatInput,
     MatIcon,
-    MatIconButton,
     MatCheckbox,
     ReactiveFormsModule,
-    MatIconAnchor,
     RouterLink,
     MatAnchor,
   ],
