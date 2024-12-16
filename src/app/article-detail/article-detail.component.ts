@@ -53,6 +53,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   articleForm: FormGroup;
   audioSrc: string | null = null;
   downloadLink: string | null = null;
+  wordCount = 0;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -120,6 +121,15 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         },
       }),
     );
+    this.subscriptions.add(
+      this.articleForm.get('content')?.valueChanges.subscribe((value: string) => {
+        this.wordCount = this.countWords(value);
+      }),
+    );
+  }
+
+  private countWords(text: string): number {
+    return text ? text.trim().split(/\s+/).length : 0;
   }
 
   ngOnDestroy() {

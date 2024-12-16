@@ -62,23 +62,25 @@
           <mat-label>Content</mat-label>
           <textarea matInput formControlName="content"></textarea>
         </mat-form-field>
-
-        Generated on:
-        <span [matTooltip]="articleForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
-          {{ articleForm.get('date')?.value | date: 'short' : 'local' }}
-        </span>
-        @if (articleForm.get('podcastDate')?.value) {
-          | Published to Podcast on:
-          <span [matTooltip]="articleForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
-            {{ articleForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+        <div>
+          Word count: {{ wordCount }}
+          | Generated on:
+          <span [matTooltip]="articleForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
+            {{ articleForm.get('date')?.value | date: 'short' : 'local' }}
           </span>
-        }
-        @if (articleForm.get('telegramDate')?.value) {
-          | Published to Telegram on:
-          <span [matTooltip]="articleForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
-            {{ articleForm.get('telegramDate')?.value | date: 'short' : 'local' }}
-          </span>
-        }
+          @if (articleForm.get('podcastDate')?.value) {
+            | Published to Podcast on:
+            <span [matTooltip]="articleForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+              {{ articleForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+            </span>
+          }
+          @if (articleForm.get('telegramDate')?.value) {
+            | Published to Telegram on:
+            <span [matTooltip]="articleForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+              {{ articleForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+            </span>
+          }
+        </div>
 
         <br />
         <br />
