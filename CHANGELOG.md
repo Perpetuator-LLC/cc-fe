@@ -1,3 +1,21 @@
+# Changelog from v0.12.1 to v0.13.0
+
+This update adds the ability to publish articles to custom Telegram channels and groups and adds control for which articles are published to the podcast RSS feed.
+
+## Enhancements
+
+- A word count feature has been added to the article details content field, providing users with a quick overview of the length of each article.
+- We've introduced new fonts to improve readability and overall aesthetics of the application.
+- The article detail buttons and list have been cleaned up for a more streamlined user interface. Additionally, issues with the team slug and RSS URL being hidden have been fixed.
+- We've expanded our publishing options to include podcasts and Telegram per team, offering more ways for users to access and share content.
+- To enhance the user experience, we've added Telegram input fields and made it so that the call to action is hidden on the home page for logged-in users.
+
+## Cleanups
+
+- We've refactored the user detail changes to use our new messages infrastructure, resulting in a consistent and reliable system.
+- To improve the performance and readability of our code, we've removed numerous console.log statements and updated comments throughout the codebase.
+
+
 # Changelog from v0.12.0 to v0.12.1
 
 This update primarily focuses on fixing issues related to the audio generation on the article page and the replacement of special characters during article updates.
