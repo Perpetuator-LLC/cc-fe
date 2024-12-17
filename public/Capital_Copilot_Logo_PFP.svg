@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_1"
+   data-name="Layer 1"
+   viewBox="0 0 101.475 133.30499"
+   version="1.1"
+   sodipodi:docname="Capital_Copilot_Logo_PFP.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   width="101.475"
+   height="133.30499"
+   inkscape:export-filename="Capital_Copilot_Logo_Slanted.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="1.7323492"
+     inkscape:cx="59.74546"
+     inkscape:cy="28.573916"
+     inkscape:window-width="1840"
+     inkscape:window-height="1248"
+     inkscape:window-x="2089"
+     inkscape:window-y="486"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer3"
+     showborder="true"
+     labelstyle="below"
+     showguides="true" />
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .cls-1 {
+        fill: #f5f5f5;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #a6a6a6;
+      }
+    </style>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 2"
+     style="display:inline">
+    <circle
+       style="display:inline;fill:#5e009d;fill-opacity:1;stroke:#000000;stroke-width:0.495;stroke-opacity:0;image-rendering:auto;stroke-dasharray:none"
+       id="path1"
+       inkscape:label="path1"
+       cx="48.879318"
+       cy="63.612564"
+       r="90.258293" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 1"
+     style="display:inline">
+    <path
+       id="polygon1-9"
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:0px"
+       class="cls-2"
+       inkscape:label="polygon1-9"
+       d="m 101.475,133.305 v -92.23 h -61.88 l -0.01,21.22 h 40.68 v 49.79 h -23.28 v 10.61 h -10.29 v -10.61 H 36.36536 l -9.791016,21.22 z"
+       sodipodi:nodetypes="ccccccccccccc" />
+    <path
+       id="polygon2-3"
+       style="display:inline;fill:#010101;stroke-width:0px"
+       class="cls-1"
+       inkscape:label="polygon2-3"
+       d="m 56.985,26.525 h 8.381504 L 79.841567,5.305 H 5.145 v 92.23 h 61.88 l 0.01,-21.22 h -40.67 v -49.79 h 20.33 v -10.61 h 10.29 z"
+       sodipodi:nodetypes="ccccccccccccc" />
+    <path
+       id="polygon1"
+       style="display:inline;fill:#a6a6a6;stroke-width:0px"
+       class="cls-2"
+       inkscape:label="polygon1"
+       d="M 51.84,117.39 H 41.55 V 106.78 H 32.444894 L 21.021166,128 H 96.33 V 35.77 H 34.45 l -0.01,21.22 h 40.68 v 49.79 H 51.84 Z"
+       sodipodi:nodetypes="ccccccccccccc" />
+    <path
+       id="polygon2"
+       style="display:inline;fill:#f5f5f5;stroke-width:0px"
+       class="cls-1"
+       d="M 61.89,71.01 H 21.22 V 21.22 H 41.55 V 10.61 h 10.29 v 10.61 h 9.401949 L 75.308834,0 H 0 v 92.23 h 61.88 z"
+       sodipodi:nodetypes="ccccccccccccc"
+       inkscape:label="polygon2" />
+  </g>
+</svg>

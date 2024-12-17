@@ -27,7 +27,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MemberResult, TeamsResult } from '../teams-list/teams-list.component';
+import { MemberResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -82,22 +82,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
-  protected initialFormValues: TeamsResult = {
-    id: 0,
-    name: null,
-    podcastUrl: null,
-    podcastEnabled: false,
-    podcastSlug: null,
-    intro: null,
-    prompt: null,
-    outro: null,
-    tgChannelId: null,
-    tgResponse: null,
-    members: [],
-  };
-  protected showPodcastFields = false;
-  protected isFormChanged = false;
   private teamId: string;
+  protected podcastUrlDisabled = true;
 
   constructor(
     private fb: FormBuilder,
@@ -120,7 +106,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       name: [''],
       podcastEnabled: [false],
       podcastSlug: [{ value: '', disabled: true }],
-      podcastUrl: [''],
+      podcastUrl: [{ value: '', disabled: true }],
       intro: [''],
       prompt: [''],
       outro: [''],
@@ -132,11 +118,19 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     this.teamForm.get('podcastEnabled')?.valueChanges.subscribe((enabled) => {
       const podcastSlugControl = this.teamForm.get('podcastSlug');
+      const team = this.teamForm.getRawValue();
+      this.podcastUrlDisabled = !enabled;
       if (enabled) {
+        // if the podcast slug is empty snake case the team name
+        const teamName = this.teamForm.get('name')?.value;
+        if (!podcastSlugControl?.value && teamName) {
+          team.podcastSlug = teamName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        }
         podcastSlugControl?.enable();
       } else {
         podcastSlugControl?.disable();
       }
+      this.teamForm.patchValue(team);
     });
 
     this.newUserForm = this.fb.group({
@@ -163,9 +157,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
-          this.initialFormValues = this.teamForm.getRawValue();
-          this.showPodcastFields = team.podcastEnabled;
-          this.checkIfFormChanged();
           this.loading = false;
         },
         error: (err) => {
@@ -174,28 +165,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
-    this.subscriptions.add(
-      this.teamForm.valueChanges.subscribe(() => {
-        this.checkIfFormChanged();
-      }),
-    );
-  }
-
-  checkIfFormChanged() {
-    const currentFormValues = this.teamForm.getRawValue() as TeamsResult;
-    const changedFields = Object.keys(currentFormValues).filter((key) => {
-      const typedKey = key as keyof TeamsResult;
-      if (typedKey === 'members') {
-        return false; // Don't update based on members, that is handled separately
-      }
-      return currentFormValues[typedKey] !== this.initialFormValues[typedKey];
-    });
-
-    if (changedFields.length > 0) {
-      this.isFormChanged = true;
-    } else {
-      this.isFormChanged = false;
-    }
   }
 
   get members(): FormArray {
@@ -305,8 +274,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.teamsService.refreshTgResponse(id).subscribe({
       next: () => {
         this.messageService.success(`Team Telegram response refreshed successfully`);
-        this.initialFormValues = this.teamForm.getRawValue();
-        this.checkIfFormChanged();
       },
       error: (err) => {
         this.messageService.error(`Failed to refresh Telegram response: ${err.message}`);
@@ -348,9 +315,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
           if (!id) {
             this.router.navigate(['/teams']);
-          } else {
-            this.initialFormValues = data ? data.team : this.teamForm.getRawValue();
-            this.checkIfFormChanged();
           }
         },
         error: (err) => {
