@@ -1,3 +1,16 @@
+# Changelog from v0.13.0 to v0.13.1
+
+In this patch update, we have improved the podcast slug and URL interaction and added a new feature to allow users to update the podcast slug and URL. Additionally, we have made some enhancements to the user interface and added new standard operating procedures (SOPs) to guide users through the application.
+
+## Enhancements
+No new enhancements were added in this update.
+
+## Cleanups
+- Removed the update team checks for staleness. This change was made to improve the efficiency of the application by eliminating unnecessary checks.
+- Disabled slug and URL immediately. This was done to prevent any potential issues or errors that could arise from these features.
+- Added Standard Operating Procedures (SOPs). This addition will help guide users through the application and provide a more streamlined experience.
+
+
 # Changelog from v0.12.1 to v0.13.0
 
 This update adds the ability to publish articles to custom Telegram channels and groups and adds control for which articles are published to the podcast RSS feed.

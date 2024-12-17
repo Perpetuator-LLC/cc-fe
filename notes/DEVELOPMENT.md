@@ -62,7 +62,7 @@ grep '"version":' ../package.json
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.13.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.13.1"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -70,7 +70,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be-private
-python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.13.0' 'v0.12.1'
+python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.13.1' 'v0.13.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -79,10 +79,10 @@ Add the Git tag and push it to the repository.
 
 ```shell
 git add .. && \
-git commit -m "chore: bump version to 0.13.0" && \
+git commit -m "chore: bump version to 0.13.1" && \
 git push origin main && \
-git tag -a v0.13.0 -m "This update adds the ability to publish articles to custom Telegram channels and groups and adds control for which articles are published to the podcast RSS feed." && \
-git push origin v0.13.0
+git tag -a v0.13.1 -m "In this patch update, we have improved the podcast slug and URL interaction and added a new feature to allow users to update the podcast slug and URL. Additionally, we have made some enhancements to the user interface and added new standard operating procedures (SOPs) to guide users through the application." && \
+git push origin v0.13.1
 ```
 
 Now open a pull request to merge it.
