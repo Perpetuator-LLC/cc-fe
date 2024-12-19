@@ -97,7 +97,6 @@
         <div>
           <button
             mat-fab
-            formControlName="podcastUrl"
             color="primary"
             type="button"
             extended
@@ -111,7 +110,7 @@
       </div>
       <div class="member-row">
         <div>
-          <button mat-flat-button color="primary" type="submit">Save Team Settings</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="!teamForm.dirty">Save Team Settings</button>
         </div>
       </div>
     </form>

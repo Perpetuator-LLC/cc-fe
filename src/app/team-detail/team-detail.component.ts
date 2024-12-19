@@ -118,12 +118,11 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     this.teamForm.get('podcastEnabled')?.valueChanges.subscribe((enabled) => {
       const team = this.teamForm.getRawValue();
-      if (team.podcastEnabled === enabled) {
-        console.debug('Podcast enabled state not changed');
+      const podcastSlugControl = this.teamForm.get('podcastSlug');
+      if (enabled != podcastSlugControl?.disabled) {
+        // console.debug('Podcast slug control already enabled');
         return;
       }
-      console.debug('Podcast enabled state changed:', enabled);
-      const podcastSlugControl = this.teamForm.get('podcastSlug');
       team.podcastEnabled = enabled;
       this.podcastUrlDisabled = !enabled;
       if (enabled) {
@@ -319,6 +318,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             return;
           }
           this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
+          this.teamForm.patchValue(data.team);
+          this.teamForm.markAsPristine();
           if (!id) {
             this.router.navigate(['/teams']);
           }
