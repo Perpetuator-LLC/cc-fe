@@ -76,7 +76,7 @@
     "typescript": "~5.4.2",
     "typescript-eslint": "8.15.0"
   },
-  "repository": "git+https://github.com/eContriver/capital-copilot-fe.git",
+  "repository": "git+https://github.com/Perpetuator-LLC/capital-copilot-fe-private.git",
   "keywords": [
     "investing",
     "ai",
@@ -90,8 +90,8 @@
   "author": "Nik Cimino",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eContriver/capital-copilot-fe/issues"
+    "url": "https://github.com/Perpetuator-LLC/capital-copilot-fe-private/issues"
   },
-  "homepage": "https://github.com/eContriver/capital-copilot-fe#readme",
+  "homepage": "https://github.com/Perpetuator-LLC/capital-copilot-fe-private#readme",
   "main": "index.js"
 }

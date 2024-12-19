@@ -8,8 +8,7 @@
 2. Add the bot to the group.
 3. Give the bot admin permissions.
 4. Get the chat ID of the group.
-5. Use the chat ID to send messages to the group.
-6. Use the bot to send messages to the group.
+5. Use the chat ID and bot Token on the Capital Copilot site.
 
 ### Creating a Bot
 
@@ -62,13 +61,13 @@ Select the channel you want to post in and notice the URL:
 
 The chat ID is `2123456789`
 
-The next step is to add the Capital Copilot Bot to the group:
+The next step is to add the new Bot to the group:
 - In the Telegram group, click on the group name
   - Click on 'Edit'
   - Click on 'Admins'
   - Click on 'Add Admin'
-  - Search for 'Capital Copilot'
-  - Click on 'Capital Copilot': @capital_copilot_crypto_news_bot
+  - Search for your new bot name
+  - Click on your new bot name (e.g. `My 
   - Disable all permissions except 'Post Messages'
   - Click on 'Done'
 
@@ -93,7 +92,7 @@ The chat ID is `-2123456789`. Set the TELGRAM_CHAT_ID environment variable to: -
 ### Creating the Team
 
 The first step is for the group to be created:
-- Visit https://copilot.perpetuator.com
+- Visit https://capitalcopilot.io
 - Click on 'Teams'
   - Click on 'Create Team'
   - Enter the name of the team

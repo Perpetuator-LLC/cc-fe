@@ -2,7 +2,7 @@
 
 ## Telegram User: Add Bot
 
-The next step is to add the Capital Copilot Bot to the group:
+The only step for the Telegram user is to add the Capital Copilot Bot to the group:
 - In the Telegram group, click on the group name
   - Click on 'Edit'
   - Click on 'Admins'
@@ -32,8 +32,8 @@ The chat ID is `2123456789`.
 
 ### Creating the Team
 
-The first step is for the group to be created:
-- Visit https://copilot.perpetuator.com
+The next step is for the Team to be created:
+- Visit https://capitalcopilot.io
 - Click on 'Teams'
   - Click on 'Create Team'
   - Enter the name of the team
@@ -45,8 +45,7 @@ The first step is for the group to be created:
   - Outro
   - Bot Token
   - Chat ID
-- Save this for now
-
-- Click on 'Add Members'
-  - Enter the Telegram username of the person you want to invite
-  - Click 'Invite'
+- Save this 
+- Verify that the Bot Token and Chat ID are correct by looking at the Telegram Response
+  - If you see Success, then the Bot Token and Chat ID are correct
+  - If you see an error, then the Bot Token and Chat ID are incorrect

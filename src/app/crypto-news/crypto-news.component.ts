@@ -108,9 +108,6 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.teams = teams.filter((team) =>
           team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
         );
-        if (this.teams.length > 0) {
-          this.selectedTeamId = this.teams[0].id;
-        }
       }),
     );
   }

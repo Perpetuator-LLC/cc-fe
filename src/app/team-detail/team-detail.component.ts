@@ -117,13 +117,19 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
 
     this.teamForm.get('podcastEnabled')?.valueChanges.subscribe((enabled) => {
-      const podcastSlugControl = this.teamForm.get('podcastSlug');
       const team = this.teamForm.getRawValue();
+      if (team.podcastEnabled === enabled) {
+        console.debug('Podcast enabled state not changed');
+        return;
+      }
+      console.debug('Podcast enabled state changed:', enabled);
+      const podcastSlugControl = this.teamForm.get('podcastSlug');
+      team.podcastEnabled = enabled;
       this.podcastUrlDisabled = !enabled;
       if (enabled) {
         // if the podcast slug is empty snake case the team name
-        const teamName = this.teamForm.get('name')?.value;
-        if (!podcastSlugControl?.value && teamName) {
+        const teamName = team.name;
+        if (!team.podcastSlug && teamName) {
           team.podcastSlug = teamName.toLowerCase().replace(/[^a-z0-9]/g, '_');
         }
         podcastSlugControl?.enable();
