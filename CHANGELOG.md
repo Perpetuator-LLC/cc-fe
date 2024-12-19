@@ -1,3 +1,15 @@
+# Changelog from v0.13.1 to v0.13.2
+
+In this patch update, we have fixed a loop in the article page and changed the default publish team to 'none' to make publishing more intentional.
+
+## Enhancements
+No new enhancements were added in this update.
+
+## Cleanups
+- The default publish team has been set to 'none'. This change has been made to make the publications more intentional and prevent unintended publications.
+- We have fixed a loop in the podcast enabled update. This will prevent the application from getting stuck in a loop, thereby improving its performance and reliability.
+
+
 # Changelog from v0.13.0 to v0.13.1
 
 In this patch update, we have improved the podcast slug and URL interaction and added a new feature to allow users to update the podcast slug and URL. Additionally, we have made some enhancements to the user interface and added new standard operating procedures (SOPs) to guide users through the application.
