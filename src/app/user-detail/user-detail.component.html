@@ -49,3 +49,31 @@
     <button mat-raised-button color="primary" type="submit">Change Password</button>
   </form>
 </mat-card>
+
+<mat-card class="danger-zone">
+  <mat-card-header>
+    <mat-card-title> Danger Zone </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title> Delete Account </mat-panel-title>
+          <mat-panel-description> This action is irreversible. </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>Are you sure you want to delete your account?</p>
+        <div class="action-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Delete Confirmation</mat-label>
+            <input
+              matInput
+              placeholder="Type team name '{{ userDetailForm.get('email')?.value }}' to confirm"
+              [(ngModel)]="deleteConfirmation"
+            />
+          </mat-form-field>
+          <button mat-flat-button color="warn" type="button" (click)="deleteDialog()">Delete Team</button>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </mat-card-content>
+</mat-card>

@@ -370,7 +370,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         message:
           "<h3>Removing team '" +
           teamName +
-          "' will remove all associated articles and audio files owned by this team.</h3>" +
+          "' will remove all associated articles and audio files owned by this team. This cannot be undone.</h3>" +
           '<br/><br/><h2>Are you sure you want to proceed?</h2>',
       },
     });

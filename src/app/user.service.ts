@@ -13,7 +13,7 @@ export interface UserDetails {
 
 export interface UpdateUserDetailsResponse {
   data?: {
-    updateUserDetails: StatusAndMessageData;
+    updateUser: StatusAndMessageData;
   };
 }
 
@@ -270,10 +270,10 @@ export class UserService extends BaseService implements OnDestroy {
     this.userDetailsSignal.set(null);
   }
 
-  updateUserDetails(username: string, email: string): Observable<StatusAndMessageData> {
+  updateUser(username: string, email: string): Observable<StatusAndMessageData> {
     const UPDATE_USER_DETAILS = gql`
-      mutation UpdateUserDetails($username: String!, $email: String!) {
-        updateUserDetails(username: $username, email: $email) {
+      mutation UpdateUser($username: String!, $email: String!) {
+        updateUser(username: $username, email: $email) {
           success
           message
         }
@@ -289,7 +289,7 @@ export class UserService extends BaseService implements OnDestroy {
       .pipe(
         map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.data?.updateUserDetails || { success: false, message: 'Failed to update details' },
+          (result: any) => result.data?.updateUser || { success: false, message: 'Failed to update details' },
         ),
         catchError((error) => {
           console.error('GraphQL query error:', error);
@@ -303,5 +303,35 @@ export class UserService extends BaseService implements OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  deleteUser(confirm: string) {
+    const DELETE_USER = gql`
+      mutation DeleteUser($confirm: String!) {
+        deleteUser(confirm: $confirm) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      deleteUser: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: DELETE_USER,
+      variables: { confirm },
+    }).pipe(
+      map((data) => {
+        if (!data.deleteUser.success) {
+          throw new Error(data.deleteUser.message);
+        }
+        return data.deleteUser;
+      }),
+    );
   }
 }

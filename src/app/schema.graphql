@@ -180,7 +180,8 @@ type Mutation {
   retryJobs(ids: [UUID]!): RetryJobs
   deleteJobs(ids: [UUID]!): DeleteJobs
   updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
-  updateUserDetails(email: String!, username: String!): UpdateUserDetails
+  updateUser(email: String!, username: String!): UpdateUser
+  deleteUser(confirm: String!): DeleteUser
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
   updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
@@ -245,7 +246,12 @@ type UpdateCookieConsent {
   message: String
 }
 
-type UpdateUserDetails {
+type UpdateUser {
+  success: Boolean
+  message: String
+}
+
+type DeleteUser {
   success: Boolean
   message: String
 }
