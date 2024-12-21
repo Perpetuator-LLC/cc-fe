@@ -398,4 +398,34 @@ export class TeamsService extends BaseService {
       }),
     );
   }
+
+  deleteTeam(teamId: string, confirm: string) {
+    const DELETE_TEAM = gql`
+      mutation DeleteTeam($teamId: ID!, $confirm: String!) {
+        deleteTeam(teamId: $teamId, confirm: $confirm) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      deleteTeam: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: DELETE_TEAM,
+      variables: { teamId, confirm },
+    }).pipe(
+      map((data) => {
+        if (!data.deleteTeam.success) {
+          throw new Error(data.deleteTeam.message);
+        }
+        return data.deleteTeam;
+      }),
+    );
+  }
 }

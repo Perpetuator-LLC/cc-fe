@@ -184,7 +184,7 @@ type Mutation {
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
   updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
-  destroyTeam(teamId: ID!): DestroyTeam
+  deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
   resendEmailChange: ResendEmailChange
@@ -267,7 +267,7 @@ type UpdateTeam {
   team: TeamType
 }
 
-type DestroyTeam {
+type DeleteTeam {
   success: Boolean
   message: String
 }

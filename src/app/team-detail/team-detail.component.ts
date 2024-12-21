@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
@@ -34,6 +34,13 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { User } from '../types';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelDescription,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 @Component({
   selector: 'app-team-detail',
@@ -71,6 +78,12 @@ import { User } from '../types';
     MatFabButton,
     MatCheckbox,
     MatTooltip,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    FormsModule,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -84,6 +97,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
   private teamId: string;
   protected podcastUrlDisabled = true;
+  protected deleteConfirmation = '';
 
   constructor(
     private fb: FormBuilder,
@@ -347,5 +361,38 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     } else {
       this.messageService.error('Failed to copy podcast URL');
     }
+  }
+
+  deleteTeamDialog() {
+    const teamName = this.teamForm.get('name')?.value;
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message:
+          "<h3>Removing team '" +
+          teamName +
+          "' will remove all associated articles and audio files owned by this team.</h3>" +
+          '<br/><br/><h2>Are you sure you want to proceed?</h2>',
+      },
+    });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        // get confirmation from user
+        this.deleteTeam();
+      }
+    });
+  }
+
+  private deleteTeam() {
+    this.subscriptions.add(
+      this.teamsService.deleteTeam(this.teamId, this.deleteConfirmation).subscribe({
+        next: () => {
+          this.messageService.success('Team deleted successfully');
+          this.router.navigate(['/teams']);
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to delete team: ${err.message}`);
+        },
+      }),
+    );
   }
 }

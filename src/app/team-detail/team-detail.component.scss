@@ -11,7 +11,8 @@
   }
 }
 
-.team-card {
+.team-card,
+.members-card {
   margin-bottom: 1em;
 }
 
@@ -59,5 +60,21 @@ mat-divider {
   button {
     flex: 0 0 auto;
     margin-left: 8px;
+  }
+}
+
+.danger-zone {
+  color: red;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
+
+  mat-form-field,
+  button {
+    flex: 1 1 100%;
   }
 }
