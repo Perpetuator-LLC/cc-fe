@@ -73,6 +73,8 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
     this.changePasswordForm = this.fb.group(
       {
+        username: ['', Validators.required],
+        email: ['', Validators.required],
         newPassword: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
       },
@@ -82,6 +84,10 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     effect(() => {
       const userData = this.userService.userDetails();
       this.userDetailForm.patchValue({
+        username: userData?.username || '',
+        email: userData?.email || '',
+      });
+      this.changePasswordForm.patchValue({
         username: userData?.username || '',
         email: userData?.email || '',
       });
@@ -109,14 +115,12 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.userService.loadUserEmailChangePending().subscribe({
       next: (emailChangePendingDetails) => {
         this.emailChangePending = emailChangePendingDetails;
-        console.debug('Email change pending:', this.emailChangePending);
       },
       error: (err) => {
         console.error('Failed to load email change pending:', err);
       },
     });
     this.emailChangePending = this.userService.emailChangePendingDetails;
-    console.debug('Email change pending initial value:', this.emailChangePending);
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
@@ -170,6 +174,10 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                   username: userDetails.username,
                   email: userDetails.email,
                 });
+                this.changePasswordForm.patchValue({
+                  username: userDetails.username,
+                  email: userDetails.email,
+                });
               },
             });
             this.userService.loadUserEmailChangePending().subscribe({
@@ -186,7 +194,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to update user details:', err);
-          this.messageService.error('Failed to update user details. Please try again.');
+          this.messageService.error(`Failed to update user details: ${err.message}`);
         },
       });
     } else {
@@ -207,6 +215,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       this.userService.changePassword(newPassword).subscribe({
         next: () => {
           this.messageService.success('Password changed successfully.');
+          window.location.reload();
         },
         error: (err) => {
           console.error('Failed to change password:', err);
@@ -220,18 +229,11 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   deleteDialog() {
     this.subscriptions.add(
-      this.teamService.getMyTeams().subscribe({
-        next: (teams) => {
-          // if (teams.length > 0) {
-          //   this.messageService.error('You must leave all teams before deleting your account.');
-          //   return;
-          // }
-          // Find all of teams where this user is an owner and is the only owner, those teams will be deleted:
-          const deletingTeams = teams
-            .filter((team) => team.members.length === 1 && team.members[0].role === 'owner')
-            .map((team) => team.name);
-          const leavingTeams = teams.filter((team) => team.members.length > 1).map((team) => team.name);
-          this.openConfirmationDialog(deletingTeams, leavingTeams);
+      this.teamService.getDeleteUserResults().subscribe({
+        next: (data) => {
+          const deleteTeamNames = data.deletingTeams.map((team) => team.name);
+          const leavingTeamNames = data.leavingTeams.map((team) => team.name);
+          this.openConfirmationDialog(deleteTeamNames, leavingTeamNames);
         },
         error: (err) => {
           this.messageService.error('Failed to load teams: ' + err.message);
@@ -249,14 +251,14 @@ export class UserDetailComponent implements OnInit, OnDestroy {
           email +
           "' will result in the following actions:<br/><br/>" +
           (deletingTeams?.length === 0
-            ? 'You are not the owner of any teams, so none will be deleted.'
+            ? 'You are not the sole owner of any teams, so no teams will be deleted.'
             : "You are the sole owner of the following team(s) and they will be permanently deleted: '" +
               deletingTeams.join("', '") +
               "'<br /><br/>WARNING: The deleted team's articles and audio files will also be permanently deleted.") +
           '<br/><br/>' +
           (leavingTeams?.length === 0
-            ? 'You will not be removed any teams.'
-            : "You will also be removed from team(s): '" + leavingTeams.join("', '") + "'") +
+            ? 'You will not be removed from any teams.'
+            : "You will be removed from team(s): '" + leavingTeams.join("', '") + "'") +
           '<br/><br/>' +
           ' None of these actions can be undone.</h3>' +
           '<br/><br/><h2>Are you sure you want to proceed?</h2>',
@@ -279,7 +281,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
           this.router.navigate(['/home']);
         },
         error: (err) => {
-          this.messageService.error(`Failed to delete team: ${err.message}`);
+          this.messageService.error(`Failed to delete account: ${err.message}`);
         },
       }),
     );

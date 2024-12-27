@@ -59,7 +59,13 @@ export class ThemeService implements OnDestroy {
     if (!this.authService.isLoggedIn()) {
       return; // User not logged in, skipping user preferences update
     }
-    this.userSettingService.updateUserSetting('theme', theme);
+    this.subscriptions.add(
+      this.userSettingService.updateUserSetting('theme', theme).subscribe({
+        error: (error) => {
+          console.error('Failed to update user theme preference:', error);
+        },
+      }),
+    );
   }
 
   loadTheme(): void {

@@ -1,16 +1,17 @@
-mat-card {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
 mat-form-field {
   width: 100%;
   margin-bottom: 1rem;
 }
 
+.email-change-notification {
+  max-width: 1016px;
+  margin: 1rem 8px;
+}
+
 .danger-zone {
   color: red;
+  max-width: 1016px;
+  margin: 1rem 8px;
 }
 
 .action-row {
@@ -22,5 +23,20 @@ mat-form-field {
   mat-form-field,
   button {
     flex: 1 1 100%;
+  }
+}
+
+.user-details {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
+  max-width: 1032px;
+  justify-content: center;
+  align-items: center;
+
+  mat-card {
+    flex: 1 1 auto;
+    max-width: 500px;
   }
 }

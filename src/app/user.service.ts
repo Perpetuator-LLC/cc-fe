@@ -1,6 +1,6 @@
 import { Injectable, signal, WritableSignal, OnDestroy } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { catchError, map, Observable, of, Subscription, throwError } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseResponse, BaseService, CommonResponse } from './base.service';
 
@@ -11,12 +11,6 @@ export interface UserDetails {
   permissions: string[];
 }
 
-export interface UpdateUserDetailsResponse {
-  data?: {
-    updateUser: StatusAndMessageData;
-  };
-}
-
 export interface UserSetting {
   key: string;
   value: string;
@@ -25,32 +19,6 @@ export interface UserSetting {
 export interface StatusAndMessageData {
   success: boolean;
   message: string;
-}
-
-export interface CancelEmailChangeResponse {
-  errors?: [{ message: string }];
-  data?: {
-    cancelEmailChange: StatusAndMessageData;
-  };
-}
-
-export interface ResendEmailChangeResponse {
-  errors?: [{ message: string }];
-  data?: {
-    resendEmailChange: StatusAndMessageData;
-  };
-}
-
-export interface ChangePasswordData {
-  success: boolean;
-  message: string;
-}
-
-export interface ChangePasswordResponse {
-  errors?: [{ message: string }];
-  data?: {
-    updateUserSetting: StatusAndMessageData;
-  };
 }
 
 @Injectable({
@@ -101,7 +69,7 @@ export class UserService extends BaseService implements OnDestroy {
     );
   }
 
-  updateUserSetting(key: string, value: string): void {
+  updateUserSetting(key: string, value: string) {
     const UPDATE_USER_SETTING = gql`
       mutation UpdateUserSetting($key: String!, $value: String!) {
         updateUserSetting(key: $key, value: $value) {
@@ -111,15 +79,19 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    this.mutate<BaseResponse>({
+    interface Response {
+      updateUserSetting: BaseResponse;
+    }
+
+    return this.mutate<Response>({
       mutation: UPDATE_USER_SETTING,
       variables: { key, value },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.success) {
-          throw new Error(data.message);
+        if (!data.updateUserSetting.success) {
+          throw new Error(data.updateUserSetting.message);
         }
+        return data.updateUserSetting;
       }),
     );
   }
@@ -134,14 +106,17 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    return this.mutate<BaseResponse>({
+    interface Response {
+      changePassword: BaseResponse;
+    }
+
+    return this.mutate<Response>({
       mutation: CHANGE_PASSWORD,
       variables: { password },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.success) {
-          throw new Error(data.message);
+        if (!data.changePassword.success) {
+          throw new Error(data.changePassword.message);
         }
         return null; // Success, null is returned. All errors were already handled and no new data to return.
       }),
@@ -187,7 +162,7 @@ export class UserService extends BaseService implements OnDestroy {
     return observable;
   }
 
-  loadUserEmailChangePending(): Observable<{ newEmail: string } | null> {
+  loadUserEmailChangePending() {
     const GQL = gql`
       query GetEmailChangePending {
         getEmailChangePending {
@@ -196,21 +171,26 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    return this.apollo
-      .query<{ getEmailChangePending: { newEmail: string } }>({
-        query: GQL,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map((result) => result.data?.getEmailChangePending || null),
-        catchError((error) => {
-          console.error('Failed to load email change pending:', error);
-          return of(null);
-        }),
-      );
+    interface Response {
+      getEmailChangePending: {
+        newEmail: string;
+      };
+    }
+
+    return this.query<Response>({
+      query: GQL,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.getEmailChangePending) {
+          return null;
+        }
+        return data.getEmailChangePending;
+      }),
+    );
   }
 
-  cancelEmailChange(): Observable<null> {
+  cancelEmailChange() {
     const CANCEL_EMAIL_CHANGE = gql`
       mutation CancelEmailChange {
         cancelEmailChange {
@@ -220,25 +200,27 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    return this.apollo
-      .mutate<CancelEmailChangeResponse>({
-        mutation: CANCEL_EMAIL_CHANGE,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) =>
-            result.data?.resendEmailChange || { success: false, message: 'Failed to resend email change' },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-        }),
-      );
+    interface Response {
+      cancelEmailChange: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: CANCEL_EMAIL_CHANGE,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.cancelEmailChange.success) {
+          throw new Error(data.cancelEmailChange.message);
+        }
+        return data.cancelEmailChange;
+      }),
+    );
   }
 
-  resendEmailChange(): Observable<null> {
+  resendEmailChange() {
     const RESEND_EMAIL_CHANGE = gql`
       mutation ResendEmailChange {
         resendEmailChange {
@@ -248,29 +230,31 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    return this.apollo
-      .mutate<ResendEmailChangeResponse>({
-        mutation: RESEND_EMAIL_CHANGE,
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) =>
-            result.data?.resendEmailChange || { success: false, message: 'Failed to resend email change' },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-        }),
-      );
+    interface Response {
+      resendEmailChange: {
+        success: boolean;
+        message: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: RESEND_EMAIL_CHANGE,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.resendEmailChange.success) {
+          throw new Error(data.resendEmailChange.message);
+        }
+        return data.resendEmailChange;
+      }),
+    );
   }
 
   clearUserDetails(): void {
     this.userDetailsSignal.set(null);
   }
 
-  updateUser(username: string, email: string): Observable<StatusAndMessageData> {
+  updateUser(username: string, email: string) {
     const UPDATE_USER_DETAILS = gql`
       mutation UpdateUser($username: String!, $email: String!) {
         updateUser(username: $username, email: $email) {
@@ -280,25 +264,21 @@ export class UserService extends BaseService implements OnDestroy {
       }
     `;
 
-    return this.apollo
-      .mutate<UpdateUserDetailsResponse>({
-        mutation: UPDATE_USER_DETAILS,
-        variables: { username, email },
-        fetchPolicy: 'network-only',
-      })
-      .pipe(
-        map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.data?.updateUser || { success: false, message: 'Failed to update details' },
-        ),
-        catchError((error) => {
-          console.error('GraphQL query error:', error);
-          if (error.cause?.error?.errors) {
-            throw new Error(error.cause.error.errors.map((e: { message: string }) => e.message).join(', '));
-          }
-          return throwError(() => new Error(`GraphQL Mutation Error: ${error.message}`));
-        }),
-      );
+    interface Response {
+      updateUser: StatusAndMessageData;
+    }
+
+    return this.mutate<Response>({
+      mutation: UPDATE_USER_DETAILS,
+      variables: { username, email },
+    }).pipe(
+      map((data) => {
+        if (!data.updateUser.success) {
+          throw new Error(data.updateUser.message);
+        }
+        return data.updateUser;
+      }),
+    );
   }
 
   ngOnDestroy() {

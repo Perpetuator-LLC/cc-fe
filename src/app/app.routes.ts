@@ -85,6 +85,12 @@ export const routes: Routes = [
     title: 'Change Email',
   },
   {
+    path: 'cancel-change-email',
+    loadComponent: () =>
+      import('./cancel-change-email/cancel-change-email.component').then((c) => c.CancelChangeEmailComponent),
+    title: 'Cancel Change Email',
+  },
+  {
     path: 'reset',
     loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',

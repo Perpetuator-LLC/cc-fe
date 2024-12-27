@@ -3,77 +3,112 @@
 </ng-template>
 <app-message></app-message>
 
-@if (emailChangePending) {
-  <mat-card class="email-change-notification">
-    <p>Your email change to {{ emailChangePending.newEmail }} is pending verification.</p>
-    <button mat-raised-button color="primary" (click)="resendEmailChange()">Resend Verification Email</button>
-    <button mat-button color="accent" (click)="cancelEmailChange()">Cancel Email Change</button>
-  </mat-card>
-}
+<div class="profile">
+  @if (emailChangePending) {
+    <mat-card class="email-change-notification">
+      <mat-card-header>
+        <mat-card-title> Email Change Pending </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Your email change to {{ emailChangePending.newEmail }} is pending verification.</p>
+        <button mat-raised-button color="primary" (click)="resendEmailChange()">Resend Verification Email</button>
+        <button mat-button color="accent" (click)="cancelEmailChange()">Cancel Email Change</button>
+      </mat-card-content>
+    </mat-card>
+  }
 
-<mat-card>
-  <form [formGroup]="userDetailForm" (ngSubmit)="onSubmitUserDetails()">
-    <mat-form-field appearance="fill">
-      <mat-label>Username</mat-label>
-      <input matInput formControlName="username" required />
-      <mat-hint>Username is publicly visible, do not use personally identifying information in it.</mat-hint>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" required />
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" type="submit">Update</button>
-  </form>
-</mat-card>
-
-<mat-card>
-  <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitPasswordChange()">
-    <mat-form-field appearance="fill">
-      <mat-label>New Password</mat-label>
-      <input matInput type="password" formControlName="newPassword" autocomplete="new-password" required />
-      @if (changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched) {
-        <mat-error>Password is required and must be at least 8 characters long.</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Confirm Password</mat-label>
-      <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" required />
-      @if (changePasswordForm.hasError('mismatch')) {
-        <mat-error>Passwords do not match.</mat-error>
-      }
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" type="submit">Change Password</button>
-  </form>
-</mat-card>
-
-<mat-card class="danger-zone">
-  <mat-card-header>
-    <mat-card-title> Danger Zone </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <mat-accordion>
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title> Delete Account </mat-panel-title>
-          <mat-panel-description> This action is irreversible. </mat-panel-description>
-        </mat-expansion-panel-header>
-        <p>Are you sure you want to delete your account?</p>
-        <div class="action-row">
+  <div class="user-details">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title> User Details </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="userDetailForm" (ngSubmit)="onSubmitUserDetails()">
           <mat-form-field appearance="fill">
-            <mat-label>Delete Confirmation</mat-label>
+            <mat-label>Username</mat-label>
+            <input matInput formControlName="username" required />
+            <mat-hint>Username is publicly visible, do not use personally identifying information in it.</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" required />
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">Update</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Password</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitPasswordChange()">
+          <input matInput formControlName="username" hidden="hidden" autocomplete="username" />
+          <input matInput formControlName="email" hidden="hidden" autocomplete="email" />
+          <mat-form-field appearance="fill">
+            <mat-label>New Password</mat-label>
             <input
               matInput
-              placeholder="Type team name '{{ userDetailForm.get('email')?.value }}' to confirm"
-              [(ngModel)]="deleteConfirmation"
+              type="password"
+              formControlName="newPassword"
+              name="new-password"
+              autocomplete="new-password"
+              required
             />
+            @if (changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched) {
+              <mat-error>Password is required and must be at least 8 characters long.</mat-error>
+            }
           </mat-form-field>
-          <button mat-flat-button color="warn" type="button" (click)="deleteDialog()">Delete Team</button>
-        </div>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </mat-card-content>
-</mat-card>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Confirm Password</mat-label>
+            <input
+              matInput
+              type="password"
+              formControlName="confirmPassword"
+              name="confirm-password"
+              autocomplete="new-password"
+              required
+            />
+            @if (changePasswordForm.hasError('mismatch')) {
+              <mat-error>Passwords do not match.</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">Change Password</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="danger-zone">
+    <mat-card-header>
+      <mat-card-title> Danger Zone </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title> Delete Account </mat-panel-title>
+            <mat-panel-description> This action is irreversible. </mat-panel-description>
+          </mat-expansion-panel-header>
+          <p>Are you sure you want to delete your account?</p>
+          <div class="action-row">
+            <mat-form-field appearance="fill">
+              <mat-label>Delete Confirmation</mat-label>
+              <input
+                matInput
+                placeholder="Type email '{{ userDetailForm.get('email')?.value }}' to confirm"
+                [(ngModel)]="deleteConfirmation"
+              />
+            </mat-form-field>
+            <button mat-flat-button color="warn" type="button" (click)="deleteDialog()">Delete Account</button>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
+  </mat-card>
+</div>

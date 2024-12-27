@@ -6,7 +6,7 @@
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <mat-card class="register-card">
       <mat-card-header>
-        <mat-card-title>Register</mat-card-title>
+        <mat-card-title>User Details</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-form-field appearance="fill">
@@ -34,8 +34,10 @@
         <!-- Disclaimers Section -->
         <div class="disclaimers">
           <mat-card class="disclaimer-card">
+            <mat-card-header>
+              <mat-card-title>Important Disclaimers</mat-card-title>
+            </mat-card-header>
             <mat-card-content>
-              <h3>Important Disclaimers</h3>
               <p>
                 Capitol Copilot AI is an educational and informational tool designed to assist in research and analysis.
                 We do not provide personalized financial advice or recommend specific investments. All investment

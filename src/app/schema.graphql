@@ -10,6 +10,7 @@ type Query {
   getUserDetails: UserDetails
   getEmailChangePending: EmailChangeRequestType
   getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
+  getDeleteUserResults: DeleteUserResults
 }
 
 type CryptoNewsData {
@@ -129,6 +130,7 @@ type UserDetails {
 type EmailChangeRequestType {
   newEmail: String
   verified: Boolean
+  canceled: Boolean
 }
 
 type PaginatedJobStatus {
@@ -167,6 +169,11 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
+type DeleteUserResults {
+  deletingTeams: [TeamType]
+  leavingTeams: [TeamType]
+}
+
 type Mutation {
   fetchCryptoNewsData: SubmitJobData
   extractCryptoNewsData(ids: [Int]!): SubmitJobData
@@ -189,6 +196,12 @@ type Mutation {
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
   resendEmailChange: ResendEmailChange
+
+  """
+  Cancel a pending email change request from a logged-in user.
+  There is a non-GraphQL API that is not authenticated that can cancel email change requests
+  which is meant to be canceled with a link sent to an email.
+  """
   cancelEmailChange: CancelEmailChange
   updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
   createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
@@ -295,6 +308,11 @@ type ResendEmailChange {
   message: String
 }
 
+"""
+Cancel a pending email change request from a logged-in user.
+There is a non-GraphQL API that is not authenticated that can cancel email change requests
+which is meant to be canceled with a link sent to an email.
+"""
 type CancelEmailChange {
   success: Boolean
   message: String

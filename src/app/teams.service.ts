@@ -428,4 +428,37 @@ export class TeamsService extends BaseService {
       }),
     );
   }
+
+  getDeleteUserResults() {
+    const GQL = gql`
+      query GetDeleteUserResults {
+        getDeleteUserResults {
+          deletingTeams {
+            id
+            name
+          }
+          leavingTeams {
+            id
+            name
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      getDeleteUserResults: {
+        deletingTeams: TeamsResult[];
+        leavingTeams: TeamsResult[];
+      };
+    }
+
+    return this.query<Response>({
+      query: GQL,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return data.getDeleteUserResults;
+      }),
+    );
+  }
 }

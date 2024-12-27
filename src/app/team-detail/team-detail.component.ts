@@ -211,24 +211,46 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       const { userId, role } = this.newUserForm.value;
       const teamId: string = this.teamForm.get('id')?.value;
       if (role === 'owner') {
-        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-          data: {
-            message:
-              '<h3>Assigning this user as an owner will give them management permissions (they can remove you).</h3>' +
-              'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
-          },
-        });
-        dialogRef.afterClosed().subscribe((confirmed) => {
-          if (confirmed) {
-            this.upsertUserToTeam(teamId, userId, role);
-          }
-        });
+        this.openNewOwnerDialog(teamId, userId, role);
       } else {
-        this.upsertUserToTeam(teamId, userId, role);
+        // if the user was an owner, we need to show a confirmation dialog
+        const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
+        const previousRole = user?.get('role')?.value;
+        if (previousRole === 'owner') {
+          const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            data: {
+              message:
+                `<h3>This will remove the management permission from user: ${user?.get('user.username')?.value}</h3>` +
+                'They will no longer be able to manage this team.<br/><br/><h2>Are you sure you want to proceed?</h2>',
+            },
+          });
+          dialogRef.afterClosed().subscribe((confirmed) => {
+            if (confirmed) {
+              this.upsertUserToTeam(teamId, userId, role);
+            }
+          });
+        } else {
+          this.upsertUserToTeam(teamId, userId, role);
+        }
       }
     } else {
       this.messageService.error('Please select a user and role');
     }
+  }
+
+  private openNewOwnerDialog(teamId: string, userId: string, role: string) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message:
+          '<h3>Assigning this user as an owner will give them management permissions (they can remove you).</h3>' +
+          'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
+      },
+    });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.upsertUserToTeam(teamId, userId, role);
+      }
+    });
   }
 
   private upsertUserToTeam(teamId: string, userId: string, role: string) {
