@@ -11,6 +11,7 @@ type Query {
   getEmailChangePending: EmailChangeRequestType
   getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
   getDeleteUserResults: DeleteUserResults
+  userDataExport(confirm: String!): UserDataExport
 }
 
 type CryptoNewsData {
@@ -172,6 +173,16 @@ scalar JSONString
 type DeleteUserResults {
   deletingTeams: [TeamType]
   leavingTeams: [TeamType]
+}
+
+type UserDataExport {
+  id: ID
+  username: String
+  email: String
+  settings: [UserSettingData]
+  teams: [TeamType]
+  articles: [CryptoArticleResult]
+  jobs: [JobData]
 }
 
 type Mutation {

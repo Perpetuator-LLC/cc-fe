@@ -5,6 +5,8 @@ import { TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
+import { Article } from './crypto-article.service';
+import { Job } from './job.service';
 
 @Injectable({
   providedIn: 'root',
@@ -458,6 +460,75 @@ export class TeamsService extends BaseService {
     }).pipe(
       map((data) => {
         return data.getDeleteUserResults;
+      }),
+    );
+  }
+
+  getUserDataExport(exportConfirmation: string) {
+    const USER_DATA_EXPORT = gql`
+      query UserDataExport($confirm: String!) {
+        userDataExport(confirm: $confirm) {
+          id
+          username
+          email
+          settings {
+            key
+            value
+          }
+          teams {
+            id
+            name
+            intro
+            prompt
+            outro
+            podcastEnabled
+            podcastSlug
+            podcastUrl
+            tgResponse
+            tgChannelId
+          }
+          articles {
+            title
+            content
+            date
+            telegramDate
+            podcastDate
+            team {
+              id
+              name
+            }
+          }
+          jobs {
+            id
+            status
+            result
+            args
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      userDataExport: {
+        id: string;
+        username: string;
+        email: string;
+        settings: { key: string; value: string }[];
+        teams: TeamsResult[];
+        articles: Article[];
+        jobs: Job[];
+      };
+    }
+
+    return this.query<Response>({
+      query: USER_DATA_EXPORT,
+      variables: { confirm: exportConfirmation },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return data.userDataExport;
       }),
     );
   }

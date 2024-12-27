@@ -54,7 +54,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   userDetailForm: FormGroup;
   changePasswordForm: FormGroup;
   deleteConfirmation = '';
+  exportConfirmation = '';
   private subscriptions = new Subscription();
+  private downloadAnchor: HTMLAnchorElement | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -227,13 +229,40 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  exportDialog() {
+    if (this.downloadAnchor !== null) {
+      this.downloadAnchor.click();
+      return;
+    }
+    this.subscriptions.add(
+      this.teamService.getUserDataExport(this.exportConfirmation).subscribe({
+        next: (data) => {
+          const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+          const url = window.URL.createObjectURL(blob);
+          this.downloadAnchor = document.createElement('a');
+          this.downloadAnchor.setAttribute('href', url);
+          this.downloadAnchor.href = url;
+          this.downloadAnchor.download = 'capital_copilot_account_data.json';
+          document.body.appendChild(this.downloadAnchor);
+          this.downloadAnchor.click();
+          // clean up the URL object? - instead keep data for subsequent downloads
+          // window.URL.revokeObjectURL(url);
+          // this.downloadAnchor.remove();
+        },
+        error: (err) => {
+          this.messageService.error('Failed to export user data: ' + err.message);
+        },
+      }),
+    );
+  }
+
   deleteDialog() {
     this.subscriptions.add(
       this.teamService.getDeleteUserResults().subscribe({
         next: (data) => {
           const deleteTeamNames = data.deletingTeams.map((team) => team.name);
           const leavingTeamNames = data.leavingTeams.map((team) => team.name);
-          this.openConfirmationDialog(deleteTeamNames, leavingTeamNames);
+          this.openDeleteConfirmationDialog(deleteTeamNames, leavingTeamNames);
         },
         error: (err) => {
           this.messageService.error('Failed to load teams: ' + err.message);
@@ -242,7 +271,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  openConfirmationDialog(deletingTeams: (string | null)[], leavingTeams: (string | null)[]) {
+  openDeleteConfirmationDialog(deletingTeams: (string | null)[], leavingTeams: (string | null)[]) {
     const email = this.userDetailForm.get('email')?.value;
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
