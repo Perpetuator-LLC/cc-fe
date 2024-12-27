@@ -1,3 +1,16 @@
+# Changelog from v0.13.2 to v0.14.0
+
+This update introduces the ability to export personal user data, delete users and teams, and includes a fix for team slug and RSS settings.
+
+## Enhancements
+- Added support for personal data export, allowing users to download their own data.
+- Introduced the ability to delete both users and teams, providing more control over account management.
+- Improved user details handling by reloading user details on password changes for managers.
+
+## Fixes
+- Corrected an issue in Team settings where the save button was disabled when both slug and RSS copy were enabled. Now, the save button correctly reflects the "dirty" state of the form.
+
+
 # Changelog from v0.13.1 to v0.13.2
 
 In this patch update, we have fixed a loop in the article page and changed the default publish team to 'none' to make publishing more intentional.
