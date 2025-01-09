@@ -41,6 +41,7 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
   selector: 'app-team-detail',
@@ -84,6 +85,7 @@ import {
     MatExpansionPanelTitle,
     MatExpansionPanelDescription,
     FormsModule,
+    MatDivider,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -98,6 +100,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private teamId: string;
   protected podcastUrlDisabled = true;
   protected deleteConfirmation = '';
+  selectedFile: File | null = null;
+  previewImage: string | ArrayBuffer | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -118,12 +122,15 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: [''],
-      podcastEnabled: [false],
-      podcastSlug: [{ value: '', disabled: true }],
-      podcastUrl: [{ value: '', disabled: true }],
       intro: [''],
       prompt: [''],
       outro: [''],
+      podcastEnabled: [false],
+      podcastSlug: [{ value: '', disabled: true }],
+      podcastUrl: [{ value: '', disabled: true }],
+      podcastDescription: [''],
+      podcastImage: [null],
+      podcastImageUrl: [null],
       members: this.fb.array([]),
       tgBotToken: [null],
       tgChannelId: [null],
@@ -326,7 +333,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (!this.teamForm.valid) {
       return;
     }
-    const { id, name, podcastEnabled, podcastSlug, intro, prompt, outro, tgBotToken, tgChannelId } =
+    const { id, name, intro, prompt, outro, podcastEnabled, podcastSlug, podcastDescription, tgBotToken, tgChannelId } =
       this.teamForm.getRawValue();
     if (podcastEnabled && !podcastSlug) {
       this.messageService.error('Podcast slug is required when podcast is enabled');
@@ -336,11 +343,12 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       ? this.teamsService.updateTeam(
           id,
           name,
-          podcastEnabled,
-          podcastSlug,
           intro,
           prompt,
           outro,
+          podcastEnabled,
+          podcastSlug,
+          podcastDescription,
           tgBotToken,
           tgChannelId,
         )
@@ -416,5 +424,37 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  onPodcastImageSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Preview the image
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewImage = reader.result;
+      };
+      reader.readAsDataURL(this.selectedFile);
+
+      this.uploadPodcastImage(file);
+    }
+  }
+
+  private uploadPodcastImage(file: File) {
+    this.teamsService.uploadPodcastImage(this.teamId, file).subscribe({
+      next: (response) => {
+        this.messageService.success('Podcast image uploaded successfully');
+        this.teamForm.patchValue({ podcastImageUrl: response.team.podcastImageUrl });
+        this.selectedFile = null;
+        this.teamForm.get('podcastImage')?.reset();
+      },
+      error: (error) => {
+        this.messageService.error(`Failed to upload podcast image: ${error.message}`);
+        this.selectedFile = null;
+        this.teamForm.get('podcastImage')?.reset();
+      },
+    });
   }
 }

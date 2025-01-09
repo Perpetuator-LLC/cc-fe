@@ -53,6 +53,14 @@ mat-nav-list {
   max-width: 100%; /* Ensure it doesn't exceed the viewport width */
 }
 
+.sidenav-header {
+  a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit the color from the parent element */
+    cursor: pointer; /* Keep the pointing cursor */
+  }
+}
+
 .footer {
   position: static;
   bottom: 0;

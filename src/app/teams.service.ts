@@ -115,11 +115,12 @@ export class TeamsService extends BaseService {
   updateTeam(
     id: string,
     name: string | null = null,
-    podcastEnabled: boolean | null = null,
-    podcastSlug: string | null = null,
     intro: string | null = null,
     prompt: string | null = null,
     outro: string | null = null,
+    podcastEnabled: boolean | null = null,
+    podcastSlug: string | null = null,
+    podcastDescription: string | null = null,
     tgBotToken: string | null = null,
     tgChannelId: string | null = null,
     refreshTgResponse: boolean | null = null,
@@ -128,11 +129,12 @@ export class TeamsService extends BaseService {
       mutation UpdateTeam(
         $id: ID!
         $name: String!
-        $podcastEnabled: Boolean
-        $podcastSlug: String
         $intro: String
         $prompt: String
         $outro: String
+        $podcastEnabled: Boolean
+        $podcastSlug: String
+        $podcastDescription: String
         $tgBotToken: String
         $tgChannelId: String
         $refreshTgResponse: Boolean
@@ -140,11 +142,12 @@ export class TeamsService extends BaseService {
         updateTeam(
           id: $id
           name: $name
-          podcastEnabled: $podcastEnabled
-          podcastSlug: $podcastSlug
           intro: $intro
           prompt: $prompt
           outro: $outro
+          podcastEnabled: $podcastEnabled
+          podcastSlug: $podcastSlug
+          podcastDescription: $podcastDescription
           tgBotToken: $tgBotToken
           tgChannelId: $tgChannelId
           refreshTgResponse: $refreshTgResponse
@@ -154,12 +157,13 @@ export class TeamsService extends BaseService {
           team {
             id
             name
-            podcastEnabled
-            podcastSlug
-            podcastUrl
             intro
             prompt
             outro
+            podcastEnabled
+            podcastSlug
+            podcastUrl
+            podcastDescription
             tgChannelId
             tgResponse
             members {
@@ -187,11 +191,12 @@ export class TeamsService extends BaseService {
       variables: {
         id,
         name,
-        podcastEnabled,
-        podcastSlug,
         intro,
         prompt,
         outro,
+        podcastEnabled,
+        podcastSlug,
+        podcastDescription,
         tgBotToken,
         tgChannelId,
         refreshTgResponse,
@@ -212,12 +217,14 @@ export class TeamsService extends BaseService {
         team(id: $id) {
           id
           name
-          podcastEnabled
-          podcastSlug
-          podcastUrl
           intro
           prompt
           outro
+          podcastEnabled
+          podcastSlug
+          podcastUrl
+          podcastImageUrl
+          podcastDescription
           tgChannelId
           tgResponse
           members {
@@ -531,5 +538,45 @@ export class TeamsService extends BaseService {
         return data.userDataExport;
       }),
     );
+  }
+
+  uploadPodcastImage(
+    id: string,
+    podcastImage: File,
+  ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
+    const GQL = gql`
+      mutation UpdateTeamPodcastImage($id: ID!, $podcastImage: Upload!) {
+        updateTeam(id: $id, podcastImage: $podcastImage) {
+          success
+          message
+          team {
+            id
+            name
+            podcastImageUrl
+          }
+        }
+      }
+    `;
+
+    return this.apollo
+      .mutate({
+        mutation: GQL,
+        variables: {
+          id,
+          podcastImage,
+        },
+        context: {
+          useMultipart: true,
+        },
+      })
+      .pipe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map((result: any) => {
+          if (!result.data.updateTeam.success) {
+            throw new Error(result.data.updateTeam.message);
+          }
+          return result.data.updateTeam;
+        }),
+      );
   }
 }

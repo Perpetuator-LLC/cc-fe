@@ -26,6 +26,8 @@ export interface TeamsResult {
   podcastUrl: string | null;
   podcastEnabled: boolean;
   podcastSlug: string | null;
+  podcastImage: string | null;
+  podcastImageUrl: string | null;
   intro: string | null;
   prompt: string | null;
   outro: string | null;

@@ -307,6 +307,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         next: () => {
           this.messageService.success('Account deleted successfully');
           this.authService.logout();
+          this.userService.clearUserDetails();
           this.router.navigate(['/home']);
         },
         error: (err) => {

@@ -6,7 +6,7 @@ import { JWT, Token } from './types';
 import { decodeJWT } from './jwt';
 import { environment } from '../environments/environment';
 import { MessageService } from './message.service';
-import { UserService } from './user.service';
+// WARNING: Do not include an GraphQL API calls here as this will create a circular dependency with graphql.provider.ts
 
 export interface RegisterError {
   messages: string[];
@@ -37,7 +37,6 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private messageService: MessageService,
-    private userSettingService: UserService,
   ) {}
 
   forgot(email: string): Observable<RegisterResponse | null> {
@@ -70,7 +69,6 @@ export class AuthService {
     return this.http.post<Token>(AuthUrls.login, { email, password }).pipe(
       tap((response) => {
         this.setSession(response);
-        this.userSettingService.loadUserDetails();
       }),
 
       catchError((error) => {
@@ -143,7 +141,6 @@ export class AuthService {
             dismissible: true,
           });
         });
-        // this.errors.push('Registration error: ' + JSON.stringify(error.error, null, 2));
         return of(null);
       }),
     );
@@ -215,7 +212,6 @@ export class AuthService {
     localStorage.removeItem('refresh_expires_at');
     this.loggedInSignal.set(false);
     this.tokenSubject.next(null);
-    this.userSettingService.clearUserDetails();
   }
 
   get isLoggedIn(): WritableSignal<boolean> {
@@ -263,6 +259,6 @@ export class AuthService {
       console.error('Failed to parse refresh expiration, invalid JSON:', e);
       this.logout();
     }
-    return false;
+    return true;
   }
 }

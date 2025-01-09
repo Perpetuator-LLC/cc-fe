@@ -10,17 +10,21 @@
     autosize
   >
     <mat-toolbar class="sidenav-header" color="primary" #toolbar>
-      <img
-        src="Capital_Copilot_Logo_Slanted.svg"
-        aria-label="Side nav toggle icon"
-        alt="Capital Copilot"
-        class="website-icon"
-        matTooltip="Capital Copilot"
-      />
+      <a href="/">
+        <img
+          src="Capital_Copilot_Logo_PFP.svg"
+          aria-label="Side nav toggle icon"
+          alt="Capital Copilot"
+          class="website-icon"
+          matTooltip="Capital Copilot"
+        />
+      </a>
       @if (!this.minimized) {
-        <div class="title-container">
-          <span class="website-title">Capital<br />&nbsp;&nbsp;&nbsp;Copilot</span>
-        </div>
+        <a href="/">
+          <div class="title-container">
+            <span class="website-title">Capital<br />&nbsp;&nbsp;&nbsp;Copilot</span>
+          </div>
+        </a>
       }
     </mat-toolbar>
     <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
@@ -147,7 +151,7 @@
     </div>
     <mat-toolbar color="primary" class="footer">
       <p>
-        &copy; 2024 Perpetuator LLC. By using Capitol Copilot, you agree to our
+        &copy; 2024-2025 Perpetuator LLC. By using Capitol Copilot, you agree to our
         <a tabindex="0" target="_blank" href="terms-and-conditions.html">Terms and Conditions</a>
         and
         <a tabindex="0" target="_blank" href="privacy-policy.html">Privacy Policy</a>.

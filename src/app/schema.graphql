@@ -64,17 +64,20 @@ type CryptoArticleResult {
 }
 
 type TeamType {
-  id: ID
-  name: String
-  members: [TeamMembershipType]
-  podcastUrl: String
-  podcastEnabled: Boolean
+  id: ID!
+  name: String!
   podcastSlug: String
-  intro: String
-  prompt: String
-  outro: String
+  podcastEnabled: Boolean!
+  intro: String!
+  prompt: String!
+  outro: String!
   tgChannelId: String
   tgResponse: String
+  podcastImage: String
+  podcastDescription: String
+  podcastUrl: String
+  podcastImageUrl: String
+  members: [TeamMembershipType]
 }
 
 type TeamMembershipType {
@@ -202,7 +205,7 @@ type Mutation {
   deleteUser(confirm: String!): DeleteUser
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastEnabled: Boolean, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastEnabled: Boolean, podcastImage: Upload, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
   deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
@@ -296,6 +299,12 @@ type UpdateTeam {
   message: String
   team: TeamType
 }
+
+"""
+Create scalar that ignores normal serialization/deserialization, since
+that will be handled by the multipart request spec
+"""
+scalar Upload
 
 type DeleteTeam {
   success: Boolean

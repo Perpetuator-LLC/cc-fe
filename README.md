@@ -7,15 +7,18 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
+- [ ] Check if image preview is working
 - [ ] Email debounce
 - [ ] On news list update filter is no longer applied
 - [ ] Allow user to remove self from team
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
   - [ ] Disable team name editing and podcast control if not owner
 - [ ] Disable trash icons if not owner and not self
-- [ ] Add delete account
-- [ ] Add delete team
+- [x] Add delete account
+- [x] Add delete team
 - [ ] All calls to services should handle errors so that they propagate to the user through messageService, unless we want services to handle them
+- [ ] Add cloudflare between user and S3
+- [ ] Add thumbnail support
 
 ## Refactoring
 
@@ -23,12 +26,14 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Replace all messages with new messaging infrastructure and remove clears
 - [ ] Search for throwError or .apollo. and use new Apollo
 - [ ] Add Job Table with URL query params that update as table is filtered
-- [ ] Move all news summary error handling to news summary function instead of returning Blocked
+- [x] Move all news summary error handling to news summary function instead of returning Blocked
 - [ ] Add job scheduling with time based jobs
 
 ## Ideal Enhancements
 
-- [ ] On Article list page add a team filter
+- [ ] Add blog post generator
+- [ ] Add RSS feeds to teams
+- [x] On Article list page add a team filter
 
 ## Possible Enhancements
 
@@ -37,6 +42,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Replace all messages with `@angular/localize` and `@angular/localize/init`???
 - [ ] Make `npm run generate` work to convert schema to types, or find a way to use them from the schema directly!?
 - [ ] Add foul language check for names, and articles?
+- [ ] Add image review process?
 - [ ] Add ElevenLabs API Key to team, or make upgrade feature?
 - [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
 - [ ] Add custom URL (to scrape) but scoped to this user only
@@ -64,6 +70,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Add to Apple
   - [ ] Add to Spotify
   - [ ] Add to Google
+  - [ ] Add to iHeartRadio
 
 ## Done
 

@@ -15,15 +15,15 @@ export const routes: Routes = [
       icon: 'home',
     },
   },
-  {
-    path: 'charts',
-    loadComponent: () => import('./charts/dashboard/dashboard.component').then((c) => c.DashboardComponent),
-    title: 'Charts',
-    canActivate: [AuthGuard],
-    data: {
-      icon: 'home',
-    },
-  },
+  // {
+  //   path: 'charts',
+  //   loadComponent: () => import('./charts/dashboard/dashboard.component').then((c) => c.DashboardComponent),
+  //   title: 'Charts',
+  //   canActivate: [AuthGuard],
+  //   data: {
+  //     icon: 'home',
+  //   },
+  // },
   // {
   //   path: 'times',
   //   loadComponent: () => import('./times/times.component').then((c) => c.TimesComponent),

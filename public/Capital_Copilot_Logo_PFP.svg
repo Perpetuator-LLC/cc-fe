@@ -2,13 +2,13 @@
 <svg
    id="Layer_1"
    data-name="Layer 1"
-   viewBox="0 0 101.475 133.30499"
+   viewBox="0 0 181.01158 181.01158"
    version="1.1"
    sodipodi:docname="Capital_Copilot_Logo_PFP.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-   width="101.475"
-   height="133.30499"
-   inkscape:export-filename="Capital_Copilot_Logo_Slanted.png"
+   width="181.01158"
+   height="181.01158"
+   inkscape:export-filename="Capital_Copilot_Logo_PFP.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -25,12 +25,12 @@
      inkscape:pagecheckerboard="true"
      inkscape:deskcolor="#505050"
      inkscape:zoom="1.7323492"
-     inkscape:cx="59.74546"
-     inkscape:cy="28.573916"
+     inkscape:cx="101.01889"
+     inkscape:cy="55.704704"
      inkscape:window-width="1840"
      inkscape:window-height="1248"
-     inkscape:window-x="2089"
-     inkscape:window-y="486"
+     inkscape:window-x="2069"
+     inkscape:window-y="407"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer3"
      showborder="true"
@@ -57,9 +57,10 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Layer 2"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(41.626475,26.893229)">
     <circle
-       style="display:inline;fill:#5e009d;fill-opacity:1;stroke:#000000;stroke-width:0.495;stroke-opacity:0;image-rendering:auto;stroke-dasharray:none"
+       style="display:inline;fill:#2f2f2f;fill-opacity:1;stroke:#000000;stroke-width:0.495;stroke-dasharray:none;stroke-opacity:0;image-rendering:auto"
        id="path1"
        inkscape:label="path1"
        cx="48.879318"
@@ -70,7 +71,8 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Layer 1"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(41.626475,26.893229)">
     <path
        id="polygon1-9"
        style="display:inline;fill:#000000;fill-opacity:1;stroke-width:0px"

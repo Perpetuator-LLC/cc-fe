@@ -28,14 +28,21 @@ mat-divider {
   }
 }
 .textarea-small {
-  min-height: 2em;
+  min-height: 3em;
+  max-height: 10em;
+  height: auto;
+  overflow: auto;
+}
+
+.textarea-medium {
+  min-height: 6em;
   max-height: 10em;
   height: auto;
   overflow: auto;
 }
 
 .textarea-large {
-  min-height: 15em;
+  min-height: 18em;
   max-height: 30em;
   height: auto;
   overflow: auto;
@@ -76,5 +83,11 @@ mat-divider {
   mat-form-field,
   button {
     flex: 1 1 100%;
+  }
+}
+
+.file-input-wrapper {
+  img {
+    max-width: 300px;
   }
 }

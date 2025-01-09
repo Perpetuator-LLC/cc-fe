@@ -162,8 +162,9 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   private setupPolling() {
     this.pollingSubscription.unsubscribe();
     this.pollingSubscription = new Subscription();
+    const pollingInterval = this.getPollingInterval();
     this.pollingSubscription.add(
-      interval(this.getPollingInterval()).subscribe(() => {
+      interval(pollingInterval).subscribe(() => {
         console.debug('Polling for job status updates');
         this.loadJobs();
       }),
@@ -172,7 +173,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   getPollingInterval(): number {
     // 3s when there are active jobs, 8s when there are none
-    return this.hasActiveJobs() ? 3000 : 8000;
+    return this.hasActiveJobs() ? 3000 : 21000;
   }
 
   hasActiveJobs(): boolean {
