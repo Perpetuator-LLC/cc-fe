@@ -62,7 +62,7 @@ grep '"version":' ../package.json
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.14.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.15.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -70,7 +70,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be-private
-poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.14.0' 'v0.13.2'
+poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.15.0' 'v0.14.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -79,10 +79,10 @@ Add the Git tag and push it to the repository.
 
 ```shell
 git add .. && \
-git commit -m "chore: bump version to 0.14.0" && \
+git commit -m "chore: bump version to 0.15.0" && \
 git push origin main && \
-git tag -a v0.14.0 -m "This update introduces the ability to export personal user data, delete users and teams, and includes a fix for team slug and RSS settings." && \
-git push origin v0.14.0
+git tag -a v0.15.0 -m "In this update, we've removed the charts feature (for now), added support for GraphQL file uploads, and introduced podcast image and description." && \
+git push origin v0.15.0
 ```
 
 Now open a pull request to merge it.

@@ -1,3 +1,22 @@
+# Changelog from v0.14.0 to v0.15.0
+
+In this update, we've removed the charts feature (for now), added support for GraphQL file uploads, and introduced podcast image and description.
+
+## Enhancements
+- Added support for GraphQL file uploads, allowing users to upload files directly through the GraphQL API.
+- Introduced podcast image and description, providing more information about the podcasts available on the platform.
+- Convert HttpInterceptors to using ApolloAuthMiddleware with ApolloLink so that the new ApolloUploadClient could be used for image/file uploads
+- Increases job polling interval to 21s.
+- Update copyright in layout to include 2025.
+- Make logo and site title a link.
+- Add podcast image and description support.
+
+## Cleanups
+- Remove apexcharts and all charting components.
+- Remove UserService from AuthService (circular dependency).
+- Remove AuthInterceptorService.
+
+
 # Changelog from v0.13.2 to v0.14.0
 
 This update introduces the ability to export personal user data, delete users and teams, and includes a fix for team slug and RSS settings.
