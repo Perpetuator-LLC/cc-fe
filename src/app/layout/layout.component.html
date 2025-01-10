@@ -11,18 +11,28 @@
   >
     <mat-toolbar class="sidenav-header" color="primary" #toolbar>
       <a href="/">
-        <img
-          src="Capital_Copilot_Logo_PFP.svg"
-          aria-label="Side nav toggle icon"
-          alt="Capital Copilot"
-          class="website-icon"
-          matTooltip="Capital Copilot"
-        />
+        @if (currentTheme() === 'dark') {
+          <img
+            src="Capital_Copilot_Logo_Slanted.svg"
+            aria-label="Side nav toggle icon"
+            alt="Capital Copilot"
+            class="website-icon"
+            matTooltip="Capital Copilot"
+          />
+        } @else {
+          <img
+            src="Capital_Copilot_Logo_PFP.svg"
+            aria-label="Side nav toggle icon"
+            alt="Capital Copilot"
+            class="website-icon"
+            matTooltip="Capital Copilot"
+          />
+        }
       </a>
       @if (!this.minimized) {
         <a href="/">
           <div class="title-container">
-            <span class="website-title">Capital<br />&nbsp;&nbsp;&nbsp;Copilot</span>
+            <span class="website-title">Capital<br />&nbsp;&nbsp;Copilot</span>
           </div>
         </a>
       }
@@ -31,11 +41,13 @@
       <div class="keep-up">
         @for (item of rootRoutes; track item.path) {
           @if (shouldShow(item)) {
-            <mat-list-item
+            <a
+              mat-list-item
               [routerLink]="item.path"
+              routerLinkActive="active-link"
               #link="routerLinkActive"
-              routerLinkActive
               [activated]="link.isActive"
+              (click)="handleClick($event, item.path)"
             >
               <div class="route-link">
                 @if (item.data && item.data['icon']) {
@@ -47,7 +59,7 @@
                   </div>
                 }
               </div>
-            </mat-list-item>
+            </a>
           }
         }
         @if (this.authService.isLoggedIn()) {

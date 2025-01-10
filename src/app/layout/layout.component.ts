@@ -137,4 +137,11 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   switchTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
   }
+
+  handleClick(event: MouseEvent, path: string | undefined): void {
+    if (event.button === 0 && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault();
+      this.router.navigate([path]);
+    }
+  }
 }
