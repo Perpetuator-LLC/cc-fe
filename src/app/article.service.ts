@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { TeamsResult } from './teams-list/teams-list.component';
-import { CryptoNewsResult } from './crypto-news/crypto-news.component';
+import { NewsResult } from './news/news.component';
 import { Job } from './job.service';
 
 export interface Article {
@@ -16,11 +16,11 @@ export interface Article {
   isLive: boolean;
   podcastDate: string;
   telegramDate: string;
-  newsSummaries: CryptoNewsResult[];
+  newsSummaries: NewsResult[];
   team: TeamsResult;
 }
 
-export interface CryptoArticlesData {
+export interface ArticlesData {
   success: boolean;
   message: string;
   totalRecords: number;
@@ -31,7 +31,7 @@ export interface CryptoArticlesData {
   articles: Article[];
 }
 
-export interface CryptoArticleData {
+export interface ArticleData {
   success: boolean;
   message: string;
   article: Article;
@@ -40,21 +40,15 @@ export interface CryptoArticleData {
 @Injectable({
   providedIn: 'root',
 })
-export class CryptoArticleService extends BaseService {
+export class ArticleService extends BaseService {
   constructor(protected override apollo: Apollo) {
     super(apollo);
   }
 
-  getCryptoArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', teamId: string | null = null) {
+  getArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', teamId: string | null = null) {
     const GQL = gql`
-      query GetCryptoArticlesData(
-        $page: Int!
-        $pageSize: Int!
-        $orderBy: String!
-        $direction: SortDirection!
-        $teamId: ID
-      ) {
-        getCryptoArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, teamId: $teamId) {
+      query GetArticlesData($page: Int!, $pageSize: Int!, $orderBy: String!, $direction: SortDirection!, $teamId: ID) {
+        getArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, teamId: $teamId) {
           success
           message
           totalRecords
@@ -82,7 +76,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      getCryptoArticles: CryptoArticlesData;
+      getArticles: ArticlesData;
     }
 
     return this.query<Response>({
@@ -91,19 +85,19 @@ export class CryptoArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getCryptoArticles.success) {
-          throw new Error(data.getCryptoArticles.message);
+        if (!data.getArticles.success) {
+          throw new Error(data.getArticles.message);
         }
-        return data.getCryptoArticles;
+        return data.getArticles;
       }),
     );
   }
 
-  getCryptoArticleById(id: string | null) {
+  getArticleById(id: string | null) {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     const GQL = gql`
-      query GetCryptoArticleData($id: ID!) {
-        getCryptoArticleData(id: $id) {
+      query GetArticleData($id: ID!) {
+        getArticleData(id: $id) {
           success
           message
           article {
@@ -138,7 +132,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      getCryptoArticleData: CryptoArticleData;
+      getArticleData: ArticleData;
     }
 
     return this.query<Response>({
@@ -147,10 +141,10 @@ export class CryptoArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getCryptoArticleData.success) {
-          throw new Error(data.getCryptoArticleData.message);
+        if (!data.getArticleData.success) {
+          throw new Error(data.getArticleData.message);
         }
-        return data.getCryptoArticleData;
+        return data.getArticleData;
       }),
     );
   }
@@ -160,15 +154,15 @@ export class CryptoArticleService extends BaseService {
     updatedTitle: string | null,
     updatedContent: string | null,
     isLive: boolean | null,
-  ): Observable<CryptoArticleData> {
+  ): Observable<ArticleData> {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
     if (isLive === null) return throwError(() => new Error('Updated is live is required'));
 
     const GQL = gql`
-      mutation UpdateCryptoArticles($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
-        updateCryptoArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
+      mutation UpdateArticles($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
+        updateArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
           success
           message
         }
@@ -176,7 +170,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      updateCryptoArticle: CryptoArticleData;
+      updateArticle: ArticleData;
     }
 
     return this.mutate<Response>({
@@ -185,10 +179,10 @@ export class CryptoArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.updateCryptoArticle.success) {
-          throw new Error(data.updateCryptoArticle.message);
+        if (!data.updateArticle.success) {
+          throw new Error(data.updateArticle.message);
         }
-        return data.updateCryptoArticle;
+        return data.updateArticle;
       }),
     );
   }
@@ -197,8 +191,8 @@ export class CryptoArticleService extends BaseService {
     if (id === null) return throwError(() => new Error('Article ID is required'));
 
     const GQL = gql`
-      mutation UpdateCryptoArticlesAudio {
-        updateCryptoArticleAudio(articleId: "${id}") {
+      mutation UpdateArticlesAudio {
+        updateArticleAudio(articleId: "${id}") {
           success
           message
           job {
@@ -215,7 +209,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      updateCryptoArticleAudio: {
+      updateArticleAudio: {
         success: boolean;
         message: string;
         job: Job;
@@ -227,10 +221,10 @@ export class CryptoArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.updateCryptoArticleAudio.success) {
-          throw new Error(data.updateCryptoArticleAudio.message);
+        if (!data.updateArticleAudio.success) {
+          throw new Error(data.updateArticleAudio.message);
         }
-        return data.updateCryptoArticleAudio;
+        return data.updateArticleAudio;
       }),
     );
   }
@@ -239,8 +233,8 @@ export class CryptoArticleService extends BaseService {
     if (articleId === null) return throwError(() => new Error('Article ID is required'));
 
     const GQL = gql`
-      mutation PublishCryptoArticleAudio($id: ID!) {
-        publishCryptoArticleAudio(articleId: $id) {
+      mutation PublishArticleAudio($id: ID!) {
+        publishArticleAudio(articleId: $id) {
           success
           message
           article {
@@ -258,7 +252,7 @@ export class CryptoArticleService extends BaseService {
     `;
 
     interface Response {
-      publishCryptoArticleAudio: {
+      publishArticleAudio: {
         success: boolean;
         message: string;
         article: Article;
@@ -271,10 +265,10 @@ export class CryptoArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.publishCryptoArticleAudio.success) {
-          throw new Error(data.publishCryptoArticleAudio.message);
+        if (!data.publishArticleAudio.success) {
+          throw new Error(data.publishArticleAudio.message);
         }
-        return data.publishCryptoArticleAudio;
+        return data.publishArticleAudio;
       }),
     );
   }

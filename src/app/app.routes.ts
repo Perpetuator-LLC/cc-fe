@@ -123,24 +123,24 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'crypto-news',
-    loadComponent: () => import('./crypto-news/crypto-news.component').then((c) => c.CryptoNewsComponent),
-    title: 'Crypto News',
+    path: 'news',
+    loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),
+    title: 'News',
     canActivate: [AuthGuard],
     data: {
       icon: 'breaking_news',
     },
   },
   {
-    path: 'crypto-article/:id',
+    path: 'article/:id',
     loadComponent: () => import('./article-detail/article-detail.component').then((c) => c.ArticleDetailComponent),
-    title: 'Crypto Article',
+    title: 'Article',
     canActivate: [AuthGuard],
   },
   {
-    path: 'crypto-articles',
+    path: 'articles',
     loadComponent: () => import('./articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
-    title: 'Crypto Articles',
+    title: 'Articles',
     canActivate: [AuthGuard],
     data: {
       icon: 'contextual_token',

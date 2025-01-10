@@ -67,7 +67,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private userService: UserService,
     private cookieConsentService: CookieConsentService,
   ) {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/crypto-news';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/news';
   }
 
   ngAfterViewInit() {

@@ -2,22 +2,22 @@ import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CryptoNewsData } from './crypto-news/crypto-news.component';
+import { NewsData } from './news/news.component';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CryptoNewsService extends BaseService {
+export class NewsService extends BaseService {
   constructor(protected override apollo: Apollo) {
     super(apollo);
   }
 
-  fetchCryptoNewsData() {
-    const FETCH_CRYPTO_NEWS_DATA = gql`
+  fetchNewsData() {
+    const FETCH_NEWS_DATA = gql`
       mutation {
-        fetchCryptoNewsData {
+        fetchNewsData {
           success
           message
           job {
@@ -34,7 +34,7 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      fetchCryptoNewsData: {
+      fetchNewsData: {
         success: boolean;
         message: string;
         job: Job;
@@ -42,21 +42,21 @@ export class CryptoNewsService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: FETCH_CRYPTO_NEWS_DATA,
+      mutation: FETCH_NEWS_DATA,
     }).pipe(
       map((data) => {
-        if (!data.fetchCryptoNewsData.success) {
-          throw new Error(data.fetchCryptoNewsData.message);
+        if (!data.fetchNewsData.success) {
+          throw new Error(data.fetchNewsData.message);
         }
-        return data.fetchCryptoNewsData;
+        return data.fetchNewsData;
       }),
     );
   }
 
-  getCryptoNews(): Observable<CryptoNewsData> {
-    const GET_CRYPTO_NEWS_DATA = gql`
-      query GetCryptoNewsData {
-        getCryptoNewsData {
+  getNews(): Observable<NewsData> {
+    const GET_NEWS_DATA = gql`
+      query GetNewsData {
+        getNewsData {
           success
           message
           results {
@@ -74,26 +74,26 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      getCryptoNewsData: CryptoNewsData;
+      getNewsData: NewsData;
     }
 
     return this.query<Response>({
-      query: GET_CRYPTO_NEWS_DATA,
+      query: GET_NEWS_DATA,
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getCryptoNewsData.success) {
-          throw new Error(data.getCryptoNewsData.message);
+        if (!data.getNewsData.success) {
+          throw new Error(data.getNewsData.message);
         }
-        return data.getCryptoNewsData;
+        return data.getNewsData;
       }),
     );
   }
 
-  extractCryptoNews(ids: number[]) {
-    const EXTRACT_CRYPTO_NEWS_DATA = gql`
+  extractNews(ids: number[]) {
+    const EXTRACT_NEWS_DATA = gql`
       mutation {
-        extractCryptoNewsData(ids: [${ids.join(' ')}]) {
+        extractNewsData(ids: [${ids.join(' ')}]) {
           success
           message
           job {
@@ -110,7 +110,7 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      extractCryptoNewsData: {
+      extractNewsData: {
         success: boolean;
         message: string;
         job: Job;
@@ -118,22 +118,22 @@ export class CryptoNewsService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: EXTRACT_CRYPTO_NEWS_DATA,
+      mutation: EXTRACT_NEWS_DATA,
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.extractCryptoNewsData.success) {
-          throw new Error(data.extractCryptoNewsData.message);
+        if (!data.extractNewsData.success) {
+          throw new Error(data.extractNewsData.message);
         }
-        return data.extractCryptoNewsData;
+        return data.extractNewsData;
       }),
     );
   }
 
-  summarizeCryptoNews(ids: number[], force = false) {
-    const SUMMARIZE_CRYPTO_NEWS_DATA = gql`
-      mutation SummarizeCryptoNewsData($ids: [Int!]!, $force: Boolean!) {
-        summarizeCryptoNewsData(ids: $ids, force: $force) {
+  summarizeNews(ids: number[], force = false) {
+    const SUMMARIZE_NEWS_DATA = gql`
+      mutation SummarizeNewsData($ids: [Int!]!, $force: Boolean!) {
+        summarizeNewsData(ids: $ids, force: $force) {
           success
           message
           job {
@@ -150,7 +150,7 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      summarizeCryptoNewsData: {
+      summarizeNewsData: {
         success: boolean;
         message: string;
         job: Job;
@@ -158,23 +158,23 @@ export class CryptoNewsService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: SUMMARIZE_CRYPTO_NEWS_DATA,
+      mutation: SUMMARIZE_NEWS_DATA,
       variables: { ids, force },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.summarizeCryptoNewsData.success) {
-          throw new Error(data.summarizeCryptoNewsData.message);
+        if (!data.summarizeNewsData.success) {
+          throw new Error(data.summarizeNewsData.message);
         }
-        return data.summarizeCryptoNewsData;
+        return data.summarizeNewsData;
       }),
     );
   }
 
-  createCryptoArticle(ids: number[], teamId: number) {
-    const CREATE_CRYPTO_ARTICLE_DATA = gql`
-      mutation CreateCryptoArticleData($ids: [Int!]!, $teamId: ID!) {
-        createCryptoArticleData(ids: $ids, teamId: $teamId) {
+  createArticle(ids: number[], teamId: number) {
+    const CREATE_ARTICLE_DATA = gql`
+      mutation CreateArticleData($ids: [Int!]!, $teamId: ID!) {
+        createArticleData(ids: $ids, teamId: $teamId) {
           success
           message
           job {
@@ -191,7 +191,7 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      createCryptoArticleData: {
+      createArticleData: {
         success: boolean;
         message: string;
         job: Job;
@@ -199,23 +199,23 @@ export class CryptoNewsService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: CREATE_CRYPTO_ARTICLE_DATA,
+      mutation: CREATE_ARTICLE_DATA,
       variables: { ids, teamId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.createCryptoArticleData.success) {
-          throw new Error(data.createCryptoArticleData.message);
+        if (!data.createArticleData.success) {
+          throw new Error(data.createArticleData.message);
         }
-        return data.createCryptoArticleData;
+        return data.createArticleData;
       }),
     );
   }
 
-  createCryptoArticleChain(newsIds: number[], teamId: number) {
-    const CREATE_CRYPTO_ARTICLE_CHAIN = gql`
-      mutation CreateCryptoArticleChain($newsIds: [ID!]!, $teamId: ID!) {
-        createCryptoArticleChain(newsIds: $newsIds, teamId: $teamId) {
+  createArticleChain(newsIds: number[], teamId: number) {
+    const CREATE_ARTICLE_CHAIN = gql`
+      mutation CreateArticleChain($newsIds: [ID!]!, $teamId: ID!) {
+        createArticleChain(newsIds: $newsIds, teamId: $teamId) {
           success
           message
           jobs {
@@ -232,7 +232,7 @@ export class CryptoNewsService extends BaseService {
     `;
 
     interface Response {
-      createCryptoArticleChain: {
+      createArticleChain: {
         success: boolean;
         message: string;
         jobs: Job[];
@@ -240,15 +240,15 @@ export class CryptoNewsService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: CREATE_CRYPTO_ARTICLE_CHAIN,
+      mutation: CREATE_ARTICLE_CHAIN,
       variables: { newsIds, teamId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.createCryptoArticleChain.success) {
-          throw new Error(data.createCryptoArticleChain.message);
+        if (!data.createArticleChain.success) {
+          throw new Error(data.createArticleChain.message);
         }
-        return data.createCryptoArticleChain;
+        return data.createArticleChain;
       }),
     );
   }

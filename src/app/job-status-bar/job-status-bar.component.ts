@@ -9,7 +9,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
 import { Job, JobService, JobType, jobTypeToString } from '../job.service';
 import { MessageService } from '../message.service';
-import { SidePanelAccordianData } from '../crypto-news/crypto-news.component';
+import { SidePanelAccordianData } from '../news/news.component';
 
 @Component({
   selector: 'app-job-status-bar',
@@ -71,11 +71,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         .getUserJobs(
           ['pending', 'running'],
           [
-            JobType.SUMMARIZE_CRYPTO_NEWS,
-            JobType.FETCH_CRYPTO_NEWS,
-            JobType.EXTRACT_CRYPTO_NEWS,
-            JobType.CREATE_CRYPTO_ARTICLE,
-            JobType.UPDATE_CRYPTO_ARTICLE_AUDIO,
+            JobType.SUMMARIZE_NEWS,
+            JobType.FETCH_NEWS,
+            JobType.EXTRACT_NEWS,
+            JobType.CREATE_ARTICLE,
+            JobType.UPDATE_ARTICLE_AUDIO,
           ],
           currentJobIds,
         )

@@ -1,6 +1,6 @@
 <ng-template #toolbarTemplate>
   <div class="toolbar-container">
-    <h1>Crypto News</h1>
+    <h1>News</h1>
   </div>
 </ng-template>
 
@@ -10,7 +10,7 @@
 
 <app-message></app-message>
 
-<div class="crypto-news-container">
+<div class="news-container">
   <app-job-status-bar />
   <mat-card class="toolbar">
     <mat-card-content class="form-container">
@@ -117,7 +117,7 @@
                   <mat-divider></mat-divider>
                   <h3>AI Summary</h3>
                   <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
-                  @if (this.userService.userDetails()?.permissions?.includes('api.change_cryptonews')) {
+                  @if (this.userService.userDetails()?.permissions?.includes('api.change_news')) {
                     <mat-divider></mat-divider>
                     <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
                       {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary

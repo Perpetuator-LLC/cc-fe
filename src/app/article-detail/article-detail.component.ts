@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Article, CryptoArticleService } from '../crypto-article.service';
+import { Article, ArticleService } from '../article.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
@@ -64,7 +64,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     private route: ActivatedRoute,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private articleService: CryptoArticleService,
+    private articleService: ArticleService,
   ) {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -100,7 +100,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.subscriptions.add(
-      this.articleService.getCryptoArticleById(this.articleId).subscribe({
+      this.articleService.getArticleById(this.articleId).subscribe({
         next: (data) => {
           if (!data.success) {
             this.messageService.error(data.message);
@@ -140,9 +140,9 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   ngAfterViewInit() {
     this.subscriptions.add(
       this.jobStatusBar.jobCompleted$.subscribe((job) => {
-        if ([JobType.UPDATE_CRYPTO_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
+        if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
           this.subscriptions.add(
-            this.articleService.getCryptoArticleById(this.articleId).subscribe({
+            this.articleService.getArticleById(this.articleId).subscribe({
               next: (data) => {
                 if (data.success && data.article.audioBase64) {
                   this.prepareAudioPlayer(data.article.audioBase64);
@@ -153,8 +153,8 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
               },
             }),
           );
-        } else if ([JobType.CREATE_CRYPTO_ARTICLE].includes(stringToJobType(job.jobType))) {
-          const newArticleUrl = `/crypto-article/${job.result}`;
+        } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+          const newArticleUrl = `/article/${job.result}`;
           this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
         }
       }),
@@ -200,7 +200,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.downloadLink) {
       const a = document.createElement('a');
       a.href = this.downloadLink;
-      a.download = `crypto_article_${this.articleId}.mp3`; // Set the download file name
+      a.download = `article_${this.articleId}.mp3`; // Set the download file name
       a.click(); // Programmatically trigger the download
     }
   }

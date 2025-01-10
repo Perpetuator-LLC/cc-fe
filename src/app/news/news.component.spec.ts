@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CryptoNewsComponent } from './crypto-news.component';
+import { NewsComponent } from './news.component';
 
-describe('CryptoNewsComponent', () => {
-  let component: CryptoNewsComponent;
-  let fixture: ComponentFixture<CryptoNewsComponent>;
+describe('NewsComponent', () => {
+  let component: NewsComponent;
+  let fixture: ComponentFixture<NewsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CryptoNewsComponent],
+      imports: [NewsComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CryptoNewsComponent);
+    fixture = TestBed.createComponent(NewsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

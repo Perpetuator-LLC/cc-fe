@@ -6,26 +6,26 @@ import { Apollo } from 'apollo-angular';
 
 // create an enum of jobTypes
 export enum JobType {
-  FETCH_CRYPTO_NEWS = 'fetch_crypto_news',
-  EXTRACT_CRYPTO_NEWS = 'extract_crypto_news',
-  SUMMARIZE_CRYPTO_NEWS = 'summarize_crypto_news',
-  CREATE_CRYPTO_ARTICLE = 'create_crypto_article',
-  UPDATE_CRYPTO_ARTICLE_AUDIO = 'update_crypto_article_audio',
+  FETCH_NEWS = 'fetch_news',
+  EXTRACT_NEWS = 'extract_news',
+  SUMMARIZE_NEWS = 'summarize_news',
+  CREATE_ARTICLE = 'create_article',
+  UPDATE_ARTICLE_AUDIO = 'update_article_audio',
 }
 
 // create a function to convert string to jobType
 export const stringToJobType = (jobType: string) => {
   switch (jobType) {
-    case 'fetch_crypto_news':
-      return JobType.FETCH_CRYPTO_NEWS;
-    case 'extract_crypto_news':
-      return JobType.EXTRACT_CRYPTO_NEWS;
-    case 'summarize_crypto_news':
-      return JobType.SUMMARIZE_CRYPTO_NEWS;
-    case 'create_crypto_article':
-      return JobType.CREATE_CRYPTO_ARTICLE;
-    case 'update_crypto_article_audio':
-      return JobType.UPDATE_CRYPTO_ARTICLE_AUDIO;
+    case 'fetch_news':
+      return JobType.FETCH_NEWS;
+    case 'extract_news':
+      return JobType.EXTRACT_NEWS;
+    case 'summarize_news':
+      return JobType.SUMMARIZE_NEWS;
+    case 'create_article':
+      return JobType.CREATE_ARTICLE;
+    case 'update_article_audio':
+      return JobType.UPDATE_ARTICLE_AUDIO;
     default:
       throw new Error('Invalid job type');
   }
@@ -33,15 +33,15 @@ export const stringToJobType = (jobType: string) => {
 
 export const jobTypeToString = (jobType: string) => {
   switch (jobType) {
-    case JobType.FETCH_CRYPTO_NEWS:
-      return 'Fetch Crypto News';
-    case JobType.EXTRACT_CRYPTO_NEWS:
+    case JobType.FETCH_NEWS:
+      return 'Fetch News';
+    case JobType.EXTRACT_NEWS:
       return 'Extract News';
-    case JobType.SUMMARIZE_CRYPTO_NEWS:
+    case JobType.SUMMARIZE_NEWS:
       return 'Summarize News';
-    case JobType.CREATE_CRYPTO_ARTICLE:
+    case JobType.CREATE_ARTICLE:
       return 'Create Article';
-    case JobType.UPDATE_CRYPTO_ARTICLE_AUDIO:
+    case JobType.UPDATE_ARTICLE_AUDIO:
       return 'Update Article Audio';
     default:
       return '';

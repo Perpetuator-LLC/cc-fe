@@ -1,7 +1,7 @@
 type Query {
-  getCryptoNewsData(ids: [Int]): CryptoNewsData
-  getCryptoArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedCryptoArticles
-  getCryptoArticleData(id: ID!): CryptoArticleData
+  getNewsData(ids: [Int]): NewsData
+  getArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedArticles
+  getArticleData(id: ID!): ArticleData
   getUserSettings(keys: [String]!): UserSettingsData
   getAllUsers: UserList
   getUserCookieConsents: [UserCookieConsentType]
@@ -14,13 +14,13 @@ type Query {
   userDataExport(confirm: String!): UserDataExport
 }
 
-type CryptoNewsData {
+type NewsData {
   success: Boolean
   message: String
-  results: [CryptoNewsResult]
+  results: [NewsResult]
 }
 
-type CryptoNewsResult {
+type NewsResult {
   id: ID
   title: String
   description: String
@@ -38,7 +38,7 @@ value as specified by
 """
 scalar DateTime
 
-type PaginatedCryptoArticles {
+type PaginatedArticles {
   success: Boolean
   message: String
   totalRecords: Int
@@ -46,12 +46,12 @@ type PaginatedCryptoArticles {
   currentPage: Int
   hasNext: Boolean
   hasPrevious: Boolean
-  articles: [CryptoArticleResult]
+  articles: [ArticleResult]
 }
 
-type CryptoArticleResult {
+type ArticleResult {
   id: ID
-  newsSummaries: [CryptoNewsResult]
+  newsSummaries: [NewsResult]
   title: String
   content: String
   date: DateTime
@@ -66,15 +66,15 @@ type CryptoArticleResult {
 type TeamType {
   id: ID!
   name: String!
-  podcastSlug: String
-  podcastEnabled: Boolean!
   intro: String!
   prompt: String!
   outro: String!
-  tgChannelId: String
-  tgResponse: String
+  podcastSlug: String
+  podcastEnabled: Boolean!
   podcastImage: String
   podcastDescription: String
+  tgChannelId: String
+  tgResponse: String
   podcastUrl: String
   podcastImageUrl: String
   members: [TeamMembershipType]
@@ -95,10 +95,10 @@ enum SortDirection {
   DESC
 }
 
-type CryptoArticleData {
+type ArticleData {
   success: Boolean
   message: String
-  article: CryptoArticleResult
+  article: ArticleResult
 }
 
 type UserSettingsData {
@@ -184,19 +184,19 @@ type UserDataExport {
   email: String
   settings: [UserSettingData]
   teams: [TeamType]
-  articles: [CryptoArticleResult]
+  articles: [ArticleResult]
   jobs: [JobData]
 }
 
 type Mutation {
-  fetchCryptoNewsData: SubmitJobData
-  extractCryptoNewsData(ids: [Int]!): SubmitJobData
-  summarizeCryptoNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
-  createCryptoArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
-  createCryptoArticleChain(newsIds: [ID]!, teamId: ID!): CreateCryptoArticleAudioChain
-  updateCryptoArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateCryptoArticle
-  updateCryptoArticleAudio(articleId: ID!): UpdateCryptoArticleAudio
-  publishCryptoArticleAudio(articleId: ID!): PublishCryptoArticleAudio
+  fetchNewsData: SubmitJobData
+  extractNewsData(ids: [Int]!): SubmitJobData
+  summarizeNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
+  createArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
+  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
+  updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
+  updateArticleAudio(articleId: ID!): UpdateArticleAudio
+  publishArticleAudio(articleId: ID!): PublishArticleAudio
   updateUserSetting(key: String!, value: String!): GraphQLData
   retryJobs(ids: [UUID]!): RetryJobs
   deleteJobs(ids: [UUID]!): DeleteJobs
@@ -227,28 +227,28 @@ type SubmitJobData {
   job: JobData
 }
 
-type CreateCryptoArticleAudioChain {
+type CreateArticleAudioChain {
   success: Boolean
   message: String
   jobs: [JobData]
 }
 
-type UpdateCryptoArticle {
+type UpdateArticle {
   success: Boolean
   message: String
-  article: CryptoArticleResult
+  article: ArticleResult
 }
 
-type UpdateCryptoArticleAudio {
+type UpdateArticleAudio {
   success: Boolean
   message: String
   job: JobData
 }
 
-type PublishCryptoArticleAudio {
+type PublishArticleAudio {
   success: Boolean
   message: String
-  article: CryptoArticleResult
+  article: ArticleResult
 }
 
 type GraphQLData {

@@ -5,7 +5,7 @@ import { TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
-import { Article } from './crypto-article.service';
+import { Article } from './article.service';
 import { Job } from './job.service';
 
 @Injectable({

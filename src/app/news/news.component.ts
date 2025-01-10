@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CryptoNewsService } from '../crypto-news.service';
+import { NewsService } from '../news.service';
 import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatList, MatListItem } from '@angular/material/list';
@@ -23,7 +23,7 @@ import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { JobType, stringToJobType } from '../job.service';
 
-export interface CryptoNewsResult {
+export interface NewsResult {
   id: string;
   title: string;
   description: string;
@@ -34,10 +34,10 @@ export interface CryptoNewsResult {
   summary: string;
 }
 
-export interface CryptoNewsData {
+export interface NewsData {
   success: boolean;
   message: string;
-  results: CryptoNewsResult[];
+  results: NewsResult[];
 }
 
 export interface SidePanelAccordianData {
@@ -46,7 +46,7 @@ export interface SidePanelAccordianData {
 }
 
 @Component({
-  selector: 'app-crypto-news',
+  selector: 'app-news',
   standalone: true,
   imports: [
     DatePipe,
@@ -73,14 +73,14 @@ export interface SidePanelAccordianData {
     CustomTooltipComponent,
     JobStatusBarComponent,
   ],
-  templateUrl: './crypto-news.component.html',
-  styleUrl: './crypto-news.component.scss',
+  templateUrl: './news.component.html',
+  styleUrl: './news.component.scss',
 })
-export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription = new Subscription();
-  newsData: CryptoNewsData | null = null;
-  filteredNews: CryptoNewsResult[] = [];
-  selectedNews = new Set<CryptoNewsResult>();
+  newsData: NewsData | null = null;
+  filteredNews: NewsResult[] = [];
+  selectedNews = new Set<NewsResult>();
   teams: TeamsResult[] = [];
   selectedTeamId: number | null = null;
 
@@ -89,7 +89,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   protected showMicroJobButtons = false;
 
   constructor(
-    private cryptoNewsService: CryptoNewsService,
+    private newsService: NewsService,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private teamsService: TeamsService,
@@ -115,14 +115,10 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     this.subscriptions.add(
       this.jobStatusBar.jobCompleted$.subscribe((job) => {
-        if (
-          [JobType.FETCH_CRYPTO_NEWS, JobType.EXTRACT_CRYPTO_NEWS, JobType.SUMMARIZE_CRYPTO_NEWS].includes(
-            stringToJobType(job.jobType),
-          )
-        ) {
+        if ([JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))) {
           this.getNews();
-        } else if ([JobType.CREATE_CRYPTO_ARTICLE].includes(stringToJobType(job.jobType))) {
-          const newArticleUrl = `/crypto-article/${job.result}`;
+        } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+          const newArticleUrl = `/article/${job.result}`;
           this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
         }
       }),
@@ -136,7 +132,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   fetchNews() {
     this.subscriptions.add(
-      this.cryptoNewsService.fetchCryptoNewsData().subscribe((data) => {
+      this.newsService.fetchNewsData().subscribe((data) => {
         this.jobStatusBar.addJob(data.job);
       }),
     );
@@ -151,7 +147,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.cryptoNewsService.extractCryptoNews(newsIds).subscribe({
+      this.newsService.extractNews(newsIds).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to extract news: No job returned');
@@ -183,7 +179,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private summarizeNews(newsIds: number[], force = false) {
     this.subscriptions.add(
-      this.cryptoNewsService.summarizeCryptoNews(newsIds, force).subscribe({
+      this.newsService.summarizeNews(newsIds, force).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to summarize news data: No job returned');
@@ -207,11 +203,11 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messageService.warning('No team selected.');
       return;
     }
-    this.messageService.info('Creating crypto article from selected news items (this may take a while)...');
+    this.messageService.info('Creating article from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.cryptoNewsService.createCryptoArticleChain(newsIds, this.selectedTeamId).subscribe({
+      this.newsService.createArticleChain(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create article: No jobs returned');
@@ -238,7 +234,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.cryptoNewsService.createCryptoArticle(newsIds, this.selectedTeamId).subscribe({
+      this.newsService.createArticle(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
           if (!data.success) {
             this.messageService.error(data.message);
@@ -248,7 +244,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.messageService.error('Failed to create article: No job returned');
             return;
           }
-          this.messageService.info('Creating crypto article from selected news items (this may take a while)...');
+          this.messageService.info('Creating article from selected news items (this may take a while)...');
           this.jobStatusBar.addJob(data.job);
         },
         error: (err: { message: string }) => {
@@ -261,14 +257,14 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   getNews() {
     const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
-      this.cryptoNewsService.getCryptoNews().subscribe({
-        next: (data: CryptoNewsData) => {
+      this.newsService.getNews().subscribe({
+        next: (data: NewsData) => {
           this.newsData = data;
           this.filteredNews = this.newsData?.results || [];
           this.reapplySelection(selectedNewsIds);
         },
         error: (err: { message: string }) => {
-          this.messageService.error(`Failed to get crypto news data: ${err.message}`);
+          this.messageService.error(`Failed to get news data: ${err.message}`);
         },
         complete: () => {
           console.debug('News data fetch complete');
@@ -324,7 +320,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     if (isNegated) {
       this.filteredNews =
         this.newsData?.results.filter(
-          (news: CryptoNewsResult) =>
+          (news: NewsResult) =>
             !(
               news.title.toLowerCase().includes(lowerCaseFilter) ||
               news.description.toLowerCase().includes(lowerCaseFilter) ||
@@ -335,7 +331,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.filteredNews =
         this.newsData?.results.filter(
-          (news: CryptoNewsResult) =>
+          (news: NewsResult) =>
             news.title.toLowerCase().includes(lowerCaseFilter) ||
             news.description.toLowerCase().includes(lowerCaseFilter) ||
             news.summary.toLowerCase().includes(lowerCaseFilter) ||
@@ -352,7 +348,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selectedNews.clear();
   }
 
-  toggleSelection(news: CryptoNewsResult) {
+  toggleSelection(news: NewsResult) {
     if (this.selectedNews.has(news)) {
       this.selectedNews.delete(news);
     } else {
@@ -360,7 +356,7 @@ export class CryptoNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  isSelected(news: CryptoNewsResult): boolean {
+  isSelected(news: NewsResult): boolean {
     return this.selectedNews.has(news);
   }
 

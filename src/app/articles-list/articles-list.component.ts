@@ -6,7 +6,7 @@ import { DatePipe, SlicePipe } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { Article, CryptoArticleService } from '../crypto-article.service';
+import { Article, ArticleService } from '../article.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -90,7 +90,7 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     private router: Router,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private articleService: CryptoArticleService,
+    private articleService: ArticleService,
     private teamsService: TeamsService,
   ) {}
 
@@ -110,7 +110,7 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     this.loadingArticles = true;
     this.subscriptions.add(
       this.articleService
-        .getCryptoArticles(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedTeam)
+        .getArticles(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedTeam)
         .subscribe({
           next: (data) => {
             this.articles = data.articles;
@@ -159,6 +159,6 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   }
 
   viewArticle(id: string) {
-    this.router.navigate(['/crypto-article', id]);
+    this.router.navigate(['/article', id]);
   }
 }
