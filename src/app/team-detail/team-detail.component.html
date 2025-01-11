@@ -125,13 +125,8 @@
 
       <div class="member-row">
         <div class="file-input-wrapper">
-          @if (teamForm.get('podcastImageUrl')?.value) {
-            <img
-              [src]="teamForm.get('podcastImageUrl')?.value"
-              alt="Podcast Image"
-              class="podcast-image-preview"
-              loading="lazy"
-            />
+          @if (imageUrl) {
+            <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
           }
 
           <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">

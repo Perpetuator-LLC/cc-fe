@@ -166,6 +166,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   displayedColumns: string[] = ['username', 'role', 'actions'];
+  imageUrl: string | null = null;
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
@@ -189,6 +190,12 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           this.loading = false;
           this.messageService.error(`Failed to retrieve team data: ${err.message}`);
         },
+      }),
+    );
+    this.imageUrl = this.teamForm.get('podcastImageUrl')?.value;
+    this.subscriptions.add(
+      this.teamForm.get('podcastImageUrl')?.valueChanges.subscribe((value) => {
+        this.imageUrl = value;
       }),
     );
   }
