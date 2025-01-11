@@ -129,6 +129,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       podcastSlug: [{ value: '', disabled: true }],
       podcastUrl: [{ value: '', disabled: true }],
       podcastDescription: [''],
+      podcastOwnerName: [''],
+      podcastOwnerEmail: [''],
+      podcastOwnerLink: [''],
       podcastImage: [null],
       podcastImageUrl: [null],
       members: this.fb.array([]),
@@ -340,8 +343,21 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (!this.teamForm.valid) {
       return;
     }
-    const { id, name, intro, prompt, outro, podcastEnabled, podcastSlug, podcastDescription, tgBotToken, tgChannelId } =
-      this.teamForm.getRawValue();
+    const {
+      id,
+      name,
+      intro,
+      prompt,
+      outro,
+      podcastEnabled,
+      podcastSlug,
+      podcastDescription,
+      podcastOwnerName,
+      podcastOwnerEmail,
+      podcastOwnerLink,
+      tgBotToken,
+      tgChannelId,
+    } = this.teamForm.getRawValue();
     if (podcastEnabled && !podcastSlug) {
       this.messageService.error('Podcast slug is required when podcast is enabled');
       return;
@@ -356,6 +372,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           podcastEnabled,
           podcastSlug,
           podcastDescription,
+          podcastOwnerName,
+          podcastOwnerEmail,
+          podcastOwnerLink,
           tgBotToken,
           tgChannelId,
         )

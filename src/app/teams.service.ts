@@ -121,6 +121,9 @@ export class TeamsService extends BaseService {
     podcastEnabled: boolean | null = null,
     podcastSlug: string | null = null,
     podcastDescription: string | null = null,
+    podcastOwnerName: string | null = null,
+    podcastOwnerEmail: string | null = null,
+    podcastOwnerLink: string | null = null,
     tgBotToken: string | null = null,
     tgChannelId: string | null = null,
     refreshTgResponse: boolean | null = null,
@@ -135,6 +138,9 @@ export class TeamsService extends BaseService {
         $podcastEnabled: Boolean
         $podcastSlug: String
         $podcastDescription: String
+        $podcastOwnerName: String
+        $podcastOwnerEmail: String
+        $podcastOwnerLink: String
         $tgBotToken: String
         $tgChannelId: String
         $refreshTgResponse: Boolean
@@ -148,6 +154,9 @@ export class TeamsService extends BaseService {
           podcastEnabled: $podcastEnabled
           podcastSlug: $podcastSlug
           podcastDescription: $podcastDescription
+          podcastOwnerName: $podcastOwnerName
+          podcastOwnerEmail: $podcastOwnerEmail
+          podcastOwnerLink: $podcastOwnerLink
           tgBotToken: $tgBotToken
           tgChannelId: $tgChannelId
           refreshTgResponse: $refreshTgResponse
@@ -164,6 +173,9 @@ export class TeamsService extends BaseService {
             podcastSlug
             podcastUrl
             podcastDescription
+            podcastOwnerName
+            podcastOwnerEmail
+            podcastOwnerLink
             tgChannelId
             tgResponse
             members {
@@ -197,6 +209,9 @@ export class TeamsService extends BaseService {
         podcastEnabled,
         podcastSlug,
         podcastDescription,
+        podcastOwnerName,
+        podcastOwnerEmail,
+        podcastOwnerLink,
         tgBotToken,
         tgChannelId,
         refreshTgResponse,
@@ -225,6 +240,9 @@ export class TeamsService extends BaseService {
           podcastUrl
           podcastImageUrl
           podcastDescription
+          podcastOwnerName
+          podcastOwnerEmail
+          podcastOwnerLink
           tgChannelId
           tgResponse
           members {
