@@ -12,7 +12,7 @@ export interface Article {
   date: string;
   title: string;
   content: string;
-  audioBase64: string;
+  audioUrl: string;
   isLive: boolean;
   podcastDate: string;
   telegramDate: string;
@@ -105,7 +105,7 @@ export class ArticleService extends BaseService {
             date
             title
             content
-            audioBase64
+            audioUrl
             isLive
             podcastDate
             telegramDate
@@ -242,7 +242,7 @@ export class ArticleService extends BaseService {
             date
             title
             content
-            audioBase64
+            audioUrl
             isLive
             podcastDate
             telegramDate

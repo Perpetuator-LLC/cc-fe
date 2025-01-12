@@ -50,17 +50,18 @@ type PaginatedArticles {
 }
 
 type ArticleResult {
-  id: ID
-  newsSummaries: [NewsResult]
-  title: String
-  content: String
-  date: DateTime
-  audioBase64: String
-  audioUrl: String
-  isLive: Boolean
+  id: ID!
+  title: String!
+  date: DateTime!
+  audioFile: String
+  content: String!
+  version: Int!
+  team: TeamType
+  isLive: Boolean!
   podcastDate: DateTime
   telegramDate: DateTime
-  team: TeamType
+  audioUrl: String
+  newsSummaries: [NewsResult]
 }
 
 type TeamType {
@@ -73,8 +74,12 @@ type TeamType {
   podcastEnabled: Boolean!
   podcastImage: String
   podcastDescription: String
+  podcastOwnerName: String
+  podcastOwnerEmail: String
+  podcastOwnerLink: String
   tgChannelId: String
   tgResponse: String
+  articles: [ArticleResult!]!
   podcastUrl: String
   podcastImageUrl: String
   members: [TeamMembershipType]
@@ -205,7 +210,7 @@ type Mutation {
   deleteUser(confirm: String!): DeleteUser
   changePassword(password: String!): ChangePassword
   createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastOwnerName: String, podcastOwnerEmail: String, podcastOwnerLink: String podcastEnabled: Boolean, podcastImage: Upload, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastEnabled: Boolean, podcastImage: Upload, podcastOwnerEmail: String, podcastOwnerLink: String, podcastOwnerName: String, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
   deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
   upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
   removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam

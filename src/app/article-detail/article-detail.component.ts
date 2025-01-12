@@ -52,7 +52,6 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   private subscriptions: Subscription = new Subscription();
   articleForm: FormGroup;
   audioSrc: string | null = null;
-  downloadLink: string | null = null;
   wordCount = 0;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -112,9 +111,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
             (this.articleForm.get('newsSummaries') as FormArray).push(this.fb.group(newsSummary));
           }
 
-          if (this.articleForm.value.audioBase64) {
-            this.prepareAudioPlayer(this.articleForm.value.audioBase64);
-          }
+          this.audioSrc = data.article.audioUrl;
         },
         error: (err) => {
           this.messageService.error(`Failed to fetch article: ${err.message}`);
@@ -144,8 +141,8 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
           this.subscriptions.add(
             this.articleService.getArticleById(this.articleId).subscribe({
               next: (data) => {
-                if (data.success && data.article.audioBase64) {
-                  this.prepareAudioPlayer(data.article.audioBase64);
+                if (data.success && data.article.audioUrl) {
+                  this.audioSrc = data.article.audioUrl;
                 }
               },
               error: (err) => {
@@ -159,21 +156,6 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       }),
     );
-  }
-
-  prepareAudioPlayer(base64Audio: string): void {
-    // Decode the base64 audio and create a Blob
-    const byteCharacters = atob(base64Audio);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
-
-    // Create a URL for the Blob and set it to the audio source
-    this.audioSrc = URL.createObjectURL(blob);
-    this.downloadLink = this.audioSrc; // Also enable the download link
   }
 
   publishAudio(): void {
@@ -197,9 +179,9 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   downloadAudio(): void {
-    if (this.downloadLink) {
+    if (this.audioSrc) {
       const a = document.createElement('a');
-      a.href = this.downloadLink;
+      a.href = this.audioSrc;
       a.download = `article_${this.articleId}.mp3`; // Set the download file name
       a.click(); // Programmatically trigger the download
     }
