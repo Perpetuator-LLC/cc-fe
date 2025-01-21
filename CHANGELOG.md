@@ -1,3 +1,17 @@
+# Changelog from v0.15.0 to v0.16.0
+
+In this update, we've introduced custom RSS Feed support and different news time frames. We've also enhanced the audio feature by converting audioBase64 to an audioUrl and added support for podcast owner details. Additionally, we've improved image reloading and made navigation links more user-friendly. Lastly, we've removed and renamed all crypto references to ensure news and articles cater to a wider range of topics.
+
+## Enhancements
+- Added custom RSS Feed support and support for different news time frames.
+- Converted audioBase64 to an audioUrl and added support for podcast owner name, email, and link.
+- Made navigation links compatible with CTRL+Click and right mouse button (RMB) open in new tab.
+
+## Cleanups
+- Fixed an issue where images were reloading multiple times on hover, reducing it to 2 reloads.
+- Removed and renamed all crypto references to ensure news and articles cover a broader range of topics.
+
+
 # Changelog from v0.14.0 to v0.15.0
 
 In this update, we've removed the charts feature (for now), added support for GraphQL file uploads, and introduced podcast image and description.
