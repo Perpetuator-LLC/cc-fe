@@ -27,7 +27,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MemberResult } from '../teams-list/teams-list.component';
+import { MemberResult, RssFeedResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -42,6 +42,8 @@ import {
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 import { MatDivider } from '@angular/material/divider';
+import { MatList, MatListItem } from '@angular/material/list';
+import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
 
 @Component({
   selector: 'app-team-detail',
@@ -86,6 +88,8 @@ import { MatDivider } from '@angular/material/divider';
     MatExpansionPanelDescription,
     FormsModule,
     MatDivider,
+    MatList,
+    MatListItem,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -96,7 +100,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   newUserForm: FormGroup;
   private subscriptions = new Subscription();
   protected loading = false;
-  supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
+  protected rssFeedLoading = false;
+  protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
+  protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
   private teamId: string;
   protected podcastUrlDisabled = true;
   protected deleteConfirmation = '';
@@ -134,6 +140,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       podcastOwnerLink: [''],
       podcastImage: [null],
       podcastImageUrl: [null],
+      rssFeeds: this.fb.array([]),
       members: this.fb.array([]),
       tgBotToken: [null],
       tgChannelId: [null],
@@ -182,23 +189,28 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         this.allUsers = users;
       }),
     );
+    this.refreshTeamData();
+    this.imageUrl = this.teamForm.get('podcastImageUrl')?.value;
+    this.subscriptions.add(
+      this.teamForm.get('podcastImageUrl')?.valueChanges.subscribe((value) => {
+        this.imageUrl = value;
+      }),
+    );
+  }
+
+  private refreshTeamData() {
     this.subscriptions.add(
       this.teamsService.getTeamById(this.teamId).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
+          this.setRssFeeds(team.rssFeeds);
           this.loading = false;
         },
         error: (err) => {
           this.loading = false;
           this.messageService.error(`Failed to retrieve team data: ${err.message}`);
         },
-      }),
-    );
-    this.imageUrl = this.teamForm.get('podcastImageUrl')?.value;
-    this.subscriptions.add(
-      this.teamForm.get('podcastImageUrl')?.valueChanges.subscribe((value) => {
-        this.imageUrl = value;
       }),
     );
   }
@@ -218,6 +230,19 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             id: [member.user.id],
             username: [member.user.username],
           }),
+        }),
+      );
+    });
+  }
+
+  private setRssFeeds(rssFeeds: RssFeedResult[]): void {
+    const rssFeedsFormArray = this.rssFeeds;
+    rssFeedsFormArray.clear();
+    rssFeeds.forEach((feed) => {
+      rssFeedsFormArray.push(
+        this.fb.group({
+          id: [feed.id, Validators.required],
+          url: [feed.url, Validators.required],
         }),
       );
     });
@@ -480,6 +505,71 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         this.messageService.error(`Failed to upload podcast image: ${error.message}`);
         this.selectedFile = null;
         this.teamForm.get('podcastImage')?.reset();
+      },
+    });
+  }
+
+  get rssFeeds(): FormArray {
+    console.log(this.teamForm.get('rssFeeds')?.value);
+    return this.teamForm.get('rssFeeds') as FormArray;
+  }
+
+  openAddRssFeedDialog(): void {
+    const dialogRef = this.dialog.open(AddRssFeedDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.addRssFeed(result.url);
+      }
+    });
+  }
+
+  addRssFeed(url: string): void {
+    this.rssFeedLoading = true;
+    this.subscriptions.add(
+      this.teamsService.createRssFeed(url).subscribe({
+        next: (data) => {
+          const existingId = this.rssFeeds.controls.findIndex((a) => a.get('id')?.value == data.rssFeed.id);
+          if (existingId >= 0) {
+            this.messageService.info('RSS Feed already exists');
+            this.rssFeedLoading = false;
+            return;
+          }
+          this.rssFeeds.push(
+            this.fb.group({
+              id: [data.rssFeed.id, Validators.required],
+              url: [data.rssFeed.url, Validators.required],
+            }),
+          );
+          this.updateRssFeeds();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update RSS Feeds: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  removeRssFeed(feedId: number): void {
+    this.rssFeeds.removeAt(this.rssFeeds.controls.findIndex((control) => control.get('id')?.value === feedId));
+    this.updateRssFeeds();
+  }
+
+  private updateRssFeeds(): void {
+    this.rssFeedLoading = true;
+    const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.id);
+    this.teamsService.setTeamRssFeeds(this.teamId, rssFeedIds).subscribe({
+      next: (data) => {
+        this.teamForm.patchValue(data.team);
+        this.rssFeedLoading = false;
+        this.messageService.success('RSS Feeds updated successfully');
+      },
+      error: (err) => {
+        this.refreshTeamData();
+        this.rssFeedLoading = false;
+        this.messageService.error(`Failed to update RSS Feeds: ${err.message}`);
       },
     });
   }

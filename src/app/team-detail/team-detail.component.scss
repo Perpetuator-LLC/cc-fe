@@ -91,3 +91,12 @@ mat-divider {
     max-width: 300px;
   }
 }
+
+.actions-column,
+.actions-cell {
+  width: 80px; /* Adjust this value as needed */
+  min-width: 80px;
+  max-width: 80px;
+  padding: 0;
+  text-align: center;
+}

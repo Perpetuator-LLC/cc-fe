@@ -20,6 +20,11 @@ export interface MemberResult {
   role: string;
 }
 
+export interface RssFeedResult {
+  id: number;
+  url: string;
+}
+
 export interface TeamsResult {
   id: number;
   name: string | null;
@@ -28,11 +33,15 @@ export interface TeamsResult {
   podcastSlug: string | null;
   podcastImage: string | null;
   podcastImageUrl: string | null;
+  podcastOwnerName: string | null;
+  podcastOwnerEmail: string | null;
+  podcastOwnerLink: string | null;
   intro: string | null;
   prompt: string | null;
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
+  rssFeeds: RssFeedResult[];
   members: MemberResult[];
 }
 

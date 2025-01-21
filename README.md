@@ -1,15 +1,19 @@
 # GPT
 
-To assist in development of this project I created:
+To assist in development of this project:
 https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
 ## Fixes
 
-- [ ] Check if image preview is working
+- [ ] Add RSS feed customization and to team
+- [ ] Add Podcast properties
+- [ ] Add Podcast categories support
+- [x] Add GUID to audio files in podcast
+- [x] Check if image preview is working
 - [ ] Email debounce
-- [ ] On news list update filter is no longer applied
+- [x] On news list update filter is no longer applied
 - [ ] Allow user to remove self from team
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
   - [ ] Disable team name editing and podcast control if not owner
@@ -44,7 +48,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Add foul language check for names, and articles?
 - [ ] Add image review process?
 - [ ] Add ElevenLabs API Key to team, or make upgrade feature?
-- [ ] Can we move LangChain and OpenAI to a separate service/end-point?]
+- [ ] Can we move LangChain and OpenAI to a separate service/end-point?
 - [ ] Add custom URL (to scrape) but scoped to this user only
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
   - [ ] Add copyright check script

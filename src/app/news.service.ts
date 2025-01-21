@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { NewsData } from './news/news.component';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
+import { News } from './news/news.component';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +13,10 @@ export class NewsService extends BaseService {
     super(apollo);
   }
 
-  fetchNewsData() {
+  fetchNews(teamId: number) {
     const FETCH_NEWS_DATA = gql`
-      mutation {
-        fetchNewsData {
-          success
-          message
+      mutation FetchNews($teamId: ID!) {
+        fetchNews(teamId: $teamId) {
           job {
             id
             jobType
@@ -34,31 +31,25 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      fetchNewsData: {
-        success: boolean;
-        message: string;
+      fetchNews: {
         job: Job;
       };
     }
 
     return this.mutate<Response>({
       mutation: FETCH_NEWS_DATA,
+      variables: { teamId: teamId },
     }).pipe(
       map((data) => {
-        if (!data.fetchNewsData.success) {
-          throw new Error(data.fetchNewsData.message);
-        }
-        return data.fetchNewsData;
+        return data.fetchNews;
       }),
     );
   }
 
-  getNews(): Observable<NewsData> {
-    const GET_NEWS_DATA = gql`
-      query GetNewsData {
-        getNewsData {
-          success
-          message
+  getNews(teamId: number, hours = 24) {
+    const GET_NEWS = gql`
+      query GetNews($teamId: ID!, $hours: Int!) {
+        getNews(teamId: $teamId, hours: $hours) {
           results {
             id
             title
@@ -74,28 +65,24 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      getNewsData: NewsData;
+      getNews: News;
     }
 
     return this.query<Response>({
-      query: GET_NEWS_DATA,
+      query: GET_NEWS,
       fetchPolicy: 'network-only',
+      variables: { teamId, hours },
     }).pipe(
       map((data) => {
-        if (!data.getNewsData.success) {
-          throw new Error(data.getNewsData.message);
-        }
-        return data.getNewsData;
+        return data.getNews;
       }),
     );
   }
 
-  extractNews(ids: number[]) {
+  extractNews(teamId: number, ids: number[]) {
     const EXTRACT_NEWS_DATA = gql`
-      mutation {
-        extractNewsData(ids: [${ids.join(' ')}]) {
-          success
-          message
+      mutation ExtractNews($teamId: ID!, $ids: [ID!]!) {
+        extractNews(teamId: $teamId, ids: $ids) {
           job {
             id
             jobType
@@ -110,32 +97,25 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      extractNewsData: {
-        success: boolean;
-        message: string;
+      extractNews: {
         job: Job;
       };
     }
 
     return this.mutate<Response>({
       mutation: EXTRACT_NEWS_DATA,
-      fetchPolicy: 'network-only',
+      variables: { teamId, ids },
     }).pipe(
       map((data) => {
-        if (!data.extractNewsData.success) {
-          throw new Error(data.extractNewsData.message);
-        }
-        return data.extractNewsData;
+        return data.extractNews;
       }),
     );
   }
 
-  summarizeNews(ids: number[], force = false) {
+  summarizeNews(teamId: number, ids: number[], force = false) {
     const SUMMARIZE_NEWS_DATA = gql`
-      mutation SummarizeNewsData($ids: [Int!]!, $force: Boolean!) {
-        summarizeNewsData(ids: $ids, force: $force) {
-          success
-          message
+      mutation SummarizeNewsData($teamId: ID!, $ids: [ID!]!, $force: Boolean!) {
+        summarizeNews(teamId: $teamId, ids: $ids, force: $force) {
           job {
             id
             jobType
@@ -150,23 +130,18 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      summarizeNewsData: {
-        success: boolean;
-        message: string;
+      summarizeNews: {
         job: Job;
       };
     }
 
     return this.mutate<Response>({
       mutation: SUMMARIZE_NEWS_DATA,
-      variables: { ids, force },
+      variables: { teamId, ids, force },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.summarizeNewsData.success) {
-          throw new Error(data.summarizeNewsData.message);
-        }
-        return data.summarizeNewsData;
+        return data.summarizeNews;
       }),
     );
   }
@@ -174,9 +149,7 @@ export class NewsService extends BaseService {
   createArticle(ids: number[], teamId: number) {
     const CREATE_ARTICLE_DATA = gql`
       mutation CreateArticleData($ids: [Int!]!, $teamId: ID!) {
-        createArticleData(ids: $ids, teamId: $teamId) {
-          success
-          message
+        createArticle(ids: $ids, teamId: $teamId) {
           job {
             id
             jobType
@@ -191,9 +164,7 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      createArticleData: {
-        success: boolean;
-        message: string;
+      createArticle: {
         job: Job;
       };
     }
@@ -204,10 +175,7 @@ export class NewsService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.createArticleData.success) {
-          throw new Error(data.createArticleData.message);
-        }
-        return data.createArticleData;
+        return data.createArticle;
       }),
     );
   }
@@ -216,8 +184,6 @@ export class NewsService extends BaseService {
     const CREATE_ARTICLE_CHAIN = gql`
       mutation CreateArticleChain($newsIds: [ID!]!, $teamId: ID!) {
         createArticleChain(newsIds: $newsIds, teamId: $teamId) {
-          success
-          message
           jobs {
             id
             jobType
@@ -233,8 +199,6 @@ export class NewsService extends BaseService {
 
     interface Response {
       createArticleChain: {
-        success: boolean;
-        message: string;
         jobs: Job[];
       };
     }
@@ -245,9 +209,6 @@ export class NewsService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.createArticleChain.success) {
-          throw new Error(data.createArticleChain.message);
-        }
         return data.createArticleChain;
       }),
     );

@@ -1,5 +1,5 @@
 type Query {
-  getNewsData(ids: [Int]): NewsData
+  getNews(teamId: ID!, hours: Int = 24): NewsData
   getArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedArticles
   getArticleData(id: ID!): ArticleData
   getUserSettings(keys: [String]!): UserSettingsData
@@ -7,6 +7,7 @@ type Query {
   getUserCookieConsents: [UserCookieConsentType]
   myTeams: [TeamType]
   team(id: ID!): TeamType
+  rssFeeds: [RssFeedType]
   getUserDetails: UserDetails
   getEmailChangePending: EmailChangeRequestType
   getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
@@ -15,8 +16,6 @@ type Query {
 }
 
 type NewsData {
-  success: Boolean
-  message: String
   results: [NewsResult]
 }
 
@@ -54,6 +53,7 @@ type ArticleResult {
   title: String!
   date: DateTime!
   audioFile: String
+  audioSeconds: Int
   content: String!
   version: Int!
   team: TeamType
@@ -77,12 +77,25 @@ type TeamType {
   podcastOwnerName: String
   podcastOwnerEmail: String
   podcastOwnerLink: String
+  podcastGuid: UUID!
   tgChannelId: String
   tgResponse: String
+  rssFeeds: [RssFeedType!]!
   articles: [ArticleResult!]!
   podcastUrl: String
   podcastImageUrl: String
   members: [TeamMembershipType]
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+type RssFeedType {
+  id: ID!
+  url: String!
 }
 
 type TeamMembershipType {
@@ -165,12 +178,6 @@ type JobData {
 }
 
 """
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
-"""
 Allows use of a JSON String for input / output from the GraphQL schema.
 
 Use of this type is *not recommended* as you lose the benefits of having a defined, static
@@ -194,10 +201,12 @@ type UserDataExport {
 }
 
 type Mutation {
-  fetchNewsData: SubmitJobData
-  extractNewsData(ids: [Int]!): SubmitJobData
-  summarizeNewsData(ids: [Int]!, force: Boolean = false): SubmitJobData
-  createArticleData(ids: [Int]!, teamId: ID!): SubmitJobData
+  createRssFeed(url: String!): CreateRssFeed
+  setTeamRssFeeds(rssFeedIds: [ID]!, teamId: ID!): SetTeamRssFeeds
+  fetchNews(teamId: ID!): FetchNews
+  extractNews(ids: [ID]!, teamId: ID!): ExtractNews
+  summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
+  createArticle(ids: [Int]!, teamId: ID!): CreateArticle
   createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
   updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
   updateArticleAudio(articleId: ID!): UpdateArticleAudio
@@ -226,15 +235,31 @@ type Mutation {
   createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
 }
 
-type SubmitJobData {
-  success: Boolean
-  message: String
+type CreateRssFeed {
+  rssFeed: RssFeedType
+}
+
+type SetTeamRssFeeds {
+  team: TeamType
+}
+
+type FetchNews {
+  job: JobData
+}
+
+type ExtractNews {
+  job: JobData
+}
+
+type SummarizeNews {
+  job: JobData
+}
+
+type CreateArticle {
   job: JobData
 }
 
 type CreateArticleAudioChain {
-  success: Boolean
-  message: String
   jobs: [JobData]
 }
 
@@ -262,8 +287,6 @@ type GraphQLData {
 }
 
 type RetryJobs {
-  success: Boolean
-  message: String
   jobs: [JobData]
 }
 

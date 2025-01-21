@@ -4,10 +4,6 @@
   </div>
 </ng-template>
 
-<ng-template #tooltipTemplate>
-  <app-custom-tooltip [text]="'This is a custom tooltip with\nmultiple lines of text.'"></app-custom-tooltip>
-</ng-template>
-
 <app-message></app-message>
 
 <div class="news-container">
@@ -16,13 +12,24 @@
     <mat-card-content class="form-container">
       <mat-form-field>
         <mat-label>Select Team</mat-label>
-        <mat-select [(value)]="selectedTeamId">
+        <mat-select [(value)]="selectedTeamId" (selectionChange)="getNews()">
           @for (team of teams; track team.id) {
             <mat-option [value]="team.id">{{ team.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button color="primary" type="button" (click)="fetchNews()">Fetch URLs</button>
+      <mat-form-field>
+        <mat-label>Time</mat-label>
+        <mat-select [(value)]="selectedHours" (selectionChange)="getNews()">
+          <mat-option [value]="12">12 Hours</mat-option>
+          <mat-option [value]="24">24 Hours</mat-option>
+          <mat-option [value]="7 * 24">1 Week</mat-option>
+          <mat-option [value]="14 * 24">2 Weeks</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedTeamId === null">
+        Fetch URLs
+      </button>
       @if (showMicroJobButtons) {
         <button
           mat-flat-button
@@ -68,17 +75,13 @@
       </mat-form-field>
       <button mat-raised-button color="primary" type="button" (click)="selectAll()">Select All</button>
       <button mat-raised-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
-      <button mat-raised-button color="primary" type="button" (click)="selectLast12Hours()">
-        Select Last 12 Hours
-      </button>
       <p>
-        Showing {{ filteredNews.length }} of {{ newsData?.results?.length || 0 }} with {{ selectedNews.size }} selected
-        (limited to last 24 hours of fetched news).
+        Showing {{ filteredNews.length }} of {{ news?.results?.length || 0 }} with {{ selectedNews.size }} selected.
       </p>
     </mat-card-content>
   </mat-card>
 
-  @if (newsData) {
+  @if (selectedTeamId !== null && news) {
     <div class="news-container">
       <mat-list>
         @for (news of filteredNews; track news.url) {
@@ -133,10 +136,10 @@
           <mat-card>
             <mat-card-header>
               <p>
-                @if (newsData.results.length) {
+                @if (news.results.length) {
                   No news articles match the filter criteria.
                 } @else {
-                  No news articles exist within the last 24 hours, perhaps try "Fetch URLs" to get the latest updates.
+                  No news articles exist, perhaps try "Fetch URLs" to get the latest updates or change the "Time" range.
                 }
               </p>
             </mat-card-header>
@@ -144,7 +147,15 @@
         }
       </mat-list>
     </div>
-  } @else {
+  } @else if (selectedTeamId !== null) {
     <mat-spinner></mat-spinner>
+  } @else {
+    <mat-list>
+      <mat-card>
+        <mat-card-header>
+          <p>Select a team to view news.</p>
+        </mat-card-header>
+      </mat-card>
+    </mat-list>
   }
 </div>

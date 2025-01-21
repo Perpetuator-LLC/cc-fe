@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
-import { TeamsResult } from './teams-list/teams-list.component';
+import { RssFeedResult, TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
@@ -227,7 +227,7 @@ export class TeamsService extends BaseService {
   }
 
   getTeamById(id: string): Observable<TeamsResult> {
-    const GQL = gql`
+    const GET_TEAM_BY_ID = gql`
       query GetTeamById($id: ID!) {
         team(id: $id) {
           id
@@ -245,6 +245,10 @@ export class TeamsService extends BaseService {
           podcastOwnerLink
           tgChannelId
           tgResponse
+          rssFeeds {
+            id
+            url
+          }
           members {
             user {
               id
@@ -261,7 +265,7 @@ export class TeamsService extends BaseService {
     }
 
     return this.watchQuery<Response>({
-      query: GQL,
+      query: GET_TEAM_BY_ID,
       variables: { id },
       fetchPolicy: 'network-only',
     }).pipe(
@@ -596,5 +600,71 @@ export class TeamsService extends BaseService {
           return result.data.updateTeam;
         }),
       );
+  }
+
+  setTeamRssFeeds(teamId: string, rssFeedIds: string[]) {
+    const GQL = gql`
+      mutation SetTeamRssFeeds($teamId: ID!, $rssFeedIds: [ID!]!) {
+        setTeamRssFeeds(teamId: $teamId, rssFeedIds: $rssFeedIds) {
+          team {
+            id
+            rssFeeds {
+              id
+              url
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      setTeamRssFeeds: {
+        team: TeamsResult;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        teamId,
+        rssFeedIds,
+      },
+    }).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((result: any) => {
+        return result.setTeamRssFeeds;
+      }),
+    );
+  }
+
+  createRssFeed(url: string) {
+    const GQL = gql`
+      mutation CreateRssFeed($url: String!) {
+        createRssFeed(url: $url) {
+          rssFeed {
+            id
+            url
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      createRssFeed: {
+        rssFeed: RssFeedResult;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        url,
+      },
+    }).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((result: any) => {
+        return result.createRssFeed;
+      }),
+    );
   }
 }

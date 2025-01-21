@@ -7,6 +7,9 @@ interface ApolloErrorParams {
     error: {
       errors: { message: string }[];
     };
+    result: {
+      errors: { message: string }[];
+    };
   };
 }
 
@@ -14,6 +17,9 @@ export function handleApolloError(data: ApolloErrorParams) {
   console.error('GraphQL query error:', data);
   if (data.cause?.error?.errors) {
     const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(', ');
+    return throwError(() => new Error(errors));
+  } else if (data.cause?.result?.errors) {
+    const errors = data.cause.result.errors.map((e: { message: string }) => e.message).join(', ');
     return throwError(() => new Error(errors));
   } else if (data.message) {
     return throwError(() => new Error(data.message));

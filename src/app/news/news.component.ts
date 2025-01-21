@@ -18,7 +18,6 @@ import { MatDivider } from '@angular/material/divider';
 import { TeamsService } from '../teams.service';
 import { TeamsResult } from '../teams-list/teams-list.component';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { CustomTooltipComponent } from '../custom-tooltip/custom-tooltip.component';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { JobType, stringToJobType } from '../job.service';
@@ -34,9 +33,7 @@ export interface NewsResult {
   summary: string;
 }
 
-export interface NewsData {
-  success: boolean;
-  message: string;
+export interface News {
   results: NewsResult[];
 }
 
@@ -70,7 +67,6 @@ export interface SidePanelAccordianData {
     MatDivider,
     MatSelect,
     MatOption,
-    CustomTooltipComponent,
     JobStatusBarComponent,
   ],
   templateUrl: './news.component.html',
@@ -78,11 +74,13 @@ export interface SidePanelAccordianData {
 })
 export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription = new Subscription();
-  newsData: NewsData | null = null;
+  news: News | null = null;
   filteredNews: NewsResult[] = [];
   selectedNews = new Set<NewsResult>();
   teams: TeamsResult[] = [];
   selectedTeamId: number | null = null;
+  selectedHours = 24;
+  filterTarget: HTMLInputElement | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -100,8 +98,8 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    this.getNews();
-    this.filteredNews = this.newsData?.results || [];
+    // this.getNews();
+    this.filteredNews = this.news?.results || [];
 
     this.subscriptions.add(
       this.teamsService.getMyTeams().subscribe((teams) => {
@@ -123,16 +121,20 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }),
     );
-    this.subscriptions.add(
-      this.jobStatusBar.jobFailed$.subscribe(() => {
-        this.showMicroJobButtons = true;
-      }),
-    );
+    // this.subscriptions.add(
+    //   this.jobStatusBar.jobFailed$.subscribe(() => {
+    //     this.showMicroJobButtons = true;
+    //   }),
+    // );
   }
 
   fetchNews() {
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
     this.subscriptions.add(
-      this.newsService.fetchNewsData().subscribe((data) => {
+      this.newsService.fetchNews(this.selectedTeamId).subscribe((data) => {
         this.jobStatusBar.addJob(data.job);
       }),
     );
@@ -143,11 +145,15 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messageService.warning('No news items selected.');
       return;
     }
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
     this.messageService.info('Extracting content from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.extractNews(newsIds).subscribe({
+      this.newsService.extractNews(this.selectedTeamId, newsIds).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to extract news: No job returned');
@@ -167,19 +173,27 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messageService.warning('No news items selected.');
       return;
     }
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
     this.messageService.info('Summarizing content of selected news items (this may take a while)...');
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
-    this.summarizeNews(newsIds);
+    this.summarizeNews(this.selectedTeamId, newsIds);
   }
 
   regenerateSummary(id: string) {
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
     this.messageService.info('Regenerating summary for news item (this may take a while)...');
-    this.summarizeNews([Number(id)], true);
+    this.summarizeNews(this.selectedTeamId, [Number(id)], true);
   }
 
-  private summarizeNews(newsIds: number[], force = false) {
+  private summarizeNews(teamId: number, newsIds: number[], force = false) {
     this.subscriptions.add(
-      this.newsService.summarizeNews(newsIds, force).subscribe({
+      this.newsService.summarizeNews(teamId, newsIds, force).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to summarize news data: No job returned');
@@ -215,7 +229,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
           }
           this.jobStatusBar.addJobs(data.jobs);
         },
-        error: (err: { message: string }) => {
+        error: (err) => {
           this.messageService.error(err.message);
         },
       }),
@@ -236,10 +250,6 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.add(
       this.newsService.createArticle(newsIds, this.selectedTeamId).subscribe({
         next: (data) => {
-          if (!data.success) {
-            this.messageService.error(data.message);
-            return;
-          }
           if (!data.job) {
             this.messageService.error('Failed to create article: No job returned');
             return;
@@ -255,13 +265,18 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getNews() {
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
     const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
-      this.newsService.getNews().subscribe({
-        next: (data: NewsData) => {
-          this.newsData = data;
-          this.filteredNews = this.newsData?.results || [];
+      this.newsService.getNews(this.selectedTeamId, this.selectedHours).subscribe({
+        next: (data: News) => {
+          this.news = data;
+          this.filteredNews = this.news?.results || [];
           this.reapplySelection(selectedNewsIds);
+          this.applyFilter(null);
         },
         error: (err: { message: string }) => {
           this.messageService.error(`Failed to get news data: ${err.message}`);
@@ -286,25 +301,12 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  selectLast12Hours() {
-    const now = new Date();
-    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000); // 12 hours ago
-
-    this.selectedNews.clear();
-    this.filteredNews.forEach((news) => {
-      const publishedDate = new Date(news.publishedAt);
-      if (publishedDate >= twelveHoursAgo && publishedDate <= now) {
-        this.selectedNews.add(news);
-      }
-    });
-  }
-
   applyFilter(target: EventTarget | null) {
-    const element = target as HTMLInputElement;
-    const filterValue = element?.value;
+    this.filterTarget = target === null ? this.filterTarget : (target as HTMLInputElement);
+    const filterValue = this.filterTarget?.value;
 
     if (!filterValue) {
-      this.filteredNews = this.newsData?.results || [];
+      this.filteredNews = this.news?.results || [];
       return;
     }
 
@@ -319,7 +321,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (isNegated) {
       this.filteredNews =
-        this.newsData?.results.filter(
+        this.news?.results.filter(
           (news: NewsResult) =>
             !(
               news.title.toLowerCase().includes(lowerCaseFilter) ||
@@ -330,7 +332,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
         ) || [];
     } else {
       this.filteredNews =
-        this.newsData?.results.filter(
+        this.news?.results.filter(
           (news: NewsResult) =>
             news.title.toLowerCase().includes(lowerCaseFilter) ||
             news.description.toLowerCase().includes(lowerCaseFilter) ||
