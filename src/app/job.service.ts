@@ -102,8 +102,6 @@ export class JobService extends BaseService {
           orderBy: $orderBy
           direction: $direction
         ) {
-          success
-          message
           totalRecords
           totalPages
           currentPage
@@ -124,8 +122,6 @@ export class JobService extends BaseService {
 
     interface Response {
       getUserJobs: {
-        success: boolean;
-        message: string;
         totalRecords: number;
         totalPages: number;
         currentPage: number;
@@ -141,9 +137,6 @@ export class JobService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getUserJobs.success) {
-          throw new Error(data.getUserJobs.message);
-        }
         return data.getUserJobs;
       }),
     );
@@ -153,8 +146,6 @@ export class JobService extends BaseService {
     const GQL = gql`
       mutation RetryJobs($ids: [UUID]!) {
         retryJobs(ids: $ids) {
-          success
-          message
           jobs {
             id
             jobType

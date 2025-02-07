@@ -5,24 +5,51 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 # Capital Copilot Front-End
 
+## Personas
+
+### Personal: Pay for Commercial Free Custom News Feeds
+- Pick your voice
+- Pick your news sources
+- Pick your topics
+- Pick your frequency
+- Pick your length
+- Pick your format
+- Pick your delivery method
+
+### Brand: Pay for a Custom Brand Channel
+- Same as above but for a team
+- Add Validator that can search internet to verify news
+  - Is this a cost to upgrade or we enforce this on all teams?
+  - Is this part of our brand or a separate service?
+- Add Schedule so it automatically produces feed every day
+- Accept ads, custom or use our network to monetize
+- Podcast and Telegram etc. Analytics
+- Auto create podcasts on different platforms
+  - YouTube Music
+  - Amazon Music
+  - iTunes
+  - Apple Podcasts
+  - Spotify
+
+### Podcast: Pay for a Custom Podcast
+
 ## Fixes
 
-- [ ] Add RSS feed customization and to team
+- [ ] Balance doesn't update on usage, when jobs finish add the new balance and then push the update to the credits
+- [ ] On team select run fetch
 - [ ] Add Podcast properties
+- [ ] Consider 
 - [ ] Add Podcast categories support
-- [x] Add GUID to audio files in podcast
-- [x] Check if image preview is working
+- [ ] When navigating away from team prompt editing, either make it auto-save or prompt to save
 - [ ] Email debounce
-- [x] On news list update filter is no longer applied
-- [ ] Allow user to remove self from team
+- [ ] Allow user to remove self from team, even if not owner
 - [ ] Disable Publish if not publisher or greater and disable Create Article as well as Update if not an Editor
   - [ ] Disable team name editing and podcast control if not owner
 - [ ] Disable trash icons if not owner and not self
-- [x] Add delete account
-- [x] Add delete team
 - [ ] All calls to services should handle errors so that they propagate to the user through messageService, unless we want services to handle them
 - [ ] Add cloudflare between user and S3
 - [ ] Add thumbnail support
+- [ ] Prevent email from being used as a username
 
 ## Refactoring
 
@@ -30,14 +57,13 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Replace all messages with new messaging infrastructure and remove clears
 - [ ] Search for throwError or .apollo. and use new Apollo
 - [ ] Add Job Table with URL query params that update as table is filtered
-- [x] Move all news summary error handling to news summary function instead of returning Blocked
 - [ ] Add job scheduling with time based jobs
 
 ## Ideal Enhancements
 
+- [ ] Add voice selection with different costs (e.g ElevenLabs, OpenAI)
+- [ ] Add Articles filter as a query param (so that we can deep link to a specific filter, back works, etc.)
 - [ ] Add blog post generator
-- [ ] Add RSS feeds to teams
-- [x] On Article list page add a team filter
 
 ## Possible Enhancements
 
@@ -47,8 +73,6 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Make `npm run generate` work to convert schema to types, or find a way to use them from the schema directly!?
 - [ ] Add foul language check for names, and articles?
 - [ ] Add image review process?
-- [ ] Add ElevenLabs API Key to team, or make upgrade feature?
-- [ ] Can we move LangChain and OpenAI to a separate service/end-point?
 - [ ] Add custom URL (to scrape) but scoped to this user only
 - [ ] Get pre-commit stuff working, with 90% coverage, formatting, copyrights, etc.
   - [ ] Add copyright check script
@@ -69,7 +93,6 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Testing
 
-- [x] Add multiple channel publishing on TG to team
 - [x] RSS Podcast feed
   - [ ] Add to Apple
   - [ ] Add to Spotify
@@ -78,6 +101,16 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Done
 
+- [x] Add multiple channel publishing on TG to team
+- [x] Move all news summary error handling to news summary function instead of returning Blocked
+- [x] Add RSS feeds to teams
+- [x] On Article list page add a team filter
+- [x] Add RSS feed customization and to team
+- [x] Add GUID to audio files in podcast
+- [x] Check if image preview is working
+- [x] On news list update filter is no longer applied
+- [x] Add delete account
+- [x] Add delete team
 - [x] Add intro, outro, and prompt to Team
 - [x] Add team to article detail page
 - [x] Cancel Pending Jobs
@@ -120,6 +153,9 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [x] Add changelog script and CHANGELOG
 - [x] Remove description logic from article summary
 - [x] Can we move OpenBB to a separate service/end-point? (disabled for now)
+- [x] Material UI
+- [x] Dark Mode/Theme (local storage -> DB w/ login)
+- [x] Cookies
 
 [ANGULAR.md](notes%2FANGULAR.md)
 [APEXCHARTS.md](notes%2FAPEXCHARTS.md)
@@ -146,10 +182,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 - [ ] Option Spread Alerts
   - [ ] Option price over time as chart (bid, ask, mid)
   - [ ] Buy option vs. Buy underlying: break-evens, how long until option is more profitable, % gains on same investment
-- [x] Material UI
 - [ ] SSO
-- [x] Dark Mode/Theme (local storage -> DB w/ login)
-- [x] Cookies
 - [ ] Payments w/ free code
 - [x] Auto-Complete Stock/Ticker with company name search
 - [ ] News (Z)

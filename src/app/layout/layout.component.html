@@ -137,15 +137,21 @@
           class="website-icon"
         />
       }
-      <ng-container #toolbarContainer></ng-container>
-      @if (this.authService.isLoggedIn()) {
-        <span class="push-right">
-          <button mat-button [routerLink]="['/profile']">
-            <mat-icon>account_circle</mat-icon>
-            {{ this.userService.userDetails()?.username }}
-          </button>
-        </span>
-      }
+      <div class="toolbar-container">
+        <ng-container #toolbarContainer></ng-container>
+        @if (this.authService.isLoggedIn()) {
+          <span class="push-right">
+            <button mat-button matTooltip="{{ this.userCredits | number: '1.0-0' }}" [routerLink]="['/transactions']">
+              <mat-icon>account_balance_wallet</mat-icon>
+              {{ shortCredits(this.userCredits) }}
+            </button>
+            <button mat-button [routerLink]="['/profile']">
+              <mat-icon>account_circle</mat-icon>
+              {{ this.userService.userDetails()?.username }}
+            </button>
+          </span>
+        }
+      </div>
     </mat-toolbar>
     @if (!drawer.opened) {
       <div class="floating-button">

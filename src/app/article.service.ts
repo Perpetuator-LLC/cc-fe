@@ -49,8 +49,6 @@ export class ArticleService extends BaseService {
     const GQL = gql`
       query GetArticlesData($page: Int!, $pageSize: Int!, $orderBy: String!, $direction: SortDirection!, $teamId: ID) {
         getArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, teamId: $teamId) {
-          success
-          message
           totalRecords
           totalPages
           currentPage
@@ -85,9 +83,6 @@ export class ArticleService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getArticles.success) {
-          throw new Error(data.getArticles.message);
-        }
         return data.getArticles;
       }),
     );

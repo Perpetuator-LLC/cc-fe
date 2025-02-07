@@ -13,6 +13,8 @@ type Query {
   getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
   getDeleteUserResults: DeleteUserResults
   userDataExport(confirm: String!): UserDataExport
+  getUserCredits: Int
+  getUserTransactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
 }
 
 type NewsData {
@@ -38,8 +40,6 @@ value as specified by
 scalar DateTime
 
 type PaginatedArticles {
-  success: Boolean
-  message: String
   totalRecords: Int
   totalPages: Int
   currentPage: Int
@@ -60,6 +60,7 @@ type ArticleResult {
   isLive: Boolean!
   podcastDate: DateTime
   telegramDate: DateTime
+  podcastEpisodeGuid: UUID!
   audioUrl: String
   newsSummaries: [NewsResult]
 }
@@ -156,8 +157,6 @@ type EmailChangeRequestType {
 }
 
 type PaginatedJobStatus {
-  success: Boolean
-  message: String
   totalRecords: Int
   totalPages: Int
   currentPage: Int
@@ -198,6 +197,24 @@ type UserDataExport {
   teams: [TeamType]
   articles: [ArticleResult]
   jobs: [JobData]
+}
+
+type PaginatedCreditTransactionType {
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  transactions: [CreditTransactionType]
+}
+
+type CreditTransactionType {
+  id: ID!
+  originalUserId: Int
+  description: String!
+  amount: Int!
+  createdAt: DateTime!
+  balance: Int
 }
 
 type Mutation {

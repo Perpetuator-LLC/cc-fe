@@ -87,8 +87,11 @@ mat-divider {
 }
 
 .file-input-wrapper {
-  img {
-    max-width: 300px;
+  div {
+    margin-bottom: 1em;
+    img {
+      max-width: 300px;
+    }
   }
 }
 
@@ -99,4 +102,8 @@ mat-divider {
   max-width: 80px;
   padding: 0;
   text-align: center;
+}
+
+.rss-feeds-section div {
+  margin-top: 1em;
 }

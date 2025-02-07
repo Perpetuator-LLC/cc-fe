@@ -155,6 +155,16 @@ export const routes: Routes = [
       icon: 'work',
     },
   },
+  {
+    path: 'transactions',
+    loadComponent: () =>
+      import('./transactions-list/transactions-list.component').then((c) => c.TransactionsListComponent),
+    title: 'Transactions',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'work',
+    },
+  },
 ];
 
 export class AppRoutingModule {}

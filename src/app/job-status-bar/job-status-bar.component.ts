@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { Job, JobService, JobType, jobTypeToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-job-status-bar',
@@ -41,6 +42,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   constructor(
     private jobService: JobService,
     private messageService: MessageService,
+    private authService: AuthService,
   ) {}
 
   @Input() data: SidePanelAccordianData = {
@@ -165,8 +167,12 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const pollingInterval = this.getPollingInterval();
     this.pollingSubscription.add(
       interval(pollingInterval).subscribe(() => {
-        console.debug('Polling for job status updates');
-        this.loadJobs();
+        if (this.authService.isLoggedIn()) {
+          console.debug('Polling for job status updates');
+          this.loadJobs();
+        } else {
+          console.debug('Not polling for job status updates, user not logged in');
+        }
       }),
     );
   }

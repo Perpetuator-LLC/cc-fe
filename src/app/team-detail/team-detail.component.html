@@ -143,9 +143,11 @@
 
       <div class="member-row">
         <div class="file-input-wrapper">
-          @if (imageUrl) {
-            <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
-          }
+          <div>
+            @if (imageUrl) {
+              <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+            }
+          </div>
 
           <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
             Upload Podcast Image

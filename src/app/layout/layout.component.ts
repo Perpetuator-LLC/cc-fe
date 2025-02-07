@@ -10,7 +10,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe, NgClass } from '@angular/common';
+import { AsyncPipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -29,6 +29,7 @@ import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
 import { UserService } from '../user.service';
 import { MatTooltip } from '@angular/material/tooltip';
+import { CreditService } from '../credit.service';
 
 @Component({
   selector: 'app-layout',
@@ -50,6 +51,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     RouterLinkActive,
     MatTooltip,
     NgClass,
+    DecimalPipe,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
@@ -63,6 +65,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   private authRequiredRoutes = AuthGuard.getAuthRequiredRoutes();
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
   private isMinimized = false;
+  protected userCredits = 0;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -73,12 +76,18 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     private router: Router,
     protected userService: UserService,
     private renderer: Renderer2,
+    private creditService: CreditService,
     // private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
-    this.userService.loadUserDetails();
+    if (this.isLoggedIn()) {
+      this.userService.loadUserDetails();
+      this.creditService.getUserCredits().subscribe((credits) => {
+        this.userCredits = credits;
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -143,5 +152,23 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
       event.preventDefault();
       this.router.navigate([path]);
     }
+  }
+
+  shortCredits(value: number): string {
+    const absValue = Math.abs(value);
+    if (isNaN(absValue)) return `${value}`;
+
+    const units = ['k', 'M', 'B'];
+    let unitIndex = -1;
+    let displayValue = absValue;
+
+    while (displayValue >= 1000 && unitIndex < units.length - 1) {
+      displayValue /= 1000;
+      unitIndex++;
+    }
+
+    const digitsToShow = 3;
+    const digits = displayValue.toFixed(digitsToShow - Math.floor(displayValue).toString().length);
+    return unitIndex === -1 ? `${value.toFixed(0)}` : `${digits}${units[unitIndex]}`;
   }
 }
