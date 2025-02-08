@@ -1,8 +1,10 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { Apollo } from 'apollo-angular';
-import { map, Observable, Subscription } from 'rxjs';
+import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Apollo, QueryRef } from 'apollo-angular';
+import { map, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseService } from './base.service';
+import { handleApolloError, mapQueryResult } from './utils/error-handler';
+import { catchError } from 'rxjs/operators';
 
 export interface UserTransaction {
   id: string;
@@ -12,30 +14,56 @@ export interface UserTransaction {
   balance: number;
 }
 
+interface GetUserCreditsResponse {
+  getUserCredits: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class CreditService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
+  private userCreditsSignal: WritableSignal<number> = signal(0);
+  private queryRef: QueryRef<GetUserCreditsResponse>;
 
   constructor(protected override apollo: Apollo) {
     super(apollo);
-  }
-
-  getUserCredits(): Observable<number> {
     const GET_USER_CREDITS = gql`
       query GetUserCredits {
         getUserCredits
       }
     `;
 
-    interface Response {
-      getUserCredits: number;
-    }
-
-    return this.query<Response>({
+    this.queryRef = this.watchQuery<GetUserCreditsResponse>({
       query: GET_USER_CREDITS,
-    }).pipe(map((data) => data.getUserCredits));
+    });
+
+    this.queryRef.valueChanges
+      .pipe(
+        map(mapQueryResult),
+        map((data) => data.getUserCredits),
+        catchError(handleApolloError),
+      )
+      .subscribe({
+        next: (credits) => {
+          this.userCreditsSignal.set(credits);
+        },
+        error: (err) => {
+          console.error('Failed to fetch user credits:', err);
+        },
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
+  get userCredits(): WritableSignal<number> {
+    return this.userCreditsSignal;
+  }
+
+  refetchUserCredits() {
+    this.queryRef.refetch();
   }
 
   getUserTransactions(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
@@ -78,9 +106,5 @@ export class CreditService extends BaseService implements OnDestroy {
       variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
     }).pipe(map((data) => data.getUserTransactions));
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
   }
 }

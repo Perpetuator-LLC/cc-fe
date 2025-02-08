@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NewsService } from '../news.service';
 import { DatePipe } from '@angular/common';
@@ -20,7 +20,9 @@ import { TeamsResult } from '../teams-list/teams-list.component';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
-import { JobType, stringToJobType } from '../job.service';
+import { ArticleService } from '../article.service';
+import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface NewsResult {
   id: string;
@@ -72,7 +74,7 @@ export interface SidePanelAccordianData {
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',
 })
-export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NewsComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   news: News | null = null;
   filteredNews: NewsResult[] = [];
@@ -81,10 +83,11 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedTeamId: number | null = null;
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
+  jobs: Job[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
-  protected showMicroJobButtons = false;
+  protected showMicroJobButtons = true;
 
   constructor(
     private newsService: NewsService,
@@ -92,7 +95,37 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     private toolbarService: ToolbarService,
     private teamsService: TeamsService,
     protected userService: UserService,
-  ) {}
+    private jobService: JobService,
+    private articleService: ArticleService,
+  ) {
+    this.subscriptions.add(
+      toObservable(this.jobService.jobs).subscribe((jobs) => {
+        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+          if (
+            [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))
+          ) {
+            this.getNews();
+          } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+            this.subscriptions.add(
+              this.articleService.getArticleById(job.result).subscribe((article) => {
+                const newArticleUrl = `/article/${job.result}`;
+                this.messageService.success(
+                  `New article URL: <a href="${newArticleUrl}">${article.title}</a>`,
+                  null,
+                  true,
+                );
+              }),
+            );
+          }
+        });
+        const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
+        if (failedJobs.length > 0) {
+          this.showMicroJobButtons = true;
+        }
+        this.jobs = jobs;
+      }),
+    );
+  }
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
@@ -110,24 +143,6 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  ngAfterViewInit() {
-    this.subscriptions.add(
-      this.jobStatusBar.jobCompleted$.subscribe((job) => {
-        if ([JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))) {
-          this.getNews();
-        } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
-          const newArticleUrl = `/article/${job.result}`;
-          this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
-        }
-      }),
-    );
-    // this.subscriptions.add(
-    //   this.jobStatusBar.jobFailed$.subscribe(() => {
-    //     this.showMicroJobButtons = true;
-    //   }),
-    // );
-  }
-
   fetchNews() {
     if (this.selectedTeamId === null) {
       this.messageService.warning('No team selected.');
@@ -135,7 +150,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.subscriptions.add(
       this.newsService.fetchNews(this.selectedTeamId).subscribe((data) => {
-        this.jobStatusBar.addJob(data.job);
+        this.jobService.addJob(data.job);
       }),
     );
   }
@@ -159,7 +174,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.messageService.error('Failed to extract news: No job returned');
             return;
           }
-          this.jobStatusBar.addJob(data.job);
+          this.jobService.addJob(data.job);
         },
         error: (error) => {
           this.messageService.error(`Failed to extract news: ${error.message}`);
@@ -199,7 +214,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.messageService.error('Failed to summarize news data: No job returned');
             return;
           }
-          this.jobStatusBar.addJob(data.job);
+          this.jobService.addJob(data.job);
         },
         error: (error) => {
           this.messageService.error(`Failed to summarize news data: ${error.message}`);
@@ -227,7 +242,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
             this.messageService.error('Failed to create article: No jobs returned');
             return;
           }
-          this.jobStatusBar.addJobs(data.jobs);
+          this.jobService.addJobs(data.jobs);
         },
         error: (err) => {
           this.messageService.error(err.message);
@@ -255,7 +270,7 @@ export class NewsComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
           }
           this.messageService.info('Creating article from selected news items (this may take a while)...');
-          this.jobStatusBar.addJob(data.job);
+          this.jobService.addJob(data.job);
         },
         error: (err: { message: string }) => {
           this.messageService.error(err.message);

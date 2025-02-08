@@ -147,7 +147,7 @@ export class UserService extends BaseService implements OnDestroy {
       getUserDetails: UserDetails;
     }
 
-    const observable = this.watchQuery<Response>({
+    const observable = this.query<Response>({
       query: GET_USER_DETAILS,
       fetchPolicy: 'network-only',
     }).pipe(map((data) => data?.getUserDetails || null));

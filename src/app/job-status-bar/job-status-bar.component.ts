@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { interval, Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
@@ -7,10 +7,10 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
-import { Job, JobService, JobType, jobTypeToString } from '../job.service';
+import { Job, JobService, JobStatus, JobType, jobTypeToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
-import { AuthService } from '../auth.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-job-status-bar',
@@ -35,15 +35,21 @@ import { AuthService } from '../auth.service';
 })
 export class JobStatusBarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  private pollingSubscription: Subscription = new Subscription();
-  jobCompleted$ = new Subject<Job>();
-  jobFailed$ = new Subject<Job>();
   protected jobs: Job[] = [];
   constructor(
     private jobService: JobService,
     private messageService: MessageService,
-    private authService: AuthService,
-  ) {}
+  ) {
+    toObservable(this.jobService.jobs).subscribe((jobs) => {
+      this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+        this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
+      });
+      this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
+        this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
+      });
+      this.jobs = jobs;
+    });
+  }
 
   @Input() data: SidePanelAccordianData = {
     title: '',
@@ -51,22 +57,17 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    // Initialize with closed state if not provided
     if (this.data.panelOpenState === undefined) {
       this.data.panelOpenState = false;
     }
-    // this.messageService.clearMessages();
     this.loadJobs();
-    this.setupPolling();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    this.pollingSubscription.unsubscribe();
   }
 
   loadJobs() {
-    // collect the currently loaded job ids, so that if one transitions to complete we still display it...
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
       this.jobService
@@ -82,52 +83,10 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           currentJobIds,
         )
         .subscribe((result) => {
-          const jobs = result.jobs;
-          jobs.forEach((job: Job) => {
-            const existingJob = this.jobs.find((j) => j.id === job.id);
-            const jobStatusChanged = existingJob !== undefined && existingJob.status !== job.status;
-            if (!jobStatusChanged) {
-              return;
-            }
-            if (job.status === 'completed') {
-              this.jobCompleted$.next(job);
-              this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
-            } else if (job.status === 'failed') {
-              this.jobFailed$.next(job);
-              this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
-            }
-          });
-          // now filter any completed jobs over X seconds old
-          const now = new Date();
-          const xSecondsAgo = new Date(now.getTime() - 15 * 1000); // X seconds ago * 1000 ms/s
-          this.jobs = jobs.filter((job: Job) => {
-            if (job.status === 'completed') {
-              const updatedAt = new Date(job.updatedAt);
-              return updatedAt >= xSecondsAgo;
-            }
-            return true;
-          });
-          this.setupPolling();
+          this.jobs = result.jobs;
         }),
     );
   }
-
-  addJobs(jobs: Job[]) {
-    this.jobs = [...jobs, ...this.jobs];
-    this.setupPolling();
-  }
-
-  addJob(job: Job) {
-    this.jobs = [job, ...this.jobs];
-    this.setupPolling();
-  }
-
-  // updateJob(updatedJob: Job) {
-  //   const index = this.jobs.findIndex((job) => job.id === updatedJob.id);
-  //   if (index !== -1) {
-  //     this.jobs[index] = updatedJob;
-  //   }
-  // }
 
   deleteJob(id: string) {
     this.subscriptions.add(
@@ -160,28 +119,4 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   }
 
   protected readonly jobTypeToString = jobTypeToString;
-
-  private setupPolling() {
-    this.pollingSubscription.unsubscribe();
-    this.pollingSubscription = new Subscription();
-    const pollingInterval = this.getPollingIntervalInMs();
-    this.pollingSubscription.add(
-      interval(pollingInterval).subscribe(() => {
-        if (this.authService.isLoggedIn()) {
-          console.debug('Polling for job status updates');
-          this.loadJobs();
-        } else {
-          console.debug('Not polling for job status updates, user not logged in');
-        }
-      }),
-    );
-  }
-
-  getPollingIntervalInMs(): number {
-    return this.hasActiveJobs() ? 3000 : 21000;
-  }
-
-  hasActiveJobs(): boolean {
-    return this.jobs.some((job) => job.status === 'pending' || job.status === 'running');
-  }
 }

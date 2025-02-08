@@ -35,6 +35,8 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
+- [ ] Last job doesn't cleanup
+- [ ] Test Job failures
 - [ ] Balance doesn't update on usage, when jobs finish add the new balance and then push the update to the credits
 - [ ] On team select run fetch
 - [ ] Add Podcast properties

@@ -1,7 +1,7 @@
 type Query {
   getNews(teamId: ID!, hours: Int = 24): NewsData
   getArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedArticles
-  getArticleData(id: ID!): ArticleData
+  getArticle(id: ID!): ArticleType
   getUserSettings(keys: [String]!): UserSettingsData
   getAllUsers: UserList
   getUserCookieConsents: [UserCookieConsentType]
@@ -45,10 +45,10 @@ type PaginatedArticles {
   currentPage: Int
   hasNext: Boolean
   hasPrevious: Boolean
-  articles: [ArticleResult]
+  articles: [ArticleType]
 }
 
-type ArticleResult {
+type ArticleType {
   id: ID!
   title: String!
   date: DateTime!
@@ -82,7 +82,7 @@ type TeamType {
   tgChannelId: String
   tgResponse: String
   rssFeeds: [RssFeedType!]!
-  articles: [ArticleResult!]!
+  articles: [ArticleType!]!
   podcastUrl: String
   podcastImageUrl: String
   members: [TeamMembershipType]
@@ -112,12 +112,6 @@ type UserType {
 enum SortDirection {
   ASC
   DESC
-}
-
-type ArticleData {
-  success: Boolean
-  message: String
-  article: ArticleResult
 }
 
 type UserSettingsData {
@@ -208,7 +202,7 @@ type UserDataExport {
   email: String
   settings: [UserSettingData]
   teams: [TeamType]
-  articles: [ArticleResult]
+  articles: [ArticleType]
   jobs: [JobData]
   transactions: [CreditTransactionType]
 }
@@ -288,7 +282,7 @@ type CreateArticleAudioChain {
 type UpdateArticle {
   success: Boolean
   message: String
-  article: ArticleResult
+  article: ArticleType
 }
 
 type UpdateArticleAudio {
@@ -300,7 +294,7 @@ type UpdateArticleAudio {
 type PublishArticleAudio {
   success: Boolean
   message: String
-  article: ArticleResult
+  article: ArticleType
 }
 
 type GraphQLData {

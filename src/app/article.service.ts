@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { TeamsResult } from './teams-list/teams-list.component';
@@ -29,12 +29,6 @@ export interface ArticlesData {
   hasNext: boolean;
   hasPrevious: boolean;
   articles: Article[];
-}
-
-export interface ArticleData {
-  success: boolean;
-  message: string;
-  article: Article;
 }
 
 @Injectable({
@@ -92,64 +86,47 @@ export class ArticleService extends BaseService {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     const GQL = gql`
       query GetArticleData($id: ID!) {
-        getArticleData(id: $id) {
-          success
-          message
-          article {
+        getArticle(id: $id) {
+          id
+          date
+          title
+          content
+          audioUrl
+          isLive
+          podcastDate
+          telegramDate
+          team {
             id
-            date
-            title
-            content
-            audioUrl
-            isLive
-            podcastDate
-            telegramDate
-            team {
-              id
-              name
-              members {
-                role
-                user {
-                  id
-                  username
-                }
+            name
+            members {
+              role
+              user {
+                id
+                username
               }
             }
-            newsSummaries {
-              id
-              url
-              title
-              summary
-            }
+          }
+          newsSummaries {
+            id
+            url
+            title
+            summary
           }
         }
       }
     `;
 
     interface Response {
-      getArticleData: ArticleData;
+      getArticle: Article;
     }
 
     return this.query<Response>({
       query: GQL,
       variables: { id },
-      fetchPolicy: 'network-only',
-    }).pipe(
-      map((data) => {
-        if (!data.getArticleData.success) {
-          throw new Error(data.getArticleData.message);
-        }
-        return data.getArticleData;
-      }),
-    );
+    }).pipe(map((data) => data.getArticle));
   }
 
-  updateArticle(
-    id: string | null,
-    updatedTitle: string | null,
-    updatedContent: string | null,
-    isLive: boolean | null,
-  ): Observable<ArticleData> {
+  updateArticle(id: string | null, updatedTitle: string | null, updatedContent: string | null, isLive: boolean | null) {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
@@ -165,13 +142,16 @@ export class ArticleService extends BaseService {
     `;
 
     interface Response {
-      updateArticle: ArticleData;
+      updateArticle: {
+        success: boolean;
+        message: string;
+        article: Article;
+      };
     }
 
     return this.mutate<Response>({
       mutation: GQL,
       variables: { id, title: updatedTitle, content: updatedContent, isLive: isLive },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.updateArticle.success) {
@@ -213,7 +193,6 @@ export class ArticleService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.updateArticleAudio.success) {
@@ -257,7 +236,6 @@ export class ArticleService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: { id: articleId },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.publishArticleAudio.success) {

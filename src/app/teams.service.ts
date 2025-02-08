@@ -264,7 +264,7 @@ export class TeamsService extends BaseService {
       team: TeamsResult;
     }
 
-    return this.watchQuery<Response>({
+    return this.query<Response>({
       query: GET_TEAM_BY_ID,
       variables: { id },
       fetchPolicy: 'network-only',
@@ -299,17 +299,10 @@ export class TeamsService extends BaseService {
       myTeams: TeamsResult[];
     }
 
-    return this.watchQuery<Response>({
+    return this.query<Response>({
       query: GQL,
       fetchPolicy: 'network-only',
-    }).pipe(
-      map((data) => {
-        if (!data.myTeams) {
-          throw new Error('Teams data is missing');
-        }
-        return data.myTeams;
-      }),
-    );
+    }).pipe(map((data) => data.myTeams));
   }
 
   upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {

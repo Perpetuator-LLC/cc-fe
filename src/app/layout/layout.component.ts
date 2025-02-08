@@ -30,6 +30,8 @@ import { AuthGuard } from '../auth.guard';
 import { UserService } from '../user.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { CreditService } from '../credit.service';
+import { Job, JobService, JobStatus } from '../job.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-layout',
@@ -66,6 +68,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
   private isMinimized = false;
   protected userCredits = 0;
+  protected jobs: Job[] = [];
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -77,16 +80,23 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     protected userService: UserService,
     private renderer: Renderer2,
     private creditService: CreditService,
-    // private cdr: ChangeDetectorRef,
-  ) {}
+    private jobService: JobService,
+  ) {
+    toObservable(this.creditService.userCredits).subscribe((credits) => {
+      this.userCredits = credits;
+    });
+    toObservable(this.jobService.jobs).subscribe((jobs) => {
+      const completed = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
+      if (completed.length > 0) {
+        this.creditService.refetchUserCredits();
+      }
+    });
+  }
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
     if (this.isLoggedIn()) {
       this.userService.loadUserDetails();
-      this.creditService.getUserCredits().subscribe((credits) => {
-        this.userCredits = credits;
-      });
     }
   }
 
@@ -108,10 +118,8 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
 
   toggleMinimized() {
     this.isMinimized = !this.isMinimized;
-    // this.renderer.?
-    // this.cdr.detectChanges(); // Force change detection
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize')); // Trigger a resize event
+      window.dispatchEvent(new Event('resize'));
     }, 0);
   }
 

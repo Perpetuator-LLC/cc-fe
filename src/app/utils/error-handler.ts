@@ -1,5 +1,7 @@
 // src/app/utils/error-handler.ts
 import { throwError } from 'rxjs';
+import { ApolloQueryResult } from '@apollo/client/core';
+import { MutationResult } from 'apollo-angular';
 
 interface ApolloErrorParams {
   message: string;
@@ -11,6 +13,23 @@ interface ApolloErrorParams {
       errors: { message: string }[];
     };
   };
+}
+
+export function mapQueryResult<T>(result: ApolloQueryResult<T>): T {
+  if (result.errors) {
+    throw new Error(result.errors.map((e) => e.message).join(', '));
+  }
+  return result.data;
+}
+
+export function mapMutationResult<T>(result: MutationResult<T>): T {
+  if (result.errors) {
+    throw new Error(result.errors.map((e) => e.message).join(', '));
+  }
+  if (result.data === null || result.data === undefined) {
+    throw new Error('No data field was returned');
+  }
+  return result.data;
 }
 
 export function handleApolloError(data: ApolloErrorParams) {

@@ -1,4 +1,5 @@
-import { Component, effect, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserDetails, UserService } from '../user.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
@@ -83,8 +84,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       { validator: this.passwordMatchValidator },
     );
 
-    effect(() => {
-      const userData = this.userService.userDetails();
+    toObservable(this.userService.userDetails).subscribe((userData) => {
       this.userDetailForm.patchValue({
         username: userData?.username || '',
         email: userData?.email || '',

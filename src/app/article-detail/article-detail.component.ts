@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Article, ArticleService } from '../article.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -16,9 +16,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
-import { JobType, stringToJobType } from '../job.service';
+import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-article-detail',
@@ -48,11 +49,12 @@ import { MatCheckbox } from '@angular/material/checkbox';
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
 })
-export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ArticleDetailComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   articleForm: FormGroup;
   audioSrc: string | null = null;
   wordCount = 0;
+  jobs: Job[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -64,6 +66,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private articleService: ArticleService,
+    private jobService: JobService,
   ) {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -91,6 +94,30 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         name: [{ value: '', disabled: true }],
       }),
     });
+    this.subscriptions.add(
+      toObservable(this.jobService.jobs).subscribe((jobs) => {
+        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+          if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
+            this.subscriptions.add(
+              this.articleService.getArticleById(this.articleId).subscribe({
+                next: (article) => {
+                  if (article.audioUrl) {
+                    this.audioSrc = article.audioUrl;
+                  }
+                },
+                error: (err) => {
+                  this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
+                },
+              }),
+            );
+          } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+            const newArticleUrl = `/article/${job.result}`;
+            this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
+          }
+        });
+        this.jobs = jobs;
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -100,18 +127,14 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.subscriptions.add(
       this.articleService.getArticleById(this.articleId).subscribe({
-        next: (data) => {
-          if (!data.success) {
-            this.messageService.error(data.message);
-            return;
-          }
-          this.articleForm.patchValue(data.article);
+        next: (article) => {
+          this.articleForm.patchValue(article);
 
-          for (const newsSummary of data.article.newsSummaries) {
+          for (const newsSummary of article.newsSummaries) {
             (this.articleForm.get('newsSummaries') as FormArray).push(this.fb.group(newsSummary));
           }
 
-          this.audioSrc = data.article.audioUrl;
+          this.audioSrc = article.audioUrl;
         },
         error: (err) => {
           this.messageService.error(`Failed to fetch article: ${err.message}`);
@@ -132,30 +155,6 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
-  }
-
-  ngAfterViewInit() {
-    this.subscriptions.add(
-      this.jobStatusBar.jobCompleted$.subscribe((job) => {
-        if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
-          this.subscriptions.add(
-            this.articleService.getArticleById(this.articleId).subscribe({
-              next: (data) => {
-                if (data.success && data.article.audioUrl) {
-                  this.audioSrc = data.article.audioUrl;
-                }
-              },
-              error: (err) => {
-                this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
-              },
-            }),
-          );
-        } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
-          const newArticleUrl = `/article/${job.result}`;
-          this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
-        }
-      }),
-    );
   }
 
   publishAudio(): void {
@@ -200,7 +199,7 @@ export class ArticleDetailComponent implements OnInit, AfterViewInit, OnDestroy 
             return;
           }
           this.messageService.info('Generating audio file...');
-          this.jobStatusBar.addJob(data.job);
+          this.jobService.addJob(data.job);
         },
         error: (err) => {
           this.messageService.error(err.message);
