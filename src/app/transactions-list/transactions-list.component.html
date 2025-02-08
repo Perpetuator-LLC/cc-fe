@@ -22,9 +22,9 @@
             <td mat-cell *matCellDef="let transaction">{{ transaction.createdAt | date: 'short' : 'local' }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>Description</th>
-            <td mat-cell *matCellDef="let transaction">{{ transaction.description.toUpperCase() }}</td>
+          <ng-container matColumnDef="jobType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let transaction">{{ jobTypeToString(transaction?.job?.jobType) }}</td>
           </ng-container>
 
           <ng-container matColumnDef="amount">
@@ -38,7 +38,11 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" matTooltip="ID: {{ row.id }}"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            matTooltip="Txn ID: {{ row.id }} Job ID: {{ row.job?.id }}"
+          ></tr>
         </table>
 
         <mat-paginator

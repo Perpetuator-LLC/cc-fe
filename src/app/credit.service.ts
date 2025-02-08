@@ -53,6 +53,10 @@ export class CreditService extends BaseService implements OnDestroy {
             description
             amount
             balance
+            job {
+              id
+              jobType
+            }
           }
         }
       }

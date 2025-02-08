@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Job, JobService, jobTypeToString } from '../job.service';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import {
@@ -48,6 +48,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
     MessageComponent,
     MatCard,
     MatCardContent,
+    DecimalPipe,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -56,7 +57,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   jobs: Job[] = [];
   dataSource = new MatTableDataSource<Job>(this.jobs);
-  displayedColumns: string[] = ['jobType', 'status', 'message', 'createdAt', 'updatedAt'];
+  displayedColumns: string[] = ['jobType', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
   totalJobs = 0;
   pageSize = 10;
   currentPage = 0;

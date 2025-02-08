@@ -23,6 +23,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
+import { jobTypeToString } from '../job.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -57,7 +58,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   transactions: UserTransaction[] = [];
   dataSource = new MatTableDataSource<UserTransaction>(this.transactions);
-  displayedColumns: string[] = ['createdAt', 'description', 'amount', 'balance'];
+  displayedColumns: string[] = ['createdAt', 'jobType', 'amount', 'balance'];
   totalTransactions = 0;
   pageSize = 10;
   currentPage = 0;
@@ -113,4 +114,6 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.currentPage = event.pageIndex;
     this.loadTransactions();
   }
+
+  protected readonly jobTypeToString = jobTypeToString;
 }

@@ -99,7 +99,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           });
           // now filter any completed jobs over X seconds old
           const now = new Date();
-          const xSecondsAgo = new Date(now.getTime() - 15 * 1000); // X seconds ago
+          const xSecondsAgo = new Date(now.getTime() - 15 * 1000); // X seconds ago * 1000 ms/s
           this.jobs = jobs.filter((job: Job) => {
             if (job.status === 'completed') {
               const updatedAt = new Date(job.updatedAt);
@@ -164,7 +164,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   private setupPolling() {
     this.pollingSubscription.unsubscribe();
     this.pollingSubscription = new Subscription();
-    const pollingInterval = this.getPollingInterval();
+    const pollingInterval = this.getPollingIntervalInMs();
     this.pollingSubscription.add(
       interval(pollingInterval).subscribe(() => {
         if (this.authService.isLoggedIn()) {
@@ -177,8 +177,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     );
   }
 
-  getPollingInterval(): number {
-    // 3s when there are active jobs, 8s when there are none
+  getPollingIntervalInMs(): number {
     return this.hasActiveJobs() ? 3000 : 21000;
   }
 

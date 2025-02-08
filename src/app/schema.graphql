@@ -166,14 +166,17 @@ type PaginatedJobStatus {
 }
 
 type JobData {
-  id: UUID
+  id: UUID!
+  taskId: UUID
   jobType: String
-  args: JSONString
+  args: JSONString!
   status: String
   error: String
   result: String
-  createdAt: DateTime
-  updatedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  creditTransactions: [CreditTransactionType!]!
+  cost: Int
 }
 
 """
@@ -183,6 +186,16 @@ Use of this type is *not recommended* as you lose the benefits of having a defin
 schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
+
+type CreditTransactionType {
+  id: ID!
+  originalUserId: Int
+  description: String!
+  amount: Int!
+  createdAt: DateTime!
+  job: JobData
+  balance: Int
+}
 
 type DeleteUserResults {
   deletingTeams: [TeamType]
@@ -197,6 +210,7 @@ type UserDataExport {
   teams: [TeamType]
   articles: [ArticleResult]
   jobs: [JobData]
+  transactions: [CreditTransactionType]
 }
 
 type PaginatedCreditTransactionType {
@@ -206,15 +220,6 @@ type PaginatedCreditTransactionType {
   hasNext: Boolean
   hasPrevious: Boolean
   transactions: [CreditTransactionType]
-}
-
-type CreditTransactionType {
-  id: ID!
-  originalUserId: Int
-  description: String!
-  amount: Int!
-  createdAt: DateTime!
-  balance: Int
 }
 
 type Mutation {

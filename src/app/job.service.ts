@@ -44,7 +44,7 @@ export const jobTypeToString = (jobType: string) => {
     case JobType.UPDATE_ARTICLE_AUDIO:
       return 'Update Article Audio';
     default:
-      return '';
+      return 'N/A';
   }
 };
 
@@ -111,6 +111,7 @@ export class JobService extends BaseService {
             id
             jobType
             status
+            cost
             error
             result
             createdAt
