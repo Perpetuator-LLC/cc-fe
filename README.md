@@ -35,7 +35,16 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
-- [ ] Last job doesn't cleanup
+- [ ] Audio is not updating on regenerate
+- [ ] If audio was already generated for this input (same hash) then don't regenerate again and just return it
+  - [ ] Add versions with hashes of the prompts, sort by date
+  - [ ] Pre-load caches, and make the beginning of the prompts the same for better cache hits
+- [ ] Still getting markdown in the summary, can we use RL to improve it?
+  - [ ] Can we just do Agentic resolve on the prompt, until we get it to where we want it?
+  - [ ] Did it match the rules?
+  - [ ] Special character or markdown, numbers, etc. then deduct
+  - [ ] Did it include all of the news?
+- [x] Last job doesn't cleanup
 - [ ] Test Job failures
 - [ ] Balance doesn't update on usage, when jobs finish add the new balance and then push the update to the credits
 - [ ] On team select run fetch
@@ -63,6 +72,9 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Ideal Enhancements
 
+- [ ] Split audio generation into a separate chunks split on the paragraphs
+  - [ ] If we have the intro and outro cached then we can just generate the middle
+  - [ ] If the user changes a paragraph then we can just regenerate that paragraph
 - [ ] Add voice selection with different costs (e.g ElevenLabs, OpenAI)
 - [ ] Add Articles filter as a query param (so that we can deep link to a specific filter, back works, etc.)
 - [ ] Add blog post generator

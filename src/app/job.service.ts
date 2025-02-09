@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
-import { map, Subscription } from 'rxjs';
+import { interval, map, merge, Subscription } from 'rxjs';
 import { BaseService } from './base.service';
 import { Apollo } from 'apollo-angular';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
-import { catchError } from 'rxjs/operators';
+import { catchError, startWith, switchMap } from 'rxjs/operators';
 
 // create an enum of jobTypes
 export enum JobType {
@@ -51,12 +51,11 @@ export const jobTypeToString = (jobType: string) => {
   }
 };
 
-// create an enum of job statuses
 export enum JobStatus {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }
 
 export interface Job {
@@ -131,7 +130,7 @@ export class JobService extends BaseService implements OnDestroy {
     const queryRef = this.watchQuery<Response>({
       query: FETCH_USER_JOBS,
       variables: {
-        statuses: ['pending', 'running'],
+        statuses: [JobStatus.PENDING, JobStatus.RUNNING],
         jobTypes: [
           JobType.SUMMARIZE_NEWS,
           JobType.FETCH_NEWS,
@@ -149,26 +148,25 @@ export class JobService extends BaseService implements OnDestroy {
     });
 
     this.subscriptions.add(
-      queryRef.valueChanges
+      merge(
+        queryRef.valueChanges.pipe(startWith(null)),
+        interval(2000), // Refresh every 2 seconds, even if there is no new data
+      )
         .pipe(
+          switchMap(() => queryRef.valueChanges),
           map(mapQueryResult),
           map((data) => data.getUserJobs.jobs),
           catchError(handleApolloError),
         )
         .subscribe({
           next: (queriedJobs) => {
+            const now = new Date();
             const filteredJobs = queriedJobs.filter((job) => {
-              // Remove completed and failed jobs from the list
-              if (job.status.toUpperCase() === JobStatus.COMPLETED) {
-                const updatedAt = new Date(job.updatedAt);
-                const now = new Date();
-                const xSecondsAgo = new Date(now.getTime() - 5 * 1000);
-                return updatedAt > xSecondsAgo; // Keep completed job for X seconds * 1000 ms
-              } else if (job.status.toUpperCase() === JobStatus.FAILED) {
-                const updatedAt = new Date(job.updatedAt);
-                const now = new Date();
-                const xSecondsAgo = new Date(now.getTime() - 15 * 1000);
-                return updatedAt > xSecondsAgo; // Keep completed job for X seconds * 1000 ms
+              const updatedAt = new Date(job.updatedAt);
+              if (job.status === JobStatus.COMPLETED) {
+                return now.getTime() - updatedAt.getTime() <= 5000; // Keep completed job for 5 seconds
+              } else if (job.status === JobStatus.FAILED) {
+                return now.getTime() - updatedAt.getTime() <= 15000; // Keep failed job for 15 seconds
               }
               return true;
             });
@@ -204,7 +202,7 @@ export class JobService extends BaseService implements OnDestroy {
       if (!jobStatusChanged) {
         return;
       }
-      if (job.status.toUpperCase() === status.toUpperCase()) {
+      if (job.status === status) {
         transitionedJobs.push(job);
       }
     });

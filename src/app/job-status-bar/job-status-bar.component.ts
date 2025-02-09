@@ -72,7 +72,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.jobService
         .getUserJobs(
-          ['pending', 'running'],
+          [JobStatus.PENDING, JobStatus.RUNNING],
           [
             JobType.SUMMARIZE_NEWS,
             JobType.FETCH_NEWS,
@@ -119,4 +119,5 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   }
 
   protected readonly jobTypeToString = jobTypeToString;
+  protected readonly JobStatus = JobStatus;
 }

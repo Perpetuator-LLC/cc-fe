@@ -109,11 +109,7 @@ export class NewsComponent implements OnInit, OnDestroy {
             this.subscriptions.add(
               this.articleService.getArticleById(job.result).subscribe((article) => {
                 const newArticleUrl = `/article/${job.result}`;
-                this.messageService.success(
-                  `New article URL: <a href="${newArticleUrl}">${article.title}</a>`,
-                  null,
-                  true,
-                );
+                this.messageService.success(`New article: <a href="${newArticleUrl}">${article.title}</a>`, null, true);
               }),
             );
           }
