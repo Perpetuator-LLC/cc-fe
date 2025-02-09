@@ -20,6 +20,7 @@ import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.ser
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { FetchPolicy } from '@apollo/client';
 
 @Component({
   selector: 'app-article-detail',
@@ -99,7 +100,7 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
           if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
             this.subscriptions.add(
-              this.articleService.getArticleById(this.articleId).subscribe({
+              this.articleService.getArticleById(this.articleId, 'network-only' as FetchPolicy).subscribe({
                 next: (article) => {
                   if (article.audioUrl) {
                     this.audioSrc = article.audioUrl;

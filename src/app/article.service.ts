@@ -6,6 +6,7 @@ import { BaseService } from './base.service';
 import { TeamsResult } from './teams-list/teams-list.component';
 import { NewsResult } from './news/news.component';
 import { Job } from './job.service';
+import { FetchPolicy } from '@apollo/client';
 
 export interface Article {
   id: string;
@@ -82,7 +83,7 @@ export class ArticleService extends BaseService {
     );
   }
 
-  getArticleById(id: string | null) {
+  getArticleById(id: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
     if (id === null) return throwError(() => new Error('Article ID is required'));
     const GQL = gql`
       query GetArticleData($id: ID!) {
@@ -123,6 +124,7 @@ export class ArticleService extends BaseService {
     return this.query<Response>({
       query: GQL,
       variables: { id },
+      fetchPolicy: fetchPolicy,
     }).pipe(map((data) => data.getArticle));
   }
 
@@ -137,16 +139,6 @@ export class ArticleService extends BaseService {
         updateArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
           success
           message
-          article {
-            id
-            date
-            title
-            content
-            audioUrl
-            isLive
-            podcastDate
-            telegramDate
-          }
         }
       }
     `;

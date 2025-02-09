@@ -35,7 +35,6 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Fixes
 
-- [ ] Audio is not updating on regenerate
 - [ ] If audio was already generated for this input (same hash) then don't regenerate again and just return it
   - [ ] Add versions with hashes of the prompts, sort by date
   - [ ] Pre-load caches, and make the beginning of the prompts the same for better cache hits
@@ -44,12 +43,7 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
   - [ ] Did it match the rules?
   - [ ] Special character or markdown, numbers, etc. then deduct
   - [ ] Did it include all of the news?
-- [x] Last job doesn't cleanup
-- [ ] Test Job failures
-- [ ] Balance doesn't update on usage, when jobs finish add the new balance and then push the update to the credits
-- [ ] On team select run fetch
 - [ ] Add Podcast properties
-- [ ] Consider 
 - [ ] Add Podcast categories support
 - [ ] When navigating away from team prompt editing, either make it auto-save or prompt to save
 - [ ] Email debounce
@@ -115,6 +109,11 @@ https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
 
 ## Done
 
+- [x] Audio is not updating on regenerate
+- [x] Last job doesn't cleanup
+- [x] Test Job failures
+- [x] Balance doesn't update on usage, when jobs finish add the new balance and then push the update to the credits
+- [-] On team select run fetch
 - [x] Add multiple channel publishing on TG to team
 - [x] Move all news summary error handling to news summary function instead of returning Blocked
 - [x] Add RSS feeds to teams
