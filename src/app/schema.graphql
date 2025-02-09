@@ -223,7 +223,8 @@ type Mutation {
   extractNews(ids: [ID]!, teamId: ID!): ExtractNews
   summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
   createArticle(ids: [Int]!, teamId: ID!): CreateArticle
-  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
+  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleChain
+  createArticleAudioChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
   updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
   updateArticleAudio(articleId: ID!): UpdateArticleAudio
   publishArticleAudio(articleId: ID!): PublishArticleAudio
@@ -273,6 +274,10 @@ type SummarizeNews {
 
 type CreateArticle {
   job: JobData
+}
+
+type CreateArticleChain {
+  jobs: [JobData]
 }
 
 type CreateArticleAudioChain {

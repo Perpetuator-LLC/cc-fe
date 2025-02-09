@@ -5,6 +5,10 @@ import { MutationResult } from 'apollo-angular';
 
 interface ApolloErrorParams {
   message: string;
+  graphQLErrors: {
+    message: string;
+    path: string[];
+  }[];
   cause: {
     error: {
       errors: { message: string }[];
@@ -34,7 +38,10 @@ export function mapMutationResult<T>(result: MutationResult<T>): T {
 
 export function handleApolloError(data: ApolloErrorParams) {
   console.error('GraphQL query error:', data);
-  if (data.cause?.error?.errors) {
+  if (data.graphQLErrors) {
+    const errors = data.graphQLErrors.map((e) => `${e.message} (in: ${e.path.join('.')})`).join(', ');
+    return throwError(() => new Error(errors));
+  } else if (data.cause?.error?.errors) {
     const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(', ');
     return throwError(() => new Error(errors));
   } else if (data.cause?.result?.errors) {

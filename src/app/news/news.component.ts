@@ -87,7 +87,7 @@ export class NewsComponent implements OnInit, OnDestroy {
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
-  protected showMicroJobButtons = true;
+  protected showMicroJobButtons = false;
 
   constructor(
     private newsService: NewsService,
@@ -114,10 +114,10 @@ export class NewsComponent implements OnInit, OnDestroy {
             );
           }
         });
-        const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
-        if (failedJobs.length > 0) {
-          this.showMicroJobButtons = true;
-        }
+        // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
+        // if (failedJobs.length > 0) {
+        //   this.showMicroJobButtons = true;
+        // }
         this.jobs = jobs;
       }),
     );
@@ -127,7 +127,6 @@ export class NewsComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    // this.getNews();
     this.filteredNews = this.news?.results || [];
 
     this.subscriptions.add(
@@ -236,6 +235,34 @@ export class NewsComponent implements OnInit, OnDestroy {
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create article: No jobs returned');
+            return;
+          }
+          this.jobService.addJobs(data.jobs);
+        },
+        error: (err) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  createArticleAudioChainFromSelected() {
+    if (this.selectedNews.size === 0) {
+      this.messageService.warning('No news items selected.');
+      return;
+    }
+    if (this.selectedTeamId === null) {
+      this.messageService.warning('No team selected.');
+      return;
+    }
+    this.messageService.info('Creating audio from selected news items (this may take a while)...');
+
+    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    this.subscriptions.add(
+      this.newsService.createArticleAudioChain(newsIds, this.selectedTeamId).subscribe({
+        next: (data) => {
+          if (!data.jobs) {
+            this.messageService.error('Failed to create audio: No jobs returned');
             return;
           }
           this.jobService.addJobs(data.jobs);

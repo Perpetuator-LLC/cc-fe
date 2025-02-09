@@ -66,7 +66,16 @@
         (click)="createArticleChainFromSelected()"
         [disabled]="selectedNews.size === 0"
       >
-        Create Article Audio
+        Generate Article
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="createArticleAudioChainFromSelected()"
+        [disabled]="selectedNews.size === 0"
+      >
+        Create Article & Audio
       </button>
       <br />
       <mat-form-field appearance="outline" class="filter-form-field">

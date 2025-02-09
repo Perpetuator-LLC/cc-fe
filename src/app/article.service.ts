@@ -137,6 +137,16 @@ export class ArticleService extends BaseService {
         updateArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
           success
           message
+          article {
+            id
+            date
+            title
+            content
+            audioUrl
+            isLive
+            podcastDate
+            telegramDate
+          }
         }
       }
     `;

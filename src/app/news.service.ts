@@ -213,4 +213,38 @@ export class NewsService extends BaseService {
       }),
     );
   }
+
+  createArticleAudioChain(newsIds: number[], teamId: number) {
+    const CREATE_ARTICLE_AUDIO_CHAIN = gql`
+      mutation CreateArticleAudioChain($newsIds: [ID!]!, $teamId: ID!) {
+        createArticleAudioChain(newsIds: $newsIds, teamId: $teamId) {
+          jobs {
+            id
+            jobType
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      createArticleAudioChain: {
+        jobs: Job[];
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: CREATE_ARTICLE_AUDIO_CHAIN,
+      variables: { newsIds, teamId },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return data.createArticleAudioChain;
+      }),
+    );
+  }
 }

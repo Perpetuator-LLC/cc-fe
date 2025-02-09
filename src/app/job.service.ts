@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
-import { interval, map, merge, Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import { BaseService } from './base.service';
 import { Apollo } from 'apollo-angular';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
-import { catchError, startWith, switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 
 // create an enum of jobTypes
 export enum JobType {
@@ -74,18 +74,45 @@ export interface Job {
 export class JobService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
   private jobsSignal: WritableSignal<Job[]> = signal([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private cleanupInterval: any;
 
   constructor(protected override apollo: Apollo) {
     super(apollo);
     this.setupJobStatusPolling();
+    this.setupCleanupLoop();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    clearInterval(this.cleanupInterval);
   }
 
   get jobs(): WritableSignal<Job[]> {
     return this.jobsSignal;
+  }
+
+  private setupCleanupLoop() {
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupOldJobs();
+    }, 5000); // Run cleanup every 5 seconds
+  }
+
+  private cleanupOldJobs() {
+    const now = new Date();
+    const jobs = this.jobsSignal();
+    const filteredJobs = jobs.filter((job) => {
+      const updatedAt = new Date(job.updatedAt);
+      if (job.status === JobStatus.COMPLETED) {
+        return now.getTime() - updatedAt.getTime() <= 5000; // Keep completed job for 5 seconds
+      } else if (job.status === JobStatus.FAILED) {
+        return now.getTime() - updatedAt.getTime() <= 15000; // Keep failed job for 15 seconds
+      }
+      return true;
+    });
+    if (filteredJobs.length !== jobs.length) {
+      this.jobsSignal.set(filteredJobs);
+    }
   }
 
   private setupJobStatusPolling() {
@@ -122,9 +149,7 @@ export class JobService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserJobs: {
-        jobs: Job[];
-      };
+      getUserJobs: { jobs: Job[] };
     }
 
     const queryRef = this.watchQuery<Response>({
@@ -147,11 +172,9 @@ export class JobService extends BaseService implements OnDestroy {
       pollInterval: 3000, // Poll every 3 seconds
     });
 
+    // Subscription for handling data updates from polling
     this.subscriptions.add(
-      merge(
-        queryRef.valueChanges.pipe(startWith(null)),
-        interval(2000), // Refresh every 2 seconds, even if there is no new data
-      )
+      queryRef.valueChanges
         .pipe(
           switchMap(() => queryRef.valueChanges),
           map(mapQueryResult),
@@ -159,28 +182,13 @@ export class JobService extends BaseService implements OnDestroy {
           catchError(handleApolloError),
         )
         .subscribe({
-          next: (queriedJobs) => {
-            const now = new Date();
-            const filteredJobs = queriedJobs.filter((job) => {
-              const updatedAt = new Date(job.updatedAt);
-              if (job.status === JobStatus.COMPLETED) {
-                return now.getTime() - updatedAt.getTime() <= 5000; // Keep completed job for 5 seconds
-              } else if (job.status === JobStatus.FAILED) {
-                return now.getTime() - updatedAt.getTime() <= 15000; // Keep failed job for 15 seconds
-              }
-              return true;
-            });
-            this.jobsSignal.set(filteredJobs);
-          },
-          error: (err) => {
-            console.error('Failed to fetch jobs:', err);
-          },
+          next: (jobs) => this.jobsSignal.set(jobs),
+          error: (err) => console.error('Failed to fetch jobs:', err),
         }),
     );
 
     toObservable(this.jobsSignal).subscribe((jobs) => {
       const jobIds = jobs.map((job) => job.id);
-      console.log('Monitoring jobs:', jobIds);
       queryRef.setVariables({ ...queryRef.variables, ids: jobIds });
       queryRef.setOptions({ ...queryRef.options, pollInterval: jobs.length === 0 ? 21000 : 3000 });
     });
@@ -306,7 +314,6 @@ export class JobService extends BaseService implements OnDestroy {
     return this.mutate<Response>({
       mutation: GQL,
       variables: { ids },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.retryJobs.success) {
@@ -316,6 +323,7 @@ export class JobService extends BaseService implements OnDestroy {
       }),
     );
   }
+
   deleteJobs(ids: string[] = []) {
     const GQL = gql`
       mutation DeleteJobs($ids: [UUID]!) {
@@ -336,7 +344,6 @@ export class JobService extends BaseService implements OnDestroy {
     return this.mutate<Response>({
       mutation: GQL,
       variables: { ids },
-      fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.deleteJobs.success) {
