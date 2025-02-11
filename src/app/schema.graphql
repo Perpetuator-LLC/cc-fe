@@ -228,7 +228,7 @@ type Mutation {
   updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
   updateArticleAudio(articleId: ID!): UpdateArticleAudio
   publishArticleAudio(articleId: ID!): PublishArticleAudio
-  updateUserSetting(key: String!, value: String!): GraphQLData
+  updateUserSetting(key: String!, value: String!): UpdateUserSetting
   retryJobs(ids: [UUID]!): RetryJobs
   deleteJobs(ids: [UUID]!): DeleteJobs
   updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
@@ -250,6 +250,7 @@ type Mutation {
   cancelEmailChange: CancelEmailChange
   updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
   createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
+  createStripeCheckoutSession(amount: Int): CreateStripeCheckoutSession
 }
 
 type CreateRssFeed {
@@ -302,7 +303,7 @@ type PublishArticleAudio {
   article: ArticleType
 }
 
-type GraphQLData {
+type UpdateUserSetting {
   success: Boolean
   message: String
 }
@@ -395,4 +396,9 @@ type UpdateScheduleMutation {
 type CreateScheduleMutation {
   success: Boolean
   message: String
+}
+
+type CreateStripeCheckoutSession {
+  sessionId: String
+  url: String
 }

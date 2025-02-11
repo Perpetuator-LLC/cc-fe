@@ -87,9 +87,12 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     });
     toObservable(this.jobService.jobs).subscribe((jobs) => {
       const completed = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
-      if (completed.length > 0) {
+      // Filter out FETCH_NEWS and EXTRACT_NEWS jobs as they cost 0 and won't update credits...
+      const filtered = completed.filter((job) => job.jobType !== 'FETCH_NEWS' && job.jobType !== 'EXTRACT_NEWS');
+      if (filtered.length > 0) {
         this.creditService.refetchUserCredits();
       }
+      this.jobs = jobs;
     });
   }
 

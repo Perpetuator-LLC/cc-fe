@@ -18,10 +18,11 @@ import {
 } from '@angular/material/expansion';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
+import { PaymentService } from '../payment.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -66,8 +67,10 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private teamService: TeamsService,
+    private paymentService: PaymentService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -105,6 +108,16 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
+
+    this.route.queryParams.subscribe((params) => {
+      if (params['payment'] === 'success') {
+        this.messageService.success('Payment was successful.');
+        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      } else if (params['payment'] === 'cancel') {
+        this.messageService.warning('Payment cancelled.');
+        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -312,6 +325,21 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.messageService.error(`Failed to delete account: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  pay(amount: number) {
+    this.subscriptions.add(
+      this.paymentService.createCheckoutSession(amount).subscribe({
+        next: (data) => {
+          if (data?.url) {
+            this.paymentService.redirectToCheckout(data.url);
+          }
+        },
+        error: (err) => {
+          this.messageService.error('Failed to create checkout session: ' + err.message);
         },
       }),
     );
