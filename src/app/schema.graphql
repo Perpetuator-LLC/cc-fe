@@ -15,6 +15,7 @@ type Query {
   userDataExport(confirm: String!): UserDataExport
   getUserCredits: Int
   getUserTransactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
+  getUserOrders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
 }
 
 type NewsData {
@@ -185,10 +186,36 @@ type CreditTransactionType {
   id: ID!
   originalUserId: Int
   description: String!
-  amount: Int!
+  creditAmount: Int!
   createdAt: DateTime!
   job: JobData
+  order: OrderType
   balance: Int
+}
+
+type OrderType {
+  id: ID!
+  originalUserId: Int
+  sessionId: String
+  amount: Int!
+  invoiceUrl: String
+  status: ApiOrderStatusChoices!
+  description: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  creditTransactions: [CreditTransactionType!]!
+}
+
+"""An enumeration."""
+enum ApiOrderStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Paid"""
+  PAID
+
+  """Canceled"""
+  CANCELED
 }
 
 type DeleteUserResults {
@@ -214,6 +241,15 @@ type PaginatedCreditTransactionType {
   hasNext: Boolean
   hasPrevious: Boolean
   transactions: [CreditTransactionType]
+}
+
+type PaginatedOrderType {
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  orders: [OrderType]
 }
 
 type Mutation {

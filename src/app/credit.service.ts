@@ -6,12 +6,25 @@ import { BaseService } from './base.service';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
 import { catchError } from 'rxjs/operators';
 
-export interface UserTransaction {
+export interface UserOrders {
   id: string;
   createdAt: string;
   description: string;
   amount: number;
   balance: number;
+  invoiceUrl: string;
+}
+
+export interface UserTransaction {
+  id: string;
+  createdAt: string;
+  description: string;
+  creditAmount: number;
+  balance: number;
+  job: {
+    id: string;
+    jobType: string;
+  };
 }
 
 interface GetUserCreditsResponse {
@@ -79,7 +92,7 @@ export class CreditService extends BaseService implements OnDestroy {
             id
             createdAt
             description
-            amount
+            creditAmount
             balance
             job {
               id
@@ -106,5 +119,56 @@ export class CreditService extends BaseService implements OnDestroy {
       variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
     }).pipe(map((data) => data.getUserTransactions));
+  }
+
+  getUserOrders(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
+    const GET_USER_ORDERS = gql`
+      query GetUserOrders($page: Int!, $pageSize: Int!, $orderBy: String, $direction: SortDirection) {
+        getUserOrders(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
+          totalRecords
+          totalPages
+          currentPage
+          hasNext
+          hasPrevious
+          orders {
+            id
+            createdAt
+            description
+            amount
+            invoiceUrl
+            status
+            createdAt
+            creditTransactions {
+              id
+              createdAt
+              description
+              creditAmount
+              balance
+              job {
+                id
+                jobType
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      getUserOrders: {
+        totalRecords: number;
+        totalPages: number;
+        currentPage: number;
+        hasNext: boolean;
+        hasPrevious: boolean;
+        orders: UserOrders[];
+      };
+    }
+
+    return this.query<Response>({
+      query: GET_USER_ORDERS,
+      variables: { page, pageSize, orderBy, direction },
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.getUserOrders));
   }
 }

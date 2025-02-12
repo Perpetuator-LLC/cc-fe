@@ -18,11 +18,25 @@ import {
 } from '@angular/material/expansion';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
 import { PaymentService } from '../payment.service';
+import { CreditService, UserOrders } from '../credit.service';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-user-detail',
@@ -46,6 +60,19 @@ import { PaymentService } from '../payment.service';
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     FormsModule,
+    MatTable,
+    MatHeaderCell,
+    MatCell,
+    MatColumnDef,
+    DatePipe,
+    DecimalPipe,
+    MatHeaderRow,
+    MatRow,
+    RouterLink,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRowDef,
+    MatRowDef,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -59,6 +86,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   exportConfirmation = '';
   private subscriptions = new Subscription();
   private downloadAnchor: HTMLAnchorElement | null = null;
+  protected orders: UserOrders[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +99,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private teamService: TeamsService,
     private paymentService: PaymentService,
+    private creditService: CreditService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -108,6 +137,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
+    this.loadUserOrders();
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
@@ -136,6 +166,19 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       },
     });
     this.emailChangePending = this.userService.emailChangePendingDetails;
+  }
+
+  private loadUserOrders() {
+    this.subscriptions.add(
+      this.creditService.getUserOrders().subscribe({
+        next: (data) => {
+          this.orders = data.orders;
+        },
+        error: (err) => {
+          console.error('Failed to load orders:', err);
+        },
+      }),
+    );
   }
 
   passwordMatchValidator(formGroup: FormGroup) {

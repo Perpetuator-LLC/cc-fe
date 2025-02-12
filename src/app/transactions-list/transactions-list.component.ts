@@ -58,7 +58,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   transactions: UserTransaction[] = [];
   dataSource = new MatTableDataSource<UserTransaction>(this.transactions);
-  displayedColumns: string[] = ['createdAt', 'jobType', 'amount', 'balance'];
+  displayedColumns: string[] = ['createdAt', 'info', 'creditAmount', 'balance'];
   totalTransactions = 0;
   pageSize = 10;
   currentPage = 0;
@@ -115,5 +115,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.loadTransactions();
   }
 
-  protected readonly jobTypeToString = jobTypeToString;
+  getTransactionInfo(transaction: UserTransaction) {
+    if (transaction.job?.jobType != null) {
+      return jobTypeToString(transaction.job.jobType);
+    }
+    return transaction.description;
+  }
 }

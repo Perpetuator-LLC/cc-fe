@@ -9,6 +9,7 @@ mat-form-field {
 }
 
 .export,
+.orders,
 .payment {
   max-width: 1016px;
   margin: 1rem 8px;
@@ -30,6 +31,12 @@ mat-form-field {
   button {
     flex: 1 1 100%;
   }
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .user-details {
