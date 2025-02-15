@@ -102,9 +102,11 @@
       <mat-card-title>Recent Orders</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      @if (orders.length > 0) {
+      @if (loadingOrders) {
+        <mat-spinner></mat-spinner>
+      } @else if (creditService.userOrders().length > 0) {
         <div>
-          <table mat-table [dataSource]="orders">
+          <table mat-table [dataSource]="creditService.userOrders()">
             <ng-container matColumnDef="createdAt">
               <th mat-header-cell *matHeaderCellDef>Created At</th>
               <td mat-cell *matCellDef="let order">{{ order.createdAt | date: 'short' : 'local' }}</td>
@@ -127,13 +129,36 @@
 
             <ng-container matColumnDef="invoiceUrl">
               <th mat-header-cell *matHeaderCellDef>Invoice</th>
-              <td mat-cell *matCellDef="let order">{{ order.invoiceUrl }}</td>
+              <td mat-cell *matCellDef="let order">
+                @if (order.status === 'PAID' && order.invoiceUrl) {
+                  <a [href]="order.invoiceUrl" target="_blank">View Invoice</a>
+                } @else if (order.status === 'PENDING' && order.sessionUrl) {
+                  <a [href]="order.sessionUrl" target="_blank">Click to complete...</a>
+                }
+              </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['createdAt', 'status', 'description', 'amount', 'invoiceUrl']"></tr>
+            <ng-container matColumnDef="refresh">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let order">
+                @if (order.status === 'PENDING') {
+                  <button mat-icon-button (click)="cancelOrder(order.id)">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="refreshOrder(order.id)">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['createdAt', 'status', 'description', 'amount', 'invoiceUrl', 'refresh']"
+            ></tr>
             <tr
               mat-row
-              *matRowDef="let row; columns: ['createdAt', 'status', 'description', 'amount', 'invoiceUrl']"
+              *matRowDef="let row; columns: ['createdAt', 'status', 'description', 'amount', 'invoiceUrl', 'refresh']"
             ></tr>
           </table>
         </div>

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
@@ -6,13 +6,14 @@ import { BaseService } from './base.service';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
 import { catchError } from 'rxjs/operators';
 
-export interface UserOrders {
+export interface UserOrder {
   id: string;
   createdAt: string;
   description: string;
   amount: number;
   balance: number;
   invoiceUrl: string;
+  sessionUrl: string;
 }
 
 export interface UserTransaction {
@@ -37,6 +38,7 @@ interface GetUserCreditsResponse {
 export class CreditService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
   private userCreditsSignal: WritableSignal<number> = signal(0);
+  private userOrdersSignal: WritableSignal<UserOrder[]> = signal([]);
   private queryRef: QueryRef<GetUserCreditsResponse>;
 
   constructor(protected override apollo: Apollo) {
@@ -73,6 +75,10 @@ export class CreditService extends BaseService implements OnDestroy {
 
   get userCredits(): WritableSignal<number> {
     return this.userCreditsSignal;
+  }
+
+  get userOrders(): Signal<UserOrder[]> {
+    return this.userOrdersSignal.asReadonly();
   }
 
   refetchUserCredits() {
@@ -136,6 +142,7 @@ export class CreditService extends BaseService implements OnDestroy {
             description
             amount
             invoiceUrl
+            sessionUrl
             status
             createdAt
             creditTransactions {
@@ -161,7 +168,7 @@ export class CreditService extends BaseService implements OnDestroy {
         currentPage: number;
         hasNext: boolean;
         hasPrevious: boolean;
-        orders: UserOrders[];
+        orders: UserOrder[];
       };
     }
 
@@ -169,6 +176,124 @@ export class CreditService extends BaseService implements OnDestroy {
       query: GET_USER_ORDERS,
       variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.getUserOrders));
+    }).pipe(map((data) => this.userOrdersSignal.set(data.getUserOrders.orders)));
+  }
+
+  refreshUserOrder(orderId: string) {
+    const REFRESH_USER_ORDER = gql`
+      mutation RefreshOrder($orderId: String!) {
+        refreshOrder(orderId: $orderId) {
+          success
+          message
+          order {
+            id
+            createdAt
+            description
+            amount
+            invoiceUrl
+            sessionUrl
+            status
+            createdAt
+            creditTransactions {
+              id
+              createdAt
+              description
+              creditAmount
+              balance
+              job {
+                id
+                jobType
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      refreshOrder: {
+        success: boolean;
+        message: string;
+        order: UserOrder;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: REFRESH_USER_ORDER,
+      variables: { orderId },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.refreshOrder.success) {
+          throw new Error(data.refreshOrder.message);
+        }
+        this.updateOrder(orderId, data.refreshOrder.order);
+        return data.refreshOrder;
+      }),
+    );
+  }
+
+  cancelUserOrder(orderId: string) {
+    const CANCEL_USER_ORDER = gql`
+      mutation CancelOrder($orderId: String!) {
+        cancelOrder(orderId: $orderId) {
+          success
+          message
+          order {
+            id
+            createdAt
+            description
+            amount
+            invoiceUrl
+            sessionUrl
+            status
+            createdAt
+            creditTransactions {
+              id
+              createdAt
+              description
+              creditAmount
+              balance
+              job {
+                id
+                jobType
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      cancelOrder: {
+        success: boolean;
+        message: string;
+        order: UserOrder;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: CANCEL_USER_ORDER,
+      variables: { orderId },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.cancelOrder.success) {
+          throw new Error(data.cancelOrder.message);
+        }
+        this.updateOrder(orderId, data.cancelOrder.order);
+        return data.cancelOrder;
+      }),
+    );
+  }
+
+  private updateOrder(orderId: string, updatedOrder: UserOrder) {
+    const orders = this.userOrdersSignal();
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex !== -1) {
+      const updatedOrders = [...orders];
+      updatedOrders[orderIndex] = { ...orders[orderIndex], ...updatedOrder };
+      this.userOrdersSignal.set(updatedOrders);
+    }
   }
 }

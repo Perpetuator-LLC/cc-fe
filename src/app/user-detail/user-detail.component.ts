@@ -5,7 +5,7 @@ import { UserDetails, UserService } from '../user.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
@@ -23,7 +23,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
 import { PaymentService } from '../payment.service';
-import { CreditService, UserOrders } from '../credit.service';
+import { CreditService } from '../credit.service';
 import {
   MatCell,
   MatCellDef,
@@ -37,6 +37,8 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-user-detail',
@@ -73,6 +75,9 @@ import { DatePipe, DecimalPipe } from '@angular/common';
     MatCellDef,
     MatHeaderRowDef,
     MatRowDef,
+    MatIcon,
+    MatIconButton,
+    MatProgressSpinner,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -86,7 +91,8 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   exportConfirmation = '';
   private subscriptions = new Subscription();
   private downloadAnchor: HTMLAnchorElement | null = null;
-  protected orders: UserOrders[] = [];
+  // protected orders: UserOrders[] = [];
+  protected loadingOrders = true;
 
   constructor(
     private fb: FormBuilder,
@@ -99,7 +105,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private teamService: TeamsService,
     private paymentService: PaymentService,
-    private creditService: CreditService,
+    protected creditService: CreditService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -141,10 +147,10 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
-        this.messageService.success('Payment was successful.');
+        this.messageService.success('Payment was successful.', 15000, true);
         this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
       } else if (params['payment'] === 'cancel') {
-        this.messageService.warning('Payment cancelled.');
+        this.messageService.warning('Payment incomplete.', 15000, true);
         this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
       }
     });
@@ -171,12 +177,8 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   private loadUserOrders() {
     this.subscriptions.add(
       this.creditService.getUserOrders().subscribe({
-        next: (data) => {
-          this.orders = data.orders;
-        },
-        error: (err) => {
-          console.error('Failed to load orders:', err);
-        },
+        next: () => (this.loadingOrders = false),
+        error: (err) => console.error('Failed to load orders:', err),
       }),
     );
   }
@@ -386,5 +388,23 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  refreshOrder(id: string) {
+    this.creditService.refreshUserOrder(id).subscribe({
+      next: (data) => {
+        this.messageService.success(`Order refreshed successfully: ${data.message}`);
+      },
+      error: (err) => {
+        this.messageService.error('Failed to refresh order: ' + err.message);
+      },
+    });
+  }
+
+  cancelOrder(id: string) {
+    this.creditService.cancelUserOrder(id).subscribe({
+      next: () => this.messageService.success('Order cancelled successfully'),
+      error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
+    });
   }
 }

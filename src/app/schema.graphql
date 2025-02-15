@@ -199,6 +199,7 @@ type OrderType {
   sessionId: String
   amount: Int!
   invoiceUrl: String
+  sessionUrl: String
   status: ApiOrderStatusChoices!
   description: String!
   createdAt: DateTime!
@@ -286,7 +287,9 @@ type Mutation {
   cancelEmailChange: CancelEmailChange
   updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
   createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
-  createStripeCheckoutSession(amount: Int): CreateStripeCheckoutSession
+  createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
+  refreshOrder(orderId: String!): RefreshOrder
+  cancelOrder(orderId: String!): CancelOrder
 }
 
 type CreateRssFeed {
@@ -437,4 +440,16 @@ type CreateScheduleMutation {
 type CreateStripeCheckoutSession {
   sessionId: String
   url: String
+}
+
+type RefreshOrder {
+  success: Boolean
+  message: String
+  order: OrderType
+}
+
+type CancelOrder {
+  success: Boolean
+  message: String
+  order: OrderType
 }
