@@ -9,6 +9,7 @@ import { catchError } from 'rxjs/operators';
 export interface UserOrder {
   id: string;
   createdAt: string;
+  status: string;
   description: string;
   amount: number;
   balance: number;
@@ -176,7 +177,12 @@ export class CreditService extends BaseService implements OnDestroy {
       query: GET_USER_ORDERS,
       variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => this.userOrdersSignal.set(data.getUserOrders.orders)));
+    }).pipe(
+      map((data) => {
+        this.userOrdersSignal.set(data.getUserOrders.orders);
+        return data.getUserOrders;
+      }),
+    );
   }
 
   refreshUserOrder(orderId: string) {

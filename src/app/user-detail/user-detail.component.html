@@ -145,6 +145,8 @@
                   <button mat-icon-button (click)="cancelOrder(order.id)">
                     <mat-icon>cancel</mat-icon>
                   </button>
+                }
+                @if (order.status === 'PENDING' || (order.status === 'PAID' && order.invoiceUrl === null)) {
                   <button mat-icon-button (click)="refreshOrder(order.id)">
                     <mat-icon>refresh</mat-icon>
                   </button>
@@ -162,7 +164,7 @@
             ></tr>
           </table>
         </div>
-        <button mat-button color="primary" routerLink="/transactions">More...</button>
+        <button mat-button color="primary" routerLink="/orders">More...</button>
       } @else {
         <div>
           <p>No orders found.</p>
