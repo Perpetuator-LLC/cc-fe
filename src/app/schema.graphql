@@ -198,7 +198,7 @@ type OrderType {
   originalUserId: Int
   sessionId: String
   amount: Int!
-  invoiceUrl: String
+  receiptUrl: String
   sessionUrl: String
   status: ApiOrderStatusChoices!
   description: String!

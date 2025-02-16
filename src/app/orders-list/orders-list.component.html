@@ -39,11 +39,11 @@
             <td mat-cell *matCellDef="let order">${{ order.amount / 100 | number: '1.2-2' }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="invoiceUrl">
-            <th mat-header-cell *matHeaderCellDef>Invoice</th>
+          <ng-container matColumnDef="receiptUrl">
+            <th mat-header-cell *matHeaderCellDef>Receipt</th>
             <td mat-cell *matCellDef="let order">
-              @if (order.status === 'PAID' && order.invoiceUrl) {
-                <a [href]="order.invoiceUrl" target="_blank">View Invoice</a>
+              @if (order.status === 'PAID' && order.receiptUrl) {
+                <a [href]="order.receiptUrl" target="_blank">View Receipt</a>
               } @else if (order.status === 'PENDING' && order.sessionUrl) {
                 <a [href]="order.sessionUrl" target="_blank">Click to complete...</a>
               }
@@ -58,7 +58,7 @@
                   <mat-icon>cancel</mat-icon>
                 </button>
               }
-              @if (order.status === 'PENDING' || (order.status === 'PAID' && order.invoiceUrl === null)) {
+              @if (order.status === 'PENDING' || (order.status === 'PAID' && order.receiptUrl === null)) {
                 <button mat-icon-button (click)="refreshOrder(order.id)">
                   <mat-icon>refresh</mat-icon>
                 </button>
@@ -68,11 +68,11 @@
 
           <tr
             mat-header-row
-            *matHeaderRowDef="['createdAt', 'status', 'description', 'amount', 'invoiceUrl', 'refresh']"
+            *matHeaderRowDef="['createdAt', 'status', 'description', 'amount', 'receiptUrl', 'refresh']"
           ></tr>
           <tr
             mat-row
-            *matRowDef="let row; columns: ['createdAt', 'status', 'description', 'amount', 'invoiceUrl', 'refresh']"
+            *matRowDef="let row; columns: ['createdAt', 'status', 'description', 'amount', 'receiptUrl', 'refresh']"
           ></tr>
         </table>
 

@@ -13,7 +13,7 @@ export interface UserOrder {
   description: string;
   amount: number;
   balance: number;
-  invoiceUrl: string;
+  receiptUrl: string;
   sessionUrl: string;
 }
 
@@ -142,7 +142,7 @@ export class CreditService extends BaseService implements OnDestroy {
             createdAt
             description
             amount
-            invoiceUrl
+            receiptUrl
             sessionUrl
             status
             createdAt
@@ -196,7 +196,7 @@ export class CreditService extends BaseService implements OnDestroy {
             createdAt
             description
             amount
-            invoiceUrl
+            receiptUrl
             sessionUrl
             status
             createdAt
@@ -250,7 +250,7 @@ export class CreditService extends BaseService implements OnDestroy {
             createdAt
             description
             amount
-            invoiceUrl
+            receiptUrl
             sessionUrl
             status
             createdAt
