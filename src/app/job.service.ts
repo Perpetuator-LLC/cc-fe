@@ -6,6 +6,7 @@ import { BaseService } from './base.service';
 import { Apollo } from 'apollo-angular';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
 import { catchError, switchMap } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 
 // create an enum of jobTypes
 export enum JobType {
@@ -77,7 +78,10 @@ export class JobService extends BaseService implements OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cleanupInterval: any;
 
-  constructor(protected override apollo: Apollo) {
+  constructor(
+    protected override apollo: Apollo,
+    private authService: AuthService,
+  ) {
     super(apollo);
     this.setupJobStatusPolling();
     this.setupCleanupLoop();
@@ -172,9 +176,11 @@ export class JobService extends BaseService implements OnDestroy {
       pollInterval: 3000, // Poll every 3 seconds
     });
 
-    // Subscription for handling data updates from polling
-    this.subscriptions.add(
-      queryRef.valueChanges
+    toObservable(this.authService.isLoggedIn).subscribe((isLoggedIn) => {
+      if (!isLoggedIn) {
+        return;
+      }
+      const jobStatus = queryRef.valueChanges
         .pipe(
           switchMap(() => queryRef.valueChanges),
           map(mapQueryResult),
@@ -184,8 +190,9 @@ export class JobService extends BaseService implements OnDestroy {
         .subscribe({
           next: (jobs) => this.jobsSignal.set(jobs),
           error: (err) => console.error('Failed to fetch jobs:', err),
-        }),
-    );
+        });
+      this.subscriptions.add(jobStatus);
+    });
 
     toObservable(this.jobsSignal).subscribe((jobs) => {
       const jobIds = jobs.map((job) => job.id);

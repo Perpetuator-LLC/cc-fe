@@ -5,6 +5,8 @@ import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { handleApolloError, mapQueryResult } from './utils/error-handler';
 import { catchError } from 'rxjs/operators';
+import { AuthService } from './auth.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface UserOrder {
   id: string;
@@ -42,7 +44,10 @@ export class CreditService extends BaseService implements OnDestroy {
   private userOrdersSignal: WritableSignal<UserOrder[]> = signal([]);
   private queryRef: QueryRef<GetUserCreditsResponse>;
 
-  constructor(protected override apollo: Apollo) {
+  constructor(
+    protected override apollo: Apollo,
+    private authService: AuthService,
+  ) {
     super(apollo);
     const GET_USER_CREDITS = gql`
       query GetUserCredits {
@@ -54,6 +59,19 @@ export class CreditService extends BaseService implements OnDestroy {
       query: GET_USER_CREDITS,
     });
 
+    // When the user logs in, fetch the user credits
+    this.subscriptions.add(
+      toObservable(this.authService.isLoggedIn).subscribe({
+        next: (isLoggedIn) => {
+          if (isLoggedIn) {
+            this.initUserCredits();
+          }
+        },
+      }),
+    );
+  }
+
+  private initUserCredits() {
     this.queryRef.valueChanges
       .pipe(
         map(mapQueryResult),

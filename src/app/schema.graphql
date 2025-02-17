@@ -16,6 +16,7 @@ type Query {
   getUserCredits: Int
   getUserTransactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
   getUserOrders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
+  getBonusCodes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedBonusCodeType
 }
 
 type NewsData {
@@ -253,31 +254,33 @@ type PaginatedOrderType {
   orders: [OrderType]
 }
 
+type PaginatedBonusCodeType {
+  bonusCodes: [BonusCodeType]
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+}
+
+type BonusCodeType {
+  id: ID!
+  code: String!
+  creator: UserType
+  consumer: UserType
+  createdAt: DateTime!
+  consumedAt: DateTime
+  creditAmount: Int!
+}
+
 type Mutation {
-  createRssFeed(url: String!): CreateRssFeed
-  setTeamRssFeeds(rssFeedIds: [ID]!, teamId: ID!): SetTeamRssFeeds
-  fetchNews(teamId: ID!): FetchNews
-  extractNews(ids: [ID]!, teamId: ID!): ExtractNews
-  summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
-  createArticle(ids: [Int]!, teamId: ID!): CreateArticle
-  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleChain
-  createArticleAudioChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
-  updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
-  updateArticleAudio(articleId: ID!): UpdateArticleAudio
-  publishArticleAudio(articleId: ID!): PublishArticleAudio
-  updateUserSetting(key: String!, value: String!): UpdateUserSetting
-  retryJobs(ids: [UUID]!): RetryJobs
-  deleteJobs(ids: [UUID]!): DeleteJobs
-  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
-  updateUser(email: String!, username: String!): UpdateUser
-  deleteUser(confirm: String!): DeleteUser
-  changePassword(password: String!): ChangePassword
-  createTeam(name: String!): CreateTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastEnabled: Boolean, podcastImage: Upload, podcastOwnerEmail: String, podcastOwnerLink: String, podcastOwnerName: String, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
-  deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
-  upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
-  removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
-  resendEmailChange: ResendEmailChange
+  redeemBonusCode(code: String!): RedeemBonusCode
+  createBonusCode(code: String!, creditAmount: Int!): CreateBonusCode
+  cancelOrder(orderId: String!): CancelOrder
+  refreshOrder(orderId: String!): RefreshOrder
+  createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
+  createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
+  updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
 
   """
   Cancel a pending email change request from a logged-in user.
@@ -285,134 +288,65 @@ type Mutation {
   which is meant to be canceled with a link sent to an email.
   """
   cancelEmailChange: CancelEmailChange
-  updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
-  createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
-  createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
-  refreshOrder(orderId: String!): RefreshOrder
-  cancelOrder(orderId: String!): CancelOrder
+  resendEmailChange: ResendEmailChange
+  removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
+  upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
+  deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
+  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastEnabled: Boolean, podcastImage: Upload, podcastOwnerEmail: String, podcastOwnerLink: String, podcastOwnerName: String, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
+  createTeam(name: String!): CreateTeam
+  changePassword(password: String!): ChangePassword
+  deleteUser(confirm: String!): DeleteUser
+  updateUser(email: String!, username: String!): UpdateUser
+  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
+  deleteJobs(ids: [UUID]!): DeleteJobs
+  retryJobs(ids: [UUID]!): RetryJobs
+  updateUserSetting(key: String!, value: String!): UpdateUserSetting
+  publishArticleAudio(articleId: ID!): PublishArticleAudio
+  updateArticleAudio(articleId: ID!): UpdateArticleAudio
+  updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
+  createArticleAudioChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
+  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleChain
+  createArticle(ids: [Int]!, teamId: ID!): CreateArticle
+  summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
+  extractNews(ids: [ID]!, teamId: ID!): ExtractNews
+  fetchNews(teamId: ID!): FetchNews
+  setTeamRssFeeds(rssFeedIds: [ID]!, teamId: ID!): SetTeamRssFeeds
+  createRssFeed(url: String!): CreateRssFeed
 }
 
-type CreateRssFeed {
-  rssFeed: RssFeedType
-}
-
-type SetTeamRssFeeds {
-  team: TeamType
-}
-
-type FetchNews {
-  job: JobData
-}
-
-type ExtractNews {
-  job: JobData
-}
-
-type SummarizeNews {
-  job: JobData
-}
-
-type CreateArticle {
-  job: JobData
-}
-
-type CreateArticleChain {
-  jobs: [JobData]
-}
-
-type CreateArticleAudioChain {
-  jobs: [JobData]
-}
-
-type UpdateArticle {
-  success: Boolean
-  message: String
-  article: ArticleType
-}
-
-type UpdateArticleAudio {
-  success: Boolean
-  message: String
-  job: JobData
-}
-
-type PublishArticleAudio {
-  success: Boolean
-  message: String
-  article: ArticleType
-}
-
-type UpdateUserSetting {
+type RedeemBonusCode {
   success: Boolean
   message: String
 }
 
-type RetryJobs {
-  jobs: [JobData]
-}
-
-type DeleteJobs {
-  success: Boolean
-  message: String
-  jobs: [JobData]
-}
-
-type UpdateCookieConsent {
+type CreateBonusCode {
   success: Boolean
   message: String
 }
 
-type UpdateUser {
+type CancelOrder {
+  success: Boolean
+  message: String
+  order: OrderType
+}
+
+type RefreshOrder {
+  success: Boolean
+  message: String
+  order: OrderType
+}
+
+type CreateStripeCheckoutSession {
+  sessionId: String
+  url: String
+}
+
+type CreateScheduleMutation {
   success: Boolean
   message: String
 }
 
-type DeleteUser {
-  success: Boolean
-  message: String
-}
-
-type ChangePassword {
-  success: Boolean
-  message: String
-}
-
-type CreateTeam {
-  success: Boolean
-  message: String
-  team: TeamType
-}
-
-type UpdateTeam {
-  success: Boolean
-  message: String
-  team: TeamType
-}
-
-"""
-Create scalar that ignores normal serialization/deserialization, since
-that will be handled by the multipart request spec
-"""
-scalar Upload
-
-type DeleteTeam {
-  success: Boolean
-  message: String
-}
-
-type UpsertUserToTeam {
-  success: Boolean
-  message: String
-  team: TeamType
-}
-
-type RemoveUserFromTeam {
-  success: Boolean
-  message: String
-  team: TeamType
-}
-
-type ResendEmailChange {
+type UpdateScheduleMutation {
   success: Boolean
   message: String
 }
@@ -427,29 +361,127 @@ type CancelEmailChange {
   message: String
 }
 
-type UpdateScheduleMutation {
+type ResendEmailChange {
   success: Boolean
   message: String
 }
 
-type CreateScheduleMutation {
+type RemoveUserFromTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type UpsertUserToTeam {
+  success: Boolean
+  message: String
+  team: TeamType
+}
+
+type DeleteTeam {
   success: Boolean
   message: String
 }
 
-type CreateStripeCheckoutSession {
-  sessionId: String
-  url: String
-}
-
-type RefreshOrder {
+type UpdateTeam {
   success: Boolean
   message: String
-  order: OrderType
+  team: TeamType
 }
 
-type CancelOrder {
+"""
+Create scalar that ignores normal serialization/deserialization, since
+that will be handled by the multipart request spec
+"""
+scalar Upload
+
+type CreateTeam {
   success: Boolean
   message: String
-  order: OrderType
+  team: TeamType
+}
+
+type ChangePassword {
+  success: Boolean
+  message: String
+}
+
+type DeleteUser {
+  success: Boolean
+  message: String
+}
+
+type UpdateUser {
+  success: Boolean
+  message: String
+}
+
+type UpdateCookieConsent {
+  success: Boolean
+  message: String
+}
+
+type DeleteJobs {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type RetryJobs {
+  jobs: [JobData]
+}
+
+type UpdateUserSetting {
+  success: Boolean
+  message: String
+}
+
+type PublishArticleAudio {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+type UpdateArticleAudio {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type UpdateArticle {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+type CreateArticleAudioChain {
+  jobs: [JobData]
+}
+
+type CreateArticleChain {
+  jobs: [JobData]
+}
+
+type CreateArticle {
+  job: JobData
+}
+
+type SummarizeNews {
+  job: JobData
+}
+
+type ExtractNews {
+  job: JobData
+}
+
+type FetchNews {
+  job: JobData
+}
+
+type SetTeamRssFeeds {
+  team: TeamType
+}
+
+type CreateRssFeed {
+  rssFeed: RssFeedType
 }
