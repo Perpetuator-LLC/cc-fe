@@ -24,6 +24,7 @@ import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
 import { PaymentService } from '../payment.service';
 import { CreditService } from '../credit.service';
+import { BonusService, BonusCode } from '../bonus.service';
 import {
   MatCell,
   MatCellDef,
@@ -93,10 +94,14 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   private downloadAnchor: HTMLAnchorElement | null = null;
   // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
+  protected redeemCode = '';
+  protected createBonusForm: FormGroup;
+  protected bonusCodes: BonusCode[] = [];
+  protected loadingBonuses = true;
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserService,
+    protected userService: UserService,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
@@ -106,6 +111,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private teamService: TeamsService,
     private paymentService: PaymentService,
     protected creditService: CreditService,
+    private bonusService: BonusService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -136,6 +142,11 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
       this.changePasswordForm.updateValueAndValidity();
     });
+
+    this.createBonusForm = this.fb.group({
+      code: ['', Validators.required],
+      creditAmount: [0, [Validators.required, Validators.min(1)]],
+    });
   }
 
   ngOnInit(): void {
@@ -144,6 +155,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadUserOrders();
+    this.loadBonusCodes();
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
@@ -179,6 +191,64 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       this.creditService.getUserOrders(1, 5).subscribe({
         next: () => (this.loadingOrders = false),
         error: (err) => console.error('Failed to load orders:', err),
+      }),
+    );
+  }
+
+  redeemBonusCode() {
+    if (this.redeemCode) {
+      this.bonusService.redeemBonusCode(this.redeemCode).subscribe({
+        next: () => {
+          this.messageService.success('Bonus code redeemed successfully.');
+          this.redeemCode = '';
+          this.loadBonusCodes();
+          this.creditService.refetchUserCredits();
+        },
+        error: (err) => {
+          this.messageService.error('Failed to redeem bonus code: ' + err.message);
+        },
+      });
+    }
+  }
+
+  createBonusCode() {
+    if (this.createBonusForm.valid) {
+      const { code, creditAmount } = this.createBonusForm.value;
+      this.bonusService.createBonusCode(code, creditAmount).subscribe({
+        next: () => {
+          this.messageService.success('Bonus code created successfully.');
+          this.createBonusForm.reset();
+          this.loadBonusCodes();
+        },
+        error: (err) => {
+          this.messageService.error('Failed to create bonus code: ' + err.message);
+        },
+      });
+    }
+  }
+
+  private loadBonusCodes() {
+    const userDetails = this.userService.userDetails();
+    if (!userDetails) {
+      return;
+    }
+    const permissions = userDetails.permissions;
+    const includesAddBonusPerm = permissions.length > 0 && permissions.includes('api.add_bonuscode');
+    if (!includesAddBonusPerm) {
+      this.loadingBonuses = false;
+      return;
+    }
+    this.loadingBonuses = true;
+    this.subscriptions.add(
+      this.bonusService.getBonusCodes().subscribe({
+        next: (data) => {
+          this.bonusCodes = data.bonusCodes;
+          this.loadingBonuses = false;
+        },
+        error: (err) => {
+          this.messageService.error('Failed to load bonus codes: ' + err.message);
+          this.loadingBonuses = false;
+        },
       }),
     );
   }
