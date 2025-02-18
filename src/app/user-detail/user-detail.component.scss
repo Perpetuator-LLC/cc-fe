@@ -8,12 +8,22 @@ mat-form-field {
   margin: 1rem 8px;
 }
 
+.bonuses {
+  mat-form-field {
+    margin-bottom: 0;
+  }
+}
+
 .export,
 .orders,
 .bonuses,
 .payment {
   max-width: 1016px;
   margin: 1rem 8px;
+
+  button {
+    margin-bottom: 16px;
+  }
 }
 
 .danger-zone {

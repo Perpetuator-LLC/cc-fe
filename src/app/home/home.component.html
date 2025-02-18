@@ -1,5 +1,5 @@
 <ng-template #toolbarTemplate>
-  <h1>Crypto & Asset Investment Community</h1>
+  <h1>AI-Powered News Automation</h1>
 </ng-template>
 
 <div class="home-container">
@@ -7,85 +7,48 @@
     <mat-card class="hero-card">
       <mat-card-header>
         <mat-card-subtitle>
-          <h1>Democratizing Investing</h1>
+          <h1>From Headlines to Audio Seamlessly</h1>
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <p>
-          Welcome to Capitol Copilot AI, a thriving community of investors, educators, and researchers dedicated to
-          mastering financial markets. We are more than just an analysis tool—we are a platform where learning,
-          collaboration, and informed investment decisions come together. Our platform empowers members to dive deep
-          into:
+          AI-Driven News Summaries. Automatic Transcript Generation. Seamless Audio Conversion. Instant Podcast
+          Publishing.
         </p>
-        <ul>
-          <li>In-depth Research and Educational Resources</li>
-          <li>Collaborative Analysis of Cryptocurrencies, Securities, and Assets</li>
-          <li>Advanced Financial Tools for Personal and Group Investment Strategies</li>
-          <li>Community-Driven News and Insights Tailored to Market Movements</li>
-        </ul>
+        <button mat-raised-button color="accent" routerLink="/register">Start Automating Now</button>
       </mat-card-content>
     </mat-card>
   </div>
 
-  @if (!this.authService.isLoggedIn()) {
-    <div class="cta-section">
-      <mat-card class="cta-card">
-        <mat-card-content>
-          <h2>Become Part of Our Investment Community</h2>
-          <p>
-            Whether you're a beginner eager to learn or a seasoned professional looking to share insights, Capitol
-            Copilot AI is the place to be. Join today and take the next step in growing your expertise while
-            contributing to a community built on trust and shared knowledge.
-          </p>
-          <button mat-raised-button color="accent" routerLink="/register">Join Us</button>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  }
-
   <div class="feature-section">
     <mat-card class="feature-card">
-      <mat-card-title>In-Depth Valuation Tools</mat-card-title>
+      <mat-card-title>AI-Driven Summaries</mat-card-title>
       <mat-card-content>
-        <p>
-          Access comprehensive models like Discounted Cash Flow (DCF) analysis to project the intrinsic value of
-          investments. Our tools are designed for both beginners and seasoned investors, with insights aimed at
-          fostering a shared learning experience.
-        </p>
+        <p>Let AI read and summarize news instantly.</p>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="feature-card">
-      <mat-card-title>Community-Driven Market Analysis</mat-card-title>
+      <mat-card-title>Transcripts On-Demand</mat-card-title>
       <mat-card-content>
-        <p>
-          Engage with fellow investors in identifying trends and potential squeezes across various markets. Our squeeze
-          indicator analysis is fine-tuned through member feedback and shared experiences, making it a true
-          collaborative effort.
-        </p>
+        <p>Generate accurate transcripts automatically.</p>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="feature-card">
-      <mat-card-title>Real-Time Crypto Monitoring</mat-card-title>
+      <mat-card-title>Audio Made Easy</mat-card-title>
       <mat-card-content>
-        <p>
-          Stay informed with real-time updates and community discussions on the fast-paced crypto market. Share
-          strategies and insights with a network of like-minded members who are always on the lookout for the next big
-          opportunity.
-        </p>
+        <p>Convert news to high-quality audio seamlessly.</p>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="feature-card">
-      <mat-card-title>Curated News & Education</mat-card-title>
+      <mat-card-title>One-Click Publishing</mat-card-title>
       <mat-card-content>
-        <p>
-          Receive the latest market news and in-depth educational content tailored to your interests. Our aggregation
-          tools bring together valuable resources from experts, researchers, and our community, ensuring you're always
-          equipped with the knowledge to succeed.
-        </p>
+        <p>Publish news podcasts with a single click.</p>
       </mat-card-content>
     </mat-card>
   </div>
 </div>
+
+<div #p5Container id="p5Container"></div>
