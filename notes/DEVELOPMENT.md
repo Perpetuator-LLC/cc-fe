@@ -62,7 +62,7 @@ grep '"version":' ../package.json
 Update version in `package.json`:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.16.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.17.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -70,7 +70,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be-private
-poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.16.0' 'v0.15.0'
+poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe-private 'v0.17.0' 'v0.16.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -79,10 +79,10 @@ Add the Git tag and push it to the repository.
 
 ```shell
 git add .. && \
-git commit -m "chore: bump version to 0.16.0" && \
+git commit -m "chore: bump version to 0.17.0" && \
 git push origin main && \
-git tag -a v0.16.0 -m "In this update, we've removed the charts feature (for now), added support for GraphQL file uploads, and introduced podcast image and description." && \
-git push origin v0.16.0
+git tag -a v0.17.0 -m "In this update, we have integrated stripe payments, a credit transaction and bonus code system, and exposed article generation without audio." && \
+git push origin v0.17.0
 ```
 
 Now open a pull request to merge it.

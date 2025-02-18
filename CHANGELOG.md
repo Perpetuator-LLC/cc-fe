@@ -1,3 +1,21 @@
+# Changelog from v0.16.0 to v0.17.0
+
+In this update, we have integrated stripe payments, a credit transaction and bonus code system, and exposed article generation without audio.
+
+## Enhancements
+- Integrated Stripe payments to purchase credits.
+- Introduced a purchase orders table with refresh and cancel options.
+- Introduced a transactions table, and displayed credit balance in the toolbar.
+- Added bonus code redeem to the user details page.
+- Added a button to generate articles without audio.
+- Made the home page have an interactive wave and simplified messaging.
+- Added job cost and transaction job for better financial tracking.
+
+## Cleanups
+- Forced cache refresh after audio generation job finishes to ensure up-to-date data.
+- Job status is now only refreshed if the user is logged in.
+
+
 # Changelog from v0.15.0 to v0.16.0
 
 In this update, we've introduced custom RSS Feed support and different news time frames. We've also enhanced the audio feature by converting audioBase64 to an audioUrl and added support for podcast owner details. Additionally, we've improved image reloading and made navigation links more user-friendly. Lastly, we've removed and renamed all crypto references to ensure news and articles cater to a wider range of topics.
