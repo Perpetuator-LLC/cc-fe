@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 

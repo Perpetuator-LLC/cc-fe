@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 

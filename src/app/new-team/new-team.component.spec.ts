@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NewTeamComponent } from './new-team.component';

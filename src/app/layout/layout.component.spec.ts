@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { LayoutComponent } from './layout.component';
 import { RouterTestingModule } from '@angular/router/testing';

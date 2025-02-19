@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CookieBannerComponent } from './cookie-banner.component';
@@ -8,9 +9,8 @@ describe('CookieBannerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CookieBannerComponent]
-    })
-    .compileComponents();
+      imports: [CookieBannerComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CookieBannerComponent);
     component = fixture.componentInstance;

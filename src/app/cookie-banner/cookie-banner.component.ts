@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component, computed } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCardFooter } from '@angular/material/card';

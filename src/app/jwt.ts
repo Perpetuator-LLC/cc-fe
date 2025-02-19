@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 // Utility function to decode JWT token
 import { JWT } from './types';
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 
 import { PaymentService } from './payment.service';

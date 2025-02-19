@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig } from '@angular/core';

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimesComponent } from './times.component';
@@ -8,9 +9,8 @@ describe('TimesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimesComponent]
-    })
-    .compileComponents();
+      imports: [TimesComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TimesComponent);
     component = fixture.componentInstance;

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';

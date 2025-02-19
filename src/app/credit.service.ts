@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';

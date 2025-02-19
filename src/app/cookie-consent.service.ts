@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, Subscription, throwError } from 'rxjs';

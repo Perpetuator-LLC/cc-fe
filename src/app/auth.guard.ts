@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 // import { CanActivateFn } from '@angular/router';
 //
 // export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {

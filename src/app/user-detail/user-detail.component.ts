@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';

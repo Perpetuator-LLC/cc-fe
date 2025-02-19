@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { MatCard, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';

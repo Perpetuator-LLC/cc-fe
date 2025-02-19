@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { catchError, map } from 'rxjs/operators';
 import { handleApolloError, mapMutationResult, mapQueryResult } from './utils/error-handler';
 import { Observable } from 'rxjs';

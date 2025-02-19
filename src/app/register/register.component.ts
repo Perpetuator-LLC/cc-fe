@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';

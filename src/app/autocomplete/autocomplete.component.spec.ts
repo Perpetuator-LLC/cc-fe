@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { AutocompleteComponent } from './autocomplete.component';
 import { Apollo } from 'apollo-angular';

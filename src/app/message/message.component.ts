@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component } from '@angular/core';
 import { Message, MessageService } from '../message.service';
 import { MatIcon } from '@angular/material/icon';

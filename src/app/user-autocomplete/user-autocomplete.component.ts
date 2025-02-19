@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatFormField } from '@angular/material/form-field';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';

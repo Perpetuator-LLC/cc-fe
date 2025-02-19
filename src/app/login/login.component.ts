@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';

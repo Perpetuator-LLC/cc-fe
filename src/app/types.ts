@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 export interface JWT {
   exp?: number;
   iat?: number;

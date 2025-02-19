@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Injectable, ViewContainerRef } from '@angular/core';
 
 @Injectable({

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ValuationComponent } from './valuation.component';
@@ -8,9 +9,8 @@ describe('ValuationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ValuationComponent]
-    })
-    .compileComponents();
+      imports: [ValuationComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ValuationComponent);
     component = fixture.componentInstance;

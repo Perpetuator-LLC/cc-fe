@@ -11,12 +11,19 @@
     "test": "ng test --watch=false",
     "serve:ssr:capital-copilot-fe": "node dist/capital-copilot-fe/server/server.mjs",
     "lint": "ng lint",
-    "generate": "graphql-codegen"
+    "generate": "graphql-codegen",
+    "check-copyright": "node scripts/check-copyright.js"
   },
   "lint-staged": {
     "*.ts": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "yarn check-copyright"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "yarn check-copyright"
     ],
     "*.html": [
       "prettier --write"

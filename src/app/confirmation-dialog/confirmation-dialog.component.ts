@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';

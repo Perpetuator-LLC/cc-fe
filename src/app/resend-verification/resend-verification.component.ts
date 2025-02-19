@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Perpetuator LLC
 import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
