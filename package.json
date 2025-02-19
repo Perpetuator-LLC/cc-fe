@@ -25,7 +25,7 @@
       "prettier --write"
     ]
   },
-  "private": false,
+  "private": true,
   "dependencies": {
     "@angular/animations": "^18.0.6",
     "@angular/cdk": "^18.0.6",
@@ -79,7 +79,7 @@
     "typescript": "~5.4.2",
     "typescript-eslint": "8.15.0"
   },
-  "repository": "git+https://github.com/Perpetuator-LLC/capital-copilot-fe-private.git",
+  "repository": "git+https://github.com/Perpetuator-LLC/capital-copilot-fe.git",
   "keywords": [
     "investing",
     "ai",
@@ -91,10 +91,10 @@
     "valuation"
   ],
   "author": "Nik Cimino",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/Perpetuator-LLC/capital-copilot-fe-private/issues"
+    "url": "https://github.com/Perpetuator-LLC/capital-copilot-fe/issues"
   },
-  "homepage": "https://github.com/Perpetuator-LLC/capital-copilot-fe-private#readme",
+  "homepage": "https://github.com/Perpetuator-LLC/capital-copilot-fe#readme",
   "main": "index.js"
 }
