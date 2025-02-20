@@ -39,10 +39,10 @@ files.forEach((file) => {
   if (
     file.endsWith('.ts') ||
     file.endsWith('.js') ||
-    file.endsWith('.html')
-    // || file.endsWith('.md')
-    // || file.endsWith('.css')
-    // || file.endsWith('.scss')
+    file.endsWith('.html') ||
+    file.endsWith('.css') ||
+    file.endsWith('.scss')
+    // file.endsWith('.md')
   ) {
     checkCopyright(file);
   }
