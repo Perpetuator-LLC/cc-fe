@@ -26,10 +26,10 @@
       "yarn check-copyright"
     ],
     "*.html": [
-      "prettier --write"
+      "yarn check-copyright"
     ],
     "*.scss": [
-      "prettier --write"
+      "yarn check-copyright"
     ]
   },
   "private": true,
