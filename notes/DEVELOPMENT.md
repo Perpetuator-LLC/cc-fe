@@ -106,6 +106,11 @@ If the change does not touch _production_ code it should be prefixed with:
 - test: (adding missing tests, refactoring tests; no production code change)
 - chore: (updating grunt tasks etc; no production code change)
 
+# GPT
+
+To assist in development of this project:
+https://chatgpt.com/g/g-D8TyqKkaO-angular-18-coding-copilot
+
 # Code Quality
 
 ...TBD
