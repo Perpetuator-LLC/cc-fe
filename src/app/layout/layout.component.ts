@@ -33,6 +33,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { CreditService } from '../credit.service';
 import { Job, JobService, JobStatus } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { MessageService } from '../message.service';
 
 @Component({
   selector: 'app-layout',
@@ -82,18 +83,29 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     private renderer: Renderer2,
     private creditService: CreditService,
     private jobService: JobService,
+    private messageService: MessageService,
   ) {
-    toObservable(this.creditService.userCredits).subscribe((credits) => {
-      this.userCredits = credits;
+    toObservable(this.creditService.userCredits).subscribe({
+      next: (credits) => {
+        this.userCredits = credits;
+      },
+      error: (error) => {
+        this.messageService.error(`Failed to load credits signal: ${error.message}`);
+      },
     });
-    toObservable(this.jobService.jobs).subscribe((jobs) => {
-      const completed = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
-      // Filter out FETCH_NEWS and EXTRACT_NEWS jobs as they cost 0 and won't update credits...
-      const filtered = completed.filter((job) => job.jobType !== 'FETCH_NEWS' && job.jobType !== 'EXTRACT_NEWS');
-      if (filtered.length > 0) {
-        this.creditService.refetchUserCredits();
-      }
-      this.jobs = jobs;
+    toObservable(this.jobService.jobs).subscribe({
+      next: (jobs) => {
+        const completed = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
+        // Filter out FETCH_NEWS and EXTRACT_NEWS jobs as they cost 0 and won't update credits...
+        const filtered = completed.filter((job) => job.jobType !== 'FETCH_NEWS' && job.jobType !== 'EXTRACT_NEWS');
+        if (filtered.length > 0) {
+          this.creditService.refetchUserCredits();
+        }
+        this.jobs = jobs;
+      },
+      error: (error) => {
+        this.messageService.error(`Failed to load jobs signal: ${error.message}`);
+      },
     });
   }
 

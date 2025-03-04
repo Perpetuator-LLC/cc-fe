@@ -4,10 +4,12 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
 import { map, Subscription } from 'rxjs';
 import { BaseService } from './base.service';
-import { Apollo } from 'apollo-angular';
-import { handleApolloError, mapQueryResult } from './utils/error-handler';
+import { Apollo, QueryRef } from 'apollo-angular';
+import { mapQueryResult } from './utils/error-handler';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { ErrorHandlerService } from './error-handler.service';
+import { MessageService } from './message.service';
 
 // create an enum of jobTypes
 export enum JobType {
@@ -70,20 +72,28 @@ export interface Job {
   updatedAt: string;
 }
 
+interface GetUserJobsResponse {
+  getUserJobs: { jobs: Job[] };
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class JobService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
+  private jobStatusSubscription: Subscription | undefined;
   private jobsSignal: WritableSignal<Job[]> = signal([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cleanupInterval: any;
+  private queryRef!: QueryRef<GetUserJobsResponse>;
 
   constructor(
     protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
     private authService: AuthService,
+    private messageService: MessageService,
   ) {
-    super(apollo);
+    super(apollo, errorHandler);
     this.setupJobStatusPolling();
     this.setupCleanupLoop();
   }
@@ -121,7 +131,35 @@ export class JobService extends BaseService implements OnDestroy {
   }
 
   private setupJobStatusPolling() {
-    const FETCH_USER_JOBS = gql`
+    this.initializeJobStatusPolling();
+    this.subscriptions.add(
+      toObservable(this.authService.isLoggedIn).subscribe({
+        next: (isLoggedIn) => {
+          if (isLoggedIn) {
+            this.initializeJobStatusPolling();
+            return;
+          }
+          if (this.jobStatusSubscription) {
+            this.jobStatusSubscription.unsubscribe();
+          }
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to load jobs after login signal: ${error.message}`);
+        },
+      }),
+    );
+
+    this.subscriptions.add(
+      toObservable(this.jobsSignal).subscribe((jobs) => {
+        const jobIds = jobs.map((job) => job.id);
+        this.queryRef.setVariables({ ...this.queryRef.variables, ids: jobIds });
+        this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 21000 : 3000 });
+      }),
+    );
+  }
+
+  private initializeJobStatusPolling() {
+    const GET_USER_JOBS = gql`
       query GetUserJobs(
         $statuses: [String!]!
         $jobTypes: [String!]
@@ -153,12 +191,8 @@ export class JobService extends BaseService implements OnDestroy {
       }
     `;
 
-    interface Response {
-      getUserJobs: { jobs: Job[] };
-    }
-
-    const queryRef = this.watchQuery<Response>({
-      query: FETCH_USER_JOBS,
+    this.queryRef = this.watchQuery<GetUserJobsResponse>({
+      query: GET_USER_JOBS,
       variables: {
         statuses: [JobStatus.PENDING, JobStatus.RUNNING],
         jobTypes: [
@@ -170,36 +204,25 @@ export class JobService extends BaseService implements OnDestroy {
         ],
         ids: [],
         page: 1,
-        pageSize: 100,
+        pageSize: 15, // Most windows are 3 wide, so 5 tall
         orderBy: 'createdAt',
         direction: 'DESC',
       },
       pollInterval: 3000, // Poll every 3 seconds
     });
 
-    toObservable(this.authService.isLoggedIn).subscribe((isLoggedIn) => {
-      if (!isLoggedIn) {
-        return;
-      }
-      const jobStatus = queryRef.valueChanges
-        .pipe(
-          switchMap(() => queryRef.valueChanges),
-          map(mapQueryResult),
-          map((data) => data.getUserJobs.jobs),
-          catchError(handleApolloError),
-        )
-        .subscribe({
-          next: (jobs) => this.jobsSignal.set(jobs),
-          error: (err) => console.error('Failed to fetch jobs:', err),
-        });
-      this.subscriptions.add(jobStatus);
-    });
-
-    toObservable(this.jobsSignal).subscribe((jobs) => {
-      const jobIds = jobs.map((job) => job.id);
-      queryRef.setVariables({ ...queryRef.variables, ids: jobIds });
-      queryRef.setOptions({ ...queryRef.options, pollInterval: jobs.length === 0 ? 21000 : 3000 });
-    });
+    this.jobStatusSubscription = this.queryRef.valueChanges
+      .pipe(
+        switchMap(() => this.queryRef.valueChanges),
+        map(mapQueryResult),
+        map((data) => data.getUserJobs.jobs),
+        catchError((error) => this.errorHandler.handleError(error)),
+      )
+      .subscribe({
+        next: (jobs) => this.jobsSignal.set(jobs),
+        error: (err) => this.messageService.error(`Failed to fetch job: ${err.message}`),
+      });
+    this.subscriptions.add(this.jobStatusSubscription);
   }
 
   addJobs(jobs: Job[]) {

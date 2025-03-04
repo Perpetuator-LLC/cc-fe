@@ -8,6 +8,7 @@ import { TeamsResult } from './teams-list/teams-list.component';
 import { NewsResult } from './news/news.component';
 import { Job } from './job.service';
 import { FetchPolicy } from '@apollo/client';
+import { ErrorHandlerService } from './error-handler.service';
 
 export interface Article {
   id: string;
@@ -37,8 +38,11 @@ export interface ArticlesData {
   providedIn: 'root',
 })
 export class ArticleService extends BaseService {
-  constructor(protected override apollo: Apollo) {
-    super(apollo);
+  constructor(
+    protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
+  ) {
+    super(apollo, errorHandler);
   }
 
   getArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', teamId: string | null = null) {

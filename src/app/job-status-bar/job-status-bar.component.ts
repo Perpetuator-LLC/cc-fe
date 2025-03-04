@@ -41,14 +41,19 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private messageService: MessageService,
   ) {
-    toObservable(this.jobService.jobs).subscribe((jobs) => {
-      this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-        this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
-      });
-      this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
-        this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
-      });
-      this.jobs = jobs;
+    toObservable(this.jobService.jobs).subscribe({
+      next: (jobs) => {
+        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+          this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
+        });
+        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
+          this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
+        });
+        this.jobs = jobs;
+      },
+      error: (error) => {
+        this.messageService.error(`Failed to load jobs: ${error.message}`);
+      },
     });
   }
 

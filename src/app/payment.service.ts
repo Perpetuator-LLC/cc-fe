@@ -6,6 +6,7 @@ import gql from 'graphql-tag';
 import { map } from 'rxjs';
 import { BaseService } from './base.service';
 import { environment } from '../environments/environment';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,8 +14,11 @@ import { environment } from '../environments/environment';
 export class PaymentService extends BaseService {
   private stripePromise = loadStripe(environment.STRIPE_PUBLIC_KEY);
 
-  constructor(protected override apollo: Apollo) {
-    super(apollo);
+  constructor(
+    protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
+  ) {
+    super(apollo, errorHandler);
   }
 
   createCheckoutSession(amount: number) {

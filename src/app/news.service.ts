@@ -5,13 +5,17 @@ import { map } from 'rxjs/operators';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
 import { News } from './news/news.component';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NewsService extends BaseService {
-  constructor(protected override apollo: Apollo) {
-    super(apollo);
+  constructor(
+    protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
+  ) {
+    super(apollo, errorHandler);
   }
 
   fetchNews(teamId: number) {

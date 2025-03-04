@@ -8,13 +8,17 @@ import { BaseService } from './base.service';
 import { User } from './types';
 import { Article } from './article.service';
 import { Job } from './job.service';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TeamsService extends BaseService {
-  constructor(protected override apollo: Apollo) {
-    super(apollo);
+  constructor(
+    protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
+  ) {
+    super(apollo, errorHandler);
   }
 
   createTeam(name: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {

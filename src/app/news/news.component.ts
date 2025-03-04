@@ -100,26 +100,40 @@ export class NewsComponent implements OnInit, OnDestroy {
     private articleService: ArticleService,
   ) {
     this.subscriptions.add(
-      toObservable(this.jobService.jobs).subscribe((jobs) => {
-        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-          if (
-            [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))
-          ) {
-            this.getNews();
-          } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
-            this.subscriptions.add(
-              this.articleService.getArticleById(job.result).subscribe((article) => {
-                const newArticleUrl = `/article/${job.result}`;
-                this.messageService.success(`New article: <a href="${newArticleUrl}">${article.title}</a>`, null, true);
-              }),
-            );
-          }
-        });
-        // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
-        // if (failedJobs.length > 0) {
-        //   this.showMicroJobButtons = true;
-        // }
-        this.jobs = jobs;
+      toObservable(this.jobService.jobs).subscribe({
+        next: (jobs) => {
+          this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+            if (
+              [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))
+            ) {
+              this.getNews();
+            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+              this.subscriptions.add(
+                this.articleService.getArticleById(job.result).subscribe({
+                  next: (article) => {
+                    const newArticleUrl = `/article/${job.result}`;
+                    this.messageService.success(
+                      `New article: <a href="${newArticleUrl}">${article.title}</a>`,
+                      null,
+                      true,
+                    );
+                  },
+                  error: (error) => {
+                    this.messageService.error(`Failed to get new article: ${error.message}`);
+                  },
+                }),
+              );
+            }
+          });
+          // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
+          // if (failedJobs.length > 0) {
+          //   this.showMicroJobButtons = true;
+          // }
+          this.jobs = jobs;
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to load jobs signal: ${error.message}`);
+        },
       }),
     );
   }
@@ -131,10 +145,15 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.filteredNews = this.news?.results || [];
 
     this.subscriptions.add(
-      this.teamsService.getMyTeams().subscribe((teams) => {
-        this.teams = teams.filter((team) =>
-          team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
-        );
+      this.teamsService.getMyTeams().subscribe({
+        next: (teams) => {
+          this.teams = teams.filter((team) =>
+            team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+          );
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to get teams: ${error.message}`);
+        },
       }),
     );
   }
@@ -145,8 +164,17 @@ export class NewsComponent implements OnInit, OnDestroy {
       return;
     }
     this.subscriptions.add(
-      this.newsService.fetchNews(this.selectedTeamId).subscribe((data) => {
-        this.jobService.addJob(data.job);
+      this.newsService.fetchNews(this.selectedTeamId).subscribe({
+        next: (data) => {
+          if (!data.job) {
+            this.messageService.error('Failed to fetch news, no job returned');
+            return;
+          }
+          this.jobService.addJob(data.job);
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to fetch news: ${error.message}`);
+        },
       }),
     );
   }

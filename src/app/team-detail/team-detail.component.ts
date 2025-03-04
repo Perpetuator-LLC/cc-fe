@@ -186,8 +186,17 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     this.subscriptions.add(
-      this.teamsService.getAllUsers().subscribe((users) => {
-        this.allUsers = users;
+      this.teamsService.getAllUsers().subscribe({
+        next: (users) => {
+          if (!users || users.length === 0) {
+            this.messageService.error('Failed to retrieve users, no users found');
+            return;
+          }
+          this.allUsers = users;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to retrieve users: ${err.message}`);
+        },
       }),
     );
     this.refreshTeamData();
@@ -511,7 +520,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   get rssFeeds(): FormArray {
-    console.log(this.teamForm.get('rssFeeds')?.value);
     return this.teamForm.get('rssFeeds') as FormArray;
   }
 

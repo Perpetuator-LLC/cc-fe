@@ -274,13 +274,25 @@ type BonusCodeType {
 }
 
 type Mutation {
+  """Redeem a bonus code for credits."""
   redeemBonusCode(code: String!): RedeemBonusCode
+
+  """Create a new bonus code that can be redeemed for credits."""
   createBonusCode(code: String!, creditAmount: Int!): CreateBonusCode
+
+  """Cancel a pending order. This will cancel the Stripe session."""
   cancelOrder(orderId: String!): CancelOrder
+
+  """
+  Refresh the status of a pending order. This will check the Stripe session status and update the order.
+  """
   refreshOrder(orderId: String!): RefreshOrder
+
+  """
+  Create a new Stripe Checkout session for a user to purchase credits.
+  Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
+  """
   createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
-  createSchedule(args: JSONString, interval: Int!, kwargs: JSONString, name: String!, task: String!): CreateScheduleMutation
-  updateSchedule(enabled: Boolean, interval: Int!, name: String!): UpdateScheduleMutation
 
   """
   Cancel a pending email change request from a logged-in user.
@@ -310,45 +322,55 @@ type Mutation {
   summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
   extractNews(ids: [ID]!, teamId: ID!): ExtractNews
   fetchNews(teamId: ID!): FetchNews
+
+  """
+  Set the RSS feeds for a team. Theses feeds will be used to fetch news articles.
+  """
   setTeamRssFeeds(rssFeedIds: [ID]!, teamId: ID!): SetTeamRssFeeds
+
+  """
+  Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
+  """
   createRssFeed(url: String!): CreateRssFeed
 }
 
+"""Redeem a bonus code for credits."""
 type RedeemBonusCode {
   success: Boolean
   message: String
 }
 
+"""Create a new bonus code that can be redeemed for credits."""
 type CreateBonusCode {
   success: Boolean
   message: String
 }
 
+"""Cancel a pending order. This will cancel the Stripe session."""
 type CancelOrder {
   success: Boolean
   message: String
   order: OrderType
 }
 
+"""
+Refresh the status of a pending order. This will check the Stripe session status and update the order.
+"""
 type RefreshOrder {
   success: Boolean
   message: String
   order: OrderType
 }
 
+"""
+Create a new Stripe Checkout session for a user to purchase credits.
+Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
+"""
 type CreateStripeCheckoutSession {
+  success: Boolean
+  message: String
   sessionId: String
   url: String
-}
-
-type CreateScheduleMutation {
-  success: Boolean
-  message: String
-}
-
-type UpdateScheduleMutation {
-  success: Boolean
-  message: String
 }
 
 """
@@ -478,10 +500,16 @@ type FetchNews {
   job: JobData
 }
 
+"""
+Set the RSS feeds for a team. Theses feeds will be used to fetch news articles.
+"""
 type SetTeamRssFeeds {
   team: TeamType
 }
 
+"""
+Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
+"""
 type CreateRssFeed {
   rssFeed: RssFeedType
 }

@@ -18,9 +18,14 @@ export class MessageComponent {
   messages: Message[] = [];
 
   constructor(private messageService: MessageService) {
-    this.messageService.messages$.subscribe((messages) => {
-      this.messages = messages;
-      this.setAutoDismiss(messages);
+    this.messageService.messages$.subscribe({
+      next: (messages) => {
+        this.messages = messages;
+        this.setAutoDismiss(messages);
+      },
+      error: (error) => {
+        console.error(`Failed to load messages: ${error.message}`);
+      },
     });
   }
 

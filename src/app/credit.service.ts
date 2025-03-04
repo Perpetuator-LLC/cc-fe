@@ -4,10 +4,12 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseService } from './base.service';
-import { handleApolloError, mapQueryResult } from './utils/error-handler';
+import { mapQueryResult } from './utils/error-handler';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { ErrorHandlerService } from './error-handler.service';
+import { MessageService } from './message.service';
 
 export interface UserOrder {
   id: string;
@@ -41,15 +43,39 @@ interface GetUserCreditsResponse {
 })
 export class CreditService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
+  private userCreditSubscription: Subscription | undefined;
   private userCreditsSignal: WritableSignal<number> = signal(0);
   private userOrdersSignal: WritableSignal<UserOrder[]> = signal([]);
-  private queryRef: QueryRef<GetUserCreditsResponse>;
+  private queryRef!: QueryRef<GetUserCreditsResponse>;
 
   constructor(
     protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
     private authService: AuthService,
+    private messageService: MessageService,
   ) {
-    super(apollo);
+    super(apollo, errorHandler);
+    this.initializeUserCreditsQuery();
+    // When the user logs in, fetch the user credits
+    this.subscriptions.add(
+      toObservable(this.authService.isLoggedIn).subscribe({
+        next: (isLoggedIn) => {
+          if (isLoggedIn) {
+            this.initializeUserCreditsQuery();
+            return;
+          }
+          if (this.userCreditSubscription) {
+            this.userCreditSubscription.unsubscribe();
+          }
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to load credit service after login signal: ${error.message}`);
+        },
+      }),
+    );
+  }
+
+  private initializeUserCreditsQuery() {
     const GET_USER_CREDITS = gql`
       query GetUserCredits {
         getUserCredits
@@ -60,24 +86,11 @@ export class CreditService extends BaseService implements OnDestroy {
       query: GET_USER_CREDITS,
     });
 
-    // When the user logs in, fetch the user credits
-    this.subscriptions.add(
-      toObservable(this.authService.isLoggedIn).subscribe({
-        next: (isLoggedIn) => {
-          if (isLoggedIn) {
-            this.initUserCredits();
-          }
-        },
-      }),
-    );
-  }
-
-  private initUserCredits() {
-    this.queryRef.valueChanges
+    this.userCreditSubscription = this.queryRef.valueChanges
       .pipe(
         map(mapQueryResult),
         map((data) => data.getUserCredits),
-        catchError(handleApolloError),
+        catchError((error) => this.errorHandler.handleError(error)),
       )
       .subscribe({
         next: (credits) => {
@@ -87,6 +100,7 @@ export class CreditService extends BaseService implements OnDestroy {
           console.error('Failed to fetch user credits:', err);
         },
       });
+    this.subscriptions.add(this.userCreditSubscription);
   }
 
   ngOnDestroy() {

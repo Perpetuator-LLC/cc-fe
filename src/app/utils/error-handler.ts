@@ -1,5 +1,4 @@
 // Copyright (c) 2025 Perpetuator LLC
-// src/app/utils/error-handler.ts
 import { throwError } from 'rxjs';
 import { ApolloQueryResult } from '@apollo/client/core';
 import { MutationResult } from 'apollo-angular';

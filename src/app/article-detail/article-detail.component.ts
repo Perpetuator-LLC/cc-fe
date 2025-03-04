@@ -97,27 +97,45 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
       }),
     });
     this.subscriptions.add(
-      toObservable(this.jobService.jobs).subscribe((jobs) => {
-        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-          if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
-            this.subscriptions.add(
-              this.articleService.getArticleById(this.articleId, 'network-only' as FetchPolicy).subscribe({
-                next: (article) => {
-                  if (article.audioUrl) {
-                    this.audioSrc = article.audioUrl;
-                  }
-                },
-                error: (err) => {
-                  this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
-                },
-              }),
-            );
-          } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
-            const newArticleUrl = `/article/${job.result}`;
-            this.messageService.success(`New article URL: <a href="${newArticleUrl}">${newArticleUrl}</a>`, null, true);
-          }
-        });
-        this.jobs = jobs;
+      toObservable(this.jobService.jobs).subscribe({
+        next: (jobs) => {
+          this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+            if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
+              this.subscriptions.add(
+                this.articleService.getArticleById(this.articleId, 'network-only' as FetchPolicy).subscribe({
+                  next: (article) => {
+                    if (article.audioUrl) {
+                      this.audioSrc = article.audioUrl;
+                    }
+                  },
+                  error: (err) => {
+                    this.messageService.error(`Failed to fetch updated audio for article: ${err.message}`);
+                  },
+                }),
+              );
+            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+              this.subscriptions.add(
+                this.articleService.getArticleById(job.result).subscribe({
+                  next: (article) => {
+                    const newArticleUrl = `/article/${job.result}`;
+                    this.messageService.success(
+                      `New article: <a href="${newArticleUrl}">${article.title}</a>`,
+                      null,
+                      true,
+                    );
+                  },
+                  error: (error) => {
+                    this.messageService.error(`Failed to get new article: ${error.message}`);
+                  },
+                }),
+              );
+            }
+          });
+          this.jobs = jobs;
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to load jobs signal: ${error.message}`);
+        },
       }),
     );
   }

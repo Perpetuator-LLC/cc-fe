@@ -4,6 +4,7 @@ import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
 import { BaseService } from './base.service';
+import { ErrorHandlerService } from './error-handler.service';
 
 export interface BonusCode {
   id: string;
@@ -24,8 +25,11 @@ export interface BonusCode {
   providedIn: 'root',
 })
 export class BonusService extends BaseService {
-  constructor(protected override apollo: Apollo) {
-    super(apollo);
+  constructor(
+    protected override apollo: Apollo,
+    protected override errorHandler: ErrorHandlerService,
+  ) {
+    super(apollo, errorHandler);
   }
 
   getBonusCodes(activeOnly = false, page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'ASC') {

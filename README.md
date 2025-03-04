@@ -12,8 +12,8 @@ Create the environment file and point it to the production back-end:
 ```html
 export const environment = {
   production: false,
-  API_URL: 'https://api.capitalcopilot.io',
-  STRIPE_PUBLIC_KEY: 'pk_test_51Oc1SLKzFZo1wXZq0chhN5lPNMKMAdeCo5ettmYAWS04whr4UIqFa1rIr7qNlGyvi7mFx7IrpQQFY0D4AAYSV6CW00brKyegzi',
+  API_URL: 'https://api.domain.io',
+  STRIPE_PUBLIC_KEY: 'pk_test_111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
 };
 ```
 

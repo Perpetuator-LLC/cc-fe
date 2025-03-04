@@ -422,11 +422,16 @@ export class UserDetailComponent implements OnInit, OnDestroy {
           '<br/><br/><h2>Are you sure you want to proceed?</h2>',
       },
     });
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        // get confirmation from user
-        this.deleteTeam();
-      }
+    dialogRef.afterClosed().subscribe({
+      next: (confirmed) => {
+        if (confirmed) {
+          // get confirmation from user
+          this.deleteTeam();
+        }
+      },
+      error: (err) => {
+        this.messageService.error('Failed to delete account: ' + err.message);
+      },
     });
   }
 
