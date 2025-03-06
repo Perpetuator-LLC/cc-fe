@@ -1,3 +1,20 @@
+# Changelog from v0.17.0 to v0.18.0
+
+In this update, we have integrated GraphQL updates for ID to UUID migration and improved error handling during login. We have also removed unused stock/finance components and updated the onboarding documentation. Additionally, we have added copyrights and checks, and removed the old open source license as this project is closed source.
+
+## Enhancements
+- Integrated GraphQL updates for ID to UUID migration
+- Improved error handling during login
+- Watch queries reset on logout
+- Removed schedule
+
+## Cleanups
+- Removed unused stock/finance components
+- Updated the readme and notes for onboarding
+- Added copyrights and checks
+- Removed old open source license, this project is closed source
+
+
 # Changelog from v0.16.0 to v0.17.0
 
 In this update, we have integrated stripe payments, a credit transaction and bonus code system, and exposed article generation without audio.
