@@ -10,7 +10,7 @@ import { Job } from './job.service';
 import { FetchPolicy } from '@apollo/client';
 import { ErrorHandlerService } from './error-handler.service';
 
-export interface Article {
+export interface Episode {
   id: string;
   date: string;
   title: string;
@@ -19,11 +19,11 @@ export interface Article {
   isLive: boolean;
   podcastDate: string;
   telegramDate: string;
-  newsSummaries: NewsResult[];
+  news: NewsResult[];
   team: TeamsResult;
 }
 
-export interface ArticlesData {
+export interface EpisodesData {
   success: boolean;
   message: string;
   totalRecords: number;
@@ -31,13 +31,13 @@ export interface ArticlesData {
   currentPage: number;
   hasNext: boolean;
   hasPrevious: boolean;
-  articles: Article[];
+  episodes: Episode[];
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class ArticleService extends BaseService {
+export class EpisodeService extends BaseService {
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
@@ -45,24 +45,30 @@ export class ArticleService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getArticles(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', teamId: string | null = null) {
+  episodes(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', podcastId: string | null = null) {
     const GQL = gql`
-      query GetArticlesData($page: Int!, $pageSize: Int!, $orderBy: String!, $direction: SortDirection!, $teamId: ID) {
-        getArticles(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, teamId: $teamId) {
+      query GetEpisodesData(
+        $page: Int!
+        $pageSize: Int!
+        $orderBy: String!
+        $direction: SortDirection!
+        $podcastId: ID
+      ) {
+        episodes(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, podcastId: $podcastId) {
           totalRecords
           totalPages
           currentPage
           hasNext
           hasPrevious
-          articles {
+          episodes {
             id
             date
-            team {
+            podcast {
               name
             }
             title
             content
-            newsSummaries {
+            news {
               id
               url
               title
@@ -74,74 +80,85 @@ export class ArticleService extends BaseService {
     `;
 
     interface Response {
-      getArticles: ArticlesData;
+      episodes: EpisodesData;
     }
 
     return this.query<Response>({
       query: GQL,
-      variables: { page, pageSize, orderBy, direction, teamId },
+      variables: { page, pageSize, orderBy, direction, podcastId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        return data.getArticles;
+        return data.episodes;
       }),
     );
   }
 
-  getArticleById(id: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
-    if (id === null) return throwError(() => new Error('Article ID is required'));
+  episodeById(id: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
+    if (id === null) return throwError(() => new Error('Episode ID is required'));
     const GQL = gql`
-      query GetArticleData($id: ID!) {
-        getArticle(id: $id) {
-          id
-          date
-          title
-          content
-          audioUrl
-          isLive
-          podcastDate
-          telegramDate
-          team {
+      query GetEpisodeData($id: ID!) {
+        episodes(episodeId: $id) {
+          episodes {
             id
-            name
-            members {
-              role
-              user {
-                id
-                username
+            date
+            title
+            content
+            audioUrl
+            isLive
+            podcastDate
+            telegramDate
+            podcast {
+              id
+              name
+              team {
+                members {
+                  role
+                  user {
+                    id
+                    username
+                  }
+                }
               }
             }
-          }
-          newsSummaries {
-            id
-            url
-            title
-            summary
+            news {
+              id
+              url
+              title
+              summary
+            }
           }
         }
       }
     `;
 
     interface Response {
-      getArticle: Article;
+      episodes: EpisodesData;
     }
 
     return this.query<Response>({
       query: GQL,
       variables: { id },
       fetchPolicy: fetchPolicy,
-    }).pipe(map((data) => data.getArticle));
+    }).pipe(
+      map((data) => {
+        if (!data.episodes?.episodes || data.episodes.episodes.length !== 1) {
+          throw new Error('Episode not found');
+        }
+        return data.episodes.episodes[0];
+      }),
+    );
   }
 
-  updateArticle(id: string | null, updatedTitle: string | null, updatedContent: string | null, isLive: boolean | null) {
-    if (id === null) return throwError(() => new Error('Article ID is required'));
+  updateEpisode(id: string | null, updatedTitle: string | null, updatedContent: string | null, isLive: boolean | null) {
+    if (id === null) return throwError(() => new Error('Episode ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
     if (isLive === null) return throwError(() => new Error('Updated is live is required'));
 
     const GQL = gql`
-      mutation UpdateArticles($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
-        updateArticle(id: $id, title: $title, content: $content, isLive: $isLive) {
+      mutation UpdateEpisodes($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
+        updateEpisode(episodeId: $id, title: $title, content: $content, isLive: $isLive) {
           success
           message
         }
@@ -149,10 +166,10 @@ export class ArticleService extends BaseService {
     `;
 
     interface Response {
-      updateArticle: {
+      updateEpisode: {
         success: boolean;
         message: string;
-        article: Article;
+        episode: Episode;
       };
     }
 
@@ -161,20 +178,20 @@ export class ArticleService extends BaseService {
       variables: { id, title: updatedTitle, content: updatedContent, isLive: isLive },
     }).pipe(
       map((data) => {
-        if (!data.updateArticle.success) {
-          throw new Error(data.updateArticle.message);
+        if (!data.updateEpisode.success) {
+          throw new Error(data.updateEpisode.message);
         }
-        return data.updateArticle;
+        return data.updateEpisode;
       }),
     );
   }
 
   generateAudio(id: string) {
-    if (id === null) return throwError(() => new Error('Article ID is required'));
+    if (id === null) return throwError(() => new Error('Episode ID is required'));
 
     const GQL = gql`
-      mutation UpdateArticlesAudio {
-        updateArticleAudio(articleId: "${id}") {
+      mutation UpdateEpisodesAudio {
+        updateEpisodeAudio(episodeId: "${id}") {
           success
           message
           job {
@@ -191,7 +208,7 @@ export class ArticleService extends BaseService {
     `;
 
     interface Response {
-      updateArticleAudio: {
+      updateEpisodeAudio: {
         success: boolean;
         message: string;
         job: Job;
@@ -202,23 +219,23 @@ export class ArticleService extends BaseService {
       mutation: GQL,
     }).pipe(
       map((data) => {
-        if (!data.updateArticleAudio.success) {
-          throw new Error(data.updateArticleAudio.message);
+        if (!data.updateEpisodeAudio.success) {
+          throw new Error(data.updateEpisodeAudio.message);
         }
-        return data.updateArticleAudio;
+        return data.updateEpisodeAudio;
       }),
     );
   }
 
-  publishAudio(articleId: string) {
-    if (articleId === null) return throwError(() => new Error('Article ID is required'));
+  publishAudio(episodeId: string) {
+    if (episodeId === null) return throwError(() => new Error('Episode ID is required'));
 
     const GQL = gql`
-      mutation PublishArticleAudio($id: ID!) {
-        publishArticleAudio(articleId: $id) {
+      mutation PublishEpisodeAudio($id: ID!) {
+        publishEpisodeAudio(episodeId: $id) {
           success
           message
-          article {
+          episode {
             id
             date
             title
@@ -233,22 +250,22 @@ export class ArticleService extends BaseService {
     `;
 
     interface Response {
-      publishArticleAudio: {
+      publishEpisodeAudio: {
         success: boolean;
         message: string;
-        article: Article;
+        episode: Episode;
       };
     }
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id: articleId },
+      variables: { id: episodeId },
     }).pipe(
       map((data) => {
-        if (!data.publishArticleAudio.success) {
-          throw new Error(data.publishArticleAudio.message);
+        if (!data.publishEpisodeAudio.success) {
+          throw new Error(data.publishEpisodeAudio.message);
         }
-        return data.publishArticleAudio;
+        return data.publishEpisodeAudio;
       }),
     );
   }

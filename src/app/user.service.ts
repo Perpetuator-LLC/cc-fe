@@ -38,10 +38,10 @@ export class UserService extends BaseService implements OnDestroy {
     super(apollo, errorHandler);
   }
 
-  getUserSettings(keys: string[]): Observable<UserSetting[]> {
+  userSettings(keys: string[]): Observable<UserSetting[]> {
     const GET_USER_SETTINGS = gql`
       query GetUserSettings {
-        getUserSettings(keys: ["${keys}"]) {
+        userSettings(keys: ["${keys}"]) {
           success
           message
           results {
@@ -53,7 +53,7 @@ export class UserService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserSettings: CommonResponse<UserSetting[]>;
+      userSettings: CommonResponse<UserSetting[]>;
     }
 
     return this.query<Response>({
@@ -62,14 +62,14 @@ export class UserService extends BaseService implements OnDestroy {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        const response = data?.getUserSettings;
+        const response = data?.userSettings;
         if (!response) {
           return [];
         }
         if (!response || !response.success) {
           throw new Error(response?.message);
         }
-        return data.getUserSettings.results;
+        return data.userSettings.results;
       }),
     );
   }
@@ -139,7 +139,7 @@ export class UserService extends BaseService implements OnDestroy {
   loadUserDetails(): Observable<UserDetails> {
     const GET_USER_DETAILS = gql`
       query GetUserDetails {
-        getUserDetails {
+        user {
           id
           email
           username
@@ -149,13 +149,13 @@ export class UserService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserDetails: UserDetails;
+      user: UserDetails;
     }
 
     const observable = this.query<Response>({
       query: GET_USER_DETAILS,
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data?.getUserDetails || null));
+    }).pipe(map((data) => data?.user || null));
     observable.subscribe({
       next: (userDetails) => {
         this.userDetailsSignal.set(userDetails);
@@ -170,14 +170,14 @@ export class UserService extends BaseService implements OnDestroy {
   loadUserEmailChangePending() {
     const GQL = gql`
       query GetEmailChangePending {
-        getEmailChangePending {
+        emailChangePending {
           newEmail
         }
       }
     `;
 
     interface Response {
-      getEmailChangePending: {
+      emailChangePending: {
         newEmail: string;
       };
     }
@@ -187,10 +187,10 @@ export class UserService extends BaseService implements OnDestroy {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.getEmailChangePending) {
+        if (!data.emailChangePending) {
           return null;
         }
-        return data.getEmailChangePending;
+        return data.emailChangePending;
       }),
     );
   }

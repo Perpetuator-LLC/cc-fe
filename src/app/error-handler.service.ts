@@ -2,7 +2,9 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
-import { throwError } from 'rxjs';
+import { EMPTY, throwError } from 'rxjs';
+import { MessageService } from './message.service';
+import { handleApolloError } from './utils/error-handler';
 
 @Injectable({
   providedIn: 'root',
@@ -11,30 +13,23 @@ export class ErrorHandlerService {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private messageService: MessageService,
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public handleError(error: any) {
-    console.error('GraphQL query error:', error);
-    let errorMessage = 'Unknown error';
-
-    if (error.graphQLErrors) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      errorMessage = error.graphQLErrors.map((e: any) => e.message).join(', ');
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    // Check for specific error indicating invalid or expired token
+    const newError = handleApolloError(error);
     if (
-      errorMessage.includes('Given token not valid for any token type') ||
-      errorMessage.includes('Token is invalid or expired') ||
-      errorMessage.includes('Authentication credentials invalid or missing')
+      newError.message.includes('Given token not valid for any token type') ||
+      newError.message.includes('Token is invalid or expired') ||
+      newError.message.includes('Authentication credentials invalid or missing')
     ) {
       this.authService.logout(); // Clear authentication state
       this.router.navigate(['/login']); // Navigate to login page
+      this.messageService.warning('Your session has expired. Please log in again.');
+      return EMPTY;
     }
-
-    return throwError(() => new Error(errorMessage));
+    console.error(newError.message);
+    return throwError(() => newError);
   }
 }

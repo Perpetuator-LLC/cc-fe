@@ -90,18 +90,16 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   loadOrders() {
     this.subscriptions.add(
-      this.creditService
-        .getUserOrders(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
-        .subscribe({
-          next: (data) => {
-            // this.currentPage = data.currentPage;
-            this.totalOrders = data.totalRecords;
-            this.loadingOrders = false;
-          },
-          error: (error) => {
-            this.messageService.error('Failed to load orders: ' + error.toString());
-          },
-        }),
+      this.creditService.orders(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection).subscribe({
+        next: (data) => {
+          // this.currentPage = data.currentPage;
+          this.totalOrders = data.totalRecords;
+          this.loadingOrders = false;
+        },
+        error: (error) => {
+          this.messageService.error('Failed to load orders: ' + error.toString());
+        },
+      }),
     );
   }
 

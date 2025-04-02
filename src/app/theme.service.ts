@@ -77,7 +77,7 @@ export class ThemeService implements OnDestroy {
       return;
     }
     this.subscriptions.add(
-      this.userSettingService.getUserSettings(['theme']).subscribe({
+      this.userSettingService.userSettings(['theme']).subscribe({
         next: (results) => {
           const themeSetting = results.find((setting) => setting.key === 'theme');
           const theme: string | undefined = themeSetting?.value.toLowerCase();

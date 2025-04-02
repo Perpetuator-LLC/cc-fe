@@ -5,8 +5,7 @@ import gql from 'graphql-tag';
 import { map, Subscription } from 'rxjs';
 import { BaseService } from './base.service';
 import { Apollo, QueryRef } from 'apollo-angular';
-import { mapQueryResult } from './utils/error-handler';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
@@ -16,8 +15,8 @@ export enum JobType {
   FETCH_NEWS = 'fetch_news',
   EXTRACT_NEWS = 'extract_news',
   SUMMARIZE_NEWS = 'summarize_news',
-  CREATE_ARTICLE = 'create_article',
-  UPDATE_ARTICLE_AUDIO = 'update_article_audio',
+  CREATE_ARTICLE = 'create_episode',
+  UPDATE_ARTICLE_AUDIO = 'update_episode_audio',
 }
 
 // create a function to convert string to jobType
@@ -29,9 +28,9 @@ export const stringToJobType = (jobType: string) => {
       return JobType.EXTRACT_NEWS;
     case 'summarize_news':
       return JobType.SUMMARIZE_NEWS;
-    case 'create_article':
+    case 'create_episode':
       return JobType.CREATE_ARTICLE;
-    case 'update_article_audio':
+    case 'update_episode_audio':
       return JobType.UPDATE_ARTICLE_AUDIO;
     default:
       throw new Error('Invalid job type');
@@ -47,9 +46,9 @@ export const jobTypeToString = (jobType: string) => {
     case JobType.SUMMARIZE_NEWS:
       return 'Summarize News';
     case JobType.CREATE_ARTICLE:
-      return 'Create Article';
+      return 'Create Episode';
     case JobType.UPDATE_ARTICLE_AUDIO:
-      return 'Update Article Audio';
+      return 'Update Episode Audio';
     default:
       return 'N/A';
   }
@@ -73,7 +72,7 @@ export interface Job {
 }
 
 interface GetUserJobsResponse {
-  getUserJobs: { jobs: Job[] };
+  jobs: { jobs: Job[] };
 }
 
 @Injectable({
@@ -131,16 +130,17 @@ export class JobService extends BaseService implements OnDestroy {
   }
 
   private setupJobStatusPolling() {
-    this.initializeJobStatusPolling();
+    // this.initializeJobStatusPolling();
     this.subscriptions.add(
       toObservable(this.authService.isLoggedIn).subscribe({
         next: (isLoggedIn) => {
+          if (this.jobStatusSubscription) {
+            // NOTE: If logged out, unsubscribe from the job status subscription, if logged in
+            this.jobStatusSubscription.unsubscribe();
+          }
           if (isLoggedIn) {
             this.initializeJobStatusPolling();
             return;
-          }
-          if (this.jobStatusSubscription) {
-            this.jobStatusSubscription.unsubscribe();
           }
         },
         error: (error) => {
@@ -169,10 +169,10 @@ export class JobService extends BaseService implements OnDestroy {
         $orderBy: String
         $direction: SortDirection
       ) {
-        getUserJobs(
-          statuses: $statuses
+        jobs(
+          jobStatuses: $statuses
           jobTypes: $jobTypes
-          ids: $ids
+          jobIds: $ids
           page: $page
           pageSize: $pageSize
           orderBy: $orderBy
@@ -213,14 +213,14 @@ export class JobService extends BaseService implements OnDestroy {
 
     this.jobStatusSubscription = this.queryRef.valueChanges
       .pipe(
-        switchMap(() => this.queryRef.valueChanges),
-        map(mapQueryResult),
-        map((data) => data.getUserJobs.jobs),
+        // switchMap(() => this.queryRef.valueChanges), // was this to rebind on error?
         catchError((error) => this.errorHandler.handleError(error)),
       )
       .subscribe({
-        next: (jobs) => this.jobsSignal.set(jobs),
-        error: (err) => this.messageService.error(`Failed to fetch job: ${err.message}`),
+        next: (results) => this.jobsSignal.set(results.data.jobs.jobs),
+        error: (error) => {
+          this.messageService.error(`Failed to fetch job: ${error.message}`);
+        },
       });
     this.subscriptions.add(this.jobStatusSubscription);
   }
@@ -248,10 +248,10 @@ export class JobService extends BaseService implements OnDestroy {
     return transitionedJobs;
   }
 
-  getUserJobs(
-    statuses: string[] = [],
+  getJobs(
+    jobStatuses: string[] = [],
     jobTypes: string[] = [],
-    ids: string[] = [],
+    jobIds: string[] = [],
     page = 1,
     pageSize = 10,
     orderBy = 'createdAt',
@@ -259,18 +259,18 @@ export class JobService extends BaseService implements OnDestroy {
   ) {
     const FETCH_USER_JOBS = gql`
       query GetUserJobs(
-        $statuses: [String!]!
+        $jobStatuses: [String!]!
         $jobTypes: [String!]
-        $ids: [UUID!]
+        $jobIds: [UUID!]
         $page: Int!
         $pageSize: Int!
         $orderBy: String
         $direction: SortDirection
       ) {
-        getUserJobs(
-          statuses: $statuses
+        jobs(
+          jobStatuses: $jobStatuses
           jobTypes: $jobTypes
-          ids: $ids
+          jobIds: $jobIds
           page: $page
           pageSize: $pageSize
           orderBy: $orderBy
@@ -296,7 +296,7 @@ export class JobService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserJobs: {
+      jobs: {
         totalRecords: number;
         totalPages: number;
         currentPage: number;
@@ -308,19 +308,19 @@ export class JobService extends BaseService implements OnDestroy {
 
     return this.query<Response>({
       query: FETCH_USER_JOBS,
-      variables: { statuses, jobTypes, ids, page, pageSize, orderBy, direction },
+      variables: { jobStatuses, jobTypes, jobIds, page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        return data.getUserJobs;
+        return data.jobs;
       }),
     );
   }
 
   retryJobs(ids: string[] = []) {
     const GQL = gql`
-      mutation RetryJobs($ids: [UUID]!) {
-        retryJobs(ids: $ids) {
+      mutation RetryJobs($jobIds: [UUID]!) {
+        retryJobs(jobIds: $jobIds) {
           jobs {
             id
             jobType
@@ -358,7 +358,7 @@ export class JobService extends BaseService implements OnDestroy {
   deleteJobs(ids: string[] = []) {
     const GQL = gql`
       mutation DeleteJobs($ids: [UUID]!) {
-        deleteJobs(ids: $ids) {
+        deleteJobs(jobIds: $ids) {
           success
           message
         }

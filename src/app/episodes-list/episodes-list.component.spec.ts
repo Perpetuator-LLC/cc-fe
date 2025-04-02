@@ -1,18 +1,18 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ArticlesListComponent } from './articles-list.component';
+import { EpisodesListComponent } from './episodes-list.component';
 
-describe('ArticlesListComponent', () => {
-  let component: ArticlesListComponent;
-  let fixture: ComponentFixture<ArticlesListComponent>;
+describe('EpisodesListComponent', () => {
+  let component: EpisodesListComponent;
+  let fixture: ComponentFixture<EpisodesListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ArticlesListComponent],
+      imports: [EpisodesListComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ArticlesListComponent);
+    fixture = TestBed.createComponent(EpisodesListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

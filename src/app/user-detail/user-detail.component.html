@@ -181,13 +181,13 @@
     <mat-card-content>
       <mat-form-field appearance="fill">
         <mat-label>Redeem Bonus Code</mat-label>
-        <input matInput [(ngModel)]="redeemCode" placeholder="Enter bonus code" />
+        <input matInput [(ngModel)]="redeemCode" placeholder="Enter code" />
       </mat-form-field>
-      <button mat-raised-button color="primary" (click)="redeemBonusCode()">Redeem</button>
+      <button mat-raised-button color="primary" (click)="redeemCode()">Redeem</button>
 
       @if (this.userService.userDetails()?.permissions?.includes('api.add_bonuscode')) {
         <div>
-          <form [formGroup]="createBonusForm" (ngSubmit)="createBonusCode()">
+          <form [formGroup]="createCodeForm" (ngSubmit)="createCode()">
             <mat-form-field appearance="fill">
               <mat-label>Bonus Code</mat-label>
               <input matInput formControlName="code" required />
@@ -201,8 +201,8 @@
 
           @if (loadingBonuses) {
             <mat-spinner></mat-spinner>
-          } @else if (bonusCodes.length > 0) {
-            <table mat-table [dataSource]="bonusCodes">
+          } @else if (codes.length > 0) {
+            <table mat-table [dataSource]="codes">
               <ng-container matColumnDef="code">
                 <th mat-header-cell *matHeaderCellDef>Code</th>
                 <td mat-cell *matCellDef="let bonus">{{ bonus.code }}</td>

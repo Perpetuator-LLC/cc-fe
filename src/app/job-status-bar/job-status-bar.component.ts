@@ -77,7 +77,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const currentJobIds = this.jobs.map((job) => job.id);
     this.subscriptions.add(
       this.jobService
-        .getUserJobs(
+        .getJobs(
           [JobStatus.PENDING, JobStatus.RUNNING],
           [
             JobType.SUMMARIZE_NEWS,

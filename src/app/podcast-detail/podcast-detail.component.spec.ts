@@ -1,18 +1,18 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ArticleDetailComponent } from './article-detail.component';
+import { PodcastDetailComponent } from './podcast-detail.component';
 
-describe('ArticleDetailComponent', () => {
-  let component: ArticleDetailComponent;
-  let fixture: ComponentFixture<ArticleDetailComponent>;
+describe('PodcastDetailComponentComponent', () => {
+  let component: PodcastDetailComponent;
+  let fixture: ComponentFixture<PodcastDetailComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ArticleDetailComponent],
+      imports: [PodcastDetailComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ArticleDetailComponent);
+    fixture = TestBed.createComponent(PodcastDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

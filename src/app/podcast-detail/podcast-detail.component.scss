@@ -1,0 +1,110 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.member-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
+
+  mat-form-field,
+  mat-checkbox,
+  button {
+    flex: 1 1 100%;
+  }
+}
+
+.podcast-card,
+.members-card {
+  margin-bottom: 1em;
+}
+
+mat-divider {
+  margin: 10px 0;
+}
+
+.container-card {
+  padding: 20px;
+
+  form {
+    margin-bottom: 1em;
+  }
+}
+.textarea-small {
+  min-height: 3em;
+  max-height: 10em;
+  height: auto;
+  overflow: auto;
+}
+
+.textarea-medium {
+  min-height: 6em;
+  max-height: 10em;
+  height: auto;
+  overflow: auto;
+}
+
+.textarea-large {
+  min-height: 18em;
+  max-height: 30em;
+  height: auto;
+  overflow: auto;
+}
+
+.expand-width {
+  flex-grow: 1;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.input-with-button {
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1 1 auto;
+  }
+
+  button {
+    flex: 0 0 auto;
+    margin-left: 8px;
+  }
+}
+
+.danger-zone {
+  color: red;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
+
+  mat-form-field,
+  button {
+    flex: 1 1 100%;
+  }
+}
+
+.file-input-wrapper {
+  div {
+    margin-bottom: 1em;
+    img {
+      max-width: 300px;
+    }
+  }
+}
+
+.actions-column,
+.actions-cell {
+  width: 80px; /* Adjust this value as needed */
+  min-width: 80px;
+  max-width: 80px;
+  padding: 0;
+  text-align: center;
+}
+
+.rss-feeds-section div {
+  margin-top: 1em;
+}

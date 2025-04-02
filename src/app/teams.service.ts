@@ -6,7 +6,7 @@ import { RssFeedResult, TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
-import { Article } from './article.service';
+import { Episode } from './episode.service';
 import { Job } from './job.service';
 import { ErrorHandlerService } from './error-handler.service';
 
@@ -63,126 +63,72 @@ export class TeamsService extends BaseService {
     );
   }
 
-  refreshTgResponse(id: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
-    const GQL = gql`
-      mutation UpdateTeam($id: ID!, $refreshTgResponse: Boolean) {
-        updateTeam(id: $id, refreshTgResponse: $refreshTgResponse) {
-          success
-          message
-          team {
-            id
-            name
-            podcastEnabled
-            podcastSlug
-            podcastUrl
-            intro
-            prompt
-            outro
-            tgChannelId
-            tgResponse
-            members {
-              user {
-                id
-                username
-              }
-              role
-            }
-          }
-        }
-      }
-    `;
-
-    interface Response {
-      updateTeam: {
-        success: boolean;
-        message: string;
-        team: TeamsResult;
-      };
-    }
-
-    const refreshTgResponse = true;
-    return this.mutate<Response>({
-      mutation: GQL,
-      variables: {
-        id,
-        refreshTgResponse,
-      },
-    }).pipe(
-      map((data) => {
-        if (!data.updateTeam.success) {
-          throw new Error(data.updateTeam.message);
-        }
-        return data.updateTeam;
-      }),
-    );
-  }
+  // refreshTgResponse(id: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
+  //   const GQL = gql`
+  //     mutation UpdateTeam($id: ID!, $refreshTgResponse: Boolean) {
+  //       updateTeam(id: $id, refreshTgResponse: $refreshTgResponse) {
+  //         success
+  //         message
+  //         team {
+  //           id
+  //           name
+  //           enabled
+  //           slug
+  //           url
+  //           intro
+  //           prompt
+  //           outro
+  //           tgChannelId
+  //           tgResponse
+  //           members {
+  //             user {
+  //               id
+  //               username
+  //             }
+  //             role
+  //           }
+  //         }
+  //       }
+  //     }
+  //   `;
+  //
+  //   interface Response {
+  //     updateTeam: {
+  //       success: boolean;
+  //       message: string;
+  //       team: TeamsResult;
+  //     };
+  //   }
+  //
+  //   const refreshTgResponse = true;
+  //   return this.mutate<Response>({
+  //     mutation: GQL,
+  //     variables: {
+  //       id,
+  //       refreshTgResponse,
+  //     },
+  //   }).pipe(
+  //     map((data) => {
+  //       if (!data.updateTeam.success) {
+  //         throw new Error(data.updateTeam.message);
+  //       }
+  //       return data.updateTeam;
+  //     }),
+  //   );
+  // }
 
   updateTeam(
     id: string,
     name: string | null = null,
-    intro: string | null = null,
-    prompt: string | null = null,
-    outro: string | null = null,
-    podcastEnabled: boolean | null = null,
-    podcastSlug: string | null = null,
-    podcastDescription: string | null = null,
-    podcastOwnerName: string | null = null,
-    podcastOwnerEmail: string | null = null,
-    podcastOwnerLink: string | null = null,
-    tgBotToken: string | null = null,
-    tgChannelId: string | null = null,
-    refreshTgResponse: boolean | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const GQL = gql`
-      mutation UpdateTeam(
-        $id: ID!
-        $name: String!
-        $intro: String
-        $prompt: String
-        $outro: String
-        $podcastEnabled: Boolean
-        $podcastSlug: String
-        $podcastDescription: String
-        $podcastOwnerName: String
-        $podcastOwnerEmail: String
-        $podcastOwnerLink: String
-        $tgBotToken: String
-        $tgChannelId: String
-        $refreshTgResponse: Boolean
-      ) {
-        updateTeam(
-          id: $id
-          name: $name
-          intro: $intro
-          prompt: $prompt
-          outro: $outro
-          podcastEnabled: $podcastEnabled
-          podcastSlug: $podcastSlug
-          podcastDescription: $podcastDescription
-          podcastOwnerName: $podcastOwnerName
-          podcastOwnerEmail: $podcastOwnerEmail
-          podcastOwnerLink: $podcastOwnerLink
-          tgBotToken: $tgBotToken
-          tgChannelId: $tgChannelId
-          refreshTgResponse: $refreshTgResponse
-        ) {
+      mutation UpdateTeam($teamId: UUID!, $name: String!) {
+        updateTeam(teamId: $teamId, name: $name) {
           success
           message
           team {
             id
             name
-            intro
-            prompt
-            outro
-            podcastEnabled
-            podcastSlug
-            podcastUrl
-            podcastDescription
-            podcastOwnerName
-            podcastOwnerEmail
-            podcastOwnerLink
-            tgChannelId
-            tgResponse
             members {
               user {
                 id
@@ -208,18 +154,6 @@ export class TeamsService extends BaseService {
       variables: {
         id,
         name,
-        intro,
-        prompt,
-        outro,
-        podcastEnabled,
-        podcastSlug,
-        podcastDescription,
-        podcastOwnerName,
-        podcastOwnerEmail,
-        podcastOwnerLink,
-        tgBotToken,
-        tgChannelId,
-        refreshTgResponse,
       },
     }).pipe(
       map((data) => {
@@ -231,29 +165,12 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getTeamById(id: string): Observable<TeamsResult> {
+  getTeamById(teamId: string): Observable<TeamsResult> {
     const GET_TEAM_BY_ID = gql`
-      query GetTeamById($id: ID!) {
-        team(id: $id) {
+      query GetTeamById($teamId: UUID!) {
+        teams(teamId: $teamId) {
           id
           name
-          intro
-          prompt
-          outro
-          podcastEnabled
-          podcastSlug
-          podcastUrl
-          podcastImageUrl
-          podcastDescription
-          podcastOwnerName
-          podcastOwnerEmail
-          podcastOwnerLink
-          tgChannelId
-          tgResponse
-          rssFeeds {
-            id
-            url
-          }
           members {
             user {
               id
@@ -266,27 +183,27 @@ export class TeamsService extends BaseService {
     `;
 
     interface Response {
-      team: TeamsResult;
+      teams: TeamsResult[];
     }
 
     return this.query<Response>({
       query: GET_TEAM_BY_ID,
-      variables: { id },
+      variables: { teamId },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        if (!data.team) {
+        if (!data.teams || data.teams.length !== 1) {
           throw new Error('Team data is missing');
         }
-        return data.team;
+        return data.teams[0];
       }),
     );
   }
 
-  getMyTeams(): Observable<TeamsResult[]> {
+  getTeams(): Observable<TeamsResult[]> {
     const GQL = gql`
       query GetMyTeams {
-        myTeams {
+        teams {
           id
           name
           members {
@@ -301,18 +218,18 @@ export class TeamsService extends BaseService {
     `;
 
     interface Response {
-      myTeams: TeamsResult[];
+      teams: TeamsResult[];
     }
 
     return this.query<Response>({
       query: GQL,
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.myTeams));
+    }).pipe(map((data) => data.teams));
   }
 
   upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {
     const GQL = gql`
-      mutation UpsertUserToTeam($teamId: ID!, $userId: ID!, $role: String!) {
+      mutation UpsertUserToTeam($teamId: UUID!, $userId: UUID!, $role: String!) {
         upsertUserToTeam(teamId: $teamId, userId: $userId, role: $role) {
           success
           message
@@ -354,7 +271,7 @@ export class TeamsService extends BaseService {
 
   removeUserFromTeam(teamId: string, userId: string): Observable<TeamsResult> {
     const REMOVE_USER_FROM_TEAM = gql`
-      mutation RemoveUserFromTeam($teamId: ID!, $userId: ID!) {
+      mutation RemoveUserFromTeam($teamId: UUID!, $userId: UUID!) {
         removeUserFromTeam(teamId: $teamId, userId: $userId) {
           success
           message
@@ -394,12 +311,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getAllUsers(): Observable<User[]> {
+  users(query: string): Observable<User[]> {
     const GQL = gql`
-      query GetAllUsers {
-        getAllUsers {
-          success
-          message
+      query GetUsers($query: String!) {
+        users(query: $query) {
           results {
             id
             username
@@ -409,7 +324,7 @@ export class TeamsService extends BaseService {
     `;
 
     interface Response {
-      getAllUsers: {
+      users: {
         success: boolean;
         message: string;
         results: User[];
@@ -418,19 +333,20 @@ export class TeamsService extends BaseService {
 
     return this.query<Response>({
       query: GQL,
+      variables: { query },
     }).pipe(
       map((data) => {
-        if (!data.getAllUsers.success) {
-          throw new Error(data.getAllUsers.message);
+        if (!data.users.success) {
+          throw new Error(data.users.message);
         }
-        return data.getAllUsers.results;
+        return data.users.results;
       }),
     );
   }
 
   deleteTeam(teamId: string, confirm: string) {
     const DELETE_TEAM = gql`
-      mutation DeleteTeam($teamId: ID!, $confirm: String!) {
+      mutation DeleteTeam($teamId: UUID!, $confirm: String!) {
         deleteTeam(teamId: $teamId, confirm: $confirm) {
           success
           message
@@ -458,10 +374,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getDeleteUserResults() {
+  deleteUserResults() {
     const GQL = gql`
       query GetDeleteUserResults {
-        getDeleteUserResults {
+        deleteUserResults {
           deletingTeams {
             id
             name
@@ -475,7 +391,7 @@ export class TeamsService extends BaseService {
     `;
 
     interface Response {
-      getDeleteUserResults: {
+      deleteUserResults: {
         deletingTeams: TeamsResult[];
         leavingTeams: TeamsResult[];
       };
@@ -486,7 +402,7 @@ export class TeamsService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        return data.getDeleteUserResults;
+        return data.deleteUserResults;
       }),
     );
   }
@@ -505,24 +421,24 @@ export class TeamsService extends BaseService {
           teams {
             id
             name
+          }
+          podcasts {
+            id
+            name
             intro
             prompt
             outro
-            podcastEnabled
-            podcastSlug
-            podcastUrl
+            enabled
+            slug
+            url
             tgResponse
             tgChannelId
-          }
-          articles {
-            title
-            content
-            date
-            telegramDate
-            podcastDate
-            team {
-              id
-              name
+            episodes {
+              title
+              content
+              date
+              telegramDate
+              podcastDate
             }
           }
           jobs {
@@ -544,7 +460,7 @@ export class TeamsService extends BaseService {
         email: string;
         settings: { key: string; value: string }[];
         teams: TeamsResult[];
-        articles: Article[];
+        episodes: Episode[];
         jobs: Job[];
       };
     }
@@ -560,80 +476,77 @@ export class TeamsService extends BaseService {
     );
   }
 
-  uploadPodcastImage(
-    id: string,
-    podcastImage: File,
-  ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
-    const GQL = gql`
-      mutation UpdateTeamPodcastImage($id: ID!, $podcastImage: Upload!) {
-        updateTeam(id: $id, podcastImage: $podcastImage) {
-          success
-          message
-          team {
-            id
-            name
-            podcastImageUrl
-          }
-        }
-      }
-    `;
+  // uploadPodcastImage(id: string, image: File): Observable<{ success: boolean; message: string; team: TeamsResult }> {
+  //   const GQL = gql`
+  //     mutation UpdateTeamPodcastImage($id: ID!, $image: Upload!) {
+  //       updateTeam(teamId: $id, image: $image) {
+  //         success
+  //         message
+  //         team {
+  //           id
+  //           name
+  //           imageUrl
+  //         }
+  //       }
+  //     }
+  //   `;
+  //
+  //   return this.apollo
+  //     .mutate({
+  //       mutation: GQL,
+  //       variables: {
+  //         id,
+  //         image,
+  //       },
+  //       context: {
+  //         useMultipart: true,
+  //       },
+  //     })
+  //     .pipe(
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       map((result: any) => {
+  //         if (!result.data.updateTeam.success) {
+  //           throw new Error(result.data.updateTeam.message);
+  //         }
+  //         return result.data.updateTeam;
+  //       }),
+  //     );
+  // }
 
-    return this.apollo
-      .mutate({
-        mutation: GQL,
-        variables: {
-          id,
-          podcastImage,
-        },
-        context: {
-          useMultipart: true,
-        },
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (!result.data.updateTeam.success) {
-            throw new Error(result.data.updateTeam.message);
-          }
-          return result.data.updateTeam;
-        }),
-      );
-  }
-
-  setTeamRssFeeds(teamId: string, rssFeedIds: string[]) {
-    const GQL = gql`
-      mutation SetTeamRssFeeds($teamId: ID!, $rssFeedIds: [ID!]!) {
-        setTeamRssFeeds(teamId: $teamId, rssFeedIds: $rssFeedIds) {
-          team {
-            id
-            rssFeeds {
-              id
-              url
-            }
-          }
-        }
-      }
-    `;
-
-    interface Response {
-      setTeamRssFeeds: {
-        team: TeamsResult;
-      };
-    }
-
-    return this.mutate<Response>({
-      mutation: GQL,
-      variables: {
-        teamId,
-        rssFeedIds,
-      },
-    }).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((result: any) => {
-        return result.setTeamRssFeeds;
-      }),
-    );
-  }
+  // setTeamRssFeeds(teamId: string, rssFeedIds: string[]) {
+  //   const GQL = gql`
+  //     mutation SetTeamRssFeeds($teamId: ID!, $rssFeedIds: [ID!]!) {
+  //       setTeamRssFeeds(teamId: $teamId, rssFeedIds: $rssFeedIds) {
+  //         team {
+  //           id
+  //           rssFeeds {
+  //             id
+  //             url
+  //           }
+  //         }
+  //       }
+  //     }
+  //   `;
+  //
+  //   interface Response {
+  //     setTeamRssFeeds: {
+  //       team: TeamsResult;
+  //     };
+  //   }
+  //
+  //   return this.mutate<Response>({
+  //     mutation: GQL,
+  //     variables: {
+  //       teamId,
+  //       rssFeedIds,
+  //     },
+  //   }).pipe(
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     map((result: any) => {
+  //       return result.setTeamRssFeeds;
+  //     }),
+  //   );
+  // }
 
   createRssFeed(url: string) {
     const GQL = gql`

@@ -1,14 +1,14 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 
-import { BonusService } from './bonus.service';
+import { PodcastsService } from './podcasts.service';
 
-describe('BonusService', () => {
-  let service: BonusService;
+describe('PodcastsService', () => {
+  let service: PodcastsService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(BonusService);
+    service = TestBed.inject(PodcastsService);
   });
 
   it('should be created', () => {

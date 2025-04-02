@@ -89,7 +89,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   loadJobs() {
     this.subscriptions.add(
       this.jobService
-        .getUserJobs([], [], [], this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
+        .getJobs([], [], [], this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
         .subscribe({
           next: (data) => {
             this.jobs = data.jobs;

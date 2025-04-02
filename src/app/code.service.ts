@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 
-export interface BonusCode {
+export interface Code {
   id: string;
   code: string;
   creditAmount: number;
@@ -24,7 +24,7 @@ export interface BonusCode {
 @Injectable({
   providedIn: 'root',
 })
-export class BonusService extends BaseService {
+export class CodeService extends BaseService {
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
@@ -32,10 +32,10 @@ export class BonusService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getBonusCodes(activeOnly = false, page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'ASC') {
+  codes(activeOnly = false, page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'ASC') {
     interface Response {
-      getBonusCodes: {
-        bonusCodes: BonusCode[];
+      codes: {
+        codes: Code[];
         totalRecords: number;
         totalPages: number;
         currentPage: number;
@@ -48,12 +48,12 @@ export class BonusService extends BaseService {
       query: GET_BONUS_CODES,
       variables: { page, pageSize, orderBy, direction, activeOnly },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.getBonusCodes));
+    }).pipe(map((data) => data.codes));
   }
 
-  createBonusCode(code: string, creditAmount: number) {
+  createCode(code: string, creditAmount: number) {
     interface Response {
-      createBonusCode: {
+      createCode: {
         success: boolean;
         message: string;
       };
@@ -64,17 +64,17 @@ export class BonusService extends BaseService {
       variables: { code, creditAmount },
     }).pipe(
       map((data) => {
-        if (!data.createBonusCode.success) {
-          throw new Error(data.createBonusCode.message);
+        if (!data.createCode.success) {
+          throw new Error(data.createCode.message);
         }
-        return data.createBonusCode;
+        return data.createCode;
       }),
     );
   }
 
-  redeemBonusCode(code: string) {
+  redeemCode(code: string) {
     interface Response {
-      redeemBonusCode: {
+      redeemCode: {
         success: boolean;
         message: string;
       };
@@ -85,19 +85,19 @@ export class BonusService extends BaseService {
       variables: { code },
     }).pipe(
       map((data) => {
-        if (!data.redeemBonusCode.success) {
-          throw new Error(data.redeemBonusCode.message);
+        if (!data.redeemCode.success) {
+          throw new Error(data.redeemCode.message);
         }
-        return data.redeemBonusCode;
+        return data.redeemCode;
       }),
     );
   }
 }
 
 const GET_BONUS_CODES = gql`
-  query GetBonusCodes($page: Int!, $pageSize: Int!, $activeOnly: Boolean!) {
-    getBonusCodes(page: $page, pageSize: $pageSize, activeOnly: $activeOnly) {
-      bonusCodes {
+  query GetCodes($page: Int!, $pageSize: Int!, $activeOnly: Boolean!) {
+    codes(page: $page, pageSize: $pageSize, activeOnly: $activeOnly) {
+      codes {
         id
         code
         creditAmount
@@ -121,8 +121,8 @@ const GET_BONUS_CODES = gql`
 `;
 
 const CREATE_BONUS_CODE = gql`
-  mutation CreateBonusCode($code: String!, $creditAmount: Int!) {
-    createBonusCode(code: $code, creditAmount: $creditAmount) {
+  mutation CreateCode($code: String!, $creditAmount: Int!) {
+    createCode(code: $code, creditAmount: $creditAmount) {
       success
       message
     }
@@ -130,8 +130,8 @@ const CREATE_BONUS_CODE = gql`
 `;
 
 const REDEEM_BONUS_CODE = gql`
-  mutation RedeemBonusCode($code: String!) {
-    redeemBonusCode(code: $code) {
+  mutation RedeemCode($code: String!) {
+    redeemCode(code: $code) {
       success
       message
     }

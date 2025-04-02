@@ -7,7 +7,7 @@ import { DatePipe, SlicePipe } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { Article, ArticleService } from '../article.service';
+import { Episode, EpisodeService } from '../episode.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -28,12 +28,11 @@ import {
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { MatDivider } from '@angular/material/divider';
-import { TeamsService } from '../teams.service';
-import { TeamsResult } from '../teams-list/teams-list.component';
+import { PodcastsService } from '../podcasts.service';
+import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
 
 @Component({
-  selector: 'app-articles-list',
+  selector: 'app-episodes-list',
   standalone: true,
   imports: [
     MatPaginatorModule,
@@ -62,26 +61,25 @@ import { TeamsResult } from '../teams-list/teams-list.component';
     MatFormField,
     MatSelect,
     MatOption,
-    MatDivider,
     MatCardContent,
   ],
-  templateUrl: './articles-list.component.html',
-  styleUrl: './articles-list.component.scss',
+  templateUrl: './episodes-list.component.html',
+  styleUrl: './episodes-list.component.scss',
 })
-export class ArticlesListComponent implements OnInit, OnDestroy {
+export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
-  articles: Article[] = [];
-  dataSource = new MatTableDataSource(this.articles);
-  displayedColumns: string[] = ['date', 'title', 'team'];
-  totalArticles = 0;
+  episodes: Episode[] = [];
+  dataSource = new MatTableDataSource(this.episodes);
+  displayedColumns: string[] = ['date', 'title', 'podcast'];
+  totalEpisodes = 0;
   pageSize = 10;
   currentPage = 0;
   sortDirection = 'DESC';
   sortActive = 'date';
-  loadingArticles = false;
-  loadingTeams = false;
-  selectedTeam: string | null = null;
-  teams: TeamsResult[] = [];
+  loadingEpisodes = false;
+  loadingPodcasts = false;
+  selectedPodcast: string | null = null;
+  podcasts: PodcastsResult[] = [];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -91,57 +89,57 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     private router: Router,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private articleService: ArticleService,
-    private teamsService: TeamsService,
+    private episodeService: EpisodeService,
+    private podcastsService: PodcastsService,
   ) {}
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    this.loadArticles();
-    this.loadTeams();
+    this.loadEpisodes();
+    this.loadPodcasts();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
-  loadArticles() {
-    this.loadingArticles = true;
+  loadEpisodes() {
+    this.loadingEpisodes = true;
     this.subscriptions.add(
-      this.articleService
-        .getArticles(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedTeam)
+      this.episodeService
+        .episodes(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedPodcast)
         .subscribe({
           next: (data) => {
-            this.articles = data.articles;
-            this.dataSource.data = this.articles;
-            this.totalArticles = data.totalRecords;
-            this.loadingArticles = false;
+            this.episodes = data.episodes;
+            this.dataSource.data = this.episodes;
+            this.totalEpisodes = data.totalRecords;
+            this.loadingEpisodes = false;
           },
           error: (error) => {
-            this.messageService.error('Failed to load articles: ' + error.toString());
-            this.loadingArticles = false;
+            this.messageService.error('Failed to load episodes: ' + error.toString());
+            this.loadingEpisodes = false;
           },
         }),
     );
   }
 
-  loadTeams() {
-    this.loadingTeams = true;
+  loadPodcasts() {
+    this.loadingPodcasts = true;
 
     this.subscriptions.add(
-      this.teamsService.getMyTeams().subscribe({
-        next: (teams: TeamsResult[]) => {
-          this.teams = teams;
-          this.loadingTeams = false;
+      this.podcastsService.getPodcasts().subscribe({
+        next: (podcasts: PodcastsResult[]) => {
+          this.podcasts = podcasts;
+          this.loadingPodcasts = false;
         },
         error: (err: { message: string }) => {
-          this.loadingTeams = false;
-          this.messageService.error(`Failed to retrieve teams data: ${err.message}`);
+          this.loadingPodcasts = false;
+          this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
         },
         complete: () => {
-          this.loadingTeams = false;
+          this.loadingPodcasts = false;
         },
       }),
     );
@@ -150,16 +148,16 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   sortChange(sortState: Sort) {
     this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
-    this.loadArticles();
+    this.loadEpisodes();
   }
 
   onPageChange(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
-    this.loadArticles();
+    this.loadEpisodes();
   }
 
-  viewArticle(id: string) {
-    this.router.navigate(['/article', id]);
+  viewEpisode(id: string) {
+    this.router.navigate(['/episode', id]);
   }
 }

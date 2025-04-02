@@ -35,7 +35,7 @@ export interface UserTransaction {
 }
 
 interface GetUserCreditsResponse {
-  getUserCredits: number;
+  credits: number;
 }
 
 @Injectable({
@@ -78,7 +78,7 @@ export class CreditService extends BaseService implements OnDestroy {
   private initializeUserCreditsQuery() {
     const GET_USER_CREDITS = gql`
       query GetUserCredits {
-        getUserCredits
+        credits
       }
     `;
 
@@ -89,7 +89,7 @@ export class CreditService extends BaseService implements OnDestroy {
     this.userCreditSubscription = this.queryRef.valueChanges
       .pipe(
         map(mapQueryResult),
-        map((data) => data.getUserCredits),
+        map((data) => data.credits),
         catchError((error) => this.errorHandler.handleError(error)),
       )
       .subscribe({
@@ -119,10 +119,10 @@ export class CreditService extends BaseService implements OnDestroy {
     this.queryRef.refetch();
   }
 
-  getUserTransactions(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
+  transactions(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
     const GET_USER_TRANSACTIONS = gql`
       query GetUserTransactions($page: Int!, $pageSize: Int!, $orderBy: String, $direction: SortDirection) {
-        getUserTransactions(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
+        transactions(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
           totalRecords
           totalPages
           currentPage
@@ -144,7 +144,7 @@ export class CreditService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserTransactions: {
+      transactions: {
         totalRecords: number;
         totalPages: number;
         currentPage: number;
@@ -158,13 +158,13 @@ export class CreditService extends BaseService implements OnDestroy {
       query: GET_USER_TRANSACTIONS,
       variables: { page, pageSize, orderBy, direction },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.getUserTransactions));
+    }).pipe(map((data) => data.transactions));
   }
 
-  getUserOrders(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
+  orders(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
     const GET_USER_ORDERS = gql`
       query GetUserOrders($page: Int!, $pageSize: Int!, $orderBy: String, $direction: SortDirection) {
-        getUserOrders(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
+        orders(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
           totalRecords
           totalPages
           currentPage
@@ -196,7 +196,7 @@ export class CreditService extends BaseService implements OnDestroy {
     `;
 
     interface Response {
-      getUserOrders: {
+      orders: {
         totalRecords: number;
         totalPages: number;
         currentPage: number;
@@ -212,8 +212,8 @@ export class CreditService extends BaseService implements OnDestroy {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        this.userOrdersSignal.set(data.getUserOrders.orders);
-        return data.getUserOrders;
+        this.userOrdersSignal.set(data.orders.orders);
+        return data.orders;
       }),
     );
   }

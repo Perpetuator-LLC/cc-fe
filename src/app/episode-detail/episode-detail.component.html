@@ -1,25 +1,25 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <h1>Article Details</h1>
+  <h1>Episode Details</h1>
 </ng-template>
 
 <app-message></app-message>
 
-<div class="article-container">
+<div class="episode-container">
   <app-job-status-bar />
   <mat-card>
     <mat-card-content class="form-container">
-      <form [formGroup]="articleForm" (ngSubmit)="updateArticle()">
+      <form [formGroup]="episodeForm" (ngSubmit)="updateEpisode()">
         <div class="audio-container">
-          <a mat-button [routerLink]="['/team', articleForm.get('team.id')?.value]">
+          <a mat-button [routerLink]="['/podcast', episodeForm.get('podcast.id')?.value]">
             <mat-icon>group</mat-icon>
-            {{ articleForm.get('team.name')?.value }}
+            {{ episodeForm.get('podcast.name')?.value }}
           </a>
-          <button mat-raised-button color="primary" class="article-control">
+          <button mat-raised-button color="primary" class="episode-control">
             <mat-icon>save</mat-icon>
             Update
           </button>
-          <button mat-raised-button color="primary" type="button" class="article-control" (click)="generateAudio()">
+          <button mat-raised-button color="primary" type="button" class="episode-control" (click)="generateAudio()">
             <mat-icon>mic</mat-icon>
             Generate Audio
           </button>
@@ -27,7 +27,7 @@
             mat-raised-button
             color="primary"
             type="button"
-            class="article-control"
+            class="episode-control"
             [hidden]="!audioSrc"
             (click)="downloadAudio()"
           >
@@ -38,7 +38,7 @@
             mat-raised-button
             color="primary"
             type="button"
-            class="article-control"
+            class="episode-control"
             [hidden]="!audioSrc"
             (click)="publishAudio()"
           >
@@ -55,30 +55,30 @@
             <audio controls [src]="audioSrc"></audio>
           }
         </div>
-        <mat-form-field class="full-width article-content">
+        <mat-form-field class="full-width episode-content">
           <mat-label>Title</mat-label>
           <input matInput formControlName="title" />
         </mat-form-field>
-        <mat-form-field class="full-width article-content">
+        <mat-form-field class="full-width episode-content">
           <mat-label>Content</mat-label>
           <textarea matInput formControlName="content"></textarea>
         </mat-form-field>
         <div>
           Word count: {{ wordCount }}
           | Generated on:
-          <span [matTooltip]="articleForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
-            {{ articleForm.get('date')?.value | date: 'short' : 'local' }}
+          <span [matTooltip]="episodeForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
+            {{ episodeForm.get('date')?.value | date: 'short' : 'local' }}
           </span>
-          @if (articleForm.get('podcastDate')?.value) {
+          @if (episodeForm.get('podcastDate')?.value) {
             | Published to Podcast on:
-            <span [matTooltip]="articleForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
-              {{ articleForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+            <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+              {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
             </span>
           }
-          @if (articleForm.get('telegramDate')?.value) {
+          @if (episodeForm.get('telegramDate')?.value) {
             | Published to Telegram on:
-            <span [matTooltip]="articleForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
-              {{ articleForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+            <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+              {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
             </span>
           }
         </div>
@@ -88,12 +88,12 @@
 
         <mat-divider></mat-divider>
 
-        <h3>Related Articles</h3>
+        <h3>Related Episodes</h3>
         <mat-list>
-          @for (relatedArticle of articleForm.get('newsSummaries')?.value; track relatedArticle.id) {
+          @for (relatedEpisode of episodeForm.get('news')?.value; track relatedEpisode.id) {
             <mat-list-item>
-              <a matLine href="{{ relatedArticle.url }}" target="_blank">
-                {{ relatedArticle.title }}
+              <a matLine href="{{ relatedEpisode.url }}" target="_blank">
+                {{ relatedEpisode.title }}
               </a>
             </mat-list-item>
           }

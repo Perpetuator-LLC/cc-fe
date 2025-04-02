@@ -1,93 +1,62 @@
 type Query {
-  getNews(teamId: ID!, hours: Int = 24): NewsData
-  getArticles(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC, teamId: ID): PaginatedArticles
-  getArticle(id: ID!): ArticleType
-  getUserSettings(keys: [String]!): UserSettingsData
-  getAllUsers: UserList
-  getUserCookieConsents: [UserCookieConsentType]
-  myTeams: [TeamType]
-  team(id: ID!): TeamType
-  rssFeeds: [RssFeedType]
-  getUserDetails: UserDetails
-  getEmailChangePending: EmailChangeRequestType
-  getUserJobs(ids: [UUID], statuses: [String], jobTypes: [String], page: Int, pageSize: Int, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
-  getDeleteUserResults: DeleteUserResults
   userDataExport(confirm: String!): UserDataExport
-  getUserCredits: Int
-  getUserTransactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
-  getUserOrders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
-  getBonusCodes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedBonusCodeType
+  credits: Int
+  transactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
+  orders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
+  codes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedCodeType
+  user: UserDetails
+  userSettings(keys: [String]!): UserSettingsData
+  users(query: String!): UserList
+  userCookieConsents: [UserCookieConsentType]
+  emailChangePending: EmailChangeRequestType
+  episodes(episodeId: ID, podcastId: ID, page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedEpisodes
+  news(podcastId: ID!, hours: Int = 24): NewsData
+  jobs(jobIds: [UUID], jobStatuses: [String], jobTypes: [String], page: Int = 1, pageSize: Int = 10, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
+  podcasts(podcastId: ID): [PodcastType!]
+  rssFeeds: [RssFeedType!]
+  teams(teamId: UUID): [TeamType]
+  deleteUserResults: DeleteUserResults
 }
 
-type NewsData {
-  results: [NewsResult]
-}
-
-type NewsResult {
+type UserDataExport {
   id: ID
-  title: String
-  description: String
-  url: String
-  publishedAt: DateTime
-  source: String
-  summary: String
-  content: String
+  username: String
+  email: String
+  settings: [UserSettingData]
+  podcasts: [PodcastType]
+  teams: [TeamType]
+  episodes: [EpisodeType]
+  jobs: [JobData]
+  transactions: [CreditTransactionType]
+  orders: [OrderType]
 }
 
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
-
-type PaginatedArticles {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  articles: [ArticleType]
+type UserSettingData {
+  key: String
+  value: String
 }
 
-type ArticleType {
-  id: ID!
-  title: String!
-  date: DateTime!
-  audioFile: String
-  audioSeconds: Int
-  content: String!
-  version: Int!
-  team: TeamType
-  isLive: Boolean!
-  podcastDate: DateTime
-  telegramDate: DateTime
-  podcastEpisodeGuid: UUID!
-  audioUrl: String
-  newsSummaries: [NewsResult]
-}
-
-type TeamType {
+type PodcastType {
   id: ID!
   name: String!
   intro: String!
   prompt: String!
   outro: String!
-  podcastSlug: String
-  podcastEnabled: Boolean!
-  podcastImage: String
-  podcastDescription: String
-  podcastOwnerName: String
-  podcastOwnerEmail: String
-  podcastOwnerLink: String
-  podcastGuid: UUID!
+  slug: String
+  enabled: Boolean!
+  image: String
+  description: String
+  ownerName: String
+  ownerEmail: String
+  ownerLink: String
+  guid: UUID!
   tgChannelId: String
   tgResponse: String
   rssFeeds: [RssFeedType!]!
-  articles: [ArticleType!]!
-  podcastUrl: String
-  podcastImageUrl: String
-  members: [TeamMembershipType]
+  episodes: [EpisodeType!]!
+  url: String
+  imageUrl: String
+  team: TeamType
 }
 
 """
@@ -101,6 +70,48 @@ type RssFeedType {
   url: String!
 }
 
+type EpisodeType {
+  id: ID!
+  title: String!
+  description: String!
+  date: DateTime!
+  audioFile: String
+  audioSeconds: Int
+  content: String!
+  version: Int!
+  news: [NewsResult]
+  podcast: PodcastType!
+  isLive: Boolean!
+  podcastDate: DateTime
+  telegramDate: DateTime
+  podcastEpisodeGuid: UUID!
+  audioUrl: String
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type NewsResult {
+  id: ID
+  title: String
+  description: String
+  url: String
+  publishedAt: DateTime
+  source: String
+  summary: String
+  content: String
+}
+
+type TeamType {
+  id: UUID!
+  name: String!
+  members: [TeamMembershipType]
+}
+
 type TeamMembershipType {
   user: UserType
   role: String
@@ -109,56 +120,6 @@ type TeamMembershipType {
 type UserType {
   id: ID
   username: String
-}
-
-enum SortDirection {
-  ASC
-  DESC
-}
-
-type UserSettingsData {
-  success: Boolean
-  message: String
-  results: [UserSettingData]
-}
-
-type UserSettingData {
-  key: String
-  value: String
-}
-
-type UserList {
-  success: Boolean
-  message: String
-  results: [UserType]
-}
-
-type UserCookieConsentType {
-  version: String
-  accepted: Boolean
-  date: DateTime
-}
-
-type UserDetails {
-  id: ID
-  username: String
-  email: String
-  permissions: [String]
-}
-
-type EmailChangeRequestType {
-  newEmail: String
-  verified: Boolean
-  canceled: Boolean
-}
-
-type PaginatedJobStatus {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  jobs: [JobData]
 }
 
 type JobData {
@@ -185,7 +146,7 @@ scalar JSONString
 
 type CreditTransactionType {
   id: ID!
-  originalUserId: Int
+  originalUserId: UUID
   description: String!
   creditAmount: Int!
   createdAt: DateTime!
@@ -196,7 +157,7 @@ type CreditTransactionType {
 
 type OrderType {
   id: ID!
-  originalUserId: Int
+  originalUserId: UUID
   sessionId: String
   amount: Int!
   receiptUrl: String
@@ -220,22 +181,6 @@ enum ApiOrderStatusChoices {
   CANCELED
 }
 
-type DeleteUserResults {
-  deletingTeams: [TeamType]
-  leavingTeams: [TeamType]
-}
-
-type UserDataExport {
-  id: ID
-  username: String
-  email: String
-  settings: [UserSettingData]
-  teams: [TeamType]
-  articles: [ArticleType]
-  jobs: [JobData]
-  transactions: [CreditTransactionType]
-}
-
 type PaginatedCreditTransactionType {
   totalRecords: Int
   totalPages: Int
@@ -243,6 +188,11 @@ type PaginatedCreditTransactionType {
   hasNext: Boolean
   hasPrevious: Boolean
   transactions: [CreditTransactionType]
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type PaginatedOrderType {
@@ -254,8 +204,8 @@ type PaginatedOrderType {
   orders: [OrderType]
 }
 
-type PaginatedBonusCodeType {
-  bonusCodes: [BonusCodeType]
+type PaginatedCodeType {
+  codes: [CodeType]
   totalRecords: Int
   totalPages: Int
   currentPage: Int
@@ -263,7 +213,7 @@ type PaginatedBonusCodeType {
   hasPrevious: Boolean
 }
 
-type BonusCodeType {
+type CodeType {
   id: ID!
   code: String!
   creator: UserType
@@ -273,90 +223,145 @@ type BonusCodeType {
   creditAmount: Int!
 }
 
+type UserDetails {
+  id: ID
+  username: String
+  email: String
+  permissions: [String]
+}
+
+type UserSettingsData {
+  success: Boolean
+  message: String
+  results: [UserSettingData]
+}
+
+type UserList {
+  results: [UserType]
+}
+
+type UserCookieConsentType {
+  version: String
+  accepted: Boolean
+  date: DateTime
+}
+
+type EmailChangeRequestType {
+  newEmail: String
+  verified: Boolean
+  canceled: Boolean
+}
+
+type PaginatedEpisodes {
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  episodes: [EpisodeType]
+}
+
+type NewsData {
+  results: [NewsResult]
+}
+
+type PaginatedJobStatus {
+  totalRecords: Int
+  totalPages: Int
+  currentPage: Int
+  hasNext: Boolean
+  hasPrevious: Boolean
+  jobs: [JobData]
+}
+
+type DeleteUserResults {
+  deletingTeams: [TeamType]
+  leavingTeams: [TeamType]
+}
+
 type Mutation {
-  """Redeem a bonus code for credits."""
-  redeemBonusCode(code: String!): RedeemBonusCode
-
   """Create a new bonus code that can be redeemed for credits."""
-  createBonusCode(code: String!, creditAmount: Int!): CreateBonusCode
+  createCode(code: String!, creditAmount: Int!): CreateCode
 
-  """Cancel a pending order. This will cancel the Stripe session."""
-  cancelOrder(orderId: String!): CancelOrder
+  """Redeem a bonus code for credits."""
+  redeemCode(code: String!): RedeemCode
 
   """
   Refresh the status of a pending order. This will check the Stripe session status and update the order.
   """
   refreshOrder(orderId: String!): RefreshOrder
 
+  """Cancel a pending order. This will cancel the Stripe session."""
+  cancelOrder(orderId: String!): CancelOrder
+
   """
   Create a new Stripe Checkout session for a user to purchase credits.
   Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
   """
   createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
-
-  """
-  Cancel a pending email change request from a logged-in user.
-  There is a non-GraphQL API that is not authenticated that can cancel email change requests
-  which is meant to be canceled with a link sent to an email.
-  """
-  cancelEmailChange: CancelEmailChange
-  resendEmailChange: ResendEmailChange
-  removeUserFromTeam(teamId: ID!, userId: ID!): RemoveUserFromTeam
-  upsertUserToTeam(role: String!, teamId: ID!, userId: ID!): UpsertUserToTeam
-  deleteTeam(confirm: String!, teamId: ID!): DeleteTeam
-  updateTeam(id: ID!, intro: String, name: String, outro: String, podcastDescription: String, podcastEnabled: Boolean, podcastImage: Upload, podcastOwnerEmail: String, podcastOwnerLink: String, podcastOwnerName: String, podcastSlug: String, prompt: String, refreshTgResponse: Boolean, tgBotToken: String, tgChannelId: String, tgResponse: String): UpdateTeam
-  createTeam(name: String!): CreateTeam
-  changePassword(password: String!): ChangePassword
-  deleteUser(confirm: String!): DeleteUser
-  updateUser(email: String!, username: String!): UpdateUser
-  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
-  deleteJobs(ids: [UUID]!): DeleteJobs
-  retryJobs(ids: [UUID]!): RetryJobs
+  processStripeCharge(amount: Int!, token: String!): ProcessStripeCharge
   updateUserSetting(key: String!, value: String!): UpdateUserSetting
-  publishArticleAudio(articleId: ID!): PublishArticleAudio
-  updateArticleAudio(articleId: ID!): UpdateArticleAudio
-  updateArticle(content: String, id: ID!, isLive: Boolean, title: String): UpdateArticle
-  createArticleAudioChain(newsIds: [ID]!, teamId: ID!): CreateArticleAudioChain
-  createArticleChain(newsIds: [ID]!, teamId: ID!): CreateArticleChain
-  createArticle(ids: [Int]!, teamId: ID!): CreateArticle
-  summarizeNews(force: Boolean = false, ids: [ID]!, teamId: ID!): SummarizeNews
-  extractNews(ids: [ID]!, teamId: ID!): ExtractNews
-  fetchNews(teamId: ID!): FetchNews
+  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
+  updateUser(email: String!, username: String!): UpdateUser
+  deleteUser(confirm: String!): DeleteUser
+  changePassword(password: String!): ChangePassword
+  resendEmailChange: ResendEmailChange
+  cancelEmailChange: CancelEmailChange
+  createEpisode(newsIds: [Int]!, podcastId: ID!): CreateEpisode
+  createEpisodeChain(newsIds: [ID]!, podcastId: ID!): CreateEpisodeChain
+  createEpisodeAudioChain(newsIds: [ID]!, podcastId: ID!): CreateEpisodeAudioChain
+  updateEpisode(content: String, episodeId: ID!, isLive: Boolean, title: String): UpdateEpisode
+  updateEpisodeAudio(episodeId: ID!): UpdateEpisodeAudio
+  publishEpisodeAudio(episodeId: ID!): PublishEpisodeAudio
+  fetchNews(podcastId: ID!): FetchNews
+  extractNews(newsIds: [ID]!, podcastId: ID!): ExtractNews
+  summarizeNews(force: Boolean = false, newsIds: [ID]!, podcastId: ID!): SummarizeNews
+  deleteJobs(jobIds: [UUID]!): DeleteJobs
+  retryJobs(jobIds: [UUID]!): RetryJobs
+  createPodcast(name: String!): CreatePodcast
+  updatePodcast(description: String, enabled: Boolean, id: ID!, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, prompt: String, refreshTgResponse: Boolean, slug: String, tgBotToken: String, tgChannelId: String): UpdatePodcast
+  deletePodcast(confirm: String!, podcastId: ID!): DeletePodcast
 
   """
-  Set the RSS feeds for a team. Theses feeds will be used to fetch news articles.
+  Set the RSS feeds for a podcast. Theses feeds will be used to fetch news episodes.
   """
-  setTeamRssFeeds(rssFeedIds: [ID]!, teamId: ID!): SetTeamRssFeeds
+  updatePodcastRssFeeds(podcastId: ID!, rssFeedIds: [ID]!): UpdatePodcastRssFeeds
 
   """
   Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
   """
   createRssFeed(url: String!): CreateRssFeed
-}
-
-"""Redeem a bonus code for credits."""
-type RedeemBonusCode {
-  success: Boolean
-  message: String
+  createTeam(name: String!): CreateTeam
+  deleteTeam(confirm: String!, teamId: UUID!): DeleteTeam
+  updateTeam(name: String, teamId: UUID!): UpdateTeam
+  upsertUser(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
+  removeUserFromTeam(teamId: UUID!, userId: UUID!): RemoveUserFromTeam
+  upsertUserToTeam(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
 }
 
 """Create a new bonus code that can be redeemed for credits."""
-type CreateBonusCode {
+type CreateCode {
   success: Boolean
   message: String
 }
 
-"""Cancel a pending order. This will cancel the Stripe session."""
-type CancelOrder {
+"""Redeem a bonus code for credits."""
+type RedeemCode {
   success: Boolean
   message: String
-  order: OrderType
 }
 
 """
 Refresh the status of a pending order. This will check the Stripe session status and update the order.
 """
 type RefreshOrder {
+  success: Boolean
+  message: String
+  order: OrderType
+}
+
+"""Cancel a pending order. This will cancel the Stripe session."""
+type CancelOrder {
   success: Boolean
   message: String
   order: OrderType
@@ -373,12 +378,32 @@ type CreateStripeCheckoutSession {
   url: String
 }
 
-"""
-Cancel a pending email change request from a logged-in user.
-There is a non-GraphQL API that is not authenticated that can cancel email change requests
-which is meant to be canceled with a link sent to an email.
-"""
-type CancelEmailChange {
+type ProcessStripeCharge {
+  success: Boolean
+  message: String
+}
+
+type UpdateUserSetting {
+  success: Boolean
+  message: String
+}
+
+type UpdateCookieConsent {
+  success: Boolean
+  message: String
+}
+
+type UpdateUser {
+  success: Boolean
+  message: String
+}
+
+type DeleteUser {
+  success: Boolean
+  message: String
+}
+
+type ChangePassword {
   success: Boolean
   message: String
 }
@@ -388,13 +413,115 @@ type ResendEmailChange {
   message: String
 }
 
-type RemoveUserFromTeam {
+type CancelEmailChange {
   success: Boolean
   message: String
-  team: TeamType
 }
 
-type UpsertUserToTeam {
+type CreateEpisode {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type CreateEpisodeChain {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type CreateEpisodeAudioChain {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type UpdateEpisode {
+  success: Boolean
+  message: String
+  episode: EpisodeType
+}
+
+type UpdateEpisodeAudio {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type PublishEpisodeAudio {
+  success: Boolean
+  message: String
+  episode: EpisodeType
+}
+
+type FetchNews {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type ExtractNews {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type SummarizeNews {
+  success: Boolean
+  message: String
+  job: JobData
+}
+
+type DeleteJobs {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type RetryJobs {
+  success: Boolean
+  message: String
+  jobs: [JobData]
+}
+
+type CreatePodcast {
+  success: Boolean
+  message: String
+  podcast: PodcastType
+}
+
+type UpdatePodcast {
+  success: Boolean
+  message: String
+  podcast: PodcastType
+}
+
+"""
+Create scalar that ignores normal serialization/deserialization, since
+that will be handled by the multipart request spec
+"""
+scalar Upload
+
+type DeletePodcast {
+  success: Boolean
+  message: String
+}
+
+"""
+Set the RSS feeds for a podcast. Theses feeds will be used to fetch news episodes.
+"""
+type UpdatePodcastRssFeeds {
+  podcast: PodcastType
+}
+
+"""
+Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
+"""
+type CreateRssFeed {
+  rssFeed: RssFeedType
+}
+
+type CreateTeam {
   success: Boolean
   message: String
   team: TeamType
@@ -411,105 +538,14 @@ type UpdateTeam {
   team: TeamType
 }
 
-"""
-Create scalar that ignores normal serialization/deserialization, since
-that will be handled by the multipart request spec
-"""
-scalar Upload
-
-type CreateTeam {
+type UpsertUserToTeam {
   success: Boolean
   message: String
   team: TeamType
 }
 
-type ChangePassword {
+type RemoveUserFromTeam {
   success: Boolean
   message: String
-}
-
-type DeleteUser {
-  success: Boolean
-  message: String
-}
-
-type UpdateUser {
-  success: Boolean
-  message: String
-}
-
-type UpdateCookieConsent {
-  success: Boolean
-  message: String
-}
-
-type DeleteJobs {
-  success: Boolean
-  message: String
-  jobs: [JobData]
-}
-
-type RetryJobs {
-  jobs: [JobData]
-}
-
-type UpdateUserSetting {
-  success: Boolean
-  message: String
-}
-
-type PublishArticleAudio {
-  success: Boolean
-  message: String
-  article: ArticleType
-}
-
-type UpdateArticleAudio {
-  success: Boolean
-  message: String
-  job: JobData
-}
-
-type UpdateArticle {
-  success: Boolean
-  message: String
-  article: ArticleType
-}
-
-type CreateArticleAudioChain {
-  jobs: [JobData]
-}
-
-type CreateArticleChain {
-  jobs: [JobData]
-}
-
-type CreateArticle {
-  job: JobData
-}
-
-type SummarizeNews {
-  job: JobData
-}
-
-type ExtractNews {
-  job: JobData
-}
-
-type FetchNews {
-  job: JobData
-}
-
-"""
-Set the RSS feeds for a team. Theses feeds will be used to fetch news articles.
-"""
-type SetTeamRssFeeds {
   team: TeamType
-}
-
-"""
-Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
-"""
-type CreateRssFeed {
-  rssFeed: RssFeedType
 }

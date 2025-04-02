@@ -1,5 +1,4 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { throwError } from 'rxjs';
 import { ApolloQueryResult } from '@apollo/client/core';
 import { MutationResult } from 'apollo-angular';
 
@@ -37,19 +36,18 @@ export function mapMutationResult<T>(result: MutationResult<T>): T {
 }
 
 export function handleApolloError(data: ApolloErrorParams) {
-  console.error('GraphQL query error:', data);
-  if (data.graphQLErrors) {
-    const errors = data.graphQLErrors.map((e) => `${e.message} (in: ${e.path.join('.')})`).join(', ');
-    return throwError(() => new Error(errors));
+  if (data.graphQLErrors && data.graphQLErrors.length > 0) {
+    const errors = data.graphQLErrors.map((e) => `${e.message} (in: ${e.path.join('.')})`).join(' ');
+    return new Error(errors);
   } else if (data.cause?.error?.errors) {
-    const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(', ');
-    return throwError(() => new Error(errors));
+    const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(' ');
+    return new Error(errors);
   } else if (data.cause?.result?.errors) {
-    const errors = data.cause.result.errors.map((e: { message: string }) => e.message).join(', ');
-    return throwError(() => new Error(errors));
+    const errors = data.cause.result.errors.map((e: { message: string }) => e.message).join(' ');
+    return new Error(errors);
   } else if (data.message) {
-    return throwError(() => new Error(data.message));
+    return new Error(data.message);
   } else {
-    return throwError(() => new Error('Unknown error'));
+    return new Error('Unknown error');
   }
 }

@@ -25,7 +25,7 @@ import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
 import { PaymentService } from '../payment.service';
 import { CreditService } from '../credit.service';
-import { BonusService, BonusCode } from '../bonus.service';
+import { CodeService, Code } from '../code.service';
 import {
   MatCell,
   MatCellDef,
@@ -95,9 +95,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   private downloadAnchor: HTMLAnchorElement | null = null;
   // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
-  protected redeemCode = '';
-  protected createBonusForm: FormGroup;
-  protected bonusCodes: BonusCode[] = [];
+  protected code = '';
+  protected createCodeForm: FormGroup;
+  protected codes: Code[] = [];
   protected loadingBonuses = true;
 
   constructor(
@@ -112,7 +112,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private teamService: TeamsService,
     private paymentService: PaymentService,
     protected creditService: CreditService,
-    private bonusService: BonusService,
+    private codeService: CodeService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -144,7 +144,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       this.changePasswordForm.updateValueAndValidity();
     });
 
-    this.createBonusForm = this.fb.group({
+    this.createCodeForm = this.fb.group({
       code: ['', Validators.required],
       creditAmount: [0, [Validators.required, Validators.min(1)]],
     });
@@ -156,7 +156,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadUserOrders();
-    this.loadBonusCodes();
+    this.loadCodes();
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
@@ -189,46 +189,46 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   private loadUserOrders() {
     this.subscriptions.add(
-      this.creditService.getUserOrders(1, 5).subscribe({
+      this.creditService.orders(1, 5).subscribe({
         next: () => (this.loadingOrders = false),
         error: (err) => console.error('Failed to load orders:', err),
       }),
     );
   }
 
-  redeemBonusCode() {
-    if (this.redeemCode) {
-      this.bonusService.redeemBonusCode(this.redeemCode).subscribe({
+  redeemCode() {
+    if (this.code) {
+      this.codeService.redeemCode(this.code).subscribe({
         next: () => {
-          this.messageService.success('Bonus code redeemed successfully.');
-          this.redeemCode = '';
-          this.loadBonusCodes();
+          this.messageService.success('code redeemed successfully.');
+          this.code = '';
+          this.loadCodes();
           this.creditService.refetchUserCredits();
         },
         error: (err) => {
-          this.messageService.error('Failed to redeem bonus code: ' + err.message);
+          this.messageService.error('Failed to redeem code: ' + err.message);
         },
       });
     }
   }
 
-  createBonusCode() {
-    if (this.createBonusForm.valid) {
-      const { code, creditAmount } = this.createBonusForm.value;
-      this.bonusService.createBonusCode(code, creditAmount).subscribe({
+  createCode() {
+    if (this.createCodeForm.valid) {
+      const { code, creditAmount } = this.createCodeForm.value;
+      this.codeService.createCode(code, creditAmount).subscribe({
         next: () => {
-          this.messageService.success('Bonus code created successfully.');
-          this.createBonusForm.reset();
-          this.loadBonusCodes();
+          this.messageService.success('Code created successfully.');
+          this.createCodeForm.reset();
+          this.loadCodes();
         },
         error: (err) => {
-          this.messageService.error('Failed to create bonus code: ' + err.message);
+          this.messageService.error('Failed to create code: ' + err.message);
         },
       });
     }
   }
 
-  private loadBonusCodes() {
+  private loadCodes() {
     const userDetails = this.userService.userDetails();
     if (!userDetails) {
       return;
@@ -241,13 +241,13 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
     this.loadingBonuses = true;
     this.subscriptions.add(
-      this.bonusService.getBonusCodes().subscribe({
+      this.codeService.codes().subscribe({
         next: (data) => {
-          this.bonusCodes = data.bonusCodes;
+          this.codes = data.codes;
           this.loadingBonuses = false;
         },
         error: (err) => {
-          this.messageService.error('Failed to load bonus codes: ' + err.message);
+          this.messageService.error('Failed to load codes: ' + err.message);
           this.loadingBonuses = false;
         },
       }),
@@ -387,7 +387,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   deleteDialog() {
     this.subscriptions.add(
-      this.teamService.getDeleteUserResults().subscribe({
+      this.teamService.deleteUserResults().subscribe({
         next: (data) => {
           const deleteTeamNames = data.deletingTeams.map((team) => team.name);
           const leavingTeamNames = data.leavingTeams.map((team) => team.name);
@@ -412,7 +412,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             ? 'You are not the sole owner of any teams, so no teams will be deleted.'
             : "You are the sole owner of the following team(s) and they will be permanently deleted: '" +
               deletingTeams.join("', '") +
-              "'<br /><br/>WARNING: The deleted team's articles and audio files will also be permanently deleted.") +
+              "'<br /><br/>WARNING: The deleted team's episodes and audio files will also be permanently deleted.") +
           '<br/><br/>' +
           (leavingTeams?.length === 0
             ? 'You will not be removed from any teams.'

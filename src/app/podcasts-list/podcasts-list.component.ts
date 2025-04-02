@@ -6,10 +6,11 @@ import { Router } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { TeamsService } from '../teams.service';
+import { PodcastsService } from '../podcasts.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
+import { TeamsResult } from '../teams-list/teams-list.component';
 
 export interface UserResult {
   id: number;
@@ -26,14 +27,28 @@ export interface RssFeedResult {
   url: string;
 }
 
-export interface TeamsResult {
+export interface PodcastsResult {
   id: number;
   name: string | null;
-  members: MemberResult[];
+  url: string | null;
+  enabled: boolean;
+  slug: string | null;
+  image: string | null;
+  imageUrl: string | null;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerLink: string | null;
+  intro: string | null;
+  prompt: string | null;
+  outro: string | null;
+  tgChannelId: string | null;
+  tgResponse: string | null;
+  rssFeeds: RssFeedResult[];
+  team: TeamsResult;
 }
 
 @Component({
-  selector: 'app-teams-list',
+  selector: 'app-podcasts-list',
   standalone: true,
   imports: [
     MatButton,
@@ -46,20 +61,20 @@ export interface TeamsResult {
     MatCardContent,
     MatCardActions,
   ],
-  templateUrl: './teams-list.component.html',
-  styleUrls: ['./teams-list.component.scss'],
+  templateUrl: './podcasts-list.component.html',
+  styleUrls: ['./podcasts-list.component.scss'],
 })
-export class TeamsListComponent implements OnInit, OnDestroy {
+export class PodcastsListComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
-  @Input() teams: TeamsResult[] = [];
+  @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
 
   constructor(
     private router: Router,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private teamsService: TeamsService,
+    private podcastsService: PodcastsService,
   ) {}
 
   ngOnInit(): void {
@@ -70,10 +85,10 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     this.loading = true;
 
     this.subscriptions.add(
-      this.teamsService.getTeams().subscribe({
-        next: (teams: TeamsResult[]) => {
+      this.podcastsService.getPodcasts().subscribe({
+        next: (podcasts: PodcastsResult[]) => {
           this.messageService.clearMessages();
-          this.teams = teams;
+          this.podcasts = podcasts;
           this.loading = false;
         },
         error: (err: { message: string }) => {
@@ -81,7 +96,7 @@ export class TeamsListComponent implements OnInit, OnDestroy {
           this.messageService.clearMessages();
           this.messageService.addMessage({
             type: 'error',
-            text: `Failed to retrieve teams data: ${err.message}`,
+            text: `Failed to retrieve podcasts data: ${err.message}`,
             dismissible: true,
           });
         },
@@ -92,8 +107,8 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  viewTeam(id: number) {
-    this.router.navigate(['/team', id]);
+  viewPodcast(id: number) {
+    this.router.navigate(['/podcast', id]);
   }
 
   ngOnDestroy() {
@@ -101,7 +116,7 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     this.toolbarService.clearToolbarComponent();
   }
 
-  createTeam() {
-    this.router.navigate(['/team/new']);
+  createPodcast() {
+    this.router.navigate(['/podcast/new']);
   }
 }

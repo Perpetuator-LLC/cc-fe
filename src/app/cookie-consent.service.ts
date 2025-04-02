@@ -12,7 +12,7 @@ interface CookieConsent {
 }
 
 interface GetUserCookieConsentsResponse {
-  getUserCookieConsents: CookieConsent[];
+  userCookieConsents: CookieConsent[];
 }
 
 interface UpdateCookieConsentResponse {
@@ -47,7 +47,7 @@ export class CookieConsentService implements OnDestroy {
 
   private GET_USER_COOKIE_CONSENTS = gql`
     query GetUserCookieConsents {
-      getUserCookieConsents {
+      userCookieConsents {
         version
         accepted
         date
@@ -97,7 +97,7 @@ export class CookieConsentService implements OnDestroy {
           fetchPolicy: 'network-only',
         })
         .pipe(
-          map((result) => result.data.getUserCookieConsents),
+          map((result) => result.data.userCookieConsents),
           catchError((error) => {
             console.error('GraphQL query error:', error);
             return throwError(() => new Error(`GraphQL Query Error: ${error.message}`));

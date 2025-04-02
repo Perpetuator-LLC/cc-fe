@@ -1,0 +1,18 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span>New Podcast</span>
+</ng-template>
+<app-message></app-message>
+
+<mat-card>
+  <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
+    <mat-form-field>
+      <mat-label>Podcast Name</mat-label>
+      <input matInput formControlName="name" required />
+      @if (nameError) {
+        <mat-error>{{ nameError }}.</mat-error>
+      }
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit" [disabled]="!podcastForm.valid">Save</button>
+  </form>
+</mat-card>

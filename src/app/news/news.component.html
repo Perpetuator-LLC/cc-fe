@@ -12,10 +12,10 @@
   <mat-card class="toolbar">
     <mat-card-content class="form-container">
       <mat-form-field>
-        <mat-label>Select Team</mat-label>
-        <mat-select [(value)]="selectedTeamId" (selectionChange)="getNews()">
-          @for (team of teams; track team.id) {
-            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+        <mat-label>Select Podcast</mat-label>
+        <mat-select [(value)]="selectedPodcastId" (selectionChange)="getNews()">
+          @for (podcast of podcasts; track podcast.id) {
+            <mat-option [value]="podcast.id">{{ podcast.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -28,7 +28,7 @@
           <mat-option [value]="14 * 24">2 Weeks</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedTeamId === null">
+      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedPodcastId === null">
         Fetch News
       </button>
       @if (showMicroJobButtons) {
@@ -54,29 +54,29 @@
           mat-flat-button
           color="primary"
           type="button"
-          (click)="createArticleFromSelected()"
+          (click)="createEpisodeFromSelected()"
           [disabled]="selectedNews.size === 0"
         >
-          Create Article (Task)
+          Create Episode (Task)
         </button>
       }
       <button
         mat-flat-button
         color="primary"
         type="button"
-        (click)="createArticleChainFromSelected()"
+        (click)="createEpisodeChainFromSelected()"
         [disabled]="selectedNews.size === 0"
       >
-        Generate Article
+        Generate Episode
       </button>
       <button
         mat-flat-button
         color="primary"
         type="button"
-        (click)="createArticleAudioChainFromSelected()"
+        (click)="createEpisodeAudioChainFromSelected()"
         [disabled]="selectedNews.size === 0"
       >
-        Create Article & Audio
+        Create Episode & Audio
       </button>
       <br />
       <mat-form-field appearance="outline" class="filter-form-field">
@@ -91,7 +91,7 @@
     </mat-card-content>
   </mat-card>
 
-  @if (selectedTeamId !== null && news) {
+  @if (selectedPodcastId !== null && news) {
     <div class="news-container">
       <mat-list>
         @for (news of filteredNews; track news.url) {
@@ -147,9 +147,9 @@
             <mat-card-header>
               <p>
                 @if (news.results.length) {
-                  No news articles match the filter criteria.
+                  No news episodes match the filter criteria.
                 } @else {
-                  No news articles exist, perhaps try "Fetch URLs" to get the latest updates or change the "Time" range.
+                  No news episodes exist, perhaps try "Fetch URLs" to get the latest updates or change the "Time" range.
                 }
               </p>
             </mat-card-header>
@@ -157,13 +157,13 @@
         }
       </mat-list>
     </div>
-  } @else if (selectedTeamId !== null) {
+  } @else if (selectedPodcastId !== null) {
     <mat-spinner></mat-spinner>
   } @else {
     <mat-list>
       <mat-card>
         <mat-card-header>
-          <p>Select a team to view news.</p>
+          <p>Select a podcast to view news.</p>
         </mat-card-header>
       </mat-card>
     </mat-list>

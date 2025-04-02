@@ -1,17 +1,17 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <h1>Articles</h1>
+  <h1>Episodes</h1>
 </ng-template>
 
 <app-message></app-message>
 
 <mat-card>
   <mat-card-content>
-    <div [hidden]="!loadingArticles">
+    <div [hidden]="!loadingEpisodes">
       <mat-spinner></mat-spinner>
     </div>
 
-    <div [hidden]="loadingArticles">
+    <div [hidden]="loadingEpisodes">
       <table
         mat-table
         [dataSource]="dataSource"
@@ -23,31 +23,31 @@
       >
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-          <td mat-cell *matCellDef="let article">
-            {{ article.date | date: 'short' : 'local' }}
+          <td mat-cell *matCellDef="let episode">
+            {{ episode.date | date: 'short' : 'local' }}
           </td>
         </ng-container>
 
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let article">
-            <a matLine [routerLink]="['/article', article.id]">{{ article.title | slice: 0 : 100 }}</a>
+          <td mat-cell *matCellDef="let episode">
+            <a matLine [routerLink]="['/episode', episode.id]">{{ episode.title | slice: 0 : 100 }}</a>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="team">
+        <ng-container matColumnDef="podcast">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-form-field [hidden]="loadingTeams">
-              <mat-label>Team</mat-label>
-              <mat-select [(value)]="selectedTeam" (selectionChange)="loadArticles()">
-                <mat-option value="">All Teams</mat-option>
-                @for (team of teams; track team.id) {
-                  <mat-option [value]="team.id">{{ team.name }}</mat-option>
+            <mat-form-field [hidden]="loadingPodcasts">
+              <mat-label>Podcast</mat-label>
+              <mat-select [(value)]="selectedPodcast" (selectionChange)="loadEpisodes()">
+                <mat-option value="">All Podcasts</mat-option>
+                @for (podcast of podcasts; track podcast.id) {
+                  <mat-option [value]="podcast.id">{{ podcast.name }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
           </th>
-          <td mat-cell *matCellDef="let article">{{ article.team.name }}</td>
+          <td mat-cell *matCellDef="let episode">{{ episode.podcast.name }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -55,7 +55,7 @@
       </table>
 
       <mat-paginator
-        [length]="totalArticles"
+        [length]="totalEpisodes"
         [pageSize]="pageSize"
         [pageSizeOptions]="[5, 10, 20]"
         (page)="onPageChange($event)"
@@ -63,11 +63,11 @@
       </mat-paginator>
     </div>
 
-    <div [hidden]="articles.length !== 0 || loadingArticles">
+    <div [hidden]="episodes.length !== 0 || loadingEpisodes">
       <span>
-        <strong>No articles found.</strong>
-        If you would like to create an article, then visit the <a routerLink="/news">News</a> page. From within the News
-        page, you can select news pages and create articles from them.
+        <strong>No episodes found.</strong>
+        If you would like to create an episode, then visit the <a routerLink="/news">News</a> page. From within the News
+        page, you can select news pages and create episodes from them.
       </span>
     </div>
   </mat-card-content>

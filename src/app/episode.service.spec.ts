@@ -1,14 +1,14 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 
-import { ArticleService } from './article.service';
+import { EpisodeService } from './episode.service';
 
-describe('ArticleService', () => {
-  let service: ArticleService;
+describe('EpisodeService', () => {
+  let service: EpisodeService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ArticleService);
+    service = TestBed.inject(EpisodeService);
   });
 
   it('should be created', () => {

@@ -16,12 +16,12 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
-import { TeamsService } from '../teams.service';
-import { TeamsResult } from '../teams-list/teams-list.component';
+import { PodcastsService } from '../podcasts.service';
+import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
-import { ArticleService } from '../article.service';
+import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -80,8 +80,8 @@ export class NewsComponent implements OnInit, OnDestroy {
   news: News | null = null;
   filteredNews: NewsResult[] = [];
   selectedNews = new Set<NewsResult>();
-  teams: TeamsResult[] = [];
-  selectedTeamId: number | null = null;
+  podcasts: PodcastsResult[] = [];
+  selectedPodcastId: number | null = null;
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
@@ -94,10 +94,10 @@ export class NewsComponent implements OnInit, OnDestroy {
     private newsService: NewsService,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private teamsService: TeamsService,
+    private podcastsService: PodcastsService,
     protected userService: UserService,
     private jobService: JobService,
-    private articleService: ArticleService,
+    private episodeService: EpisodeService,
   ) {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
@@ -109,17 +109,17 @@ export class NewsComponent implements OnInit, OnDestroy {
               this.getNews();
             } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
               this.subscriptions.add(
-                this.articleService.getArticleById(job.result).subscribe({
-                  next: (article) => {
-                    const newArticleUrl = `/article/${job.result}`;
+                this.episodeService.episodeById(job.result).subscribe({
+                  next: (episode) => {
+                    const newEpisodeUrl = `/episode/${job.result}`;
                     this.messageService.success(
-                      `New article: <a href="${newArticleUrl}">${article.title}</a>`,
+                      `New episode: <a href="${newEpisodeUrl}">${episode.title}</a>`,
                       null,
                       true,
                     );
                   },
                   error: (error) => {
-                    this.messageService.error(`Failed to get new article: ${error.message}`);
+                    this.messageService.error(`Failed to get new episode: ${error.message}`);
                   },
                 }),
               );
@@ -145,26 +145,26 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.filteredNews = this.news?.results || [];
 
     this.subscriptions.add(
-      this.teamsService.getMyTeams().subscribe({
-        next: (teams) => {
-          this.teams = teams.filter((team) =>
-            team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+      this.podcastsService.getPodcasts().subscribe({
+        next: (podcasts) => {
+          this.podcasts = podcasts.filter((podcast) =>
+            podcast.team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
           );
         },
         error: (error) => {
-          this.messageService.error(`Failed to get teams: ${error.message}`);
+          this.messageService.error(`Failed to get podcasts: ${error.message}`);
         },
       }),
     );
   }
 
   fetchNews() {
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     this.subscriptions.add(
-      this.newsService.fetchNews(this.selectedTeamId).subscribe({
+      this.newsService.fetchNews(this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to fetch news, no job returned');
@@ -184,15 +184,15 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Extracting content from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.extractNews(this.selectedTeamId, newsIds).subscribe({
+      this.newsService.extractNews(this.selectedPodcastId, newsIds).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to extract news: No job returned');
@@ -212,27 +212,27 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Summarizing content of selected news items (this may take a while)...');
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
-    this.summarizeNews(this.selectedTeamId, newsIds);
+    this.summarizeNews(this.selectedPodcastId, newsIds);
   }
 
   regenerateSummary(id: string) {
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Regenerating summary for news item (this may take a while)...');
-    this.summarizeNews(this.selectedTeamId, [Number(id)], true);
+    this.summarizeNews(this.selectedPodcastId, [Number(id)], true);
   }
 
-  private summarizeNews(teamId: number, newsIds: number[], force = false) {
+  private summarizeNews(podcastId: number, newsIds: number[], force = false) {
     this.subscriptions.add(
-      this.newsService.summarizeNews(teamId, newsIds, force).subscribe({
+      this.newsService.summarizeNews(podcastId, newsIds, force).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to summarize news data: No job returned');
@@ -247,23 +247,23 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
-  createArticleChainFromSelected() {
+  createEpisodeChainFromSelected() {
     if (this.selectedNews.size === 0) {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
-    this.messageService.info('Creating article from selected news items (this may take a while)...');
+    this.messageService.info('Creating episode from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createArticleChain(newsIds, this.selectedTeamId).subscribe({
+      this.newsService.createEpisodeChain(newsIds, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.jobs) {
-            this.messageService.error('Failed to create article: No jobs returned');
+            this.messageService.error('Failed to create episode: No jobs returned');
             return;
           }
           this.jobService.addJobs(data.jobs);
@@ -275,20 +275,20 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
-  createArticleAudioChainFromSelected() {
+  createEpisodeAudioChainFromSelected() {
     if (this.selectedNews.size === 0) {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Creating audio from selected news items (this may take a while)...');
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createArticleAudioChain(newsIds, this.selectedTeamId).subscribe({
+      this.newsService.createEpisodeAudioChain(newsIds, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create audio: No jobs returned');
@@ -303,25 +303,25 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
-  createArticleFromSelected() {
+  createEpisodeFromSelected() {
     if (this.selectedNews.size === 0) {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
 
     const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createArticle(newsIds, this.selectedTeamId).subscribe({
+      this.newsService.createEpisode(newsIds, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.job) {
-            this.messageService.error('Failed to create article: No job returned');
+            this.messageService.error('Failed to create episode: No job returned');
             return;
           }
-          this.messageService.info('Creating article from selected news items (this may take a while)...');
+          this.messageService.info('Creating episode from selected news items (this may take a while)...');
           this.jobService.addJob(data.job);
         },
         error: (err: { message: string }) => {
@@ -332,13 +332,13 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   getNews() {
-    if (this.selectedTeamId === null) {
-      this.messageService.warning('No team selected.');
+    if (this.selectedPodcastId === null) {
+      this.messageService.warning('No podcast selected.');
       return;
     }
     const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
-      this.newsService.getNews(this.selectedTeamId, this.selectedHours).subscribe({
+      this.newsService.news(this.selectedPodcastId, this.selectedHours).subscribe({
         next: (data: News) => {
           this.news = data;
           this.filteredNews = this.news?.results || [];

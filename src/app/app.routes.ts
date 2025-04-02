@@ -71,6 +71,27 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'podcasts',
+    loadComponent: () => import('./podcasts-list/podcasts-list.component').then((c) => c.PodcastsListComponent),
+    title: 'Podcasts',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'podcasts',
+    },
+  },
+  {
+    path: 'podcast/new',
+    loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
+    title: 'Create Podcast',
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'podcast/:id',
+    loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
+    title: 'Podcast',
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'teams',
     loadComponent: () => import('./teams-list/teams-list.component').then((c) => c.TeamsListComponent),
     title: 'Teams',
@@ -101,15 +122,15 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'article/:id',
-    loadComponent: () => import('./article-detail/article-detail.component').then((c) => c.ArticleDetailComponent),
-    title: 'Article',
+    path: 'episode/:id',
+    loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
+    title: 'Episode',
     canActivate: [AuthGuard],
   },
   {
-    path: 'articles',
-    loadComponent: () => import('./articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
-    title: 'Articles',
+    path: 'episodes',
+    loadComponent: () => import('./episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
+    title: 'Episodes',
     canActivate: [AuthGuard],
     data: {
       icon: 'contextual_token',

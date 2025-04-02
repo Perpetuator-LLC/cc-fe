@@ -90,7 +90,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   loadTransactions() {
     this.subscriptions.add(
       this.creditService
-        .getUserTransactions(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
+        .transactions(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
         .subscribe({
           next: (data) => {
             this.transactions = data.transactions;
