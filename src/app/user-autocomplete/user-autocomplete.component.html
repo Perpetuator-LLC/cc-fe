@@ -1,15 +1,23 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<mat-form-field>
-  <mat-label>User</mat-label>
-  <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto" autocomplete="user" />
-  <mat-autocomplete
-    #auto="matAutocomplete"
-    (optionSelected)="onOptionSelected($event.option.value)"
-    [displayWith]="displayFn"
-    autoActiveFirstOption
-  >
-    @for (user of filteredUsers$ | async; track user.id) {
-      <mat-option [value]="user">{{ user.username }}</mat-option>
+<mat-form-field appearance="fill">
+  <mat-label>Users</mat-label>
+  <input
+    type="text"
+    matInput
+    [formControl]="searchControl"
+    [matAutocomplete]="auto"
+    placeholder="Type at least 3 characters to search">
+  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+    @if (searchControl.value && searchControl.value.length < 3 && isString(searchControl.value)) {
+      <mat-option disabled>Type at least 3 characters to search</mat-option>
+    } @else if ((filteredUsers$ | async)?.length === 0) {
+      <mat-option disabled>No users found</mat-option>
+    } @else {
+      @for (user of filteredUsers$ | async; track user.id) {
+        <mat-option [value]="user" (onSelectionChange)="onOptionSelected(user)">
+          {{ user.username }}
+        </mat-option>
+      }
     }
   </mat-autocomplete>
 </mat-form-field>

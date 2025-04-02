@@ -98,7 +98,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   protected code = '';
   protected createCodeForm: FormGroup;
   protected codes: Code[] = [];
-  protected loadingBonuses = true;
+  protected loadingCodes = true;
 
   constructor(
     private fb: FormBuilder,
@@ -229,29 +229,33 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadCodes() {
+    // Get the current value of the signal directly
     const userDetails = this.userService.userDetails();
+
     if (!userDetails) {
+      this.loadingCodes = false;
       return;
     }
+
     const permissions = userDetails.permissions;
-    const includesAddBonusPerm = permissions.length > 0 && permissions.includes('api.add_bonuscode');
+    const includesAddBonusPerm = permissions && permissions.length > 0 && permissions.includes('api.add_bonuscode');
+
     if (!includesAddBonusPerm) {
-      this.loadingBonuses = false;
+      this.loadingCodes = false;
       return;
     }
-    this.loadingBonuses = true;
-    this.subscriptions.add(
-      this.codeService.codes().subscribe({
-        next: (data) => {
-          this.codes = data.codes;
-          this.loadingBonuses = false;
-        },
-        error: (err) => {
-          this.messageService.error('Failed to load codes: ' + err.message);
-          this.loadingBonuses = false;
-        },
-      }),
-    );
+
+    this.loadingCodes = true;
+    this.codeService.codes().subscribe({
+      next: (data) => {
+        this.codes = data.codes;
+        this.loadingCodes = false;
+      },
+      error: (err) => {
+        this.messageService.error('Failed to load codes: ' + err.message);
+        this.loadingCodes = false;
+      },
+    });
   }
 
   passwordMatchValidator(formGroup: FormGroup) {

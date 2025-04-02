@@ -85,7 +85,7 @@ import {
 export class TeamDetailComponent implements OnInit, OnDestroy {
   @ViewChild('autocomplete') autoComplete!: UserAutocompleteComponent;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  allUsers: User[] = [];
+  users: User[] = [];
   teamForm: FormGroup;
   newUserForm: FormGroup;
   private subscriptions = new Subscription();
@@ -139,11 +139,11 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
     // this.teamForm.get('enabled')?.valueChanges.subscribe((enabled) => {
     //   const team = this.teamForm.getRawValue();
-    //   const slugControl = this.teamForm.get('slug');
-    //   if (enabled != slugControl?.disabled) {
-    //     // console.debug('Podcast slug control already enabled');
-    //     return;
-    //   }
+    //   // const slugControl = this.teamForm.get('slug');
+    //   // if (enabled != slugControl?.disabled) {
+    //   //   // console.debug('Podcast slug control already enabled');
+    //   //   return;
+    //   // }
     //   // team.enabled = enabled;
     //   this.urlDisabled = !enabled;
     //   if (enabled) {
@@ -196,6 +196,28 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     //     this.imageUrl = value;
     //   }),
     // );
+  }
+
+  protected searchUsers(query: string) {
+    if (query && query.length >= 3) {
+      // this.loading = true;
+      this.subscriptions.add(
+        this.teamsService.users(query).subscribe({
+          next: (users) => {
+            this.users = users;
+            // this.loading = false;
+          },
+          error: (err) => {
+            this.messageService.error(`Failed to retrieve users: ${err.message}`);
+            // this.loading = false;
+            this.users = [];
+          },
+        }),
+      );
+    } else {
+      // Clear results when query is too short
+      this.users = [];
+    }
   }
 
   private refreshTeamData() {

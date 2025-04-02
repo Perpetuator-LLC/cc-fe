@@ -88,7 +88,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   // allUsers: User[] = [];
   podcastForm: FormGroup;
-  newUserForm: FormGroup;
+  // newUserForm: FormGroup;
   private subscriptions = new Subscription();
   protected loading = false;
   protected rssFeedLoading = false;
@@ -160,10 +160,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       this.podcastForm.patchValue(podcast);
     });
 
-    this.newUserForm = this.fb.group({
-      userId: ['', Validators.required],
-      role: ['', Validators.required],
-    });
+    // this.newUserForm = this.fb.group({
+    //   userId: ['', Validators.required],
+    //   role: ['', Validators.required],
+    // });
   }
 
   // displayedColumns: string[] = ['username', 'role', 'actions'];

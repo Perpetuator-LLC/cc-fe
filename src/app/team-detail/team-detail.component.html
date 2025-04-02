@@ -19,6 +19,13 @@
           <input matInput formControlName="name" />
         </mat-form-field>
       </div>
+
+      <div class="member-row">
+        <div>
+          <button mat-flat-button color="primary" type="submit" [disabled]="!teamForm.dirty">Save Team Settings</button>
+        </div>
+      </div>
+
     </form>
   </mat-card-content>
 </mat-card>
@@ -34,8 +41,9 @@
         <div>
           <app-user-autocomplete
             #autocomplete
-            [users]="allUsers"
+            [users]="users"
             (userSelected)="onUserSelected($event)"
+            (searchValueChanged)="searchUsers($event)"
           ></app-user-autocomplete>
         </div>
         <div>

@@ -5,7 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
 import { Observable } from 'rxjs';
 import { TeamsService } from '../teams.service';
-import { map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { User } from '../types';
@@ -31,6 +31,7 @@ export class UserAutocompleteComponent implements OnInit {
   filteredUsers$: Observable<User[]> = new Observable<User[]>();
 
   @Output() userSelected = new EventEmitter<{ id: string; username: string }>();
+  @Output() searchValueChanged = new EventEmitter<string>();
   @Input() users!: User[];
 
   constructor(private teamsService: TeamsService) {}
@@ -38,45 +39,42 @@ export class UserAutocompleteComponent implements OnInit {
   ngOnInit() {
     this.filteredUsers$ = this.searchControl.valueChanges.pipe(
       startWith(''),
-      map((value) => this._filterUsers(value || '')),
-      // debounceTime(300),
-      // distinctUntilChanged(),
-      // switchMap((query) => {
-      //   if (typeof query === 'string') {
-      //     return this.teamsService.getUserAutocomplete(query);
-      //   } else {
-      //     // This actually might work as once the user selects it, it is an object
-      //     console.warn('Query is not a string:', query);
-      //     return [];
-      //   }
-      // }),
+      debounceTime(300),
+      distinctUntilChanged(),
+      map((value) => {
+        if (typeof value === 'string') {
+          const query = value.trim();
+          if (query.length >= 3) {
+            this.searchValueChanged.emit(query);
+          } else if (query.length < 3) {
+            this.searchValueChanged.emit(''); // Clear results when query is too short
+          }
+          return this._filterUsers(value);
+        }
+        return this._filterUsers(value || '');
+      }),
     );
   }
 
-  private _filterUsers(value: string): User[] {
-    if (typeof value === 'object') {
-      return [];
-    }
-    const filterValue = value.toLowerCase();
-    return this.users.filter((user) => user.username.toLowerCase().includes(filterValue));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  isString(value: any): boolean {
+    return typeof value === 'string';
   }
 
-  // onUserSelected(user: User) {
-  //   this.userSelected.emit(user);
-  // }
+  private _filterUsers(value: string | User): User[] {
+    if (typeof value !== 'string') {
+      return this.users;
+    }
 
-  // onOptionSelected(userId: string) {
-  //   const selectedUser = this.filteredUsers$.pipe(map((users) => users.find((user) => user.id === userId)));
-  //   selectedUser.subscribe((user) => {
-  //     if (user) {
-  //       this.userSelected.emit(user);
-  //     }
-  //   });
-  // }
+    const filterValue = value.toLowerCase();
+    // Only filter locally if we have users
+    return this.users && this.users.length
+      ? this.users.filter((user) => user.username.toLowerCase().includes(filterValue))
+      : [];
+  }
 
   onOptionSelected(user: { id: string; username: string }) {
     this.userSelected.emit(user);
-    // this.searchControl.setValue(''); // Reset the search control value to an empty string
   }
 
   displayFn(user: { id: string; username: string }): string {

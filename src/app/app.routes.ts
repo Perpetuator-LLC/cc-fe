@@ -92,6 +92,30 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'episode/:id',
+    loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
+    title: 'Episode',
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'episodes',
+    loadComponent: () => import('./episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
+    title: 'Episodes',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'contextual_token',
+    },
+  },
+  {
+    path: 'news',
+    loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),
+    title: 'News',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'breaking_news',
+    },
+  },
+  {
     path: 'teams',
     loadComponent: () => import('./teams-list/teams-list.component').then((c) => c.TeamsListComponent),
     title: 'Teams',
@@ -111,30 +135,6 @@ export const routes: Routes = [
     loadComponent: () => import('./team-detail/team-detail.component').then((c) => c.TeamDetailComponent),
     title: 'Team',
     canActivate: [AuthGuard],
-  },
-  {
-    path: 'news',
-    loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),
-    title: 'News',
-    canActivate: [AuthGuard],
-    data: {
-      icon: 'breaking_news',
-    },
-  },
-  {
-    path: 'episode/:id',
-    loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
-    title: 'Episode',
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'episodes',
-    loadComponent: () => import('./episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
-    title: 'Episodes',
-    canActivate: [AuthGuard],
-    data: {
-      icon: 'contextual_token',
-    },
   },
   {
     path: 'jobs',

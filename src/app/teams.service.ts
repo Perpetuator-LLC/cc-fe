@@ -118,7 +118,7 @@ export class TeamsService extends BaseService {
   // }
 
   updateTeam(
-    id: string,
+    teamId: string,
     name: string | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const GQL = gql`
@@ -152,7 +152,7 @@ export class TeamsService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: {
-        id,
+        teamId,
         name,
       },
     }).pipe(
@@ -336,9 +336,6 @@ export class TeamsService extends BaseService {
       variables: { query },
     }).pipe(
       map((data) => {
-        if (!data.users.success) {
-          throw new Error(data.users.message);
-        }
         return data.users.results;
       }),
     );

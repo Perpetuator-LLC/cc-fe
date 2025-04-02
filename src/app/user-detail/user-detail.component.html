@@ -174,14 +174,14 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="bonuses">
+  <mat-card class="codes">
     <mat-card-header>
-      <mat-card-title>Bonus Code</mat-card-title>
+      <mat-card-title>Gift Code</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <mat-form-field appearance="fill">
-        <mat-label>Redeem Bonus Code</mat-label>
-        <input matInput [(ngModel)]="redeemCode" placeholder="Enter code" />
+        <mat-label>Redeem Code</mat-label>
+        <input matInput [(ngModel)]="code" placeholder="Enter code" />
       </mat-form-field>
       <button mat-raised-button color="primary" (click)="redeemCode()">Redeem</button>
 
@@ -199,33 +199,33 @@
             <button mat-raised-button color="primary" type="submit">Create Bonus Code</button>
           </form>
 
-          @if (loadingBonuses) {
+          @if (loadingCodes) {
             <mat-spinner></mat-spinner>
           } @else if (codes.length > 0) {
             <table mat-table [dataSource]="codes">
               <ng-container matColumnDef="code">
                 <th mat-header-cell *matHeaderCellDef>Code</th>
-                <td mat-cell *matCellDef="let bonus">{{ bonus.code }}</td>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
               </ng-container>
 
               <ng-container matColumnDef="creditAmount">
                 <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
-                <td mat-cell *matCellDef="let bonus">{{ bonus.creditAmount }}</td>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
               </ng-container>
 
               <ng-container matColumnDef="creator">
                 <th mat-header-cell *matHeaderCellDef>Creator</th>
-                <td mat-cell *matCellDef="let bonus">{{ bonus.creator.username }}</td>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
               </ng-container>
 
               <ng-container matColumnDef="consumer">
                 <th mat-header-cell *matHeaderCellDef>Consumer</th>
-                <td mat-cell *matCellDef="let bonus">{{ bonus.consumer?.username || 'N/A' }}</td>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="consumedAt">
                 <th mat-header-cell *matHeaderCellDef>Consumed At</th>
-                <td mat-cell *matCellDef="let bonus">{{ bonus.consumedAt | date: 'short' : 'local' }}</td>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"></tr>
@@ -235,7 +235,7 @@
               ></tr>
             </table>
           } @else {
-            <p>No bonuses found.</p>
+            <p>No codes found.</p>
           }
         </div>
       }
