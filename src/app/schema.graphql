@@ -316,14 +316,36 @@ type Mutation {
   fetchNews(podcastId: ID!): FetchNews
   extractNews(newsIds: [ID]!, podcastId: ID!): ExtractNews
   summarizeNews(force: Boolean = false, newsIds: [ID]!, podcastId: ID!): SummarizeNews
+
+  """
+  Mutation to delete jobs that are in PENDING or FAILED state. This mutation will check if any of the requested jobs
+  are already completed and will not delete them. The mutation returns a message indicating the status of the
+  operation and a list of the jobs that were deleted. If any of the requested jobs are not in PENDING or FAILED state,
+  they will not be deleted and a message will be returned indicating that those jobs were not deleted.
+  """
   deleteJobs(jobIds: [UUID]!): DeleteJobs
+
+  """
+  Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
+  PENDING, clear the result and error fields, and requeue the jobs for processing. It will also check if any of the
+  jobs are already completed and will not restart them. The mutation returns a message indicating the status of the
+  operation and a list of the jobs that were restarted.
+  """
   retryJobs(jobIds: [UUID]!): RetryJobs
-  createPodcast(name: String!): CreatePodcast
-  updatePodcast(description: String, enabled: Boolean, id: ID!, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, prompt: String, refreshTgResponse: Boolean, slug: String, tgBotToken: String, tgChannelId: String): UpdatePodcast
+
+  """
+  Create a new podcast. This will create a new podcast and associate it with the team.
+  """
+  createPodcast(name: String!, teamId: UUID!): CreatePodcast
+
+  """
+  Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
+  """
+  updatePodcast(description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastId: ID!, prompt: String, refreshTgResponse: Boolean, slug: String, tgBotToken: String, tgChannelId: String): UpdatePodcast
   deletePodcast(confirm: String!, podcastId: ID!): DeletePodcast
 
   """
-  Set the RSS feeds for a podcast. Theses feeds will be used to fetch news episodes.
+  Set the RSS feeds for a podcast. These feeds will be used to fetch news articles for summarizing into episodes.
   """
   updatePodcastRssFeeds(podcastId: ID!, rssFeedIds: [ID]!): UpdatePodcastRssFeeds
 
@@ -472,24 +494,42 @@ type SummarizeNews {
   job: JobData
 }
 
+"""
+Mutation to delete jobs that are in PENDING or FAILED state. This mutation will check if any of the requested jobs
+are already completed and will not delete them. The mutation returns a message indicating the status of the
+operation and a list of the jobs that were deleted. If any of the requested jobs are not in PENDING or FAILED state,
+they will not be deleted and a message will be returned indicating that those jobs were not deleted.
+"""
 type DeleteJobs {
   success: Boolean
   message: String
   jobs: [JobData]
 }
 
+"""
+Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
+PENDING, clear the result and error fields, and requeue the jobs for processing. It will also check if any of the
+jobs are already completed and will not restart them. The mutation returns a message indicating the status of the
+operation and a list of the jobs that were restarted.
+"""
 type RetryJobs {
   success: Boolean
   message: String
   jobs: [JobData]
 }
 
+"""
+Create a new podcast. This will create a new podcast and associate it with the team.
+"""
 type CreatePodcast {
   success: Boolean
   message: String
   podcast: PodcastType
 }
 
+"""
+Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
+"""
 type UpdatePodcast {
   success: Boolean
   message: String
@@ -508,9 +548,11 @@ type DeletePodcast {
 }
 
 """
-Set the RSS feeds for a podcast. Theses feeds will be used to fetch news episodes.
+Set the RSS feeds for a podcast. These feeds will be used to fetch news articles for summarizing into episodes.
 """
 type UpdatePodcastRssFeeds {
+  success: Boolean
+  message: String
   podcast: PodcastType
 }
 
@@ -518,6 +560,8 @@ type UpdatePodcastRssFeeds {
 Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
 """
 type CreateRssFeed {
+  success: Boolean
+  message: String
   rssFeed: RssFeedType
 }
 

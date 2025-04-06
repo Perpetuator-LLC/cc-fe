@@ -29,7 +29,7 @@ export class ErrorHandlerService {
       this.messageService.warning('Your session has expired. Please log in again.');
       return EMPTY;
     }
-    console.error(newError.message);
+    console.error(newError);
     return throwError(() => newError);
   }
 }

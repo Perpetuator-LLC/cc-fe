@@ -37,8 +37,9 @@ export function mapMutationResult<T>(result: MutationResult<T>): T {
 
 export function handleApolloError(data: ApolloErrorParams) {
   if (data.graphQLErrors && data.graphQLErrors.length > 0) {
-    const errors = data.graphQLErrors.map((e) => `${e.message} (in: ${e.path.join('.')})`).join(' ');
-    return new Error(errors);
+    const errors = data.graphQLErrors.map((e) => e.message).join(' ');
+    const cause = data.graphQLErrors.map((e) => e.path.join('.')).join(' ');
+    return new Error(errors, { cause });
   } else if (data.cause?.error?.errors) {
     const errors = data.cause.error.errors.map((e: { message: string }) => e.message).join(' ');
     return new Error(errors);

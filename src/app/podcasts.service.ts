@@ -65,7 +65,7 @@ export class PodcastsService extends BaseService {
   refreshTgResponse(id: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast($id: ID!, $refreshTgResponse: Boolean) {
-        updatePodcast(id: $id, refreshTgResponse: $refreshTgResponse) {
+        updatePodcast(podcastId: $id, refreshTgResponse: $refreshTgResponse) {
           success
           message
           podcast {
@@ -152,7 +152,7 @@ export class PodcastsService extends BaseService {
         $refreshTgResponse: Boolean
       ) {
         updatePodcast(
-          id: $id
+          podcastId: $id
           name: $name
           intro: $intro
           prompt: $prompt
@@ -572,7 +572,7 @@ export class PodcastsService extends BaseService {
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcastPodcastImage($id: ID!, $image: Upload!) {
-        updatePodcast(id: $id, image: $image) {
+        updatePodcast(podcastId: $id, image: $image) {
           success
           message
           podcast {

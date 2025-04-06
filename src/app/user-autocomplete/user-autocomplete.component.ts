@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { MatFormField } from '@angular/material/form-field';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
@@ -26,7 +26,7 @@ import { User } from '../types';
   templateUrl: './user-autocomplete.component.html',
   styleUrl: './user-autocomplete.component.scss',
 })
-export class UserAutocompleteComponent implements OnInit {
+export class UserAutocompleteComponent implements OnInit, OnChanges {
   searchControl = new FormControl();
   filteredUsers$: Observable<User[]> = new Observable<User[]>();
 
@@ -37,8 +37,19 @@ export class UserAutocompleteComponent implements OnInit {
   constructor(private teamsService: TeamsService) {}
 
   ngOnInit() {
+    this.setupFilteredUsers();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Re-filter when users array changes
+    if (changes['users'] && this.searchControl) {
+      this.setupFilteredUsers();
+    }
+  }
+
+  private setupFilteredUsers() {
     this.filteredUsers$ = this.searchControl.valueChanges.pipe(
-      startWith(''),
+      startWith(this.searchControl.value || ''),
       debounceTime(300),
       distinctUntilChanged(),
       map((value) => {
@@ -47,7 +58,7 @@ export class UserAutocompleteComponent implements OnInit {
           if (query.length >= 3) {
             this.searchValueChanged.emit(query);
           } else if (query.length < 3) {
-            this.searchValueChanged.emit(''); // Clear results when query is too short
+            this.searchValueChanged.emit('');
           }
           return this._filterUsers(value);
         }
