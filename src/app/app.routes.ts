@@ -103,7 +103,7 @@ export const routes: Routes = [
     title: 'Episodes',
     canActivate: [AuthGuard],
     data: {
-      icon: 'contextual_token',
+      icon: 'animated_images',
     },
   },
   {
