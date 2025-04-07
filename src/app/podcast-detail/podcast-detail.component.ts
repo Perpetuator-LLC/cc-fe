@@ -7,6 +7,8 @@ import { MessageService } from '../message.service';
 import { PodcastsService } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
+import { TeamsService } from '../teams.service';
+import { TeamsResult } from '../teams-list/teams-list.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatFormField } from '@angular/material/form-field';
@@ -41,6 +43,7 @@ import {
 } from '@angular/material/expansion';
 import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -81,6 +84,8 @@ import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-d
     FormsModule,
     MatDivider,
     MatCard,
+    MatSelect,
+    MatOption,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -99,6 +104,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   protected deleteConfirmation = '';
   selectedFile: File | null = null;
   previewImage: string | ArrayBuffer | null = null;
+  protected teams: TeamsResult[] = [];
+  protected loadingTeams = false;
 
   constructor(
     private fb: FormBuilder,
@@ -109,6 +116,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
     private clipboard: Clipboard,
+    private teamsService: TeamsService,
   ) {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -118,6 +126,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
+      team: [null],
       name: [''],
       intro: [''],
       prompt: [''],
@@ -197,14 +206,36 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.imageUrl = value;
       }),
     );
+    this.loadTeams();
+  }
+
+  private loadTeams(): void {
+    this.loadingTeams = true;
+    this.subscriptions.add(
+      this.teamsService.getTeams().subscribe({
+        next: (teams) => {
+          this.teams = teams;
+          this.loadingTeams = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load teams: ${err.message}`);
+          this.loadingTeams = false;
+        },
+      }),
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  compareTeams(team1: any, team2: any): boolean {
+    return team1 && team2 ? team1.id === team2.id : team1 === team2;
   }
 
   private refreshPodcastData() {
     this.subscriptions.add(
       this.podcastsService.getPodcastById(this.podcastId).subscribe({
         next: (podcast) => {
+          console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);
-          // this.setMembers(podcast.members);
           this.setRssFeeds(podcast.rssFeeds);
           this.loading = false;
         },
@@ -215,26 +246,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }),
     );
   }
-
-  get members(): FormArray {
-    return this.podcastForm.get('members') as FormArray;
-  }
-
-  // private setMembers(members: MemberResult[]): void {
-  //   const membersFormArray = this.members;
-  //   membersFormArray.clear();
-  //   members.forEach((member) => {
-  //     membersFormArray.push(
-  //       this.fb.group({
-  //         role: [member.role, Validators.required],
-  //         user: this.fb.group({
-  //           id: [member.user.id],
-  //           username: [member.user.username],
-  //         }),
-  //       }),
-  //     );
-  //   });
-  // }
 
   private setRssFeeds(rssFeeds: RssFeedResult[]): void {
     const rssFeedsFormArray = this.rssFeeds;
@@ -248,113 +259,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       );
     });
   }
-
-  // addOrUpdateUserInPodcast() {
-  //   if (this.newUserForm.valid) {
-  //     const { userId, role } = this.newUserForm.value;
-  //     const podcastId: string = this.podcastForm.get('id')?.value;
-  //     if (role === 'owner') {
-  //       this.openNewOwnerDialog(podcastId, userId, role);
-  //     } else {
-  //       // if the user was an owner, we need to show a confirmation dialog
-  //       const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
-  //       const previousRole = user?.get('role')?.value;
-  //       if (previousRole === 'owner') {
-  //         const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-  //           data: {
-  //             message:
-  //               `<h3>This will remove the management permission from user: ${user?.get('user.username')?.value}</h3>
-  //               ` +
-  //               'They will no longer be able to manage this podcast.<br/><br/><h2>Are you sure you want to proceed?
-  //               </h2>',
-  //           },
-  //         });
-  //         dialogRef.afterClosed().subscribe((confirmed) => {
-  //           if (confirmed) {
-  //             this.upsertUserToPodcast(podcastId, userId, role);
-  //           }
-  //         });
-  //       } else {
-  //         this.upsertUserToPodcast(podcastId, userId, role);
-  //       }
-  //     }
-  //   } else {
-  //     this.messageService.error('Please select a user and role');
-  //   }
-  // }
-
-  // private openNewOwnerDialog(podcastId: string, userId: string, role: string) {
-  //   const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-  //     data: {
-  //       message:
-  //         '<h3>Assigning this user as an owner will give them management permissions (they can remove you).</h3>' +
-  //         'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
-  //     },
-  //   });
-  //   dialogRef.afterClosed().subscribe((confirmed) => {
-  //     if (confirmed) {
-  //       this.upsertUserToPodcast(podcastId, userId, role);
-  //     }
-  //   });
-  // }
-
-  // private upsertUserToPodcast(podcastId: string, userId: string, role: string) {
-  //   this.subscriptions.add(
-  //     this.podcastsService.upsertUserToPodcast(podcastId, userId, role).subscribe({
-  //       next: (podcast) => {
-  //         this.podcastForm.patchValue(podcast);
-  //         this.setMembers(podcast.members);
-  //         this.newUserForm.reset();
-  //         this.autoComplete.clearInput();
-  //       },
-  //       error: (err) => {
-  //         this.messageService.error(`Failed to add user: ${err.message}`);
-  //       },
-  //     }),
-  //   );
-  // }
-
-  // removeUserFromPodcast(userId: string) {
-  //   const podcastId = this.podcastForm.get('id')?.value;
-  //   const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
-  //   const role = user?.get('role')?.value;
-  //
-  //   if (role === 'owner') {
-  //     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-  //       data: {
-  //         message:
-  //           '<h3>Removing this owner will remove their management permissions and access to this podcast.</h3>' +
-  //           'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>
-  //           ',
-  //       },
-  //     });
-  //     dialogRef.afterClosed().subscribe((confirmed) => {
-  //       if (confirmed) {
-  //         this.deleteUserFromPodcast(podcastId, userId);
-  //       }
-  //     });
-  //   } else {
-  //     this.deleteUserFromPodcast(podcastId, userId);
-  //   }
-  // }
-
-  // private deleteUserFromPodcast(podcastId: string, userId: string) {
-  //   this.subscriptions.add(
-  //     this.podcastsService.removeUserFromPodcast(podcastId, userId).subscribe({
-  //       next: (podcast) => {
-  //         this.podcastForm.patchValue(podcast);
-  //         this.setMembers(podcast.members);
-  //       },
-  //       error: (err) => {
-  //         this.messageService.error(`Failed to remove user: ${err.message}`);
-  //       },
-  //     }),
-  //   );
-  // }
-
-  // onUserSelected(user: { id: string; username: string }) {
-  //   this.newUserForm.patchValue({ userId: user.id });
-  // }
 
   refreshTelegram() {
     const { id } = this.podcastForm.getRawValue();
@@ -374,6 +278,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     }
     const {
       id,
+      team,
       name,
       intro,
       prompt,
@@ -393,6 +298,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     }
     const saveObservable = this.podcastsService.updatePodcast(
       id,
+      team ? team.id : null,
       name,
       intro,
       prompt,

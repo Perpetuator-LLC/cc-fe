@@ -21,6 +21,19 @@
       </div>
       <div class="member-row">
         <mat-form-field appearance="fill">
+          <mat-label>Team</mat-label>
+          <mat-select formControlName="team" [compareWith]="compareTeams">
+            @for (team of teams; track team.id) {
+              <mat-option [value]="team">{{ team.name }}</mat-option>
+            }
+          </mat-select>
+          @if (loadingTeams) {
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          }
+        </mat-form-field>
+      </div>
+      <div class="member-row">
+        <mat-form-field appearance="fill">
           <mat-label>Intro</mat-label>
           <textarea matInput formControlName="intro" class="textarea-small"></textarea>
         </mat-form-field>

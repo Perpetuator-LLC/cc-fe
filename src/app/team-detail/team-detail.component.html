@@ -96,6 +96,64 @@
   </mat-card-content>
 </mat-card>
 
+<mat-card class="podcasts-card">
+  <mat-card-header>
+    <mat-card-title>Podcasts</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loadingPodcasts) {
+      <div class="loading-spinner">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
+    }
+
+    <mat-table [dataSource]="podcasts">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let podcast">{{ podcast.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Enabled Column -->
+      <ng-container matColumnDef="enabled">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let podcast">
+          @if (podcast.enabled) {
+            <mat-icon color="primary">check_circle</mat-icon>
+          } @else {
+            <mat-icon color="warn">cancel</mat-icon>
+          }
+        </mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let podcast">
+          <a mat-icon-button color="primary" [routerLink]="['/podcast', podcast.id]" matTooltip="View Podcast">
+            <mat-icon>visibility</mat-icon>
+          </a>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Header and Row Declarations -->
+      <mat-header-row *matHeaderRowDef="podcastsDisplayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: podcastsDisplayedColumns"></mat-row>
+    </mat-table>
+
+    @if (!loadingPodcasts && podcasts.length === 0) {
+      <div class="no-podcasts-message">
+        <p>No podcasts found for this team.</p>
+      </div>
+    }
+
+    <div class="action-button-container">
+      <a mat-raised-button color="primary" routerLink="/podcast/new">Create New Podcast</a>
+    </div>
+  </mat-card-content>
+</mat-card>
+
 <mat-card class="danger-zone">
   <mat-card-header>
     <mat-card-title> Danger Zone </mat-card-title>

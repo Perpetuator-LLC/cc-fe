@@ -123,6 +123,7 @@ export class PodcastsService extends BaseService {
 
   updatePodcast(
     id: string,
+    teamId: string | null = null,
     name: string | null = null,
     intro: string | null = null,
     prompt: string | null = null,
@@ -140,7 +141,8 @@ export class PodcastsService extends BaseService {
     const GQL = gql`
       mutation UpdatePodcast(
         $id: ID!
-        $name: String!
+        $teamId: UUID
+        $name: String
         $intro: String
         $prompt: String
         $outro: String
@@ -156,6 +158,7 @@ export class PodcastsService extends BaseService {
       ) {
         updatePodcast(
           podcastId: $id
+          teamId: $teamId
           name: $name
           intro: $intro
           prompt: $prompt
@@ -188,6 +191,8 @@ export class PodcastsService extends BaseService {
             tgChannelId
             tgResponse
             team {
+              id
+              name
               members {
                 user {
                   id
@@ -213,6 +218,7 @@ export class PodcastsService extends BaseService {
       mutation: GQL,
       variables: {
         id,
+        teamId,
         name,
         intro,
         prompt,
@@ -261,6 +267,7 @@ export class PodcastsService extends BaseService {
             url
           }
           team {
+            id
             members {
               user {
                 id
@@ -289,6 +296,29 @@ export class PodcastsService extends BaseService {
         return data.podcasts[0];
       }),
     );
+  }
+
+  getPodcastsByTeamId(teamId: string): Observable<PodcastsResult[]> {
+    const GQL = gql`
+      query PodcastsByTeamId($teamId: UUID!) {
+        podcasts(teamId: $teamId) {
+          id
+          name
+          enabled
+          slug
+          url
+        }
+      }
+    `;
+
+    interface Response {
+      podcasts: PodcastsResult[];
+    }
+
+    return this.query<Response>({
+      query: GQL,
+      variables: { teamId },
+    }).pipe(map((result) => result.podcasts));
   }
 
   getPodcasts(): Observable<PodcastsResult[]> {

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
 import { TeamsService } from '../teams.service';
@@ -31,7 +31,6 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MemberResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-// import { Clipboard } from '@angular/cdk/clipboard';
 import { User } from '../types';
 import {
   MatAccordion,
@@ -40,6 +39,8 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
+import { PodcastsService } from '../podcasts.service';
+import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
 
 @Component({
   selector: 'app-team-detail',
@@ -80,6 +81,7 @@ import {
     MatExpansionPanelTitle,
     MatExpansionPanelDescription,
     FormsModule,
+    RouterLink,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
@@ -90,14 +92,12 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   newUserForm: FormGroup;
   private subscriptions = new Subscription();
   protected loading = false;
-  // protected rssFeedLoading = false;
   protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
-  // protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
   private teamId: string;
-  // protected urlDisabled = true;
   protected deleteConfirmation = '';
-  // selectedFile: File | null = null;
-  // previewImage: string | ArrayBuffer | null = null;
+  protected podcasts: PodcastsResult[] = [];
+  protected podcastsDisplayedColumns: string[] = ['name', 'enabled', 'actions'];
+  protected loadingPodcasts = false;
 
   constructor(
     private fb: FormBuilder,
@@ -107,7 +107,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     private teamsService: TeamsService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
-    // private clipboard: Clipboard,
+    private podcastsService: PodcastsService,
   ) {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -118,46 +118,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: [''],
-      // intro: [''],
-      // prompt: [''],
-      // outro: [''],
-      // enabled: [false],
-      // slug: [{ value: '', disabled: true }],
-      // url: [{ value: '', disabled: true }],
-      // description: [''],
-      // ownerName: [''],
-      // ownerEmail: [''],
-      // ownerLink: [''],
-      // image: [null],
-      // imageUrl: [null],
-      // rssFeeds: this.fb.array([]),
       members: this.fb.array([]),
-      // tgBotToken: [null],
-      // tgChannelId: [null],
-      // tgResponse: [null],
     });
-
-    // this.teamForm.get('enabled')?.valueChanges.subscribe((enabled) => {
-    //   const team = this.teamForm.getRawValue();
-    //   // const slugControl = this.teamForm.get('slug');
-    //   // if (enabled != slugControl?.disabled) {
-    //   //   // console.debug('Podcast slug control already enabled');
-    //   //   return;
-    //   // }
-    //   // team.enabled = enabled;
-    //   this.urlDisabled = !enabled;
-    //   if (enabled) {
-    //     // if the podcast slug is empty snake case the team name
-    //     const teamName = team.name;
-    //     if (!team.slug && teamName) {
-    //       team.slug = teamName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    //     }
-    //     slugControl?.enable();
-    //   } else {
-    //     slugControl?.disable();
-    //   }
-    //   this.teamForm.patchValue(team);
-    // });
 
     this.newUserForm = this.fb.group({
       userId: ['', Validators.required],
@@ -174,28 +136,23 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.loading = true;
-    // this.subscriptions.add(
-    //   // TODO: get user query auto-complete from input form
-    //   this.teamsService.users('soo').subscribe({
-    //     next: (users) => {
-    //       if (!users || users.length === 0) {
-    //         this.messageService.error('Failed to retrieve users, no users found');
-    //         return;
-    //       }
-    //       this.allUsers = users;
-    //     },
-    //     error: (err) => {
-    //       this.messageService.error(`Failed to retrieve users: ${err.message}`);
-    //     },
-    //   }),
-    // );
     this.refreshTeamData();
-    // this.imageUrl = this.teamForm.get('imageUrl')?.value;
-    // this.subscriptions.add(
-    //   this.teamForm.get('imageUrl')?.valueChanges.subscribe((value) => {
-    //     this.imageUrl = value;
-    //   }),
-    // );
+  }
+
+  private loadTeamPodcasts(): void {
+    this.loadingPodcasts = true;
+    this.subscriptions.add(
+      this.podcastsService.getPodcastsByTeamId(this.teamId).subscribe({
+        next: (podcasts: PodcastsResult[]) => {
+          this.podcasts = podcasts;
+          this.loadingPodcasts = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load team podcasts: ${err.message}`);
+          this.loadingPodcasts = false;
+        },
+      }),
+    );
   }
 
   protected searchUsers(query: string) {
@@ -226,8 +183,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
-          // this.setRssFeeds(team.rssFeeds);
           this.loading = false;
+          this.loadTeamPodcasts();
         },
         error: (err) => {
           this.loading = false;
