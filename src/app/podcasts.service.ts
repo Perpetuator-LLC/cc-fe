@@ -18,10 +18,13 @@ export class PodcastsService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  createPodcast(name: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
+  createPodcast(
+    name: string,
+    teamId: string,
+  ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation CreatePodcast($name: String!) {
-        createPodcast(name: $name) {
+      mutation CreatePodcast($name: String!, $teamId: UUID!) {
+        createPodcast(name: $name, teamId: $teamId) {
           success
           message
           podcast {
@@ -51,7 +54,7 @@ export class PodcastsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { name },
+      variables: { name, teamId },
     }).pipe(
       map((data) => {
         if (!data.createPodcast.success) {
@@ -608,7 +611,7 @@ export class PodcastsService extends BaseService {
 
   setPodcastRssFeeds(podcastId: string, rssFeedIds: string[]) {
     const GQL = gql`
-      mutation SetPodcastRssFeeds($podcastId: ID!, $rssFeedIds: [ID!]!) {
+      mutation UpdatePodcastRssFeeds($podcastId: ID!, $rssFeedIds: [ID!]!) {
         updatePodcastRssFeeds(podcastId: $podcastId, rssFeedIds: $rssFeedIds) {
           podcast {
             id
@@ -622,7 +625,7 @@ export class PodcastsService extends BaseService {
     `;
 
     interface Response {
-      setPodcastRssFeeds: {
+      udpatePodcastRssFeeds: {
         podcast: PodcastsResult;
       };
     }
@@ -636,7 +639,7 @@ export class PodcastsService extends BaseService {
     }).pipe(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((result: any) => {
-        return result.setPodcastRssFeeds;
+        return result.updatePodcastRssFeeds;
       }),
     );
   }

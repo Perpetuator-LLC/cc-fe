@@ -27,7 +27,7 @@ export interface RssFeedResult {
 }
 
 export interface TeamsResult {
-  id: number;
+  id: string;
   name: string | null;
   members: MemberResult[];
 }
@@ -92,7 +92,7 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  viewTeam(id: number) {
+  viewTeam(id: string) {
     this.router.navigate(['/team', id]);
   }
 

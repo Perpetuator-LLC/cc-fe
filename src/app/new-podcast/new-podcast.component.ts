@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService } from '../podcasts.service';
+import { TeamsService } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
@@ -12,6 +13,8 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
 import { MatCard } from '@angular/material/card';
+import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
+import { TeamsResult } from '../teams-list/teams-list.component';
 
 @Component({
   selector: 'app-new-podcast',
@@ -26,6 +29,9 @@ import { MatCard } from '@angular/material/card';
     MessageComponent,
     MatCard,
     MatError,
+    MatSelect,
+    MatOption,
+    MatOptgroup,
   ],
   templateUrl: './new-podcast.component.html',
   styleUrls: ['./new-podcast.component.scss'],
@@ -33,42 +39,32 @@ import { MatCard } from '@angular/material/card';
 export class NewPodcastComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   podcastForm: FormGroup;
-  // podcastForm: FormGroup = this.fb.group({
-  //   id: [{ value: '', disabled: true }],
-  //   name: ['', [Validators.required, Validators.minLength(3)]],
-  //   members: this.fb.array([]),
-  // });
   private subscriptions = new Subscription();
   nameError: string | null = null;
+  ownedTeams: TeamsResult[] = [];
+  isLoadingTeams = true;
+  teamNameLinked = true;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private messageService: MessageService,
     private podcastsService: PodcastsService,
+    private teamsService: TeamsService,
     private toolbarService: ToolbarService,
   ) {
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9 ]+$/)]],
-      members: this.fb.array([]),
+      teamSelection: ['new', Validators.required],
+      newTeamName: [''],
+      existingTeamId: [''],
     });
 
-    this.podcastForm.get('name')?.valueChanges.subscribe(() => {
-      this.podcastForm.updateValueAndValidity();
-      const errors = this.podcastForm.get('name')?.errors;
-      if (errors) {
-        if (errors['required']) {
-          this.nameError = 'Podcast name is required';
-        } else if (errors['minlength']) {
-          this.nameError = 'Podcast name must be at least 3 characters';
-        } else if (errors['pattern']) {
-          this.nameError = 'Podcast name can only contain letters, numbers, and spaces';
-        } else {
-          this.nameError = 'Enter a valid podcast name';
-        }
-      } else {
-        this.nameError = null;
+    this.podcastForm.get('name')?.valueChanges.subscribe((value) => {
+      this.updateNameValidation(value);
+      if (this.teamNameLinked && this.podcastForm.get('teamSelection')?.value === 'new') {
+        this.podcastForm.get('newTeamName')?.setValue(value);
       }
     });
   }
@@ -78,30 +74,84 @@ export class NewPodcastComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.loadOwnedTeams();
   }
 
-  // get members(): FormArray {
-  //   return this.podcastForm.get('members') as FormArray;
-  // }
-
-  createPodcast() {
-    if (this.podcastForm.valid) {
-      const { name } = this.podcastForm.getRawValue();
-      this.subscriptions.add(
-        this.podcastsService.createPodcast(name).subscribe({
-          next: (created) => {
-            this.messageService.success('Podcast created successfully');
-            this.router.navigate(['/podcast', created.podcast.id]);
-          },
-          error: (err) => {
-            this.messageService.error(`Failed to create podcast: ${err.message}`);
-          },
-        }),
-      );
+  private updateNameValidation(value: string): void {
+    this.podcastForm.updateValueAndValidity();
+    const errors = this.podcastForm.get('name')?.errors;
+    if (errors) {
+      if (errors['required']) {
+        this.nameError = 'Podcast name is required';
+      } else if (errors['minlength']) {
+        this.nameError = `Podcast name must be at least 3 characters`;
+      } else if (errors['pattern']) {
+        this.nameError = 'Podcast name can only contain letters, numbers, and spaces';
+      } else {
+        this.nameError = `Enter a valid podcast name, received: ${value}`;
+      }
+    } else {
+      this.nameError = null;
     }
   }
 
-  ngOnDestroy() {
+  loadOwnedTeams(): void {
+    this.isLoadingTeams = true;
+    this.subscriptions.add(
+      this.teamsService.getTeams().subscribe({
+        next: (teams) => {
+          this.ownedTeams = teams.filter((team) => team.members.some((member) => member.role === 'owner'));
+          this.isLoadingTeams = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load teams: ${err.message}`);
+          this.isLoadingTeams = false;
+        },
+      }),
+    );
+  }
+
+  onNewTeamNameFocus(): void {
+    this.teamNameLinked = false;
+  }
+
+  createPodcast(): void {
+    if (this.podcastForm.valid) {
+      const { name, teamSelection, newTeamName, existingTeamId } = this.podcastForm.getRawValue();
+
+      if (teamSelection === 'new') {
+        const teamName = newTeamName || name;
+        this.subscriptions.add(
+          this.teamsService.createTeam(teamName).subscribe({
+            next: (teamResult) => {
+              this.createPodcastWithTeam(name, teamResult.team.id);
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to create team: ${err.message}`);
+            },
+          }),
+        );
+      } else {
+        this.createPodcastWithTeam(name, existingTeamId || teamSelection);
+      }
+    }
+  }
+
+  private createPodcastWithTeam(name: string, teamId: string): void {
+    this.subscriptions.add(
+      this.podcastsService.createPodcast(name, teamId).subscribe({
+        next: (created) => {
+          this.messageService.success('Podcast created successfully');
+          this.router.navigate(['/podcast', created.podcast.id]);
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to create podcast: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
   }

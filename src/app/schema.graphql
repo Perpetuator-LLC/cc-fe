@@ -14,8 +14,8 @@ type Query {
   jobs(jobIds: [UUID], jobStatuses: [String], jobTypes: [String], page: Int = 1, pageSize: Int = 10, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
   podcasts(podcastId: ID): [PodcastType!]
   rssFeeds: [RssFeedType!]
-  teams(teamId: UUID): [TeamType]
   deleteUserResults: DeleteUserResults
+  teams(teamId: UUID): [TeamType]
 }
 
 type UserDataExport {
@@ -52,11 +52,11 @@ type PodcastType {
   guid: UUID!
   tgChannelId: String
   tgResponse: String
+  team: TeamType
   rssFeeds: [RssFeedType!]!
   episodes: [EpisodeType!]!
   url: String
   imageUrl: String
-  team: TeamType
 }
 
 """
@@ -64,6 +64,22 @@ Leverages the internal Python implementation of UUID (uuid.UUID) to provide nati
 in fields, resolvers and input.
 """
 scalar UUID
+
+type TeamType {
+  id: UUID!
+  name: String!
+  members: [TeamMembershipType]
+}
+
+type TeamMembershipType {
+  user: UserType
+  role: String
+}
+
+type UserType {
+  id: ID
+  username: String
+}
 
 type RssFeedType {
   id: ID!
@@ -104,22 +120,6 @@ type NewsResult {
   source: String
   summary: String
   content: String
-}
-
-type TeamType {
-  id: UUID!
-  name: String!
-  members: [TeamMembershipType]
-}
-
-type TeamMembershipType {
-  user: UserType
-  role: String
-}
-
-type UserType {
-  id: ID
-  username: String
 }
 
 type JobData {
@@ -277,6 +277,8 @@ type PaginatedJobStatus {
 type DeleteUserResults {
   deletingTeams: [TeamType]
   leavingTeams: [TeamType]
+  deletingPodcasts: [PodcastType]
+  leavingPodcasts: [PodcastType]
 }
 
 type Mutation {

@@ -391,23 +391,21 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       this.messageService.error('Podcast slug is required when podcast is enabled');
       return;
     }
-    const saveObservable = id
-      ? this.podcastsService.updatePodcast(
-          id,
-          name,
-          intro,
-          prompt,
-          outro,
-          enabled,
-          slug,
-          description,
-          ownerName,
-          ownerEmail,
-          ownerLink,
-          tgBotToken,
-          tgChannelId,
-        )
-      : this.podcastsService.createPodcast(name);
+    const saveObservable = this.podcastsService.updatePodcast(
+      id,
+      name,
+      intro,
+      prompt,
+      outro,
+      enabled,
+      slug,
+      description,
+      ownerName,
+      ownerEmail,
+      ownerLink,
+      tgBotToken,
+      tgChannelId,
+    );
 
     this.subscriptions.add(
       saveObservable.subscribe({
