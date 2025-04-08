@@ -160,6 +160,9 @@ mat.$theme-ignore-duplication-warnings: true;
 //@include custom-card-theme($dark-theme);
 //@include custom-card-theme($light-theme);
 
+//color: red;
+//color: mat.get-color-from-palette($warn);
+
 // Keep your existing theme applications
 body.dark {
   @include mat.all-component-themes($dark-theme);
@@ -256,6 +259,11 @@ a {
   &:visited {
     color: var(--md-sys-color-primary-visited);
   }
+}
+
+// Dialogs open outside of the normal component tree, so we have to apply the styles globally
+mat-dialog-container h3.danger {
+  color: var(--md-sys-color-error);
 }
 
 // Now, debug the theme map

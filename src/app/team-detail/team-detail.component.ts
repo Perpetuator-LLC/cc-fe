@@ -214,19 +214,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // private setRssFeeds(rssFeeds: RssFeedResult[]): void {
-  //   const rssFeedsFormArray = this.rssFeeds;
-  //   rssFeedsFormArray.clear();
-  //   rssFeeds.forEach((feed) => {
-  //     rssFeedsFormArray.push(
-  //       this.fb.group({
-  //         id: [feed.id, Validators.required],
-  //         url: [feed.url, Validators.required],
-  //       }),
-  //     );
-  //   });
-  // }
-
   addOrUpdateUserInTeam() {
     if (this.newUserForm.valid) {
       const { userId, role } = this.newUserForm.value;
@@ -331,18 +318,6 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.newUserForm.patchValue({ userId: user.id });
   }
 
-  // refreshTelegram() {
-  //   const { id } = this.teamForm.getRawValue();
-  //   this.teamsService.refreshTgResponse(id).subscribe({
-  //     next: () => {
-  //       this.messageService.success(`Team Telegram response refreshed successfully`);
-  //     },
-  //     error: (err) => {
-  //       this.messageService.error(`Failed to refresh Telegram response: ${err.message}`);
-  //     },
-  //   });
-  // }
-
   saveTeam() {
     if (!this.teamForm.valid) {
       return;
@@ -376,33 +351,34 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.toolbarService.clearToolbarComponent();
   }
 
-  // copyPodcastUrl() {
-  //   const url = this.teamForm.get('url')?.value;
-  //   if (!url || url === '') {
-  //     this.messageService.error('Podcast URL is empty');
-  //     return;
-  //   }
-  //   if (this.clipboard.copy(url)) {
-  //     this.messageService.success('Podcast URL copied to clipboard');
-  //   } else {
-  //     this.messageService.error('Failed to copy podcast URL');
-  //   }
-  // }
-
   deleteTeamDialog() {
     const teamName = this.teamForm.get('name')?.value;
+
+    // Build podcast list to show in the confirmation dialog
+    let podcastsList = '';
+    if (this.podcasts.length > 0) {
+      podcastsList =
+        '<ul>' +
+        this.podcasts.map((podcast) => `<li>${podcast.name}</li>`).join('') +
+        '</ul>' +
+        '<h3 class="danger">WARNING: The deleted podcast\'s episodes and audio files will also be ' +
+        'permanently deleted.</h3>';
+    } else {
+      podcastsList = '<p>No podcasts associated with this team.</p>';
+    }
+
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         message:
-          "<h3>Removing team '" +
-          teamName +
-          "' will remove all associated episodes and audio files owned by this team. This cannot be undone.</h3>" +
-          '<br/><br/><h2>Are you sure you want to proceed?</h2>',
+          `<h3>Removing team '${teamName}' will result in the following podcasts also being removed:</h3>` +
+          podcastsList +
+          '<h2>This action cannot be undone. Are you sure you want to proceed?</h2>',
       },
+      width: '500px',
     });
+
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        // get confirmation from user
         this.deleteTeam();
       }
     });
@@ -421,100 +397,4 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       }),
     );
   }
-
-  // onPodcastImageSelected(event: Event) {
-  //   const file = (event.target as HTMLInputElement).files?.[0];
-  //   if (file) {
-  //     this.selectedFile = file;
-  //
-  //     // Preview the image
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       this.previewImage = reader.result;
-  //     };
-  //     reader.readAsDataURL(this.selectedFile);
-  //
-  //     this.uploadPodcastImage(file);
-  //   }
-  // }
-
-  // private uploadPodcastImage(file: File) {
-  //   this.teamsService.uploadPodcastImage(this.teamId, file).subscribe({
-  //     next: (response) => {
-  //       this.messageService.success('Podcast image uploaded successfully');
-  //       this.teamForm.patchValue({ imageUrl: response.team.imageUrl });
-  //       this.selectedFile = null;
-  //       this.teamForm.get('image')?.reset();
-  //     },
-  //     error: (error) => {
-  //       this.messageService.error(`Failed to upload podcast image: ${error.message}`);
-  //       this.selectedFile = null;
-  //       this.teamForm.get('image')?.reset();
-  //     },
-  //   });
-  // }
-
-  // get rssFeeds(): FormArray {
-  //   return this.teamForm.get('rssFeeds') as FormArray;
-  // }
-  //
-  // openAddRssFeedDialog(): void {
-  //   const dialogRef = this.dialog.open(AddRssFeedDialogComponent, {
-  //     width: '400px',
-  //   });
-  //
-  //   dialogRef.afterClosed().subscribe((result) => {
-  //     if (result) {
-  //       this.addRssFeed(result.url);
-  //     }
-  //   });
-  // }
-  //
-  // addRssFeed(url: string): void {
-  //   this.rssFeedLoading = true;
-  //   this.subscriptions.add(
-  //     this.teamsService.createRssFeed(url).subscribe({
-  //       next: (data) => {
-  //         const existingId = this.rssFeeds.controls.findIndex((a) => a.get('id')?.value == data.rssFeed.id);
-  //         if (existingId >= 0) {
-  //           this.messageService.info('RSS Feed already exists');
-  //           this.rssFeedLoading = false;
-  //           return;
-  //         }
-  //         this.rssFeeds.push(
-  //           this.fb.group({
-  //             id: [data.rssFeed.id, Validators.required],
-  //             url: [data.rssFeed.url, Validators.required],
-  //           }),
-  //         );
-  //         this.updateRssFeeds();
-  //       },
-  //       error: (err) => {
-  //         this.messageService.error(`Failed to update RSS Feeds: ${err.message}`);
-  //       },
-  //     }),
-  //   );
-  // }
-  // //
-  // removeRssFeed(feedId: number): void {
-  //   this.rssFeeds.removeAt(this.rssFeeds.controls.findIndex((control) => control.get('id')?.value === feedId));
-  //   this.updateRssFeeds();
-  // }
-  //
-  // private updateRssFeeds(): void {
-  //   this.rssFeedLoading = true;
-  //   const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.id);
-  //   this.teamsService.setTeamRssFeeds(this.teamId, rssFeedIds).subscribe({
-  //     next: (data) => {
-  //       this.teamForm.patchValue(data.team);
-  //       this.rssFeedLoading = false;
-  //       this.messageService.success('RSS Feeds updated successfully');
-  //     },
-  //     error: (err) => {
-  //       this.refreshTeamData();
-  //       this.rssFeedLoading = false;
-  //       this.messageService.error(`Failed to update RSS Feeds: ${err.message}`);
-  //     },
-  //   });
-  // }
 }

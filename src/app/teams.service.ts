@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { RssFeedResult, TeamsResult } from './teams-list/teams-list.component';
+import { PodcastsResult } from './podcasts-list/podcasts-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
@@ -62,60 +63,6 @@ export class TeamsService extends BaseService {
       }),
     );
   }
-
-  // refreshTgResponse(id: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
-  //   const GQL = gql`
-  //     mutation UpdateTeam($id: ID!, $refreshTgResponse: Boolean) {
-  //       updateTeam(id: $id, refreshTgResponse: $refreshTgResponse) {
-  //         success
-  //         message
-  //         team {
-  //           id
-  //           name
-  //           enabled
-  //           slug
-  //           url
-  //           intro
-  //           prompt
-  //           outro
-  //           tgChannelId
-  //           tgResponse
-  //           members {
-  //             user {
-  //               id
-  //               username
-  //             }
-  //             role
-  //           }
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface Response {
-  //     updateTeam: {
-  //       success: boolean;
-  //       message: string;
-  //       team: TeamsResult;
-  //     };
-  //   }
-  //
-  //   const refreshTgResponse = true;
-  //   return this.mutate<Response>({
-  //     mutation: GQL,
-  //     variables: {
-  //       id,
-  //       refreshTgResponse,
-  //     },
-  //   }).pipe(
-  //     map((data) => {
-  //       if (!data.updateTeam.success) {
-  //         throw new Error(data.updateTeam.message);
-  //       }
-  //       return data.updateTeam;
-  //     }),
-  //   );
-  // }
 
   updateTeam(
     teamId: string,
@@ -383,6 +330,14 @@ export class TeamsService extends BaseService {
             id
             name
           }
+          deletingPodcasts {
+            id
+            name
+          }
+          leavingPodcasts {
+            id
+            name
+          }
         }
       }
     `;
@@ -391,6 +346,8 @@ export class TeamsService extends BaseService {
       deleteUserResults: {
         deletingTeams: TeamsResult[];
         leavingTeams: TeamsResult[];
+        deletingPodcasts: PodcastsResult[];
+        leavingPodcasts: PodcastsResult[];
       };
     }
 

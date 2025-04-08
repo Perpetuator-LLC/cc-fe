@@ -29,6 +29,7 @@ export interface RssFeedResult {
 
 export interface PodcastsResult {
   id: number;
+  team: TeamsResult;
   name: string | null;
   url: string | null;
   enabled: boolean;
@@ -44,7 +45,6 @@ export interface PodcastsResult {
   tgChannelId: string | null;
   tgResponse: string | null;
   rssFeeds: RssFeedResult[];
-  team: TeamsResult;
 }
 
 @Component({

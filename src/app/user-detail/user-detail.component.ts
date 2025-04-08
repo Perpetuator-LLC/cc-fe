@@ -395,7 +395,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         next: (data) => {
           const deleteTeamNames = data.deletingTeams.map((team) => team.name);
           const leavingTeamNames = data.leavingTeams.map((team) => team.name);
-          this.openDeleteConfirmationDialog(deleteTeamNames, leavingTeamNames);
+          const deletePodcastNames = data.deletingPodcasts.map((podcast) => podcast.name);
+          const leavingPodcastNames = data.leavingPodcasts.map((podcast) => podcast.name);
+          this.openDeleteConfirmationDialog(deleteTeamNames, leavingTeamNames, deletePodcastNames, leavingPodcastNames);
         },
         error: (err) => {
           this.messageService.error('Failed to load teams: ' + err.message);
@@ -404,26 +406,42 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  openDeleteConfirmationDialog(deletingTeams: (string | null)[], leavingTeams: (string | null)[]) {
+  openDeleteConfirmationDialog(
+    deletingTeams: (string | null)[],
+    leavingTeams: (string | null)[],
+    deletingPodcasts: (string | null)[],
+    leavingPodcasts: (string | null)[],
+  ) {
     const email = this.userDetailForm.get('email')?.value;
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      panelClass: 'delete-confirmation-dialog',
       data: {
         message:
           "<h3>Removing your account '" +
           email +
-          "' will result in the following actions:<br/><br/>" +
+          "' will result in the following actions:</h3>" +
           (deletingTeams?.length === 0
             ? 'You are not the sole owner of any teams, so no teams will be deleted.'
             : "You are the sole owner of the following team(s) and they will be permanently deleted: '" +
               deletingTeams.join("', '") +
-              "'<br /><br/>WARNING: The deleted team's episodes and audio files will also be permanently deleted.") +
+              "'") +
           '<br/><br/>' +
           (leavingTeams?.length === 0
             ? 'You will not be removed from any teams.'
             : "You will be removed from team(s): '" + leavingTeams.join("', '") + "'") +
           '<br/><br/>' +
-          ' None of these actions can be undone.</h3>' +
-          '<br/><br/><h2>Are you sure you want to proceed?</h2>',
+          (deletingPodcasts?.length === 0
+            ? 'These teams are not the owner of any podcasts, so no podcasts will be deleted.'
+            : "The teams that will be deleted own the following podcast(s) and they will be permanently deleted: '" +
+              deletingPodcasts.join("', '") +
+              "'<h3 class='danger'>WARNING: The deleted podcast's episodes and audio files will also be " +
+              'permanently deleted.</h3>') +
+          (leavingPodcasts?.length === 0
+            ? 'You will not be removed from any podcasts.'
+            : "You will be removed from podcast(s): '" + leavingPodcasts.join("', '") + "'") +
+          '<br/><br/>' +
+          ' None of these actions can be undone.' +
+          '<h2>Are you sure you want to proceed?</h2>',
       },
     });
     dialogRef.afterClosed().subscribe({
