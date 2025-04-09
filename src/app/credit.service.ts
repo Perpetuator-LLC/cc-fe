@@ -179,7 +179,7 @@ export class CreditService extends BaseService implements OnDestroy {
             sessionUrl
             status
             createdAt
-            creditTransactions {
+            transactions {
               id
               createdAt
               description
@@ -233,7 +233,7 @@ export class CreditService extends BaseService implements OnDestroy {
             sessionUrl
             status
             createdAt
-            creditTransactions {
+            transactions {
               id
               createdAt
               description
@@ -287,7 +287,7 @@ export class CreditService extends BaseService implements OnDestroy {
             sessionUrl
             status
             createdAt
-            creditTransactions {
+            transactions {
               id
               createdAt
               description

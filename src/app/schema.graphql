@@ -1,7 +1,7 @@
 type Query {
   userDataExport(confirm: String!): UserDataExport
   credits: Int
-  transactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedCreditTransactionType
+  transactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedTransactionType
   orders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
   codes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedCodeType
   user: UserDetails
@@ -27,7 +27,7 @@ type UserDataExport {
   teams: [TeamType]
   episodes: [EpisodeType]
   jobs: [JobData]
-  transactions: [CreditTransactionType]
+  transactions: [TransactionType]
   orders: [OrderType]
 }
 
@@ -132,7 +132,7 @@ type JobData {
   result: String
   createdAt: DateTime!
   updatedAt: DateTime!
-  creditTransactions: [CreditTransactionType!]!
+  transactions: [TransactionType!]!
   cost: Int
 }
 
@@ -144,7 +144,7 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
-type CreditTransactionType {
+type TransactionType {
   id: ID!
   originalUserId: UUID
   description: String!
@@ -166,7 +166,7 @@ type OrderType {
   description: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  creditTransactions: [CreditTransactionType!]!
+  transactions: [TransactionType!]!
 }
 
 """An enumeration."""
@@ -181,13 +181,13 @@ enum ApiOrderStatusChoices {
   CANCELED
 }
 
-type PaginatedCreditTransactionType {
+type PaginatedTransactionType {
   totalRecords: Int
   totalPages: Int
   currentPage: Int
   hasNext: Boolean
   hasPrevious: Boolean
-  transactions: [CreditTransactionType]
+  transactions: [TransactionType]
 }
 
 enum SortDirection {
