@@ -477,8 +477,8 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.paymentService.createCheckoutSession(amount).subscribe({
         next: (data) => {
-          if (data?.url) {
-            this.paymentService.redirectToCheckout(data.url);
+          if (data?.order?.sessionUrl) {
+            this.paymentService.redirectToCheckout(data.order.sessionUrl);
           }
         },
         error: (err) => {

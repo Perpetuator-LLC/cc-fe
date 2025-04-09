@@ -5,14 +5,14 @@ type Query {
   orders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
   codes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedCodeType
   user: UserDetails
-  userSettings(keys: [String]!): UserSettingsData
+  userSettings(keys: [String]!): UserSettingsType
   users(query: String!): UserList
   userCookieConsents: [UserCookieConsentType]
   emailChangePending: EmailChangeRequestType
   episodes(episodeId: ID, podcastId: ID, page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedEpisodes
   news(podcastId: ID!, hours: Int = 24): NewsData
   jobs(jobIds: [UUID], jobStatuses: [String], jobTypes: [String], page: Int = 1, pageSize: Int = 10, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
-  podcasts(podcastId: ID): [PodcastType!]
+  podcasts(podcastId: ID, teamId: UUID): [PodcastType!]
   rssFeeds: [RssFeedType!]
   deleteUserResults: DeleteUserResults
   teams(teamId: UUID): [TeamType]
@@ -22,7 +22,7 @@ type UserDataExport {
   id: ID
   username: String
   email: String
-  settings: [UserSettingData]
+  settings: [UserSettingType]
   podcasts: [PodcastType]
   teams: [TeamType]
   episodes: [EpisodeType]
@@ -31,7 +31,7 @@ type UserDataExport {
   orders: [OrderType]
 }
 
-type UserSettingData {
+type UserSettingType {
   key: String
   value: String
 }
@@ -230,10 +230,10 @@ type UserDetails {
   permissions: [String]
 }
 
-type UserSettingsData {
+type UserSettingsType {
   success: Boolean
   message: String
-  results: [UserSettingData]
+  results: [UserSettingType]
 }
 
 type UserList {
@@ -301,13 +301,26 @@ type Mutation {
   Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
   """
   createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
-  processStripeCharge(amount: Int!, token: String!): ProcessStripeCharge
+
+  """Mutation to update user settings."""
   updateUserSetting(key: String!, value: String!): UpdateUserSetting
+
+  """Mutation to update user cookie consent."""
   updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
+
+  """Mutation to update user information."""
   updateUser(email: String!, username: String!): UpdateUser
+
+  """Mutation to delete a user."""
   deleteUser(confirm: String!): DeleteUser
+
+  """Mutation to change user password."""
   changePassword(password: String!): ChangePassword
+
+  """Mutation to resend email change verification link."""
   resendEmailChange: ResendEmailChange
+
+  """Mutation to cancel email change request."""
   cancelEmailChange: CancelEmailChange
   createEpisode(newsIds: [Int]!, podcastId: ID!): CreateEpisode
   createEpisodeChain(newsIds: [ID]!, podcastId: ID!): CreateEpisodeChain
@@ -355,11 +368,23 @@ type Mutation {
   Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
   """
   createRssFeed(url: String!): CreateRssFeed
+
+  """Mutation to create a new team."""
   createTeam(name: String!): CreateTeam
+
+  """Mutation to delete a team."""
   deleteTeam(confirm: String!, teamId: UUID!): DeleteTeam
+
+  """Mutation to update a team."""
   updateTeam(name: String, teamId: UUID!): UpdateTeam
+
+  """Mutation to add or update a user in a team."""
   upsertUser(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
+
+  """Mutation to remove a user from a team."""
   removeUserFromTeam(teamId: UUID!, userId: UUID!): RemoveUserFromTeam
+
+  """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
 }
 
@@ -398,45 +423,48 @@ Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
 type CreateStripeCheckoutSession {
   success: Boolean
   message: String
-  sessionId: String
-  url: String
+  order: OrderType
 }
 
-type ProcessStripeCharge {
-  success: Boolean
-  message: String
-}
-
+"""Mutation to update user settings."""
 type UpdateUserSetting {
   success: Boolean
   message: String
+  userSetting: UserSettingType
 }
 
+"""Mutation to update user cookie consent."""
 type UpdateCookieConsent {
   success: Boolean
   message: String
+  consent: UserCookieConsentType
 }
 
+"""Mutation to update user information."""
 type UpdateUser {
   success: Boolean
   message: String
 }
 
+"""Mutation to delete a user."""
 type DeleteUser {
   success: Boolean
   message: String
 }
 
+"""Mutation to change user password."""
 type ChangePassword {
   success: Boolean
   message: String
 }
 
+"""Mutation to resend email change verification link."""
 type ResendEmailChange {
   success: Boolean
   message: String
 }
 
+"""Mutation to cancel email change request."""
 type CancelEmailChange {
   success: Boolean
   message: String
@@ -567,29 +595,34 @@ type CreateRssFeed {
   rssFeed: RssFeedType
 }
 
+"""Mutation to create a new team."""
 type CreateTeam {
   success: Boolean
   message: String
   team: TeamType
 }
 
+"""Mutation to delete a team."""
 type DeleteTeam {
   success: Boolean
   message: String
 }
 
+"""Mutation to update a team."""
 type UpdateTeam {
   success: Boolean
   message: String
   team: TeamType
 }
 
+"""Mutation to add or update a user in a team."""
 type UpsertUserToTeam {
   success: Boolean
   message: String
   team: TeamType
 }
 
+"""Mutation to remove a user from a team."""
 type RemoveUserFromTeam {
   success: Boolean
   message: String

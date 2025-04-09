@@ -299,7 +299,7 @@ export class PodcastsService extends BaseService {
   }
 
   getPodcastsByTeamId(teamId: string): Observable<PodcastsResult[]> {
-    const GQL = gql`
+    const GET_TEAM_BY_TEAM_ID = gql`
       query PodcastsByTeamId($teamId: UUID!) {
         podcasts(teamId: $teamId) {
           id
@@ -316,7 +316,7 @@ export class PodcastsService extends BaseService {
     }
 
     return this.query<Response>({
-      query: GQL,
+      query: GET_TEAM_BY_TEAM_ID,
       variables: { teamId },
     }).pipe(map((result) => result.podcasts));
   }
@@ -350,123 +350,6 @@ export class PodcastsService extends BaseService {
     }).pipe(map((data) => data.podcasts));
   }
 
-  // upsertUserToPodcast(podcastId: string, userId: string, role: string): Observable<PodcastsResult> {
-  //   const GQL = gql`
-  //     mutation UpsertUserToPodcast($podcastId: ID!, $userId: ID!, $role: String!) {
-  //       upsertUserToPodcast(podcastId: $podcastId, userId: $userId, role: $role) {
-  //         success
-  //         message
-  //         podcast {
-  //           id
-  //           name
-  //           members {
-  //             user {
-  //               id
-  //               username
-  //             }
-  //             role
-  //           }
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface Response {
-  //     upsertUserToPodcast: {
-  //       success: boolean;
-  //       message: string;
-  //       podcast: PodcastsResult;
-  //     };
-  //   }
-  //
-  //   return this.mutate<Response>({
-  //     mutation: GQL,
-  //     variables: { podcastId, userId, role },
-  //   }).pipe(
-  //     map((data) => {
-  //       if (!data.upsertUserToPodcast.success) {
-  //         throw new Error(data.upsertUserToPodcast.message);
-  //       }
-  //       return data.upsertUserToPodcast.podcast;
-  //     }),
-  //   );
-  // }
-
-  // removeUserFromPodcast(podcastId: string, userId: string): Observable<PodcastsResult> {
-  //   const REMOVE_USER_FROM_TEAM = gql`
-  //     mutation RemoveUserFromPodcast($podcastId: ID!, $userId: ID!) {
-  //       removeUserFromPodcast(podcastId: $podcastId, userId: $userId) {
-  //         success
-  //         message
-  //         podcast {
-  //           id
-  //           name
-  //           members {
-  //             user {
-  //               id
-  //               username
-  //             }
-  //             role
-  //           }
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface RemoveUserFromPodcastData {
-  //     removeUserFromPodcast: {
-  //       success: boolean;
-  //       message: string;
-  //       podcast: PodcastsResult;
-  //     };
-  //   }
-  //
-  //   return this.mutate<RemoveUserFromPodcastData>({
-  //     mutation: REMOVE_USER_FROM_TEAM,
-  //     variables: { podcastId, userId },
-  //   }).pipe(
-  //     map((data) => {
-  //       if (!data.removeUserFromPodcast.success) {
-  //         throw new Error(data.removeUserFromPodcast.message);
-  //       }
-  //       return data.removeUserFromPodcast.podcast;
-  //     }),
-  //   );
-  // }
-
-  // users(query: string): Observable<User[]> {
-  //   const GQL = gql`
-  //     query GetUsers($query: String!) {
-  //       users(query: $query) {
-  //         results {
-  //           id
-  //           username
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface Response {
-  //     users: {
-  //       success: boolean;
-  //       message: string;
-  //       results: User[];
-  //     };
-  //   }
-  //
-  //   return this.query<Response>({
-  //     query: GQL,
-  //     variables: { query },
-  //   }).pipe(
-  //     map((data) => {
-  //       if (!data.users.success) {
-  //         throw new Error(data.users.message);
-  //       }
-  //       return data.users.results;
-  //     }),
-  //   );
-  // }
-
   deletePodcast(podcastId: string, confirm: string) {
     const DELETE_TEAM = gql`
       mutation DeletePodcast($podcastId: ID!, $confirm: String!) {
@@ -496,108 +379,6 @@ export class PodcastsService extends BaseService {
       }),
     );
   }
-
-  // deleteUserResults() {
-  //   const GQL = gql`
-  //     query GetDeleteUserResults {
-  //       deleteUserResults {
-  //         deletingPodcasts {
-  //           id
-  //           name
-  //         }
-  //         leavingPodcasts {
-  //           id
-  //           name
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface Response {
-  //     deleteUserResults: {
-  //       deletingPodcasts: PodcastsResult[];
-  //       leavingPodcasts: PodcastsResult[];
-  //     };
-  //   }
-  //
-  //   return this.query<Response>({
-  //     query: GQL,
-  //     fetchPolicy: 'network-only',
-  //   }).pipe(
-  //     map((data) => {
-  //       return data.deleteUserResults;
-  //     }),
-  //   );
-  // }
-
-  // getUserDataExport(exportConfirmation: string) {
-  //   const USER_DATA_EXPORT = gql`
-  //     query UserDataExport($confirm: String!) {
-  //       userDataExport(confirm: $confirm) {
-  //         id
-  //         username
-  //         email
-  //         settings {
-  //           key
-  //           value
-  //         }
-  //         podcasts {
-  //           id
-  //           name
-  //           intro
-  //           prompt
-  //           outro
-  //           enabled
-  //           slug
-  //           url
-  //           tgResponse
-  //           tgChannelId
-  //         }
-  //         episodes {
-  //           title
-  //           content
-  //           date
-  //           telegramDate
-  //           podcastDate
-  //           podcast {
-  //             id
-  //             name
-  //           }
-  //         }
-  //         jobs {
-  //           id
-  //           status
-  //           result
-  //           args
-  //           createdAt
-  //           updatedAt
-  //         }
-  //       }
-  //     }
-  //   `;
-  //
-  //   interface Response {
-  //     userDataExport: {
-  //       id: string;
-  //       username: string;
-  //       email: string;
-  //       settings: { key: string; value: string }[];
-  //       podcasts: PodcastsResult[];
-  //       episodes: Episode[];
-  //       jobs: Job[];
-  //     };
-  //   }
-  //
-  //   return this.query<Response>({
-  //     query: USER_DATA_EXPORT,
-  //     variables: { confirm: exportConfirmation },
-  //     fetchPolicy: 'network-only',
-  //   }).pipe(
-  //     map((data) => {
-  //       return data.userDataExport;
-  //     }),
-  //   );
-  // }
 
   uploadPodcastImage(
     id: string,

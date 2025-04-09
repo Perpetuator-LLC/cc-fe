@@ -7,6 +7,7 @@ import { map } from 'rxjs';
 import { BaseService } from './base.service';
 import { environment } from '../environments/environment';
 import { ErrorHandlerService } from './error-handler.service';
+import { UserOrder } from './credit.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,16 +26,22 @@ export class PaymentService extends BaseService {
     const CREATE_STRIPE_CHECKOUT_SESSION = gql`
       mutation CreateStripeCheckoutSession($amount: Int!) {
         createStripeCheckoutSession(amount: $amount) {
-          sessionId
-          url
+          success
+          message
+          order {
+            id
+            sessionId
+            sessionUrl
+          }
         }
       }
     `;
 
     interface Response {
       createStripeCheckoutSession: {
-        sessionId: string;
-        url: string;
+        success: boolean;
+        message: string;
+        order: UserOrder;
       };
     }
 
@@ -43,8 +50,8 @@ export class PaymentService extends BaseService {
       variables: { amount },
     }).pipe(
       map((data) => {
-        if (!data.createStripeCheckoutSession.sessionId) {
-          throw new Error('Failed to create checkout session');
+        if (!data.createStripeCheckoutSession.success) {
+          throw new Error(data.createStripeCheckoutSession.message);
         }
         return data.createStripeCheckoutSession;
       }),
