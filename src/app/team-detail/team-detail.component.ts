@@ -39,8 +39,7 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
-import { PodcastsService } from '../podcasts.service';
-import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
+import { PodcastConnection, PodcastsResult, PodcastsService } from '../podcasts.service';
 
 @Component({
   selector: 'app-team-detail',
@@ -93,7 +92,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
-  private teamId: string;
+  private teamUuid: string;
   protected deleteConfirmation = '';
   protected podcasts: PodcastsResult[] = [];
   protected podcastsDisplayedColumns: string[] = ['name', 'enabled', 'actions'];
@@ -113,7 +112,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (!id) {
       throw new Error('Failed to get Team ID from route.');
     }
-    this.teamId = id;
+    this.teamUuid = id;
 
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -142,9 +141,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   private loadTeamPodcasts(): void {
     this.loadingPodcasts = true;
     this.subscriptions.add(
-      this.podcastsService.getPodcastsByTeamId(this.teamId).subscribe({
-        next: (podcasts: PodcastsResult[]) => {
-          this.podcasts = podcasts;
+      this.podcastsService.getPodcastsByTeamId(this.teamUuid).subscribe({
+        next: (podcasts: PodcastConnection) => {
+          this.podcasts = podcasts.edges.map((edge) => edge.node);
           this.loadingPodcasts = false;
         },
         error: (err) => {
@@ -179,7 +178,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
   private refreshTeamData() {
     this.subscriptions.add(
-      this.teamsService.getTeamById(this.teamId).subscribe({
+      this.teamsService.getTeamById(this.teamUuid).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
@@ -217,9 +216,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   addOrUpdateUserInTeam() {
     if (this.newUserForm.valid) {
       const { userId, role } = this.newUserForm.value;
-      const teamId: string = this.teamForm.get('id')?.value;
+      const teamUuid: string = this.teamForm.get('id')?.value;
       if (role === 'owner') {
-        this.openNewOwnerDialog(teamId, userId, role);
+        this.openNewOwnerDialog(teamUuid, userId, role);
       } else {
         // if the user was an owner, we need to show a confirmation dialog
         const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
@@ -234,11 +233,11 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           });
           dialogRef.afterClosed().subscribe((confirmed) => {
             if (confirmed) {
-              this.upsertUserToTeam(teamId, userId, role);
+              this.upsertUserToTeam(teamUuid, userId, role);
             }
           });
         } else {
-          this.upsertUserToTeam(teamId, userId, role);
+          this.upsertUserToTeam(teamUuid, userId, role);
         }
       }
     } else {
@@ -246,7 +245,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  private openNewOwnerDialog(teamId: string, userId: string, role: string) {
+  private openNewOwnerDialog(teamUuid: string, userId: string, role: string) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         message:
@@ -256,14 +255,14 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.upsertUserToTeam(teamId, userId, role);
+        this.upsertUserToTeam(teamUuid, userId, role);
       }
     });
   }
 
-  private upsertUserToTeam(teamId: string, userId: string, role: string) {
+  private upsertUserToTeam(teamUuid: string, userId: string, role: string) {
     this.subscriptions.add(
-      this.teamsService.upsertUserToTeam(teamId, userId, role).subscribe({
+      this.teamsService.upsertUserToTeam(teamUuid, userId, role).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
@@ -278,7 +277,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   }
 
   removeUserFromTeam(userId: string) {
-    const teamId = this.teamForm.get('id')?.value;
+    const teamUuid = this.teamForm.get('id')?.value;
     const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
     const role = user?.get('role')?.value;
 
@@ -292,17 +291,17 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       });
       dialogRef.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteUserFromTeam(teamId, userId);
+          this.deleteUserFromTeam(teamUuid, userId);
         }
       });
     } else {
-      this.deleteUserFromTeam(teamId, userId);
+      this.deleteUserFromTeam(teamUuid, userId);
     }
   }
 
-  private deleteUserFromTeam(teamId: string, userId: string) {
+  private deleteUserFromTeam(teamUuid: string, userId: string) {
     this.subscriptions.add(
-      this.teamsService.removeUserFromTeam(teamId, userId).subscribe({
+      this.teamsService.removeUserFromTeam(teamUuid, userId).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
@@ -386,7 +385,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
   private deleteTeam() {
     this.subscriptions.add(
-      this.teamsService.deleteTeam(this.teamId, this.deleteConfirmation).subscribe({
+      this.teamsService.deleteTeam(this.teamUuid, this.deleteConfirmation).subscribe({
         next: () => {
           this.messageService.success('Team deleted successfully');
           this.router.navigate(['/teams']);

@@ -97,7 +97,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
       next: (jobs) => {
         const completed = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
         // Filter out FETCH_NEWS and EXTRACT_NEWS jobs as they cost 0 and won't update credits...
-        const filtered = completed.filter((job) => job.jobType !== 'FETCH_NEWS' && job.jobType !== 'EXTRACT_NEWS');
+        const filtered = completed.filter((job) => job.kind !== 'FETCH_NEWS' && job.kind !== 'EXTRACT_NEWS');
         if (filtered.length > 0) {
           this.creditService.refetchUserCredits();
         }

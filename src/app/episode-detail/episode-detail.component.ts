@@ -100,7 +100,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.jobType))) {
+            if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.episodeById(this.episodeId, 'network-only' as FetchPolicy).subscribe({
                   next: (episode) => {
@@ -113,7 +113,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                   },
                 }),
               );
-            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.episodeById(job.result).subscribe({
                   next: (episode) => {

@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
 
-// create an enum of jobTypes
+// create an enum of kinds
 export enum JobType {
   FETCH_NEWS = 'fetch_news',
   EXTRACT_NEWS = 'extract_news',
@@ -19,9 +19,9 @@ export enum JobType {
   UPDATE_ARTICLE_AUDIO = 'update_episode_audio',
 }
 
-// create a function to convert string to jobType
-export const stringToJobType = (jobType: string) => {
-  switch (jobType) {
+// create a function to convert string to kind
+export const stringToJobType = (kind: string) => {
+  switch (kind) {
     case 'fetch_news':
       return JobType.FETCH_NEWS;
     case 'extract_news':
@@ -37,8 +37,8 @@ export const stringToJobType = (jobType: string) => {
   }
 };
 
-export const jobTypeToString = (jobType: string) => {
-  switch (jobType) {
+export const kindToString = (kind: string) => {
+  switch (kind) {
     case JobType.FETCH_NEWS:
       return 'Fetch News';
     case JobType.EXTRACT_NEWS:
@@ -63,7 +63,7 @@ export enum JobStatus {
 
 export interface Job {
   id: string;
-  jobType: string;
+  kind: string;
   status: string;
   error: string;
   result: string;
@@ -161,31 +161,30 @@ export class JobService extends BaseService implements OnDestroy {
   private initializeJobStatusPolling() {
     const GET_USER_JOBS = gql`
       query GetUserJobs(
-        $statuses: [String!]!
-        $jobTypes: [String!]
-        $ids: [UUID!]
-        $page: Int!
-        $pageSize: Int!
+        $statuses: [JobStatus!]!
+        $kinds: [JobKind!]
+        $jobUuids: [UUID!]
+        $first: Int!
         $orderBy: String
-        $direction: SortDirection
       ) {
-        jobs(
-          jobStatuses: $statuses
-          jobTypes: $jobTypes
-          jobIds: $ids
-          page: $page
-          pageSize: $pageSize
-          orderBy: $orderBy
-          direction: $direction
-        ) {
-          jobs {
-            id
-            jobType
-            status
-            error
-            result
-            createdAt
-            updatedAt
+        jobs(statuses: $statuses, kinds: $kinds, jobUuids: $jobUuids, first: $first, orderBy: $orderBy) {
+          edges {
+            cursor
+            node {
+              id
+              kind
+              status
+              error
+              result
+              createdAt
+              updatedAt
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -195,7 +194,7 @@ export class JobService extends BaseService implements OnDestroy {
       query: GET_USER_JOBS,
       variables: {
         statuses: [JobStatus.PENDING, JobStatus.RUNNING],
-        jobTypes: [
+        kinds: [
           JobType.SUMMARIZE_NEWS,
           JobType.FETCH_NEWS,
           JobType.EXTRACT_NEWS,
@@ -249,81 +248,96 @@ export class JobService extends BaseService implements OnDestroy {
   }
 
   getJobs(
-    jobStatuses: string[] = [],
-    jobTypes: string[] = [],
+    statuses: string[] = [],
+    kinds: string[] = [],
     jobIds: string[] = [],
-    page = 1,
-    pageSize = 10,
+    first = 10,
+    after: string | null = null,
     orderBy = 'createdAt',
     direction = 'DESC',
   ) {
     const FETCH_USER_JOBS = gql`
       query GetUserJobs(
-        $jobStatuses: [String!]!
-        $jobTypes: [String!]
-        $jobIds: [UUID!]
-        $page: Int!
-        $pageSize: Int!
+        $statuses: [JobStatus!]!
+        $kinds: [JobKind!]
+        $jobUuids: [UUID!]
+        $first: Int
+        $after: String
         $orderBy: String
-        $direction: SortDirection
       ) {
-        jobs(
-          jobStatuses: $jobStatuses
-          jobTypes: $jobTypes
-          jobIds: $jobIds
-          page: $page
-          pageSize: $pageSize
-          orderBy: $orderBy
-          direction: $direction
-        ) {
-          totalRecords
-          totalPages
-          currentPage
-          hasNext
-          hasPrevious
-          jobs {
-            id
-            jobType
-            status
-            cost
-            error
-            result
-            createdAt
-            updatedAt
+        jobs(statuses: $statuses, kinds: $kinds, jobUuids: $jobUuids, first: $first, after: $after, orderBy: $orderBy) {
+          edges {
+            cursor
+            node {
+              id
+              kind
+              status
+              cost
+              error
+              result
+              createdAt
+              updatedAt
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
     `;
 
+    const sort = direction === 'DESC' ? `-${orderBy}` : orderBy;
+
+    interface JobEdge {
+      cursor: string;
+      node: Job;
+    }
+
+    interface PageInfo {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      startCursor?: string;
+      endCursor?: string;
+    }
+
     interface Response {
       jobs: {
-        totalRecords: number;
-        totalPages: number;
-        currentPage: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-        jobs: Job[];
+        edges: JobEdge[];
+        pageInfo: PageInfo;
       };
     }
 
     return this.query<Response>({
       query: FETCH_USER_JOBS,
-      variables: { jobStatuses, jobTypes, jobIds, page, pageSize, orderBy, direction },
+      variables: {
+        statuses,
+        kinds,
+        jobIds,
+        first,
+        after,
+        sort,
+      },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
-        return data.jobs;
+        return {
+          jobs: data.jobs.edges.map((edge) => edge.node),
+          pageInfo: data.jobs.pageInfo,
+        };
       }),
     );
   }
 
   retryJobs(ids: string[] = []) {
     const GQL = gql`
-      mutation RetryJobs($jobIds: [UUID]!) {
-        retryJobs(jobIds: $jobIds) {
+      mutation RetryJobs($jobUuids: [UUID]!) {
+        retryJobs(jobUuids: $jobUuids) {
           jobs {
             id
-            jobType
+            kind
             status
             error
             result
@@ -358,7 +372,7 @@ export class JobService extends BaseService implements OnDestroy {
   deleteJobs(ids: string[] = []) {
     const GQL = gql`
       mutation DeleteJobs($ids: [UUID]!) {
-        deleteJobs(jobIds: $ids) {
+        deleteJobs(jobUuids: $ids) {
           success
           message
         }

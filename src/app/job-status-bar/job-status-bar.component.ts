@@ -8,7 +8,7 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
-import { Job, JobService, JobStatus, JobType, jobTypeToString } from '../job.service';
+import { Job, JobService, JobStatus, JobType, kindToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -44,10 +44,10 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-          this.messageService.success(`${jobTypeToString(job.jobType)} completed.`);
+          this.messageService.success(`${kindToString(job.kind)} completed.`);
         });
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
-          this.messageService.error(`${jobTypeToString(job.jobType)} failed: ${job.error}`);
+          this.messageService.error(`${kindToString(job.kind)} failed: ${job.error}`);
         });
         this.jobs = jobs;
       },
@@ -124,6 +124,6 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     );
   }
 
-  protected readonly jobTypeToString = jobTypeToString;
+  protected readonly kindToString = kindToString;
   protected readonly JobStatus = JobStatus;
 }

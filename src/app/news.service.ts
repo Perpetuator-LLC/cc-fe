@@ -18,13 +18,13 @@ export class NewsService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  fetchNews(podcastId: number) {
+  fetchNews(podcastUuid: number) {
     const FETCH_NEWS_DATA = gql`
-      mutation FetchNews($podcastId: ID!) {
-        fetchNews(podcastId: $podcastId) {
+      mutation FetchNews($podcastUuid: UUID!) {
+        fetchNews(podcastUuid: $podcastUuid) {
           job {
             id
-            jobType
+            kind
             status
             error
             result
@@ -43,7 +43,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: FETCH_NEWS_DATA,
-      variables: { podcastId: podcastId },
+      variables: { podcastUuid: podcastUuid },
     }).pipe(
       map((data) => {
         return data.fetchNews;
@@ -51,19 +51,28 @@ export class NewsService extends BaseService {
     );
   }
 
-  news(podcastId: number, hours = 24) {
+  news(podcastUuid: number, hours = 24) {
     const GET_NEWS = gql`
-      query GetNews($podcastId: ID!, $hours: Int!) {
-        news(podcastId: $podcastId, hours: $hours) {
-          results {
-            id
-            title
-            description
-            url
-            publishedAt
-            source
-            content
-            summary
+      query GetNews($podcastUuid: UUID!, $hours: Int!) {
+        news(podcastUuid: $podcastUuid, hours: $hours) {
+          edges {
+            cursor
+            node {
+              id
+              title
+              description
+              url
+              publishedAt
+              source
+              content
+              summary
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -76,7 +85,7 @@ export class NewsService extends BaseService {
     return this.query<Response>({
       query: GET_NEWS,
       fetchPolicy: 'network-only',
-      variables: { podcastId, hours },
+      variables: { podcastUuid, hours },
     }).pipe(
       map((data) => {
         return data.news;
@@ -84,13 +93,13 @@ export class NewsService extends BaseService {
     );
   }
 
-  extractNews(podcastId: number, ids: number[]) {
+  extractNews(podcastUuid: number, ids: number[]) {
     const EXTRACT_NEWS_DATA = gql`
-      mutation ExtractNews($podcastId: ID!, $ids: [ID!]!) {
-        extractNews(podcastId: $podcastId, newsIds: $ids) {
+      mutation ExtractNews($podcastUuid: UUID!, $newsUuids: [UUID!]!) {
+        extractNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids) {
           job {
             id
-            jobType
+            kind
             status
             error
             result
@@ -109,7 +118,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: EXTRACT_NEWS_DATA,
-      variables: { podcastId, ids },
+      variables: { podcastUuid, ids },
     }).pipe(
       map((data) => {
         return data.extractNews;
@@ -117,13 +126,13 @@ export class NewsService extends BaseService {
     );
   }
 
-  summarizeNews(podcastId: number, ids: number[], force = false) {
+  summarizeNews(podcastUuid: number, ids: number[], force = false) {
     const SUMMARIZE_NEWS_DATA = gql`
-      mutation SummarizeNewsData($podcastId: ID!, $ids: [ID!]!, $force: Boolean!) {
-        summarizeNews(podcastId: $podcastId, newsIds: $ids, force: $force) {
+      mutation SummarizeNewsData($podcastUuid: UUID!, $newsUuids: [UUID!]!, $force: Boolean!) {
+        summarizeNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids, force: $force) {
           job {
             id
-            jobType
+            kind
             status
             error
             result
@@ -142,7 +151,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: SUMMARIZE_NEWS_DATA,
-      variables: { podcastId, ids, force },
+      variables: { podcastUuid, ids, force },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -151,13 +160,13 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisode(ids: number[], podcastId: number) {
+  createEpisode(newsUuids: number[], podcastUuid: number) {
     const CREATE_ARTICLE_DATA = gql`
-      mutation CreateEpisodeData($ids: [Int!]!, $podcastId: ID!) {
-        createEpisode(newsIds: $ids, podcastId: $podcastId) {
+      mutation CreateEpisodeData($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
+        createEpisode(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           job {
             id
-            jobType
+            kind
             status
             error
             result
@@ -176,7 +185,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: CREATE_ARTICLE_DATA,
-      variables: { ids, podcastId },
+      variables: { newsUuids, podcastUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -185,13 +194,13 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisodeChain(newsIds: number[], podcastId: number) {
+  createEpisodeChain(newsUuids: number[], podcastUuid: number) {
     const CREATE_ARTICLE_CHAIN = gql`
-      mutation CreateEpisodeChain($newsIds: [ID!]!, $podcastId: ID!) {
-        createEpisodeChain(newsIds: $newsIds, podcastId: $podcastId) {
+      mutation CreateEpisodeChain($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
+        createEpisodeChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           jobs {
             id
-            jobType
+            kind
             status
             error
             result
@@ -210,7 +219,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: CREATE_ARTICLE_CHAIN,
-      variables: { newsIds, podcastId },
+      variables: { newsUuids, podcastUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -219,13 +228,13 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisodeAudioChain(newsIds: number[], podcastId: number) {
+  createEpisodeAudioChain(newsUuids: number[], podcastUuid: number) {
     const CREATE_ARTICLE_AUDIO_CHAIN = gql`
-      mutation CreateEpisodeAudioChain($newsIds: [ID!]!, $podcastId: ID!) {
-        createEpisodeAudioChain(newsIds: $newsIds, podcastId: $podcastId) {
+      mutation CreateEpisodeAudioChain($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
+        createEpisodeAudioChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           jobs {
             id
-            jobType
+            kind
             status
             error
             result
@@ -244,7 +253,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: CREATE_ARTICLE_AUDIO_CHAIN,
-      variables: { newsIds, podcastId },
+      variables: { newsUuids, podcastUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {

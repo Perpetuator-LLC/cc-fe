@@ -28,8 +28,7 @@ import {
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { PodcastsService } from '../podcasts.service';
-import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
 
 @Component({
   selector: 'app-episodes-list',
@@ -80,6 +79,9 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   loadingPodcasts = false;
   selectedPodcast: string | null = null;
   podcasts: PodcastsResult[] = [];
+  cursors: (string | null)[] = [null];
+  hasNextPage = false;
+  hasPreviousPage = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -105,24 +107,23 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadEpisodes() {
-    this.loadingEpisodes = true;
-    this.subscriptions.add(
-      this.episodeService
-        .episodes(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection, this.selectedPodcast)
-        .subscribe({
-          next: (data) => {
-            this.episodes = data.episodes;
-            this.dataSource.data = this.episodes;
-            this.totalEpisodes = data.totalRecords;
-            this.loadingEpisodes = false;
-          },
-          error: (error) => {
-            this.messageService.error('Failed to load episodes: ' + error.toString());
-            this.loadingEpisodes = false;
-          },
-        }),
-    );
+  loadEpisodes(after: string | null = null, pageIndex = 0) {
+    this.episodeService
+      .episodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
+      .subscribe({
+        next: ({ episodes, pageInfo }) => {
+          this.episodes = episodes;
+          this.dataSource.data = episodes;
+          this.hasNextPage = pageInfo.hasNextPage;
+          this.hasPreviousPage = pageInfo.hasPreviousPage;
+          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+          this.loadingEpisodes = false;
+        },
+        error: (err) => {
+          this.messageService.error('Failed to load episodes: ' + err);
+          this.loadingEpisodes = false;
+        },
+      });
   }
 
   loadPodcasts() {
@@ -146,15 +147,29 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   }
 
   sortChange(sortState: Sort) {
-    this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
+    this.sortDirection = sortState.direction.toUpperCase();
+    this.cursors = [null]; // reset all known cursors
+    this.paginator.firstPage();
     this.loadEpisodes();
   }
 
   onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    this.currentPage = event.pageIndex;
-    this.loadEpisodes();
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, we must reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null]; // reset all known cursors
+      this.paginator.firstPage(); // back to pageIndex = 0
+      this.loadEpisodes(); // load first page
+      return;
+    }
+
+    // Otherwise, grab the cursor for the page they jumped to
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadEpisodes(after, newPageIndex);
   }
 
   viewEpisode(id: string) {

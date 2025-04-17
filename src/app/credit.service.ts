@@ -30,7 +30,7 @@ export interface UserTransaction {
   balance: number;
   job: {
     id: string;
-    jobType: string;
+    kind: string;
   };
 }
 
@@ -136,7 +136,7 @@ export class CreditService extends BaseService implements OnDestroy {
             balance
             job {
               id
-              jobType
+              kind
             }
           }
         }
@@ -187,7 +187,7 @@ export class CreditService extends BaseService implements OnDestroy {
               balance
               job {
                 id
-                jobType
+                kind
               }
             }
           }
@@ -241,7 +241,7 @@ export class CreditService extends BaseService implements OnDestroy {
               balance
               job {
                 id
-                jobType
+                kind
               }
             }
           }
@@ -295,7 +295,7 @@ export class CreditService extends BaseService implements OnDestroy {
               balance
               job {
                 id
-                jobType
+                kind
               }
             }
           }

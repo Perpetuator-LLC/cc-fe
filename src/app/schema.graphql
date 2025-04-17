@@ -1,62 +1,214 @@
 type Query {
   userDataExport(confirm: String!): UserDataExport
   credits: Int
-  transactions(page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedTransactionType
-  orders(page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedOrderType
-  codes(activeOnly: Boolean = true, page: Int, pageSize: Int, orderBy: String = "createdAt", direction: SortDirection = ASC): PaginatedCodeType
+
+  """List of Transactions [Relay]"""
+  transactions(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    user: UUID
+    creditAmount: Int
+    createdAt: DateTime
+    job: ID
+    order: ID
+    transactionUuid: UUID
+    createdAfter: DateTime
+    createdBefore: DateTime
+    minAmount: Decimal
+    maxAmount: Decimal
+    descriptionContains: String
+
+    """Ordering"""
+    orderBy: String
+  ): TransactionTypeConnection
+
+  """List of Orders [Relay]"""
+  orders(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    user: UUID
+    amount: Int
+    status: String
+    createdAt: DateTime
+    updatedAt: DateTime
+    sessionId: String
+    sessionUrl: String
+    orderUuid: UUID
+    minAmount: Decimal
+    maxAmount: Decimal
+    createdAfter: DateTime
+    createdBefore: DateTime
+
+    """Ordering"""
+    orderBy: String
+  ): OrderTypeConnection
+
+  """List of Codes [Relay]"""
+  codes(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    code: String
+    creditAmount: Int
+    active: Boolean
+    creator: UUID
+    consumer: UUID
+    createdAt: DateTime
+    consumedAt: DateTime
+    codeUuid: UUID
+    creatorUuid: UUID
+    creatorUsername: String
+    consumerUuid: UUID
+    consumerUsername: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    consumedAfter: DateTime
+    consumedBefore: DateTime
+    codeContains: String
+    minCredits: Decimal
+    maxCredits: Decimal
+
+    """Ordering"""
+    orderBy: String
+  ): CodeTypeConnection
   user: UserDetails
   userSettings(keys: [String]!): UserSettingsType
   users(query: String!): UserList
   userCookieConsents: [UserCookieConsentType]
   emailChangePending: EmailChangeRequestType
-  episodes(episodeId: ID, podcastId: ID, page: Int, pageSize: Int, orderBy: String = "date", direction: SortDirection = ASC): PaginatedEpisodes
-  news(podcastId: ID!, hours: Int = 24): NewsData
-  jobs(jobIds: [UUID], jobStatuses: [String], jobTypes: [String], page: Int = 1, pageSize: Int = 10, orderBy: String = "updatedAt", direction: SortDirection = ASC): PaginatedJobStatus
-  podcasts(podcastId: ID, teamId: UUID): [PodcastType!]
-  rssFeeds: [RssFeedType!]
+
+  """List of Episodes [Relay]"""
+  episodes(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    podcast: ID
+    title: String
+    date: DateTime
+    isLive: Boolean
+    episodeUuid: UUID
+    podcastUuid: UUID
+    titleContains: String
+
+    """Ordering"""
+    orderBy: String
+  ): EpisodeTypeConnection
+
+  """Relay connection for News items, filtered by hours and podcast"""
+  news(hours: Int = 24, podcastUuid: UUID!, offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, newsUuid: UUID, titleContains: String, sourceContains: String): NewsTypeConnection
+  jobs(
+    jobUuids: [UUID]
+    statuses: [JobStatus]
+    kinds: [JobKind]
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    kind: String
+    createdAt: DateTime
+    updatedAt: DateTime
+    jobUuid: UUID
+    kindContains: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    updatedAfter: DateTime
+    updatedBefore: DateTime
+
+    """Ordering"""
+    orderBy: String
+  ): JobTypeConnection
+  podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, team_Id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
+  rssFeeds(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, url: String, rssFeedUuid: UUID): RssFeedTypeConnection
   deleteUserResults: DeleteUserResults
-  teams(teamId: UUID): [TeamType]
+  teams(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, name: String, teamUuid: UUID): TeamTypeConnection
+  node(
+    """The ID of the object"""
+    id: ID!
+  ): Node
 }
 
+"""User data export schema"""
 type UserDataExport {
-  id: ID
-  username: String
-  email: String
-  settings: [UserSettingType]
-  podcasts: [PodcastType]
-  teams: [TeamType]
-  episodes: [EpisodeType]
-  jobs: [JobData]
-  transactions: [TransactionType]
-  orders: [OrderType]
-}
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+  id: UUID!
+  email: String!
+  jobs(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    kind: String
+    createdAt: DateTime
+    updatedAt: DateTime
+    jobUuid: UUID
+    kindContains: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    updatedAfter: DateTime
+    updatedBefore: DateTime
 
-type UserSettingType {
-  key: String
-  value: String
-}
+    """Ordering"""
+    orderBy: String
+  ): JobTypeConnection!
+  orders(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    user: UUID
+    amount: Int
+    status: String
+    createdAt: DateTime
+    updatedAt: DateTime
+    sessionId: String
+    sessionUrl: String
+    orderUuid: UUID
+    minAmount: Decimal
+    maxAmount: Decimal
+    createdAfter: DateTime
+    createdBefore: DateTime
 
-type PodcastType {
-  id: ID!
-  name: String!
-  intro: String!
-  prompt: String!
-  outro: String!
-  slug: String
-  enabled: Boolean!
-  image: String
-  description: String
-  ownerName: String
-  ownerEmail: String
-  ownerLink: String
-  guid: UUID!
-  tgChannelId: String
-  tgResponse: String
-  team: TeamType
-  rssFeeds: [RssFeedType!]!
-  episodes: [EpisodeType!]!
-  url: String
-  imageUrl: String
+    """Ordering"""
+    orderBy: String
+  ): OrderTypeConnection!
+  transactions(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    user: UUID
+    creditAmount: Int
+    createdAt: DateTime
+    job: ID
+    order: ID
+    transactionUuid: UUID
+    createdAfter: DateTime
+    createdBefore: DateTime
+    minAmount: Decimal
+    maxAmount: Decimal
+    descriptionContains: String
+
+    """Ordering"""
+    orderBy: String
+  ): TransactionTypeConnection!
+  teams: [TeamType!]
+  podcasts: [PodcastType!]
+  episodes: [EpisodeType!]
 }
 
 """
@@ -65,75 +217,63 @@ in fields, resolvers and input.
 """
 scalar UUID
 
-type TeamType {
-  id: UUID!
-  name: String!
-  members: [TeamMembershipType]
-}
+type JobTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
 
-type TeamMembershipType {
-  user: UserType
-  role: String
-}
-
-type UserType {
-  id: ID
-  username: String
-}
-
-type RssFeedType {
-  id: ID!
-  url: String!
-}
-
-type EpisodeType {
-  id: ID!
-  title: String!
-  description: String!
-  date: DateTime!
-  audioFile: String
-  audioSeconds: Int
-  content: String!
-  version: Int!
-  news: [NewsResult]
-  podcast: PodcastType!
-  isLive: Boolean!
-  podcastDate: DateTime
-  telegramDate: DateTime
-  podcastEpisodeGuid: UUID!
-  audioUrl: String
+  """Contains the nodes in this connection."""
+  edges: [JobTypeEdge]!
 }
 
 """
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
 """
-scalar DateTime
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
 
-type NewsResult {
-  id: ID
-  title: String
-  description: String
-  url: String
-  publishedAt: DateTime
-  source: String
-  summary: String
-  content: String
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
 }
 
-type JobData {
-  id: UUID!
+"""A Relay edge containing a `JobType` and its cursor."""
+type JobTypeEdge {
+  """The item at the end of the edge"""
+  node: JobType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""
+JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
+"""
+type JobType implements Node {
   taskId: UUID
-  jobType: String
+  kind: String
   args: JSONString
   status: String
   error: String
   result: String
   createdAt: DateTime!
   updatedAt: DateTime!
-  transactions: [TransactionType!]!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
   cost: Int
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
 }
 
 """
@@ -144,20 +284,33 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
-type TransactionType {
-  id: ID!
-  originalUserId: UUID
-  description: String!
-  creditAmount: Int!
-  createdAt: DateTime!
-  job: JobData
-  order: OrderType
-  balance: Int
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type OrderTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [OrderTypeEdge]!
 }
 
-type OrderType {
-  id: ID!
-  originalUserId: UUID
+"""A Relay edge containing a `OrderType` and its cursor."""
+type OrderTypeEdge {
+  """The item at the end of the edge"""
+  node: OrderType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""OrderType is a GraphQL type that represents an order."""
+type OrderType implements Node {
+  user: UserDataExport
   sessionId: String
   amount: Int!
   receiptUrl: String
@@ -166,7 +319,10 @@ type OrderType {
   description: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  transactions: [TransactionType!]!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
 }
 
 """An enumeration."""
@@ -181,46 +337,163 @@ enum ApiOrderStatusChoices {
   CANCELED
 }
 
-type PaginatedTransactionType {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  transactions: [TransactionType]
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+type TransactionTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [TransactionTypeEdge]!
 }
 
-enum SortDirection {
-  ASC
-  DESC
+"""A Relay edge containing a `TransactionType` and its cursor."""
+type TransactionTypeEdge {
+  """The item at the end of the edge"""
+  node: TransactionType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
-type PaginatedOrderType {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  orders: [OrderType]
-}
+"""TransactionType is a GraphQL type that represents a transaction."""
+type TransactionType implements Node {
+  user: UserDataExport
+  description: String!
+  creditAmount: Int!
+  createdAt: DateTime!
+  job: JobType
+  order: OrderType
 
-type PaginatedCodeType {
-  codes: [CodeType]
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-}
-
-type CodeType {
+  """The ID of the object"""
   id: ID!
+  uuid: UUID
+  balance: Int
+}
+
+type TeamType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  uuid: UUID
+  members: [TeamMembershipType]
+}
+
+type TeamMembershipType {
+  user: UserType
+  role: String
+}
+
+"""User schema."""
+type UserType implements Node {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""
+Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
+"""
+type PodcastType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  intro: String!
+  prompt: String!
+  outro: String!
+  slug: String
+  enabled: Boolean!
+  description: String
+  ownerName: String
+  ownerEmail: String
+  ownerLink: String
+  tgChannelId: String
+  tgResponse: String
+  rssFeeds: [RssFeedType]
+  uuid: UUID
+  url: String
+  imageUrl: String
+  team: TeamType
+}
+
+"""
+Type for RssFeed model. This is used to create a new RssFeed and to get the list of RssFeeds.
+"""
+type RssFeedType implements Node {
+  """The ID of the object"""
+  id: ID!
+  url: String!
+  uuid: UUID
+}
+
+"""GraphQL type for Episode model."""
+type EpisodeType implements Node {
+  title: String!
+  description: String!
+  date: DateTime!
+  audioFile: String
+  audioSeconds: Int
+  content: String!
+  version: Int!
+  news: [NewsType]
+  podcast: PodcastType!
+  isLive: Boolean!
+  podcastDate: DateTime
+  telegramDate: DateTime
+  podcastEpisodeGuid: UUID!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  audioUrl: String
+}
+
+type NewsType implements Node {
+  """The ID of the object"""
+  id: ID!
+  title: String!
+  description: String!
+  url: String!
+  publishedAt: DateTime!
+  source: String!
+  summary: String!
+  content: String!
+  uuid: UUID
+}
+
+type CodeTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [CodeTypeEdge]!
+}
+
+"""A Relay edge containing a `CodeType` and its cursor."""
+type CodeTypeEdge {
+  """The item at the end of the edge"""
+  node: CodeType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""CodeType is a GraphQL type that represents a bonus code."""
+type CodeType implements Node {
   code: String!
   creator: UserType
   consumer: UserType
   createdAt: DateTime!
   consumedAt: DateTime
   creditAmount: Int!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
 }
 
 type UserDetails {
@@ -234,6 +507,11 @@ type UserSettingsType {
   success: Boolean
   message: String
   results: [UserSettingType]
+}
+
+type UserSettingType {
+  key: String
+  value: String
 }
 
 type UserList {
@@ -252,26 +530,89 @@ type EmailChangeRequestType {
   canceled: Boolean
 }
 
-type PaginatedEpisodes {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  episodes: [EpisodeType]
+type EpisodeTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [EpisodeTypeEdge]!
 }
 
-type NewsData {
-  results: [NewsResult]
+"""A Relay edge containing a `EpisodeType` and its cursor."""
+type EpisodeTypeEdge {
+  """The item at the end of the edge"""
+  node: EpisodeType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
-type PaginatedJobStatus {
-  totalRecords: Int
-  totalPages: Int
-  currentPage: Int
-  hasNext: Boolean
-  hasPrevious: Boolean
-  jobs: [JobData]
+type NewsTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [NewsTypeEdge]!
+}
+
+"""A Relay edge containing a `NewsType` and its cursor."""
+type NewsTypeEdge {
+  """The item at the end of the edge"""
+  node: NewsType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""An enumeration."""
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+"""An enumeration."""
+enum JobKind {
+  UPDATE_EPISODE_AUDIO
+  FETCH_NEWS
+  EXTRACT_NEWS
+  SUMMARIZE_NEWS
+  CREATE_ARTICLE
+}
+
+type PodcastTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [PodcastTypeEdge]!
+}
+
+"""A Relay edge containing a `PodcastType` and its cursor."""
+type PodcastTypeEdge {
+  """The item at the end of the edge"""
+  node: PodcastType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type RssFeedTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [RssFeedTypeEdge]!
+}
+
+"""A Relay edge containing a `RssFeedType` and its cursor."""
+type RssFeedTypeEdge {
+  """The item at the end of the edge"""
+  node: RssFeedType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 type DeleteUserResults {
@@ -279,6 +620,23 @@ type DeleteUserResults {
   leavingTeams: [TeamType]
   deletingPodcasts: [PodcastType]
   leavingPodcasts: [PodcastType]
+}
+
+type TeamTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [TeamTypeEdge]!
+}
+
+"""A Relay edge containing a `TeamType` and its cursor."""
+type TeamTypeEdge {
+  """The item at the end of the edge"""
+  node: TeamType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 type Mutation {
@@ -291,10 +649,10 @@ type Mutation {
   """
   Refresh the status of a pending order. This will check the Stripe session status and update the order.
   """
-  refreshOrder(orderId: String!): RefreshOrder
+  refreshOrder(orderUuid: UUID!): RefreshOrder
 
   """Cancel a pending order. This will cancel the Stripe session."""
-  cancelOrder(orderId: String!): CancelOrder
+  cancelOrder(orderUuid: UUID!): CancelOrder
 
   """
   Create a new Stripe Checkout session for a user to purchase credits.
@@ -322,15 +680,27 @@ type Mutation {
 
   """Mutation to cancel email change request."""
   cancelEmailChange: CancelEmailChange
-  createEpisode(newsIds: [Int]!, podcastId: ID!): CreateEpisode
-  createEpisodeChain(newsIds: [ID]!, podcastId: ID!): CreateEpisodeChain
-  createEpisodeAudioChain(newsIds: [ID]!, podcastId: ID!): CreateEpisodeAudioChain
-  updateEpisode(content: String, episodeId: ID!, isLive: Boolean, title: String): UpdateEpisode
-  updateEpisodeAudio(episodeId: ID!): UpdateEpisodeAudio
-  publishEpisodeAudio(episodeId: ID!): PublishEpisodeAudio
-  fetchNews(podcastId: ID!): FetchNews
-  extractNews(newsIds: [ID]!, podcastId: ID!): ExtractNews
-  summarizeNews(force: Boolean = false, newsIds: [ID]!, podcastId: ID!): SummarizeNews
+
+  """Mutation to create an episode."""
+  createEpisode(newsUuids: [UUID]!, podcastUuid: UUID!): CreateEpisode
+
+  """Mutation to create an episode chain."""
+  createEpisodeChain(newsUuids: [UUID]!, podcastUuid: UUID!): CreateEpisodeChain
+
+  """Mutation to create an episode audio chain."""
+  createEpisodeAudioChain(newsUuids: [UUID]!, podcastUuid: UUID!): CreateEpisodeAudioChain
+
+  """Mutation to update an episode."""
+  updateEpisode(content: String, episodeUuid: UUID!, isLive: Boolean, title: String): UpdateEpisode
+
+  """Mutation to update episode audio."""
+  updateEpisodeAudio(episodeUuid: UUID!): UpdateEpisodeAudio
+
+  """Mutation to publish episode audio to Telegram channel."""
+  publishEpisodeAudio(episodeUuid: UUID!): PublishEpisodeAudio
+  fetchNews(podcastUuid: UUID!): FetchNews
+  extractNews(newsUuids: [UUID]!, podcastUuid: UUID!): ExtractNews
+  summarizeNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): SummarizeNews
 
   """
   Mutation to delete jobs that are in PENDING or FAILED state. This mutation will check if any of the requested jobs
@@ -338,7 +708,7 @@ type Mutation {
   operation and a list of the jobs that were deleted. If any of the requested jobs are not in PENDING or FAILED state,
   they will not be deleted and a message will be returned indicating that those jobs were not deleted.
   """
-  deleteJobs(jobIds: [UUID]!): DeleteJobs
+  deleteJobs(jobUuids: [UUID]!): DeleteJobs
 
   """
   Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
@@ -346,23 +716,23 @@ type Mutation {
   jobs are already completed and will not restart them. The mutation returns a message indicating the status of the
   operation and a list of the jobs that were restarted.
   """
-  retryJobs(jobIds: [UUID]!): RetryJobs
+  retryJobs(jobUuids: [UUID]!): RetryJobs
 
   """
   Create a new podcast. This will create a new podcast and associate it with the team.
   """
-  createPodcast(name: String!, teamId: UUID!): CreatePodcast
+  createPodcast(name: String!, teamUuid: UUID!): CreatePodcast
 
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastId: ID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamId: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
-  deletePodcast(confirm: String!, podcastId: ID!): DeletePodcast
+  updatePodcast(description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
+  deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """
   Set the RSS feeds for a podcast. These feeds will be used to fetch news articles for summarizing into episodes.
   """
-  updatePodcastRssFeeds(podcastId: ID!, rssFeedIds: [ID]!): UpdatePodcastRssFeeds
+  updatePodcastRssFeeds(podcastUuid: UUID!, rssFeedUuids: [UUID]!): UpdatePodcastRssFeeds
 
   """
   Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
@@ -373,19 +743,19 @@ type Mutation {
   createTeam(name: String!): CreateTeam
 
   """Mutation to delete a team."""
-  deleteTeam(confirm: String!, teamId: UUID!): DeleteTeam
+  deleteTeam(confirm: String!, teamUuid: UUID!): DeleteTeam
 
   """Mutation to update a team."""
-  updateTeam(name: String, teamId: UUID!): UpdateTeam
+  updateTeam(name: String, teamUuid: UUID!): UpdateTeam
 
   """Mutation to add or update a user in a team."""
-  upsertUser(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
+  upsertUser(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
 
   """Mutation to remove a user from a team."""
-  removeUserFromTeam(teamId: UUID!, userId: UUID!): RemoveUserFromTeam
+  removeUserFromTeam(teamUuid: UUID!, userUuid: UUID!): RemoveUserFromTeam
 
   """Mutation to add or update a user in a team."""
-  upsertUserToTeam(role: String!, teamId: UUID!, userId: UUID!): UpsertUserToTeam
+  upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
 }
 
 """Create a new bonus code that can be redeemed for credits."""
@@ -470,36 +840,42 @@ type CancelEmailChange {
   message: String
 }
 
+"""Mutation to create an episode."""
 type CreateEpisode {
   success: Boolean
   message: String
-  job: JobData
+  job: JobType
 }
 
+"""Mutation to create an episode chain."""
 type CreateEpisodeChain {
   success: Boolean
   message: String
-  jobs: [JobData]
+  jobs: [JobType]
 }
 
+"""Mutation to create an episode audio chain."""
 type CreateEpisodeAudioChain {
   success: Boolean
   message: String
-  jobs: [JobData]
+  jobs: [JobType]
 }
 
+"""Mutation to update an episode."""
 type UpdateEpisode {
   success: Boolean
   message: String
   episode: EpisodeType
 }
 
+"""Mutation to update episode audio."""
 type UpdateEpisodeAudio {
   success: Boolean
   message: String
-  job: JobData
+  job: JobType
 }
 
+"""Mutation to publish episode audio to Telegram channel."""
 type PublishEpisodeAudio {
   success: Boolean
   message: String
@@ -509,19 +885,19 @@ type PublishEpisodeAudio {
 type FetchNews {
   success: Boolean
   message: String
-  job: JobData
+  job: JobType
 }
 
 type ExtractNews {
   success: Boolean
   message: String
-  job: JobData
+  job: JobType
 }
 
 type SummarizeNews {
   success: Boolean
   message: String
-  job: JobData
+  job: JobType
 }
 
 """
@@ -533,7 +909,7 @@ they will not be deleted and a message will be returned indicating that those jo
 type DeleteJobs {
   success: Boolean
   message: String
-  jobs: [JobData]
+  jobs: [JobType]
 }
 
 """
@@ -545,7 +921,7 @@ operation and a list of the jobs that were restarted.
 type RetryJobs {
   success: Boolean
   message: String
-  jobs: [JobData]
+  jobs: [JobType]
 }
 
 """

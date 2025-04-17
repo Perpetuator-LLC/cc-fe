@@ -2,10 +2,62 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
-import { RssFeedResult, PodcastsResult } from './podcasts-list/podcasts-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { TeamsResult } from './teams-list/teams-list.component';
+
+export interface UserResult {
+  id: number;
+  username: string;
+}
+
+export interface MemberResult {
+  user: UserResult;
+  role: string;
+}
+
+export interface RssFeedResult {
+  id: number;
+  url: string;
+}
+
+export interface PodcastsResult {
+  id: number;
+  team: TeamsResult;
+  name: string | null;
+  url: string | null;
+  enabled: boolean;
+  slug: string | null;
+  image: string | null;
+  imageUrl: string | null;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerLink: string | null;
+  intro: string | null;
+  prompt: string | null;
+  outro: string | null;
+  tgChannelId: string | null;
+  tgResponse: string | null;
+  rssFeeds: RssFeedResult[];
+}
+
+export interface RelayEdge<T> {
+  cursor: string;
+  node: T;
+}
+
+export interface PageInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor: string | null;
+  endCursor: string | null;
+}
+
+export interface PodcastConnection {
+  edges: RelayEdge<PodcastsResult>[];
+  pageInfo: PageInfo;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -20,11 +72,11 @@ export class PodcastsService extends BaseService {
 
   createPodcast(
     name: string,
-    teamId: string,
+    teamUuid: string,
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation CreatePodcast($name: String!, $teamId: UUID!) {
-        createPodcast(name: $name, teamId: $teamId) {
+      mutation CreatePodcast($name: String!, $teamUuid: UUID!) {
+        createPodcast(name: $name, teamUuid: $teamUuid) {
           success
           message
           podcast {
@@ -54,7 +106,7 @@ export class PodcastsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { name, teamId },
+      variables: { name, teamUuid },
     }).pipe(
       map((data) => {
         if (!data.createPodcast.success) {
@@ -67,8 +119,8 @@ export class PodcastsService extends BaseService {
 
   refreshTgResponse(id: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation UpdatePodcast($id: ID!, $refreshTgResponse: Boolean) {
-        updatePodcast(podcastId: $id, refreshTgResponse: $refreshTgResponse) {
+      mutation UpdatePodcast($uuid: UUID!, $refreshTgResponse: Boolean) {
+        updatePodcast(podcastUuid: $uuid, refreshTgResponse: $refreshTgResponse) {
           success
           message
           podcast {
@@ -123,7 +175,7 @@ export class PodcastsService extends BaseService {
 
   updatePodcast(
     id: string,
-    teamId: string | null = null,
+    teamUuid: string | null = null,
     name: string | null = null,
     intro: string | null = null,
     prompt: string | null = null,
@@ -140,8 +192,8 @@ export class PodcastsService extends BaseService {
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast(
-        $id: ID!
-        $teamId: UUID
+        $uuid: UUID!
+        $teamUuid: UUID
         $name: String
         $intro: String
         $prompt: String
@@ -157,8 +209,8 @@ export class PodcastsService extends BaseService {
         $refreshTgResponse: Boolean
       ) {
         updatePodcast(
-          podcastId: $id
-          teamId: $teamId
+          podcastUuid: $uuid
+          teamUuid: $teamUuid
           name: $name
           intro: $intro
           prompt: $prompt
@@ -218,7 +270,7 @@ export class PodcastsService extends BaseService {
       mutation: GQL,
       variables: {
         id,
-        teamId,
+        teamUuid,
         name,
         intro,
         prompt,
@@ -245,36 +297,47 @@ export class PodcastsService extends BaseService {
 
   getPodcastById(id: string): Observable<PodcastsResult> {
     const GET_TEAM_BY_ID = gql`
-      query GetPodcastById($id: ID!) {
-        podcasts(podcastId: $id) {
-          id
-          name
-          intro
-          prompt
-          outro
-          enabled
-          slug
-          url
-          imageUrl
-          description
-          ownerName
-          ownerEmail
-          ownerLink
-          tgChannelId
-          tgResponse
-          rssFeeds {
-            id
-            url
-          }
-          team {
-            id
-            members {
-              user {
+      query GetPodcastById($uuid: UUID!) {
+        podcasts(podcastUuid: $uuid) {
+          edges {
+            cursor
+            node {
+              id
+              name
+              intro
+              prompt
+              outro
+              enabled
+              slug
+              url
+              imageUrl
+              description
+              ownerName
+              ownerEmail
+              ownerLink
+              tgChannelId
+              tgResponse
+              rssFeeds {
                 id
-                username
+                url
               }
-              role
+              team {
+                id
+                members {
+                  user {
+                    id
+                    username
+                  }
+                  role
+                }
+              }
             }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -298,26 +361,51 @@ export class PodcastsService extends BaseService {
     );
   }
 
-  getPodcastsByTeamId(teamId: string): Observable<PodcastsResult[]> {
-    const GET_TEAM_BY_TEAM_ID = gql`
-      query PodcastsByTeamId($teamId: UUID!) {
-        podcasts(teamId: $teamId) {
-          id
-          name
-          enabled
-          slug
-          url
+  getPodcastsByTeamId(teamUuid: string): Observable<PodcastConnection> {
+    const GET_TEAM_BY_TEAM_UUID = gql`
+      query PodcastsByTeamId($teamUuid: UUID!) {
+        podcasts(teamUuid: $teamUuid) {
+          edges {
+            cursor
+            node {
+              id
+              name
+              intro
+              prompt
+              outro
+              enabled
+              slug
+              url
+              imageUrl
+              description
+              ownerName
+              ownerEmail
+              ownerLink
+              tgChannelId
+              tgResponse
+              rssFeeds {
+                id
+                url
+              }
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+          }
         }
       }
     `;
 
     interface Response {
-      podcasts: PodcastsResult[];
+      podcasts: PodcastConnection;
     }
 
     return this.query<Response>({
-      query: GET_TEAM_BY_TEAM_ID,
-      variables: { teamId },
+      query: GET_TEAM_BY_TEAM_UUID,
+      variables: { teamUuid },
     }).pipe(map((result) => result.podcasts));
   }
 
@@ -325,16 +413,27 @@ export class PodcastsService extends BaseService {
     const GQL = gql`
       query GetPodcasts {
         podcasts {
-          id
-          name
-          team {
-            members {
-              user {
-                id
-                username
+          edges {
+            cursor
+            node {
+              id
+              name
+              team {
+                members {
+                  user {
+                    id
+                    username
+                  }
+                  role
+                }
               }
-              role
             }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -350,10 +449,10 @@ export class PodcastsService extends BaseService {
     }).pipe(map((data) => data.podcasts));
   }
 
-  deletePodcast(podcastId: string, confirm: string) {
+  deletePodcast(podcastUuid: string, confirm: string) {
     const DELETE_TEAM = gql`
-      mutation DeletePodcast($podcastId: ID!, $confirm: String!) {
-        deletePodcast(podcastId: $podcastId, confirm: $confirm) {
+      mutation DeletePodcast($podcastUuid: UUID!, $confirm: String!) {
+        deletePodcast(podcastUuid: $podcastUuid, confirm: $confirm) {
           success
           message
         }
@@ -369,7 +468,7 @@ export class PodcastsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: DELETE_TEAM,
-      variables: { podcastId, confirm },
+      variables: { podcastUuid, confirm },
     }).pipe(
       map((data) => {
         if (!data.deletePodcast.success) {
@@ -385,8 +484,8 @@ export class PodcastsService extends BaseService {
     image: File,
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation UpdatePodcastPodcastImage($id: ID!, $image: Upload!) {
-        updatePodcast(podcastId: $id, image: $image) {
+      mutation UpdatePodcastPodcastImage($podcastUuid: UUID!, $image: Upload!) {
+        updatePodcast(podcastUuid: $podcastUuid, image: $image) {
           success
           message
           podcast {
@@ -420,10 +519,10 @@ export class PodcastsService extends BaseService {
       );
   }
 
-  setPodcastRssFeeds(podcastId: string, rssFeedIds: string[]) {
+  setPodcastRssFeeds(podcastUuid: string, rssFeedUuids: string[]) {
     const GQL = gql`
-      mutation UpdatePodcastRssFeeds($podcastId: ID!, $rssFeedIds: [ID!]!) {
-        updatePodcastRssFeeds(podcastId: $podcastId, rssFeedIds: $rssFeedIds) {
+      mutation UpdatePodcastRssFeeds($podcastUuid: UUID!, $rssFeedUuids: [UUID!]!) {
+        updatePodcastRssFeeds(podcastUuid: $podcastUuid, rssFeedUuids: $rssFeedUuids) {
           podcast {
             id
             rssFeeds {
@@ -444,8 +543,8 @@ export class PodcastsService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: {
-        podcastId,
-        rssFeedIds,
+        podcastUuid,
+        rssFeedUuids,
       },
     }).pipe(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

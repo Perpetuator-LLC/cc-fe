@@ -95,27 +95,30 @@ export class CodeService extends BaseService {
 }
 
 const GET_BONUS_CODES = gql`
-  query GetCodes($page: Int!, $pageSize: Int!, $activeOnly: Boolean!) {
-    codes(page: $page, pageSize: $pageSize, activeOnly: $activeOnly) {
-      codes {
-        id
-        code
-        creditAmount
-        creator {
+  query GetCodes($page: Int!, $after: String!, $active: Boolean!) {
+    codes(page: $page, pageSize: $pageSize, active: $active) {
+      edges {
+        node {
           id
-          username
+          code
+          creditAmount
+          creator {
+            id
+            username
+          }
+          consumer {
+            id
+            username
+          }
+          consumedAt
         }
-        consumer {
-          id
-          username
-        }
-        consumedAt
       }
-      totalRecords
-      totalPages
-      currentPage
-      hasNext
-      hasPrevious
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
     }
   }
 `;

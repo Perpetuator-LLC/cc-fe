@@ -34,6 +34,49 @@ export interface EpisodesData {
   episodes: Episode[];
 }
 
+const FETCH_EPISODES = gql`
+  query GetEpisodesData($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!) {
+    episodes(podcastUuid: $podcastUuid, first: $first, after: $after, orderBy: $orderBy) {
+      edges {
+        cursor
+        node {
+          id
+          date
+          podcast {
+            name
+          }
+          title
+          content
+          news {
+            id
+            url
+            title
+            summary
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+export interface EpisodeEdge {
+  cursor: string;
+  node: Episode;
+}
+
+export interface EpisodePageInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor?: string;
+  endCursor?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -45,52 +88,32 @@ export class EpisodeService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  episodes(page = 1, pageSize = 10, orderBy = 'date', direction = 'DESC', podcastId: string | null = null) {
-    const GQL = gql`
-      query GetEpisodesData(
-        $page: Int!
-        $pageSize: Int!
-        $orderBy: String!
-        $direction: SortDirection!
-        $podcastId: ID
-      ) {
-        episodes(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction, podcastId: $podcastId) {
-          totalRecords
-          totalPages
-          currentPage
-          hasNext
-          hasPrevious
-          episodes {
-            id
-            date
-            podcast {
-              name
-            }
-            title
-            content
-            news {
-              id
-              url
-              title
-              summary
-            }
-          }
-        }
-      }
-    `;
+  episodes(
+    first = 10,
+    after: string | null = null,
+    orderBy = 'date',
+    direction = 'DESC',
+    podcastUuid: string | null = null,
+  ) {
+    // build the Relay‐style sort string
+    const sort = direction === 'DESC' ? `-${orderBy}` : orderBy;
 
     interface Response {
-      episodes: EpisodesData;
+      episodes: {
+        edges: EpisodeEdge[];
+        pageInfo: EpisodePageInfo;
+      };
     }
 
     return this.query<Response>({
-      query: GQL,
-      variables: { page, pageSize, orderBy, direction, podcastId },
+      query: FETCH_EPISODES,
+      variables: { podcastUuid, first, after, sort },
       fetchPolicy: 'network-only',
     }).pipe(
-      map((data) => {
-        return data.episodes;
-      }),
+      map(({ episodes }) => ({
+        episodes: episodes.edges.map((edge) => edge.node),
+        pageInfo: episodes.pageInfo,
+      })),
     );
   }
 
@@ -196,7 +219,7 @@ export class EpisodeService extends BaseService {
           message
           job {
             id
-            jobType
+            kind
             status
             error
             result

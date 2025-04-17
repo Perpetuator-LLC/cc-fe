@@ -6,46 +6,10 @@ import { Router } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { PodcastsService } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
-import { TeamsResult } from '../teams-list/teams-list.component';
-
-export interface UserResult {
-  id: number;
-  username: string;
-}
-
-export interface MemberResult {
-  user: UserResult;
-  role: string;
-}
-
-export interface RssFeedResult {
-  id: number;
-  url: string;
-}
-
-export interface PodcastsResult {
-  id: number;
-  team: TeamsResult;
-  name: string | null;
-  url: string | null;
-  enabled: boolean;
-  slug: string | null;
-  image: string | null;
-  imageUrl: string | null;
-  ownerName: string | null;
-  ownerEmail: string | null;
-  ownerLink: string | null;
-  intro: string | null;
-  prompt: string | null;
-  outro: string | null;
-  tgChannelId: string | null;
-  tgResponse: string | null;
-  rssFeeds: RssFeedResult[];
-}
 
 @Component({
   selector: 'app-podcasts-list',

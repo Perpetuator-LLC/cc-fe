@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Job, JobService, jobTypeToString } from '../job.service';
+import { Job, JobService, kindToString } from '../job.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
@@ -58,12 +58,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   jobs: Job[] = [];
   dataSource = new MatTableDataSource<Job>(this.jobs);
-  displayedColumns: string[] = ['jobType', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
+  displayedColumns: string[] = ['kind', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
   totalJobs = 0;
   pageSize = 10;
-  currentPage = 0;
+  currentCursor: string | undefined;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
+  hasNextPage = false;
+  hasPreviousPage = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -86,20 +88,20 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadJobs() {
+  loadJobs(after: string | null = null) {
     this.subscriptions.add(
-      this.jobService
-        .getJobs([], [], [], this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
-        .subscribe({
-          next: (data) => {
-            this.jobs = data.jobs;
-            this.dataSource.data = this.jobs;
-            this.totalJobs = data.totalRecords;
-          },
-          error: (error) => {
-            this.messageService.error('Failed to load jobs: ' + error.toString());
-          },
-        }),
+      this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
+        next: ({ jobs, pageInfo }) => {
+          this.jobs = jobs;
+          this.dataSource.data = this.jobs;
+          this.hasNextPage = pageInfo.hasNextPage;
+          this.hasPreviousPage = pageInfo.hasPreviousPage;
+          this.currentCursor = pageInfo.endCursor;
+        },
+        error: (error) => {
+          this.messageService.error('Failed to load jobs: ' + error.toString());
+        },
+      }),
     );
   }
 
@@ -111,8 +113,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   onPageChange(event: PageEvent) {
     this.pageSize = event.pageSize;
-    this.currentPage = event.pageIndex;
-    this.loadJobs();
+    // this.currentPage = event.pageIndex;
+    this.loadJobs(this.currentCursor);
   }
 
   retryJob(id: string) {
@@ -132,5 +134,5 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  protected readonly jobTypeToString = jobTypeToString;
+  protected readonly kindToString = kindToString;
 }

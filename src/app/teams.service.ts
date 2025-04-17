@@ -65,12 +65,12 @@ export class TeamsService extends BaseService {
   }
 
   updateTeam(
-    teamId: string,
+    teamUuid: string,
     name: string | null = null,
   ): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const GQL = gql`
-      mutation UpdateTeam($teamId: UUID!, $name: String!) {
-        updateTeam(teamId: $teamId, name: $name) {
+      mutation UpdateTeam($teamUuid: UUID!, $name: String!) {
+        updateTeam(teamUuid: $teamUuid, name: $name) {
           success
           message
           team {
@@ -99,7 +99,7 @@ export class TeamsService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: {
-        teamId,
+        teamUuid,
         name,
       },
     }).pipe(
@@ -112,11 +112,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getTeamById(teamId: string): Observable<TeamsResult> {
+  getTeamById(teamUuid: string): Observable<TeamsResult> {
     const GET_TEAM_BY_ID = gql`
-      query GetTeamById($teamId: UUID!) {
-        teams(teamId: $teamId) {
-          id
+      query GetTeamById($teamUuid: UUID!) {
+        teams(teamUuid: $teamUuid) {
           name
           members {
             user {
@@ -135,7 +134,7 @@ export class TeamsService extends BaseService {
 
     return this.query<Response>({
       query: GET_TEAM_BY_ID,
-      variables: { teamId },
+      variables: { teamUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -174,10 +173,10 @@ export class TeamsService extends BaseService {
     }).pipe(map((data) => data.teams));
   }
 
-  upsertUserToTeam(teamId: string, userId: string, role: string): Observable<TeamsResult> {
+  upsertUserToTeam(teamUuid: string, userId: string, role: string): Observable<TeamsResult> {
     const GQL = gql`
-      mutation UpsertUserToTeam($teamId: UUID!, $userId: UUID!, $role: String!) {
-        upsertUserToTeam(teamId: $teamId, userId: $userId, role: $role) {
+      mutation UpsertUserToTeam($teamUuid: UUID!, $userId: UUID!, $role: String!) {
+        upsertUserToTeam(teamUuid: $teamUuid, userId: $userId, role: $role) {
           success
           message
           team {
@@ -205,7 +204,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { teamId, userId, role },
+      variables: { teamUuid, userId, role },
     }).pipe(
       map((data) => {
         if (!data.upsertUserToTeam.success) {
@@ -216,10 +215,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  removeUserFromTeam(teamId: string, userId: string): Observable<TeamsResult> {
+  removeUserFromTeam(teamUuid: string, userId: string): Observable<TeamsResult> {
     const REMOVE_USER_FROM_TEAM = gql`
-      mutation RemoveUserFromTeam($teamId: UUID!, $userId: UUID!) {
-        removeUserFromTeam(teamId: $teamId, userId: $userId) {
+      mutation RemoveUserFromTeam($teamUuid: UUID!, $userId: UUID!) {
+        removeUserFromTeam(teamUuid: $teamUuid, userId: $userId) {
           success
           message
           team {
@@ -247,7 +246,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<RemoveUserFromTeamData>({
       mutation: REMOVE_USER_FROM_TEAM,
-      variables: { teamId, userId },
+      variables: { teamUuid, userId },
     }).pipe(
       map((data) => {
         if (!data.removeUserFromTeam.success) {
@@ -288,10 +287,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  deleteTeam(teamId: string, confirm: string) {
+  deleteTeam(teamUuid: string, confirm: string) {
     const DELETE_TEAM = gql`
-      mutation DeleteTeam($teamId: UUID!, $confirm: String!) {
-        deleteTeam(teamId: $teamId, confirm: $confirm) {
+      mutation DeleteTeam($teamUuid: UUID!, $confirm: String!) {
+        deleteTeam(teamUuid: $teamUuid, confirm: $confirm) {
           success
           message
         }
@@ -307,7 +306,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: DELETE_TEAM,
-      variables: { teamId, confirm },
+      variables: { teamUuid, confirm },
     }).pipe(
       map((data) => {
         if (!data.deleteTeam.success) {
@@ -433,7 +432,7 @@ export class TeamsService extends BaseService {
   // uploadPodcastImage(id: string, image: File): Observable<{ success: boolean; message: string; team: TeamsResult }> {
   //   const GQL = gql`
   //     mutation UpdateTeamPodcastImage($id: ID!, $image: Upload!) {
-  //       updateTeam(teamId: $id, image: $image) {
+  //       updateTeam(teamUuid: $id, image: $image) {
   //         success
   //         message
   //         team {
@@ -467,10 +466,10 @@ export class TeamsService extends BaseService {
   //     );
   // }
 
-  // setTeamRssFeeds(teamId: string, rssFeedIds: string[]) {
+  // setTeamRssFeeds(teamUuid: string, rssFeedIds: string[]) {
   //   const GQL = gql`
-  //     mutation SetTeamRssFeeds($teamId: ID!, $rssFeedIds: [ID!]!) {
-  //       setTeamRssFeeds(teamId: $teamId, rssFeedIds: $rssFeedIds) {
+  //     mutation SetTeamRssFeeds($teamUuid: ID!, $rssFeedIds: [ID!]!) {
+  //       setTeamRssFeeds(teamUuid: $teamUuid, rssFeedIds: $rssFeedIds) {
   //         team {
   //           id
   //           rssFeeds {
@@ -491,7 +490,7 @@ export class TeamsService extends BaseService {
   //   return this.mutate<Response>({
   //     mutation: GQL,
   //     variables: {
-  //       teamId,
+  //       teamUuid,
   //       rssFeedIds,
   //     },
   //   }).pipe(

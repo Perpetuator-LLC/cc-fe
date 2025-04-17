@@ -24,7 +24,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { jobTypeToString } from '../job.service';
+import { kindToString } from '../job.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -117,8 +117,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   getTransactionInfo(transaction: UserTransaction) {
-    if (transaction.job?.jobType != null) {
-      return jobTypeToString(transaction.job.jobType);
+    if (transaction.job?.kind != null) {
+      return kindToString(transaction.job.kind);
     }
     return transaction.description;
   }

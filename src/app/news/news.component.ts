@@ -104,10 +104,10 @@ export class NewsComponent implements OnInit, OnDestroy {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if (
-              [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.jobType))
+              [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.kind))
             ) {
               this.getNews();
-            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.jobType))) {
+            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.episodeById(job.result).subscribe({
                   next: (episode) => {
@@ -190,9 +190,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     this.messageService.info('Extracting content from selected news items (this may take a while)...');
 
-    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.extractNews(this.selectedPodcastId, newsIds).subscribe({
+      this.newsService.extractNews(this.selectedPodcastId, newsUuids).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to extract news: No job returned');
@@ -217,8 +217,8 @@ export class NewsComponent implements OnInit, OnDestroy {
       return;
     }
     this.messageService.info('Summarizing content of selected news items (this may take a while)...');
-    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
-    this.summarizeNews(this.selectedPodcastId, newsIds);
+    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
+    this.summarizeNews(this.selectedPodcastId, newsUuids);
   }
 
   regenerateSummary(id: string) {
@@ -230,9 +230,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.summarizeNews(this.selectedPodcastId, [Number(id)], true);
   }
 
-  private summarizeNews(podcastId: number, newsIds: number[], force = false) {
+  private summarizeNews(podcastUuid: number, newsUuids: number[], force = false) {
     this.subscriptions.add(
-      this.newsService.summarizeNews(podcastId, newsIds, force).subscribe({
+      this.newsService.summarizeNews(podcastUuid, newsUuids, force).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to summarize news data: No job returned');
@@ -258,9 +258,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     this.messageService.info('Creating episode from selected news items (this may take a while)...');
 
-    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createEpisodeChain(newsIds, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisodeChain(newsUuids, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create episode: No jobs returned');
@@ -286,9 +286,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     this.messageService.info('Creating audio from selected news items (this may take a while)...');
 
-    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createEpisodeAudioChain(newsIds, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisodeAudioChain(newsUuids, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create audio: No jobs returned');
@@ -313,9 +313,9 @@ export class NewsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const newsIds = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
     this.subscriptions.add(
-      this.newsService.createEpisode(newsIds, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisode(newsUuids, this.selectedPodcastId).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to create episode: No job returned');

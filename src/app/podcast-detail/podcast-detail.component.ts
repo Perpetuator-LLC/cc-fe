@@ -99,7 +99,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   protected rssFeedLoading = false;
   // protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
   protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
-  private podcastId: string;
+  private podcastUuid: string;
   protected urlDisabled = true;
   protected deleteConfirmation = '';
   selectedFile: File | null = null;
@@ -122,7 +122,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     if (!id) {
       throw new Error('Failed to get Podcast ID from route.');
     }
-    this.podcastId = id;
+    this.podcastUuid = id;
 
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -232,7 +232,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   private refreshPodcastData() {
     this.subscriptions.add(
-      this.podcastsService.getPodcastById(this.podcastId).subscribe({
+      this.podcastsService.getPodcastById(this.podcastUuid).subscribe({
         next: (podcast) => {
           console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);
@@ -373,7 +373,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   private deletePodcast() {
     this.subscriptions.add(
-      this.podcastsService.deletePodcast(this.podcastId, this.deleteConfirmation).subscribe({
+      this.podcastsService.deletePodcast(this.podcastUuid, this.deleteConfirmation).subscribe({
         next: () => {
           this.messageService.success('Podcast deleted successfully');
           this.router.navigate(['/podcasts']);
@@ -402,7 +402,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   private uploadPodcastImage(file: File) {
-    this.podcastsService.uploadPodcastImage(this.podcastId, file).subscribe({
+    this.podcastsService.uploadPodcastImage(this.podcastUuid, file).subscribe({
       next: (response) => {
         this.messageService.success('Podcast image uploaded successfully');
         this.podcastForm.patchValue({ imageUrl: response.podcast.imageUrl });
@@ -467,7 +467,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private updateRssFeeds(): void {
     this.rssFeedLoading = true;
     const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.id);
-    this.podcastsService.setPodcastRssFeeds(this.podcastId, rssFeedIds).subscribe({
+    this.podcastsService.setPodcastRssFeeds(this.podcastUuid, rssFeedIds).subscribe({
       next: (data) => {
         this.podcastForm.patchValue(data.podcast);
         this.rssFeedLoading = false;
