@@ -13,7 +13,7 @@
     <mat-card-content class="form-container">
       <mat-form-field>
         <mat-label>Select Podcast</mat-label>
-        <mat-select [(value)]="selectedPodcastId" (selectionChange)="getNews()">
+        <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="getNews()">
           @for (podcast of podcasts; track podcast.uuid) {
             <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
           }
@@ -28,7 +28,7 @@
           <mat-option [value]="14 * 24">2 Weeks</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedPodcastId === null">
+      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedPodcastUuid === null">
         Fetch News
       </button>
       @if (showMicroJobButtons) {
@@ -91,7 +91,7 @@
     </mat-card-content>
   </mat-card>
 
-  @if (selectedPodcastId !== null && news) {
+  @if (selectedPodcastUuid !== null && news) {
     <div class="news-container">
       <mat-list>
         @for (news of filteredNews; track news.url) {
@@ -132,7 +132,7 @@
                   <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
                   @if (this.userService.userDetails()?.permissions?.includes('api.change_news')) {
                     <mat-divider></mat-divider>
-                    <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.id)">
+                    <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.uuid)">
                       {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
                     </button>
                     <h3>Site Content</h3>
@@ -157,7 +157,7 @@
         }
       </mat-list>
     </div>
-  } @else if (selectedPodcastId !== null) {
+  } @else if (selectedPodcastUuid !== null) {
     <mat-spinner></mat-spinner>
   } @else {
     <mat-list>

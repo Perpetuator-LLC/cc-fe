@@ -9,6 +9,7 @@ import { PageInfo, RelayEdge } from './utils/relay';
 
 export interface NewsResult {
   id: string;
+  uuid: string;
   title: string;
   description: string;
   url: string;
@@ -34,7 +35,7 @@ export class NewsService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  fetchNews(podcastUuid: number) {
+  fetchNews(podcastUuid: string) {
     const FETCH_NEWS_DATA = gql`
       mutation FetchNews($podcastUuid: UUID!) {
         fetchNews(podcastUuid: $podcastUuid) {
@@ -60,7 +61,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: FETCH_NEWS_DATA,
-      variables: { podcastUuid: podcastUuid },
+      variables: { podcastUuid },
     }).pipe(
       map((data) => {
         return data.fetchNews;
@@ -68,7 +69,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  news(podcastUuid: number, hours = 24) {
+  news(podcastUuid: string, hours = 24) {
     const GET_NEWS = gql`
       query GetNews($podcastUuid: UUID!, $hours: Int!) {
         news(podcastUuid: $podcastUuid, hours: $hours) {
@@ -111,7 +112,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  extractNews(podcastUuid: number, ids: number[]) {
+  extractNews(podcastUuid: string, newsUuids: string[]) {
     const EXTRACT_NEWS_DATA = gql`
       mutation ExtractNews($podcastUuid: UUID!, $newsUuids: [UUID!]!) {
         extractNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids) {
@@ -137,7 +138,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: EXTRACT_NEWS_DATA,
-      variables: { podcastUuid, ids },
+      variables: { podcastUuid, newsUuids },
     }).pipe(
       map((data) => {
         return data.extractNews;
@@ -145,7 +146,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  summarizeNews(podcastUuid: number, ids: number[], force = false) {
+  summarizeNews(podcastUuid: string, newsUuids: string[], force = false) {
     const SUMMARIZE_NEWS_DATA = gql`
       mutation SummarizeNewsData($podcastUuid: UUID!, $newsUuids: [UUID!]!, $force: Boolean!) {
         summarizeNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids, force: $force) {
@@ -171,7 +172,7 @@ export class NewsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: SUMMARIZE_NEWS_DATA,
-      variables: { podcastUuid, ids, force },
+      variables: { podcastUuid, newsUuids, force },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
@@ -180,7 +181,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisode(newsUuids: number[], podcastUuid: number) {
+  createEpisode(newsUuids: string[], podcastUuid: string) {
     const CREATE_ARTICLE_DATA = gql`
       mutation CreateEpisodeData($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
         createEpisode(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
@@ -215,7 +216,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisodeChain(newsUuids: number[], podcastUuid: number) {
+  createEpisodeChain(newsUuids: string[], podcastUuid: string) {
     const CREATE_ARTICLE_CHAIN = gql`
       mutation CreateEpisodeChain($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
         createEpisodeChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
@@ -250,7 +251,7 @@ export class NewsService extends BaseService {
     );
   }
 
-  createEpisodeAudioChain(newsUuids: number[], podcastUuid: number) {
+  createEpisodeAudioChain(newsUuids: string[], podcastUuid: string) {
     const CREATE_ARTICLE_AUDIO_CHAIN = gql`
       mutation CreateEpisodeAudioChain($newsUuids: [UUID!]!, $podcastUuid: UUID!) {
         createEpisodeAudioChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {

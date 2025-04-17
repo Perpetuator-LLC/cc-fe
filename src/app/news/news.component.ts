@@ -69,7 +69,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   filteredNews: NewsResult[] = [];
   selectedNews = new Set<NewsResult>();
   podcasts: PodcastsResult[] = [];
-  selectedPodcastId: number | null = null;
+  selectedPodcastUuid: string | null = null;
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
@@ -147,12 +147,12 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   fetchNews() {
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.subscriptions.add(
-      this.newsService.fetchNews(this.selectedPodcastId).subscribe({
+      this.newsService.fetchNews(this.selectedPodcastUuid).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to fetch news, no job returned');
@@ -172,15 +172,15 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Extracting content from selected news items (this may take a while)...');
 
-    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
-      this.newsService.extractNews(this.selectedPodcastId, newsUuids).subscribe({
+      this.newsService.extractNews(this.selectedPodcastUuid, newsUuids).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to extract news: No job returned');
@@ -200,25 +200,25 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Summarizing content of selected news items (this may take a while)...');
-    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
-    this.summarizeNews(this.selectedPodcastId, newsUuids);
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
+    this.summarizeNews(this.selectedPodcastUuid, newsUuids);
   }
 
-  regenerateSummary(id: string) {
-    if (this.selectedPodcastId === null) {
+  regenerateSummary(uuid: string) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Regenerating summary for news item (this may take a while)...');
-    this.summarizeNews(this.selectedPodcastId, [Number(id)], true);
+    this.summarizeNews(this.selectedPodcastUuid, [uuid], true);
   }
 
-  private summarizeNews(podcastUuid: number, newsUuids: number[], force = false) {
+  private summarizeNews(podcastUuid: string, newsUuids: string[], force = false) {
     this.subscriptions.add(
       this.newsService.summarizeNews(podcastUuid, newsUuids, force).subscribe({
         next: (data) => {
@@ -240,15 +240,15 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Creating episode from selected news items (this may take a while)...');
 
-    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
-      this.newsService.createEpisodeChain(newsUuids, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisodeChain(newsUuids, this.selectedPodcastUuid).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create episode: No jobs returned');
@@ -268,15 +268,15 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     this.messageService.info('Creating audio from selected news items (this may take a while)...');
 
-    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
-      this.newsService.createEpisodeAudioChain(newsUuids, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisodeAudioChain(newsUuids, this.selectedPodcastUuid).subscribe({
         next: (data) => {
           if (!data.jobs) {
             this.messageService.error('Failed to create audio: No jobs returned');
@@ -296,14 +296,14 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
 
-    const newsUuids = [...this.selectedNews].map((entry) => Number(entry.id));
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
-      this.newsService.createEpisode(newsUuids, this.selectedPodcastId).subscribe({
+      this.newsService.createEpisode(newsUuids, this.selectedPodcastUuid).subscribe({
         next: (data) => {
           if (!data.job) {
             this.messageService.error('Failed to create episode: No job returned');
@@ -320,13 +320,13 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   getNews() {
-    if (this.selectedPodcastId === null) {
+    if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
     const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
-      this.newsService.news(this.selectedPodcastId, this.selectedHours).subscribe({
+      this.newsService.news(this.selectedPodcastUuid, this.selectedHours).subscribe({
         next: (data: NewsConnection) => {
           this.news = data;
           this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
@@ -343,14 +343,14 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getSelectedNewsIds(): number[] {
-    return [...this.selectedNews].map((entry) => Number(entry.id));
+  private getSelectedNewsIds(): string[] {
+    return [...this.selectedNews].map((entry) => entry.uuid);
   }
 
-  private reapplySelection(selectedNewsIds: number[]): void {
+  private reapplySelection(selectedNewsUuids: string[]): void {
     this.selectedNews.clear();
     this.filteredNews.forEach((news) => {
-      if (selectedNewsIds.includes(Number(news.id))) {
+      if (selectedNewsUuids.includes(news.uuid)) {
         this.selectedNews.add(news);
       }
     });
