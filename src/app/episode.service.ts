@@ -4,12 +4,12 @@ import { Apollo, gql } from 'apollo-angular';
 import { throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
-import { TeamsResult } from './teams-list/teams-list.component';
 import { Job } from './job.service';
 import { FetchPolicy } from '@apollo/client';
 import { ErrorHandlerService } from './error-handler.service';
 import { NewsResult } from './news.service';
 import { RelayConnection } from './utils/relay';
+import { TeamsResult } from './teams.service';
 
 export interface Episode {
   id: string;
@@ -115,7 +115,7 @@ export class EpisodeService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  episodes(
+  getEpisodes(
     first = 10,
     after: string | null = null,
     sort = 'date',
@@ -142,6 +142,7 @@ export class EpisodeService extends BaseService {
 
   episodeById(episodeUuid: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
     if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
+
     interface Response {
       episodes: RelayConnection<Episode>;
     }

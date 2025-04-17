@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
-import { TeamsResult } from './teams-list/teams-list.component';
 import { PageInfo, RelayEdge } from './utils/relay';
+import { TeamsResult } from './teams.service';
 
 export interface UserResult {
   id: string;

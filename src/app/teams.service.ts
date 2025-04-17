@@ -2,7 +2,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
-import { RssFeedResult, TeamsResult } from './teams-list/teams-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
@@ -10,6 +9,31 @@ import { Episode } from './episode.service';
 import { Job } from './job.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { PodcastsResult } from './podcasts.service';
+import { RelayConnection } from './utils/relay';
+
+export interface UserResult {
+  id: string;
+  uuid: string;
+  username: string;
+}
+
+export interface MemberResult {
+  user: UserResult;
+  role: string;
+}
+
+export interface RssFeedResult {
+  id: string;
+  uuid: string;
+  url: string;
+}
+
+export interface TeamsResult {
+  id: string;
+  uuid: string;
+  name: string | null;
+  members: MemberResult[];
+}
 
 @Injectable({
   providedIn: 'root',
@@ -159,7 +183,7 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getTeams(): Observable<TeamsResult[]> {
+  getTeams() {
     const GQL = gql`
       query GetMyTeams {
         teams {
@@ -189,13 +213,18 @@ export class TeamsService extends BaseService {
     `;
 
     interface Response {
-      teams: TeamsResult[];
+      teams: RelayConnection<TeamsResult>;
     }
 
     return this.query<Response>({
       query: GQL,
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.teams));
+    }).pipe(
+      map((data) => ({
+        teams: data.teams.edges.map((edge) => edge.node),
+        pageInfo: data.teams.pageInfo,
+      })),
+    );
   }
 
   upsertUserToTeam(teamUuid: string, userUuid: string, role: string): Observable<TeamsResult> {

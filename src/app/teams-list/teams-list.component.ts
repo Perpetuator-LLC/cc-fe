@@ -6,31 +6,10 @@ import { Router } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { TeamsService } from '../teams.service';
+import { TeamsResult, TeamsService } from '../teams.service';
 import { Subscription } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
-
-export interface UserResult {
-  id: number;
-  username: string;
-}
-
-export interface MemberResult {
-  user: UserResult;
-  role: string;
-}
-
-export interface RssFeedResult {
-  id: number;
-  url: string;
-}
-
-export interface TeamsResult {
-  id: string;
-  name: string | null;
-  members: MemberResult[];
-}
 
 @Component({
   selector: 'app-teams-list',
@@ -71,9 +50,9 @@ export class TeamsListComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.teamsService.getTeams().subscribe({
-        next: (teams: TeamsResult[]) => {
+        next: (response) => {
           this.messageService.clearMessages();
-          this.teams = teams;
+          this.teams = response.teams;
           this.loading = false;
         },
         error: (err: { message: string }) => {

@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Va
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
-import { TeamsService } from '../teams.service';
+import { MemberResult, TeamsService } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -28,7 +28,6 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MemberResult } from '../teams-list/teams-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { User } from '../types';

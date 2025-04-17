@@ -562,7 +562,7 @@ enum JobKind {
   FETCH_NEWS
   EXTRACT_NEWS
   SUMMARIZE_NEWS
-  CREATE_ARTICLE
+  CREATE_EPISODE
 }
 
 type PodcastTypeConnection {

@@ -109,7 +109,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
   loadEpisodes(after: string | null = null, pageIndex = 0) {
     this.episodeService
-      .episodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
+      .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
       .subscribe({
         next: ({ episodes, pageInfo }) => {
           this.episodes = episodes;

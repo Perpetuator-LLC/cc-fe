@@ -7,8 +7,7 @@ import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
-import { TeamsService } from '../teams.service';
-import { TeamsResult } from '../teams-list/teams-list.component';
+import { TeamsResult, TeamsService } from '../teams.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatFormField } from '@angular/material/form-field';
@@ -212,8 +211,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.loadingTeams = true;
     this.subscriptions.add(
       this.teamsService.getTeams().subscribe({
-        next: (teams) => {
-          this.teams = teams;
+        next: (response) => {
+          this.teams = response.teams;
           this.loadingTeams = false;
         },
         error: (err) => {

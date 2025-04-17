@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService } from '../podcasts.service';
-import { TeamsService } from '../teams.service';
+import { TeamsResult, TeamsService } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
@@ -14,7 +14,6 @@ import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
 import { MatCard } from '@angular/material/card';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
-import { TeamsResult } from '../teams-list/teams-list.component';
 
 @Component({
   selector: 'app-new-podcast',
@@ -99,8 +98,8 @@ export class NewPodcastComponent implements OnInit, OnDestroy {
     this.isLoadingTeams = true;
     this.subscriptions.add(
       this.teamsService.getTeams().subscribe({
-        next: (teams) => {
-          this.ownedTeams = teams.filter((team) => team.members.some((member) => member.role === 'owner'));
+        next: (response) => {
+          this.ownedTeams = response.teams.filter((team) => team.members.some((member) => member.role === 'owner'));
           this.isLoadingTeams = false;
         },
         error: (err) => {
