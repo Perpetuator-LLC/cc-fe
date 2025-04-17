@@ -60,7 +60,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
-  private episodeId: string;
+  private episodeUuid: string;
 
   constructor(
     private fb: FormBuilder,
@@ -74,7 +74,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     if (!id) {
       throw new Error('Failed to get Episode ID from route.');
     }
-    this.episodeId = id;
+    this.episodeUuid = id;
     this.episodeForm = this.fb.group({
       id: [{ value: '', disabled: true }, Validators.required],
       isLive: [false, Validators.required],
@@ -100,9 +100,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            if ([JobType.UPDATE_ARTICLE_AUDIO].includes(stringToJobType(job.kind))) {
+            if ([JobType.UPDATE_EPISODE_AUDIO].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
-                this.episodeService.episodeById(this.episodeId, 'network-only' as FetchPolicy).subscribe({
+                this.episodeService.episodeById(this.episodeUuid, 'network-only' as FetchPolicy).subscribe({
                   next: (episode) => {
                     if (episode.audioUrl) {
                       this.audioSrc = episode.audioUrl;
@@ -113,7 +113,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                   },
                 }),
               );
-            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.kind))) {
+            } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.episodeById(job.result).subscribe({
                   next: (episode) => {
@@ -146,7 +146,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.subscriptions.add(
-      this.episodeService.episodeById(this.episodeId).subscribe({
+      this.episodeService.episodeById(this.episodeUuid).subscribe({
         next: (episode) => {
           this.episodeForm.patchValue(episode);
 
@@ -180,7 +180,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   publishAudio(): void {
     this.messageService.info('Audio file publishing...');
     this.subscriptions.add(
-      this.episodeService.publishAudio(this.episodeId).subscribe({
+      this.episodeService.publishAudio(this.episodeUuid).subscribe({
         next: (response) => {
           this.messageService.success('Audio file published successfully.');
           this.episodeForm.patchValue(response.episode);
@@ -201,14 +201,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     if (this.audioSrc) {
       const a = document.createElement('a');
       a.href = this.audioSrc;
-      a.download = `episode_${this.episodeId}.mp3`; // Set the download file name
+      a.download = `episode_${this.episodeUuid}.mp3`; // Set the download file name
       a.click(); // Programmatically trigger the download
     }
   }
 
   generateAudio(): void {
     this.subscriptions.add(
-      this.episodeService.generateAudio(this.episodeId).subscribe({
+      this.episodeService.generateAudio(this.episodeUuid).subscribe({
         next: (data) => {
           if (!data.success) {
             this.messageService.error(data.message);

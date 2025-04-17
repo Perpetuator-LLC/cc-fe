@@ -2,8 +2,8 @@
 @if (jobs.length > 0) {
   <div class="jobs-container">
     <mat-list>
-      @for (job of jobs; track job.id) {
-        <mat-list-item matTooltip="ID: {{ job.id }}" class="job-cards">
+      @for (job of jobs; track job.uuid) {
+        <mat-list-item class="job-cards">
           <mat-card class="job-card {{ job.status }}">
             <mat-accordion>
               <mat-expansion-panel [expanded]="data.panelOpenState">

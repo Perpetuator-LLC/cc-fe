@@ -4,8 +4,24 @@ import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs/operators';
 import { Job } from './job.service';
 import { BaseService } from './base.service';
-import { News } from './news/news.component';
 import { ErrorHandlerService } from './error-handler.service';
+import { PageInfo, RelayEdge } from './utils/relay';
+
+export interface NewsResult {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  publishedAt: string;
+  source: string;
+  content: string;
+  summary: string;
+}
+
+export interface NewsConnection {
+  edges: RelayEdge<NewsResult>[];
+  pageInfo: PageInfo;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +40,7 @@ export class NewsService extends BaseService {
         fetchNews(podcastUuid: $podcastUuid) {
           job {
             id
+            uuid
             kind
             status
             error
@@ -59,6 +76,7 @@ export class NewsService extends BaseService {
             cursor
             node {
               id
+              uuid
               title
               description
               url
@@ -79,7 +97,7 @@ export class NewsService extends BaseService {
     `;
 
     interface Response {
-      news: News;
+      news: NewsConnection;
     }
 
     return this.query<Response>({
@@ -99,6 +117,7 @@ export class NewsService extends BaseService {
         extractNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids) {
           job {
             id
+            uuid
             kind
             status
             error
@@ -132,6 +151,7 @@ export class NewsService extends BaseService {
         summarizeNews(podcastUuid: $podcastUuid, newsUuids: $newsUuids, force: $force) {
           job {
             id
+            uuid
             kind
             status
             error
@@ -166,6 +186,7 @@ export class NewsService extends BaseService {
         createEpisode(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           job {
             id
+            uuid
             kind
             status
             error
@@ -200,6 +221,7 @@ export class NewsService extends BaseService {
         createEpisodeChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           jobs {
             id
+            uuid
             kind
             status
             error
@@ -234,6 +256,7 @@ export class NewsService extends BaseService {
         createEpisodeAudioChain(newsUuids: $newsUuids, podcastUuid: $podcastUuid) {
           jobs {
             id
+            uuid
             kind
             status
             error

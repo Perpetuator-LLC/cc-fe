@@ -5,10 +5,11 @@ import { throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { TeamsResult } from './teams-list/teams-list.component';
-import { NewsResult } from './news/news.component';
 import { Job } from './job.service';
 import { FetchPolicy } from '@apollo/client';
 import { ErrorHandlerService } from './error-handler.service';
+import { NewsResult } from './news.service';
+import { RelayConnection } from './utils/relay';
 
 export interface Episode {
   id: string;
@@ -23,24 +24,14 @@ export interface Episode {
   team: TeamsResult;
 }
 
-export interface EpisodesData {
-  success: boolean;
-  message: string;
-  totalRecords: number;
-  totalPages: number;
-  currentPage: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-  episodes: Episode[];
-}
-
-const FETCH_EPISODES = gql`
+const GET_EPISODES = gql`
   query GetEpisodesData($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!) {
     episodes(podcastUuid: $podcastUuid, first: $first, after: $after, orderBy: $orderBy) {
       edges {
         cursor
         node {
           id
+          uuid
           date
           podcast {
             name
@@ -49,6 +40,7 @@ const FETCH_EPISODES = gql`
           content
           news {
             id
+            uuid
             url
             title
             summary
@@ -65,17 +57,52 @@ const FETCH_EPISODES = gql`
   }
 `;
 
-export interface EpisodeEdge {
-  cursor: string;
-  node: Episode;
-}
-
-export interface EpisodePageInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  startCursor?: string;
-  endCursor?: string;
-}
+const GET_EPISODE = gql`
+  query GetEpisodeData($episodeUuid: UUID!) {
+    episodes(episodeUuid: $episodeUuid) {
+      edges {
+        cursor
+        node {
+          id
+          uuid
+          date
+          title
+          content
+          audioUrl
+          isLive
+          podcastDate
+          telegramDate
+          podcast {
+            id
+            name
+            team {
+              members {
+                role
+                user {
+                  id
+                  username
+                }
+              }
+            }
+          }
+          news {
+            id
+            uuid
+            url
+            title
+            summary
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
 
 @Injectable({
   providedIn: 'root',
@@ -91,23 +118,19 @@ export class EpisodeService extends BaseService {
   episodes(
     first = 10,
     after: string | null = null,
-    orderBy = 'date',
+    sort = 'date',
     direction = 'DESC',
     podcastUuid: string | null = null,
   ) {
-    // build the Relay‐style sort string
-    const sort = direction === 'DESC' ? `-${orderBy}` : orderBy;
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface Response {
-      episodes: {
-        edges: EpisodeEdge[];
-        pageInfo: EpisodePageInfo;
-      };
+      episodes: RelayConnection<Episode>;
     }
 
     return this.query<Response>({
-      query: FETCH_EPISODES,
-      variables: { podcastUuid, first, after, sort },
+      query: GET_EPISODES,
+      variables: { podcastUuid, first, after, orderBy },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ episodes }) => ({
@@ -117,71 +140,40 @@ export class EpisodeService extends BaseService {
     );
   }
 
-  episodeById(id: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
-    if (id === null) return throwError(() => new Error('Episode ID is required'));
-    const GQL = gql`
-      query GetEpisodeData($id: ID!) {
-        episodes(episodeId: $id) {
-          episodes {
-            id
-            date
-            title
-            content
-            audioUrl
-            isLive
-            podcastDate
-            telegramDate
-            podcast {
-              id
-              name
-              team {
-                members {
-                  role
-                  user {
-                    id
-                    username
-                  }
-                }
-              }
-            }
-            news {
-              id
-              url
-              title
-              summary
-            }
-          }
-        }
-      }
-    `;
-
+  episodeById(episodeUuid: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
+    if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
     interface Response {
-      episodes: EpisodesData;
+      episodes: RelayConnection<Episode>;
     }
 
     return this.query<Response>({
-      query: GQL,
-      variables: { id },
+      query: GET_EPISODE,
+      variables: { episodeUuid },
       fetchPolicy: fetchPolicy,
     }).pipe(
-      map((data) => {
-        if (!data.episodes?.episodes || data.episodes.episodes.length !== 1) {
+      map((response) => {
+        if (!response.episodes?.edges || response.episodes.edges.length !== 1) {
           throw new Error('Episode not found');
         }
-        return data.episodes.episodes[0];
+        return response.episodes.edges[0].node;
       }),
     );
   }
 
-  updateEpisode(id: string | null, updatedTitle: string | null, updatedContent: string | null, isLive: boolean | null) {
-    if (id === null) return throwError(() => new Error('Episode ID is required'));
+  updateEpisode(
+    episodeUuid: string | null,
+    updatedTitle: string | null,
+    updatedContent: string | null,
+    isLive: boolean | null,
+  ) {
+    if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
     if (isLive === null) return throwError(() => new Error('Updated is live is required'));
 
     const GQL = gql`
-      mutation UpdateEpisodes($id: ID!, $title: String!, $content: String!, $isLive: Boolean!) {
-        updateEpisode(episodeId: $id, title: $title, content: $content, isLive: $isLive) {
+      mutation UpdateEpisodes($episodeUuid: UUID!, $title: String!, $content: String!, $isLive: Boolean!) {
+        updateEpisode(episodeUuid: $episodeUuid, title: $title, content: $content, isLive: $isLive) {
           success
           message
         }
@@ -198,7 +190,7 @@ export class EpisodeService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id, title: updatedTitle, content: updatedContent, isLive: isLive },
+      variables: { episodeUuid, title: updatedTitle, content: updatedContent, isLive: isLive },
     }).pipe(
       map((data) => {
         if (!data.updateEpisode.success) {
@@ -209,16 +201,17 @@ export class EpisodeService extends BaseService {
     );
   }
 
-  generateAudio(id: string) {
-    if (id === null) return throwError(() => new Error('Episode ID is required'));
+  generateAudio(episodeUuid: string) {
+    if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
 
     const GQL = gql`
       mutation UpdateEpisodesAudio {
-        updateEpisodeAudio(episodeId: "${id}") {
+        updateEpisodeAudio(episodeUuid: "${episodeUuid}") {
           success
           message
           job {
             id
+            uuid
             kind
             status
             error
@@ -250,16 +243,17 @@ export class EpisodeService extends BaseService {
     );
   }
 
-  publishAudio(episodeId: string) {
-    if (episodeId === null) return throwError(() => new Error('Episode ID is required'));
+  publishAudio(episodeUuid: string) {
+    if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
 
     const GQL = gql`
-      mutation PublishEpisodeAudio($id: ID!) {
-        publishEpisodeAudio(episodeId: $id) {
+      mutation PublishEpisodeAudio($episodeUuid: UUID!) {
+        publishEpisodeAudio(episodeUuid: $episodeUuid) {
           success
           message
           episode {
             id
+            uuid
             date
             title
             content
@@ -282,7 +276,7 @@ export class EpisodeService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { id: episodeId },
+      variables: { episodeUuid },
     }).pipe(
       map((data) => {
         if (!data.publishEpisodeAudio.success) {

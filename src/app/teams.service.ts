@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { RssFeedResult, TeamsResult } from './teams-list/teams-list.component';
-import { PodcastsResult } from './podcasts-list/podcasts-list.component';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { User } from './types';
 import { Episode } from './episode.service';
 import { Job } from './job.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { PodcastsResult } from './podcasts.service';
 
 @Injectable({
   providedIn: 'root',
@@ -116,13 +116,26 @@ export class TeamsService extends BaseService {
     const GET_TEAM_BY_ID = gql`
       query GetTeamById($teamUuid: UUID!) {
         teams(teamUuid: $teamUuid) {
-          name
-          members {
-            user {
+          edges {
+            node {
               id
-              username
+              uuid
+              name
+              members {
+                user {
+                  id
+                  uuid
+                  username
+                }
+                role
+              }
             }
-            role
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -150,14 +163,26 @@ export class TeamsService extends BaseService {
     const GQL = gql`
       query GetMyTeams {
         teams {
-          id
-          name
-          members {
-            user {
+          edges {
+            node {
               id
-              username
+              uuid
+              name
+              members {
+                user {
+                  id
+                  uuid
+                  username
+                }
+                role
+              }
             }
-            role
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
           }
         }
       }
@@ -173,10 +198,10 @@ export class TeamsService extends BaseService {
     }).pipe(map((data) => data.teams));
   }
 
-  upsertUserToTeam(teamUuid: string, userId: string, role: string): Observable<TeamsResult> {
+  upsertUserToTeam(teamUuid: string, userUuid: string, role: string): Observable<TeamsResult> {
     const GQL = gql`
-      mutation UpsertUserToTeam($teamUuid: UUID!, $userId: UUID!, $role: String!) {
-        upsertUserToTeam(teamUuid: $teamUuid, userId: $userId, role: $role) {
+      mutation UpsertUserToTeam($teamUuid: UUID!, $userUuid: UUID!, $role: String!) {
+        upsertUserToTeam(teamUuid: $teamUuid, userUuid: $userUuid, role: $role) {
           success
           message
           team {
@@ -204,7 +229,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { teamUuid, userId, role },
+      variables: { teamUuid, userUuid, role },
     }).pipe(
       map((data) => {
         if (!data.upsertUserToTeam.success) {
@@ -215,10 +240,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  removeUserFromTeam(teamUuid: string, userId: string): Observable<TeamsResult> {
+  removeUserFromTeam(teamUuid: string, userUuid: string): Observable<TeamsResult> {
     const REMOVE_USER_FROM_TEAM = gql`
-      mutation RemoveUserFromTeam($teamUuid: UUID!, $userId: UUID!) {
-        removeUserFromTeam(teamUuid: $teamUuid, userId: $userId) {
+      mutation RemoveUserFromTeam($teamUuid: UUID!, $userUuid: UUID!) {
+        removeUserFromTeam(teamUuid: $teamUuid, userUuid: $userUuid) {
           success
           message
           team {
@@ -246,7 +271,7 @@ export class TeamsService extends BaseService {
 
     return this.mutate<RemoveUserFromTeamData>({
       mutation: REMOVE_USER_FROM_TEAM,
-      variables: { teamUuid, userId },
+      variables: { teamUuid, userUuid },
     }).pipe(
       map((data) => {
         if (!data.removeUserFromTeam.success) {
@@ -365,6 +390,7 @@ export class TeamsService extends BaseService {
       query UserDataExport($confirm: String!) {
         userDataExport(confirm: $confirm) {
           id
+          uuid
           username
           email
           settings {
@@ -386,16 +412,17 @@ export class TeamsService extends BaseService {
             url
             tgResponse
             tgChannelId
-            episodes {
-              title
-              content
-              date
-              telegramDate
-              podcastDate
-            }
+          }
+          episodes {
+            title
+            content
+            date
+            telegramDate
+            podcastDate
           }
           jobs {
             id
+            kind
             status
             result
             args

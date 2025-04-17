@@ -32,7 +32,7 @@ export class CodeService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  codes(activeOnly = false, page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'ASC') {
+  codes(active = false, after: string | null = null, first = 10, orderBy = 'createdAt', direction = 'ASC') {
     interface Response {
       codes: {
         codes: Code[];
@@ -46,7 +46,7 @@ export class CodeService extends BaseService {
 
     return this.query<Response>({
       query: GET_BONUS_CODES,
-      variables: { page, pageSize, orderBy, direction, activeOnly },
+      variables: { page: after, pageSize: first, orderBy, direction, activeOnly: active },
       fetchPolicy: 'network-only',
     }).pipe(map((data) => data.codes));
   }
@@ -95,8 +95,8 @@ export class CodeService extends BaseService {
 }
 
 const GET_BONUS_CODES = gql`
-  query GetCodes($page: Int!, $after: String!, $active: Boolean!) {
-    codes(page: $page, pageSize: $pageSize, active: $active) {
+  query GetCodes($first: Int, $after: String, $active: Boolean!) {
+    codes(first: $first, after: $after, active: $active) {
       edges {
         node {
           id

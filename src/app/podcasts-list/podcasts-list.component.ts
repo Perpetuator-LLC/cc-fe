@@ -50,9 +50,9 @@ export class PodcastsListComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.podcastsService.getPodcasts().subscribe({
-        next: (podcasts: PodcastsResult[]) => {
+        next: (response) => {
           this.messageService.clearMessages();
-          this.podcasts = podcasts;
+          this.podcasts = response.podcasts;
           this.loading = false;
         },
         error: (err: { message: string }) => {
@@ -71,8 +71,8 @@ export class PodcastsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  viewPodcast(id: number) {
-    this.router.navigate(['/podcast', id]);
+  viewPodcast(uuid: string) {
+    this.router.navigate(['/podcast', uuid]);
   }
 
   ngOnDestroy() {

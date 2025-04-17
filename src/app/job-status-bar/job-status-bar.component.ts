@@ -83,8 +83,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
             JobType.SUMMARIZE_NEWS,
             JobType.FETCH_NEWS,
             JobType.EXTRACT_NEWS,
-            JobType.CREATE_ARTICLE,
-            JobType.UPDATE_ARTICLE_AUDIO,
+            JobType.CREATE_EPISODE,
+            JobType.UPDATE_EPISODE_AUDIO,
           ],
           currentJobIds,
         )

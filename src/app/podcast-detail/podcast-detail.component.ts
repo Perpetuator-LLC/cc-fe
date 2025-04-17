@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Va
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
-import { PodcastsService } from '../podcasts.service';
+import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { TeamsService } from '../teams.service';
@@ -28,7 +28,6 @@ import {
 import { UserAutocompleteComponent } from '../user-autocomplete/user-autocomplete.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { RssFeedResult } from '../podcasts-list/podcasts-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';

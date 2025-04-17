@@ -6,9 +6,11 @@ import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { TeamsResult } from './teams-list/teams-list.component';
+import { PageInfo, RelayEdge } from './utils/relay';
 
 export interface UserResult {
-  id: number;
+  id: string;
+  uuid: string;
   username: string;
 }
 
@@ -18,12 +20,14 @@ export interface MemberResult {
 }
 
 export interface RssFeedResult {
-  id: number;
+  id: string;
+  uuid: string;
   url: string;
 }
 
 export interface PodcastsResult {
-  id: number;
+  id: string;
+  uuid: string;
   team: TeamsResult;
   name: string | null;
   url: string | null;
@@ -40,18 +44,6 @@ export interface PodcastsResult {
   tgChannelId: string | null;
   tgResponse: string | null;
   rssFeeds: RssFeedResult[];
-}
-
-export interface RelayEdge<T> {
-  cursor: string;
-  node: T;
-}
-
-export interface PageInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  startCursor: string | null;
-  endCursor: string | null;
 }
 
 export interface PodcastConnection {
@@ -296,7 +288,7 @@ export class PodcastsService extends BaseService {
   }
 
   getPodcastById(id: string): Observable<PodcastsResult> {
-    const GET_TEAM_BY_ID = gql`
+    const GET_PODCAST_BY_ID = gql`
       query GetPodcastById($uuid: UUID!) {
         podcasts(podcastUuid: $uuid) {
           edges {
@@ -344,27 +336,30 @@ export class PodcastsService extends BaseService {
     `;
 
     interface Response {
-      podcasts: PodcastsResult[];
+      podcasts: {
+        edges: RelayEdge<PodcastsResult>[];
+        pageInfo: PageInfo;
+      };
     }
 
     return this.query<Response>({
-      query: GET_TEAM_BY_ID,
-      variables: { id },
+      query: GET_PODCAST_BY_ID,
+      variables: { uuid: id },
       fetchPolicy: 'network-only',
     }).pipe(
-      map((data) => {
-        if (!data.podcasts || data.podcasts.length !== 1) {
+      map(({ podcasts }) => {
+        if (!podcasts.edges || podcasts.edges.length !== 1) {
           throw new Error('Podcast data is missing');
         }
-        return data.podcasts[0];
+        return podcasts.edges[0].node;
       }),
     );
   }
 
   getPodcastsByTeamId(teamUuid: string): Observable<PodcastConnection> {
-    const GET_TEAM_BY_TEAM_UUID = gql`
-      query PodcastsByTeamId($teamUuid: UUID!) {
-        podcasts(teamUuid: $teamUuid) {
+    const GET_PODCASTS_BY_TEAM_UUID = gql`
+      query PodcastsByTeamId($teamUuid: UUID!, $first: Int, $after: String) {
+        podcasts(teamUuid: $teamUuid, first: $first, after: $after) {
           edges {
             cursor
             node {
@@ -404,19 +399,20 @@ export class PodcastsService extends BaseService {
     }
 
     return this.query<Response>({
-      query: GET_TEAM_BY_TEAM_UUID,
-      variables: { teamUuid },
+      query: GET_PODCASTS_BY_TEAM_UUID,
+      variables: { teamUuid, first: 10, after: null },
     }).pipe(map((result) => result.podcasts));
   }
 
-  getPodcasts(): Observable<PodcastsResult[]> {
+  getPodcasts(first = 10, after: string | null = null) {
     const GQL = gql`
-      query GetPodcasts {
-        podcasts {
+      query GetPodcasts($first: Int, $after: String) {
+        podcasts(first: $first, after: $after) {
           edges {
             cursor
             node {
               id
+              uuid
               name
               team {
                 members {
@@ -440,13 +436,22 @@ export class PodcastsService extends BaseService {
     `;
 
     interface Response {
-      podcasts: PodcastsResult[];
+      podcasts: {
+        edges: RelayEdge<PodcastsResult>[];
+        pageInfo: PageInfo;
+      };
     }
 
     return this.query<Response>({
       query: GQL,
+      variables: { first, after },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.podcasts));
+    }).pipe(
+      map(({ podcasts }) => ({
+        podcasts: podcasts.edges.map((edge) => edge.node),
+        pageInfo: podcasts.pageInfo,
+      })),
+    );
   }
 
   deletePodcast(podcastUuid: string, confirm: string) {

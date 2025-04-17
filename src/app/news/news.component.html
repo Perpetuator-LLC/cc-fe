@@ -14,8 +14,8 @@
       <mat-form-field>
         <mat-label>Select Podcast</mat-label>
         <mat-select [(value)]="selectedPodcastId" (selectionChange)="getNews()">
-          @for (podcast of podcasts; track podcast.id) {
-            <mat-option [value]="podcast.id">{{ podcast.name }}</mat-option>
+          @for (podcast of podcasts; track podcast.uuid) {
+            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -86,7 +86,7 @@
       <button mat-raised-button color="primary" type="button" (click)="selectAll()">Select All</button>
       <button mat-raised-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
       <p>
-        Showing {{ filteredNews.length }} of {{ news?.results?.length || 0 }} with {{ selectedNews.size }} selected.
+        Showing {{ filteredNews.length }} of {{ news?.edges?.length || 0 }} with {{ selectedNews.size }} selected.
       </p>
     </mat-card-content>
   </mat-card>
@@ -146,10 +146,10 @@
           <mat-card>
             <mat-card-header>
               <p>
-                @if (news.results.length) {
+                @if (news.edges.length) {
                   No news episodes match the filter criteria.
                 } @else {
-                  No news episodes exist, perhaps try "Fetch URLs" to get the latest updates or change the "Time" range.
+                  No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the "Time" range.
                 }
               </p>
             </mat-card-header>

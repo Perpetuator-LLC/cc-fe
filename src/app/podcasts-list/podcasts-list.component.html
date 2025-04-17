@@ -16,13 +16,13 @@
   <h2>No podcasts found.</h2>
 } @else {
   <div class="podcasts-container">
-    @for (podcast of podcasts; track podcast.id) {
+    @for (podcast of podcasts; track podcast.uuid) {
       <mat-card class="podcast-card">
         <mat-card-header>
           <mat-card-title>{{ podcast.name }}</mat-card-title>
         </mat-card-header>
         <mat-card-actions>
-          <button mat-button color="primary" (click)="viewPodcast(podcast.id)">
+          <button mat-button color="primary" (click)="viewPodcast(podcast.uuid)">
             <mat-icon aria-label="View podcast details">video_settings</mat-icon>
             View Details
           </button>

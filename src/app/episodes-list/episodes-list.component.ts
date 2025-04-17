@@ -131,8 +131,8 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.podcastsService.getPodcasts().subscribe({
-        next: (podcasts: PodcastsResult[]) => {
-          this.podcasts = podcasts;
+        next: (response) => {
+          this.podcasts = response.podcasts;
           this.loadingPodcasts = false;
         },
         error: (err: { message: string }) => {
@@ -172,7 +172,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.loadEpisodes(after, newPageIndex);
   }
 
-  viewEpisode(id: string) {
-    this.router.navigate(['/episode', id]);
+  viewEpisode(uuid: string) {
+    this.router.navigate(['/episode', uuid]);
   }
 }

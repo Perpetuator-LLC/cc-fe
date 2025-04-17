@@ -9,45 +9,46 @@ import { catchError } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
+import { PageInfo, RelayEdge } from './utils/relay';
 
 // create an enum of kinds
 export enum JobType {
-  FETCH_NEWS = 'fetch_news',
-  EXTRACT_NEWS = 'extract_news',
-  SUMMARIZE_NEWS = 'summarize_news',
-  CREATE_ARTICLE = 'create_episode',
-  UPDATE_ARTICLE_AUDIO = 'update_episode_audio',
+  FETCH_NEWS = 'FETCH_NEWS',
+  EXTRACT_NEWS = 'EXTRACT_NEWS',
+  SUMMARIZE_NEWS = 'SUMMARIZE_NEWS',
+  CREATE_EPISODE = 'CREATE_EPISODE',
+  UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
 }
 
 // create a function to convert string to kind
 export const stringToJobType = (kind: string) => {
-  switch (kind) {
-    case 'fetch_news':
+  switch (kind.toUpperCase()) {
+    case 'FETCH_NEWS':
       return JobType.FETCH_NEWS;
-    case 'extract_news':
+    case 'EXTRACT_NEWS':
       return JobType.EXTRACT_NEWS;
-    case 'summarize_news':
+    case 'SUMMARIZE_NEWS':
       return JobType.SUMMARIZE_NEWS;
-    case 'create_episode':
-      return JobType.CREATE_ARTICLE;
-    case 'update_episode_audio':
-      return JobType.UPDATE_ARTICLE_AUDIO;
+    case 'CREATE_EPISODE':
+      return JobType.CREATE_EPISODE;
+    case 'UPDATE_EPISODE_AUDIO':
+      return JobType.UPDATE_EPISODE_AUDIO;
     default:
       throw new Error('Invalid job type');
   }
 };
 
 export const kindToString = (kind: string) => {
-  switch (kind) {
+  switch (kind.toUpperCase()) {
     case JobType.FETCH_NEWS:
       return 'Fetch News';
     case JobType.EXTRACT_NEWS:
       return 'Extract News';
     case JobType.SUMMARIZE_NEWS:
       return 'Summarize News';
-    case JobType.CREATE_ARTICLE:
+    case JobType.CREATE_EPISODE:
       return 'Create Episode';
-    case JobType.UPDATE_ARTICLE_AUDIO:
+    case JobType.UPDATE_EPISODE_AUDIO:
       return 'Update Episode Audio';
     default:
       return 'N/A';
@@ -55,14 +56,15 @@ export const kindToString = (kind: string) => {
 };
 
 export enum JobStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }
 
 export interface Job {
   id: string;
+  uuid: string;
   kind: string;
   status: string;
   error: string;
@@ -72,8 +74,21 @@ export interface Job {
 }
 
 interface GetUserJobsResponse {
-  jobs: { jobs: Job[] };
+  jobs: {
+    edges: RelayEdge<Job>[];
+    pageInfo: PageInfo;
+  };
 }
+
+// Create a JobConnection interface similar to PodcastConnection
+export interface JobConnection {
+  edges: RelayEdge<Job>[];
+  pageInfo: PageInfo;
+}
+
+// interface GetUserJobsResponse {
+//   jobs: { jobs: Job[] };
+// }
 
 @Injectable({
   providedIn: 'root',
@@ -151,8 +166,8 @@ export class JobService extends BaseService implements OnDestroy {
 
     this.subscriptions.add(
       toObservable(this.jobsSignal).subscribe((jobs) => {
-        const jobIds = jobs.map((job) => job.id);
-        this.queryRef.setVariables({ ...this.queryRef.variables, ids: jobIds });
+        const jobUuids = jobs.map((job) => job.uuid);
+        this.queryRef.setVariables({ ...this.queryRef.variables, jobUuids });
         this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 21000 : 3000 });
       }),
     );
@@ -164,14 +179,16 @@ export class JobService extends BaseService implements OnDestroy {
         $statuses: [JobStatus!]!
         $kinds: [JobKind!]
         $jobUuids: [UUID!]
-        $first: Int!
+        $first: Int
+        $after: String
         $orderBy: String
       ) {
-        jobs(statuses: $statuses, kinds: $kinds, jobUuids: $jobUuids, first: $first, orderBy: $orderBy) {
+        jobs(statuses: $statuses, kinds: $kinds, jobUuids: $jobUuids, first: $first, after: $after, orderBy: $orderBy) {
           edges {
             cursor
             node {
               id
+              uuid
               kind
               status
               error
@@ -198,14 +215,13 @@ export class JobService extends BaseService implements OnDestroy {
           JobType.SUMMARIZE_NEWS,
           JobType.FETCH_NEWS,
           JobType.EXTRACT_NEWS,
-          JobType.CREATE_ARTICLE,
-          JobType.UPDATE_ARTICLE_AUDIO,
+          JobType.CREATE_EPISODE,
+          JobType.UPDATE_EPISODE_AUDIO,
         ],
-        ids: [],
-        page: 1,
-        pageSize: 15, // Most windows are 3 wide, so 5 tall
-        orderBy: 'createdAt',
-        direction: 'DESC',
+        jobUuids: [],
+        // after: ??,
+        first: 15, // Most windows are 3 wide, so 5 tall
+        orderBy: '-createdAt',
       },
       pollInterval: 3000, // Poll every 3 seconds
     });
@@ -216,7 +232,7 @@ export class JobService extends BaseService implements OnDestroy {
         catchError((error) => this.errorHandler.handleError(error)),
       )
       .subscribe({
-        next: (results) => this.jobsSignal.set(results.data.jobs.jobs),
+        next: (results) => this.jobsSignal.set(results.data.jobs.edges.map((edge) => edge.node)),
         error: (error) => {
           this.messageService.error(`Failed to fetch job: ${error.message}`);
         },
@@ -250,10 +266,10 @@ export class JobService extends BaseService implements OnDestroy {
   getJobs(
     statuses: string[] = [],
     kinds: string[] = [],
-    jobIds: string[] = [],
+    jobUuids: string[] = [],
     first = 10,
     after: string | null = null,
-    orderBy = 'createdAt',
+    sort = 'createdAt',
     direction = 'DESC',
   ) {
     const FETCH_USER_JOBS = gql`
@@ -270,6 +286,7 @@ export class JobService extends BaseService implements OnDestroy {
             cursor
             node {
               id
+              uuid
               kind
               status
               cost
@@ -289,7 +306,7 @@ export class JobService extends BaseService implements OnDestroy {
       }
     `;
 
-    const sort = direction === 'DESC' ? `-${orderBy}` : orderBy;
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface JobEdge {
       cursor: string;
@@ -315,10 +332,10 @@ export class JobService extends BaseService implements OnDestroy {
       variables: {
         statuses,
         kinds,
-        jobIds,
+        jobUuids,
         first,
         after,
-        sort,
+        orderBy,
       },
       fetchPolicy: 'network-only',
     }).pipe(
@@ -337,6 +354,7 @@ export class JobService extends BaseService implements OnDestroy {
         retryJobs(jobUuids: $jobUuids) {
           jobs {
             id
+            uuid
             kind
             status
             error

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { NewsService } from '../news.service';
+import { NewsConnection, NewsService, NewsResult } from '../news.service';
 import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatList, MatListItem } from '@angular/material/list';
@@ -16,8 +16,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
-import { PodcastsService } from '../podcasts.service';
-import { PodcastsResult } from '../podcasts-list/podcasts-list.component';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
@@ -25,20 +24,9 @@ import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-export interface NewsResult {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  publishedAt: string;
-  source: string;
-  content: string;
-  summary: string;
-}
-
-export interface News {
-  results: NewsResult[];
-}
+// export interface News {
+//   results: NewsResult[];
+// }
 
 export interface SidePanelAccordianData {
   title: string;
@@ -77,7 +65,7 @@ export interface SidePanelAccordianData {
 })
 export class NewsComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  news: News | null = null;
+  news: NewsConnection | null = null;
   filteredNews: NewsResult[] = [];
   selectedNews = new Set<NewsResult>();
   podcasts: PodcastsResult[] = [];
@@ -107,7 +95,7 @@ export class NewsComponent implements OnInit, OnDestroy {
               [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.kind))
             ) {
               this.getNews();
-            } else if ([JobType.CREATE_ARTICLE].includes(stringToJobType(job.kind))) {
+            } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.episodeById(job.result).subscribe({
                   next: (episode) => {
@@ -142,12 +130,12 @@ export class NewsComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
-    this.filteredNews = this.news?.results || [];
+    this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
 
     this.subscriptions.add(
       this.podcastsService.getPodcasts().subscribe({
-        next: (podcasts) => {
-          this.podcasts = podcasts.filter((podcast) =>
+        next: (response) => {
+          this.podcasts = response.podcasts.filter((podcast) =>
             podcast.team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
           );
         },
@@ -339,9 +327,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     const selectedNewsIds = this.getSelectedNewsIds();
     this.subscriptions.add(
       this.newsService.news(this.selectedPodcastId, this.selectedHours).subscribe({
-        next: (data: News) => {
+        next: (data: NewsConnection) => {
           this.news = data;
-          this.filteredNews = this.news?.results || [];
+          this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
           this.reapplySelection(selectedNewsIds);
           this.applyFilter(null);
         },
@@ -373,39 +361,40 @@ export class NewsComponent implements OnInit, OnDestroy {
     const filterValue = this.filterTarget?.value;
 
     if (!filterValue) {
-      this.filteredNews = this.news?.results || [];
+      this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
       return;
     }
 
+    // Rest of the method remains the same but using the new data structure
     let lowerCaseFilter = filterValue.toLowerCase();
     let isNegated = false;
 
     if (lowerCaseFilter.startsWith('-')) {
       isNegated = true;
-      lowerCaseFilter = lowerCaseFilter.substring(1); // Remove the '-' at the beginning
-      lowerCaseFilter = lowerCaseFilter.trim(); // Remove any leading/trailing whitespace
+      lowerCaseFilter = lowerCaseFilter.substring(1);
+      lowerCaseFilter = lowerCaseFilter.trim();
     }
 
+    const allNews = this.news?.edges.map((edge) => edge.node) || [];
+
     if (isNegated) {
-      this.filteredNews =
-        this.news?.results.filter(
-          (news: NewsResult) =>
-            !(
-              news.title.toLowerCase().includes(lowerCaseFilter) ||
-              news.description.toLowerCase().includes(lowerCaseFilter) ||
-              news.summary.toLowerCase().includes(lowerCaseFilter) ||
-              news.source.toLowerCase().includes(lowerCaseFilter)
-            ),
-        ) || [];
-    } else {
-      this.filteredNews =
-        this.news?.results.filter(
-          (news: NewsResult) =>
+      this.filteredNews = allNews.filter(
+        (news: NewsResult) =>
+          !(
             news.title.toLowerCase().includes(lowerCaseFilter) ||
             news.description.toLowerCase().includes(lowerCaseFilter) ||
             news.summary.toLowerCase().includes(lowerCaseFilter) ||
-            news.source.toLowerCase().includes(lowerCaseFilter),
-        ) || [];
+            news.source.toLowerCase().includes(lowerCaseFilter)
+          ),
+      );
+    } else {
+      this.filteredNews = allNews.filter(
+        (news: NewsResult) =>
+          news.title.toLowerCase().includes(lowerCaseFilter) ||
+          news.description.toLowerCase().includes(lowerCaseFilter) ||
+          news.summary.toLowerCase().includes(lowerCaseFilter) ||
+          news.source.toLowerCase().includes(lowerCaseFilter),
+      );
     }
   }
 

@@ -144,25 +144,7 @@ type UserDataExport {
   username: String!
   id: UUID!
   email: String!
-  jobs(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-    kind: String
-    createdAt: DateTime
-    updatedAt: DateTime
-    jobUuid: UUID
-    kindContains: String
-    createdAfter: DateTime
-    createdBefore: DateTime
-    updatedAfter: DateTime
-    updatedBefore: DateTime
-
-    """Ordering"""
-    orderBy: String
-  ): JobTypeConnection!
+  settings: [UserSettingType]
   orders(
     offset: Int
     before: String
@@ -206,6 +188,8 @@ type UserDataExport {
     """Ordering"""
     orderBy: String
   ): TransactionTypeConnection!
+  uuid: UUID
+  jobs: [JobType!]
   teams: [TeamType!]
   podcasts: [PodcastType!]
   episodes: [EpisodeType!]
@@ -217,12 +201,17 @@ in fields, resolvers and input.
 """
 scalar UUID
 
-type JobTypeConnection {
+type UserSettingType {
+  key: String
+  value: String
+}
+
+type OrderTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
 
   """Contains the nodes in this connection."""
-  edges: [JobTypeEdge]!
+  edges: [OrderTypeEdge]!
 }
 
 """
@@ -240,63 +229,6 @@ type PageInfo {
 
   """When paginating forwards, the cursor to continue."""
   endCursor: String
-}
-
-"""A Relay edge containing a `JobType` and its cursor."""
-type JobTypeEdge {
-  """The item at the end of the edge"""
-  node: JobType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-"""
-JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
-"""
-type JobType implements Node {
-  taskId: UUID
-  kind: String
-  args: JSONString
-  status: String
-  error: String
-  result: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  cost: Int
-}
-
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
-"""
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
-"""
-scalar JSONString
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
-
-type OrderTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [OrderTypeEdge]!
 }
 
 """A Relay edge containing a `OrderType` and its cursor."""
@@ -325,6 +257,12 @@ type OrderType implements Node {
   uuid: UUID
 }
 
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
 """An enumeration."""
 enum ApiOrderStatusChoices {
   """Pending"""
@@ -336,6 +274,13 @@ enum ApiOrderStatusChoices {
   """Canceled"""
   CANCELED
 }
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
 
 """The `Decimal` scalar type represents a python Decimal."""
 scalar Decimal
@@ -371,6 +316,33 @@ type TransactionType implements Node {
   uuid: UUID
   balance: Int
 }
+
+"""
+JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
+"""
+type JobType implements Node {
+  taskId: UUID
+  kind: String
+  args: JSONString
+  status: String
+  error: String
+  result: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  cost: Int
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
 
 type TeamType implements Node {
   """The ID of the object"""
@@ -509,11 +481,6 @@ type UserSettingsType {
   results: [UserSettingType]
 }
 
-type UserSettingType {
-  key: String
-  value: String
-}
-
 type UserList {
   results: [UserType]
 }
@@ -559,6 +526,23 @@ type NewsTypeConnection {
 type NewsTypeEdge {
   """The item at the end of the edge"""
   node: NewsType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type JobTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [JobTypeEdge]!
+}
+
+"""A Relay edge containing a `JobType` and its cursor."""
+type JobTypeEdge {
+  """The item at the end of the edge"""
+  node: JobType
 
   """A cursor for use in pagination"""
   cursor: String!
