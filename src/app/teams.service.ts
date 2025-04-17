@@ -35,6 +35,34 @@ export interface TeamsResult {
   members: MemberResult[];
 }
 
+const GET_TEAMS = gql`
+  query GetMyTeams {
+    teams {
+      edges {
+        node {
+          id
+          uuid
+          name
+          members {
+            user {
+              id
+              uuid
+              username
+            }
+            role
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -54,11 +82,13 @@ export class TeamsService extends BaseService {
           message
           team {
             id
+            uuid
             name
             members {
               role
               user {
                 id
+                uuid
                 username
               }
             }
@@ -99,10 +129,12 @@ export class TeamsService extends BaseService {
           message
           team {
             id
+            uuid
             name
             members {
               user {
                 id
+                uuid
                 username
               }
               role
@@ -136,57 +168,10 @@ export class TeamsService extends BaseService {
     );
   }
 
-  getTeamById(teamUuid: string): Observable<TeamsResult> {
+  getTeamById(teamUuid: string) {
     const GET_TEAM_BY_ID = gql`
       query GetTeamById($teamUuid: UUID!) {
         teams(teamUuid: $teamUuid) {
-          edges {
-            node {
-              id
-              uuid
-              name
-              members {
-                user {
-                  id
-                  uuid
-                  username
-                }
-                role
-              }
-            }
-          }
-          pageInfo {
-            hasNextPage
-            hasPreviousPage
-            startCursor
-            endCursor
-          }
-        }
-      }
-    `;
-
-    interface Response {
-      teams: TeamsResult[];
-    }
-
-    return this.query<Response>({
-      query: GET_TEAM_BY_ID,
-      variables: { teamUuid },
-      fetchPolicy: 'network-only',
-    }).pipe(
-      map((data) => {
-        if (!data.teams || data.teams.length !== 1) {
-          throw new Error('Team data is missing');
-        }
-        return data.teams[0];
-      }),
-    );
-  }
-
-  getTeams() {
-    const GQL = gql`
-      query GetMyTeams {
-        teams {
           edges {
             node {
               id
@@ -217,7 +202,26 @@ export class TeamsService extends BaseService {
     }
 
     return this.query<Response>({
-      query: GQL,
+      query: GET_TEAM_BY_ID,
+      variables: { teamUuid },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((response) => {
+        if (!response.teams?.edges || response.teams.edges.length !== 1) {
+          throw new Error('Team data is missing');
+        }
+        return response.teams.edges[0].node;
+      }),
+    );
+  }
+
+  getTeams() {
+    interface Response {
+      teams: RelayConnection<TeamsResult>;
+    }
+
+    return this.query<Response>({
+      query: GET_TEAMS,
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => ({
@@ -235,10 +239,12 @@ export class TeamsService extends BaseService {
           message
           team {
             id
+            uuid
             name
             members {
               user {
                 id
+                uuid
                 username
               }
               role
@@ -277,10 +283,12 @@ export class TeamsService extends BaseService {
           message
           team {
             id
+            uuid
             name
             members {
               user {
                 id
+                uuid
                 username
               }
               role
@@ -317,6 +325,7 @@ export class TeamsService extends BaseService {
         users(query: $query) {
           results {
             id
+            uuid
             username
           }
         }
@@ -377,18 +386,22 @@ export class TeamsService extends BaseService {
         deleteUserResults {
           deletingTeams {
             id
+            uuid
             name
           }
           leavingTeams {
             id
+            uuid
             name
           }
           deletingPodcasts {
             id
+            uuid
             name
           }
           leavingPodcasts {
             id
+            uuid
             name
           }
         }
@@ -418,7 +431,6 @@ export class TeamsService extends BaseService {
     const USER_DATA_EXPORT = gql`
       query UserDataExport($confirm: String!) {
         userDataExport(confirm: $confirm) {
-          id
           uuid
           username
           email
@@ -427,11 +439,11 @@ export class TeamsService extends BaseService {
             value
           }
           teams {
-            id
+            uuid
             name
           }
           podcasts {
-            id
+            uuid
             name
             intro
             prompt
@@ -443,6 +455,7 @@ export class TeamsService extends BaseService {
             tgChannelId
           }
           episodes {
+            uuid
             title
             content
             date
@@ -450,7 +463,7 @@ export class TeamsService extends BaseService {
             podcastDate
           }
           jobs {
-            id
+            uuid
             kind
             status
             result
@@ -563,6 +576,7 @@ export class TeamsService extends BaseService {
         createRssFeed(url: $url) {
           rssFeed {
             id
+            uuid
             url
           }
         }

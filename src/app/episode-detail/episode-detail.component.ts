@@ -70,13 +70,15 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private episodeService: EpisodeService,
     private jobService: JobService,
   ) {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
+    const uuid = this.route.snapshot.paramMap.get('uuid');
+    if (!uuid) {
       throw new Error('Failed to get Episode ID from route.');
     }
-    this.episodeUuid = id;
+    this.episodeUuid = uuid;
+
     this.episodeForm = this.fb.group({
       id: [{ value: '', disabled: true }, Validators.required],
+      uuid: [{ value: '', disabled: true }, Validators.required],
       isLive: [false, Validators.required],
       title: ['', Validators.required],
       content: ['', Validators.required],
@@ -93,6 +95,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       ]),
       podcast: this.fb.group({
         id: [{ value: '', disabled: true }],
+        uuid: [{ value: '', disabled: true }],
         name: [{ value: '', disabled: true }],
       }),
     });
@@ -102,7 +105,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if ([JobType.UPDATE_EPISODE_AUDIO].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
-                this.episodeService.episodeById(this.episodeUuid, 'network-only' as FetchPolicy).subscribe({
+                this.episodeService.getEpisodeById(this.episodeUuid, 'network-only' as FetchPolicy).subscribe({
                   next: (episode) => {
                     if (episode.audioUrl) {
                       this.audioSrc = episode.audioUrl;
@@ -115,7 +118,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
               );
             } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
-                this.episodeService.episodeById(job.result).subscribe({
+                this.episodeService.getEpisodeById(job.result).subscribe({
                   next: (episode) => {
                     const newEpisodeUrl = `/episode/${job.result}`;
                     this.messageService.success(
@@ -146,7 +149,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.subscriptions.add(
-      this.episodeService.episodeById(this.episodeUuid).subscribe({
+      this.episodeService.getEpisodeById(this.episodeUuid).subscribe({
         next: (episode) => {
           this.episodeForm.patchValue(episode);
 
@@ -232,7 +235,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     const formValues = this.episodeForm.getRawValue() as Episode;
     this.subscriptions.add(
       this.episodeService
-        .updateEpisode(formValues.id, formValues.title, formValues.content, formValues.isLive)
+        .updateEpisode(formValues.uuid, formValues.title, formValues.content, formValues.isLive)
         .subscribe({
           next: (response) => {
             if (!response.success) {

@@ -38,7 +38,8 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
-import { PodcastConnection, PodcastsResult, PodcastsService } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
+import { RelayConnection } from '../utils/relay';
 
 @Component({
   selector: 'app-team-detail',
@@ -107,14 +108,15 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private podcastsService: PodcastsService,
   ) {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
+    const uuid = this.route.snapshot.paramMap.get('uuid');
+    if (!uuid) {
       throw new Error('Failed to get Team ID from route.');
     }
-    this.teamUuid = id;
+    this.teamUuid = uuid;
 
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
+      uuid: [{ value: '', disabled: true }],
       name: [''],
       members: this.fb.array([]),
     });
@@ -141,7 +143,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.loadingPodcasts = true;
     this.subscriptions.add(
       this.podcastsService.getPodcastsByTeamId(this.teamUuid).subscribe({
-        next: (podcasts: PodcastConnection) => {
+        next: (podcasts: RelayConnection<PodcastsResult>) => {
           this.podcasts = podcasts.edges.map((edge) => edge.node);
           this.loadingPodcasts = false;
         },

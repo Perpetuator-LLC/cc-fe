@@ -23,7 +23,7 @@
         <mat-form-field appearance="fill">
           <mat-label>Team</mat-label>
           <mat-select formControlName="team" [compareWith]="compareTeams">
-            @for (team of teams; track team.id) {
+            @for (team of teams; track team.uuid) {
               <mat-option [value]="team">{{ team.name }}</mat-option>
             }
           </mat-select>
@@ -197,7 +197,7 @@
           <ng-container matColumnDef="actions">
             <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
             <mat-cell *matCellDef="let feed" class="actions-cell">
-              <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.id)">
+              <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
                 <mat-icon>delete</mat-icon>
               </button>
             </mat-cell>

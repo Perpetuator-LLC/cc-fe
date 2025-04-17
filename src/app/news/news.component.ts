@@ -97,7 +97,7 @@ export class NewsComponent implements OnInit, OnDestroy {
               this.getNews();
             } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
               this.subscriptions.add(
-                this.episodeService.episodeById(job.result).subscribe({
+                this.episodeService.getEpisodeById(job.result).subscribe({
                   next: (episode) => {
                     const newEpisodeUrl = `/episode/${job.result}`;
                     this.messageService.success(

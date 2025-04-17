@@ -13,6 +13,7 @@ import { TeamsResult } from './teams.service';
 
 export interface Episode {
   id: string;
+  uuid: string;
   date: string;
   title: string;
   content: string;
@@ -34,6 +35,8 @@ const GET_EPISODES = gql`
           uuid
           date
           podcast {
+            id
+            uuid
             name
           }
           title
@@ -74,6 +77,7 @@ const GET_EPISODE = gql`
           telegramDate
           podcast {
             id
+            uuid
             name
             team {
               members {
@@ -140,7 +144,7 @@ export class EpisodeService extends BaseService {
     );
   }
 
-  episodeById(episodeUuid: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
+  getEpisodeById(episodeUuid: string | null, fetchPolicy = 'cache-first' as FetchPolicy) {
     if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
 
     interface Response {

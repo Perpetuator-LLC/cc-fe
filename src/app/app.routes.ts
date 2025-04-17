@@ -86,13 +86,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'podcast/:id',
+    path: 'podcast/:uuid',
     loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
     title: 'Podcast',
     canActivate: [AuthGuard],
   },
   {
-    path: 'episode/:id',
+    path: 'episode/:uuid',
     loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
     title: 'Episode',
     canActivate: [AuthGuard],
@@ -131,7 +131,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'team/:id',
+    path: 'team/:uuid',
     loadComponent: () => import('./team-detail/team-detail.component').then((c) => c.TeamDetailComponent),
     title: 'Team',
     canActivate: [AuthGuard],

@@ -61,7 +61,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['kind', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
   totalJobs = 0;
   pageSize = 10;
-  currentCursor: string | undefined;
+  cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
   sortActive = 'createdAt';
   hasNextPage = false;
@@ -88,7 +88,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadJobs(after: string | null = null) {
+  loadJobs(after: string | null = null, pageIndex = 0) {
     this.subscriptions.add(
       this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ jobs, pageInfo }) => {
@@ -96,7 +96,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
           this.dataSource.data = this.jobs;
           this.hasNextPage = pageInfo.hasNextPage;
           this.hasPreviousPage = pageInfo.hasPreviousPage;
-          this.currentCursor = pageInfo.endCursor;
+          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+
+          // Set a large enough number to enable the next button if hasNextPage is true
+          this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
@@ -106,15 +109,29 @@ export class JobsListComponent implements OnInit, OnDestroy {
   }
 
   sortChange(sortState: Sort) {
-    this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
+    this.sortDirection = sortState.direction.toUpperCase();
+    this.cursors = [null]; // reset all known cursors
+    this.paginator.firstPage();
     this.loadJobs();
   }
 
   onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    // this.currentPage = event.pageIndex;
-    this.loadJobs(this.currentCursor);
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null]; // reset all known cursors
+      this.paginator.firstPage(); // back to pageIndex = 0
+      this.loadJobs(); // load first page
+      return;
+    }
+
+    // Otherwise, grab the cursor for the page they jumped to
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadJobs(after, newPageIndex);
   }
 
   retryJob(id: string) {

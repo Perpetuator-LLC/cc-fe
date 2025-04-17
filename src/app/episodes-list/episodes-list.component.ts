@@ -108,6 +108,8 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   }
 
   loadEpisodes(after: string | null = null, pageIndex = 0) {
+    this.loadingEpisodes = true;
+
     this.episodeService
       .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
       .subscribe({
@@ -117,6 +119,11 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
           this.hasNextPage = pageInfo.hasNextPage;
           this.hasPreviousPage = pageInfo.hasPreviousPage;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+          this.currentPage = pageIndex;
+
+          // Set a large enough number to enable the next button if hasNextPage is true
+          this.totalEpisodes = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+
           this.loadingEpisodes = false;
         },
         error: (err) => {
@@ -155,19 +162,19 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: PageEvent) {
+    this.loadingEpisodes = true;
     const newPageIndex = event.pageIndex;
     const newPageSize = event.pageSize;
 
-    // If pageSize changed, we must reset pagination entirely
+    // If pageSize changed, reset pagination
     if (newPageSize !== this.pageSize) {
       this.pageSize = newPageSize;
-      this.cursors = [null]; // reset all known cursors
-      this.paginator.firstPage(); // back to pageIndex = 0
-      this.loadEpisodes(); // load first page
+      this.cursors = [null];
+      this.loadEpisodes(null, 0);
       return;
     }
 
-    // Otherwise, grab the cursor for the page they jumped to
+    // For page navigation, use stored cursor
     const after = this.cursors[newPageIndex] ?? null;
     this.loadEpisodes(after, newPageIndex);
   }

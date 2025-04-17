@@ -385,11 +385,11 @@ type PodcastType implements Node {
   ownerLink: String
   tgChannelId: String
   tgResponse: String
-  rssFeeds: [RssFeedType]
   uuid: UUID
-  url: String
-  imageUrl: String
+  rssFeeds: [RssFeedType]
   team: TeamType
+  imageUrl: String
+  url: String
 }
 
 """

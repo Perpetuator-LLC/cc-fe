@@ -20,8 +20,8 @@
         <mat-option value="new">Create New Team</mat-option>
         @if (ownedTeams.length > 0) {
           <mat-optgroup label="Your Owned Teams">
-            @for (team of ownedTeams; track team.id) {
-              <mat-option [value]="team.id">{{ team.name }}</mat-option>
+            @for (team of ownedTeams; track team.uuid) {
+              <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
             }
           </mat-optgroup>
         }

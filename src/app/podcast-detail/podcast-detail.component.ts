@@ -116,14 +116,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private clipboard: Clipboard,
     private teamsService: TeamsService,
   ) {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
+    const uuid = this.route.snapshot.paramMap.get('uuid');
+    if (!uuid) {
       throw new Error('Failed to get Podcast ID from route.');
     }
-    this.podcastUuid = id;
+    this.podcastUuid = uuid;
 
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
+      uuid: [{ value: '', disabled: true }],
       team: [null],
       name: [''],
       intro: [''],
@@ -252,6 +253,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       rssFeedsFormArray.push(
         this.fb.group({
           id: [feed.id, Validators.required],
+          uuid: [feed.uuid, Validators.required],
           url: [feed.url, Validators.required],
         }),
       );
@@ -275,7 +277,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       return;
     }
     const {
-      id,
+      uuid,
       team,
       name,
       intro,
@@ -295,8 +297,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       return;
     }
     const saveObservable = this.podcastsService.updatePodcast(
-      id,
-      team ? team.id : null,
+      uuid,
+      team ? team.uuid : null,
       name,
       intro,
       prompt,
@@ -318,15 +320,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
             this.messageService.error(data.message);
             return;
           }
-          this.messageService.success(`Podcast ${id ? 'updated' : 'created'} successfully`);
+          this.messageService.success(`Podcast ${uuid ? 'updated' : 'created'} successfully`);
           this.podcastForm.patchValue(data.podcast);
           this.podcastForm.markAsPristine();
-          if (!id) {
+          if (!uuid) {
             this.router.navigate(['/podcasts']);
           }
         },
         error: (err) => {
-          this.messageService.error(`Failed to ${id ? 'update' : 'create'} podcast: ${err.message}`);
+          this.messageService.error(`Failed to ${uuid ? 'update' : 'create'} podcast: ${err.message}`);
         },
       }),
     );
@@ -436,7 +438,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastsService.createRssFeed(url).subscribe({
         next: (data) => {
-          const existingId = this.rssFeeds.controls.findIndex((a) => a.get('id')?.value == data.rssFeed.id);
+          const existingId = this.rssFeeds.controls.findIndex((a) => a.get('uuid')?.value == data.rssFeed.uuid);
           if (existingId >= 0) {
             this.messageService.info('RSS Feed already exists');
             this.rssFeedLoading = false;
@@ -445,6 +447,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           this.rssFeeds.push(
             this.fb.group({
               id: [data.rssFeed.id, Validators.required],
+              uuid: [data.rssFeed.uuid, Validators.required],
               url: [data.rssFeed.url, Validators.required],
             }),
           );
@@ -457,14 +460,14 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  removeRssFeed(feedId: number): void {
-    this.rssFeeds.removeAt(this.rssFeeds.controls.findIndex((control) => control.get('id')?.value === feedId));
+  removeRssFeed(feedId: string): void {
+    this.rssFeeds.removeAt(this.rssFeeds.controls.findIndex((control) => control.get('uuid')?.value === feedId));
     this.updateRssFeeds();
   }
 
   private updateRssFeeds(): void {
     this.rssFeedLoading = true;
-    const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.id);
+    const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.uuid);
     this.podcastsService.setPodcastRssFeeds(this.podcastUuid, rssFeedIds).subscribe({
       next: (data) => {
         this.podcastForm.patchValue(data.podcast);

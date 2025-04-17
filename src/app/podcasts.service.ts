@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
-import { PageInfo, RelayEdge } from './utils/relay';
+import { PageInfo, RelayConnection, RelayEdge } from './utils/relay';
 import { TeamsResult } from './teams.service';
 
 export interface UserResult {
@@ -46,11 +46,6 @@ export interface PodcastsResult {
   rssFeeds: RssFeedResult[];
 }
 
-export interface PodcastConnection {
-  edges: RelayEdge<PodcastsResult>[];
-  pageInfo: PageInfo;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -73,12 +68,16 @@ export class PodcastsService extends BaseService {
           message
           podcast {
             id
+            uuid
             name
             team {
+              id
+              uuid
               members {
                 role
                 user {
                   id
+                  uuid
                   username
                 }
               }
@@ -109,14 +108,15 @@ export class PodcastsService extends BaseService {
     );
   }
 
-  refreshTgResponse(id: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
+  refreshTgResponse(podcastUuid: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation UpdatePodcast($uuid: UUID!, $refreshTgResponse: Boolean) {
-        updatePodcast(podcastUuid: $uuid, refreshTgResponse: $refreshTgResponse) {
+      mutation UpdatePodcast($podcastUuid: UUID!, $refreshTgResponse: Boolean) {
+        updatePodcast(podcastUuid: $podcastUuid, refreshTgResponse: $refreshTgResponse) {
           success
           message
           podcast {
             id
+            uuid
             name
             enabled
             slug
@@ -127,12 +127,15 @@ export class PodcastsService extends BaseService {
             tgChannelId
             tgResponse
             team {
+              id
+              uuid
               members {
+                role
                 user {
                   id
+                  uuid
                   username
                 }
-                role
               }
             }
           }
@@ -152,7 +155,7 @@ export class PodcastsService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: {
-        id,
+        podcastUuid,
         refreshTgResponse,
       },
     }).pipe(
@@ -166,7 +169,7 @@ export class PodcastsService extends BaseService {
   }
 
   updatePodcast(
-    id: string,
+    podcastUuid: string,
     teamUuid: string | null = null,
     name: string | null = null,
     intro: string | null = null,
@@ -184,7 +187,7 @@ export class PodcastsService extends BaseService {
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast(
-        $uuid: UUID!
+        $podcastUuid: UUID!
         $teamUuid: UUID
         $name: String
         $intro: String
@@ -201,7 +204,7 @@ export class PodcastsService extends BaseService {
         $refreshTgResponse: Boolean
       ) {
         updatePodcast(
-          podcastUuid: $uuid
+          podcastUuid: $podcastUuid
           teamUuid: $teamUuid
           name: $name
           intro: $intro
@@ -221,6 +224,7 @@ export class PodcastsService extends BaseService {
           message
           podcast {
             id
+            uuid
             name
             intro
             prompt
@@ -236,10 +240,12 @@ export class PodcastsService extends BaseService {
             tgResponse
             team {
               id
+              uuid
               name
               members {
                 user {
                   id
+                  uuid
                   username
                 }
                 role
@@ -261,7 +267,7 @@ export class PodcastsService extends BaseService {
     return this.mutate<Response>({
       mutation: GQL,
       variables: {
-        id,
+        podcastUuid,
         teamUuid,
         name,
         intro,
@@ -287,14 +293,15 @@ export class PodcastsService extends BaseService {
     );
   }
 
-  getPodcastById(id: string): Observable<PodcastsResult> {
+  getPodcastById(podcastUuid: string): Observable<PodcastsResult> {
     const GET_PODCAST_BY_ID = gql`
-      query GetPodcastById($uuid: UUID!) {
-        podcasts(podcastUuid: $uuid) {
+      query GetPodcastById($podcastUuid: UUID!) {
+        podcasts(podcastUuid: $podcastUuid) {
           edges {
             cursor
             node {
               id
+              uuid
               name
               intro
               prompt
@@ -311,13 +318,16 @@ export class PodcastsService extends BaseService {
               tgResponse
               rssFeeds {
                 id
+                uuid
                 url
               }
               team {
                 id
+                uuid
                 members {
                   user {
                     id
+                    uuid
                     username
                   }
                   role
@@ -336,15 +346,12 @@ export class PodcastsService extends BaseService {
     `;
 
     interface Response {
-      podcasts: {
-        edges: RelayEdge<PodcastsResult>[];
-        pageInfo: PageInfo;
-      };
+      podcasts: RelayConnection<PodcastsResult>;
     }
 
     return this.query<Response>({
       query: GET_PODCAST_BY_ID,
-      variables: { uuid: id },
+      variables: { podcastUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ podcasts }) => {
@@ -356,7 +363,7 @@ export class PodcastsService extends BaseService {
     );
   }
 
-  getPodcastsByTeamId(teamUuid: string): Observable<PodcastConnection> {
+  getPodcastsByTeamId(teamUuid: string) {
     const GET_PODCASTS_BY_TEAM_UUID = gql`
       query PodcastsByTeamId($teamUuid: UUID!, $first: Int, $after: String) {
         podcasts(teamUuid: $teamUuid, first: $first, after: $after) {
@@ -364,6 +371,7 @@ export class PodcastsService extends BaseService {
             cursor
             node {
               id
+              uuid
               name
               intro
               prompt
@@ -380,6 +388,7 @@ export class PodcastsService extends BaseService {
               tgResponse
               rssFeeds {
                 id
+                uuid
                 url
               }
             }
@@ -395,7 +404,7 @@ export class PodcastsService extends BaseService {
     `;
 
     interface Response {
-      podcasts: PodcastConnection;
+      podcasts: RelayConnection<PodcastsResult>;
     }
 
     return this.query<Response>({
@@ -415,9 +424,11 @@ export class PodcastsService extends BaseService {
               uuid
               name
               team {
+                uuid
                 members {
                   user {
                     id
+                    uuid
                     username
                   }
                   role
@@ -495,6 +506,7 @@ export class PodcastsService extends BaseService {
           message
           podcast {
             id
+            uuid
             name
             imageUrl
           }
@@ -530,8 +542,10 @@ export class PodcastsService extends BaseService {
         updatePodcastRssFeeds(podcastUuid: $podcastUuid, rssFeedUuids: $rssFeedUuids) {
           podcast {
             id
+            uuid
             rssFeeds {
               id
+              uuid
               url
             }
           }
@@ -565,6 +579,7 @@ export class PodcastsService extends BaseService {
         createRssFeed(url: $url) {
           rssFeed {
             id
+            uuid
             url
           }
         }
