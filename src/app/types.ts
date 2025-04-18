@@ -17,5 +17,6 @@ export interface AutocompleteResult {
 
 export interface User {
   id: string;
+  uuid: string;
   username: string;
 }

@@ -496,7 +496,7 @@ export class PodcastsService extends BaseService {
   }
 
   uploadPodcastImage(
-    id: string,
+    podcastUuid: string,
     image: File,
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
@@ -518,7 +518,7 @@ export class PodcastsService extends BaseService {
       .mutate({
         mutation: GQL,
         variables: {
-          id,
+          podcastUuid,
           image,
         },
         context: {

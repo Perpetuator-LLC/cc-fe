@@ -122,7 +122,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
 
     this.newUserForm = this.fb.group({
-      userId: ['', Validators.required],
+      userUuid: ['', Validators.required],
       role: ['', Validators.required],
     });
   }
@@ -207,6 +207,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           role: [member.role, Validators.required],
           user: this.fb.group({
             id: [member.user.id],
+            uuid: [member.user.uuid],
             username: [member.user.username],
           }),
         }),
@@ -216,13 +217,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
   addOrUpdateUserInTeam() {
     if (this.newUserForm.valid) {
-      const { userId, role } = this.newUserForm.value;
-      const teamUuid: string = this.teamForm.get('id')?.value;
+      const { userUuid, role } = this.newUserForm.value;
+      const teamUuid: string = this.teamForm.get('uuid')?.value;
       if (role === 'owner') {
-        this.openNewOwnerDialog(teamUuid, userId, role);
+        this.openNewOwnerDialog(teamUuid, userUuid, role);
       } else {
         // if the user was an owner, we need to show a confirmation dialog
-        const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
+        const user = this.members.controls.find((control) => control.get('user.uuid')?.value === userUuid);
         const previousRole = user?.get('role')?.value;
         if (previousRole === 'owner') {
           const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -234,11 +235,11 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
           });
           dialogRef.afterClosed().subscribe((confirmed) => {
             if (confirmed) {
-              this.upsertUserToTeam(teamUuid, userId, role);
+              this.upsertUserToTeam(teamUuid, userUuid, role);
             }
           });
         } else {
-          this.upsertUserToTeam(teamUuid, userId, role);
+          this.upsertUserToTeam(teamUuid, userUuid, role);
         }
       }
     } else {
@@ -246,7 +247,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  private openNewOwnerDialog(teamUuid: string, userId: string, role: string) {
+  private openNewOwnerDialog(teamUuid: string, userUuid: string, role: string) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         message:
@@ -256,14 +257,14 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.upsertUserToTeam(teamUuid, userId, role);
+        this.upsertUserToTeam(teamUuid, userUuid, role);
       }
     });
   }
 
-  private upsertUserToTeam(teamUuid: string, userId: string, role: string) {
+  private upsertUserToTeam(teamUuid: string, userUuid: string, role: string) {
     this.subscriptions.add(
-      this.teamsService.upsertUserToTeam(teamUuid, userId, role).subscribe({
+      this.teamsService.upsertUserToTeam(teamUuid, userUuid, role).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
@@ -277,9 +278,9 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  removeUserFromTeam(userId: string) {
-    const teamUuid = this.teamForm.get('id')?.value;
-    const user = this.members.controls.find((control) => control.get('user.id')?.value === userId);
+  removeUserFromTeam(userUuid: string) {
+    const teamUuid = this.teamForm.get('uuid')?.value;
+    const user = this.members.controls.find((control) => control.get('user.uuid')?.value === userUuid);
     const role = user?.get('role')?.value;
 
     if (role === 'owner') {
@@ -292,17 +293,17 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       });
       dialogRef.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteUserFromTeam(teamUuid, userId);
+          this.deleteUserFromTeam(teamUuid, userUuid);
         }
       });
     } else {
-      this.deleteUserFromTeam(teamUuid, userId);
+      this.deleteUserFromTeam(teamUuid, userUuid);
     }
   }
 
-  private deleteUserFromTeam(teamUuid: string, userId: string) {
+  private deleteUserFromTeam(teamUuid: string, userUuid: string) {
     this.subscriptions.add(
-      this.teamsService.removeUserFromTeam(teamUuid, userId).subscribe({
+      this.teamsService.removeUserFromTeam(teamUuid, userUuid).subscribe({
         next: (team) => {
           this.teamForm.patchValue(team);
           this.setMembers(team.members);
@@ -314,16 +315,16 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  onUserSelected(user: { id: string; username: string }) {
-    this.newUserForm.patchValue({ userId: user.id });
+  onUserSelected(user: { uuid: string; username: string }) {
+    this.newUserForm.patchValue({ userUuid: user.uuid });
   }
 
   saveTeam() {
     if (!this.teamForm.valid) {
       return;
     }
-    const { id, name } = this.teamForm.getRawValue();
-    const saveObservable = id ? this.teamsService.updateTeam(id, name) : this.teamsService.createTeam(name);
+    const { uuid, name } = this.teamForm.getRawValue();
+    const saveObservable = uuid ? this.teamsService.updateTeam(uuid, name) : this.teamsService.createTeam(name);
 
     this.subscriptions.add(
       saveObservable.subscribe({
@@ -332,15 +333,15 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             this.messageService.error(data.message);
             return;
           }
-          this.messageService.success(`Team ${id ? 'updated' : 'created'} successfully`);
+          this.messageService.success(`Team ${uuid ? 'updated' : 'created'} successfully`);
           this.teamForm.patchValue(data.team);
           this.teamForm.markAsPristine();
-          if (!id) {
+          if (!uuid) {
             this.router.navigate(['/teams']);
           }
         },
         error: (err) => {
-          this.messageService.error(`Failed to ${id ? 'update' : 'create'} team: ${err.message}`);
+          this.messageService.error(`Failed to ${uuid ? 'update' : 'create'} team: ${err.message}`);
         },
       }),
     );

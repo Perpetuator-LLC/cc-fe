@@ -3,7 +3,6 @@ import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/c
 import { Subscription } from 'rxjs';
 import { UserTransaction, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import {
   MatCell,
@@ -34,7 +33,6 @@ import { kindToString } from '../job.service';
     MatTableModule,
     MatSortModule,
     DatePipe,
-    MatTooltip,
     MatTable,
     MatSort,
     MatColumnDef,

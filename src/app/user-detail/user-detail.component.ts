@@ -138,6 +138,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         username: userData?.username || '',
         email: userData?.email || '',
       });
+      this.loadCodes();
     });
 
     this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
@@ -156,7 +157,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadUserOrders();
-    this.loadCodes();
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
@@ -246,7 +246,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     this.loadingCodes = true;
-    this.codeService.codes().subscribe({
+    this.codeService.getCodes().subscribe({
       next: (data) => {
         this.codes = data.codes;
         this.loadingCodes = false;

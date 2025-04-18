@@ -202,8 +202,6 @@ export class CreditService extends BaseService implements OnDestroy {
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ transactions }) => {
-        // TODO: Why is this forcing txns yet episodes can use results?
-        // console.log('Response data:', transactions);
         return {
           transactions: transactions.edges.map((edge) => edge.node),
           pageInfo: transactions.pageInfo,
@@ -232,6 +230,7 @@ export class CreditService extends BaseService implements OnDestroy {
             hasNextPage: data.orders.pageInfo.hasNextPage,
             hasPreviousPage: data.orders.pageInfo.hasPreviousPage,
             endCursor: data.orders.pageInfo.endCursor,
+            startCursor: data.orders.pageInfo.startCursor,
           },
         };
       }),

@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { RelayConnection } from './utils/relay';
 
 export interface Code {
   id: string;
@@ -32,23 +33,25 @@ export class CodeService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  codes(active = false, after: string | null = null, first = 10, orderBy = 'createdAt', direction = 'ASC') {
+  getCodes(active = null, after: string | null = null, first = 10, sort = 'createdAt', direction = 'ASC') {
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
+
     interface Response {
-      codes: {
-        codes: Code[];
-        totalRecords: number;
-        totalPages: number;
-        currentPage: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-      };
+      codes: RelayConnection<Code>;
     }
 
     return this.query<Response>({
       query: GET_BONUS_CODES,
-      variables: { page: after, pageSize: first, orderBy, direction, activeOnly: active },
+      variables: { after, first, orderBy, active },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.codes));
+    }).pipe(
+      map(({ codes }) => {
+        return {
+          codes: codes.edges.map((edge) => edge.node),
+          pageInfo: codes.pageInfo,
+        };
+      }),
+    );
   }
 
   createCode(code: string, creditAmount: number) {
@@ -95,8 +98,8 @@ export class CodeService extends BaseService {
 }
 
 const GET_BONUS_CODES = gql`
-  query GetCodes($first: Int, $after: String, $active: Boolean!) {
-    codes(first: $first, after: $after, active: $active) {
+  query GetCodes($first: Int, $after: String, $active: Boolean, $orderBy: String!) {
+    codes(first: $first, after: $after, active: $active, orderBy: $orderBy) {
       edges {
         node {
           id

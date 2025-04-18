@@ -129,7 +129,7 @@ export class EpisodeService extends BaseService {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface Response {
-      response: RelayConnection<Episode>;
+      episodes: RelayConnection<Episode>;
     }
 
     return this.query<Response>({
@@ -137,9 +137,9 @@ export class EpisodeService extends BaseService {
       variables: { podcastUuid, first, after, orderBy },
       fetchPolicy: 'network-only',
     }).pipe(
-      map(({ response }) => ({
-        episodes: response.edges.map((edge) => edge.node),
-        pageInfo: response.pageInfo,
+      map(({ episodes }) => ({
+        episodes: episodes.edges.map((edge) => edge.node),
+        pageInfo: episodes.pageInfo,
       })),
     );
   }

@@ -13,7 +13,7 @@
     } @else if ((filteredUsers$ | async)?.length === 0) {
       <mat-option disabled>No users found</mat-option>
     } @else {
-      @for (user of filteredUsers$ | async; track user.id) {
+      @for (user of filteredUsers$ | async; track user.uuid) {
         <mat-option [value]="user" (onSelectionChange)="onOptionSelected(user)">
           {{ user.username }}
         </mat-option>

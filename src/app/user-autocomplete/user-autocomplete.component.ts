@@ -30,7 +30,7 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
   searchControl = new FormControl();
   filteredUsers$: Observable<User[]> = new Observable<User[]>();
 
-  @Output() userSelected = new EventEmitter<{ id: string; username: string }>();
+  @Output() userSelected = new EventEmitter<{ uuid: string; username: string }>();
   @Output() searchValueChanged = new EventEmitter<string>();
   @Input() users!: User[];
 
@@ -84,7 +84,7 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
       : [];
   }
 
-  onOptionSelected(user: { id: string; username: string }) {
+  onOptionSelected(user: { uuid: string; username: string }) {
     this.userSelected.emit(user);
   }
 
