@@ -1,3 +1,27 @@
+# Changelog from v0.18.0 to v0.19.0
+
+This update primarily focuses on integrating Relay support, enhancing podcast and team functionalities, and refining transaction handling. 
+
+## Enhancements
+- Integrated Relay support with codes, transactions, podcasts, episodes, and jobs.
+- Added ability to change podcast team and display podcasts in team detail view.
+- Enabled selection or creation of team when creating a podcast.
+- Updated episode and podcast details icons.
+- Rearranged menu items and added save button to team.
+- Adopted API changes to switch from Team to Team and Podcast and from Article to Episode.
+
+## Cleanups
+- Fixed routing of users to login after register.
+- Stopped exposing all transactions for each order.
+- Fixed getTeams to return RelayConnection type.
+- Corrected job status bar messages.
+- Renamed CreditTransaction to Transaction.
+- Switched create stripe checkout session to return an order.
+- Showed associated podcasts that will be deleted with users and teams.
+- Fixed update podcast to use podcastId and user drop-down to refresh after load with only 3 chars.
+- Fixed update GQL and redeem code input.
+
+
 # Changelog from v0.17.0 to v0.18.0
 
 In this update, we have integrated GraphQL updates for ID to UUID migration and improved error handling during login. We have also removed unused stock/finance components and updated the onboarding documentation. Additionally, we have added copyrights and checks, and removed the old open source license as this project is closed source.
