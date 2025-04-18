@@ -81,7 +81,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
               text: 'Registration successful! Check your email for a verification link.',
               dismissible: true,
             });
-            this.router.navigate(['/charts']);
+            this.router.navigate(['/login']);
           } else {
             // console.error('Registration failed while authenticating:', this.authService.getErrors());
             // const authErrors = this.authService.getErrors();

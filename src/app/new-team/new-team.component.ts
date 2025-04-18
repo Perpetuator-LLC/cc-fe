@@ -91,7 +91,7 @@ export class NewTeamComponent implements OnInit, OnDestroy {
         this.teamsService.createTeam(name).subscribe({
           next: (created) => {
             this.messageService.success('Team created successfully');
-            this.router.navigate(['/team', created.team.id]);
+            this.router.navigate(['/team', created.team.uuid]);
           },
           error: (err) => {
             this.messageService.error(`Failed to create team: ${err.message}`);

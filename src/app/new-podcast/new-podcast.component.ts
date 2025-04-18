@@ -123,7 +123,7 @@ export class NewPodcastComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
           this.teamsService.createTeam(teamName).subscribe({
             next: (teamResult) => {
-              this.createPodcastWithTeam(name, teamResult.team.id);
+              this.createPodcastWithTeam(name, teamResult.team.uuid);
             },
             error: (err) => {
               this.messageService.error(`Failed to create team: ${err.message}`);
