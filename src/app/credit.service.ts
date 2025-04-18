@@ -10,9 +10,11 @@ import { AuthService } from './auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
+import { RelayConnection } from './utils/relay';
 
 export interface UserOrder {
   id: string;
+  uuid: string;
   createdAt: string;
   status: string;
   description: string;
@@ -24,6 +26,7 @@ export interface UserOrder {
 
 export interface UserTransaction {
   id: string;
+  uuid: string;
   createdAt: string;
   description: string;
   creditAmount: number;
@@ -37,6 +40,73 @@ export interface UserTransaction {
 interface GetUserCreditsResponse {
   credits: number;
 }
+
+const GET_ORDERS = gql`
+  query GetOrders($first: Int!, $after: String, $orderBy: String) {
+    orders(first: $first, after: $after, orderBy: $orderBy) {
+      edges {
+        node {
+          id
+          uuid
+          createdAt
+          description
+          amount
+          receiptUrl
+          sessionUrl
+          status
+          transactions {
+            id
+            uuid
+            createdAt
+            description
+            creditAmount
+            balance
+            job {
+              id
+              kind
+            }
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+const GET_TRANSACTIONS = gql`
+  query GetTransactions($first: Int!, $after: String, $orderBy: String) {
+    transactions(first: $first, after: $after, orderBy: $orderBy) {
+      edges {
+        node {
+          id
+          uuid
+          createdAt
+          description
+          creditAmount
+          balance
+          job {
+            id
+            uuid
+            kind
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
 
 @Injectable({
   providedIn: 'root',
@@ -119,120 +189,70 @@ export class CreditService extends BaseService implements OnDestroy {
     this.queryRef.refetch();
   }
 
-  transactions(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
-    const GET_USER_TRANSACTIONS = gql`
-      query GetUserTransactions($page: Int!, $pageSize: Int!, $orderBy: String, $direction: SortDirection) {
-        transactions(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
-          totalRecords
-          totalPages
-          currentPage
-          hasNext
-          hasPrevious
-          transactions {
-            id
-            createdAt
-            description
-            creditAmount
-            balance
-            job {
-              id
-              kind
-            }
-          }
-        }
-      }
-    `;
+  getTransactions(first = 10, after: string | null = null, sort = 'createdAt', direction = 'DESC') {
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface Response {
-      transactions: {
-        totalRecords: number;
-        totalPages: number;
-        currentPage: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-        transactions: UserTransaction[];
-      };
+      transactions: RelayConnection<UserTransaction>;
     }
 
     return this.query<Response>({
-      query: GET_USER_TRANSACTIONS,
-      variables: { page, pageSize, orderBy, direction },
-      fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.transactions));
-  }
-
-  orders(page = 1, pageSize = 10, orderBy = 'createdAt', direction = 'DESC') {
-    const GET_USER_ORDERS = gql`
-      query GetUserOrders($page: Int!, $pageSize: Int!, $orderBy: String, $direction: SortDirection) {
-        orders(page: $page, pageSize: $pageSize, orderBy: $orderBy, direction: $direction) {
-          totalRecords
-          totalPages
-          currentPage
-          hasNext
-          hasPrevious
-          orders {
-            id
-            createdAt
-            description
-            amount
-            receiptUrl
-            sessionUrl
-            status
-            createdAt
-            transactions {
-              id
-              createdAt
-              description
-              creditAmount
-              balance
-              job {
-                id
-                kind
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    interface Response {
-      orders: {
-        totalRecords: number;
-        totalPages: number;
-        currentPage: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-        orders: UserOrder[];
-      };
-    }
-
-    return this.query<Response>({
-      query: GET_USER_ORDERS,
-      variables: { page, pageSize, orderBy, direction },
+      query: GET_TRANSACTIONS,
+      variables: { first, after, orderBy },
       fetchPolicy: 'network-only',
     }).pipe(
-      map((data) => {
-        this.userOrdersSignal.set(data.orders.orders);
-        return data.orders;
+      map(({ transactions }) => {
+        // TODO: Why is this forcing txns yet episodes can use results?
+        // console.log('Response data:', transactions);
+        return {
+          transactions: transactions.edges.map((edge) => edge.node),
+          pageInfo: transactions.pageInfo,
+        };
       }),
     );
   }
 
-  refreshUserOrder(orderId: string) {
+  getOrders(first = 10, after: string | null = null, sort = 'createdAt', direction = 'DESC') {
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
+
+    interface Response {
+      orders: RelayConnection<UserOrder>;
+    }
+
+    return this.query<Response>({
+      query: GET_ORDERS,
+      variables: { first, after, orderBy, direction },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        this.userOrdersSignal.set(data.orders.edges.map((edge) => edge.node));
+        return {
+          orders: data.orders.edges.map((edge) => edge.node),
+          pageInfo: {
+            hasNextPage: data.orders.pageInfo.hasNextPage,
+            hasPreviousPage: data.orders.pageInfo.hasPreviousPage,
+            endCursor: data.orders.pageInfo.endCursor,
+          },
+        };
+      }),
+    );
+  }
+
+  refreshUserOrder(orderUuid: string) {
     const REFRESH_USER_ORDER = gql`
-      mutation RefreshOrder($orderId: String!) {
-        refreshOrder(orderId: $orderId) {
+      mutation RefreshOrder($orderUuid: UUID!) {
+        refreshOrder(orderUuid: $orderUuid) {
           success
           message
           order {
             id
+            uuid
             createdAt
             description
             amount
             receiptUrl
             sessionUrl
             status
-            createdAt
             transactions {
               id
               createdAt
@@ -259,34 +279,34 @@ export class CreditService extends BaseService implements OnDestroy {
 
     return this.mutate<Response>({
       mutation: REFRESH_USER_ORDER,
-      variables: { orderId },
+      variables: { orderUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.refreshOrder.success) {
           throw new Error(data.refreshOrder.message);
         }
-        this.updateOrder(orderId, data.refreshOrder.order);
+        this.updateOrder(orderUuid, data.refreshOrder.order);
         return data.refreshOrder;
       }),
     );
   }
 
-  cancelUserOrder(orderId: string) {
+  cancelUserOrder(orderUuid: string) {
     const CANCEL_USER_ORDER = gql`
-      mutation CancelOrder($orderId: String!) {
-        cancelOrder(orderId: $orderId) {
+      mutation CancelOrder($orderUuid: UUID!) {
+        cancelOrder(orderUuid: $orderUuid) {
           success
           message
           order {
             id
+            uuid
             createdAt
             description
             amount
             receiptUrl
             sessionUrl
             status
-            createdAt
             transactions {
               id
               createdAt
@@ -313,22 +333,22 @@ export class CreditService extends BaseService implements OnDestroy {
 
     return this.mutate<Response>({
       mutation: CANCEL_USER_ORDER,
-      variables: { orderId },
+      variables: { orderUuid },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => {
         if (!data.cancelOrder.success) {
           throw new Error(data.cancelOrder.message);
         }
-        this.updateOrder(orderId, data.cancelOrder.order);
+        this.updateOrder(orderUuid, data.cancelOrder.order);
         return data.cancelOrder;
       }),
     );
   }
 
-  private updateOrder(orderId: string, updatedOrder: UserOrder) {
+  private updateOrder(orderUuid: string, updatedOrder: UserOrder) {
     const orders = this.userOrdersSignal();
-    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    const orderIndex = orders.findIndex((o) => o.id === orderUuid);
     if (orderIndex !== -1) {
       const updatedOrders = [...orders];
       updatedOrders[orderIndex] = { ...orders[orderIndex], ...updatedOrder };

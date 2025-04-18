@@ -62,7 +62,9 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['createdAt', 'info', 'creditAmount', 'balance'];
   totalTransactions = 0;
   pageSize = 10;
-  currentPage = 0;
+  cursors: (string | null)[] = [null];
+  hasNextPage = false;
+  hasPreviousPage = false;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
 
@@ -87,20 +89,26 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadTransactions() {
+  loadTransactions(after: string | null = null, pageIndex = 0) {
     this.subscriptions.add(
-      this.creditService
-        .transactions(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection)
-        .subscribe({
-          next: (data) => {
-            this.transactions = data.transactions;
-            this.dataSource.data = this.transactions;
-            this.totalTransactions = data.totalRecords;
-          },
-          error: (error) => {
-            this.messageService.error('Failed to load transactions: ' + error.toString());
-          },
-        }),
+      this.creditService.getTransactions(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
+        next: (response) => {
+          this.transactions = response.transactions;
+          this.dataSource.data = this.transactions;
+          this.hasNextPage = response.pageInfo.hasNextPage;
+          this.hasPreviousPage = response.pageInfo.hasPreviousPage;
+          this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
+
+          // Set a large enough number to enable the next button if hasNextPage is true
+          this.totalTransactions = response.pageInfo.hasNextPage
+            ? (pageIndex + 2) * this.pageSize
+            : (pageIndex + 1) * this.pageSize;
+        },
+        error: (error) => {
+          console.error(error);
+          this.messageService.error('Failed to load transactions: ' + error.toString());
+        },
+      }),
     );
   }
 
@@ -111,9 +119,21 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    this.currentPage = event.pageIndex;
-    this.loadTransactions();
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null]; // reset all known cursors
+      this.paginator.firstPage(); // back to pageIndex = 0
+      this.loadTransactions(); // load first page
+      return;
+    }
+
+    // Otherwise, grab the cursor for the page they jumped to
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadTransactions(after, newPageIndex);
   }
 
   getTransactionInfo(transaction: UserTransaction) {

@@ -189,7 +189,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   private loadUserOrders() {
     this.subscriptions.add(
-      this.creditService.orders(1, 5).subscribe({
+      this.creditService.getOrders(5).subscribe({
         next: () => (this.loadingOrders = false),
         error: (err) => console.error('Failed to load orders:', err),
       }),

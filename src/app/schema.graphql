@@ -144,55 +144,14 @@ type UserDataExport {
   username: String!
   id: UUID!
   email: String!
-  settings: [UserSettingType]
-  orders(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-    user: UUID
-    amount: Int
-    status: String
-    createdAt: DateTime
-    updatedAt: DateTime
-    sessionId: String
-    sessionUrl: String
-    orderUuid: UUID
-    minAmount: Decimal
-    maxAmount: Decimal
-    createdAfter: DateTime
-    createdBefore: DateTime
-
-    """Ordering"""
-    orderBy: String
-  ): OrderTypeConnection!
-  transactions(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-    user: UUID
-    creditAmount: Int
-    createdAt: DateTime
-    job: ID
-    order: ID
-    transactionUuid: UUID
-    createdAfter: DateTime
-    createdBefore: DateTime
-    minAmount: Decimal
-    maxAmount: Decimal
-    descriptionContains: String
-
-    """Ordering"""
-    orderBy: String
-  ): TransactionTypeConnection!
   uuid: UUID
   jobs: [JobType!]
   teams: [TeamType!]
   podcasts: [PodcastType!]
   episodes: [EpisodeType!]
+  orders: [OrderType!]
+  transactions: [TransactionType!]
+  settings: [UserSettingType!]
 }
 
 """
@@ -200,122 +159,6 @@ Leverages the internal Python implementation of UUID (uuid.UUID) to provide nati
 in fields, resolvers and input.
 """
 scalar UUID
-
-type UserSettingType {
-  key: String
-  value: String
-}
-
-type OrderTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [OrderTypeEdge]!
-}
-
-"""
-The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
-"""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: String
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: String
-}
-
-"""A Relay edge containing a `OrderType` and its cursor."""
-type OrderTypeEdge {
-  """The item at the end of the edge"""
-  node: OrderType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-"""OrderType is a GraphQL type that represents an order."""
-type OrderType implements Node {
-  user: UserDataExport
-  sessionId: String
-  amount: Int!
-  receiptUrl: String
-  sessionUrl: String
-  status: ApiOrderStatusChoices!
-  description: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
-"""An enumeration."""
-enum ApiOrderStatusChoices {
-  """Pending"""
-  PENDING
-
-  """Paid"""
-  PAID
-
-  """Canceled"""
-  CANCELED
-}
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
-
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
-
-type TransactionTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [TransactionTypeEdge]!
-}
-
-"""A Relay edge containing a `TransactionType` and its cursor."""
-type TransactionTypeEdge {
-  """The item at the end of the edge"""
-  node: TransactionType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-"""TransactionType is a GraphQL type that represents a transaction."""
-type TransactionType implements Node {
-  user: UserDataExport
-  description: String!
-  creditAmount: Int!
-  createdAt: DateTime!
-  job: JobType
-  order: OrderType
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  balance: Int
-}
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
@@ -336,6 +179,12 @@ type JobType implements Node {
   cost: Int
 }
 
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
 """
 Allows use of a JSON String for input / output from the GraphQL schema.
 
@@ -343,6 +192,13 @@ Use of this type is *not recommended* as you lose the benefits of having a defin
 schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
 
 type TeamType implements Node {
   """The ID of the object"""
@@ -435,6 +291,114 @@ type NewsType implements Node {
   summary: String!
   content: String!
   uuid: UUID
+}
+
+"""OrderType is a GraphQL type that represents an order."""
+type OrderType implements Node {
+  user: UserDataExport
+  sessionId: String
+  amount: Int!
+  receiptUrl: String
+  sessionUrl: String
+  status: ApiOrderStatusChoices!
+  description: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  transactions: [TransactionType!]
+}
+
+"""An enumeration."""
+enum ApiOrderStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Paid"""
+  PAID
+
+  """Canceled"""
+  CANCELED
+}
+
+"""TransactionType is a GraphQL type that represents a transaction."""
+type TransactionType implements Node {
+  user: UserDataExport
+  description: String!
+  creditAmount: Int!
+  createdAt: DateTime!
+  job: JobType
+  order: OrderType
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  balance: Int
+}
+
+type UserSettingType implements Node {
+  key: String
+  value: String
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+type TransactionTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [TransactionTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Relay edge containing a `TransactionType` and its cursor."""
+type TransactionTypeEdge {
+  """The item at the end of the edge"""
+  node: TransactionType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+type OrderTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [OrderTypeEdge]!
+}
+
+"""A Relay edge containing a `OrderType` and its cursor."""
+type OrderTypeEdge {
+  """The item at the end of the edge"""
+  node: OrderType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 type CodeTypeConnection {

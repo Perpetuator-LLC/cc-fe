@@ -61,8 +61,10 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   orders: UserOrder[] = [];
   totalOrders = 0;
+  cursors: (string | null)[] = [null];
   pageSize = 10;
-  currentPage = 0;
+  hasNextPage = false;
+  hasPreviousPage = false;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
 
@@ -88,31 +90,52 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadOrders() {
+  loadOrders(after: string | null = null, pageIndex = 0) {
+    this.loadingOrders = true;
     this.subscriptions.add(
-      this.creditService.orders(this.currentPage + 1, this.pageSize, this.sortActive, this.sortDirection).subscribe({
-        next: (data) => {
-          // this.currentPage = data.currentPage;
-          this.totalOrders = data.totalRecords;
+      this.creditService.getOrders(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
+        next: ({ orders, pageInfo }) => {
+          this.orders = orders;
+          this.hasNextPage = pageInfo.hasNextPage;
+          this.hasPreviousPage = pageInfo.hasPreviousPage;
+          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+
+          // Set a large enough number to enable the next button if hasNextPage is true
+          this.totalOrders = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
           this.loadingOrders = false;
         },
         error: (error) => {
           this.messageService.error('Failed to load orders: ' + error.toString());
+          this.loadingOrders = false;
         },
       }),
     );
   }
 
   sortChange(sortState: Sort) {
-    this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
+    this.sortDirection = sortState.direction.toUpperCase();
+    this.cursors = [null]; // reset all known cursors
+    this.paginator.firstPage();
     this.loadOrders();
   }
 
   onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    this.currentPage = event.pageIndex;
-    this.loadOrders();
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null]; // reset all known cursors
+      this.paginator.firstPage(); // back to pageIndex = 0
+      this.loadOrders(); // load first page
+      return;
+    }
+
+    // Otherwise, grab the cursor for the page they jumped to
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadOrders(after, newPageIndex);
   }
 
   refreshOrder(id: string) {

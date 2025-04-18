@@ -26,7 +26,7 @@ export interface Episode {
 }
 
 const GET_EPISODES = gql`
-  query GetEpisodesData($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!) {
+  query GetEpisodes($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!) {
     episodes(podcastUuid: $podcastUuid, first: $first, after: $after, orderBy: $orderBy) {
       edges {
         cursor
@@ -61,7 +61,7 @@ const GET_EPISODES = gql`
 `;
 
 const GET_EPISODE = gql`
-  query GetEpisodeData($episodeUuid: UUID!) {
+  query GetEpisode($episodeUuid: UUID!) {
     episodes(episodeUuid: $episodeUuid) {
       edges {
         cursor
@@ -129,7 +129,7 @@ export class EpisodeService extends BaseService {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface Response {
-      episodes: RelayConnection<Episode>;
+      response: RelayConnection<Episode>;
     }
 
     return this.query<Response>({
@@ -137,9 +137,9 @@ export class EpisodeService extends BaseService {
       variables: { podcastUuid, first, after, orderBy },
       fetchPolicy: 'network-only',
     }).pipe(
-      map(({ episodes }) => ({
-        episodes: episodes.edges.map((edge) => edge.node),
-        pageInfo: episodes.pageInfo,
+      map(({ response }) => ({
+        episodes: response.edges.map((edge) => edge.node),
+        pageInfo: response.pageInfo,
       })),
     );
   }
