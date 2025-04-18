@@ -54,18 +54,6 @@ const GET_ORDERS = gql`
           receiptUrl
           sessionUrl
           status
-          transactions {
-            id
-            uuid
-            createdAt
-            description
-            creditAmount
-            balance
-            job {
-              id
-              kind
-            }
-          }
         }
         cursor
       }
