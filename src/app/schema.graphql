@@ -308,7 +308,6 @@ type OrderType implements Node {
   """The ID of the object"""
   id: ID!
   uuid: UUID
-  transactions: [TransactionType!]
 }
 
 """An enumeration."""

@@ -80,6 +80,8 @@ const GET_EPISODE = gql`
             uuid
             name
             team {
+              id
+              uuid
               members {
                 role
                 user {

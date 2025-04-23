@@ -240,17 +240,6 @@ export class CreditService extends BaseService implements OnDestroy {
             receiptUrl
             sessionUrl
             status
-            transactions {
-              id
-              createdAt
-              description
-              creditAmount
-              balance
-              job {
-                id
-                kind
-              }
-            }
           }
         }
       }
@@ -294,17 +283,6 @@ export class CreditService extends BaseService implements OnDestroy {
             receiptUrl
             sessionUrl
             status
-            transactions {
-              id
-              createdAt
-              description
-              creditAmount
-              balance
-              job {
-                id
-                kind
-              }
-            }
           }
         }
       }

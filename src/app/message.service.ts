@@ -21,7 +21,29 @@ export class MessageService {
   messages$ = this.messagesSubject.asObservable();
 
   error(text: string, timeout: number | undefined | null = 15000, dismissible = true) {
+    const enrichedError = new Error(text);
+    const stack = this.getCallerStack();
+    if (stack) {
+      enrichedError.stack = stack;
+    }
+    console.error(enrichedError);
     this.addMessage({ type: 'error', text, dismissible, timeout });
+  }
+
+  getCallerStack() {
+    const fullStack = new Error().stack;
+    if (!fullStack) return null;
+
+    // Split the stack by lines
+    const lines = fullStack.split('\n');
+
+    // Remove the Error message and current function frame
+    // The remaining lines represent the caller's context
+    if (lines.length > 2) {
+      return lines.slice(2).join('\n');
+    }
+
+    return null;
   }
 
   warning(text: string, timeout: number | undefined | null = 8000, dismissible = true) {
