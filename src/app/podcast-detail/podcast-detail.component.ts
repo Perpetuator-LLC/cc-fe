@@ -2,7 +2,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
@@ -24,7 +24,6 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { UserAutocompleteComponent } from '../user-autocomplete/user-autocomplete.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
@@ -42,6 +41,7 @@ import {
 import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -84,18 +84,15 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatCard,
     MatSelect,
     MatOption,
+    PodcastCategoriesComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
-  @ViewChild('autocomplete') autoComplete!: UserAutocompleteComponent;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  // allUsers: User[] = [];
   podcastForm: FormGroup;
-  // newUserForm: FormGroup;
   private subscriptions = new Subscription();
   protected loading = false;
   protected rssFeedLoading = false;
-  // protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
   protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
   private podcastUuid: string;
   protected urlDisabled = true;
@@ -140,10 +137,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       image: [null],
       imageUrl: [null],
       rssFeeds: this.fb.array([]),
-      // members: this.fb.array([]),
       tgBotToken: [null],
       tgChannelId: [null],
       tgResponse: [null],
+      categories: [{}],
     });
 
     this.podcastForm.get('enabled')?.valueChanges.subscribe((enabled) => {
@@ -167,14 +164,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }
       this.podcastForm.patchValue(podcast);
     });
-
-    // this.newUserForm = this.fb.group({
-    //   userId: ['', Validators.required],
-    //   role: ['', Validators.required],
-    // });
   }
 
-  // displayedColumns: string[] = ['username', 'role', 'actions'];
   imageUrl: string | null = null;
 
   ngOnInit(): void {
@@ -183,21 +174,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.loading = true;
-    // this.subscriptions.add(
-    //   // TODO: input from form drop-down text box
-    //   this.podcastsService.users('soo').subscribe({
-    //     next: (users) => {
-    //       if (!users || users.length === 0) {
-    //         this.messageService.error('Failed to retrieve users, no users found');
-    //         return;
-    //       }
-    //       this.allUsers = users;
-    //     },
-    //     error: (err) => {
-    //       this.messageService.error(`Failed to retrieve users: ${err.message}`);
-    //     },
-    //   }),
-    // );
     this.refreshPodcastData();
     this.imageUrl = this.podcastForm.get('imageUrl')?.value;
     this.subscriptions.add(
@@ -206,6 +182,67 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }),
     );
     this.loadTeams();
+
+    this.subscriptions.add(
+      this.podcastForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
+        // Only update if the form is valid.
+        if (this.podcastForm.valid && this.podcastForm.dirty) {
+          const {
+            uuid,
+            team,
+            name,
+            intro,
+            prompt,
+            outro,
+            enabled,
+            slug,
+            description,
+            ownerName,
+            ownerEmail,
+            ownerLink,
+            tgBotToken,
+            tgChannelId,
+            categories,
+          } = this.podcastForm.getRawValue();
+          if (enabled && !slug) {
+            return;
+          }
+          this.podcastsService
+            .updatePodcast(
+              uuid,
+              team ? team.uuid : null,
+              name,
+              intro,
+              prompt,
+              outro,
+              enabled,
+              slug,
+              description,
+              ownerName,
+              ownerEmail,
+              ownerLink,
+              tgBotToken,
+              tgChannelId,
+              null,
+              categories,
+            )
+            .subscribe({
+              next: (data) => {
+                if (!data.success) {
+                  this.messageService.error(data.message);
+                  return;
+                }
+                this.messageService.success(`Podcast updated successfully`, 3000);
+                this.podcastForm.patchValue(data.podcast);
+                this.podcastForm.markAsPristine();
+              },
+              error: (err) => {
+                this.messageService.error(`Failed to update podcast: ${err.message}`);
+              },
+            });
+        }
+      }),
+    );
   }
 
   private loadTeams(): void {
@@ -224,9 +261,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  compareTeams(team1: any, team2: any): boolean {
-    return team1 && team2 ? team1.id === team2.id : team1 === team2;
+  compareTeams(o1: TeamsResult | null, o2: TeamsResult | null): boolean {
+    return !!o1 && !!o2 && o1.uuid === o2.uuid;
   }
 
   private refreshPodcastData() {
@@ -261,8 +297,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   refreshTelegram() {
-    const { id } = this.podcastForm.getRawValue();
-    this.podcastsService.refreshTgResponse(id).subscribe({
+    const { uuid } = this.podcastForm.getRawValue();
+    this.podcastsService.refreshTgResponse(uuid).subscribe({
       next: () => {
         this.messageService.success(`Podcast Telegram response refreshed successfully`);
       },
@@ -291,6 +327,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       ownerLink,
       tgBotToken,
       tgChannelId,
+      categories,
     } = this.podcastForm.getRawValue();
     if (enabled && !slug) {
       this.messageService.error('Podcast slug is required when podcast is enabled');
@@ -311,6 +348,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       ownerLink,
       tgBotToken,
       tgChannelId,
+      null,
+      categories,
     );
 
     this.subscriptions.add(

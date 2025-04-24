@@ -11,8 +11,7 @@ import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
 import { PageInfo, RelayEdge } from './utils/relay';
 
-// create an enum of kinds
-export enum JobType {
+export enum JobKind {
   FETCH_NEWS = 'FETCH_NEWS',
   EXTRACT_NEWS = 'EXTRACT_NEWS',
   SUMMARIZE_NEWS = 'SUMMARIZE_NEWS',
@@ -20,19 +19,18 @@ export enum JobType {
   UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
 }
 
-// create a function to convert string to kind
-export const stringToJobType = (kind: string) => {
+export const stringToJobKind = (kind: string) => {
   switch (kind.toUpperCase()) {
     case 'FETCH_NEWS':
-      return JobType.FETCH_NEWS;
+      return JobKind.FETCH_NEWS;
     case 'EXTRACT_NEWS':
-      return JobType.EXTRACT_NEWS;
+      return JobKind.EXTRACT_NEWS;
     case 'SUMMARIZE_NEWS':
-      return JobType.SUMMARIZE_NEWS;
+      return JobKind.SUMMARIZE_NEWS;
     case 'CREATE_EPISODE':
-      return JobType.CREATE_EPISODE;
+      return JobKind.CREATE_EPISODE;
     case 'UPDATE_EPISODE_AUDIO':
-      return JobType.UPDATE_EPISODE_AUDIO;
+      return JobKind.UPDATE_EPISODE_AUDIO;
     default:
       throw new Error('Invalid job type');
   }
@@ -40,15 +38,15 @@ export const stringToJobType = (kind: string) => {
 
 export const kindToString = (kind: string) => {
   switch (kind.toUpperCase()) {
-    case JobType.FETCH_NEWS:
+    case JobKind.FETCH_NEWS:
       return 'Fetch News';
-    case JobType.EXTRACT_NEWS:
+    case JobKind.EXTRACT_NEWS:
       return 'Extract News';
-    case JobType.SUMMARIZE_NEWS:
+    case JobKind.SUMMARIZE_NEWS:
       return 'Summarize News';
-    case JobType.CREATE_EPISODE:
+    case JobKind.CREATE_EPISODE:
       return 'Create Episode';
-    case JobType.UPDATE_EPISODE_AUDIO:
+    case JobKind.UPDATE_EPISODE_AUDIO:
       return 'Update Episode Audio';
     default:
       return 'N/A';
@@ -61,6 +59,36 @@ export enum JobStatus {
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
 }
+
+export const stringToJobStatus = (status: string) => {
+  switch (status.toUpperCase()) {
+    case 'PENDING':
+      return JobStatus.PENDING;
+    case 'RUNNING':
+      return JobStatus.RUNNING;
+    case 'COMPLETED':
+      return JobStatus.COMPLETED;
+    case 'FAILED':
+      return JobStatus.FAILED;
+    default:
+      throw new Error('Invalid job status');
+  }
+};
+
+export const statusToString = (status: string) => {
+  switch (status.toUpperCase()) {
+    case JobStatus.PENDING:
+      return 'Pending';
+    case JobStatus.RUNNING:
+      return 'Running';
+    case JobStatus.COMPLETED:
+      return 'Completed';
+    case JobStatus.FAILED:
+      return 'Failed';
+    default:
+      return 'N/A';
+  }
+};
 
 export interface Job {
   id: string;
@@ -132,9 +160,9 @@ export class JobService extends BaseService implements OnDestroy {
     const jobs = this.jobsSignal();
     const filteredJobs = jobs.filter((job) => {
       const updatedAt = new Date(job.updatedAt);
-      if (job.status === JobStatus.COMPLETED) {
+      if (stringToJobStatus(job.status) === JobStatus.COMPLETED) {
         return now.getTime() - updatedAt.getTime() <= 5000; // Keep completed job for 5 seconds
-      } else if (job.status === JobStatus.FAILED) {
+      } else if (stringToJobStatus(job.status) === JobStatus.FAILED) {
         return now.getTime() - updatedAt.getTime() <= 15000; // Keep failed job for 15 seconds
       }
       return true;
@@ -168,7 +196,7 @@ export class JobService extends BaseService implements OnDestroy {
       toObservable(this.jobsSignal).subscribe((jobs) => {
         const jobUuids = jobs.map((job) => job.uuid);
         this.queryRef.setVariables({ ...this.queryRef.variables, jobUuids });
-        this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 21000 : 3000 });
+        this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 0 : 3000 });
       }),
     );
   }
@@ -212,11 +240,11 @@ export class JobService extends BaseService implements OnDestroy {
       variables: {
         statuses: [JobStatus.PENDING, JobStatus.RUNNING],
         kinds: [
-          JobType.SUMMARIZE_NEWS,
-          JobType.FETCH_NEWS,
-          JobType.EXTRACT_NEWS,
-          JobType.CREATE_EPISODE,
-          JobType.UPDATE_EPISODE_AUDIO,
+          JobKind.SUMMARIZE_NEWS,
+          JobKind.FETCH_NEWS,
+          JobKind.EXTRACT_NEWS,
+          JobKind.CREATE_EPISODE,
+          JobKind.UPDATE_EPISODE_AUDIO,
         ],
         jobUuids: [],
         // after: ??,
@@ -238,6 +266,8 @@ export class JobService extends BaseService implements OnDestroy {
         },
       });
     this.subscriptions.add(this.jobStatusSubscription);
+
+    this.queryRef.refetch();
   }
 
   addJobs(jobs: Job[]) {
@@ -252,11 +282,12 @@ export class JobService extends BaseService implements OnDestroy {
     const transitionedJobs: Job[] = [];
     newJobs.forEach((job: Job) => {
       const existingJob = previousJobs.find((j) => j.uuid === job.uuid);
-      const jobStatusChanged = existingJob !== undefined && existingJob.status !== job.status;
+      const jobStatusChanged =
+        existingJob !== undefined && stringToJobStatus(existingJob.status) !== stringToJobStatus(job.status);
       if (!jobStatusChanged) {
         return;
       }
-      if (job.status.toUpperCase() === status.toUpperCase()) {
+      if (stringToJobStatus(job.status) === stringToJobStatus(status)) {
         transitionedJobs.push(job);
       }
     });

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Job, JobService, kindToString } from '../job.service';
+import { Job, JobService, kindToString, statusToString } from '../job.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
@@ -152,4 +152,5 @@ export class JobsListComponent implements OnInit, OnDestroy {
   }
 
   protected readonly kindToString = kindToString;
+  protected readonly statusToString = statusToString;
 }

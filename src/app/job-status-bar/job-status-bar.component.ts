@@ -8,7 +8,7 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe } from '@angular/common';
-import { Job, JobService, JobStatus, JobType, kindToString } from '../job.service';
+import { Job, JobService, JobStatus, JobKind, kindToString, stringToJobStatus, statusToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -80,11 +80,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         .getJobs(
           [JobStatus.PENDING, JobStatus.RUNNING],
           [
-            JobType.SUMMARIZE_NEWS,
-            JobType.FETCH_NEWS,
-            JobType.EXTRACT_NEWS,
-            JobType.CREATE_EPISODE,
-            JobType.UPDATE_EPISODE_AUDIO,
+            JobKind.SUMMARIZE_NEWS,
+            JobKind.FETCH_NEWS,
+            JobKind.EXTRACT_NEWS,
+            JobKind.CREATE_EPISODE,
+            JobKind.UPDATE_EPISODE_AUDIO,
           ],
           currentJobIds,
         )
@@ -126,4 +126,6 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   protected readonly kindToString = kindToString;
   protected readonly JobStatus = JobStatus;
+  protected readonly stringToJobStatus = stringToJobStatus;
+  protected readonly statusToString = statusToString;
 }

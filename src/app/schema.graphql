@@ -131,6 +131,7 @@ type Query {
   podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, team_Id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
   rssFeeds(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, url: String, rssFeedUuid: UUID): RssFeedTypeConnection
   deleteUserResults: DeleteUserResults
+  podcastCategories: PodcastCategoriesType
   teams(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, name: String, teamUuid: UUID): TeamTypeConnection
   node(
     """The ID of the object"""
@@ -166,7 +167,7 @@ JobType is a GraphQL type that represents a job in the system. It includes field
 type JobType implements Node {
   taskId: UUID
   kind: String
-  args: JSONString
+  args: GenericScalar
   status: String
   error: String
   result: String
@@ -186,12 +187,11 @@ interface Node {
 }
 
 """
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
 """
-scalar JSONString
+scalar GenericScalar
 
 """
 The `DateTime` scalar type represents a DateTime
@@ -241,6 +241,7 @@ type PodcastType implements Node {
   ownerLink: String
   tgChannelId: String
   tgResponse: String
+  categories: GenericScalar
   uuid: UUID
   rssFeeds: [RssFeedType]
   team: TeamType
@@ -569,6 +570,10 @@ type DeleteUserResults {
   leavingPodcasts: [PodcastType]
 }
 
+type PodcastCategoriesType {
+  categories: GenericScalar
+}
+
 type TeamTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -673,7 +678,7 @@ type Mutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
+  updatePodcast(categories: GenericScalar, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """

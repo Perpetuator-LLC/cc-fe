@@ -17,7 +17,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
-import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
+import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -103,7 +103,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            if ([JobType.UPDATE_EPISODE_AUDIO].includes(stringToJobType(job.kind))) {
+            if ([JobKind.UPDATE_EPISODE_AUDIO].includes(stringToJobKind(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.getEpisodeById(this.episodeUuid, 'network-only' as FetchPolicy).subscribe({
                   next: (episode) => {
@@ -116,7 +116,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                   },
                 }),
               );
-            } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
+            } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.getEpisodeById(job.result).subscribe({
                   next: (episode) => {

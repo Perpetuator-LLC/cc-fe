@@ -8,6 +8,8 @@ import { ErrorHandlerService } from './error-handler.service';
 import { PageInfo, RelayConnection, RelayEdge } from './utils/relay';
 import { TeamsResult } from './teams.service';
 
+export type GenericScalar = unknown;
+
 export interface UserResult {
   id: string;
   uuid: string;
@@ -43,7 +45,14 @@ export interface PodcastsResult {
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
+  categories: string[] | null;
   rssFeeds: RssFeedResult[];
+}
+
+interface PodcastCategoriesResponse {
+  podcastCategories: {
+    categories: Record<string, string[]>;
+  };
 }
 
 @Injectable({
@@ -126,6 +135,7 @@ export class PodcastsService extends BaseService {
             outro
             tgChannelId
             tgResponse
+            categories
             team {
               id
               uuid
@@ -184,6 +194,7 @@ export class PodcastsService extends BaseService {
     tgBotToken: string | null = null,
     tgChannelId: string | null = null,
     refreshTgResponse: boolean | null = null,
+    categories: GenericScalar = null,
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast(
@@ -202,6 +213,7 @@ export class PodcastsService extends BaseService {
         $tgBotToken: String
         $tgChannelId: String
         $refreshTgResponse: Boolean
+        $categories: GenericScalar
       ) {
         updatePodcast(
           podcastUuid: $podcastUuid
@@ -219,6 +231,7 @@ export class PodcastsService extends BaseService {
           tgBotToken: $tgBotToken
           tgChannelId: $tgChannelId
           refreshTgResponse: $refreshTgResponse
+          categories: $categories
         ) {
           success
           message
@@ -238,6 +251,7 @@ export class PodcastsService extends BaseService {
             ownerLink
             tgChannelId
             tgResponse
+            categories
             team {
               id
               uuid
@@ -282,6 +296,7 @@ export class PodcastsService extends BaseService {
         tgBotToken,
         tgChannelId,
         refreshTgResponse,
+        categories,
       },
     }).pipe(
       map((data) => {
@@ -316,6 +331,7 @@ export class PodcastsService extends BaseService {
               ownerLink
               tgChannelId
               tgResponse
+              categories
               rssFeeds {
                 id
                 uuid
@@ -386,6 +402,7 @@ export class PodcastsService extends BaseService {
               ownerLink
               tgChannelId
               tgResponse
+              categories
               rssFeeds {
                 id
                 uuid
@@ -463,6 +480,20 @@ export class PodcastsService extends BaseService {
         pageInfo: podcasts.pageInfo,
       })),
     );
+  }
+
+  getPodcastCategories(): Observable<Record<string, string[]>> {
+    const GQL = gql`
+      query GetPodcastCategories {
+        podcastCategories {
+          categories
+        }
+      }
+    `;
+
+    return this.query<PodcastCategoriesResponse>({
+      query: GQL,
+    }).pipe(map((data) => data.podcastCategories.categories));
   }
 
   deletePodcast(podcastUuid: string, confirm: string) {

@@ -1,0 +1,46 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="categories-container">
+  <h3>Podcast Categories</h3>
+  <div class="category-selection">
+    <div class="parent-categories">
+      <h4>Main Categories</h4>
+      <div *ngFor="let category of parentCategories" class="category-item">
+        <label>
+          <input type="checkbox" [checked]="isParentSelected(category)" (change)="toggleParentCategory(category)" />
+          {{ category }}
+        </label>
+      </div>
+    </div>
+
+    <div class="sub-categories">
+      <h4>Sub-Categories</h4>
+      <ng-container *ngFor="let parent of selectedParents">
+        <div class="sub-category-group">
+          <h5>{{ parent }}</h5>
+          <div *ngFor="let sub of categoriesMap[parent]" class="category-item">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="isSubSelected(parent, sub)"
+                (change)="toggleSubCategory(parent, sub)"
+              />
+              {{ sub }}
+            </label>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="selected-categories">
+    <h4>Selected Categories:</h4>
+    <ul>
+      <li *ngFor="let parent of selectedParents">
+        {{ parent }}
+        <ul *ngIf="getSelectedSubs(parent).length > 0">
+          <li *ngFor="let sub of getSelectedSubs(parent)">{{ sub }}</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>

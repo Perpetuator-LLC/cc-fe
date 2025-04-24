@@ -21,7 +21,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { EpisodeService } from '../episode.service';
-import { Job, JobService, JobStatus, JobType, stringToJobType } from '../job.service';
+import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 // export interface News {
@@ -92,10 +92,10 @@ export class NewsComponent implements OnInit, OnDestroy {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if (
-              [JobType.FETCH_NEWS, JobType.EXTRACT_NEWS, JobType.SUMMARIZE_NEWS].includes(stringToJobType(job.kind))
+              [JobKind.FETCH_NEWS, JobKind.EXTRACT_NEWS, JobKind.SUMMARIZE_NEWS].includes(stringToJobKind(job.kind))
             ) {
               this.getNews();
-            } else if ([JobType.CREATE_EPISODE].includes(stringToJobType(job.kind))) {
+            } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
               this.subscriptions.add(
                 this.episodeService.getEpisodeById(job.result).subscribe({
                   next: (episode) => {

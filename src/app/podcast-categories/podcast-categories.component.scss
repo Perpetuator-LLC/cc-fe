@@ -1,0 +1,21 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.categories-container {
+  margin-top: 1rem;
+}
+.category-selection {
+  display: flex;
+  gap: 2rem;
+}
+.parent-categories,
+.sub-categories {
+  flex: 1;
+}
+.category-item {
+  margin-bottom: 0.5rem;
+}
+.sub-category-group {
+  margin-bottom: 1rem;
+}
+.selected-categories {
+  margin-top: 1.5rem;
+}

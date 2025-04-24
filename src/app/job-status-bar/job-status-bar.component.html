@@ -14,17 +14,17 @@
                         <mat-card-title>{{ kindToString(job.kind) }}</mat-card-title>
                       </div>
                       <div class="job-status">
-                        <mat-card-subtitle>{{ job.status.toUpperCase() }}</mat-card-subtitle>
+                        <mat-card-subtitle>{{ statusToString(job.status) }}</mat-card-subtitle>
                       </div>
                     </div>
-                    @if (job.status === JobStatus.RUNNING) {
+                    @if (stringToJobStatus(job.status) === JobStatus.RUNNING) {
                       <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                     }
                   </mat-card-header>
                 </mat-expansion-panel-header>
-                @if (job.status === JobStatus.FAILED || job.status === JobStatus.PENDING) {
-                  <button mat-flat-button color="primary" type="button" (click)="retryJob(job.id)">Retry</button>
-                  <button mat-flat-button color="primary" type="button" (click)="deleteJob(job.id)">Delete</button>
+                @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
+                  <button mat-flat-button color="primary" type="button" (click)="retryJob(job.uuid)">Retry</button>
+                  <button mat-flat-button color="primary" type="button" (click)="deleteJob(job.uuid)">Delete</button>
                 }
                 @if (job.error) {
                   <p class="error">Error: {{ job.error }}</p>
