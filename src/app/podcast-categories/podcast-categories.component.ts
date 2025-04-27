@@ -5,9 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { PodcastsService } from '../podcasts.service';
 
-// Import Angular Material Modules needed for the template
 import { MatListModule } from '@angular/material/list';
-// Import MatCheckboxChange along with MatCheckboxModule
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 

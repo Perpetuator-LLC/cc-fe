@@ -1,47 +1,45 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<mat-accordion multi="true">
-  @for (parent of parentCategories; track parent) {
-    <mat-expansion-panel class="category-expansion-panel">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <!-- Stop propagation to prevent checkbox click from toggling expansion -->
-          <mat-checkbox
-            [checked]="isParentSelected(parent)"
-            (change)="toggleParentCategory(parent)"
-            (click)="$event.stopPropagation()"
-            color="primary">
-            {{ parent }}
-          </mat-checkbox>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-
-      <!-- Content of the expansion panel: Subcategories -->
-      @if (getSubcategories(parent).length > 0) {
-        <mat-list role="list" class="sub-category-list">
-          @for (sub of getSubcategories(parent); track sub) {
-            <mat-list-item role="listitem">
-              <mat-checkbox
-                [checked]="isSubSelected(parent, sub)"
-                (change)="toggleSubCategory(parent, sub)"
-                color="primary">
-                {{ sub }}
-              </mat-checkbox>
-            </mat-list-item>
-          }
-        </mat-list>
-      } @else {
-        <div class="no-subcategories-message">No subcategories.</div>
-      }
-    </mat-expansion-panel>
-  } @empty {
-    <mat-list-item>Loading categories...</mat-list-item>
-  }
-</mat-accordion>
-
-<!-- Optional: Display selected values for debugging/verification -->
-<!--
-<div class="selected-categories-debug">
-  <h3>Selected (Debug):</h3>
-  <pre>{{ value | json }}</pre>
+<div class="section-header">
+  <h2>Podcast Categories</h2>
 </div>
--->
+
+<div class="categories-grid-container">
+  <mat-accordion multi="true" class="categories-grid">
+    @for (parent of parentCategories; track parent) {
+      <mat-expansion-panel class="category-expansion-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <!-- Stop propagation to prevent checkbox click from toggling expansion -->
+            <mat-checkbox
+              [checked]="isParentSelected(parent)"
+              (change)="toggleParentCategory(parent)"
+              (click)="$event.stopPropagation()"
+              color="primary">
+              {{ parent }}
+            </mat-checkbox>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <!-- Content of the expansion panel: Subcategories -->
+        @if (getSubcategories(parent).length > 0) {
+          <mat-list role="list" class="sub-category-list">
+            @for (sub of getSubcategories(parent); track sub) {
+              <mat-list-item role="listitem">
+                <mat-checkbox
+                  [checked]="isSubSelected(parent, sub)"
+                  (change)="toggleSubCategory(parent, sub)"
+                  color="primary">
+                  {{ sub }}
+                </mat-checkbox>
+              </mat-list-item>
+            }
+          </mat-list>
+        } @else {
+          <div class="no-subcategories-message">No subcategories.</div>
+        }
+      </mat-expansion-panel>
+    } @empty {
+      <mat-list-item>Loading categories...</mat-list-item>
+    }
+  </mat-accordion>
+</div>
