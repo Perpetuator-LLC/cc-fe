@@ -1,39 +1,43 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
-/* Rely primarily on Material Design Theming defined globally */
+@use '@angular/material' as mat;
 
-.parent-category-group {
-  // Add slight separation between parent category groups if desired
+.category-expansion-panel {
+  // Remove default box-shadow if desired for a flatter look within the accordion
+  // box-shadow: none !important;
+
+  // Adjust margins if needed
   margin-bottom: 4px;
 }
 
-.sub-categories-container {
-  // Indent the container for subcategories
-  // Using padding on the container allows list item hover/focus effects to span full width within container
-  padding-left: 32px; // Standard Material Design indentation level
+// Ensure the checkbox in the header aligns nicely
+.mat-expansion-panel-header .mat-checkbox {
+  // Add margin if checkbox feels too close to the edge or text
+  // margin-right: 16px;
 }
 
-/*
-  Alternatively, indent each sub-item directly if preferred:
-  .sub-category-item {
-    padding-left: 32px !important; // May need !important depending on specificity
-  }
-*/
-
-/* Remove other custom styles unless absolutely necessary */
-/* .categories-container, .category-selection, .parent-categories, .sub-categories, etc. are likely no longer needed */
-
-// Ensure checkboxes align well within list items if needed
-// Usually MatCheckbox works well inside MatListItem by default
-mat-list-item {
-  // Adjust height slightly if default feels cramped with checkboxes
-  // height: 48px; // Example override, use Material Design tokens if possible
+.sub-category-list {
+  // Remove default padding from mat-list if it looks odd inside the panel
+  padding-top: 0;
+  padding-bottom: 0;
 }
+
+.sub-category-list mat-list-item {
+  // Adjust height or padding if needed for subcategory items
+  // height: 40px; // Example: Make sub-items slightly shorter
+}
+
+.no-subcategories-message {
+  padding: 16px; // Add padding consistent with panel content
+  //color: mat.get-theme-color(mat.define-light-theme((color: (primary: mat.define-palette(mat.$indigo-palette), accent: mat.define-palette(mat.$pink-palette, A200, A100, A400)))), disabled-text); // Use theme's disabled text color
+  font-style: italic;
+}
+
+/* Remove styles related to the old structure like .parent-category-group, .sub-categories-container */
 
 .selected-categories-debug {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.05); // Slight background for visibility
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
-

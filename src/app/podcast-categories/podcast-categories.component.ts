@@ -9,11 +9,12 @@ import { PodcastsService } from '../podcasts.service';
 import { MatListModule } from '@angular/material/list';
 // Import MatCheckboxChange along with MatCheckboxModule
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-podcast-categories',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatCheckboxModule],
+  imports: [CommonModule, MatListModule, MatCheckboxModule, MatExpansionModule],
   templateUrl: './podcast-categories.component.html',
   styleUrl: './podcast-categories.component.scss',
   providers: [

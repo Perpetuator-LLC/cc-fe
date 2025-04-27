@@ -1,20 +1,25 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<mat-list role="list">
+<mat-accordion multi="true">
   @for (parent of parentCategories; track parent) {
-    <div class="parent-category-group">
-      <mat-list-item role="listitem">
-        <mat-checkbox
-          [checked]="isParentSelected(parent)"
-          (change)="toggleParentCategory(parent)"
-          color="primary">
-          {{ parent }}
-        </mat-checkbox>
-      </mat-list-item>
+    <mat-expansion-panel class="category-expansion-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <!-- Stop propagation to prevent checkbox click from toggling expansion -->
+          <mat-checkbox
+            [checked]="isParentSelected(parent)"
+            (change)="toggleParentCategory(parent)"
+            (click)="$event.stopPropagation()"
+            color="primary">
+            {{ parent }}
+          </mat-checkbox>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
 
+      <!-- Content of the expansion panel: Subcategories -->
       @if (getSubcategories(parent).length > 0) {
-        <div class="sub-categories-container">
+        <mat-list role="list" class="sub-category-list">
           @for (sub of getSubcategories(parent); track sub) {
-            <mat-list-item role="listitem" class="sub-category-item">
+            <mat-list-item role="listitem">
               <mat-checkbox
                 [checked]="isSubSelected(parent, sub)"
                 (change)="toggleSubCategory(parent, sub)"
@@ -23,13 +28,15 @@
               </mat-checkbox>
             </mat-list-item>
           }
-        </div>
+        </mat-list>
+      } @else {
+        <div class="no-subcategories-message">No subcategories.</div>
       }
-    </div>
+    </mat-expansion-panel>
   } @empty {
     <mat-list-item>Loading categories...</mat-list-item>
   }
-</mat-list>
+</mat-accordion>
 
 <!-- Optional: Display selected values for debugging/verification -->
 <!--
