@@ -1,21 +1,39 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-.categories-container {
-  margin-top: 1rem;
+
+/* Rely primarily on Material Design Theming defined globally */
+
+.parent-category-group {
+  // Add slight separation between parent category groups if desired
+  margin-bottom: 4px;
 }
-.category-selection {
-  display: flex;
-  gap: 2rem;
+
+.sub-categories-container {
+  // Indent the container for subcategories
+  // Using padding on the container allows list item hover/focus effects to span full width within container
+  padding-left: 32px; // Standard Material Design indentation level
 }
-.parent-categories,
-.sub-categories {
-  flex: 1;
+
+/*
+  Alternatively, indent each sub-item directly if preferred:
+  .sub-category-item {
+    padding-left: 32px !important; // May need !important depending on specificity
+  }
+*/
+
+/* Remove other custom styles unless absolutely necessary */
+/* .categories-container, .category-selection, .parent-categories, .sub-categories, etc. are likely no longer needed */
+
+// Ensure checkboxes align well within list items if needed
+// Usually MatCheckbox works well inside MatListItem by default
+mat-list-item {
+  // Adjust height slightly if default feels cramped with checkboxes
+  // height: 48px; // Example override, use Material Design tokens if possible
 }
-.category-item {
-  margin-bottom: 0.5rem;
-}
-.sub-category-group {
-  margin-bottom: 1rem;
-}
-.selected-categories {
+
+.selected-categories-debug {
   margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.05); // Slight background for visibility
+  border-radius: 4px;
 }
+
