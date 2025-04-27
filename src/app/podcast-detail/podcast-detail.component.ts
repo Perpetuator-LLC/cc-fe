@@ -444,7 +444,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.podcastsService.uploadPodcastImage(this.podcastUuid, file).subscribe({
       next: (response) => {
         this.messageService.success('Podcast image uploaded successfully');
-        this.podcastForm.patchValue({ imageUrl: response.podcast.imageUrl });
+        const imageUrl = response.podcast.imageUrl;
+        const cacheBustedUrl = imageUrl + (imageUrl?.includes('?') ? '&' : '?') + 'v=' + new Date().getTime();
+        this.podcastForm.patchValue({ imageUrl: cacheBustedUrl });
         this.selectedFile = null;
         this.podcastForm.get('image')?.reset();
       },
@@ -453,6 +455,34 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.selectedFile = null;
         this.podcastForm.get('image')?.reset();
       },
+    });
+  }
+
+  deletePodcastImage() {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: 'Are you sure you want to delete this podcast image?',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.podcastsService.deletePodcastImage(this.podcastUuid).subscribe({
+          next: (data) => {
+            if (!data.success) {
+              this.messageService.error(data.message);
+              return;
+            }
+            this.messageService.success('Podcast image deleted successfully');
+            this.podcastForm.patchValue({ imageUrl: data.podcast.imageUrl });
+            this.imageUrl = data.podcast.imageUrl;
+            this.podcastForm.markAsPristine();
+          },
+          error: (err) => {
+            this.messageService.error(`Failed to delete podcast image: ${err.message}`);
+          },
+        });
+      }
     });
   }
 

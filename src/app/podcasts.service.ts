@@ -545,26 +545,76 @@ export class PodcastsService extends BaseService {
       }
     `;
 
-    return this.apollo
-      .mutate({
-        mutation: GQL,
-        variables: {
-          podcastUuid,
-          image,
-        },
-        context: {
-          useMultipart: true,
-        },
-      })
-      .pipe(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map((result: any) => {
-          if (!result.data.updatePodcast.success) {
-            throw new Error(result.data.updatePodcast.message);
+    interface Response {
+      updatePodcast: {
+        success: boolean;
+        message: string;
+        podcast: PodcastsResult;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        podcastUuid,
+        image,
+      },
+      context: {
+        useMultipart: true,
+      },
+    }).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((result: any) => {
+        if (!result.updatePodcast.success) {
+          throw new Error(result.updatePodcast.message);
+        }
+        return result.updatePodcast;
+      }),
+    );
+  }
+
+  deletePodcastImage(podcastUuid: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
+    const GQL = gql`
+      mutation DeletePodcastPodcastImage($podcastUuid: UUID!, $deleteImage: Boolean!) {
+        updatePodcast(podcastUuid: $podcastUuid, deleteImage: $deleteImage) {
+          success
+          message
+          podcast {
+            id
+            uuid
+            name
+            imageUrl
           }
-          return result.data.updatePodcast;
-        }),
-      );
+        }
+      }
+    `;
+
+    interface Response {
+      updatePodcast: {
+        success: boolean;
+        message: string;
+        podcast: PodcastsResult;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        podcastUuid,
+        deleteImage: true,
+      },
+      context: {
+        useMultipart: true,
+      },
+    }).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((result: any) => {
+        if (!result.updatePodcast.success) {
+          throw new Error(result.updatePodcast.message);
+        }
+        return result.updatePodcast;
+      }),
+    );
   }
 
   setPodcastRssFeeds(podcastUuid: string, rssFeedUuids: string[]) {

@@ -168,6 +168,8 @@
           <div>
             @if (imageUrl) {
               <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+            } @else {
+              <h3>No Podcast Image Added.</h3>
             }
           </div>
 
@@ -187,6 +189,16 @@
             accept="image/*"
             hidden
           />
+        </div>
+
+        <div>
+          @if (imageUrl) {
+            <div class="image-container">
+              <button mat-icon-button color="warn" type="button" (click)="deletePodcastImage()" matTooltip="Delete image">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
         </div>
       </div>
 

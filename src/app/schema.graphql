@@ -678,7 +678,7 @@ type Mutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(categories: GenericScalar, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
+  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """
