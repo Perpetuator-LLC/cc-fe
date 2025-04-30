@@ -56,6 +56,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   episodeForm: FormGroup;
   audioSrc: string | null = null;
   wordCount = 0;
+  charCount = 0;
   jobs: Job[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -167,6 +168,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.episodeForm.get('content')?.valueChanges.subscribe((value: string) => {
         this.wordCount = this.countWords(value);
+        this.charCount = value.length;
       }),
     );
   }

@@ -1,4 +1,5 @@
 type Query {
+  voices(provider: VoiceProvider, tiers: [VoiceTier], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, modelName: String, externalId: String): VoiceTypeConnection
   userDataExport(confirm: String!): UserDataExport
   credits: Int
 
@@ -139,6 +140,106 @@ type Query {
   ): Node
 }
 
+type VoiceTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [VoiceTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Relay edge containing a `VoiceType` and its cursor."""
+type VoiceTypeEdge {
+  """The item at the end of the edge"""
+  node: VoiceType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type VoiceType implements Node {
+  """The ID of the object"""
+  id: ID!
+  provider: VoiceProvider
+
+  """
+  The specific model used by the provider (e.g., 'tts-1-hd', 'eleven-monolingual-v1').
+  """
+  modelName: String!
+
+  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
+  externalId: String!
+  displayName: String
+
+  """Whether this voice is available for use."""
+  enabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: GenericScalar
+  uuid: UUID
+  tier: VoiceTier
+  sampleUrl: String
+  creditsPerMillionChar: Int
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+"""An enumeration."""
+enum VoiceProvider {
+  OPENAI
+  ELEVENLABS
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""An enumeration."""
+enum VoiceTier {
+  PREMIUM_HD
+  PREMIUM
+  REGULAR_HD
+  REGULAR
+  REGULAR_LD
+}
+
 """User data export schema"""
 type UserDataExport {
   """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
@@ -154,12 +255,6 @@ type UserDataExport {
   transactions: [TransactionType!]
   settings: [UserSettingType!]
 }
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
@@ -179,26 +274,6 @@ type JobType implements Node {
   uuid: UUID
   cost: Int
 }
-
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
-"""
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
-"""
-scalar GenericScalar
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 type TeamType implements Node {
   """The ID of the object"""
@@ -247,6 +322,7 @@ type PodcastType implements Node {
   team: TeamType
   imageUrl: String
   url: String
+  voice: VoiceType
 }
 
 """
@@ -353,23 +429,6 @@ type TransactionTypeConnection {
 
   """Contains the nodes in this connection."""
   edges: [TransactionTypeEdge]!
-}
-
-"""
-The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
-"""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: String
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: String
 }
 
 """A Relay edge containing a `TransactionType` and its cursor."""
@@ -592,6 +651,17 @@ type TeamTypeEdge {
 }
 
 type Mutation {
+  createVoice(enabled: Boolean = true, externalId: String!, modelName: String!, provider: VoiceProvider!): CreateVoice
+  updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
+  deleteVoice(voiceUuid: UUID!): DeleteVoice
+
+  """
+  Refresh voices from OpenAI and ElevenLabs providers and sync the local DB.
+  
+  Returns lists of added, updated, and removed voices.
+  """
+  refreshVoices(forceMetadata: Boolean = false): RefreshVoices
+
   """Create a new bonus code that can be redeemed for credits."""
   createCode(code: String!, creditAmount: Int!): CreateCode
 
@@ -678,7 +748,7 @@ type Mutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String): UpdatePodcast
+  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """
@@ -708,6 +778,35 @@ type Mutation {
 
   """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
+}
+
+type CreateVoice {
+  success: Boolean
+  message: String
+  voice: VoiceType
+}
+
+type UpdateVoice {
+  success: Boolean
+  message: String
+  voice: VoiceType
+}
+
+type DeleteVoice {
+  success: Boolean
+  message: String
+}
+
+"""
+Refresh voices from OpenAI and ElevenLabs providers and sync the local DB.
+
+Returns lists of added, updated, and removed voices.
+"""
+type RefreshVoices {
+  success: Boolean
+  message: String
+  addedVoices: [VoiceType]
+  updatedVoices: [VoiceType]
 }
 
 """Create a new bonus code that can be redeemed for credits."""

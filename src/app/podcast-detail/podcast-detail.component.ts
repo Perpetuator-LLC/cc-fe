@@ -1,6 +1,14 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, debounceTime } from 'rxjs';
 import { MessageService } from '../message.service';
@@ -40,8 +48,9 @@ import {
 } from '@angular/material/expansion';
 import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
-import { MatOption, MatSelect } from '@angular/material/select';
+import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
+import { tierToString, Voice, VoicesService, VoiceTier } from '../voices.service';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -79,6 +88,7 @@ import { PodcastCategoriesComponent } from '../podcast-categories/podcast-catego
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatExpansionPanelDescription,
+    MatSelectTrigger,
     FormsModule,
     MatDivider,
     MatCard,
@@ -101,6 +111,13 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   previewImage: string | ArrayBuffer | null = null;
   protected teams: TeamsResult[] = [];
   protected loadingTeams = false;
+  protected voices: Voice[] = [];
+  protected loadingVoices = false;
+  protected selectedVoiceUuid: string | null = null;
+  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+  voiceFilter = new FormControl<VoiceTier[]>([]);
+  voiceTiers = Object.values(VoiceTier);
+  currentPlayingVoice: Voice | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -112,6 +129,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private clipboard: Clipboard,
     private teamsService: TeamsService,
+    private voicesService: VoicesService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -141,6 +159,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       tgChannelId: [null],
       tgResponse: [null],
       categories: [{}],
+      voice: [null],
     });
 
     this.podcastForm.get('enabled')?.valueChanges.subscribe((enabled) => {
@@ -182,6 +201,13 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }),
     );
     this.loadTeams();
+    this.applyVoiceFilters();
+
+    // this.subscriptions.add(
+    //   this.podcastForm.get('voice')?.valueChanges.subscribe((voiceUuid) => {
+    //     this.onVoiceChange(voiceUuid);
+    //   }),
+    // );
 
     this.subscriptions.add(
       this.podcastForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
@@ -225,6 +251,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               tgChannelId,
               null,
               categories,
+              voice ? voice.uuid : null,
             )
             .subscribe({
               next: (data) => {
@@ -243,6 +270,105 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         }
       }),
     );
+  }
+
+  getVoiceDisplayName(voice: Voice): string {
+    return (
+      `${voice.displayName ?? 'Name not set'} - ${tierToString(voice.tier) ?? 'Tier not set'}` +
+      ` (${Math.round(voice.creditsPerMillionChar / 1000)} CPM)`
+    );
+  }
+
+  // onVoiceChange(voiceUuid: string | null): void {
+  //   this.podcastsService
+  //     .updatePodcast(
+  //       this.podcastUuid,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       null,
+  //       voiceUuid,
+  //     )
+  //     .subscribe({
+  //       next: (data) => {
+  //         if (!data.success) {
+  //           this.messageService.error(data.message);
+  //           return;
+  //         }
+  //         this.messageService.success('Voice updated successfully');
+  //       },
+  //       error: (err) => {
+  //         this.messageService.error(`Failed to update voice: ${err.message}`);
+  //       },
+  //     });
+  // }
+
+  private loadVoices(tiers?: VoiceTier[], enabled?: boolean): void {
+    this.loadingVoices = true;
+    this.subscriptions.add(
+      this.voicesService.getVoices(tiers, enabled).subscribe({
+        next: (response) => {
+          this.voices = response.voices;
+          this.loadingVoices = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load voices: ${err.message}`);
+          this.loadingVoices = false;
+        },
+      }),
+    );
+  }
+
+  compareVoices(o1: Voice | null, o2: Voice | null): boolean {
+    return !!o1 && !!o2 && o1.uuid === o2.uuid;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  displayVoice(voice: any): string {
+    return voice ? this.getVoiceDisplayName(voice) : '';
+  }
+
+  playVoiceSample(voice: Voice): void {
+    if (!voice.sampleUrl) return;
+
+    const audio = this.audioPlayer.nativeElement;
+    audio.src = voice.sampleUrl;
+    audio.load();
+    audio.play().catch((err) => {
+      this.messageService.error(`Failed to play audio sample: ${err.message}`);
+    });
+    this.currentPlayingVoice = voice;
+  }
+
+  stopVoiceSample(): void {
+    const audio = this.audioPlayer.nativeElement;
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    this.currentPlayingVoice = null;
+  }
+
+  applyVoiceFilters(): void {
+    const selectedTiers = this.voiceFilter.value;
+    const enabled = true;
+    this.loadVoices(selectedTiers?.length ? selectedTiers : undefined, enabled);
+  }
+
+  clearVoiceFilters(): void {
+    this.voiceFilter.setValue([]);
+    this.loadVoices();
   }
 
   private loadTeams(): void {
@@ -269,9 +395,11 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastsService.getPodcastById(this.podcastUuid).subscribe({
         next: (podcast) => {
-          console.log('Team ID:', podcast.team);
+          // console.log('Voice ID:', podcast.voice);
+          // console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);
           this.setRssFeeds(podcast.rssFeeds);
+          // this.selectedVoiceUuid = podcast.voice?.uuid || null;
           this.loading = false;
         },
         error: (err) => {
@@ -328,6 +456,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       tgBotToken,
       tgChannelId,
       categories,
+      voice,
     } = this.podcastForm.getRawValue();
     if (enabled && !slug) {
       this.messageService.error('Podcast slug is required when podcast is enabled');
@@ -350,6 +479,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       tgChannelId,
       null,
       categories,
+      voice ? voice.uuid : null,
     );
 
     this.subscriptions.add(
@@ -550,4 +680,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       },
     });
   }
+
+  protected readonly tierToString = tierToString;
 }

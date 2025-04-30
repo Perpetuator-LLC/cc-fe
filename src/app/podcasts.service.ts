@@ -7,6 +7,7 @@ import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { PageInfo, RelayConnection, RelayEdge } from './utils/relay';
 import { TeamsResult } from './teams.service';
+import { Voice } from './voices.service';
 
 export type GenericScalar = unknown;
 
@@ -45,8 +46,10 @@ export interface PodcastsResult {
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
+  // categories: CategoryResult[] | null;
   categories: string[] | null;
   rssFeeds: RssFeedResult[];
+  voice: Voice | null;
 }
 
 interface PodcastCategoriesResponse {
@@ -90,6 +93,20 @@ export class PodcastsService extends BaseService {
                   username
                 }
               }
+            }
+            voice {
+              id
+              uuid
+              provider
+              enabled
+              modelName
+              externalId
+              displayName
+              tier
+              creditsPerMillionChar
+              sampleUrl
+              createdAt
+              updatedAt
             }
           }
         }
@@ -195,6 +212,7 @@ export class PodcastsService extends BaseService {
     tgChannelId: string | null = null,
     refreshTgResponse: boolean | null = null,
     categories: GenericScalar = null,
+    voiceUuid: string | null = null,
   ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast(
@@ -214,6 +232,7 @@ export class PodcastsService extends BaseService {
         $tgChannelId: String
         $refreshTgResponse: Boolean
         $categories: GenericScalar
+        $voiceUuid: UUID
       ) {
         updatePodcast(
           podcastUuid: $podcastUuid
@@ -232,6 +251,7 @@ export class PodcastsService extends BaseService {
           tgChannelId: $tgChannelId
           refreshTgResponse: $refreshTgResponse
           categories: $categories
+          voiceUuid: $voiceUuid
         ) {
           success
           message
@@ -252,6 +272,21 @@ export class PodcastsService extends BaseService {
             tgChannelId
             tgResponse
             categories
+            voice {
+              id
+              uuid
+              provider
+              enabled
+              modelName
+              externalId
+              displayName
+              tier
+              creditsPerMillionChar
+              sampleUrl
+              createdAt
+              updatedAt
+              sampleUrl
+            }
             team {
               id
               uuid
@@ -297,6 +332,7 @@ export class PodcastsService extends BaseService {
         tgChannelId,
         refreshTgResponse,
         categories,
+        voiceUuid,
       },
     }).pipe(
       map((data) => {
@@ -348,6 +384,20 @@ export class PodcastsService extends BaseService {
                   }
                   role
                 }
+              }
+              voice {
+                id
+                uuid
+                provider
+                enabled
+                modelName
+                externalId
+                displayName
+                tier
+                creditsPerMillionChar
+                sampleUrl
+                createdAt
+                updatedAt
               }
             }
           }

@@ -32,6 +32,13 @@
           }
         </mat-form-field>
       </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="section-header">
+        <h2>Transcript</h2>
+      </div>
+
       <div class="member-row">
         <mat-form-field appearance="fill">
           <mat-label>Intro</mat-label>
@@ -40,7 +47,7 @@
       </div>
       <div class="member-row">
         <mat-form-field appearance="fill">
-          <mat-label>Prompt</mat-label>
+          <mat-label>Transcript Prompt</mat-label>
           <textarea matInput formControlName="prompt" class="textarea-large"></textarea>
         </mat-form-field>
       </div>
@@ -50,6 +57,72 @@
           <textarea matInput formControlName="outro" class="textarea-small"></textarea>
         </mat-form-field>
       </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="section-header">
+        <h2>Audio</h2>
+      </div>
+
+      <!-- Replace the existing voice selection section in podcast-detail.component.html -->
+      <div class="member-row">
+        <div class="voice-filters">
+          <mat-form-field appearance="fill" class="tier-filter">
+            <mat-label>Filter by Tier</mat-label>
+            <mat-select [formControl]="voiceFilter" multiple>
+              @for (tier of voiceTiers; track tier) {
+                <mat-option [value]="tier">
+                  {{ tierToString(tier) }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-button color="primary" (click)="applyVoiceFilters()">Apply Filters</button>
+          <button mat-button (click)="clearVoiceFilters()">Clear Filters</button>
+        </div>
+
+        <mat-form-field appearance="fill" class="voice-select">
+          <mat-label>Voice</mat-label>
+          <mat-select formControlName="voice" [compareWith]="compareVoices">
+            <mat-select-trigger>
+              {{ displayVoice(podcastForm.get('voice')?.value) }}
+            </mat-select-trigger>
+            <mat-option [value]="null">No Voice Selected</mat-option>
+            @for (voice of voices; track voice.uuid) {
+              <mat-option [value]="voice" class="voice-option">
+                <div class="voice-option-content">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [disabled]="!voice.sampleUrl"
+                    (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
+                    (mouseleave)="stopVoiceSample()"
+                    (click)="$event.stopPropagation()">
+                    <mat-icon>music_note</mat-icon>
+                  </button>
+                  {{ getVoiceDisplayName(voice) }}
+                </div>
+              </mat-option>
+            }
+          </mat-select>
+          @if (loadingVoices) {
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          }
+        </mat-form-field>
+        <i>CPM is an approximation to Credits Per Minute of audio or Credits Per One-Thousand Characters</i>
+
+        <!-- Hidden audio element for playing samples -->
+        <audio #audioPlayer></audio>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="section-header">
+        <h2>Metadata</h2>
+      </div>
+
+      <span>This information will show up in podcasting platforms like Apple Podcasts, Spotify, etc.</span>
+
       <div class="member-row">
         <mat-form-field appearance="fill">
           <mat-label>Owner Email</mat-label>
@@ -68,6 +141,19 @@
           <input matInput formControlName="ownerLink" />
         </mat-form-field>
       </div>
+      <div class="member-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Podcast Description</mat-label>
+          <textarea matInput formControlName="description" class="textarea-medium"></textarea>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="section-header">
+        <h2>Publishing</h2>
+      </div>
+
       <div>
         To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot and a channel. See:
         <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
@@ -116,13 +202,6 @@
       </div>
 
       <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Podcast Description</mat-label>
-          <textarea matInput formControlName="description" class="textarea-medium"></textarea>
-        </mat-form-field>
-      </div>
-
-      <div class="member-row">
         <div>
           <mat-checkbox formControlName="enabled">Podcast Enabled</mat-checkbox>
         </div>
@@ -156,7 +235,6 @@
 <!--          <button mat-flat-button color="primary" type="submit" [disabled]="!podcastForm.dirty">Save Podcast Settings</button>-->
 <!--        </div>-->
 <!--      </div>-->
-
       <mat-divider></mat-divider>
 
       <div class="section-header">

@@ -65,6 +65,7 @@
         </mat-form-field>
         <div>
           Word count: {{ wordCount }}
+          | Character count: {{ charCount }}
           | Generated on:
           <span [matTooltip]="episodeForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
             {{ episodeForm.get('date')?.value | date: 'short' : 'local' }}

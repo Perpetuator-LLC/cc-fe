@@ -120,3 +120,25 @@ mat-divider {
     //background: rgba(255, 255, 255, 0.8);
   }
 }
+/* Add to podcast-detail.component.scss */
+.voice-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.tier-filter {
+  min-width: 400px;
+}
+
+.voice-select {
+  width: 100%;
+}
+
+.voice-option-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
