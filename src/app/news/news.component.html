@@ -132,6 +132,9 @@
                   <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
                   @if (this.userService.userDetails()?.permissions?.includes('api.change_news')) {
                     <mat-divider></mat-divider>
+                    <button mat-flat-button color="primary" type="button" (click)="extractNews([news.uuid])">
+                      Extract News
+                    </button>
                     <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.uuid)">
                       {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
                     </button>

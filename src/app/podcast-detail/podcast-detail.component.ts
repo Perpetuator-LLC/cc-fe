@@ -118,6 +118,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   voiceFilter = new FormControl<VoiceTier[]>([]);
   voiceTiers = Object.values(VoiceTier);
   currentPlayingVoice: Voice | null = null;
+  private audioPlayTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -203,12 +204,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.loadTeams();
     this.applyVoiceFilters();
 
-    // this.subscriptions.add(
-    //   this.podcastForm.get('voice')?.valueChanges.subscribe((voiceUuid) => {
-    //     this.onVoiceChange(voiceUuid);
-    //   }),
-    // );
-
     this.subscriptions.add(
       this.podcastForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
         // Only update if the form is valid.
@@ -229,6 +224,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
             tgBotToken,
             tgChannelId,
             categories,
+            voice,
           } = this.podcastForm.getRawValue();
           if (enabled && !slug) {
             return;
@@ -279,41 +275,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  // onVoiceChange(voiceUuid: string | null): void {
-  //   this.podcastsService
-  //     .updatePodcast(
-  //       this.podcastUuid,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       null,
-  //       voiceUuid,
-  //     )
-  //     .subscribe({
-  //       next: (data) => {
-  //         if (!data.success) {
-  //           this.messageService.error(data.message);
-  //           return;
-  //         }
-  //         this.messageService.success('Voice updated successfully');
-  //       },
-  //       error: (err) => {
-  //         this.messageService.error(`Failed to update voice: ${err.message}`);
-  //       },
-  //     });
-  // }
-
   private loadVoices(tiers?: VoiceTier[], enabled?: boolean): void {
     this.loadingVoices = true;
     this.subscriptions.add(
@@ -340,18 +301,33 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   playVoiceSample(voice: Voice): void {
-    if (!voice.sampleUrl) return;
+    if (this.audioPlayTimeout) {
+      clearTimeout(this.audioPlayTimeout);
+    }
 
-    const audio = this.audioPlayer.nativeElement;
-    audio.src = voice.sampleUrl;
-    audio.load();
-    audio.play().catch((err) => {
-      this.messageService.error(`Failed to play audio sample: ${err.message}`);
-    });
-    this.currentPlayingVoice = voice;
+    this.audioPlayTimeout = setTimeout(() => {
+      if (!voice.sampleUrl) return;
+
+      const audio = this.audioPlayer.nativeElement;
+      audio.src = voice.sampleUrl;
+      audio.load();
+      audio.play().catch((err) => {
+        if (err.name === 'AbortError') {
+          return; // User interrupted playback
+        }
+        this.messageService.error(`Failed to play audio sample: ${err.message}`);
+      });
+      this.currentPlayingVoice = voice;
+      this.audioPlayTimeout = null;
+    }, 100);
   }
 
   stopVoiceSample(): void {
+    if (this.audioPlayTimeout) {
+      clearTimeout(this.audioPlayTimeout);
+      this.audioPlayTimeout = null;
+    }
+
     const audio = this.audioPlayer.nativeElement;
     if (!audio.paused) {
       audio.pause();

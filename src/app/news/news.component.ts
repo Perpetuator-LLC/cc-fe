@@ -172,13 +172,17 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No news items selected.');
       return;
     }
+    this.messageService.info('Extracting content from selected news items (this may take a while)...');
+
+    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
+    this.extractNews(newsUuids);
+  }
+
+  extractNews(newsUuids: string[]) {
     if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');
       return;
     }
-    this.messageService.info('Extracting content from selected news items (this may take a while)...');
-
-    const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
       this.newsService.extractNews(this.selectedPodcastUuid, newsUuids).subscribe({
         next: (data) => {

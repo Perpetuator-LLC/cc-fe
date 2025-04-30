@@ -77,8 +77,8 @@
               }
             </mat-select>
           </mat-form-field>
-          <button mat-button color="primary" (click)="applyVoiceFilters()">Apply Filters</button>
-          <button mat-button (click)="clearVoiceFilters()">Clear Filters</button>
+          <button mat-button color="primary" (click)="applyVoiceFilters()" type="button">Apply Filters</button>
+          <button mat-button (click)="clearVoiceFilters()" type="button">Clear Filters</button>
         </div>
 
         <mat-form-field appearance="fill" class="voice-select">
@@ -98,7 +98,7 @@
                     (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
                     (mouseleave)="stopVoiceSample()"
                     (click)="$event.stopPropagation()">
-                    <mat-icon>music_note</mat-icon>
+                    <mat-icon>sound_sampler</mat-icon>
                   </button>
                   {{ getVoiceDisplayName(voice) }}
                 </div>
@@ -147,6 +147,12 @@
           <textarea matInput formControlName="description" class="textarea-medium"></textarea>
         </mat-form-field>
       </div>
+
+      <div class="section-header">
+        <h3>Categories</h3>
+      </div>
+
+      <app-podcast-categories formControlName="categories" />
 
       <mat-divider></mat-divider>
 
@@ -203,7 +209,7 @@
 
       <div class="member-row">
         <div>
-          <mat-checkbox formControlName="enabled">Podcast Enabled</mat-checkbox>
+          <mat-checkbox formControlName="enabled" matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line.">Podcast Enabled</mat-checkbox>
         </div>
         <div>
           <mat-form-field appearance="fill">
@@ -225,10 +231,6 @@
           </button>
         </div>
       </div>
-
-      <mat-divider></mat-divider>
-
-      <app-podcast-categories formControlName="categories" />
 
 <!--      <div class="member-row">-->
 <!--        <div>-->
