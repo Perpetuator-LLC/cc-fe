@@ -1,5 +1,5 @@
 type Query {
-  voices(providers: [VoiceProvider], tiers: [VoiceTier], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, modelName: String, externalId: String): VoiceTypeConnection
+  voices(models: [VoiceModel], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, model: String, externalId: String): VoiceTypeConnection
   userDataExport(confirm: String!): UserDataExport
   credits: Int
 
@@ -177,12 +177,7 @@ type VoiceTypeEdge {
 type VoiceType implements Node {
   """The ID of the object"""
   id: ID!
-  provider: VoiceProvider
-
-  """
-  The specific model used by the provider (e.g., 'tts-1-hd', 'eleven-monolingual-v1').
-  """
-  modelName: String!
+  model: VoiceModel
 
   """The name (OpenAI) or ID (ElevenLabs) of the voice."""
   externalId: String!
@@ -194,7 +189,6 @@ type VoiceType implements Node {
   updatedAt: DateTime!
   metadata: GenericScalar
   uuid: UUID
-  tier: VoiceTier
   sampleUrl: String
   creditsPerMillionChar: Int
 }
@@ -206,9 +200,12 @@ interface Node {
 }
 
 """An enumeration."""
-enum VoiceProvider {
-  OPENAI
-  ELEVENLABS
+enum VoiceModel {
+  OPENAI_TTS_1
+  OPENAI_TTS_1_HD
+  OPENAI_GPT_4O_MINI_TTS
+  ELEVENLABS_MULTILINGUAL_V2
+  ELEVENLABS_FLASH_V2_5
 }
 
 """
@@ -230,15 +227,6 @@ Leverages the internal Python implementation of UUID (uuid.UUID) to provide nati
 in fields, resolvers and input.
 """
 scalar UUID
-
-"""An enumeration."""
-enum VoiceTier {
-  PREMIUM_HD
-  PREMIUM
-  REGULAR_HD
-  REGULAR
-  REGULAR_LD
-}
 
 """User data export schema"""
 type UserDataExport {
@@ -651,7 +639,7 @@ type TeamTypeEdge {
 }
 
 type Mutation {
-  createVoice(enabled: Boolean = true, externalId: String!, modelName: String!, provider: VoiceProvider!): CreateVoice
+  createVoice(displayName: String, enabled: Boolean = true, externalId: String!, externalUserId: String, model: VoiceModel!, private: Boolean = true): CreateVoice
   updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
   deleteVoice(voiceUuid: UUID!): DeleteVoice
 
@@ -660,7 +648,7 @@ type Mutation {
   
   Returns lists of added, updated, and removed voices.
   """
-  refreshVoices(externalIds: [String], forceMetadata: Boolean = false, modelNames: [String], providers: [VoiceProvider] = [OPENAI, ELEVENLABS], tiers: [VoiceTier] = [PREMIUM_HD, PREMIUM, REGULAR_HD, REGULAR, REGULAR_LD]): RefreshVoices
+  refreshVoices(externalIds: [String], forceMetadata: Boolean = false, forceSampleAudio: Boolean = false, models: [VoiceModel] = []): RefreshVoices
 
   """Create a new bonus code that can be redeemed for credits."""
   createCode(code: String!, creditAmount: Int!): CreateCode
@@ -743,7 +731,7 @@ type Mutation {
   """
   Create a new podcast. This will create a new podcast and associate it with the team.
   """
-  createPodcast(name: String!, teamUuid: UUID!): CreatePodcast
+  createPodcast(name: String!, teamUuid: UUID!, voiceUuid: UUID): CreatePodcast
 
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.

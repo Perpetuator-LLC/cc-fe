@@ -266,6 +266,11 @@ mat-dialog-container h3.danger {
   color: var(--md-sys-color-error);
 }
 
+//.add-voice-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+//  max-width: 1200px !important; // Set desired max-width
+//  width: 90vw !important;       // Adjust width relative to viewport, up to max-width
+//}
+
 // Now, debug the theme map
 //@function print-map($map, $indent: '') {
 //  @each $key, $value in $map {

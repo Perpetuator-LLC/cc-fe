@@ -168,4 +168,52 @@ export class VoicesService extends BaseService {
       })),
     );
   }
+
+  createVoice(model: string, externalId: string, externalUserId?: string, displayName?: string) {
+    const CREATE_VOICE = gql`
+      mutation CreateVoice($model: VoiceModel!, $externalId: String!, $externalUserId: String, $displayName: String) {
+        createVoice(
+          model: $model
+          externalId: $externalId
+          externalUserId: $externalUserId
+          displayName: $displayName
+        ) {
+          success
+          message
+          voice {
+            id
+            uuid
+            displayName
+            model
+            externalId
+            creditsPerMillionChar
+            enabled
+            sampleUrl
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      createVoice: {
+        success: boolean;
+        message: string;
+        voice: Voice;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: CREATE_VOICE,
+      variables: { model, externalId, externalUserId, displayName },
+    }).pipe(
+      map((result) => {
+        if (!result.createVoice.success) {
+          throw new Error(result.createVoice.message);
+        }
+        return result.createVoice;
+      }),
+    );
+  }
 }

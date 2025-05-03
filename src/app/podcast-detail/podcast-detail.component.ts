@@ -51,6 +51,7 @@ import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-d
 import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
+import { AddVoiceDialogComponent } from '../add-voice-dialog/add-voice-dialog.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -364,6 +365,38 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  openAddVoiceDialog(): void {
+    const dialogRef = this.dialog.open(AddVoiceDialogComponent, {
+      // width: '1200px',
+      panelClass: 'add-voice-dialog',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.createCustomVoice(result);
+      }
+    });
+  }
+
+  createCustomVoice(voiceData: {
+    externalId: string;
+    model: string;
+    externalUserId: string;
+    displayName: string;
+  }): void {
+    this.voicesService
+      .createVoice(voiceData.model, voiceData.externalId, voiceData.externalUserId, voiceData.displayName)
+      .subscribe({
+        next: () => {
+          this.messageService.success('Voice added successfully');
+          this.applyVoiceFilters();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to add voice: ${err.message}`);
+        },
+      });
+  }
+
   compareTeams(o1: TeamsResult | null, o2: TeamsResult | null): boolean {
     return !!o1 && !!o2 && o1.uuid === o2.uuid;
   }
@@ -385,20 +418,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
-  }
-
-  private setRssFeeds(rssFeeds: RssFeedResult[]): void {
-    const rssFeedsFormArray = this.rssFeeds;
-    rssFeedsFormArray.clear();
-    rssFeeds.forEach((feed) => {
-      rssFeedsFormArray.push(
-        this.fb.group({
-          id: [feed.id, Validators.required],
-          uuid: [feed.uuid, Validators.required],
-          url: [feed.url, Validators.required],
-        }),
-      );
-    });
   }
 
   refreshTelegram() {
@@ -634,6 +653,20 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  private setRssFeeds(rssFeeds: RssFeedResult[]): void {
+    const rssFeedsFormArray = this.rssFeeds;
+    rssFeedsFormArray.clear();
+    rssFeeds.forEach((feed) => {
+      rssFeedsFormArray.push(
+        this.fb.group({
+          id: [feed.id, Validators.required],
+          uuid: [feed.uuid, Validators.required],
+          url: [feed.url, Validators.required],
+        }),
+      );
+    });
   }
 
   removeRssFeed(feedId: string): void {
