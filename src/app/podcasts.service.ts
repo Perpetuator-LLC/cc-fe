@@ -97,12 +97,10 @@ export class PodcastsService extends BaseService {
             voice {
               id
               uuid
-              provider
               enabled
-              modelName
+              model
               externalId
               displayName
-              tier
               creditsPerMillionChar
               sampleUrl
               createdAt
@@ -275,12 +273,10 @@ export class PodcastsService extends BaseService {
             voice {
               id
               uuid
-              provider
               enabled
-              modelName
+              model
               externalId
               displayName
-              tier
               creditsPerMillionChar
               sampleUrl
               createdAt
@@ -388,12 +384,10 @@ export class PodcastsService extends BaseService {
               voice {
                 id
                 uuid
-                provider
                 enabled
-                modelName
+                model
                 externalId
                 displayName
-                tier
                 creditsPerMillionChar
                 sampleUrl
                 createdAt

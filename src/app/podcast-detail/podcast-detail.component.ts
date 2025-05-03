@@ -50,7 +50,7 @@ import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
-import { tierToString, Voice, VoicesService, VoiceTier } from '../voices.service';
+import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -269,8 +269,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   getVoiceDisplayName(voice: Voice): string {
+    const tier = voiceToTier(voice);
     return (
-      `${voice.displayName ?? 'Name not set'} - ${tierToString(voice.tier) ?? 'Tier not set'}` +
+      `${voice.displayName ?? 'Name not set'} - ${tierToString(tier) ?? 'Tier not set'}` +
       ` (${Math.round(voice.creditsPerMillionChar / 1000)} CPM)`
     );
   }

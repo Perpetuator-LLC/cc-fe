@@ -32,6 +32,21 @@ export const stringToVoiceTier = (tier: string) => {
   }
 };
 
+export const voiceToTier = (voice: Voice) => {
+  if (voice.model === 'ELEVENLABS_MULTILINGUAL_V2') {
+    return VoiceTier.PREMIUM_HD;
+  } else if (voice.model === 'ELEVENLABS_FLASH_V2_5') {
+    return VoiceTier.PREMIUM;
+  } else if (voice.model === 'OPENAI_TTS_1_HD') {
+    return VoiceTier.REGULAR_HD;
+  } else if (voice.model === 'OPENAI_TTS_1') {
+    return VoiceTier.REGULAR;
+  } else if (voice.model === 'OPENAI_GPT_4O_MINI_TTS') {
+    return VoiceTier.REGULAR_LD;
+  }
+  throw new Error('Invalid voice model');
+};
+
 export const tierToString = (tier: string) => {
   switch (tier.toUpperCase()) {
     case VoiceTier.PREMIUM_HD:
@@ -52,11 +67,9 @@ export const tierToString = (tier: string) => {
 export interface Voice {
   id: string;
   uuid: string;
-  provider: string;
   enabled: boolean;
-  modelName: string;
+  model: string;
   externalId: string;
-  tier: string;
   creditsPerMillionChar: number;
   displayName: string | null;
   sampleUrl: string | null;
@@ -65,16 +78,14 @@ export interface Voice {
 }
 
 const GET_VOICES = gql`
-  query GetVoices($tiers: [VoiceTier!], $enabled: Boolean) {
-    voices(tiers: $tiers, enabled: $enabled) {
+  query GetVoices($models: [VoiceModel!], $enabled: Boolean) {
+    voices(models: $models, enabled: $enabled) {
       edges {
         node {
           id
           uuid
-          provider
           enabled
-          modelName
-          tier
+          model
           creditsPerMillionChar
           externalId
           displayName
@@ -121,9 +132,33 @@ export class VoicesService extends BaseService {
     //     pageInfo: voices.pageInfo,
     //   })),
     // );
+
+    // convert tiers to VoiceModel
+    const models = tiers?.map((tier) => {
+      switch (tier) {
+        case VoiceTier.PREMIUM_HD:
+          return 'ELEVENLABS_MULTILINGUAL_V2';
+        // return 'eleven_multilingual_v2';
+        case VoiceTier.PREMIUM:
+          return 'ELEVENLABS_FLASH_V2_5';
+        // return 'eleven_flash_v2_5';
+        case VoiceTier.REGULAR_HD:
+          return 'OPENAI_TTS_1_HD';
+        // return 'tts-1-hd';
+        case VoiceTier.REGULAR:
+          return 'OPENAI_TTS_1';
+        // return 'tts-1';
+        case VoiceTier.REGULAR_LD:
+          return 'OPENAI_GPT_4O_MINI_TTS';
+        // return 'gpt-4o-mini-tts';
+        default:
+          throw new Error('Invalid voice tier');
+      }
+    });
+
     return this.query<Response>({
       query: GET_VOICES,
-      variables: { tiers, enabled },
+      variables: { models, enabled },
       // fetchPolicy: 'cache-and-network', // Or your preferred policy
     }).pipe(
       // map((result) => result.data.voices.edges.map((edge) => edge.node))

@@ -1,5 +1,5 @@
 type Query {
-  voices(provider: VoiceProvider, tiers: [VoiceTier], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, modelName: String, externalId: String): VoiceTypeConnection
+  voices(providers: [VoiceProvider], tiers: [VoiceTier], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, modelName: String, externalId: String): VoiceTypeConnection
   userDataExport(confirm: String!): UserDataExport
   credits: Int
 
@@ -660,7 +660,7 @@ type Mutation {
   
   Returns lists of added, updated, and removed voices.
   """
-  refreshVoices(forceMetadata: Boolean = false): RefreshVoices
+  refreshVoices(externalIds: [String], forceMetadata: Boolean = false, modelNames: [String], providers: [VoiceProvider] = [OPENAI, ELEVENLABS], tiers: [VoiceTier] = [PREMIUM_HD, PREMIUM, REGULAR_HD, REGULAR, REGULAR_LD]): RefreshVoices
 
   """Create a new bonus code that can be redeemed for credits."""
   createCode(code: String!, creditAmount: Int!): CreateCode
