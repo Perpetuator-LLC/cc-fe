@@ -142,3 +142,86 @@ mat-divider {
   align-items: center;
   width: 100%;
 }
+
+/* Modify in src/app/podcast-detail/podcast-detail.component.scss */
+
+.voice-controls-container {
+  display: flex;
+  flex-wrap: wrap;       /* Allow items to wrap */
+  align-items: flex-start; /* Align items to the top */
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+/* Apply common flex behavior to direct children acting as filter items */
+.voice-controls-container > .voice-filter-item {
+  flex: 1 1 auto;     /* Allow grow, shrink, auto basis */
+  min-width: 200px;   /* Default minimum width before wrapping */
+}
+
+/* Specific minimum widths */
+.tier-filter {
+  min-width: 250px;   /* Tier filter needs a bit more space */
+}
+
+.voice-search {
+  /* min-width: 200px; */ /* Inherits default */
+}
+
+.voice-buttons {
+  /* This is also a .voice-filter-item, gets flex: 1 1 auto */
+  min-width: 280px;   /* Adjust based on button content + gaps */
+  display: flex;
+  flex-wrap: wrap;    /* Allow buttons inside to wrap */
+  gap: 8px;
+  justify-content: flex-start; /* Align buttons to the start */
+
+  button {
+    flex: 0 0 auto;   /* Buttons don't grow or shrink */
+    white-space: nowrap;
+  }
+}
+
+/* Keep the voice selection dropdown full width and add space above */
+.voice-select {
+  width: 100%;
+  margin-top: 10px; /* Add space between controls and dropdown */
+}
+
+/* Remove the old .voice-filters class if it exists and conflicts */
+/* .voice-filters { ... } */
+
+/* Ensure member-row styles don't conflict (existing styles seem okay) */
+.member-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 16px;
+  align-items: start; /* Keep alignment consistent */
+
+  /* Target direct children, excluding specific containers handled separately */
+  > mat-form-field:not(.voice-filter-item):not(.voice-select),
+  > mat-checkbox,
+  > button:not(.voice-filter-item button), /* Avoid targeting buttons inside .voice-buttons */
+  > div:not(.voice-controls-container):not(.voice-buttons) {
+    flex: 1 1 100%; /* Default full-width behavior for other items */
+  }
+
+  /* Styles for other specific structures within member-row */
+  .input-with-button {
+    display: flex;
+    align-items: center;
+    flex: 1 1 100%;
+
+    input { flex: 1 1 auto; }
+    button { flex: 0 0 auto; margin-left: 8px; }
+  }
+}
+
+/* Other existing styles... */
+.voice-option-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}

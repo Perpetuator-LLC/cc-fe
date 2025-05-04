@@ -122,6 +122,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private audioPlayTimeout: ReturnType<typeof setTimeout> | null = null;
   protected lastSubmittedCategories: Record<string, string[]> = {};
   private pendingSubmitCategories: Record<string, string[]> = {};
+  voiceSearchControl = new FormControl<string>('');
+  private tierFilteredVoices: Voice[] = [];
+  protected filteredVoices: Voice[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -187,6 +190,12 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }
       this.podcastForm.patchValue(podcast);
     });
+
+    this.subscriptions.add(
+      this.voiceSearchControl.valueChanges.pipe(debounceTime(300)).subscribe((searchTerm) => {
+        this.applyVoiceSearch(searchTerm);
+      }),
+    );
   }
 
   imageUrl: string | null = null;
@@ -297,6 +306,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           },
         }),
     );
+
+    this.applyVoiceFilters();
   }
 
   getVoiceDisplayName(voice: Voice): string {
@@ -307,17 +318,27 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Modify loadVoices to store results and apply search
   private loadVoices(tiers?: VoiceTier[], enabled?: boolean): void {
     this.loadingVoices = true;
     this.subscriptions.add(
       this.voicesService.getVoices(tiers, enabled).subscribe({
         next: (response) => {
-          this.voices = response.voices;
+          this.tierFilteredVoices = response.voices; // Store the tier-filtered list
+          this.applyVoiceSearch(this.voiceSearchControl.value); // Apply current search term
           this.loadingVoices = false;
+          // Ensure the selected voice is still in the filtered list
+          const currentVoice = this.podcastForm.get('voice')?.value;
+          if (currentVoice && !this.filteredVoices.some((v) => v.uuid === currentVoice.uuid)) {
+            // Optionally clear the selection if the current voice is filtered out
+            // this.podcastForm.get('voice')?.setValue(null);
+          }
         },
         error: (err) => {
           this.messageService.error(`Failed to load voices: ${err.message}`);
           this.loadingVoices = false;
+          this.tierFilteredVoices = [];
+          this.filteredVoices = [];
         },
       }),
     );
@@ -368,14 +389,30 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.currentPlayingVoice = null;
   }
 
+  private applyVoiceSearch(searchTerm: string | null): void {
+    const lowerCaseSearchTerm = (searchTerm || '').toLowerCase().trim();
+    if (!lowerCaseSearchTerm) {
+      this.filteredVoices = [...this.tierFilteredVoices]; // No search term, show all tier-filtered voices
+    } else {
+      this.filteredVoices = this.tierFilteredVoices.filter((voice) =>
+        (voice.displayName || '').toLowerCase().includes(lowerCaseSearchTerm),
+      );
+    }
+  }
+
   applyVoiceFilters(): void {
     const selectedTiers = this.voiceFilter.value;
     const enabled = true;
+    // Reset search control without emitting event to avoid double filtering initially
+    // this.voiceSearchControl.setValue('', { emitEvent: false });
     this.loadVoices(selectedTiers?.length ? selectedTiers : undefined, enabled);
   }
 
   clearVoiceFilters(): void {
     this.voiceFilter.setValue([]);
+    this.voiceSearchControl.setValue(''); // This will trigger the valueChanges subscription
+    // loadVoices will be called implicitly by voiceSearchControl change if needed,
+    // but explicitly calling it ensures tiers are also reset.
     this.loadVoices();
   }
 
