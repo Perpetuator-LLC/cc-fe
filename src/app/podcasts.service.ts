@@ -47,7 +47,7 @@ export interface PodcastsResult {
   tgChannelId: string | null;
   tgResponse: string | null;
   // categories: CategoryResult[] | null;
-  categories: string[] | null;
+  categories: Record<string, string[]> | null;
   rssFeeds: RssFeedResult[];
   voice: Voice | null;
 }

@@ -121,6 +121,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   currentPlayingVoice: Voice | null = null;
   private audioPlayTimeout: ReturnType<typeof setTimeout> | null = null;
   protected lastSubmittedCategories: Record<string, string[]> = {};
+  private pendingSubmitCategories: Record<string, string[]> = {};
 
   constructor(
     private fb: FormBuilder,
@@ -213,15 +214,11 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           filter(() => this.podcastForm.valid && this.podcastForm.dirty),
           filter(() => {
             const { enabled, slug } = this.podcastForm.getRawValue();
-            if (enabled && !slug) {
-              return false;
-            }
-            return true;
+            return !(enabled && !slug);
           }),
           switchMap(() => {
-            // Store current categories state before sending request
-            this.lastSubmittedCategories = { ...this.podcastForm.getRawValue().categories };
-
+            // Only update pendingSubmitCategories here
+            this.pendingSubmitCategories = { ...this.podcastForm.getRawValue().categories };
             const {
               uuid,
               team,
@@ -240,7 +237,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               categories,
               voice,
             } = this.podcastForm.getRawValue();
-
             return this.podcastsService.updatePodcast(
               uuid,
               team ? team.uuid : null,
@@ -264,21 +260,18 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         )
         .subscribe({
           next: (data) => {
-            if (!data.success) {
+            if (data.success) {
+              // Update lastSubmittedCategories only when server confirms
+              this.lastSubmittedCategories = this.pendingSubmitCategories;
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { categories, ...otherData } = data.podcast;
+              // Patch other fields and mark pristine
+              this.podcastForm.patchValue(otherData);
+              this.podcastForm.markAsPristine();
+              this.messageService.success('Podcast updated successfully', 3000);
+            } else {
               this.messageService.error(data.message);
-              return;
             }
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { categories, ...otherData } = data.podcast;
-
-            // Only patch non-categories data
-            this.podcastForm.patchValue(otherData);
-
-            // Mark form as pristine since values are now saved
-            this.podcastForm.markAsPristine();
-
-            this.messageService.success(`Podcast updated successfully`, 3000);
           },
           error: (err) => {
             this.messageService.error(`Failed to update podcast: ${err.message}`);
@@ -428,6 +421,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           this.podcastForm.patchValue(podcast);
           this.setRssFeeds(podcast.rssFeeds);
           // this.selectedVoiceUuid = podcast.voice?.uuid || null;
+          this.lastSubmittedCategories = podcast.categories as Record<string, string[]>;
           this.loading = false;
         },
         error: (err) => {

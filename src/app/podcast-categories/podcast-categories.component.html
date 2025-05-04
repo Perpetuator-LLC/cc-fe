@@ -2,7 +2,10 @@
 <div class="categories-grid-container">
   <mat-accordion multi="true" class="categories-grid">
     @for (parent of parentCategories; track parent) {
-      <mat-expansion-panel class="category-expansion-panel">
+      <mat-expansion-panel
+        class="category-expansion-panel"
+        [expanded]="isParentSelected(parent)"
+      >
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-checkbox
