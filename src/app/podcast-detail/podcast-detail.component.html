@@ -155,7 +155,7 @@
         <h3>Categories</h3>
       </div>
 
-      <app-podcast-categories formControlName="categories" />
+      <app-podcast-categories formControlName="categories" [pendingCategories]="lastSubmittedCategories"/>
 
       <mat-divider></mat-divider>
 

@@ -5,18 +5,19 @@
       <mat-expansion-panel class="category-expansion-panel">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <!-- Stop propagation to prevent checkbox click from toggling expansion -->
             <mat-checkbox
               [checked]="isParentSelected(parent)"
               (change)="toggleParentCategory(parent)"
               (click)="$event.stopPropagation()"
               color="primary">
               {{ parent }}
+              @if (isPending(parent)) {
+                <span class="pending-indicator">●</span>
+              }
+<!--              <span *ngIf="isPending(parent)" class="pending-indicator">●</span>-->
             </mat-checkbox>
           </mat-panel-title>
         </mat-expansion-panel-header>
-
-        <!-- Content of the expansion panel: Subcategories -->
         @if (getSubcategories(parent).length > 0) {
           <mat-list role="list" class="sub-category-list">
             @for (sub of getSubcategories(parent); track sub) {
@@ -26,6 +27,9 @@
                   (change)="toggleSubCategory(parent, sub)"
                   color="primary">
                   {{ sub }}
+                  @if (isPending(parent, sub)) {
+                    <span class="pending-indicator">●</span>
+                  }
                 </mat-checkbox>
               </mat-list-item>
             }

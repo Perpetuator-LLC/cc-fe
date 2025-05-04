@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, debounceTime } from 'rxjs';
+import { Subscription, debounceTime, filter, switchMap } from 'rxjs'; // Import filter and switchMap, of
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
@@ -120,6 +120,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   voiceTiers = Object.values(VoiceTier);
   currentPlayingVoice: Voice | null = null;
   private audioPlayTimeout: ReturnType<typeof setTimeout> | null = null;
+  protected lastSubmittedCategories: Record<string, string[]> = {};
 
   constructor(
     private fb: FormBuilder,
@@ -206,32 +207,41 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.applyVoiceFilters();
 
     this.subscriptions.add(
-      this.podcastForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
-        // Only update if the form is valid.
-        if (this.podcastForm.valid && this.podcastForm.dirty) {
-          const {
-            uuid,
-            team,
-            name,
-            intro,
-            prompt,
-            outro,
-            enabled,
-            slug,
-            description,
-            ownerName,
-            ownerEmail,
-            ownerLink,
-            tgBotToken,
-            tgChannelId,
-            categories,
-            voice,
-          } = this.podcastForm.getRawValue();
-          if (enabled && !slug) {
-            return;
-          }
-          this.podcastsService
-            .updatePodcast(
+      this.podcastForm.valueChanges
+        .pipe(
+          debounceTime(1000),
+          filter(() => this.podcastForm.valid && this.podcastForm.dirty),
+          filter(() => {
+            const { enabled, slug } = this.podcastForm.getRawValue();
+            if (enabled && !slug) {
+              return false;
+            }
+            return true;
+          }),
+          switchMap(() => {
+            // Store current categories state before sending request
+            this.lastSubmittedCategories = { ...this.podcastForm.getRawValue().categories };
+
+            const {
+              uuid,
+              team,
+              name,
+              intro,
+              prompt,
+              outro,
+              enabled,
+              slug,
+              description,
+              ownerName,
+              ownerEmail,
+              ownerLink,
+              tgBotToken,
+              tgChannelId,
+              categories,
+              voice,
+            } = this.podcastForm.getRawValue();
+
+            return this.podcastsService.updatePodcast(
               uuid,
               team ? team.uuid : null,
               name,
@@ -249,23 +259,31 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               null,
               categories,
               voice ? voice.uuid : null,
-            )
-            .subscribe({
-              next: (data) => {
-                if (!data.success) {
-                  this.messageService.error(data.message);
-                  return;
-                }
-                this.messageService.success(`Podcast updated successfully`, 3000);
-                this.podcastForm.patchValue(data.podcast);
-                this.podcastForm.markAsPristine();
-              },
-              error: (err) => {
-                this.messageService.error(`Failed to update podcast: ${err.message}`);
-              },
-            });
-        }
-      }),
+            );
+          }),
+        )
+        .subscribe({
+          next: (data) => {
+            if (!data.success) {
+              this.messageService.error(data.message);
+              return;
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { categories, ...otherData } = data.podcast;
+
+            // Only patch non-categories data
+            this.podcastForm.patchValue(otherData);
+
+            // Mark form as pristine since values are now saved
+            this.podcastForm.markAsPristine();
+
+            this.messageService.success(`Podcast updated successfully`, 3000);
+          },
+          error: (err) => {
+            this.messageService.error(`Failed to update podcast: ${err.message}`);
+          },
+        }),
     );
   }
 

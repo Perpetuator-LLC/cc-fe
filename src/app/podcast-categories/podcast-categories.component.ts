@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 
-import { Component, OnInit, forwardRef } from '@angular/core';
+import { Component, Input, OnInit, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { PodcastsService } from '../podcasts.service';
@@ -27,6 +27,7 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
   categoriesMap: Record<string, string[]> = {};
   parentCategories: string[] = [];
   value: Record<string, string[]> = {};
+  @Input() pendingCategories: Record<string, string[]> = {};
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: Record<string, string[]>) => void = () => {};
@@ -40,6 +41,24 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
       this.categoriesMap = categories;
       this.parentCategories = Object.keys(this.categoriesMap);
     });
+  }
+
+  isPending(parent: string, sub?: string): boolean {
+    if (!this.pendingCategories[parent]) {
+      return false;
+    }
+
+    if (sub) {
+      // Check if subcategory is pending
+      const isCurrentlySelected = this.isSubSelected(parent, sub);
+      const wasSubmittedSelected = this.pendingCategories[parent]?.includes(sub);
+      return isCurrentlySelected !== wasSubmittedSelected;
+    } else {
+      // Check if parent category is pending
+      const isCurrentlySelected = this.isParentSelected(parent);
+      const wasSubmittedSelected = !!this.pendingCategories[parent];
+      return isCurrentlySelected !== wasSubmittedSelected;
+    }
   }
 
   writeValue(obj: Record<string, string[]> | null): void {
