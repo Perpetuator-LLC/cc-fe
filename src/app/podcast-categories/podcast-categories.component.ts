@@ -44,12 +44,11 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
   }
 
   isPending(parent: string, sub?: string): boolean {
-    // if (!this.pendingCategories[parent]) {
-    //   return false;
-    // }
-    //
     if (sub) {
-      // Check if subcategory is pending
+      // Only check subcategory pending state if the parent is currently selected
+      if (!this.pendingCategories[parent]) {
+        return false;
+      }
       const isCurrentlySelected = this.isSubSelected(parent, sub);
       const wasSubmittedSelected = this.pendingCategories[parent]?.includes(sub);
       return isCurrentlySelected !== wasSubmittedSelected;
