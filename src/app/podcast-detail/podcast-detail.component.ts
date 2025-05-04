@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, debounceTime, filter, switchMap } from 'rxjs'; // Import filter and switchMap, of
+import { Subscription, debounceTime, filter, switchMap, map } from 'rxjs'; // Import filter and switchMap, of
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
@@ -216,11 +216,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
             const { enabled, slug } = this.podcastForm.getRawValue();
             return !(enabled && !slug);
           }),
-          switchMap(() => {
+          switchMap((valueToSubmit) => {
             // Only update pendingSubmitCategories here
-            this.pendingSubmitCategories = { ...this.podcastForm.getRawValue().categories };
+            this.pendingSubmitCategories = { ...valueToSubmit.categories };
             const {
-              uuid,
               team,
               name,
               intro,
@@ -236,44 +235,64 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               tgChannelId,
               categories,
               voice,
-            } = this.podcastForm.getRawValue();
-            return this.podcastsService.updatePodcast(
-              uuid,
-              team ? team.uuid : null,
-              name,
-              intro,
-              prompt,
-              outro,
-              enabled,
-              slug,
-              description,
-              ownerName,
-              ownerEmail,
-              ownerLink,
-              tgBotToken,
-              tgChannelId,
-              null,
-              categories,
-              voice ? voice.uuid : null,
-            );
+            } = valueToSubmit;
+            return this.podcastsService
+              .updatePodcast(
+                this.podcastUuid,
+                team ? team.uuid : null,
+                name,
+                intro,
+                prompt,
+                outro,
+                enabled,
+                slug,
+                description,
+                ownerName,
+                ownerEmail,
+                ownerLink,
+                tgBotToken,
+                tgChannelId,
+                null,
+                categories,
+                voice ? voice.uuid : null,
+              )
+              .pipe(
+                // Pass the submitted value along with the result
+                map((result) => ({ result, submittedValue: valueToSubmit })),
+              );
           }),
         )
         .subscribe({
-          next: (data) => {
-            if (data.success) {
+          // The type here should now correctly infer as { result: PodcastUpdateResult, submittedValue: any }
+          next: ({ result, submittedValue }) => {
+            if (result.success) {
               // Update lastSubmittedCategories only when server confirms
-              this.lastSubmittedCategories = this.pendingSubmitCategories;
+              this.lastSubmittedCategories = { ...this.pendingSubmitCategories }; // Use a copy
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { categories, ...otherData } = data.podcast;
-              // Patch other fields and mark pristine
-              this.podcastForm.patchValue(otherData);
-              this.podcastForm.markAsPristine();
+              const { categories, ...otherData } = result.podcast;
+              // Patch other fields
+              this.podcastForm.patchValue(otherData, { emitEvent: false });
+
+              // Only mark as pristine if the form hasn't changed since submission
+              if (JSON.stringify(this.podcastForm.getRawValue()) === JSON.stringify(submittedValue)) {
+                this.podcastForm.markAsPristine();
+                // Clear pending state only if pristine matches submitted
+                this.pendingSubmitCategories = {};
+              } else {
+                // If form changed, recalculate pending state based on current vs last *successful* submit
+                // This might require adjusting the pending logic slightly if needed,
+                // but for now, just don't clear pendingSubmitCategories.
+              }
               this.messageService.success('Podcast updated successfully', 3000);
             } else {
-              this.messageService.error(data.message);
+              // On failure, revert pending state? Or keep showing pending?
+              // For now, we'll keep pendingSubmitCategories as is, indicating the attempt.
+              this.messageService.error(result.message);
             }
           },
           error: (err) => {
+            // Also revert pending state on error?
+            // this.pendingSubmitCategories = {}; // Optional: Clear pending on error
             this.messageService.error(`Failed to update podcast: ${err.message}`);
           },
         }),
