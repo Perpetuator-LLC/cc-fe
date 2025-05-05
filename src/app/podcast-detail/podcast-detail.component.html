@@ -64,32 +64,35 @@
         <h2>Audio</h2>
       </div>
 
-<!-- Replace the existing voice selection section in podcast-detail.component.html -->
-<div class="member-row voice-controls-container">
-  <mat-form-field appearance="fill" class="voice-filter-item tier-filter">
-    <mat-label>Filter by Tier</mat-label>
-    <mat-select [formControl]="voiceFilter" multiple>
-      @for (tier of voiceTiers; track tier) {
-        <mat-option [value]="tier">
-          {{ tierToString(tier) }}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+      <!-- Replace the existing voice selection section in podcast-detail.component.html -->
+      <div class="member-row voice-controls-container">
+        <mat-form-field appearance="fill" class="voice-filter-item tier-filter">
+          <mat-label>Filter by Tier</mat-label>
+          <mat-select [formControl]="voiceFilter" multiple>
+            @for (tier of voiceTiers; track tier) {
+              <mat-option [value]="tier">
+                {{ tierToString(tier) }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-  <mat-form-field appearance="fill" class="voice-filter-item voice-search">
-    <mat-label>Search Voices</mat-label>
-    <input matInput [formControl]="voiceSearchControl" placeholder="Enter name" />
-  </mat-form-field>
+        <mat-form-field appearance="fill" class="voice-filter-item voice-search">
+          <mat-label>Search Voices</mat-label>
+          <input matInput [formControl]="voiceSearchControl" placeholder="Enter name" />
+        </mat-form-field>
 
-  <div class="voice-filter-item voice-buttons">
-    <button mat-button color="primary" (click)="applyVoiceFilters()" type="button">Apply Filters</button>
-    <button mat-button (click)="clearVoiceFilters()" type="button">Clear Filters</button>
-    <button mat-raised-button color="accent" (click)="openAddVoiceDialog()" type="button">
-      <mat-icon>add</mat-icon> Add Voice
-    </button>
-  </div>
-</div>
+        <div class="voice-filter-item voice-buttons">
+          <button mat-button color="primary" (click)="applyVoiceFilters()" type="button">Apply Filters</button>
+          <button mat-button (click)="clearVoiceFilters()" type="button">Clear Filters</button>
+          <button mat-raised-button color="accent" (click)="openAddVoiceDialog()" type="button">
+            <mat-icon>add</mat-icon> Add Voice
+          </button>
+          @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
+            <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
+          }
+        </div>
+      </div>
 
       <div class="member-row">
         <mat-form-field appearance="fill" class="voice-select">

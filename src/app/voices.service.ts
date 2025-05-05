@@ -102,6 +102,45 @@ const GET_VOICES = gql`
   }
 `;
 
+const REFRESH_VOICES = gql`
+  mutation RefreshVoices(
+    $forceMetadata: Boolean
+    $forceSampleAudio: Boolean
+    $models: [VoiceModel!]
+    $externalIds: [String!]
+  ) {
+    refreshVoices(
+      forceMetadata: $forceMetadata
+      forceSampleAudio: $forceSampleAudio
+      models: $models
+      externalIds: $externalIds
+    ) {
+      success
+      message
+      addedVoices {
+        id
+        uuid
+        displayName
+        model
+        externalId
+        enabled
+        sampleUrl
+        # metadata # Consider if metadata is needed here
+      }
+      updatedVoices {
+        id
+        uuid
+        displayName
+        model
+        externalId
+        enabled
+        sampleUrl
+        # metadata # Consider if metadata is needed here
+      }
+    }
+  }
+`;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -213,6 +252,50 @@ export class VoicesService extends BaseService {
           throw new Error(result.createVoice.message);
         }
         return result.createVoice;
+      }),
+    );
+  }
+
+  refreshVoices(
+    forceMetadata?: boolean,
+    forceSampleAudio?: boolean,
+    models?: string[],
+    externalIds?: string[] | null, // Allow null
+  ) {
+    interface Response {
+      refreshVoices: {
+        success: boolean;
+        message: string;
+        addedVoices: Voice[];
+        updatedVoices: Voice[];
+      };
+    }
+
+    // Ensure empty array is sent as null for externalIds if applicable
+    const variables: Record<string, unknown> = {
+      forceMetadata,
+      forceSampleAudio,
+      models,
+      externalIds: externalIds && externalIds.length > 0 ? externalIds : null,
+    };
+
+    // Remove undefined variables explicitly if GQL schema requires it
+    Object.keys(variables).forEach((key) => {
+      if (variables[key] === undefined) {
+        delete variables[key];
+      }
+      // Ensure null is passed if externalIds is empty/null
+      if (key === 'externalIds' && !variables[key]) {
+        variables[key] = null;
+      }
+    });
+
+    return this.mutate<Response>({
+      mutation: REFRESH_VOICES,
+      variables: variables,
+    }).pipe(
+      map((result) => {
+        return result.refreshVoices;
       }),
     );
   }

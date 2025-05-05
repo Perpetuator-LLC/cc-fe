@@ -52,6 +52,8 @@ import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
 import { AddVoiceDialogComponent } from '../add-voice-dialog/add-voice-dialog.component';
+import { UserService } from '../user.service';
+import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-voices-dialog.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -137,6 +139,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private clipboard: Clipboard,
     private teamsService: TeamsService,
     private voicesService: VoicesService,
+    protected userService: UserService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -760,4 +763,22 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   protected readonly tierToString = tierToString;
+
+  protected openRefreshVoicesDialog(): void {
+    const dialogRef = this.dialog.open(RefreshVoicesDialogComponent, {
+      width: '500px', // Adjust width as needed
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.messageService.success(result.message || 'Voices refreshed successfully.');
+        // Optionally reload voices if needed, e.g., by calling applyVoiceFilters()
+        this.applyVoiceFilters();
+      } else if (result?.message) {
+        // Handle potential errors reported from the dialog/service even if success is false
+        this.messageService.error(result.message);
+      }
+      // Handle cancellation or other cases if necessary
+    });
+  }
 }
