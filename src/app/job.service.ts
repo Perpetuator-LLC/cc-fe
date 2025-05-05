@@ -379,7 +379,7 @@ export class JobService extends BaseService implements OnDestroy {
     );
   }
 
-  retryJobs(ids: string[] = []) {
+  retryJobs(jobUuids: string[] = []) {
     const GQL = gql`
       mutation RetryJobs($jobUuids: [UUID]!) {
         retryJobs(jobUuids: $jobUuids) {
@@ -407,7 +407,7 @@ export class JobService extends BaseService implements OnDestroy {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { ids },
+      variables: { jobUuids },
     }).pipe(
       map((data) => {
         if (!data.retryJobs.success) {
