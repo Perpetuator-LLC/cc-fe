@@ -1,3 +1,24 @@
+# Changelog from v0.19.0 to v0.20.0
+
+This update introduces several enhancements and fixes to improve the podcast feature, voice controls, and category management. 
+It also includes a few cleanups to optimize the application's performance.
+
+## Enhancements
+- Add ability to customize Podcast voices and import voices from ElevenLabs and OpenAI.
+- Added categories to podcasts and cleaned cost per credit calculations.
+- Improved News summarization by an order of magnitude using concurrent processing.
+- Delayed podcast auto-save to 3 seconds to reduce thrashing.
+- Added refresh voices feature.
+- Added auto-save to podcast settings and rearranged into sections.
+- Introduced voice dialog with the ability to add shared voice IDs or import PVCs.
+- Introduced the ability to delete podcast image.
+
+## Cleanups
+- Fixed the retry job function to correctly pass the job UUID.
+- Fixed job statuses/kind/uuid for retry and delete.
+- Removed transaction from refresh and cancel orders.
+
+
 # Changelog from v0.18.0 to v0.19.0
 
 This update primarily focuses on integrating Relay support, enhancing podcast and team functionalities, and refining transaction handling. 
