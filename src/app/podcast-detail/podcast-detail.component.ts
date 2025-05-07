@@ -195,7 +195,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.add(
-      this.voiceSearchControl.valueChanges.pipe(debounceTime(300)).subscribe((searchTerm) => {
+      this.voiceSearchControl.valueChanges.pipe(debounceTime(3000)).subscribe((searchTerm) => {
         this.applyVoiceSearch(searchTerm);
       }),
     );
