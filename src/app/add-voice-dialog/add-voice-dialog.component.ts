@@ -37,9 +37,9 @@ export class AddVoiceDialogComponent {
     private dialogRef: MatDialogRef<AddVoiceDialogComponent>,
   ) {
     this.voiceForm = this.fb.group({
-      externalId: ['21m00Tcm4TlvDq8ikWAM', Validators.required],
-      externalUserId: '63e06b7e7cafdc46be4d2e0b3f045940231ae058d508589653d74d1265a574ca',
-      displayName: [{ value: 'Rachel Smith', disabled: true }],
+      externalId: ['', Validators.required],
+      externalUserId: '',
+      displayName: [{ value: '', disabled: true }],
       model: ['ELEVENLABS_FLASH_V2_5', Validators.required],
     });
 
