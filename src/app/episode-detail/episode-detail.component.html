@@ -59,6 +59,10 @@
           <mat-label>Title</mat-label>
           <input matInput formControlName="title" />
         </mat-form-field>
+        <mat-form-field class="full-width episode-description">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description"></textarea>
+        </mat-form-field>
         <mat-form-field class="full-width episode-content">
           <mat-label>Content</mat-label>
           <textarea matInput formControlName="content"></textarea>
@@ -89,13 +93,17 @@
 
         <mat-divider></mat-divider>
 
-        <h3>Related Episodes</h3>
+        <h3>Referenced News</h3>
         <mat-list>
-          @for (relatedEpisode of episodeForm.get('news')?.value; track relatedEpisode.id) {
+          @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
             <mat-list-item>
-              <a matLine href="{{ relatedEpisode.url }}" target="_blank">
-                {{ relatedEpisode.title }}
+              <a matLine href="{{ referencedNews.url }}" target="_blank">
+                {{ referencedNews.title }}
               </a>
+            </mat-list-item>
+          } @empty {
+            <mat-list-item>
+              <span>None.</span>
             </mat-list-item>
           }
         </mat-list>

@@ -9,7 +9,7 @@ import { catchError } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
-import { PageInfo, RelayEdge } from './utils/relay';
+import { RelayConnection } from './utils/relay';
 
 export enum JobKind {
   FETCH_NEWS = 'FETCH_NEWS',
@@ -102,21 +102,8 @@ export interface Job {
 }
 
 interface GetUserJobsResponse {
-  jobs: {
-    edges: RelayEdge<Job>[];
-    pageInfo: PageInfo;
-  };
+  jobs: RelayConnection<Job>;
 }
-
-// Create a JobConnection interface similar to PodcastConnection
-export interface JobConnection {
-  edges: RelayEdge<Job>[];
-  pageInfo: PageInfo;
-}
-
-// interface GetUserJobsResponse {
-//   jobs: { jobs: Job[] };
-// }
 
 @Injectable({
   providedIn: 'root',
@@ -339,23 +326,8 @@ export class JobService extends BaseService implements OnDestroy {
 
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
-    interface JobEdge {
-      cursor: string;
-      node: Job;
-    }
-
-    interface PageInfo {
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-      startCursor?: string;
-      endCursor?: string;
-    }
-
     interface Response {
-      jobs: {
-        edges: JobEdge[];
-        pageInfo: PageInfo;
-      };
+      jobs: RelayConnection<Job>;
     }
 
     return this.query<Response>({

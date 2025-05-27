@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Job, JobService, kindToString, statusToString } from '../job.service';
+import { Job, JobService, JobStatus, kindToString, statusToString, stringToJobStatus } from '../job.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
@@ -24,6 +24,8 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatButtonModule, MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-jobs-list',
@@ -50,6 +52,10 @@ import { MatCard, MatCardContent } from '@angular/material/card';
     MatCard,
     MatCardContent,
     DecimalPipe,
+    MatIcon,
+    MatIconModule,
+    MatIconButton,
+    MatButtonModule,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -58,14 +64,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   jobs: Job[] = [];
   dataSource = new MatTableDataSource<Job>(this.jobs);
-  displayedColumns: string[] = ['kind', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
+  displayedColumns: string[] = ['kind', 'status', 'message', 'cost', 'createdAt', 'updatedAt', 'actions'];
   totalJobs = 0;
   pageSize = 10;
   cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
   sortActive = 'createdAt';
-  hasNextPage = false;
-  hasPreviousPage = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -94,11 +98,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         next: ({ jobs, pageInfo }) => {
           this.jobs = jobs;
           this.dataSource.data = this.jobs;
-          this.hasNextPage = pageInfo.hasNextPage;
-          this.hasPreviousPage = pageInfo.hasPreviousPage;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-
-          // Set a large enough number to enable the next button if hasNextPage is true
           this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
         },
         error: (error) => {
@@ -134,6 +134,20 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.loadJobs(after, newPageIndex);
   }
 
+  deleteJob(id: string) {
+    this.subscriptions.add(
+      this.jobService.deleteJobs([id]).subscribe({
+        next: () => {
+          this.jobs = this.jobs.filter((job) => job.id !== id);
+          this.messageService.success('Job deleted.');
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to delete job: ${err.message}`);
+        },
+      }),
+    );
+  }
+
   retryJob(id: string) {
     this.subscriptions.add(
       this.jobService.retryJobs([id]).subscribe({
@@ -153,4 +167,6 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   protected readonly kindToString = kindToString;
   protected readonly statusToString = statusToString;
+  protected readonly stringToJobStatus = stringToJobStatus;
+  protected readonly JobStatus = JobStatus;
 }

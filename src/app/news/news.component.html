@@ -13,7 +13,7 @@
     <mat-card-content class="form-container">
       <mat-form-field>
         <mat-label>Select Podcast</mat-label>
-        <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="getNews()">
+        <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastSelect(selectedPodcastUuid)">
           @for (podcast of podcasts; track podcast.uuid) {
             <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
           }
@@ -77,6 +77,15 @@
         [disabled]="selectedNews.size === 0"
       >
         Create Episode & Audio
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="createBlankEpisode()"
+        [disabled]="selectedPodcastUuid === null"
+      >
+        Create Blank Episode
       </button>
       <br />
       <mat-form-field appearance="outline" class="filter-form-field">

@@ -16,6 +16,7 @@ export interface Episode {
   uuid: string;
   date: string;
   title: string;
+  description: string;
   content: string;
   audioUrl: string;
   isLive: boolean;
@@ -70,6 +71,7 @@ const GET_EPISODE = gql`
           uuid
           date
           title
+          description
           content
           audioUrl
           isLive
@@ -170,17 +172,31 @@ export class EpisodeService extends BaseService {
   updateEpisode(
     episodeUuid: string | null,
     updatedTitle: string | null,
+    updatedDescription: string | null,
     updatedContent: string | null,
     isLive: boolean | null,
   ) {
     if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
     if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
+    if (updatedDescription === null) return throwError(() => new Error('Updated description is required'));
     if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
     if (isLive === null) return throwError(() => new Error('Updated is live is required'));
 
     const GQL = gql`
-      mutation UpdateEpisodes($episodeUuid: UUID!, $title: String!, $content: String!, $isLive: Boolean!) {
-        updateEpisode(episodeUuid: $episodeUuid, title: $title, content: $content, isLive: $isLive) {
+      mutation UpdateEpisodes(
+        $episodeUuid: UUID!
+        $title: String!
+        $description: String!
+        $content: String!
+        $isLive: Boolean!
+      ) {
+        updateEpisode(
+          episodeUuid: $episodeUuid
+          title: $title
+          description: $description
+          content: $content
+          isLive: $isLive
+        ) {
           success
           message
         }
@@ -197,7 +213,13 @@ export class EpisodeService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { episodeUuid, title: updatedTitle, content: updatedContent, isLive: isLive },
+      variables: {
+        episodeUuid,
+        title: updatedTitle,
+        description: updatedDescription,
+        content: updatedContent,
+        isLive: isLive,
+      },
     }).pipe(
       map((data) => {
         if (!data.updateEpisode.success) {
@@ -253,7 +275,7 @@ export class EpisodeService extends BaseService {
   publishAudio(episodeUuid: string) {
     if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
 
-    const GQL = gql`
+    const PUBLISH_EPISODE_AUDIO = gql`
       mutation PublishEpisodeAudio($episodeUuid: UUID!) {
         publishEpisodeAudio(episodeUuid: $episodeUuid) {
           success
@@ -282,7 +304,7 @@ export class EpisodeService extends BaseService {
     }
 
     return this.mutate<Response>({
-      mutation: GQL,
+      mutation: PUBLISH_EPISODE_AUDIO,
       variables: { episodeUuid },
     }).pipe(
       map((data) => {

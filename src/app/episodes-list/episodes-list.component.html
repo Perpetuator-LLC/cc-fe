@@ -31,7 +31,7 @@
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef>Title</th>
           <td mat-cell *matCellDef="let episode">
-            <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title | slice: 0 : 100 }}</a>
+            <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title === "" ? "(Blank)" : episode.title | slice: 0 : 100 }}</a>
           </td>
         </ng-container>
 

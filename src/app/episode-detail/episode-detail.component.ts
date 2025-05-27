@@ -82,6 +82,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       uuid: [{ value: '', disabled: true }, Validators.required],
       isLive: [false, Validators.required],
       title: ['', Validators.required],
+      description: ['', Validators.required],
       content: ['', Validators.required],
       date: ['', Validators.required],
       audioBase64: ['', Validators.required],
@@ -237,7 +238,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     const formValues = this.episodeForm.getRawValue() as Episode;
     this.subscriptions.add(
       this.episodeService
-        .updateEpisode(formValues.uuid, formValues.title, formValues.content, formValues.isLive)
+        .updateEpisode(formValues.uuid, formValues.title, formValues.description, formValues.content, formValues.isLive)
         .subscribe({
           next: (response) => {
             if (!response.success) {

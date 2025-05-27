@@ -199,42 +199,63 @@
             <button mat-raised-button color="primary" type="submit">Create Bonus Code</button>
           </form>
 
+          <div class="filter-controls">
+            <mat-button-toggle-group [value]="activeCodesFilter">
+              <mat-button-toggle [value]="true" (click)="toggleActiveFilter(true)">
+                <mat-icon>check_circle</mat-icon> Unused Codes
+              </mat-button-toggle>
+              <mat-button-toggle [value]="false" (click)="toggleActiveFilter(false)">
+                <mat-icon>cancel</mat-icon> Used Codes
+              </mat-button-toggle>
+              <mat-button-toggle [value]="null" (click)="toggleActiveFilter(null)">
+                <mat-icon>all_inclusive</mat-icon> All Codes
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
           @if (loadingCodes) {
             <mat-spinner></mat-spinner>
-          } @else if (codes.length > 0) {
-            <table mat-table [dataSource]="codes">
-              <ng-container matColumnDef="code">
-                <th mat-header-cell *matHeaderCellDef>Code</th>
-                <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
-              </ng-container>
+          }
+          <table mat-table [dataSource]="dataSource">
+            <ng-container matColumnDef="code">
+              <th mat-header-cell *matHeaderCellDef>Code</th>
+              <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
+            </ng-container>
 
-              <ng-container matColumnDef="creditAmount">
-                <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
-                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
-              </ng-container>
+            <ng-container matColumnDef="creditAmount">
+              <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
+              <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
+            </ng-container>
 
-              <ng-container matColumnDef="creator">
-                <th mat-header-cell *matHeaderCellDef>Creator</th>
-                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
-              </ng-container>
+            <ng-container matColumnDef="creator">
+              <th mat-header-cell *matHeaderCellDef>Creator</th>
+              <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
+            </ng-container>
 
-              <ng-container matColumnDef="consumer">
-                <th mat-header-cell *matHeaderCellDef>Consumer</th>
-                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
-              </ng-container>
+            <ng-container matColumnDef="consumer">
+              <th mat-header-cell *matHeaderCellDef>Consumer</th>
+              <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
+            </ng-container>
 
-              <ng-container matColumnDef="consumedAt">
-                <th mat-header-cell *matHeaderCellDef>Consumed At</th>
-                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
-              </ng-container>
+            <ng-container matColumnDef="consumedAt">
+              <th mat-header-cell *matHeaderCellDef>Consumed At</th>
+              <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
+            </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"></tr>
-              <tr
-                mat-row
-                *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
-              ></tr>
-            </table>
-          } @else {
+            <tr mat-header-row *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
+            ></tr>
+          </table>
+          <mat-paginator
+            [length]="totalCodes"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[5, 10, 20]"
+            [showFirstLastButtons]="false"
+            (page)="onCodesPageChange($event)"
+          >
+          </mat-paginator>
+          @if (dataSource.data.length === 0) {
             <p>No codes found.</p>
           }
         </div>

@@ -73,6 +73,8 @@ export class NewsComponent implements OnInit, OnDestroy {
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
+  private podcastHistoryKey = 'news-podcast-history';
+  private podcastHistory: string[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -101,7 +103,7 @@ export class NewsComponent implements OnInit, OnDestroy {
                   next: (episode) => {
                     const newEpisodeUrl = `/episode/${job.result}`;
                     this.messageService.success(
-                      `New episode: <a href="${newEpisodeUrl}">${episode.title}</a>`,
+                      `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
                       null,
                       true,
                     );
@@ -138,12 +140,15 @@ export class NewsComponent implements OnInit, OnDestroy {
           this.podcasts = response.podcasts.filter((podcast) =>
             podcast.team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
           );
+          this.sortPodcastsByHistory();
         },
         error: (error) => {
           this.messageService.error(`Failed to get podcasts: ${error.message}`);
         },
       }),
     );
+
+    this.loadPodcastHistory();
   }
 
   fetchNews() {
@@ -234,6 +239,97 @@ export class NewsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.messageService.error(`Failed to summarize news data: ${error.message}`);
+        },
+      }),
+    );
+  }
+
+  // Add this method to handle podcast selection
+  onPodcastSelect(podcastUuid: string | null) {
+    if (!podcastUuid) {
+      this.messageService.warning('No podcast selected.');
+      return;
+    }
+    // Update selection history
+    this.updatePodcastHistory(podcastUuid);
+    // Get news with the selected podcast
+    this.getNews();
+  }
+
+  // Method to load podcast history
+  private loadPodcastHistory() {
+    this.userService.userSettings([this.podcastHistoryKey]).subscribe({
+      next: (settings) => {
+        const historySetting = settings.find((setting) => setting.key === this.podcastHistoryKey);
+        if (historySetting) {
+          try {
+            this.podcastHistory = JSON.parse(historySetting.value);
+            // Sort podcasts based on history when they're loaded
+            this.sortPodcastsByHistory();
+          } catch (e) {
+            console.error('Error parsing podcast history', e);
+            this.podcastHistory = [];
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error loading podcast history', err);
+      },
+    });
+  }
+
+  // Method to update podcast history
+  private updatePodcastHistory(podcastUuid: string) {
+    // Remove the selected podcast if it's already in history
+    this.podcastHistory = this.podcastHistory.filter((uuid) => uuid !== podcastUuid);
+    // Add it to the beginning (most recent)
+    this.podcastHistory.unshift(podcastUuid);
+
+    // Save the updated history
+    this.userService.updateUserSetting(this.podcastHistoryKey, JSON.stringify(this.podcastHistory)).subscribe({
+      error: (err) => console.error('Error saving podcast history', err),
+    });
+  }
+
+  // Method to sort podcasts based on history
+  private sortPodcastsByHistory() {
+    if (!this.podcasts || this.podcasts.length === 0 || this.podcastHistory.length === 0) {
+      return;
+    }
+
+    // Create a map for quick lookup of podcast index in history
+    const historyMap: Record<string, number> = {};
+    this.podcastHistory.forEach((uuid, index) => {
+      historyMap[uuid] = index;
+    });
+
+    // Sort podcasts: recently selected first, then others
+    this.podcasts.sort((a, b) => {
+      const indexA = historyMap[a.uuid] !== undefined ? historyMap[a.uuid] : Number.MAX_SAFE_INTEGER;
+      const indexB = historyMap[b.uuid] !== undefined ? historyMap[b.uuid] : Number.MAX_SAFE_INTEGER;
+      return indexA - indexB;
+    });
+  }
+
+  createBlankEpisode() {
+    if (this.selectedPodcastUuid === null) {
+      this.messageService.warning('No podcast selected.');
+      return;
+    }
+
+    const newsUuids: string[] = [];
+    this.subscriptions.add(
+      this.newsService.createEpisode(newsUuids, this.selectedPodcastUuid).subscribe({
+        next: (data) => {
+          if (!data.job) {
+            this.messageService.error('Failed to create episode: No job returned');
+            return;
+          }
+          this.messageService.info('Creating blank episode...');
+          this.jobService.addJob(data.job);
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
         },
       }),
     );

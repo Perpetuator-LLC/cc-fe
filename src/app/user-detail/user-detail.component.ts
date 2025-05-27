@@ -37,10 +37,13 @@ import {
   MatRow,
   MatRowDef,
   MatTable,
+  MatTableDataSource,
 } from '@angular/material/table';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-user-detail',
@@ -80,25 +83,33 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     MatIcon,
     MatIconButton,
     MatProgressSpinner,
+    MatPaginatorModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
 })
 export class UserDetailComponent implements OnInit, OnDestroy {
   emailChangePending: { newEmail: string } | null = null;
-  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   userDetailForm: FormGroup;
   changePasswordForm: FormGroup;
   deleteConfirmation = '';
   exportConfirmation = '';
   private subscriptions = new Subscription();
   private downloadAnchor: HTMLAnchorElement | null = null;
-  // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
   protected code = '';
   protected createCodeForm: FormGroup;
   protected codes: Code[] = [];
+  dataSource = new MatTableDataSource<Code>(this.codes);
   protected loadingCodes = true;
+  cursors: (string | null)[] = [null];
+  totalCodes = 0;
+  pageSize = 5;
+  activeCodesFilter: boolean | null = true;
+
+  @ViewChild(MatPaginator) codesPaginator!: MatPaginator;
+  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private fb: FormBuilder,
@@ -129,21 +140,25 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       { validator: this.passwordMatchValidator },
     );
 
-    toObservable(this.userService.userDetails).subscribe((userData) => {
-      this.userDetailForm.patchValue({
-        username: userData?.username || '',
-        email: userData?.email || '',
-      });
-      this.changePasswordForm.patchValue({
-        username: userData?.username || '',
-        email: userData?.email || '',
-      });
-      this.loadCodes();
-    });
+    this.subscriptions.add(
+      toObservable(this.userService.userDetails).subscribe((userData) => {
+        this.userDetailForm.patchValue({
+          username: userData?.username || '',
+          email: userData?.email || '',
+        });
+        this.changePasswordForm.patchValue({
+          username: userData?.username || '',
+          email: userData?.email || '',
+        });
+        this.loadCodes();
+      }),
+    );
 
-    this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
-      this.changePasswordForm.updateValueAndValidity();
-    });
+    this.subscriptions.add(
+      this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
+        this.changePasswordForm.updateValueAndValidity();
+      }),
+    );
 
     this.createCodeForm = this.fb.group({
       code: ['', Validators.required],
@@ -158,15 +173,17 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.loadUserDetails();
     this.loadUserOrders();
 
-    this.route.queryParams.subscribe((params) => {
-      if (params['payment'] === 'success') {
-        this.messageService.success('Payment was successful.', 15000, true);
-        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-      } else if (params['payment'] === 'cancel') {
-        this.messageService.warning('Payment incomplete.', 15000, true);
-        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-      }
-    });
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['payment'] === 'success') {
+          this.messageService.success('Payment was successful.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        } else if (params['payment'] === 'cancel') {
+          this.messageService.warning('Payment incomplete.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        }
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -176,14 +193,16 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   private loadUserDetails() {
     this.userService.loadUserDetails();
-    this.userService.loadUserEmailChangePending().subscribe({
-      next: (emailChangePendingDetails) => {
-        this.emailChangePending = emailChangePendingDetails;
-      },
-      error: (err) => {
-        console.error('Failed to load email change pending:', err);
-      },
-    });
+    this.subscriptions.add(
+      this.userService.loadUserEmailChangePending().subscribe({
+        next: (emailChangePendingDetails) => {
+          this.emailChangePending = emailChangePendingDetails;
+        },
+        error: (err) => {
+          console.error('Failed to load email change pending:', err);
+        },
+      }),
+    );
     this.emailChangePending = this.userService.emailChangePendingDetails;
   }
 
@@ -198,37 +217,41 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   redeemCode() {
     if (this.code) {
-      this.codeService.redeemCode(this.code).subscribe({
-        next: () => {
-          this.messageService.success('code redeemed successfully.');
-          this.code = '';
-          this.loadCodes();
-          this.creditService.refetchUserCredits();
-        },
-        error: (err) => {
-          this.messageService.error('Failed to redeem code: ' + err.message);
-        },
-      });
+      this.subscriptions.add(
+        this.codeService.redeemCode(this.code).subscribe({
+          next: () => {
+            this.messageService.success('code redeemed successfully.');
+            this.code = '';
+            this.loadCodes();
+            this.creditService.refetchUserCredits();
+          },
+          error: (err) => {
+            this.messageService.error('Failed to redeem code: ' + err.message);
+          },
+        }),
+      );
     }
   }
 
   createCode() {
     if (this.createCodeForm.valid) {
       const { code, creditAmount } = this.createCodeForm.value;
-      this.codeService.createCode(code, creditAmount).subscribe({
-        next: () => {
-          this.messageService.success('Code created successfully.');
-          this.createCodeForm.reset();
-          this.loadCodes();
-        },
-        error: (err) => {
-          this.messageService.error('Failed to create code: ' + err.message);
-        },
-      });
+      this.subscriptions.add(
+        this.codeService.createCode(code, creditAmount).subscribe({
+          next: () => {
+            this.messageService.success('Code created successfully.');
+            this.createCodeForm.reset();
+            this.loadCodes();
+          },
+          error: (err) => {
+            this.messageService.error('Failed to create code: ' + err.message);
+          },
+        }),
+      );
     }
   }
 
-  private loadCodes() {
+  private loadCodes(after: string | null = null, pageIndex = 0) {
     // Get the current value of the signal directly
     const userDetails = this.userService.userDetails();
 
@@ -246,16 +269,47 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     this.loadingCodes = true;
-    this.codeService.getCodes().subscribe({
-      next: (data) => {
-        this.codes = data.codes;
-        this.loadingCodes = false;
-      },
-      error: (err) => {
-        this.messageService.error('Failed to load codes: ' + err.message);
-        this.loadingCodes = false;
-      },
-    });
+    this.subscriptions.add(
+      this.codeService.getCodes(this.activeCodesFilter, after, this.pageSize).subscribe({
+        next: ({ codes, pageInfo }) => {
+          this.codes = codes;
+          this.dataSource.data = codes;
+          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+          this.totalCodes = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+          this.loadingCodes = false;
+        },
+        error: (err) => {
+          this.messageService.error('Failed to load codes: ' + err.message);
+          this.loadingCodes = false;
+        },
+      }),
+    );
+  }
+
+  onCodesPageChange(event: PageEvent) {
+    this.loadingCodes = true;
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null];
+      this.loadCodes(null, 0);
+      return;
+    }
+
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadCodes(after, newPageIndex);
+  }
+
+  toggleActiveFilter(value: boolean | null) {
+    this.activeCodesFilter = value;
+    this.cursors = [null]; // Reset pagination
+    if (this.codesPaginator) {
+      this.codesPaginator.firstPage(); // Reset to first page
+    }
+    this.loadCodes(); // Reload codes with new filter
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
@@ -272,66 +326,72 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   cancelEmailChange(): void {
-    this.userService.cancelEmailChange().subscribe({
-      next: () => {
-        this.loadUserDetails();
-        this.messageService.success('Email change cancelled.');
-      },
-      error: (err) => {
-        console.error('Failed to cancel email change:', err);
-        this.messageService.error('Failed to cancel email change request. Please try again.');
-      },
-    });
+    this.subscriptions.add(
+      this.userService.cancelEmailChange().subscribe({
+        next: () => {
+          this.loadUserDetails();
+          this.messageService.success('Email change cancelled.');
+        },
+        error: (err) => {
+          console.error('Failed to cancel email change:', err);
+          this.messageService.error('Failed to cancel email change request. Please try again.');
+        },
+      }),
+    );
   }
 
   resendEmailChange(): void {
-    this.userService.resendEmailChange().subscribe({
-      next: () => {
-        this.messageService.success('Email change request resent');
-      },
-      error: (err) => {
-        console.error('Failed to reset email change:', err);
-        this.messageService.error('Failed to reset email change request. Please try again.');
-      },
-    });
+    this.subscriptions.add(
+      this.userService.resendEmailChange().subscribe({
+        next: () => {
+          this.messageService.success('Email change request resent');
+        },
+        error: (err) => {
+          console.error('Failed to reset email change:', err);
+          this.messageService.error('Failed to reset email change request. Please try again.');
+        },
+      }),
+    );
   }
 
   onSubmitUserDetails(): void {
     if (this.userDetailForm.valid) {
       const { username, email } = this.userDetailForm.value;
-      this.userService.updateUser(username, email).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.messageService.success('User details updated successfully.');
-            this.userService.loadUserDetails().subscribe({
-              next: (userDetails: UserDetails) => {
-                this.userDetailForm.patchValue({
-                  username: userDetails.username,
-                  email: userDetails.email,
-                });
-                this.changePasswordForm.patchValue({
-                  username: userDetails.username,
-                  email: userDetails.email,
-                });
-              },
-            });
-            this.userService.loadUserEmailChangePending().subscribe({
-              next: (emailChangePendingDetails) => {
-                this.emailChangePending = emailChangePendingDetails;
-              },
-              error: (err) => {
-                console.error('Failed to load email change pending:', err);
-              },
-            });
-          } else {
-            this.messageService.error(`Failed to update user details: ${response.message}`);
-          }
-        },
-        error: (err) => {
-          console.error('Failed to update user details:', err);
-          this.messageService.error(`Failed to update user details: ${err.message}`);
-        },
-      });
+      this.subscriptions.add(
+        this.userService.updateUser(username, email).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.success('User details updated successfully.');
+              this.userService.loadUserDetails().subscribe({
+                next: (userDetails: UserDetails) => {
+                  this.userDetailForm.patchValue({
+                    username: userDetails.username,
+                    email: userDetails.email,
+                  });
+                  this.changePasswordForm.patchValue({
+                    username: userDetails.username,
+                    email: userDetails.email,
+                  });
+                },
+              });
+              this.userService.loadUserEmailChangePending().subscribe({
+                next: (emailChangePendingDetails) => {
+                  this.emailChangePending = emailChangePendingDetails;
+                },
+                error: (err) => {
+                  console.error('Failed to load email change pending:', err);
+                },
+              });
+            } else {
+              this.messageService.error(`Failed to update user details: ${response.message}`);
+            }
+          },
+          error: (err) => {
+            console.error('Failed to update user details:', err);
+            this.messageService.error(`Failed to update user details: ${err.message}`);
+          },
+        }),
+      );
     } else {
       this.messageService.error('Please enter valid user details.');
     }
@@ -347,16 +407,18 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.userService.changePassword(newPassword).subscribe({
-        next: () => {
-          this.messageService.success('Password changed successfully.');
-          window.location.reload();
-        },
-        error: (err) => {
-          console.error('Failed to change password:', err);
-          this.messageService.error('Failed to change password. Please try again.');
-        },
-      });
+      this.subscriptions.add(
+        this.userService.changePassword(newPassword).subscribe({
+          next: () => {
+            this.messageService.success('Password changed successfully.');
+            window.location.reload();
+          },
+          error: (err) => {
+            console.error('Failed to change password:', err);
+            this.messageService.error('Failed to change password. Please try again.');
+          },
+        }),
+      );
     } else {
       this.messageService.error('Please enter valid password details.');
     }
@@ -444,17 +506,19 @@ export class UserDetailComponent implements OnInit, OnDestroy {
           '<h2>Are you sure you want to proceed?</h2>',
       },
     });
-    dialogRef.afterClosed().subscribe({
-      next: (confirmed) => {
-        if (confirmed) {
-          // get confirmation from user
-          this.deleteTeam();
-        }
-      },
-      error: (err) => {
-        this.messageService.error('Failed to delete account: ' + err.message);
-      },
-    });
+    this.subscriptions.add(
+      dialogRef.afterClosed().subscribe({
+        next: (confirmed) => {
+          if (confirmed) {
+            // get confirmation from user
+            this.deleteTeam();
+          }
+        },
+        error: (err) => {
+          this.messageService.error('Failed to delete account: ' + err.message);
+        },
+      }),
+    );
   }
 
   private deleteTeam() {
@@ -489,20 +553,24 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   refreshOrder(id: string) {
-    this.creditService.refreshUserOrder(id).subscribe({
-      next: (data) => {
-        this.messageService.success(`Order refreshed successfully: ${data.message}`);
-      },
-      error: (err) => {
-        this.messageService.error('Failed to refresh order: ' + err.message);
-      },
-    });
+    this.subscriptions.add(
+      this.creditService.refreshUserOrder(id).subscribe({
+        next: (data) => {
+          this.messageService.success(`Order refreshed successfully: ${data.message}`);
+        },
+        error: (err) => {
+          this.messageService.error('Failed to refresh order: ' + err.message);
+        },
+      }),
+    );
   }
 
   cancelOrder(id: string) {
-    this.creditService.cancelUserOrder(id).subscribe({
-      next: () => this.messageService.success('Order cancelled successfully'),
-      error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
-    });
+    this.subscriptions.add(
+      this.creditService.cancelUserOrder(id).subscribe({
+        next: () => this.messageService.success('Order cancelled successfully'),
+        error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
+      }),
+    );
   }
 }
