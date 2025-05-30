@@ -28,6 +28,7 @@ mat-divider {
     margin-bottom: 1em;
   }
 }
+
 .textarea-small {
   min-height: 3em;
   max-height: 10em;
@@ -50,6 +51,7 @@ mat-divider {
 }
 
 .expand-width {
+  position: relative;
   flex-grow: 1;
 
   mat-form-field {
@@ -89,16 +91,21 @@ mat-divider {
 
 .file-input-wrapper {
   div {
-    margin-bottom: 1em;
+    width: 100%;
+
     img {
-      max-width: 300px;
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 6px;
     }
   }
 }
 
 .actions-column,
 .actions-cell {
-  width: 80px; /* Adjust this value as needed */
+  width: 80px;
+  /* Adjust this value as needed */
   min-width: 80px;
   max-width: 80px;
   padding: 0;
@@ -120,6 +127,7 @@ mat-divider {
     //background: rgba(255, 255, 255, 0.8);
   }
 }
+
 /* Add to podcast-detail.component.scss */
 .voice-filters {
   display: flex;
@@ -147,37 +155,47 @@ mat-divider {
 
 .voice-controls-container {
   display: flex;
-  flex-wrap: wrap;       /* Allow items to wrap */
-  align-items: flex-start; /* Align items to the top */
+  flex-wrap: wrap;
+  /* Allow items to wrap */
+  align-items: center;
+  /* Align items to the top */
   gap: 16px;
   margin-bottom: 10px;
 }
 
 /* Apply common flex behavior to direct children acting as filter items */
 .voice-controls-container > .voice-filter-item {
-  flex: 1 1 auto;     /* Allow grow, shrink, auto basis */
-  min-width: 200px;   /* Default minimum width before wrapping */
+  flex: 1 1 auto;
+  /* Allow grow, shrink, auto basis */
+  min-width: 200px;
+  /* Default minimum width before wrapping */
 }
 
 /* Specific minimum widths */
 .tier-filter {
-  min-width: 250px;   /* Tier filter needs a bit more space */
+  min-width: 250px;
+  /* Tier filter needs a bit more space */
 }
 
 .voice-search {
-  /* min-width: 200px; */ /* Inherits default */
+  /* min-width: 200px; */
+  /* Inherits default */
 }
 
 .voice-buttons {
   /* This is also a .voice-filter-item, gets flex: 1 1 auto */
-  min-width: 280px;   /* Adjust based on button content + gaps */
+  min-width: 280px;
+  /* Adjust based on button content + gaps */
   display: flex;
-  flex-wrap: wrap;    /* Allow buttons inside to wrap */
+  flex-wrap: wrap;
+  /* Allow buttons inside to wrap */
   gap: 8px;
-  justify-content: flex-start; /* Align buttons to the start */
+  justify-content: flex-end;
+  /* Align buttons to the start */
 
   button {
-    flex: 0 0 auto;   /* Buttons don't grow or shrink */
+    flex: 0 0 auto;
+    /* Buttons don't grow or shrink */
     white-space: nowrap;
   }
 }
@@ -185,7 +203,8 @@ mat-divider {
 /* Keep the voice selection dropdown full width and add space above */
 .voice-select {
   width: 100%;
-  margin-top: 10px; /* Add space between controls and dropdown */
+  margin-top: 10px;
+  /* Add space between controls and dropdown */
 }
 
 /* Remove the old .voice-filters class if it exists and conflicts */
@@ -197,14 +216,17 @@ mat-divider {
   flex-wrap: wrap;
   width: 100%;
   gap: 16px;
-  align-items: start; /* Keep alignment consistent */
+  align-items: start;
+  /* Keep alignment consistent */
 
   /* Target direct children, excluding specific containers handled separately */
-  > mat-form-field:not(.voice-filter-item):not(.voice-select),
-  > mat-checkbox,
-  > button:not(.voice-filter-item button), /* Avoid targeting buttons inside .voice-buttons */
-  > div:not(.voice-controls-container):not(.voice-buttons) {
-    flex: 1 1 100%; /* Default full-width behavior for other items */
+  >mat-form-field:not(.voice-filter-item):not(.voice-select),
+  >mat-checkbox,
+  >button:not(.voice-filter-item button),
+  /* Avoid targeting buttons inside .voice-buttons */
+  >div:not(.voice-controls-container):not(.voice-buttons) {
+    flex: 1 1 100%;
+    /* Default full-width behavior for other items */
   }
 
   /* Styles for other specific structures within member-row */
@@ -213,8 +235,14 @@ mat-divider {
     align-items: center;
     flex: 1 1 100%;
 
-    input { flex: 1 1 auto; }
-    button { flex: 0 0 auto; margin-left: 8px; }
+    input {
+      flex: 1 1 auto;
+    }
+
+    button {
+      flex: 0 0 auto;
+      margin-left: 8px;
+    }
   }
 }
 
@@ -224,4 +252,367 @@ mat-divider {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+.podcast-detail-page {
+  padding: 32px 72px;
+  background-color: var(--secondary-color);
+  margin-top: -20px;
+
+  .detail-header {
+    margin-bottom: 40px;
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 28px;
+
+      .title {
+        h2 {
+          margin-top: 0;
+          margin-bottom: 12px;
+          font-size: 32px;
+          font-weight: 600;
+          color: var(--theme-color);
+        }
+
+        p {
+          font-size: 14px;
+          margin: 0;
+          color: var(--description-color);
+          font-weight: 400;
+        }
+      }
+
+      .buttons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .delete-btn {
+          background-color: transparent;
+          color: #ff4a4a;
+          padding: 0;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .publish-btn {
+          background-color: var(--primary);
+          border-radius: 10px;
+          color: white;
+          border: 1px solid #ffffff24;
+          font-size: 14px;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .status-summary {
+      display: flex;
+      gap: 60px;
+
+      .status-item {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .status-label {
+          color: var(--description-color);
+          font-size: 14px;
+          font-weight: 400;
+        }
+
+        .status-value {
+          font-size: 14px;
+          color: var(--theme-color);
+          font-weight: 500;
+        }
+
+        .enable {
+          background: #4cb782;
+          border-radius: 6px;
+          color: white;
+          font-size: 12px;
+          font-weight: 500;
+          border: 1px solid 1px solid #ffffffe6;
+          width: 50px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .disable {
+          border-radius: 6px;
+          color: var(--theme-color);
+          font-size: 12px;
+          font-weight: 500;
+          border: 1px solid var(--border-color);
+          background: var(--secondary-dark);
+          width: 50px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  .podcast-card {
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+
+    .mat-mdc-card-content {
+      padding-inline: 0;
+    }
+
+    .file-input-wrapper {
+      background: var(--secondary-light);
+      padding: 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 195px;
+      background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='6' ry='6' stroke='%23FFFFFF1A' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+
+      .upload-btn {
+        background-color: var(--secondary-dark);
+        color: var(--theme-color);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        min-height: 28px !important;
+        height: 28px;
+        max-height: 28px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-inline: auto;
+        width: fit-content;
+        padding-inline: 16px;
+
+        svg {
+          margin-right: 6px;
+        }
+      }
+
+      .desc {
+        font-size: 11px;
+        color: var(--description-color);
+        font-weight: 400;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .slug-input {
+      position: relative;
+    }
+
+    .url-btn-div {
+      position: absolute;
+      right: 16px;
+      top: 40%;
+      transform: translateY(-50%);
+
+      .url-btn {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        color: var(--description-color);
+        font-size: 12px;
+        font-weight: 500;
+        padding: 0;
+        height: auto;
+
+        .mat-icon {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+}
+
+.custom-dark-field {
+  .mdc-text-field {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .mat-form-field-flex {
+    background: #32353b;
+    border-radius: 10px;
+    border: 1px solid #55585e;
+    color: #fff;
+    min-height: 56px;
+    align-items: center;
+  }
+
+  .mat-form-field-infix {
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 12px 16px;
+  }
+
+  .mat-input-element,
+  .mat-select-value {
+    color: #fff !important;
+    background: transparent !important;
+  }
+
+  .mat-form-field-label {
+    color: #fff !important;
+    opacity: 0.8;
+  }
+
+  .mat-form-field-underline,
+  .mat-form-field-ripple {
+    display: none;
+  }
+
+  .mat-select-arrow {
+    color: #aaa;
+  }
+}
+
+.voice-info {
+  p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--theme-yellow);
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 0;
+  }
+}
+
+.voice-controls-container {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .voice-buttons {
+    .apply-btn {
+      background: var(--secondary-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--theme-color);
+      font-weight: 500;
+    }
+
+    .clear-btn {
+      color: var(--theme-color);
+      font-weight: 500;
+    }
+
+    .add-voice-btn {
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--theme-color);
+      color: var(--secondary-light);
+    }
+  }
+}
+
+.voice-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  .voice-card {
+    background: var(--secondary-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+
+    button {
+      flex: auto !important;
+      padding: 0;
+      line-height: 0;
+      border: 2px solid var(--theme-color);
+      width: 24px;
+      min-width: 24px;
+      height: 24px;
+      color: var(--theme-color);
+
+      .mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .voice-name {
+      width: 100%;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--theme-color);
+    }
+  }
+}
+
+.rss-form {
+  .mat-mdc-table {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+
+    .mdc-data-table__row:last-child .mat-mdc-cell {
+      border-bottom: 0;
+    }
+
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: var(--theme-color);
+      background: var(--secondary-dark);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .mat-mdc-row {
+      &:hover {
+        background-color: #2a2a2a;
+      }
+    }
+
+    .mat-mdc-cell {
+      padding: 8px 16px;
+      color: var(--theme-color);
+      background: var(--toolbar-container-background-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .actions-cell {
+      button {
+        color: var(--theme-color);
+      }
+    }
+  }
+}
+
+.rss-actions {
+  button {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1411764706);
+    font-size: 14px;
+  }
 }

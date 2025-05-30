@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
+import { PodcastsListComponent } from './podcasts-list/podcasts-list.component';
 
 export const routes: Routes = [
   {
@@ -72,13 +73,35 @@ export const routes: Routes = [
   },
   {
     path: 'podcasts',
-    loadComponent: () => import('./podcasts-list/podcasts-list.component').then((c) => c.PodcastsListComponent),
-    title: 'Podcasts',
+    component: PodcastsListComponent,
     canActivate: [AuthGuard],
+    title: 'Podcasts',
     data: {
-      icon: 'podcasts',
+      icon: 'graphic_eq',
     },
+    children: [
+      {
+        path: 'tech',
+        loadComponent: () => import('./episodes-list/episodes-list.component').then((m) => m.EpisodesListComponent),
+        title: 'Tech Podcasts',
+      },
+      {
+        path: 'music',
+        loadComponent: () => import('./episode-detail/episode-detail.component').then((m) => m.EpisodeDetailComponent),
+        title: 'Music Podcasts',
+      },
+    ],
   },
+
+  // {
+  //   path: 'podcasts',
+  //   loadComponent: () => import('./podcasts-list/podcasts-list.component').then((c) => c.PodcastsListComponent),
+  //   title: 'Podcasts',
+  //   canActivate: [AuthGuard],
+  //   data: {
+  //     icon: 'graphic_eq',
+  //   },
+  // },
   {
     path: 'podcast/new',
     loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),

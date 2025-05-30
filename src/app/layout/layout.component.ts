@@ -71,6 +71,8 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   private isMinimized = false;
   protected userCredits = 0;
   protected jobs: Job[] = [];
+  itemtitle = '';
+  protected isSecondSidebarVisible = true;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -110,7 +112,9 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+    console.log('rootRoutes', this.rootRoutes);
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
+    this.currentTheme = this.themeService.theme;
     if (this.isLoggedIn()) {
       this.userService.loadUserDetails();
     }
@@ -132,6 +136,11 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     resizeObserver.observe(this.toolbar.nativeElement);
   }
 
+  gettitlePath(item: string) {
+    this.itemtitle = item;
+    console.log('itemmmm', item);
+  }
+
   toggleMinimized() {
     this.isMinimized = !this.isMinimized;
     setTimeout(() => {
@@ -140,6 +149,11 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   shouldShow(item: Route): boolean {
+    // First check if the route should be hidden from main sidebar
+    if (item.path && ['news', 'episodes'].includes(item.path)) {
+      return false;
+    }
+
     if (item.path && this.loggedOutRoutes.includes(item.path)) {
       return !this.isLoggedIn();
     } else if (item.path && this.authRequiredRoutes.includes(item.path)) {
@@ -168,6 +182,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   switchTheme(theme: Theme): void {
+    this.currentTheme.set(theme);
     this.themeService.setTheme(theme);
   }
 
@@ -194,5 +209,9 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     const digitsToShow = 3;
     const digits = displayValue.toFixed(digitsToShow - Math.floor(displayValue).toString().length);
     return unitIndex === -1 ? `${value.toFixed(0)}` : `${digits}${units[unitIndex]}`;
+  }
+
+  toggleSecondSidebar() {
+    this.isSecondSidebarVisible = !this.isSecondSidebarVisible;
   }
 }

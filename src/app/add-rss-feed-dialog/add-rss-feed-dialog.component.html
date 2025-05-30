@@ -2,13 +2,15 @@
 <h2 mat-dialog-title>Add RSS Feed</h2>
 <mat-dialog-content>
   <form [formGroup]="rssFeedForm">
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="fill" style="width: 100%">
       <mat-label>RSS Feed URL</mat-label>
       <input matInput formControlName="url" />
     </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="onAdd()" [disabled]="!rssFeedForm.valid">Add</button>
+  <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
+  <button class="add-btn" mat-raised-button color="primary" (click)="onAdd()" [disabled]="!rssFeedForm.valid">
+    Add
+  </button>
 </mat-dialog-actions>

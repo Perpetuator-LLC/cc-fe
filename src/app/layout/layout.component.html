@@ -1,180 +1,324 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <app-cookie-banner></app-cookie-banner>
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav
-    #drawer
-    class="sidenav sidenav-bottom"
-    fixedInViewport
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false"
-    autosize
-  >
-    <mat-toolbar class="sidenav-header" color="primary" #toolbar>
-      <a href="/">
-        @if (currentTheme() === 'dark') {
+<div
+  class="layout-container"
+  [ngClass]="{
+    'after-login-layout': this.authService.isLoggedIn(),
+    'before-login-layout': !this.authService.isLoggedIn(),
+  }"
+>
+  @if (this.authService.isLoggedIn()) {
+    <header class="after-header">
+      <div class="sidebar after-login-sidebar">
+        <a href="/home" class="mat-link website-logo">
           <img
             src="Capital_Copilot_Logo_Slanted.svg"
             aria-label="Side nav toggle icon"
             alt="Capital Copilot"
-            class="website-icon"
+            width="24"
+            height="24"
             matTooltip="Capital Copilot"
           />
-        } @else {
-          <img
-            src="Capital_Copilot_Logo_PFP.svg"
-            aria-label="Side nav toggle icon"
-            alt="Capital Copilot"
-            class="website-icon"
-            matTooltip="Capital Copilot"
-          />
-        }
-      </a>
-      @if (!this.minimized) {
-        <a href="/">
-          <div class="title-container">
-            <span class="website-title">Capital<br />&nbsp;&nbsp;Copilot</span>
-          </div>
+          <div class="route-title">Home</div>
         </a>
-      }
-    </mat-toolbar>
-    <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
-      <div class="keep-up">
-        @for (item of rootRoutes; track item.path) {
-          @if (shouldShow(item)) {
-            <a
-              mat-list-item
-              [routerLink]="item.path"
-              routerLinkActive="active-link"
-              #link="routerLinkActive"
-              [activated]="link.isActive"
-              (click)="handleClick($event, item.path)"
-            >
-              <div class="route-link">
-                @if (item.data && item.data['icon']) {
-                  <mat-icon matTooltip="{{ item.title }}">{{ item.data['icon'] }}</mat-icon>
-                }
-                @if (!this.minimized) {
-                  <div class="route-title">
-                    {{ item.title }}
+        <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
+          <div class="keep-up">
+            @for (item of rootRoutes; track item.path) {
+              @if (shouldShow(item)) {
+                <a
+                  class="mat-link"
+                  mat-list-item
+                  [routerLink]="item.path"
+                  routerLinkActive="active-link"
+                  (click)="gettitlePath(item.title)"
+                  #link="routerLinkActive"
+                  [activated]="link.isActive"
+                  (click)="handleClick($event, item.path)"
+                >
+                  <div class="route-link">
+                    @if (item.data && item.data['icon']) {
+                      <mat-icon matTooltip="{{ item.title }}">{{ item.data['icon'] }}</mat-icon>
+                    }
+                    @if (!this.minimized) {
+                      <div class="route-title">
+                        {{ item.title }}
+                      </div>
+                    }
                   </div>
+                </a>
+              }
+            }
+          </div>
+          <div class="push-down">
+            @if (!this.minimized) {
+              <div>
+                <div
+                  class="theme-toggle-card"
+                  tabindex="0"
+                  (click)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')"
+                  (keydown.enter)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')"
+                  (keydown.space)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')"
+                >
+                  @if (currentTheme() === 'dark') {
+                    <mat-icon class="theme-icon">dark_mode</mat-icon>
+                    <div class="theme-label">Dark<br />Mode</div>
+                  } @else {
+                    <mat-icon class="theme-icon">light_mode</mat-icon>
+                    <div class="theme-label">Light<br />Mode</div>
+                  }
+                </div>
+              </div>
+            }
+            <a class="mat-link" mat-list-item tabindex="0" target="_blank" href="privacy-policy.html">
+              <div class="route-link">
+                <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
+                @if (!this.minimized) {
+                  <div class="route-title">Privacy</div>
                 }
               </div>
             </a>
-          }
-        }
-        @if (this.authService.isLoggedIn()) {
-          <mat-list-item tabindex="0" (click)="logout()" (keydown.enter)="logout()" (keydown.space)="logout()">
-            <div class="route-link">
-              <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
-              @if (!this.minimized) {
-                <div class="route-title">Logout</div>
+            <a class="mat-link" mat-list-item tabindex="0" target="_blank" href="terms-and-conditions.html">
+              <div class="route-link">
+                <mat-icon matTooltip="Terms and Conditions">gavel</mat-icon>
+                @if (!this.minimized) {
+                  <div class="route-title">Terms</div>
+                }
+              </div>
+            </a>
+            <mat-list-item
+              class="mat-link log-out-btn"
+              tabindex="0"
+              (click)="logout()"
+              (keydown.enter)="logout()"
+              (keydown.space)="logout()"
+            >
+              <div class="route-link">
+                <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
+                @if (!this.minimized) {
+                  <div class="route-title">Logout</div>
+                }
+              </div>
+            </mat-list-item>
+          </div>
+        </mat-nav-list>
+        <img
+          class="openCollapseSidebar"
+          src="/openSidebaricon.svg"
+          alt="icon"
+          (click)="toggleSecondSidebar()"
+          (keydown.enter)="toggleSecondSidebar()"
+          (keydown.space)="toggleSecondSidebar()"
+          tabindex="0"
+          [ngClass]="{ hidden: isSecondSidebarVisible }"
+        />
+      </div>
+      @if (['Podcasts', 'Teams', 'Jobs'].includes(itemtitle)) {
+        <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
+          <div class="sidebar-content">
+            <div class="second-header">
+              <h6>{{ itemtitle }}</h6>
+              <svg
+                class="collapseSecondSidebar"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                (click)="toggleSecondSidebar()"
+              >
+                <path
+                  d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
+                  stroke="#ADADAD"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12.5 11.6667L10.8333 10L12.5 8.33334"
+                  stroke="#ADADAD"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            @if (itemtitle === 'Podcasts') {
+              <div class="links">
+                <a [routerLink]="['/news']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">News</span>
+                </a>
+                <a [routerLink]="['/episodes']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Episodes</span>
+                </a>
+                <a [routerLink]="['/podcasts']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Podcast List</span>
+                </a>
+              </div>
+            }
+
+            @if (itemtitle === 'Teams') {
+              <div class="links">
+                <a [routerLink]="['/news']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Teams1</span>
+                </a>
+                <a [routerLink]="['/episodes']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Teams2</span>
+                </a>
+                <a [routerLink]="['/podcasts']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Teams3</span>
+                </a>
+              </div>
+            }
+            @if (itemtitle === 'Jobs') {
+              <div class="links">
+                <a [routerLink]="['/news']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Job 1</span>
+                </a>
+                <a [routerLink]="['/episodes']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Job 2</span>
+                </a>
+                <a [routerLink]="['/podcasts']" class="header-logo s-link" routerLinkActive="active">
+                  <mat-icon> rss_feed</mat-icon>
+                  <span class="website-title">Job 3</span>
+                </a>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </header>
+  } @else {
+    <div class="sidebar before-login-sidebar">
+      <div class="navbar">
+        <div class="mat-link website-logo">
+          <a href="/home" class="header-logo">
+            <img src="Capital_Copilot_Logo_Slanted.svg" aria-label="Logo" alt="Capital Copilot" class="website-icon" />
+            <span class="website-title">Capital Copilot</span>
+          </a>
+        </div>
+        <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
+          <div class="keep-up">
+            <!--
+          @if (!this.minimized) {
+          <div>
+            <div class="theme-toggle-card" tabindex="0"
+              (click)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')"
+              (keydown.enter)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')"
+              (keydown.space)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')">
+              @if (currentTheme() === 'dark') {
+              <mat-icon class="theme-icon">dark_mode</mat-icon>
+              } @else {
+              <mat-icon class="theme-icon">light_mode</mat-icon>
               }
             </div>
-          </mat-list-item>
-        }
-        @if (!this.minimized) {
-          <div>
-            <mat-button-toggle-group
-              #group="matButtonToggleGroup"
-              [(ngModel)]="currentTheme"
-              (change)="switchTheme(group.value)"
-              aria-label="Theme Toggle"
-            >
-              <mat-button-toggle value="dark" matTooltip="Dark Theme">
-                <mat-icon>dark_mode</mat-icon>
-              </mat-button-toggle>
-              <mat-button-toggle value="light" matTooltip="Light Theme">
-                <mat-icon>light_mode</mat-icon>
-              </mat-button-toggle>
-            </mat-button-toggle-group>
           </div>
-        }
-      </div>
-      <div class="push-down">
-        <a mat-list-item tabindex="0" target="_blank" href="privacy-policy.html">
-          <div class="route-link">
-            <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
-            @if (!this.minimized) {
+          }
+        -->
+            <a class="mat-link" mat-list-item [routerLink]="['/register']" routerLinkActive="active-link">
+              <div class="route-link">
+                <mat-icon matTooltip="Register">person_add</mat-icon>
+                @if (!this.minimized) {
+                  <div class="route-title">Register</div>
+                }
+              </div>
+            </a>
+            <a class="mat-link loginBtn" mat-list-item [routerLink]="['/login']" routerLinkActive="active-link">
+              <div class="route-link">
+                <mat-icon matTooltip="Sign In">login</mat-icon>
+                @if (!this.minimized) {
+                  <div class="route-title">Login</div>
+                }
+              </div>
+            </a>
+            <!--
+          <a class="mat-link" mat-list-item [routerLink]="['/about']" routerLinkActive="active-link">
+            <div class="route-link">
+              <mat-icon matTooltip="About Us">info</mat-icon>
+              @if (!this.minimized) {
+              <div class="route-title">About Us</div>
+              }
+            </div>
+          </a>
+          <a class="mat-link" mat-list-item [routerLink]="['/contact']" routerLinkActive="active-link">
+            <div class="route-link">
+              <mat-icon matTooltip="Contact">contact_support</mat-icon>
+              @if (!this.minimized) {
+              <div class="route-title">Contact</div>
+              }
+            </div>
+          </a>
+        -->
+          </div>
+          <div class="push-down">
+            <!--
+          <a class="mat-link" mat-list-item tabindex="0" target="_blank" href="privacy-policy.html">
+            <div class="route-link">
+              <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
+              @if (!this.minimized) {
               <div class="route-title">Privacy</div>
-            }
-          </div>
-        </a>
-        <a mat-list-item tabindex="0" target="_blank" href="terms-and-conditions.html">
-          <div class="route-link">
-            <mat-icon matTooltip="Terms and Conditions">gavel</mat-icon>
-            @if (!this.minimized) {
+              }
+            </div>
+          </a>
+          <a class="mat-link" mat-list-item tabindex="0" target="_blank" href="terms-and-conditions.html">
+            <div class="route-link">
+              <mat-icon matTooltip="Terms and Conditions">gavel</mat-icon>
+              @if (!this.minimized) {
               <div class="route-title">Terms</div>
-            }
+              }
+            </div>
+          </a>
+        -->
           </div>
-        </a>
-        @if (drawer.mode === 'side') {
-          <button type="button" aria-label="Hide expansion" mat-fab (click)="this.toggleMinimized()">
-            @if (this.minimized) {
-              <mat-icon aria-label="Expand menu" matTooltip="Expand Menu">arrow_menu_open</mat-icon>
-            } @else {
-              <mat-icon aria-label="Collapse menu" matTooltip="Collapse Menu">arrow_menu_close</mat-icon>
-            }
-          </button>
-        } @else {
-          <button type="button" aria-label="Hide sidenav" mat-fab (click)="drawer.toggle()">
-            @if (drawer.opened) {
-              <mat-icon aria-label="Close menu" matTooltip="Close Menu">menu_open</mat-icon>
-            } @else {
-              <mat-icon aria-label="Open menu" matTooltip="Open Menu">menu_close</mat-icon>
-            }
-          </button>
-        }
+        </mat-nav-list>
       </div>
-    </mat-nav-list>
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      @if (!drawer.opened) {
-        <img
-          src="Capital_Copilot_Logo_Slanted.svg"
-          aria-label="Side nav toggle icon"
-          alt="Capital Copilot"
-          class="website-icon"
-        />
-      }
+    </div>
+  }
+  <div class="main-content">
+    <mat-toolbar color="primary" class="toolbar-container-section">
       <div class="toolbar-container">
         <ng-container #toolbarContainer></ng-container>
         @if (this.authService.isLoggedIn()) {
           <span class="push-right">
-            <button mat-button matTooltip="{{ this.userCredits | number: '1.0-0' }}" [routerLink]="['/transactions']">
+            <button
+              class="credit-btn"
+              mat-button
+              matTooltip="{{ this.userCredits | number: '1.0-0' }}"
+              [routerLink]="['/transactions']"
+            >
               <mat-icon>account_balance_wallet</mat-icon>
-              {{ shortCredits(this.userCredits) }}
+              {{ shortCredits(this.userCredits) }} Credits
             </button>
-            <button mat-button [routerLink]="['/profile']">
-              <mat-icon>account_circle</mat-icon>
+            <button class="profile-btn" mat-button [routerLink]="['/profile']">
+              <mat-icon class="profile-icon">account_circle</mat-icon>
               {{ this.userService.userDetails()?.username }}
             </button>
           </span>
         }
       </div>
     </mat-toolbar>
-    @if (!drawer.opened) {
-      <div class="floating-button">
-        <button type="button" aria-label="Collapse sidenav" mat-fab (click)="drawer.toggle()">
-          <mat-icon aria-label="Collapse nav icon">menu_close</mat-icon>
-        </button>
-      </div>
-    }
     <div class="content-area">
-      <div class="sidenav-scroll-wrapper">
-        <div class="sidenav-content">
+      <div class="content-wrapper">
+        <div class="content">
           <ng-content></ng-content>
         </div>
       </div>
     </div>
     <mat-toolbar color="primary" class="footer">
       <p>
-        &copy; 2024-2025 Perpetuator LLC. By using Capitol Copilot, you agree to our
+        &copy; 2024-2025 Perpetuator LLC. By using Capitol Copilot, you agree to<br />
+        our
         <a tabindex="0" target="_blank" href="terms-and-conditions.html">Terms and Conditions</a>
         and
         <a tabindex="0" target="_blank" href="privacy-policy.html">Privacy Policy</a>.
       </p>
     </mat-toolbar>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+</div>

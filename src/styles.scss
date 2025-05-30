@@ -79,62 +79,50 @@
 //}
 
 // https://github.com/angular/components/blob/main/src/material/core/theming/prebuilt/cyan-orange.scss
-$dark-theme: mat.define-theme(
-  (
-    color: (
-      theme-type: dark,
-      primary: mat.$orange-palette,
-      tertiary: mat.$violet-palette,
-      //use-system-variables: true,
-      //warn: mat.$yellow-palette,
-      //accent: mat.$m2-amber-palette,
-      //secondary: mat.$blue-palette,
-      //error: mat.$red-palette,
-      //success: mat.$green-palette,
-      //warning: mat.$yellow-palette,
-      //background: mat.$m2-gray-palette,
-    ),
-    typography: (
-      brand-family: 'Lexend',
-      plain-family: 'Open Sans',
-      bold-weight: 900,
-      medium-weight: 700,
-      regular-weight: 500,
-    ),
-    density: (
-      scale: 0,
-    ),
-  )
-);
+$dark-theme: mat.define-theme((color: (theme-type: dark,
+        primary: mat.$orange-palette,
+        tertiary: mat.$violet-palette,
+        //use-system-variables: true,
+        //warn: mat.$yellow-palette,
+        //accent: mat.$m2-amber-palette,
+        //secondary: mat.$blue-palette,
+        //error: mat.$red-palette,
+        //success: mat.$green-palette,
+        //warning: mat.$yellow-palette,
+        //background: mat.$m2-gray-palette,
+      ),
+      typography: (brand-family: 'Lexend',
+        plain-family: 'Open Sans',
+        bold-weight: 900,
+        medium-weight: 700,
+        regular-weight: 500,
+      ),
+      density: (scale: 0,
+      ),
+    ));
 
 // https://github.com/angular/components/blob/main/src/material/core/theming/prebuilt/azure-blue.scss
-$light-theme: mat.define-theme(
-  (
-    color: (
-      theme-type: light,
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-      //use-system-variables: true,
-      //warn: mat.$yellow-palette,
-      //accent: mat.$m2-amber-palette,
-      //secondary: mat.$orange-palette,
-      //error: mat.$red-palette,
-      //success: mat.$green-palette,
-      //warning: mat.$yellow-palette,
-      //background: mat.$m2-gray-palette
-    ),
-    typography: (
-      brand-family: 'Lexend',
-      plain-family: 'Open Sans',
-      bold-weight: 900,
-      medium-weight: 700,
-      regular-weight: 500,
-    ),
-    density: (
-      scale: 0,
-    ),
-  )
-);
+$light-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+        //use-system-variables: true,
+        //warn: mat.$yellow-palette,
+        //accent: mat.$m2-amber-palette,
+        //secondary: mat.$orange-palette,
+        //error: mat.$red-palette,
+        //success: mat.$green-palette,
+        //warning: mat.$yellow-palette,
+        //background: mat.$m2-gray-palette
+      ),
+      typography: (brand-family: 'Lexend',
+        plain-family: 'Open Sans',
+        bold-weight: 900,
+        medium-weight: 700,
+        regular-weight: 500,
+      ),
+      density: (scale: 0,
+      ),
+    ));
 
 //@include mat.all-component-typographies($typography);
 
@@ -166,12 +154,14 @@ mat.$theme-ignore-duplication-warnings: true;
 // Keep your existing theme applications
 body.dark {
   @include mat.all-component-themes($dark-theme);
+
   //@include mat.all-component-densities($dark-theme);
   //@include mat.all-component-bases($dark-theme);
   .mat-mdc-card {
     background-color: rgba(111, 111, 111, 0.1);
     //background-color: var(--mdc-outlined-card-outline-color);
   }
+
   //font-family: "Lexend", sans-serif;
   //font-optical-sizing: auto;
   //font-weight: 400;
@@ -180,6 +170,7 @@ body.dark {
 
 body.light {
   @include mat.all-component-themes($light-theme);
+
   //@include mat.all-component-densities($light-theme);
   //@include mat.all-component-bases($light-theme);
   .mat-mdc-card {
@@ -220,6 +211,7 @@ body {
   //font-style: normal;
   //font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
 :root {
   //.mat-toolbar, .mat-toolbar h1, .mat-toolbar h2, .mat-toolbar h3, .mat-toolbar h4, .mat-toolbar h5, .mat-toolbar h6 {
   //  font-family: var(--mat-toolbar-title-text-font, var(--mat-app-title-large-font));
@@ -233,7 +225,17 @@ body {
   --md-sys-color-warning: #ffeb3b;
   --md-sys-color-error: #df4646;
   --md-sys-color-background: #f5f5f5;
-
+  --toolbar-container-background-color: #ffffff;
+  --secondary-color: #F5F5F5;
+  --secondary-dark: #F5F5F5;
+  --secondary-light: #ffffff;
+  --theme-color: #262627;
+  --border-color: #E7E7E9;
+  --secondary-400: #F5F5F5;
+  --secondary-500: #F5F5F5;
+  --primary: #F14A00;
+  --theme-yellow: #2F55EB;
+  --description-color: #767676;
   //--md-sys-color-primary-hover: #1976d2;
   //--md-sys-color-primary-visited: #1976d2;
   //--md-sys-color-secondary-hover: #f50057;
@@ -251,11 +253,277 @@ body {
   //--md-sys-color-text-icon: rgba(0, 0, 0, 0.38);
   //--md-sys-color-divider: rgba(0, 0, 0, 0.12);
 }
+
+.dark {
+  --toolbar-container-background-color: #272B32;
+  --secondary-color: #272B32;
+  --secondary-dark: #373C43;
+  --secondary-light: #373C43;
+  --theme-color: #ffffff;
+  --border-color: #ffffff1a;
+  --secondary-400: #474D55;
+  --secondary-500: #424951;
+  --description-color: #B5B5B5;
+  --theme-yellow: #F5C400;
+}
+
+.light {
+  .actionMenu {
+    button {
+      &:hover {
+        background-color: #F5F5F5 !important;
+      }
+    }
+  }
+
+  .savePodcastBtn {
+    background: #F14A00 !important;
+  }
+}
+
+.page-title {
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--theme-color);
+
+  .arrow {
+    @media screen and (max-width:576px) {
+      display: none;
+    }
+  }
+
+  .page-title-secondary {
+    font-size: 13px;
+    font-weight: 500;
+    color: #B5B5B5;
+
+    @media screen and (max-width:576px) {
+      display: none;
+    }
+  }
+}
+
+.mat-tab-group {
+  .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: var(--primary) !important
+  }
+
+  .mat-mdc-tab .mdc-tab__text-label {
+    color: var(--theme-color);
+  }
+
+  .mat-mdc-tab .mdc-tab-indicator__content--underline {
+    border-color: var(--primary) !important;
+  }
+
+  .mat-mdc-tab-label-container {
+    border-bottom-color: var(--border-color);
+  }
+
+  .mat-mdc-tab:hover .mdc-tab__ripple::before {
+    background-color: transparent;
+  }
+
+  .mat-mdc-tab-labels {
+    gap: 24px;
+  }
+
+  .mat-mdc-tab.mdc-tab {
+    padding: 0;
+    justify-content: flex-start;
+    flex-grow: 0 !important;
+    min-width: auto;
+  }
+}
+
+.mat-expansion-panel {
+  background: var(--secondary-light) !important;
+  color: var(--theme-color) !important;
+}
+
+.mat-mdc-checkbox .mat-internal-form-field {
+  color: var(--theme-color) !important;
+}
+
+.mdc-checkbox__background {
+  border-color: var(--theme-color) !important;
+}
+
+.mat-mdc-checkbox-checked .mdc-checkbox__background {
+  border-color: var(--primary) !important;
+  background-color: var(--primary) !important;
+
+  svg {
+    color: white !important;
+  }
+
+  .mdc-checkbox__mixedmark {
+    color: white !important;
+  }
+}
+
+.mdc-text-field {
+  background: var(--secondary-light) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px !important;
+
+  &.mdc-text-field--focused {
+    border-color: var(--primary);
+
+    .mdc-floating-label {
+      color: var(--primary) !important;
+      opacity: 0.7;
+    }
+  }
+
+  .mdc-floating-label {
+    color: var(--theme-color) !important;
+    opacity: 0.7;
+  }
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-error {
+    color: #FF7171;
+  }
+
+  .mat-mdc-input-element {
+    color: var(--theme-color) !important;
+    caret-color: var(--primary) !important
+  }
+
+  .mdc-line-ripple {
+    display: none;
+
+    &::before {
+      border-bottom-color: var(--border-color) !important;
+    }
+  }
+
+  &.mat-focused {
+    .mdc-line-ripple {
+      &::after {
+        border-bottom-color: var(--primary) !important;
+      }
+    }
+  }
+}
+
+.mat-mdc-dialog-surface {
+  background-color: var(--secondary-color) !important;
+  border-radius: 8px !important;
+}
+
+.mat-mdc-dialog-title {
+  color: var(--theme-color) !important;
+}
+
+.mat-app-background {
+  background-color: var(--toolbar-container-background-color);
+}
+
+div.mat-mdc-select-panel {
+  background-color: var(--secondary-light);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 12px;
+
+  .mat-mdc-option {
+    border-radius: 8px;
+
+    &.mat-mdc-option-active {
+      background-color: var(--secondary-500);
+    }
+  }
+
+  .mat-pseudo-checkbox {
+    border-color: var(--border-color);
+
+    &.mat-pseudo-checkbox-checked {
+      background-color: var(--primary);
+
+      &::after {
+        color: white;
+      }
+    }
+  }
+
+  .mdc-list-item__primary-text {
+    color: var(--theme-color) !important;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
+
+.mat-mdc-menu-panel {
+  background-color: var(--secondary-light) !important;
+  border: 1px solid var(--border-color);
+}
+
+.main-content {
+  .toolbar-container-section {
+    .push-right {
+      @media screen and (max-width: 576px) {
+        button {
+          &.credit-btn {
+            min-width: 40px !important;
+          }
+
+          .mat-icon {
+            margin-right: 0;
+          }
+
+          .mdc-button__label {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+.actionMenu {
+  background-color: var(--secondary-light) !important;
+  border-radius: 8px !important;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  min-width: 194px !important;
+
+  .mat-mdc-menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+
+    button {
+      background-color: transparent;
+      border: 0;
+      color: var(--theme-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+
+      &:hover {
+        background-color: #515459;
+      }
+    }
+  }
+}
+
 a {
   color: var(--md-sys-color-primary);
+
   &:hover {
     color: var(--md-sys-color-primary-hover);
   }
+
   &:visited {
     color: var(--md-sys-color-primary-visited);
   }

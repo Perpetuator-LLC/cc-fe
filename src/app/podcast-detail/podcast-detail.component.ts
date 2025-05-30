@@ -18,7 +18,7 @@ import { MessageComponent } from '../message/message.component';
 import { TeamsResult, TeamsService } from '../teams.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
 import {
   MatCell,
@@ -54,6 +54,8 @@ import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../v
 import { AddVoiceDialogComponent } from '../add-voice-dialog/add-voice-dialog.component';
 import { UserService } from '../user.service';
 import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-voices-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -65,6 +67,7 @@ import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-v
     MatProgressSpinner,
     ReactiveFormsModule,
     MatFormField,
+    MatFormFieldModule,
     MatButton,
     MatTable,
     MatHeaderCell,
@@ -98,6 +101,8 @@ import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-v
     MatSelect,
     MatOption,
     PodcastCategoriesComponent,
+    MatTabsModule,
+    DeletePodcastDialogComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -127,6 +132,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   voiceSearchControl = new FormControl<string>('');
   private tierFilteredVoices: Voice[] = [];
   protected filteredVoices: Voice[] = [];
+  isEditing = false;
 
   constructor(
     private fb: FormBuilder,
@@ -588,37 +594,25 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  deletePodcastDialog() {
-    const podcastName = this.podcastForm.get('name')?.value;
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        message:
-          "<h3>Removing podcast '" +
-          podcastName +
-          "' will remove all associated episodes and audio files owned by this podcast. This cannot be undone.</h3>" +
-          '<br/><br/><h2>Are you sure you want to proceed?</h2>',
-      },
+  deletePodcastDialog(): void {
+    const dialogRef = this.dialog.open(DeletePodcastDialogComponent, {
+      width: '500px',
+      data: { podcastName: this.podcastForm.get('name')?.value },
     });
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        // get confirmation from user
-        this.deletePodcast();
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.podcastsService.deletePodcast(this.podcastUuid, this.deleteConfirmation).subscribe({
+          next: () => {
+            this.messageService.success('Podcast deleted successfully');
+            this.router.navigate(['/podcasts']);
+          },
+          error: (error) => {
+            this.messageService.error(`Failed to delete podcast: ${error.message}`);
+          },
+        });
       }
     });
-  }
-
-  private deletePodcast() {
-    this.subscriptions.add(
-      this.podcastsService.deletePodcast(this.podcastUuid, this.deleteConfirmation).subscribe({
-        next: () => {
-          this.messageService.success('Podcast deleted successfully');
-          this.router.navigate(['/podcasts']);
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to delete podcast: ${err.message}`);
-        },
-      }),
-    );
   }
 
   onPodcastImageSelected(event: Event) {
@@ -780,5 +774,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       }
       // Handle cancellation or other cases if necessary
     });
+  }
+
+  finfo(voice: Voice) {
+    console.log('voice', voice);
   }
 }

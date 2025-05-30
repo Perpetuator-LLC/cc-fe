@@ -1,427 +1,519 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span>Podcast</span>
+  <span class="page-title"
+    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span>
+    <span class="page-title-secondary">All Podcast List > {{ podcastForm.get('name')?.value }}</span></span
+  >
 </ng-template>
 <app-message></app-message>
 
-<mat-card class="podcast-card">
-  <mat-card-content>
-    <div [hidden]="!loading">
-      <div class="loading-spinner">
-        <mat-spinner></mat-spinner>
+<div class="podcast-detail-page">
+  <div class="detail-header">
+    <div class="top-header">
+      <div class="title">
+        <h2>{{ podcastForm.get('name')?.value }}</h2>
+        <p>{{ podcastForm.get('intro')?.value }}</p>
+      </div>
+      <div class="buttons">
+        <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
+          <mat-icon>delete</mat-icon>
+          Delete Podcast
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          class="publish-btn"
+          type="button"
+          (click)="savePodcast()"
+          [disabled]="!podcastForm.dirty || !podcastForm.valid"
+        >
+          <mat-icon>publish</mat-icon>
+          Publish
+        </button>
       </div>
     </div>
+    <div class="bottom-header">
+      <div class="status-summary">
+        <div class="status-item">
+          <span class="status-label">Team</span>
+          <span class="status-value">
+            {{ podcastForm.get('team')?.value?.name || 'No team selected' }}
+          </span>
+        </div>
 
-    <form [formGroup]="podcastForm" (ngSubmit)="savePodcast()">
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Podcast Name</mat-label>
-          <input matInput formControlName="name" />
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Team</mat-label>
-          <mat-select formControlName="team" [compareWith]="compareTeams">
-            @for (team of teams; track team.uuid) {
-              <mat-option [value]="team">{{ team.name }}</mat-option>
-            }
-          </mat-select>
-          @if (loadingTeams) {
-            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-          }
-        </mat-form-field>
-      </div>
+        <div class="status-item">
+          <span class="status-label">Response</span>
+          <span class="status-badge enable">Enable</span>
+        </div>
 
-      <mat-divider></mat-divider>
-
-      <div class="section-header">
-        <h2>Transcript</h2>
-      </div>
-
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Intro</mat-label>
-          <textarea matInput formControlName="intro" class="textarea-small"></textarea>
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Transcript Prompt</mat-label>
-          <textarea matInput formControlName="prompt" class="textarea-large"></textarea>
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Outro</mat-label>
-          <textarea matInput formControlName="outro" class="textarea-small"></textarea>
-        </mat-form-field>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <div class="section-header">
-        <h2>Audio</h2>
-      </div>
-
-      <!-- Replace the existing voice selection section in podcast-detail.component.html -->
-      <div class="member-row voice-controls-container">
-        <mat-form-field appearance="fill" class="voice-filter-item tier-filter">
-          <mat-label>Filter by Tier</mat-label>
-          <mat-select [formControl]="voiceFilter" multiple>
-            @for (tier of voiceTiers; track tier) {
-              <mat-option [value]="tier">
-                {{ tierToString(tier) }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="fill" class="voice-filter-item voice-search">
-          <mat-label>Search Voices</mat-label>
-          <input matInput [formControl]="voiceSearchControl" placeholder="Enter name" />
-        </mat-form-field>
-
-        <div class="voice-filter-item voice-buttons">
-          <button mat-button color="primary" (click)="applyVoiceFilters()" type="button">Apply Filters</button>
-          <button mat-button (click)="clearVoiceFilters()" type="button">Clear Filters</button>
-          <button mat-raised-button color="accent" (click)="openAddVoiceDialog()" type="button">
-            <mat-icon>add</mat-icon> Add Voice
-          </button>
-          @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
-            <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
-          }
+        <div class="status-item">
+          <span class="status-label">Last Created</span>
+          <span class="status-value">2 days ago</span>
         </div>
       </div>
-
-      <div class="member-row">
-        <mat-form-field appearance="fill" class="voice-select">
-          <mat-label>Voice</mat-label>
-          <mat-select formControlName="voice" [compareWith]="compareVoices">
-            <mat-select-trigger>
-              {{ displayVoice(podcastForm.get('voice')?.value) }}
-            </mat-select-trigger>
-            <mat-option [value]="null">No Voice Selected</mat-option>
-            <!-- *** Use filteredVoices here *** -->
-            @for (voice of filteredVoices; track voice.uuid) {
-              <mat-option [value]="voice" class="voice-option">
-                <div class="voice-option-content">
-                  <button
-                    mat-icon-button
-                    type="button"
-                    [disabled]="!voice.sampleUrl"
-                    (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
-                    (mouseleave)="stopVoiceSample()"
-                    (click)="$event.stopPropagation()">
-                    <mat-icon>sound_sampler</mat-icon>
-                  </button>
-                  {{ getVoiceDisplayName(voice) }}
-                </div>
-              </mat-option>
-            }
-          </mat-select>
-          @if (loadingVoices) {
-            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-          }
-        </mat-form-field>
-        <i>CPM is an approximation to Credits Per Minute of audio or Credits Per One-Thousand Characters</i>
-
-        <!-- Hidden audio element for playing samples -->
-        <audio #audioPlayer></audio>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <div class="section-header">
-        <h2>Metadata</h2>
-      </div>
-
-      <span>This information will show up in podcasting platforms like Apple Podcasts, Spotify, etc.</span>
-
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Owner Email</mat-label>
-          <input matInput formControlName="ownerEmail" />
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Owner Name</mat-label>
-          <input matInput formControlName="ownerName" />
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Owner Link</mat-label>
-          <input matInput formControlName="ownerLink" />
-        </mat-form-field>
-      </div>
-      <div class="member-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Podcast Description</mat-label>
-          <textarea matInput formControlName="description" class="textarea-medium"></textarea>
-        </mat-form-field>
-      </div>
-
-      <div class="section-header">
-        <h3>Categories</h3>
-      </div>
-
-      <app-podcast-categories formControlName="categories" [pendingCategories]="lastSubmittedCategories"/>
-
-      <mat-divider></mat-divider>
-
-      <div class="section-header">
-        <h2>Publishing</h2>
-      </div>
-
-      <div>
-        To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot and a channel. See:
-        <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
-      </div>
-      <div class="member-row">
-        <div>
-          <mat-form-field
-            appearance="fill"
-            matTooltip="Bot Token is not readable for security reasons. To update it, just provide it."
-          >
-            <mat-label>Telegram Bot Token</mat-label>
-            <input matInput formControlName="tgBotToken" />
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field
-            appearance="fill"
-            matTooltip="Channel IDs must prefix '-100', if it is not provided it will be automatically added."
-          >
-            <mat-label>Telegram Channel ID</mat-label>
-            <input matInput formControlName="tgChannelId" />
-          </mat-form-field>
-        </div>
-        <div class="expand-width">
-          <mat-form-field appearance="fill">
-            <mat-label>Telegram Response</mat-label>
-            <div class="input-with-button">
-              <input
-                matInput
-                formControlName="tgResponse"
-                readonly
-                matTooltip="{{ podcastForm.get('tgResponse')?.value }}"
-              />
-              <button
-                mat-icon-button
-                color="primary"
-                type="button"
-                (click)="refreshTelegram()"
-                matTooltip="Connect to Telegram to check Bot Token and Channel ID."
-              >
-                <mat-icon>refresh</mat-icon>
-              </button>
+    </div>
+  </div>
+  <mat-card class="podcast-card">
+    <mat-tab-group class="mat-tab-group">
+      <mat-tab label="Podcast Information">
+        <mat-card-content>
+          <div [hidden]="!loading">
+            <div class="loading-spinner">
+              <mat-spinner></mat-spinner>
             </div>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="member-row">
-        <div>
-          <mat-checkbox formControlName="enabled" matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line.">Podcast Enabled</mat-checkbox>
-        </div>
-        <div>
-          <mat-form-field appearance="fill">
-            <mat-label>Podcast Slug</mat-label>
-            <input matInput formControlName="slug" />
-          </mat-form-field>
-        </div>
-        <div>
-          <button
-            mat-fab
-            color="primary"
-            type="button"
-            extended
-            (click)="copyPodcastUrl()"
-            [disabled]="urlDisabled"
-          >
-            <mat-icon>content_copy</mat-icon>
-            Copy Podcast Podcast (RSS) URL
-          </button>
-        </div>
-      </div>
-
-<!--      <div class="member-row">-->
-<!--        <div>-->
-<!--          <button mat-flat-button color="primary" type="submit" [disabled]="!podcastForm.dirty">Save Podcast Settings</button>-->
-<!--        </div>-->
-<!--      </div>-->
-      <mat-divider></mat-divider>
-
-      <div class="section-header">
-        <h2>Podcast Image</h2>
-      </div>
-
-      <div class="member-row">
-        <div class="file-input-wrapper">
-          <div>
-            @if (imageUrl) {
-              <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
-            } @else {
-              <h3>No Podcast Image Added.</h3>
-            }
           </div>
 
-          <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
-            Upload Podcast Image
-          </button>
-          @if (selectedFile) {
-            <mat-spinner />
-            <span>Uploading: {{ selectedFile.name }}</span>
-          }
+          <form [formGroup]="podcastForm">
+            <div class="member-row">
+              <div class="file-input-wrapper">
+                <div class="image-preview">
+                  @if (imageUrl) {
+                    <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+                  } @else {
+                    <div></div>
+                  }
+                </div>
 
-          <input
-            #fileInput
-            type="file"
-            formControlName="image"
-            (change)="onPodcastImageSelected($event)"
-            accept="image/*"
-            hidden
-          />
-        </div>
+                @if (selectedFile) {
+                  <div class="upload-progress upload-btn">
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span>Uploading: {{ selectedFile.name }}</span>
+                  </div>
+                } @else {
+                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
+                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g clip-path="url(#clip0_210_6192)">
+                        <path
+                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
+                          fill="currentColor"
+                        />
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_210_6192">
+                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                    Upload Podcast Featured Image
+                  </button>
 
-        <div>
-          @if (imageUrl) {
-            <div class="image-container">
-              <button mat-icon-button color="warn" type="button" (click)="deletePodcastImage()" matTooltip="Delete image">
-                <mat-icon>delete</mat-icon>
-              </button>
+                  <span class="desc">Upload image file (PNG/JPG, max size: 100KB)</span>
+                }
+
+                <input
+                  #fileInput
+                  type="file"
+                  formControlName="image"
+                  (change)="onPodcastImageSelected($event)"
+                  accept="image/*"
+                  hidden
+                />
+              </div>
+
+              <div class="image-actions">
+                @if (imageUrl) {
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="deletePodcastImage()"
+                    matTooltip="Delete image"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
             </div>
-          }
-        </div>
-      </div>
 
-      <mat-divider></mat-divider>
+            <div class="form-group">
+              <div class="member-row">
+                <mat-form-field appearance="fill" class="custom-dark-field">
+                  <mat-label>Podcast Name</mat-label>
+                  <input matInput formControlName="name" required />
+                  @if (podcastForm.get('name')?.invalid && podcastForm.get('name')?.touched) {
+                    <mat-error>Podcast name is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="member-row">
+                <mat-form-field appearance="fill" class="custom-dark-field">
+                  <mat-label>Team</mat-label>
+                  <mat-select formControlName="team" [compareWith]="compareTeams" required>
+                    @for (team of teams; track team.uuid) {
+                      <mat-option [value]="team">{{ team.name }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (loadingTeams) {
+                    <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                  }
+                  @if (podcastForm.get('team')?.invalid && podcastForm.get('team')?.touched) {
+                    <mat-error>Team selection is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="member-row">
+              <div style="text-align: right">
+                <mat-checkbox
+                  formControlName="enabled"
+                  matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
+                  >Podcast Enabled</mat-checkbox
+                >
+              </div>
+              <div class="slug-input">
+                <mat-form-field appearance="fill" style="width: 100%">
+                  <mat-label>Podcast Slug</mat-label>
+                  <input matInput formControlName="slug" [disabled]="!podcastForm.get('enabled')?.value" />
+                  @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {
+                    <mat-error>Slug is required when podcast is enabled</mat-error>
+                  }
+                </mat-form-field>
+                <div class="url-btn-div">
+                  <button
+                    class="url-btn"
+                    mat-fab
+                    color="primary"
+                    type="button"
+                    extended
+                    (click)="copyPodcastUrl()"
+                    [disabled]="urlDisabled"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                    Copy Podcast URL
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
 
-      <div class="rss-feeds-section">
-        <h3>RSS Feeds</h3>
-        <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
-          <!-- RSS Feed URL Column -->
-          <ng-container matColumnDef="url">
-            <mat-header-cell *matHeaderCellDef> RSS Feed URL </mat-header-cell>
-            <mat-cell *matCellDef="let feed"> {{ feed.url }} </mat-cell>
-          </ng-container>
+      <mat-tab label="Transcript">
+        <mat-card-content>
+          <form [formGroup]="podcastForm">
+            <div class="member-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Intro</mat-label>
+                <textarea
+                  matInput
+                  formControlName="intro"
+                  class="textarea-small"
+                  placeholder="Enter podcast intro text"
+                ></textarea>
+              </mat-form-field>
+            </div>
+            <div class="member-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Outro</mat-label>
+                <textarea
+                  matInput
+                  formControlName="outro"
+                  class="textarea-small"
+                  placeholder="Enter podcast outro text"
+                ></textarea>
+              </mat-form-field>
+            </div>
+            <div class="member-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Transcript Prompt</mat-label>
+                <textarea
+                  matInput
+                  formControlName="prompt"
+                  class="textarea-large"
+                  placeholder="Enter transcript prompt"
+                ></textarea>
+              </mat-form-field>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
 
-          <!-- Delete Button Column -->
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
-            <mat-cell *matCellDef="let feed" class="actions-cell">
-              <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-cell>
-          </ng-container>
+      <mat-tab label="Audio">
+        <mat-card-content>
+          <form [formGroup]="podcastForm">
+            <div class="voice-info">
+              <p>
+                <mat-icon>info</mat-icon>CPM is an approximation to Credits Per Minute of audio or Credits Per
+                One-Thousand Characters
+              </p>
+            </div>
+            <div class="member-row voice-controls-container">
+              <mat-form-field appearance="fill" class="voice-filter-item voice-search">
+                <mat-label>Search Voices</mat-label>
+                <input matInput [formControl]="voiceSearchControl" placeholder="Enter name" />
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="voice-filter-item tier-filter">
+                <mat-label>Filter by Tier</mat-label>
+                <mat-select [formControl]="voiceFilter" multiple>
+                  @for (tier of voiceTiers; track tier) {
+                    <mat-option [value]="tier">
+                      {{ tierToString(tier) }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-          <!-- Header and Row Declarations -->
-          <mat-header-row *matHeaderRowDef="rssFeedsDisplayedColumns"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: rssFeedsDisplayedColumns"></mat-row>
-        </mat-table>
-        @if (rssFeedLoading) {
-          <mat-spinner diameter="20"></mat-spinner>
-        }
-        <div>
-          <button mat-raised-button color="primary" type="button" (click)="openAddRssFeedDialog()">Add RSS Feed</button>
-        </div>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+              <div class="voice-filter-item voice-buttons">
+                <button mat-button class="apply-btn" color="primary" (click)="applyVoiceFilters()" type="button">
+                  Apply Filters
+                </button>
+                <button mat-button class="clear-btn" (click)="clearVoiceFilters()" type="button">Clear Filters</button>
+                <button
+                  mat-raised-button
+                  class="add-voice-btn"
+                  color="accent"
+                  (click)="openAddVoiceDialog()"
+                  type="button"
+                >
+                  <mat-icon>add</mat-icon> Add Voice
+                </button>
+                @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
+                  <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
+                }
+              </div>
+            </div>
 
-<!--<mat-card class="members-card">-->
-<!--  <mat-card-header>-->
-<!--    <mat-card-title> Members </mat-card-title>-->
-<!--  </mat-card-header>-->
+            <div class="member-row">
+              <mat-form-field appearance="fill" class="voice-select">
+                <mat-label>Voice</mat-label>
+                <mat-select formControlName="voice" [compareWith]="compareVoices">
+                  <mat-select-trigger>
+                    {{ displayVoice(podcastForm.get('voice')?.value) }}
+                  </mat-select-trigger>
+                  <mat-option [value]="null">No Voice Selected</mat-option>
+                  @for (voice of filteredVoices; track voice.uuid) {
+                    <mat-option [value]="voice" class="voice-option">
+                      <div class="voice-option-content">
+                        <button
+                          mat-icon-button
+                          type="button"
+                          [disabled]="!voice.sampleUrl"
+                          (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
+                          (mouseleave)="stopVoiceSample()"
+                          (click)="$event.stopPropagation()"
+                        >
+                          <mat-icon>sound_sampler</mat-icon>
+                        </button>
+                        {{ getVoiceDisplayName(voice) }}
+                      </div>
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (loadingVoices) {
+                  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                }
+              </mat-form-field>
 
-<!--  <mat-card-content>-->
-<!--    <form [formGroup]="newUserForm" (ngSubmit)="addOrUpdateUserInPodcast()">-->
-<!--      <div class="member-row">-->
-<!--        <div>-->
-<!--          <app-user-autocomplete-->
-<!--            #autocomplete-->
-<!--            [users]="allUsers"-->
-<!--            (userSelected)="onUserSelected($event)"-->
-<!--          ></app-user-autocomplete>-->
-<!--        </div>-->
-<!--        <div>-->
-<!--          <mat-form-field>-->
-<!--            <mat-label>Role</mat-label>-->
-<!--            <mat-select formControlName="role">-->
-<!--              @for (role of supportedRoles; track role) {-->
-<!--                <mat-option value="{{ role }}">{{ role | titlecase }}</mat-option>-->
-<!--              }-->
-<!--            </mat-select>-->
-<!--          </mat-form-field>-->
-<!--        </div>-->
-<!--        <div>-->
-<!--          <button mat-flat-button color="primary" type="submit">Add or Update User</button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </form>-->
+              <audio #audioPlayer></audio>
+            </div>
+            <div class="member-row">
+              <div class="voice-list" formControlName="voice">
+                @for (voice of filteredVoices; track voice.uuid) {
+                  <div
+                    class="voice-card"
+                    (click)="finfo(voice)"
+                    (keydown.enter)="finfo(voice)"
+                    (keydown.space)="finfo(voice)"
+                    tabindex="0"
+                    role="button"
+                    [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
+                  >
+                    <button
+                      mat-icon-button
+                      type="button"
+                      [disabled]="!voice.sampleUrl"
+                      (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
+                      (mouseleave)="stopVoiceSample()"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <mat-icon>graphic_eq</mat-icon>
+                    </button>
+                    <div class="voice-name">{{ getVoiceDisplayName(voice) }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
 
-<!--    <mat-table [dataSource]="podcastForm.get('members')?.value || []">-->
-<!--      &lt;!&ndash; Username Column &ndash;&gt;-->
-<!--      <ng-container matColumnDef="username">-->
-<!--        <mat-header-cell *matHeaderCellDef> Username </mat-header-cell>-->
-<!--        <mat-cell *matCellDef="let member">-->
-<!--          {{ member.user.username }}-->
-<!--        </mat-cell>-->
-<!--      </ng-container>-->
+      <mat-tab label="Metadata">
+        <mat-card-content>
+          <form [formGroup]="podcastForm">
+            <div class="voice-info">
+              <p>
+                <mat-icon>info</mat-icon>This information will show up in podcasting platforms like Apple Podcasts,
+                Spotify, etc
+              </p>
+            </div>
 
-<!--      &lt;!&ndash; Role Column &ndash;&gt;-->
-<!--      <ng-container matColumnDef="role">-->
-<!--        <mat-header-cell *matHeaderCellDef> Role </mat-header-cell>-->
-<!--        <mat-cell *matCellDef="let member">-->
-<!--          {{ member.role | titlecase }}-->
-<!--        </mat-cell>-->
-<!--      </ng-container>-->
+            <div class="form-group">
+              <div class="member-row">
+                <mat-form-field appearance="fill">
+                  <mat-label>Owner Name</mat-label>
+                  <input matInput formControlName="ownerName" />
+                </mat-form-field>
+              </div>
+              <div class="member-row">
+                <mat-form-field appearance="fill">
+                  <mat-label>Owner Email</mat-label>
+                  <input matInput formControlName="ownerEmail" type="email" />
+                  @if (podcastForm.get('ownerEmail')?.invalid && podcastForm.get('ownerEmail')?.touched) {
+                    <mat-error>Please enter a valid email address</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
 
-<!--      &lt;!&ndash; Actions Column &ndash;&gt;-->
-<!--      <ng-container matColumnDef="actions">-->
-<!--        <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>-->
-<!--        <mat-cell *matCellDef="let member">-->
-<!--          <button mat-icon-button color="warn" type="button" (click)="removeUserFromPodcast(member.user.id)">-->
-<!--            <mat-icon>delete</mat-icon>-->
-<!--          </button>-->
-<!--        </mat-cell>-->
-<!--      </ng-container>-->
+            <div class="member-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Owner Link</mat-label>
+                <input matInput formControlName="ownerLink" type="url" />
+                @if (podcastForm.get('ownerLink')?.invalid && podcastForm.get('ownerLink')?.touched) {
+                  <mat-error>Please enter a valid URL</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="member-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Podcast Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="description"
+                  class="textarea-medium"
+                  placeholder="Enter podcast description"
+                ></textarea>
+              </mat-form-field>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
 
-<!--      &lt;!&ndash; Header and Row Declarations &ndash;&gt;-->
-<!--      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>-->
-<!--      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>-->
-<!--    </mat-table>-->
-<!--  </mat-card-content>-->
-<!--</mat-card>-->
+      <mat-tab label="Categories">
+        <mat-card-content>
+          <form [formGroup]="podcastForm">
+            <div class="categories-info">
+              <p>
+                Select categories that best describe your podcast content. These categories help listeners find your
+                podcast in directories.
+              </p>
+            </div>
 
-<mat-card class="danger-zone">
-  <mat-card-header>
-    <mat-card-title> Danger Zone </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <mat-accordion>
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title> Delete Podcast </mat-panel-title>
-          <mat-panel-description> This action is irreversible. </mat-panel-description>
-        </mat-expansion-panel-header>
-        <p>Are you sure you want to delete this podcast?</p>
-        <div class="action-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Delete Confirmation</mat-label>
-            <input
-              matInput
-              placeholder="Type podcast name '{{ podcastForm.get('name')?.value }}' to confirm"
-              [(ngModel)]="deleteConfirmation"
-            />
-          </mat-form-field>
-          <button mat-flat-button color="warn" type="button" (click)="deletePodcastDialog()">Delete Podcast</button>
-        </div>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </mat-card-content>
-</mat-card>
+            <app-podcast-categories formControlName="categories" [pendingCategories]="lastSubmittedCategories" />
+          </form>
+        </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="Publishing">
+        <mat-card-content>
+          <form [formGroup]="podcastForm">
+            <div class="voice-info">
+              <p>
+                <mat-icon>info</mat-icon>To get the Telegram Bot Token and Channel ID, you need to create a Telegram bot
+                and a channel. See:
+                <a href="https://core.telegram.org/bots#6-botfather" target="_blank">Create a Telegram bot</a>
+              </p>
+            </div>
+            <div class="form-group">
+              <div class="member-row">
+                <mat-form-field
+                  appearance="fill"
+                  matTooltip="Bot Token is not readable for security reasons. To update it, just provide it."
+                >
+                  <mat-label>Telegram Bot Token</mat-label>
+                  <input matInput formControlName="tgBotToken" />
+                </mat-form-field>
+              </div>
+              <div class="member-row">
+                <mat-form-field
+                  appearance="fill"
+                  matTooltip="Channel IDs must prefix '-100', if it is not provided it will be automatically added."
+                >
+                  <mat-label>Telegram Channel ID</mat-label>
+                  <input matInput formControlName="tgChannelId" />
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="member-row">
+              <div class="expand-width">
+                <mat-form-field appearance="fill">
+                  <mat-label>Telegram Response</mat-label>
+                  <div class="input-with-button">
+                    <input
+                      matInput
+                      formControlName="tgResponse"
+                      readonly
+                      matTooltip="{{ podcastForm.get('tgResponse')?.value }}"
+                    />
+                  </div>
+                </mat-form-field>
+                <div class="url-btn-div">
+                  <button
+                    class="url-btn"
+                    mat-fab
+                    color="primary"
+                    type="button"
+                    extended
+                    (click)="refreshTelegram()"
+                    matTooltip="Connect to Telegram to check Bot Token and Channel ID."
+                  >
+                    <mat-icon>refresh</mat-icon>
+                    Reload
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="RSS Feeds">
+        <mat-card-content>
+          <form [formGroup]="podcastForm" class="rss-form">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px">
+              <div class="voice-info">
+                <p style="margin-bottom: 0">
+                  <mat-icon>info</mat-icon>Add RSS feeds to import content into your podcast. Each feed will be checked
+                  periodically for new episodes.
+                </p>
+              </div>
+              <div class="rss-actions">
+                <button mat-raised-button color="primary" type="button" (click)="openAddRssFeedDialog()">
+                  <mat-icon>add</mat-icon>
+                  Add RSS Feed
+                </button>
+              </div>
+            </div>
+
+            <div class="rss-feeds-section">
+              <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
+                <!-- RSS Feed URL Column -->
+                <ng-container matColumnDef="url">
+                  <mat-header-cell *matHeaderCellDef> RSS Feed URL </mat-header-cell>
+                  <mat-cell *matCellDef="let feed"> {{ feed.url }} </mat-cell>
+                </ng-container>
+
+                <!-- Delete Button Column -->
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
+                  <mat-cell *matCellDef="let feed" class="actions-cell">
+                    <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-cell>
+                </ng-container>
+
+                <!-- Header and Row Declarations -->
+                <mat-header-row *matHeaderRowDef="rssFeedsDisplayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: rssFeedsDisplayedColumns"></mat-row>
+              </mat-table>
+              @if (rssFeedLoading) {
+                <mat-spinner diameter="20"></mat-spinner>
+              }
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>
