@@ -17,6 +17,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -34,6 +36,10 @@ import { CreditService } from '../credit.service';
 import { Job, JobService, JobStatus } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MessageService } from '../message.service';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatDialog } from '@angular/material/dialog';
+import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
+import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
 
 @Component({
   selector: 'app-layout',
@@ -42,6 +48,7 @@ import { MessageService } from '../message.service';
   standalone: true,
   imports: [
     AsyncPipe,
+    SvgIconComponent,
     CookieBannerComponent,
     FormsModule,
     MatButtonModule,
@@ -49,6 +56,8 @@ import { MessageService } from '../message.service';
     MatButtonToggleGroup,
     MatIconModule,
     MatListModule,
+    MatMenuModule,
+    MatSlideToggleModule,
     MatSidenavModule,
     MatToolbarModule,
     RouterLink,
@@ -86,6 +95,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     private creditService: CreditService,
     private jobService: JobService,
     private messageService: MessageService,
+    private dialog: MatDialog,
   ) {
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
@@ -213,5 +223,23 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
 
   toggleSecondSidebar() {
     this.isSecondSidebarVisible = !this.isSecondSidebarVisible;
+  }
+
+  openTermsModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(TermsAndConditionsModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
+  }
+
+  openPrivacyModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(PrivacyPolicyModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
   }
 }

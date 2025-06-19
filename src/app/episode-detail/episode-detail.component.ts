@@ -22,6 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 @Component({
   selector: 'app-episode-detail',
@@ -47,6 +48,7 @@ import { FetchPolicy } from '@apollo/client';
     ReactiveFormsModule,
     RouterLink,
     MatAnchor,
+    SvgIconComponent,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',

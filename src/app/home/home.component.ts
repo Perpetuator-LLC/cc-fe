@@ -2,28 +2,57 @@
 import { MatCard, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
 import { AuthService } from '../auth.service';
-import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef, OnInit } from '@angular/core';
 import p5 from 'p5';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MatCard, MatCardHeader, MatCardContent, MatCardTitle, MatCardSubtitle, MatButton, RouterLink],
+  imports: [
+    CommonModule,
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatButton,
+    RouterLink,
+    MatIcon,
+    SvgIconComponent,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent implements AfterViewInit, OnDestroy {
+export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
   protected isLoggedIn = this.authService.isLoggedIn;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild('p5Container', { static: true }) p5Container!: ElementRef;
   private p5Instance!: p5;
 
+  gridPodcasts: PodcastsResult[] = [];
+
   constructor(
     private toolbarService: ToolbarService,
     protected authService: AuthService,
+    private podcastsService: PodcastsService,
   ) {}
+
+  ngOnInit(): void {
+    this.podcastsService.getPodcasts(3).subscribe({
+      next: (result) => {
+        this.gridPodcasts = result.podcasts;
+      },
+      error: () => {
+        this.gridPodcasts = [];
+      },
+    });
+  }
 
   ngAfterViewInit() {
     const viewContainerRef = this.toolbarService.getViewContainerRef();

@@ -6,60 +6,60 @@
   >
 </ng-template>
 <app-message></app-message>
-<mat-card class="create-podcast-card">
-  <mat-card-content class="content-header">
-    <div class="title">
-      <h3>All Podcasts</h3>
-      <span>{{ podcasts.length }} podcasts</span>
-    </div>
-    <button mat-flat-button color="primary" type="button" (click)="createPodcast()">+ Create Podcast</button>
-  </mat-card-content>
-</mat-card>
+@if (loading) {
+  <div class="loading-spinner">
+    <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+  </div>
+} @else if (podcasts.length === 0) {
+  <h2>No podcasts found.</h2>
+} @else {
+  <mat-card class="create-podcast-card">
+    <mat-card-content class="content-header">
+      <div class="title">
+        <h3>All Podcasts</h3>
+        <span>{{ podcasts.length }} podcasts</span>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="createPodcast()">+ Create Podcast</button>
+    </mat-card-content>
+  </mat-card>
 
-<div class="middle-card">
-  <div class="table-controls">
-    <div class="search-filter">
-      <div class="input-search-div">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput placeholder="Search by podcast name" />
+  <div class="middle-card">
+    <div class="table-controls">
+      <div class="search-filter">
+        <div class="input-search-div">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search by podcast name" disabled="" />
+        </div>
+
+        <button mat-flat-button class="filter-button" disabled="">
+          <mat-icon>filter_list</mat-icon>
+          Filter
+        </button>
       </div>
 
-      <button mat-flat-button class="filter-button">
-        <mat-icon>filter_list</mat-icon>
-        Filter
-      </button>
+      <div class="view-toggles">
+        <button mat-flat-button class="manage-btn" [matMenuTriggerFor]="columnMenu">
+          <mat-icon>view_column</mat-icon>
+          Manage Column
+        </button>
+        <mat-menu #columnMenu="matMenu" class="column-menu">
+          <div class="column-menu-content">
+            @for (column of allColumns; track column.id) {
+              <mat-checkbox [(ngModel)]="column.selected" (change)="updateDisplayedColumns()">
+                {{ column.label }}
+              </mat-checkbox>
+            }
+          </div>
+        </mat-menu>
+        <button class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
+          <app-svg-icon icon="grid"></app-svg-icon>
+        </button>
+        <button class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
+          <app-svg-icon icon="list"></app-svg-icon>
+        </button>
+      </div>
     </div>
 
-    <div class="view-toggles">
-      <button mat-flat-button class="manage-btn" [matMenuTriggerFor]="columnMenu">
-        <mat-icon>view_column</mat-icon>
-        Manage Column
-      </button>
-      <mat-menu #columnMenu="matMenu" class="column-menu">
-        <div class="column-menu-content">
-          @for (column of allColumns; track column.id) {
-            <mat-checkbox [(ngModel)]="column.selected" (change)="updateDisplayedColumns()">
-              {{ column.label }}
-            </mat-checkbox>
-          }
-        </div>
-      </mat-menu>
-      <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
-        <mat-icon>grid_view</mat-icon>
-      </button>
-      <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
-        <mat-icon>list</mat-icon>
-      </button>
-    </div>
-  </div>
-
-  @if (loading) {
-    <div class="loading-spinner">
-      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-    </div>
-  } @else if (podcasts.length === 0) {
-    <h2>No podcasts found.</h2>
-  } @else {
     <div class="podcasts-container">
       @if (!isGridView) {
         <table mat-table [dataSource]="dataSource" matSort>
@@ -68,7 +68,11 @@
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Podcast Name</th>
             <td mat-cell *matCellDef="let podcast">
               <div class="p_name">
-                <img src="/image.png" alt="img" />
+                @if (podcast.imageUrl) {
+                  <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+                } @else {
+                  <img src="/image.png" alt="img" />
+                }
                 <div class="name">
                   <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
                     {{ podcast.name }}
@@ -115,16 +119,22 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let podcast">
-              <button mat-icon-button [matMenuTriggerFor]="podcastActionsMenu" aria-label="Podcast actions">
+              <button
+                class="action-btn"
+                style="color: var(--theme-color)"
+                mat-icon-button
+                [matMenuTriggerFor]="podcastActionsMenu"
+                aria-label="Podcast actions"
+              >
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
                 <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
-                  <mat-icon>edit</mat-icon>
+                  <app-svg-icon icon="edit"></app-svg-icon>
                   <span>Edit</span>
                 </button>
                 <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
-                  <mat-icon>delete</mat-icon>
+                  <app-svg-icon icon="delete"></app-svg-icon>
                   <span>Delete</span>
                 </button>
               </mat-menu>
@@ -163,16 +173,21 @@
                       {{ podcast.name }}
                     </a>
                     <div>
-                      <button mat-icon-button [matMenuTriggerFor]="podcastActionsMenu" aria-label="Podcast actions">
+                      <button
+                        class="action-btn"
+                        mat-icon-button
+                        [matMenuTriggerFor]="podcastActionsMenu"
+                        aria-label="Podcast actions"
+                      >
                         <mat-icon>more_vert</mat-icon>
                       </button>
                       <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
                         <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
-                          <mat-icon>edit</mat-icon>
+                          <app-svg-icon icon="edit"></app-svg-icon>
                           <span>Edit</span>
                         </button>
                         <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
-                          <mat-icon>delete</mat-icon>
+                          <app-svg-icon icon="delete"></app-svg-icon>
                           <span>Delete</span>
                         </button>
                       </mat-menu>
@@ -201,5 +216,5 @@
         </mat-paginator>
       }
     </div>
-  }
-</div>
+  </div>
+}

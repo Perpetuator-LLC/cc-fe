@@ -1,75 +1,195 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <h1>Episodes</h1>
+  <span class="page-title"
+    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">Episodes</span></span
+  >
 </ng-template>
 
 <app-message></app-message>
 
-<mat-card>
-  <mat-card-content>
-    <div [hidden]="!loadingEpisodes">
-      <mat-spinner></mat-spinner>
+@if (loadingEpisodes) {
+  <div class="loading-spinner">
+    <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+  </div>
+} @else if (episodes.length === 0) {
+  <h2>No podcasts found.</h2>
+} @else {
+  <mat-card class="create-episode-card">
+    <mat-card-content class="content-header">
+      <div class="title">
+        <h3>All Episodes</h3>
+        <span>{{ episodes.length }} Episodes</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <div class="middle-card">
+    <div class="table-controls">
+      <div class="search-filter">
+        <div class="input-search-div">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search by podcast name" disabled="" />
+        </div>
+
+        <button mat-flat-button class="filter-button" disabled="">
+          <mat-icon>filter_list</mat-icon>
+          Filter
+        </button>
+      </div>
+
+      <div class="view-toggles">
+        <button class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
+          <app-svg-icon icon="grid"></app-svg-icon>
+        </button>
+        <button class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
+          <app-svg-icon icon="list"></app-svg-icon>
+        </button>
+      </div>
     </div>
+    <div class="episodes-container">
+      @if (!isGridView) {
+        <div [hidden]="loadingEpisodes">
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            (matSortChange)="sortChange($event)"
+            matSort
+            matSortActive="date"
+            matSortDirection="desc"
+            matSortDisableClear
+          >
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>Episode Title</th>
+              <td mat-cell *matCellDef="let episode">
+                <div class="episode-title">
+                  <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title | slice: 0 : 100 }}</a>
+                  <div class="episode-date">{{ episode.date | date: 'short' : 'local' }}</div>
+                </div>
+              </td>
+            </ng-container>
 
-    <div [hidden]="loadingEpisodes">
-      <table
-        mat-table
-        [dataSource]="dataSource"
-        (matSortChange)="sortChange($event)"
-        matSort
-        matSortActive="date"
-        matSortDirection="desc"
-        matSortDisableClear
-      >
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-          <td mat-cell *matCellDef="let episode">
-            {{ episode.date | date: 'short' : 'local' }}
-          </td>
-        </ng-container>
+            <ng-container matColumnDef="podcast">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-form-field [hidden]="loadingPodcasts">
+                  <mat-label>Podcast</mat-label>
+                  <mat-select [(value)]="selectedPodcast" (selectionChange)="loadEpisodes()">
+                    <mat-option [value]="null">All Podcasts</mat-option>
+                    @for (podcast of podcasts; track podcast.uuid) {
+                      <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </th>
+              <td mat-cell *matCellDef="let episode">
+                <div class="podcast-name">
+                  <mat-icon>graphic_eq</mat-icon>
+                  {{ episode.podcast.name }}
+                </div>
+              </td>
+            </ng-container>
 
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let episode">
-            <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title | slice: 0 : 100 }}</a>
-          </td>
-        </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let episode">
+                <button
+                  class="action-btn"
+                  style="color: var(--theme-color)"
+                  mat-icon-button
+                  [matMenuTriggerFor]="podcastActionsMenu"
+                  aria-label="Podcast actions"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+                  <button mat-menu-item [routerLink]="['/episode', episode.uuid]">
+                    <app-svg-icon icon="edit"></app-svg-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item>
+                    <app-svg-icon icon="delete"></app-svg-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
 
-        <ng-container matColumnDef="podcast">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-form-field [hidden]="loadingPodcasts">
-              <mat-label>Podcast</mat-label>
-              <mat-select [(value)]="selectedPodcast" (selectionChange)="loadEpisodes()">
-                <mat-option [value]="null">All Podcasts</mat-option>
-                @for (podcast of podcasts; track podcast.uuid) {
-                  <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </th>
-          <td mat-cell *matCellDef="let episode">{{ episode.podcast.name }}</td>
-        </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+          <mat-paginator
+            [length]="totalEpisodes"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[5, 10, 20]"
+            [showFirstLastButtons]="false"
+            (page)="onPageChange($event)"
+          >
+          </mat-paginator>
+        </div>
 
-      <mat-paginator
-        [length]="totalEpisodes"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="[5, 10, 20]"
-        [showFirstLastButtons]="false"
-        (page)="onPageChange($event)"
-      >
-      </mat-paginator>
+        <div [hidden]="episodes.length !== 0 || loadingEpisodes">
+          <span>
+            <strong>No episodes found.</strong>
+            If you would like to create an episode, then visit the <a routerLink="/news">News</a> page. From within the
+            News page, you can select news pages and create episodes from them.
+          </span>
+        </div>
+      }
+      @if (isGridView) {
+        <div class="podcasts-grid">
+          @for (episode of dataSource.data; track episode.uuid) {
+            <mat-card class="podcast-card">
+              <mat-card-header>
+                <div class="grid-header" style="width: 100%">
+                  <div class="grid-header-name">
+                    <div>
+                      <a [routerLink]="['/episode', episode.uuid]" class="podcast-name-link">
+                        {{ episode.title }}
+                      </a>
+                      <div class="episode-date">{{ episode.date | date: 'short' : 'local' }}</div>
+                    </div>
+
+                    <div>
+                      <button
+                        class="action-btn"
+                        mat-icon-button
+                        [matMenuTriggerFor]="podcastActionsMenu"
+                        aria-label="Podcast actions"
+                      >
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+                        <button mat-menu-item [routerLink]="['/episode', episode.uuid]">
+                          <app-svg-icon icon="edit"></app-svg-icon>
+                          <span>Edit</span>
+                        </button>
+                        <button mat-menu-item>
+                          <app-svg-icon icon="delete"></app-svg-icon>
+                          <span>Delete</span>
+                        </button>
+                      </mat-menu>
+                    </div>
+                  </div>
+                </div>
+              </mat-card-header>
+
+              <div class="bottom-header">
+                <span class="publish">Published</span>
+                <div class="podcast-name">
+                  <mat-icon>graphic_eq</mat-icon>
+                  {{ episode.podcast.name }}
+                </div>
+              </div>
+            </mat-card>
+          }
+        </div>
+        <mat-paginator
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons
+          aria-label="Select page of episodes"
+        >
+        </mat-paginator>
+      }
     </div>
-
-    <div [hidden]="episodes.length !== 0 || loadingEpisodes">
-      <span>
-        <strong>No episodes found.</strong>
-        If you would like to create an episode, then visit the <a routerLink="/news">News</a> page. From within the News
-        page, you can select news pages and create episodes from them.
-      </span>
-    </div>
-  </mat-card-content>
-</mat-card>
+  </div>
+}

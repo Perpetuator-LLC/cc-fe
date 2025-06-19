@@ -23,6 +23,7 @@ export interface Episode {
   telegramDate: string;
   news: NewsResult[];
   team: TeamsResult;
+  podcast: { id: string; uuid: string; name: string };
 }
 
 const GET_EPISODES = gql`

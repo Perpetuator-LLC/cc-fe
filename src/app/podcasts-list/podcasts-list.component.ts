@@ -8,7 +8,7 @@ import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { Subscription } from 'rxjs';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import {
   MatTable,
@@ -34,6 +34,7 @@ import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-po
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 export interface ColumnOption {
   id: string;
@@ -47,11 +48,12 @@ export interface ColumnOption {
   imports: [
     MatButton,
     MatCard,
+    SvgIconComponent,
     MatCardTitle,
     MatCardHeader,
     MatIcon,
     MessageComponent,
-    MatProgressSpinner,
+    MatProgressBarModule,
     MatCardContent,
     MatCardActions,
     MatTable,

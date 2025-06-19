@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { UserTransaction, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ToolbarService } from '../toolbar.service';
+import { MatIcon } from '@angular/material/icon';
 import {
   MatCell,
   MatCellDef,
@@ -33,6 +34,7 @@ import { kindToString } from '../job.service';
     MatTableModule,
     MatSortModule,
     DatePipe,
+    MatIcon,
     MatTable,
     MatSort,
     MatColumnDef,

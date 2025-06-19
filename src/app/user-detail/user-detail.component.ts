@@ -41,6 +41,7 @@ import {
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
 
 @Component({
   selector: 'app-user-detail',
@@ -80,6 +81,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     MatIcon,
     MatIconButton,
     MatProgressSpinner,
+    DeleteAccountDialogComponent,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -504,5 +506,20 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       next: () => this.messageService.success('Order cancelled successfully'),
       error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
     });
+  }
+
+  openDeleteAccountDialog() {
+    const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
+      data: { email: this.userDetailForm.get('email')?.value },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.deleteAccount();
+      }
+    });
+  }
+
+  deleteAccount() {
+    this.deleteTeam();
   }
 }

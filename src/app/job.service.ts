@@ -99,6 +99,7 @@ export interface Job {
   result: string;
   createdAt: string;
   updatedAt: string;
+  cost?: number;
 }
 
 interface GetUserJobsResponse {

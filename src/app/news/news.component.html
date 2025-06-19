@@ -1,16 +1,18 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <div class="toolbar-container">
-    <h1>News</h1>
-  </div>
+  <span class="page-title"
+    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">News</span></span
+  >
 </ng-template>
 
 <app-message></app-message>
-
-<div class="news-container">
-  <app-job-status-bar />
-  <mat-card class="toolbar">
-    <mat-card-content class="form-container">
+<mat-card class="create-podcast-card">
+  <mat-card-content class="content-header">
+    <div class="title">
+      <h3>News</h3>
+      <span>{{ filteredNews.length }} Updated News</span>
+    </div>
+    <div class="select-right-podcasts">
       <mat-form-field>
         <mat-label>Select Podcast</mat-label>
         <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="getNews()">
@@ -28,147 +30,191 @@
           <mat-option [value]="14 * 24">2 Weeks</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button color="primary" type="button" (click)="fetchNews()" [disabled]="selectedPodcastUuid === null">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="fetchNews()"
+        [disabled]="selectedPodcastUuid === null"
+      >
         Fetch News
       </button>
-      @if (showMicroJobButtons) {
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="extractSelectedNews()"
-          [disabled]="selectedNews.size === 0"
-        >
-          Retrieve (Task)
-        </button>
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="summarizeSelected()"
-          [disabled]="selectedNews.size === 0"
-        >
-          Summarize (Task)
-        </button>
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="createEpisodeFromSelected()"
-          [disabled]="selectedNews.size === 0"
-        >
-          Create Episode (Task)
-        </button>
-      }
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="createEpisodeChainFromSelected()"
-        [disabled]="selectedNews.size === 0"
-      >
-        Generate Episode
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="createEpisodeAudioChainFromSelected()"
-        [disabled]="selectedNews.size === 0"
-      >
-        Create Episode & Audio
-      </button>
-      <br />
-      <mat-form-field appearance="outline" class="filter-form-field">
-        <mat-label>Filter news</mat-label>
-        <input matInput (input)="applyFilter($event.target || null)" placeholder="Enter a keyword" />
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="button" (click)="selectAll()">Select All</button>
-      <button mat-raised-button color="primary" type="button" (click)="unselectAll()">Unselect All</button>
-      <p>
-        Showing {{ filteredNews.length }} of {{ news?.edges?.length || 0 }} with {{ selectedNews.size }} selected.
-      </p>
-    </mat-card-content>
-  </mat-card>
-
-  @if (selectedPodcastUuid !== null && news) {
-    <div class="news-container">
-      <mat-list>
-        @for (news of filteredNews; track news.url) {
-          <mat-list-item class="news-item">
+    </div>
+  </mat-card-content>
+</mat-card>
+<div class="news-list-container">
+  <app-job-status-bar />
+  <div class="middle-card">
+    <div class="news-list">
+      <div class="table-controls">
+        <div class="search-filter">
+          <div class="input-search-div">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput (input)="applyFilter($event.target || null)" placeholder="Search by news name" />
+          </div>
+          <button mat-flat-button class="filter-button" disabled="">
+            <mat-icon>filter_list</mat-icon>
+            Filter
+          </button>
+        </div>
+        <div class="select-btn">
+          <mat-checkbox
+            [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
+            (change)="selectAll()"
+            >Select All</mat-checkbox
+          >
+          <mat-checkbox [checked]="selectedNews.size === 0" (change)="unselectAll()">Unselect All</mat-checkbox>
+        </div>
+      </div>
+      <div class="bottom-filters">
+        <p>
+          Showing {{ filteredNews.length }} of {{ news?.edges?.length || 0 }} with {{ selectedNews.size }} selected.
+        </p>
+        <div class="filters-btn">
+          @if (showMicroJobButtons) {
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="extractSelectedNews()"
+              [disabled]="selectedNews.size === 0"
+            >
+              Retrieve (Task)
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="summarizeSelected()"
+              [disabled]="selectedNews.size === 0"
+            >
+              Summarize (Task)
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="createEpisodeFromSelected()"
+              [disabled]="selectedNews.size === 0"
+            >
+              Create Episode (Task)
+            </button>
+          }
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="createEpisodeAudioChainFromSelected()"
+            [disabled]="selectedNews.size === 0"
+          >
+            Create Episode & Audio
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="createEpisodeChainFromSelected()"
+            [disabled]="selectedNews.size === 0"
+          >
+            Generate Episode
+          </button>
+        </div>
+      </div>
+      <div class="news-container">
+        @if (selectedPodcastUuid !== null && news) {
+          <div class="news-container">
+            <mat-list>
+              @for (news of filteredNews; track news.url) {
+                <mat-list-item class="news-item">
+                  <div class="news-card" tabindex="0" (click)="selectNews(news)" (keydown.enter)="selectNews(news)">
+                    <mat-checkbox
+                      (click)="$event.stopPropagation(); toggleSelection(news)"
+                      [checked]="isSelected(news)"
+                    ></mat-checkbox>
+                    <div class="news-card-wrapper">
+                      <div class="news-content">
+                        <div class="news-header">
+                          <div class="title">
+                            <a [href]="news.url" target="_blank" (click)="$event.stopPropagation()">{{ news.title }}</a>
+                          </div>
+                          <div class="source">
+                            <mat-icon>graphic_eq</mat-icon>
+                            <p><strong>Source:</strong> {{ news.source }}</p>
+                          </div>
+                        </div>
+                        <div class="date">
+                          <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
+                            {{ news.publishedAt | date: 'short' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-list-item>
+              } @empty {
+                <mat-card>
+                  <mat-card-header>
+                    <p>
+                      @if (news.edges.length) {
+                        No news episodes match the filter criteria.
+                      } @else {
+                        No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the "Time"
+                        range.
+                      }
+                    </p>
+                  </mat-card-header>
+                </mat-card>
+              }
+            </mat-list>
+          </div>
+        } @else if (selectedPodcastUuid !== null) {
+          <mat-spinner></mat-spinner>
+        } @else {
+          <mat-list>
             <mat-card>
               <mat-card-header>
-                <mat-checkbox (change)="toggleSelection(news)" [checked]="isSelected(news)"></mat-checkbox>
-                <mat-card-title>
-                  <a [href]="news.url" target="_blank">{{ news.title }}</a>
-                </mat-card-title>
+                <p>Select a podcast to view news.</p>
               </mat-card-header>
-              <mat-card-content>
-                <mat-expansion-panel>
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      <p>
-                        <strong>Published at:</strong>
-                        <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
-                          {{ news.publishedAt | date: 'short' }}
-                        </span>
-                        - <strong>Source:</strong> {{ news.source }}
-                      </p>
-                      @if (news.summary) {
-                        <p>&nbsp;(AI Summary Generated)</p>
-                      } @else if (news.content) {
-                        <p>&nbsp;(No AI Summary)</p>
-                      }
-                    </mat-panel-title>
-                  </mat-expansion-panel-header>
-                  <mat-divider></mat-divider>
-                  <h3>RSS Description</h3>
-                  <p
-                    class="news-details news-description"
-                    [innerHTML]="news.description || 'No description provided'"
-                  ></p>
-                  <mat-divider></mat-divider>
-                  <h3>AI Summary</h3>
-                  <p class="news-details">{{ news.summary || 'No news summary available' }}</p>
-                  @if (this.userService.userDetails()?.permissions?.includes('api.change_news')) {
-                    <mat-divider></mat-divider>
-                    <button mat-flat-button color="primary" type="button" (click)="extractNews([news.uuid])">
-                      Extract News
-                    </button>
-                    <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(news.uuid)">
-                      {{ news.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
-                    </button>
-                    <h3>Site Content</h3>
-                    <p class="news-details">{{ news.content || 'No news content available' }}</p>
-                  }
-                </mat-expansion-panel>
-              </mat-card-content>
             </mat-card>
-          </mat-list-item>
-        } @empty {
-          <mat-card>
-            <mat-card-header>
-              <p>
-                @if (news.edges.length) {
-                  No news episodes match the filter criteria.
-                } @else {
-                  No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the "Time" range.
-                }
-              </p>
-            </mat-card-header>
-          </mat-card>
+          </mat-list>
         }
-      </mat-list>
+      </div>
     </div>
-  } @else if (selectedPodcastUuid !== null) {
-    <mat-spinner></mat-spinner>
-  } @else {
-    <mat-list>
-      <mat-card>
-        <mat-card-header>
-          <p>Select a podcast to view news.</p>
-        </mat-card-header>
-      </mat-card>
-    </mat-list>
-  }
+    <div class="news-details">
+      @if (selectedNewsDetail) {
+        <div>
+          <div class="description-title">
+            <div class="title">
+              <a [href]="selectedNewsDetail.url" target="_blank">{{ selectedNewsDetail.title }}</a>
+            </div>
+            <div class="source">
+              <mat-icon>graphic_eq</mat-icon>
+              <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
+            </div>
+            <a [href]="selectedNewsDetail.url" target="_blank">
+              <button mat-raised-button color="primary" type="button" class="read-btn">Read More</button>
+            </a>
+          </div>
+          <h3>RSS Description</h3>
+          <p class="news-description" [innerHTML]="selectedNewsDetail.description || 'No description provided'"></p>
+          <mat-divider></mat-divider>
+          <h3>AI Summary</h3>
+          <p class="">{{ selectedNewsDetail.summary || 'No news summary available' }}</p>
+          @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
+            <mat-divider></mat-divider>
+            <button mat-flat-button color="primary" type="button" (click)="extractNews([selectedNewsDetail.uuid])">
+              Extract News
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(selectedNewsDetail.uuid)">
+              {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+            </button>
+            <h3>Site Content</h3>
+            <p class="">{{ selectedNewsDetail.content || 'No news content available' }}</p>
+          }
+        </div>
+      } @else {
+        <p>Select a news item to see details.</p>
+      }
+    </div>
+  </div>
 </div>

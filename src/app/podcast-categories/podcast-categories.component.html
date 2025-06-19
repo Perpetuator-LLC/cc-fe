@@ -1,48 +1,116 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="categories-grid-container">
-  <mat-accordion multi="true" class="categories-grid">
+  <div class="categories-list-card">
     @for (parent of parentCategories; track parent) {
-      <mat-expansion-panel
-        class="category-expansion-panel"
-        [expanded]="isParentSelected(parent)"
-      >
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-checkbox
-              [checked]="isParentSelected(parent)"
-              (change)="toggleParentCategory(parent)"
-              (click)="$event.stopPropagation()"
-              color="primary">
-              {{ parent }}
-              @if (isPending(parent)) {
-                <span class="pending-indicator">●</span>
-              }
-<!--              <span *ngIf="isPending(parent)" class="pending-indicator">●</span>-->
-            </mat-checkbox>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        @if (getSubcategories(parent).length > 0) {
-          <mat-list role="list" class="sub-category-list">
-            @for (sub of getSubcategories(parent); track sub) {
-              <mat-list-item role="listitem">
-                <mat-checkbox
-                  [checked]="isSubSelected(parent, sub)"
-                  (change)="toggleSubCategory(parent, sub)"
-                  color="primary">
-                  {{ sub }}
-                  @if (isPending(parent, sub)) {
-                    <span class="pending-indicator">●</span>
-                  }
-                </mat-checkbox>
-              </mat-list-item>
+      <div class="category-card">
+        <div class="parent-header">
+          <mat-checkbox
+            [checked]="isParentSelected(parent)"
+            (change)="toggleParentCategory(parent)"
+            (click)="$event.stopPropagation()"
+            color="primary"
+          >
+            {{ parent }}
+            @if (isPending(parent)) {
+              <span class="pending-indicator">●</span>
             }
-          </mat-list>
-        } @else {
-          <div class="no-subcategories-message">No subcategories.</div>
-        }
-      </mat-expansion-panel>
+          </mat-checkbox>
+          <p>
+            Auto-curated content that keeps your audience engaged with relevant, timely coverage across this topic area.
+          </p>
+        </div>
+        <div class="parent-child-category">
+          @if (getSubcategories(parent).length > 0) {
+            <mat-form-field appearance="fill" class="subcategory-select">
+              <mat-label>Select Sub-categories</mat-label>
+              <mat-select
+                (selectionChange)="onSubcategorySelectionChange(parent, $event.value)"
+                [value]="getSelectedSubcategories(parent)"
+                multiple
+              >
+                <mat-select-trigger>
+                  <!-- Empty to hide default chips -->
+                </mat-select-trigger>
+                <div class="heading-div" style="display: flex; align-items: center; justify-content: space-between">
+                  <h3 style="margin: 0; color: var(--description-color); font-size: 14px">{{ parent }} Category</h3>
+                  <mat-checkbox
+                    [checked]="areAllSubcategoriesSelected(parent)"
+                    (change)="toggleSelectAllSubcategories(parent, $event.checked)"
+                    color="primary"
+                  >
+                    Select All
+                  </mat-checkbox>
+                </div>
+                <div class="input-search-div">
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input matInput placeholder="Search by category name" disabled="" />
+                </div>
+                @for (sub of getSubcategories(parent); track sub) {
+                  <mat-option [value]="sub">
+                    {{ sub }}
+                    @if (isPending(parent, sub)) {
+                      <span class="pending-indicator"> ●</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="category-chip-list">
+              @for (sub of getSelectedSubcategories(parent); track sub) {
+                <mat-chip [removable]="true" (removed)="removeSubcategory(parent, sub)">
+                  {{ sub }}
+                  <button matChipRemove>
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+              }
+            </div>
+          } @else {
+            <div class="no-subcategories-message">No subcategories.</div>
+          }
+        </div>
+      </div>
     } @empty {
       <mat-list-item>Loading categories...</mat-list-item>
     }
+  </div>
+
+  <!--
+  <mat-accordion multi="true" class="categories-grid">
+    @for (parent of parentCategories; track parent) {
+    <mat-expansion-panel class="category-expansion-panel" [expanded]="isParentSelected(parent)">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-checkbox [checked]="isParentSelected(parent)" (change)="toggleParentCategory(parent)"
+            (click)="$event.stopPropagation()" color="primary">
+            {{ parent }}
+            @if (isPending(parent)) {
+            <span class="pending-indicator">●</span>
+            }
+          
+          </mat-checkbox>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (getSubcategories(parent).length > 0) {
+      <mat-list role="list" class="sub-category-list">
+        @for (sub of getSubcategories(parent); track sub) {
+        <mat-list-item role="listitem">
+          <mat-checkbox [checked]="isSubSelected(parent, sub)" (change)="toggleSubCategory(parent, sub)"
+            color="primary">
+            {{ sub }}
+            @if (isPending(parent, sub)) {
+            <span class="pending-indicator">●</span>
+            }
+          </mat-checkbox>
+        </mat-list-item>
+        }
+      </mat-list>
+      } @else {
+      <div class="no-subcategories-message">No subcategories.</div>
+      }
+    </mat-expansion-panel>
+    } @empty {
+    <mat-list-item>Loading categories...</mat-list-item>
+    }
   </mat-accordion>
-</div>
+--></div>

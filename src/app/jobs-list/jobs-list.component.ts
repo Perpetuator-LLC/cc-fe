@@ -5,6 +5,7 @@ import { Job, JobService, kindToString, statusToString } from '../job.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
+import { MatIcon } from '@angular/material/icon';
 import {
   MatCell,
   MatCellDef,
@@ -24,11 +25,14 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-jobs-list',
   standalone: true,
   imports: [
+    CommonModule,
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
@@ -36,6 +40,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
     MatTooltip,
     MatTable,
     MatSort,
+    MatIcon,
     MatColumnDef,
     MatHeaderCell,
     MatCell,
@@ -50,6 +55,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
     MatCard,
     MatCardContent,
     DecimalPipe,
+    SvgIconComponent,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -58,7 +64,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   jobs: Job[] = [];
   dataSource = new MatTableDataSource<Job>(this.jobs);
-  displayedColumns: string[] = ['kind', 'status', 'message', 'cost', 'createdAt', 'updatedAt'];
+  displayedColumns: string[] = ['kind', 'message', 'cost', 'createdAt', 'updatedAt', 'status'];
   totalJobs = 0;
   pageSize = 10;
   cursors: (string | null)[] = [null];
@@ -153,4 +159,77 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   protected readonly kindToString = kindToString;
   protected readonly statusToString = statusToString;
+
+  // Group jobs by date for timeline view
+  get groupedJobs() {
+    if (!this.jobs) return [];
+    const groups: { label: string; jobs: Job[] }[] = [];
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const dateLabel = (dateStr: string) => {
+      const date = new Date(dateStr);
+      if (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      ) {
+        return (
+          'Today, ' +
+          date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        );
+      }
+      if (
+        date.getDate() === yesterday.getDate() &&
+        date.getMonth() === yesterday.getMonth() &&
+        date.getFullYear() === yesterday.getFullYear()
+      ) {
+        return (
+          'Yesterday, ' +
+          date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        );
+      }
+      return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    };
+
+    for (const job of this.jobs) {
+      const label = dateLabel(job.createdAt);
+      let group = groups.find((g) => g.label === label);
+      if (!group) {
+        group = { label, jobs: [] };
+        groups.push(group);
+      }
+      group.jobs.push(job);
+    }
+    groups.sort((a, b) => new Date(b.jobs[0].createdAt).getTime() - new Date(a.jobs[0].createdAt).getTime());
+    for (const group of groups) {
+      group.jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    return groups;
+  }
+
+  iconForJob(kind: string): string {
+    switch (kind) {
+      case 'fetch_news':
+        return 'rss_feed';
+      case 'create_episode':
+        return 'podcasts';
+      default:
+        return 'work';
+    }
+  }
+
+  statusClass(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'job-success';
+      case 'failed':
+        return 'job-failed';
+      case 'pending':
+        return 'job-pending';
+      default:
+        return '';
+    }
+  }
 }

@@ -1,105 +1,152 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <h1>Episode Details</h1>
+  <span class="page-title"
+    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> Episodes ><span class="page-title-secondary">
+      {{ episodeForm.get('title')?.value }}</span
+    ></span
+  >
 </ng-template>
 
 <app-message></app-message>
-
-<div class="episode-container">
-  <app-job-status-bar />
-  <mat-card>
-    <mat-card-content class="form-container">
-      <form [formGroup]="episodeForm" (ngSubmit)="updateEpisode()">
-        <div class="audio-container">
-          <a mat-button [routerLink]="['/podcast', episodeForm.get('podcast.uuid')?.value]">
-            <mat-icon>group</mat-icon>
+<form [formGroup]="episodeForm" (ngSubmit)="updateEpisode()" class="podcast-detail-page">
+  <div class="detail-header">
+    <div class="top-header">
+      <div class="title">
+        <h2>{{ episodeForm.get('title')?.value }}</h2>
+      </div>
+      <div class="buttons">
+        @if (audioSrc) {
+          <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
+            Live on Podcast
+          </mat-checkbox>
+        }
+        <button
+          (click)="updateEpisode()"
+          mat-flat-button
+          color="primary"
+          class="episode-control publish-btn"
+          type="button"
+        >
+          Update
+        </button>
+      </div>
+    </div>
+    <div class="bottom-header">
+      <div class="status-summary">
+        <div class="status-item">
+          <span class="status-label">Podcast</span>
+          <a [routerLink]="['/podcast', episodeForm.get('podcast.uuid')?.value]" class="status-value">
             {{ episodeForm.get('podcast.name')?.value }}
           </a>
-          <button mat-raised-button color="primary" class="episode-control">
-            <mat-icon>save</mat-icon>
-            Update
-          </button>
-          <button mat-raised-button color="primary" type="button" class="episode-control" (click)="generateAudio()">
-            <mat-icon>mic</mat-icon>
-            Generate Audio
-          </button>
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            class="episode-control"
-            [hidden]="!audioSrc"
-            (click)="downloadAudio()"
-          >
-            <mat-icon>download</mat-icon>
-            Download MP3
-          </button>
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            class="episode-control"
-            [hidden]="!audioSrc"
-            (click)="publishAudio()"
-          >
-            <mat-icon>publish</mat-icon>
-            Publish to Telegram
-          </button>
-          @if (audioSrc) {
-            <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
-              Live on Podcast
-            </mat-checkbox>
-          }
-          <br />
-          @if (audioSrc) {
-            <audio controls [src]="audioSrc"></audio>
-          }
         </div>
-        <mat-form-field class="full-width episode-content">
-          <mat-label>Title</mat-label>
-          <input matInput formControlName="title" />
-        </mat-form-field>
-        <mat-form-field class="full-width episode-content">
-          <mat-label>Content</mat-label>
-          <textarea matInput formControlName="content"></textarea>
-        </mat-form-field>
-        <div>
-          Word count: {{ wordCount }}
-          | Character count: {{ charCount }}
-          | Generated on:
-          <span [matTooltip]="episodeForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
-            {{ episodeForm.get('date')?.value | date: 'short' : 'local' }}
+        <div class="status-item">
+          <span class="status-label">Word Count</span>
+          <span class="status-value">
+            {{ wordCount }}
           </span>
-          @if (episodeForm.get('podcastDate')?.value) {
-            | Published to Podcast on:
-            <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
-              {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
-            </span>
-          }
-          @if (episodeForm.get('telegramDate')?.value) {
-            | Published to Telegram on:
-            <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
-              {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
-            </span>
-          }
+        </div>
+        <div class="status-item">
+          <span class="status-label">Character Count</span>
+          <span class="status-value">
+            {{ charCount }}
+          </span>
         </div>
 
-        <br />
-        <br />
+        <div class="status-item">
+          <span class="status-label">Generated On</span>
+          <span
+            class="status-value"
+            [matTooltip]="episodeForm.get('date')?.value | date: 'z'"
+            matTooltipPosition="above"
+            >{{ episodeForm.get('date')?.value | date: 'short' : 'local' }}</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="episode-container">
+    <app-job-status-bar />
+    <mat-card class="podcast-card">
+      <mat-card-content class="form-container">
+        <div class="audio-border">
+          <div class="audio-header">
+            <h4>Episode Audio</h4>
+            <div class="buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                class="episode-control"
+                [hidden]="!audioSrc"
+                (click)="downloadAudio()"
+              >
+                <mat-icon>download</mat-icon>
+                Download MP3
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                class="episode-control"
+                [hidden]="!audioSrc"
+                (click)="publishAudio()"
+              >
+                <app-svg-icon icon="telegram"></app-svg-icon>
+                Publish to Telegram
+              </button>
+              <button mat-raised-button color="primary" type="button" class="episode-control" (click)="generateAudio()">
+                <app-svg-icon icon="audio"></app-svg-icon>
+                Generate Audio
+              </button>
+            </div>
+          </div>
+          <div class="audio-card">
+            @if (audioSrc) {
+              <audio controls [src]="audioSrc"></audio>
+            }
+          </div>
+        </div>
+        <div>
+          <mat-form-field class="full-width episode-content">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" />
+          </mat-form-field>
+          <mat-form-field class="full-width episode-content">
+            <mat-label>Content</mat-label>
+            <textarea matInput formControlName="content"></textarea>
+          </mat-form-field>
+          <div>
+            @if (episodeForm.get('podcastDate')?.value) {
+              | Published to Podcast on:
+              <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+                {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+              </span>
+            }
+            @if (episodeForm.get('telegramDate')?.value) {
+              | Published to Telegram on:
+              <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+                {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+              </span>
+            }
+          </div>
 
-        <mat-divider></mat-divider>
+          <br />
+          <br />
 
-        <h3>Related Episodes</h3>
-        <mat-list>
-          @for (relatedEpisode of episodeForm.get('news')?.value; track relatedEpisode.id) {
-            <mat-list-item>
-              <a matLine href="{{ relatedEpisode.url }}" target="_blank">
-                {{ relatedEpisode.title }}
-              </a>
-            </mat-list-item>
-          }
-        </mat-list>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</div>
+          <mat-divider></mat-divider>
+
+          <h3>Related Episodes</h3>
+          <mat-list>
+            @for (relatedEpisode of episodeForm.get('news')?.value; track relatedEpisode.id) {
+              <mat-list-item>
+                <a matLine href="{{ relatedEpisode.url }}" target="_blank">
+                  {{ relatedEpisode.title }}
+                </a>
+              </mat-list-item>
+            }
+          </mat-list>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</form>

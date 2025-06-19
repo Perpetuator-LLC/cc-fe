@@ -1,0 +1,124 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.create-team-card {
+  background-color: transparent !important;
+  box-shadow: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 30px;
+    padding-top: 0;
+    height: 40px;
+
+    @media screen and (max-width: 576px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      padding-inline: 20px;
+      height: auto;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      h3 {
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        margin: 0;
+        color: var(--theme-color);
+      }
+
+      span {
+        background: var(--secondary-dark);
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        padding: 0 10px;
+        height: 22px;
+        color: var(--theme-color);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.middle-card {
+  padding-inline: 30px;
+  background-color: var(--secondary-color);
+
+  @media screen and (max-width: 576px) {
+    padding-inline: 20px;
+  }
+}
+
+.table-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  padding-top: 12px;
+
+  @media screen and (max-width: 576px) {
+    flex-direction: column;
+  }
+
+  .search-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-button {
+    display: flex;
+    align-items: center;
+  }
+
+  .input-search-div {
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 322px;
+    border-radius: 10px;
+    padding: 0 10px;
+    background-color: var(--toolbar-container-background-color);
+
+    @media screen and (max-width: 576px) {
+      width: auto;
+    }
+
+    input {
+      border: 0;
+      background: transparent;
+      color: #b5b5b5;
+      height: 36px;
+      width: 100%;
+    }
+  }
+
+  .filter-button {
+    background-color: var(--toolbar-container-background-color);
+    color: var(--theme-color);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+
+    .mat-icon {
+      margin-right: 4px;
+    }
+  }
+}

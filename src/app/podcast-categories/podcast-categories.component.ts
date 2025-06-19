@@ -8,11 +8,24 @@ import { PodcastsService } from '../podcasts.service';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-podcast-categories',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatCheckboxModule, MatExpansionModule],
+  imports: [
+    CommonModule,
+    MatListModule,
+    MatCheckboxModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatIconModule,
+  ],
   templateUrl: './podcast-categories.component.html',
   styleUrl: './podcast-categories.component.scss',
   providers: [
@@ -85,6 +98,36 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
     return this.value[parent]?.includes(sub) || false;
   }
 
+  getSelectedSubcategories(parent: string): string[] {
+    return this.value[parent] || [];
+  }
+
+  onSubcategorySelectionChange(parent: string, selectedSubs: string[]) {
+    const newValue = { ...this.value };
+    if (!newValue[parent] && selectedSubs.length > 0) {
+      // If parent isn't selected but subs are, select the parent
+      newValue[parent] = [];
+    }
+
+    newValue[parent] = selectedSubs;
+
+    // If a parent has no selected subcategories but is still in the value object,
+    // you might want to decide if it should be removed.
+    // For now, we'll keep it to signify the parent itself is "checked".
+    // If you want to deselect the parent when all subs are deselected, you'd add:
+    // if (newValue[parent].length === 0) {
+    //   delete newValue[parent];
+    // }
+
+    this.value = newValue;
+    this.updateModel();
+  }
+
+  removeSubcategory(parent: string, sub: string): void {
+    const selectedSubs = this.getSelectedSubcategories(parent).filter((s) => s !== sub);
+    this.onSubcategorySelectionChange(parent, selectedSubs);
+  }
+
   // Update the event type from 'Event' to 'MatCheckboxChange'
   toggleParentCategory(parent: string) {
     // Note: We don't actually need to use event.checked here because
@@ -100,31 +143,27 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
     this.updateModel();
   }
 
-  // Update the event type from 'Event' to 'MatCheckboxChange'
-  toggleSubCategory(parent: string, sub: string) {
-    // Similar to toggleParentCategory, event.checked isn't strictly needed here
-    // as the logic relies on the pre-change state via `isSubSelected`.
-    const newValue = { ...this.value };
-
-    if (!newValue[parent]) {
-      // If parent doesn't exist yet (e.g., checking first sub before parent), add it.
-      newValue[parent] = [];
-    }
-
-    const currentSubs = newValue[parent] || [];
-    if (this.isSubSelected(parent, sub)) {
-      // Deselect sub
-      newValue[parent] = currentSubs.filter((s) => s !== sub);
-    } else {
-      // Select sub
-      newValue[parent] = [...currentSubs, sub];
-    }
-
-    this.value = newValue;
-    this.updateModel();
-  }
-
   getSubcategories(parent: string): string[] {
     return this.categoriesMap[parent] || [];
+  }
+
+  // Returns true if all subcategories for the parent are selected
+  areAllSubcategoriesSelected(parent: string): boolean {
+    const subcategories = this.getSubcategories(parent);
+    const selected = this.getSelectedSubcategories(parent);
+    return subcategories.length > 0 && subcategories.every((sub) => selected.includes(sub));
+  }
+
+  // Selects or deselects all subcategories for the parent
+  toggleSelectAllSubcategories(parent: string, checked: boolean): void {
+    const subcategories = this.getSubcategories(parent);
+    const newValue = { ...this.value };
+    if (checked) {
+      newValue[parent] = [...subcategories];
+    } else {
+      newValue[parent] = [];
+    }
+    this.value = newValue;
+    this.updateModel();
   }
 }

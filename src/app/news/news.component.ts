@@ -23,6 +23,7 @@ import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.componen
 import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
 
 // export interface News {
 //   results: NewsResult[];
@@ -40,6 +41,7 @@ export interface SidePanelAccordianData {
     DatePipe,
     MatFormField,
     MatLabel,
+    MatIconModule,
     MatList,
     MatListItem,
     MatCard,
@@ -73,6 +75,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
+  selectedNewsDetail: NewsResult | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -136,7 +139,7 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.podcastsService.getPodcasts().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts.filter((podcast) =>
-            podcast.team.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+            podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
           );
         },
         error: (error) => {
@@ -420,6 +423,10 @@ export class NewsComponent implements OnInit, OnDestroy {
 
   isSelected(news: NewsResult): boolean {
     return this.selectedNews.has(news);
+  }
+
+  selectNews(news: NewsResult) {
+    this.selectedNewsDetail = news;
   }
 
   ngOnDestroy() {

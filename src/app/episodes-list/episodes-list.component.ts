@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatLine, MatOption } from '@angular/material/core';
 import { DatePipe, SlicePipe } from '@angular/common';
@@ -9,6 +9,7 @@ import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
 import { Subscription } from 'rxjs';
+import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import {
@@ -29,6 +30,10 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-episodes-list',
@@ -39,6 +44,7 @@ import { PodcastsResult, PodcastsService } from '../podcasts.service';
     MatSortModule,
     MatLabel,
     MatCard,
+    MatCardHeader,
     RouterLink,
     MatLine,
     SlicePipe,
@@ -61,6 +67,12 @@ import { PodcastsResult, PodcastsService } from '../podcasts.service';
     MatSelect,
     MatOption,
     MatCardContent,
+    MatMenu,
+    MatMenuTrigger,
+    MatIcon,
+    SvgIconComponent,
+    MatCheckboxModule,
+    MatProgressBarModule,
   ],
   templateUrl: './episodes-list.component.html',
   styleUrl: './episodes-list.component.scss',
@@ -69,7 +81,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   episodes: Episode[] = [];
   dataSource = new MatTableDataSource(this.episodes);
-  displayedColumns: string[] = ['date', 'title', 'podcast'];
+  displayedColumns: string[] = ['title', 'podcast', 'actions'];
   totalEpisodes = 0;
   pageSize = 10;
   currentPage = 0;
@@ -82,7 +94,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   cursors: (string | null)[] = [null];
   hasNextPage = false;
   hasPreviousPage = false;
-
+  isGridView = false;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -107,6 +119,10 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  toggleView(isGrid: boolean) {
+    this.isGridView = isGrid;
+  }
+
   loadEpisodes(after: string | null = null, pageIndex = 0) {
     this.loadingEpisodes = true;
 
@@ -116,6 +132,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
         next: ({ episodes, pageInfo }) => {
           this.episodes = episodes;
           this.dataSource.data = episodes;
+          console.log('Loaded episodes:', episodes);
           this.hasNextPage = pageInfo.hasNextPage;
           this.hasPreviousPage = pageInfo.hasPreviousPage;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;

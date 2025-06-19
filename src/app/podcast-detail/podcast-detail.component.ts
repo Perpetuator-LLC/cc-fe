@@ -17,6 +17,7 @@ import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { TeamsResult, TeamsService } from '../teams.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
@@ -65,6 +66,7 @@ import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-pod
   imports: [
     MessageComponent,
     MatProgressSpinner,
+    MatProgressBarModule,
     ReactiveFormsModule,
     MatFormField,
     MatFormFieldModule,
@@ -201,7 +203,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.add(
-      this.voiceSearchControl.valueChanges.pipe(debounceTime(3000)).subscribe((searchTerm) => {
+      this.voiceSearchControl.valueChanges.pipe(debounceTime(1000)).subscribe((searchTerm) => {
         this.applyVoiceSearch(searchTerm);
       }),
     );
@@ -776,7 +778,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Add this helper method to check if a voice is selected
+  isVoiceSelected(voice: Voice): boolean {
+    const selected = this.podcastForm.get('voice')?.value;
+    return selected && selected.uuid === voice.uuid;
+  }
+
+  // Update finfo to select the voice
   finfo(voice: Voice) {
-    console.log('voice', voice);
+    this.podcastForm.get('voice')?.setValue(voice);
+    this.savePodcast(); // Immediately hit the API after selection
   }
 }

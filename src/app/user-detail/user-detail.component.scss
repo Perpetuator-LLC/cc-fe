@@ -1,7 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 mat-form-field {
   width: 100%;
-  margin-bottom: 1rem;
 }
 
 .email-change-notification {
@@ -64,5 +63,102 @@ mat-form-field {
   mat-card {
     flex: 1 1 auto;
     max-width: 500px;
+  }
+}
+
+.profile-page-container {
+  max-width: 1140px;
+  margin: auto;
+
+  .save-btn {
+    background-color: var(--theme-white);
+    color: var(--toolbar-container-background-color);
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  .export-btn {
+    background-color: transparent;
+    color: var(--theme-color);
+    border-radius: 0;
+    padding: 0;
+    height: auto;
+  }
+
+  .remove-btn {
+    background-color: #ff4a4a;
+    border: 1px solid #ffffff57;
+    border-radius: 10px;
+    color: white;
+  }
+
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+
+    h3 {
+      color: var(--theme-color);
+      font-size: 32px;
+      font-weight: 600;
+    }
+
+    .top-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  .user-details-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .voice-info {
+      margin-top: 10px;
+
+      p {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--theme-yellow);
+        font-size: 14px;
+        font-style: italic;
+        margin-top: 0;
+      }
+    }
+
+    .details-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 60px;
+
+      .content {
+        h4 {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--theme-color);
+        }
+
+        p {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--description-color);
+        }
+      }
+
+      .form {
+        .profile-card {
+          border: 1px solid var(--border-color);
+          background-color: var(--secondary-light);
+        }
+
+        .mdc-text-field {
+          background-color: var(--secondary-450) !important;
+        }
+      }
+    }
   }
 }

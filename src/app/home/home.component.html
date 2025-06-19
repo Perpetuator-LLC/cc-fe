@@ -1,54 +1,158 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <h1>AI-Powered News Automation</h1>
+  <span class="page-title"
+    ><img
+      src="Capital_Copilot_Logo_Slanted.svg"
+      aria-label="Side nav toggle icon"
+      alt="Capital Copilot"
+      width="24"
+      height="24"
+      matTooltip="Capital Copilot"
+    />Home
+  </span>
 </ng-template>
 
 <div class="home-container">
+  <!-- Hero Section -->
   <div class="hero-section">
-    <mat-card class="hero-card">
-      <mat-card-header>
-        <mat-card-subtitle>
-          <h1>From Headlines to Audio Seamlessly</h1>
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>
-          AI-Driven News Summaries. Automatic Transcript Generation. Seamless Audio Conversion. Instant Podcast
-          Publishing.
-        </p>
-        <button mat-raised-button color="accent" routerLink="/register">Start Automating Now</button>
-      </mat-card-content>
+    <mat-card class="hero-banner-card">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>From Headlines to Audio — Seamlessly</h1>
+          <p>
+            AI-powered news summaries. Instant transcript generation. Effortless audio<br />
+            conversion. Publish podcasts in seconds.
+          </p>
+          <button mat-raised-button color="accent" routerLink="/register">Start Automating Now</button>
+        </div>
+        <div class="hero-illustration">
+          <!-- Placeholder for illustration -->
+          <img src="/assets/product-loading.png" alt="Hero Illustration" width="249" height="249" />
+        </div>
+      </div>
     </mat-card>
   </div>
 
-  <div class="feature-section">
-    <mat-card class="feature-card">
-      <mat-card-title>AI-Driven Summaries</mat-card-title>
-      <mat-card-content>
-        <p>Let AI read and summarize news instantly.</p>
-      </mat-card-content>
-    </mat-card>
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <mat-icon>podcasts</mat-icon>
+        <div class="stat-label">Total Podcasts</div>
+      </div>
 
-    <mat-card class="feature-card">
-      <mat-card-title>Transcripts On-Demand</mat-card-title>
-      <mat-card-content>
-        <p>Generate accurate transcripts automatically.</p>
-      </mat-card-content>
+      <div class="stat-value">18</div>
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
     </mat-card>
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <mat-icon>library_music</mat-icon>
+        <div class="stat-label">Total Episodes</div>
+      </div>
 
-    <mat-card class="feature-card">
-      <mat-card-title>Audio Made Easy</mat-card-title>
-      <mat-card-content>
-        <p>Convert news to high-quality audio seamlessly.</p>
-      </mat-card-content>
+      <div class="stat-value">175</div>
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
     </mat-card>
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <mat-icon>description</mat-icon>
+        <div class="stat-label">Transcripts</div>
+      </div>
 
-    <mat-card class="feature-card">
-      <mat-card-title>One-Click Publishing</mat-card-title>
-      <mat-card-content>
-        <p>Publish news podcasts with a single click.</p>
-      </mat-card-content>
+      <div class="stat-value">287,876</div>
+
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
     </mat-card>
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <mat-icon>rss_feed</mat-icon>
+        <div class="stat-label">Episodes Generated from News</div>
+      </div>
+
+      <div class="stat-value">175</div>
+
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
+    </mat-card>
+  </div>
+
+  <!-- Modules Section -->
+  <div class="module-section-container">
+    <h3 class="section-title">Modules</h3>
+    <div class="modules-section">
+      <div class="module-card generate-podcast">
+        <div class="module-wrapper">
+          <div class="module-header">
+            <div>
+              <div class="module-title">Generate Podcast</div>
+              <div class="module-desc">
+                Create AI-powered news podcasts with automatic transcripts, seamless audio conversion, and instant
+                publishing.
+              </div>
+            </div>
+            <a class="module-link" routerLink="/generate-podcast">Generate Podcast &rarr;</a>
+          </div>
+          <span class="image-section">
+            <img src="/assets/generate.png" alt="generate" />
+          </span>
+        </div>
+      </div>
+      <div class="module-card create-episode">
+        <div class="module-header">
+          <div>
+            <div class="module-title">Create New Episode</div>
+            <div class="module-desc">
+              Turn any headline or news story into an audio episode — complete with AI-driven summaries, transcripts,
+              and audio, ready to publish.
+            </div>
+          </div>
+          <a class="module-link" routerLink="/create-episode">Create an Episode &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Podcasts Section -->
+  <div class="recent-podcasts-section">
+    <div class="section-header">
+      <h3 class="section-title">Recent Podcasts</h3>
+      <a class="view-all-link" routerLink="/podcasts">View all</a>
+    </div>
+    <div class="podcasts-grid">
+      <mat-card class="podcast-card" *ngFor="let podcast of gridPodcasts">
+        <mat-card-header>
+          <div class="grid-header" style="width: 100%">
+            <a [routerLink]="['/podcast', podcast.uuid]">
+              <img [src]="podcast.imageUrl || '/image.png'" alt="img" class="img" />
+            </a>
+            <div class="response-div">
+              <span [class]="podcast.enabled ? 'enable' : 'disable'">
+                {{ podcast.enabled ? 'Enable' : 'Disable' }}
+              </span>
+            </div>
+            <div class="grid-header-name">
+              <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
+                {{ podcast.name }}
+              </a>
+              <div>
+                <!-- Actions can be omitted or added as needed -->
+              </div>
+            </div>
+            <p>{{ podcast.team?.members?.[0]?.user?.username || 'Daniel' }} - Premium (396 CPM)</p>
+          </div>
+        </mat-card-header>
+        <div class="chip-header">
+          <span class="chip">
+            <img src="/telegram.svg" alt="telegram" />
+            {{ podcast.tgChannelId || '1002282842326' }}
+          </span>
+          <span class="days">2 days ago</span>
+        </div>
+        <div class="bottom-header">
+          <span class="chip">+4 More</span>
+          <p>{{ podcast.team?.name || 'Perpetuator LLC' }}</p>
+        </div>
+      </mat-card>
+    </div>
   </div>
 </div>
 

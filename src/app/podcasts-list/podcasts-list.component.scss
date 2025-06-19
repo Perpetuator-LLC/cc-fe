@@ -1,10 +1,4 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
-}
 
 .table-controls {
   display: flex;
@@ -122,13 +116,15 @@
       font-weight: 500;
     }
 
-    .mat-mdc-icon-button {
+    .view-btn {
       background-color: transparent;
       border-radius: 8px;
       width: 40px;
       height: 40px;
       color: var(--theme-color);
       border: 1px solid transparent;
+      line-height: 0;
+      cursor: pointer;
 
       .mat-icon {
         font-size: 20px;
@@ -318,6 +314,7 @@
     button {
       padding: 0;
       height: auto;
+      color: var(--theme-color);
 
       span {
         display: none;
@@ -418,12 +415,14 @@
     justify-content: space-between;
     padding-inline: 30px;
     padding-top: 0;
+    height: 40px;
 
     @media screen and (max-width: 576px) {
       flex-direction: column;
       align-items: flex-start;
       gap: 20px;
       padding-inline: 20px;
+      height: auto;
     }
 
     .title {
@@ -437,6 +436,7 @@
         line-height: 100%;
         letter-spacing: 0%;
         margin: 0;
+        color: var(--theme-color);
       }
 
       span {
@@ -446,7 +446,7 @@
         font-size: 12px;
         line-height: 100%;
         letter-spacing: 0%;
-        width: 84px;
+        padding: 0 10px;
         height: 22px;
         color: var(--theme-color);
         display: inline-flex;
@@ -466,12 +466,6 @@
       letter-spacing: 0%;
     }
   }
-}
-
-mat-paginator {
-  margin-top: 1rem;
-  background: transparent;
-  border-top: 1px solid var(--border-color);
 }
 
 .column-menu-content {

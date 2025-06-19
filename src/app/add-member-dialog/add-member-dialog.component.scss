@@ -1,0 +1,41 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+.form-field {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+  max-width: 500px;
+}
+
+mat-dialog-actions {
+  padding: 16px 0;
+}
+
+.cancel-btn {
+  background: var(--secondary-light);
+  border: 1px solid var(--border-color);
+  color: var(--theme-color);
+  border-radius: 10px;
+  width: 88px;
+  height: 40px;
+}
+
+.savePodcastBtn {
+  background: #ffffff;
+  border-radius: 10px;
+  color: var(--toolbar-container-background-color);
+  width: 225px;
+  font-size: 14px;
+  font-weight: 600;
+  height: 40px;
+}

@@ -1,14 +1,33 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .member-row {
   display: flex;
-  flex-wrap: wrap;
-  width: 100%;
   gap: 16px;
+  width: auto;
 
   mat-form-field,
   mat-checkbox,
   button {
     flex: 1 1 100%;
+  }
+}
+
+.team-title {
+  display: flex;
+  align-items: center;
+
+  .edit-btn {
+    background: transparent;
+    padding: 0;
+    height: auto;
+    color: var(--theme-color);
+    width: auto;
+    flex: auto;
+
+    .mat-icon {
+      width: 30px;
+      font-size: 30px;
+      height: 30px;
+    }
   }
 }
 
@@ -28,6 +47,7 @@ mat-divider {
     margin-bottom: 1em;
   }
 }
+
 .textarea-small {
   min-height: 3em;
   max-height: 10em;
@@ -90,6 +110,7 @@ mat-divider {
 .file-input-wrapper {
   div {
     margin-bottom: 1em;
+
     img {
       max-width: 300px;
     }
@@ -98,7 +119,8 @@ mat-divider {
 
 .actions-column,
 .actions-cell {
-  width: 80px; /* Adjust this value as needed */
+  width: 80px;
+  /* Adjust this value as needed */
   min-width: 80px;
   max-width: 80px;
   padding: 0;
@@ -122,4 +144,167 @@ mat-divider {
 .no-podcasts-message {
   padding: 16px;
   text-align: center;
+}
+
+.podcast-detail-page {
+  padding: 32px 72px;
+  background-color: var(--secondary-color);
+  margin-top: -20px;
+
+  .detail-header {
+    margin-bottom: 40px;
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 28px;
+
+      .title {
+        input {
+          font-size: 32px;
+          font-weight: 600;
+          color: var(--theme-color);
+        }
+
+        p {
+          font-size: 14px;
+          margin: 0;
+          color: var(--description-color);
+          font-weight: 400;
+        }
+      }
+
+      .buttons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .delete-btn {
+          background-color: transparent;
+          color: #ff4a4a;
+          padding: 0;
+          font-size: 14px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .mat-mdc-card-header {
+    padding-inline: 0;
+  }
+
+  .mat-mdc-card-content {
+    padding-inline: 0;
+    margin-top: 20px;
+  }
+
+  .search-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .p_name {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .name {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      span {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        color: #b5b5b5;
+      }
+    }
+  }
+
+  .podcast-name-link {
+    color: var(--theme-color);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .enable {
+    background: #4cb782;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid 1px solid #ffffffe6;
+    width: 50px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .disable {
+    border-radius: 6px;
+    color: var(--theme-color);
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    background: var(--secondary-dark);
+    width: 50px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .input-search-div {
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 322px;
+    border-radius: 10px;
+    padding: 0 10px;
+    background-color: var(--toolbar-container-background-color);
+
+    @media screen and (max-width: 576px) {
+      width: auto;
+    }
+
+    input {
+      border: 0;
+      background: transparent;
+      color: #b5b5b5;
+      height: 36px;
+      width: 100%;
+    }
+  }
+
+  .publish-btn {
+    background-color: var(--primary);
+    border-radius: 10px;
+    color: white;
+    border: 1px solid #ffffff24;
+    font-size: 14px;
+    font-weight: 600;
+  }
 }

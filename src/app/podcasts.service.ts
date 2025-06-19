@@ -31,7 +31,7 @@ export interface RssFeedResult {
 export interface PodcastsResult {
   id: string;
   uuid: string;
-  team: TeamsResult;
+  team: TeamsResult | null;
   name: string | null;
   url: string | null;
   enabled: boolean;
