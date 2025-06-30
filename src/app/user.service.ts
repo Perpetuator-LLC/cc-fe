@@ -5,6 +5,7 @@ import { map, Observable, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseResponse, BaseService, CommonResponse } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { AuthService } from './auth.service';
 
 export interface UserDetails {
   id: string;
@@ -34,6 +35,7 @@ export class UserService extends BaseService implements OnDestroy {
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
+    private authService: AuthService,
   ) {
     super(apollo, errorHandler);
   }
@@ -107,12 +109,19 @@ export class UserService extends BaseService implements OnDestroy {
         changePassword(password: $password) {
           success
           message
+          token
+          refreshToken
         }
       }
     `;
 
     interface Response {
-      changePassword: BaseResponse;
+      changePassword: {
+        success: boolean;
+        message: string;
+        token?: string;
+        refreshToken?: string;
+      };
     }
 
     return this.mutate<Response>({
@@ -122,6 +131,13 @@ export class UserService extends BaseService implements OnDestroy {
       map((data) => {
         if (!data.changePassword.success) {
           throw new Error(data.changePassword.message);
+        }
+        // If a token is returned, update the auth session.
+        if (data.changePassword.token && data.changePassword.refreshToken) {
+          this.authService.setSession({
+            access: data.changePassword.token,
+            refresh: data.changePassword.refreshToken,
+          });
         }
         return null; // Success, null is returned. All errors were already handled and no new data to return.
       }),

@@ -38,7 +38,7 @@ export class CodeService extends BaseService {
     after: string | null = null,
     first = 10,
     sort = 'createdAt',
-    direction = 'ASC',
+    direction = 'DESC',
   ) {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 

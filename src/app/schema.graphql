@@ -1,13 +1,40 @@
-type Query {
-  intrinsicValueReport(ivrUuid: UUID, symbol: String): IntrinsicValueReportType
+schema {
+  query: ApiQuery
+  mutation: ApiMutation
+}
 
-  """List of Intrinsic Value Reports"""
-  intrinsicValueReports(offset: Int, before: String, after: String, first: Int, last: Int, ivrUuid: UUID, symbol: String, createdAt: DateTime): IntrinsicValueReportTypeConnection
-  company(ticker: String): CompanyType
-  companies(offset: Int, before: String, after: String, first: Int, last: Int, ticker: String, ticker_Icontains: String, sector: String, sector_Icontains: String, industry: String, industry_Icontains: String): CompanyTypeConnection
-  financialSnapshots(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, periodType: DataFinancialSnapshotPeriodTypeChoices, periodEnd_Gte: Date, periodEnd_Lte: Date): FinancialSnapshotTypeConnection
-  valuationRuns(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, marginOfSafety_Gte: Decimal, marginOfSafety_Lte: Decimal, createdAt_Gte: DateTime, createdAt_Lte: DateTime): ValuationRunTypeConnection
-  bargainStocks(minMarginOfSafety: Float): [CompanyType]
+type ApiQuery {
+  """
+  List of Discounted Cash Flow Analyses with filtering capabilities [Relay]
+  """
+  dcfAnalyses(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    company: ID
+    user: UUID
+    createdAt: DateTime
+    analysisUuid: UUID
+    companyTicker: String
+    companyName: String
+    companySector: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    minCurrentPrice: Decimal
+    maxCurrentPrice: Decimal
+    minAvgFairPrice: Decimal
+    maxAvgFairPrice: Decimal
+    minPe: Decimal
+    maxPe: Decimal
+    minAvgIrr: Decimal
+    maxAvgIrr: Decimal
+    valuationStatus: String
+
+    """Ordering"""
+    orderBy: String
+  ): DiscountedCashFlowAnalysisTypeConnection
   voices(models: [VoiceModel], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, model: String, externalId: String): VoiceTypeConnection
   userDataExport(confirm: String!): UserDataExport
   credits: Int
@@ -149,31 +176,75 @@ type Query {
   ): Node
 }
 
-type IntrinsicValueReportType implements Node {
+type DiscountedCashFlowAnalysisTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [DiscountedCashFlowAnalysisTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""
+A Relay edge containing a `DiscountedCashFlowAnalysisType` and its cursor.
+"""
+type DiscountedCashFlowAnalysisTypeEdge {
+  """The item at the end of the edge"""
+  node: DiscountedCashFlowAnalysisType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type DiscountedCashFlowAnalysisType implements Node {
   """The ID of the object"""
   id: ID!
+  company: CompanyType!
   user: UserDataExport!
-  symbol: String!
   createdAt: DateTime!
-  startDate: Date!
-  endDate: Date!
-  projectionDate: Date!
-  rawData: GenericScalar
-  bookValue: Decimal
-  eps: Decimal
+  currentPrice: Decimal
+  bookValuePerShare: Decimal
+  earningsPerShare: Decimal
   dividendsPerShare: Decimal
-  retentionRatio: Decimal
+  priceToBook: Decimal
+  priceToEarnings: Decimal
+  priceToCashFlow: Decimal
+  debtToEquity: Decimal
+  liabilitiesToAssets: Decimal
+  debtToAssets: Decimal
   maxPe: Decimal
   avgPe: Decimal
   medianPe: Decimal
   minPe: Decimal
-  currentPrice: Decimal
-  projectedMaxPrice: Decimal
-  projectedAvgPrice: Decimal
-  projectedMedianPrice: Decimal
-  projectedMinPrice: Decimal
-  summary: String
-  uuid: UUID
+  maxFairPrice: Decimal
+  avgFairPrice: Decimal
+  medianFairPrice: Decimal
+  minFairPrice: Decimal
+  maxIrr: Decimal
+  avgIrr: Decimal
+  medianIrr: Decimal
+  minIrr: Decimal
+  futureDate: Date
+
+  """"""
+  predictedBookValue: BigInt
+  predictedEps: Decimal
 }
 
 """An object with an ID"""
@@ -181,6 +252,150 @@ interface Node {
   """The ID of the object"""
   id: ID!
 }
+
+type CompanyType {
+  id: ID!
+  ticker: String!
+  name: String!
+  sector: String!
+  industry: String!
+  exchange: ExchangeType
+  description: String!
+  address: String!
+  fiscalYearEnd: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  balancesheetReports: [BalanceSheetType!]!
+  incomestatementReports: [IncomeStatementType!]!
+  cashflowReports: [CashFlowType!]!
+  dcfAnalyses(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    company: ID
+    user: UUID
+    createdAt: DateTime
+    analysisUuid: UUID
+    companyTicker: String
+    companyName: String
+    companySector: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    minCurrentPrice: Decimal
+    maxCurrentPrice: Decimal
+    minAvgFairPrice: Decimal
+    maxAvgFairPrice: Decimal
+    minPe: Decimal
+    maxPe: Decimal
+    minAvgIrr: Decimal
+    maxAvgIrr: Decimal
+    valuationStatus: String
+
+    """Ordering"""
+    orderBy: String
+  ): DiscountedCashFlowAnalysisTypeConnection!
+}
+
+type ExchangeType {
+  id: ID!
+  name: String!
+  acronym: String!
+  mic: String!
+  country: String!
+  city: String!
+  website: String!
+  companySet: [CompanyType!]!
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type BalanceSheetType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  totalAssets: BigInt
+
+  """"""
+  totalLiabilities: BigInt
+
+  """"""
+  totalEquity: BigInt
+
+  """"""
+  shortTermDebt: BigInt
+
+  """"""
+  longTermDebt: BigInt
+
+  """"""
+  commonStockSharesOutstanding: BigInt
+}
+
+"""
+The `Date` scalar type represents a Date
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar Date
+
+"""
+The `BigInt` scalar type represents non-fractional whole numeric values.
+`BigInt` is not constrained to 32-bit like the `Int` type and thus is a less
+compatible type.
+"""
+scalar BigInt
+
+type IncomeStatementType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  totalRevenue: BigInt
+
+  """"""
+  netIncome: BigInt
+  epsReported: Decimal
+}
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+type CashFlowType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  operatingCashFlow: BigInt
+
+  """"""
+  dividendPayout: BigInt
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
 
 """User data export schema"""
 type UserDataExport {
@@ -197,12 +412,6 @@ type UserDataExport {
   transactions: [TransactionType!]
   settings: [UserSettingType!]
 }
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
@@ -229,13 +438,6 @@ GraphQL scalar value that could be:
 String, Boolean, Int, Float, List or Object.
 """
 scalar GenericScalar
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 type TeamType implements Node {
   """The ID of the object"""
@@ -413,249 +615,6 @@ type UserSettingType implements Node {
   uuid: UUID
 }
 
-"""
-The `Date` scalar type represents a Date
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar Date
-
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
-
-type IntrinsicValueReportTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [IntrinsicValueReportTypeEdge]!
-}
-
-"""
-The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
-"""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: String
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: String
-}
-
-"""A Relay edge containing a `IntrinsicValueReportType` and its cursor."""
-type IntrinsicValueReportTypeEdge {
-  """The item at the end of the edge"""
-  node: IntrinsicValueReportType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-type CompanyType implements Node {
-  """The ID of the object"""
-  id: ID!
-  ticker: String!
-  name: String!
-  exchange: ExchangeType
-  sector: String!
-  industry: String!
-  country: String!
-  currency: String!
-  priceLast: Decimal
-  priceDate: Date
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  financials(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, periodType: DataFinancialSnapshotPeriodTypeChoices, periodEnd_Gte: Date, periodEnd_Lte: Date): FinancialSnapshotTypeConnection!
-  valuations(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, marginOfSafety_Gte: Decimal, marginOfSafety_Lte: Decimal, createdAt_Gte: DateTime, createdAt_Lte: DateTime): ValuationRunTypeConnection!
-  valuationanalysisSet(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, createdAt_Gte: DateTime, createdAt_Lte: DateTime): ValuationAnalysisTypeConnection!
-  uuid: UUID!
-}
-
-type ExchangeType implements Node {
-  code: String!
-  name: String!
-  companySet(offset: Int, before: String, after: String, first: Int, last: Int, ticker: String, ticker_Icontains: String, sector: String, sector_Icontains: String, industry: String, industry_Icontains: String): CompanyTypeConnection!
-
-  """The ID of the object"""
-  id: ID!
-}
-
-type CompanyTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [CompanyTypeEdge]!
-}
-
-"""A Relay edge containing a `CompanyType` and its cursor."""
-type CompanyTypeEdge {
-  """The item at the end of the edge"""
-  node: CompanyType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-type FinancialSnapshotTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [FinancialSnapshotTypeEdge]!
-}
-
-"""A Relay edge containing a `FinancialSnapshotType` and its cursor."""
-type FinancialSnapshotTypeEdge {
-  """The item at the end of the edge"""
-  node: FinancialSnapshotType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-type FinancialSnapshotType implements Node {
-  """The ID of the object"""
-  id: ID!
-  company: CompanyType!
-  periodType: DataFinancialSnapshotPeriodTypeChoices!
-  periodEnd: Date!
-  revenue: Decimal
-  ebit: Decimal
-  eps: Decimal
-  netIncome: Decimal
-  freeCashFlow: Decimal
-  sharesOut: Decimal
-  totalDebt: Decimal
-  cashAndEquiv: Decimal
-  assets: Decimal
-  liabilities: Decimal
-  equity: Decimal
-  rawData: JSONString
-  sourceTag: String!
-  createdAt: DateTime!
-
-  """Financial data used for valuation"""
-  valuationrunSet(offset: Int, before: String, after: String, first: Int, last: Int, company_Ticker: String, marginOfSafety_Gte: Decimal, marginOfSafety_Lte: Decimal, createdAt_Gte: DateTime, createdAt_Lte: DateTime): ValuationRunTypeConnection!
-  uuid: UUID!
-}
-
-"""An enumeration."""
-enum DataFinancialSnapshotPeriodTypeChoices {
-  """Fiscal Year"""
-  FY
-
-  """Quarter"""
-  Q
-
-  """Trailing Twelve Months"""
-  TTM
-}
-
-"""
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
-"""
-scalar JSONString
-
-type ValuationRunTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [ValuationRunTypeEdge]!
-}
-
-"""A Relay edge containing a `ValuationRunType` and its cursor."""
-type ValuationRunTypeEdge {
-  """The item at the end of the edge"""
-  node: ValuationRunType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-type ValuationRunType implements Node {
-  """The ID of the object"""
-  id: ID!
-  company: CompanyType!
-
-  """Financial data used for valuation"""
-  snapshot: FinancialSnapshotType!
-  analyst: UserDataExport
-  asOfDate: Date!
-  baseYearFcf: Decimal!
-
-  """% CAGR for years 1-N"""
-  stage1Growth: Decimal!
-  stage1Years: Int!
-
-  """% CAGR for years N+1-M"""
-  stage2Growth: Decimal!
-  stage2Years: Int!
-  terminalGrowth: Decimal!
-
-  """WACC or required return"""
-  discountRate: Decimal!
-  enterpriseValue: Decimal!
-  equityValue: Decimal!
-  intrinsicPrice: Decimal!
-
-  """(Intrinsic Price − Market Price) / Intrinsic Price"""
-  marginOfSafety: Decimal!
-  maxPe: Decimal
-  avgPe: Decimal
-  medianPe: Decimal
-  minPe: Decimal
-  projectedMaxPrice: Decimal
-  projectedAvgPrice: Decimal
-  projectedMedianPrice: Decimal
-  projectedMinPrice: Decimal
-  notes: String!
-  summary: String!
-  createdAt: DateTime!
-  uuid: UUID
-}
-
-type ValuationAnalysisTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [ValuationAnalysisTypeEdge]!
-}
-
-"""A Relay edge containing a `ValuationAnalysisType` and its cursor."""
-type ValuationAnalysisTypeEdge {
-  """The item at the end of the edge"""
-  node: ValuationAnalysisType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
-type ValuationAnalysisType implements Node {
-  """The ID of the object"""
-  id: ID!
-  company: CompanyType!
-  rawData: JSONString
-  calculationSteps: JSONString
-  projectedCashFlows: JSONString
-  growthAssumptions: JSONString
-  dcfValuation: Decimal
-  peValuation: Decimal
-  bookValuation: Decimal
-  createdAt: DateTime!
-}
-
 type VoiceTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -828,6 +787,7 @@ enum JobStatus {
 
 """An enumeration."""
 enum JobKind {
+  REFRESH_STOCK_LISTINGS
   UPDATE_EPISODE_AUDIO
   FETCH_NEWS
   EXTRACT_NEWS
@@ -897,29 +857,15 @@ type TeamTypeEdge {
   cursor: String!
 }
 
-type Mutation {
-  """Generate an intrinsic value report for a stock symbol"""
-  createIntrinsicValueReport(symbol: String!): CreateIntrinsicValueReport
+type ApiMutation {
+  """Generate a DCF analysis report for a stock symbol"""
+  createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
 
-  """Create a financial snapshot for a company"""
-  createFinancialSnapshot(companyTicker: String!, ebit: Decimal, eps: Decimal, freeCashFlow: Decimal, netIncome: Decimal, periodEnd: Date!, periodType: String!, revenue: Decimal): CreateFinancialSnapshot
-
-  """Generate a valuation run for a company with automatic data collection"""
-  createValuationRun(
-    """Company ticker symbol"""
-    companyTicker: String!
-
-    """Optional notes about this valuation"""
-    notes: String
-  ): CreateValuationRun
-
-  """Generate a comprehensive, transparent valuation"""
-  createEnhancedValuation(
-    companyTicker: String!
-
-    """Optional notes about this valuation"""
-    notes: String
-  ): CreateEnhancedValuation
+  """Force refresh of stock listings from Alpha Vantage"""
+  refreshStockListings(
+    """Force refresh even if not needed"""
+    force: Boolean = false
+  ): RefreshStockListings
   createVoice(displayName: String, enabled: Boolean = true, externalId: String!, externalUserId: String, model: VoiceModel!, private: Boolean = true): CreateVoice
   updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
   deleteVoice(voiceUuid: UUID!): DeleteVoice
@@ -1049,33 +995,18 @@ type Mutation {
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
 }
 
-"""Generate an intrinsic value report for a stock symbol"""
-type CreateIntrinsicValueReport {
+"""Generate a DCF analysis report for a stock symbol"""
+type CreateDiscountedCashFlowAnalysis {
   success: Boolean
   message: String
-  report: IntrinsicValueReportType
+  report: DiscountedCashFlowAnalysisType
 }
 
-"""Create a financial snapshot for a company"""
-type CreateFinancialSnapshot {
+"""Force refresh of stock listings from Alpha Vantage"""
+type RefreshStockListings {
   success: Boolean
   message: String
-  snapshot: FinancialSnapshotType
-}
-
-"""Generate a valuation run for a company with automatic data collection"""
-type CreateValuationRun {
-  success: Boolean
-  message: String
-  valuationRun: ValuationRunType
-}
-
-"""Generate a comprehensive, transparent valuation"""
-type CreateEnhancedValuation {
-  success: Boolean
-  message: String
-  valuationRun: ValuationRunType
-  valuationAnalysis: ValuationAnalysisType
+  job: JobType
 }
 
 type CreateVoice {
@@ -1175,6 +1106,8 @@ type DeleteUser {
 type ChangePassword {
   success: Boolean
   message: String
+  token: String
+  refreshToken: String
 }
 
 """Mutation to resend email change verification link."""
