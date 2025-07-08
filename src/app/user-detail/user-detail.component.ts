@@ -6,42 +6,22 @@ import { UserDetails, UserService } from '../user.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelDescription,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
-import { PaymentService } from '../payment.service';
 import { CreditService } from '../credit.service';
-import { CodeService, Code } from '../code.service';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-} from '@angular/material/table';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CodeService } from '../code.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
+import { ExportPersonalDialogComponent } from '../export-personal-dialog.component';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 @Component({
   selector: 'app-user-detail',
@@ -56,32 +36,12 @@ import { DeleteAccountDialogComponent } from '../delete-account-dialog.component
     MessageComponent,
     MatError,
     MatHint,
-    MatAccordion,
     MatCardContent,
     MatCardHeader,
     MatCardTitle,
-    MatExpansionPanel,
-    MatExpansionPanelDescription,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
     FormsModule,
-    MatTable,
-    MatHeaderCell,
-    MatCell,
-    MatColumnDef,
-    DatePipe,
-    DecimalPipe,
-    MatHeaderRow,
-    MatRow,
-    RouterLink,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRowDef,
-    MatRowDef,
     MatIcon,
-    MatIconButton,
-    MatProgressSpinner,
-    DeleteAccountDialogComponent,
+    SvgIconComponent,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -97,10 +57,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   private downloadAnchor: HTMLAnchorElement | null = null;
   // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
-  protected code = '';
-  protected createCodeForm: FormGroup;
-  protected codes: Code[] = [];
-  protected loadingCodes = true;
 
   constructor(
     private fb: FormBuilder,
@@ -112,7 +68,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private authService: AuthService,
     private teamService: TeamsService,
-    private paymentService: PaymentService,
     protected creditService: CreditService,
     private codeService: CodeService,
   ) {
@@ -140,16 +95,10 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         username: userData?.username || '',
         email: userData?.email || '',
       });
-      this.loadCodes();
     });
 
     this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
       this.changePasswordForm.updateValueAndValidity();
-    });
-
-    this.createCodeForm = this.fb.group({
-      code: ['', Validators.required],
-      creditAmount: [0, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -158,7 +107,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
-    this.loadUserOrders();
 
     this.route.queryParams.subscribe((params) => {
       if (params['payment'] === 'success') {
@@ -187,77 +135,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       },
     });
     this.emailChangePending = this.userService.emailChangePendingDetails;
-  }
-
-  private loadUserOrders() {
-    this.subscriptions.add(
-      this.creditService.getOrders(5).subscribe({
-        next: () => (this.loadingOrders = false),
-        error: (err) => console.error('Failed to load orders:', err),
-      }),
-    );
-  }
-
-  redeemCode() {
-    if (this.code) {
-      this.codeService.redeemCode(this.code).subscribe({
-        next: () => {
-          this.messageService.success('code redeemed successfully.');
-          this.code = '';
-          this.loadCodes();
-          this.creditService.refetchUserCredits();
-        },
-        error: (err) => {
-          this.messageService.error('Failed to redeem code: ' + err.message);
-        },
-      });
-    }
-  }
-
-  createCode() {
-    if (this.createCodeForm.valid) {
-      const { code, creditAmount } = this.createCodeForm.value;
-      this.codeService.createCode(code, creditAmount).subscribe({
-        next: () => {
-          this.messageService.success('Code created successfully.');
-          this.createCodeForm.reset();
-          this.loadCodes();
-        },
-        error: (err) => {
-          this.messageService.error('Failed to create code: ' + err.message);
-        },
-      });
-    }
-  }
-
-  private loadCodes() {
-    // Get the current value of the signal directly
-    const userDetails = this.userService.userDetails();
-
-    if (!userDetails) {
-      this.loadingCodes = false;
-      return;
-    }
-
-    const permissions = userDetails.permissions;
-    const includesAddBonusPerm = permissions && permissions.length > 0 && permissions.includes('api.add_bonuscode');
-
-    if (!includesAddBonusPerm) {
-      this.loadingCodes = false;
-      return;
-    }
-
-    this.loadingCodes = true;
-    this.codeService.getCodes().subscribe({
-      next: (data) => {
-        this.codes = data.codes;
-        this.loadingCodes = false;
-      },
-      error: (err) => {
-        this.messageService.error('Failed to load codes: ' + err.message);
-        this.loadingCodes = false;
-      },
-    });
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
@@ -364,6 +241,17 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  openExportPersonalDialog() {
+    const dialogRef = this.dialog.open(ExportPersonalDialogComponent, {
+      data: { password: this.userDetailForm.get('password')?.value },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.exportDialog();
+      }
+    });
+  }
+
   exportDialog() {
     if (this.downloadAnchor !== null) {
       this.downloadAnchor.click();
@@ -419,7 +307,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       panelClass: 'delete-confirmation-dialog',
       data: {
         message:
-          "<h3>Removing your account '" +
+          "<h3 class='deleteModal'>Removing your account '" +
           email +
           "' will result in the following actions:</h3>" +
           (deletingTeams?.length === 0
@@ -475,21 +363,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  pay(amount: number) {
-    this.subscriptions.add(
-      this.paymentService.createCheckoutSession(amount).subscribe({
-        next: (data) => {
-          if (data?.order?.sessionUrl) {
-            this.paymentService.redirectToCheckout(data.order.sessionUrl);
-          }
-        },
-        error: (err) => {
-          this.messageService.error('Failed to create checkout session: ' + err.message);
-        },
-      }),
-    );
-  }
-
   refreshOrder(id: string) {
     this.creditService.refreshUserOrder(id).subscribe({
       next: (data) => {
@@ -520,6 +393,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   deleteAccount() {
-    this.deleteTeam();
+    this.deleteDialog();
   }
 }

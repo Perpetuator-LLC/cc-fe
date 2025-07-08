@@ -26,7 +26,7 @@ import { routes } from '../app.routes';
 import { Theme, ThemeService } from '../theme.service';
 import { AuthService } from '../auth.service';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { CookieBannerComponent } from '../cookie-banner/cookie-banner.component';
 import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
@@ -40,6 +40,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
 import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
+import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.component';
 
 @Component({
   selector: 'app-layout',
@@ -65,6 +66,7 @@ import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
     MatTooltip,
     NgClass,
     DecimalPipe,
+    RedeemGiftCodeDialogComponent,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
@@ -79,9 +81,12 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
   private isMinimized = false;
   protected userCredits = 0;
+  userDetailForm: FormGroup;
   protected jobs: Job[] = [];
   itemtitle = '';
   protected isSecondSidebarVisible = true;
+  isHomePage = false;
+  showSecondSidebar = false;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
 
@@ -96,7 +101,13 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     private jobService: JobService,
     private messageService: MessageService,
     private dialog: MatDialog,
+    private fb: FormBuilder,
   ) {
+    this.userDetailForm = this.fb.group({
+      username: ['', Validators.required],
+      email: [{ value: '' }],
+    });
+
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
         this.userCredits = credits;
@@ -118,6 +129,16 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
       error: (error) => {
         this.messageService.error(`Failed to load jobs signal: ${error.message}`);
       },
+    });
+    this.router.events.subscribe(() => {
+      const url = this.router.url;
+      this.isHomePage = url === '/' || url === '/home';
+      this.showSecondSidebar =
+        url.startsWith('/podcasts') ||
+        url.startsWith('/podcast/') ||
+        url.startsWith('/news') ||
+        url.startsWith('/episodes') ||
+        url.startsWith('/episode/');
     });
   }
 
@@ -240,6 +261,16 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
       width: '80vw',
       maxWidth: '900px',
       panelClass: 'privacy-policy-modal',
+    });
+  }
+
+  openRedeemGiftCodeDialog() {
+    this.dialog.open(RedeemGiftCodeDialogComponent, {
+      width: '600px',
+      data: {
+        email: this.userDetailForm.get('email')?.value,
+        permissions: this.userService.userDetails()?.permissions,
+      },
     });
   }
 }

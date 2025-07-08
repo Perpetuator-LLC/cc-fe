@@ -24,6 +24,7 @@
             conversion. Publish podcasts in seconds.
           </p>
           <button mat-raised-button color="accent" routerLink="/register">Start Automating Now</button>
+          <div #p5Container id="p5Container"></div>
         </div>
         <div class="hero-illustration">
           <!-- Placeholder for illustration -->
@@ -37,7 +38,7 @@
   <div class="stats-section">
     <mat-card class="stat-card">
       <div class="stat-title">
-        <mat-icon>podcasts</mat-icon>
+        <app-svg-icon icon="podcast"></app-svg-icon>
         <div class="stat-label">Total Podcasts</div>
       </div>
 
@@ -46,7 +47,7 @@
     </mat-card>
     <mat-card class="stat-card">
       <div class="stat-title">
-        <mat-icon>library_music</mat-icon>
+        <app-svg-icon icon="episodes"></app-svg-icon>
         <div class="stat-label">Total Episodes</div>
       </div>
 
@@ -55,7 +56,7 @@
     </mat-card>
     <mat-card class="stat-card">
       <div class="stat-title">
-        <mat-icon>description</mat-icon>
+        <app-svg-icon icon="transcript"></app-svg-icon>
         <div class="stat-label">Transcripts</div>
       </div>
 
@@ -65,11 +66,31 @@
     </mat-card>
     <mat-card class="stat-card">
       <div class="stat-title">
-        <mat-icon>rss_feed</mat-icon>
+        <app-svg-icon icon="published"></app-svg-icon>
         <div class="stat-label">Episodes Generated from News</div>
       </div>
 
       <div class="stat-value">175</div>
+
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <app-svg-icon icon="newspaper"></app-svg-icon>
+        <div class="stat-label">Summarized News</div>
+      </div>
+
+      <div class="stat-value">166</div>
+
+      <div class="stat-change positive"><span>+12%</span> from last month</div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <div class="stat-title">
+        <mat-icon>graphic_eq</mat-icon>
+        <div class="stat-label">Minutes of Published Audio</div>
+      </div>
+
+      <div class="stat-value">34 minutes</div>
 
       <div class="stat-change positive"><span>+12%</span> from last month</div>
     </mat-card>
@@ -92,7 +113,7 @@
             <a class="module-link" routerLink="/generate-podcast">Generate Podcast &rarr;</a>
           </div>
           <span class="image-section">
-            <img src="/assets/generate.png" alt="generate" />
+            <img src="/assets/icons/dna.svg" alt="generate" />
           </span>
         </div>
       </div>
@@ -155,5 +176,3 @@
     </div>
   </div>
 </div>
-
-<div #p5Container id="p5Container"></div>

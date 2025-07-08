@@ -164,7 +164,6 @@
 
 .middle-card {
   display: flex;
-  overflow: hidden;
 
   .title a {
     font-size: 16px;
@@ -194,26 +193,52 @@
 
   .read-btn {
     background: transparent;
-    border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: var(--theme-color);
     font-weight: 500;
-    font-size: 12px;
+    font-size: 13px;
+    height: auto;
+    box-shadow: none;
+    padding: 0;
+    color: var(--purple);
   }
 
   .news-list {
-    width: calc(100% - 450px);
+    width: 100%;
     padding: 12px 20px;
     background-color: var(--secondary-color);
+    transition: 0.3s all ease-in;
+
+    &.newsListSelected {
+      width: calc(100% - 450px);
+    }
+  }
+
+  .news-detail-section {
+    display: none;
+    overflow: hidden;
+    width: 100%;
+
+    &.newsDetailSelectedSection {
+      display: block;
+    }
   }
 
   .news-details {
-    max-width: 450px;
-    width: 450px;
+    min-width: 0;
+    width: 0;
+    height: 100%;
     background-color: var(--secondary-light);
     padding: 20px;
     color: var(--theme-color);
     border-left: 1px solid var(--border-color);
+    transition: 0.3s all ease-in-out;
+    transform: translateX(1000%);
+
+    &.newsDetailSelected {
+      max-width: 450px;
+      width: auto;
+      transform: translateX(0);
+    }
 
     h3 {
       font-size: 14px;
@@ -231,6 +256,18 @@
   .description-title {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 20px;
+
+    .cross-icon {
+      display: block;
+      text-align: right;
+      position: relative;
+      top: 10px;
+      margin-top: -22px;
+
+      span {
+        cursor: pointer;
+      }
+    }
   }
 
   .bottom-filters {
@@ -427,5 +464,207 @@
         border-color: var(--border-color);
       }
     }
+  }
+}
+
+.before-select-podcast {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+
+  .news-before-container {
+    max-width: 730px;
+    margin: auto;
+
+    h3 {
+      margin: 0;
+      font-size: 32px;
+      color: var(--theme-color);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    p {
+      color: var(--description-color);
+      text-align: center;
+      max-width: 600px;
+      margin: 10px auto 0;
+    }
+
+    .before-select-right-podcasts {
+      text-align: center;
+      margin-top: 30px;
+
+      .fields {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button {
+        border-radius: 10px;
+        background-color: var(--primary);
+        color: white;
+      }
+    }
+  }
+}
+
+.newsSelected {
+  border-color: var(--theme-color) !important;
+
+  .next-btn {
+    background-color: var(--theme-color);
+    color: var(--secondary-light);
+  }
+}
+
+.next-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-color);
+
+  span {
+    color: inherit !important;
+    font-size: 16px !important;
+  }
+}
+
+.date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.bottom-sticky-buttons {
+  display: flex;
+  background: #515459;
+  border: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 0;
+  z-index: 555;
+  width: 80%;
+  max-width: 600px;
+  margin: auto;
+  border-radius: 10px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  .select-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .custom-select-all {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--theme-color);
+      gap: 8px;
+
+      input[type='checkbox'] {
+        display: none;
+      }
+
+      .custom-checkbox {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 2px solid var(--primary);
+        background: #23242a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-right: 8px;
+        transition:
+          background 0.2s,
+          border 0.2s;
+      }
+
+      input[type='checkbox']:checked + .custom-checkbox {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+
+      input[type='checkbox']:checked + .custom-checkbox::after {
+        content: '';
+        display: block;
+        width: 8px;
+        height: 4px;
+        border-left: 2px solid white;
+        border-bottom: 2px solid white;
+        transform: rotate(-45deg);
+        position: absolute;
+        left: 3px;
+        top: 3px;
+      }
+
+      input[type='checkbox']:indeterminate + .custom-checkbox {
+        background: transparent;
+        border-color: var(--primary);
+      }
+
+      input[type='checkbox']:indeterminate + .custom-checkbox::after {
+        content: '';
+        display: block;
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+        background: var(--primary);
+        position: absolute;
+      }
+    }
+
+    .select-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--theme-color);
+    }
+  }
+
+  .filters-btn {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-left: 10px;
+
+    button {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0;
+      height: auto;
+      color: var(--theme-color);
+      background-color: transparent;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      transition: color 0.2s;
+
+      &:disabled {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .delete-btn {
+    background-color: transparent;
+    color: #ff4a4a;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 10px;
   }
 }

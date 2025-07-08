@@ -1,4 +1,9 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<app-layout>
+<ng-container *ngIf="!isLoginRoute; else loginOnly">
+  <app-layout>
+    <router-outlet />
+  </app-layout>
+</ng-container>
+<ng-template #loginOnly>
   <router-outlet />
-</app-layout>
+</ng-template>

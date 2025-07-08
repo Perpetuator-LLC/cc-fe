@@ -83,13 +83,14 @@ mat-form-field {
     border-radius: 0;
     padding: 0;
     height: auto;
+    box-shadow: none;
   }
 
   .remove-btn {
-    background-color: #ff4a4a;
+    background-color: #ff4a4a !important;
     border: 1px solid #ffffff57;
     border-radius: 10px;
-    color: white;
+    color: white !important;
   }
 
   .profile-header {

@@ -22,12 +22,17 @@ import { ThemeService } from '../theme.service';
 import { CookieConsentService } from '../cookie-consent.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
+import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    MatToolbarModule,
     MatFormField,
     MatInput,
     MatButton,
@@ -67,6 +72,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private themeService: ThemeService,
     private userService: UserService,
     private cookieConsentService: CookieConsentService,
+    private dialog: MatDialog,
   ) {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
   }
@@ -106,5 +112,23 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  openTermsModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(TermsAndConditionsModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
+  }
+
+  openPrivacyModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(PrivacyPolicyModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
   }
 }

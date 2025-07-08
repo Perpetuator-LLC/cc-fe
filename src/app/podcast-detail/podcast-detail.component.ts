@@ -38,7 +38,7 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatAccordion,
@@ -57,6 +57,8 @@ import { UserService } from '../user.service';
 import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-voices-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -71,6 +73,8 @@ import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-pod
     MatFormField,
     MatFormFieldModule,
     MatButton,
+    MatMenuModule,
+    MatButtonModule,
     MatTable,
     MatHeaderCell,
     MatCell,
@@ -788,5 +792,17 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   finfo(voice: Voice) {
     this.podcastForm.get('voice')?.setValue(voice);
     this.savePodcast(); // Immediately hit the API after selection
+  }
+
+  onCheckboxChange(event: MatCheckboxChange, tier: VoiceTier) {
+    const current = this.voiceFilter.value || [];
+
+    if (event.checked) {
+      this.voiceFilter.setValue([...current, tier]);
+    } else {
+      this.voiceFilter.setValue(current.filter((t) => t !== tier));
+    }
+
+    this.applyVoiceFilters();
   }
 }

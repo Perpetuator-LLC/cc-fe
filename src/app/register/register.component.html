@@ -4,10 +4,26 @@
 </ng-template>
 <app-message></app-message>
 <div class="register-container">
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  <div class="header">
+    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">
+      <img
+        src="Capital_Copilot_Logo_Slanted.svg"
+        aria-label="Side nav toggle icon"
+        alt="Capital Copilot"
+        width="24"
+        height="24"
+        matTooltip="Capital Copilot"
+      />
+      <div class="route-title">Capital Copilot</div>
+    </a>
+    <p>Already have an account? <a href="/login">Login</a></p>
+  </div>
+  <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <mat-card class="register-card">
       <mat-card-header>
-        <mat-card-title>User Details</mat-card-title>
+        <mat-card-title>
+          <h3>User Details</h3>
+        </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-form-field appearance="fill">
@@ -76,6 +92,7 @@
       </mat-card-content>
       <mat-card-actions>
         <button
+          class="login-btn"
           mat-raised-button
           color="primary"
           type="submit"
@@ -86,6 +103,7 @@
       </mat-card-actions>
       <mat-card-actions>
         <button
+          class="login-btn"
           mat-raised-button
           color="accent"
           type="button"
@@ -97,4 +115,15 @@
       </mat-card-actions>
     </mat-card>
   </form>
+  <mat-toolbar color="primary" class="footer">
+    <p>
+      &copy; 2024-2025 Perpetuator LLC. By using Capitol Copilot, you agree to<br />
+      our
+      <button type="button" tabindex="0" class="link-button" (click)="openTermsModal($event)">
+        Terms and Conditions
+      </button>
+      and
+      <button type="button" tabindex="0" class="link-button" (click)="openPrivacyModal($event)">Privacy Policy</button>.
+    </p>
+  </mat-toolbar>
 </div>

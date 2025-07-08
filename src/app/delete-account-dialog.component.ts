@@ -13,10 +13,13 @@ import { MatInputModule } from '@angular/material/input';
   imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
   template: `
     <div class="delete-dialog">
-      <h2 mat-dialog-title>Delete Account</h2>
+      <h2 mat-dialog-title>Permanently remove your account</h2>
       <mat-dialog-content>
         <div class="danger-zone">
-          <p>Are you sure you want to delete your account? This action is irreversible.</p>
+          <p>
+            Username is publicly visible, do not use personally identifying information in it. Username is publicly
+            visible, do not use personally identifying information in it.
+          </p>
           <div class="action-row">
             <mat-form-field appearance="fill" style="width:100%">
               <mat-label>Delete Confirmation</mat-label>
@@ -78,8 +81,8 @@ import { MatInputModule } from '@angular/material/input';
       .delete-btn {
         border-radius: 10px;
         border: 1px solid var(--border-color);
-        background: #ff4a4a;
-        color: white;
+        background: #ff4a4a !important;
+        color: white !important;
       }
     `,
   ],

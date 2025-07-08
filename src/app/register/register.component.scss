@@ -2,10 +2,69 @@
 mat-card {
   margin: 2rem auto;
   padding: 20px;
+
+  .mat-mdc-card-header {
+    justify-content: center;
+  }
 }
 
 mat-card.register-card {
   max-width: 800px;
+  background-color: var(--secondary-color);
+  border: 1px solid #a9a3c257;
+  border-radius: 8px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .login-btn {
+    background: #811cfd;
+    width: 100%;
+    border-radius: 10px;
+    color: #ffffff;
+    border: 1px solid #ffffff1a;
+  }
+
+  .forgot {
+    text-align: center;
+    width: 100%;
+    background-color: transparent !important;
+    color: var(--description-color);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px;
+  width: 90%;
+
+  .website-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .route-title {
+    font-size: 20px;
+    color: var(--theme-color);
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--description-color);
+
+    a {
+      color: var(--theme-color);
+    }
+  }
 }
 
 .actions {
@@ -26,8 +85,9 @@ mat-form-field {
 .register-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  background-color: #1f2329;
 }
 
 //.disclaimers {
@@ -47,4 +107,35 @@ mat-form-field {
 
 mat-icon {
   margin-right: 8px;
+}
+
+.footer {
+  background-color: transparent;
+  text-align: center;
+
+  .link-button {
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  @media screen and (max-width: 599px) {
+    height: auto;
+    white-space: normal;
+  }
+
+  p {
+    margin-inline: auto;
+    color: #b5b5b5;
+    font-weight: 400;
+    line-height: 16px;
+    font-size: 11px;
+
+    a {
+      color: #f57c00;
+      font-weight: 500;
+    }
+  }
 }

@@ -21,15 +21,27 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
-import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
+import { PaymentService } from '../payment.service';
+import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
+import { MatInput, MatLabel } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { UserService } from '../user.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-orders-list',
   standalone: true,
   imports: [
+    CommonModule,
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
@@ -38,6 +50,13 @@ import { MatIconButton } from '@angular/material/button';
     MatSort,
     MatColumnDef,
     MatHeaderCell,
+    MatCardHeader,
+    MatCardTitle,
+    MatError,
+    MatFormField,
+    MatHint,
+    MatInput,
+    MatLabel,
     MatCell,
     MatCellDef,
     MatHeaderCellDef,
@@ -53,6 +72,9 @@ import { MatIconButton } from '@angular/material/button';
     MatProgressSpinner,
     MatIcon,
     MatIconButton,
+    MatCheckbox,
+    SvgIconComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './orders-list.component.html',
   styleUrl: './orders-list.component.scss',
@@ -60,6 +82,7 @@ import { MatIconButton } from '@angular/material/button';
 export class OrdersListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   orders: UserOrder[] = [];
+  protected userCredits = 0;
   totalOrders = 0;
   cursors: (string | null)[] = [null];
   pageSize = 10;
@@ -67,23 +90,48 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   hasPreviousPage = false;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
+  protected user = this.userService.userDetails;
+  protected isLoggedIn = this.authService.isLoggedIn;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   loadingOrders = true;
 
+  submitted = false;
+
+  form = new FormGroup({
+    amount: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]),
+    terms: new FormControl(false, Validators.requiredTrue),
+    agreement: new FormControl(false, Validators.requiredTrue),
+  });
+
   constructor(
     protected creditService: CreditService,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
-  ) {}
+    private paymentService: PaymentService,
+    protected userService: UserService,
+    protected authService: AuthService,
+  ) {
+    toObservable(this.creditService.userCredits).subscribe({
+      next: (credits) => {
+        this.userCredits = credits;
+      },
+      error: (error) => {
+        this.messageService.error(`Failed to load credits signal: ${error.message}`);
+      },
+    });
+  }
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadOrders();
+    if (this.isLoggedIn()) {
+      this.userService.loadUserDetails();
+    }
   }
 
   ngOnDestroy() {
@@ -154,5 +202,38 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       next: () => this.messageService.success('Order cancelled successfully'),
       error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
     });
+  }
+
+  setAmount(dollars: number) {
+    this.form.get('amount')?.setValue(String(dollars));
+  }
+
+  payFromInput() {
+    this.submitted = true;
+    this.form.get('amount')?.markAsTouched();
+    this.form.get('terms')?.markAsTouched();
+    this.form.get('agreement')?.markAsTouched();
+    if (this.form.invalid) {
+      return;
+    }
+    const amount = this.form.get('amount')?.value;
+    if (amount != null && amount !== '' && !isNaN(+amount)) {
+      this.pay(+amount * 100);
+    }
+  }
+
+  pay(amount: number) {
+    this.subscriptions.add(
+      this.paymentService.createCheckoutSession(amount).subscribe({
+        next: (data) => {
+          if (data?.order?.sessionUrl) {
+            this.paymentService.redirectToCheckout(data.order.sessionUrl);
+          }
+        },
+        error: (err) => {
+          this.messageService.error('Failed to create checkout session: ' + err.message);
+        },
+      }),
+    );
   }
 }

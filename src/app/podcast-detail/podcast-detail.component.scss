@@ -155,12 +155,29 @@ mat-divider {
 
 .voice-controls-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
+  justify-content: space-between;
   /* Allow items to wrap */
   align-items: center;
   /* Align items to the top */
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
+}
+
+.voice-header {
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--theme-color);
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--description-color);
+    margin-top: 6px;
+    margin-bottom: 30px;
+  }
 }
 
 /* Apply common flex behavior to direct children acting as filter items */
@@ -177,11 +194,6 @@ mat-divider {
   /* Tier filter needs a bit more space */
 }
 
-.voice-search {
-  /* min-width: 200px; */
-  /* Inherits default */
-}
-
 .voice-buttons {
   /* This is also a .voice-filter-item, gets flex: 1 1 auto */
   min-width: 280px;
@@ -192,6 +204,14 @@ mat-divider {
   gap: 8px;
   justify-content: flex-end;
   /* Align buttons to the start */
+
+  .filter-btn {
+    background-color: var(--secondary-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--theme-color);
+    font-weight: 400;
+  }
 
   button {
     flex: 0 0 auto;
@@ -579,21 +599,23 @@ mat-divider {
     }
 
     .radio-round {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       background: transparent;
-      border: 2px solid var(--primary);
+      border: 2px solid var(--purple);
       border-radius: 50%;
-      min-width: 16px;
-      padding: 3px;
+      min-width: 18px;
       opacity: 0;
       visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       span {
-        width: 100%;
-        height: 100%;
+        width: 12px;
+        height: 12px;
         display: block;
-        background: var(--primary);
+        background: var(--purple);
         border-radius: 50%;
       }
     }
@@ -671,4 +693,16 @@ mat-divider {
     border: 1px solid rgba(255, 255, 255, 0.1411764706);
     font-size: 14px;
   }
+}
+
+.checkbox-block {
+  display: block;
+}
+
+.filter-container {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
 }

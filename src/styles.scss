@@ -250,6 +250,8 @@ body {
   --theme-white: #f14a00;
   --theme-yellow: #2f55eb;
   --description-color: #767676;
+  --theme-transparent: rgb(255 255 255 / 42%);
+  --purple: #8f8fff;
   //--md-sys-color-primary-hover: #1976d2;
   //--md-sys-color-primary-visited: #1976d2;
   //--md-sys-color-secondary-hover: #f50057;
@@ -281,6 +283,7 @@ body {
   --description-color: #b5b5b5;
   --theme-yellow: #f5c400;
   --theme-white: #ffffff;
+  --theme-transparent: rgba(0, 0, 0, 0.4);
 }
 
 .light {
@@ -294,6 +297,31 @@ body {
 
   .savePodcastBtn {
     background: #f14a00 !important;
+  }
+}
+
+.mat-mdc-dialog-content {
+  color: var(--description-color) !important;
+}
+
+.mdc-dialog__surface .deleteModal {
+  color: var(--theme-color);
+}
+
+.mdc-dialog__surface:has(.deleteModal) {
+  .mdc-dialog__actions {
+    button {
+      background: var(--secondary-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--theme-color) !important;
+      font-weight: 500;
+
+      &:nth-child(2) {
+        background: var(--theme-white) !important;
+        color: var(--toolbar-container-background-color) !important;
+      }
+    }
   }
 }
 
@@ -377,7 +405,7 @@ body {
 
 .mat-tab-group {
   .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-    color: var(--primary) !important;
+    color: var(--purple) !important;
   }
 
   .mat-mdc-tab .mdc-tab__text-label {
@@ -385,7 +413,7 @@ body {
   }
 
   .mat-mdc-tab .mdc-tab-indicator__content--underline {
-    border-color: var(--primary) !important;
+    border-color: var(--purple) !important;
   }
 
   .mat-mdc-tab-label-container {

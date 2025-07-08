@@ -12,6 +12,10 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
+import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register',
@@ -31,6 +35,7 @@ import { MessageComponent } from '../message/message.component';
     MatCheckbox,
     MessageComponent,
     RouterLink,
+    MatToolbarModule,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -50,6 +55,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
+    private dialog: MatDialog,
   ) {}
 
   ngAfterViewInit() {
@@ -113,5 +119,23 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         },
       });
     }
+  }
+
+  openTermsModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(TermsAndConditionsModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
+  }
+
+  openPrivacyModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(PrivacyPolicyModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
   }
 }

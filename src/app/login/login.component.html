@@ -6,10 +6,26 @@
 <app-message></app-message>
 <link rel="stylesheet" href="login.component.scss" />
 <div class="login-container">
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <div class="header">
+    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">
+      <img
+        src="Capital_Copilot_Logo_Slanted.svg"
+        aria-label="Side nav toggle icon"
+        alt="Capital Copilot"
+        width="24"
+        height="24"
+        matTooltip="Capital Copilot"
+      />
+      <div class="route-title">Capital Copilot</div>
+    </a>
+    <p>Don’t have an account? <a href="/register">Sign up</a></p>
+  </div>
+  <form class="form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <mat-card class="login-card">
       <mat-card-header>
-        <mat-card-title>Email & Password</mat-card-title>
+        <mat-card-title>
+          <h3>Login to Capital Copilot</h3>
+        </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-form-field appearance="fill">
@@ -22,10 +38,13 @@
         </mat-form-field>
       </mat-card-content>
       <mat-card-actions>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!loginForm.valid">Login</button>
+        <button class="login-btn" mat-raised-button color="primary" type="submit" [disabled]="!loginForm.valid">
+          Login
+        </button>
       </mat-card-actions>
       <mat-card-actions>
         <button
+          class="forgot"
           mat-button
           color="accent"
           type="button"
@@ -37,4 +56,16 @@
       </mat-card-actions>
     </mat-card>
   </form>
+
+  <mat-toolbar color="primary" class="footer">
+    <p>
+      &copy; 2024-2025 Perpetuator LLC. By using Capitol Copilot, you agree to<br />
+      our
+      <button type="button" tabindex="0" class="link-button" (click)="openTermsModal($event)">
+        Terms and Conditions
+      </button>
+      and
+      <button type="button" tabindex="0" class="link-button" (click)="openPrivacyModal($event)">Privacy Policy</button>.
+    </p>
+  </mat-toolbar>
 </div>

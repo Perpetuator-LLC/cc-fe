@@ -3,6 +3,8 @@ import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/c
 import { Subscription } from 'rxjs';
 import { NewsConnection, NewsService, NewsResult } from '../news.service';
 import { DatePipe } from '@angular/common';
+import { NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
@@ -24,6 +26,7 @@ import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 // export interface News {
 //   results: NewsResult[];
@@ -39,6 +42,8 @@ export interface SidePanelAccordianData {
   standalone: true,
   imports: [
     DatePipe,
+    NgIf,
+    NgClass,
     MatFormField,
     MatLabel,
     MatIconModule,
@@ -61,6 +66,7 @@ export interface SidePanelAccordianData {
     MatSelect,
     MatOption,
     JobStatusBarComponent,
+    SvgIconComponent,
   ],
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',
@@ -76,6 +82,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
   selectedNewsDetail: NewsResult | null = null;
+  newsFetched = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -162,12 +169,22 @@ export class NewsComponent implements OnInit, OnDestroy {
             return;
           }
           this.jobService.addJob(data.job);
+          // Set newsFetched to true after fetch is initiated
+          this.newsFetched = true;
         },
         error: (error) => {
           this.messageService.error(`Failed to fetch news: ${error.message}`);
         },
       }),
     );
+  }
+
+  onPodcastChange() {
+    this.newsFetched = false;
+    this.news = null;
+    this.filteredNews = [];
+    this.selectedNews.clear();
+    this.selectedNewsDetail = null;
   }
 
   extractSelectedNews() {
@@ -339,6 +356,8 @@ export class NewsComponent implements OnInit, OnDestroy {
           this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
           this.reapplySelection(selectedNewsIds);
           this.applyFilter(null);
+          // Set newsFetched to true after news is loaded
+          this.newsFetched = true;
         },
         error: (err: { message: string }) => {
           this.messageService.error(`Failed to get news data: ${err.message}`);
@@ -427,6 +446,10 @@ export class NewsComponent implements OnInit, OnDestroy {
 
   selectNews(news: NewsResult) {
     this.selectedNewsDetail = news;
+  }
+
+  clearSelectedNewsDetail() {
+    this.selectedNewsDetail = null;
   }
 
   ngOnDestroy() {

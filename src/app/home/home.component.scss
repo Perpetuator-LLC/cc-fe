@@ -26,6 +26,9 @@ mat-card {
   align-items: center;
   position: relative;
   z-index: 50;
+  @media screen and (max-width: 576px) {
+    padding: 20px;
+  }
 }
 
 .hero-section {
@@ -34,12 +37,18 @@ mat-card {
   .hero-banner-card {
     padding: 8px 40px;
     background-color: #f5d6c8;
+    @media screen and (max-width: 576px) {
+      padding: 8px 20px;
+    }
 
     h1 {
       color: #262627;
       font-size: 40px;
       font-weight: 700;
       margin: 0;
+      @media screen and (max-width: 576px) {
+        font-size: 28px;
+      }
     }
 
     p {
@@ -47,6 +56,9 @@ mat-card {
       color: #262627;
       font-weight: 500;
       margin: 12px 0 20px;
+      @media screen and (max-width: 576px) {
+        font-size: 16px;
+      }
     }
 
     button {
@@ -63,15 +75,25 @@ mat-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      @media screen and (max-width: 768px) {
+        flex-direction: column;
+      }
     }
   }
 }
 
 .stats-section {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-top: 22px;
   width: 100%;
+  @media screen and (max-width: 991px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media screen and (max-width: 576px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 
   .stat-card {
     border: 1px solid var(--border-color);
@@ -126,13 +148,22 @@ mat-card {
   width: 100%;
   display: flex;
   gap: 12px;
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+  }
 
   .generate-podcast {
     width: 60%;
+    @media screen and (max-width: 768px) {
+      width: auto;
+    }
   }
 
   .create-episode {
     width: 40%;
+    @media screen and (max-width: 768px) {
+      width: auto;
+    }
   }
 
   .module-card {
@@ -145,6 +176,9 @@ mat-card {
   .module-wrapper {
     display: flex;
     gap: 40px;
+    @media screen and (max-width: 576px) {
+      flex-direction: column;
+    }
 
     .module-header {
       height: auto;
@@ -154,9 +188,17 @@ mat-card {
   .image-section {
     min-width: 273px;
     max-width: 273px;
+    background: var(--purple);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    @media screen and (max-width: 576px) {
+      min-width: auto;
+    }
 
     img {
-      width: 100%;
+      width: auto;
     }
   }
 
@@ -168,7 +210,7 @@ mat-card {
     height: 100%;
 
     a {
-      color: var(--primary);
+      color: var(--purple);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
