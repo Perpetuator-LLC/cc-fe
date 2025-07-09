@@ -1,6 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .create-episode-card {
-  background-color: transparent !important;
+  background-color: var(--toolbar-container-background-color) !important;
   box-shadow: none;
   border-bottom: 1px solid var(--border-color);
   border-radius: 0;
@@ -81,14 +81,19 @@
   gap: 16px;
   padding-top: 12px;
 
-  @media screen and (max-width: 576px) {
+  @media screen and (max-width: 900px) {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .search-filter {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    @media screen and (max-width: 991px) {
+      flex-wrap: wrap;
+    }
   }
 
   .input-search-div {
@@ -219,6 +224,14 @@
   margin-top: 20px;
   border-radius: 8px;
   overflow: hidden;
+
+  @media screen and (max-width: 900px) {
+    table {
+      overflow: auto;
+      display: block;
+      white-space: nowrap;
+    }
+  }
 
   .episode-title {
     a {

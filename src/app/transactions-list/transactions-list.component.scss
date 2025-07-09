@@ -1,9 +1,13 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
+.transaction-wrapper {
+  margin: auto;
+  max-width: 1140px;
+}
+
 .create-team-card {
   background-color: transparent !important;
   box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
   border-radius: 0;
 
   .content-header {
@@ -26,6 +30,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
 
       h3 {
         font-weight: 600;

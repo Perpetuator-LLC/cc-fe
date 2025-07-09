@@ -5,12 +5,14 @@
   right: 20px;
   z-index: 1000;
   width: 300px;
-  color: black;
+  color: var(--theme-color);
   border-radius: 10px;
 }
 
 .mat-mdc-card.message-card {
-  background-color: #3b3a43;
+  background-color: #515459;
+  border: 1px solid var(--border-color);
+  padding-top: 0;
 }
 
 .message-card {
@@ -28,12 +30,16 @@
   z-index: 10;
   border-radius: 50%;
   padding: 0;
+  color: var(--theme-color);
 }
 
 .message-content {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  font-size: 14px;
+  color: var(--theme-color);
+  font-weight: 500;
 }
 
 .message-icon {
@@ -41,11 +47,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 50%;
+  padding: 6px;
+  height: 30px;
+  width: 30px;
+  min-width: 30px;
 }
 
 .message-text {
   flex: 1;
   padding-left: 10px;
+  padding-right: 30px;
   word-wrap: break-word;
 }
 
@@ -53,18 +65,58 @@
   padding: 8px;
 }
 
+.mat-card-content .mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: black;
+}
+
+.message-icon-span {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .error {
-  background-color: #ffdddd;
+  .message-icon {
+    background-color: rgb(255 0 1 / 15%);
+
+    .message-icon-span {
+      background-color: #ff0001;
+    }
+  }
 }
 
 .warning {
-  background-color: #fff8db;
+  .message-icon {
+    background-color: rgb(255 42 4 / 15%);
+
+    .message-icon-span {
+      background-color: #ff2a04;
+    }
+  }
 }
 
 .info {
-  background-color: #d9f2ff;
+  .message-icon {
+    background-color: rgb(255 179 31 / 15%);
+
+    .message-icon-span {
+      background-color: #ffb31f;
+    }
+  }
 }
 
 .success {
-  background-color: #d9ffd9;
+  .message-icon {
+    background-color: rgb(61 255 96 / 15%);
+
+    .message-icon-span {
+      background-color: #3dff60;
+    }
+  }
 }

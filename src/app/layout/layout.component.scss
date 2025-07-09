@@ -334,6 +334,7 @@ mat-nav-list {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .content-area {
@@ -345,6 +346,7 @@ mat-nav-list {
 .content-wrapper {
   height: 100%;
   width: 100%;
+  background-color: var(--secondary-color);
 }
 
 .before-login-layout {
@@ -470,6 +472,33 @@ mat-nav-list {
     display: flex;
     overscroll-behavior: hidden;
 
+    .collapseSecondSidebarMobile {
+      display: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      display: none;
+      position: fixed;
+      left: 0;
+      z-index: 555;
+      height: 100vh;
+      transform: translateX(-100%);
+      transition: 0.3s all ease-in;
+
+      &.showSidebar {
+        display: flex;
+        transform: none;
+      }
+
+      .collapseSecondSidebar {
+        display: none;
+      }
+
+      .collapseSecondSidebarMobile {
+        display: inline;
+      }
+    }
+
     .second-sidebar {
       display: flex;
       width: 240px;
@@ -548,13 +577,23 @@ mat-nav-list {
   .main-content {
     overflow-x: auto;
 
+    .hamburger-icon {
+      display: none;
+
+      @media screen and (max-width: 600px) {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+    }
+
     .toolbar-container-section {
       background-color: var(--toolbar-container-background-color);
       border-bottom: 1px solid var(--border-color);
       padding-inline: 30px;
 
       @media screen and (max-width: 576px) {
-        padding-inline: 20px;
+        padding-inline: 16px;
       }
 
       .push-right {

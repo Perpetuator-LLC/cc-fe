@@ -3,7 +3,7 @@ import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core'
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ToolbarService } from '../toolbar.service';
 import {
   MatAccordion,
@@ -16,6 +16,10 @@ import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
+import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-forgot-password',
@@ -37,6 +41,8 @@ import { MessageComponent } from '../message/message.component';
     MatButton,
     ReactiveFormsModule,
     MessageComponent,
+    MatToolbarModule,
+    RouterLink,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',
@@ -54,6 +60,7 @@ export class ForgotPasswordComponent implements AfterViewInit {
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
+    private dialog: MatDialog,
   ) {}
 
   ngAfterViewInit() {
@@ -88,6 +95,23 @@ export class ForgotPasswordComponent implements AfterViewInit {
         });
         console.error('Password reset failed', error);
       },
+    });
+  }
+  openTermsModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(TermsAndConditionsModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
+    });
+  }
+
+  openPrivacyModal(event: Event) {
+    event.preventDefault();
+    this.dialog.open(PrivacyPolicyModalComponent, {
+      width: '80vw',
+      maxWidth: '900px',
+      panelClass: 'privacy-policy-modal',
     });
   }
 }

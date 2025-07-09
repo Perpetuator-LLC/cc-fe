@@ -2,6 +2,7 @@
 
 .gift-page-wrapper {
   position: relative;
+  padding: 0 30px;
 
   .gift-container {
     margin: auto;
@@ -12,6 +13,11 @@
       justify-content: space-between;
       margin-bottom: 34px;
       margin-top: 40px;
+
+      @media screen and (max-width: 600px) {
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
 
       .title {
         h3 {
@@ -34,13 +40,13 @@
         h4 {
           font-size: 32px;
           font-weight: 700;
-          color: var(--theme-color);
+          color: var(--theme-yellow);
           margin: 0;
         }
 
         p {
           margin: 0;
-          margin-top: 6px;
+          margin-bottom: 6px;
           font-size: 13px;
           font-weight: 500;
           color: var(--description-color);
@@ -55,7 +61,12 @@
     .input-field {
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: 20px;
+
+      @media screen and (max-width: 600px) {
+        flex-wrap: wrap;
+        gap: 0;
+      }
     }
 
     .voice-info {
@@ -76,6 +87,10 @@
       gap: 6px;
       align-items: center;
       margin-bottom: 20px;
+
+      @media screen and (max-width: 600px) {
+        flex-wrap: wrap;
+      }
 
       button {
         background-color: var(--secondary-light);
@@ -117,6 +132,12 @@
       font-weight: 600;
       color: var(--toolbar-container-background-color);
       cursor: pointer;
+      max-width: 508px;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
 
       span {
         background-color: var(--theme-transparent);

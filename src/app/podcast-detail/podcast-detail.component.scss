@@ -162,6 +162,10 @@ mat-divider {
   /* Align items to the top */
   gap: 16px;
   margin-bottom: 40px;
+
+  @media screen and (max-width: 576px) {
+    flex-direction: column;
+  }
 }
 
 .voice-header {
@@ -279,6 +283,14 @@ mat-divider {
   background-color: var(--secondary-color);
   margin-top: -20px;
 
+  @media screen and (max-width: 600px) {
+    padding: 32px 40px;
+  }
+
+  @media screen and (max-width: 450px) {
+    padding: 32px 20px;
+  }
+
   .detail-header {
     margin-bottom: 40px;
 
@@ -288,6 +300,10 @@ mat-divider {
       align-items: flex-start;
       gap: 10px;
       margin-bottom: 28px;
+
+      @media screen and (max-width: 900px) {
+        flex-direction: column;
+      }
 
       .title {
         h2 {
@@ -317,6 +333,7 @@ mat-divider {
           padding: 0;
           font-size: 14px;
           font-weight: 600;
+          white-space: nowrap;
         }
 
         .publish-btn {
@@ -326,6 +343,7 @@ mat-divider {
           border: 1px solid #ffffff24;
           font-size: 14px;
           font-weight: 600;
+          white-space: nowrap;
         }
       }
     }
@@ -333,6 +351,11 @@ mat-divider {
     .status-summary {
       display: flex;
       gap: 60px;
+
+      @media screen and (max-width: 900px) {
+        flex-wrap: wrap;
+        gap: 30px;
+      }
 
       .status-item {
         display: flex;
@@ -435,6 +458,10 @@ mat-divider {
     .form-group {
       display: flex;
       gap: 10px;
+
+      @media screen and (max-width: 576px) {
+        flex-direction: column;
+      }
     }
 
     .slug-input {
@@ -507,6 +534,19 @@ mat-divider {
   }
 }
 
+.rss-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  @media screen and (max-width: 576px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
 .voice-info {
   p {
     display: flex;
@@ -525,6 +565,10 @@ mat-divider {
   }
 
   .voice-buttons {
+    @media screen and (max-width: 576px) {
+      justify-content: flex-start;
+    }
+
     .apply-btn {
       background: var(--secondary-light);
       border: 1px solid var(--border-color);
@@ -575,7 +619,7 @@ mat-divider {
 
 .voice-list {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 10px;
 
   .voice-card {
@@ -624,7 +668,7 @@ mat-divider {
       flex: auto !important;
       padding: 0;
       line-height: 0;
-      border: 2px solid var(--theme-color);
+      border: 0;
       width: 24px;
       min-width: 24px;
       height: 24px;
@@ -705,4 +749,23 @@ mat-divider {
   flex-direction: column;
   gap: 8px;
   min-width: 200px;
+}
+
+.no-card {
+  background-color: var(--secondary-light) !important;
+  border: 1px solid var(--border-color);
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-color);
+}
+
+.image-actions {
+  position: absolute;
+  right: 0;
+
+  button {
+    color: var(--theme-color);
+  }
 }

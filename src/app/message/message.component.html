@@ -13,15 +13,17 @@
         <mat-card-content [ngClass]="message.type">
           <div class="message-content">
             <div class="message-icon">
-              @if (message.type === 'error') {
-                <mat-icon color="warn">error</mat-icon>
-              } @else if (message.type === 'info') {
-                <mat-icon color="primary">info</mat-icon>
-              } @else if (message.type === 'success') {
-                <mat-icon color="primary">check_circle</mat-icon>
-              } @else if (message.type === 'warning') {
-                <mat-icon color="warn">warning</mat-icon>
-              }
+              <div class="message-icon-span">
+                @if (message.type === 'error') {
+                  <mat-icon color="warn">error</mat-icon>
+                } @else if (message.type === 'info') {
+                  <mat-icon color="primary">info</mat-icon>
+                } @else if (message.type === 'success') {
+                  <mat-icon color="primary">check_circle</mat-icon>
+                } @else if (message.type === 'warning') {
+                  <mat-icon color="warn">warning</mat-icon>
+                }
+              </div>
             </div>
             <div class="message-text" [innerHTML]="message.text"></div>
           </div>

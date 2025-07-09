@@ -68,7 +68,7 @@
           </div>
 
           <form [formGroup]="podcastForm">
-            <div class="member-row">
+            <div class="member-row" style="margin-bottom: 20px">
               <div class="file-input-wrapper">
                 <div class="image-preview">
                   @if (imageUrl) {
@@ -325,7 +325,15 @@
                       (mouseleave)="stopVoiceSample()"
                       (click)="$event.stopPropagation()"
                     >
-                      <mat-icon>graphic_eq</mat-icon>
+                      <ng-container
+                        *ngIf="currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid; else playIcon"
+                      >
+                        <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
+                        <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
+                      </ng-container>
+                      <ng-template #playIcon>
+                        <app-svg-icon icon="play"></app-svg-icon>
+                      </ng-template>
                     </button>
                     <div class="voice-name">
                       {{ getVoiceDisplayName(voice) }}
@@ -474,7 +482,7 @@
       <mat-tab label="RSS Feeds">
         <mat-card-content>
           <form [formGroup]="podcastForm" class="rss-form">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px">
+            <div class="rss-info">
               <div class="voice-info">
                 <p style="margin-bottom: 0">
                   <mat-icon>info</mat-icon>Add RSS feeds to import content into your podcast. Each feed will be checked
@@ -490,27 +498,33 @@
             </div>
 
             <div class="rss-feeds-section">
-              <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
-                <!-- RSS Feed URL Column -->
-                <ng-container matColumnDef="url">
-                  <mat-header-cell *matHeaderCellDef> RSS Feed URL </mat-header-cell>
-                  <mat-cell *matCellDef="let feed"> {{ feed.url }} </mat-cell>
-                </ng-container>
+              @if (!podcastForm.get('rssFeeds')?.value?.length) {
+                <mat-card class="no-card">
+                  <h3>No Data Found</h3>
+                </mat-card>
+              } @else {
+                <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
+                  <!-- RSS Feed URL Column -->
+                  <ng-container matColumnDef="url">
+                    <mat-header-cell *matHeaderCellDef> RSS Feed URL </mat-header-cell>
+                    <mat-cell *matCellDef="let feed"> {{ feed.url }} </mat-cell>
+                  </ng-container>
 
-                <!-- Delete Button Column -->
-                <ng-container matColumnDef="actions">
-                  <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
-                  <mat-cell *matCellDef="let feed" class="actions-cell">
-                    <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </mat-cell>
-                </ng-container>
+                  <!-- Delete Button Column -->
+                  <ng-container matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
+                    <mat-cell *matCellDef="let feed" class="actions-cell">
+                      <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </mat-cell>
+                  </ng-container>
 
-                <!-- Header and Row Declarations -->
-                <mat-header-row *matHeaderRowDef="rssFeedsDisplayedColumns"></mat-header-row>
-                <mat-row *matRowDef="let row; columns: rssFeedsDisplayedColumns"></mat-row>
-              </mat-table>
+                  <!-- Header and Row Declarations -->
+                  <mat-header-row *matHeaderRowDef="rssFeedsDisplayedColumns"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: rssFeedsDisplayedColumns"></mat-row>
+                </mat-table>
+              }
             </div>
           </form>
         </mat-card-content>

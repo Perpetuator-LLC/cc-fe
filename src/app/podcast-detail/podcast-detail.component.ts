@@ -59,13 +59,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
   styleUrls: ['./podcast-detail.component.scss'],
   standalone: true,
   imports: [
+    CommonModule, // <-- Added to enable *ngIf
     MessageComponent,
     MatProgressSpinner,
     MatProgressBarModule,
@@ -109,6 +111,7 @@ import { MatButtonModule } from '@angular/material/button';
     PodcastCategoriesComponent,
     MatTabsModule,
     DeletePodcastDialogComponent,
+    SvgIconComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {

@@ -36,19 +36,28 @@ import { MatCardModule } from '@angular/material/card';
         <div>
           <mat-card-title>Redeem Gift Code</mat-card-title>
           <p class="description">
-            Username is publicly visible, do not use personally identifying information in it. Username is publicly
-            visible, do not use personally identifying information in it.
+            Have a gift code? Enter it below and enjoy your exclusive benefits — it’s our way of saying thank you!
           </p>
         </div>
       </mat-card-header>
       <mat-card-content>
         <mat-form-field appearance="fill" style="width:100%">
           <mat-label>Redeem Code</mat-label>
-          <input matInput [(ngModel)]="code" placeholder="Enter code" />
+          <input matInput [(ngModel)]="code" (ngModelChange)="codeError = false" placeholder="Enter code" />
         </mat-form-field>
+        <div
+          class="error-message"
+          *ngIf="codeError"
+          style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
+        >
+          Please enter a code before redeeming.
+        </div>
         <div class="btn-container">
           <button mat-raised-button class="cancel-btn" color="primary" (click)="onCancel()">Cancel</button>
-          <button mat-raised-button class="redeem-btn" color="primary" (click)="redeemCode()">Redeem</button>
+          <button mat-raised-button class="redeem-btn" color="primary" (click)="redeemCode()">
+            <mat-progress-spinner diameter="20" *ngIf="redeeming" mode="indeterminate"></mat-progress-spinner
+            ><span *ngIf="!redeeming">Redeem</span>
+          </button>
         </div>
 
         <ng-container *ngIf="permissions?.includes('api.add_bonuscode')">
@@ -213,22 +222,31 @@ export class RedeemGiftCodeDialogComponent implements OnInit {
     this.loadCodes();
   }
 
+  redeeming = false;
+  codeError = false;
+
   redeemCode() {
-    if (this.code) {
-      this.codeService.redeemCode(this.code).subscribe({
-        next: () => {
-          this.messageService.success('Code redeemed successfully.');
-          this.code = '';
-          this.loadCodes();
-          this.creditService.refetchUserCredits();
-        },
-        error: (err: unknown) => {
-          const msg =
-            err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
-          this.messageService.error('Failed to redeem code: ' + msg);
-        },
-      });
+    if (!this.code) {
+      this.codeError = true;
+      return;
     }
+    this.codeError = false;
+    this.redeeming = true;
+    this.codeService.redeemCode(this.code).subscribe({
+      next: () => {
+        this.messageService.success('Code redeemed successfully.');
+        this.code = '';
+        this.loadCodes();
+        this.creditService.refetchUserCredits();
+        this.redeeming = false;
+      },
+      error: (err: unknown) => {
+        const msg =
+          err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
+        this.messageService.error('Failed to redeem code: ' + msg);
+        this.redeeming = false;
+      },
+    });
   }
 
   createCode() {

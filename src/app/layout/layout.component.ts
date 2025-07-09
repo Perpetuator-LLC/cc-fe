@@ -9,6 +9,7 @@ import {
   AfterViewInit,
   ElementRef,
   Renderer2,
+  HostListener,
 } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe, DecimalPipe, NgClass } from '@angular/common';
@@ -87,8 +88,10 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   protected isSecondSidebarVisible = true;
   isHomePage = false;
   showSecondSidebar = false;
+  showMobileSidebar = false;
 
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
+  @ViewChild('afterHeader', { static: false, read: ElementRef }) afterHeaderRef!: ElementRef;
 
   constructor(
     protected themeService: ThemeService,
@@ -266,11 +269,26 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
 
   openRedeemGiftCodeDialog() {
     this.dialog.open(RedeemGiftCodeDialogComponent, {
-      width: '600px',
+      width: '500px',
       data: {
         email: this.userDetailForm.get('email')?.value,
         permissions: this.userService.userDetails()?.permissions,
       },
     });
+  }
+
+  onHamburgerClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.showMobileSidebar = !this.showMobileSidebar;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.showMobileSidebar) {
+      const headerEl = this.afterHeaderRef?.nativeElement;
+      if (headerEl && !headerEl.contains(event.target)) {
+        this.showMobileSidebar = false;
+      }
+    }
   }
 }

@@ -178,7 +178,7 @@
 }
 
 .create-team-card {
-  background-color: transparent !important;
+  background-color: var(--toolbar-container-background-color) !important;
   box-shadow: none;
   border-bottom: 1px solid var(--border-color);
   border-radius: 0;

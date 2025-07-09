@@ -8,7 +8,7 @@
   }"
 >
   @if (this.authService.isLoggedIn()) {
-    <header class="after-header">
+    <header #afterHeader class="after-header" [ngClass]="{ showSidebar: showMobileSidebar }">
       <div class="sidebar after-login-sidebar">
         <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">
           <img
@@ -135,6 +135,30 @@
                   stroke-linejoin="round"
                 />
               </svg>
+              <svg
+                class="collapseSecondSidebarMobile"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                (click)="onHamburgerClick($event)"
+              >
+                <path
+                  d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
+                  stroke="#ADADAD"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12.5 11.6667L10.8333 10L12.5 8.33334"
+                  stroke="#ADADAD"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </div>
             <!--  @if (itemtitle === 'Podcasts') { -->
             <div class="links">
@@ -184,7 +208,7 @@
                   />
                 </svg>
 
-                <span class="website-title">Podcast List</span>
+                <span class="website-title">Podcasts</span>
               </a>
             </div>
             <!-- } -->
@@ -284,6 +308,16 @@
   <div class="main-content">
     <mat-toolbar color="primary" class="toolbar-container-section">
       <div class="toolbar-container">
+        <div class="hamburger-icon">
+          <app-svg-icon
+            width="24"
+            height="24"
+            icon="hamburger"
+            (click)="onHamburgerClick($event)"
+            style="cursor: pointer"
+          ></app-svg-icon>
+          <img src="/assets/logo-white.svg" alt="logo" />
+        </div>
         <ng-container #toolbarContainer></ng-container>
         @if (this.authService.isLoggedIn()) {
           <span class="push-right">
@@ -300,6 +334,7 @@
             <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
               <mat-icon class="profile-icon">account_circle</mat-icon>
               {{ this.userService.userDetails()?.username }}
+              <span style="margin-left: 4px; rotate: 90deg; font-size: 20px">></span>
             </button>
             <mat-menu #profileMenu="matMenu" class="profile-menu">
               <div class="profile-header">

@@ -3,8 +3,18 @@ mat-card {
   margin: 2rem auto;
   padding: 20px;
 
+  @media screen and (max-width: 576px) {
+    padding-inline: 10px;
+  }
+
   .mat-mdc-card-header {
     justify-content: center;
+  }
+
+  .mat-mdc-card-actions {
+    @media screen and (max-width: 576px) {
+      padding-inline: 16px;
+    }
   }
 }
 
@@ -38,6 +48,10 @@ mat-card.register-card {
   }
 }
 
+form {
+  padding: 0 20px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -55,6 +69,10 @@ mat-card.register-card {
     font-size: 20px;
     color: var(--theme-color);
     font-weight: 600;
+
+    @media screen and (max-width: 576px) {
+      display: none;
+    }
   }
 
   p {

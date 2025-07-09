@@ -68,7 +68,7 @@ import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
       .saveTeamBtn {
         background: #ffffff;
         border-radius: 10px;
-        color: var(--toolbar-container-background-color);
+        color: black;
         width: 225px;
         font-size: 14px;
         font-weight: 600;

@@ -25,4 +25,10 @@
   border: 1px solid var(--border-color);
   background: var(--theme-color);
   color: var(--secondary-light);
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: auto;
+  }
 }

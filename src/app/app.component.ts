@@ -16,6 +16,10 @@ export class AppComponent {
   constructor(public router: Router) {}
 
   get isLoginRoute(): boolean {
-    return this.router.url.startsWith('/login') || this.router.url.startsWith('/register');
+    return (
+      this.router.url.startsWith('/login') ||
+      this.router.url.startsWith('/register') ||
+      this.router.url.startsWith('/forgot')
+    );
   }
 }

@@ -26,6 +26,7 @@ mat-card {
   align-items: center;
   position: relative;
   z-index: 50;
+
   @media screen and (max-width: 576px) {
     padding: 20px;
   }
@@ -37,6 +38,7 @@ mat-card {
   .hero-banner-card {
     padding: 8px 40px;
     background-color: #f5d6c8;
+
     @media screen and (max-width: 576px) {
       padding: 8px 20px;
     }
@@ -46,6 +48,11 @@ mat-card {
       font-size: 40px;
       font-weight: 700;
       margin: 0;
+
+      @media screen and (max-width: 991px) {
+        font-size: 30px;
+      }
+
       @media screen and (max-width: 576px) {
         font-size: 28px;
       }
@@ -56,7 +63,8 @@ mat-card {
       color: #262627;
       font-weight: 500;
       margin: 12px 0 20px;
-      @media screen and (max-width: 576px) {
+
+      @media screen and (max-width: 991px) {
         font-size: 16px;
       }
     }
@@ -75,6 +83,7 @@ mat-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
       @media screen and (max-width: 768px) {
         flex-direction: column;
       }
@@ -88,9 +97,11 @@ mat-card {
   gap: 12px;
   margin-top: 22px;
   width: 100%;
+
   @media screen and (max-width: 991px) {
     grid-template-columns: repeat(2, 1fr);
   }
+
   @media screen and (max-width: 576px) {
     grid-template-columns: repeat(1, 1fr);
   }
@@ -100,6 +111,7 @@ mat-card {
     width: 100%;
     background-color: var(--secondary-light) !important;
     padding: 20px;
+    box-shadow: none;
 
     .stat-title {
       display: flex;
@@ -148,12 +160,14 @@ mat-card {
   width: 100%;
   display: flex;
   gap: 12px;
+
   @media screen and (max-width: 768px) {
     flex-direction: column;
   }
 
   .generate-podcast {
     width: 60%;
+
     @media screen and (max-width: 768px) {
       width: auto;
     }
@@ -161,6 +175,7 @@ mat-card {
 
   .create-episode {
     width: 40%;
+
     @media screen and (max-width: 768px) {
       width: auto;
     }
@@ -176,7 +191,9 @@ mat-card {
   .module-wrapper {
     display: flex;
     gap: 40px;
-    @media screen and (max-width: 576px) {
+    justify-content: space-between;
+
+    @media screen and (max-width: 768px) {
       flex-direction: column;
     }
 
@@ -193,8 +210,10 @@ mat-card {
     display: flex;
     justify-content: center;
     align-items: center;
-    @media screen and (max-width: 576px) {
+
+    @media screen and (max-width: 768px) {
       min-width: auto;
+      max-width: 100%;
     }
 
     img {
@@ -209,11 +228,20 @@ mat-card {
     gap: 20px;
     height: 100%;
 
-    a {
+    a,
+    button {
       color: var(--purple);
+      background-color: transparent;
+      box-shadow: none;
+      border: 0;
+      display: inline;
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      line-height: 0;
+      gap: 8px;
     }
   }
 
@@ -242,6 +270,8 @@ mat-card {
   .view-all-link {
     color: var(--theme-color);
     text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
   }
 }
 
@@ -384,7 +414,7 @@ mat-card {
   font-size: 13px;
   margin-top: 6px !important;
   margin-bottom: 12px !important;
-  color: var(--theme-color);
+  color: var(--description-color);
   font-weight: 500;
 }
 
