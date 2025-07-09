@@ -36,6 +36,8 @@ import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
+import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-orders-list',
@@ -75,6 +77,9 @@ import { AuthService } from '../auth.service';
     MatCheckbox,
     SvgIconComponent,
     ReactiveFormsModule,
+    MatMenuTrigger,
+    MatMenu,
+    MatProgressBarModule,
   ],
   templateUrl: './orders-list.component.html',
   styleUrl: './orders-list.component.scss',
@@ -204,8 +209,17 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     });
   }
 
+  get calculatedCredits(): number {
+    const amount = Number(this.form.get('amount')?.value);
+    if (!isNaN(amount) && amount > 0) {
+      return amount * 1000;
+    }
+    return 0;
+  }
+
   setAmount(dollars: number) {
     this.form.get('amount')?.setValue(String(dollars));
+    // Optionally trigger validation or recalculation here
   }
 
   payFromInput() {

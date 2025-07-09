@@ -8,7 +8,7 @@ import { ToolbarService } from '../toolbar.service';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MessageComponent } from '../message/message.component';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
-import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatDivider } from '@angular/material/divider';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatLine } from '@angular/material/core';
@@ -23,6 +23,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 
 @Component({
   selector: 'app-episode-detail',
@@ -49,6 +51,10 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
     RouterLink,
     MatAnchor,
     SvgIconComponent,
+    MatCardHeader,
+    MatTabsModule,
+    MatMenu,
+    MatMenuTrigger,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',

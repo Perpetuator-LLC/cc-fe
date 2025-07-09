@@ -27,6 +27,7 @@ import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.ser
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // export interface News {
 //   results: NewsResult[];
@@ -67,6 +68,7 @@ export interface SidePanelAccordianData {
     MatOption,
     JobStatusBarComponent,
     SvgIconComponent,
+    MatProgressBarModule,
   ],
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',

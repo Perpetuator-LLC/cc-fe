@@ -243,6 +243,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   openExportPersonalDialog() {
     const dialogRef = this.dialog.open(ExportPersonalDialogComponent, {
+      width: '500px',
       data: { password: this.userDetailForm.get('password')?.value },
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -305,6 +306,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     const email = this.userDetailForm.get('email')?.value;
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       panelClass: 'delete-confirmation-dialog',
+      width: '500px',
       data: {
         message:
           "<h3 class='deleteModal'>Removing your account '" +
@@ -383,6 +385,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   openDeleteAccountDialog() {
     const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
+      width: '500px',
       data: { email: this.userDetailForm.get('email')?.value },
     });
     dialogRef.afterClosed().subscribe((result) => {

@@ -184,7 +184,7 @@
                   />
                 </svg>
 
-                <span class="website-title">Podcast List</span>
+                <span class="website-title">Podcasts</span>
               </a>
             </div>
             <!-- } -->
@@ -300,6 +300,7 @@
             <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
               <mat-icon class="profile-icon">account_circle</mat-icon>
               {{ this.userService.userDetails()?.username }}
+              <span style="margin-left: 4px; rotate: 90deg; font-size: 20px">></span>
             </button>
             <mat-menu #profileMenu="matMenu" class="profile-menu">
               <div class="profile-header">

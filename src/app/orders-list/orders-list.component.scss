@@ -40,7 +40,7 @@
 
         p {
           margin: 0;
-          margin-top: 6px;
+          margin-bottom: 6px;
           font-size: 13px;
           font-weight: 500;
           color: var(--description-color);
@@ -55,7 +55,7 @@
     .input-field {
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: 20px;
     }
 
     .voice-info {
@@ -117,6 +117,12 @@
       font-weight: 600;
       color: var(--toolbar-container-background-color);
       cursor: pointer;
+      max-width: 508px;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
 
       span {
         background-color: var(--theme-transparent);

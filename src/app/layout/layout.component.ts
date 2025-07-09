@@ -266,7 +266,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
 
   openRedeemGiftCodeDialog() {
     this.dialog.open(RedeemGiftCodeDialogComponent, {
-      width: '600px',
+      width: '500px',
       data: {
         email: this.userDetailForm.get('email')?.value,
         permissions: this.userService.userDetails()?.permissions,
