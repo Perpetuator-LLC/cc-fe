@@ -45,6 +45,7 @@ mat-card {
       color: var(--theme-color);
     }
   }
+
 }
 
 form {
@@ -70,7 +71,7 @@ mat-card.login-card {
   }
 
   .login-btn {
-    background: #811cfd;
+    background: #811CFD;
     width: 100%;
     border-radius: 10px;
     color: #ffffff;
@@ -100,7 +101,7 @@ mat-form-field {
   justify-content: space-between;
   align-items: center;
   height: 100vh;
-  background-color: #1f2329;
+  background-color: #1F2329;
 }
 
 .error-container {
