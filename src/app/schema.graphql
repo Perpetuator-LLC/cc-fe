@@ -4,6 +4,17 @@ schema {
 }
 
 type ApiQuery {
+  stockListings(symbol: String, exchange: String, assetType: String, status: String, limit: Int): [StockListingType]
+  stockListing(symbol: String!): StockListingType
+  companies(ticker: String, name: String, sector: String, industry: String, limit: Int = 100): [CompanyType]
+  company(ticker: String!): CompanyType
+  stockPrices(ticker: String!, interval: String, startDate: String, endDate: String, limit: Int = 100): [StockPriceType]
+  earnings(ticker: String!, isAnnual: Boolean, limit: Int = 100): [EarningsType]
+  balanceSheets(ticker: String!, isAnnual: Boolean, limit: Int = 100): [BalanceSheetType]
+  incomeStatements(ticker: String!, isAnnual: Boolean, limit: Int = 100): [IncomeStatementType]
+  cashFlows(ticker: String!, isAnnual: Boolean, limit: Int = 100): [CashFlowType]
+  listingStatus: ListingStatusType
+
   """
   List of Discounted Cash Flow Analyses with filtering capabilities [Relay]
   """
@@ -35,6 +46,9 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): DiscountedCashFlowAnalysisTypeConnection
+
+  """Get site-wide statistics and metrics"""
+  siteStatistics: SiteStatisticsType
   voices(models: [VoiceModel], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, model: String, externalId: String): VoiceTypeConnection
   userDataExport(confirm: String!): UserDataExport
   credits: Int
@@ -176,6 +190,159 @@ type ApiQuery {
   ): Node
 }
 
+type StockListingType {
+  id: ID!
+  symbol: String!
+  name: String!
+  exchange: String!
+  assetType: String!
+  ipoDate: Date
+  delistingDate: Date
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+The `Date` scalar type represents a Date
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar Date
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type CompanyType {
+  id: ID!
+  ticker: String!
+  name: String!
+  sector: String!
+  industry: String!
+  exchange: ExchangeType
+  description: String!
+  address: String!
+  fiscalYearEnd: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  balancesheetReports: [BalanceSheetType!]!
+  incomestatementReports: [IncomeStatementType!]!
+  cashflowReports: [CashFlowType!]!
+  dcfAnalyses(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    company: ID
+    user: UUID
+    createdAt: DateTime
+    analysisUuid: UUID
+    companyTicker: String
+    companyName: String
+    companySector: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+    minCurrentPrice: Decimal
+    maxCurrentPrice: Decimal
+    minAvgFairPrice: Decimal
+    maxAvgFairPrice: Decimal
+    minPe: Decimal
+    maxPe: Decimal
+    minAvgIrr: Decimal
+    maxAvgIrr: Decimal
+    valuationStatus: String
+
+    """Ordering"""
+    orderBy: String
+  ): DiscountedCashFlowAnalysisTypeConnection!
+  stockPrices: [StockPriceType!]!
+  earnings: [EarningsType!]!
+}
+
+type ExchangeType {
+  id: ID!
+  name: String!
+  acronym: String!
+  mic: String!
+  country: String!
+  city: String!
+  website: String!
+  companySet: [CompanyType!]!
+}
+
+type BalanceSheetType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  totalAssets: BigInt
+
+  """"""
+  totalLiabilities: BigInt
+
+  """"""
+  totalEquity: BigInt
+
+  """"""
+  shortTermDebt: BigInt
+
+  """"""
+  longTermDebt: BigInt
+
+  """"""
+  commonStockSharesOutstanding: BigInt
+}
+
+"""
+The `BigInt` scalar type represents non-fractional whole numeric values.
+`BigInt` is not constrained to 32-bit like the `Int` type and thus is a less
+compatible type.
+"""
+scalar BigInt
+
+type IncomeStatementType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  totalRevenue: BigInt
+
+  """"""
+  netIncome: BigInt
+  epsReported: Decimal
+}
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+type CashFlowType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """"""
+  operatingCashFlow: BigInt
+
+  """"""
+  dividendPayout: BigInt
+}
+
 type DiscountedCashFlowAnalysisTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -253,150 +420,6 @@ interface Node {
   id: ID!
 }
 
-type CompanyType {
-  id: ID!
-  ticker: String!
-  name: String!
-  sector: String!
-  industry: String!
-  exchange: ExchangeType
-  description: String!
-  address: String!
-  fiscalYearEnd: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  balancesheetReports: [BalanceSheetType!]!
-  incomestatementReports: [IncomeStatementType!]!
-  cashflowReports: [CashFlowType!]!
-  dcfAnalyses(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-    company: ID
-    user: UUID
-    createdAt: DateTime
-    analysisUuid: UUID
-    companyTicker: String
-    companyName: String
-    companySector: String
-    createdAfter: DateTime
-    createdBefore: DateTime
-    minCurrentPrice: Decimal
-    maxCurrentPrice: Decimal
-    minAvgFairPrice: Decimal
-    maxAvgFairPrice: Decimal
-    minPe: Decimal
-    maxPe: Decimal
-    minAvgIrr: Decimal
-    maxAvgIrr: Decimal
-    valuationStatus: String
-
-    """Ordering"""
-    orderBy: String
-  ): DiscountedCashFlowAnalysisTypeConnection!
-}
-
-type ExchangeType {
-  id: ID!
-  name: String!
-  acronym: String!
-  mic: String!
-  country: String!
-  city: String!
-  website: String!
-  companySet: [CompanyType!]!
-}
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
-
-type BalanceSheetType {
-  id: ID!
-  company: CompanyType!
-  fiscalDateEnding: Date!
-  isAnnual: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """"""
-  totalAssets: BigInt
-
-  """"""
-  totalLiabilities: BigInt
-
-  """"""
-  totalEquity: BigInt
-
-  """"""
-  shortTermDebt: BigInt
-
-  """"""
-  longTermDebt: BigInt
-
-  """"""
-  commonStockSharesOutstanding: BigInt
-}
-
-"""
-The `Date` scalar type represents a Date
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar Date
-
-"""
-The `BigInt` scalar type represents non-fractional whole numeric values.
-`BigInt` is not constrained to 32-bit like the `Int` type and thus is a less
-compatible type.
-"""
-scalar BigInt
-
-type IncomeStatementType {
-  id: ID!
-  company: CompanyType!
-  fiscalDateEnding: Date!
-  isAnnual: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """"""
-  totalRevenue: BigInt
-
-  """"""
-  netIncome: BigInt
-  epsReported: Decimal
-}
-
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
-
-type CashFlowType {
-  id: ID!
-  company: CompanyType!
-  fiscalDateEnding: Date!
-  isAnnual: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """"""
-  operatingCashFlow: BigInt
-
-  """"""
-  dividendPayout: BigInt
-}
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
 """User data export schema"""
 type UserDataExport {
   """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
@@ -412,6 +435,12 @@ type UserDataExport {
   transactions: [TransactionType!]
   settings: [UserSettingType!]
 }
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
@@ -485,6 +514,7 @@ type PodcastType implements Node {
   rssFeeds: [RssFeedType]
   team: TeamType
   imageUrl: String
+  thumbnailUrl: String
   url: String
   voice: VoiceType
 }
@@ -613,6 +643,155 @@ type UserSettingType implements Node {
   """The ID of the object"""
   id: ID!
   uuid: UUID
+}
+
+type StockPriceType {
+  id: ID!
+  company: CompanyType!
+  date: DateTime!
+  interval: DataStockPriceIntervalChoices!
+  openPrice: Decimal
+  highPrice: Decimal
+  lowPrice: Decimal
+  closePrice: Decimal
+
+  """"""
+  volume: BigInt
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""An enumeration."""
+enum DataStockPriceIntervalChoices {
+  """1 Minute"""
+  A_1MIN
+
+  """5 Minutes"""
+  A_5MIN
+
+  """15 Minutes"""
+  A_15MIN
+
+  """30 Minutes"""
+  A_30MIN
+
+  """1 Hour"""
+  A_60MIN
+
+  """Daily"""
+  DAILY
+
+  """Weekly"""
+  WEEKLY
+
+  """Monthly"""
+  MONTHLY
+}
+
+type EarningsType {
+  id: ID!
+  company: CompanyType!
+  fiscalDateEnding: Date!
+  isAnnual: Boolean!
+  reportedEps: Decimal
+  estimatedEps: Decimal
+  surpriseEps: Decimal
+  surprisePercentage: Decimal
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListingStatusType {
+  lastUpdated: DateTime!
+  isUpdating: Boolean!
+  updateCount: Int!
+}
+
+"""Site-wide statistics without sensitive data"""
+type SiteStatisticsType {
+  """Total number of registered users"""
+  totalUsers: Int
+
+  """Users who logged in within last 30 days"""
+  activeUsers30Days: Int
+
+  """Total number of teams"""
+  totalTeams: Int
+
+  """Total number of podcasts"""
+  totalPodcasts: Int
+
+  """Number of enabled podcasts"""
+  enabledPodcasts: Int
+
+  """Total number of episodes"""
+  totalEpisodes: Int
+
+  """Number of live episodes"""
+  liveEpisodes: Int
+
+  """Total news articles processed"""
+  totalNewsArticles: Int
+
+  """Total jobs executed"""
+  totalJobs: Int
+
+  """Jobs currently pending"""
+  pendingJobs: Int
+
+  """Jobs currently running"""
+  runningJobs: Int
+
+  """Successfully completed jobs"""
+  completedJobs: Int
+
+  """Failed jobs"""
+  failedJobs: Int
+
+  """Total companies tracked"""
+  totalCompanies: Int
+
+  """Total DCF analyses generated"""
+  totalDcfAnalyses: Int
+
+  """Total stock price records"""
+  totalStockPrices: Int
+
+  """Total voices available"""
+  totalVoices: Int
+
+  """Number of enabled voices"""
+  enabledVoices: Int
+
+  """Total minutes of audio generated across all episodes"""
+  totalAudioMinutesGenerated: Float
+
+  """Total minutes of audio published (live episodes)"""
+  totalAudioMinutesPublished: Float
+
+  """Episodes created in last 30 days"""
+  recentEpisodes: Int
+
+  """News articles processed in last 30 days"""
+  recentNewsProcessed: Int
+
+  """DCF analyses created in last 30 days"""
+  recentDcfAnalyses: Int
+
+  """Jobs created in last 30 days"""
+  recentJobs: Int
+
+  """Jobs pending in last 30 days"""
+  recentPendingJobs: Int
+
+  """Jobs running in last 30 days"""
+  recentRunningJobs: Int
+
+  """Jobs completed in last 30 days"""
+  recentCompletedJobs: Int
+
+  """Jobs failed in last 30 days"""
+  recentFailedJobs: Int
 }
 
 type VoiceTypeConnection {
@@ -793,6 +972,12 @@ enum JobKind {
   EXTRACT_NEWS
   SUMMARIZE_NEWS
   CREATE_EPISODE
+  FETCH_COMPANY_INFO
+  FETCH_STOCK_PRICES
+  FETCH_BALANCE_SHEET
+  FETCH_INCOME_STATEMENT
+  FETCH_CASH_FLOW
+  FETCH_EARNINGS
 }
 
 type PodcastTypeConnection {
@@ -858,14 +1043,71 @@ type TeamTypeEdge {
 }
 
 type ApiMutation {
-  """Generate a DCF analysis report for a stock symbol"""
-  createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
-
   """Force refresh of stock listings from Alpha Vantage"""
   refreshStockListings(
     """Force refresh even if not needed"""
     force: Boolean = false
   ): RefreshStockListings
+
+  """Fetch company information from Alpha Vantage"""
+  fetchCompanyInfo(
+    """Stock symbol to fetch company info for"""
+    symbol: String!
+  ): FetchCompanyInfo
+
+  """Fetch stock price data from Alpha Vantage"""
+  fetchStockPrices(
+    """End date in YYYY-MM-DD format"""
+    endDate: String
+
+    """Price interval"""
+    interval: StockPriceInterval = DAILY
+
+    """Start date in YYYY-MM-DD format"""
+    startDate: String
+
+    """Stock symbol to fetch prices for"""
+    symbol: String!
+  ): FetchStockPrices
+
+  """Fetch balance sheet data from Alpha Vantage"""
+  fetchBalanceSheet(
+    """Fetch annual (True) or quarterly (False) data"""
+    isAnnual: Boolean = true
+
+    """Stock symbol to fetch balance sheet for"""
+    symbol: String!
+  ): FetchBalanceSheet
+
+  """Fetch income statement data from Alpha Vantage"""
+  fetchIncomeStatement(
+    """Fetch annual (True) or quarterly (False) data"""
+    isAnnual: Boolean = true
+
+    """Stock symbol to fetch income statement for"""
+    symbol: String!
+  ): FetchIncomeStatement
+
+  """Fetch cash flow data from Alpha Vantage"""
+  fetchCashFlow(
+    """Fetch annual (True) or quarterly (False) data"""
+    isAnnual: Boolean = true
+
+    """Stock symbol to fetch cash flow for"""
+    symbol: String!
+  ): FetchCashFlow
+
+  """Fetch earnings data from Alpha Vantage"""
+  fetchEarnings(
+    """Fetch annual (True) or quarterly (False) data"""
+    isAnnual: Boolean = true
+
+    """Stock symbol to fetch earnings for"""
+    symbol: String!
+  ): FetchEarnings
+
+  """Generate a DCF analysis report for a stock symbol"""
+  createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
   createVoice(displayName: String, enabled: Boolean = true, externalId: String!, externalUserId: String, model: VoiceModel!, private: Boolean = true): CreateVoice
   updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
   deleteVoice(voiceUuid: UUID!): DeleteVoice
@@ -995,18 +1237,72 @@ type ApiMutation {
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
 }
 
-"""Generate a DCF analysis report for a stock symbol"""
-type CreateDiscountedCashFlowAnalysis {
-  success: Boolean
-  message: String
-  report: DiscountedCashFlowAnalysisType
-}
-
 """Force refresh of stock listings from Alpha Vantage"""
 type RefreshStockListings {
   success: Boolean
   message: String
   job: JobType
+}
+
+"""Fetch company information from Alpha Vantage"""
+type FetchCompanyInfo {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Fetch stock price data from Alpha Vantage"""
+type FetchStockPrices {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Valid intervals for stock price data - matches model choices exactly"""
+enum StockPriceInterval {
+  MIN_1
+  MIN_5
+  MIN_15
+  MIN_30
+  MIN_60
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+"""Fetch balance sheet data from Alpha Vantage"""
+type FetchBalanceSheet {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Fetch income statement data from Alpha Vantage"""
+type FetchIncomeStatement {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Fetch cash flow data from Alpha Vantage"""
+type FetchCashFlow {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Fetch earnings data from Alpha Vantage"""
+type FetchEarnings {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Generate a DCF analysis report for a stock symbol"""
+type CreateDiscountedCashFlowAnalysis {
+  success: Boolean
+  message: String
+  report: DiscountedCashFlowAnalysisType
 }
 
 type CreateVoice {
