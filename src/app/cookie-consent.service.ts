@@ -27,7 +27,8 @@ interface UpdateCookieConsentResponse {
 })
 export class CookieConsentService implements OnDestroy {
   private subscriptions = new Subscription();
-  public readonly COOKIE_CONSENT_VERSION = '2024-08-09';
+  // Last was: '2024-08-09'
+  public readonly COOKIE_CONSENT_VERSION = '2025-11-24';
   private cookieConsentSignal: WritableSignal<CookieConsent | null> = signal(null);
 
   get cookieConsent(): WritableSignal<CookieConsent | null> {
