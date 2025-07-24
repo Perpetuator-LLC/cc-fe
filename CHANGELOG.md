@@ -1,3 +1,11 @@
+# Changelog from v0.21.0 to v0.21.1
+
+This update primarily focuses on the integration and updating of the terms and conditions and privacy policy on the website.
+
+## Enhancements
+- Embedded and updated the terms and conditions and privacy policy on the website.
+
+
 # Changelog from v0.20.0 to v0.21.0
 
 In this update, we have exposed the podcast description, fixed the order and code pagination, and added better handling for password change logouts.
