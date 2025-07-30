@@ -11,4 +11,6 @@ import { MatDivider } from '@angular/material/divider';
   templateUrl: './privacy-policy.component.html',
   styleUrls: ['./privacy-policy.component.scss'],
 })
-export class PrivacyPolicyComponent {}
+export class PrivacyPolicyComponent {
+  protected readonly Date = Date;
+}

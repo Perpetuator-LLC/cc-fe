@@ -1,8 +1,7 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"
-    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">News</span></span
-  >
+  <span class="page-title"><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span
+      class="page-title-secondary">News</span></span>
 </ng-template>
 
 <app-message></app-message>
@@ -20,7 +19,7 @@
           <mat-label>Select Podcast</mat-label>
           <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()">
             @for (podcast of podcasts; track podcast.uuid) {
-              <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -34,13 +33,8 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="fetchNews()"
-        [disabled]="selectedPodcastUuid === null"
-      >
+      <button mat-flat-button color="primary" type="button" (click)="fetchNews()"
+        [disabled]="selectedPodcastUuid === null">
         Fetch News
       </button>
     </div>
@@ -70,7 +64,7 @@
           <mat-label>Select Podcast</mat-label>
           <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()">
             @for (podcast of podcasts; track podcast.uuid) {
-              <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -83,14 +77,8 @@
             <mat-option [value]="14 * 24">2 Weeks</mat-option>
           </mat-select>
         </mat-form-field>
-        <button
-          class="fetch-btn"
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="fetchNews()"
-          [disabled]="selectedPodcastUuid === null"
-        >
+        <button class="fetch-btn" mat-flat-button color="primary" type="button" (click)="fetchNews()"
+          [disabled]="selectedPodcastUuid === null">
           Fetch News
         </button>
       </div>
@@ -108,12 +96,9 @@
           <div *ngIf="selectedNews.size > 0">
             <div class="select-btn">
               <label class="custom-select-all">
-                <input
-                  type="checkbox"
-                  [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
+                <input type="checkbox" [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
                   [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                  (change)="selectAll()"
-                />
+                  (change)="selectAll()" />
                 <span class="custom-checkbox"></span>
                 <span class="select-label">Select all</span>
               </label>
@@ -137,132 +122,98 @@
         </div>
         <div class="news-container">
           @if (selectedPodcastUuid !== null && news) {
-            <div class="news-container">
-              <mat-list>
-                @for (news of filteredNews; track news.url) {
-                  <mat-list-item class="news-item">
-                    <div class="news-card" tabindex="0" (click)="selectNews(news)" (keydown.enter)="selectNews(news)">
-                      <mat-checkbox
-                        (click)="$event.stopPropagation(); toggleSelection(news)"
-                        [checked]="isSelected(news)"
-                      ></mat-checkbox>
-                      <div class="news-card-wrapper" [ngClass]="{ newsSelected: selectedNewsDetail === news }">
-                        <div class="news-content">
-                          <div class="news-header">
-                            <div class="title">
-                              <a [href]="news.url" target="_blank" (click)="$event.stopPropagation()">{{
-                                news.title
-                              }}</a>
-                            </div>
-                            <div class="source">
-                              <mat-icon>graphic_eq</mat-icon>
-                              <p><strong>Source:</strong> {{ news.source }}</p>
-                            </div>
-                          </div>
-                          <div class="date">
-                            <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
-                              {{ news.publishedAt | date: 'short' }}
-                            </span>
-                            <div class="next-btn">
-                              <span>> </span>
-                            </div>
-                          </div>
+          <div class="news-container">
+            <mat-list>
+              @for (news of filteredNews; track news.url) {
+              <mat-list-item class="news-item">
+                <div class="news-card" tabindex="0" (click)="selectNews(news)" (keydown.enter)="selectNews(news)">
+                  <mat-checkbox (click)="$event.stopPropagation(); toggleSelection(news)"
+                    [checked]="isSelected(news)"></mat-checkbox>
+                  <div class="news-card-wrapper" [ngClass]="{ newsSelected: selectedNewsDetail === news }">
+                    <div class="news-content">
+                      <div class="news-header">
+                        <div class="title">
+                          <a [href]="news.url" target="_blank" (click)="$event.stopPropagation()">{{
+                            news.title
+                            }}</a>
+                        </div>
+                        <div class="source">
+                          <mat-icon>graphic_eq</mat-icon>
+                          <p><strong>Source:</strong> {{ news.source }}</p>
+                        </div>
+                      </div>
+                      <div class="date">
+                        <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
+                          {{ news.publishedAt | date: 'short' }}
+                        </span>
+                        <div class="next-btn">
+                          <span>> </span>
                         </div>
                       </div>
                     </div>
-                  </mat-list-item>
-                } @empty {
-                  <mat-card>
-                    <mat-card-header>
-                      <p>
-                        @if (news.edges.length) {
-                          No news episodes match the filter criteria.
-                        } @else {
-                          No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the
-                          "Time" range.
-                        }
-                      </p>
-                    </mat-card-header>
-                  </mat-card>
-                }
-              </mat-list>
-            </div>
-          } @else if (selectedPodcastUuid !== null) {
-            <mat-progress-bar
-              mode="indeterminate"
-              color="primary"
-              style="width: 100%; height: 2px; position: absolute; top: 64px; left: 0"
-            ></mat-progress-bar>
-          } @else {
-            <mat-list>
+                  </div>
+                </div>
+              </mat-list-item>
+              } @empty {
               <mat-card>
                 <mat-card-header>
-                  <p>Select a podcast to view news.</p>
+                  <p>
+                    @if (news.edges.length) {
+                    No news episodes match the filter criteria.
+                    } @else {
+                    No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the
+                    "Time" range.
+                    }
+                  </p>
                 </mat-card-header>
               </mat-card>
+              }
             </mat-list>
+          </div>
+          } @else if (selectedPodcastUuid !== null) {
+          <mat-progress-bar mode="indeterminate" color="primary"
+            style="width: 100%; height: 2px; position: absolute; top: 64px; left: 0"></mat-progress-bar>
+          } @else {
+          <mat-list>
+            <mat-card>
+              <mat-card-header>
+                <p>Select a podcast to view news.</p>
+              </mat-card-header>
+            </mat-card>
+          </mat-list>
           }
         </div>
         <div *ngIf="selectedNews.size > 0" class="bottom-sticky-buttons">
           <div class="select-btn desktop">
             <label class="custom-select-all">
-              <input
-                type="checkbox"
-                [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
+              <input type="checkbox" [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
                 [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                (change)="selectAll()"
-              />
+                (change)="selectAll()" />
               <span class="custom-checkbox"></span>
               <span class="select-label">Select all</span>
             </label>
           </div>
           <div class="filters-btn">
             @if (showMicroJobButtons) {
-              <button
-                mat-flat-button
-                color="primary"
-                type="button"
-                (click)="extractSelectedNews()"
-                [disabled]="selectedNews.size === 0"
-              >
-                Retrieve (Task)
-              </button>
-              <button
-                mat-flat-button
-                color="primary"
-                type="button"
-                (click)="summarizeSelected()"
-                [disabled]="selectedNews.size === 0"
-              >
-                Summarize (Task)
-              </button>
-              <button
-                mat-flat-button
-                color="primary"
-                type="button"
-                (click)="createEpisodeFromSelected()"
-                [disabled]="selectedNews.size === 0"
-              >
-                Create Episode (Task)
-              </button>
+            <button mat-flat-button color="primary" type="button" (click)="extractSelectedNews()"
+              [disabled]="selectedNews.size === 0">
+              Retrieve (Task)
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="summarizeSelected()"
+              [disabled]="selectedNews.size === 0">
+              Summarize (Task)
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="createEpisodeFromSelected()"
+              [disabled]="selectedNews.size === 0">
+              Create Episode (Task)
+            </button>
             }
-            <button
-              style="color: var(--purple)"
-              mat-flat-button
-              color="primary"
-              type="button"
-              (click)="createEpisodeAudioChainFromSelected()"
-              [disabled]="selectedNews.size === 0"
-            >
+            <button style="color: var(--purple)" mat-flat-button color="primary" type="button"
+              (click)="createEpisodeAudioChainFromSelected()" [disabled]="selectedNews.size === 0">
               Create Episode & Audio
             </button>
-            <button
-              mat-flat-button
-              color="primary"
-              type="button"
-              (click)="createEpisodeChainFromSelected()"
-              [disabled]="selectedNews.size === 0"
-            >
+            <button mat-flat-button color="primary" type="button" (click)="createEpisodeChainFromSelected()"
+              [disabled]="selectedNews.size === 0">
               Generate Episode
             </button>
           </div>
@@ -275,50 +226,45 @@
       <div class="news-detail-section" [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }">
         <div class="news-details" [ngClass]="{ newsDetailSelected: selectedNewsDetail }">
           @if (selectedNewsDetail) {
-            <div>
-              <div class="description-title">
-                <div class="cross-icon">
-                  <span tabindex="0" (click)="clearSelectedNewsDetail()" (keydown.enter)="clearSelectedNewsDetail()">
-                    <app-svg-icon icon="cross"></app-svg-icon>
-                  </span>
-                </div>
-                <div class="title">
-                  <a [href]="selectedNewsDetail.url" target="_blank">{{ selectedNewsDetail.title }}</a>
-                </div>
-                <div class="source">
-                  <mat-icon>graphic_eq</mat-icon>
-                  <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
-                </div>
-                <a [href]="selectedNewsDetail.url" target="_blank">
-                  <button mat-raised-button color="primary" type="button" class="read-btn">
-                    Read More <app-svg-icon icon="right"></app-svg-icon>
-                  </button>
-                </a>
+          <div>
+            <div class="description-title">
+              <div class="cross-icon">
+                <span tabindex="0" (click)="clearSelectedNewsDetail()" (keydown.enter)="clearSelectedNewsDetail()">
+                  <app-svg-icon icon="cross"></app-svg-icon>
+                </span>
               </div>
-              <h3>RSS Description</h3>
-              <p class="news-description" [innerHTML]="selectedNewsDetail.description || 'No description provided'"></p>
-              <mat-divider></mat-divider>
-              <h3>AI Summary</h3>
-              <p class="">{{ selectedNewsDetail.summary || 'No news summary available' }}</p>
-              @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
-                <mat-divider></mat-divider>
-                <button mat-flat-button color="primary" type="button" (click)="extractNews([selectedNewsDetail.uuid])">
-                  Extract News
+              <div class="title">
+                <a [href]="selectedNewsDetail.url" target="_blank">{{ selectedNewsDetail.title }}</a>
+              </div>
+              <div class="source">
+                <mat-icon>graphic_eq</mat-icon>
+                <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
+              </div>
+              <a [href]="selectedNewsDetail.url" target="_blank">
+                <button mat-raised-button color="primary" type="button" class="read-btn">
+                  Read More <app-svg-icon icon="right"></app-svg-icon>
                 </button>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="regenerateSummary(selectedNewsDetail.uuid)"
-                >
-                  {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
-                </button>
-                <h3>Site Content</h3>
-                <p class="">{{ selectedNewsDetail.content || 'No news content available' }}</p>
-              }
+              </a>
             </div>
+            <h3>RSS Description</h3>
+            <p class="news-description" [innerHTML]="selectedNewsDetail.description || 'No description provided'"></p>
+            <mat-divider></mat-divider>
+            <h3>AI Summary</h3>
+            <p class="">{{ selectedNewsDetail.summary || 'No news summary available' }}</p>
+            @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
+            <mat-divider></mat-divider>
+            <button mat-flat-button color="primary" type="button" (click)="extractNews([selectedNewsDetail.uuid])">
+              Extract News
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="regenerateSummary(selectedNewsDetail.uuid)">
+              {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+            </button>
+            <h3>Site Content</h3>
+            <p class="">{{ selectedNewsDetail.content || 'No news content available' }}</p>
+            }
+          </div>
           } @else {
-            <p>Select a news item to see details.</p>
+          <p>Select a news item to see details.</p>
           }
         </div>
       </div>

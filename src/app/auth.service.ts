@@ -163,7 +163,7 @@ export class AuthService {
     );
   }
 
-  private setSession(authResult: Token) {
+  setSession(authResult: Token) {
     const accessToken = authResult.access;
     const refreshToken = authResult.refresh;
 

@@ -90,8 +90,6 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   totalOrders = 0;
   cursors: (string | null)[] = [null];
   pageSize = 10;
-  hasNextPage = false;
-  hasPreviousPage = false;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
   protected user = this.userService.userDetails;
@@ -148,11 +146,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       this.creditService.getOrders(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ orders, pageInfo }) => {
           this.orders = orders;
-          this.hasNextPage = pageInfo.hasNextPage;
-          this.hasPreviousPage = pageInfo.hasPreviousPage;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-
-          // Set a large enough number to enable the next button if hasNextPage is true
           this.totalOrders = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
           this.loadingOrders = false;
         },

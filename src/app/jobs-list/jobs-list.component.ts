@@ -56,6 +56,7 @@ import { CommonModule } from '@angular/common';
     MatCardContent,
     DecimalPipe,
     SvgIconComponent,
+    MatIcon,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -70,8 +71,6 @@ export class JobsListComponent implements OnInit, OnDestroy {
   cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
   sortActive = 'createdAt';
-  hasNextPage = false;
-  hasPreviousPage = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -100,11 +99,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         next: ({ jobs, pageInfo }) => {
           this.jobs = jobs;
           this.dataSource.data = this.jobs;
-          this.hasNextPage = pageInfo.hasNextPage;
-          this.hasPreviousPage = pageInfo.hasPreviousPage;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-
-          // Set a large enough number to enable the next button if hasNextPage is true
           this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
         },
         error: (error) => {
@@ -138,6 +133,20 @@ export class JobsListComponent implements OnInit, OnDestroy {
     // Otherwise, grab the cursor for the page they jumped to
     const after = this.cursors[newPageIndex] ?? null;
     this.loadJobs(after, newPageIndex);
+  }
+
+  deleteJob(id: string) {
+    this.subscriptions.add(
+      this.jobService.deleteJobs([id]).subscribe({
+        next: () => {
+          this.jobs = this.jobs.filter((job) => job.id !== id);
+          this.messageService.success('Job deleted.');
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to delete job: ${err.message}`);
+        },
+      }),
+    );
   }
 
   retryJob(id: string) {

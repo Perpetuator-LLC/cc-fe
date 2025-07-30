@@ -1,10 +1,8 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"
-    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> Episodes ><span class="page-title-secondary">
-      {{ episodeForm.get('title')?.value }}</span
-    ></span
-  >
+  <span class="page-title"><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> Episodes ><span
+      class="page-title-secondary">
+      {{ episodeForm.get('title')?.value }}</span></span>
 </ng-template>
 
 <app-message></app-message>
@@ -16,17 +14,12 @@
       </div>
       <div class="buttons">
         @if (audioSrc) {
-          <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
-            Live on Podcast
-          </mat-checkbox>
+        <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
+          Live on Podcast
+        </mat-checkbox>
         }
-        <button
-          (click)="updateEpisode()"
-          mat-flat-button
-          color="primary"
-          class="episode-control publish-btn"
-          type="button"
-        >
+        <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control publish-btn"
+          type="button">
           Update
         </button>
       </div>
@@ -54,12 +47,8 @@
 
         <div class="status-item">
           <span class="status-label">Generated On</span>
-          <span
-            class="status-value"
-            [matTooltip]="episodeForm.get('date')?.value | date: 'z'"
-            matTooltipPosition="above"
-            >{{ episodeForm.get('date')?.value | date: 'short' : 'local' }}</span
-          >
+          <span class="status-value" [matTooltip]="episodeForm.get('date')?.value | date: 'z'"
+            matTooltipPosition="above">{{ episodeForm.get('date')?.value | date: 'short' : 'local' }}</span>
         </div>
       </div>
     </div>
@@ -74,35 +63,18 @@
               <div class="audio-header">
                 <h4>Episode Audio</h4>
                 <div class="buttons">
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="button"
-                    class="episode-control"
-                    [hidden]="!audioSrc"
-                    (click)="downloadAudio()"
-                  >
+                  <button mat-raised-button color="primary" type="button" class="episode-control" [hidden]="!audioSrc"
+                    (click)="downloadAudio()">
                     <mat-icon>download</mat-icon>
                     Download MP3
                   </button>
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="button"
-                    class="episode-control"
-                    [hidden]="!audioSrc"
-                    (click)="publishAudio()"
-                  >
+                  <button mat-raised-button color="primary" type="button" class="episode-control" [hidden]="!audioSrc"
+                    (click)="publishAudio()">
                     <app-svg-icon icon="telegram"></app-svg-icon>
                     Publish to Telegram
                   </button>
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="button"
-                    class="episode-control"
-                    (click)="generateAudio()"
-                  >
+                  <button mat-raised-button color="primary" type="button" class="episode-control"
+                    (click)="generateAudio()">
                     <app-svg-icon icon="audio"></app-svg-icon>
                     Generate Audio
                   </button>
@@ -110,7 +82,7 @@
               </div>
               <div class="audio-card">
                 @if (audioSrc) {
-                  <audio controls [src]="audioSrc"></audio>
+                <audio controls [src]="audioSrc"></audio>
                 }
               </div>
             </div>
@@ -125,18 +97,20 @@
               </mat-form-field>
               <div>
                 @if (episodeForm.get('podcastDate')?.value) {
-                  | Published to Podcast on:
-                  <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
-                    {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
-                  </span>
+                | Published to Podcast on:
+                <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+                  {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+                </span>
                 }
                 @if (episodeForm.get('telegramDate')?.value) {
-                  | Published to Telegram on:
-                  <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
-                    {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
-                  </span>
+                | Published to Telegram on:
+                <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+                  {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+                </span>
                 }
               </div>
+
+
             </div>
           </mat-card-content>
         </mat-tab>
@@ -148,32 +122,33 @@
             </div>
             <div class="related-grid">
               @for (relatedEpisode of episodeForm.get('news')?.value; track relatedEpisode.id) {
-                <mat-card class="related-card">
-                  <mat-card-header>
-                    <div class="grid-header" style="width: 100%">
-                      <div class="grid-header-name">
-                        <div>
-                          <a href="{{ relatedEpisode.url }}" target="_blank" class="podcast-name-link">
-                            {{ relatedEpisode.title }}
-                          </a>
-                        </div>
+              <mat-card class="related-card">
+                <mat-card-header>
+                  <div class="grid-header" style="width: 100%">
+                    <div class="grid-header-name">
+                      <div>
+                        <a href="{{ relatedEpisode.url }}" target="_blank" class="podcast-name-link">
+                          {{ relatedEpisode.title }}
+                        </a>
                       </div>
                     </div>
-                  </mat-card-header>
-
-                  <div class="bottom-header">
-                    <span class="publish">Published</span>
-                    <div class="podcast-name">
-                      <mat-icon>graphic_eq</mat-icon>
-                      {{ relatedEpisode.__typename }}
-                    </div>
                   </div>
-                </mat-card>
+                </mat-card-header>
+
+                <div class="bottom-header">
+                  <span class="publish">Published</span>
+                  <div class="podcast-name">
+                    <mat-icon>graphic_eq</mat-icon>
+                    {{ relatedEpisode.__typename }}
+                  </div>
+                </div>
+              </mat-card>
               }
             </div>
           </mat-card-content>
         </mat-tab>
       </mat-tab-group>
+
     </mat-card>
   </div>
 </form>

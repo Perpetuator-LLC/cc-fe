@@ -1,3 +1,23 @@
+# Changelog from v0.21.0 to v0.21.1
+
+This update primarily focuses on the integration and updating of the terms and conditions and privacy policy on the website.
+
+## Enhancements
+- Embedded and updated the terms and conditions and privacy policy on the website.
+
+
+# Changelog from v0.20.0 to v0.21.0
+
+In this update, we have exposed the podcast description, fixed the order and code pagination, and added better handling for password change logouts.
+
+## Enhancements
+- Exposed the podcast description, fixed the order and code pagination, and added a refresh and delete job list to enhance the podcast feature.
+
+## Cleanups
+- Removed the hard-coded testing voice from the default settings.
+- Introduced a feature to invalidate old tokens when passwords are changed, improving account security.
+
+
 # Changelog from v0.19.0 to v0.20.0
 
 This update introduces several enhancements and fixes to improve the podcast feature, voice controls, and category management. 

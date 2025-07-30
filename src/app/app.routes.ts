@@ -187,6 +187,17 @@ export const routes: Routes = [
       icon: 'work',
     },
   },
+  {
+    path: 'privacy-policy',
+    loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
+    title: 'Privacy Policy',
+  },
+  {
+    path: 'terms-and-conditions',
+    loadComponent: () =>
+      import('./terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
+    title: 'Terms',
+  },
 ];
 
 export class AppRoutingModule {}

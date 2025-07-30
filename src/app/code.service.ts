@@ -33,7 +33,13 @@ export class CodeService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getCodes(active = null, after: string | null = null, first = 10, sort = 'createdAt', direction = 'ASC') {
+  getCodes(
+    active: boolean | null = null,
+    after: string | null = null,
+    first = 10,
+    sort = 'createdAt',
+    direction = 'DESC',
+  ) {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
     interface Response {
@@ -101,6 +107,7 @@ const GET_BONUS_CODES = gql`
   query GetCodes($first: Int, $after: String, $active: Boolean, $orderBy: String!) {
     codes(first: $first, after: $after, active: $active, orderBy: $orderBy) {
       edges {
+        cursor
         node {
           id
           code

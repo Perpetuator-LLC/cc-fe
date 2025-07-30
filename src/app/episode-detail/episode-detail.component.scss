@@ -10,6 +10,10 @@
 //  flex-direction: column;
 //}
 
+.episode-description textarea {
+  min-height: 100px; /* Set the minimum height */
+}
+
 .episode-content textarea {
   //  flex: 1;
   min-height: 600px;

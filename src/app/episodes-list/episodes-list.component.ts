@@ -10,7 +10,6 @@ import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import {
   MatCell,
@@ -49,7 +48,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatLine,
     SlicePipe,
     DatePipe,
-    MatProgressSpinner,
     MatTable,
     MatSort,
     MatColumnDef,

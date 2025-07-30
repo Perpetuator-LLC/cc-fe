@@ -1,24 +1,23 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"
-    ><mat-icon>graphic_eq</mat-icon>Home <span>></span> <span class="page-title-secondary">Account Settings</span></span
-  >
+  <span class="page-title"><mat-icon>graphic_eq</mat-icon>Home <span>></span> <span class="page-title-secondary">Account
+      Settings</span></span>
 </ng-template>
 <app-message></app-message>
 
 <div class="profile">
   <div class="profile-page-container">
     @if (emailChangePending) {
-      <mat-card class="email-change-notification">
-        <mat-card-header>
-          <mat-card-title> Email Change Pending </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p>Your email change to {{ emailChangePending.newEmail }} is pending verification.</p>
-          <button mat-raised-button color="primary" (click)="resendEmailChange()">Resend Verification Email</button>
-          <button mat-button color="accent" (click)="cancelEmailChange()">Cancel Email Change</button>
-        </mat-card-content>
-      </mat-card>
+    <mat-card class="email-change-notification">
+      <mat-card-header>
+        <mat-card-title> Email Change Pending </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Your email change to {{ emailChangePending.newEmail }} is pending verification.</p>
+        <button mat-raised-button color="primary" (click)="resendEmailChange()">Resend Verification Email</button>
+        <button mat-button color="accent" (click)="cancelEmailChange()">Cancel Email Change</button>
+      </mat-card-content>
+    </mat-card>
     }
     <div class="profile-header">
       <h3>Account Settings</h3>
@@ -45,9 +44,8 @@
                 <mat-form-field appearance="fill" style="margin-bottom: 30px">
                   <mat-label>Username</mat-label>
                   <input matInput formControlName="username" required />
-                  <mat-hint
-                    >Username is publicly visible, do not use personally identifying information in it.</mat-hint
-                  >
+                  <mat-hint>Username is publicly visible, do not use personally identifying information in
+                    it.</mat-hint>
                 </mat-form-field>
 
                 <mat-form-field appearance="fill">
@@ -77,33 +75,21 @@
                 <input matInput formControlName="email" hidden="hidden" autocomplete="email" />
                 <mat-form-field appearance="fill">
                   <mat-label>New Password</mat-label>
-                  <input
-                    matInput
-                    type="password"
-                    formControlName="newPassword"
-                    name="new-password"
-                    autocomplete="new-password"
-                    required
-                  />
+                  <input matInput type="password" formControlName="newPassword" name="new-password"
+                    autocomplete="new-password" required />
                   @if (
-                    changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched
+                  changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched
                   ) {
-                    <mat-error>Password is required and must be at least 8 characters long.</mat-error>
+                  <mat-error>Password is required and must be at least 8 characters long.</mat-error>
                   }
                 </mat-form-field>
 
                 <mat-form-field appearance="fill">
                   <mat-label>Confirm Password</mat-label>
-                  <input
-                    matInput
-                    type="password"
-                    formControlName="confirmPassword"
-                    name="confirm-password"
-                    autocomplete="new-password"
-                    required
-                  />
+                  <input matInput type="password" formControlName="confirmPassword" name="confirm-password"
+                    autocomplete="new-password" required />
                   @if (changePasswordForm.hasError('mismatch')) {
-                    <mat-error>Passwords do not match.</mat-error>
+                  <mat-error>Passwords do not match.</mat-error>
                   }
                 </mat-form-field>
 

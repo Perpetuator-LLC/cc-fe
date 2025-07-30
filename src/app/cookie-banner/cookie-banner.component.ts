@@ -23,8 +23,4 @@ export class CookieBannerComponent {
   acceptCookies(): void {
     this.cookieConsentService.setCookieConsent(true);
   }
-
-  declineCookies(): void {
-    this.cookieConsentService.setCookieConsent(false);
-  }
 }
