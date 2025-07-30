@@ -209,4 +209,8 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   updateDisplayedColumns(): void {
     this.displayedColumns = this.allColumns.filter((column) => column.selected).map((column) => column.id);
   }
+
+  _countCategories(podcast: PodcastsResult) {
+    return podcast?.categories ? Object.keys(podcast?.categories)?.length : 0;
+  }
 }

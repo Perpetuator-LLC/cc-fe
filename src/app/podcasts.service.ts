@@ -484,6 +484,9 @@ export class PodcastsService extends BaseService {
               id
               uuid
               name
+              tgChannelId
+              tgResponse
+              categories
               team {
                 uuid
                 members {
