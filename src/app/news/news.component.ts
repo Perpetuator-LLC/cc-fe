@@ -345,6 +345,19 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
+  generateBlankEpisode() {
+    if (!this.selectedPodcastUuid) return;
+    this.newsService.createEpisode([], this.selectedPodcastUuid).subscribe({
+      next: () => {
+        this.messageService.success('Blank episode created successfully.');
+      },
+      error: (err) => {
+        this.messageService.error('Failed to create blank episode.');
+        console.error(err);
+      },
+    });
+  }
+
   getNews() {
     if (this.selectedPodcastUuid === null) {
       this.messageService.warning('No podcast selected.');

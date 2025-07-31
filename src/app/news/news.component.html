@@ -81,6 +81,10 @@
           [disabled]="selectedPodcastUuid === null">
           Fetch News
         </button>
+        <button mat-flat-button color="accent" type="button" (click)="generateBlankEpisode()"
+          style="background-color: var(--primary);color:white" [disabled]="selectedPodcastUuid === null">
+          Generate Episode
+        </button>
       </div>
     </mat-card-content>
   </mat-card>
