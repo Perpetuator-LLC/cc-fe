@@ -74,43 +74,4 @@
       <mat-list-item>Loading categories...</mat-list-item>
     }
   </div>
-
-  <!--
-  <mat-accordion multi="true" class="categories-grid">
-    @for (parent of parentCategories; track parent) {
-    <mat-expansion-panel class="category-expansion-panel" [expanded]="isParentSelected(parent)">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-checkbox [checked]="isParentSelected(parent)" (change)="toggleParentCategory(parent)"
-            (click)="$event.stopPropagation()" color="primary">
-            {{ parent }}
-            @if (isPending(parent)) {
-            <span class="pending-indicator">●</span>
-            }
-          
-          </mat-checkbox>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      @if (getSubcategories(parent).length > 0) {
-      <mat-list role="list" class="sub-category-list">
-        @for (sub of getSubcategories(parent); track sub) {
-        <mat-list-item role="listitem">
-          <mat-checkbox [checked]="isSubSelected(parent, sub)" (change)="toggleSubCategory(parent, sub)"
-            color="primary">
-            {{ sub }}
-            @if (isPending(parent, sub)) {
-            <span class="pending-indicator">●</span>
-            }
-          </mat-checkbox>
-        </mat-list-item>
-        }
-      </mat-list>
-      } @else {
-      <div class="no-subcategories-message">No subcategories.</div>
-      }
-    </mat-expansion-panel>
-    } @empty {
-    <mat-list-item>Loading categories...</mat-list-item>
-    }
-  </mat-accordion>
---></div>
+</div>

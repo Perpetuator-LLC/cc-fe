@@ -264,18 +264,15 @@
                 </button>
 
                 <mat-menu #filterMenu="matMenu" class="filter-menu">
-                  <div class="filter-container" (click)="$event.stopPropagation()">
+                  <div class="filter-container" role="button" tabindex="0" (click)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
                     @for (tier of voiceTiers; track tier) {
-                      <mat-checkbox
-                        [value]="tier"
-                        [checked]="voiceFilter.value?.includes(tier)"
-                        (change)="onCheckboxChange($event, tier)"
-                        class="checkbox-block"
-                      >
-                        {{ tierToString(tier) }}
-                      </mat-checkbox>
+                    <mat-checkbox [value]="tier" [checked]="voiceFilter.value?.includes(tier)" (change)="onCheckboxChange($event, tier)"
+                      class="checkbox-block">
+                      {{ tierToString(tier) }}
+                    </mat-checkbox>
                     }
-
+                  
                     <button mat-button color="warn" (click)="clearVoiceFilters()">Clear All</button>
                   </div>
                 </mat-menu>

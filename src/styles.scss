@@ -333,7 +333,17 @@ body {
     display: none;
   }
 }
+ .mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
+   border-color: var(--border-color) !important;
+ }
 
+ .mat-mdc-chip-action-label {
+   color: var(--theme-color) !important;
+ }
+
+ .mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
+   color: var(--theme-color) !important;
+ }
 .search-filter {
   .mat-mdc-form-field-bottom-align {
     display: none;
