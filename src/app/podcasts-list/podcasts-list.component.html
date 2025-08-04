@@ -189,7 +189,9 @@
           </div>
         </mat-card-header>
         <div class="chip-header">
-          <span class="chip"><img src="/telegram.svg" alt="telegram" /> 1002282842326</span>
+          @if (isColumnSelected('tgChannelId')) {
+            <span class="chip"><img src="/telegram.svg" alt="telegram" /> {{ podcast?.tgChannelId || '1002282842326' }}</span>
+          }
           <span class="days">2 days ago</span>
         </div>
         <div class="bottom-header">
