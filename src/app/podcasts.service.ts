@@ -38,6 +38,7 @@ export interface PodcastsResult {
   slug: string | null;
   image: string | null;
   imageUrl: string | null;
+  thumbnailUrl: string | null;
   ownerName: string | null;
   ownerEmail: string | null;
   ownerLink: string | null;
@@ -484,6 +485,8 @@ export class PodcastsService extends BaseService {
               id
               uuid
               name
+              #imageUrl // Don't use imageUrl, use thumbnailUrl for loading many podcasts
+              thumbnailUrl
               tgChannelId
               tgResponse
               categories

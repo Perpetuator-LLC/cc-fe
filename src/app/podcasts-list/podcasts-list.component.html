@@ -68,10 +68,10 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Podcast Name</th>
         <td mat-cell *matCellDef="let podcast">
           <div class="p_name">
-            @if (podcast.imageUrl) {
-            <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+            @if (podcast.thumbnailUrl || podcast.imageUrl) {
+              <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
             } @else {
-            <img src="/image.png" alt="img" />
+              <img src="/image.png" alt="img" />
             }
             <div class="name">
               <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
