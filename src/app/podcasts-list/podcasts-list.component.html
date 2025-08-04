@@ -152,7 +152,11 @@
         <mat-card-header>
           <div class="grid-header" style="width: 100%">
             <a [routerLink]="['/podcast', podcast.uuid]">
-              <img src="/image.png" alt="img" class="img" />
+              @if (podcast.thumbnailUrl || podcast.imageUrl) {
+                <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
+              } @else {
+                <img src="/image.png" alt="img" class="img" />
+              }
             </a>
             <div class="response-div">
               <span [class]="podcast.enabled ? 'enable' : 'disable'">{{
