@@ -489,6 +489,7 @@ export class PodcastsService extends BaseService {
               categories
               team {
                 uuid
+                name
                 members {
                   user {
                     id
