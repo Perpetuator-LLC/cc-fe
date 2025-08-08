@@ -1,9 +1,12 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<ng-container *ngIf="!isLoginRoute; else loginOnly">
+<app-message></app-message>
+<app-cookie-banner></app-cookie-banner>
+@if (!isLoginRoute) {
   <app-layout>
     <router-outlet />
   </app-layout>
-</ng-container>
-<ng-template #loginOnly>
-  <router-outlet />
-</ng-template>
+} @else {
+  <app-pre-login-layout>
+    <router-outlet />
+  </app-pre-login-layout>
+}

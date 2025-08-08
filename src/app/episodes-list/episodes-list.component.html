@@ -61,7 +61,7 @@
           <th mat-header-cell *matHeaderCellDef>Episode Title</th>
           <td mat-cell *matCellDef="let episode">
             <div class="episode-title">
-              <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title | slice: 0 : 100 }}</a>
+              <a matLine [routerLink]="['/episode', episode.uuid]">{{ episode.title === "" ? "(Blank)" : episode.title | slice: 0 : 100 }}</a>
               <div class="episode-date">{{ episode.date | date: 'short' : 'local' }}</div>
             </div>
           </td>

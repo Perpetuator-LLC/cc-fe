@@ -13,9 +13,6 @@ import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
-import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
-import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register',
@@ -55,7 +52,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
-    private dialog: MatDialog,
   ) {}
 
   ngAfterViewInit() {
@@ -89,17 +85,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
             });
             this.router.navigate(['/login']);
           } else {
-            // console.error('Registration failed while authenticating:', this.authService.getErrors());
-            // const authErrors = this.authService.getErrors();
-            // for (const error of authErrors) {
-            //   this.messageService.addMessage({
-            //     type: 'error',
-            //     text: 'Registration failed while authenticating: ' + error.toString(),
-            //     dismissible: true,
-            //   });
-            // }
-            // if (authErrors.length === 0) {
-            // Expect a message when no token is returned, but if not then add one
             if (this.messageService.messageCount === 0) {
               this.messageService.addMessage({
                 type: 'error',
@@ -119,23 +104,5 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         },
       });
     }
-  }
-
-  openTermsModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(TermsAndConditionsModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
-  }
-
-  openPrivacyModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(PrivacyPolicyModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
   }
 }

@@ -1,5 +1,21 @@
 [//]: # (Copyright © 2024 Perpetuator LLC)
 
+# TODO
+
+Auto-formatter needs to be run as part of commit/push process.
+
+Replace `src/app/redeem-gift-code-dialog.component.ts` with SCSS
+```
+          style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
+```
+
+Replace all `*ngIf`
+
+Find unused imports and remove them.
+
+Find unused styles and remove them.
+
+
 # Concepts
 
 ## CLI First
