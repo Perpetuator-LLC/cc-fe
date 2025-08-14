@@ -3,11 +3,21 @@ import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { CommonModule } from '@angular/common';
+import { PreLoginLayoutComponent } from './pre-login-layout/pre-login-layout.component';
+import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
+import { MessageComponent } from './message/message.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LayoutComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    LayoutComponent,
+    PreLoginLayoutComponent,
+    CookieBannerComponent,
+    MessageComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

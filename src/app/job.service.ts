@@ -308,11 +308,11 @@ export class JobService extends BaseService implements OnDestroy {
               uuid
               kind
               status
-              cost
               error
               result
               createdAt
               updatedAt
+              cost
             }
           }
           pageInfo {
@@ -333,29 +333,22 @@ export class JobService extends BaseService implements OnDestroy {
 
     return this.query<Response>({
       query: FETCH_USER_JOBS,
-      variables: {
-        statuses,
-        kinds,
-        jobUuids,
-        first,
-        after,
-        orderBy,
-      },
+      variables: { statuses, kinds, jobUuids, first, after, orderBy },
       fetchPolicy: 'network-only',
     }).pipe(
-      map((data) => {
-        return {
-          jobs: data.jobs.edges.map((edge) => edge.node),
-          pageInfo: data.jobs.pageInfo,
-        };
-      }),
+      map(({ jobs }) => ({
+        jobs: jobs.edges.map((edge) => edge.node),
+        pageInfo: jobs.pageInfo,
+      })),
     );
   }
 
-  retryJobs(jobUuids: string[] = []) {
-    const GQL = gql`
-      mutation RetryJobs($jobUuids: [UUID]!) {
+  retryJobs(jobUuids: string[]) {
+    const RETRY_JOBS = gql`
+      mutation RetryJobs($jobUuids: [UUID!]!) {
         retryJobs(jobUuids: $jobUuids) {
+          success
+          message
           jobs {
             id
             uuid
@@ -365,6 +358,7 @@ export class JobService extends BaseService implements OnDestroy {
             result
             createdAt
             updatedAt
+            cost
           }
         }
       }
@@ -379,7 +373,7 @@ export class JobService extends BaseService implements OnDestroy {
     }
 
     return this.mutate<Response>({
-      mutation: GQL,
+      mutation: RETRY_JOBS,
       variables: { jobUuids },
     }).pipe(
       map((data) => {
@@ -391,10 +385,10 @@ export class JobService extends BaseService implements OnDestroy {
     );
   }
 
-  deleteJobs(ids: string[] = []) {
-    const GQL = gql`
-      mutation DeleteJobs($ids: [UUID]!) {
-        deleteJobs(jobUuids: $ids) {
+  deleteJobs(jobUuids: string[]) {
+    const DELETE_JOBS = gql`
+      mutation DeleteJobs($jobUuids: [UUID!]!) {
+        deleteJobs(jobUuids: $jobUuids) {
           success
           message
         }
@@ -409,8 +403,8 @@ export class JobService extends BaseService implements OnDestroy {
     }
 
     return this.mutate<Response>({
-      mutation: GQL,
-      variables: { ids },
+      mutation: DELETE_JOBS,
+      variables: { jobUuids },
     }).pipe(
       map((data) => {
         if (!data.deleteJobs.success) {
