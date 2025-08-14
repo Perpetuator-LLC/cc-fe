@@ -378,11 +378,15 @@
   }
 
   .img {
-    width: 100%;
+    width: auto;
     height: 157px;
-    object-fit: cover;
+    max-width: 100%;
+    object-fit: contain;
     border-radius: 8px;
     margin-bottom: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .mat-mdc-card-header p {
