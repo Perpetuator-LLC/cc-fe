@@ -17,9 +17,7 @@ import { MatButton } from '@angular/material/button';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
-import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
-import { MatDialog } from '@angular/material/dialog';
+import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -43,6 +41,7 @@ import { MatDialog } from '@angular/material/dialog';
     MessageComponent,
     MatToolbarModule,
     RouterLink,
+    SharedFooterComponent,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',
@@ -60,7 +59,6 @@ export class ForgotPasswordComponent implements AfterViewInit {
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
-    private dialog: MatDialog,
   ) {}
 
   ngAfterViewInit() {
@@ -95,23 +93,6 @@ export class ForgotPasswordComponent implements AfterViewInit {
         });
         console.error('Password reset failed', error);
       },
-    });
-  }
-  openTermsModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(TermsAndConditionsModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
-  }
-
-  openPrivacyModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(PrivacyPolicyModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
     });
   }
 }

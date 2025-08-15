@@ -1,12 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from './user.service';
@@ -14,6 +14,10 @@ import { CodeService, Code } from './code.service';
 import { CreditService } from './credit.service';
 import { MessageService } from './message.service';
 import { MatCardModule } from '@angular/material/card';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Subscription } from 'rxjs';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-redeem-gift-code-dialog',
@@ -29,6 +33,12 @@ import { MatCardModule } from '@angular/material/card';
     MatTableModule,
     MatProgressSpinnerModule,
     MatCardModule,
+    MatPaginator,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatIcon,
+    MatIcon,
+    MatIcon,
   ],
   template: `
     <mat-card class="codes">
@@ -78,6 +88,20 @@ import { MatCardModule } from '@angular/material/card';
               <mat-spinner></mat-spinner>
             </ng-container>
             <ng-container *ngIf="!loadingCodes && codes.length > 0">
+              <div class="filter-controls">
+                <mat-button-toggle-group [value]="activeCodesFilter">
+                  <mat-button-toggle [value]="true" (click)="toggleActiveFilter(true)">
+                    <mat-icon>check_circle</mat-icon> Unused Codes
+                  </mat-button-toggle>
+                  <mat-button-toggle [value]="false" (click)="toggleActiveFilter(false)">
+                    <mat-icon>cancel</mat-icon> Used Codes
+                  </mat-button-toggle>
+                  <mat-button-toggle [value]="null" (click)="toggleActiveFilter(null)">
+                    <mat-icon>all_inclusive</mat-icon> All Codes
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+
               <table mat-table [dataSource]="codes">
                 <ng-container matColumnDef="code">
                   <th mat-header-cell *matHeaderCellDef>Code</th>
@@ -113,6 +137,14 @@ import { MatCardModule } from '@angular/material/card';
                   *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
                 ></tr>
               </table>
+              <mat-paginator
+                [length]="totalCodes"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="[5, 10, 20]"
+                [showFirstLastButtons]="false"
+                (page)="onCodesPageChange($event)"
+              >
+              </mat-paginator>
             </ng-container>
             <ng-container *ngIf="!loadingCodes && codes.length === 0">
               <p>No codes found.</p>
@@ -195,12 +227,23 @@ import { MatCardModule } from '@angular/material/card';
     `,
   ],
 })
-export class RedeemGiftCodeDialogComponent implements OnInit {
+export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
   code = '';
   createCodeForm: FormGroup;
   codes: Code[] = [];
+  dataSource = new MatTableDataSource<Code>(this.codes);
   loadingCodes = true;
   permissions: string[] = [];
+  cursors: (string | null)[] = [null];
+  totalCodes = 0;
+  pageSize = 5;
+  activeCodesFilter: boolean | null = true;
+  private subscriptions = new Subscription();
+  redeeming = false;
+  codeError = false;
+
+  @ViewChild(MatPaginator) codesPaginator!: MatPaginator;
+  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private fb: FormBuilder,
@@ -222,8 +265,9 @@ export class RedeemGiftCodeDialogComponent implements OnInit {
     this.loadCodes();
   }
 
-  redeeming = false;
-  codeError = false;
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
 
   redeemCode() {
     if (!this.code) {
@@ -232,59 +276,92 @@ export class RedeemGiftCodeDialogComponent implements OnInit {
     }
     this.codeError = false;
     this.redeeming = true;
-    this.codeService.redeemCode(this.code).subscribe({
-      next: () => {
-        this.messageService.success('Code redeemed successfully.');
-        this.code = '';
-        this.loadCodes();
-        this.creditService.refetchUserCredits();
-        this.redeeming = false;
-      },
-      error: (err: unknown) => {
-        const msg =
-          err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
-        this.messageService.error('Failed to redeem code: ' + msg);
-        this.redeeming = false;
-      },
-    });
+    this.subscriptions.add(
+      this.codeService.redeemCode(this.code).subscribe({
+        next: () => {
+          this.messageService.success('Code redeemed successfully.');
+          this.code = '';
+          this.loadCodes();
+          this.creditService.refetchUserCredits();
+          this.redeeming = false;
+        },
+        error: (err: unknown) => {
+          const msg =
+            err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
+          this.messageService.error('Failed to redeem code: ' + msg);
+          this.redeeming = false;
+        },
+      }),
+    );
   }
 
   createCode() {
     if (this.createCodeForm.valid) {
       const { code, creditAmount } = this.createCodeForm.value;
-      this.codeService.createCode(code, creditAmount).subscribe({
-        next: () => {
-          this.messageService.success('Code created successfully.');
-          this.createCodeForm.reset();
-          this.loadCodes();
-        },
-        error: (err: unknown) => {
-          const msg =
-            err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
-          this.messageService.error('Failed to create code: ' + msg);
-        },
-      });
+      this.subscriptions.add(
+        this.codeService.createCode(code, creditAmount).subscribe({
+          next: () => {
+            this.messageService.success('Code created successfully.');
+            this.createCodeForm.reset();
+            this.loadCodes();
+          },
+          error: (err: unknown) => {
+            const msg =
+              err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
+            this.messageService.error('Failed to create code: ' + msg);
+          },
+        }),
+      );
     }
   }
 
-  loadCodes() {
+  private loadCodes(after: string | null = null, pageIndex = 0) {
     if (!this.permissions.includes('api.add_bonuscode')) {
       this.loadingCodes = false;
       return;
     }
     this.loadingCodes = true;
-    this.codeService.getCodes().subscribe({
-      next: (data: { codes: Code[] }) => {
-        this.codes = data.codes;
-        this.loadingCodes = false;
-      },
-      error: (err: unknown) => {
-        const msg =
-          err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : String(err);
-        this.messageService.error('Failed to load codes: ' + msg);
-        this.loadingCodes = false;
-      },
-    });
+    this.subscriptions.add(
+      this.codeService.getCodes(this.activeCodesFilter, after, this.pageSize).subscribe({
+        next: ({ codes, pageInfo }) => {
+          this.codes = codes;
+          this.dataSource.data = codes;
+          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+          this.totalCodes = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+          this.loadingCodes = false;
+        },
+        error: (err) => {
+          this.messageService.error('Failed to load codes: ' + err.message);
+          this.loadingCodes = false;
+        },
+      }),
+    );
+  }
+
+  onCodesPageChange(event: PageEvent) {
+    this.loadingCodes = true;
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
+
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null];
+      this.loadCodes(null, 0);
+      return;
+    }
+
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadCodes(after, newPageIndex);
+  }
+
+  toggleActiveFilter(value: boolean | null) {
+    this.activeCodesFilter = value;
+    this.cursors = [null]; // Reset pagination
+    if (this.codesPaginator) {
+      this.codesPaginator.firstPage(); // Reset to first page
+    }
+    this.loadCodes(); // Reload codes with new filter
   }
 
   onCancel(): void {

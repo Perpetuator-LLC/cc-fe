@@ -86,20 +86,24 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       { validator: this.passwordMatchValidator },
     );
 
-    toObservable(this.userService.userDetails).subscribe((userData) => {
-      this.userDetailForm.patchValue({
-        username: userData?.username || '',
-        email: userData?.email || '',
-      });
-      this.changePasswordForm.patchValue({
-        username: userData?.username || '',
-        email: userData?.email || '',
-      });
-    });
+    this.subscriptions.add(
+      toObservable(this.userService.userDetails).subscribe((userData) => {
+        this.userDetailForm.patchValue({
+          username: userData?.username || '',
+          email: userData?.email || '',
+        });
+        this.changePasswordForm.patchValue({
+          username: userData?.username || '',
+          email: userData?.email || '',
+        });
+      }),
+    );
 
-    this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
-      this.changePasswordForm.updateValueAndValidity();
-    });
+    this.subscriptions.add(
+      this.changePasswordForm.get('confirmPassword')?.valueChanges.subscribe(() => {
+        this.changePasswordForm.updateValueAndValidity();
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -108,15 +112,17 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
 
-    this.route.queryParams.subscribe((params) => {
-      if (params['payment'] === 'success') {
-        this.messageService.success('Payment was successful.', 15000, true);
-        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-      } else if (params['payment'] === 'cancel') {
-        this.messageService.warning('Payment incomplete.', 15000, true);
-        this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-      }
-    });
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['payment'] === 'success') {
+          this.messageService.success('Payment was successful.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        } else if (params['payment'] === 'cancel') {
+          this.messageService.warning('Payment incomplete.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        }
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -126,14 +132,16 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   private loadUserDetails() {
     this.userService.loadUserDetails();
-    this.userService.loadUserEmailChangePending().subscribe({
-      next: (emailChangePendingDetails) => {
-        this.emailChangePending = emailChangePendingDetails;
-      },
-      error: (err) => {
-        console.error('Failed to load email change pending:', err);
-      },
-    });
+    this.subscriptions.add(
+      this.userService.loadUserEmailChangePending().subscribe({
+        next: (emailChangePendingDetails) => {
+          this.emailChangePending = emailChangePendingDetails;
+        },
+        error: (err) => {
+          console.error('Failed to load email change pending:', err);
+        },
+      }),
+    );
     this.emailChangePending = this.userService.emailChangePendingDetails;
   }
 
@@ -178,39 +186,41 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   onSubmitUserDetails(): void {
     if (this.userDetailForm.valid) {
       const { username, email } = this.userDetailForm.value;
-      this.userService.updateUser(username, email).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.messageService.success('User details updated successfully.');
-            this.userService.loadUserDetails().subscribe({
-              next: (userDetails: UserDetails) => {
-                this.userDetailForm.patchValue({
-                  username: userDetails.username,
-                  email: userDetails.email,
-                });
-                this.changePasswordForm.patchValue({
-                  username: userDetails.username,
-                  email: userDetails.email,
-                });
-              },
-            });
-            this.userService.loadUserEmailChangePending().subscribe({
-              next: (emailChangePendingDetails) => {
-                this.emailChangePending = emailChangePendingDetails;
-              },
-              error: (err) => {
-                console.error('Failed to load email change pending:', err);
-              },
-            });
-          } else {
-            this.messageService.error(`Failed to update user details: ${response.message}`);
-          }
-        },
-        error: (err) => {
-          console.error('Failed to update user details:', err);
-          this.messageService.error(`Failed to update user details: ${err.message}`);
-        },
-      });
+      this.subscriptions.add(
+        this.userService.updateUser(username, email).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.success('User details updated successfully.');
+              this.userService.loadUserDetails().subscribe({
+                next: (userDetails: UserDetails) => {
+                  this.userDetailForm.patchValue({
+                    username: userDetails.username,
+                    email: userDetails.email,
+                  });
+                  this.changePasswordForm.patchValue({
+                    username: userDetails.username,
+                    email: userDetails.email,
+                  });
+                },
+              });
+              this.userService.loadUserEmailChangePending().subscribe({
+                next: (emailChangePendingDetails) => {
+                  this.emailChangePending = emailChangePendingDetails;
+                },
+                error: (err) => {
+                  console.error('Failed to load email change pending:', err);
+                },
+              });
+            } else {
+              this.messageService.error(`Failed to update user details: ${response.message}`);
+            }
+          },
+          error: (err) => {
+            console.error('Failed to update user details:', err);
+            this.messageService.error(`Failed to update user details: ${err.message}`);
+          },
+        }),
+      );
     } else {
       this.messageService.error('Please enter valid user details.');
     }
@@ -226,16 +236,18 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.userService.changePassword(newPassword).subscribe({
-        next: () => {
-          this.messageService.success('Password changed successfully.');
-          window.location.reload();
-        },
-        error: (err) => {
-          console.error('Failed to change password:', err);
-          this.messageService.error('Failed to change password. Please try again.');
-        },
-      });
+      this.subscriptions.add(
+        this.userService.changePassword(newPassword).subscribe({
+          next: () => {
+            this.messageService.success('Password changed successfully.');
+            window.location.reload();
+          },
+          error: (err) => {
+            console.error('Failed to change password:', err);
+            this.messageService.error('Failed to change password. Please try again.');
+          },
+        }),
+      );
     } else {
       this.messageService.error('Please enter valid password details.');
     }
@@ -336,17 +348,19 @@ export class UserDetailComponent implements OnInit, OnDestroy {
           '<h2>Are you sure you want to proceed?</h2>',
       },
     });
-    dialogRef.afterClosed().subscribe({
-      next: (confirmed) => {
-        if (confirmed) {
-          // get confirmation from user
-          this.deleteTeam();
-        }
-      },
-      error: (err) => {
-        this.messageService.error('Failed to delete account: ' + err.message);
-      },
-    });
+    this.subscriptions.add(
+      dialogRef.afterClosed().subscribe({
+        next: (confirmed) => {
+          if (confirmed) {
+            // get confirmation from user
+            this.deleteTeam();
+          }
+        },
+        error: (err) => {
+          this.messageService.error('Failed to delete account: ' + err.message);
+        },
+      }),
+    );
   }
 
   private deleteTeam() {
@@ -366,21 +380,25 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   refreshOrder(id: string) {
-    this.creditService.refreshUserOrder(id).subscribe({
-      next: (data) => {
-        this.messageService.success(`Order refreshed successfully: ${data.message}`);
-      },
-      error: (err) => {
-        this.messageService.error('Failed to refresh order: ' + err.message);
-      },
-    });
+    this.subscriptions.add(
+      this.creditService.refreshUserOrder(id).subscribe({
+        next: (data) => {
+          this.messageService.success(`Order refreshed successfully: ${data.message}`);
+        },
+        error: (err) => {
+          this.messageService.error('Failed to refresh order: ' + err.message);
+        },
+      }),
+    );
   }
 
   cancelOrder(id: string) {
-    this.creditService.cancelUserOrder(id).subscribe({
-      next: () => this.messageService.success('Order cancelled successfully'),
-      error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
-    });
+    this.subscriptions.add(
+      this.creditService.cancelUserOrder(id).subscribe({
+        next: () => this.messageService.success('Order cancelled successfully'),
+        error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
+      }),
+    );
   }
 
   openDeleteAccountDialog() {

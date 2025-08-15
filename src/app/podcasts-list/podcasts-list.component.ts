@@ -91,7 +91,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
   dataSource = new MatTableDataSource<PodcastsResult>([]);
-  displayedColumns: string[] = ['name', 'team', 'tgChannelId', 'categories', 'tgResponse', 'actions'];
+  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'actions'];
   isGridView = false; // Default to list view
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
@@ -99,7 +99,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   allColumns: ColumnOption[] = [
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
-    { id: 'tgChannelId', label: 'Telegram ID', selected: true },
+    { id: 'tgChannelId', label: 'Telegram ID', selected: false },
     { id: 'categories', label: 'Categories', selected: true },
     { id: 'tgResponse', label: 'Response', selected: true },
     { id: 'actions', label: 'Actions', selected: true },
@@ -217,6 +217,11 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   updateDisplayedColumns(): void {
     this.displayedColumns = this.allColumns.filter((column) => column.selected).map((column) => column.id);
+  }
+
+  isColumnSelected(columnId: string): boolean {
+    const column = this.allColumns.find((col) => col.id === columnId);
+    return column ? column.selected : false;
   }
 
   _countCategories(podcast: PodcastsResult) {

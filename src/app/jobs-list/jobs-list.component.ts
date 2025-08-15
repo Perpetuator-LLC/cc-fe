@@ -1,11 +1,21 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Job, JobService, kindToString, statusToString } from '../job.service';
+import {
+  Job,
+  JobKind,
+  JobService,
+  JobStatus,
+  kindToString,
+  statusToString,
+  stringToJobKind,
+  stringToJobStatus,
+} from '../job.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCell,
   MatCellDef,
@@ -41,6 +51,8 @@ import { CommonModule } from '@angular/common';
     MatTable,
     MatSort,
     MatIcon,
+    MatButton,
+    MatIconButton,
     MatColumnDef,
     MatHeaderCell,
     MatCell,
@@ -56,7 +68,6 @@ import { CommonModule } from '@angular/common';
     MatCardContent,
     DecimalPipe,
     SvgIconComponent,
-    MatIcon,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -166,9 +177,6 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  protected readonly kindToString = kindToString;
-  protected readonly statusToString = statusToString;
-
   // Group jobs by date for timeline view
   get groupedJobs() {
     if (!this.jobs) return [];
@@ -202,43 +210,75 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     };
 
-    for (const job of this.jobs) {
-      const label = dateLabel(job.createdAt);
-      let group = groups.find((g) => g.label === label);
-      if (!group) {
-        group = { label, jobs: [] };
-        groups.push(group);
+    const jobsByDate = this.jobs.reduce((acc: Record<string, Job[]>, job) => {
+      const dateKey = job.createdAt.split('T')[0];
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
       }
-      group.jobs.push(job);
-    }
-    groups.sort((a, b) => new Date(b.jobs[0].createdAt).getTime() - new Date(a.jobs[0].createdAt).getTime());
-    for (const group of groups) {
-      group.jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
+      acc[dateKey].push(job);
+      return acc;
+    }, {});
+
+    Object.keys(jobsByDate)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      .forEach((dateKey) => {
+        groups.push({
+          label: dateLabel(dateKey),
+          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        });
+      });
+
     return groups;
   }
 
+  statusClass(status: string): string {
+    switch (stringToJobStatus(status)) {
+      case JobStatus.PENDING:
+        return 'job-pending';
+      case JobStatus.RUNNING:
+        return 'job-running';
+      case JobStatus.COMPLETED:
+        return 'job-success';
+      case JobStatus.FAILED:
+        return 'job-failed';
+      default:
+        return '';
+    }
+  }
+
   iconForJob(kind: string): string {
-    switch (kind) {
-      case 'fetch_news':
-        return 'rss_feed';
-      case 'create_episode':
-        return 'podcasts';
+    switch (stringToJobKind(kind)) {
+      case JobKind.FETCH_NEWS:
+        return 'cloud_download';
+      case JobKind.EXTRACT_NEWS:
+        return 'auto_fix_high';
+      case JobKind.SUMMARIZE_NEWS:
+        return 'summarize';
+      case JobKind.CREATE_EPISODE:
+        return 'mic';
+      case JobKind.UPDATE_EPISODE_AUDIO:
+        return 'audiotrack';
       default:
         return 'work';
     }
   }
 
-  statusClass(status: string): string {
-    switch (status) {
-      case 'completed':
-        return 'job-success';
-      case 'failed':
-        return 'job-failed';
-      case 'pending':
-        return 'job-pending';
-      default:
-        return '';
-    }
-  }
+  // retryJob(uuid: string) {
+  //   this.subscriptions.add(
+  //     this.jobService.retryJobs([uuid]).subscribe({
+  //       next: () => {
+  //         this.messageService.success('Job retry initiated.');
+  //         this.loadJobs(); // Reload to get updated job list
+  //       },
+  //       error: (err: { message: string }) => {
+  //         this.messageService.error(`Failed to retry job: ${err.message}`);
+  //       },
+  //     }),
+  //   );
+  // }
+
+  protected readonly kindToString = kindToString;
+  protected readonly statusToString = statusToString;
+  protected readonly stringToJobStatus = stringToJobStatus;
+  protected readonly JobStatus = JobStatus;
 }

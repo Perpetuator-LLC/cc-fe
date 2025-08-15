@@ -82,7 +82,6 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['title', 'podcast', 'actions'];
   totalEpisodes = 0;
   pageSize = 10;
-  currentPage = 0;
   sortDirection = 'DESC';
   sortActive = 'date';
   loadingEpisodes = false;
@@ -90,8 +89,6 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   selectedPodcast: string | null = null;
   podcasts: PodcastsResult[] = [];
   cursors: (string | null)[] = [null];
-  hasNextPage = false;
-  hasPreviousPage = false;
   isGridView = false;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -124,28 +121,25 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   loadEpisodes(after: string | null = null, pageIndex = 0) {
     this.loadingEpisodes = true;
 
-    this.episodeService
-      .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
-      .subscribe({
-        next: ({ episodes, pageInfo }) => {
-          this.episodes = episodes;
-          this.dataSource.data = episodes;
-          console.log('Loaded episodes:', episodes);
-          this.hasNextPage = pageInfo.hasNextPage;
-          this.hasPreviousPage = pageInfo.hasPreviousPage;
-          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-          this.currentPage = pageIndex;
-
-          // Set a large enough number to enable the next button if hasNextPage is true
-          this.totalEpisodes = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
-
-          this.loadingEpisodes = false;
-        },
-        error: (err) => {
-          this.messageService.error('Failed to load episodes: ' + err);
-          this.loadingEpisodes = false;
-        },
-      });
+    this.subscriptions.add(
+      this.episodeService
+        .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
+        .subscribe({
+          next: ({ episodes, pageInfo }) => {
+            this.episodes = episodes;
+            this.dataSource.data = episodes;
+            this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+            this.totalEpisodes = pageInfo.hasNextPage
+              ? (pageIndex + 2) * this.pageSize
+              : (pageIndex + 1) * this.pageSize;
+            this.loadingEpisodes = false;
+          },
+          error: (err) => {
+            this.messageService.error('Failed to load episodes: ' + err);
+            this.loadingEpisodes = false;
+          },
+        }),
+    );
   }
 
   loadPodcasts() {
@@ -189,7 +183,6 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // For page navigation, use stored cursor
     const after = this.cursors[newPageIndex] ?? null;
     this.loadEpisodes(after, newPageIndex);
   }
