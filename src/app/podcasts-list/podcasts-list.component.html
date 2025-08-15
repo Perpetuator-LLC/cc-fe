@@ -28,10 +28,10 @@
     <div class="search-filter">
       <div class="input-search-div">
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput placeholder="Search by podcast name" disabled="" />
+        <input [(ngModel)]="searchString" matInput placeholder="Search by podcast name" (input)="onSearchChange($event)" />
       </div>
 
-      <button mat-flat-button class="filter-button" disabled="">
+      <button mat-flat-button class="filter-button">
         <mat-icon>filter_list</mat-icon>
         Filter
       </button>
@@ -141,7 +141,7 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
     <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
-      aria-label="Select page of podcasts">
+      aria-label="Select page of podcasts" (page)="onPageChange($event)">
     </mat-paginator>
     }
 
