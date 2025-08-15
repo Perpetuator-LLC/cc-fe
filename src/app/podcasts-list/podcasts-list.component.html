@@ -68,10 +68,10 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Podcast Name</th>
         <td mat-cell *matCellDef="let podcast">
           <div class="p_name">
-            @if (podcast.imageUrl) {
-            <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+            @if (podcast.thumbnailUrl || podcast.imageUrl) {
+              <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
             } @else {
-            <img src="/image.png" alt="img" />
+              <img src="/image.png" alt="img" />
             }
             <div class="name">
               <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
@@ -86,7 +86,7 @@
       <!-- Team Column -->
       <ng-container matColumnDef="team">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Team</th>
-        <td mat-cell *matCellDef="let podcast">{{ podcast.team?.members?.[0]?.user?.username || 'Perpetuator LLC' }}
+        <td mat-cell *matCellDef="let podcast">{{ podcast.team?.name || '-' }}
         </td>
       </ng-container>
 
@@ -152,7 +152,11 @@
         <mat-card-header>
           <div class="grid-header" style="width: 100%">
             <a [routerLink]="['/podcast', podcast.uuid]">
-              <img src="/image.png" alt="img" class="img" />
+              @if (podcast.thumbnailUrl || podcast.imageUrl) {
+                <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
+              } @else {
+                <img src="/image.png" alt="img" class="img" />
+              }
             </a>
             <div class="response-div">
               <span [class]="podcast.enabled ? 'enable' : 'disable'">{{
@@ -185,7 +189,9 @@
           </div>
         </mat-card-header>
         <div class="chip-header">
-          <span class="chip"><img src="/telegram.svg" alt="telegram" /> 1002282842326</span>
+          @if (isColumnSelected('tgChannelId')) {
+            <span class="chip"><img src="/telegram.svg" alt="telegram" /> {{ podcast?.tgChannelId || '1002282842326' }}</span>
+          }
           <span class="days">2 days ago</span>
         </div>
         <div class="bottom-header">

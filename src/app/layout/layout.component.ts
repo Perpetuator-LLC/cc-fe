@@ -42,6 +42,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
 import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
 import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.component';
+import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 
 @Component({
   selector: 'app-layout',
@@ -68,6 +69,7 @@ import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.compon
     NgClass,
     DecimalPipe,
     RedeemGiftCodeDialogComponent,
+    SharedFooterComponent,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {

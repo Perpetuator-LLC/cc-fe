@@ -24,8 +24,6 @@ import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
-import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
 
 @Component({
   selector: 'app-login',
@@ -112,23 +110,5 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  }
-
-  openTermsModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(TermsAndConditionsModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
-  }
-
-  openPrivacyModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(PrivacyPolicyModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
   }
 }

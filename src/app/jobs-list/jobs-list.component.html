@@ -55,6 +55,22 @@
               <div class="timeline-message">
                 {{ job.error || job.result }}
               </div>
+
+              <div class="timeline-actions">
+                <!-- Only allow pending to be retried if over 2 minutes old? Do it on back-end? -->
+                @if (stringToJobStatus(job.status) === JobStatus.FAILED) {
+                  <button mat-icon-button color="primary" (click)="retryJob(job.uuid)" matTooltip="Retry job">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                }
+                <!-- Track retry attempts and only allow 2? Do it on back-end? -->
+                @if (stringToJobStatus(job.status) === JobStatus.PENDING) {
+                  <button mat-icon-button color="warn" (click)="deleteJob(job.uuid)" matTooltip="Delete job">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+
               <div class="timeline-meta mobile">
                 <div class="dot-div">
                   <span class="dot"></span>
