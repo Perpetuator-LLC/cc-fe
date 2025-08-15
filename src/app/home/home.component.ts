@@ -4,12 +4,15 @@ import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
 import { AuthService } from '../auth.service';
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef, OnInit } from '@angular/core';
 import p5 from 'p5';
 import { CommonModule } from '@angular/common';
+import { DashboardService } from '../dashboard.service';
+import { SiteStatistics } from '../interface';
 
 @Component({
   selector: 'app-home',
@@ -34,6 +37,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild('p5Container', { static: true }) p5Container!: ElementRef;
   private p5Instance!: p5;
+  siteStats: SiteStatistics | undefined;
+  loadingStats = true;
 
   gridPodcasts: PodcastsResult[] = [];
 
@@ -41,6 +46,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     private toolbarService: ToolbarService,
     protected authService: AuthService,
     private podcastsService: PodcastsService,
+    private dashboardService: DashboardService,
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +56,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
       },
       error: () => {
         this.gridPodcasts = [];
+      },
+    });
+    // load site stats
+    this.dashboardService.getStats().subscribe({
+      next: (result) => {
+        this.siteStats = result;
+        this.loadingStats = false;
+      },
+      error: (error) => {
+        console.error(':: Stats API :: ', error);
+        this.loadingStats = false;
       },
     });
   }
