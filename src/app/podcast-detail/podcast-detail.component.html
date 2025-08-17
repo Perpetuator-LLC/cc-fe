@@ -27,12 +27,12 @@
         <button
           mat-flat-button
           color="primary"
-          class="publish-btn"
+          class="save-btn"
           type="button"
           (click)="savePodcast()"
           [disabled]="!podcastForm.dirty || !podcastForm.valid"
         >
-          Publish
+          Save
         </button>
       </div>
     </div>
@@ -68,67 +68,6 @@
           </div>
 
           <form [formGroup]="podcastForm">
-            <div class="member-row" style="margin-bottom: 20px">
-              <div class="file-input-wrapper">
-                <div class="image-preview">
-                  @if (imageUrl) {
-                    <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
-                  } @else {
-                    <div></div>
-                  }
-                </div>
-
-                @if (selectedFile) {
-                  <div class="upload-progress upload-btn">
-                    <mat-spinner diameter="20"></mat-spinner>
-                    <span>Uploading: {{ selectedFile.name }}</span>
-                  </div>
-                } @else {
-                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
-                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clip-path="url(#clip0_210_6192)">
-                        <path
-                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
-                          fill="currentColor"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_210_6192">
-                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    Upload Podcast Featured Image
-                  </button>
-
-                  <span class="desc">Upload image file (PNG/JPG, max size: 100KB)</span>
-                }
-
-                <input
-                  #fileInput
-                  type="file"
-                  formControlName="image"
-                  (change)="onPodcastImageSelected($event)"
-                  accept="image/*"
-                  hidden
-                />
-              </div>
-
-              <div class="image-actions">
-                @if (imageUrl) {
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    type="button"
-                    (click)="deletePodcastImage()"
-                    matTooltip="Delete image"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                }
-              </div>
-            </div>
-
             <div class="form-group">
               <div class="member-row">
                 <mat-form-field appearance="fill" class="custom-dark-field">
@@ -186,6 +125,68 @@
                 </div>
               </div>
             </div>
+
+            <div class="member-row" style="margin-bottom: 20px">
+              <div class="file-input-wrapper">
+                <div class="image-preview">
+                  @if (imageUrl) {
+                    <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+                  } @else {
+                    <div></div>
+                  }
+                </div>
+
+                @if (selectedFile) {
+                  <div class="upload-progress upload-btn">
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span>Uploading: {{ selectedFile.name }}</span>
+                  </div>
+                } @else {
+                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
+                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g clip-path="url(#clip0_210_6192)">
+                        <path
+                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
+                          fill="currentColor"
+                        />
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_210_6192">
+                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                    Upload Podcast Featured Image
+                  </button>
+
+                  <span class="desc">Upload image file (PNG/JPG, max size: 750KB)</span>
+                }
+
+                <input
+                  #fileInput
+                  type="file"
+                  formControlName="image"
+                  (change)="onPodcastImageSelected($event)"
+                  accept="image/*"
+                  hidden
+                />
+              </div>
+
+              <div class="image-actions">
+                @if (imageUrl) {
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="deletePodcastImage()"
+                    matTooltip="Delete image"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+
           </form>
         </mat-card-content>
       </mat-tab>
@@ -272,7 +273,7 @@
                       {{ tierToString(tier) }}
                     </mat-checkbox>
                     }
-                  
+
                     <button mat-button color="warn" (click)="clearVoiceFilters()">Clear All</button>
                   </div>
                 </mat-menu>
