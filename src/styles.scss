@@ -140,7 +140,7 @@ $light-theme: mat.define-theme(
 
 // ignore-duplication-warnings: true is used to suppress warnings about duplicate styles
 // Supposedly we can use: @include mat.all-component-colors($dark-theme); but it doesn't work
-mat.$theme-ignore-duplication-warnings: true;
+$theme-ignore-duplication-warnings: true;
 
 //@mixin custom-card-theme($theme) {
 //  $color-config: map.get($theme, color);
