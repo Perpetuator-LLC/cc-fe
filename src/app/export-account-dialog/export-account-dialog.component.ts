@@ -8,30 +8,25 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 @Component({
-  selector: 'app-delete-team-dialog',
+  selector: 'app-export-account-dialog',
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
-  templateUrl: './delete-team-dialog.component.html',
-  styleUrls: ['./delete-team-dialog.component.scss'],
+  templateUrl: './export-account-dialog.component.html',
+  styleUrls: ['./export-account-dialog.component.scss'],
 })
-export class DeleteTeamDialogComponent {
-  deleteConfirmation = '';
-  teamName: string;
+export class ExportAccountDialogComponent {
+  exportConfirmation = '';
 
   constructor(
-    public dialogRef: MatDialogRef<DeleteTeamDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { teamName: string },
-  ) {
-    this.teamName = data.teamName;
-  }
+    public dialogRef: MatDialogRef<ExportAccountDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: unknown,
+  ) {}
 
   onCancel(): void {
     this.dialogRef.close(false);
   }
 
-  onDelete(): void {
-    if (this.deleteConfirmation === this.teamName) {
-      this.dialogRef.close(true);
-    }
+  onExport(): void {
+    this.dialogRef.close(this.exportConfirmation);
   }
 }
