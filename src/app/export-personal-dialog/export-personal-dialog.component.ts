@@ -7,79 +7,15 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MessageService } from './message.service';
-import { TeamsService } from './teams.service';
+import { MessageService } from '../message.service';
+import { TeamsService } from '../teams.service';
 
 @Component({
   selector: 'app-export-personal-dialog',
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
-  template: `
-    <div class="export-dialog">
-      <h2 mat-dialog-title>Export Personal Data</h2>
-      <mat-dialog-content>
-        <div class="danger-zone">
-          <p>Are you sure you want to export all your personal data? Please confirm by entering your password.</p>
-          <div class="action-row">
-            <mat-form-field appearance="fill" style="width:100%">
-              <mat-label>Export Confirmation</mat-label>
-              <input
-                matInput
-                type="password"
-                autocomplete="current-password"
-                placeholder="Type password to confirm export"
-                [(ngModel)]="exportConfirmation"
-              />
-            </mat-form-field>
-          </div>
-        </div>
-      </mat-dialog-content>
-      <mat-dialog-actions align="end">
-        <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
-        <button class="export-btn" mat-flat-button color="primary" (click)="onExport()">Export</button>
-      </mat-dialog-actions>
-    </div>
-  `,
-  styles: [
-    `
-      .export-dialog {
-        padding: 28px;
-      }
-      .export-dialog .mat-mdc-dialog-title {
-        padding: 0;
-        font-size: 18px;
-      }
-      .export-dialog .mat-mdc-dialog-title::before {
-        display: none;
-      }
-      .mat-mdc-dialog-content {
-        padding: 0;
-        color: var(--description-color);
-      }
-      .mat-mdc-dialog-content p {
-        margin-top: 0;
-      }
-      .action-row {
-        margin-top: 20px;
-      }
-      mat-dialog-actions {
-        padding: 20px 0 0;
-      }
-      .cancel-btn {
-        background: var(--secondary-light);
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        color: var(--theme-color);
-        font-weight: 500;
-      }
-      .export-btn {
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        background: var(--primary, #1976d2);
-        color: white;
-      }
-    `,
-  ],
+  templateUrl: './export-personal-dialog.component.html',
+  styleUrls: ['./export-personal-dialog.component.scss'],
 })
 export class ExportPersonalDialogComponent {
   exportConfirmation = '';

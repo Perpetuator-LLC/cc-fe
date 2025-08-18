@@ -20,8 +20,8 @@ import { CreditService } from '../credit.service';
 import { CodeService } from '../code.service';
 import { MatIcon } from '@angular/material/icon';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
-import { ExportPersonalDialogComponent } from '../export-personal-dialog.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 
 @Component({
   selector: 'app-user-detail',

@@ -669,9 +669,9 @@ mat-nav-list {
 .link-button {
   background: none;
   border: none;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
-  padding: 0;
+  padding: 9px 12px;
   font: inherit;
   outline: none;
   color: var(--primary);
@@ -681,4 +681,10 @@ mat-nav-list {
 .link-button:focus {
   text-decoration: underline;
   color: var(--primary, #1976d2);
+}
+
+.arrow-left {
+  margin-left: 4px;
+  rotate: 90deg;
+  font-size: 20px
 }
