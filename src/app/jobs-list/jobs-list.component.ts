@@ -11,63 +11,31 @@ import {
   stringToJobKind,
   stringToJobStatus,
 } from '../job.service';
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-  MatTableDataSource,
-  MatTableModule,
-} from '@angular/material/table';
+import { MatIconButton } from '@angular/material/button';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
-import { MatCard, MatCardContent } from '@angular/material/card';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-jobs-list',
   standalone: true,
   imports: [
-    CommonModule,
+    MatTooltipModule,
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
     DatePipe,
-    MatTooltip,
-    MatTable,
-    MatSort,
     MatIcon,
-    MatButton,
     MatIconButton,
-    MatColumnDef,
-    MatHeaderCell,
-    MatCell,
-    MatCellDef,
-    MatHeaderCellDef,
-    MatHeaderRowDef,
-    MatRow,
-    MatHeaderRow,
-    MatRowDef,
-    MatPaginator,
     MessageComponent,
-    MatCard,
-    MatCardContent,
     DecimalPipe,
-    SvgIconComponent,
+    NgClass,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -146,11 +114,11 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.loadJobs(after, newPageIndex);
   }
 
-  deleteJob(id: string) {
+  deleteJob(uuid: string) {
     this.subscriptions.add(
-      this.jobService.deleteJobs([id]).subscribe({
+      this.jobService.deleteJobs([uuid]).subscribe({
         next: () => {
-          this.jobs = this.jobs.filter((job) => job.id !== id);
+          this.jobs = this.jobs.filter((job) => job.uuid !== uuid);
           this.messageService.success('Job deleted.');
         },
         error: (err: { message: string }) => {
@@ -160,11 +128,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  retryJob(id: string) {
+  retryJob(uuid: string) {
     this.subscriptions.add(
-      this.jobService.retryJobs([id]).subscribe({
+      this.jobService.retryJobs([uuid]).subscribe({
         next: (data) => {
-          this.jobs = [...data.jobs, ...this.jobs.filter((job) => job.id !== id)];
+          console.log('retryJob success:', data);
+          this.jobs = [...data.jobs, ...this.jobs.filter((job) => job.uuid !== uuid)];
           this.dataSource.data = this.jobs;
         },
         error: (err: { message: string }) => {
@@ -256,8 +225,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
         return 'summarize';
       case JobKind.CREATE_EPISODE:
         return 'mic';
+      case JobKind.SELECT_UNUSED_NEWS:
+        return 'check_circle';
       case JobKind.UPDATE_EPISODE_AUDIO:
         return 'audiotrack';
+      case JobKind.PUBLISH_EPISODE_AUDIO:
+        return 'cloud_upload';
       default:
         return 'work';
     }

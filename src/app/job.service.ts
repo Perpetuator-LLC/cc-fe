@@ -16,7 +16,9 @@ export enum JobKind {
   EXTRACT_NEWS = 'EXTRACT_NEWS',
   SUMMARIZE_NEWS = 'SUMMARIZE_NEWS',
   CREATE_EPISODE = 'CREATE_EPISODE',
+  SELECT_UNUSED_NEWS = 'SELECT_UNUSED_NEWS',
   UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
+  PUBLISH_EPISODE_AUDIO = 'PUBLISH_EPISODE_AUDIO',
 }
 
 export const stringToJobKind = (kind: string) => {
@@ -29,8 +31,12 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.SUMMARIZE_NEWS;
     case 'CREATE_EPISODE':
       return JobKind.CREATE_EPISODE;
+    case 'SELECT_UNUSED_NEWS':
+      return JobKind.SELECT_UNUSED_NEWS;
     case 'UPDATE_EPISODE_AUDIO':
       return JobKind.UPDATE_EPISODE_AUDIO;
+    case 'PUBLISH_EPISODE_AUDIO':
+      return JobKind.PUBLISH_EPISODE_AUDIO;
     default:
       throw new Error('Invalid job type');
   }
@@ -46,8 +52,12 @@ export const kindToString = (kind: string) => {
       return 'Summarize News';
     case JobKind.CREATE_EPISODE:
       return 'Create Episode';
+    case JobKind.SELECT_UNUSED_NEWS:
+      return 'Select Unused News';
     case JobKind.UPDATE_EPISODE_AUDIO:
       return 'Update Episode Audio';
+    case JobKind.PUBLISH_EPISODE_AUDIO:
+      return 'Publish Episode Audio';
     default:
       return 'N/A';
   }
@@ -182,6 +192,9 @@ export class JobService extends BaseService implements OnDestroy {
 
     this.subscriptions.add(
       toObservable(this.jobsSignal).subscribe((jobs) => {
+        if (!this.queryRef) {
+          return; // If queryRef is not initialized, do nothing
+        }
         const jobUuids = jobs.map((job) => job.uuid);
         this.queryRef.setVariables({ ...this.queryRef.variables, jobUuids });
         this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 0 : 3000 });
@@ -232,7 +245,9 @@ export class JobService extends BaseService implements OnDestroy {
           JobKind.FETCH_NEWS,
           JobKind.EXTRACT_NEWS,
           JobKind.CREATE_EPISODE,
+          JobKind.SELECT_UNUSED_NEWS,
           JobKind.UPDATE_EPISODE_AUDIO,
+          JobKind.PUBLISH_EPISODE_AUDIO,
         ],
         jobUuids: [],
         // after: ??,
