@@ -240,15 +240,17 @@ export class JobService extends BaseService implements OnDestroy {
       query: GET_USER_JOBS,
       variables: {
         statuses: [JobStatus.PENDING, JobStatus.RUNNING],
-        kinds: [
-          JobKind.SUMMARIZE_NEWS,
-          JobKind.FETCH_NEWS,
-          JobKind.EXTRACT_NEWS,
-          JobKind.CREATE_EPISODE,
-          JobKind.SELECT_UNUSED_NEWS,
-          JobKind.UPDATE_EPISODE_AUDIO,
-          JobKind.PUBLISH_EPISODE_AUDIO,
-        ],
+        // kinds: [
+        //   JobKind.SUMMARIZE_NEWS,
+        //   JobKind.FETCH_NEWS,
+        //   JobKind.EXTRACT_NEWS,
+        //   JobKind.CREATE_EPISODE,
+        //   JobKind.SELECT_UNUSED_NEWS,
+        //   JobKind.UPDATE_EPISODE_AUDIO,
+        //   JobKind.PUBLISH_EPISODE_AUDIO,
+        //   // If you want to track all jobs, comment out the kinds filter
+        //   JobKind.DATA...
+        // ],
         jobUuids: [],
         // after: ??,
         first: 15, // Most windows are 3 wide, so 5 tall
