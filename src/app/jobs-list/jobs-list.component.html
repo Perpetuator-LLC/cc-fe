@@ -55,8 +55,24 @@
 
                 <div class="timeline-message">
                   <div style="font-size: 10px; color: #666;">
-                    {{ job.error || job.result }}
+                    {{ getJobMessage(job) }}
                   </div>
+
+                  <!-- Links for podcast and episode -->
+                  @if (hasPodcastUuid(job) || hasEpisodeUuid(job)) {
+                    <div class="job-link">
+                      @if (hasPodcastUuid(job)) {
+                        <a [routerLink]="['/podcast', getPodcastUuid(job)]">{{ getPodcastName(job) }}</a>
+                      }
+                      @if (hasPodcastUuid(job) && hasEpisodeUuid(job)) {
+                        <span class="link-separator"> > </span>
+                      }
+                      @if (hasEpisodeUuid(job)) {
+                        <a [routerLink]="['/episode', getEpisodeUuid(job)]">{{ getEpisodeName(job) }}</a>
+                      }
+                    </div>
+                  }
+                  <!-- News UUIDs are hidden for now as requested -->
                 </div>
 
                 <div class="timeline-actions">

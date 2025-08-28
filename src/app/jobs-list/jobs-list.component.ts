@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   Job,
   JobKind,
@@ -17,10 +18,31 @@ import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
+import { RouterLink } from '@angular/router';
+import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { EpisodeService } from '../episode.service';
+
+interface JobResult {
+  message?: string;
+  podcast_uuid?: string;
+  episode_uuid?: string;
+  news_uuids?: string[];
+  [key: string]: unknown; // Allow for additional properties
+}
+
+interface EnrichedJob extends Job {
+  podcastName?: string;
+  episodeName?: string;
+}
+
+interface Episode {
+  uuid: string;
+  title?: string;
+}
 
 @Component({
   selector: 'app-jobs-list',
@@ -36,14 +58,15 @@ import { MessageComponent } from '../message/message.component';
     MessageComponent,
     DecimalPipe,
     NgClass,
+    RouterLink,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
 })
 export class JobsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  jobs: Job[] = [];
-  dataSource = new MatTableDataSource<Job>(this.jobs);
+  jobs: EnrichedJob[] = [];
+  dataSource = new MatTableDataSource<EnrichedJob>(this.jobs);
   displayedColumns: string[] = ['kind', 'message', 'cost', 'createdAt', 'updatedAt', 'status'];
   totalJobs = 0;
   pageSize = 10;
@@ -59,6 +82,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
+    private podcastsService: PodcastsService,
+    private episodeService: EpisodeService,
   ) {}
 
   ngOnInit(): void {
@@ -76,10 +101,21 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ jobs, pageInfo }) => {
-          this.jobs = jobs;
-          this.dataSource.data = this.jobs;
-          this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-          this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+          this.enrichJobsWithNames(jobs)
+            .then((enrichedJobs) => {
+              this.jobs = enrichedJobs;
+              this.dataSource.data = this.jobs;
+              this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+              this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+            })
+            .catch((error) => {
+              this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
+              // Still show jobs even if enrichment fails
+              this.jobs = jobs.map((job) => ({ ...job }));
+              this.dataSource.data = this.jobs;
+              this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+              this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+            });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
@@ -88,30 +124,114 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  sortChange(sortState: Sort) {
-    this.sortActive = sortState.active;
-    this.sortDirection = sortState.direction.toUpperCase();
-    this.cursors = [null]; // reset all known cursors
-    this.paginator.firstPage();
-    this.loadJobs();
-  }
+  // Enrich jobs with podcast and episode names using GraphQL queries
+  private async enrichJobsWithNames(jobs: Job[]): Promise<EnrichedJob[]> {
+    // Extract unique UUIDs from all jobs
+    const podcastUuids = new Set<string>();
+    const episodeUuids = new Set<string>();
 
-  onPageChange(event: PageEvent) {
-    const newPageIndex = event.pageIndex;
-    const newPageSize = event.pageSize;
+    jobs.forEach((job) => {
+      const result = this.parseJobResult(job);
+      if (result?.podcast_uuid) {
+        podcastUuids.add(result.podcast_uuid);
+      }
+      if (result?.episode_uuid) {
+        episodeUuids.add(result.episode_uuid);
+      }
+    });
 
-    // If pageSize changed, reset pagination entirely
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      this.cursors = [null]; // reset all known cursors
-      this.paginator.firstPage(); // back to pageIndex = 0
-      this.loadJobs(); // load first page
-      return;
+    // Create observables for fetching data
+    const queries = [];
+
+    if (podcastUuids.size > 0) {
+      queries.push(this.fetchPodcastNames(Array.from(podcastUuids)));
     }
 
-    // Otherwise, grab the cursor for the page they jumped to
-    const after = this.cursors[newPageIndex] ?? null;
-    this.loadJobs(after, newPageIndex);
+    if (episodeUuids.size > 0) {
+      queries.push(this.fetchEpisodeNames(Array.from(episodeUuids)));
+    }
+
+    // If no UUIDs to fetch, return jobs as-is
+    if (queries.length === 0) {
+      return jobs.map((job) => ({ ...job }));
+    }
+
+    try {
+      const results = await forkJoin(queries).toPromise();
+
+      // Create lookup maps
+      const podcastNameMap = new Map<string, string>();
+      const episodeNameMap = new Map<string, string>();
+
+      if (results) {
+        results.forEach((result: { podcasts?: PodcastsResult[]; episodes?: Episode[] }) => {
+          if (result.podcasts) {
+            result.podcasts.forEach((podcast: PodcastsResult) => {
+              podcastNameMap.set(podcast.uuid, podcast.name || 'Unnamed Podcast');
+            });
+          }
+          if (result.episodes) {
+            result.episodes.forEach((episode: Episode) => {
+              episodeNameMap.set(episode.uuid, episode.title || 'Untitled Episode');
+            });
+          }
+        });
+      }
+
+      // Enrich jobs with the fetched names
+      return jobs.map((job) => {
+        const enrichedJob: EnrichedJob = { ...job };
+        const result = this.parseJobResult(job);
+
+        if (result?.podcast_uuid && podcastNameMap.has(result.podcast_uuid)) {
+          enrichedJob.podcastName = podcastNameMap.get(result.podcast_uuid);
+        }
+
+        if (result?.episode_uuid && episodeNameMap.has(result.episode_uuid)) {
+          enrichedJob.episodeName = episodeNameMap.get(result.episode_uuid);
+        }
+
+        return enrichedJob;
+      });
+    } catch (error) {
+      console.warn('Failed to fetch podcast/episode names:', error);
+      return jobs.map((job) => ({ ...job }));
+    }
+  }
+
+  // Fetch multiple podcast names efficiently
+  private fetchPodcastNames(uuids: string[]) {
+    // Use the existing getPodcasts method with multiple queries or create a batch query
+    const queries = uuids.map((uuid) =>
+      this.podcastsService
+        .getPodcastById(uuid)
+        .pipe
+        // Handle individual errors gracefully
+        // catchError(() => of({ uuid, name: 'Podcast' } as PodcastsResult))
+        (),
+    );
+
+    return forkJoin(queries).pipe(
+      // Transform to the expected format
+      map((podcasts) => ({ podcasts })),
+    );
+  }
+
+  // Fetch multiple episode names efficiently
+  private fetchEpisodeNames(uuids: string[]) {
+    const queries = uuids.map((uuid) =>
+      this.episodeService
+        .getEpisodeById(uuid)
+        .pipe
+        // Handle individual errors gracefully
+        // catchError(() => of({ uuid, title: 'Episode' }))
+        (),
+    );
+
+    return forkJoin(queries).pipe(
+      // Transform to the expected format
+      map((episodes) => ({ episodes })),
+    );
   }
 
   deleteJob(uuid: string) {
@@ -236,19 +356,71 @@ export class JobsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // retryJob(uuid: string) {
-  //   this.subscriptions.add(
-  //     this.jobService.retryJobs([uuid]).subscribe({
-  //       next: () => {
-  //         this.messageService.success('Job retry initiated.');
-  //         this.loadJobs(); // Reload to get updated job list
-  //       },
-  //       error: (err: { message: string }) => {
-  //         this.messageService.error(`Failed to retry job: ${err.message}`);
-  //       },
-  //     }),
-  //   );
-  // }
+  // Parse job result JSON safely
+  parseJobResult(job: Job): JobResult | null {
+    if (!job.result) return null;
+    try {
+      return JSON.parse(job.result);
+    } catch {
+      return null;
+    }
+  }
+
+  // Get formatted message for job display
+  getJobMessage(job: Job): string {
+    // Show error if failed
+    if (job.error) {
+      return job.error;
+    }
+
+    const parsedResult = this.parseJobResult(job);
+    if (parsedResult?.message) {
+      return parsedResult.message;
+    }
+
+    // Fallback to raw result
+    return job.result || 'No message available';
+  }
+
+  // Check if job result has podcast UUID
+  hasPodcastUuid(job: Job): boolean {
+    const parsedResult = this.parseJobResult(job);
+    return parsedResult?.podcast_uuid != null;
+  }
+
+  // Check if job result has episode UUID
+  hasEpisodeUuid(job: Job): boolean {
+    const parsedResult = this.parseJobResult(job);
+    return parsedResult?.episode_uuid != null;
+  }
+
+  // Check if job result has news UUIDs (hidden for now)
+  hasNewsUuids(job: Job): boolean {
+    const parsedResult = this.parseJobResult(job);
+    return parsedResult?.news_uuids != null && Array.isArray(parsedResult.news_uuids);
+  }
+
+  // Get podcast UUID from job result
+  getPodcastUuid(job: Job): string | null {
+    const parsedResult = this.parseJobResult(job);
+    return parsedResult?.podcast_uuid || null;
+  }
+
+  // Get episode UUID from job result
+  getEpisodeUuid(job: Job): string | null {
+    const parsedResult = this.parseJobResult(job);
+    return parsedResult?.episode_uuid || null;
+  }
+
+  // Get podcast name from enriched job
+  getPodcastName(job: EnrichedJob): string {
+    return job.podcastName || 'Podcast';
+  }
+
+  // Get episode name from enriched job
+  getEpisodeName(job: EnrichedJob): string {
+    return job.episodeName || 'Episode';
+  }
 
   protected readonly kindToString = kindToString;
   protected readonly statusToString = statusToString;
