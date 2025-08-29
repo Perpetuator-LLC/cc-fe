@@ -78,69 +78,76 @@
 //  }
 //}
 
-// https://github.com/angular/components/blob/main/src/material/core/theming/prebuilt/cyan-orange.scss
-$dark-theme: mat.define-theme(
-  (
-    color: (
-      theme-type: dark,
-      primary: mat.$orange-palette,
-      tertiary: mat.$violet-palette,
-      //use-system-variables: true,
-      //warn: mat.$yellow-palette,
-      //accent: mat.$m2-amber-palette,
-      //secondary: mat.$blue-palette,
-      //error: mat.$red-palette,
-      //success: mat.$green-palette,
-      //warning: mat.$yellow-palette,
-       //background: mat.$m2-gray-palette,
-    ),
-    typography: (
-      brand-family: 'DM Sans',
-      plain-family: 'DM Sans',
-      bold-weight: 900,
-      medium-weight: 700,
-      regular-weight: 500,
-    ),
-    density: (
-      scale: 0,
-    ),
-  )
-);
+// Mixin to extract theme colors and create CSS custom properties
+@mixin theme-colors($is-dark: false) {
+  // Declare variables in mixin scope so they are available after conditionals
+  $primary-color: null;
+  $primary-light: null;
+  $primary-dark: null;
+  $tertiary-color: null;
 
-// https://github.com/angular/components/blob/main/src/material/core/theming/prebuilt/azure-blue.scss
-$light-theme: mat.define-theme(
-  (
-    color: (
-      theme-type: light,
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-      //use-system-variables: true,
-      //warn: mat.$yellow-palette,
-      //accent: mat.$m2-amber-palette,
-      //secondary: mat.$orange-palette,
-      //error: mat.$red-palette,
-      //success: mat.$green-palette,
-      //warning: mat.$yellow-palette,
-       //background: mat.$m2-gray-palette
-    ),
-    typography: (
-      brand-family: 'DM Sans',
-      plain-family: 'DM Sans',
-      bold-weight: 900,
-      medium-weight: 700,
-      regular-weight: 500,
-    ),
-    density: (
-      scale: 0,
-    ),
-  )
-);
+  @if $is-dark {
+    // Dark theme colors - using direct Material Design color values
+    $primary-color: #ff9800; // Orange 500
+    $primary-light: #ffb74d; // Orange 300
+    $primary-dark: #f57c00; // Orange 700
+    $tertiary-color: #9c27b0; // Violet 500
+  }
+
+  @else {
+    // Light theme colors - using direct Material Design color values
+    $primary-color: #2196f3; // Azure/Blue 500
+    $primary-light: #64b5f6; // Blue 300
+    $primary-dark: #1976d2; // Blue 700
+    $tertiary-color: #2196f3; // Blue 500
+  }
+
+  // Create CSS custom properties
+  --md-sys-color-primary: #{$primary-color};
+  --md-sys-color-primary-light: #{$primary-light};
+  --md-sys-color-primary-dark: #{$primary-dark};
+  --md-sys-color-tertiary: #{$tertiary-color};
+  --md-sys-color-secondary: #{$primary-color};
+  --md-sys-color-success: #4caf50;
+  --md-sys-color-warning: #ffeb3b;
+  --md-sys-color-error: #df4646;
+}
+
+// Dark theme definition
+$dark-theme: mat.define-theme((color: (theme-type: dark,
+        primary: mat.$orange-palette,
+        tertiary: mat.$violet-palette,
+      ),
+      typography: (brand-family: 'DM Sans',
+        plain-family: 'DM Sans',
+        bold-weight: 900,
+        medium-weight: 700,
+        regular-weight: 500,
+      ),
+      density: (scale: 0,
+      ),
+    ));
+
+// Light theme definition
+$light-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (brand-family: 'DM Sans',
+        plain-family: 'DM Sans',
+        bold-weight: 900,
+        medium-weight: 700,
+        regular-weight: 500,
+      ),
+      density: (scale: 0,
+      ),
+    ));
 
 //@include mat.all-component-typographies($typography);
 
 // ignore-duplication-warnings: true is used to suppress warnings about duplicate styles
 // Supposedly we can use: @include mat.all-component-colors($dark-theme); but it doesn't work
-mat.$theme-ignore-duplication-warnings: true;
+$theme-ignore-duplication-warnings: true;
 
 //@mixin custom-card-theme($theme) {
 //  $color-config: map.get($theme, color);
@@ -163,33 +170,60 @@ mat.$theme-ignore-duplication-warnings: true;
 //color: red;
 //color: mat.get-color-from-palette($warn);
 
-// Keep your existing theme applications
+// Apply themes based on body classes
 body.dark {
   @include mat.all-component-themes($dark-theme);
+  @include theme-colors(true);
 
-  //@include mat.all-component-densities($dark-theme);
-  //@include mat.all-component-bases($dark-theme);
+  // Dark theme specific custom properties
+  --toolbar-container-background-color: #272b32;
+  --secondary-color: #272b32;
+  --secondary-dark: #373c43;
+  --secondary-light: #373c43;
+  --theme-color: #ffffff;
+  --border-color: #ffffff1a;
+  --secondary-400: #474d55;
+  --secondary-450: #474d55;
+  --secondary-500: #424951;
+  --description-color: #b5b5b5;
+  --theme-yellow: #f5c400;
+  --theme-white: #ffffff;
+  --theme-transparent: rgba(0, 0, 0, 0.4);
+  --md-sys-color-background: #1a1a1a;
+  --primary: #f14a00;
+  --purple: #8f8fff;
+
   .mat-mdc-card {
     background-color: rgba(111, 111, 111, 0.1);
     box-shadow: none;
-    //background-color: var(--mdc-outlined-card-outline-color);
   }
-
-  //font-family: "Lexend", sans-serif;
-  //font-optical-sizing: auto;
-  //font-weight: 400;
-  //font-style: normal;
 }
 
 body.light {
   @include mat.all-component-themes($light-theme);
+  @include theme-colors(false);
 
-  //@include mat.all-component-densities($light-theme);
-  //@include mat.all-component-bases($light-theme);
+  // Light theme specific custom properties
+  --toolbar-container-background-color: #ffffff;
+  --secondary-color: #f5f5f5;
+  --secondary-dark: #f5f5f5;
+  --secondary-light: #ffffff;
+  --theme-color: #262627;
+  --border-color: #e7e7e9;
+  --secondary-400: #f5f5f5;
+  --secondary-450: #ffffff;
+  --secondary-500: #f5f5f5;
+  --description-color: #767676;
+  --theme-yellow: #2f55eb;
+  --theme-white: #f14a00;
+  --theme-transparent: rgb(255 255 255 / 42%);
+  --md-sys-color-background: #f5f5f5;
+  --primary: #f14a00;
+  --purple: #8f8fff;
+
   .mat-mdc-card {
     background-color: rgba(111, 111, 111, 0.1);
     box-shadow: none;
-    //background-color: var(--mdc-outlined-card-outline-color);
   }
 }
 
@@ -226,19 +260,11 @@ body {
   //font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+// Default theme (light) for when no body class is set
 :root {
-  //.mat-toolbar, .mat-toolbar h1, .mat-toolbar h2, .mat-toolbar h3, .mat-toolbar h4, .mat-toolbar h5, .mat-toolbar h6 {
-  //  font-family: var(--mat-toolbar-title-text-font, var(--mat-app-title-large-font));
-  //--mat-toolbar-title-text-font: 'Lexend', sans-serif;
-  //--md-sys-typography-font-family: 'Lexend', sans-serif;
-  //--md-toolbar-title-text-font: 'Lexend', sans-serif;
-  --md-sys-color-primary: #2196f3;
-  --md-sys-color-secondary: #ff0000;
-  --md-sys-color-tertiary: #9e9e9e;
-  --md-sys-color-success: #4caf50;
-  --md-sys-color-warning: #ffeb3b;
-  --md-sys-color-error: #df4646;
-  --md-sys-color-background: #f5f5f5;
+  @include theme-colors(false);
+
+  // Default light theme properties
   --toolbar-container-background-color: #ffffff;
   --secondary-color: #f5f5f5;
   --secondary-dark: #f5f5f5;
@@ -254,22 +280,7 @@ body {
   --description-color: #767676;
   --theme-transparent: rgb(255 255 255 / 42%);
   --purple: #8f8fff;
-  //--md-sys-color-primary-hover: #1976d2;
-  //--md-sys-color-primary-visited: #1976d2;
-  //--md-sys-color-secondary-hover: #f50057;
-  //--md-sys-color-secondary-visited: #f50057;
-  //--md-sys-color-success-hover: #388e3c;
-  //--md-sys-color-success-visited: #388e3c;
-  //--md-sys-color-warning-hover: #fbc02d;
-  //--md-sys-color-warning-visited: #fbc02d;
-  //--md-sys-color-error-hover: #b71c1c;
-  //--md-sys-color-error-visited: #b71c1c;
-  //--md-sys-color-text-primary: rgba(0, 0, 0, 0.87);
-  //--md-sys-color-text-secondary: rgba(0, 0, 0, 0.54);
-  //--md-sys-color-text-disabled: rgba(0, 0, 0, 0.38);
-  //--md-sys-color-text-hint: rgba(0, 0, 0, 0.38);
-  //--md-sys-color-text-icon: rgba(0, 0, 0, 0.38);
-  //--md-sys-color-divider: rgba(0, 0, 0, 0.12);
+  --md-sys-color-background: #f5f5f5;
 }
 
 .dark {
@@ -333,17 +344,19 @@ body {
     display: none;
   }
 }
- .mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
-   border-color: var(--border-color) !important;
- }
 
- .mat-mdc-chip-action-label {
-   color: var(--theme-color) !important;
- }
+.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
+  border-color: var(--border-color) !important;
+}
 
- .mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
-   color: var(--theme-color) !important;
- }
+.mat-mdc-chip-action-label {
+  color: var(--theme-color) !important;
+}
+
+.mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
+  color: var(--theme-color) !important;
+}
+
 .search-filter {
   .mat-mdc-form-field-bottom-align {
     display: none;

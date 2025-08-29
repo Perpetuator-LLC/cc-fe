@@ -7,7 +7,8 @@ import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import {
@@ -31,7 +32,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-podcast-dialog.component';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
@@ -94,6 +95,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   isGridView = false; // Default to list view
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
+  currentCursor: string | null = null;
   allColumns: ColumnOption[] = [
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
@@ -102,6 +104,8 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'tgResponse', label: 'Response', selected: true },
     { id: 'actions', label: 'Actions', selected: true },
   ];
+  searchString: string | null = null;
+  searchTerm$ = new Subject<string>();
 
   constructor(
     private router: Router,
@@ -109,7 +113,12 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private toolbarService: ToolbarService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
-  ) {}
+  ) {
+    this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
+      this.searchString = term;
+      this.loadPodcasts(10, null, term || undefined);
+    });
+  }
 
   ngOnInit(): void {
     this.messageService.clearMessages();
@@ -124,10 +133,10 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadPodcasts(): void {
+  loadPodcasts(first = 10, after: string | null = null, name?: string, slug?: string): void {
     this.loading = true;
     this.subscriptions.add(
-      this.podcastsService.getPodcasts().subscribe({
+      this.podcastsService.getPodcasts(first, after, name, slug).subscribe({
         next: (response) => {
           this.messageService.clearMessages();
           this.podcasts = response.podcasts;
@@ -217,5 +226,22 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   _countCategories(podcast: PodcastsResult) {
     return podcast?.categories ? Object.keys(podcast?.categories)?.length : 0;
+  }
+
+  onSearchChange(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm$.next(value);
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageSize = event.pageSize;
+    const searchString = this.searchString ? this.searchString : '';
+
+    if (event.pageIndex === 0) {
+      this.loadPodcasts(this.pageSize, null, searchString);
+    } else {
+      // use cursor-based pagination
+      this.loadPodcasts(this.pageSize, this.currentCursor, searchString);
+    }
   }
 }
