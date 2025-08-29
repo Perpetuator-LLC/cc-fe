@@ -27,55 +27,8 @@ import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
     MatError,
     MatDialogModule,
   ],
-  template: `
-    <h2 mat-dialog-title>Create New Team</h2>
-    <mat-dialog-content>
-      <app-message></app-message>
-      <form [formGroup]="teamForm" (ngSubmit)="createTeam()">
-        <mat-form-field>
-          <mat-label>Team Name</mat-label>
-          <input matInput formControlName="name" required />
-          @if (nameError) {
-            <mat-error>{{ nameError }}</mat-error>
-          }
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
-      <button class="saveTeamBtn" mat-flat-button color="primary" (click)="createTeam()" [disabled]="!teamForm.valid">
-        Save Team
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [
-    `
-      mat-form-field {
-        width: 100%;
-        margin-bottom: 1rem;
-      }
-      mat-dialog-content {
-        min-width: 400px;
-      }
-      .cancel-btn {
-        background: var(--secondary-light);
-        border: 1px solid var(--border-color);
-        color: var(--theme-color);
-        border-radius: 10px;
-        width: 88px;
-        height: 40px;
-      }
-      .saveTeamBtn {
-        background: #ffffff;
-        border-radius: 10px;
-        color: black;
-        width: 225px;
-        font-size: 14px;
-        font-weight: 600;
-        height: 40px;
-      }
-    `,
-  ],
+  templateUrl: './create-team-dialog.component.html',
+  styleUrls: ['./create-team-dialog.component.scss'],
 })
 export class CreateTeamDialogComponent implements OnDestroy {
   teamForm: FormGroup;

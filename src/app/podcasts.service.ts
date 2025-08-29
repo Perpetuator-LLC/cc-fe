@@ -475,10 +475,10 @@ export class PodcastsService extends BaseService {
     }).pipe(map((result) => result.podcasts));
   }
 
-  getPodcasts(first = 10, after: string | null = null) {
+  getPodcasts(first = 10, after: string | null = null, name?: string, slug?: string) {
     const GQL = gql`
-      query GetPodcasts($first: Int, $after: String) {
-        podcasts(first: $first, after: $after) {
+      query GetPodcasts($first: Int, $after: String, $name: String, $slug: String) {
+        podcasts(first: $first, after: $after, name: $name, slug: $slug) {
           edges {
             cursor
             node {
@@ -523,7 +523,12 @@ export class PodcastsService extends BaseService {
 
     return this.query<Response>({
       query: GQL,
-      variables: { first, after },
+      variables: {
+        first,
+        after,
+        name: name || null,
+        slug: slug || null,
+      },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ podcasts }) => ({

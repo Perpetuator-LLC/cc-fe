@@ -19,61 +19,8 @@ interface CategoryOption {
   selector: 'app-create-podcast-categories',
   standalone: true,
   imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatChipsModule, MatIconModule],
-  template: `
-    <div class="categories-container">
-      <mat-form-field appearance="fill" class="category-select">
-        <mat-label>Select Categories</mat-label>
-        <mat-select (selectionChange)="onCategorySelectionChange($event.value)" [value]="getSelectedValues()" multiple>
-          @for (option of categoryOptions; track option.value) {
-            @if (option.isParent) {
-              <mat-option [value]="option.value" class="parent-option">
-                <strong>{{ option.label }}</strong>
-              </mat-option>
-            } @else {
-              <mat-option [value]="option.value" class="subcategory-option">
-                &nbsp;&nbsp;&nbsp;&nbsp;{{ option.label }}
-              </mat-option>
-            }
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <div class="selected-chips">
-        @for (category of getAllSelectedCategories(); track category) {
-          <mat-chip [removable]="true" (removed)="removeCategory(category)">
-            {{ category }}
-            <button matChipRemove>
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-        }
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .categories-container {
-        margin-top: 1rem;
-      }
-      .category-select {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-      .selected-chips {
-        margin-bottom: 1rem;
-      }
-      .selected-chips mat-chip {
-        margin: 0.25rem;
-      }
-      .parent-option {
-        font-weight: bold;
-        background-color: var(--secondary-light);
-      }
-      .subcategory-option {
-        font-weight: normal;
-      }
-    `,
-  ],
+  templateUrl: './create-podcast-categories.component.html',
+  styleUrl: './create-podcast-categories.component.scss',
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
