@@ -47,6 +47,27 @@ type ApiQuery {
     orderBy: String
   ): DiscountedCashFlowAnalysisTypeConnection
 
+  """List of user's dynamic schedules [Relay]"""
+  dynamicSchedules(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    name: String
+    enabled: Boolean
+    jobKind: String
+    createdAt: DateTime
+    updatedAt: DateTime
+    scheduleUuid: UUID
+    nameContains: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+
+    """Ordering"""
+    orderBy: String
+  ): DynamicScheduleTypeConnection
+
   """Get site-wide statistics and metrics"""
   siteStatistics: SiteStatisticsType
   voices(models: [VoiceModel], offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, model: String, externalId: String): VoiceTypeConnection
@@ -707,6 +728,60 @@ type ListingStatusType {
   updateCount: Int!
 }
 
+type DynamicScheduleTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [DynamicScheduleTypeEdge]!
+}
+
+"""A Relay edge containing a `DynamicScheduleType` and its cursor."""
+type DynamicScheduleTypeEdge {
+  """The item at the end of the edge"""
+  node: DynamicScheduleType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""GraphQL type for DynamicSchedule model."""
+type DynamicScheduleType implements Node {
+  name: String!
+  jobKind: JobKind
+
+  """Interval in seconds"""
+  interval: Int!
+  args: GenericScalar
+  kwargs: GenericScalar
+  enabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum JobKind {
+  REFRESH_STOCK_LISTINGS
+  UPDATE_EPISODE_AUDIO
+  PUBLISH_EPISODE_AUDIO
+  FETCH_NEWS
+  EXTRACT_NEWS
+  SUMMARIZE_NEWS
+  CREATE_EPISODE
+  SELECT_UNUSED_NEWS
+  PUBLISH_LATEST_EPISODE_CHAIN
+  FETCH_COMPANY_INFO
+  FETCH_STOCK_PRICES
+  FETCH_BALANCE_SHEET
+  FETCH_INCOME_STATEMENT
+  FETCH_CASH_FLOW
+  FETCH_EARNINGS
+}
+
 """Site-wide statistics without sensitive data"""
 type SiteStatisticsType {
   """Total number of registered users"""
@@ -964,24 +1039,6 @@ enum JobStatus {
   FAILED
 }
 
-"""An enumeration."""
-enum JobKind {
-  REFRESH_STOCK_LISTINGS
-  UPDATE_EPISODE_AUDIO
-  PUBLISH_EPISODE_AUDIO
-  FETCH_NEWS
-  EXTRACT_NEWS
-  SUMMARIZE_NEWS
-  CREATE_EPISODE
-  SELECT_UNUSED_NEWS
-  FETCH_COMPANY_INFO
-  FETCH_STOCK_PRICES
-  FETCH_BALANCE_SHEET
-  FETCH_INCOME_STATEMENT
-  FETCH_CASH_FLOW
-  FETCH_EARNINGS
-}
-
 type PodcastTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -1110,6 +1167,57 @@ type ApiMutation {
 
   """Generate a DCF analysis report for a stock symbol"""
   createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
+
+  """Mutation to create a new dynamic schedule."""
+  createDynamicSchedule(
+    """Arguments to pass to the job"""
+    args: GenericScalar
+
+    """Whether the schedule is enabled"""
+    enabled: Boolean = true
+
+    """Interval in seconds between executions"""
+    interval: Int!
+
+    """Type of job to schedule"""
+    jobKind: JobKind!
+
+    """Keyword arguments to pass to the job"""
+    kwargs: GenericScalar
+
+    """Unique name for the schedule"""
+    name: String!
+  ): CreateDynamicSchedule
+
+  """Mutation to update an existing dynamic schedule."""
+  updateDynamicSchedule(
+    """New arguments to pass to the job"""
+    args: GenericScalar
+
+    """Whether the schedule is enabled"""
+    enabled: Boolean
+
+    """New interval in seconds"""
+    interval: Int
+
+    """New job type"""
+    jobKind: JobKind
+
+    """New keyword arguments to pass to the job"""
+    kwargs: GenericScalar
+
+    """New name for the schedule"""
+    name: String
+
+    """UUID of the schedule to update"""
+    scheduleUuid: UUID!
+  ): UpdateDynamicSchedule
+
+  """Mutation to delete a dynamic schedule."""
+  deleteDynamicSchedule(
+    """UUID of the schedule to delete"""
+    scheduleUuid: UUID!
+  ): DeleteDynamicSchedule
   createVoice(displayName: String, enabled: Boolean = true, externalId: String!, externalUserId: String, model: VoiceModel!, private: Boolean = true): CreateVoice
   updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
   deleteVoice(voiceUuid: UUID!): DeleteVoice
@@ -1320,6 +1428,26 @@ type CreateDiscountedCashFlowAnalysis {
   success: Boolean
   message: String
   report: DiscountedCashFlowAnalysisType
+}
+
+"""Mutation to create a new dynamic schedule."""
+type CreateDynamicSchedule {
+  success: Boolean
+  message: String
+  schedule: DynamicScheduleType
+}
+
+"""Mutation to update an existing dynamic schedule."""
+type UpdateDynamicSchedule {
+  success: Boolean
+  message: String
+  schedule: DynamicScheduleType
+}
+
+"""Mutation to delete a dynamic schedule."""
+type DeleteDynamicSchedule {
+  success: Boolean
+  message: String
 }
 
 type CreateVoice {
