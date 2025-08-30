@@ -16,7 +16,7 @@ import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -25,6 +25,7 @@ import { MessageComponent } from '../message/message.component';
 import { RouterLink } from '@angular/router';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface JobResult {
   message?: string;
@@ -55,10 +56,12 @@ interface Episode {
     DatePipe,
     MatIcon,
     MatIconButton,
+    MatButton,
     MessageComponent,
     DecimalPipe,
     NgClass,
     RouterLink,
+    MatProgressSpinner,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -73,6 +76,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
   cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
   sortActive = 'createdAt';
+  hasNextPage = false;
+  currentCursor: string | null = null;
+  isLoadingMore = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -97,28 +103,48 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadJobs(after: string | null = null, pageIndex = 0) {
+  loadJobs(after: string | null = null, pageIndex = 0, append = false) {
+    if (append) {
+      this.isLoadingMore = true;
+    }
+
     this.subscriptions.add(
       this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ jobs, pageInfo }) => {
           this.enrichJobsWithNames(jobs)
             .then((enrichedJobs) => {
-              this.jobs = enrichedJobs;
+              if (append) {
+                this.jobs = [...this.jobs, ...enrichedJobs];
+              } else {
+                this.jobs = enrichedJobs;
+              }
               this.dataSource.data = this.jobs;
+              this.hasNextPage = pageInfo.hasNextPage || false;
+              this.currentCursor = pageInfo.endCursor ?? null;
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+              this.isLoadingMore = false;
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
               // Still show jobs even if enrichment fails
-              this.jobs = jobs.map((job) => ({ ...job }));
+              const jobsToAdd = jobs.map((job) => ({ ...job }));
+              if (append) {
+                this.jobs = [...this.jobs, ...jobsToAdd];
+              } else {
+                this.jobs = jobsToAdd;
+              }
               this.dataSource.data = this.jobs;
+              this.hasNextPage = pageInfo.hasNextPage || false;
+              this.currentCursor = pageInfo.endCursor ?? null;
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+              this.isLoadingMore = false;
             });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
+          this.isLoadingMore = false;
         },
       }),
     );
@@ -420,6 +446,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Get episode name from enriched job
   getEpisodeName(job: EnrichedJob): string {
     return job.episodeName || 'Episode';
+  }
+
+  loadMoreJobs(): void {
+    if (this.hasNextPage && this.currentCursor && !this.isLoadingMore) {
+      this.loadJobs(this.currentCursor, 0, true);
+    }
   }
 
   protected readonly kindToString = kindToString;
