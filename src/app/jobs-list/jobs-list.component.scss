@@ -231,4 +231,28 @@
   @media screen and (max-width: 576px) {
     margin-bottom: 10px;
   }
+
+  .job-link {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--description-color);
+    display: flex;
+    align-items: center;
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .link-separator {
+      margin: 0 6px;
+      color: var(--description-color);
+      font-weight: 400;
+    }
+  }
 }

@@ -11,16 +11,16 @@
           height="24" matTooltip="Capital Copilot" />
         <div class="route-title">Home</div>
       </a>
-      <mat-nav-list class="fill-side" [ngClass]="{ minimized: this.minimized }">
+      <mat-nav-list [ngClass]="{ minimized: this.minimized }">
         <div class="keep-up">
           @for (item of rootRoutes; track item.path) {
           @if (shouldShow(item)) {
           <a class="mat-link" mat-list-item [routerLink]="item.path" routerLinkActive="active-link"
-            (click)="gettitlePath((item.title ?? '').toString())" #link="routerLinkActive" [activated]="link.isActive"
+            (click)="getTitlePath((item.title ?? '').toString())" #link="routerLinkActive" [activated]="link.isActive"
             (click)="handleClick($event, item.path)">
             <div class="route-link">
               @if (item.data && item.data['icon']) {
-              <mat-icon matTooltip="{{ item.title }}">{{ item.data['icon'] }}</mat-icon>
+              <mat-icon>{{ item.data['icon'] }}</mat-icon>
               }
               @if (!this.minimized) {
               <div class="route-title">
@@ -35,7 +35,7 @@
         <div class="push-down">
           <button class="mat-link link-button" mat-list-item tabindex="0" (click)="openPrivacyModal($event)">
             <div class="route-link">
-              <mat-icon matTooltip="Privacy Policy">policy</mat-icon>
+              <mat-icon>policy</mat-icon>
               @if (!this.minimized) {
               <div class="route-title">Privacy</div>
               }
@@ -44,7 +44,7 @@
           <button class="mat-link link-button" mat-list-item type="button" tabindex="0"
             (click)="openTermsModal($event)">
             <div class="route-link">
-              <mat-icon matTooltip="Terms and Conditions">gavel</mat-icon>
+              <mat-icon>gavel</mat-icon>
               @if (!this.minimized) {
               <div class="route-title">Terms</div>
               }
@@ -53,7 +53,7 @@
           <mat-list-item class="mat-link log-out-btn" tabindex="0" (click)="logout()" (keydown.enter)="logout()"
             (keydown.space)="logout()">
             <div class="route-link">
-              <mat-icon aria-label="Logout" matTooltip="Logout">logout</mat-icon>
+              <mat-icon aria-label="Logout">logout</mat-icon>
               @if (!this.minimized) {
               <div class="route-title">Logout</div>
               }

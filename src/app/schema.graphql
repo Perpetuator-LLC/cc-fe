@@ -968,10 +968,12 @@ enum JobStatus {
 enum JobKind {
   REFRESH_STOCK_LISTINGS
   UPDATE_EPISODE_AUDIO
+  PUBLISH_EPISODE_AUDIO
   FETCH_NEWS
   EXTRACT_NEWS
   SUMMARIZE_NEWS
   CREATE_EPISODE
+  SELECT_UNUSED_NEWS
   FETCH_COMPANY_INFO
   FETCH_STOCK_PRICES
   FETCH_BALANCE_SHEET
@@ -1168,6 +1170,21 @@ type ApiMutation {
 
   """Mutation to create an episode audio chain."""
   createEpisodeAudioChain(newsUuids: [UUID]!, podcastUuid: UUID!): CreateEpisodeAudioChain
+
+  """
+  Mutation to create a full episode chain that fetches news, selects unused news,
+  extracts, summarizes, creates episode, and generates audio.
+  """
+  createLatestEpisodeChain(podcastUuid: UUID!): CreateLatestEpisodeChain
+
+  """Mutation to create a full episode chain without audio generation."""
+  createLatestEpisodeChainNoAudio(podcastUuid: UUID!): CreateLatestEpisodeChainNoAudio
+
+  """
+  Mutation to create a full episode chain that fetches news, selects unused news,
+  extracts, summarizes, creates episode, generates audio, and publishes to Telegram.
+  """
+  publishLatestEpisodeChain(podcastUuid: UUID!): PublishLatestEpisodeChain
 
   """Mutation to update an episode."""
   updateEpisode(content: String, description: String, episodeUuid: UUID!, isLive: Boolean, title: String): UpdateEpisode
@@ -1434,6 +1451,33 @@ type CreateEpisodeChain {
 
 """Mutation to create an episode audio chain."""
 type CreateEpisodeAudioChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""
+Mutation to create a full episode chain that fetches news, selects unused news,
+extracts, summarizes, creates episode, and generates audio.
+"""
+type CreateLatestEpisodeChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""Mutation to create a full episode chain without audio generation."""
+type CreateLatestEpisodeChainNoAudio {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""
+Mutation to create a full episode chain that fetches news, selects unused news,
+extracts, summarizes, creates episode, generates audio, and publishes to Telegram.
+"""
+type PublishLatestEpisodeChain {
   success: Boolean
   message: String
   jobs: [JobType]
