@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -14,7 +14,7 @@ import { CodeService, Code } from './code.service';
 import { CreditService } from './credit.service';
 import { MessageService } from './message.service';
 import { MatCardModule } from '@angular/material/card';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
@@ -33,20 +33,18 @@ import { MatIcon } from '@angular/material/icon';
     MatTableModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatPaginator,
+    MatPaginatorModule,
     MatButtonToggleGroup,
     MatButtonToggle,
     MatIcon,
-    MatIcon,
-    MatIcon,
   ],
   template: `
-    <mat-card class="codes">
+    <mat-card class="codes" [ngClass]="{ 'admin-view': permissions.includes('api.add_bonuscode') }">
       <mat-card-header>
         <div>
           <mat-card-title>Redeem Gift Code</mat-card-title>
           <p class="description">
-            Have a gift code? Enter it below and enjoy your exclusive benefits — it’s our way of saying thank you!
+            Have a gift code? Enter it below and enjoy your exclusive benefits - it's our way of saying thank you!
           </p>
         </div>
       </mat-card-header>
@@ -55,39 +53,49 @@ import { MatIcon } from '@angular/material/icon';
           <mat-label>Redeem Code</mat-label>
           <input matInput [(ngModel)]="code" (ngModelChange)="codeError = false" placeholder="Enter code" />
         </mat-form-field>
-        <div
-          class="error-message"
-          *ngIf="codeError"
-          style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
-        >
-          Please enter a code before redeeming.
-        </div>
+        @if (codeError) {
+          <div
+            class="error-message"
+            style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
+          >
+            Please enter a code before redeeming.
+          </div>
+        }
         <div class="btn-container">
           <button mat-raised-button class="cancel-btn" color="primary" (click)="onCancel()">Cancel</button>
           <button mat-raised-button class="redeem-btn" color="primary" (click)="redeemCode()">
-            <mat-progress-spinner diameter="20" *ngIf="redeeming" mode="indeterminate"></mat-progress-spinner
-            ><span *ngIf="!redeeming">Redeem</span>
+            @if (redeeming) {
+              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+            }
+            @if (!redeeming) {
+              <span>Redeem</span>
+            }
           </button>
         </div>
 
-        <ng-container *ngIf="permissions?.includes('api.add_bonuscode')">
-          <div>
+        @if (permissions.includes('api.add_bonuscode')) {
+          <div class="admin-section">
+            <h3 class="admin-title">Admin: Bonus Code Management</h3>
             <form [formGroup]="createCodeForm" (ngSubmit)="createCode()">
-              <mat-form-field appearance="fill">
-                <mat-label>Bonus Code</mat-label>
-                <input matInput formControlName="code" required />
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>Credit Amount</mat-label>
-                <input matInput formControlName="creditAmount" type="number" required />
-              </mat-form-field>
+              <div class="form-row">
+                <mat-form-field appearance="fill">
+                  <mat-label>Bonus Code</mat-label>
+                  <input matInput formControlName="code" required />
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Credit Amount</mat-label>
+                  <input matInput formControlName="creditAmount" type="number" required />
+                </mat-form-field>
+              </div>
               <button mat-raised-button color="primary" type="submit">Create Bonus Code</button>
             </form>
 
-            <ng-container *ngIf="loadingCodes">
-              <mat-spinner></mat-spinner>
-            </ng-container>
-            <ng-container *ngIf="!loadingCodes && codes.length > 0">
+            @if (loadingCodes) {
+              <div class="loading-container">
+                <mat-spinner></mat-spinner>
+              </div>
+            }
+            @if (!loadingCodes && codes.length > 0) {
               <div class="filter-controls">
                 <mat-button-toggle-group [value]="activeCodesFilter">
                   <mat-button-toggle [value]="true" (click)="toggleActiveFilter(true)">
@@ -102,55 +110,58 @@ import { MatIcon } from '@angular/material/icon';
                 </mat-button-toggle-group>
               </div>
 
-              <table mat-table [dataSource]="codes">
-                <ng-container matColumnDef="code">
-                  <th mat-header-cell *matHeaderCellDef>Code</th>
-                  <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
-                </ng-container>
+              <div class="table-container">
+                <table mat-table [dataSource]="dataSource" class="codes-table">
+                  <ng-container matColumnDef="code">
+                    <th mat-header-cell *matHeaderCellDef>Code</th>
+                    <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
+                  </ng-container>
 
-                <ng-container matColumnDef="creditAmount">
-                  <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
-                  <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
-                </ng-container>
+                  <ng-container matColumnDef="creditAmount">
+                    <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
+                    <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
+                  </ng-container>
 
-                <ng-container matColumnDef="creator">
-                  <th mat-header-cell *matHeaderCellDef>Creator</th>
-                  <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
-                </ng-container>
+                  <ng-container matColumnDef="creator">
+                    <th mat-header-cell *matHeaderCellDef>Creator</th>
+                    <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
+                  </ng-container>
 
-                <ng-container matColumnDef="consumer">
-                  <th mat-header-cell *matHeaderCellDef>Consumer</th>
-                  <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
-                </ng-container>
+                  <ng-container matColumnDef="consumer">
+                    <th mat-header-cell *matHeaderCellDef>Consumer</th>
+                    <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
+                  </ng-container>
 
-                <ng-container matColumnDef="consumedAt">
-                  <th mat-header-cell *matHeaderCellDef>Consumed At</th>
-                  <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
-                </ng-container>
+                  <ng-container matColumnDef="consumedAt">
+                    <th mat-header-cell *matHeaderCellDef>Consumed At</th>
+                    <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
+                  </ng-container>
 
-                <tr
-                  mat-header-row
-                  *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
-                ></tr>
-                <tr
-                  mat-row
-                  *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
-                ></tr>
-              </table>
-              <mat-paginator
-                [length]="totalCodes"
-                [pageSize]="pageSize"
-                [pageSizeOptions]="[5, 10, 20]"
-                [showFirstLastButtons]="false"
-                (page)="onCodesPageChange($event)"
-              >
-              </mat-paginator>
-            </ng-container>
-            <ng-container *ngIf="!loadingCodes && codes.length === 0">
-              <p>No codes found.</p>
-            </ng-container>
+                  <tr
+                    mat-header-row
+                    *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
+                  ></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
+                  ></tr>
+                </table>
+                <mat-paginator
+                  [length]="totalCodes"
+                  [pageIndex]="currentPage"
+                  [pageSize]="pageSize"
+                  [pageSizeOptions]="[5, 10, 20]"
+                  [showFirstLastButtons]="false"
+                  (page)="onCodesPageChange($event)"
+                >
+                </mat-paginator>
+              </div>
+            }
+            @if (!loadingCodes && codes.length === 0) {
+              <p class="no-codes">No codes found.</p>
+            }
           </div>
-        </ng-container>
+        }
       </mat-card-content>
     </mat-card>
   `,
@@ -175,6 +186,70 @@ import { MatIcon } from '@angular/material/icon';
         background: var(--primary) !important;
         color: white !important;
         min-width: 225px;
+      }
+
+      /* Create Bonus Code form styling */
+      form {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--secondary-light);
+      }
+
+      form button[type='submit'] {
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--primary) !important;
+        color: white !important;
+        font-weight: 500;
+        margin-top: 16px;
+      }
+
+      form button[type='submit']:hover {
+        opacity: 0.9;
+      }
+
+      /* Filter controls styling */
+      .filter-controls {
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .filter-controls mat-button-toggle-group {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .filter-controls mat-button-toggle {
+        border: none !important;
+        border-right: 1px solid var(--border-color) !important;
+        border-radius: 0 !important;
+        background: var(--secondary-light);
+        color: var(--theme-color);
+        font-weight: 500;
+      }
+
+      .filter-controls mat-button-toggle:last-child {
+        border-right: none !important;
+      }
+
+      .filter-controls mat-button-toggle.mat-button-toggle-checked {
+        background: var(--primary) !important;
+        color: white !important;
+      }
+
+      .filter-controls mat-button-toggle:hover:not(.mat-button-toggle-checked) {
+        background: var(--secondary-400);
+      }
+
+      .filter-controls mat-button-toggle mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
 
       .mat-mdc-card-title {
@@ -224,6 +299,50 @@ import { MatIcon } from '@angular/material/icon';
         background: #ff4a4a !important;
         color: white !important;
       }
+
+      /* Admin view specific styles */
+      .admin-view {
+        min-width: 600px;
+        max-width: 90vw;
+        width: 800px;
+      }
+
+      .admin-section {
+        margin-top: 20px;
+      }
+
+      .admin-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--theme-color);
+        margin-bottom: 16px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .loading-container {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .codes-table {
+        min-width: 500px;
+      }
+
+      .no-codes {
+        text-align: center;
+        color: var(--description-color);
+        font-size: 14px;
+        margin: 20px 0;
+      }
     `,
   ],
 })
@@ -237,13 +356,13 @@ export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
   cursors: (string | null)[] = [null];
   totalCodes = 0;
   pageSize = 5;
+  currentPage = 0;
   activeCodesFilter: boolean | null = true;
   private subscriptions = new Subscription();
   redeeming = false;
   codeError = false;
 
   @ViewChild(MatPaginator) codesPaginator!: MatPaginator;
-  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private fb: FormBuilder,
@@ -321,12 +440,14 @@ export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
       return;
     }
     this.loadingCodes = true;
+    this.currentPage = pageIndex;
     this.subscriptions.add(
       this.codeService.getCodes(this.activeCodesFilter, after, this.pageSize).subscribe({
         next: ({ codes, pageInfo }) => {
           this.codes = codes;
           this.dataSource.data = codes;
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
+          // Better total count calculation - use a large number if there are more pages
           this.totalCodes = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
           this.loadingCodes = false;
         },
@@ -339,29 +460,28 @@ export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
   }
 
   onCodesPageChange(event: PageEvent) {
-    this.loadingCodes = true;
     const newPageIndex = event.pageIndex;
     const newPageSize = event.pageSize;
 
     // If pageSize changed, reset pagination entirely
     if (newPageSize !== this.pageSize) {
       this.pageSize = newPageSize;
+      this.currentPage = 0;
       this.cursors = [null];
       this.loadCodes(null, 0);
       return;
     }
 
+    // Normal page navigation
     const after = this.cursors[newPageIndex] ?? null;
     this.loadCodes(after, newPageIndex);
   }
 
   toggleActiveFilter(value: boolean | null) {
     this.activeCodesFilter = value;
-    this.cursors = [null]; // Reset pagination
-    if (this.codesPaginator) {
-      this.codesPaginator.firstPage(); // Reset to first page
-    }
-    this.loadCodes(); // Reload codes with new filter
+    this.currentPage = 0;
+    this.cursors = [null];
+    this.loadCodes(null, 0);
   }
 
   onCancel(): void {

@@ -105,12 +105,12 @@ mat-nav-list {
   width: 56px; // 40px for the icon + 16px for the padding
 }
 
-.fill-side {
-  height: calc(100vh - 16px);
-  //height: calc(100vh - 64px - 16px); /* Adjust the height to account for the header */
-  transition: width 0.3s ease;
-  /* Smoothly adjust the width */
-}
+//.fill-side {
+//  height: calc(100vh - 16px);
+//  //height: calc(100vh - 64px - 16px); /* Adjust the height to account for the header */
+//  transition: width 0.3s ease;
+//  /* Smoothly adjust the width */
+//}
 
 .push-down {
   margin-top: auto;
@@ -392,11 +392,11 @@ mat-nav-list {
       }
     }
 
-    .fill-side {
-      height: auto;
-      flex-direction: row;
-      padding: 0;
-    }
+    //.fill-side {
+    //  height: auto;
+    //  flex-direction: row;
+    //  padding: 0;
+    //}
 
     .keep-up {
       display: flex;

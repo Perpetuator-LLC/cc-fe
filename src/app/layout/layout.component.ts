@@ -6,13 +6,12 @@ import {
   ViewChild,
   OnDestroy,
   ViewContainerRef,
-  AfterViewInit,
   ElementRef,
   Renderer2,
   HostListener,
 } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe, DecimalPipe, NgClass } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -26,9 +25,7 @@ import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from '../app.routes';
 import { Theme, ThemeService } from '../theme.service';
 import { AuthService } from '../auth.service';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { CookieBannerComponent } from '../cookie-banner/cookie-banner.component';
 import { ToolbarService } from '../toolbar.service';
 import { AuthGuard } from '../auth.guard';
 import { UserService } from '../user.service';
@@ -50,13 +47,9 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
   styleUrls: ['./layout.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,
     SvgIconComponent,
-    CookieBannerComponent,
     FormsModule,
     MatButtonModule,
-    MatButtonToggle,
-    MatButtonToggleGroup,
     MatIconModule,
     MatListModule,
     MatMenuModule,
@@ -68,12 +61,11 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
     MatTooltip,
     NgClass,
     DecimalPipe,
-    RedeemGiftCodeDialogComponent,
     SharedFooterComponent,
   ],
 })
-export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
-  @ViewChild('toolbar', { read: ElementRef }) toolbar!: ElementRef;
+export class LayoutComponent implements OnDestroy, OnInit {
+  // @ViewChild('toolbar', { read: ElementRef }) toolbar!: ElementRef;
   @ViewChild('drawer') drawer!: MatSidenav;
   rootRoutes = routes.filter((r) => r.path);
   private breakpointObserver = inject(BreakpointObserver);
@@ -86,7 +78,7 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   protected userCredits = 0;
   userDetailForm: FormGroup;
   protected jobs: Job[] = [];
-  itemtitle = '';
+  itemTitle = '';
   protected isSecondSidebarVisible = true;
   isHomePage = false;
   showSecondSidebar = false;
@@ -160,21 +152,21 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
     this.toolbarService.clearToolbarComponent();
   }
 
-  ngAfterViewInit() {
-    const resizeObserver = new ResizeObserver(() => {
-      const toolbarHeight = this.toolbar.nativeElement.offsetHeight;
-      const fillSideElement = document.querySelector('.fill-side');
-      if (fillSideElement) {
-        this.renderer.setStyle(fillSideElement, 'height', `calc(100vh - ${toolbarHeight}px - 16px)`);
-      }
-    });
+  // ngAfterViewInit() {
+  //   // const resizeObserver = new ResizeObserver(() => {
+  //   //   const toolbarHeight = this.toolbar.nativeElement.offsetHeight;
+  //   //   const fillSideElement = document.querySelector('.fill-side');
+  //   //   if (fillSideElement) {
+  //   //     this.renderer.setStyle(fillSideElement, 'height', `calc(100vh - ${toolbarHeight}px - 16px)`);
+  //   //   }
+  //   // });
+  //   //
+  //   // resizeObserver.observe(this.toolbar.nativeElement);
+  // }
 
-    resizeObserver.observe(this.toolbar.nativeElement);
-  }
-
-  gettitlePath(item: string) {
-    this.itemtitle = item;
-    console.log('itemmmm', item);
+  getTitlePath(item: string) {
+    this.itemTitle = item;
+    // console.log('item', item);
   }
 
   toggleMinimized() {
@@ -270,11 +262,16 @@ export class LayoutComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   openRedeemGiftCodeDialog() {
+    const userPermissions = this.userService.userDetails()?.permissions || [];
+    const hasAdminPermissions = userPermissions.includes('api.add_bonuscode');
+
     this.dialog.open(RedeemGiftCodeDialogComponent, {
-      width: '500px',
+      width: hasAdminPermissions ? '800px' : '500px',
+      maxWidth: hasAdminPermissions ? '90vw' : '500px',
+      maxHeight: hasAdminPermissions ? '90vh' : undefined,
       data: {
         email: this.userDetailForm.get('email')?.value,
-        permissions: this.userService.userDetails()?.permissions,
+        permissions: userPermissions,
       },
     });
   }
