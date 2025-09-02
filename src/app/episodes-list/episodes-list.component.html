@@ -89,7 +89,7 @@
                 <app-svg-icon icon="edit"></app-svg-icon>
                 <span>Edit</span>
               </button>
-              <button mat-menu-item>
+              <button mat-menu-item (click)="deleteEpisode(episode)">
                 <app-svg-icon icon="delete"></app-svg-icon>
                 <span>Delete</span>
               </button>
@@ -138,7 +138,7 @@
                     <app-svg-icon icon="edit"></app-svg-icon>
                     <span>Edit</span>
                   </button>
-                  <button mat-menu-item>
+                  <button mat-menu-item (click)="deleteEpisode(episode)">
                     <app-svg-icon icon="delete"></app-svg-icon>
                     <span>Delete</span>
                   </button>

@@ -2,19 +2,16 @@
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService } from '../episode.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
-import { MatList, MatListItem } from '@angular/material/list';
 import { MessageComponent } from '../message/message.component';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
-import { MatDivider } from '@angular/material/divider';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatLine } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
@@ -24,23 +21,20 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-episode-detail',
   standalone: true,
   imports: [
     FormsModule,
-    MatListItem,
     MessageComponent,
-    MatList,
     JobStatusBarComponent,
     MatCardContent,
     MatCard,
-    MatDivider,
     MatLabel,
     MatFormField,
-    MatLine,
     DatePipe,
     MatTooltip,
     MatButton,
@@ -49,12 +43,9 @@ import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
     MatCheckbox,
     ReactiveFormsModule,
     RouterLink,
-    MatAnchor,
     SvgIconComponent,
     MatCardHeader,
     MatTabsModule,
-    MatMenu,
-    MatMenuTrigger,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',
@@ -78,6 +69,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private episodeService: EpisodeService,
     private jobService: JobService,
+    private router: Router,
+    private dialog: MatDialog,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -261,5 +254,32 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           },
         }),
     );
+  }
+
+  deleteEpisode(): void {
+    const episodeTitle = this.episodeForm.get('title')?.value || 'this episode';
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Delete Episode',
+        message: `Are you sure you want to delete "${episodeTitle}"? This action cannot be undone.`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.subscriptions.add(
+          this.episodeService.deleteEpisode(this.episodeUuid).subscribe({
+            next: (response) => {
+              this.messageService.success(response.message);
+              this.router.navigate(['/episodes']); // Navigate back to episodes list
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to delete episode: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
   }
 }

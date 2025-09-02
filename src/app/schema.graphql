@@ -1302,6 +1302,9 @@ type ApiMutation {
 
   """Mutation to publish episode audio to Telegram channel."""
   publishEpisodeAudio(episodeUuid: UUID!): PublishEpisodeAudio
+
+  """Mutation to delete an episode."""
+  deleteEpisode(episodeUuid: UUID!): DeleteEpisode
   fetchNews(podcastUuid: UUID!): FetchNews
   extractNews(newsUuids: [UUID]!, podcastUuid: UUID!): ExtractNews
   summarizeNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): SummarizeNews
@@ -1630,6 +1633,13 @@ type PublishEpisodeAudio {
   success: Boolean
   message: String
   episode: EpisodeType
+}
+
+"""Mutation to delete an episode."""
+type DeleteEpisode {
+  success: Boolean
+  message: String
+  episodeUuid: UUID
 }
 
 type FetchNews {
