@@ -316,4 +316,38 @@ export class EpisodeService extends BaseService {
       }),
     );
   }
+
+  deleteEpisode(episodeUuid: string) {
+    if (!episodeUuid) return throwError(() => new Error('Episode ID is required'));
+
+    const DELETE_EPISODE = gql`
+      mutation DeleteEpisode($episodeUuid: UUID!) {
+        deleteEpisode(episodeUuid: $episodeUuid) {
+          success
+          message
+          episodeUuid
+        }
+      }
+    `;
+
+    interface Response {
+      deleteEpisode: {
+        success: boolean;
+        message: string;
+        episodeUuid: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: DELETE_EPISODE,
+      variables: { episodeUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.deleteEpisode.success) {
+          throw new Error(data.deleteEpisode.message);
+        }
+        return data.deleteEpisode;
+      }),
+    );
+  }
 }

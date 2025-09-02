@@ -26,13 +26,17 @@ import {
   MatTableModule,
 } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'app-episodes-list',
@@ -71,6 +75,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     SvgIconComponent,
     MatCheckboxModule,
     MatProgressBarModule,
+    MatMenuItem,
+    MatPrefix,
+    MatIconButton,
+    MatIconButton,
+    MatButton,
+    MatInput,
   ],
   templateUrl: './episodes-list.component.html',
   styleUrl: './episodes-list.component.scss',
@@ -100,6 +110,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private episodeService: EpisodeService,
     private podcastsService: PodcastsService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -189,5 +200,30 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
   viewEpisode(uuid: string) {
     this.router.navigate(['/episode', uuid]);
+  }
+
+  deleteEpisode(episode: Episode) {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Delete Episode',
+        message: `Are you sure you want to delete the episode "${episode.title}"? This action cannot be undone.`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.subscriptions.add(
+          this.episodeService.deleteEpisode(episode.uuid).subscribe({
+            next: () => {
+              this.messageService.success('Episode deleted successfully');
+              this.loadEpisodes(); // Reload the episodes list
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to delete episode: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
   }
 }
