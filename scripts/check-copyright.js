@@ -1,18 +1,18 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025. Capital Copilot
 const fs = require('fs');
 const path = require('path');
 
 const currentYear = new Date().getFullYear();
-const COPYRIGHT_NOTICE_REGEX_JS_TS = new RegExp(`^\\/\\/ Copyright \\(c\\) 20\\d{2}-${currentYear} Perpetuator LLC$`);
+const COPYRIGHT_NOTICE_REGEX_JS_TS = new RegExp(`^\\/\\/ Copyright \\(c\\) ${currentYear}. Capital Copilot$`);
 const COPYRIGHT_NOTICE_REGEX_HTML_MD = new RegExp(
-  `^<!-- Copyright \\(c\\) 20\\d{2}-${currentYear} Perpetuator LLC -->$`,
+  `^<!--\\n  ~ Copyright \\(c\\) ${currentYear}. \\n  ~ All rights reserved. Capital Copilot.\\n  -->$`,
 );
 const COPYRIGHT_NOTICE_REGEX_CSS = new RegExp(
-  `^\\/\\* Copyright \\(c\\) 20\\d{2}-${currentYear} Perpetuator LLC \\*\\/$`,
+  `^\\/\\*\\n  ~ Copyright \\(c\\) ${currentYear}. \\n  ~ All rights reserved. Capital Copilot.\\n  \\*\\/$`,
 );
-const COPYRIGHT_NOTICE_CURRENT_YEAR_JS_TS = `// Copyright (c) ${currentYear} Perpetuator LLC`;
-const COPYRIGHT_NOTICE_CURRENT_YEAR_HTML_MD = `<!-- Copyright (c) ${currentYear} Perpetuator LLC -->`;
-const COPYRIGHT_NOTICE_CURRENT_YEAR_CSS = `/* Copyright (c) ${currentYear} Perpetuator LLC */`;
+const COPYRIGHT_NOTICE_CURRENT_YEAR_JS_TS = `// Copyright (c) ${currentYear}. Capital Copilot`;
+const COPYRIGHT_NOTICE_CURRENT_YEAR_HTML_MD = `<!--\n  ~ Copyright (c) ${currentYear}. \n  ~ All rights reserved. Capital Copilot.\n  -->`;
+const COPYRIGHT_NOTICE_CURRENT_YEAR_CSS = `/*\n  ~ Copyright (c) ${currentYear}. \n  ~ All rights reserved. Capital Copilot.\n  */`;
 
 function checkCopyright(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');

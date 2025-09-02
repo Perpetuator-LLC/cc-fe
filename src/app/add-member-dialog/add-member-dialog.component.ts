@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025. Capital Copilot
 import { Component, OnDestroy, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -13,10 +13,12 @@ import { User } from '../types';
 import { Subscription } from 'rxjs';
 import { TeamsService } from '../teams.service';
 import { MessageService } from '../message.service';
+import { MemberResult } from '../teams.service';
 
 export interface AddMemberDialogData {
   teamUuid: string;
   supportedRoles: string[];
+  member?: MemberResult | null;
 }
 
 @Component({
@@ -49,9 +51,17 @@ export class AddMemberDialogComponent implements OnDestroy {
     private messageService: MessageService,
     @Inject(MAT_DIALOG_DATA) public data: AddMemberDialogData,
   ) {
+    const userUuidControl = { value: '', disabled: false };
+    const roleControl = ['', Validators.required];
+
+    if (this.data.member) {
+      userUuidControl.value = this.data.member.user.uuid;
+      roleControl[0] = this.data.member.role;
+    }
+
     this.newUserForm = this.fb.group({
-      userUuid: ['', Validators.required],
-      role: ['', Validators.required],
+      userUuid: [userUuidControl.value, Validators.required],
+      role: roleControl,
     });
   }
 

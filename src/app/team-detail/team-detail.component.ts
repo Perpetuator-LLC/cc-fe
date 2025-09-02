@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025. Capital Copilot
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -345,12 +345,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  openAddMemberDialog(): void {
+  openAddMemberDialog(member: MemberResult | null = null): void {
     const dialogRef = this.dialog.open(AddMemberDialogComponent, {
       width: '500px',
       data: {
         teamUuid: this.teamUuid,
         supportedRoles: this.supportedRoles,
+        member: member,
       },
     });
 
