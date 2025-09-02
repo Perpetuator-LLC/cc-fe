@@ -1,4 +1,7 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!--
+  ~ Copyright (c) 2025. 
+  ~ All rights reserved. Capital Copilot.
+  -->
 <ng-template #toolbarTemplate>
   <span class="page-title"><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> Episodes ><span
       class="page-title-secondary">
@@ -10,7 +13,7 @@
   <div class="detail-header">
     <div class="top-header">
       <div class="title">
-        <h2>{{ episodeForm.get('title')?.value }}</h2>
+        <h2>{{ episodeForm.get('title')?.value || 'N/A' }}</h2>
       </div>
       <div class="buttons">
         @if (audioSrc) {
@@ -18,7 +21,7 @@
           Live on Podcast
         </mat-checkbox>
         }
-        <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control publish-btn"
+        <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control save-btn"
           type="button">
           Update
         </button>
@@ -83,7 +86,11 @@
               <div class="audio-card">
                 @if (audioSrc) {
                 <audio controls [src]="audioSrc"></audio>
-                }
+                }@else{
+                  <div class="empty-audio">
+                    <app-svg-icon width="24" height="24" icon="music" style="cursor: pointer"></app-svg-icon>
+                    No audio found this episode</div>
+                  }
               </div>
             </div>
             <div>
@@ -120,10 +127,21 @@
         </mat-tab>
         <mat-tab label="Referenced News">
           <mat-card-content class="form-container related-episodes">
-            <div class="title">
-              <h3>Referenced News</h3>
-              <span>{{ episodeForm.get('news')?.value?.length }} news articles</span>
+            <div class="view-toggles">
+              <div class="title">
+                <h3>Referenced News</h3>
+                <span>{{ episodeForm.get('news')?.value?.length }} news articles</span>
+              </div>
+              <div class="view-btn-container">
+                <button class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
+                  <app-svg-icon icon="grid"></app-svg-icon>
+                </button>
+                <button class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
+                  <app-svg-icon icon="list"></app-svg-icon>
+                </button>
+              </div>
             </div>
+            @if (isGridView) {
             <div class="related-grid">
               @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
               <mat-card class="related-card">
@@ -153,6 +171,46 @@
                 </div>
               }
             </div>
+
+            }
+
+            @if (!isGridView) {
+            <div class="related-table">
+              <table class="news-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
+                  <tr>
+                    <td>
+                      <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                        {{ referencedNews.title }}
+                      </a>
+                    </td>
+                    
+                    <td>
+                      {{ referencedNews.__typename }}
+                    </td>
+                    <td>
+                      <span class="publish">Published</span>
+                    </td>
+                  </tr>
+                  } @empty {
+                  <tr>
+                    <td colspan="2" class="no-related">
+                      <p>No referenced news articles found.</p>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
           </mat-card-content>
         </mat-tab>
       </mat-tab-group>

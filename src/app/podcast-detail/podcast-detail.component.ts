@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025. Capital Copilot
 import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   FormArray,
@@ -490,6 +490,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastsService.getPodcastById(this.podcastUuid).subscribe({
         next: (podcast) => {
+          // console.log('Podcast data received:', podcast);
           // console.log('Voice ID:', podcast.voice);
           // console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);

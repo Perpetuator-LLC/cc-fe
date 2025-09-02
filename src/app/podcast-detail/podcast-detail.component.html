@@ -1,4 +1,7 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!--
+  ~ Copyright (c) 2025. 
+  ~ All rights reserved. Capital Copilot.
+  -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span>
@@ -20,10 +23,6 @@
         <p>{{ podcastForm.get('intro')?.value }}</p>
       </div>
       <div class="buttons">
-        <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
-          <mat-icon>delete</mat-icon>
-          Delete Podcast
-        </button>
         <button
           mat-flat-button
           color="primary"
@@ -40,19 +39,30 @@
       <div class="status-summary">
         <div class="status-item">
           <span class="status-label">Team</span>
-          <span class="status-value">
-            {{ podcastForm.get('team')?.value?.name || 'No team selected' }}
-          </span>
+          <ng-container *ngIf="podcastForm.get('team')?.value?.name; else noTeamSelected">
+            <a href="/team/{{ podcastForm.get('team')?.value?.uuid }}" class="status-value">
+              {{ podcastForm.get('team')?.value?.name }}
+            </a>
+          </ng-container>
+          <ng-template #noTeamSelected>
+            <span class="status-value">No team selected</span>
+          </ng-template>
         </div>
 
         <div class="status-item">
           <span class="status-label">Response</span>
-          <span class="status-badge enable">Enable</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcastForm.get('tgResponse')?.value"
+            [class.disable]="!podcastForm.get('tgResponse')?.value"
+          >
+            {{ podcastForm.get('tgResponse')?.value ? 'Enable' : 'Disable' }}
+          </span>
         </div>
 
         <div class="status-item">
           <span class="status-label">Last Created</span>
-          <span class="status-value">2 days ago</span>
+          <span class="status-value">{{ podcastForm.get('voice')?.value?.updatedAt | date: 'mediumDate' }}</span>
         </div>
       </div>
     </div>
@@ -536,6 +546,20 @@
             </div>
           </form>
         </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="Danger Zone">
+        <mat-card-content>
+          <h3>Danger Zone Settings</h3>
+          <p>Here you can find advanced and potentially destructive actions related to your podcast.</p>
+        </mat-card-content>
+        <mat-card class="danger-card">
+          <div class="danger-card-title">Delete Podcast</div>
+          <p>Once you delete a podcast, it will be permanently removed from the data.</p>
+          <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
+            Delete this Podcast
+          </button>
+        </mat-card>
       </mat-tab>
     </mat-tab-group>
   </mat-card>

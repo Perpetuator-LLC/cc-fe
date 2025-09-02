@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025. Capital Copilot
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService } from '../episode.service';
@@ -66,6 +66,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
+  isGridView = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -96,13 +97,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       audioBase64: ['', Validators.required],
       podcastDate: ['', Validators.required],
       telegramDate: ['', Validators.required],
-      news: this.fb.array([
-        this.fb.group({
-          id: [{ value: '', disabled: true }],
-          url: [{ value: '', disabled: true }],
-          title: [{ value: '', disabled: true }],
-        }),
-      ]),
+      news: this.fb.array([]),
       podcast: this.fb.group({
         id: [{ value: '', disabled: true }],
         uuid: [{ value: '', disabled: true }],
@@ -153,6 +148,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  toggleView(isGrid: boolean) {
+    this.isGridView = isGrid;
+  }
+
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
@@ -163,8 +162,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         next: (episode) => {
           this.episodeForm.patchValue(episode);
 
+          const newsFormArray = this.episodeForm.get('news') as FormArray;
+          newsFormArray.clear();
           for (const newsSummary of episode.news) {
-            (this.episodeForm.get('news') as FormArray).push(this.fb.group(newsSummary));
+            newsFormArray.push(this.fb.group(newsSummary));
           }
 
           this.audioSrc = episode.audioUrl;

@@ -1,4 +1,7 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!--
+  ~ Copyright (c) 2025. 
+  ~ All rights reserved. Capital Copilot.
+  -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">News</span></span
@@ -87,16 +90,6 @@
             </mat-select>
           </mat-form-field>
           <button
-            class="fetch-btn"
-            mat-flat-button
-            color="primary"
-            type="button"
-            (click)="fetchNews()"
-            [disabled]="selectedPodcastUuid === null"
-          >
-            Fetch News
-          </button>
-          <button
             mat-flat-button
             color="accent"
             type="button"
@@ -121,15 +114,21 @@
             @if (selectedNews.size > 0) {
               <div>
                 <div class="select-btn">
-                  <label class="custom-select-all">
+                  <label
+                    class="custom-select-all"
+                    (click)="toggleSelectAll()"
+                    tabindex="0"
+                    (keydown.enter)="toggleSelectAll()"
+                    (keydown.space)="toggleSelectAll()"
+                  >
                     <input
                       type="checkbox"
                       [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
                       [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                      (change)="selectAll()"
+                      (change)="toggleSelectAll()"
                     />
                     <span class="custom-checkbox"></span>
-                    <span class="select-label">Select all</span>
+                    <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
                   </label>
                 </div>
               </div>
@@ -221,15 +220,21 @@
           @if (selectedNews.size > 0) {
             <div class="bottom-sticky-buttons">
               <div class="select-btn desktop">
-                <label class="custom-select-all">
+                <label
+                  class="custom-select-all"
+                  (click)="toggleSelectAll()"
+                  tabindex="0"
+                  (keydown.enter)="toggleSelectAll()"
+                  (keydown.space)="toggleSelectAll()"
+                >
                   <input
                     type="checkbox"
                     [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
                     [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                    (change)="selectAll()"
+                    (change)="toggleSelectAll()"
                   />
                   <span class="custom-checkbox"></span>
-                  <span class="select-label">Select all</span>
+                  <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
                 </label>
               </div>
               <div class="filters-btn">
@@ -282,10 +287,7 @@
                   Generate Episode
                 </button>
               </div>
-              <button mat-flat-button class="delete-btn">
-                <mat-icon>delete</mat-icon>
-                Delete
-              </button>
+              
             </div>
           }
         </div>
