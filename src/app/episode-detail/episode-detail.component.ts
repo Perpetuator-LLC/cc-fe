@@ -9,9 +9,9 @@ import { MessageComponent } from '../message/message.component';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
@@ -23,6 +23,9 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
+import { SchedulingService, DynamicSchedule } from '../scheduling.service';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-episode-detail',
@@ -36,8 +39,10 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
     MatLabel,
     MatFormField,
     DatePipe,
+    NgClass,
     MatTooltip,
     MatButton,
+    MatIconButton,
     MatInput,
     MatIcon,
     MatCheckbox,
@@ -46,6 +51,10 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
     SvgIconComponent,
     MatCardHeader,
     MatTabsModule,
+    MatSlideToggle,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',
@@ -57,6 +66,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
+  schedules: DynamicSchedule[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -71,6 +81,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private router: Router,
     private dialog: MatDialog,
+    private schedulingService: SchedulingService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -171,6 +182,16 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       this.episodeForm.get('content')?.valueChanges.subscribe((value: string) => {
         this.wordCount = this.countWords(value);
         this.charCount = value.length;
+      }),
+    );
+    this.subscriptions.add(
+      this.schedulingService.getSchedulesForPodcast(this.episodeUuid).subscribe({
+        next: (schedules) => {
+          this.schedules = schedules;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to fetch schedules: ${err.message}`);
+        },
       }),
     );
   }
@@ -281,5 +302,119 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  addSchedule(): void {
+    // This method should navigate to create schedule or open a dialog
+    // since schedules are managed separately, not as part of the episode form
+    this.createNewSchedule();
+  }
+
+  removeSchedule(index: number): void {
+    // This method should delete a specific schedule
+    // since schedules are managed separately, not as part of the episode form
+    if (index >= 0 && index < this.schedules.length) {
+      this.deleteSchedule(this.schedules[index]);
+    }
+  }
+
+  saveSchedules(): void {
+    this.subscriptions.add(
+      this.schedulingService.savePodcastSchedules(this.episodeUuid, this.schedules).subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.messageService.error(response.message);
+            return;
+          }
+          this.messageService.success('Schedules saved successfully.');
+          this.schedules = response.schedules;
+        },
+        error: (err) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  // Scheduling methods
+  getScheduleDescription(schedule: DynamicSchedule): string {
+    switch (schedule.scheduleType) {
+      case 'INTERVAL': {
+        const hours = Math.floor((schedule.interval || 0) / 3600);
+        const minutes = Math.floor(((schedule.interval || 0) % 3600) / 60);
+        return hours > 0 ? `Every ${hours}h ${minutes}m` : `Every ${minutes}m`;
+      }
+      case 'CRONTAB':
+        return `${schedule.cronHour}:${schedule.cronMinute} on ${schedule.cronDayOfWeek}`;
+
+      case 'CLOCKED':
+        return `Once at ${new Date(schedule.clockedTime || '').toLocaleString()}`;
+
+      case 'SOLAR':
+        return `At ${schedule.solarEvent} (${schedule.solarLatitude}, ${schedule.solarLongitude})`;
+
+      default:
+        return schedule.interval ? `Every ${schedule.interval}s` : 'Unknown';
+    }
+  }
+
+  toggleScheduleEnabled(schedule: DynamicSchedule, enabled: boolean): void {
+    this.subscriptions.add(
+      this.schedulingService.updateDynamicSchedule(schedule.uuid, { enabled }).subscribe({
+        next: () => {
+          this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
+          // Update local schedule state
+          const index = this.schedules.findIndex((s) => s.uuid === schedule.uuid);
+          if (index !== -1) {
+            this.schedules[index] = { ...this.schedules[index], enabled };
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update schedule: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  editSchedule(schedule: DynamicSchedule): void {
+    // Navigate to scheduling page or open edit dialog
+    // TODO: Implement edit schedule functionality
+    console.log('Edit schedule requested for:', schedule.name);
+    this.messageService.info('Edit schedule functionality coming soon');
+  }
+
+  deleteSchedule(schedule: DynamicSchedule): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Delete Schedule',
+        message: `Are you sure you want to delete the schedule "${schedule.name}"? This action cannot be undone.`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.subscriptions.add(
+          this.schedulingService.deleteDynamicSchedule(schedule.uuid).subscribe({
+            next: () => {
+              this.messageService.success('Schedule deleted successfully');
+              // Remove from local schedules array
+              this.schedules = this.schedules.filter((s) => s.uuid !== schedule.uuid);
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to delete schedule: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  createNewSchedule(): void {
+    // Navigate to scheduling page or open create dialog
+    this.messageService.info('Create schedule functionality coming soon');
+  }
+
+  formatJobKind(jobKind: string): string {
+    return jobKind.replace(/_/g, ' ');
   }
 }

@@ -148,6 +148,15 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'scheduling',
+    loadComponent: () => import('./scheduling/scheduling.component').then((c) => c.SchedulingComponent),
+    title: 'Scheduling',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'schedule',
+    },
+  },
+  {
     path: 'team/new',
     loadComponent: () => import('./new-team/new-team.component').then((c) => c.NewTeamComponent),
     title: 'Create Team',

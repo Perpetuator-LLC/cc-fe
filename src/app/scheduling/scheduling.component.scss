@@ -1,0 +1,221 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.middle-card {
+  padding-inline: 30px;
+  background-color: var(--secondary-color);
+
+  @media screen and (max-width: 576px) {
+    padding-inline: 20px;
+  }
+}
+
+.create-schedule-card {
+  background-color: var(--toolbar-container-background-color) !important;
+  box-shadow: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 30px;
+    padding-top: 0;
+    height: 40px;
+
+    @media screen and (max-width: 576px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      padding-inline: 20px;
+      height: auto;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      h3 {
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        margin: 0;
+        color: var(--theme-color);
+      }
+
+      span {
+        background: var(--secondary-dark);
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        padding: 0 10px;
+        height: 22px;
+        color: var(--theme-color);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    button {
+      background: #f14a00;
+      border-radius: 10px;
+      border: 1px solid #ffffff57;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+}
+
+.create-form-card {
+  margin: 20px 30px;
+  background-color: var(--secondary-light) !important;
+  border: 1px solid var(--border-color);
+
+  @media screen and (max-width: 576px) {
+    margin: 20px 20px;
+  }
+
+  mat-card-header {
+    h3 {
+      margin: 0;
+      color: var(--theme-color);
+      font-weight: 600;
+      font-size: 18px;
+    }
+  }
+}
+
+.schedule-form {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    mat-form-field {
+      flex: 1;
+
+      &.full-width {
+        width: 100%;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+.schedules-container {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border-color);
+
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: var(--theme-color);
+      background: var(--secondary-dark);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .mat-mdc-row {
+      &:hover {
+        background-color: var(--secondary-light);
+      }
+    }
+
+    .mat-mdc-cell {
+      padding: 16px;
+      color: var(--theme-color);
+      background: var(--toolbar-container-background-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+  }
+}
+
+.schedule-name {
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--theme-color);
+  }
+
+  .schedule-description {
+    font-size: 12px;
+    color: var(--description-color);
+  }
+}
+
+.job-kind-chip {
+  background: var(--secondary-dark);
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 12px;
+  color: var(--theme-color);
+  display: inline-flex;
+  align-items: center;
+}
+
+.schedule-type-chip {
+  background: var(--primary);
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 12px;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+}
+
+.action-btn {
+  background: transparent;
+  border: 0;
+  color: var(--theme-color);
+}
+
+.no-schedules {
+  margin-top: 40px;
+  text-align: center;
+
+  mat-card {
+    background-color: var(--secondary-light) !important;
+    border: 1px solid var(--border-color);
+
+    h3 {
+      color: var(--theme-color);
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: var(--description-color);
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.loading-spinner {
+  margin: 20px 0;
+}

@@ -16,11 +16,10 @@
           @for (item of rootRoutes; track item.path) {
           @if (shouldShow(item)) {
           <a class="mat-link" mat-list-item [routerLink]="item.path" routerLinkActive="active-link"
-            (click)="getTitlePath((item.title ?? '').toString())" #link="routerLinkActive" [activated]="link.isActive"
-            (click)="handleClick($event, item.path)">
+            (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)" #link="routerLinkActive" [activated]="link.isActive">
             <div class="route-link">
               @if (item.data && item.data['icon']) {
-              <mat-icon>{{ item.data['icon'] }}</mat-icon>
+                <mat-icon>{{ item.data['icon'] }}</mat-icon>
               }
               @if (!this.minimized) {
               <div class="route-title">
@@ -69,7 +68,11 @@
     <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
       <div class="sidebar-content">
         <div class="second-header">
+          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/')) {
           <h6>Podcasts</h6>
+          } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+          <h6>Jobs</h6>
+          }
           <svg class="collapseSecondSidebar" width="20" height="20" viewBox="0 0 20 20" fill="none"
             xmlns="http://www.w3.org/2000/svg" (click)="toggleSecondSidebar()">
             <path
@@ -87,8 +90,9 @@
               stroke-linejoin="round" />
           </svg>
         </div>
-        <!--  @if (itemtitle === 'Podcasts') { -->
         <div class="links">
+          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/')) {
+          <!-- Podcasts section links -->
           <a [routerLink]="['/news']" class="header-logo s-link" routerLinkActive="active">
             <mat-icon> rss_feed</mat-icon>
             <span class="website-title">News</span>
@@ -109,7 +113,6 @@
                 </clipPath>
               </defs>
             </svg>
-
             <span class="website-title">Episodes</span>
           </a>
           <a [routerLink]="['/podcasts']" class="header-logo s-link" routerLinkActive="active">
@@ -121,11 +124,20 @@
                 d="M12.675 11.625C12.675 11.3067 12.8014 11.0015 13.0265 10.7765C13.2515 10.5514 13.5567 10.425 13.875 10.425M10.275 11.625C10.275 10.6702 10.6543 9.75455 11.3294 9.07942C12.0045 8.40428 12.9202 8.025 13.875 8.025M7.875 11.625C7.875 10.0337 8.50714 8.50758 9.63236 7.38236C10.7576 6.25714 12.2837 5.625 13.875 5.625M13.5 14.25L14.25 15.75M4.5 14.25L3.75 15.75"
                 stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-
             <span class="website-title">Podcasts</span>
           </a>
+          } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+          <!-- Jobs section links -->
+          <a [routerLink]="['/jobs']" class="header-logo s-link" routerLinkActive="active">
+            <mat-icon>work</mat-icon>
+            <span class="website-title">Jobs</span>
+          </a>
+          <a [routerLink]="['/scheduling']" class="header-logo s-link" routerLinkActive="active">
+            <mat-icon>schedule</mat-icon>
+            <span class="website-title">Scheduling</span>
+          </a>
+          }
         </div>
-        <!-- } -->
       </div>
     </div>
     }
