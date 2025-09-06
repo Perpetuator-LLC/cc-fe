@@ -91,7 +91,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
     protected themeService: ThemeService,
     protected authService: AuthService,
     private toolbarService: ToolbarService,
-    private router: Router,
+    protected router: Router,
     protected userService: UserService,
     private renderer: Renderer2,
     private creditService: CreditService,
@@ -135,7 +135,9 @@ export class LayoutComponent implements OnDestroy, OnInit {
         url.startsWith('/podcast/') ||
         url.startsWith('/news') ||
         url.startsWith('/episodes') ||
-        url.startsWith('/episode/');
+        url.startsWith('/episode/') ||
+        url.startsWith('/jobs') ||
+        url.startsWith('/scheduling');
     });
   }
 

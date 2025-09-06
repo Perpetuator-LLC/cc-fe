@@ -19,6 +19,10 @@ export enum JobKind {
   SELECT_UNUSED_NEWS = 'SELECT_UNUSED_NEWS',
   UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
   PUBLISH_EPISODE_AUDIO = 'PUBLISH_EPISODE_AUDIO',
+  PUBLISH_LATEST_EPISODE_CHAIN = 'PUBLISH_LATEST_EPISODE_CHAIN',
+  REFRESH_STOCK_LISTINGS = 'REFRESH_STOCK_LISTINGS',
+  SCHEDULE_JOB = 'SCHEDULE_JOB',
+  CANCEL_SCHEDULED_JOB = 'CANCEL_SCHEDULED_JOB',
 }
 
 export const stringToJobKind = (kind: string) => {
@@ -37,6 +41,14 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.UPDATE_EPISODE_AUDIO;
     case 'PUBLISH_EPISODE_AUDIO':
       return JobKind.PUBLISH_EPISODE_AUDIO;
+    case 'PUBLISH_LATEST_EPISODE_CHAIN':
+      return JobKind.PUBLISH_LATEST_EPISODE_CHAIN;
+    case 'REFRESH_STOCK_LISTINGS':
+      return JobKind.REFRESH_STOCK_LISTINGS;
+    case 'SCHEDULE_JOB':
+      return JobKind.SCHEDULE_JOB;
+    case 'CANCEL_SCHEDULED_JOB':
+      return JobKind.CANCEL_SCHEDULED_JOB;
     default:
       throw new Error('Invalid job type');
   }
@@ -58,6 +70,14 @@ export const kindToString = (kind: string) => {
       return 'Update Episode Audio';
     case JobKind.PUBLISH_EPISODE_AUDIO:
       return 'Publish Episode Audio';
+    case JobKind.PUBLISH_LATEST_EPISODE_CHAIN:
+      return 'Publish Latest Episode Chain';
+    case JobKind.REFRESH_STOCK_LISTINGS:
+      return 'Refresh Stock Listings';
+    case JobKind.SCHEDULE_JOB:
+      return 'Schedule Job';
+    case JobKind.CANCEL_SCHEDULED_JOB:
+      return 'Cancel Scheduled Job';
     default:
       return 'N/A';
   }
