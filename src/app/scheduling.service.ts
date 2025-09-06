@@ -324,7 +324,7 @@ export class SchedulingService extends BaseService {
     );
   }
 
-  savePodcastSchedules(podcastUuid: string, schedules: ScheduleType[]) {
+  savePodcastSchedules(podcastUuid: string, schedules: DynamicSchedule[]) {
     console.debug('Saving schedules for podcast', podcastUuid, schedules);
     // This is a placeholder - implement based on your backend requirements
     // interface Response {
