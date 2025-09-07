@@ -6,10 +6,11 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angular/material/expansion';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, JsonPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
 import { Job, JobService, JobStatus, JobKind, kindToString, stringToJobStatus, statusToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
@@ -41,12 +42,14 @@ interface Episode {
     MatExpansionPanelHeader,
     MatCardHeader,
     MatButton,
+    MatIconButton,
     MatCardSubtitle,
     MatProgressBar,
     MatCardTitle,
     DatePipe,
     JsonPipe,
     RouterLink,
+    MatIcon,
   ],
   templateUrl: './job-status-bar.component.html',
   styleUrl: './job-status-bar.component.scss',
