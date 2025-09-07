@@ -40,6 +40,6 @@ mat-dialog-actions {
 .delete-btn {
     border-radius: 10px;
     border: 1px solid var(--border-color);
-    background: #ff4a4a;
-    color: white;
+    background: var(--md-sys-color-error);
+    color: var(--theme-white);
 }
