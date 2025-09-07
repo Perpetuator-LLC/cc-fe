@@ -138,7 +138,7 @@ mat-card {
       color: var(--description-color);
 
       span {
-        color: #49ff70;
+        color: var(--md-sys-color-success);
       }
     }
   }
@@ -154,7 +154,7 @@ mat-card {
     .skeleton-icon {
       width: 24px;
       height: 24px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -164,7 +164,7 @@ mat-card {
     .skeleton-label {
       width: 80px;
       height: 14px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -174,7 +174,7 @@ mat-card {
     .skeleton-value {
       width: 60px;
       height: 30px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -184,7 +184,7 @@ mat-card {
     .skeleton-change {
       width: 120px;
       height: 14px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -441,7 +441,7 @@ mat-card {
   }
 
   .mat-mdc-button {
-    color: #f14a00;
+    color: var(--primary);
   }
 
   .img {
@@ -499,12 +499,12 @@ mat-card {
 }
 
 .enable {
-  background: #4cb782;
+  background: var(--md-sys-color-success);
   border-radius: 6px;
-  color: white;
+  color: var(--theme-white);
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid 1px solid #ffffffe6;
+  border: 1px solid var(--border-color);
   width: 50px;
   height: 20px;
   display: inline-flex;
@@ -536,7 +536,7 @@ mat-card {
 
   .days {
     font-size: 12px;
-    color: #b5b5b5;
+    color: var(--description-color);
     font-weight: 400;
   }
 }

@@ -117,22 +117,22 @@
   }
 
   .pending {
-    background-color: #e3f2fd;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-warning);
   }
 
   .running {
-    background-color: #e8f5e9;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-success);
   }
 
   .failed {
-    background-color: #ffebee;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-error);
   }
 
   .completed {
-    background-color: #f5f5f5;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-primary);
   }
 
@@ -171,11 +171,11 @@
     }
 
     .error {
-      background-color: #ffcdd244;
+      background-color: rgba(255, 205, 210, 0.27);
     }
 
     .result {
-      background-color: #c8e6c944;
+      background-color: rgba(200, 230, 201, 0.27);
     }
   }
 
