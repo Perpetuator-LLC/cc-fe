@@ -25,20 +25,20 @@
 }
 
 .job-success {
-  color: white;
-  background-color: #4cb782;
+  color: var(--theme-white);
+  background-color: var(--md-sys-color-success);
   border-radius: 6px;
 }
 
 .job-failed {
-  color: white;
-  background-color: #ff4a4a;
+  color: var(--theme-white);
+  background-color: var(--md-sys-color-error);
   border-radius: 6px;
 }
 
 .job-pending {
-  color: white;
-  background-color: #f19900;
+  color: var(--theme-white);
+  background-color: var(--md-sys-color-warning);
   border-radius: 6px;
 }
 
@@ -99,25 +99,25 @@
   min-width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: #222;
+  background: var(--secondary-500);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 1.2rem;
   font-size: 1.5rem;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: var(--theme-white);
+  border: 1px solid var(--border-color);
 
   &.job-success {
-    background: #4cb782;
+    background: var(--md-sys-color-success);
   }
 
   &.job-failed {
-    background: #ff4a4a;
+    background: var(--md-sys-color-error);
   }
 
   &.job-pending {
-    background: #ffb700;
+    background: var(--md-sys-color-warning);
   }
 }
 
@@ -165,18 +165,18 @@
   font-weight: 500;
 
   &.job-success {
-    background: #4cb782;
-    color: white;
+    background: var(--md-sys-color-success);
+    color: var(--theme-white);
   }
 
   &.job-failed {
-    background: #ff4a4a;
-    color: white;
+    background: var(--md-sys-color-error);
+    color: var(--theme-white);
   }
 
   &.job-pending {
-    background: #ffb700;
-    color: black;
+    background: var(--md-sys-color-warning);
+    color: var(--theme-color);
   }
 }
 
@@ -211,7 +211,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #515459;
+    background-color: var(--secondary-500);
     display: inline-block;
   }
 

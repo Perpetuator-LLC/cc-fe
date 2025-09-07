@@ -40,6 +40,6 @@ mat-dialog-actions {
 .export-btn {
     border-radius: 10px;
     border: 1px solid var(--border-color);
-    background: var(--primary, #1976d2);
-    color: white;
+    background: var(--primary);
+    color: var(--theme-white);
 }

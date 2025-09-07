@@ -504,11 +504,11 @@ mat-nav-list {
       width: 240px;
       min-width: 240px;
       max-width: 240px;
-      background: #1f2329;
+      background: var(--secondary-color);
       padding: 20px 16px;
       transition: all 0.3s ease;
       transform: translateX(0);
-      border-right: 1px solid #ffffff1a;
+      border-right: 1px solid var(--border-color);
 
       &.hidden {
         transform: translateX(-100%);
@@ -540,7 +540,7 @@ mat-nav-list {
         margin: 0;
         font-size: 14px;
         font-weight: 600;
-        color: #adadad;
+        color: var(--description-color);
       }
 
       .s-link {
@@ -549,11 +549,11 @@ mat-nav-list {
         align-items: center;
         gap: 10px;
         border-radius: 10px;
-        color: #ffffff;
+        color: var(--theme-white);
         padding: 13px 10px;
 
         &.active {
-          background: #373c43;
+          background: var(--secondary-dark);
         }
 
         .mat-icon {
@@ -568,7 +568,7 @@ mat-nav-list {
       }
 
       .links {
-        color: white;
+        color: var(--theme-white);
         margin-top: 30px;
       }
     }
@@ -652,13 +652,13 @@ mat-nav-list {
 
       p {
         margin-inline: auto;
-        color: #b5b5b5;
+        color: var(--description-color);
         font-weight: 400;
         line-height: 16px;
         font-size: 11px;
 
         a {
-          color: #f57c00;
+          color: var(--primary);
           font-weight: 500;
         }
       }
@@ -680,7 +680,7 @@ mat-nav-list {
 .link-button:hover,
 .link-button:focus {
   text-decoration: underline;
-  color: var(--primary, #1976d2);
+  color: var(--primary);
 }
 
 .arrow-left {

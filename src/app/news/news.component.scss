@@ -165,7 +165,7 @@
     button {
       background: var(--theme-white);
       border-radius: 10px;
-      border: 1px solid #ffffff57;
+      border: 1px solid var(--border-color);
       color: var(--toolbar-container-background-color);
       font-weight: 600;
       font-size: 14px;
@@ -464,7 +464,7 @@
     input {
       border: 0;
       background: transparent;
-      color: #b5b5b5;
+      color: var(--description-color);
       height: 36px;
       width: 100%;
     }
@@ -476,7 +476,7 @@
 
     .mat-mdc-form-field-flex {
       border-radius: 8px !important;
-      background-color: #373c43;
+      background-color: var(--secondary-dark);
       padding: 0 16px;
     }
 
@@ -511,7 +511,7 @@
     }
 
     input::placeholder {
-      color: #b5b5b5;
+      color: var(--description-color);
       opacity: 1;
     }
 
@@ -674,7 +674,7 @@
 
 .bottom-sticky-buttons {
   display: flex;
-  background: #515459;
+  background: var(--secondary-500);
   border: 1px solid var(--border-color);
   position: sticky;
   bottom: 0;
@@ -724,7 +724,7 @@
 
   .delete-btn {
     background-color: transparent;
-    color: #ff4a4a;
+    color: var(--md-sys-color-error);
     padding: 0;
     font-size: 14px;
     font-weight: 600;
@@ -774,7 +774,7 @@
       height: 16px;
       border-radius: 4px;
       border: 2px solid var(--primary);
-      background: #23242a;
+      background: var(--secondary-color);
       display: flex;
       align-items: center;
       justify-content: center;
