@@ -345,12 +345,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  openAddMemberDialog(): void {
+  openAddMemberDialog(member: MemberResult | null = null): void {
     const dialogRef = this.dialog.open(AddMemberDialogComponent, {
       width: '500px',
       data: {
         teamUuid: this.teamUuid,
         supportedRoles: this.supportedRoles,
+        member: member,
       },
     });
 
