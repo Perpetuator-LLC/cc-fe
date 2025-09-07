@@ -7,7 +7,7 @@ import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angular/material/expansion';
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { DatePipe } from '@angular/common';
+import { DatePipe, JsonPipe } from '@angular/common';
 import { Job, JobService, JobStatus, JobKind, kindToString, stringToJobStatus, statusToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
@@ -30,6 +30,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
     MatProgressBar,
     MatCardTitle,
     DatePipe,
+    JsonPipe,
   ],
   templateUrl: './job-status-bar.component.html',
   styleUrl: './job-status-bar.component.scss',

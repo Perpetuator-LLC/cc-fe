@@ -120,13 +120,21 @@ export const statusToString = (status: string) => {
   }
 };
 
+export interface JobResult {
+  message?: string;
+  podcast_uuid?: string;
+  episode_uuid?: string;
+  news_uuids?: string[];
+  [key: string]: unknown;
+}
+
 export interface Job {
   id: string;
   uuid: string;
   kind: string;
   status: string;
   error: string;
-  result: string;
+  result: JobResult | null;
   createdAt: string;
   updatedAt: string;
   cost?: number;

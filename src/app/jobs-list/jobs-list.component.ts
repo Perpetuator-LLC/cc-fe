@@ -7,6 +7,7 @@ import {
   JobKind,
   JobService,
   JobStatus,
+  JobResult, // Add this import
   kindToString,
   statusToString,
   stringToJobKind,
@@ -26,14 +27,6 @@ import { RouterLink } from '@angular/router';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
-interface JobResult {
-  message?: string;
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  news_uuids?: string[];
-  [key: string]: unknown; // Allow for additional properties
-}
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -382,14 +375,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Parse job result JSON safely
+  // Parse job result JSON safely - now result is already a JSON object
   parseJobResult(job: Job): JobResult | null {
-    if (!job.result) return null;
-    try {
-      return JSON.parse(job.result);
-    } catch {
-      return null;
-    }
+    return job.result; // No need to JSON.parse anymore since it's already an object
   }
 
   // Get formatted message for job display
@@ -399,43 +387,38 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return job.error;
     }
 
-    const parsedResult = this.parseJobResult(job);
-    if (parsedResult?.message) {
-      return parsedResult.message;
+    const result = job.result;
+    if (result?.message) {
+      return result.message;
     }
 
-    // Fallback to raw result
-    return job.result || 'No message available';
+    // Fallback to stringified result
+    return result ? JSON.stringify(result) : 'No message available';
   }
 
   // Check if job result has podcast UUID
   hasPodcastUuid(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.podcast_uuid != null;
+    return job.result?.podcast_uuid != null;
   }
 
   // Check if job result has episode UUID
   hasEpisodeUuid(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.episode_uuid != null;
+    return job.result?.episode_uuid != null;
   }
 
   // Check if job result has news UUIDs (hidden for now)
   hasNewsUuids(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.news_uuids != null && Array.isArray(parsedResult.news_uuids);
+    return job.result?.news_uuids != null && Array.isArray(job.result.news_uuids);
   }
 
   // Get podcast UUID from job result
   getPodcastUuid(job: Job): string | null {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.podcast_uuid || null;
+    return job.result?.podcast_uuid || null;
   }
 
   // Get episode UUID from job result
   getEpisodeUuid(job: Job): string | null {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.episode_uuid || null;
+    return job.result?.episode_uuid || null;
   }
 
   // Get podcast name from enriched job

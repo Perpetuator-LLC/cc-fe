@@ -30,7 +30,7 @@
                   <p class="error">Error: {{ job.error }}</p>
                 }
                 @if (job.result) {
-                  <p class="result">Result: {{ job.result }}</p>
+                  <p class="result">Result: {{ job.result.message || (job.result | json) }}</p>
                 }
                 <p><strong>Created At:</strong> {{ job.createdAt | date: 'short' }}</p>
                 <p><strong>Updated At:</strong> {{ job.updatedAt | date: 'short' }}</p>
