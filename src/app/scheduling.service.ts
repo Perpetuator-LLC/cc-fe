@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { RelayConnection } from './utils/relay';
+import { parseScheduleArgs } from './utils/schedule';
 
 export enum ScheduleType {
   INTERVAL = 'INTERVAL',
@@ -69,17 +70,17 @@ const GET_DYNAMIC_SCHEDULES = gql`
 const CREATE_DYNAMIC_SCHEDULE = gql`
   mutation CreateDynamicSchedule(
     $name: String!
-    $jobKind: String!
-    $scheduleType: String
-    $interval: Int
+    $jobKind: JobKind!
+    $scheduleType: ScheduleTypeEnum
+    $interval: Int!
     $cronHour: String
     $cronMinute: String
     $cronDayOfWeek: String
-    $clockedTime: String
+    $clockedTime: DateTime
     $solarEvent: String
     $solarLatitude: Float
     $solarLongitude: Float
-    $args: JSONString
+    $args: GenericScalar
     $enabled: Boolean!
   ) {
     createDynamicSchedule(
@@ -126,17 +127,17 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
   mutation UpdateDynamicSchedule(
     $scheduleUuid: UUID!
     $name: String
-    $jobKind: String
-    $scheduleType: String
+    $jobKind: JobKind
+    $scheduleType: ScheduleTypeEnum
     $interval: Int
     $cronHour: String
     $cronMinute: String
     $cronDayOfWeek: String
-    $clockedTime: String
+    $clockedTime: DateTime
     $solarEvent: String
     $solarLatitude: Float
     $solarLongitude: Float
-    $args: JSONString
+    $args: GenericScalar
     $enabled: Boolean
   ) {
     updateDynamicSchedule(
@@ -318,7 +319,8 @@ export class SchedulingService extends BaseService {
       map(({ schedules }) =>
         schedules.filter((schedule) => {
           // Filter schedules that could apply to this episode's podcast
-          return schedule.args && (schedule.args as Record<string, string>)['podcast_uuid'];
+          const parsedArgs = parseScheduleArgs(schedule.args);
+          return parsedArgs['podcast_uuid'];
         }),
       ),
     );

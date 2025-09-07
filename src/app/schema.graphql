@@ -61,6 +61,7 @@ type ApiQuery {
     updatedAt: DateTime
     scheduleUuid: UUID
     nameContains: String
+    episodeUuid: UUID
     createdAfter: DateTime
     createdBefore: DateTime
 
@@ -749,9 +750,23 @@ type DynamicScheduleTypeEdge {
 type DynamicScheduleType implements Node {
   name: String!
   jobKind: JobKind
+  scheduleType: ScheduleTypeEnum
 
   """Interval in seconds"""
-  interval: Int!
+  interval: Int
+  cronMinute: String
+  cronHour: String
+  cronDayOfWeek: String
+
+  """Cron day of month field"""
+  cronDayOfMonth: String!
+
+  """Cron month of year field"""
+  cronMonthOfYear: String!
+  clockedTime: DateTime
+  solarEvent: String
+  solarLatitude: Float
+  solarLongitude: Float
   args: GenericScalar
   kwargs: GenericScalar
   enabled: Boolean!
@@ -780,6 +795,14 @@ enum JobKind {
   FETCH_INCOME_STATEMENT
   FETCH_CASH_FLOW
   FETCH_EARNINGS
+}
+
+"""GraphQL enum for schedule types"""
+enum ScheduleTypeEnum {
+  INTERVAL
+  CRONTAB
+  CLOCKED
+  SOLAR
 }
 
 """Site-wide statistics without sensitive data"""
@@ -1168,16 +1191,38 @@ type ApiMutation {
   """Generate a DCF analysis report for a stock symbol"""
   createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
 
-  """Mutation to create a new dynamic schedule."""
+  """
+  Mutation to create a new dynamic schedule supporting multiple schedule types.
+  """
   createDynamicSchedule(
     """Arguments to pass to the job"""
     args: GenericScalar
 
+    """One-time execution datetime (required for clocked schedules)"""
+    clockedTime: DateTime
+
+    """Cron day of month field (default: '*')"""
+    cronDayOfMonth: String
+
+    """Cron day of week field (default: '*')"""
+    cronDayOfWeek: String
+
+    """Cron hour field (default: '*')"""
+    cronHour: String
+
+    """Cron minute field (default: '*')"""
+    cronMinute: String
+
+    """Cron month of year field (default: '*')"""
+    cronMonthOfYear: String
+
     """Whether the schedule is enabled"""
     enabled: Boolean = true
 
-    """Interval in seconds between executions"""
-    interval: Int!
+    """
+    Interval in seconds between executions (required for interval schedules)
+    """
+    interval: Int
 
     """Type of job to schedule"""
     jobKind: JobKind!
@@ -1187,12 +1232,42 @@ type ApiMutation {
 
     """Unique name for the schedule"""
     name: String!
+
+    """Type of schedule"""
+    scheduleType: ScheduleTypeEnum = INTERVAL
+
+    """Solar event: 'sunrise' or 'sunset' (required for solar schedules)"""
+    solarEvent: String
+
+    """Latitude for solar calculations (required for solar schedules)"""
+    solarLatitude: Float
+
+    """Longitude for solar calculations (required for solar schedules)"""
+    solarLongitude: Float
   ): CreateDynamicSchedule
 
   """Mutation to update an existing dynamic schedule."""
   updateDynamicSchedule(
     """New arguments to pass to the job"""
     args: GenericScalar
+
+    """New one-time execution datetime"""
+    clockedTime: DateTime
+
+    """New cron day of month field"""
+    cronDayOfMonth: String
+
+    """New cron day of week field"""
+    cronDayOfWeek: String
+
+    """New cron hour field"""
+    cronHour: String
+
+    """New cron minute field"""
+    cronMinute: String
+
+    """New cron month of year field"""
+    cronMonthOfYear: String
 
     """Whether the schedule is enabled"""
     enabled: Boolean
@@ -1209,8 +1284,20 @@ type ApiMutation {
     """New name for the schedule"""
     name: String
 
+    """New schedule type"""
+    scheduleType: ScheduleTypeEnum
+
     """UUID of the schedule to update"""
     scheduleUuid: UUID!
+
+    """New solar event: 'sunrise' or 'sunset'"""
+    solarEvent: String
+
+    """New latitude for solar calculations"""
+    solarLatitude: Float
+
+    """New longitude for solar calculations"""
+    solarLongitude: Float
   ): UpdateDynamicSchedule
 
   """Mutation to delete a dynamic schedule."""
@@ -1433,7 +1520,9 @@ type CreateDiscountedCashFlowAnalysis {
   report: DiscountedCashFlowAnalysisType
 }
 
-"""Mutation to create a new dynamic schedule."""
+"""
+Mutation to create a new dynamic schedule supporting multiple schedule types.
+"""
 type CreateDynamicSchedule {
   success: Boolean
   message: String
