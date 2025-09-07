@@ -179,6 +179,54 @@
     }
   }
 
+  .job-message {
+    margin-top: 8px;
+
+    .message-text {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .job-link {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--description-color);
+      display: flex;
+      align-items: center;
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .link-separator {
+        margin: 0 6px;
+        color: var(--description-color);
+        font-weight: 400;
+      }
+    }
+  }
+
+  .job-timestamps {
+    margin-top: 8px;
+
+    .timestamp-text {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 2px;
+
+      strong {
+        font-weight: 500;
+      }
+    }
+  }
+
   .job-card {
     button {
       margin-right: 1em;

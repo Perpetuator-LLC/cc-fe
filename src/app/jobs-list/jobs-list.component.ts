@@ -27,6 +27,7 @@ import { RouterLink } from '@angular/router';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { JobDisplayService } from '../job-display.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -83,6 +84,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private podcastsService: PodcastsService,
     private episodeService: EpisodeService,
+    private jobDisplayService: JobDisplayService,
   ) {}
 
   ngOnInit(): void {

@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
@@ -8,10 +9,24 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, JsonPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Job, JobService, JobStatus, JobKind, kindToString, stringToJobStatus, statusToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { JobDisplayService } from '../job-display.service';
+import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { EpisodeService } from '../episode.service';
+
+interface EnrichedJob extends Job {
+  podcastName?: string;
+  episodeName?: string;
+}
+
+interface Episode {
+  uuid: string;
+  title?: string;
+}
 
 @Component({
   selector: 'app-job-status-bar',
@@ -31,16 +46,21 @@ import { toObservable } from '@angular/core/rxjs-interop';
     MatCardTitle,
     DatePipe,
     JsonPipe,
+    RouterLink,
   ],
   templateUrl: './job-status-bar.component.html',
   styleUrl: './job-status-bar.component.scss',
 })
 export class JobStatusBarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  protected jobs: Job[] = [];
+  protected jobs: EnrichedJob[] = [];
+
   constructor(
     private jobService: JobService,
     private messageService: MessageService,
+    private jobDisplayService: JobDisplayService,
+    private podcastsService: PodcastsService,
+    private episodeService: EpisodeService,
   ) {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
@@ -50,7 +70,14 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
           this.messageService.error(`${kindToString(job.kind)} failed: ${job.error}`);
         });
-        this.jobs = jobs;
+        this.enrichJobsWithNames(jobs)
+          .then((enrichedJobs) => {
+            this.jobs = enrichedJobs;
+          })
+          .catch((error) => {
+            console.warn('Failed to enrich jobs with names:', error);
+            this.jobs = jobs.map((job) => ({ ...job }));
+          });
       },
       error: (error) => {
         this.messageService.error(`Failed to load jobs: ${error.message}`);
@@ -90,7 +117,14 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           currentJobIds,
         )
         .subscribe((result) => {
-          this.jobs = result.jobs;
+          this.enrichJobsWithNames(result.jobs)
+            .then((enrichedJobs) => {
+              this.jobs = enrichedJobs;
+            })
+            .catch((error) => {
+              console.warn('Failed to enrich jobs with names:', error);
+              this.jobs = result.jobs.map((job) => ({ ...job }));
+            });
         }),
     );
   }
@@ -123,6 +157,126 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  // Enrich jobs with podcast and episode names using GraphQL queries
+  private async enrichJobsWithNames(jobs: Job[]): Promise<EnrichedJob[]> {
+    // Extract unique UUIDs from all jobs
+    const podcastUuids = new Set<string>();
+    const episodeUuids = new Set<string>();
+
+    jobs.forEach((job) => {
+      const result = this.jobDisplayService.parseJobResult(job);
+      if (result?.podcast_uuid) {
+        podcastUuids.add(result.podcast_uuid);
+      }
+      if (result?.episode_uuid) {
+        episodeUuids.add(result.episode_uuid);
+      }
+    });
+
+    // Create observables for fetching data
+    const queries = [];
+
+    if (podcastUuids.size > 0) {
+      queries.push(this.fetchPodcastNames(Array.from(podcastUuids)));
+    }
+
+    if (episodeUuids.size > 0) {
+      queries.push(this.fetchEpisodeNames(Array.from(episodeUuids)));
+    }
+
+    // If no UUIDs to fetch, return jobs as-is
+    if (queries.length === 0) {
+      return jobs.map((job) => ({ ...job }));
+    }
+
+    try {
+      const results = await forkJoin(queries).toPromise();
+
+      // Create lookup maps
+      const podcastNameMap = new Map<string, string>();
+      const episodeNameMap = new Map<string, string>();
+
+      if (results) {
+        results.forEach((result: { podcasts?: PodcastsResult[]; episodes?: Episode[] }) => {
+          if (result.podcasts) {
+            result.podcasts.forEach((podcast: PodcastsResult) => {
+              podcastNameMap.set(podcast.uuid, podcast.name || 'Unnamed Podcast');
+            });
+          }
+          if (result.episodes) {
+            result.episodes.forEach((episode: Episode) => {
+              episodeNameMap.set(episode.uuid, episode.title || 'Untitled Episode');
+            });
+          }
+        });
+      }
+
+      // Enrich jobs with the fetched names
+      return jobs.map((job) => {
+        const enrichedJob: EnrichedJob = { ...job };
+        const result = this.jobDisplayService.parseJobResult(job);
+
+        if (result?.podcast_uuid && podcastNameMap.has(result.podcast_uuid)) {
+          enrichedJob.podcastName = podcastNameMap.get(result.podcast_uuid);
+        }
+
+        if (result?.episode_uuid && episodeNameMap.has(result.episode_uuid)) {
+          enrichedJob.episodeName = episodeNameMap.get(result.episode_uuid);
+        }
+
+        return enrichedJob;
+      });
+    } catch (error) {
+      console.warn('Failed to fetch podcast/episode names:', error);
+      return jobs.map((job) => ({ ...job }));
+    }
+  }
+
+  // Fetch multiple podcast names efficiently
+  private fetchPodcastNames(uuids: string[]) {
+    const queries = uuids.map((uuid) => this.podcastsService.getPodcastById(uuid).pipe());
+
+    return forkJoin(queries).pipe(map((podcasts) => ({ podcasts })));
+  }
+
+  // Fetch multiple episode names efficiently
+  private fetchEpisodeNames(uuids: string[]) {
+    const queries = uuids.map((uuid) => this.episodeService.getEpisodeById(uuid).pipe());
+
+    return forkJoin(queries).pipe(map((episodes) => ({ episodes })));
+  }
+
+  // Delegate to shared service methods
+  getJobMessage(job: Job): string {
+    return this.jobDisplayService.getJobMessage(job);
+  }
+
+  hasPodcastUuid(job: Job): boolean {
+    return this.jobDisplayService.hasPodcastUuid(job);
+  }
+
+  hasEpisodeUuid(job: Job): boolean {
+    return this.jobDisplayService.hasEpisodeUuid(job);
+  }
+
+  getPodcastUuid(job: Job): string | null {
+    return this.jobDisplayService.getPodcastUuid(job);
+  }
+
+  getEpisodeUuid(job: Job): string | null {
+    return this.jobDisplayService.getEpisodeUuid(job);
+  }
+
+  // Get podcast name from enriched job
+  getPodcastName(job: EnrichedJob): string {
+    return job.podcastName || 'Podcast';
+  }
+
+  // Get episode name from enriched job
+  getEpisodeName(job: EnrichedJob): string {
+    return job.episodeName || 'Episode';
   }
 
   protected readonly kindToString = kindToString;
