@@ -113,7 +113,7 @@
     input {
       border: 0;
       background: transparent;
-      color: #b5b5b5;
+      color: var(--description-color);
       height: 36px;
       width: 100%;
     }
@@ -125,7 +125,7 @@
 
     .mat-mdc-form-field-flex {
       border-radius: 8px !important;
-      background-color: #373c43;
+      background-color: var(--secondary-dark);
       padding: 0 16px;
     }
 
@@ -160,7 +160,7 @@
     }
 
     input::placeholder {
-      color: #b5b5b5;
+      color: var(--description-color);
       opacity: 1;
     }
 
@@ -324,7 +324,7 @@
   }
 
   .mat-mdc-button {
-    color: #f14a00;
+    color: var(--primary);
   }
 
   .img {
