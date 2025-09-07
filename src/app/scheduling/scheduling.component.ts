@@ -22,6 +22,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MessageComponent } from '../message/message.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { parseScheduleArgs } from '../utils/schedule';
 
 @Component({
   selector: 'app-scheduling',
@@ -233,10 +234,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     this.showCreateForm = true;
 
     // Parse args to get podcast UUID
-    const podcastUuid =
-      schedule.args && typeof schedule.args === 'object'
-        ? (schedule.args as Record<string, string>)['podcast_uuid']
-        : '';
+    const parsedArgs = parseScheduleArgs(schedule.args);
+    const podcastUuid = parsedArgs['podcast_uuid'] || '';
 
     this.scheduleForm.patchValue({
       name: schedule.name,
@@ -367,9 +366,9 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   }
 
   getPodcastName(schedule: DynamicSchedule): string {
-    if (!schedule.args || typeof schedule.args !== 'object') return 'N/A';
+    const parsedArgs = parseScheduleArgs(schedule.args);
+    const podcastUuid = parsedArgs['podcast_uuid'];
 
-    const podcastUuid = (schedule.args as Record<string, string>)['podcast_uuid'];
     if (!podcastUuid) return 'N/A';
 
     const podcast = this.podcasts.find((p) => p.uuid === podcastUuid);
