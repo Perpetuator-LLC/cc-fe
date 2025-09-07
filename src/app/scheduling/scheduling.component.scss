@@ -62,10 +62,10 @@
     }
 
     button {
-      background: #f14a00;
+      background: var(--primary);
       border-radius: 10px;
-      border: 1px solid #ffffff57;
-      color: white;
+      border: 1px solid var(--border-color);
+      color: var(--theme-white);
       font-weight: 600;
       font-size: 14px;
       line-height: 100%;

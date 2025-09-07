@@ -21,7 +21,7 @@ mat-card {
 mat-card.register-card {
   max-width: 800px;
   background-color: var(--secondary-color);
-  border: 1px solid #a9a3c257;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 
   h3 {
@@ -33,11 +33,11 @@ mat-card.register-card {
   }
 
   .login-btn {
-    background: #811cfd;
+    background: var(--purple);
     width: 100%;
     border-radius: 10px;
-    color: #ffffff;
-    border: 1px solid #ffffff1a;
+    color: var(--theme-white);
+    border: 1px solid var(--border-color);
   }
 
   .forgot {

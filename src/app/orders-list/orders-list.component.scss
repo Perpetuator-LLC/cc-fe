@@ -124,7 +124,7 @@
 
     .pay-btn {
       background-color: var(--theme-white);
-      border: 1px solid #ffffff57;
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       width: 100%;
       padding: 12px;
@@ -155,24 +155,21 @@
 // Status classes for order status
 .order-status {
   padding: 2px 8px;
-  color: white;
+  color: var(--theme-white);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
 
   &.paid {
-    background-color: #2e7d32;
-    /* green */
+    background-color: var(--md-sys-color-success);
   }
 
   &.pending {
-    background-color: #f9a825;
-    /* orange */
+    background-color: var(--md-sys-color-warning);
   }
 
   &.cancelled {
-    background-color: #f12c00;
-    /* red */
+    background-color: var(--md-sys-color-error);
   }
 }
 

@@ -37,14 +37,14 @@ mat-card {
 
   .hero-banner-card {
     padding: 8px 40px;
-    background-color: #f5d6c8;
+    background-color: var(--secondary-light);
 
     @media screen and (max-width: 576px) {
       padding: 8px 20px;
     }
 
     h1 {
-      color: #262627;
+      color: var(--theme-color);
       font-size: 40px;
       font-weight: 700;
       margin: 0;
@@ -60,7 +60,7 @@ mat-card {
 
     p {
       font-size: 18px;
-      color: #262627;
+      color: var(--theme-color);
       font-weight: 500;
       margin: 12px 0 20px;
 
@@ -72,11 +72,11 @@ mat-card {
     button {
       background-color: var(--primary);
       border-radius: 10px;
-      color: white;
+      color: var(--theme-white);
       font-size: 16px;
       font-weight: 500;
       box-shadow: none;
-      border: 1px solid rgba(255, 255, 255, 0.34);
+      border: 1px solid var(--border-color);
     }
 
     .hero-content {

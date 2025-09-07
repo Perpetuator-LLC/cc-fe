@@ -92,7 +92,7 @@ mat-divider {
 }
 
 .danger-zone {
-  color: red;
+  color: var(--md-sys-color-error);
 }
 
 .danger-card {
@@ -106,7 +106,7 @@ mat-divider {
     padding-bottom: 30px;
   }
   .delete-btn {
-    background-color: #ff4a4a;
+    background-color: var(--md-sys-color-error);
     color: white;
     padding: 0;
     font-size: 14px;
@@ -214,7 +214,7 @@ mat-divider {
 
         .delete-btn {
           background-color: transparent;
-          color: #ff4a4a;
+          color: var(--md-sys-color-error);
           padding: 0;
           font-size: 14px;
           font-weight: 600;
@@ -263,7 +263,7 @@ mat-divider {
         font-size: 12px;
         line-height: 100%;
         letter-spacing: 0%;
-        color: #b5b5b5;
+        color: var(--description-color);
       }
     }
   }
@@ -280,12 +280,12 @@ mat-divider {
   }
 
   .enable {
-    background: #4cb782;
+    background: var(--md-sys-color-success);
     border-radius: 6px;
-    color: white;
+    color: var(--theme-white);
     font-size: 12px;
     font-weight: 500;
-    border: 1px solid 1px solid #ffffffe6;
+    border: 1px solid var(--border-color);
     width: 50px;
     height: 20px;
     display: inline-flex;
@@ -324,7 +324,7 @@ mat-divider {
     input {
       border: 0;
       background: transparent;
-      color: #b5b5b5;
+      color: var(--description-color);
       height: 36px;
       width: 100%;
     }
@@ -333,8 +333,8 @@ mat-divider {
   .save-btn {
     background-color: var(--primary);
     border-radius: 10px;
-    color: white;
-    border: 1px solid #ffffff24;
+    color: var(--theme-white);
+    border: 1px solid var(--border-color);
     font-size: 14px;
     font-weight: 600;
   }
