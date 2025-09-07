@@ -99,6 +99,11 @@
   box-shadow: none;
   border-bottom: 1px solid var(--border-color);
   border-radius: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: 20px;
+  transform: translateY(-20px);
 
   .content-header {
     display: flex;

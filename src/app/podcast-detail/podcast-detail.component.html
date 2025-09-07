@@ -20,10 +20,6 @@
         <p>{{ podcastForm.get('intro')?.value }}</p>
       </div>
       <div class="buttons">
-        <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
-          <mat-icon>delete</mat-icon>
-          Delete Podcast
-        </button>
         <button
           mat-flat-button
           color="primary"
@@ -40,19 +36,30 @@
       <div class="status-summary">
         <div class="status-item">
           <span class="status-label">Team</span>
-          <span class="status-value">
-            {{ podcastForm.get('team')?.value?.name || 'No team selected' }}
-          </span>
+          <ng-container *ngIf="podcastForm.get('team')?.value?.name; else noTeamSelected">
+            <a href="/team/{{ podcastForm.get('team')?.value?.uuid }}" class="status-value">
+              {{ podcastForm.get('team')?.value?.name }}
+            </a>
+          </ng-container>
+          <ng-template #noTeamSelected>
+            <span class="status-value">No team selected</span>
+          </ng-template>
         </div>
 
         <div class="status-item">
           <span class="status-label">Response</span>
-          <span class="status-badge enable">Enable</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcastForm.get('tgResponse')?.value"
+            [class.disable]="!podcastForm.get('tgResponse')?.value"
+          >
+            {{ podcastForm.get('tgResponse')?.value ? 'Enable' : 'Disable' }}
+          </span>
         </div>
 
         <div class="status-item">
           <span class="status-label">Last Created</span>
-          <span class="status-value">2 days ago</span>
+          <span class="status-value">{{ podcastForm.get('voice')?.value?.updatedAt | date: 'mediumDate' }}</span>
         </div>
       </div>
     </div>
@@ -68,6 +75,67 @@
           </div>
 
           <form [formGroup]="podcastForm">
+            <div class="member-row" style="margin-bottom: 20px">
+              <div class="file-input-wrapper">
+                <div class="image-preview">
+                  @if (imageUrl) {
+                    <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
+                  } @else {
+                    <div></div>
+                  }
+                </div>
+
+                @if (selectedFile) {
+                  <div class="upload-progress upload-btn">
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span>Uploading: {{ selectedFile.name }}</span>
+                  </div>
+                } @else {
+                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
+                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g clip-path="url(#clip0_210_6192)">
+                        <path
+                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
+                          fill="currentColor"
+                        />
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_210_6192">
+                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                    Upload Podcast Featured Image
+                  </button>
+
+                  <span class="desc">Upload image file (PNG/JPG, max size: 100KB)</span>
+                }
+
+                <input
+                  #fileInput
+                  type="file"
+                  formControlName="image"
+                  (change)="onPodcastImageSelected($event)"
+                  accept="image/*"
+                  hidden
+                />
+              </div>
+
+              <div class="image-actions">
+                @if (imageUrl) {
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="deletePodcastImage()"
+                    matTooltip="Delete image"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+
             <div class="form-group">
               <div class="member-row">
                 <mat-form-field appearance="fill" class="custom-dark-field">
@@ -125,68 +193,6 @@
                 </div>
               </div>
             </div>
-
-            <div class="member-row" style="margin-bottom: 20px">
-              <div class="file-input-wrapper">
-                <div class="image-preview">
-                  @if (imageUrl) {
-                    <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
-                  } @else {
-                    <div></div>
-                  }
-                </div>
-
-                @if (selectedFile) {
-                  <div class="upload-progress upload-btn">
-                    <mat-spinner diameter="20"></mat-spinner>
-                    <span>Uploading: {{ selectedFile.name }}</span>
-                  </div>
-                } @else {
-                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
-                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clip-path="url(#clip0_210_6192)">
-                        <path
-                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
-                          fill="currentColor"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_210_6192">
-                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    Upload Podcast Featured Image
-                  </button>
-
-                  <span class="desc">Upload image file (PNG/JPG, max size: 750KB)</span>
-                }
-
-                <input
-                  #fileInput
-                  type="file"
-                  formControlName="image"
-                  (change)="onPodcastImageSelected($event)"
-                  accept="image/*"
-                  hidden
-                />
-              </div>
-
-              <div class="image-actions">
-                @if (imageUrl) {
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    type="button"
-                    (click)="deletePodcastImage()"
-                    matTooltip="Delete image"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                }
-              </div>
-            </div>
-
           </form>
         </mat-card-content>
       </mat-tab>
@@ -265,13 +271,23 @@
                 </button>
 
                 <mat-menu #filterMenu="matMenu" class="filter-menu">
-                  <div class="filter-container" role="button" tabindex="0" (click)="$event.stopPropagation()"
-                    (keydown.space)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+                  <div
+                    class="filter-container"
+                    role="button"
+                    tabindex="0"
+                    (click)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()"
+                    (keydown.enter)="$event.stopPropagation()"
+                  >
                     @for (tier of voiceTiers; track tier) {
-                    <mat-checkbox [value]="tier" [checked]="voiceFilter.value?.includes(tier)" (change)="onCheckboxChange($event, tier)"
-                      class="checkbox-block">
-                      {{ tierToString(tier) }}
-                    </mat-checkbox>
+                      <mat-checkbox
+                        [value]="tier"
+                        [checked]="voiceFilter.value?.includes(tier)"
+                        (change)="onCheckboxChange($event, tier)"
+                        class="checkbox-block"
+                      >
+                        {{ tierToString(tier) }}
+                      </mat-checkbox>
                     }
 
                     <button mat-button color="warn" (click)="clearVoiceFilters()">Clear All</button>
@@ -323,15 +339,16 @@
                       (mouseleave)="stopVoiceSample()"
                       (click)="$event.stopPropagation()"
                     >
-                      <ng-container
-                        *ngIf="currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid; else playIcon"
-                      >
-                        <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
-                        <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
-                      </ng-container>
-                      <ng-template #playIcon>
-                        <app-svg-icon icon="play"></app-svg-icon>
-                      </ng-template>
+                      @if (currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid) {
+                        <ng-container>
+                          <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
+                          <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
+                        </ng-container>
+                      } @else {
+                        <ng-container #playIcon>
+                          <app-svg-icon icon="play"></app-svg-icon>
+                        </ng-container>
+                      }
                     </button>
                     <div class="voice-name">
                       {{ getVoiceDisplayName(voice) }}
@@ -526,6 +543,20 @@
             </div>
           </form>
         </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="Danger Zone">
+        <mat-card-content>
+          <h3>Danger Zone Settings</h3>
+          <p>Here you can find advanced and potentially destructive actions related to your podcast.</p>
+        </mat-card-content>
+        <mat-card class="danger-card">
+          <div class="danger-card-title">Delete Podcast</div>
+          <p>Once you delete a podcast, it will be permanently removed from the data.</p>
+          <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
+            Delete this Podcast
+          </button>
+        </mat-card>
       </mat-tab>
     </mat-tab-group>
   </mat-card>

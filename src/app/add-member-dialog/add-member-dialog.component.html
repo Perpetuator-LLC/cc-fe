@@ -9,6 +9,7 @@
           [users]="users"
           (userSelected)="onUserSelected($event)"
           (searchValueChanged)="searchUsers($event)"
+          [initialUser]="data.member?.user"
         >
         </app-user-autocomplete>
       </div>
@@ -32,6 +33,6 @@
 <mat-dialog-actions align="end">
   <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
   <button class="savePodcastBtn" mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!newUserForm.valid">
-    Add Member
+    {{ data.member ? 'Update Member' : 'Add Member' }}
   </button>
 </mat-dialog-actions>

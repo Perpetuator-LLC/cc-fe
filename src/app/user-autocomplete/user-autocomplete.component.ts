@@ -33,17 +33,36 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
   @Output() userSelected = new EventEmitter<{ uuid: string; username: string }>();
   @Output() searchValueChanged = new EventEmitter<string>();
   @Input() users!: User[];
+  @Input() initialUser: User | undefined;
+  @Input() disabled = false;
 
   constructor(private teamsService: TeamsService) {}
 
   ngOnInit() {
+    if (this.initialUser) {
+      this.searchControl.setValue(this.initialUser);
+    }
+    if (this.disabled) {
+      this.searchControl.disable();
+    } else {
+      this.searchControl.enable();
+    }
     this.setupFilteredUsers();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Re-filter when users array changes
     if (changes['users'] && this.searchControl) {
       this.setupFilteredUsers();
+    }
+    if (changes['initialUser'] && this.initialUser) {
+      this.searchControl.setValue(this.initialUser);
+    }
+    if (changes['disabled']) {
+      if (this.disabled) {
+        this.searchControl.disable();
+      } else {
+        this.searchControl.enable();
+      }
     }
   }
 
@@ -88,8 +107,8 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
     this.userSelected.emit(user);
   }
 
-  displayFn(user: { id: string; username: string }): string {
-    return user ? user.username : '';
+  displayFn(user: User | string): string {
+    return user ? (typeof user === 'string' ? user : user.username) : '';
   }
 
   clearInput() {

@@ -95,6 +95,37 @@ mat-divider {
   color: red;
 }
 
+.danger-card {
+  background: var(--secondary-light) !important;
+  color: var(--theme-color);
+  border: 1px solid var(--border-color);
+  margin-top: 20px;
+  p{
+    margin: 0;
+    padding: 0 20px;
+    padding-bottom: 30px;
+  }
+  .delete-btn {
+    background-color: #ff4a4a;
+    color: white;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    width: fit-content;
+    margin-left: 20px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+  }
+}
+.danger-card-title{
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  margin-inline: 10px;
+}
+
 .action-row {
   display: flex;
   flex-wrap: wrap;
