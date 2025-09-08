@@ -1,11 +1,132 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 .middle-card {
+  padding-top: 1.5em;
   padding-inline: 30px;
   background-color: var(--secondary-color);
+  position: relative;
 
   @media screen and (max-width: 576px) {
     padding-inline: 20px;
+  }
+}
+
+// Compact filter in upper right corner
+.filter-container-top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+
+  @media screen and (max-width: 576px) {
+    right: 20px;
+    top: 15px;
+  }
+
+  .status-filter-compact {
+    width: 140px;
+    font-size: 12px;
+
+    ::ng-deep .mat-mdc-form-field-wrapper {
+      height: 36px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      min-height: 20px;
+      padding: 8px 0;
+    }
+
+    ::ng-deep .mdc-notched-outline__leading,
+    ::ng-deep .mdc-notched-outline__notch,
+    ::ng-deep .mdc-notched-outline__trailing {
+      border-color: var(--border-color);
+      border-width: 1px;
+    }
+
+    ::ng-deep .mdc-notched-outline--focused .mdc-notched-outline__leading,
+    ::ng-deep .mdc-notched-outline--focused .mdc-notched-outline__notch,
+    ::ng-deep .mdc-notched-outline--focused .mdc-notched-outline__trailing {
+      border-color: var(--primary);
+      border-width: 1px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    ::ng-deep .mat-mdc-select-value {
+      font-size: 12px;
+      color: var(--description-color);
+    }
+
+    @media screen and (max-width: 576px) {
+      width: 120px;
+      font-size: 11px;
+
+      ::ng-deep .mat-mdc-select-value {
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+.timeline-date-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--theme-color);
+  margin-bottom: 24px;
+}
+
+// Empty state styling
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  .empty-state-content {
+    max-width: 400px;
+  }
+
+  .empty-state-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--description-color);
+    margin-bottom: 16px;
+  }
+
+  .empty-state-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin: 0 0 12px 0;
+  }
+
+  .empty-state-message {
+    font-size: 16px;
+    color: var(--description-color);
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Legacy filter container (kept for compatibility)
+.filter-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-top: 20px;
+
+  .status-filter {
+    width: 200px;
+    font-size: 14px;
+
+    @media screen and (max-width: 576px) {
+      width: 100%;
+    }
   }
 }
 
@@ -15,7 +136,6 @@
   font-weight: 500;
   font-size: 12px;
   line-height: 100%;
-  //letter-spacing: 0%;
   padding: 4px 8px;
   color: var(--theme-color);
   display: inline-flex;
@@ -42,28 +162,20 @@
   border-radius: 6px;
 }
 
+.job-running {
+  color: var(--theme-white);
+  background-color: var(--md-sys-color-primary);
+  border-radius: 6px;
+}
+
 .timeline {
   position: relative;
   margin: -20px auto 0;
-  //padding: 3.25rem 0;
   max-width: 1140px;
 
   @media screen and (max-width: 576px) {
     margin: 1rem auto;
   }
-}
-
-.timeline-date {
-  font-weight: 400;
-  font-size: 10px;
-  color: #aaa;
-}
-
-.timeline-date-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--theme-color);
-  margin-bottom: 24px;
 }
 
 .timeline-spacing {
@@ -119,6 +231,10 @@
   &.job-pending {
     background: var(--md-sys-color-warning);
   }
+
+  &.job-running {
+    background: var(--md-sys-color-primary);
+  }
 }
 
 .timeline-content {
@@ -137,17 +253,35 @@
 
 .timeline-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 0.5rem;
+  gap: 12px;
 
-  .flex {
+  .timeline-left-content {
     display: flex;
     align-items: center;
-    gap: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
 
-    @media screen and (max-width: 576px) {
+    @media screen and (max-width: 768px) {
       flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    // Add bullet separator between timeline-title and timeline-meta
+    .timeline-meta::before {
+      //content: '-';
+      //margin-right: 20px;
+      //color: var(--secondary-500);
+      //font-weight: bold;
+
+      @media screen and (max-width: 768px) {
+        display: none; // Hide on mobile when stacked vertically
+      }
     }
   }
 }
@@ -156,6 +290,8 @@
   font-weight: 600;
   font-size: 14px;
   color: var(--theme-color);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .timeline-status {
@@ -163,6 +299,8 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 
   &.job-success {
     background: var(--md-sys-color-success);
@@ -178,35 +316,72 @@
     background: var(--md-sys-color-warning);
     color: var(--theme-color);
   }
+
+  &.job-running {
+    background: var(--md-sys-color-primary);
+    color: var(--theme-white);
+  }
 }
 
 .timeline-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 11px;
   color: var(--description-color);
-  width: 100%;
+  flex-wrap: wrap;
 
   &.mobile {
     display: none;
   }
 
-  @media screen and (max-width: 576px) {
+  @media screen and (max-width: 768px) {
     &.desktop {
       display: none;
     }
 
     &.mobile {
       display: flex;
+      justify-content: space-between;
+      width: 100%;
     }
   }
 
-  .timeline-content-left {
+  > span {
+    white-space: nowrap;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 4px;
+
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: 6px;
+      color: var(--secondary-500);
+      font-weight: bold;
+    }
+  }
+
+  .timeline-cost {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    // Ensure the bullet separator applies to timeline-cost
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: 6px;
+      color: var(--secondary-500);
+      font-weight: bold;
+    }
+  }
+
+  .timeline-date {
+    font-weight: 400;
+    font-size: 11px;
   }
 
   .dot-div {
@@ -221,13 +396,6 @@
     border-radius: 50%;
     background-color: var(--secondary-500);
     display: inline-block;
-  }
-
-  .timeline-cost {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
   }
 
   .timeline-actions {

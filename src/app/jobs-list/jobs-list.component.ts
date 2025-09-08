@@ -26,8 +26,9 @@ import { MessageComponent } from '../message/message.component';
 import { RouterLink } from '@angular/router';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { JobDisplayService } from '../job-display.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -55,7 +56,8 @@ interface Episode {
     DecimalPipe,
     NgClass,
     RouterLink,
-    MatProgressSpinner,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -73,6 +75,18 @@ export class JobsListComponent implements OnInit, OnDestroy {
   hasNextPage = false;
   currentCursor: string | null = null;
   isLoadingMore = false;
+
+  // New status filter property
+  statusFilter: string | null = null;
+
+  // Available status options for the dropdown
+  statusOptions = [
+    { value: null, label: 'All Statuses' },
+    { value: JobStatus.PENDING, label: 'Pending' },
+    { value: JobStatus.RUNNING, label: 'Running' },
+    { value: JobStatus.COMPLETED, label: 'Completed' },
+    { value: JobStatus.FAILED, label: 'Failed' },
+  ];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -103,8 +117,11 @@ export class JobsListComponent implements OnInit, OnDestroy {
       this.isLoadingMore = true;
     }
 
+    // Build statuses array based on filter
+    const statuses = this.statusFilter ? [this.statusFilter] : [];
+
     this.subscriptions.add(
-      this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
+      this.jobService.getJobs(statuses, [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ jobs, pageInfo }) => {
           this.enrichJobsWithNames(jobs)
             .then((enrichedJobs) => {
@@ -287,9 +304,29 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Group jobs by date for timeline view
+  // Method to handle status filter change
+  onStatusFilterChange(newStatus: string | null): void {
+    this.statusFilter = newStatus;
+    this.loadJobs(); // Reload jobs with new filter
+  }
+
+  // Get status label for display
+  getStatusLabel(status: string): string {
+    const option = this.statusOptions.find((opt) => opt.value === status);
+    return option ? option.label : 'Unknown';
+  }
+
+  // Group jobs by date for timeline view - apply client-side filtering if needed
   get groupedJobs() {
     if (!this.jobs) return [];
+
+    let filteredJobs = this.jobs;
+
+    // Apply client-side filtering if a specific status is selected
+    if (this.statusFilter) {
+      filteredJobs = this.jobs.filter((job) => stringToJobStatus(job.status) === stringToJobStatus(this.statusFilter!));
+    }
+
     const groups: { label: string; jobs: Job[] }[] = [];
     const today = new Date();
     const yesterday = new Date();
@@ -320,7 +357,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     };
 
-    const jobsByDate = this.jobs.reduce((acc: Record<string, Job[]>, job) => {
+    const jobsByDate = filteredJobs.reduce((acc: Record<string, Job[]>, job) => {
       const dateKey = job.createdAt.split('T')[0];
       if (!acc[dateKey]) {
         acc[dateKey] = [];
