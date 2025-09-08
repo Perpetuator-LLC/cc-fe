@@ -10,34 +10,51 @@
   <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
 </div>
 } @else if (groupedJobs.length === 0) {
-<div class="empty-state">
-  <div class="empty-state-content">
-    <mat-icon class="empty-state-icon">work_off</mat-icon>
-    <h3 class="empty-state-title">No Jobs Found</h3>
-    <p class="empty-state-message">
-      @if (statusFilter) {
-        No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new job.
-      } @else {
-        No jobs have been created yet. Jobs will appear here once you start running processes.
-      }
-    </p>
+  <div class="middle-card">
+    <div class="jobs-container">
+      <div class="timeline">
+        <!-- Status Filter in upper right corner -->
+        <div class="filter-container-top-right">
+          <mat-form-field appearance="outline" class="status-filter-compact">
+            <mat-select [value]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" placeholder="All Statuses">
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-state-content">
+            <mat-icon class="empty-state-icon">work_off</mat-icon>
+            <h3 class="empty-state-title">No Jobs Found</h3>
+            <p class="empty-state-message">
+              @if (statusFilter) {
+                No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new job.
+              } @else {
+                No jobs have been created yet. Jobs will appear here once you start running processes.
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 } @else {
 <div class="middle-card">
-  <!-- Status Filter in upper right corner -->
-  <div class="filter-container-top-right">
-    <mat-form-field appearance="outline" class="status-filter-compact">
-      <mat-select [value]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" placeholder="All Statuses">
-        @for (option of statusOptions; track option.value) {
-          <mat-option [value]="option.value">{{ option.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
-
   <div class="jobs-container">
     <div class="timeline">
+      <!-- Status Filter in upper right corner -->
+      <div class="filter-container-top-right">
+        <mat-form-field appearance="outline" class="status-filter-compact">
+          <mat-select [value]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" placeholder="All Statuses">
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       @for (group of groupedJobs; track group.label) {
         <div class="timeline-date-title">{{ group.label }}</div>
         <div class="timeline-spacing">
