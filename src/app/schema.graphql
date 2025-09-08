@@ -61,7 +61,6 @@ type ApiQuery {
     updatedAt: DateTime
     scheduleUuid: UUID
     nameContains: String
-    episodeUuid: UUID
     createdAfter: DateTime
     createdBefore: DateTime
 
@@ -473,7 +472,7 @@ type JobType implements Node {
   args: GenericScalar
   status: String
   error: String
-  result: String
+  result: GenericScalar
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -754,19 +753,29 @@ type DynamicScheduleType implements Node {
 
   """Interval in seconds"""
   interval: Int
-  cronMinute: String
-  cronHour: String
-  cronDayOfWeek: String
+
+  """Cron minute field"""
+  cronMinute: String!
+
+  """Cron hour field"""
+  cronHour: String!
+
+  """Cron day of week field"""
+  cronDayOfWeek: String!
 
   """Cron day of month field"""
   cronDayOfMonth: String!
 
   """Cron month of year field"""
   cronMonthOfYear: String!
+
+  """One-time execution datetime"""
   clockedTime: DateTime
+
+  """Solar event (sunrise/sunset)"""
   solarEvent: String
-  solarLatitude: Float
-  solarLongitude: Float
+  solarLatitude: Decimal
+  solarLongitude: Decimal
   args: GenericScalar
   kwargs: GenericScalar
   enabled: Boolean!

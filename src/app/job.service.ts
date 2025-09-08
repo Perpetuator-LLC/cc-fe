@@ -282,7 +282,7 @@ export class JobService extends BaseService implements OnDestroy {
         jobUuids: [],
         // after: ??,
         first: 15, // Most windows are 3 wide, so 5 tall
-        orderBy: '-createdAt',
+        orderBy: '-updatedAt',
       },
       pollInterval: 3000, // Poll every 3 seconds
     });
