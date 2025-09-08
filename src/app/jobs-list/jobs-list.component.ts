@@ -30,6 +30,7 @@ import { JobDisplayService } from '../job-display.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -60,6 +61,7 @@ interface Episode {
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -78,6 +80,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   currentCursor: string | null = null;
   isLoadingMore = false;
   isInitialLoading = true; // Add initial loading state
+  loading = false; // Add top-level loading indicator (like podcasts component)
 
   // New status filter property
   statusFilter: string | null = null;
@@ -118,6 +121,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
   loadJobs(after: string | null = null, pageIndex = 0, append = false) {
     if (append) {
       this.isLoadingMore = true;
+    } else {
+      this.loading = true; // Set top-level loading indicator
     }
 
     // Build statuses array based on filter
@@ -139,7 +144,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
-              this.isInitialLoading = false; // Set initial loading to false after first load
+              this.isInitialLoading = false;
+              this.loading = false; // Clear top-level loading indicator
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
@@ -156,13 +162,15 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
-              this.isInitialLoading = false; // Set initial loading to false after first load
+              this.isInitialLoading = false;
+              this.loading = false; // Clear top-level loading indicator
             });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
           this.isLoadingMore = false;
-          this.isInitialLoading = false; // Set initial loading to false on error
+          this.isInitialLoading = false;
+          this.loading = false; // Clear top-level loading indicator
         },
       }),
     );
