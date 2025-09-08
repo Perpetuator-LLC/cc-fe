@@ -19,6 +19,14 @@
         </mat-form-field>
       </div>
 
+      <!-- Initial loading state -->
+      @if (isInitialLoading) {
+        <div class="loading-state">
+          <mat-spinner diameter="48"></mat-spinner>
+          <p class="loading-message">Loading jobs...</p>
+        </div>
+      }
+
       @for (group of groupedJobs; track group.label) {
         <div class="timeline-date-title">{{ group.label }}</div>
         <div class="timeline-spacing">
@@ -127,8 +135,8 @@
         </div>
       }
 
-      <!-- Empty state when no jobs match the filter -->
-      @if (groupedJobs.length === 0) {
+      <!-- Empty state when no jobs match the filter (only show when not loading) -->
+      @if (groupedJobs.length === 0 && !isInitialLoading) {
         <div class="empty-state">
           <div class="empty-state-content">
             <mat-icon class="empty-state-icon">work_off</mat-icon>
@@ -145,18 +153,15 @@
       }
     </div>
 
-    @if (hasNextPage) {
+    <!-- Load More Jobs button - only show when not loading and there are actually more results -->
+    @if (hasNextPage && !isInitialLoading && !isLoadingMore && groupedJobs.length > 0) {
       <div class="load-more-container">
         <button
           mat-flat-button
           color="primary"
           class="load-more-btn"
-          (click)="loadMoreJobs()"
-          [disabled]="isLoadingMore">
-          @if (isLoadingMore) {
-            <mat-icon>refresh</mat-icon>
-          }
-          {{ isLoadingMore ? 'Loading...' : 'Load More Jobs' }}
+          (click)="loadMoreJobs()">
+          Load More Jobs
         </button>
       </div>
     }

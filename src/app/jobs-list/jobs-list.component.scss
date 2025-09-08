@@ -112,6 +112,27 @@
   }
 }
 
+// Loading state styling
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+  text-align: center;
+
+  mat-spinner {
+    margin-bottom: 24px;
+  }
+
+  .loading-message {
+    font-size: 16px;
+    color: var(--description-color);
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
 // Legacy filter container (kept for compatibility)
 .filter-container {
   display: flex;
