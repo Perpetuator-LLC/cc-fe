@@ -29,6 +29,7 @@ import { EpisodeService } from '../episode.service';
 import { JobDisplayService } from '../job-display.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -58,6 +59,7 @@ interface Episode {
     RouterLink,
     MatSelectModule,
     MatFormFieldModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -75,6 +77,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   hasNextPage = false;
   currentCursor: string | null = null;
   isLoadingMore = false;
+  isInitialLoading = true; // Add initial loading state
 
   // New status filter property
   statusFilter: string | null = null;
@@ -136,6 +139,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
+              this.isInitialLoading = false; // Set initial loading to false after first load
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
@@ -152,11 +156,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
+              this.isInitialLoading = false; // Set initial loading to false after first load
             });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
           this.isLoadingMore = false;
+          this.isInitialLoading = false; // Set initial loading to false on error
         },
       }),
     );
@@ -307,6 +313,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Method to handle status filter change
   onStatusFilterChange(newStatus: string | null): void {
     this.statusFilter = newStatus;
+    this.isInitialLoading = true; // Show loading when filter changes
     this.loadJobs(); // Reload jobs with new filter
   }
 
