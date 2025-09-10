@@ -17,7 +17,7 @@
     <div class="top-header">
       <div class="title">
         <h2>{{ podcastForm.get('name')?.value }}</h2>
-        <p>{{ podcastForm.get('intro')?.value }}</p>
+        <p>{{ podcastForm.get('description')?.value }}</p>
       </div>
       <div class="buttons">
         <button
@@ -47,19 +47,25 @@
         </div>
 
         <div class="status-item">
-          <span class="status-label">Response</span>
+          <span class="status-label">Live</span>
           <span
             class="status-badge"
-            [class.enable]="podcastForm.get('tgResponse')?.value"
-            [class.disable]="!podcastForm.get('tgResponse')?.value"
+            [class.enable]="podcastForm.get('enabled')?.value"
+            [class.disable]="!podcastForm.get('enabled')?.value"
           >
-            {{ podcastForm.get('tgResponse')?.value ? 'Enable' : 'Disable' }}
+            {{ podcastForm.get('enabled')?.value ? 'Live' : 'Disabled' }}
           </span>
         </div>
 
         <div class="status-item">
-          <span class="status-label">Last Created</span>
-          <span class="status-value">{{ podcastForm.get('voice')?.value?.updatedAt | date: 'mediumDate' }}</span>
+          <span class="status-label">Telegram Connection</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')"
+            [class.disable]="!podcastForm.get('tgResponse')?.value || !podcastForm.get('tgResponse')?.value.startsWith('Success.')"
+          >
+            {{ (podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')) ? 'Connected' : 'Disconnected' }}
+          </span>
         </div>
       </div>
     </div>
@@ -75,6 +81,65 @@
           </div>
 
           <form [formGroup]="podcastForm">
+            <div class="form-group">
+              <div class="member-row">
+                <mat-form-field appearance="fill" class="custom-dark-field">
+                  <mat-label>Podcast Name</mat-label>
+                  <input matInput formControlName="name" required />
+                  @if (podcastForm.get('name')?.invalid && podcastForm.get('name')?.touched) {
+                    <mat-error>Podcast name is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="member-row">
+                <mat-form-field appearance="fill" class="custom-dark-field">
+                  <mat-label>Team</mat-label>
+                  <mat-select formControlName="team" [compareWith]="compareTeams" required>
+                    @for (team of teams; track team.uuid) {
+                      <mat-option [value]="team">{{ team.name }}</mat-option>
+                    }
+                  </mat-select>
+
+                  @if (podcastForm.get('team')?.invalid && podcastForm.get('team')?.touched) {
+                    <mat-error>Team selection is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="member-row">
+              <div style="text-align: right">
+                <mat-checkbox
+                  formControlName="enabled"
+                  matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
+                >Podcast Enabled</mat-checkbox
+                >
+              </div>
+              <div class="slug-input">
+                <mat-form-field appearance="fill" style="width: 100%">
+                  <mat-label>Podcast Slug</mat-label>
+                  <input matInput formControlName="slug" [disabled]="!podcastForm.get('enabled')?.value" />
+                  @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {
+                    <mat-error>Slug is required when podcast is enabled</mat-error>
+                  }
+                </mat-form-field>
+                <div class="url-btn-div">
+                  <button
+                    class="url-btn"
+                    mat-fab
+                    color="primary"
+                    type="button"
+                    extended
+                    (click)="copyPodcastUrl()"
+                    [disabled]="urlDisabled"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                    Copy Podcast URL
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div class="member-row" style="margin-bottom: 20px">
               <div class="file-input-wrapper">
                 <div class="image-preview">
@@ -133,64 +198,6 @@
                     <mat-icon>delete</mat-icon>
                   </button>
                 }
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="member-row">
-                <mat-form-field appearance="fill" class="custom-dark-field">
-                  <mat-label>Podcast Name</mat-label>
-                  <input matInput formControlName="name" required />
-                  @if (podcastForm.get('name')?.invalid && podcastForm.get('name')?.touched) {
-                    <mat-error>Podcast name is required</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-              <div class="member-row">
-                <mat-form-field appearance="fill" class="custom-dark-field">
-                  <mat-label>Team</mat-label>
-                  <mat-select formControlName="team" [compareWith]="compareTeams" required>
-                    @for (team of teams; track team.uuid) {
-                      <mat-option [value]="team">{{ team.name }}</mat-option>
-                    }
-                  </mat-select>
-
-                  @if (podcastForm.get('team')?.invalid && podcastForm.get('team')?.touched) {
-                    <mat-error>Team selection is required</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="member-row">
-              <div style="text-align: right">
-                <mat-checkbox
-                  formControlName="enabled"
-                  matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
-                  >Podcast Enabled</mat-checkbox
-                >
-              </div>
-              <div class="slug-input">
-                <mat-form-field appearance="fill" style="width: 100%">
-                  <mat-label>Podcast Slug</mat-label>
-                  <input matInput formControlName="slug" [disabled]="!podcastForm.get('enabled')?.value" />
-                  @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {
-                    <mat-error>Slug is required when podcast is enabled</mat-error>
-                  }
-                </mat-form-field>
-                <div class="url-btn-div">
-                  <button
-                    class="url-btn"
-                    mat-fab
-                    color="primary"
-                    type="button"
-                    extended
-                    (click)="copyPodcastUrl()"
-                    [disabled]="urlDisabled"
-                  >
-                    <mat-icon>content_copy</mat-icon>
-                    Copy Podcast URL
-                  </button>
-                </div>
               </div>
             </div>
           </form>
