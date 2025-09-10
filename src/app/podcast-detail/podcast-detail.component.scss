@@ -335,6 +335,15 @@ mat-divider {
           font-size: 14px;
           font-weight: 600;
           white-space: nowrap;
+
+          &:disabled,
+          &[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background-color: var(--secondary-dark);
+            color: var(--description-color);
+          }
         }
       }
     }
@@ -372,7 +381,7 @@ mat-divider {
           font-size: 12px;
           font-weight: 500;
           border: 1px solid var(--border-color);
-          width: 50px;
+          width: 90px;
           height: 20px;
           display: inline-flex;
           align-items: center;
@@ -386,7 +395,7 @@ mat-divider {
           font-weight: 500;
           border: 1px solid var(--border-color);
           background: var(--secondary-dark);
-          width: 50px;
+          width: 90px;
           height: 20px;
           display: inline-flex;
           align-items: center;
@@ -565,6 +574,16 @@ mat-divider {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  .rss-actions {
+    flex: 0 0 auto; /* Prevent shrinking */
+
+    button {
+      white-space: nowrap; /* Prevent text wrapping */
+      min-width: fit-content; /* Ensure button fits content */
+      padding: 8px 16px; /* Add consistent padding */
+    }
   }
 }
 

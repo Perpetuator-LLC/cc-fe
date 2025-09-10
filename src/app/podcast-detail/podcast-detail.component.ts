@@ -171,6 +171,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       prompt: [''],
       outro: [''],
       enabled: [false],
+      createdAt: [{ value: '', disabled: true }],
       slug: [{ value: '', disabled: true }],
       url: [{ value: '', disabled: true }],
       description: [''],
