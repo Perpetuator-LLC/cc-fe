@@ -1,3 +1,57 @@
+# Changelog from v0.21.1 to v0.22.0
+
+In this update, we've introduced new features and improvements to the job service, podcast functionalities, and user interface. We've also made some cleanups and bug fixes to enhance the overall performance of the application.
+
+## Enhancements
+- Added the delete episode service connection and dialog.
+- Introduced a 'load more jobs' button.
+- Enabled loading of all kinds of jobs in the job service.
+- Added support for new job return values to link to objects etc.
+- Implemented support for select unused and publish episode audio job kinds.
+- Introduced theme colors usage guide and implemented CSS custom properties for light and dark themes.
+- Renamed podcast save button, removed tooltips layout icons, and started to remove dynamic fill styles.
+- Added skeleton loading for stats cards in the home component.
+- Integrated Relay support and enhanced podcast functionalities.
+- Finished integrating 0.21.0 changes, added prelogin layout, and shared footer.
+- Added support for thumbnails on podcast grid and list view.
+- Introduced a 'create blank episode' button in the news page and a category button in the create podcast modal.
+- Made improvements to the podcast detail page, user interface, and responsiveness.
+- Revamped login, accounts, and other pages.
+- Included sidebar as per figma.
+
+## Cleanups
+- Moved export-account-dialog to a separate folder structure with separate HTML and SCSS files.
+- Hid the Telegram Channel ID by default.
+- Centered and contained thumbnails on podcast grid view.
+- Converted podcast list component table to display team name instead of owner.
+- Fixed eslint error and resolved lint issues.
+- Improved podcasts pages.
+
+
+# Changelog from v0.21.0 to v0.21.1
+
+In this update, we have embedded and updated the terms and conditions as well as the privacy policy for the site.
+
+## Enhancements
+- Embedded and updated the terms and conditions and privacy policy for the site.
+
+## Cleanups
+No significant cleanups were made in this update.
+
+
+# Changelog from v0.20.0 to v0.21.0
+
+In this update, we've introduced new features to enhance security and improve the user interface, as well as performed some cleanups to optimize the application's performance.
+
+## Enhancements
+- Introduced a new feature that invalidates old tokens whenever a password change occurs, enhancing the security of user accounts.
+- Exposed podcast descriptions, fixed order/code pagination, added a blank episode feature, and included a refresh/delete job list to improve user interface and functionality.
+
+## Cleanups
+- Updated the application schema for better data management.
+- Removed the hard-coded testing voice from default settings to optimize the application's performance.
+
+
 # Changelog from v0.19.0 to v0.20.0
 
 This update introduces several enhancements and fixes to improve the podcast feature, voice controls, and category management. 
