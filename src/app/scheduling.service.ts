@@ -28,8 +28,8 @@ export interface DynamicSchedule {
   cronHour?: string;
   cronMinute?: string;
   cronDayOfWeek?: string;
-  cronDayOfMonth?: string; // Added missing field
-  cronMonthOfYear?: string; // Added missing field
+  cronDayOfMonth?: string;
+  cronMonthOfYear?: string;
   clockedTime?: string;
   solarEvent?: SolarEvent;
   solarLatitude?: number;
@@ -76,7 +76,7 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
     $name: String!
     $jobKind: JobKind!
     $scheduleType: ScheduleTypeEnum
-    $interval: Int!
+    $interval: Int
     $cronHour: String
     $cronMinute: String
     $cronDayOfWeek: String
