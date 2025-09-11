@@ -70,7 +70,7 @@
     "@types/apollo-upload-client": "^18.0.0",
     "@types/jasmine": "~5.1.0",
     "@types/p5": "^1.7.6",
-    "angular-eslint": "18.1.0",
+    "angular-eslint": "18.4.3",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
