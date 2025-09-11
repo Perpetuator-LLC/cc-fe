@@ -469,13 +469,15 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     const localDate = new Date();
     localDate.setHours(hours, minutes, 0, 0);
 
-    const utcHours = localDate.getUTCHours();
-    const utcMinutes = localDate.getUTCMinutes();
+    // const utcHours = localDate.getUTCHours();
+    // const utcMinutes = localDate.getUTCMinutes();
 
     // Update cron fields with UTC time
     this.scheduleForm.patchValue({
-      cronHour: utcHours.toString(),
-      cronMinute: utcMinutes.toString(),
+      cronHour: hours.toString(),
+      cronMinute: minutes.toString(),
+      // cronHour: utcHours.toString(),
+      // cronMinute: utcMinutes.toString(),
     });
 
     // Clear preset selection when manually changing time
