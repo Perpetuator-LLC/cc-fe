@@ -28,6 +28,8 @@ export interface DynamicSchedule {
   cronHour?: string;
   cronMinute?: string;
   cronDayOfWeek?: string;
+  cronDayOfMonth?: string; // Added missing field
+  cronMonthOfYear?: string; // Added missing field
   clockedTime?: string;
   solarEvent?: SolarEvent;
   solarLatitude?: number;
@@ -52,6 +54,8 @@ const GET_DYNAMIC_SCHEDULES = gql`
           cronHour
           cronMinute
           cronDayOfWeek
+          cronDayOfMonth
+          cronMonthOfYear
           clockedTime
           solarEvent
           solarLatitude
@@ -76,6 +80,8 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
     $cronHour: String
     $cronMinute: String
     $cronDayOfWeek: String
+    $cronDayOfMonth: String
+    $cronMonthOfYear: String
     $clockedTime: DateTime
     $solarEvent: String
     $solarLatitude: Float
@@ -91,6 +97,8 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
       cronHour: $cronHour
       cronMinute: $cronMinute
       cronDayOfWeek: $cronDayOfWeek
+      cronDayOfMonth: $cronDayOfMonth
+      cronMonthOfYear: $cronMonthOfYear
       clockedTime: $clockedTime
       solarEvent: $solarEvent
       solarLatitude: $solarLatitude
@@ -109,6 +117,8 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
         cronHour
         cronMinute
         cronDayOfWeek
+        cronDayOfMonth
+        cronMonthOfYear
         clockedTime
         solarEvent
         solarLatitude
@@ -133,6 +143,8 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
     $cronHour: String
     $cronMinute: String
     $cronDayOfWeek: String
+    $cronDayOfMonth: String
+    $cronMonthOfYear: String
     $clockedTime: DateTime
     $solarEvent: String
     $solarLatitude: Float
@@ -149,6 +161,8 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
       cronHour: $cronHour
       cronMinute: $cronMinute
       cronDayOfWeek: $cronDayOfWeek
+      cronDayOfMonth: $cronDayOfMonth
+      cronMonthOfYear: $cronMonthOfYear
       clockedTime: $clockedTime
       solarEvent: $solarEvent
       solarLatitude: $solarLatitude
@@ -167,6 +181,8 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
         cronHour
         cronMinute
         cronDayOfWeek
+        cronDayOfMonth
+        cronMonthOfYear
         clockedTime
         solarEvent
         solarLatitude
@@ -236,11 +252,13 @@ export class SchedulingService extends BaseService {
         cronHour: schedule.cronHour,
         cronMinute: schedule.cronMinute,
         cronDayOfWeek: schedule.cronDayOfWeek,
+        cronDayOfMonth: schedule.cronDayOfMonth,
+        cronMonthOfYear: schedule.cronMonthOfYear,
         clockedTime: schedule.clockedTime,
         solarEvent: schedule.solarEvent,
         solarLatitude: schedule.solarLatitude,
         solarLongitude: schedule.solarLongitude,
-        args: schedule.args ? JSON.stringify(schedule.args) : null,
+        args: schedule.args ?? {},
         enabled: schedule.enabled ?? true,
       },
     }).pipe(
@@ -273,11 +291,13 @@ export class SchedulingService extends BaseService {
         cronHour: schedule.cronHour,
         cronMinute: schedule.cronMinute,
         cronDayOfWeek: schedule.cronDayOfWeek,
+        cronDayOfMonth: schedule.cronDayOfMonth,
+        cronMonthOfYear: schedule.cronMonthOfYear,
         clockedTime: schedule.clockedTime,
         solarEvent: schedule.solarEvent,
         solarLatitude: schedule.solarLatitude,
         solarLongitude: schedule.solarLongitude,
-        args: schedule.args ? JSON.stringify(schedule.args) : null,
+        args: schedule.args ?? {},
         enabled: schedule.enabled,
       },
     }).pipe(
