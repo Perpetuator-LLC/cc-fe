@@ -79,19 +79,93 @@
 
       <!-- Crontab Schedule Fields -->
       @if (scheduleForm.get('scheduleType')?.value === 'CRONTAB') {
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Hour</mat-label>
-          <input matInput formControlName="cronHour" placeholder="9" />
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Minute</mat-label>
-          <input matInput formControlName="cronMinute" placeholder="0" />
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Days of Week</mat-label>
-          <input matInput formControlName="cronDayOfWeek" placeholder="1-5" />
-        </mat-form-field>
+      <div class="crontab-section">
+        <!-- Preset Options -->
+        <div class="form-row">
+          <mat-form-field class="full-width">
+            <mat-label>Quick Presets</mat-label>
+            <mat-select [value]="selectedPreset" (selectionChange)="applyPreset($event.value)">
+              <mat-option value="">Custom</mat-option>
+              @for (preset of crontabPresets; track preset.value) {
+              <mat-option [value]="preset.value">{{ preset.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Time Selection -->
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Time (Local)</mat-label>
+            <input matInput type="time" formControlName="localTime"
+                   (change)="onLocalTimeChange()"
+                   placeholder="09:00" />
+            <mat-hint>Will run at {{ getUtcTimeDisplay() }} UTC</mat-hint>
+          </mat-form-field>
+          <div class="timezone-info">
+            <mat-icon matTooltip="Your timezone: {{ getUserTimezone() }}">info</mat-icon>
+            <span>{{ getUserTimezone() }}</span>
+          </div>
+        </div>
+
+        <!-- Advanced Cron Fields -->
+        <div class="advanced-cron" [class.expanded]="showAdvancedCron">
+          <div class="form-row">
+            <button mat-button type="button"
+                    (click)="toggleAdvancedCron()"
+                    class="advanced-toggle">
+              <mat-icon>{{ showAdvancedCron ? 'expand_less' : 'expand_more' }}</mat-icon>
+              {{ showAdvancedCron ? 'Hide' : 'Show' }} Advanced Options
+            </button>
+          </div>
+
+          @if (showAdvancedCron) {
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Minute (0-59)</mat-label>
+              <input matInput formControlName="cronMinute" placeholder="0" />
+              <mat-hint>* = every minute, */15 = every 15 minutes</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Hour (0-23)</mat-label>
+              <input matInput formControlName="cronHour" placeholder="9" />
+              <mat-hint>* = every hour, */2 = every 2 hours</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Day of Month (1-31)</mat-label>
+              <input matInput formControlName="cronDayOfMonth" placeholder="*" />
+              <mat-hint>* = every day, 1,15 = 1st and 15th</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Month (1-12)</mat-label>
+              <input matInput formControlName="cronMonthOfYear" placeholder="*" />
+              <mat-hint>* = every month, 1-6 = Jan-Jun</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="full-width">
+              <mat-label>Day of Week (0-6, Sun=0)</mat-label>
+              <input matInput formControlName="cronDayOfWeek" placeholder="1-5" />
+              <mat-hint>* = every day, 1-5 = Mon-Fri, 0,6 = weekends</mat-hint>
+            </mat-form-field>
+          </div>
+          }
+        </div>
+
+        <!-- Schedule Preview -->
+        <div class="schedule-preview">
+          <mat-card>
+            <mat-card-content>
+              <h4>Schedule Preview</h4>
+              <p class="preview-text">{{ getCronPreview() }}</p>
+              <p class="cron-expression">Cron: {{ getCronExpression() }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
       </div>
       }
 

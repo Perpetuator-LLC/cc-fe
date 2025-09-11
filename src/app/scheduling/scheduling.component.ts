@@ -14,12 +14,13 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MessageComponent } from '../message/message.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { parseScheduleArgs } from '../utils/schedule';
@@ -40,6 +41,7 @@ import { parseScheduleArgs } from '../utils/schedule';
     MatIcon,
     MatFormField,
     MatLabel,
+    MatHint,
     MatInput,
     MatSelect,
     MatOption,
@@ -48,6 +50,7 @@ import { parseScheduleArgs } from '../utils/schedule';
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
+    MatTooltip,
     MessageComponent,
     SvgIconComponent,
   ],
@@ -64,6 +67,23 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   loadingPodcasts = false;
   showCreateForm = false;
   editingSchedule: DynamicSchedule | null = null;
+
+  // Crontab enhancement properties
+  showAdvancedCron = false;
+  selectedPreset = '';
+  userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  crontabPresets = [
+    { value: 'daily_9am', label: 'Daily at 9:00 AM' },
+    { value: 'daily_6pm', label: 'Daily at 6:00 PM' },
+    { value: 'weekdays_9am', label: 'Weekdays at 9:00 AM' },
+    { value: 'weekends_10am', label: 'Weekends at 10:00 AM' },
+    { value: 'every_2h', label: 'Every 2 Hours' },
+    { value: 'every_6h', label: 'Every 6 Hours' },
+    { value: 'every_30min', label: 'Every 30 Minutes' },
+    { value: 'weekly_monday_9am', label: 'Weekly on Monday at 9:00 AM' },
+    { value: 'monthly_1st_9am', label: 'Monthly on 1st at 9:00 AM' },
+  ];
 
   scheduleForm: FormGroup;
 
@@ -98,10 +118,13 @@ export class SchedulingComponent implements OnInit, OnDestroy {
       enabled: [true],
       // Interval fields
       interval: [3600],
-      // Crontab fields
-      cronHour: [''],
-      cronMinute: [''],
-      cronDayOfWeek: [''],
+      // Crontab fields - enhanced with all fields
+      localTime: ['09:00'], // New field for timezone-aware time input
+      cronHour: ['9'],
+      cronMinute: ['0'],
+      cronDayOfWeek: ['*'],
+      cronDayOfMonth: ['*'], // Added missing field
+      cronMonthOfYear: ['*'], // Added missing field
       // Clocked fields
       clockedTime: [''],
       // Solar fields
@@ -169,6 +192,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
       cronHour: scheduleType === ScheduleType.CRONTAB ? '9' : '',
       cronMinute: scheduleType === ScheduleType.CRONTAB ? '0' : '',
       cronDayOfWeek: scheduleType === ScheduleType.CRONTAB ? '1-5' : '',
+      cronDayOfMonth: scheduleType === ScheduleType.CRONTAB ? '*' : '',
+      cronMonthOfYear: scheduleType === ScheduleType.CRONTAB ? '*' : '',
       clockedTime: scheduleType === ScheduleType.CLOCKED ? new Date().toISOString() : '',
       solarEvent: scheduleType === ScheduleType.SOLAR ? SolarEvent.SUNRISE : SolarEvent.SUNRISE,
       solarLatitude: scheduleType === ScheduleType.SOLAR ? 40.7128 : null,
@@ -201,6 +226,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
         scheduleData.cronHour = formValue.cronHour;
         scheduleData.cronMinute = formValue.cronMinute;
         scheduleData.cronDayOfWeek = formValue.cronDayOfWeek;
+        scheduleData.cronDayOfMonth = formValue.cronDayOfMonth;
+        scheduleData.cronMonthOfYear = formValue.cronMonthOfYear;
         break;
       }
       case ScheduleType.CLOCKED: {
@@ -247,6 +274,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
       cronHour: schedule.cronHour,
       cronMinute: schedule.cronMinute,
       cronDayOfWeek: schedule.cronDayOfWeek,
+      cronDayOfMonth: schedule.cronDayOfMonth,
+      cronMonthOfYear: schedule.cronMonthOfYear,
       clockedTime: schedule.clockedTime,
       solarEvent: schedule.solarEvent,
       solarLatitude: schedule.solarLatitude,
@@ -279,6 +308,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
         scheduleData.cronHour = formValue.cronHour;
         scheduleData.cronMinute = formValue.cronMinute;
         scheduleData.cronDayOfWeek = formValue.cronDayOfWeek;
+        scheduleData.cronDayOfMonth = formValue.cronDayOfMonth;
+        scheduleData.cronMonthOfYear = formValue.cronMonthOfYear;
         break;
       }
       case ScheduleType.CLOCKED: {
@@ -418,5 +449,301 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 
   formatSolarEvent(event: string): string {
     return event.charAt(0).toUpperCase() + event.slice(1).toLowerCase();
+  }
+
+  // Enhanced crontab methods
+  toggleAdvancedCron() {
+    this.showAdvancedCron = !this.showAdvancedCron;
+  }
+
+  getUserTimezone(): string {
+    return this.userTimezone;
+  }
+
+  onLocalTimeChange() {
+    const localTime = this.scheduleForm.get('localTime')?.value;
+    if (!localTime) return;
+
+    // Convert local time to UTC for cron fields
+    const [hours, minutes] = localTime.split(':').map(Number);
+    const localDate = new Date();
+    localDate.setHours(hours, minutes, 0, 0);
+
+    const utcHours = localDate.getUTCHours();
+    const utcMinutes = localDate.getUTCMinutes();
+
+    // Update cron fields with UTC time
+    this.scheduleForm.patchValue({
+      cronHour: utcHours.toString(),
+      cronMinute: utcMinutes.toString(),
+    });
+
+    // Clear preset selection when manually changing time
+    this.selectedPreset = '';
+  }
+
+  getUtcTimeDisplay(): string {
+    const cronHour = this.scheduleForm.get('cronHour')?.value;
+    const cronMinute = this.scheduleForm.get('cronMinute')?.value;
+
+    if (!cronHour || !cronMinute) return '--:--';
+
+    // Handle step values and wildcards
+    if (cronHour.includes('*') || cronMinute.includes('*')) {
+      return 'Variable times';
+    }
+
+    const hour = cronHour.padStart(2, '0');
+    const minute = cronMinute.padStart(2, '0');
+    return `${hour}:${minute}`;
+  }
+
+  applyPreset(presetValue: string) {
+    if (!presetValue) {
+      this.selectedPreset = '';
+      return;
+    }
+
+    this.selectedPreset = presetValue;
+    // const now = new Date();
+    // const currentHour = now.getHours();
+
+    switch (presetValue) {
+      case 'daily_9am':
+        this.scheduleForm.patchValue({
+          localTime: '09:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(9, 0).hour.toString(),
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'daily_6pm':
+        this.scheduleForm.patchValue({
+          localTime: '18:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(18, 0).hour.toString(),
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'weekdays_9am':
+        this.scheduleForm.patchValue({
+          localTime: '09:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(9, 0).hour.toString(),
+          cronDayOfWeek: '1-5',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'weekends_10am':
+        this.scheduleForm.patchValue({
+          localTime: '10:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(10, 0).hour.toString(),
+          cronDayOfWeek: '0,6',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'every_2h':
+        this.scheduleForm.patchValue({
+          localTime: '',
+          cronMinute: '0',
+          cronHour: '*/2',
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'every_6h':
+        this.scheduleForm.patchValue({
+          localTime: '',
+          cronMinute: '0',
+          cronHour: '*/6',
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'every_30min':
+        this.scheduleForm.patchValue({
+          localTime: '',
+          cronMinute: '*/30',
+          cronHour: '*',
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'weekly_monday_9am':
+        this.scheduleForm.patchValue({
+          localTime: '09:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(9, 0).hour.toString(),
+          cronDayOfWeek: '1',
+          cronDayOfMonth: '*',
+          cronMonthOfYear: '*',
+        });
+        break;
+
+      case 'monthly_1st_9am':
+        this.scheduleForm.patchValue({
+          localTime: '09:00',
+          cronMinute: '0',
+          cronHour: this.convertLocalToUtc(9, 0).hour.toString(),
+          cronDayOfWeek: '*',
+          cronDayOfMonth: '1',
+          cronMonthOfYear: '*',
+        });
+        break;
+    }
+  }
+
+  private convertLocalToUtc(localHour: number, localMinute: number): { hour: number; minute: number } {
+    const localDate = new Date();
+    localDate.setHours(localHour, localMinute, 0, 0);
+    return {
+      hour: localDate.getUTCHours(),
+      minute: localDate.getUTCMinutes(),
+    };
+  }
+
+  getCronPreview(): string {
+    const minute = this.scheduleForm.get('cronMinute')?.value || '*';
+    const hour = this.scheduleForm.get('cronHour')?.value || '*';
+    const dayOfWeek = this.scheduleForm.get('cronDayOfWeek')?.value || '*';
+    const dayOfMonth = this.scheduleForm.get('cronDayOfMonth')?.value || '*';
+    const month = this.scheduleForm.get('cronMonthOfYear')?.value || '*';
+
+    // Generate human-readable description
+    let description = 'Runs ';
+
+    // Handle frequency
+    if (minute === '*/30') {
+      description += 'every 30 minutes';
+    } else if (minute === '*/15') {
+      description += 'every 15 minutes';
+    } else if (hour === '*/2') {
+      description += 'every 2 hours';
+    } else if (hour === '*/6') {
+      description += 'every 6 hours';
+    } else {
+      // Specific time
+      const timeStr = this.formatCronTime(hour, minute);
+      description += `at ${timeStr}`;
+
+      // Add day constraints
+      if (dayOfWeek !== '*') {
+        description += ` on ${this.formatDayOfWeek(dayOfWeek)}`;
+      }
+
+      if (dayOfMonth !== '*') {
+        description += ` on day ${dayOfMonth} of the month`;
+      }
+
+      if (month !== '*') {
+        description += ` in ${this.formatMonth(month)}`;
+      }
+    }
+
+    return description + ' (UTC time)';
+  }
+
+  getCronExpression(): string {
+    const minute = this.scheduleForm.get('cronMinute')?.value || '*';
+    const hour = this.scheduleForm.get('cronHour')?.value || '*';
+    const dayOfMonth = this.scheduleForm.get('cronDayOfMonth')?.value || '*';
+    const month = this.scheduleForm.get('cronMonthOfYear')?.value || '*';
+    const dayOfWeek = this.scheduleForm.get('cronDayOfWeek')?.value || '*';
+
+    return `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+  }
+
+  private formatCronTime(hour: string, minute: string): string {
+    if (hour === '*' || minute === '*') return 'variable times';
+
+    const h = parseInt(hour, 10);
+    const m = parseInt(minute, 10);
+
+    if (isNaN(h) || isNaN(m)) return 'variable times';
+
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  }
+
+  private formatDayOfWeek(dayOfWeek: string): string {
+    const dayMap: Record<string, string> = {
+      '0': 'Sunday',
+      '1': 'Monday',
+      '2': 'Tuesday',
+      '3': 'Wednesday',
+      '4': 'Thursday',
+      '5': 'Friday',
+      '6': 'Saturday',
+    };
+
+    if (dayOfWeek === '*') return 'every day';
+    if (dayOfWeek === '1-5') return 'weekdays';
+    if (dayOfWeek === '0,6') return 'weekends';
+
+    // Handle comma-separated values
+    if (dayOfWeek.includes(',')) {
+      const days = dayOfWeek
+        .split(',')
+        .map((d) => dayMap[d.trim()])
+        .filter(Boolean);
+      return days.join(', ');
+    }
+
+    // Handle ranges
+    if (dayOfWeek.includes('-')) {
+      return `${dayOfWeek} (range)`;
+    }
+
+    return dayMap[dayOfWeek] || dayOfWeek;
+  }
+
+  private formatMonth(month: string): string {
+    const monthMap: Record<string, string> = {
+      '1': 'January',
+      '2': 'February',
+      '3': 'March',
+      '4': 'April',
+      '5': 'May',
+      '6': 'June',
+      '7': 'July',
+      '8': 'August',
+      '9': 'September',
+      '10': 'October',
+      '11': 'November',
+      '12': 'December',
+    };
+
+    if (month === '*') return 'every month';
+
+    if (month.includes(',')) {
+      const months = month
+        .split(',')
+        .map((m) => monthMap[m.trim()])
+        .filter(Boolean);
+      return months.join(', ');
+    }
+
+    if (month.includes('-')) {
+      const [start, end] = month.split('-');
+      return `${monthMap[start]} to ${monthMap[end]}`;
+    }
+
+    return monthMap[month] || month;
   }
 }
