@@ -17,13 +17,9 @@
     <div class="top-header">
       <div class="title">
         <h2>{{ podcastForm.get('name')?.value }}</h2>
-        <p>{{ podcastForm.get('intro')?.value }}</p>
+        <p>{{ podcastForm.get('description')?.value }}</p>
       </div>
       <div class="buttons">
-        <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
-          <mat-icon>delete</mat-icon>
-          Delete Podcast
-        </button>
         <button
           mat-flat-button
           color="primary"
@@ -40,19 +36,36 @@
       <div class="status-summary">
         <div class="status-item">
           <span class="status-label">Team</span>
-          <span class="status-value">
-            {{ podcastForm.get('team')?.value?.name || 'No team selected' }}
+          <ng-container *ngIf="podcastForm.get('team')?.value?.name; else noTeamSelected">
+            <a href="/team/{{ podcastForm.get('team')?.value?.uuid }}" class="status-value">
+              {{ podcastForm.get('team')?.value?.name }}
+            </a>
+          </ng-container>
+          <ng-template #noTeamSelected>
+            <span class="status-value">No team selected</span>
+          </ng-template>
+        </div>
+
+        <div class="status-item">
+          <span class="status-label">Live</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcastForm.get('enabled')?.value"
+            [class.disable]="!podcastForm.get('enabled')?.value"
+          >
+            {{ podcastForm.get('enabled')?.value ? 'Live' : 'Disabled' }}
           </span>
         </div>
 
         <div class="status-item">
-          <span class="status-label">Response</span>
-          <span class="status-badge enable">Enable</span>
-        </div>
-
-        <div class="status-item">
-          <span class="status-label">Last Created</span>
-          <span class="status-value">2 days ago</span>
+          <span class="status-label">Telegram Connection</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')"
+            [class.disable]="!podcastForm.get('tgResponse')?.value || !podcastForm.get('tgResponse')?.value.startsWith('Success.')"
+          >
+            {{ (podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')) ? 'Connected' : 'Disconnected' }}
+          </span>
         </div>
       </div>
     </div>
@@ -93,12 +106,13 @@
                 </mat-form-field>
               </div>
             </div>
+
             <div class="member-row">
               <div style="text-align: right">
                 <mat-checkbox
                   formControlName="enabled"
                   matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
-                  >Podcast Enabled</mat-checkbox
+                >Podcast Enabled</mat-checkbox
                 >
               </div>
               <div class="slug-input">
@@ -159,7 +173,7 @@
                     Upload Podcast Featured Image
                   </button>
 
-                  <span class="desc">Upload image file (PNG/JPG, max size: 750KB)</span>
+                  <span class="desc">Upload image file (PNG/JPG, max size: 100KB)</span>
                 }
 
                 <input
@@ -186,7 +200,6 @@
                 }
               </div>
             </div>
-
           </form>
         </mat-card-content>
       </mat-tab>
@@ -265,13 +278,23 @@
                 </button>
 
                 <mat-menu #filterMenu="matMenu" class="filter-menu">
-                  <div class="filter-container" role="button" tabindex="0" (click)="$event.stopPropagation()"
-                    (keydown.space)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+                  <div
+                    class="filter-container"
+                    role="button"
+                    tabindex="0"
+                    (click)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()"
+                    (keydown.enter)="$event.stopPropagation()"
+                  >
                     @for (tier of voiceTiers; track tier) {
-                    <mat-checkbox [value]="tier" [checked]="voiceFilter.value?.includes(tier)" (change)="onCheckboxChange($event, tier)"
-                      class="checkbox-block">
-                      {{ tierToString(tier) }}
-                    </mat-checkbox>
+                      <mat-checkbox
+                        [value]="tier"
+                        [checked]="voiceFilter.value?.includes(tier)"
+                        (change)="onCheckboxChange($event, tier)"
+                        class="checkbox-block"
+                      >
+                        {{ tierToString(tier) }}
+                      </mat-checkbox>
                     }
 
                     <button mat-button color="warn" (click)="clearVoiceFilters()">Clear All</button>
@@ -323,15 +346,16 @@
                       (mouseleave)="stopVoiceSample()"
                       (click)="$event.stopPropagation()"
                     >
-                      <ng-container
-                        *ngIf="currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid; else playIcon"
-                      >
-                        <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
-                        <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
-                      </ng-container>
-                      <ng-template #playIcon>
-                        <app-svg-icon icon="play"></app-svg-icon>
-                      </ng-template>
+                      @if (currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid) {
+                        <ng-container>
+                          <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
+                          <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
+                        </ng-container>
+                      } @else {
+                        <ng-container #playIcon>
+                          <app-svg-icon icon="play"></app-svg-icon>
+                        </ng-container>
+                      }
                     </button>
                     <div class="voice-name">
                       {{ getVoiceDisplayName(voice) }}
@@ -526,6 +550,20 @@
             </div>
           </form>
         </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="Danger Zone">
+        <mat-card-content>
+          <h3>Danger Zone Settings</h3>
+          <p>Here you can find advanced and potentially destructive actions related to your podcast.</p>
+        </mat-card-content>
+        <mat-card class="danger-card">
+          <div class="danger-card-title">Delete Podcast</div>
+          <p>Once you delete a podcast, it will be permanently removed from the data.</p>
+          <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
+            Delete this Podcast
+          </button>
+        </mat-card>
       </mat-tab>
     </mat-tab-group>
   </mat-card>

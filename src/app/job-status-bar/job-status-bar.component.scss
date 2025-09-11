@@ -4,6 +4,7 @@
   height: 100%;
   transition: all 0.3s ease;
   border-radius: 8px;
+  //padding-top: 8em;
   //overflow: hidden;
   //display: flex;
 
@@ -20,7 +21,7 @@
     }
   }
 
-  mat-content {
+  mat_content {
   }
 
   .mat-mdc-card-header-text {
@@ -117,22 +118,22 @@
   }
 
   .pending {
-    background-color: #e3f2fd;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-warning);
   }
 
   .running {
-    background-color: #e8f5e9;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-success);
   }
 
   .failed {
-    background-color: #ffebee;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-error);
   }
 
   .completed {
-    background-color: #f5f5f5;
+    background-color: var(--secondary-light);
     border-left: 5px solid var(--md-sys-color-primary);
   }
 
@@ -171,11 +172,85 @@
     }
 
     .error {
-      background-color: #ffcdd244;
+      background-color: rgba(255, 205, 210, 0.27);
     }
 
     .result {
-      background-color: #c8e6c944;
+      background-color: rgba(200, 230, 201, 0.27);
+    }
+  }
+
+  .job-message {
+    margin-top: 8px;
+
+    .message-text {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .job-link {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--description-color);
+      display: flex;
+      align-items: center;
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .link-separator {
+        margin: 0 6px;
+        color: var(--description-color);
+        font-weight: 400;
+      }
+    }
+  }
+
+  .job-timestamps {
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .timestamp-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timestamp-text {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 2px;
+
+      strong {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .timeline-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
     }
   }
 

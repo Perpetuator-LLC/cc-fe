@@ -110,21 +110,27 @@ export class NewsComponent implements OnInit, OnDestroy {
             ) {
               this.getNews();
             } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              this.subscriptions.add(
-                this.episodeService.getEpisodeById(job.result).subscribe({
-                  next: (episode) => {
-                    const newEpisodeUrl = `/episode/${job.result}`;
-                    this.messageService.success(
-                      `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
-                      null,
-                      true,
-                    );
-                  },
-                  error: (error) => {
-                    this.messageService.error(`Failed to get new episode: ${error.message}`);
-                  },
-                }),
-              );
+              // Extract episode UUID from job result JSON object
+              const episodeUuid = job.result?.episode_uuid;
+              if (episodeUuid) {
+                this.subscriptions.add(
+                  this.episodeService.getEpisodeById(episodeUuid).subscribe({
+                    next: (episode) => {
+                      const newEpisodeUrl = `/episode/${episodeUuid}`;
+                      this.messageService.success(
+                        `New episode: <a href="${newEpisodeUrl}">${
+                          episode.title === '' ? '(Blank)' : episode.title
+                        }</a>`,
+                        null,
+                        true,
+                      );
+                    },
+                    error: (error) => {
+                      this.messageService.error(`Failed to get new episode: ${error.message}`);
+                    },
+                  }),
+                );
+              }
             }
           });
           // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
@@ -153,6 +159,15 @@ export class NewsComponent implements OnInit, OnDestroy {
             podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
           );
           this.sortPodcastsByHistory();
+
+          if (this.podcasts.length > 0) {
+            const lastSelected = this.podcastHistory[0];
+            if (lastSelected && this.podcasts.some((p) => p.uuid === lastSelected)) {
+              this.selectedPodcastUuid = lastSelected;
+            } else {
+              this.selectedPodcastUuid = this.podcasts[0].uuid;
+            }
+          }
         },
         error: (error) => {
           this.messageService.error(`Failed to get podcasts: ${error.message}`);
@@ -188,11 +203,14 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   onPodcastChange() {
-    this.newsFetched = false;
     this.news = null;
     this.filteredNews = [];
     this.selectedNews.clear();
     this.selectedNewsDetail = null;
+
+    if (this.newsFetched && this.selectedPodcastUuid !== null) {
+      this.onPodcastSelect(this.selectedPodcastUuid);
+    }
   }
 
   extractSelectedNews() {
@@ -543,6 +561,14 @@ export class NewsComponent implements OnInit, OnDestroy {
 
   unselectAll() {
     this.selectedNews.clear();
+  }
+
+  toggleSelectAll() {
+    if (this.selectedNews.size === this.filteredNews.length && this.filteredNews.length > 0) {
+      this.unselectAll();
+    } else {
+      this.selectAll();
+    }
   }
 
   toggleSelection(news: NewsResult) {

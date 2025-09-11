@@ -35,7 +35,7 @@
     input {
       border: 0;
       background: transparent;
-      color: #b5b5b5;
+      color: var(--description-color);
       height: 36px;
       width: 100%;
     }
@@ -47,7 +47,7 @@
 
     .mat-mdc-form-field-flex {
       border-radius: 8px !important;
-      background-color: #373c43;
+      background-color: var(--secondary-dark);
       padding: 0 16px;
     }
 
@@ -82,7 +82,7 @@
     }
 
     input::placeholder {
-      color: #b5b5b5;
+      color: var(--description-color);
       opacity: 1;
     }
 
@@ -188,13 +188,13 @@
   }
 
   .enable {
-    background: #4cb782;
+    background: var(--md-sys-color-success);
     border-radius: 6px;
-    color: white;
+    color: var(--theme-white);
     font-size: 12px;
     font-weight: 500;
-    border: 1px solid 1px solid #ffffffe6;
-    width: 50px;
+    border: 1px solid var(--border-color);
+    width: 90px;
     height: 20px;
     display: inline-flex;
     align-items: center;
@@ -208,7 +208,7 @@
     font-weight: 500;
     border: 1px solid var(--border-color);
     background: var(--secondary-dark);
-    width: 50px;
+    width: 90px;
     height: 20px;
     display: inline-flex;
     align-items: center;
@@ -230,7 +230,7 @@
 
   .mat-mdc-row {
     &:hover {
-      background-color: #2a2a2a;
+      background-color: var(--secondary-light);
     }
   }
 
@@ -242,7 +242,7 @@
   }
 
   .mat-mdc-button {
-    color: #f14a00;
+    color: var(--primary);
   }
 
   .chip {
@@ -282,7 +282,7 @@
         font-size: 12px;
         line-height: 100%;
         letter-spacing: 0%;
-        color: #b5b5b5;
+        color: var(--description-color);
       }
     }
   }
@@ -332,7 +332,7 @@
 
     .days {
       font-size: 12px;
-      color: #b5b5b5;
+      color: var(--description-color);
       font-weight: 400;
     }
   }
@@ -374,7 +374,7 @@
   }
 
   .mat-mdc-button {
-    color: #f14a00;
+    color: var(--primary);
   }
 
   .img {
@@ -460,10 +460,10 @@
     }
 
     button {
-      background: #f14a00;
+      background: var(--primary);
       border-radius: 10px;
-      border: 1px solid #ffffff57;
-      color: white;
+      border: 1px solid var(--border-color);
+      color: var(--theme-white);
       font-weight: 600;
       font-size: 14px;
       line-height: 100%;

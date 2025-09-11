@@ -5,9 +5,56 @@
 
 <app-message />
 
+@if (loading) {
+<div class="loading-spinner">
+  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+</div>
+} @else if (groupedJobs.length === 0) {
+  <div class="middle-card">
+    <div class="jobs-container">
+      <div class="timeline">
+        <!-- Status Filter in upper right corner -->
+        <div class="filter-container-top-right">
+          <mat-form-field appearance="outline" class="status-filter-compact">
+            <mat-select [value]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" placeholder="All Statuses">
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-state-content">
+            <mat-icon class="empty-state-icon">work_off</mat-icon>
+            <h3 class="empty-state-title">No Jobs Found</h3>
+            <p class="empty-state-message">
+              @if (statusFilter) {
+                No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new job.
+              } @else {
+                No jobs have been created yet. Jobs will appear here once you start running processes.
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
 <div class="middle-card">
   <div class="jobs-container">
     <div class="timeline">
+      <!-- Status Filter in upper right corner -->
+      <div class="filter-container-top-right">
+        <mat-form-field appearance="outline" class="status-filter-compact">
+          <mat-select [value]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" placeholder="All Statuses">
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       @for (group of groupedJobs; track group.label) {
         <div class="timeline-date-title">{{ group.label }}</div>
         <div class="timeline-spacing">
@@ -18,33 +65,29 @@
               </div>
               <div class="timeline-content">
                 <div class="timeline-header">
-                  <div class="flex">
+                  <div class="timeline-left-content">
                     <span class="timeline-title">{{ kindToString(job.kind) }}</span>
                     <div class="timeline-meta desktop">
-                      <div class="dot-div">
-                        <span class="dot"></span>
-                        <span class="timeline-cost">
-                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                              d="M9.90981 3.63584C9.61086 3.54161 9.27492 3.49585 8.88679 3.4719C8.44315 3.44453 7.90403 3.44453 7.24259 3.44453H5.74961C4.96796 3.44453 4.35519 3.44453 3.86565 3.49107C3.36667 3.53851 2.95809 3.63688 2.59792 3.8576C2.22074 4.08873 1.90362 4.40585 1.67249 4.78303C1.6643 4.79639 1.65628 4.80982 1.64842 4.82332C1.68611 4.11978 1.78453 3.65383 2.04159 3.28496C2.17612 3.09192 2.33895 2.92216 2.52411 2.78192C3.09743 2.34766 3.91526 2.34766 5.55092 2.34766H8.16817C8.99069 2.34766 9.40195 2.34766 9.65748 2.61405C9.85373 2.81865 9.89925 3.11902 9.90981 3.63584Z"
-                              fill="currentColor" />
-                            <path
-                              d="M1.98419 4.97407C1.625 5.56021 1.625 6.35811 1.625 7.95391C1.625 9.5497 1.625 10.3476 1.98419 10.9337C2.18518 11.2617 2.46093 11.5375 2.78891 11.7385C3.37505 12.0977 4.17295 12.0977 5.76875 12.0977H7.23125C8.82705 12.0977 9.62495 12.0977 10.2111 11.7385C10.5391 11.5375 10.8148 11.2617 11.0158 10.9337C11.2517 10.5488 11.3327 10.0725 11.3605 9.33886H8.27277C7.33655 9.33886 6.5776 8.57991 6.5776 7.64369C6.5776 6.70747 7.33655 5.94852 8.27277 5.94852H11.3154C11.2665 5.54504 11.1776 5.23807 11.0158 4.97407C10.8148 4.64609 10.5391 4.37033 10.2111 4.16935C10.1177 4.11213 10.019 4.06403 9.9125 4.02359C9.3505 3.81016 8.57285 3.81016 7.23125 3.81016H5.76875C4.17295 3.81016 3.37505 3.81016 2.78891 4.16935C2.46093 4.37033 2.18518 4.64609 1.98419 4.97407Z"
-                              fill="currentColor" />
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                              d="M11.3642 6.67977H8.27277C7.74041 6.67977 7.30885 7.11133 7.30885 7.64369C7.30885 8.17605 7.74041 8.60761 8.27277 8.60761H11.3739C11.375 8.4057 11.375 8.18842 11.375 7.95391C11.375 7.458 11.375 7.03916 11.3642 6.67977ZM8.27277 7.27806C8.07084 7.27806 7.90715 7.44176 7.90715 7.64369C7.90715 7.84562 8.07084 8.00931 8.27277 8.00931H9.60232C9.80424 8.00931 9.96794 7.84562 9.96794 7.64369C9.96794 7.44176 9.80424 7.27806 9.60232 7.27806H8.27277Z"
-                              fill="currentColor" />
-                          </svg>
-
-                          {{ job.cost | number: '1.0-0' }} Credits
-                        </span>
-                      </div>
-                      <div class="dot-div">
-                        <span class="dot"></span>
-                        <span class="timeline-date">
-                          {{ job.createdAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
-                        </span>
-                      </div>
+                      <span class="timeline-cost">
+                        <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M9.90981 3.63584C9.61086 3.54161 9.27492 3.49585 8.88679 3.4719C8.44315 3.44453 7.90403 3.44453 7.24259 3.44453H5.74961C4.96796 3.44453 4.35519 3.44453 3.86565 3.49107C3.36667 3.53851 2.95809 3.63688 2.59792 3.8576C2.22074 4.08873 1.90362 4.40585 1.67249 4.78303C1.6643 4.79639 1.65628 4.80982 1.64842 4.82332C1.68611 4.11978 1.78453 3.65383 2.04159 3.28496C2.17612 3.09192 2.33895 2.92216 2.52411 2.78192C3.09743 2.34766 3.91526 2.34766 5.55092 2.34766H8.16817C8.99069 2.34766 9.40195 2.34766 9.65748 2.61405C9.85373 2.81865 9.89925 3.11902 9.90981 3.63584Z"
+                            fill="currentColor" />
+                          <path
+                            d="M1.98419 4.97407C1.625 5.56021 1.625 6.35811 1.625 7.95391C1.625 9.5497 1.625 10.3476 1.98419 10.9337C2.18518 11.2617 2.46093 11.5375 2.78891 11.7385C3.37505 12.0977 4.17295 12.0977 5.76875 12.0977H7.23125C8.82705 12.0977 9.62495 12.0977 10.2111 11.7385C10.5391 11.5375 10.8148 11.2617 11.0158 10.9337C11.2517 10.5488 11.3327 10.0725 11.3605 9.33886H8.27277C7.33655 9.33886 6.5776 8.57991 6.5776 7.64369C6.5776 6.70747 7.33655 5.94852 8.27277 5.94852H11.3154C11.2665 5.54504 11.1776 5.23807 11.0158 4.97407C10.8148 4.64609 10.5391 4.37033 10.2111 4.16935C10.1177 4.11213 10.019 4.06403 9.9125 4.02359C9.3505 3.81016 8.57285 3.81016 7.23125 3.81016H5.76875C4.17295 3.81016 3.37505 3.81016 2.78891 4.16935C2.46093 4.37033 2.18518 4.64609 1.98419 4.97407Z"
+                            fill="currentColor" />
+                          <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M11.3642 6.67977H8.27277C7.74041 6.67977 7.30885 7.11133 7.30885 7.64369C7.30885 8.17605 7.74041 8.60761 8.27277 8.60761H11.3739C11.375 8.4057 11.375 8.18842 11.375 7.95391C11.375 7.458 11.375 7.03916 11.3642 6.67977ZM8.27277 7.27806C8.07084 7.27806 7.90715 7.44176 7.90715 7.64369C7.90715 7.84562 8.07084 8.00931 8.27277 8.00931H9.60232C9.80424 8.00931 9.96794 7.84562 9.96794 7.64369C9.96794 7.44176 9.80424 7.27806 9.60232 7.27806H8.27277Z"
+                            fill="currentColor" />
+                        </svg>
+                        {{ job.cost | number: '1.0-0' }} Credits
+                      </span>
+                      <span class="timeline-date">
+                        Updated {{ job.updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
+                      </span>
+                      <span class="timeline-date">
+                        Created {{ job.createdAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
+                      </span>
                     </div>
                   </div>
 
@@ -75,8 +118,9 @@
                   <!-- News UUIDs are hidden for now as requested -->
                 </div>
 
-                <div class="timeline-actions">
-                  @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
+                <!-- Desktop action buttons - shown on larger screens -->
+                @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
+                  <div class="timeline-actions desktop">
                     <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(job.uuid)">
                       <mat-icon>refresh</mat-icon>
                     </button>
@@ -84,9 +128,8 @@
                     <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(job.uuid)">
                       <mat-icon>delete</mat-icon>
                     </button>
-                  }
-
-                </div>
+                  </div>
+                }
 
                 <div class="timeline-meta mobile">
                   <div class="dot-div">
@@ -110,18 +153,49 @@
                   <div class="dot-div">
                     <span class="dot"></span>
                     <span class="timeline-date">
-                      {{ job.createdAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
+                      {{ job.updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
                     </span>
                   </div>
+
+                  <!-- Move buttons to be inline with mobile metadata -->
+                  @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
+                    <div class="timeline-actions">
+                      <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(job.uuid)">
+                        <mat-icon>refresh</mat-icon>
+                      </button>
+
+                      <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(job.uuid)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
           }
         </div>
       }
+
+      <!-- Empty state when no jobs match the filter (only show when not loading) -->
+      @if (groupedJobs.length === 0 && !isInitialLoading) {
+        <div class="empty-state">
+          <div class="empty-state-content">
+            <mat-icon class="empty-state-icon">work_off</mat-icon>
+            <h3 class="empty-state-title">No Jobs Found</h3>
+            <p class="empty-state-message">
+              @if (statusFilter) {
+                No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new job.
+              } @else {
+                No jobs have been created yet. Jobs will appear here once you start running processes.
+              }
+            </p>
+          </div>
+        </div>
+      }
     </div>
 
-    @if (hasNextPage) {
+    <!-- Load More Jobs button - only show when not loading and there are actually more results -->
+    @if (hasNextPage && !loading && !isLoadingMore && groupedJobs.length > 0) {
       <div class="load-more-container">
         <button
           mat-flat-button
@@ -138,4 +212,4 @@
     }
   </div>
 </div>
-
+}

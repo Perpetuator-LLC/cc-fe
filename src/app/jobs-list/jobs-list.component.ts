@@ -1,10 +1,11 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
-import { Subscription, forkJoin } from 'rxjs';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   Job,
   JobKind,
+  JobResult,
   JobService,
   JobStatus,
   kindToString,
@@ -16,24 +17,20 @@ import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { RouterLink } from '@angular/router';
-import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
-interface JobResult {
-  message?: string;
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  news_uuids?: string[];
-  [key: string]: unknown; // Allow for additional properties
-}
+import { JobDisplayService } from '../job-display.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -61,7 +58,10 @@ interface Episode {
     DecimalPipe,
     NgClass,
     RouterLink,
-    MatProgressSpinner,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
@@ -75,10 +75,24 @@ export class JobsListComponent implements OnInit, OnDestroy {
   pageSize = 10;
   cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
-  sortActive = 'createdAt';
+  sortActive = 'updatedAt';
   hasNextPage = false;
   currentCursor: string | null = null;
   isLoadingMore = false;
+  isInitialLoading = true;
+  loading = false;
+
+  // New status filter property
+  statusFilter: string | null = null;
+
+  // Available status options for the dropdown
+  statusOptions = [
+    { value: null, label: 'All Statuses' },
+    { value: JobStatus.PENDING, label: 'Pending' },
+    { value: JobStatus.RUNNING, label: 'Running' },
+    { value: JobStatus.COMPLETED, label: 'Completed' },
+    { value: JobStatus.FAILED, label: 'Failed' },
+  ];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -90,6 +104,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private podcastsService: PodcastsService,
     private episodeService: EpisodeService,
+    private jobDisplayService: JobDisplayService,
   ) {}
 
   ngOnInit(): void {
@@ -106,10 +121,15 @@ export class JobsListComponent implements OnInit, OnDestroy {
   loadJobs(after: string | null = null, pageIndex = 0, append = false) {
     if (append) {
       this.isLoadingMore = true;
+    } else {
+      this.loading = true; // Set top-level loading indicator
     }
 
+    // Build statuses array based on filter
+    const statuses = this.statusFilter ? [this.statusFilter] : [];
+
     this.subscriptions.add(
-      this.jobService.getJobs([], [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
+      this.jobService.getJobs(statuses, [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ jobs, pageInfo }) => {
           this.enrichJobsWithNames(jobs)
             .then((enrichedJobs) => {
@@ -124,6 +144,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
+              this.isInitialLoading = false;
+              this.loading = false; // Clear top-level loading indicator
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
@@ -140,11 +162,15 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
+              this.isInitialLoading = false;
+              this.loading = false; // Clear top-level loading indicator
             });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
           this.isLoadingMore = false;
+          this.isInitialLoading = false;
+          this.loading = false; // Clear top-level loading indicator
         },
       }),
     );
@@ -292,9 +318,30 @@ export class JobsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Group jobs by date for timeline view
+  // Method to handle status filter change
+  onStatusFilterChange(newStatus: string | null): void {
+    this.statusFilter = newStatus;
+    this.isInitialLoading = true; // Show loading when filter changes
+    this.loadJobs(); // Reload jobs with new filter
+  }
+
+  // Get status label for display
+  getStatusLabel(status: string): string {
+    const option = this.statusOptions.find((opt) => opt.value === status);
+    return option ? option.label : 'Unknown';
+  }
+
+  // Group jobs by date for timeline view - apply client-side filtering if needed
   get groupedJobs() {
     if (!this.jobs) return [];
+
+    let filteredJobs = this.jobs;
+
+    // Apply client-side filtering if a specific status is selected
+    if (this.statusFilter) {
+      filteredJobs = this.jobs.filter((job) => stringToJobStatus(job.status) === stringToJobStatus(this.statusFilter!));
+    }
+
     const groups: { label: string; jobs: Job[] }[] = [];
     const today = new Date();
     const yesterday = new Date();
@@ -325,12 +372,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     };
 
-    const jobsByDate = this.jobs.reduce((acc: Record<string, Job[]>, job) => {
-      const dateKey = job.createdAt.split('T')[0];
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
+    const jobsByDate = filteredJobs.reduce((acc: Record<string, Job[]>, job) => {
+      const updatedDate = new Date(job.updatedAt);
+      const localDateStr = updatedDate.toLocaleDateString();
+      if (!acc[localDateStr]) {
+        acc[localDateStr] = [];
       }
-      acc[dateKey].push(job);
+      acc[localDateStr].push(job);
       return acc;
     }, {});
 
@@ -339,7 +387,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       .forEach((dateKey) => {
         groups.push({
           label: dateLabel(dateKey),
-          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
         });
       });
 
@@ -382,14 +430,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Parse job result JSON safely
+  // Parse job result JSON safely - now result is already a JSON object
   parseJobResult(job: Job): JobResult | null {
-    if (!job.result) return null;
-    try {
-      return JSON.parse(job.result);
-    } catch {
-      return null;
-    }
+    return job.result; // No need to JSON.parse anymore since it's already an object
   }
 
   // Get formatted message for job display
@@ -399,43 +442,38 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return job.error;
     }
 
-    const parsedResult = this.parseJobResult(job);
-    if (parsedResult?.message) {
-      return parsedResult.message;
+    const result = job.result;
+    if (result?.message) {
+      return result.message;
     }
 
-    // Fallback to raw result
-    return job.result || 'No message available';
+    // Fallback to stringified result
+    return result ? JSON.stringify(result) : 'No message available';
   }
 
   // Check if job result has podcast UUID
   hasPodcastUuid(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.podcast_uuid != null;
+    return job.result?.podcast_uuid != null;
   }
 
   // Check if job result has episode UUID
   hasEpisodeUuid(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.episode_uuid != null;
+    return job.result?.episode_uuid != null;
   }
 
   // Check if job result has news UUIDs (hidden for now)
   hasNewsUuids(job: Job): boolean {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.news_uuids != null && Array.isArray(parsedResult.news_uuids);
+    return job.result?.news_uuids != null && Array.isArray(job.result.news_uuids);
   }
 
   // Get podcast UUID from job result
   getPodcastUuid(job: Job): string | null {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.podcast_uuid || null;
+    return job.result?.podcast_uuid || null;
   }
 
   // Get episode UUID from job result
   getEpisodeUuid(job: Job): string | null {
-    const parsedResult = this.parseJobResult(job);
-    return parsedResult?.episode_uuid || null;
+    return job.result?.episode_uuid || null;
   }
 
   // Get podcast name from enriched job

@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, debounceTime, filter, switchMap, map } from 'rxjs'; // Import filter and switchMap, of
+import { Subscription, debounceTime, filter, switchMap, map } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
@@ -171,6 +171,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       prompt: [''],
       outro: [''],
       enabled: [false],
+      createdAt: [{ value: '', disabled: true }],
       slug: [{ value: '', disabled: true }],
       url: [{ value: '', disabled: true }],
       description: [''],
@@ -490,6 +491,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastsService.getPodcastById(this.podcastUuid).subscribe({
         next: (podcast) => {
+          // console.log('Podcast data received:', podcast);
           // console.log('Voice ID:', podcast.voice);
           // console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);

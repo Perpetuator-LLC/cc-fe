@@ -4,8 +4,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #424242; /* Ensure background is opaque */
-  color: white;
+  background-color: var(--secondary-500); /* Ensure background is opaque */
+  color: var(--theme-white);
   text-align: left;
   padding: 1em;
   z-index: 2000; /* Higher z-index to be above nav */
@@ -25,7 +25,7 @@
 }
 
 .privacy-link {
-  color: #BB86FC; /* Material Design secondary color */
+  color: var(--purple); /* Material Design secondary color */
 }
 
 /* Adjust margin or padding on the main content */

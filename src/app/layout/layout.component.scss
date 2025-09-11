@@ -22,10 +22,10 @@ mat-sidenav-content mat-toolbar {
     border-radius: 200px;
     background: radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.07) 0.68%, rgba(255, 255, 255, 0.07) 100%);
     backdrop-filter: blur(8px);
-    box-shadow: -5px -5px 250px 0px #ffffff05 inset;
+    box-shadow: -5px -5px 250px 0px var(--border-color) inset;
 
     .header-logo {
-      color: white;
+      color: var(--theme-white);
       display: flex;
       align-items: center;
       text-decoration: none;
@@ -44,7 +44,7 @@ mat-sidenav-content mat-toolbar {
       width: 142px;
       font-size: 16px;
       font-weight: 400;
-      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, #3d1e70 0%, #972a09 50.58%, #3d1e70 100%);
+      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--purple) 0%, var(--primary) 50.58%, var(--purple) 100%);
     }
 
     .nav-list-row {
@@ -183,7 +183,7 @@ mat-nav-list {
   align-items: center !important;
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
+  color: var(--theme-white);
 
   .mat-icon {
     margin-right: 16px;
@@ -203,7 +203,7 @@ mat-nav-list {
   text-decoration: none;
 
   &.active-link {
-    background-color: #373c43 !important;
+    background-color: var(--secondary-dark) !important;
     border-left: 3px solid var(--purple);
   }
 }
@@ -215,7 +215,7 @@ mat-nav-list {
 }
 
 .mat-link.mdc-list-item--activated {
-  background-color: #373c43 !important;
+  background-color: var(--secondary-dark) !important;
   border-left: 3px solid var(--purple);
 }
 
@@ -240,11 +240,11 @@ mat-nav-list {
 
 .log-out-btn {
   .mat-icon {
-    color: #ff7171 !important;
+    color: var(--md-sys-color-error) !important;
   }
 
   .route-title {
-    color: #ff7171;
+    color: var(--md-sys-color-error);
   }
 }
 
@@ -260,7 +260,7 @@ mat-nav-list {
     width: 24px;
     /* Set the width of the icon */
     height: 24px;
-    color: #fff;
+    color: var(--theme-white);
     /* Set the height of the icon */
     //margin-right: 16px; /* Space between icon and text */
   }
@@ -273,15 +273,15 @@ mat-nav-list {
 }
 
 .active-link {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--theme-transparent);
 }
 
 .footer-links {
-  background: #ffffff;
+  background: var(--toolbar-container-background-color);
   justify-content: space-between;
   align-items: center;
   padding: 60px 70px;
-  color: #1f2024;
+  color: var(--theme-color);
   font-size: 16px;
   font-weight: normal;
   font-family: 'Sarabun', sans-serif;
@@ -292,7 +292,7 @@ mat-nav-list {
     gap: 20px;
 
     a {
-      color: #1f2024;
+      color: var(--theme-color);
       font-size: 16px;
       line-height: 20px;
       font-weight: 400;
@@ -320,8 +320,8 @@ mat-nav-list {
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: #1f2329;
-  border-right: 1px solid #ffffff1a;
+  background: var(--secondary-color);
+  border-right: 1px solid var(--border-color);
   min-width: 84px !important;
   width: 84px;
   transition: min-width 0.3s ease;
@@ -376,7 +376,7 @@ mat-nav-list {
       width: 100%;
       padding: 20px 54px;
       backdrop-filter: blur(8px);
-      box-shadow: -5px -5px 250px 0px #ffffff05 inset;
+      box-shadow: -5px -5px 250px 0px var(--border-color) inset;
       border-radius: 200px;
       background: radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.07) 0.68%, rgba(255, 255, 255, 0.07) 100%);
     }
@@ -421,7 +421,7 @@ mat-nav-list {
         background-color: transparent;
       }
 
-      &:hover::focus {
+      &:hover:focus {
         background-color: transparent;
       }
 
@@ -439,10 +439,10 @@ mat-nav-list {
       height: 48px !important;
       width: 142px !important;
       min-width: 142px;
-      font-family: 'Sarabun';
+      font-family: 'Sarabun', serif;
       font-size: 16px;
       font-weight: 400;
-      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, #3d1e70 0%, #972a09 50.58%, #3d1e70 100%);
+      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--purple) 0%, var(--primary) 50.58%, var(--purple) 100%);
     }
   }
 
@@ -470,7 +470,7 @@ mat-nav-list {
 
   .after-header {
     display: flex;
-    overscroll-behavior: hidden;
+    overscroll-behavior: none;
 
     .collapseSecondSidebarMobile {
       display: none;
@@ -501,14 +501,14 @@ mat-nav-list {
 
     .second-sidebar {
       display: flex;
-      width: 240px;
-      min-width: 240px;
-      max-width: 240px;
-      background: #1f2329;
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+      background: var(--secondary-color);
       padding: 20px 16px;
       transition: all 0.3s ease;
       transform: translateX(0);
-      border-right: 1px solid #ffffff1a;
+      border-right: 1px solid var(--border-color);
 
       &.hidden {
         transform: translateX(-100%);
@@ -540,7 +540,7 @@ mat-nav-list {
         margin: 0;
         font-size: 14px;
         font-weight: 600;
-        color: #adadad;
+        color: var(--description-color);
       }
 
       .s-link {
@@ -549,11 +549,11 @@ mat-nav-list {
         align-items: center;
         gap: 10px;
         border-radius: 10px;
-        color: #ffffff;
+        color: var(--theme-white);
         padding: 13px 10px;
 
         &.active {
-          background: #373c43;
+          background: var(--secondary-dark);
         }
 
         .mat-icon {
@@ -568,7 +568,7 @@ mat-nav-list {
       }
 
       .links {
-        color: white;
+        color: var(--theme-white);
         margin-top: 30px;
       }
     }
@@ -652,13 +652,13 @@ mat-nav-list {
 
       p {
         margin-inline: auto;
-        color: #b5b5b5;
+        color: var(--description-color);
         font-weight: 400;
         line-height: 16px;
         font-size: 11px;
 
         a {
-          color: #f57c00;
+          color: var(--primary);
           font-weight: 500;
         }
       }
@@ -680,7 +680,7 @@ mat-nav-list {
 .link-button:hover,
 .link-button:focus {
   text-decoration: underline;
-  color: var(--primary, #1976d2);
+  color: var(--primary);
 }
 
 .arrow-left {

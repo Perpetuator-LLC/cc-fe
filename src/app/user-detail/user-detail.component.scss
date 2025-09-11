@@ -90,10 +90,10 @@ mat-form-field {
   }
 
   .remove-btn {
-    background-color: #ff4a4a !important;
-    border: 1px solid #ffffff57;
+    background-color: var(--md-sys-color-error) !important;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    color: white !important;
+    color: var(--theme-white) !important;
   }
 
   .profile-header {

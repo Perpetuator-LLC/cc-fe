@@ -485,6 +485,7 @@ export class PodcastsService extends BaseService {
               id
               uuid
               name
+              enabled
               #imageUrl // Don't use imageUrl, use thumbnailUrl for loading many podcasts
               thumbnailUrl
               tgChannelId

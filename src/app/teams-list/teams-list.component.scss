@@ -35,7 +35,7 @@
     input {
       border: 0;
       background: transparent;
-      color: #b5b5b5;
+      color: var(--description-color);
       height: 36px;
       width: 100%;
     }
@@ -117,7 +117,7 @@
 
   .mat-mdc-row {
     &:hover {
-      background-color: #2a2a2a;
+      background-color: var(--secondary-light);
     }
   }
 
@@ -129,7 +129,7 @@
   }
 
   .mat-mdc-button {
-    color: #f14a00;
+    color: var(--primary);
   }
 
   .t_name {
@@ -147,7 +147,7 @@
         font-size: 12px;
         line-height: 100%;
         letter-spacing: 0%;
-        color: #b5b5b5;
+        color: var(--description-color);
       }
     }
   }
@@ -230,10 +230,10 @@
     }
 
     button {
-      background: #f14a00;
+      background: var(--primary);
       border-radius: 10px;
-      border: 1px solid #ffffff57;
-      color: white;
+      border: 1px solid var(--border-color);
+      color: var(--theme-white);
       font-weight: 600;
       font-size: 14px;
       line-height: 100%;
