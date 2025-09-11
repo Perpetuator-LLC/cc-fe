@@ -118,6 +118,19 @@
                   <!-- News UUIDs are hidden for now as requested -->
                 </div>
 
+                <!-- Desktop action buttons - shown on larger screens -->
+                @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
+                  <div class="timeline-actions desktop">
+                    <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(job.uuid)">
+                      <mat-icon>refresh</mat-icon>
+                    </button>
+
+                    <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(job.uuid)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                }
+
                 <div class="timeline-meta mobile">
                   <div class="dot-div">
                     <span class="dot"></span>
@@ -140,7 +153,7 @@
                   <div class="dot-div">
                     <span class="dot"></span>
                     <span class="timeline-date">
-                      {{ job.createdAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
+                      {{ job.updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
                     </span>
                   </div>
 
