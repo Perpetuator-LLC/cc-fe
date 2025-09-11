@@ -24,18 +24,18 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      color: white;
+      color: var(--theme-white);
 
       .website-title {
         font-size: 1.5rem;
         font-weight: 400;
-        color: #fff;
+        color: var(--theme-white);
         white-space: nowrap;
       }
       .website-title-copilot {
         font-size: 1.5rem;
         font-weight: 200;
-        color: #fff;
+        color: var(--theme-white);
         white-space: nowrap;
       }
     }
@@ -46,7 +46,7 @@
       gap: 16px;
 
       .theme-toggle {
-        color: white;
+        color: var(--theme-white);
         background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
         width: 40px;
@@ -59,7 +59,7 @@
         }
 
         .mat-icon {
-          color: white;
+          color: var(--theme-white);
         }
       }
 
@@ -99,7 +99,7 @@
         width: 100%;
         padding: 20px 54px;
         backdrop-filter: blur(8px);
-        box-shadow: -5px -5px 250px 0px #ffffff05 inset;
+        box-shadow: -5px -5px 250px 0px var(--border-color) inset;
         border-radius: 200px;
         background: radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.07) 0.68%, rgba(255, 255, 255, 0.07) 100%);
       }
@@ -165,7 +165,7 @@
         font-family: 'Sarabun';
         font-size: 16px;
         font-weight: 400;
-        background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, #3d1e70 0%, #972a09 50.58%, #3d1e70 100%);
+        background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--purple) 0%, var(--primary) 50.58%, var(--purple) 100%);
       }
     }
 

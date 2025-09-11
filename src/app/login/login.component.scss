@@ -55,7 +55,7 @@ form {
 mat-card.login-card {
   max-width: 489px;
   background-color: var(--secondary-color);
-  border: 1px solid #a9a3c257;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 
   @media screen and (max-width: 576px) {
@@ -71,11 +71,11 @@ mat-card.login-card {
   }
 
   .login-btn {
-    background: #811CFD;
+    background: var(--purple);
     width: 100%;
     border-radius: 10px;
-    color: #ffffff;
-    border: 1px solid #ffffff1a;
+    color: var(--theme-white);
+    border: 1px solid var(--border-color);
   }
 
   .forgot {
@@ -130,13 +130,13 @@ mat-icon {
 
   p {
     margin-inline: auto;
-    color: #b5b5b5;
+    color: var(--description-color);
     font-weight: 400;
     line-height: 16px;
     font-size: 11px;
 
     a {
-      color: #f57c00;
+      color: var(--md-sys-color-primary-dark);
       font-weight: 500;
     }
   }

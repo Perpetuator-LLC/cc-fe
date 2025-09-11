@@ -109,12 +109,31 @@
         </td>
       </ng-container>
 
-      <!-- Telegram Response Column -->
-      <ng-container matColumnDef="tgResponse">
-        <th mat-header-cell *matHeaderCellDef>Response</th>
+      <!-- Live Status Column -->
+      <ng-container matColumnDef="enabled">
+        <th mat-header-cell *matHeaderCellDef>Live</th>
         <td mat-cell *matCellDef="let podcast">
-          <span [class]="podcast?.tgResponse ? 'enable' : 'disable'">{{ podcast?.tgResponse ? 'Enable' : 'Disable'
-            }}</span>
+          <span
+            class="status-badge"
+            [class.enable]="podcast?.enabled"
+            [class.disable]="!podcast?.enabled"
+          >
+            {{ podcast?.enabled ? 'Live' : 'Disabled' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Telegram Connected Column -->
+      <ng-container matColumnDef="tgResponse">
+        <th mat-header-cell *matHeaderCellDef>Telegram Connected</th>
+        <td mat-cell *matCellDef="let podcast">
+          <span
+            class="status-badge"
+            [class.enable]="podcast?.tgResponse && podcast?.tgResponse.startsWith('Success.')"
+            [class.disable]="!podcast?.tgResponse || !podcast?.tgResponse.startsWith('Success.')"
+          >
+            {{ (podcast?.tgResponse && podcast?.tgResponse.startsWith('Success.')) ? 'Connected' : 'Disconnected' }}
+          </span>
         </td>
       </ng-container>
 

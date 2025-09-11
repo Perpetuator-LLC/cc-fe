@@ -37,106 +37,110 @@
 
   <!-- Stats Cards -->
   <!-- Loading Skeleton -->
-  <div class="stats-section" *ngIf="loadingStats">
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-    <mat-card class="stat-card skeleton-card">
-      <div class="skeleton-icon"></div>
-      <div class="skeleton-label"></div>
-      <div class="skeleton-value"></div>
-      <div class="skeleton-change"></div>
-    </mat-card>
-  </div>
+  @if (loadingStats) {
+    <div class="stats-section">
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+    </div>
+  }
 
-  <!-- Actual Stats -->
-  <div class="stats-section" *ngIf="!loadingStats && siteStats">
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <app-svg-icon icon="podcast"></app-svg-icon>
-        <div class="stat-label">Total Podcasts</div>
-      </div>
+  @if (!loadingStats && siteStats) {
+    <!-- Actual Stats -->
+    <div class="stats-section">
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="podcast"></app-svg-icon>
+          <div class="stat-label">Total Podcasts</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <app-svg-icon icon="episodes"></app-svg-icon>
-        <div class="stat-label">Total Episodes</div>
-      </div>
+        <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="episodes"></app-svg-icon>
+          <div class="stat-label">Total Episodes</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <app-svg-icon icon="transcript"></app-svg-icon>
-        <div class="stat-label">Transcripts</div>
-      </div>
+        <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="transcript"></app-svg-icon>
+          <div class="stat-label">Transcripts</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.totalVoices }}</div>
+        <div class="stat-value">{{ siteStats.totalVoices }}</div>
 
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <app-svg-icon icon="published"></app-svg-icon>
-        <div class="stat-label">Episodes Generated from News</div>
-      </div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="published"></app-svg-icon>
+          <div class="stat-label">Episodes Generated from News</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
+        <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
 
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <app-svg-icon icon="newspaper"></app-svg-icon>
-        <div class="stat-label">Summarized News</div>
-      </div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="newspaper"></app-svg-icon>
+          <div class="stat-label">Summarized News</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
+        <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
 
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <div class="stat-title">
-        <mat-icon>graphic_eq</mat-icon>
-        <div class="stat-label">Minutes of Published Audio</div>
-      </div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <mat-icon>graphic_eq</mat-icon>
+          <div class="stat-label">Minutes of Published Audio</div>
+        </div>
 
-      <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number:'1.0-0' }} minutes</div>
+        <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number: '1.0-0' }} minutes</div>
 
-      <div class="stat-change positive"><span>+12%</span> from last month</div>
-    </mat-card>
-  </div>
+        <div class="stat-change positive"><span>+12%</span> from last month</div>
+      </mat-card>
+    </div>
+  }
 
   <!-- Modules Section -->
   <div class="module-section-container">
@@ -152,8 +156,9 @@
                 publishing.
               </div>
             </div>
-            <a class="module-link" routerLink="/podcasts">Generate Podcast <app-svg-icon
-                icon="right"></app-svg-icon></a>
+            <a class="module-link" routerLink="/podcasts"
+              >Generate Podcast <app-svg-icon icon="right"></app-svg-icon
+            ></a>
           </div>
           <span class="image-section">
             <img src="/assets/icons/dna.svg" alt="generate" />

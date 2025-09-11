@@ -74,7 +74,7 @@ mat-divider {
 }
 
 .danger-zone {
-  color: red;
+  color: var(--md-sys-color-error);
 }
 
 .action-row {
@@ -327,23 +327,23 @@ mat-divider {
         align-items: center;
         gap: 20px;
 
-        .delete-btn {
-          background-color: transparent;
-          color: #ff4a4a;
-          padding: 0;
-          font-size: 14px;
-          font-weight: 600;
-          white-space: nowrap;
-        }
-
         .save-btn {
           background-color: var(--primary);
           border-radius: 10px;
-          color: white;
-          border: 1px solid #ffffff24;
+          color: var(--theme-white);
+          border: 1px solid var(--border-color);
           font-size: 14px;
           font-weight: 600;
           white-space: nowrap;
+
+          &:disabled,
+          &[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background-color: var(--secondary-dark);
+            color: var(--description-color);
+          }
         }
       }
     }
@@ -375,13 +375,13 @@ mat-divider {
         }
 
         .enable {
-          background: #4cb782;
+          background: var(--md-sys-color-success);
           border-radius: 6px;
-          color: white;
+          color: var(--theme-white);
           font-size: 12px;
           font-weight: 500;
-          border: 1px solid 1px solid #ffffffe6;
-          width: 50px;
+          border: 1px solid var(--border-color);
+          width: 90px;
           height: 20px;
           display: inline-flex;
           align-items: center;
@@ -395,7 +395,7 @@ mat-divider {
           font-weight: 500;
           border: 1px solid var(--border-color);
           background: var(--secondary-dark);
-          width: 50px;
+          width: 90px;
           height: 20px;
           display: inline-flex;
           align-items: center;
@@ -405,6 +405,36 @@ mat-divider {
     }
   }
 
+  .danger-card {
+    background: var(--secondary-light) !important;
+    color: var(--theme-color);
+    border: 1px solid var(--border-color);
+    margin-top: 20px;
+    p{
+      margin: 0;
+      padding: 0 20px;
+      padding-bottom: 30px;
+    }
+    .delete-btn {
+      background-color: var(--md-sys-color-error);
+      color: white;
+      padding: 0;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      width: fit-content;
+      margin-left: 20px;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+  }
+  .danger-card-title{
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    margin-inline: 10px;
+  }
   .podcast-card {
     background-color: transparent;
     border: 0;
@@ -499,28 +529,28 @@ mat-divider {
   }
 
   .mat-form-field-flex {
-    background: #32353b;
+    background: var(--secondary-dark);
     border-radius: 10px;
-    border: 1px solid #55585e;
-    color: #fff;
+    border: 1px solid var(--border-color);
+    color: var(--theme-white);
     min-height: 56px;
     align-items: center;
   }
 
   .mat-form-field-infix {
-    color: #fff;
+    color: var(--theme-white);
     font-size: 1.1rem;
     padding: 12px 16px;
   }
 
   .mat-input-element,
   .mat-select-value {
-    color: #fff !important;
+    color: var(--theme-white) !important;
     background: transparent !important;
   }
 
   .mat-form-field-label {
-    color: #fff !important;
+    color: var(--theme-white) !important;
     opacity: 0.8;
   }
 
@@ -530,7 +560,7 @@ mat-divider {
   }
 
   .mat-select-arrow {
-    color: #aaa;
+    color: var(--description-color);
   }
 }
 
@@ -544,6 +574,16 @@ mat-divider {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  .rss-actions {
+    flex: 0 0 auto; /* Prevent shrinking */
+
+    button {
+      white-space: nowrap; /* Prevent text wrapping */
+      min-width: fit-content; /* Ensure button fits content */
+      padding: 8px 16px; /* Add consistent padding */
+    }
   }
 }
 
@@ -611,7 +651,7 @@ mat-divider {
   input {
     border: 0;
     background: transparent;
-    color: #b5b5b5;
+    color: var(--description-color);
     height: 36px;
     width: 100%;
   }
@@ -710,7 +750,7 @@ mat-divider {
 
     .mat-mdc-row {
       &:hover {
-        background-color: #2a2a2a;
+        background-color: var(--secondary-light);
       }
     }
 

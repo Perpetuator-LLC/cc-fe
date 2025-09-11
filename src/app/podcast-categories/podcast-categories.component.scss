@@ -141,7 +141,7 @@
 }
 
 .pending-indicator {
-  color: #00b116;
+  color: var(--md-sys-color-success);
   font-size: 12px;
   vertical-align: super;
   margin-left: 4px;

@@ -27,7 +27,7 @@ import {
 import { MatSort } from '@angular/material/sort';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SlicePipe } from '@angular/common';
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
@@ -79,6 +79,7 @@ export interface ColumnOption {
     MatPaginator,
     MatCheckboxModule,
     FormsModule,
+    MatMenuItem,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
@@ -91,7 +92,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
   dataSource = new MatTableDataSource<PodcastsResult>([]);
-  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'actions'];
+  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'enabled', 'actions'];
   isGridView = false; // Default to list view
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
@@ -101,7 +102,8 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'team', label: 'Team', selected: true },
     { id: 'tgChannelId', label: 'Telegram ID', selected: false },
     { id: 'categories', label: 'Categories', selected: true },
-    { id: 'tgResponse', label: 'Response', selected: true },
+    { id: 'enabled', label: 'Live', selected: true },
+    { id: 'tgResponse', label: 'Telegram Connected', selected: true },
     { id: 'actions', label: 'Actions', selected: true },
   ];
   searchString: string | null = null;

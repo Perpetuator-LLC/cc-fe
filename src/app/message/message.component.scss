@@ -10,7 +10,7 @@
 }
 
 .mat-mdc-card.message-card {
-  background-color: #515459;
+  background-color: var(--secondary-500);
   border: 1px solid var(--border-color);
   padding-top: 0;
 }
@@ -69,7 +69,7 @@
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: black;
+  color: var(--theme-color);
 }
 
 .message-icon-span {
@@ -83,40 +83,40 @@
 
 .error {
   .message-icon {
-    background-color: rgb(255 0 1 / 15%);
+    background-color: rgba(var(--md-sys-color-error), 0.15);
 
     .message-icon-span {
-      background-color: #ff0001;
+      background-color: var(--md-sys-color-error);
     }
   }
 }
 
 .warning {
   .message-icon {
-    background-color: rgb(255 42 4 / 15%);
+    background-color: rgba(var(--md-sys-color-warning), 0.15);
 
     .message-icon-span {
-      background-color: #ff2a04;
+      background-color: var(--md-sys-color-warning);
     }
   }
 }
 
 .info {
   .message-icon {
-    background-color: rgb(255 179 31 / 15%);
+    background-color: rgba(255, 179, 31, 0.15);
 
     .message-icon-span {
-      background-color: #ffb31f;
+      background-color: var(--theme-yellow);
     }
   }
 }
 
 .success {
   .message-icon {
-    background-color: rgb(61 255 96 / 15%);
+    background-color: rgba(61, 255, 96, 0.15);
 
     .message-icon-span {
-      background-color: #3dff60;
+      background-color: var(--md-sys-color-success);
     }
   }
 }

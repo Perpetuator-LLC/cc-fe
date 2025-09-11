@@ -8,7 +8,7 @@
 
   p {
     margin-inline: auto;
-    color: #b5b5b5;
+    color: var(--description-color);
     font-weight: 400;
     line-height: 16px;
     font-size: 11px;
@@ -34,5 +34,5 @@
 .link-button:hover,
 .link-button:focus {
   text-decoration: underline;
-  color: var(--primary, #1976d2);
+  color: var(--primary);
 }
