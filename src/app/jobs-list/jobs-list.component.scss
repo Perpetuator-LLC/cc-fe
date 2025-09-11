@@ -265,6 +265,7 @@
 
   &.job-pending {
     background: var(--md-sys-color-warning);
+    color: var(--secondary-500);
   }
 
   &.job-running {
@@ -344,12 +345,11 @@
 
   &.job-failed {
     background: var(--md-sys-color-error);
-    color: var(--theme-white);
   }
 
   &.job-pending {
     background: var(--md-sys-color-warning);
-    color: var(--theme-color);
+    color: var(--secondary-500);
   }
 
   &.job-running {

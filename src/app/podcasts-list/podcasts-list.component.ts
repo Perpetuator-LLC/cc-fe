@@ -27,7 +27,7 @@ import {
 import { MatSort } from '@angular/material/sort';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SlicePipe } from '@angular/common';
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
@@ -79,6 +79,7 @@ export interface ColumnOption {
     MatPaginator,
     MatCheckboxModule,
     FormsModule,
+    MatMenuItem,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],

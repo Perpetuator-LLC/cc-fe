@@ -1,13 +1,13 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
-import { Subscription, forkJoin } from 'rxjs';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   Job,
   JobKind,
+  JobResult,
   JobService,
   JobStatus,
-  JobResult, // Add this import
   kindToString,
   statusToString,
   stringToJobKind,
@@ -17,14 +17,14 @@ import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { RouterLink } from '@angular/router';
-import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
 import { JobDisplayService } from '../job-display.service';
 import { MatSelectModule } from '@angular/material/select';
@@ -75,12 +75,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
   pageSize = 10;
   cursors: (string | null)[] = [null];
   sortDirection = 'DESC';
-  sortActive = 'createdAt';
+  sortActive = 'updatedAt';
   hasNextPage = false;
   currentCursor: string | null = null;
   isLoadingMore = false;
-  isInitialLoading = true; // Add initial loading state
-  loading = false; // Add top-level loading indicator (like podcasts component)
+  isInitialLoading = true;
+  loading = false;
 
   // New status filter property
   statusFilter: string | null = null;
@@ -373,11 +373,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
     };
 
     const jobsByDate = filteredJobs.reduce((acc: Record<string, Job[]>, job) => {
-      const dateKey = job.createdAt.split('T')[0];
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
+      const updatedDate = new Date(job.updatedAt);
+      const localDateStr = updatedDate.toLocaleDateString();
+      if (!acc[localDateStr]) {
+        acc[localDateStr] = [];
       }
-      acc[dateKey].push(job);
+      acc[localDateStr].push(job);
       return acc;
     }, {});
 
@@ -386,7 +387,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       .forEach((dateKey) => {
         groups.push({
           label: dateLabel(dateKey),
-          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
         });
       });
 
