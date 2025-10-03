@@ -58,11 +58,11 @@
                   <!-- Move buttons to be inline with timestamps -->
                   @if (stringToJobStatus(job.status) === JobStatus.FAILED || stringToJobStatus(job.status) === JobStatus.PENDING) {
                     <div class="timeline-actions">
-                      <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(job.uuid)">
+                      <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(job.uuid)" type="button">
                         <mat-icon>refresh</mat-icon>
                       </button>
 
-                      <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(job.uuid)">
+                      <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(job.uuid)" type="button">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </div>

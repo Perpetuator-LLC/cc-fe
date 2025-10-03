@@ -19,7 +19,7 @@ export enum SolarEvent {
   SUNSET = 'sunset',
 }
 
-export interface DynamicSchedule {
+export interface Schedule {
   uuid: string;
   name: string;
   jobKind: string;
@@ -41,9 +41,9 @@ export interface DynamicSchedule {
   updatedAt: string;
 }
 
-const GET_DYNAMIC_SCHEDULES = gql`
-  query GetDynamicSchedules {
-    dynamicSchedules {
+const GET_SCHEDULES = gql`
+  query GetSchedules {
+    schedules {
       edges {
         node {
           uuid
@@ -71,11 +71,11 @@ const GET_DYNAMIC_SCHEDULES = gql`
   }
 `;
 
-const CREATE_DYNAMIC_SCHEDULE = gql`
-  mutation CreateDynamicSchedule(
+const CREATE_SCHEDULE = gql`
+  mutation CreateSchedule(
     $name: String!
     $jobKind: JobKind!
-    $scheduleType: ScheduleTypeEnum
+    $scheduleType: ScheduleKind
     $interval: Int
     $cronHour: String
     $cronMinute: String
@@ -89,7 +89,7 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
     $args: GenericScalar
     $enabled: Boolean!
   ) {
-    createDynamicSchedule(
+    createSchedule(
       name: $name
       jobKind: $jobKind
       scheduleType: $scheduleType
@@ -133,12 +133,12 @@ const CREATE_DYNAMIC_SCHEDULE = gql`
   }
 `;
 
-const UPDATE_DYNAMIC_SCHEDULE = gql`
-  mutation UpdateDynamicSchedule(
+const UPDATE_SCHEDULE = gql`
+  mutation UpdateSchedule(
     $scheduleUuid: UUID!
     $name: String
     $jobKind: JobKind
-    $scheduleType: ScheduleTypeEnum
+    $scheduleType: ScheduleKind
     $interval: Int
     $cronHour: String
     $cronMinute: String
@@ -152,7 +152,7 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
     $args: GenericScalar
     $enabled: Boolean
   ) {
-    updateDynamicSchedule(
+    updateSchedule(
       scheduleUuid: $scheduleUuid
       name: $name
       jobKind: $jobKind
@@ -197,9 +197,9 @@ const UPDATE_DYNAMIC_SCHEDULE = gql`
   }
 `;
 
-const DELETE_DYNAMIC_SCHEDULE = gql`
-  mutation DeleteDynamicSchedule($scheduleUuid: UUID!) {
-    deleteDynamicSchedule(scheduleUuid: $scheduleUuid) {
+const DELETE_SCHEDULE = gql`
+  mutation DeleteSchedule($scheduleUuid: UUID!) {
+    deleteSchedule(scheduleUuid: $scheduleUuid) {
       success
       message
     }
@@ -217,33 +217,33 @@ export class SchedulingService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getDynamicSchedules() {
+  getSchedules() {
     interface Response {
-      dynamicSchedules: RelayConnection<DynamicSchedule>;
+      schedules: RelayConnection<Schedule>;
     }
 
     return this.query<Response>({
-      query: GET_DYNAMIC_SCHEDULES,
+      query: GET_SCHEDULES,
       fetchPolicy: 'network-only',
     }).pipe(
-      map(({ dynamicSchedules }) => ({
-        schedules: dynamicSchedules.edges.map((edge) => edge.node),
-        pageInfo: dynamicSchedules.pageInfo,
+      map(({ schedules }) => ({
+        schedules: schedules.edges.map((edge) => edge.node),
+        pageInfo: schedules.pageInfo,
       })),
     );
   }
 
-  createDynamicSchedule(schedule: Partial<DynamicSchedule>) {
+  createSchedule(schedule: Partial<Schedule>) {
     interface Response {
-      createDynamicSchedule: {
+      createSchedule: {
         success: boolean;
         message: string;
-        schedule: DynamicSchedule;
+        schedule: Schedule;
       };
     }
 
     return this.mutate<Response>({
-      mutation: CREATE_DYNAMIC_SCHEDULE,
+      mutation: CREATE_SCHEDULE,
       variables: {
         name: schedule.name,
         jobKind: schedule.jobKind,
@@ -263,25 +263,25 @@ export class SchedulingService extends BaseService {
       },
     }).pipe(
       map((data) => {
-        if (!data.createDynamicSchedule.success) {
-          throw new Error(data.createDynamicSchedule.message);
+        if (!data.createSchedule.success) {
+          throw new Error(data.createSchedule.message);
         }
-        return data.createDynamicSchedule;
+        return data.createSchedule;
       }),
     );
   }
 
-  updateDynamicSchedule(scheduleUuid: string, schedule: Partial<DynamicSchedule>) {
+  updateSchedule(scheduleUuid: string, schedule: Partial<Schedule>) {
     interface Response {
-      updateDynamicSchedule: {
+      updateSchedule: {
         success: boolean;
         message: string;
-        schedule: DynamicSchedule;
+        schedule: Schedule;
       };
     }
 
     return this.mutate<Response>({
-      mutation: UPDATE_DYNAMIC_SCHEDULE,
+      mutation: UPDATE_SCHEDULE,
       variables: {
         scheduleUuid,
         name: schedule.name,
@@ -302,31 +302,31 @@ export class SchedulingService extends BaseService {
       },
     }).pipe(
       map((data) => {
-        if (!data.updateDynamicSchedule.success) {
-          throw new Error(data.updateDynamicSchedule.message);
+        if (!data.updateSchedule.success) {
+          throw new Error(data.updateSchedule.message);
         }
-        return data.updateDynamicSchedule;
+        return data.updateSchedule;
       }),
     );
   }
 
-  deleteDynamicSchedule(scheduleUuid: string) {
+  deleteSchedule(scheduleUuid: string) {
     interface Response {
-      deleteDynamicSchedule: {
+      deleteSchedule: {
         success: boolean;
         message: string;
       };
     }
 
     return this.mutate<Response>({
-      mutation: DELETE_DYNAMIC_SCHEDULE,
+      mutation: DELETE_SCHEDULE,
       variables: { scheduleUuid },
     }).pipe(
       map((data) => {
-        if (!data.deleteDynamicSchedule.success) {
-          throw new Error(data.deleteDynamicSchedule.message);
+        if (!data.deleteSchedule.success) {
+          throw new Error(data.deleteSchedule.message);
         }
-        return data.deleteDynamicSchedule;
+        return data.deleteSchedule;
       }),
     );
   }
@@ -335,7 +335,7 @@ export class SchedulingService extends BaseService {
     console.debug('Fetching schedules for podcast', podcastUuid);
     // For now, return all schedules and filter client-side
     // In a real implementation, you might want to add episode-specific filtering
-    return this.getDynamicSchedules().pipe(
+    return this.getSchedules().pipe(
       map(({ schedules }) =>
         schedules.filter((schedule) => {
           // Filter schedules that could apply to this episode's podcast
@@ -346,7 +346,7 @@ export class SchedulingService extends BaseService {
     );
   }
 
-  savePodcastSchedules(podcastUuid: string, schedules: DynamicSchedule[]) {
+  savePodcastSchedules(podcastUuid: string, schedules: Schedule[]) {
     console.debug('Saving schedules for podcast', podcastUuid, schedules);
     // This is a placeholder - implement based on your backend requirements
     // interface Response {
@@ -356,7 +356,7 @@ export class SchedulingService extends BaseService {
     // }
 
     // Return a mock observable for now
-    return this.getDynamicSchedules().pipe(
+    return this.getSchedules().pipe(
       map(() => ({
         success: true,
         message: 'Schedules saved successfully',
