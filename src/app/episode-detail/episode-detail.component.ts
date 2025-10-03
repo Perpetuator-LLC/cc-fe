@@ -23,7 +23,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
-import { SchedulingService, DynamicSchedule } from '../scheduling.service';
+import { SchedulingService, Schedule } from '../scheduling.service';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 
@@ -66,7 +66,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
-  schedules: DynamicSchedule[] = [];
+  schedules: Schedule[] = [];
   isGridView = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -342,7 +342,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   // Scheduling methods
-  getScheduleDescription(schedule: DynamicSchedule): string {
+  getScheduleDescription(schedule: Schedule): string {
     switch (schedule.scheduleType) {
       case 'INTERVAL': {
         const hours = Math.floor((schedule.interval || 0) / 3600);
@@ -363,9 +363,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleScheduleEnabled(schedule: DynamicSchedule, enabled: boolean): void {
+  toggleScheduleEnabled(schedule: Schedule, enabled: boolean): void {
     this.subscriptions.add(
-      this.schedulingService.updateDynamicSchedule(schedule.uuid, { enabled }).subscribe({
+      this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
         next: () => {
           this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
           // Update local schedule state
@@ -381,14 +381,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  editSchedule(schedule: DynamicSchedule): void {
+  editSchedule(schedule: Schedule): void {
     // Navigate to scheduling page or open edit dialog
     // TODO: Implement edit schedule functionality
     console.log('Edit schedule requested for:', schedule.name);
     this.messageService.info('Edit schedule functionality coming soon');
   }
 
-  deleteSchedule(schedule: DynamicSchedule): void {
+  deleteSchedule(schedule: Schedule): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: {
         title: 'Delete Schedule',
@@ -399,7 +399,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.subscriptions.add(
-          this.schedulingService.deleteDynamicSchedule(schedule.uuid).subscribe({
+          this.schedulingService.deleteSchedule(schedule.uuid).subscribe({
             next: () => {
               this.messageService.success('Schedule deleted successfully');
               // Remove from local schedules array

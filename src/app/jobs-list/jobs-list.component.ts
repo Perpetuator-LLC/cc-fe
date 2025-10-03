@@ -425,6 +425,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
         return 'audiotrack';
       case JobKind.PUBLISH_EPISODE_AUDIO:
         return 'cloud_upload';
+      case JobKind.TEST_RAISE:
+        return 'bug_report';
+      case JobKind.TEST_PRINT:
+        return 'print';
       default:
         return 'work';
     }

@@ -23,6 +23,8 @@ export enum JobKind {
   REFRESH_STOCK_LISTINGS = 'REFRESH_STOCK_LISTINGS',
   SCHEDULE_JOB = 'SCHEDULE_JOB',
   CANCEL_SCHEDULED_JOB = 'CANCEL_SCHEDULED_JOB',
+  TEST_PRINT = 'TEST_PRINT',
+  TEST_RAISE = 'TEST_RAISE',
 }
 
 export const stringToJobKind = (kind: string) => {
@@ -49,6 +51,10 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.SCHEDULE_JOB;
     case 'CANCEL_SCHEDULED_JOB':
       return JobKind.CANCEL_SCHEDULED_JOB;
+    case 'TEST_PRINT':
+      return JobKind.TEST_PRINT;
+    case 'TEST_RAISE':
+      return JobKind.TEST_RAISE;
     default:
       throw new Error('Invalid job type');
   }
@@ -78,6 +84,10 @@ export const kindToString = (kind: string) => {
       return 'Schedule Job';
     case JobKind.CANCEL_SCHEDULED_JOB:
       return 'Cancel Scheduled Job';
+    case JobKind.TEST_PRINT:
+      return 'Test Print';
+    case JobKind.TEST_RAISE:
+      return 'Test Raise';
     default:
       return 'N/A';
   }

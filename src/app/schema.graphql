@@ -46,9 +46,11 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): DiscountedCashFlowAnalysisTypeConnection
-
-  """List of user's dynamic schedules [Relay]"""
-  dynamicSchedules(
+  schedule(
+    """The ID of the object"""
+    id: ID!
+  ): ScheduleType
+  schedules(
     offset: Int
     before: String
     after: String
@@ -66,7 +68,7 @@ type ApiQuery {
 
     """Ordering"""
     orderBy: String
-  ): DynamicScheduleTypeConnection
+  ): ScheduleTypeConnection
 
   """Get site-wide statistics and metrics"""
   siteStatistics: SiteStatisticsType
@@ -728,28 +730,11 @@ type ListingStatusType {
   updateCount: Int!
 }
 
-type DynamicScheduleTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [DynamicScheduleTypeEdge]!
-}
-
-"""A Relay edge containing a `DynamicScheduleType` and its cursor."""
-type DynamicScheduleTypeEdge {
-  """The item at the end of the edge"""
-  node: DynamicScheduleType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
 """GraphQL type for DynamicSchedule model."""
-type DynamicScheduleType implements Node {
+type ScheduleType implements Node {
   name: String!
   jobKind: JobKind
-  scheduleType: ScheduleTypeEnum
+  scheduleType: ScheduleKind
 
   """Interval in seconds"""
   interval: Int
@@ -804,14 +789,33 @@ enum JobKind {
   FETCH_INCOME_STATEMENT
   FETCH_CASH_FLOW
   FETCH_EARNINGS
+  TEST_RAISE
+  TEST_PRINT
 }
 
-"""GraphQL enum for schedule types"""
-enum ScheduleTypeEnum {
+"""An enumeration."""
+enum ScheduleKind {
   INTERVAL
   CRONTAB
   CLOCKED
   SOLAR
+}
+
+type ScheduleTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [ScheduleTypeEdge]!
+}
+
+"""A Relay edge containing a `ScheduleType` and its cursor."""
+type ScheduleTypeEdge {
+  """The item at the end of the edge"""
+  node: ScheduleType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 """Site-wide statistics without sensitive data"""
@@ -1203,7 +1207,7 @@ type ApiMutation {
   """
   Mutation to create a new dynamic schedule supporting multiple schedule types.
   """
-  createDynamicSchedule(
+  createSchedule(
     """Arguments to pass to the job"""
     args: GenericScalar
 
@@ -1243,7 +1247,7 @@ type ApiMutation {
     name: String!
 
     """Type of schedule"""
-    scheduleType: ScheduleTypeEnum = INTERVAL
+    scheduleType: ScheduleKind = INTERVAL
 
     """Solar event: 'sunrise' or 'sunset' (required for solar schedules)"""
     solarEvent: String
@@ -1253,67 +1257,67 @@ type ApiMutation {
 
     """Longitude for solar calculations (required for solar schedules)"""
     solarLongitude: Float
-  ): CreateDynamicSchedule
+  ): CreateSchedule
 
   """Mutation to update an existing dynamic schedule."""
-  updateDynamicSchedule(
-    """New arguments to pass to the job"""
+  updateSchedule(
+    """Arguments to pass to the job"""
     args: GenericScalar
 
-    """New one-time execution datetime"""
+    """One-time execution datetime"""
     clockedTime: DateTime
 
-    """New cron day of month field"""
+    """Cron day of month field"""
     cronDayOfMonth: String
 
-    """New cron day of week field"""
+    """Cron day of week field"""
     cronDayOfWeek: String
 
-    """New cron hour field"""
+    """Cron hour field"""
     cronHour: String
 
-    """New cron minute field"""
+    """Cron minute field"""
     cronMinute: String
 
-    """New cron month of year field"""
+    """Cron month of year field"""
     cronMonthOfYear: String
 
     """Whether the schedule is enabled"""
     enabled: Boolean
 
-    """New interval in seconds"""
+    """Interval in seconds between executions"""
     interval: Int
 
-    """New job type"""
+    """Job kind of the schedule"""
     jobKind: JobKind
 
-    """New keyword arguments to pass to the job"""
+    """Keyword arguments to pass to the job"""
     kwargs: GenericScalar
 
-    """New name for the schedule"""
+    """Unique name for the schedule"""
     name: String
 
-    """New schedule type"""
-    scheduleType: ScheduleTypeEnum
+    """Type of schedule"""
+    scheduleType: ScheduleKind
 
     """UUID of the schedule to update"""
     scheduleUuid: UUID!
 
-    """New solar event: 'sunrise' or 'sunset'"""
+    """Solar event: 'sunrise' or 'sunset'"""
     solarEvent: String
 
-    """New latitude for solar calculations"""
+    """Latitude for solar calculations"""
     solarLatitude: Float
 
-    """New longitude for solar calculations"""
+    """Longitude for solar calculations"""
     solarLongitude: Float
-  ): UpdateDynamicSchedule
+  ): UpdateSchedule
 
   """Mutation to delete a dynamic schedule."""
-  deleteDynamicSchedule(
+  deleteSchedule(
     """UUID of the schedule to delete"""
     scheduleUuid: UUID!
-  ): DeleteDynamicSchedule
+  ): DeleteSchedule
   createVoice(displayName: String, enabled: Boolean = true, externalId: String!, externalUserId: String, model: VoiceModel!, private: Boolean = true): CreateVoice
   updateVoice(enabled: Boolean, voiceUuid: UUID!): UpdateVoice
   deleteVoice(voiceUuid: UUID!): DeleteVoice
@@ -1532,21 +1536,21 @@ type CreateDiscountedCashFlowAnalysis {
 """
 Mutation to create a new dynamic schedule supporting multiple schedule types.
 """
-type CreateDynamicSchedule {
+type CreateSchedule {
   success: Boolean
   message: String
-  schedule: DynamicScheduleType
+  schedule: ScheduleType
 }
 
 """Mutation to update an existing dynamic schedule."""
-type UpdateDynamicSchedule {
+type UpdateSchedule {
   success: Boolean
   message: String
-  schedule: DynamicScheduleType
+  schedule: ScheduleType
 }
 
 """Mutation to delete a dynamic schedule."""
-type DeleteDynamicSchedule {
+type DeleteSchedule {
   success: Boolean
   message: String
 }

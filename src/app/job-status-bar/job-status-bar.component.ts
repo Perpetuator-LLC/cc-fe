@@ -11,7 +11,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, JsonPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { Job, JobService, JobStatus, JobKind, kindToString, stringToJobStatus, statusToString } from '../job.service';
+import { Job, JobService, JobStatus, kindToString, stringToJobStatus, statusToString } from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -111,11 +111,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         .getJobs(
           [JobStatus.PENDING, JobStatus.RUNNING],
           [
-            JobKind.SUMMARIZE_NEWS,
-            JobKind.FETCH_NEWS,
-            JobKind.EXTRACT_NEWS,
-            JobKind.CREATE_EPISODE,
-            JobKind.UPDATE_EPISODE_AUDIO,
+            // JobKind.SUMMARIZE_NEWS,
+            // JobKind.FETCH_NEWS,
+            // JobKind.EXTRACT_NEWS,
+            // JobKind.CREATE_EPISODE,
+            // JobKind.UPDATE_EPISODE_AUDIO,
           ],
           currentJobIds,
         )

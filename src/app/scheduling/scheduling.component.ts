@@ -6,7 +6,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import { SchedulingService, DynamicSchedule, ScheduleType, SolarEvent } from '../scheduling.service';
+import { SchedulingService, Schedule, ScheduleType, SolarEvent } from '../scheduling.service';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
@@ -59,14 +59,14 @@ import { parseScheduleArgs } from '../utils/schedule';
 })
 export class SchedulingComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
-  schedules: DynamicSchedule[] = [];
+  schedules: Schedule[] = [];
   podcasts: PodcastsResult[] = [];
-  dataSource = new MatTableDataSource<DynamicSchedule>(this.schedules);
+  dataSource = new MatTableDataSource<Schedule>(this.schedules);
   displayedColumns: string[] = ['name', 'jobKind', 'scheduleType', 'interval', 'podcast', 'enabled', 'actions'];
   loading = false;
   loadingPodcasts = false;
   showCreateForm = false;
-  editingSchedule: DynamicSchedule | null = null;
+  editingSchedule: Schedule | null = null;
 
   // Crontab enhancement properties
   showAdvancedCron = false;
@@ -85,14 +85,14 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     { value: 'monthly_1st_9am', label: 'Monthly on 1st at 9:00 AM' },
   ];
 
-  scheduleForm: FormGroup;
+  scheduleForm: FormGroup = new FormGroup({});
 
-  jobKinds = [
-    'FETCH_NEWS',
-    'CREATE_EPISODE',
-    'PUBLISH_EPISODE_AUDIO',
+  schedulableJobKinds = [
+    // 'FETCH_NEWS',
+    // 'CREATE_EPISODE',
+    // 'PUBLISH_EPISODE_AUDIO',
     'PUBLISH_LATEST_EPISODE_CHAIN',
-    'REFRESH_STOCK_LISTINGS',
+    // 'REFRESH_STOCK_LISTINGS',
   ];
 
   scheduleTypes = Object.values(ScheduleType);
@@ -132,6 +132,9 @@ export class SchedulingComponent implements OnInit, OnDestroy {
       solarLatitude: [40.7128],
       solarLongitude: [-74.006],
     });
+    if (window.location.hostname === 'localhost') {
+      this.schedulableJobKinds.push('TEST_PRINT', 'TEST_RAISE');
+    }
   }
 
   ngOnInit(): void {
@@ -153,7 +156,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   loadSchedules() {
     this.loading = true;
     this.subscriptions.add(
-      this.schedulingService.getDynamicSchedules().subscribe({
+      this.schedulingService.getSchedules().subscribe({
         next: ({ schedules }) => {
           this.schedules = schedules;
           this.dataSource.data = schedules;
@@ -208,7 +211,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     }
 
     const formValue = this.scheduleForm.value;
-    const scheduleData: Partial<DynamicSchedule> = {
+    const scheduleData: Partial<Schedule> = {
       name: formValue.name,
       jobKind: formValue.jobKind,
       scheduleType: formValue.scheduleType,
@@ -243,7 +246,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.add(
-      this.schedulingService.createDynamicSchedule(scheduleData).subscribe({
+      this.schedulingService.createSchedule(scheduleData).subscribe({
         next: () => {
           this.messageService.success('Schedule created successfully');
           this.loadSchedules();
@@ -256,7 +259,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     );
   }
 
-  editSchedule(schedule: DynamicSchedule) {
+  editSchedule(schedule: Schedule) {
     this.editingSchedule = schedule;
     this.showCreateForm = true;
 
@@ -290,7 +293,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     }
 
     const formValue = this.scheduleForm.value;
-    const scheduleData: Partial<DynamicSchedule> = {
+    const scheduleData: Partial<Schedule> = {
       name: formValue.name,
       jobKind: formValue.jobKind,
       scheduleType: formValue.scheduleType,
@@ -325,7 +328,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.add(
-      this.schedulingService.updateDynamicSchedule(this.editingSchedule.uuid, scheduleData).subscribe({
+      this.schedulingService.updateSchedule(this.editingSchedule.uuid, scheduleData).subscribe({
         next: () => {
           this.messageService.success('Schedule updated successfully');
           this.loadSchedules();
@@ -338,7 +341,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     );
   }
 
-  deleteSchedule(schedule: DynamicSchedule) {
+  deleteSchedule(schedule: Schedule) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: {
         title: 'Delete Schedule',
@@ -349,7 +352,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.subscriptions.add(
-          this.schedulingService.deleteDynamicSchedule(schedule.uuid).subscribe({
+          this.schedulingService.deleteSchedule(schedule.uuid).subscribe({
             next: () => {
               this.messageService.success('Schedule deleted successfully');
               this.loadSchedules();
@@ -363,9 +366,9 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleSchedule(schedule: DynamicSchedule, enabled: boolean) {
+  toggleSchedule(schedule: Schedule, enabled: boolean) {
     this.subscriptions.add(
-      this.schedulingService.updateDynamicSchedule(schedule.uuid, { enabled }).subscribe({
+      this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
         next: () => {
           this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
           this.loadSchedules();
@@ -396,7 +399,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     this.scheduleForm.reset();
   }
 
-  getPodcastName(schedule: DynamicSchedule): string {
+  getPodcastName(schedule: Schedule): string {
     const parsedArgs = parseScheduleArgs(schedule.args);
     const podcastUuid = parsedArgs['podcast_uuid'];
 
@@ -406,7 +409,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     return podcast?.name || 'Unknown Podcast';
   }
 
-  getScheduleDescription(schedule: DynamicSchedule): string {
+  getScheduleDescription(schedule: Schedule): string {
     switch (schedule.scheduleType) {
       case ScheduleType.INTERVAL: {
         const hours = Math.floor((schedule.interval || 0) / 3600);

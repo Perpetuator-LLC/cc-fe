@@ -41,7 +41,7 @@
         <mat-form-field>
           <mat-label>Job Type</mat-label>
           <mat-select formControlName="jobKind">
-            @for (jobKind of jobKinds; track jobKind) {
+            @for (jobKind of schedulableJobKinds; track jobKind) {
             <mat-option [value]="jobKind">{{ formatJobKind(jobKind) }}</mat-option>
             }
           </mat-select>
