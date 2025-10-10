@@ -92,10 +92,19 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
     const selectedValues: string[] = [];
 
     Object.keys(this.value).forEach((parent) => {
-      // Add subcategories only
-      this.value[parent]?.forEach((sub) => {
-        selectedValues.push(`sub:${parent}:${sub}`);
-      });
+      const allSubcategories = this.categoriesMap[parent] || [];
+      const selectedSubcategories = this.value[parent] || [];
+
+      if (allSubcategories.length > 0 && allSubcategories.every((sub) => selectedSubcategories.includes(sub))) {
+        selectedValues.push(`parent:${parent}`);
+        selectedSubcategories.forEach((sub) => {
+          selectedValues.push(`sub:${parent}:${sub}`);
+        });
+      } else {
+        selectedSubcategories.forEach((sub) => {
+          selectedValues.push(`sub:${parent}:${sub}`);
+        });
+      }
     });
 
     return selectedValues;
@@ -113,21 +122,53 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
     return allCategories;
   }
 
+  getVisibleCategories(): { visible: string[]; remainingCount: number } {
+    const allCategories = this.getAllSelectedCategories();
+    const maxVisible = 2;
+
+    if (allCategories.length <= maxVisible) {
+      return { visible: allCategories, remainingCount: 0 };
+    }
+
+    return {
+      visible: allCategories.slice(0, maxVisible),
+      remainingCount: allCategories.length - maxVisible,
+    };
+  }
+
   onCategorySelectionChange(selectedValues: string[]) {
     const newValue: Record<string, string[]> = {};
 
+    const selectionsByParent: Record<string, { parent: boolean; subcategories: string[] }> = {};
+
     selectedValues.forEach((value) => {
-      if (value.startsWith('sub:')) {
+      if (value.startsWith('parent:')) {
+        const parent = value.replace('parent:', '');
+        if (!selectionsByParent[parent]) {
+          selectionsByParent[parent] = { parent: false, subcategories: [] };
+        }
+        selectionsByParent[parent].parent = true;
+      } else if (value.startsWith('sub:')) {
         const parts = value.replace('sub:', '').split(':');
         if (parts.length === 2) {
           const [parent, sub] = parts;
-          if (!newValue[parent]) {
-            newValue[parent] = [];
+          if (!selectionsByParent[parent]) {
+            selectionsByParent[parent] = { parent: false, subcategories: [] };
           }
-          if (!newValue[parent].includes(sub)) {
-            newValue[parent].push(sub);
-          }
+          selectionsByParent[parent].subcategories.push(sub);
         }
+      }
+    });
+
+    Object.keys(selectionsByParent).forEach((parent) => {
+      const selection = selectionsByParent[parent];
+
+      if (selection.parent && selection.subcategories.length === 0) {
+        if (this.categoriesMap[parent]) {
+          newValue[parent] = [...this.categoriesMap[parent]];
+        }
+      } else if (selection.subcategories.length > 0) {
+        newValue[parent] = [...selection.subcategories];
       }
     });
 

@@ -203,6 +203,13 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   }
 
   deleteEpisode(episode: Episode) {
+    if (episode.isLive && episode.podcast) {
+      this.messageService.error(
+        'Cannot delete episode that is currently live on podcast. Please unpublish the episode first.',
+      );
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: {
         title: 'Delete Episode',

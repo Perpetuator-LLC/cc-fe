@@ -92,9 +92,7 @@
     $primary-light: #ffb74d; // Orange 300
     $primary-dark: #f57c00; // Orange 700
     $tertiary-color: #9c27b0; // Violet 500
-  }
-
-  @else {
+  } @else {
     // Light theme colors - using direct Material Design color values
     $primary-color: #2196f3; // Azure/Blue 500
     $primary-light: #64b5f6; // Blue 300
@@ -114,34 +112,46 @@
 }
 
 // Dark theme definition
-$dark-theme: mat.define-theme((color: (theme-type: dark,
-        primary: mat.$orange-palette,
-        tertiary: mat.$violet-palette,
-      ),
-      typography: (brand-family: 'DM Sans',
-        plain-family: 'DM Sans',
-        bold-weight: 900,
-        medium-weight: 700,
-        regular-weight: 500,
-      ),
-      density: (scale: 0,
-      ),
-    ));
+$dark-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: dark,
+      primary: mat.$orange-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: (
+      brand-family: 'DM Sans',
+      plain-family: 'DM Sans',
+      bold-weight: 900,
+      medium-weight: 700,
+      regular-weight: 500,
+    ),
+    density: (
+      scale: 0,
+    ),
+  )
+);
 
 // Light theme definition
-$light-theme: mat.define-theme((color: (theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: (brand-family: 'DM Sans',
-        plain-family: 'DM Sans',
-        bold-weight: 900,
-        medium-weight: 700,
-        regular-weight: 500,
-      ),
-      density: (scale: 0,
-      ),
-    ));
+$light-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: (
+      brand-family: 'DM Sans',
+      plain-family: 'DM Sans',
+      bold-weight: 900,
+      medium-weight: 700,
+      regular-weight: 500,
+    ),
+    density: (
+      scale: 0,
+    ),
+  )
+);
 
 //@include mat.all-component-typographies($typography);
 
@@ -178,6 +188,7 @@ body.dark {
   // Dark theme specific custom properties
   --toolbar-container-background-color: #272b32;
   --secondary-color: #272b32;
+  --secondary-color-opacity: #272b32e5;
   --secondary-dark: #373c43;
   --secondary-light: #373c43;
   --theme-color: #ffffff;
@@ -206,6 +217,7 @@ body.light {
   // Light theme specific custom properties
   --toolbar-container-background-color: #ffffff;
   --secondary-color: #f5f5f5;
+  --secondary-color-opacity: #f5f5f5e6;
   --secondary-dark: #f5f5f5;
   --secondary-light: #ffffff;
   --theme-color: #262627;
@@ -267,6 +279,7 @@ body {
   // Default light theme properties
   --toolbar-container-background-color: #ffffff;
   --secondary-color: #f5f5f5;
+  --secondary-color-opacity: #f5f5f5e6;
   --secondary-dark: #f5f5f5;
   --secondary-light: #ffffff;
   --theme-color: #262627;
@@ -286,6 +299,7 @@ body {
 .dark {
   --toolbar-container-background-color: #272b32;
   --secondary-color: #272b32;
+  --secondary-color-opacity: #272b32e5;
   --secondary-dark: #373c43;
   --secondary-light: #373c43;
   --theme-color: #ffffff;
@@ -356,6 +370,51 @@ body {
 .mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
   color: var(--theme-color) !important;
 }
+.mdc-switch--selected:enabled .mdc-switch__handle::after{
+  background:white !important
+}
+.mat-mdc-slide-toggle .mdc-switch__icons{
+  display: none;
+}
+.mat-mdc-slide-toggle .mdc-switch{
+  width: 37px;
+}
+.mat-mdc-slide-toggle .mdc-switch .mdc-switch__track{
+  height: 22px;
+}
+.mat-mdc-slide-toggle .mdc-switch .mdc-switch__handle{
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 16px !important;
+}
+.mat-mdc-slide-toggle .mdc-switch--unselected .mdc-switch__handle:has(.mdc-switch__icons){
+  margin: 0 4px !important;
+}
+.mat-mdc-slide-toggle .mdc-switch__handle .mdc-switch__ripple{
+  display: none;
+}
+.mdc-switch--unselected:enabled .mdc-switch__handle::after{
+  background: var(--theme-color) !important;
+}
+.mdc-switch__track::before{
+  background: var(--secondary-dark) !important;
+}
+.mdc-switch--unselected .mdc-switch__track::before, .mdc-switch--unselected .mdc-switch__track::after{
+  border-color: var(--border-color) !important;
+}
+.clear-all-btn .mdc-button__ripple {
+  display: none;
+}
+
+.timeline-actions {
+  mat-icon {
+    color: var(--theme-color);
+  }
+}
+
+.mat-mdc-select-placeholder{
+  color: var(--description-color) !important;
+}
 
 .search-filter {
   .mat-mdc-form-field-bottom-align {
@@ -392,6 +451,7 @@ body {
 
 .mat-mdc-dialog-content {
   color: var(--description-color) !important;
+  font-weight: 400 !important;
 }
 
 .mdc-dialog__surface .deleteModal {
@@ -613,12 +673,17 @@ div.mat-mdc-autocomplete-panel {
 }
 
 .mat-mdc-dialog-surface {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--secondary-color-opacity) !important;
   border-radius: 8px !important;
+  box-shadow: 0px 4px 10px 0px #0000000a !important;
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--border-color);
 }
 
 .mat-mdc-dialog-title {
   color: var(--theme-color) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
 }
 
 .mat-app-background {
@@ -641,12 +706,12 @@ div.mat-mdc-select-panel {
     border-radius: 8px;
 
     &.mat-mdc-option-active {
-      background-color: var(--secondary-500);
+      background-color: var(--secondary-500) !important;
     }
   }
 
   .mat-pseudo-checkbox {
-    border-color: var(--border-color);
+    border-color: var(--border-color) !important;
 
     &.mat-pseudo-checkbox-checked {
       background-color: var(--primary);
@@ -661,9 +726,31 @@ div.mat-mdc-select-panel {
     color: var(--theme-color) !important;
     font-size: 14px;
     font-weight: 400;
+    margin-right: 0 !important;
   }
 }
 
+.mat-mdc-select{
+  color: var(--theme-color) !important;
+}
+.mat-mdc-paginator{
+  color: var(--theme-color) !important;
+  .mat-mdc-option {
+    justify-content: center;
+  }
+}
+.mat-mdc-paginator-container .mdc-text-field.mdc-text-field--focused{
+  border-color:var(--border-color) !important;
+}
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mat-mdc-notch-piece{
+  border-color:var(--border-color) !important;
+}
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mat-mdc-notch-piece{
+  border-color:var(--border-color) !important;
+}
+.mat-mdc-form-field.mat-focused .mat-mdc-select-arrow, .mat-mdc-select-arrow{
+  color:var(--theme-color) !important;
+}
 .mat-mdc-menu-panel {
   background-color: var(--secondary-light) !important;
   border: 1px solid var(--border-color);
@@ -962,6 +1049,16 @@ mat-paginator {
         border-color: var(--border-color) !important;
       }
     }
+  }
+}
+.mat-mdc-menu-item-text {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  gap: 8px;
+
+  app-svg-icon {
+    line-height: 0;
   }
 }
 

@@ -18,12 +18,17 @@
     </mat-form-field>
 
     <div class="selected-chips">
-        @for (category of getAllSelectedCategories(); track category) {
+        @for (category of getVisibleCategories().visible; track category) {
         <mat-chip [removable]="true" (removed)="removeCategory(category)">
             {{ category }}
             <button matChipRemove>
                 <mat-icon>cancel</mat-icon>
             </button>
+        </mat-chip>
+        }
+        @if (getVisibleCategories().remainingCount > 0) {
+        <mat-chip class="more-chip">
+            {{ getVisibleCategories().remainingCount }} more
         </mat-chip>
         }
     </div>

@@ -24,6 +24,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MessageComponent } from '../message/message.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { parseScheduleArgs } from '../utils/schedule';
+import { ScheduleModalComponent, ScheduleModalData } from '../schedule-modal/schedule-modal.component';
 
 @Component({
   selector: 'app-scheduling',
@@ -260,29 +261,25 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   }
 
   editSchedule(schedule: Schedule) {
-    this.editingSchedule = schedule;
-    this.showCreateForm = true;
+    const dialogRef = this.dialog.open(ScheduleModalComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: {
+        schedule: schedule,
+        mode: 'edit',
+      } as ScheduleModalData,
+    });
 
-    // Parse args to get podcast UUID
-    const parsedArgs = parseScheduleArgs(schedule.args);
-    const podcastUuid = parsedArgs['podcast_uuid'] || '';
-
-    this.scheduleForm.patchValue({
-      name: schedule.name,
-      jobKind: schedule.jobKind,
-      scheduleType: schedule.scheduleType || ScheduleType.INTERVAL,
-      podcastUuid: podcastUuid,
-      enabled: schedule.enabled,
-      interval: schedule.interval,
-      cronHour: schedule.cronHour,
-      cronMinute: schedule.cronMinute,
-      cronDayOfWeek: schedule.cronDayOfWeek,
-      cronDayOfMonth: schedule.cronDayOfMonth,
-      cronMonthOfYear: schedule.cronMonthOfYear,
-      clockedTime: schedule.clockedTime,
-      solarEvent: schedule.solarEvent,
-      solarLatitude: schedule.solarLatitude,
-      solarLongitude: schedule.solarLongitude,
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Update the local schedules array with the updated schedule
+        const index = this.schedules.findIndex((s) => s.uuid === result.uuid);
+        if (index !== -1) {
+          this.schedules[index] = result;
+          this.dataSource.data = this.schedules;
+        }
+        this.messageService.success('Schedule updated successfully');
+      }
     });
   }
 
@@ -381,15 +378,21 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   }
 
   showCreateSchedule() {
-    this.showCreateForm = true;
-    this.editingSchedule = null;
-    this.scheduleForm.reset({
-      scheduleType: ScheduleType.INTERVAL,
-      enabled: true,
-      interval: 3600,
-      solarEvent: SolarEvent.SUNRISE,
-      solarLatitude: 40.7128,
-      solarLongitude: -74.006,
+    const dialogRef = this.dialog.open(ScheduleModalComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: {
+        mode: 'create',
+      } as ScheduleModalData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Add the new schedule to the local schedules array
+        this.schedules.push(result);
+        this.dataSource.data = this.schedules;
+        this.messageService.success('Schedule created successfully');
+      }
     });
   }
 

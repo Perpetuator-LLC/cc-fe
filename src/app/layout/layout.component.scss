@@ -25,7 +25,7 @@ mat-sidenav-content mat-toolbar {
     box-shadow: -5px -5px 250px 0px var(--border-color) inset;
 
     .header-logo {
-      color: var(--theme-white);
+      color: var(--theme-color);
       display: flex;
       align-items: center;
       text-decoration: none;
@@ -183,7 +183,7 @@ mat-nav-list {
   align-items: center !important;
   font-size: 12px;
   font-weight: 600;
-  color: var(--theme-white);
+  color: var(--theme-color);
 
   .mat-icon {
     margin-right: 16px;
@@ -260,7 +260,7 @@ mat-nav-list {
     width: 24px;
     /* Set the width of the icon */
     height: 24px;
-    color: var(--theme-white);
+    color: var(--theme-color);
     /* Set the height of the icon */
     //margin-right: 16px; /* Space between icon and text */
   }
@@ -512,7 +512,7 @@ mat-nav-list {
 
       &.hidden {
         transform: translateX(-100%);
-        margin-left: -240px;
+        margin-left: -180px;
         padding: 0;
         opacity: 0;
         visibility: hidden;
@@ -549,7 +549,7 @@ mat-nav-list {
         align-items: center;
         gap: 10px;
         border-radius: 10px;
-        color: var(--theme-white);
+        color: var(--theme-color);
         padding: 13px 10px;
 
         &.active {
@@ -568,7 +568,7 @@ mat-nav-list {
       }
 
       .links {
-        color: var(--theme-white);
+        color: var(--theme-color);
         margin-top: 30px;
       }
     }

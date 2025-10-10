@@ -18,14 +18,32 @@ export interface ConfirmDeleteDialogData {
       <p>{{ data.message }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-flat-button color="warn" (click)="onConfirm()">Delete</button>
+      <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
+      <button class="deletePodcastBtn" mat-flat-button color="warn" (click)="onConfirm()">Delete</button>
     </mat-dialog-actions>
   `,
   styles: [
     `
       mat-dialog-actions {
         gap: 8px;
+      }
+      .cancel-btn {
+        background: var(--secondary-light);
+        border: 1px solid var(--border-color);
+        color: var(--theme-color);
+        border-radius: 10px;
+        width: 88px;
+        height: 40px;
+      }
+      .deletePodcastBtn {
+        background: #ff4a4a;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: white;
+        width: 225px;
+        font-size: 14px;
+        font-weight: 600;
+        height: 40px;
       }
     `,
   ],

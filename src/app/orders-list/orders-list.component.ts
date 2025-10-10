@@ -104,8 +104,6 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   form = new FormGroup({
     amount: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]),
-    terms: new FormControl(false, Validators.requiredTrue),
-    agreement: new FormControl(false, Validators.requiredTrue),
   });
 
   constructor(
@@ -218,8 +216,6 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   payFromInput() {
     this.submitted = true;
     this.form.get('amount')?.markAsTouched();
-    this.form.get('terms')?.markAsTouched();
-    this.form.get('agreement')?.markAsTouched();
     if (this.form.invalid) {
       return;
     }

@@ -23,9 +23,6 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
-import { SchedulingService, Schedule } from '../scheduling.service';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-episode-detail',
@@ -51,10 +48,6 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
     SvgIconComponent,
     MatCardHeader,
     MatTabsModule,
-    MatSlideToggle,
-    MatMenu,
-    MatMenuItem,
-    MatMenuTrigger,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',
@@ -66,7 +59,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
-  schedules: Schedule[] = [];
   isGridView = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -82,7 +74,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private router: Router,
     private dialog: MatDialog,
-    private schedulingService: SchedulingService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -189,16 +180,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         this.charCount = value.length;
       }),
     );
-    this.subscriptions.add(
-      this.schedulingService.getSchedulesForPodcast(this.episodeUuid).subscribe({
-        next: (schedules) => {
-          this.schedules = schedules;
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to fetch schedules: ${err.message}`);
-        },
-      }),
-    );
   }
 
   private countWords(text: string): number {
@@ -283,6 +264,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   deleteEpisode(): void {
+    const episode = this.episodeForm.getRawValue() as Episode;
+
+    if (episode.isLive && episode.podcast) {
+      this.messageService.error(
+        'Cannot delete episode that is currently live on podcast. Please unpublish the episode first.',
+      );
+      return;
+    }
     const episodeTitle = this.episodeForm.get('title')?.value || 'this episode';
 
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
@@ -307,116 +296,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         );
       }
     });
-  }
-
-  addSchedule(): void {
-    // This method should navigate to create schedule or open a dialog
-    // since schedules are managed separately, not as part of the episode form
-    this.createNewSchedule();
-  }
-
-  removeSchedule(index: number): void {
-    // This method should delete a specific schedule
-    // since schedules are managed separately, not as part of the episode form
-    if (index >= 0 && index < this.schedules.length) {
-      this.deleteSchedule(this.schedules[index]);
-    }
-  }
-
-  saveSchedules(): void {
-    this.subscriptions.add(
-      this.schedulingService.savePodcastSchedules(this.episodeUuid, this.schedules).subscribe({
-        next: (response) => {
-          if (!response.success) {
-            this.messageService.error(response.message);
-            return;
-          }
-          this.messageService.success('Schedules saved successfully.');
-          this.schedules = response.schedules;
-        },
-        error: (err) => {
-          this.messageService.error(err.message);
-        },
-      }),
-    );
-  }
-
-  // Scheduling methods
-  getScheduleDescription(schedule: Schedule): string {
-    switch (schedule.scheduleType) {
-      case 'INTERVAL': {
-        const hours = Math.floor((schedule.interval || 0) / 3600);
-        const minutes = Math.floor(((schedule.interval || 0) % 3600) / 60);
-        return hours > 0 ? `Every ${hours}h ${minutes}m` : `Every ${minutes}m`;
-      }
-      case 'CRONTAB':
-        return `${schedule.cronHour}:${schedule.cronMinute} on ${schedule.cronDayOfWeek}`;
-
-      case 'CLOCKED':
-        return `Once at ${new Date(schedule.clockedTime || '').toLocaleString()}`;
-
-      case 'SOLAR':
-        return `At ${schedule.solarEvent} (${schedule.solarLatitude}, ${schedule.solarLongitude})`;
-
-      default:
-        return schedule.interval ? `Every ${schedule.interval}s` : 'Unknown';
-    }
-  }
-
-  toggleScheduleEnabled(schedule: Schedule, enabled: boolean): void {
-    this.subscriptions.add(
-      this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
-        next: () => {
-          this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
-          // Update local schedule state
-          const index = this.schedules.findIndex((s) => s.uuid === schedule.uuid);
-          if (index !== -1) {
-            this.schedules[index] = { ...this.schedules[index], enabled };
-          }
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to update schedule: ${err.message}`);
-        },
-      }),
-    );
-  }
-
-  editSchedule(schedule: Schedule): void {
-    // Navigate to scheduling page or open edit dialog
-    // TODO: Implement edit schedule functionality
-    console.log('Edit schedule requested for:', schedule.name);
-    this.messageService.info('Edit schedule functionality coming soon');
-  }
-
-  deleteSchedule(schedule: Schedule): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: {
-        title: 'Delete Schedule',
-        message: `Are you sure you want to delete the schedule "${schedule.name}"? This action cannot be undone.`,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.subscriptions.add(
-          this.schedulingService.deleteSchedule(schedule.uuid).subscribe({
-            next: () => {
-              this.messageService.success('Schedule deleted successfully');
-              // Remove from local schedules array
-              this.schedules = this.schedules.filter((s) => s.uuid !== schedule.uuid);
-            },
-            error: (err) => {
-              this.messageService.error(`Failed to delete schedule: ${err.message}`);
-            },
-          }),
-        );
-      }
-    });
-  }
-
-  createNewSchedule(): void {
-    // Navigate to scheduling page or open create dialog
-    this.messageService.info('Create schedule functionality coming soon');
   }
 
   formatJobKind(jobKind: string): string {

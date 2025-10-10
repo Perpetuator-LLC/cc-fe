@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, debounceTime, filter, switchMap, map } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
@@ -40,6 +40,10 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
+import { SchedulingService, Schedule } from '../scheduling.service';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { ScheduleModalComponent, ScheduleModalData } from '../schedule-modal/schedule-modal.component';
 import {
   MatAccordion,
   MatExpansionPanel,
@@ -112,6 +116,10 @@ import { CommonModule } from '@angular/common';
     MatTabsModule,
     DeletePodcastDialogComponent,
     SvgIconComponent,
+    MatSlideToggle,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -142,6 +150,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private tierFilteredVoices: Voice[] = [];
   protected filteredVoices: Voice[] = [];
   isEditing = false;
+  schedules: Schedule[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -155,6 +164,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private teamsService: TeamsService,
     private voicesService: VoicesService,
     protected userService: UserService,
+    private schedulingService: SchedulingService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -235,98 +245,23 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.loadTeams();
     this.applyVoiceFilters();
 
-    this.subscriptions.add(
-      this.podcastForm.valueChanges
-        .pipe(
-          debounceTime(1000),
-          filter(() => this.podcastForm.valid && this.podcastForm.dirty),
-          filter(() => {
-            const { enabled, slug } = this.podcastForm.getRawValue();
-            return !(enabled && !slug);
-          }),
-          switchMap((valueToSubmit) => {
-            // Only update pendingSubmitCategories here
-            this.pendingSubmitCategories = { ...valueToSubmit.categories };
-            const {
-              team,
-              name,
-              intro,
-              prompt,
-              outro,
-              enabled,
-              slug,
-              description,
-              ownerName,
-              ownerEmail,
-              ownerLink,
-              tgBotToken,
-              tgChannelId,
-              categories,
-              voice,
-            } = valueToSubmit;
-            return this.podcastsService
-              .updatePodcast(
-                this.podcastUuid,
-                team ? team.uuid : null,
-                name,
-                intro,
-                prompt,
-                outro,
-                enabled,
-                slug,
-                description,
-                ownerName,
-                ownerEmail,
-                ownerLink,
-                tgBotToken,
-                tgChannelId,
-                null,
-                categories,
-                voice ? voice.uuid : null,
-              )
-              .pipe(
-                // Pass the submitted value along with the result
-                map((result) => ({ result, submittedValue: valueToSubmit })),
-              );
-          }),
-        )
-        .subscribe({
-          // The type here should now correctly infer as { result: PodcastUpdateResult, submittedValue: any }
-          next: ({ result, submittedValue }) => {
-            if (result.success) {
-              // Update lastSubmittedCategories only when server confirms
-              this.lastSubmittedCategories = { ...this.pendingSubmitCategories }; // Use a copy
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { categories, ...otherData } = result.podcast;
-              // Patch other fields
-              this.podcastForm.patchValue(otherData, { emitEvent: false });
-
-              // Only mark as pristine if the form hasn't changed since submission
-              if (JSON.stringify(this.podcastForm.getRawValue()) === JSON.stringify(submittedValue)) {
-                this.podcastForm.markAsPristine();
-                // Clear pending state only if pristine matches submitted
-                this.pendingSubmitCategories = {};
-              } else {
-                // If form changed, recalculate pending state based on current vs last *successful* submit
-                // This might require adjusting the pending logic slightly if needed,
-                // but for now, just don't clear pendingSubmitCategories.
-              }
-              this.messageService.success('Podcast updated successfully', 3000);
-            } else {
-              // On failure, revert pending state? Or keep showing pending?
-              // For now, we'll keep pendingSubmitCategories as is, indicating the attempt.
-              this.messageService.error(result.message);
-            }
-          },
-          error: (err) => {
-            // Also revert pending state on error?
-            // this.pendingSubmitCategories = {}; // Optional: Clear pending on error
-            this.messageService.error(`Failed to update podcast: ${err.message}`);
-          },
-        }),
-    );
+    // Live updates disabled - data will only be saved when save button is clicked
 
     this.applyVoiceFilters();
+    this.loadSchedules();
+  }
+
+  loadSchedules(): void {
+    this.subscriptions.add(
+      this.schedulingService.getSchedulesForPodcast(this.podcastUuid).subscribe({
+        next: (schedules) => {
+          this.schedules = schedules;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to fetch schedules: ${err.message}`);
+        },
+      }),
+    );
   }
 
   getVoiceDisplayName(voice: Voice): string {
@@ -410,13 +345,27 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   private applyVoiceSearch(searchTerm: string | null): void {
     const lowerCaseSearchTerm = (searchTerm || '').toLowerCase().trim();
+    let filteredList: Voice[];
+
     if (!lowerCaseSearchTerm) {
-      this.filteredVoices = [...this.tierFilteredVoices]; // No search term, show all tier-filtered voices
+      filteredList = [...this.tierFilteredVoices];
     } else {
-      this.filteredVoices = this.tierFilteredVoices.filter((voice) =>
+      filteredList = this.tierFilteredVoices.filter((voice) =>
         (voice.displayName || '').toLowerCase().includes(lowerCaseSearchTerm),
       );
     }
+
+    // Move selected voice to the top of the list
+    const selectedVoice = this.podcastForm.get('voice')?.value;
+    if (selectedVoice) {
+      const selectedIndex = filteredList.findIndex((voice) => voice.uuid === selectedVoice.uuid);
+      if (selectedIndex > 0) {
+        const [selectedVoiceItem] = filteredList.splice(selectedIndex, 1);
+        filteredList.unshift(selectedVoiceItem);
+      }
+    }
+
+    this.filteredVoices = filteredList;
   }
 
   applyVoiceFilters(): void {
@@ -809,5 +758,117 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     }
 
     this.applyVoiceFilters();
+  }
+
+  // Scheduling methods
+  getScheduleDescription(schedule: Schedule): string {
+    switch (schedule.scheduleType) {
+      case 'INTERVAL': {
+        const hours = Math.floor((schedule.interval || 0) / 3600);
+        const minutes = Math.floor(((schedule.interval || 0) % 3600) / 60);
+        return hours > 0 ? `Every ${hours}h ${minutes}m` : `Every ${minutes}m`;
+      }
+      case 'CRONTAB':
+        return `${schedule.cronHour}:${schedule.cronMinute} on ${schedule.cronDayOfWeek}`;
+
+      case 'CLOCKED':
+        return `Once at ${new Date(schedule.clockedTime || '').toLocaleString()}`;
+
+      case 'SOLAR':
+        return `At ${schedule.solarEvent} (${schedule.solarLatitude}, ${schedule.solarLongitude})`;
+
+      default:
+        return schedule.interval ? `Every ${schedule.interval}s` : 'Unknown';
+    }
+  }
+
+  toggleScheduleEnabled(schedule: Schedule, enabled: boolean): void {
+    this.subscriptions.add(
+      this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
+        next: () => {
+          this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
+          // Update local schedule state
+          const index = this.schedules.findIndex((s) => s.uuid === schedule.uuid);
+          if (index !== -1) {
+            this.schedules[index] = { ...this.schedules[index], enabled };
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update schedule: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  editSchedule(schedule: Schedule): void {
+    const dialogRef = this.dialog.open(ScheduleModalComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: {
+        schedule: schedule,
+        mode: 'edit',
+      } as ScheduleModalData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Update the local schedules array with the updated schedule
+        const index = this.schedules.findIndex((s) => s.uuid === result.uuid);
+        if (index !== -1) {
+          this.schedules[index] = result;
+        }
+        this.messageService.success('Schedule updated successfully');
+      }
+    });
+  }
+
+  deleteSchedule(schedule: Schedule): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: 'Delete Schedule',
+        message: `Are you sure you want to delete the schedule "${schedule.name}"? This action cannot be undone.`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.subscriptions.add(
+          this.schedulingService.deleteSchedule(schedule.uuid).subscribe({
+            next: () => {
+              this.messageService.success('Schedule deleted successfully');
+              // Remove from local schedules array
+              this.schedules = this.schedules.filter((s) => s.uuid !== schedule.uuid);
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to delete schedule: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  createNewSchedule(): void {
+    const dialogRef = this.dialog.open(ScheduleModalComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: {
+        podcastUuid: this.podcastUuid,
+        mode: 'create',
+      } as ScheduleModalData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Add the new schedule to the local schedules array
+        this.schedules.push(result);
+        this.messageService.success('Schedule created successfully');
+      }
+    });
+  }
+
+  formatJobKind(jobKind: string): string {
+    return jobKind.replace(/_/g, ' ');
   }
 }

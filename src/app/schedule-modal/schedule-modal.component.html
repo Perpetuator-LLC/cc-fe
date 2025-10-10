@@ -1,0 +1,204 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="schedule-modal-container">
+  <div class="modal-header">
+    <h2>{{ getFormTitle() }}</h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-content">
+    @if (loadingPodcasts) {
+    <div class="loading-spinner">
+      <mat-progress-bar mode="indeterminate" value="20" style="height: 2px;margin-top: -20px;"></mat-progress-bar>
+    </div>
+    }
+
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="schedule-form">
+      <div class="form-row">
+        <mat-form-field class="full-width">
+          <mat-label>Schedule Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter schedule name" />
+          @if (scheduleForm.get('name')?.invalid && scheduleForm.get('name')?.touched) {
+            <mat-error>Schedule name is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Job Type</mat-label>
+          <mat-select formControlName="jobKind">
+            @for (jobKind of schedulableJobKinds; track jobKind) {
+            <mat-option [value]="jobKind">{{ formatJobKind(jobKind) }}</mat-option>
+            }
+          </mat-select>
+          @if (scheduleForm.get('jobKind')?.invalid && scheduleForm.get('jobKind')?.touched) {
+            <mat-error>Job type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Schedule Type</mat-label>
+          <mat-select formControlName="scheduleType" (selectionChange)="onScheduleTypeChange()">
+            @for (type of scheduleTypes; track type) {
+            <mat-option [value]="type">{{ type }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Podcast</mat-label>
+          <mat-select formControlName="podcastUuid">
+            <mat-option [value]="">None</mat-option>
+            @for (podcast of podcasts; track podcast.uuid) {
+            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Interval Schedule Fields -->
+      @if (scheduleForm.get('scheduleType')?.value === 'INTERVAL') {
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Interval (seconds)</mat-label>
+          <input matInput type="number" formControlName="interval" placeholder="3600" />
+          <mat-hint>Enter interval in seconds (e.g., 3600 = 1 hour)</mat-hint>
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- Crontab Schedule Fields -->
+      @if (scheduleForm.get('scheduleType')?.value === 'CRONTAB') {
+      <div class="crontab-section">
+        <!-- Preset Options -->
+        <div class="form-row">
+          <mat-form-field class="full-width">
+            <mat-label>Quick Presets</mat-label>
+            <mat-select [value]="selectedPreset" (selectionChange)="applyPreset($event.value)">
+              <mat-option value="">Custom</mat-option>
+              @for (preset of crontabPresets; track preset.value) {
+              <mat-option [value]="preset.value">{{ preset.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Time Selection -->
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Time (Local)</mat-label>
+            <input matInput type="time" formControlName="localTime" (change)="onTimeChange($event)" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Timezone</mat-label>
+            <input matInput [value]="userTimezone" readonly />
+          </mat-form-field>
+        </div>
+
+        <!-- Advanced Cron Settings -->
+        <div class="form-row">
+          <button type="button" mat-button (click)="showAdvancedCron = !showAdvancedCron">
+            <mat-icon>{{ showAdvancedCron ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ showAdvancedCron ? 'Hide' : 'Show' }} Advanced Cron Settings
+          </button>
+        </div>
+
+        @if (showAdvancedCron) {
+        <div class="advanced-cron">
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Minute</mat-label>
+              <input matInput formControlName="cronMinute" placeholder="0" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Hour</mat-label>
+              <input matInput formControlName="cronHour" placeholder="9" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Day of Month</mat-label>
+              <input matInput formControlName="cronDayOfMonth" placeholder="*" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Month</mat-label>
+              <input matInput formControlName="cronMonthOfYear" placeholder="*" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Day of Week</mat-label>
+              <input matInput formControlName="cronDayOfWeek" placeholder="*" />
+            </mat-form-field>
+          </div>
+        </div>
+        }
+
+        <!-- Schedule Preview -->
+        <div class="schedule-preview">
+          <mat-card>
+            <mat-card-content>
+              <h4>Schedule Preview</h4>
+              <p class="preview-text">{{ getCronPreview() }}</p>
+              <p class="cron-expression">Cron: {{ getCronExpression() }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+      }
+
+      <!-- Clocked Schedule Fields -->
+      @if (scheduleForm.get('scheduleType')?.value === 'CLOCKED') {
+      <div class="form-row">
+        <mat-form-field class="full-width">
+          <mat-label>Scheduled Time</mat-label>
+          <input matInput type="datetime-local" formControlName="clockedTime" />
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- Solar Schedule Fields -->
+      @if (scheduleForm.get('scheduleType')?.value === 'SOLAR') {
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Solar Event</mat-label>
+          <mat-select formControlName="solarEvent">
+            @for (event of solarEvents; track event) {
+            <mat-option [value]="event">{{ formatSolarEvent(event) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Latitude</mat-label>
+          <input matInput type="number" step="0.0001" formControlName="solarLatitude" placeholder="40.7128" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Longitude</mat-label>
+          <input matInput type="number" step="0.0001" formControlName="solarLongitude" placeholder="-74.0060" />
+        </mat-form-field>
+      </div>
+      }
+
+      <div class="form-row">
+        <mat-slide-toggle formControlName="enabled">
+          Enabled
+        </mat-slide-toggle>
+      </div>
+
+      <div class="form-actions">
+        <button class="cancel-btn" type="button" mat-button (click)="onCancel()" [disabled]="loading">
+          Cancel
+        </button>
+        <button class="save-btn" type="submit" mat-flat-button color="primary" [disabled]="loading || scheduleForm.invalid">
+          @if (loading) {
+            <mat-progress-bar mode="indeterminate" diameter="20"></mat-progress-bar>
+          }
+          {{ data.mode === 'edit' ? 'Update' : 'Create' }} Schedule
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

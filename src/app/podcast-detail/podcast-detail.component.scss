@@ -1,4 +1,192 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+// Scheduling section styles
+.scheduling-section {
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+
+    h3 {
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 100%;
+      letter-spacing: 0;
+      margin: 0;
+      color: var(--theme-color);
+    }
+
+    span {
+      background: var(--secondary-dark);
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      padding: 0 10px;
+      height: 22px;
+      color: var(--theme-color);
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.scheduling-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+
+  @media screen and (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.schedule-card {
+  background: var(--secondary-light) !important;
+  color: var(--theme-color);
+  border: 1px solid var(--border-color);
+
+  .schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+
+    .schedule-info {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--theme-color);
+      }
+
+      .schedule-type {
+        margin: 0;
+        font-size: 12px;
+        color: var(--description-color);
+        text-transform: capitalize;
+      }
+    }
+
+    .schedule-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      .action-btn{
+        padding: 0;
+        width: auto;
+        height: auto;
+        line-height: 0;
+      }
+    }
+  }
+
+  .schedule-details {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+
+    .schedule-timing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: var(--description-color);
+      }
+
+      span {
+        font-size: 14px;
+        color: var(--theme-color);
+      }
+    }
+
+    .schedule-status {
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+
+        &.enabled {
+          background: var(--md-sys-color-success);
+          color: var(--theme-white);
+        }
+
+        &.disabled {
+          background: var(--secondary-dark);
+          color: var(--description-color);
+        }
+      }
+    }
+  }
+}
+
+.no-schedules {
+  text-align: center;
+  margin-top: 20px;
+
+  mat-card {
+    background: var(--secondary-light) !important;
+    border: 1px solid var(--border-color);
+    padding: 40px 20px;
+
+    mat-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--description-color);
+      }
+
+      h4 {
+        margin: 0;
+        color: var(--theme-color);
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+        color: var(--description-color);
+        text-align: center;
+        max-width: 400px;
+      }
+    }
+  }
+}
+
+.schedule-actions-footer {
+  margin-top: 20px;
+  text-align: center;
+
+  button {
+    background: var(--primary);
+    color: white;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    font-weight: 500;
+  }
+}
+.create-schedule-btn{
+  background-color: var(--primary);
+  color: white;
+}
 .member-row {
   display: flex;
   flex-wrap: wrap;
@@ -10,6 +198,12 @@
   button {
     flex: 1 1 100%;
   }
+}
+
+.clear-all-btn{
+  background-color: transparent;
+  color: var(--primary);
+  justify-content: flex-start;
 }
 
 .podcast-card,

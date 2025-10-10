@@ -42,17 +42,9 @@
             <button mat-raised-button color="primary" (click)="setAmount(50)">Buy 50k credits $50</button>
             <button mat-raised-button color="primary" (click)="setAmount(100)">Buy 100k credits $100</button>
           </div>
-          <div class="checkbox-container">
-            <mat-checkbox formControlName="terms">
-              <p><span>I agree with</span> terms & conditions</p>
-            </mat-checkbox>
-            <mat-checkbox formControlName="agreement">
-              <p><span>I agree with</span> the agreement on the storage for the cardholders credentials</p>
-            </mat-checkbox>
-          </div>
           @if (submitted && form.invalid) {
             <span class="error">
-              Please enter a valid amount and agree to the terms & conditions and the agreement.
+              Please enter a valid amount.
             </span>
           }
           <button
@@ -61,7 +53,7 @@
             color="primary"
             type="button"
             (click)="payFromInput()"
-            [disabled]="!form.get('terms')?.value || !form.get('agreement')?.value"
+            [disabled]="!form.get('amount')?.value"
           >
             Pay
             <span> ${{ form.get('amount')?.value || 0 | number: '1.2-2' }} </span>
