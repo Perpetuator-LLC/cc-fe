@@ -1,3 +1,15 @@
+# Changelog from v0.22.0 to v0.23.0
+
+In this update, we have introduced a new feature that exposes the test raise and test print task for debugging purposes, as well as limiting scheduled tasks to the latest episode with audio. Additionally, we have upgraded the eslint dependency to resolve issues with the nrwl dependency.
+
+## Enhancements
+- A new feature has been added that exposes the test raise and test print task for debugging.
+- The task scheduling is now also limited to generating the latest episode with audio (single step tasks are removed).
+
+## Cleanups
+- The eslint dependency has been upgraded to fix issues with the nrwl dependency.
+
+
 # Changelog from v0.21.1 to v0.22.0
 
 In this update, we've introduced new features and improvements to the job service, podcast functionalities, and user interface. We've also made some cleanups and bug fixes to enhance the overall performance of the application.
