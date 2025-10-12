@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
 import { AuthService } from './auth.service';
 import { Injectable } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
+import { cachePolicyRegistry } from './cache-policies';
 
 const uri = environment.API_URL + '/graphql/'; // GraphQL server URL
 
@@ -43,21 +44,9 @@ export function apolloOptionsFactory(apolloAuthMiddleware: ApolloAuthMiddleware)
   return {
     link: authMiddleware.concat(uploadLink),
     cache: new InMemoryCache({
-      typePolicies: {
-        PodcastType: {
-          fields: {
-            rssFeeds: {
-              // Merge function for rssFeeds array that properly handles object references
-              merge(existing, incoming) {
-                // For arrays of objects with IDs, we want to replace the entire array
-                // but let Apollo normalize the individual objects by their IDs
-                // This allows proper caching and deduplication of RSS feed objects
-                return incoming;
-              },
-            },
-          },
-        },
-      },
+      // Use the cache policy registry to allow modules to register their own policies
+      // This decouples the global Apollo config from feature-specific cache requirements
+      typePolicies: cachePolicyRegistry.getAll(),
     }),
   };
 }

@@ -8,6 +8,19 @@ import { ErrorHandlerService } from './error-handler.service';
 import { PageInfo, RelayConnection, RelayEdge } from './utils/relay';
 import { TeamsResult } from './teams.service';
 import { Voice } from './voices.service';
+import { cachePolicyRegistry } from './cache-policies';
+
+// Register cache policies for PodcastType
+// This keeps cache configuration modular and decoupled from global Apollo config
+cachePolicyRegistry.register('PodcastType', {
+  rssFeeds: {
+    merge(existing, incoming) {
+      // Replace the entire rssFeeds array when updated
+      // This is appropriate since setPodcastRssFeeds sends the complete list
+      return incoming;
+    },
+  },
+});
 
 export type GenericScalar = unknown;
 
