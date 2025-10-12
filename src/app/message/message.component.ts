@@ -5,12 +5,12 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { NgClass } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
-import { MatRow, MatTextColumn } from '@angular/material/table';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [MatIcon, MatCard, MatCardContent, NgClass, MatIconButton, MatRow, MatTextColumn],
+  imports: [MatIcon, MatCard, MatCardContent, NgClass, MatIconButton, MatProgressBar],
   templateUrl: './message.component.html',
   styleUrl: './message.component.scss',
 })
