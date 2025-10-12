@@ -38,7 +38,7 @@ export class AddRssFeedDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.rssFeedForm = this.fb.group({
-      url: ['', [Validators.required, Validators.pattern('https?://.+')]],
+      urls: ['', [Validators.required]],
     });
   }
 
@@ -48,7 +48,21 @@ export class AddRssFeedDialogComponent {
 
   onAdd(): void {
     if (this.rssFeedForm.valid) {
-      this.dialogRef.close(this.rssFeedForm.value);
+      const urlsText = this.rssFeedForm.value.urls;
+      // Parse URLs by splitting on whitespace and commas
+      const urls = urlsText
+        .split(/[\s,]+/)
+        .map((url: string) => url.trim())
+        .filter((url: string) => url.length > 0)
+        .map((url: string) => {
+          // Add https:// if the URL doesn't start with http:// or https://
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            return `https://${url}`;
+          }
+          return url;
+        });
+
+      this.dialogRef.close({ urls });
     }
   }
 }
