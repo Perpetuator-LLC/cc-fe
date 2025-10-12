@@ -291,36 +291,32 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           }),
         )
         .subscribe({
-          // The type here should now correctly infer as { result: PodcastUpdateResult, submittedValue: any }
-          next: ({ result, submittedValue }) => {
+          next: ({ result }) => {
             if (result.success) {
               // Update lastSubmittedCategories only when server confirms
-              this.lastSubmittedCategories = { ...this.pendingSubmitCategories }; // Use a copy
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { categories, ...otherData } = result.podcast;
-              // Patch other fields
-              this.podcastForm.patchValue(otherData, { emitEvent: false });
+              this.lastSubmittedCategories = { ...this.pendingSubmitCategories };
 
-              // Only mark as pristine if the form hasn't changed since submission
-              if (JSON.stringify(this.podcastForm.getRawValue()) === JSON.stringify(submittedValue)) {
-                this.podcastForm.markAsPristine();
-                // Clear pending state only if pristine matches submitted
-                this.pendingSubmitCategories = {};
-              } else {
-                // If form changed, recalculate pending state based on current vs last *successful* submit
-                // This might require adjusting the pending logic slightly if needed,
-                // but for now, just don't clear pendingSubmitCategories.
-              }
+              // Don't patch the form with server response during auto-save to avoid thrashing
+              // The server response should match what we sent, so patching is unnecessary
+              // Only update fields that the server might have changed (like url when enabling podcast)
+              const serverData = result.podcast;
+              this.podcastForm.patchValue(
+                {
+                  url: serverData.url,
+                },
+                { emitEvent: false },
+              );
+
+              // Reset dirty flag since we successfully saved
+              this.podcastForm.markAsPristine();
+              this.pendingSubmitCategories = {};
+
               this.messageService.success('Podcast updated successfully', 3000);
             } else {
-              // On failure, revert pending state? Or keep showing pending?
-              // For now, we'll keep pendingSubmitCategories as is, indicating the attempt.
               this.messageService.error(result.message);
             }
           },
           error: (err) => {
-            // Also revert pending state on error?
-            // this.pendingSubmitCategories = {}; // Optional: Clear pending on error
             this.messageService.error(`Failed to update podcast: ${err.message}`);
           },
         }),
