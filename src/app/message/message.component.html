@@ -3,7 +3,7 @@
 @if (messages.length > 0) {
   <link rel="stylesheet" href="message.component.scss" />
   <div class="message-container">
-    @for (message of messages; track message; let index = $index) {
+    @for (message of messages; track message.timestamp) {
       <mat-card class="message-card">
         @if (message.dismissible) {
           <button class="close-button" mat-icon-button (click)="removeMessage(message.timestamp)" aria-label="Close">
@@ -22,10 +22,17 @@
                   <mat-icon color="primary">check_circle</mat-icon>
                 } @else if (message.type === 'warning') {
                   <mat-icon color="warn">warning</mat-icon>
+                } @else if (message.type === 'progress') {
+                  <mat-icon color="primary">sync</mat-icon>
                 }
               </div>
             </div>
-            <div class="message-text" [innerHTML]="message.text"></div>
+            <div class="message-text">
+              <div [innerHTML]="message.text"></div>
+              @if (message.type === 'progress' && message.progress !== undefined) {
+                <mat-progress-bar mode="determinate" [value]="message.progress" style="margin-top: 8px;"></mat-progress-bar>
+              }
+            </div>
           </div>
         </mat-card-content>
       </mat-card>

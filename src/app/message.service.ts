@@ -4,13 +4,15 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface Message extends NewMessage {
   timestamp: number;
+  progress?: number; // 0-100 for progress messages
 }
 
 export interface NewMessage {
-  type: 'error' | 'warning' | 'info' | 'success';
+  type: 'error' | 'warning' | 'info' | 'success' | 'progress';
   text: string;
   dismissible?: boolean;
   timeout?: number | null;
+  progress?: number; // 0-100 for progress messages
 }
 
 @Injectable({
@@ -56,6 +58,34 @@ export class MessageService {
 
   info(text: string, timeout: number | undefined | null = 3000, dismissible = false) {
     this.addMessage({ type: 'info', text, dismissible, timeout });
+  }
+
+  progress(text: string, progress = 0, dismissible = false): number {
+    const timestamp = Date.now();
+    const currentMessages = this.messagesSubject.value;
+    let uniqueTimestamp = timestamp;
+    while (currentMessages.some((m) => m.timestamp === uniqueTimestamp)) {
+      uniqueTimestamp += 1;
+    }
+    const internalMessage: Message = {
+      type: 'progress',
+      text,
+      progress,
+      dismissible,
+      timeout: null,
+      timestamp: uniqueTimestamp,
+    };
+    this.messagesSubject.next([...currentMessages, internalMessage]);
+    return uniqueTimestamp;
+  }
+
+  updateProgress(timestamp: number, text: string, progress: number) {
+    const currentMessages = this.messagesSubject.value;
+    const index = currentMessages.findIndex((message) => message.timestamp === timestamp);
+    if (index !== -1) {
+      currentMessages[index] = { ...currentMessages[index], text, progress };
+      this.messagesSubject.next([...currentMessages]);
+    }
   }
 
   addMessage(message: NewMessage) {

@@ -118,7 +118,7 @@
               <div class="slug-input">
                 <mat-form-field appearance="fill" style="width: 100%">
                   <mat-label>Podcast Slug</mat-label>
-                  <input matInput formControlName="slug" [disabled]="!podcastForm.get('enabled')?.value" />
+                  <input matInput formControlName="slug" />
                   @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {
                     <mat-error>Slug is required when podcast is enabled</mat-error>
                   }
@@ -253,7 +253,7 @@
         </mat-card-content>
       </mat-tab>
 
-      <mat-tab label="Audio">
+      <mat-tab label="Voice">
         <mat-card-content>
           <form [formGroup]="podcastForm">
             <div class="voice-info">
@@ -334,7 +334,7 @@
 
             <div class="member-row">
               <audio #audioPlayer></audio>
-              <div class="voice-list" formControlName="voice">
+              <div class="voice-list">
                 @for (voice of filteredVoices; track voice.uuid) {
                   <div
                     class="voice-card"
