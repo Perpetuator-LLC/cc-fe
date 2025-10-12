@@ -50,6 +50,7 @@ import {
 } from '@angular/material/expansion';
 import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
+import { RssFeedResultsDialogComponent } from '../rss-feed-results-dialog/rss-feed-results-dialog.component';
 import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
@@ -701,13 +702,133 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   openAddRssFeedDialog(): void {
     const dialogRef = this.dialog.open(AddRssFeedDialogComponent, {
-      width: '400px',
+      width: '600px',
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.addRssFeed(result.url);
+      if (result && result.urls) {
+        this.addRssFeedsInBulk(result.urls);
       }
+    });
+  }
+
+  private async addRssFeedsInBulk(urls: string[]): Promise<void> {
+    this.rssFeedLoading = true;
+    const successful: string[] = [];
+    const failed: { url: string; error: string }[] = [];
+
+    // Create progress message
+    const progressTimestamp = this.messageService.progress(
+      `Processing RSS feeds: 0 of ${urls.length} completed`,
+      0,
+      false,
+    );
+
+    // Process 5 URLs at a time in parallel
+    const batchSize = 5;
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
+      const promises = batch.map((url) => this.processSingleRssFeed(url));
+
+      const results = await Promise.allSettled(promises);
+
+      results.forEach((result, index) => {
+        const url = batch[index];
+        if (result.status === 'fulfilled' && result.value.success) {
+          successful.push(url);
+        } else {
+          const errorMsg =
+            result.status === 'rejected'
+              ? result.reason?.message || 'Unknown error'
+              : result.value.error || 'Failed to add feed';
+          failed.push({ url, error: errorMsg });
+        }
+      });
+
+      // Calculate progress
+      const processed = i + batch.length;
+      const progressPercent = Math.round((processed / urls.length) * 100);
+
+      // Update progress message
+      this.messageService.updateProgress(
+        progressTimestamp,
+        `Processing RSS feeds: ${processed} of ${urls.length} completed
+        (${successful.length} successful, ${failed.length} failed)`,
+        progressPercent,
+      );
+
+      // Partial save after each batch if there are successful feeds
+      if (successful.length > 0) {
+        try {
+          await this.updateRssFeedsAsync();
+        } catch (err: Error) {
+          this.messageService.error(`Failed to save batch: ${err.message}`);
+        }
+      }
+    }
+
+    this.rssFeedLoading = false;
+
+    // Remove progress message
+    this.messageService.removeMessage(progressTimestamp);
+
+    // Show completion message
+    if (successful.length > 0 && failed.length === 0) {
+      this.messageService.success(`Successfully added ${successful.length} RSS feed(s)`);
+    } else if (successful.length > 0 && failed.length > 0) {
+      this.messageService.warning(`Added ${successful.length} RSS feed(s), but ${failed.length} failed`);
+    } else if (failed.length > 0) {
+      this.messageService.error(`Failed to add all ${failed.length} RSS feed(s)`);
+    }
+
+    // Show results dialog
+    this.dialog.open(RssFeedResultsDialogComponent, {
+      width: '700px',
+      data: { successful, failed },
+    });
+  }
+
+  private processSingleRssFeed(url: string): Promise<{ success: boolean; error?: string }> {
+    return new Promise((resolve) => {
+      this.podcastsService.createRssFeed(url).subscribe({
+        next: (data) => {
+          if (!data.rssFeed) {
+            resolve({ success: false, error: 'RSS Feed creation returned null' });
+            return;
+          }
+          const existingId = this.rssFeeds.controls.findIndex((a) => a.get('uuid')?.value == data.rssFeed.uuid);
+          if (existingId >= 0) {
+            resolve({ success: false, error: 'RSS Feed already exists' });
+            return;
+          }
+          this.rssFeeds.push(
+            this.fb.group({
+              id: [data.rssFeed.id, Validators.required],
+              uuid: [data.rssFeed.uuid, Validators.required],
+              url: [data.rssFeed.url, Validators.required],
+            }),
+          );
+          resolve({ success: true });
+        },
+        error: (err) => {
+          resolve({ success: false, error: err.message || 'Failed to create RSS feed' });
+        },
+      });
+    });
+  }
+
+  private updateRssFeedsAsync(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.uuid);
+      this.podcastsService.setPodcastRssFeeds(this.podcastUuid, rssFeedIds).subscribe({
+        next: (data) => {
+          this.podcastForm.patchValue(data.podcast);
+          resolve();
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
     });
   }
 
@@ -733,6 +854,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.messageService.error(`Failed to update RSS Feeds: ${err.message}`);
+          this.rssFeedLoading = false;
         },
       }),
     );
