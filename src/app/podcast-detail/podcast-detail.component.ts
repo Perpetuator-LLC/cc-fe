@@ -38,6 +38,7 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -112,6 +113,7 @@ import { CommonModule } from '@angular/common';
     MatTabsModule,
     DeletePodcastDialogComponent,
     SvgIconComponent,
+    CdkTextareaAutosize,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
