@@ -1,6 +1,13 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  @if (authService.isLoggedIn()) {
+    <h1>Terms and Conditions</h1>
+  } @else {
+    <p><a href="/register">Sign up</a> or <a href="/login">Login</a></p>
+  }
+</ng-template>
 <mat-card class="terms-and-conditions">
   <mat-card-content>
-    <iframe src="https://app.termly.io/policy-viewer/policy.html?policyUUID=e6868e23-5a4e-4d25-8b19-2175f6f43d87" width="100%" height="800px" style="border:none;"></iframe>
+    <iframe src="https://app.termly.io/policy-viewer/policy.html?policyUUID=e6868e23-5a4e-4d25-8b19-2175f6f43d87"></iframe>
   </mat-card-content>
 </mat-card>

@@ -629,6 +629,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   onPodcastImageSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      // Check file size (1MB = 1048576 bytes)
+      const maxSizeInBytes = 1048576; // 1MB - correlates to backend limit on Podcast model save image field
+      if (file.size > maxSizeInBytes) {
+        this.messageService.error('File size exceeds the maximum limit of 1MB. Please upload a smaller image.');
+        this.selectedFile = null;
+        this.podcastForm.get('image')?.reset();
+        return;
+      }
+
       this.selectedFile = file;
 
       // Preview the image

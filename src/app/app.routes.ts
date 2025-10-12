@@ -199,13 +199,19 @@ export const routes: Routes = [
   {
     path: 'privacy-policy',
     loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
-    title: 'Privacy Policy',
+    title: 'Privacy',
+    data: {
+      icon: 'policy',
+    },
   },
   {
     path: 'terms-and-conditions',
     loadComponent: () =>
       import('./terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
     title: 'Terms',
+    data: {
+      icon: 'gavel',
+    },
   },
 ];
 

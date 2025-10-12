@@ -4,6 +4,11 @@ import { MutationResult } from 'apollo-angular';
 
 interface ApolloErrorParams {
   message: string;
+  networkError?: {
+    statusCode?: number;
+    status?: number;
+    result?: unknown;
+  };
   graphQLErrors: {
     message: string;
     path: string[];
@@ -36,6 +41,15 @@ export function mapMutationResult<T>(result: MutationResult<T>): T {
 }
 
 export function handleApolloError(data: ApolloErrorParams) {
+  // Check for HTTP 413 Payload Too Large error
+  if (data.networkError) {
+    const statusCode = data.networkError.statusCode || data.networkError.status;
+    if (statusCode === 413) {
+      // back-end nginx configuration limits to 1MB
+      return new Error('File size exceeds the maximum limit. Please upload a smaller file.');
+    }
+  }
+
   if (data.graphQLErrors && data.graphQLErrors.length > 0) {
     const errors = data.graphQLErrors.map((e) => e.message).join(' ');
     const cause = data.graphQLErrors.map((e) => e.path.join('.')).join(' ');

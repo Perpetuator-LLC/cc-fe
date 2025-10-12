@@ -643,8 +643,6 @@ mat-nav-list {
     .footer {
       background-color: var(--toolbar-container-background-color);
 
-      .link-button {}
-
       @media screen and (max-width: 599px) {
         height: auto;
         white-space: normal;
@@ -664,23 +662,6 @@ mat-nav-list {
       }
     }
   }
-}
-
-.link-button {
-  background: none;
-  border: none;
-  text-decoration: none;
-  cursor: pointer;
-  padding: 9px 12px;
-  font: inherit;
-  outline: none;
-  color: var(--primary);
-}
-
-.link-button:hover,
-.link-button:focus {
-  text-decoration: underline;
-  color: var(--primary);
 }
 
 .arrow-left {

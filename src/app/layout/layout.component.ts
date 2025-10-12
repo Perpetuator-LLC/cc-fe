@@ -36,8 +36,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { MessageService } from '../message.service';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
-import { TermsAndConditionsModalComponent } from '../terms-and-conditions-modal.component';
-import { PrivacyPolicyModalComponent } from '../privacy-policy-modal.component';
 import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.component';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 
@@ -184,6 +182,11 @@ export class LayoutComponent implements OnDestroy, OnInit {
       return false;
     }
 
+    // Routes visible to all users (logged in or out)
+    if (item.path && ['privacy-policy', 'terms-and-conditions'].includes(item.path)) {
+      return true;
+    }
+
     if (item.path && this.loggedOutRoutes.includes(item.path)) {
       return !this.isLoggedIn();
     } else if (item.path && this.authRequiredRoutes.includes(item.path)) {
@@ -243,24 +246,6 @@ export class LayoutComponent implements OnDestroy, OnInit {
 
   toggleSecondSidebar() {
     this.isSecondSidebarVisible = !this.isSecondSidebarVisible;
-  }
-
-  openTermsModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(TermsAndConditionsModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
-  }
-
-  openPrivacyModal(event: Event) {
-    event.preventDefault();
-    this.dialog.open(PrivacyPolicyModalComponent, {
-      width: '80vw',
-      maxWidth: '900px',
-      panelClass: 'privacy-policy-modal',
-    });
   }
 
   openRedeemGiftCodeDialog() {

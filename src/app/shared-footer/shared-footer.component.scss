@@ -17,22 +17,10 @@
       font-size: 15px;
       white-space: normal;
     }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
   }
-}
-
-.link-button {
-  background: none;
-  border: none;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
-  outline: none;
-  color: var(--primary);
-}
-
-.link-button:hover,
-.link-button:focus {
-  text-decoration: underline;
-  color: var(--primary);
 }
