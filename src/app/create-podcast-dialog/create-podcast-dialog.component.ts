@@ -10,10 +10,8 @@ import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
-import { MatCard } from '@angular/material/card';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { CreatePodcastCategoriesComponent } from './create-podcast-categories.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 @Component({
@@ -27,13 +25,11 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
     MatButton,
     MatLabel,
     MessageComponent,
-    MatCard,
     MatError,
     MatSelect,
     MatOption,
     MatOptgroup,
     MatDialogModule,
-    CreatePodcastCategoriesComponent,
     SvgIconComponent,
   ],
   template: `
@@ -78,11 +74,6 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
             <input matInput formControlName="newTeamName" (focus)="onNewTeamNameFocus()" />
           </mat-form-field>
         }
-
-        <div class="categories-section">
-          <h3>Categories</h3>
-          <app-create-podcast-categories formControlName="categories" />
-        </div>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -146,19 +137,6 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
         font-weight: 600;
         height: 40px;
       }
-      .categories-section {
-      }
-      .categories-section h3 {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        color: var(--theme-color);
-        font-size: 16px;
-        font-weight: 500;
-      }
-      .categories-section app-podcast-categories {
-        max-height: 300px;
-        overflow-y: auto;
-      }
       .mat-mdc-select {
         color: var(--theme-color);
       }
@@ -186,7 +164,6 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
       teamSelection: ['', Validators.required],
       newTeamName: [''],
       existingTeamId: [''],
-      categories: [{}],
     });
 
     this.podcastForm.get('name')?.valueChanges.subscribe((value) => {
@@ -273,68 +250,13 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   }
 
   private createPodcastWithTeam(name: string, teamUuid: string): void {
-    const categories = this.podcastForm.get('categories')?.value || {};
-
-    // Log the categories being sent (for debugging)
-    console.log('Categories to be sent:', categories);
-    console.log('Categories type:', typeof categories);
-    console.log('Categories keys:', Object.keys(categories));
-
-    // Verify the format matches what the API expects
-    if (Object.keys(categories).length > 0) {
-      Object.keys(categories).forEach((parent) => {
-        console.log(`Parent category "${parent}":`, categories[parent]);
-        console.log(`Subcategories for "${parent}":`, categories[parent]);
-      });
-    }
-
     this.subscriptions.add(
       this.podcastsService.createPodcast(name, teamUuid).subscribe({
         next: (created) => {
-          // If categories are selected, update the podcast with categories
-          if (Object.keys(categories).length > 0) {
-            console.log('Updating podcast with categories:', categories);
-            this.podcastsService
-              .updatePodcast(
-                created.podcast.uuid,
-                teamUuid,
-                name,
-                null, // intro
-                null, // prompt
-                null, // outro
-                null, // enabled
-                null, // slug
-                null, // description
-                null, // ownerName
-                null, // ownerEmail
-                null, // ownerLink
-                null, // tgBotToken
-                null, // tgChannelId
-                null, // refreshTgResponse
-                categories, // categories
-                null, // voiceUuid
-              )
-              .subscribe({
-                next: (updated) => {
-                  console.log('Podcast updated successfully with categories:', updated.podcast.categories);
-                  this.messageService.success('Podcast created successfully with categories');
-                  this.dialogRef.close(updated.podcast);
-                },
-                error: (err) => {
-                  console.error('Failed to update podcast categories:', err);
-                  this.messageService.error(`Failed to update podcast categories: ${err.message}`);
-                  // Still close with the created podcast even if categories update failed
-                  this.dialogRef.close(created.podcast);
-                },
-              });
-          } else {
-            console.log('No categories selected, creating podcast without categories');
-            this.messageService.success('Podcast created successfully');
-            this.dialogRef.close(created.podcast);
-          }
+          this.messageService.success('Podcast created successfully');
+          this.dialogRef.close(created.podcast);
         },
         error: (err) => {
-          console.error('Failed to create podcast:', err);
           this.messageService.error(`Failed to create podcast: ${err.message}`);
         },
       }),
