@@ -42,7 +42,23 @@ export function apolloOptionsFactory(apolloAuthMiddleware: ApolloAuthMiddleware)
 
   return {
     link: authMiddleware.concat(uploadLink),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        PodcastType: {
+          fields: {
+            rssFeeds: {
+              // Merge function for rssFeeds array that properly handles object references
+              merge(existing, incoming) {
+                // For arrays of objects with IDs, we want to replace the entire array
+                // but let Apollo normalize the individual objects by their IDs
+                // This allows proper caching and deduplication of RSS feed objects
+                return incoming;
+              },
+            },
+          },
+        },
+      },
+    }),
   };
 }
 
