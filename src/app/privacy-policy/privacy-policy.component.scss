@@ -1,0 +1,16 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.privacy-policy {
+  margin: 16px;
+
+  mat-card-content {
+    padding: 0;
+
+    iframe {
+      display: block;
+      width: 100%;
+      min-height: calc(100vh - 200px);
+      border: none;
+    }
+  }
+}
+

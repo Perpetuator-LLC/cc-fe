@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { PreLoginLayoutComponent } from './pre-login-layout/pre-login-layout.component';
 import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
 import { MessageComponent } from './message/message.component';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-root',
@@ -23,13 +24,37 @@ import { MessageComponent } from './message/message.component';
 })
 export class AppComponent {
   title = 'Capital Copilot';
-  constructor(public router: Router) {}
+  constructor(
+    public router: Router,
+    private authService: AuthService,
+  ) {}
 
   get isLoginRoute(): boolean {
-    return (
-      this.router.url.startsWith('/login') ||
-      this.router.url.startsWith('/register') ||
-      this.router.url.startsWith('/forgot')
-    );
+    // Routes that are always pre-login layout regardless of auth state
+    const alwaysPreLoginRoutes = [
+      '/login',
+      '/register',
+      '/forgot',
+      '/reset',
+      '/resend',
+      '/verify',
+      '/change-email',
+      '/cancel-change-email',
+    ];
+
+    // Check if current route is always pre-login
+    if (alwaysPreLoginRoutes.some((route) => this.router.url.startsWith(route))) {
+      return true;
+    }
+
+    // Routes that should use pre-login layout only when NOT logged in
+    const conditionalRoutes = ['/privacy-policy', '/terms-and-conditions'];
+
+    // If on a conditional route and user is NOT logged in, use pre-login layout
+    if (conditionalRoutes.some((route) => this.router.url.startsWith(route))) {
+      return !this.authService.isLoggedIn();
+    }
+
+    return false;
   }
 }

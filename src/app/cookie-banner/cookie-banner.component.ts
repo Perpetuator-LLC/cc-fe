@@ -3,12 +3,13 @@ import { Component, computed } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCardFooter } from '@angular/material/card';
 import { MatTabLink } from '@angular/material/tabs';
+import { RouterLink } from '@angular/router';
 import { CookieConsentService } from '../cookie-consent.service';
 
 @Component({
   selector: 'app-cookie-banner',
   standalone: true,
-  imports: [MatButton, MatCardFooter, MatTabLink],
+  imports: [MatButton, MatCardFooter, MatTabLink, RouterLink],
   templateUrl: './cookie-banner.component.html',
   styleUrls: ['./cookie-banner.component.scss'],
 })

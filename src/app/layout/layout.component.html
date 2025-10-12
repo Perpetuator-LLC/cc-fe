@@ -32,23 +32,6 @@
           }
         </div>
         <div class="push-down">
-          <button class="mat-link link-button" mat-list-item tabindex="0" (click)="openPrivacyModal($event)">
-            <div class="route-link">
-              <mat-icon>policy</mat-icon>
-              @if (!this.minimized) {
-              <div class="route-title">Privacy</div>
-              }
-            </div>
-          </button>
-          <button class="mat-link link-button" mat-list-item type="button" tabindex="0"
-            (click)="openTermsModal($event)">
-            <div class="route-link">
-              <mat-icon>gavel</mat-icon>
-              @if (!this.minimized) {
-              <div class="route-title">Terms</div>
-              }
-            </div>
-          </button>
           <mat-list-item class="mat-link log-out-btn" tabindex="0" (click)="logout()" (keydown.enter)="logout()"
             (keydown.space)="logout()">
             <div class="route-link">
