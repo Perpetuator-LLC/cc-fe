@@ -761,8 +761,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       if (successful.length > 0) {
         try {
           await this.updateRssFeedsAsync();
-        } catch (err: Error) {
-          this.messageService.error(`Failed to save batch: ${err.message}`);
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+          this.messageService.error(`Failed to save batch: ${errorMessage}`);
         }
       }
     }
