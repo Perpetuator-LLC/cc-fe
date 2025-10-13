@@ -28,6 +28,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { marked } from 'marked';
 
 // export interface News {
 //   results: NewsResult[];
@@ -100,6 +102,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     protected userService: UserService,
     private jobService: JobService,
     private episodeService: EpisodeService,
+    private sanitizer: DomSanitizer,
   ) {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
@@ -594,5 +597,11 @@ export class NewsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
+  }
+
+  // Method to convert markdown to safe HTML
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

@@ -318,7 +318,7 @@
                 ></p>
                 <mat-divider></mat-divider>
                 <h3>AI Summary</h3>
-                <p class="">{{ selectedNewsDetail.summary || 'No news summary available' }}</p>
+                <p class="" [innerHTML]="selectedNewsDetail.summary ? markdownToHtml(selectedNewsDetail.summary) : 'No news summary available'"></p>
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
                   <mat-divider></mat-divider>
                   <button
