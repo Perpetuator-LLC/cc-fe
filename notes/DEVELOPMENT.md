@@ -83,7 +83,7 @@ grep '"version":' ../package.json
 Update version in package.json:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.23.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.24.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -95,7 +95,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be
-poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.23.0' 'v0.22.0'
+poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.24.0' 'v0.23.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -106,15 +106,15 @@ Create the release commit:
 
 ```shell
 git add .. && \
-git commit -m "chore: bump version to 0.23.0"
+git commit -m "chore: bump version to 0.24.0"
 ```
 
 Push to main and create the release tag:
 
 ```shell
 git push origin main && \
-git tag -a v0.23.0 -m "In this update, we have introduced a new feature that exposes the test raise and test print task for debugging purposes, as well as limiting scheduled tasks to the latest episode with audio. Improves error handling and reporting with image upload failures. Additionally, we have upgraded the eslint dependency to resolve issues with the nrwl dependency." && \
-git push origin v0.23.0
+git tag -a v0.24.0 -m "This update introduces several new features and improvements to the podcast list component, news detail section, and the message component. It also includes a fix to the auto-save feature." && \
+git push origin v0.24.0
 ```
 
 #### Step 5: Clean up feature branch (if applicable)
