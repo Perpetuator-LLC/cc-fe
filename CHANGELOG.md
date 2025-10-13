@@ -1,3 +1,22 @@
+# Changelog from v0.23.0 to v0.24.0
+
+This update introduces several new features and improvements to the podcast list component, news detail section, and the message component. It also includes a fix to the auto-save feature.
+
+## Enhancements
+- Added a feature to create new and empty episodes to the podcast list component.
+- Made the news detail section sticky and show from top to bottom.
+- Added Markdown to HTML conversion using 'marked' and displayed AI summary of news using it.
+- Decoupled the cache policy customization from GraphQL provider via cache policies registry.
+- Added a progress bar to the message component and enabled parallel multiple RSS feed loading.
+- Made podcast intro, outro, and prompt auto resize.
+- Increased intro and outro text field heights.
+- Simplified the create new podcast dialog by removing categories.
+- Converted terms and conditions as well as privacy policy to new page loading from termly.
+
+## Cleanups
+- Fixed the auto-save feature to work as expected while editing podcast fields and button updates.
+
+
 # Changelog from v0.22.0 to v0.23.0
 
 In this update, we have introduced a new feature that exposes the test raise and test print task for debugging purposes, as well as limiting scheduled tasks to the latest episode with audio. Additionally, we have upgraded the eslint dependency to resolve issues with the nrwl dependency.
