@@ -9,6 +9,7 @@ import { PageInfo, RelayConnection, RelayEdge } from './utils/relay';
 import { TeamsResult } from './teams.service';
 import { Voice } from './voices.service';
 import { cachePolicyRegistry } from './cache-policies';
+import { Job } from './job.service';
 
 // Register cache policies for PodcastType
 // This keeps cache configuration modular and decoupled from global Apollo config
@@ -752,6 +753,43 @@ export class PodcastsService extends BaseService {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((result: any) => {
         return result.createRssFeed;
+      }),
+    );
+  }
+
+  createLatestEpisodeChain(podcastUuid: string): Observable<{ jobs: Job[] }> {
+    const GQL = gql`
+      mutation CreateLatestEpisodeChain($podcastUuid: UUID!) {
+        createLatestEpisodeChain(podcastUuid: $podcastUuid) {
+          jobs {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      createLatestEpisodeChain: {
+        jobs: Job[];
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        podcastUuid,
+      },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return data.createLatestEpisodeChain;
       }),
     );
   }

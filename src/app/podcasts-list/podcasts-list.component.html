@@ -19,9 +19,14 @@
       <h3>All Podcasts</h3>
       <span>{{ podcasts.length }} podcasts</span>
     </div>
-    <button mat-flat-button color="primary" type="button" (click)="createPodcast()">+ Create Podcast</button>
+    <button mat-flat-button color="primary" type="button" (click)="createPodcast()">
+      <mat-icon>add</mat-icon>
+      Create Podcast
+    </button>
   </mat-card-content>
 </mat-card>
+
+<app-job-status-bar />
 
 <div class="middle-card">
   <div class="table-controls">
@@ -137,6 +142,19 @@
         </td>
       </ng-container>
 
+      <!-- Create Episode Column -->
+      <ng-container matColumnDef="createEpisode">
+        <th mat-header-cell *matHeaderCellDef>Create Episode</th>
+        <td mat-cell *matCellDef="let podcast">
+          <button mat-flat-button (click)="createLatestEpisode(podcast.uuid)"
+            style="background-color: var(--primary); color: white; border-radius: 10px;"
+            matTooltip="Create an episode from the latest news for this podcast">
+            <mat-icon>add</mat-icon>
+            New Episode
+          </button>
+        </td>
+      </ng-container>
+
       <!-- Actions Column -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -149,6 +167,14 @@
             <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
               <app-svg-icon icon="edit"></app-svg-icon>
               <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
+              <mat-icon>newspaper</mat-icon>
+              <span>Create New Episode</span>
+            </button>
+            <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
+              <mat-icon>add_circle_outline</mat-icon>
+              <span>Create Blank Episode</span>
             </button>
             <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
               <app-svg-icon icon="delete"></app-svg-icon>
@@ -198,6 +224,14 @@
                   <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
                     <app-svg-icon icon="edit"></app-svg-icon>
                     <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
+                    <mat-icon>newspaper</mat-icon>
+                    <span>Create New Episode</span>
+                  </button>
+                  <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <span>Create Blank Episode</span>
                   </button>
                   <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
                     <app-svg-icon icon="delete"></app-svg-icon>
