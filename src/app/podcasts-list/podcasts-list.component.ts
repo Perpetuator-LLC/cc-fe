@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
-import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
@@ -26,7 +26,6 @@ import {
 } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatTooltip } from '@angular/material/tooltip';
-import { SlicePipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -36,6 +35,11 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { NewsService } from '../news.service';
+import { EpisodeService } from '../episode.service';
+import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 
 export interface ColumnOption {
   id: string;
@@ -50,13 +54,11 @@ export interface ColumnOption {
     MatButton,
     MatCard,
     SvgIconComponent,
-    MatCardTitle,
     MatCardHeader,
     MatIcon,
     MessageComponent,
     MatProgressBarModule,
     MatCardContent,
-    MatCardActions,
     MatTable,
     MatSort,
     MatHeaderCell,
@@ -69,7 +71,6 @@ export interface ColumnOption {
     MatRowDef,
     MatColumnDef,
     MatTooltip,
-    SlicePipe,
     MatMenuTrigger,
     MatMenu,
     RouterLink,
@@ -80,6 +81,7 @@ export interface ColumnOption {
     MatCheckboxModule,
     FormsModule,
     MatMenuItem,
+    JobStatusBarComponent,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
@@ -92,7 +94,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
   dataSource = new MatTableDataSource<PodcastsResult>([]);
-  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'enabled', 'actions'];
+  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'enabled', 'createEpisode', 'actions'];
   isGridView = false; // Default to list view
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
@@ -104,10 +106,12 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'categories', label: 'Categories', selected: true },
     { id: 'enabled', label: 'Live', selected: true },
     { id: 'tgResponse', label: 'Telegram Connected', selected: true },
+    { id: 'createEpisode', label: 'Create Episode', selected: true },
     { id: 'actions', label: 'Actions', selected: true },
   ];
   searchString: string | null = null;
   searchTerm$ = new Subject<string>();
+  jobs: Job[] = [];
 
   constructor(
     private router: Router,
@@ -115,11 +119,51 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private toolbarService: ToolbarService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
+    private newsService: NewsService,
+    private episodeService: EpisodeService,
+    private jobService: JobService,
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
       this.loadPodcasts(10, null, term || undefined);
     });
+
+    // Subscribe to job updates to track episode creation
+    this.subscriptions.add(
+      toObservable(this.jobService.jobs).subscribe({
+        next: (jobs) => {
+          this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+            if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
+              // Extract episode UUID from job result JSON object
+              const episodeUuid = job.result?.episode_uuid;
+              if (episodeUuid) {
+                this.subscriptions.add(
+                  this.episodeService.getEpisodeById(episodeUuid).subscribe({
+                    next: (episode) => {
+                      const newEpisodeUrl = `/episode/${episodeUuid}`;
+                      this.messageService.success(
+                        `New episode: <a href="${newEpisodeUrl}">${
+                          episode.title === '' ? '(Blank)' : episode.title
+                        }</a>`,
+                        null,
+                        true,
+                      );
+                    },
+                    error: (error) => {
+                      this.messageService.error(`Failed to get new episode: ${error.message}`);
+                    },
+                  }),
+                );
+              }
+            }
+          });
+          this.jobs = jobs;
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to load jobs signal: ${error.message}`);
+        },
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -245,5 +289,45 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
       // use cursor-based pagination
       this.loadPodcasts(this.pageSize, this.currentCursor, searchString);
     }
+  }
+
+  createBlankEpisode(podcastUuid: string) {
+    const newsUuids: string[] = [];
+    this.subscriptions.add(
+      this.newsService.createEpisode(newsUuids, podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.job) {
+            this.messageService.error('Failed to create episode: No job returned');
+            return;
+          }
+          this.messageService.info('Creating blank episode...');
+          this.jobService.addJob(data.job);
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  createLatestEpisode(podcastUuid: string) {
+    this.subscriptions.add(
+      this.podcastsService.createLatestEpisodeChain(podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.jobs || data.jobs.length === 0) {
+            this.messageService.error('Failed to create latest episode: No jobs returned');
+            return;
+          }
+          this.messageService.info('Creating latest episode from news...');
+          // Add all jobs to the job service for tracking
+          data.jobs.forEach((job) => {
+            this.jobService.addJob(job);
+          });
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
   }
 }
