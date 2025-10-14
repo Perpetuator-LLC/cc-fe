@@ -64,10 +64,6 @@
             </button>
           </div>
         </div>
-        <div class="title desktop">
-          <h3>News</h3>
-          <span>{{ filteredNews.length }} Updated News</span>
-        </div>
         <div class="select-right-podcasts">
           <mat-form-field>
             <mat-label>Select Podcast</mat-label>
@@ -86,6 +82,24 @@
               <mat-option [value]="14 * 24">2 Weeks</mat-option>
             </mat-select>
           </mat-form-field>
+          <div class="select-btn desktop">
+            <label
+              class="custom-select-all"
+              (click)="toggleSelectAll()"
+              tabindex="0"
+              (keydown.enter)="toggleSelectAll()"
+              (keydown.space)="toggleSelectAll()"
+            >
+              <input
+                type="checkbox"
+                [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
+                [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
+                (change)="toggleSelectAll()"
+              />
+              <span class="custom-checkbox"></span>
+              <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
+            </label>
+          </div>
           <button
             mat-flat-button
             color="accent"
@@ -103,37 +117,13 @@
       <app-job-status-bar />
       <div class="middle-card">
         <div class="news-list" [ngClass]="{ newsListSelected: selectedNewsDetail }">
-          <div class="mobile-title">
-            <div class="title">
-              <h3>News</h3>
-              <span>{{ filteredNews.length }} Updated News</span>
-            </div>
-            @if (selectedNews.size > 0) {
-              <div>
-                <div class="select-btn">
-                  <label
-                    class="custom-select-all"
-                    (click)="toggleSelectAll()"
-                    tabindex="0"
-                    (keydown.enter)="toggleSelectAll()"
-                    (keydown.space)="toggleSelectAll()"
-                  >
-                    <input
-                      type="checkbox"
-                      [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
-                      [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                      (change)="toggleSelectAll()"
-                    />
-                    <span class="custom-checkbox"></span>
-                    <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
-                  </label>
-                </div>
-              </div>
-            }
-          </div>
           <div class="bottom-filters table-controls desktop">
             <p>
-              Showing {{ filteredNews.length }} of {{ news?.edges?.length || 0 }} with {{ selectedNews.size }} selected.
+              @if (loadingNews) {
+                Loading news articles... ({{ totalNewsCount }} loaded so far)
+              } @else {
+                Showing {{ filteredNews.length }} of {{ totalNewsCount }} with {{ selectedNews.size }} selected.
+              }
             </p>
             <div class="search-filter">
               <div class="input-search-div">

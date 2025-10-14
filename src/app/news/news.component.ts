@@ -89,6 +89,8 @@ export class NewsComponent implements OnInit, OnDestroy {
   private podcastHistory: string[] = [];
   selectedNewsDetail: NewsResult | null = null;
   newsFetched = false;
+  loadingNews = false;
+  totalNewsCount = 0;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -211,7 +213,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.selectedNews.clear();
     this.selectedNewsDetail = null;
 
-    if (this.newsFetched && this.selectedPodcastUuid !== null) {
+    if (this.selectedPodcastUuid !== null) {
       this.onPodcastSelect(this.selectedPodcastUuid);
     }
   }
@@ -483,21 +485,42 @@ export class NewsComponent implements OnInit, OnDestroy {
       return;
     }
     const selectedNewsIds = this.getSelectedNewsIds();
+    this.loadingNews = true;
+    this.totalNewsCount = 0;
+
+    this.loadAllNewsPages(this.selectedPodcastUuid, this.selectedHours, selectedNewsIds);
+  }
+
+  private loadAllNewsPages(
+    podcastUuid: string,
+    hours: number,
+    selectedNewsIds: string[],
+    after: string | null = null,
+    accumulatedEdges: { cursor: string; node: NewsResult }[] = [],
+  ) {
     this.subscriptions.add(
-      this.newsService.news(this.selectedPodcastUuid, this.selectedHours).subscribe({
+      this.newsService.news(podcastUuid, hours, 100, after).subscribe({
         next: (data: NewsConnection) => {
-          this.news = data;
-          this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
-          this.reapplySelection(selectedNewsIds);
-          this.applyFilter(null);
-          // Set newsFetched to true after news is loaded
-          this.newsFetched = true;
+          const allEdges = [...accumulatedEdges, ...data.edges];
+          this.totalNewsCount = allEdges.length;
+
+          if (data.pageInfo.hasNextPage && data.pageInfo.endCursor) {
+            this.loadAllNewsPages(podcastUuid, hours, selectedNewsIds, data.pageInfo.endCursor, allEdges);
+          } else {
+            this.news = {
+              edges: allEdges,
+              pageInfo: data.pageInfo,
+            };
+            this.filteredNews = this.news.edges.map((edge) => edge.node);
+            this.reapplySelection(selectedNewsIds);
+            this.applyFilter(null);
+            this.newsFetched = true;
+            this.loadingNews = false;
+          }
         },
         error: (err: { message: string }) => {
           this.messageService.error(`Failed to get news data: ${err.message}`);
-        },
-        complete: () => {
-          console.debug('News data fetch complete');
+          this.loadingNews = false;
         },
       }),
     );

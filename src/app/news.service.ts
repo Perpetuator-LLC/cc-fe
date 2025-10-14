@@ -69,10 +69,10 @@ export class NewsService extends BaseService {
     );
   }
 
-  news(podcastUuid: string, hours = 24) {
+  news(podcastUuid: string, hours = 24, first = 100, after: string | null = null) {
     const GET_NEWS = gql`
-      query GetNews($podcastUuid: UUID!, $hours: Int!) {
-        news(podcastUuid: $podcastUuid, hours: $hours) {
+      query GetNews($podcastUuid: UUID!, $hours: Int!, $first: Int!, $after: String) {
+        news(podcastUuid: $podcastUuid, hours: $hours, first: $first, after: $after) {
           edges {
             cursor
             node {
@@ -104,7 +104,7 @@ export class NewsService extends BaseService {
     return this.query<Response>({
       query: GET_NEWS,
       fetchPolicy: 'network-only',
-      variables: { podcastUuid, hours },
+      variables: { podcastUuid, hours, first, after },
     }).pipe(
       map((data) => {
         return data.news;
