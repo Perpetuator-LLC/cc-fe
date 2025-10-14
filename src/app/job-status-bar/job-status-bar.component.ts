@@ -75,11 +75,11 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         });
         this.enrichJobsWithNames(jobs)
           .then((enrichedJobs) => {
-            this.jobs = enrichedJobs;
+            this.jobs = this.sortJobs(enrichedJobs);
           })
           .catch((error) => {
             console.warn('Failed to enrich jobs with names:', error);
-            this.jobs = jobs.map((job) => ({ ...job }));
+            this.jobs = this.sortJobs(jobs.map((job) => ({ ...job })));
           });
       },
       error: (error) => {
@@ -280,6 +280,29 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   // Get episode name from enriched job
   getEpisodeName(job: EnrichedJob): string {
     return job.episodeName || 'Episode';
+  }
+
+  private sortJobs(jobs: EnrichedJob[]): EnrichedJob[] {
+    return jobs.sort((a, b) => {
+      const statusA = stringToJobStatus(a.status);
+      const statusB = stringToJobStatus(b.status);
+
+      const statusOrder = {
+        [JobStatus.COMPLETED]: 0,
+        [JobStatus.FAILED]: 1,
+        [JobStatus.RUNNING]: 2,
+        [JobStatus.PENDING]: 3,
+      };
+
+      const orderA = statusOrder[statusA];
+      const orderB = statusOrder[statusB];
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
   }
 
   protected readonly kindToString = kindToString;
