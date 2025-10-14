@@ -231,11 +231,18 @@ export class JobService extends BaseService implements OnDestroy {
     this.subscriptions.add(
       toObservable(this.jobsSignal).subscribe((jobs) => {
         if (!this.queryRef) {
-          return; // If queryRef is not initialized, do nothing
+          return;
         }
         const jobUuids = jobs.map((job) => job.uuid);
-        this.queryRef.setVariables({ ...this.queryRef.variables, jobUuids });
-        this.queryRef.setOptions({ ...this.queryRef.options, pollInterval: jobs.length === 0 ? 0 : 3000 });
+        const newPollInterval = jobs.length === 0 ? 0 : 3000;
+
+        void this.queryRef.refetch({ ...this.queryRef.variables, jobUuids });
+
+        if (newPollInterval === 0) {
+          this.queryRef.stopPolling();
+        } else {
+          this.queryRef.startPolling(newPollInterval);
+        }
       }),
     );
   }
