@@ -17,14 +17,24 @@
       </p>
       <div class="before-select-right-podcasts">
         <div class="fields">
-          <mat-form-field style="width: 300px; max-width: 100%">
-            <mat-label>Select Podcast</mat-label>
-            <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()">
-              @for (podcast of podcasts; track podcast.uuid) {
-                <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <div class="podcast-field-wrapper">
+            <mat-form-field style="width: 300px; max-width: 100%">
+              <mat-label>Select Podcast</mat-label>
+              <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()" [disabled]="loadingPodcasts">
+                @if (loadingPodcasts) {
+                  <mat-option disabled>
+                    Loading podcasts...
+                  </mat-option>
+                }
+                @for (podcast of podcasts; track podcast.uuid) {
+                  <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (loadingPodcasts) {
+              <mat-spinner diameter="20" class="podcast-loading-spinner"></mat-spinner>
+            }
+          </div>
           <mat-form-field style="width: 134px; max-width: 100%">
             <mat-label>Time</mat-label>
             <mat-select [(value)]="selectedHours" (selectionChange)="onPodcastChange()">
@@ -67,11 +77,19 @@
         <div class="select-right-podcasts">
           <mat-form-field>
             <mat-label>Select Podcast</mat-label>
-            <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()">
+            <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()" [disabled]="loadingPodcasts">
+              @if (loadingPodcasts) {
+                <mat-option disabled>
+                  <mat-icon>autorenew</mat-icon> Loading podcasts...
+                </mat-option>
+              }
               @for (podcast of podcasts; track podcast.uuid) {
                 <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
               }
             </mat-select>
+            @if (loadingPodcasts) {
+              <mat-spinner matSuffix diameter="20"></mat-spinner>
+            }
           </mat-form-field>
           <mat-form-field class="time-field">
             <mat-label>Time</mat-label>
@@ -102,10 +120,9 @@
           </div>
           <button
             mat-flat-button
-            color="accent"
+            color="tertiary"
             type="button"
             (click)="createBlankEpisode()"
-            style="background-color: var(--primary); color: white"
             [disabled]="selectedPodcastUuid === null"
           >
             Create Empty Episode
@@ -308,6 +325,14 @@
                 ></p>
                 <mat-divider></mat-divider>
                 <h3>AI Summary</h3>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="regenerateSummary(selectedNewsDetail.uuid)"
+                >
+                  {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+                </button>
                 <p class="" [innerHTML]="selectedNewsDetail.summary ? markdownToHtml(selectedNewsDetail.summary) : 'No news summary available'"></p>
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
                   <mat-divider></mat-divider>
@@ -318,14 +343,6 @@
                     (click)="extractNews([selectedNewsDetail.uuid])"
                   >
                     Extract News
-                  </button>
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="button"
-                    (click)="regenerateSummary(selectedNewsDetail.uuid)"
-                  >
-                    {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
                   </button>
                   <h3>Site Content</h3>
                   <p class="">{{ selectedNewsDetail.content || 'No news content available' }}</p>

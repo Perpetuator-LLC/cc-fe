@@ -645,6 +645,20 @@
         }
       }
 
+      .podcast-field-wrapper {
+        position: relative;
+        display: inline-block;
+
+        .podcast-loading-spinner {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          z-index: 10;
+        }
+      }
+
       button {
         border-radius: 10px;
         background-color: var(--primary);
@@ -848,5 +862,19 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--theme-color);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

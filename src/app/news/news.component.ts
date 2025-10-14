@@ -91,6 +91,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   newsFetched = false;
   loadingNews = false;
   totalNewsCount = 0;
+  loadingPodcasts = true;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
@@ -173,9 +174,11 @@ export class NewsComponent implements OnInit, OnDestroy {
               this.selectedPodcastUuid = this.podcasts[0].uuid;
             }
           }
+          this.loadingPodcasts = false;
         },
         error: (error) => {
           this.messageService.error(`Failed to get podcasts: ${error.message}`);
+          this.loadingPodcasts = false;
         },
       }),
     );
@@ -214,7 +217,8 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.selectedNewsDetail = null;
 
     if (this.selectedPodcastUuid !== null) {
-      this.onPodcastSelect(this.selectedPodcastUuid);
+      this.newsFetched = true;
+      this.fetchNews();
     }
   }
 
