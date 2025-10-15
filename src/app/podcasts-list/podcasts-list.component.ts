@@ -40,6 +40,7 @@ import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
+import { ResearchService } from '../research.service';
 
 export interface ColumnOption {
   id: string;
@@ -122,6 +123,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private newsService: NewsService,
     private episodeService: EpisodeService,
     private jobService: JobService,
+    private researchService: ResearchService,
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
@@ -134,7 +136,6 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              // Extract episode UUID from job result JSON object
               const episodeUuid = job.result?.episode_uuid;
               if (episodeUuid) {
                 this.subscriptions.add(
@@ -155,6 +156,9 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
                   }),
                 );
               }
+            }
+            if ([JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(stringToJobKind(job.kind))) {
+              this.messageService.success(`Research complete! <a href="/topics">View Research Topics</a>`, null, true);
             }
           });
           this.jobs = jobs;
@@ -326,6 +330,26 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (err: { message: string }) => {
           this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  createResearchEpisode(podcastUuid: string) {
+    this.subscriptions.add(
+      this.researchService.createResearchChain(podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.jobs || data.jobs.length === 0) {
+            this.messageService.error('Failed to start research: No jobs returned');
+            return;
+          }
+          this.messageService.info(`Research started! ${data.jobs.length} jobs created.`);
+          data.jobs.forEach((job) => {
+            this.jobService.addJob(job);
+          });
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to start research: ${err.message}`);
         },
       }),
     );

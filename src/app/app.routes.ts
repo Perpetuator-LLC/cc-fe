@@ -178,6 +178,21 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'topics',
+    loadComponent: () => import('./topics-list/topics-list.component').then((c) => c.TopicsListComponent),
+    title: 'Research Topics',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'science',
+    },
+  },
+  {
+    path: 'topic/:uuid',
+    loadComponent: () => import('./topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
+    title: 'Topic Detail',
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'transactions',
     loadComponent: () =>
       import('./transactions-list/transactions-list.component').then((c) => c.TransactionsListComponent),
