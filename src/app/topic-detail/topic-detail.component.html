@@ -1,0 +1,142 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span class="page-title"><mat-icon>science</mat-icon>Research Topics <span>></span>
+    <span class="page-title-secondary">{{ topic?.title || 'Topic Detail' }}</span></span>
+</ng-template>
+<app-message></app-message>
+@if (loading) {
+<div class="loading-spinner">
+  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+</div>
+} @else if (!topic) {
+<div class="middle-card">
+  <h2>Topic not found.</h2>
+  <button mat-flat-button (click)="goBack()" style="background-color: var(--primary); color: white;">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Topics
+  </button>
+</div>
+} @else {
+<div class="topic-header-card">
+  <button mat-flat-button (click)="goBack()" class="back-button">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Topics
+  </button>
+
+  <div class="topic-header">
+    <div class="header-content">
+      <h1>{{ topic.title }}</h1>
+      @if (topic.description) {
+      <p class="description">{{ topic.description }}</p>
+      }
+      <div class="metadata">
+        <span class="meta-item">
+          <mat-icon>podcasts</mat-icon>
+          {{ topic.podcast.name }}
+        </span>
+        <span class="meta-item">
+          <mat-icon>calendar_today</mat-icon>
+          {{ formatDate(topic.createdAt) }}
+        </span>
+        <span class="meta-item">
+          <mat-icon>link</mat-icon>
+          {{ topic.sources.length }} sources
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<mat-tab-group class="topic-tabs">
+  @if (topic.transcript) {
+  <mat-tab label="Transcript">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-header>
+          <mat-icon>description</mat-icon>
+          <h3>Final Transcript</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="content-section">
+            <pre class="transcript-content">{{ topic.transcript }}</pre>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+  }
+
+  @if (topic.validatedContent) {
+  <mat-tab label="Validated Research">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-header>
+          <mat-icon>fact_check</mat-icon>
+          <h3>Fact-Checked Content</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="content-section">
+            <pre class="content-text">{{ topic.validatedContent }}</pre>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+  }
+
+  @if (topic.researchContent) {
+  <mat-tab label="Raw Research">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-header>
+          <mat-icon>search</mat-icon>
+          <h3>Research Content</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="content-section">
+            <pre class="content-text">{{ topic.researchContent }}</pre>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+  }
+
+  @if (topic.sources.length > 0) {
+  <mat-tab label="Sources">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-header>
+          <mat-icon>link</mat-icon>
+          <h3>Research Sources ({{ topic.sources.length }})</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="sources-list">
+            @for (source of topic.sources; track source.uuid) {
+            <div class="source-item">
+              <div class="source-header">
+                @if (source.title) {
+                <h4>{{ source.title }}</h4>
+                }
+                <a [href]="source.url" target="_blank" rel="noopener noreferrer" class="source-link">
+                  {{ source.url }}
+                  <mat-icon>open_in_new</mat-icon>
+                </a>
+                <span class="source-date">{{ formatDate(source.createdAt) }}</span>
+              </div>
+              @if (source.content) {
+              <div class="source-content">
+                <p>{{ source.content }}</p>
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+  }
+</mat-tab-group>
+}
+

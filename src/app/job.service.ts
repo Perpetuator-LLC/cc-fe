@@ -23,6 +23,10 @@ export enum JobKind {
   REFRESH_STOCK_LISTINGS = 'REFRESH_STOCK_LISTINGS',
   SCHEDULE_JOB = 'SCHEDULE_JOB',
   CANCEL_SCHEDULED_JOB = 'CANCEL_SCHEDULED_JOB',
+  CREATE_RESEARCH_TOPIC = 'CREATE_RESEARCH_TOPIC',
+  RESEARCH_TOPIC = 'RESEARCH_TOPIC',
+  VALIDATE_RESEARCH = 'VALIDATE_RESEARCH',
+  GENERATE_RESEARCH_TRANSCRIPT = 'GENERATE_RESEARCH_TRANSCRIPT',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -51,6 +55,14 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.SCHEDULE_JOB;
     case 'CANCEL_SCHEDULED_JOB':
       return JobKind.CANCEL_SCHEDULED_JOB;
+    case 'CREATE_RESEARCH_TOPIC':
+      return JobKind.CREATE_RESEARCH_TOPIC;
+    case 'RESEARCH_TOPIC':
+      return JobKind.RESEARCH_TOPIC;
+    case 'VALIDATE_RESEARCH':
+      return JobKind.VALIDATE_RESEARCH;
+    case 'GENERATE_RESEARCH_TRANSCRIPT':
+      return JobKind.GENERATE_RESEARCH_TRANSCRIPT;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -84,6 +96,14 @@ export const kindToString = (kind: string) => {
       return 'Schedule Job';
     case JobKind.CANCEL_SCHEDULED_JOB:
       return 'Cancel Scheduled Job';
+    case JobKind.CREATE_RESEARCH_TOPIC:
+      return 'Create Research Topic';
+    case JobKind.RESEARCH_TOPIC:
+      return 'Research Topic';
+    case JobKind.VALIDATE_RESEARCH:
+      return 'Validate Research';
+    case JobKind.GENERATE_RESEARCH_TRANSCRIPT:
+      return 'Generate Research Transcript';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
@@ -233,7 +253,7 @@ export class JobService extends BaseService implements OnDestroy {
         if (!this.queryRef) {
           return;
         }
-        const jobUuids = jobs.map((job) => job.uuid);
+        const jobUuids = jobs.map((job) => job.uuid).filter((uuid) => uuid !== null && uuid !== undefined);
         const newPollInterval = jobs.length === 0 ? 0 : 3000;
 
         void this.queryRef.refetch({ ...this.queryRef.variables, jobUuids });
