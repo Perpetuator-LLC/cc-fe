@@ -1,3 +1,19 @@
+# Changelog from v0.24.0 to v0.24.1
+
+In this update, we've fixed some issues and introduced new features to enhance the user experience. The team link on the podcast page now works as expected, and the floating buttons are now visible. We've also made the news section scrollable. On the feature side, we've updated the deprecated setOptions to the new refetch and sorted jobs to show completed ones first. Additionally, selecting a podcast in the news component now triggers a fetch, and the podcast dropdown loading now has a spinner.
+
+## Enhancements
+- Updated the deprecated setOptions to the new refetch.
+- Sorted jobs to show completed ones first.
+- Selecting a podcast in the news component now triggers a fetch.
+- Podcast dropdown loading now has a spinner.
+
+## Fixes
+- Fixed the team link on the podcast page to work as expected.
+- Made the floating buttons visible.
+- Made the news section scrollable.
+
+
 # Changelog from v0.23.0 to v0.24.0
 
 This update introduces several new features and improvements to the podcast list component, news detail section, and the message component. It also includes a fix to the auto-save feature.
