@@ -2,7 +2,7 @@
 @if (jobs.length > 0) {
   <div class="jobs-container">
     <mat-list>
-      @for (job of jobs; track job.uuid) {
+      @for (job of jobs; track job.id) {
         <mat-list-item class="job-cards">
           <mat-card class="job-card {{ job.status }}">
             <mat-accordion>

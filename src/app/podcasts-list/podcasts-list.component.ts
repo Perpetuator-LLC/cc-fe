@@ -158,7 +158,34 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
               }
             }
             if ([JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(stringToJobKind(job.kind))) {
-              this.messageService.success(`Research complete! <a href="/topics">View Research Topics</a>`, null, true);
+              const topicUuid = job.result?.topic_uuid;
+              const episodeUuid = job.result?.episode_uuid;
+
+              if (topicUuid) {
+                this.subscriptions.add(
+                  this.researchService.getTopicById(topicUuid).subscribe({
+                    next: (topic) => {
+                      const topicUrl = `/topic/${topicUuid}`;
+                      const topicTitle = topic.title === '' ? '(Blank)' : topic.title;
+
+                      let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
+
+                      if (episodeUuid) {
+                        const episodeUrl = `/episode/${episodeUuid}`;
+                        message += ` | <a href="${episodeUrl}">View Episode</a>`;
+                      }
+
+                      this.messageService.success(message, null, true);
+                    },
+                    error: (error) => {
+                      this.messageService.error(`Failed to get research topic: ${error.message}`);
+                    },
+                  }),
+                );
+              } else {
+                const fallbackMessage = `Research complete! <a href="/topics">View Research Topics</a>`;
+                this.messageService.success(fallbackMessage, null, true);
+              }
             }
           });
           this.jobs = jobs;

@@ -154,6 +154,7 @@ export interface JobResult {
   message?: string;
   podcast_uuid?: string;
   episode_uuid?: string;
+  topic_uuid?: string;
   news_uuids?: string[];
   [key: string]: unknown;
 }
