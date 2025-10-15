@@ -116,27 +116,7 @@ export class NewsComponent implements OnInit, OnDestroy {
             ) {
               this.getNews();
             } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              // Extract episode UUID from job result JSON object
-              const episodeUuid = job.result?.episode_uuid;
-              if (episodeUuid) {
-                this.subscriptions.add(
-                  this.episodeService.getEpisodeById(episodeUuid).subscribe({
-                    next: (episode) => {
-                      const newEpisodeUrl = `/episode/${episodeUuid}`;
-                      this.messageService.success(
-                        `New episode: <a href="${newEpisodeUrl}">${
-                          episode.title === '' ? '(Blank)' : episode.title
-                        }</a>`,
-                        null,
-                        true,
-                      );
-                    },
-                    error: (error) => {
-                      this.messageService.error(`Failed to get new episode: ${error.message}`);
-                    },
-                  }),
-                );
-              }
+              this.handleEpisodeCreationComplete(job);
             }
           });
           // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
@@ -630,5 +610,26 @@ export class NewsComponent implements OnInit, OnDestroy {
   markdownToHtml(markdown: string): SafeHtml {
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private handleEpisodeCreationComplete(job: Job): void {
+    const episodeUuid = job.result?.episode_uuid;
+    if (episodeUuid) {
+      this.subscriptions.add(
+        this.episodeService.getEpisodeById(episodeUuid).subscribe({
+          next: (episode) => {
+            const newEpisodeUrl = `/episode/${episodeUuid}`;
+            this.messageService.success(
+              `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
+              null,
+              true,
+            );
+          },
+          error: (error) => {
+            this.messageService.error(`Failed to get new episode: ${error.message}`);
+          },
+        }),
+      );
+    }
   }
 }
