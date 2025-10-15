@@ -134,6 +134,8 @@ export class LayoutComponent implements OnDestroy, OnInit {
         url.startsWith('/news') ||
         url.startsWith('/episodes') ||
         url.startsWith('/episode/') ||
+        url.startsWith('/topics') ||
+        url.startsWith('/topic/') ||
         url.startsWith('/jobs') ||
         url.startsWith('/scheduling');
     });

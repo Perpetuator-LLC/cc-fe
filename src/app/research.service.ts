@@ -105,6 +105,58 @@ export class ResearchService extends BaseService {
     );
   }
 
+  getTopicById(topicUuid: string): Observable<Topic> {
+    const GET_TOPIC = gql`
+      query GetTopic($topicUuid: UUID!) {
+        topics(topicUuid: $topicUuid) {
+          edges {
+            cursor
+            node {
+              uuid
+              title
+              description
+              researchContent
+              validatedContent
+              transcript
+              createdAt
+              updatedAt
+              podcast {
+                uuid
+                name
+              }
+              sources {
+                uuid
+                title
+                url
+                content
+                createdAt
+              }
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+          }
+        }
+      }
+    `;
+
+    return this.query<GetTopicsResponse>({
+      query: GET_TOPIC,
+      variables: { topicUuid },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        if (!data.topics?.edges || data.topics.edges.length !== 1) {
+          throw new Error('Topic not found');
+        }
+        return data.topics.edges[0].node;
+      }),
+    );
+  }
+
   createResearchChain(podcastUuid: string): Observable<CreateResearchChainResponse['createResearchChain']> {
     const CREATE_RESEARCH_CHAIN = gql`
       mutation CreateResearchChain($podcastUuid: UUID!) {
