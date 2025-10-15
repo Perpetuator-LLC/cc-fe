@@ -103,7 +103,7 @@ export const kindToString = (kind: string) => {
     case JobKind.VALIDATE_RESEARCH:
       return 'Validate Research';
     case JobKind.GENERATE_RESEARCH_TRANSCRIPT:
-      return 'Generate Research Transcript';
+      return 'Generate Research';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:

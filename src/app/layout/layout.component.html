@@ -109,6 +109,10 @@
             </svg>
             <span class="website-title">Podcasts</span>
           </a>
+          <a [routerLink]="['/topics']" class="header-logo s-link" routerLinkActive="active">
+            <mat-icon>science</mat-icon>
+            <span class="website-title">Research Topics</span>
+          </a>
           } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
           <!-- Jobs section links -->
           <a [routerLink]="['/jobs']" class="header-logo s-link" routerLinkActive="active">

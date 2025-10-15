@@ -56,8 +56,11 @@ mat-divider {
 }
 
 .textarea-prompt {
-  max-height: 40em;
-  overflow: auto;
+  min-height: 200px;
+  max-height: 600px;
+  height: 400px;
+  overflow-y: auto;
+  resize: vertical;
 }
 
 .expand-width {
@@ -292,6 +295,7 @@ mat-divider {
   padding: 32px 72px;
   background-color: var(--secondary-color);
   margin-top: -20px;
+  overflow-anchor: none;
 
   @media screen and (max-width: 600px) {
     padding: 32px 40px;
