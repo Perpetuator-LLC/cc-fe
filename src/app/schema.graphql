@@ -4,6 +4,22 @@ schema {
 }
 
 type ApiQuery {
+  """List of Research Topics [Relay]"""
+  topics(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    podcast: ID
+    title: String
+    topicUuid: UUID
+    podcastUuid: UUID
+    titleContains: String
+
+    """Ordering"""
+    orderBy: String
+  ): TopicTypeConnection
   stockListings(symbol: String, exchange: String, assetType: String, status: String, limit: Int): [StockListingType]
   stockListing(symbol: String!): StockListingType
   companies(ticker: String, name: String, sector: String, industry: String, limit: Int = 100): [CompanyType]
@@ -213,6 +229,183 @@ type ApiQuery {
   ): Node
 }
 
+type TopicTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [TopicTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Relay edge containing a `TopicType` and its cursor."""
+type TopicTypeEdge {
+  """The item at the end of the edge"""
+  node: TopicType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type TopicType implements Node {
+  podcast: PodcastType!
+  title: String!
+  description: String
+  researchContent: String
+  validatedContent: String
+  transcript: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  sources: [SourceType]
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+"""
+Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
+"""
+type PodcastType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  intro: String!
+  prompt: String!
+  outro: String!
+  slug: String
+  enabled: Boolean!
+  description: String
+  ownerName: String
+  ownerEmail: String
+  ownerLink: String
+  tgChannelId: String
+  tgResponse: String
+  categories: GenericScalar
+  uuid: UUID
+  rssFeeds: [RssFeedType]
+  team: TeamType
+  imageUrl: String
+  thumbnailUrl: String
+  url: String
+  voice: VoiceType
+}
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""
+Type for RssFeed model. This is used to create a new RssFeed and to get the list of RssFeeds.
+"""
+type RssFeedType implements Node {
+  """The ID of the object"""
+  id: ID!
+  url: String!
+  uuid: UUID
+}
+
+type TeamType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  uuid: UUID
+  members: [TeamMembershipType]
+}
+
+type TeamMembershipType {
+  user: PublicUserType
+  role: String
+}
+
+"""User type that only exposes public fields (username, uuid) - no email"""
+type PublicUserType implements Node {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+type VoiceType implements Node {
+  """The ID of the object"""
+  id: ID!
+  model: VoiceModel
+
+  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
+  externalId: String!
+  displayName: String
+
+  """Whether this voice is available for use."""
+  enabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: GenericScalar
+  uuid: UUID
+  sampleUrl: String
+  creditsPerMillionChar: Int
+}
+
+"""An enumeration."""
+enum VoiceModel {
+  OPENAI_TTS_1
+  OPENAI_TTS_1_HD
+  OPENAI_GPT_4O_MINI_TTS
+  ELEVENLABS_MULTILINGUAL_V2
+  ELEVENLABS_FLASH_V2_5
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type SourceType implements Node {
+  topic: TopicType!
+  title: String
+  url: String!
+  content: String
+  createdAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
 type StockListingType {
   id: ID!
   symbol: String!
@@ -232,13 +425,6 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar Date
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 type CompanyType {
   id: ID!
@@ -375,23 +561,6 @@ type DiscountedCashFlowAnalysisTypeConnection {
 }
 
 """
-The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
-"""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: String
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: String
-}
-
-"""
 A Relay edge containing a `DiscountedCashFlowAnalysisType` and its cursor.
 """
 type DiscountedCashFlowAnalysisTypeEdge {
@@ -437,12 +606,6 @@ type DiscountedCashFlowAnalysisType implements Node {
   predictedEps: Decimal
 }
 
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
 """User data export schema"""
 type UserDataExport {
   """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
@@ -458,12 +621,6 @@ type UserDataExport {
   transactions: [TransactionType!]
   settings: [UserSettingType!]
 }
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
@@ -482,102 +639,6 @@ type JobType implements Node {
   id: ID!
   uuid: UUID
   cost: Int
-}
-
-"""
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
-"""
-scalar GenericScalar
-
-type TeamType implements Node {
-  """The ID of the object"""
-  id: ID!
-  name: String!
-  uuid: UUID
-  members: [TeamMembershipType]
-}
-
-type TeamMembershipType {
-  user: PublicUserType
-  role: String
-}
-
-"""User type that only exposes public fields (username, uuid) - no email"""
-type PublicUserType implements Node {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
-"""
-Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
-"""
-type PodcastType implements Node {
-  """The ID of the object"""
-  id: ID!
-  name: String!
-  intro: String!
-  prompt: String!
-  outro: String!
-  slug: String
-  enabled: Boolean!
-  description: String
-  ownerName: String
-  ownerEmail: String
-  ownerLink: String
-  tgChannelId: String
-  tgResponse: String
-  categories: GenericScalar
-  uuid: UUID
-  rssFeeds: [RssFeedType]
-  team: TeamType
-  imageUrl: String
-  thumbnailUrl: String
-  url: String
-  voice: VoiceType
-}
-
-"""
-Type for RssFeed model. This is used to create a new RssFeed and to get the list of RssFeeds.
-"""
-type RssFeedType implements Node {
-  """The ID of the object"""
-  id: ID!
-  url: String!
-  uuid: UUID
-}
-
-type VoiceType implements Node {
-  """The ID of the object"""
-  id: ID!
-  model: VoiceModel
-
-  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
-  externalId: String!
-  displayName: String
-
-  """Whether this voice is available for use."""
-  enabled: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  metadata: GenericScalar
-  uuid: UUID
-  sampleUrl: String
-  creditsPerMillionChar: Int
-}
-
-"""An enumeration."""
-enum VoiceModel {
-  OPENAI_TTS_1
-  OPENAI_TTS_1_HD
-  OPENAI_GPT_4O_MINI_TTS
-  ELEVENLABS_MULTILINGUAL_V2
-  ELEVENLABS_FLASH_V2_5
 }
 
 """GraphQL type for Episode model."""
@@ -623,7 +684,7 @@ type OrderType implements Node {
   receiptUrl: String
   sessionUrl: String
   status: ApiOrderStatusChoices!
-  description: String!
+  description: String
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -789,6 +850,11 @@ enum JobKind {
   FETCH_INCOME_STATEMENT
   FETCH_CASH_FLOW
   FETCH_EARNINGS
+  CREATE_RESEARCH_TOPIC
+  RESEARCH_TOPIC
+  VALIDATE_RESEARCH
+  GENERATE_RESEARCH_TRANSCRIPT
+  CREATE_RESEARCH_EPISODE
   TEST_RAISE
   TEST_PRINT
 }
@@ -1138,6 +1204,38 @@ type TeamTypeEdge {
 }
 
 type ApiMutation {
+  """Mutation to create a research topic based on podcast prompt."""
+  createResearchTopic(podcastUuid: UUID!): CreateResearchTopic
+
+  """Mutation to research a topic."""
+  researchTopic(topicUuid: UUID!): ResearchTopic
+
+  """Mutation to validate research content."""
+  validateResearch(topicUuid: UUID!): ValidateResearch
+
+  """Mutation to generate transcript from validated research."""
+  generateResearchTranscript(topicUuid: UUID!): GenerateResearchTranscript
+
+  """
+  Mutation to create a full research chain: create topic -> research -> validate -> generate transcript.
+  """
+  createResearchChain(podcastUuid: UUID!): CreateResearchChain
+
+  """Mutation to create an episode from a research topic."""
+  createResearchEpisode(topicUuid: UUID!): CreateResearchEpisode
+
+  """
+  Mutation to create a full research chain that produces a ready-to-publish episode.
+  Creates: topic -> research -> validate -> transcript -> episode
+  """
+  createFullResearchChain(podcastUuid: UUID!): CreateFullResearchChain
+
+  """Mutation to update a topic."""
+  updateTopic(description: String, researchContent: String, title: String, topicUuid: UUID!, transcript: String, validatedContent: String): UpdateTopic
+
+  """Mutation to delete a topic."""
+  deleteTopic(topicUuid: UUID!): DeleteTopic
+
   """Force refresh of stock listings from Alpha Vantage"""
   refreshStockListings(
     """Force refresh even if not needed"""
@@ -1463,6 +1561,74 @@ type ApiMutation {
 
   """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
+}
+
+"""Mutation to create a research topic based on podcast prompt."""
+type CreateResearchTopic {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to research a topic."""
+type ResearchTopic {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to validate research content."""
+type ValidateResearch {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to generate transcript from validated research."""
+type GenerateResearchTranscript {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Mutation to create a full research chain: create topic -> research -> validate -> generate transcript.
+"""
+type CreateResearchChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""Mutation to create an episode from a research topic."""
+type CreateResearchEpisode {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Mutation to create a full research chain that produces a ready-to-publish episode.
+Creates: topic -> research -> validate -> transcript -> episode
+"""
+type CreateFullResearchChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""Mutation to update a topic."""
+type UpdateTopic {
+  success: Boolean
+  message: String
+  topic: TopicType
+}
+
+"""Mutation to delete a topic."""
+type DeleteTopic {
+  success: Boolean
+  message: String
+  topicUuid: UUID
 }
 
 """Force refresh of stock listings from Alpha Vantage"""
