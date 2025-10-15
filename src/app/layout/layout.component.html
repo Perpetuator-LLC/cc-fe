@@ -51,7 +51,7 @@
     <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
       <div class="sidebar-content">
         <div class="second-header">
-          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/')) {
+          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/') || router.url.startsWith('/topics') || router.url.startsWith('/topic/')) {
           <h6>Podcasts</h6>
           } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
           <h6>Jobs</h6>
@@ -74,7 +74,7 @@
           </svg>
         </div>
         <div class="links">
-          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/')) {
+          @if (router.url.startsWith('/podcasts') || router.url.startsWith('/podcast/') || router.url.startsWith('/news') || router.url.startsWith('/episodes') || router.url.startsWith('/episode/') || router.url.startsWith('/topics') || router.url.startsWith('/topic/')) {
           <!-- Podcasts section links -->
           <a [routerLink]="['/news']" class="header-logo s-link" routerLinkActive="active">
             <mat-icon> rss_feed</mat-icon>

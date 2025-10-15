@@ -6,9 +6,9 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angular/material/expansion';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { Job, JobService, JobStatus, kindToString, stringToJobStatus, statusToString } from '../job.service';
@@ -41,13 +41,11 @@ interface Episode {
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatCardHeader,
-    MatButton,
     MatIconButton,
     MatCardSubtitle,
     MatProgressBar,
     MatCardTitle,
     DatePipe,
-    JsonPipe,
     RouterLink,
     MatIcon,
   ],
