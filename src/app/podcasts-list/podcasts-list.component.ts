@@ -136,56 +136,10 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              const episodeUuid = job.result?.episode_uuid;
-              if (episodeUuid) {
-                this.subscriptions.add(
-                  this.episodeService.getEpisodeById(episodeUuid).subscribe({
-                    next: (episode) => {
-                      const newEpisodeUrl = `/episode/${episodeUuid}`;
-                      this.messageService.success(
-                        `New episode: <a href="${newEpisodeUrl}">${
-                          episode.title === '' ? '(Blank)' : episode.title
-                        }</a>`,
-                        null,
-                        true,
-                      );
-                    },
-                    error: (error) => {
-                      this.messageService.error(`Failed to get new episode: ${error.message}`);
-                    },
-                  }),
-                );
-              }
+              this.handleEpisodeCreationComplete(job);
             }
             if ([JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(stringToJobKind(job.kind))) {
-              const topicUuid = job.result?.topic_uuid;
-              const episodeUuid = job.result?.episode_uuid;
-
-              if (topicUuid) {
-                this.subscriptions.add(
-                  this.researchService.getTopicById(topicUuid).subscribe({
-                    next: (topic) => {
-                      const topicUrl = `/topic/${topicUuid}`;
-                      const topicTitle = topic.title === '' ? '(Blank)' : topic.title;
-
-                      let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
-
-                      if (episodeUuid) {
-                        const episodeUrl = `/episode/${episodeUuid}`;
-                        message += ` | <a href="${episodeUrl}">View Episode</a>`;
-                      }
-
-                      this.messageService.success(message, null, true);
-                    },
-                    error: (error) => {
-                      this.messageService.error(`Failed to get research topic: ${error.message}`);
-                    },
-                  }),
-                );
-              } else {
-                const fallbackMessage = `Research complete! <a href="/topics">View Research Topics</a>`;
-                this.messageService.success(fallbackMessage, null, true);
-              }
+              this.handleResearchComplete(job);
             }
           });
           this.jobs = jobs;
@@ -195,6 +149,71 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
         },
       }),
     );
+  }
+
+  private handleEpisodeCreationComplete(job: Job): void {
+    const episodeUuid = job.result?.episode_uuid;
+    if (episodeUuid) {
+      this.subscriptions.add(
+        this.episodeService.getEpisodeById(episodeUuid).subscribe({
+          next: (episode) => {
+            const newEpisodeUrl = `/episode/${episodeUuid}`;
+            this.messageService.success(
+              `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
+              null,
+              true,
+            );
+          },
+          error: (error) => {
+            this.messageService.error(`Failed to get new episode: ${error.message}`);
+          },
+        }),
+      );
+    }
+  }
+
+  private handleResearchComplete(job: Job): void {
+    const topicUuid = job.result?.topic_uuid;
+    const episodeUuid = job.result?.episode_uuid;
+
+    if (topicUuid) {
+      this.subscriptions.add(
+        this.researchService.getTopicById(topicUuid).subscribe({
+          next: (topic) => {
+            const topicUrl = `/topic/${topicUuid}`;
+            const topicTitle = topic.title === '' ? '(Blank)' : topic.title;
+
+            let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
+
+            if (episodeUuid) {
+              this.subscriptions.add(
+                this.episodeService.getEpisodeById(episodeUuid).subscribe({
+                  next: (episode) => {
+                    const episodeUrl = `/episode/${episodeUuid}`;
+                    const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
+                    message += ` | Episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
+                    this.messageService.success(message, null, true);
+                  },
+                  error: () => {
+                    const episodeUrl = `/episode/${episodeUuid}`;
+                    message += ` | <a href="${episodeUrl}">View Episode</a>`;
+                    this.messageService.success(message, null, true);
+                  },
+                }),
+              );
+            } else {
+              this.messageService.success(message, null, true);
+            }
+          },
+          error: (error) => {
+            this.messageService.error(`Failed to get research topic: ${error.message}`);
+          },
+        }),
+      );
+    } else {
+      const fallbackMessage = `Research complete! <a href="/topics">View Research Topics</a>`;
+      this.messageService.success(fallbackMessage, null, true);
+    }
   }
 
   ngOnInit(): void {
