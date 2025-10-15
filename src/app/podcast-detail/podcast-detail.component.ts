@@ -38,7 +38,6 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -63,6 +62,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { CommonModule } from '@angular/common';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -145,6 +145,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private tierFilteredVoices: Voice[] = [];
   protected filteredVoices: Voice[] = [];
   isEditing = false;
+  private savedScrollPosition = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -248,6 +249,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
             return !(enabled && !slug);
           }),
           switchMap((valueToSubmit) => {
+            // Save scroll position before submitting
+            this.savedScrollPosition = window.scrollY;
+
             // Only update pendingSubmitCategories here
             this.pendingSubmitCategories = { ...valueToSubmit.categories };
             const {
@@ -313,6 +317,11 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               // Reset dirty flag since we successfully saved
               this.podcastForm.markAsPristine();
               this.pendingSubmitCategories = {};
+
+              // Restore scroll position after change detection
+              setTimeout(() => {
+                window.scrollTo(0, this.savedScrollPosition);
+              }, 0);
 
               this.messageService.success('Podcast updated successfully', 3000);
             } else {
