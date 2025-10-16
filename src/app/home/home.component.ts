@@ -50,15 +50,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.podcastsService.getPodcasts(3).subscribe({
-      next: (result) => {
-        this.gridPodcasts = result.podcasts;
-      },
-      error: () => {
-        this.gridPodcasts = [];
-      },
-    });
-    // load site stats
+    if (this.isLoggedIn()) {
+      this.podcastsService.getPodcasts(3).subscribe({
+        next: (result) => {
+          this.gridPodcasts = result.podcasts;
+        },
+        error: () => {
+          this.gridPodcasts = [];
+        },
+      });
+    }
+
     this.dashboardService.getStats().subscribe({
       next: (result) => {
         this.siteStats = result;

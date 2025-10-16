@@ -1217,7 +1217,8 @@ type ApiMutation {
   generateResearchTranscript(topicUuid: UUID!): GenerateResearchTranscript
 
   """
-  Mutation to create a full research chain: create topic -> research -> validate -> generate transcript -> generate audio.
+  Mutation to create a full research chain:
+      create topic -> research -> validate -> generate transcript -> generate audio.
   """
   createResearchChain(podcastUuid: UUID!): CreateResearchChain
 
@@ -1592,7 +1593,8 @@ type GenerateResearchTranscript {
 }
 
 """
-Mutation to create a full research chain: create topic -> research -> validate -> generate transcript -> generate audio.
+Mutation to create a full research chain:
+    create topic -> research -> validate -> generate transcript -> generate audio.
 """
 type CreateResearchChain {
   success: Boolean

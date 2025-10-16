@@ -9,7 +9,7 @@
   <!--      height="24"-->
   <!--      matTooltip="Capital Copilot"-->
   <!--    />-->
-  Home
+<!--  Home-->
   <!--  </span>-->
 </ng-template>
 
@@ -87,7 +87,7 @@
           <div class="stat-label">Total Podcasts</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
+        <div class="stat-value">{{ siteStats.total_podcasts }}</div>
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
       <mat-card class="stat-card">
@@ -96,7 +96,7 @@
           <div class="stat-label">Total Episodes</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
+        <div class="stat-value">{{ siteStats.total_episodes }}</div>
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
       <mat-card class="stat-card">
@@ -105,7 +105,7 @@
           <div class="stat-label">Transcripts</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.totalVoices }}</div>
+        <div class="stat-value">{{ siteStats.total_voices }}</div>
 
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
@@ -115,7 +115,7 @@
           <div class="stat-label">Episodes Generated from News</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
+        <div class="stat-value">{{ siteStats.total_news_articles }}</div>
 
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
@@ -125,7 +125,7 @@
           <div class="stat-label">Summarized News</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
+        <div class="stat-value">{{ siteStats.recent_news_processed }}</div>
 
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
@@ -135,7 +135,7 @@
           <div class="stat-label">Minutes of Published Audio</div>
         </div>
 
-        <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number: '1.0-0' }} minutes</div>
+        <div class="stat-value">{{ siteStats.total_audio_minutes_published | number: '1.0-0' }} minutes</div>
 
         <div class="stat-change positive"><span>+12%</span> from last month</div>
       </mat-card>
@@ -181,46 +181,48 @@
   </div>
 
   <!-- Recent Podcasts Section -->
-  <div class="recent-podcasts-section">
-    <div class="section-header">
-      <h3 class="section-title">Recent Podcasts</h3>
-      <a class="view-all-link" routerLink="/podcasts">View all</a>
-    </div>
-    <div class="podcasts-grid">
-      <mat-card class="podcast-card" *ngFor="let podcast of gridPodcasts">
-        <mat-card-header>
-          <div class="grid-header" style="width: 100%">
-            <a [routerLink]="['/podcast', podcast.uuid]">
-              <img [src]="podcast.imageUrl || '/image.png'" alt="img" class="img" />
-            </a>
-            <div class="response-div">
-              <span [class]="podcast.enabled ? 'enable' : 'disable'">
-                {{ podcast.enabled ? 'Enable' : 'Disable' }}
-              </span>
-            </div>
-            <div class="grid-header-name">
-              <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
-                {{ podcast.name }}
+  @if (isLoggedIn()) {
+    <div class="recent-podcasts-section">
+      <div class="section-header">
+        <h3 class="section-title">Recent Podcasts</h3>
+        <a class="view-all-link" routerLink="/podcasts">View all</a>
+      </div>
+      <div class="podcasts-grid">
+        <mat-card class="podcast-card" *ngFor="let podcast of gridPodcasts">
+          <mat-card-header>
+            <div class="grid-header" style="width: 100%">
+              <a [routerLink]="['/podcast', podcast.uuid]">
+                <img [src]="podcast.imageUrl || '/image.png'" alt="img" class="img" />
               </a>
-              <div>
-                <!-- Actions can be omitted or added as needed -->
+              <div class="response-div">
+                <span [class]="podcast.enabled ? 'enable' : 'disable'">
+                  {{ podcast.enabled ? 'Enable' : 'Disable' }}
+                </span>
               </div>
+              <div class="grid-header-name">
+                <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
+                  {{ podcast.name }}
+                </a>
+                <div>
+                  <!-- Actions can be omitted or added as needed -->
+                </div>
+              </div>
+              <p>{{ podcast.team?.members?.[0]?.user?.username || 'Daniel' }} - Premium (396 CPM)</p>
             </div>
-            <p>{{ podcast.team?.members?.[0]?.user?.username || 'Daniel' }} - Premium (396 CPM)</p>
+          </mat-card-header>
+          <div class="chip-header">
+            <span class="chip">
+              <img src="/telegram.svg" alt="telegram" />
+              {{ podcast.tgChannelId || '1002282842326' }}
+            </span>
+            <span class="days">2 days ago</span>
           </div>
-        </mat-card-header>
-        <div class="chip-header">
-          <span class="chip">
-            <img src="/telegram.svg" alt="telegram" />
-            {{ podcast.tgChannelId || '1002282842326' }}
-          </span>
-          <span class="days">2 days ago</span>
-        </div>
-        <div class="bottom-header">
-          <span class="chip">+4 More</span>
-          <p>{{ podcast.team?.name || 'Perpetuator LLC' }}</p>
-        </div>
-      </mat-card>
+          <div class="bottom-header">
+            <span class="chip">+4 More</span>
+            <p>{{ podcast.team?.name || 'Perpetuator LLC' }}</p>
+          </div>
+        </mat-card>
+      </div>
     </div>
-  </div>
+  }
 </div>
