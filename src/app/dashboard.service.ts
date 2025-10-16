@@ -1,55 +1,19 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { gql } from 'apollo-angular';
-import { BaseService } from './base.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { SiteStatistics } from './interface';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DashboardService extends BaseService {
-  getStats() {
-    const GQL = gql`
-      query GetSiteStatistics {
-        siteStatistics {
-          totalUsers
-          activeUsers30Days
-          totalTeams
-          totalPodcasts
-          totalAudioMinutesGenerated
-          totalAudioMinutesPublished
-          enabledPodcasts
-          totalEpisodes
-          liveEpisodes
-          totalNewsArticles
-          totalJobs
-          completedJobs
-          failedJobs
-          totalCompanies
-          totalDcfAnalyses
-          totalStockPrices
-          totalVoices
-          enabledVoices
-          recentEpisodes
-          recentNewsProcessed
-          recentDcfAnalyses
-          recentJobs
-          recentCompletedJobs
-          recentFailedJobs
-          recentPendingJobs
-          recentRunningJobs
-        }
-      }
-    `;
+export class DashboardService {
+  private readonly apiUrl = environment.API_URL;
 
-    interface Response {
-      siteStatistics: SiteStatistics;
-    }
+  constructor(private http: HttpClient) {}
 
-    return this.query<Response>({
-      query: GQL,
-      fetchPolicy: 'network-only',
-    }).pipe(map(({ siteStatistics }) => siteStatistics));
+  getStats(): Observable<SiteStatistics> {
+    return this.http.get<SiteStatistics>(`${this.apiUrl}/site-statistics/`);
   }
 }

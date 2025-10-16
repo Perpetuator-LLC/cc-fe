@@ -55,6 +55,16 @@
     <div class="header-actions">
       <ng-container #toolbarContainer></ng-container>
 
+      <a mat-button [routerLink]="['/register']" color="primary" class="auth-link register-link">
+        <mat-icon>person_add</mat-icon>
+        <span>Register</span>
+      </a>
+
+      <a mat-button [routerLink]="['/login']" class="auth-link login-link">
+        <mat-icon>login</mat-icon>
+        <span>Sign In</span>
+      </a>
+
       <button
         mat-icon-button
         class="theme-toggle"

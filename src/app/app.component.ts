@@ -48,10 +48,15 @@ export class AppComponent {
     }
 
     // Routes that should use pre-login layout only when NOT logged in
-    const conditionalRoutes = ['/privacy-policy', '/terms-and-conditions'];
+    const conditionalRoutes = ['/', '/home', '/privacy-policy', '/terms-and-conditions'];
 
     // If on a conditional route and user is NOT logged in, use pre-login layout
-    if (conditionalRoutes.some((route) => this.router.url.startsWith(route))) {
+    const isConditionalRoute = conditionalRoutes.some(
+      (route) =>
+        this.router.url === route || this.router.url.startsWith(route + '?') || this.router.url.startsWith(route + '#'),
+    );
+
+    if (isConditionalRoute) {
       return !this.authService.isLoggedIn();
     }
 
