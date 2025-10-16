@@ -70,13 +70,17 @@ mat-card {
     }
 
     button {
-      background-color: var(--primary);
+      background-color: var(--primary) !important;
       border-radius: 10px;
-      color: var(--theme-white);
+      color: #ffffff !important;
       font-size: 16px;
       font-weight: 500;
       box-shadow: none;
       border: 1px solid var(--border-color);
+
+      .mdc-button__label {
+        color: #ffffff !important;
+      }
     }
 
     .hero-content {
