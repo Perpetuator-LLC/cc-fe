@@ -38,6 +38,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
 import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.component';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
+import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 
 @Component({
   selector: 'app-layout',
@@ -60,6 +61,7 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
     NgClass,
     DecimalPipe,
     SharedFooterComponent,
+    JobStatusBarComponent,
   ],
 })
 export class LayoutComponent implements OnDestroy, OnInit {

@@ -21,7 +21,6 @@ import { MatDivider } from '@angular/material/divider';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
-import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -68,7 +67,6 @@ export interface SidePanelAccordianData {
     MatDivider,
     MatSelect,
     MatOption,
-    JobStatusBarComponent,
     SvgIconComponent,
     MatProgressBarModule,
   ],
@@ -94,7 +92,6 @@ export class NewsComponent implements OnInit, OnDestroy {
   loadingPodcasts = true;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
   protected showMicroJobButtons = false;
 
   constructor(

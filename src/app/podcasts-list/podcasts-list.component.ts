@@ -39,7 +39,6 @@ import { NewsService } from '../news.service';
 import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { ResearchService } from '../research.service';
 
 export interface ColumnOption {
@@ -82,7 +81,6 @@ export interface ColumnOption {
     MatCheckboxModule,
     FormsModule,
     MatMenuItem,
-    JobStatusBarComponent,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
