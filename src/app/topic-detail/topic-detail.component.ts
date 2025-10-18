@@ -14,6 +14,7 @@ import { MatButton } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
+import { JobService } from '../job.service';
 
 @Component({
   selector: 'app-topic-detail',
@@ -48,6 +49,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private researchService: ResearchService,
+    private jobService: JobService,
   ) {}
 
   ngOnInit(): void {
@@ -107,6 +109,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
             5000,
             true,
           );
+          this.jobService.addJobs(response.jobs);
           this.isGeneratingResearch = false;
           setTimeout(() => {
             this.loadTopic();
