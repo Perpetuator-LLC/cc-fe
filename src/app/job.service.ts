@@ -23,10 +23,18 @@ export enum JobKind {
   REFRESH_STOCK_LISTINGS = 'REFRESH_STOCK_LISTINGS',
   SCHEDULE_JOB = 'SCHEDULE_JOB',
   CANCEL_SCHEDULED_JOB = 'CANCEL_SCHEDULED_JOB',
+  FETCH_COMPANY_INFO = 'FETCH_COMPANY_INFO',
+  FETCH_STOCK_PRICES = 'FETCH_STOCK_PRICES',
+  FETCH_BALANCE_SHEET = 'FETCH_BALANCE_SHEET',
+  FETCH_INCOME_STATEMENT = 'FETCH_INCOME_STATEMENT',
+  FETCH_CASH_FLOW = 'FETCH_CASH_FLOW',
+  FETCH_EARNINGS = 'FETCH_EARNINGS',
   CREATE_RESEARCH_TOPIC = 'CREATE_RESEARCH_TOPIC',
   RESEARCH_TOPIC = 'RESEARCH_TOPIC',
   VALIDATE_RESEARCH = 'VALIDATE_RESEARCH',
   GENERATE_RESEARCH_TRANSCRIPT = 'GENERATE_RESEARCH_TRANSCRIPT',
+  CREATE_RESEARCH_EPISODE = 'CREATE_RESEARCH_EPISODE',
+  PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN = 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -55,6 +63,18 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.SCHEDULE_JOB;
     case 'CANCEL_SCHEDULED_JOB':
       return JobKind.CANCEL_SCHEDULED_JOB;
+    case 'FETCH_COMPANY_INFO':
+      return JobKind.FETCH_COMPANY_INFO;
+    case 'FETCH_STOCK_PRICES':
+      return JobKind.FETCH_STOCK_PRICES;
+    case 'FETCH_BALANCE_SHEET':
+      return JobKind.FETCH_BALANCE_SHEET;
+    case 'FETCH_INCOME_STATEMENT':
+      return JobKind.FETCH_INCOME_STATEMENT;
+    case 'FETCH_CASH_FLOW':
+      return JobKind.FETCH_CASH_FLOW;
+    case 'FETCH_EARNINGS':
+      return JobKind.FETCH_EARNINGS;
     case 'CREATE_RESEARCH_TOPIC':
       return JobKind.CREATE_RESEARCH_TOPIC;
     case 'RESEARCH_TOPIC':
@@ -63,6 +83,10 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.VALIDATE_RESEARCH;
     case 'GENERATE_RESEARCH_TRANSCRIPT':
       return JobKind.GENERATE_RESEARCH_TRANSCRIPT;
+    case 'CREATE_RESEARCH_EPISODE':
+      return JobKind.CREATE_RESEARCH_EPISODE;
+    case 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN':
+      return JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -89,13 +113,25 @@ export const kindToString = (kind: string) => {
     case JobKind.PUBLISH_EPISODE_AUDIO:
       return 'Publish Episode Audio';
     case JobKind.PUBLISH_LATEST_EPISODE_CHAIN:
-      return 'Publish Latest Episode Chain';
+      return 'Publish Latest News Episode Chain';
     case JobKind.REFRESH_STOCK_LISTINGS:
       return 'Refresh Stock Listings';
     case JobKind.SCHEDULE_JOB:
       return 'Schedule Job';
     case JobKind.CANCEL_SCHEDULED_JOB:
       return 'Cancel Scheduled Job';
+    case JobKind.FETCH_COMPANY_INFO:
+      return 'Fetch Company Info';
+    case JobKind.FETCH_STOCK_PRICES:
+      return 'Fetch Stock Prices';
+    case JobKind.FETCH_BALANCE_SHEET:
+      return 'Fetch Balance Sheet';
+    case JobKind.FETCH_INCOME_STATEMENT:
+      return 'Fetch Income Statement';
+    case JobKind.FETCH_CASH_FLOW:
+      return 'Fetch Cash Flow';
+    case JobKind.FETCH_EARNINGS:
+      return 'Fetch Earnings';
     case JobKind.CREATE_RESEARCH_TOPIC:
       return 'Create Research Topic';
     case JobKind.RESEARCH_TOPIC:
@@ -104,6 +140,10 @@ export const kindToString = (kind: string) => {
       return 'Validate Research';
     case JobKind.GENERATE_RESEARCH_TRANSCRIPT:
       return 'Generate Research';
+    case JobKind.CREATE_RESEARCH_EPISODE:
+      return 'Create Research Episode';
+    case JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN:
+      return 'Publish Research Topic Episode Chain';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:

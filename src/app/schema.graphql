@@ -856,6 +856,7 @@ enum JobKind {
   VALIDATE_RESEARCH
   GENERATE_RESEARCH_TRANSCRIPT
   CREATE_RESEARCH_EPISODE
+  PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN
   TEST_RAISE
   TEST_PRINT
 }
@@ -1228,13 +1229,23 @@ type ApiMutation {
 
   """
   Mutation to create a full research chain that produces a ready-to-publish episode.
-  Creates: topic -> research -> validate -> transcript -> episode
+  Creates: topic -> research -> validate -> transcript -> episode -> audio
   
   If topic_uuid is provided, uses that topic.
   Otherwise, if user-created topics exist for the podcast, picks one randomly.
   Otherwise, generates a new AI topic.
   """
   createFullResearchChain(podcastUuid: UUID!, topicUuid: UUID): CreateFullResearchChain
+
+  """
+  Mutation to create a full research chain that produces and publishes a ready-to-publish episode.
+  Creates: topic -> research -> validate -> transcript -> episode -> audio -> publish
+  
+  If topic_uuid is provided, uses that topic.
+  Otherwise, if user-created topics exist for the podcast, picks one randomly.
+  Otherwise, generates a new AI topic.
+  """
+  publishResearchTopicEpisodeChain(podcastUuid: UUID!, topicUuid: UUID): PublishResearchTopicEpisodeChain
 
   """Mutation to update a topic."""
   updateTopic(description: String, researchContent: String, title: String, topicUuid: UUID!, transcript: String, validatedContent: String): UpdateTopic
@@ -1619,13 +1630,27 @@ type CreateResearchEpisode {
 
 """
 Mutation to create a full research chain that produces a ready-to-publish episode.
-Creates: topic -> research -> validate -> transcript -> episode
+Creates: topic -> research -> validate -> transcript -> episode -> audio
 
 If topic_uuid is provided, uses that topic.
 Otherwise, if user-created topics exist for the podcast, picks one randomly.
 Otherwise, generates a new AI topic.
 """
 type CreateFullResearchChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
+}
+
+"""
+Mutation to create a full research chain that produces and publishes a ready-to-publish episode.
+Creates: topic -> research -> validate -> transcript -> episode -> audio -> publish
+
+If topic_uuid is provided, uses that topic.
+Otherwise, if user-created topics exist for the podcast, picks one randomly.
+Otherwise, generates a new AI topic.
+"""
+type PublishResearchTopicEpisodeChain {
   success: Boolean
   message: String
   jobs: [JobType]
