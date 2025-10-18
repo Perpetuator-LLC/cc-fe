@@ -92,6 +92,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     // 'CREATE_EPISODE',
     // 'PUBLISH_EPISODE_AUDIO',
     'PUBLISH_LATEST_EPISODE_CHAIN',
+    'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN',
     // 'REFRESH_STOCK_LISTINGS',
   ];
 
