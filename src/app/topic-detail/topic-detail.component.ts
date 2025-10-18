@@ -9,8 +9,8 @@ import { MessageService } from '../message.service';
 import { ResearchService, Topic } from '../research.service';
 import { Subscription } from 'rxjs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
@@ -25,8 +25,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatIcon,
     MessageComponent,
     MatProgressBarModule,
+    MatProgressSpinner,
     MatCardContent,
-    MatTooltip,
     CommonModule,
     MatTabsModule,
     MatChipsModule,
@@ -40,6 +40,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   protected loading = false;
   topic: Topic | null = null;
   topicUuid: string | null = null;
+  isGeneratingResearch = false;
 
   constructor(
     private router: Router,
@@ -86,6 +87,37 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/topics']);
+  }
+
+  generateResearch(): void {
+    if (!this.topic || this.isGeneratingResearch) {
+      return;
+    }
+
+    this.isGeneratingResearch = true;
+    this.messageService.clearMessages();
+    this.messageService.info('Starting full research chain for this topic...', 0, false);
+
+    this.subscriptions.add(
+      this.researchService.createFullResearchChain(this.topic.podcast.uuid, this.topic.uuid).subscribe({
+        next: (response) => {
+          this.messageService.clearMessages();
+          this.messageService.success(
+            `Research generation started! ${response.jobs.length} job(s) created.`,
+            5000,
+            true,
+          );
+          this.isGeneratingResearch = false;
+          setTimeout(() => {
+            this.loadTopic();
+          }, 2000);
+        },
+        error: (err: { message: string }) => {
+          this.isGeneratingResearch = false;
+          this.messageService.error(`Failed to generate research: ${err.message}`);
+        },
+      }),
+    );
   }
 
   formatDate(dateString: string): string {

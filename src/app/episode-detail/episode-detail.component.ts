@@ -6,7 +6,6 @@ import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
-import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { DatePipe, NgClass } from '@angular/common';
@@ -33,7 +32,6 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
   imports: [
     FormsModule,
     MessageComponent,
-    JobStatusBarComponent,
     MatCardContent,
     MatCard,
     MatLabel,
@@ -70,7 +68,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   isGridView = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  @ViewChild(JobStatusBarComponent) jobStatusBar!: JobStatusBarComponent;
   private episodeUuid: string;
 
   constructor(

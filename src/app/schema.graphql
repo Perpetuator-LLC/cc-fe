@@ -270,6 +270,7 @@ type TopicType implements Node {
   researchContent: String
   validatedContent: String
   transcript: String
+  isUserCreated: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -1228,14 +1229,21 @@ type ApiMutation {
   """
   Mutation to create a full research chain that produces a ready-to-publish episode.
   Creates: topic -> research -> validate -> transcript -> episode
+  
+  If topic_uuid is provided, uses that topic.
+  Otherwise, if user-created topics exist for the podcast, picks one randomly.
+  Otherwise, generates a new AI topic.
   """
-  createFullResearchChain(podcastUuid: UUID!): CreateFullResearchChain
+  createFullResearchChain(podcastUuid: UUID!, topicUuid: UUID): CreateFullResearchChain
 
   """Mutation to update a topic."""
   updateTopic(description: String, researchContent: String, title: String, topicUuid: UUID!, transcript: String, validatedContent: String): UpdateTopic
 
   """Mutation to delete a topic."""
   deleteTopic(topicUuid: UUID!): DeleteTopic
+
+  """Mutation to create a custom user-defined topic without AI generation."""
+  createCustomTopic(description: String, podcastUuid: UUID!, title: String!): CreateCustomTopic
 
   """Force refresh of stock listings from Alpha Vantage"""
   refreshStockListings(
@@ -1612,6 +1620,10 @@ type CreateResearchEpisode {
 """
 Mutation to create a full research chain that produces a ready-to-publish episode.
 Creates: topic -> research -> validate -> transcript -> episode
+
+If topic_uuid is provided, uses that topic.
+Otherwise, if user-created topics exist for the podcast, picks one randomly.
+Otherwise, generates a new AI topic.
 """
 type CreateFullResearchChain {
   success: Boolean
@@ -1631,6 +1643,13 @@ type DeleteTopic {
   success: Boolean
   message: String
   topicUuid: UUID
+}
+
+"""Mutation to create a custom user-defined topic without AI generation."""
+type CreateCustomTopic {
+  success: Boolean
+  message: String
+  topic: TopicType
 }
 
 """Force refresh of stock listings from Alpha Vantage"""

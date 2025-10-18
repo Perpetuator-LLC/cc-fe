@@ -15,6 +15,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .title {
@@ -32,6 +34,31 @@
   span {
     font-size: 14px;
     color: var(--description-color);
+  }
+}
+
+.create-topic-button {
+  background: var(--primary);
+  color: var(--theme-white);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+
+  &:hover {
+    opacity: 0.9;
   }
 }
 
@@ -135,3 +162,14 @@
   margin-top: 20px;
 }
 
+@media screen and (max-width: 576px) {
+  .content-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .create-topic-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
