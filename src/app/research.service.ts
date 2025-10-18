@@ -24,6 +24,7 @@ export interface Topic {
   researchContent: string | null;
   validatedContent: string | null;
   transcript: string | null;
+  isUserCreated?: boolean;
   createdAt: string;
   updatedAt: string;
   podcast: {
@@ -38,6 +39,22 @@ interface CreateResearchChainResponse {
     success: boolean;
     message: string;
     jobs: Job[];
+  };
+}
+
+interface CreateFullResearchChainResponse {
+  createFullResearchChain: {
+    success: boolean;
+    message: string;
+    jobs: Job[];
+  };
+}
+
+interface CreateCustomTopicResponse {
+  createCustomTopic: {
+    success: boolean;
+    message: string;
+    topic: Topic;
   };
 }
 
@@ -186,6 +203,76 @@ export class ResearchService extends BaseService {
           throw new Error(data.createResearchChain.message);
         }
         return data.createResearchChain;
+      }),
+    );
+  }
+
+  createFullResearchChain(
+    podcastUuid: string,
+    topicUuid?: string,
+  ): Observable<CreateFullResearchChainResponse['createFullResearchChain']> {
+    const CREATE_FULL_RESEARCH_CHAIN = gql`
+      mutation CreateFullResearchChain($podcastUuid: UUID!, $topicUuid: UUID) {
+        createFullResearchChain(podcastUuid: $podcastUuid, topicUuid: $topicUuid) {
+          success
+          message
+          jobs {
+            id
+            kind
+            status
+            args
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    return this.mutate<CreateFullResearchChainResponse>({
+      mutation: CREATE_FULL_RESEARCH_CHAIN,
+      variables: { podcastUuid, topicUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.createFullResearchChain.success) {
+          throw new Error(data.createFullResearchChain.message);
+        }
+        return data.createFullResearchChain;
+      }),
+    );
+  }
+
+  createCustomTopic(
+    podcastUuid: string,
+    title: string,
+    description?: string,
+  ): Observable<CreateCustomTopicResponse['createCustomTopic']> {
+    const CREATE_CUSTOM_TOPIC = gql`
+      mutation CreateCustomTopic($podcastUuid: UUID!, $title: String!, $description: String) {
+        createCustomTopic(podcastUuid: $podcastUuid, title: $title, description: $description) {
+          success
+          message
+          topic {
+            uuid
+            title
+            description
+            isUserCreated
+            createdAt
+          }
+        }
+      }
+    `;
+
+    return this.mutate<CreateCustomTopicResponse>({
+      mutation: CREATE_CUSTOM_TOPIC,
+      variables: { podcastUuid, title, description },
+    }).pipe(
+      map((data) => {
+        if (!data.createCustomTopic.success) {
+          throw new Error(data.createCustomTopic.message);
+        }
+        return data.createCustomTopic;
       }),
     );
   }

@@ -44,6 +44,21 @@
         </span>
       </div>
     </div>
+    <div class="header-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="generateResearch()"
+        [disabled]="isGeneratingResearch"
+        class="generate-button">
+        @if (isGeneratingResearch) {
+          <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        } @else {
+          <mat-icon>auto_awesome</mat-icon>
+        }
+        Generate Research
+      </button>
+    </div>
   </div>
 </div>
 
@@ -139,4 +154,3 @@
   }
 </mat-tab-group>
 }
-

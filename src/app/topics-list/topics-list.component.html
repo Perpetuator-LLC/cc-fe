@@ -20,6 +20,10 @@
       <h3>All Research Topics</h3>
       <span>{{ topics.length }} topics</span>
     </div>
+    <button mat-flat-button type="button" (click)="createTopic()" class="create-topic-button">
+      <mat-icon>add</mat-icon>
+      Create Topic
+    </button>
   </mat-card-content>
 </mat-card>
 
@@ -85,4 +89,3 @@
   </div>
 </div>
 }
-
