@@ -50,6 +50,14 @@ interface CreateFullResearchChainResponse {
   };
 }
 
+interface PublishResearchTopicEpisodeChainResponse {
+  publishResearchTopicEpisodeChain: {
+    success: boolean;
+    message: string;
+    jobs: Job[];
+  };
+}
+
 interface CreateCustomTopicResponse {
   createCustomTopic: {
     success: boolean;
@@ -239,6 +247,42 @@ export class ResearchService extends BaseService {
           throw new Error(data.createFullResearchChain.message);
         }
         return data.createFullResearchChain;
+      }),
+    );
+  }
+
+  publishResearchTopicEpisodeChain(
+    podcastUuid: string,
+    topicUuid: string,
+  ): Observable<PublishResearchTopicEpisodeChainResponse['publishResearchTopicEpisodeChain']> {
+    const PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN = gql`
+      mutation PublishResearchTopicEpisodeChain($podcastUuid: UUID!, $topicUuid: UUID!) {
+        publishResearchTopicEpisodeChain(podcastUuid: $podcastUuid, topicUuid: $topicUuid) {
+          success
+          message
+          jobs {
+            id
+            kind
+            status
+            args
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    return this.mutate<PublishResearchTopicEpisodeChainResponse>({
+      mutation: PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN,
+      variables: { podcastUuid, topicUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.publishResearchTopicEpisodeChain.success) {
+          throw new Error(data.publishResearchTopicEpisodeChain.message);
+        }
+        return data.publishResearchTopicEpisodeChain;
       }),
     );
   }
