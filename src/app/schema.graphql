@@ -675,7 +675,23 @@ type NewsType implements Node {
   summary: String!
   content: String!
   validatedSummary: String
+  validationConfidence: ApiNewsValidationConfidenceChoices
   uuid: UUID
+}
+
+"""An enumeration."""
+enum ApiNewsValidationConfidenceChoices {
+  """High"""
+  HIGH
+
+  """Medium"""
+  MEDIUM
+
+  """Low"""
+  LOW
+
+  """Unverified"""
+  UNVERIFIED
 }
 
 """OrderType is a GraphQL type that represents an order."""
@@ -1528,6 +1544,7 @@ type ApiMutation {
   fetchNews(podcastUuid: UUID!): FetchNews
   extractNews(newsUuids: [UUID]!, podcastUuid: UUID!): ExtractNews
   summarizeNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): SummarizeNews
+  validateNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): ValidateNews
   processNewsChain(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): ProcessNewsChain
 
   """
@@ -1972,6 +1989,12 @@ type ExtractNews {
 }
 
 type SummarizeNews {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+type ValidateNews {
   success: Boolean
   message: String
   job: JobType
