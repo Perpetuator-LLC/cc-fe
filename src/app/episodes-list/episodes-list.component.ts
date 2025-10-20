@@ -89,7 +89,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   episodes: Episode[] = [];
   dataSource = new MatTableDataSource(this.episodes);
-  displayedColumns: string[] = ['title', 'podcast', 'actions'];
+  displayedColumns: string[] = ['title', 'podcast', 'status', 'actions'];
   totalEpisodes = 0;
   pageSize = 10;
   sortDirection = 'DESC';
