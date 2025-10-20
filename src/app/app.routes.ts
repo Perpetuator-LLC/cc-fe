@@ -180,7 +180,7 @@ export const routes: Routes = [
   {
     path: 'topics',
     loadComponent: () => import('./topics-list/topics-list.component').then((c) => c.TopicsListComponent),
-    title: 'Research Topics',
+    title: 'Topics',
     canActivate: [AuthGuard],
     data: {
       icon: 'science',
