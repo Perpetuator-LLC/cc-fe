@@ -109,7 +109,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
     if (topic.transcript) return 'Complete';
     if (topic.validatedContent) return 'Validated';
     if (topic.researchContent) return 'Researched';
-    return 'In Progress';
+    return 'Not Started';
   }
 
   getStatusClass(topic: Topic): string {
