@@ -192,7 +192,7 @@
           <mat-card-header>
             <div class="grid-header" style="width: 100%">
               <a [routerLink]="['/podcast', podcast.uuid]">
-                <img [src]="podcast.imageUrl || '/image.png'" alt="img" class="img" />
+                <img [src]="podcast.thumbnailUrl || '/image.png'" alt="img" class="img" />
               </a>
               <div class="response-div">
                 <span [class]="podcast.enabled ? 'enable' : 'disable'">
@@ -207,19 +207,19 @@
                   <!-- Actions can be omitted or added as needed -->
                 </div>
               </div>
-              <p>{{ podcast.team?.members?.[0]?.user?.username || 'Daniel' }} - Premium (396 CPM)</p>
+              <p>{{ podcast.team?.members?.[0]?.user?.username || '(No Name)' }} - Premium (396 CPM)</p>
             </div>
           </mat-card-header>
           <div class="chip-header">
             <span class="chip">
               <img src="/telegram.svg" alt="telegram" />
-              {{ podcast.tgChannelId || '1002282842326' }}
+              {{ podcast.tgChannelId || '(No Channel ID)' }}
             </span>
             <span class="days">2 days ago</span>
           </div>
           <div class="bottom-header">
             <span class="chip">+4 More</span>
-            <p>{{ podcast.team?.name || 'Perpetuator LLC' }}</p>
+            <p>{{ podcast.team?.name || '(No Team)' }}</p>
           </div>
         </mat-card>
       </div>
