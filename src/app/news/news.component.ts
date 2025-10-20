@@ -3,11 +3,10 @@ import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/c
 import { Subscription } from 'rxjs';
 import { NewsConnection, NewsService, NewsResult } from '../news.service';
 import { DatePipe } from '@angular/common';
-import { NgIf } from '@angular/common';
 import { NgClass } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatList, MatListItem } from '@angular/material/list';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatInput } from '@angular/material/input';
 import { MessageService } from '../message.service';
@@ -15,7 +14,6 @@ import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
@@ -44,7 +42,6 @@ export interface SidePanelAccordianData {
   standalone: true,
   imports: [
     DatePipe,
-    NgIf,
     NgClass,
     MatFormField,
     MatLabel,
@@ -52,7 +49,6 @@ export interface SidePanelAccordianData {
     MatList,
     MatListItem,
     MatCard,
-    MatCardTitle,
     MatCardHeader,
     MatCheckbox,
     MatCardContent,
@@ -60,9 +56,6 @@ export interface SidePanelAccordianData {
     MessageComponent,
     MatButton,
     MatProgressSpinner,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
     MatTooltip,
     MatDivider,
     MatSelect,
@@ -109,7 +102,9 @@ export class NewsComponent implements OnInit, OnDestroy {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if (
-              [JobKind.FETCH_NEWS, JobKind.EXTRACT_NEWS, JobKind.SUMMARIZE_NEWS].includes(stringToJobKind(job.kind))
+              [JobKind.FETCH_NEWS, JobKind.EXTRACT_NEWS, JobKind.SUMMARIZE_NEWS, JobKind.VALIDATE_NEWS].includes(
+                stringToJobKind(job.kind),
+              )
             ) {
               this.getNews();
             } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
@@ -252,6 +247,28 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     this.messageService.info('Regenerating summary for news item (this may take a while)...');
     this.summarizeNews(this.selectedPodcastUuid, [uuid], true);
+  }
+
+  processNews(uuid: string) {
+    if (this.selectedPodcastUuid === null) {
+      this.messageService.warning('No podcast selected.');
+      return;
+    }
+    this.messageService.info('Processing news item (this may take a while)...');
+    this.subscriptions.add(
+      this.newsService.processNewsChain(this.selectedPodcastUuid, [uuid]).subscribe({
+        next: (data) => {
+          if (!data.jobs) {
+            this.messageService.error('Failed to process news: No jobs returned');
+            return;
+          }
+          this.jobService.addJobs(data.jobs);
+        },
+        error: (error) => {
+          this.messageService.error(`Failed to process news: ${error.message}`);
+        },
+      }),
+    );
   }
 
   private summarizeNews(podcastUuid: string, newsUuids: string[], force = false) {

@@ -167,9 +167,16 @@
                           <div class="news-content">
                             <div class="news-header">
                               <div class="title">
-                                <a [href]="news.url" target="_blank" (click)="$event.stopPropagation()">{{
-                                  news.title
-                                }}</a>
+                                <a
+                                  [href]="news.url"
+                                  target="_blank"
+                                  (click)="$event.stopPropagation()"
+                                  [matTooltip]="'Opens ' + news.source + ' in new tab'"
+                                  matTooltipPosition="above"
+                                  class="external-link"
+                                >
+                                  {{ news.title }}
+                                </a>
                               </div>
                               <div class="source">
                                 <mat-icon>graphic_eq</mat-icon>
@@ -305,13 +312,24 @@
                     </span>
                   </div>
                   <div class="title">
-                    <a [href]="selectedNewsDetail.url" target="_blank">{{ selectedNewsDetail.title }}</a>
+                    <a
+                      [href]="selectedNewsDetail.url"
+                      target="_blank"
+                      [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
+                      matTooltipPosition="above"
+                      class="external-link">
+                      {{ selectedNewsDetail.title }}
+                    </a>
                   </div>
                   <div class="source">
                     <mat-icon>graphic_eq</mat-icon>
                     <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
                   </div>
-                  <a [href]="selectedNewsDetail.url" target="_blank">
+                  <a
+                    [href]="selectedNewsDetail.url"
+                    target="_blank"
+                    [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
+                    matTooltipPosition="above">
                     <button mat-raised-button color="primary" type="button" class="read-btn">
                       Read More <app-svg-icon icon="right"></app-svg-icon>
                     </button>
@@ -328,11 +346,29 @@
                   mat-flat-button
                   color="primary"
                   type="button"
-                  (click)="regenerateSummary(selectedNewsDetail.uuid)"
+                  (click)="processNews(selectedNewsDetail.uuid)"
                 >
-                  {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary
+                  Process News
                 </button>
+                @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    (click)="regenerateSummary(selectedNewsDetail.uuid)"
+                    style="margin-left: 8px"
+                  >
+                    {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary (Force)
+                  </button>
+                }
                 <p class="" [innerHTML]="selectedNewsDetail.summary ? markdownToHtml(selectedNewsDetail.summary) : 'No news summary available'"></p>
+                <mat-divider></mat-divider>
+                <h3>Validated Summary</h3>
+                @if (selectedNewsDetail.validatedSummary) {
+                  <p class="" [innerHTML]="markdownToHtml(selectedNewsDetail.validatedSummary)"></p>
+                } @else {
+                  <p class="">News not (yet) validated.</p>
+                }
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
                   <mat-divider></mat-divider>
                   <button

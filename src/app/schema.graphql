@@ -674,6 +674,7 @@ type NewsType implements Node {
   source: String!
   summary: String!
   content: String!
+  validatedSummary: String
   uuid: UUID
 }
 
@@ -842,6 +843,7 @@ enum JobKind {
   FETCH_NEWS
   EXTRACT_NEWS
   SUMMARIZE_NEWS
+  VALIDATE_NEWS
   CREATE_EPISODE
   SELECT_UNUSED_NEWS
   PUBLISH_LATEST_EPISODE_CHAIN
@@ -1526,6 +1528,7 @@ type ApiMutation {
   fetchNews(podcastUuid: UUID!): FetchNews
   extractNews(newsUuids: [UUID]!, podcastUuid: UUID!): ExtractNews
   summarizeNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): SummarizeNews
+  processNewsChain(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): ProcessNewsChain
 
   """
   Mutation to delete jobs that are in PENDING or FAILED state. This mutation will check if any of the requested jobs
@@ -1972,6 +1975,12 @@ type SummarizeNews {
   success: Boolean
   message: String
   job: JobType
+}
+
+type ProcessNewsChain {
+  success: Boolean
+  message: String
+  jobs: [JobType]
 }
 
 """

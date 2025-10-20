@@ -10,7 +10,6 @@
 
 # High-level
 
-- Most concepts are explained in the `notes` top-level directory in the repo - look there for info, and add to it.
 - Do not use inline styles in Angular components, use SCSS files instead.
 - Use Angular best practices.
 - Use Angular Material (MD3) components where possible.

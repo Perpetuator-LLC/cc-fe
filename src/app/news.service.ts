@@ -17,6 +17,7 @@ export interface NewsResult {
   source: string;
   content: string;
   summary: string;
+  validatedSummary?: string;
 }
 
 export interface NewsConnection {
@@ -85,6 +86,7 @@ export class NewsService extends BaseService {
               source
               content
               summary
+              validatedSummary
             }
           }
           pageInfo {
@@ -282,6 +284,41 @@ export class NewsService extends BaseService {
     }).pipe(
       map((data) => {
         return data.createEpisodeAudioChain;
+      }),
+    );
+  }
+
+  processNewsChain(podcastUuid: string, newsUuids: string[]) {
+    const PROCESS_NEWS_CHAIN = gql`
+      mutation ProcessNewsChain($podcastUuid: UUID!, $newsUuids: [UUID!]!) {
+        processNewsChain(podcastUuid: $podcastUuid, newsUuids: $newsUuids) {
+          jobs {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      processNewsChain: {
+        jobs: Job[];
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: PROCESS_NEWS_CHAIN,
+      variables: { podcastUuid, newsUuids },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return data.processNewsChain;
       }),
     );
   }
