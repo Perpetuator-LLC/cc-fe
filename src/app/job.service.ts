@@ -15,6 +15,7 @@ export enum JobKind {
   FETCH_NEWS = 'FETCH_NEWS',
   EXTRACT_NEWS = 'EXTRACT_NEWS',
   SUMMARIZE_NEWS = 'SUMMARIZE_NEWS',
+  VALIDATE_NEWS = 'VALIDATE_NEWS',
   CREATE_EPISODE = 'CREATE_EPISODE',
   SELECT_UNUSED_NEWS = 'SELECT_UNUSED_NEWS',
   UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
@@ -47,6 +48,8 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.EXTRACT_NEWS;
     case 'SUMMARIZE_NEWS':
       return JobKind.SUMMARIZE_NEWS;
+    case 'VALIDATE_NEWS':
+      return JobKind.VALIDATE_NEWS;
     case 'CREATE_EPISODE':
       return JobKind.CREATE_EPISODE;
     case 'SELECT_UNUSED_NEWS':
@@ -104,6 +107,8 @@ export const kindToString = (kind: string) => {
       return 'Extract News';
     case JobKind.SUMMARIZE_NEWS:
       return 'Summarize News';
+    case JobKind.VALIDATE_NEWS:
+      return 'Validate News';
     case JobKind.CREATE_EPISODE:
       return 'Create Episode';
     case JobKind.SELECT_UNUSED_NEWS:
