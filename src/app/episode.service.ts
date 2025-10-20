@@ -43,6 +43,7 @@ const GET_EPISODES = gql`
           }
           title
           content
+          isLive
           news {
             id
             uuid

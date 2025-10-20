@@ -233,6 +233,58 @@
     }
   }
 
+  table {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border-color);
+
+    .mdc-data-table__row:last-child .mat-mdc-cell {
+      border-bottom: 0;
+    }
+  }
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: var(--theme-color);
+    background: var(--secondary-dark);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mat-mdc-row {
+    &:hover {
+      background-color: var(--secondary-light);
+    }
+  }
+
+  .mat-mdc-cell {
+    padding: 16px;
+    color: var(--theme-color);
+    background: var(--toolbar-container-background-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .status-badge {
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    width: 90px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &.live {
+      background: var(--md-sys-color-success);
+      color: var(--theme-white);
+    }
+
+    &.not-live {
+      background: var(--secondary-dark);
+      color: var(--theme-color);
+    }
+  }
+
   .episode-title {
     a {
       color: var(--theme-color);
