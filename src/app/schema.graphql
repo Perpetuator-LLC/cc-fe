@@ -218,7 +218,7 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): JobTypeConnection
-  podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, team_Id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
+  podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
   rssFeeds(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, url: String, rssFeedUuid: UUID): RssFeedTypeConnection
   deleteUserResults: DeleteUserResults
   podcastCategories: PodcastCategoriesType
@@ -875,6 +875,7 @@ enum JobKind {
   GENERATE_RESEARCH_TRANSCRIPT
   CREATE_RESEARCH_EPISODE
   PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN
+  GENERATE_PODCAST
   TEST_RAISE
   TEST_PRINT
 }
@@ -1584,6 +1585,19 @@ type ApiMutation {
   """
   createRssFeed(url: String!): CreateRssFeed
 
+  """
+  Generate a complete podcast from a text description using AI.
+  This creates a job that will generate podcast metadata including:
+  - Name (if not provided)
+  - Intro, outro, and content generation prompt
+  - Description and categories
+  - RSS feeds discovery
+  - Voice recommendation
+  
+  The podcast_uuid will be available in the job result once generation completes.
+  """
+  generatePodcast(description: String!, teamUuid: UUID!, title: String): GeneratePodcast
+
   """Mutation to create a new team."""
   createTeam(name: String!): CreateTeam
 
@@ -2075,6 +2089,23 @@ type CreateRssFeed {
   success: Boolean
   message: String
   rssFeed: RssFeedType
+}
+
+"""
+Generate a complete podcast from a text description using AI.
+This creates a job that will generate podcast metadata including:
+- Name (if not provided)
+- Intro, outro, and content generation prompt
+- Description and categories
+- RSS feeds discovery
+- Voice recommendation
+
+The podcast_uuid will be available in the job result once generation completes.
+"""
+type GeneratePodcast {
+  success: Boolean
+  message: String
+  job: JobType
 }
 
 """Mutation to create a new team."""

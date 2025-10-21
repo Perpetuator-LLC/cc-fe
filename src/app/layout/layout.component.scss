@@ -669,3 +669,10 @@ mat-nav-list {
   rotate: 90deg;
   font-size: 20px
 }
+
+.layout-loading-spinner {
+  position: relative;
+  z-index: 1000;
+  width: 100%;
+  margin-top: -2px;
+}

@@ -27,6 +27,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+import { JobDisplayService } from '../job-display.service';
 
 // export interface News {
 //   results: NewsResult[];
@@ -96,25 +97,32 @@ export class NewsComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private episodeService: EpisodeService,
     private sanitizer: DomSanitizer,
+    private jobDisplayService: JobDisplayService,
   ) {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+            const jobKind = stringToJobKind(job.kind);
+            // Refresh news list when news processing jobs complete
             if (
               [JobKind.FETCH_NEWS, JobKind.EXTRACT_NEWS, JobKind.SUMMARIZE_NEWS, JobKind.VALIDATE_NEWS].includes(
-                stringToJobKind(job.kind),
+                jobKind,
               )
             ) {
               this.getNews();
-            } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              this.handleEpisodeCreationComplete(job);
+            }
+            // Use centralized handler for episode and podcast creation
+            else if ([JobKind.CREATE_EPISODE, JobKind.GENERATE_PODCAST].includes(jobKind)) {
+              this.subscriptions.add(
+                this.jobDisplayService.handleJobCompletion(job).subscribe({
+                  error: (error) => {
+                    this.messageService.error(`Failed to process job completion: ${error.message}`);
+                  },
+                }),
+              );
             }
           });
-          // const failedJobs = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
-          // if (failedJobs.length > 0) {
-          //   this.showMicroJobButtons = true;
-          // }
           this.jobs = jobs;
         },
         error: (error) => {
@@ -624,26 +632,5 @@ export class NewsComponent implements OnInit, OnDestroy {
   markdownToHtml(markdown: string): SafeHtml {
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
-  }
-
-  private handleEpisodeCreationComplete(job: Job): void {
-    const episodeUuid = job.result?.episode_uuid;
-    if (episodeUuid) {
-      this.subscriptions.add(
-        this.episodeService.getEpisodeById(episodeUuid).subscribe({
-          next: (episode) => {
-            const newEpisodeUrl = `/episode/${episodeUuid}`;
-            this.messageService.success(
-              `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
-              null,
-              true,
-            );
-          },
-          error: (error) => {
-            this.messageService.error(`Failed to get new episode: ${error.message}`);
-          },
-        }),
-      );
-    }
   }
 }

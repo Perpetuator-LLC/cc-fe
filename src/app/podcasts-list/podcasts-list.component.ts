@@ -2,7 +2,7 @@
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
@@ -40,6 +40,7 @@ import { EpisodeService } from '../episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ResearchService } from '../research.service';
+import { JobDisplayService } from '../job-display.service';
 
 export interface ColumnOption {
   id: string;
@@ -114,6 +115,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private podcastsService: PodcastsService,
@@ -122,22 +124,30 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private episodeService: EpisodeService,
     private jobService: JobService,
     private researchService: ResearchService,
+    private jobDisplayService: JobDisplayService,
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
       this.loadPodcasts(10, null, term || undefined);
     });
 
-    // Subscribe to job updates to track episode creation
+    // Subscribe to job updates and use centralized handler
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              this.handleEpisodeCreationComplete(job);
-            }
-            if ([JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(stringToJobKind(job.kind))) {
-              this.handleResearchComplete(job);
+            const jobKind = stringToJobKind(job.kind);
+            // Handle all supported job completions centrally
+            if (
+              [JobKind.CREATE_EPISODE, JobKind.GENERATE_PODCAST, JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(jobKind)
+            ) {
+              this.subscriptions.add(
+                this.jobDisplayService.handleJobCompletion(job).subscribe({
+                  error: (error) => {
+                    this.messageService.error(`Failed to process job completion: ${error.message}`);
+                  },
+                }),
+              );
             }
           });
           this.jobs = jobs;
@@ -149,77 +159,28 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  private handleEpisodeCreationComplete(job: Job): void {
-    const episodeUuid = job.result?.episode_uuid;
-    if (episodeUuid) {
-      this.subscriptions.add(
-        this.episodeService.getEpisodeById(episodeUuid).subscribe({
-          next: (episode) => {
-            const newEpisodeUrl = `/episode/${episodeUuid}`;
-            this.messageService.success(
-              `New episode: <a href="${newEpisodeUrl}">${episode.title === '' ? '(Blank)' : episode.title}</a>`,
-              null,
-              true,
-            );
-          },
-          error: (error) => {
-            this.messageService.error(`Failed to get new episode: ${error.message}`);
-          },
-        }),
-      );
-    }
-  }
-
-  private handleResearchComplete(job: Job): void {
-    const topicUuid = job.result?.topic_uuid;
-    const episodeUuid = job.result?.episode_uuid;
-
-    if (topicUuid) {
-      this.subscriptions.add(
-        this.researchService.getTopicById(topicUuid).subscribe({
-          next: (topic) => {
-            const topicUrl = `/topic/${topicUuid}`;
-            const topicTitle = topic.title === '' ? '(Blank)' : topic.title;
-
-            let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
-
-            if (episodeUuid) {
-              this.subscriptions.add(
-                this.episodeService.getEpisodeById(episodeUuid).subscribe({
-                  next: (episode) => {
-                    const episodeUrl = `/episode/${episodeUuid}`;
-                    const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
-                    message += ` | Episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
-                    this.messageService.success(message, null, true);
-                  },
-                  error: () => {
-                    const episodeUrl = `/episode/${episodeUuid}`;
-                    message += ` | <a href="${episodeUrl}">View Episode</a>`;
-                    this.messageService.success(message, null, true);
-                  },
-                }),
-              );
-            } else {
-              this.messageService.success(message, null, true);
-            }
-          },
-          error: (error) => {
-            this.messageService.error(`Failed to get research topic: ${error.message}`);
-          },
-        }),
-      );
-    } else {
-      const fallbackMessage = `Research complete! <a href="/topics">View Research Topics</a>`;
-      this.messageService.success(fallbackMessage, null, true);
-    }
-  }
-
   ngOnInit(): void {
     this.messageService.clearMessages();
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadPodcasts();
+
+    // Check for query parameter to auto-open create dialog
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['create'] === 'true') {
+          // Remove the query parameter from URL
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true,
+          });
+          // Open the create podcast dialog
+          setTimeout(() => this.createPodcast(), 0);
+        }
+      }),
+    );
   }
 
   ngAfterViewInit() {
@@ -237,6 +198,10 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
           this.dataSource = new MatTableDataSource(this.podcasts);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
+          // Update currentCursor for pagination
+          if (response.pageInfo && response.pageInfo.endCursor) {
+            this.currentCursor = response.pageInfo.endCursor;
+          }
           this.loading = false;
         },
         error: (err: { message: string }) => {

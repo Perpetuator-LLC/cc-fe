@@ -35,6 +35,44 @@
     </mat-card>
   </div>
 
+  <!-- Modules Section -->
+  <div class="module-section-container">
+    <h3 class="section-title">Modules</h3>
+    <div class="modules-section">
+      <div class="module-card generate-podcast">
+        <div class="module-wrapper">
+          <div class="module-header">
+            <div>
+              <div class="module-title">Generate Podcast</div>
+              <div class="module-desc">
+                Create AI-powered news podcasts with automatic transcripts, seamless audio conversion, and instant
+                publishing.
+              </div>
+            </div>
+            <a class="module-link" [routerLink]="['/podcasts']" [queryParams]="{ create: 'true' }"
+              >Generate Podcast <app-svg-icon icon="right"></app-svg-icon
+            ></a>
+          </div>
+          <span class="image-section">
+            <img src="/assets/icons/dna.svg" alt="generate" />
+          </span>
+        </div>
+      </div>
+      <div class="module-card create-episode">
+        <div class="module-header">
+          <div>
+            <div class="module-title">Create New Episode</div>
+            <div class="module-desc">
+              Turn any headline or news story into an audio episode — complete with AI-driven summaries, transcripts,
+              and audio, ready to publish.
+            </div>
+          </div>
+          <a class="module-link" routerLink="/news">Create an Episode <app-svg-icon icon="right"></app-svg-icon></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Stats Cards -->
   <!-- Loading Skeleton -->
   @if (loadingStats) {
@@ -141,44 +179,6 @@
       </mat-card>
     </div>
   }
-
-  <!-- Modules Section -->
-  <div class="module-section-container">
-    <h3 class="section-title">Modules</h3>
-    <div class="modules-section">
-      <div class="module-card generate-podcast">
-        <div class="module-wrapper">
-          <div class="module-header">
-            <div>
-              <div class="module-title">Generate Podcast</div>
-              <div class="module-desc">
-                Create AI-powered news podcasts with automatic transcripts, seamless audio conversion, and instant
-                publishing.
-              </div>
-            </div>
-            <a class="module-link" routerLink="/podcasts"
-              >Generate Podcast <app-svg-icon icon="right"></app-svg-icon
-            ></a>
-          </div>
-          <span class="image-section">
-            <img src="/assets/icons/dna.svg" alt="generate" />
-          </span>
-        </div>
-      </div>
-      <div class="module-card create-episode">
-        <div class="module-header">
-          <div>
-            <div class="module-title">Create New Episode</div>
-            <div class="module-desc">
-              Turn any headline or news story into an audio episode — complete with AI-driven summaries, transcripts,
-              and audio, ready to publish.
-            </div>
-          </div>
-          <a class="module-link" routerLink="/news">Create an Episode <app-svg-icon icon="right"></app-svg-icon></a>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Recent Podcasts Section -->
   @if (isLoggedIn()) {

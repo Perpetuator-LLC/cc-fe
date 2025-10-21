@@ -13,6 +13,7 @@ import { MessageComponent } from '../message/message.component';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { JobService } from '../job.service';
 
 @Component({
   selector: 'app-create-podcast-dialog',
@@ -33,15 +34,21 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
     SvgIconComponent,
   ],
   template: `
-    <h2 mat-dialog-title>Create New Podcast</h2>
+    <h2 mat-dialog-title>Generate Podcast</h2>
     <mat-dialog-content>
       <app-message></app-message>
       <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
         <mat-form-field>
-          <mat-label>Podcast Name</mat-label>
-          <input matInput formControlName="name" required />
-          @if (nameError) {
-            <mat-error>{{ nameError }}</mat-error>
+          <mat-label>Description (Required)</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            required
+            rows="4"
+            placeholder="Describe your podcast... (e.g., 'A daily tech news podcast covering AI and startups')"
+          ></textarea>
+          @if (descriptionError) {
+            <mat-error>{{ descriptionError }}</mat-error>
           }
         </mat-form-field>
 
@@ -71,9 +78,17 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
         @if (podcastForm.get('teamSelection')?.value === 'new') {
           <mat-form-field>
             <mat-label>New Team Name</mat-label>
-            <input matInput formControlName="newTeamName" (focus)="onNewTeamNameFocus()" />
+            <input matInput formControlName="newTeamName" />
           </mat-form-field>
         }
+
+        <mat-form-field>
+          <mat-label>Title (Optional)</mat-label>
+          <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
+          @if (titleError) {
+            <mat-error>{{ titleError }}</mat-error>
+          }
+        </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -85,7 +100,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
         (click)="createPodcast()"
         [disabled]="!podcastForm.valid"
       >
-        Save Podcast
+        Generate Podcast
       </button>
     </mat-dialog-actions>
   `,
@@ -146,10 +161,10 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   podcastForm: FormGroup;
   private subscriptions = new Subscription();
-  nameError: string | null = null;
+  descriptionError: string | null = null;
+  titleError: string | null = null;
   ownedTeams: TeamsResult[] = [];
   isLoadingTeams = true;
-  teamNameLinked = true;
 
   constructor(
     private fb: FormBuilder,
@@ -157,20 +172,21 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
     private podcastsService: PodcastsService,
     private teamsService: TeamsService,
     public dialogRef: MatDialogRef<CreatePodcastDialogComponent>,
+    private jobService: JobService,
   ) {
     this.podcastForm = this.fb.group({
-      id: [{ value: '', disabled: true }],
-      name: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9 ]+$/)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
       teamSelection: ['', Validators.required],
       newTeamName: [''],
-      existingTeamId: [''],
+      title: [''],
     });
 
-    this.podcastForm.get('name')?.valueChanges.subscribe((value) => {
-      this.updateNameValidation(value);
-      if (this.teamNameLinked && this.podcastForm.get('teamSelection')?.value === 'new') {
-        this.podcastForm.get('newTeamName')?.setValue(value);
-      }
+    this.podcastForm.get('description')?.valueChanges.subscribe(() => {
+      this.updateDescriptionValidation();
+    });
+
+    this.podcastForm.get('title')?.valueChanges.subscribe(() => {
+      this.updateTitleValidation();
     });
   }
 
@@ -179,21 +195,27 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
     this.loadOwnedTeams();
   }
 
-  private updateNameValidation(value: string): void {
-    this.podcastForm.updateValueAndValidity();
-    const errors = this.podcastForm.get('name')?.errors;
+  private updateDescriptionValidation(): void {
+    const errors = this.podcastForm.get('description')?.errors;
     if (errors) {
       if (errors['required']) {
-        this.nameError = 'Podcast name is required';
+        this.descriptionError = 'Description is required';
       } else if (errors['minlength']) {
-        this.nameError = `Podcast name must be at least 3 characters`;
-      } else if (errors['pattern']) {
-        this.nameError = 'Podcast name can only contain letters, numbers, and spaces';
+        this.descriptionError = 'Description must be at least 10 characters';
       } else {
-        this.nameError = `Enter a valid podcast name, received: ${value}`;
+        this.descriptionError = 'Enter a valid description';
       }
     } else {
-      this.nameError = null;
+      this.descriptionError = null;
+    }
+  }
+
+  private updateTitleValidation(): void {
+    const errors = this.podcastForm.get('title')?.errors;
+    if (errors) {
+      this.titleError = 'Enter a valid title';
+    } else {
+      this.titleError = null;
     }
   }
 
@@ -213,30 +235,20 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
     );
   }
 
-  onNewTeamNameFocus(): void {
-    this.teamNameLinked = false;
-  }
-
   selectCreateNewTeam(): void {
     this.podcastForm.get('teamSelection')?.setValue('new');
-
-    // Auto-fill new team name with podcast name if podcast name already exists
-    const podcastName = this.podcastForm.get('name')?.value;
-    if (podcastName && this.teamNameLinked) {
-      this.podcastForm.get('newTeamName')?.setValue(podcastName);
-    }
   }
 
   createPodcast(): void {
     if (this.podcastForm.valid) {
-      const { name, teamSelection, newTeamName, existingTeamId } = this.podcastForm.getRawValue();
+      const { description, teamSelection, newTeamName, title } = this.podcastForm.getRawValue();
 
       if (teamSelection === 'new') {
-        const teamName = newTeamName || name;
+        const teamName = newTeamName || 'New Team';
         this.subscriptions.add(
           this.teamsService.createTeam(teamName).subscribe({
             next: (teamResult) => {
-              this.createPodcastWithTeam(name, teamResult.team.uuid);
+              this.generatePodcastWithTeam(description, teamResult.team.uuid, title);
             },
             error: (err) => {
               this.messageService.error(`Failed to create team: ${err.message}`);
@@ -244,20 +256,21 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
           }),
         );
       } else {
-        this.createPodcastWithTeam(name, existingTeamId || teamSelection);
+        this.generatePodcastWithTeam(description, teamSelection, title);
       }
     }
   }
 
-  private createPodcastWithTeam(name: string, teamUuid: string): void {
+  private generatePodcastWithTeam(description: string, teamUuid: string, title?: string): void {
     this.subscriptions.add(
-      this.podcastsService.createPodcast(name, teamUuid).subscribe({
+      this.podcastsService.generatePodcast(description, teamUuid, title || undefined).subscribe({
         next: (created) => {
-          this.messageService.success('Podcast created successfully');
-          this.dialogRef.close(created.podcast);
+          this.messageService.info('Generating podcast...');
+          this.jobService.addJob(created.job);
+          this.dialogRef.close(true);
         },
         error: (err) => {
-          this.messageService.error(`Failed to create podcast: ${err.message}`);
+          this.messageService.error(`Failed to generate podcast: ${err.message}`);
         },
       }),
     );
