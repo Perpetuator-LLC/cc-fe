@@ -6,12 +6,8 @@
 
 <app-message></app-message>
 
-@if (loadingEpisodes) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
-</div>
-} @else if (episodes.length === 0) {
-<h2>No podcasts found.</h2>
+@if (episodes.length === 0 && !loadingEpisodes) {
+<h2>No episodes found.</h2>
 } @else {
 <mat-card class="create-episode-card">
   <mat-card-content class="content-header">

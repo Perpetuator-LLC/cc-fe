@@ -19,6 +19,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -39,6 +40,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { RedeemGiftCodeDialogComponent } from '../redeem-gift-code-dialog.component';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.component';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-layout',
@@ -55,6 +57,7 @@ import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.componen
     MatSlideToggleModule,
     MatSidenavModule,
     MatToolbarModule,
+    MatProgressBarModule,
     RouterLink,
     RouterLinkActive,
     MatTooltip,
@@ -67,6 +70,7 @@ import { JobStatusBarComponent } from '../job-status-bar/job-status-bar.componen
 export class LayoutComponent implements OnDestroy, OnInit {
   // @ViewChild('toolbar', { read: ElementRef }) toolbar!: ElementRef;
   @ViewChild('drawer') drawer!: MatSidenav;
+  protected loading = this.loadingService.loading;
   rootRoutes = routes.filter((r) => r.path);
   private breakpointObserver = inject(BreakpointObserver);
   protected currentTheme = this.themeService.theme;
@@ -99,6 +103,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
     private messageService: MessageService,
     private dialog: MatDialog,
     private fb: FormBuilder,
+    private loadingService: LoadingService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],

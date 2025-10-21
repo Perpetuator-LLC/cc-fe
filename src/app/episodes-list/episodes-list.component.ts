@@ -2,15 +2,14 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
-import { MatLine, MatOption } from '@angular/material/core';
-import { DatePipe, SlicePipe } from '@angular/common';
+import { MatOption } from '@angular/material/core';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import {
   MatCell,
   MatCellDef,
@@ -23,9 +22,8 @@ import {
   MatRowDef,
   MatTable,
   MatTableDataSource,
-  MatTableModule,
 } from '@angular/material/table';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
@@ -37,53 +35,51 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
   imports: [
-    MatPaginatorModule,
-    MatTableModule,
-    MatSortModule,
-    MatLabel,
+    MatButton,
     MatCard,
+    SvgIconComponent,
     MatCardHeader,
-    RouterLink,
-    MatLine,
-    SlicePipe,
-    DatePipe,
+    MatIcon,
+    MessageComponent,
+    MatProgressBarModule,
+    MatCardContent,
     MatTable,
     MatSort,
-    MatColumnDef,
     MatHeaderCell,
     MatCell,
-    MatCellDef,
-    MatHeaderCellDef,
-    MatHeaderRowDef,
-    MatRow,
     MatHeaderRow,
+    MatRow,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRowDef,
     MatRowDef,
-    MatPaginator,
-    MessageComponent,
+    MatColumnDef,
+    MatMenuTrigger,
+    MatMenu,
+    RouterLink,
     MatFormField,
+    MatLabel,
     MatSelect,
     MatOption,
-    MatCardContent,
-    MatMenu,
-    MatMenuTrigger,
-    MatIcon,
-    SvgIconComponent,
+    MatPaginator,
     MatCheckboxModule,
-    MatProgressBarModule,
     MatMenuItem,
     MatPrefix,
     MatIconButton,
     MatIconButton,
     MatButton,
     MatInput,
+    CommonModule,
   ],
   templateUrl: './episodes-list.component.html',
-  styleUrl: './episodes-list.component.scss',
+  styleUrls: ['./episodes-list.component.scss'],
 })
 export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
@@ -111,6 +107,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     private episodeService: EpisodeService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {
@@ -123,6 +120,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide(); // Make sure to hide loading when component is destroyed
   }
 
   toggleView(isGrid: boolean) {
@@ -131,6 +129,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
   loadEpisodes(after: string | null = null, pageIndex = 0) {
     this.loadingEpisodes = true;
+    this.loadingService.show(); // Show global loading spinner
 
     this.subscriptions.add(
       this.episodeService
@@ -144,10 +143,16 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
               ? (pageIndex + 2) * this.pageSize
               : (pageIndex + 1) * this.pageSize;
             this.loadingEpisodes = false;
+            this.loadingService.hide(); // Hide global loading spinner
           },
           error: (err) => {
             this.messageService.error('Failed to load episodes: ' + err);
             this.loadingEpisodes = false;
+            this.loadingService.hide(); // Hide global loading spinner on error
+          },
+          complete: () => {
+            this.loadingEpisodes = false;
+            this.loadingService.hide(); // Hide global loading spinner on complete
           },
         }),
     );

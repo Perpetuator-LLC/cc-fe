@@ -36,6 +36,7 @@ export enum JobKind {
   GENERATE_RESEARCH_TRANSCRIPT = 'GENERATE_RESEARCH_TRANSCRIPT',
   CREATE_RESEARCH_EPISODE = 'CREATE_RESEARCH_EPISODE',
   PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN = 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN',
+  GENERATE_PODCAST = 'GENERATE_PODCAST',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -90,6 +91,8 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.CREATE_RESEARCH_EPISODE;
     case 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN':
       return JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN;
+    case 'GENERATE_PODCAST':
+      return JobKind.GENERATE_PODCAST;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -149,6 +152,8 @@ export const kindToString = (kind: string) => {
       return 'Create Research Episode';
     case JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN:
       return 'Publish Research Topic Episode Chain';
+    case JobKind.GENERATE_PODCAST:
+      return 'Generate Podcast';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:

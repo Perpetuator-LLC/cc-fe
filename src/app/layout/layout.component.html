@@ -283,6 +283,11 @@
         }
       </div>
     </mat-toolbar>
+    @if (loading()) {
+      <div class="layout-loading-spinner">
+        <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+      </div>
+    }
     <app-job-status-bar />
     <div class="content-area">
       <div class="content-wrapper">

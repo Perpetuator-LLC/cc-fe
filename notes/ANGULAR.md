@@ -53,3 +53,30 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 ```
 ng version
 ```
+
+## WebStorm Testing
+
+When I run tests in WebStorm I have to set the "Jest package" to the following path:
+
+```
+~/.nvm/versions/node/v20.13.1/bin/node \
+  ~/projects/capital-copilot-fe/node_modules/@angular/cli/bin/ng.js \
+  test \
+  capital-copilot-fe \
+  --karma-config ~/Applications/WebStorm.app/Contents/plugins/karma/js_reporter/karma-intellij/lib/intellij.conf.js \
+  --source-map
+```
+
+If tests are failing with old erros, we may need to clear the Jest cache:
+
+```
+npx jest --clearCache
+```
+
+Or kill karma server processes:
+
+```
+pkill -f karma
+```
+ Can also go to Test view and kill the karma server from there.
+

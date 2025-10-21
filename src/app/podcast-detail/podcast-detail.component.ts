@@ -121,7 +121,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   podcastForm: FormGroup;
   private subscriptions = new Subscription();
-  protected loading = false;
+  protected loading = true;
   protected rssFeedLoading = false;
   protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
   private podcastUuid: string;
@@ -455,6 +455,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           this.messageService.error(`Failed to load teams: ${err.message}`);
           this.loadingTeams = false;
         },
+        complete: () => {
+          this.loadingTeams = false;
+        },
       }),
     );
   }
@@ -511,6 +514,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.loading = false;
           this.messageService.error(`Failed to retrieve podcast data: ${err.message}`);
+        },
+        complete: () => {
+          this.loading = false;
         },
       }),
     );
@@ -621,7 +627,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.podcastsService.deletePodcast(this.podcastUuid, this.deleteConfirmation).subscribe({
+        this.podcastsService.deletePodcast(this.podcastUuid, result).subscribe({
           next: () => {
             this.messageService.success('Podcast deleted successfully');
             this.router.navigate(['/podcasts']);
