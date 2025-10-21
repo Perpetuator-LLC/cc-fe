@@ -6,9 +6,12 @@
   >
 </ng-template>
 <app-message></app-message>
-@if (loadingTeams || loadingVoices || rssFeedLoading) {
+@if (loading || loadingTeams || loadingVoices || rssFeedLoading) {
   <div class="loading-spinner">
-    <mat-progress-bar value="20" diameter="20" mode="indeterminate" style="height: 2px"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+  </div>
+  <div class="loading-spinner">
+    <mat-progress-bar mode="indeterminate" style="height: 2px"></mat-progress-bar>
   </div>
 }
 
@@ -566,7 +569,7 @@
         </mat-card-content>
         <mat-card class="danger-card">
           <div class="danger-card-title">Delete Podcast</div>
-          <p>Once you delete a podcast, it will be permanently removed from the data.</p>
+          <p>Once you delete a podcast, it will be permanently removed. This action cannot be undone.</p>
           <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
             Delete this Podcast
           </button>

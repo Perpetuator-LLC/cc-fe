@@ -147,6 +147,51 @@ export class PodcastsService extends BaseService {
     );
   }
 
+  generatePodcast(
+    description: string,
+    teamUuid: string,
+    title?: string,
+  ): Observable<{ success: boolean; message: string; job: Job }> {
+    const GQL = gql`
+      mutation GeneratePodcast($description: String!, $teamUuid: UUID!, $title: String) {
+        generatePodcast(description: $description, teamUuid: $teamUuid, title: $title) {
+          success
+          message
+          job {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      generatePodcast: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { description, teamUuid, title },
+    }).pipe(
+      map((data) => {
+        if (!data.generatePodcast.success) {
+          throw new Error(data.generatePodcast.message);
+        }
+        return data.generatePodcast;
+      }),
+    );
+  }
+
   refreshTgResponse(podcastUuid: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
       mutation UpdatePodcast($podcastUuid: UUID!, $refreshTgResponse: Boolean) {

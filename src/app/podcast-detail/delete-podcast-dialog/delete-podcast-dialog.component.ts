@@ -31,7 +31,7 @@ export class DeletePodcastDialogComponent {
 
   onDelete(): void {
     if (this.deleteConfirmation === this.podcastName) {
-      this.dialogRef.close(true);
+      this.dialogRef.close(this.deleteConfirmation);
     }
   }
 }
