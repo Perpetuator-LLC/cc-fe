@@ -38,6 +38,8 @@ import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { LoadingService } from '../loading.service';
+
 @Component({
   selector: 'app-orders-list',
   standalone: true,
@@ -115,6 +117,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     protected userService: UserService,
     protected authService: AuthService,
+    private loadingService: LoadingService,
   ) {
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
@@ -138,10 +141,12 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide();
   }
 
   loadOrders(after: string | null = null, pageIndex = 0) {
     this.loadingOrders = true;
+    this.loadingService.show();
     this.subscriptions.add(
       this.creditService.getOrders(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: ({ orders, pageInfo }) => {
@@ -149,10 +154,16 @@ export class OrdersListComponent implements OnInit, OnDestroy {
           this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
           this.totalOrders = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
           this.loadingOrders = false;
+          this.loadingService.hide();
         },
         error: (error) => {
           this.messageService.error('Failed to load orders: ' + error.toString());
           this.loadingOrders = false;
+          this.loadingService.hide();
+        },
+        complete: () => {
+          this.loadingOrders = false;
+          this.loadingService.hide();
         },
       }),
     );

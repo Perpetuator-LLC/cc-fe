@@ -4,11 +4,7 @@
     <span class="page-title-secondary">Podcast List</span></span>
 </ng-template>
 <app-message></app-message>
-@if (loading) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
-</div>
-} @else if (podcasts.length === 0) {
+@if (podcasts.length === 0 && !loading) {
 <div class="middle-card">
   <h2>No podcasts found.</h2>
 </div>
@@ -49,9 +45,11 @@
       <mat-menu #columnMenu="matMenu" class="column-menu">
         <div class="column-menu-content">
           @for (column of allColumns; track column.id) {
-          <mat-checkbox [(ngModel)]="column.selected" (change)="updateDisplayedColumns()">
-            {{ column.label }}
-          </mat-checkbox>
+            <div class="column-item" mat-menu-item>
+              <mat-checkbox [(ngModel)]="column.selected" (change)="updateDisplayedColumns()">
+                {{ column.label }}
+              </mat-checkbox>
+            </div>
           }
         </div>
       </mat-menu>

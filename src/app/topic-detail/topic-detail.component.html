@@ -4,11 +4,7 @@
     <span class="page-title-secondary">{{ topic?.title || 'Topic Detail' }}</span></span>
 </ng-template>
 <app-message></app-message>
-@if (loading) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
-</div>
-} @else if (!topic) {
+@if (!topic && !loading) {
 <div class="middle-card">
   <h2>Topic not found.</h2>
   <button mat-flat-button (click)="goBack()" style="background-color: var(--primary); color: white;">
@@ -16,7 +12,7 @@
     Back to Topics
   </button>
 </div>
-} @else {
+} @else if (topic) {
 <div class="topic-header-card">
   <button mat-flat-button (click)="goBack()" class="back-button">
     <mat-icon>arrow_back</mat-icon>

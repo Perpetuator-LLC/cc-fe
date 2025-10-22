@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { JobService } from '../job.service';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-topic-detail',
@@ -50,6 +51,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private researchService: ResearchService,
     private jobService: JobService,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {
@@ -64,24 +66,35 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.loadingService.hide();
+  }
+
   loadTopic(): void {
+    if (!this.topicUuid) {
+      this.messageService.error('No topic ID provided');
+      return;
+    }
+
     this.loading = true;
+    this.loadingService.show();
     this.subscriptions.add(
-      this.researchService.getTopics(undefined, 100).subscribe({
-        next: (response) => {
+      this.researchService.getTopicById(this.topicUuid).subscribe({
+        next: (topic) => {
           this.messageService.clearMessages();
-          this.topic = response.topics.find((t) => t.uuid === this.topicUuid) || null;
-          if (!this.topic) {
-            this.messageService.error('Topic not found');
-          }
+          this.topic = topic;
           this.loading = false;
+          this.loadingService.hide();
         },
-        error: (err: { message: string }) => {
+        error: (err) => {
           this.loading = false;
-          this.messageService.error(`Failed to retrieve topic: ${err.message}`);
+          this.loadingService.hide();
+          this.messageService.error(`Failed to fetch topic: ${err.message}`);
         },
         complete: () => {
           this.loading = false;
+          this.loadingService.hide();
         },
       }),
     );
@@ -132,10 +145,5 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit',
     });
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-    this.toolbarService.clearToolbarComponent();
   }
 }

@@ -28,6 +28,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { JobDisplayService } from '../job-display.service';
+import { LoadingService } from '../loading.service';
 
 // export interface News {
 //   results: NewsResult[];
@@ -98,6 +99,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     private episodeService: EpisodeService,
     private sanitizer: DomSanitizer,
     private jobDisplayService: JobDisplayService,
+    private loadingService: LoadingService,
   ) {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
@@ -492,6 +494,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     const selectedNewsIds = this.getSelectedNewsIds();
     this.loadingNews = true;
+    this.loadingService.show();
     this.totalNewsCount = 0;
 
     this.loadAllNewsPages(this.selectedPodcastUuid, this.selectedHours, selectedNewsIds);
@@ -522,11 +525,13 @@ export class NewsComponent implements OnInit, OnDestroy {
             this.applyFilter(null);
             this.newsFetched = true;
             this.loadingNews = false;
+            this.loadingService.hide();
           }
         },
         error: (err: { message: string }) => {
           this.messageService.error(`Failed to get news data: ${err.message}`);
           this.loadingNews = false;
+          this.loadingService.hide();
         },
       }),
     );
@@ -626,6 +631,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
+    this.loadingService.hide();
   }
 
   // Method to convert markdown to safe HTML

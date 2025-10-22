@@ -5,11 +5,7 @@
 
 <app-message />
 
-@if (loading) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
-</div>
-} @else if (groupedJobs.length === 0) {
+@if (groupedJobs.length === 0 && !loading) {
   <div class="middle-card">
     <div class="jobs-container">
       <div class="timeline">

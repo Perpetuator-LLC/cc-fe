@@ -41,6 +41,7 @@ import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.ser
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ResearchService } from '../research.service';
 import { JobDisplayService } from '../job-display.service';
+import { LoadingService } from '../loading.service';
 
 export interface ColumnOption {
   id: string;
@@ -125,6 +126,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private jobService: JobService,
     private researchService: ResearchService,
     private jobDisplayService: JobDisplayService,
+    private loadingService: LoadingService,
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
@@ -190,6 +192,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loadPodcasts(first = 10, after: string | null = null, name?: string, slug?: string): void {
     this.loading = true;
+    this.loadingService.show();
     this.subscriptions.add(
       this.podcastsService.getPodcasts(first, after, name, slug).subscribe({
         next: (response) => {
@@ -203,18 +206,16 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
             this.currentCursor = response.pageInfo.endCursor;
           }
           this.loading = false;
+          this.loadingService.hide();
         },
         error: (err: { message: string }) => {
           this.loading = false;
-          this.messageService.clearMessages();
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Failed to retrieve podcasts data: ${err.message}`,
-            dismissible: true,
-          });
+          this.loadingService.hide();
+          this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
         },
         complete: () => {
           this.loading = false;
+          this.loadingService.hide();
         },
       }),
     );
@@ -226,7 +227,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    this.toolbarService.clearToolbarComponent();
+    this.loadingService.hide();
   }
 
   createPodcast(): void {

@@ -4,11 +4,7 @@
     <span class="page-title-secondary">All Topics</span></span>
 </ng-template>
 <app-message></app-message>
-@if (loading) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
-</div>
-} @else if (topics.length === 0) {
+@if (topics.length === 0 && !loading) {
 <div class="middle-card">
   <h2>No research topics found.</h2>
   <p>Research topics will appear here after running the "Research Episode" workflow.</p>
