@@ -31,6 +31,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { LoadingService } from '../loading.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
@@ -105,6 +106,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private podcastsService: PodcastsService,
     private episodeService: EpisodeService,
     private jobDisplayService: JobDisplayService,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {
@@ -116,13 +118,15 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide();
   }
 
   loadJobs(after: string | null = null, pageIndex = 0, append = false) {
     if (append) {
       this.isLoadingMore = true;
     } else {
-      this.loading = true; // Set top-level loading indicator
+      this.loading = true;
+      this.loadingService.show();
     }
 
     // Build statuses array based on filter
@@ -145,11 +149,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
-              this.loading = false; // Clear top-level loading indicator
+              this.loading = false;
+              if (!append) {
+                this.loadingService.hide();
+              }
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
-              // Still show jobs even if enrichment fails
               const jobsToAdd = jobs.map((job) => ({ ...job }));
               if (append) {
                 this.jobs = [...this.jobs, ...jobsToAdd];
@@ -163,14 +169,20 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
-              this.loading = false; // Clear top-level loading indicator
+              this.loading = false;
+              if (!append) {
+                this.loadingService.hide();
+              }
             });
         },
         error: (error) => {
           this.messageService.error('Failed to load jobs: ' + error.toString());
           this.isLoadingMore = false;
           this.isInitialLoading = false;
-          this.loading = false; // Clear top-level loading indicator
+          this.loading = false;
+          if (!append) {
+            this.loadingService.hide();
+          }
         },
       }),
     );

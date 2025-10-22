@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserDetails, UserService } from '../user.service';
@@ -22,6 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -57,6 +58,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   private downloadAnchor: HTMLAnchorElement | null = null;
   // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -70,6 +72,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     private teamService: TeamsService,
     protected creditService: CreditService,
     private codeService: CodeService,
+    private loadingService: LoadingService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -125,8 +128,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide();
     this.toolbarService.clearToolbarComponent();
   }
 

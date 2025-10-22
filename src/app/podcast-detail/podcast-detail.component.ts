@@ -18,7 +18,7 @@ import { MessageComponent } from '../message/message.component';
 import { TeamsResult, TeamsService } from '../teams.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
 import {
@@ -40,17 +40,9 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelDescription,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
-import { MatDivider } from '@angular/material/divider';
 import { AddRssFeedDialogComponent } from '../add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { RssFeedResultsDialogComponent } from '../rss-feed-results-dialog/rss-feed-results-dialog.component';
-import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
+import { MatOption, MatSelect } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
 import { AddVoiceDialogComponent } from '../add-voice-dialog/add-voice-dialog.component';
@@ -63,6 +55,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { CommonModule } from '@angular/common';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { LoadingService } from '../loading.service';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -93,26 +86,16 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
     MatInput,
     MatIconButton,
     MatHeaderRowDef,
-    MatCardHeader,
-    MatCardTitle,
     MatCardContent,
     MatFabButton,
     MatCheckbox,
     MatTooltip,
-    MatAccordion,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatExpansionPanelDescription,
-    MatSelectTrigger,
     FormsModule,
-    MatDivider,
     MatCard,
     MatSelect,
     MatOption,
     PodcastCategoriesComponent,
     MatTabsModule,
-    DeletePodcastDialogComponent,
     SvgIconComponent,
     CdkTextareaAutosize,
   ],
@@ -150,15 +133,16 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private router: Router,
     private messageService: MessageService,
-    private podcastsService: PodcastsService,
     private toolbarService: ToolbarService,
+    private podcastsService: PodcastsService,
+    private teamService: TeamsService,
+    private router: Router,
     private dialog: MatDialog,
     private clipboard: Clipboard,
-    private teamsService: TeamsService,
     private voicesService: VoicesService,
     protected userService: UserService,
+    private loadingService: LoadingService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -446,12 +430,12 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private loadTeams(): void {
     this.loadingTeams = true;
     this.subscriptions.add(
-      this.teamsService.getTeams().subscribe({
-        next: (response) => {
+      this.teamService.getTeams().subscribe({
+        next: (response: { teams: TeamsResult[] }) => {
           this.teams = response.teams;
           this.loadingTeams = false;
         },
-        error: (err) => {
+        error: (err: { message: string }) => {
           this.messageService.error(`Failed to load teams: ${err.message}`);
           this.loadingTeams = false;
         },
@@ -499,24 +483,25 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   private refreshPodcastData() {
+    this.loading = true;
+    this.loadingService.show();
     this.subscriptions.add(
       this.podcastsService.getPodcastById(this.podcastUuid).subscribe({
         next: (podcast) => {
-          // console.log('Podcast data received:', podcast);
-          // console.log('Voice ID:', podcast.voice);
-          // console.log('Team ID:', podcast.team);
           this.podcastForm.patchValue(podcast);
           this.setRssFeeds(podcast.rssFeeds);
-          // this.selectedVoiceUuid = podcast.voice?.uuid || null;
           this.lastSubmittedCategories = podcast.categories as Record<string, string[]>;
           this.loading = false;
+          this.loadingService.hide();
         },
         error: (err) => {
           this.loading = false;
+          this.loadingService.hide();
           this.messageService.error(`Failed to retrieve podcast data: ${err.message}`);
         },
         complete: () => {
           this.loading = false;
+          this.loadingService.hide();
         },
       }),
     );
@@ -603,6 +588,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide();
     this.toolbarService.clearToolbarComponent();
   }
 

@@ -25,6 +25,7 @@ import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { kindToString } from '../job.service';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -67,6 +68,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   hasPreviousPage = false;
   sortDirection = 'DESC';
   sortActive = 'createdAt';
+  loading = false;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -76,6 +78,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     private creditService: CreditService,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {
@@ -85,11 +88,14 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.loadTransactions();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.loadingService.hide();
   }
 
   loadTransactions(after: string | null = null, pageIndex = 0) {
+    this.loading = true;
+    this.loadingService.show();
     this.subscriptions.add(
       this.creditService.getTransactions(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
         next: (response) => {
@@ -107,6 +113,12 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error(error);
           this.messageService.error('Failed to load transactions: ' + error.toString());
+          this.loading = false;
+          this.loadingService.hide();
+        },
+        complete: () => {
+          this.loading = false;
+          this.loadingService.hide();
         },
       }),
     );

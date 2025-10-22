@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTopicDialogComponent } from '../create-topic-dialog/create-topic-dialog.component';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-topics-list',
@@ -51,6 +52,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
     private researchService: ResearchService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +62,11 @@ export class TopicsListComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadPodcasts();
     this.loadTopics();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.loadingService.hide();
   }
 
   loadPodcasts(): void {
@@ -77,6 +84,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
 
   loadTopics(): void {
     this.loading = true;
+    this.loadingService.show();
     this.subscriptions.add(
       this.researchService.getTopics(undefined, 50).subscribe({
         next: (response) => {
@@ -84,18 +92,17 @@ export class TopicsListComponent implements OnInit, OnDestroy {
           this.topics = response.topics;
           this.dataSource = new MatTableDataSource(this.topics);
           this.loading = false;
+          this.loadingService.hide();
         },
         error: (err: { message: string }) => {
           this.loading = false;
+          this.loadingService.hide();
           this.messageService.clearMessages();
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Failed to retrieve research topics: ${err.message}`,
-            dismissible: true,
-          });
+          this.messageService.error(`Failed to retrieve topics data: ${err.message}`);
         },
         complete: () => {
           this.loading = false;
+          this.loadingService.hide();
         },
       }),
     );
@@ -143,10 +150,5 @@ export class TopicsListComponent implements OnInit, OnDestroy {
         this.loadTopics();
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-    this.toolbarService.clearToolbarComponent();
   }
 }
