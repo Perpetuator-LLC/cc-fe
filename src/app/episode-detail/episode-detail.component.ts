@@ -25,6 +25,7 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
 import { SchedulingService, Schedule } from '../scheduling.service';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-episode-detail',
@@ -80,6 +81,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private dialog: MatDialog,
     private schedulingService: SchedulingService,
+    private loadingService: LoadingService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -162,6 +164,18 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
+    this.loadEpisodeData();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.loadingService.hide();
+    this.toolbarService.clearToolbarComponent();
+  }
+
+  private loadEpisodeData(): void {
+    this.loadingService.show();
+
     this.subscriptions.add(
       this.episodeService.getEpisodeById(this.episodeUuid).subscribe({
         next: (episode) => {
@@ -174,18 +188,22 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           }
 
           this.audioSrc = episode.audioUrl;
+          this.loadingService.hide();
         },
         error: (err) => {
+          this.loadingService.hide();
           this.messageService.error(`Failed to fetch episode: ${err.message}`);
         },
       }),
     );
+
     this.subscriptions.add(
       this.episodeForm.get('content')?.valueChanges.subscribe((value: string) => {
         this.wordCount = this.countWords(value);
         this.charCount = value.length;
       }),
     );
+
     this.subscriptions.add(
       this.schedulingService.getSchedulesForPodcast(this.episodeUuid).subscribe({
         next: (schedules) => {
@@ -200,11 +218,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
   private countWords(text: string): number {
     return text ? text.trim().split(/\s+/).length : 0;
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-    this.toolbarService.clearToolbarComponent();
   }
 
   publishAudio(): void {

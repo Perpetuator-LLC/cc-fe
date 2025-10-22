@@ -182,6 +182,17 @@ toggleTheme() {
 
 # Color Theme Potentials
 
+Choose:
+-
+```css
+primary {
+  trust: #2A4489; /* Trust Capital Blue */
+  growth: #00C896; /* Analyticsreen */
+}
+```
+
+Suggested:
+
 Primary Foundation Colors
 **#1E3A8A (ep Blue)
 Establishes maximum trust and security for financial platform users. Blue is universally recognized for banking and fintech applications, with research showing it's the most effective color for building user confidence when handling money and personal data.

@@ -6,11 +6,6 @@
 </ng-template>
 
 <app-message />
-@if (loadingOrders) {
-  <div class="loading-spinner">
-    <mat-progress-bar value="20" diameter="20" mode="indeterminate" style="height: 2px"></mat-progress-bar>
-  </div>
-}
 
 <div class="gift-page-wrapper">
   <div class="gift-container">
@@ -168,8 +163,11 @@
               [pageSizeOptions]="[5, 10, 20]"
               (page)="onPageChange($event)"
             ></mat-paginator>
-          } @else {
-            <p>No orders found.</p>
+          } @else if (orders.length === 0 && !loadingOrders) {
+            <div class="middle-card">
+              <h2>No orders found.</h2>
+              <p>Your order history will appear here after making purchases.</p>
+            </div>
           }
         </div>
       </div>
