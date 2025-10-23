@@ -2,7 +2,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
@@ -43,10 +43,11 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['title', 'podcast', 'created', 'status', 'actions'];
   topics: Topic[] = [];
   podcasts: PodcastsResult[] = [];
-  selectedPodcastUuid: string | null = null;
+  private shouldOpenCreateDialog = false;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
     private researchService: ResearchService,
@@ -60,6 +61,23 @@ export class TopicsListComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+
+    // Check for query parameter to auto-open create dialog
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['create'] === 'true') {
+          // Remove the query parameter from URL
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true,
+          });
+          // Set flag to open dialog after podcasts load
+          this.shouldOpenCreateDialog = true;
+        }
+      }),
+    );
+
     this.loadPodcasts();
     this.loadTopics();
   }
@@ -74,6 +92,11 @@ export class TopicsListComponent implements OnInit, OnDestroy {
       this.podcastsService.getPodcasts().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts;
+          // If create dialog should open, open it now that podcasts are loaded
+          if (this.shouldOpenCreateDialog) {
+            this.shouldOpenCreateDialog = false;
+            setTimeout(() => this.createTopic(), 0);
+          }
         },
         error: (err: { message: string }) => {
           this.messageService.error(`Failed to load podcasts: ${err.message}`);

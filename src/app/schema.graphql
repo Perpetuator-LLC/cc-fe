@@ -351,6 +351,7 @@ type TeamType implements Node {
   name: String!
   uuid: UUID
   members: [TeamMembershipType]
+  podcasts: [PodcastType!]
 }
 
 type TeamMembershipType {

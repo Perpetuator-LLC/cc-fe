@@ -78,6 +78,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
+    if (!this.p5Container || !this.p5Container.nativeElement) {
+      return;
+    }
+
     const sketch = (s: p5) => {
       const xspacing = 16;
       let w: number;
