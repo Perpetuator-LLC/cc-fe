@@ -658,7 +658,8 @@ type EpisodeType implements Node {
   audioFile: String
   audioSeconds: Int
   content: String!
-  version: Int!
+  currentVersionNumber: Int!
+  isCurrentValidated: Boolean!
   news: [NewsType]
   podcast: PodcastType!
   isLive: Boolean!
@@ -670,6 +671,7 @@ type EpisodeType implements Node {
   id: ID!
   uuid: UUID
   audioUrl: String
+  versions: [EpisodeVersionType]
 }
 
 type NewsType implements Node {
@@ -700,6 +702,37 @@ enum ApiNewsValidationConfidenceChoices {
 
   """Unverified"""
   UNVERIFIED
+}
+
+"""
+GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
+"""
+type EpisodeVersionType {
+  versionNumber: Int!
+  title: String!
+  description: String!
+  content: String!
+  isValidated: Boolean!
+  validationNotes: String
+  changeType: ApiEpisodeVersionChangeTypeChoices!
+  createdAt: DateTime!
+  createdBy: UserDataExport
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum ApiEpisodeVersionChangeTypeChoices {
+  """Created"""
+  CREATED
+
+  """Validated"""
+  VALIDATED
+
+  """Manually Edited"""
+  EDITED
+
+  """Regenerated"""
+  REGENERATED
 }
 
 """OrderType is a GraphQL type that represents an order."""
@@ -868,6 +901,7 @@ enum JobKind {
   EXTRACT_NEWS
   SUMMARIZE_NEWS
   VALIDATE_NEWS
+  VALIDATE_EPISODE
   CREATE_EPISODE
   SELECT_UNUSED_NEWS
   PUBLISH_LATEST_EPISODE_CHAIN
@@ -1542,7 +1576,11 @@ type ApiMutation {
   """
   publishLatestEpisodeChain(podcastUuid: UUID!): PublishLatestEpisodeChain
 
-  """Mutation to update an episode."""
+  """
+  Mutation to update an episode.
+  Creates a new version snapshot when content changes.
+  Use EditEpisode for content-only changes; this mutation also handles is_live status.
+  """
   updateEpisode(content: String, description: String, episodeUuid: UUID!, isLive: Boolean, title: String): UpdateEpisode
 
   """Mutation to update episode audio."""
@@ -1553,6 +1591,30 @@ type ApiMutation {
 
   """Mutation to delete an episode."""
   deleteEpisode(episodeUuid: UUID!): DeleteEpisode
+
+  """
+  Mutation to manually edit an episode's content, creating a new version.
+  The edited version is marked as unvalidated.
+  """
+  editEpisode(content: String, description: String, episodeUuid: UUID!, title: String): EditEpisode
+
+  """
+  Mutation to manually trigger validation on an episode's current content.
+  Creates a validation job that will update the episode and create a new validated version.
+  """
+  validateEpisodeManual(episodeUuid: UUID!): ValidateEpisodeManual
+
+  """
+  Mutation to regenerate an episode from its source news articles or research topic.
+  Creates a new version with regenerated content.
+  """
+  regenerateEpisode(episodeUuid: UUID!): RegenerateEpisode
+
+  """
+  Mutation to revert an episode to a previous version.
+  Creates a new version entry with the reverted content.
+  """
+  revertEpisodeVersion(episodeUuid: UUID!, versionNumber: Int!): RevertEpisodeVersion
   fetchNews(podcastUuid: UUID!): FetchNews
   extractNews(newsUuids: [UUID]!, podcastUuid: UUID!): ExtractNews
   summarizeNews(force: Boolean = false, newsUuids: [UUID]!, podcastUuid: UUID!): SummarizeNews
@@ -1976,7 +2038,11 @@ type PublishLatestEpisodeChain {
   jobs: [JobType]
 }
 
-"""Mutation to update an episode."""
+"""
+Mutation to update an episode.
+Creates a new version snapshot when content changes.
+Use EditEpisode for content-only changes; this mutation also handles is_live status.
+"""
 type UpdateEpisode {
   success: Boolean
   message: String
@@ -2002,6 +2068,46 @@ type DeleteEpisode {
   success: Boolean
   message: String
   episodeUuid: UUID
+}
+
+"""
+Mutation to manually edit an episode's content, creating a new version.
+The edited version is marked as unvalidated.
+"""
+type EditEpisode {
+  success: Boolean
+  message: String
+  episode: EpisodeType
+}
+
+"""
+Mutation to manually trigger validation on an episode's current content.
+Creates a validation job that will update the episode and create a new validated version.
+"""
+type ValidateEpisodeManual {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Mutation to regenerate an episode from its source news articles or research topic.
+Creates a new version with regenerated content.
+"""
+type RegenerateEpisode {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Mutation to revert an episode to a previous version.
+Creates a new version entry with the reverted content.
+"""
+type RevertEpisodeVersion {
+  success: Boolean
+  message: String
+  episode: EpisodeType
 }
 
 type FetchNews {

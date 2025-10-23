@@ -1,13 +1,15 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Episode, EpisodeService } from '../episode.service';
+import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -20,6 +22,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { SchedulingService, Schedule } from '../scheduling.service';
@@ -50,6 +53,9 @@ import { LoadingService } from '../loading.service';
     SvgIconComponent,
     MatCardHeader,
     MatTabsModule,
+    MatExpansionModule,
+    MatSelectModule,
+    MatOption,
     MatSlideToggle,
     MatMenu,
     MatMenuItem,
@@ -67,6 +73,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   jobs: Job[] = [];
   schedules: Schedule[] = [];
   isGridView = false;
+  selectedVersionNumber: number | null = null;
+  selectedVersion: EpisodeVersion | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -96,6 +104,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       title: ['', Validators.required],
       description: ['', Validators.required],
       content: ['', Validators.required],
+      currentVersionNumber: [1],
+      isCurrentValidated: [false],
+      versions: this.fb.array([]),
       date: ['', Validators.required],
       audioBase64: ['', Validators.required],
       podcastDate: ['', Validators.required],
@@ -185,6 +196,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           newsFormArray.clear();
           for (const newsSummary of episode.news) {
             newsFormArray.push(this.fb.group(newsSummary));
+          }
+
+          const versionsFormArray = this.episodeForm.get('versions') as FormArray;
+          versionsFormArray.clear();
+          for (const version of episode.versions) {
+            versionsFormArray.push(this.fb.group(version));
           }
 
           this.audioSrc = episode.audioUrl;
@@ -431,5 +448,154 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
   formatJobKind(jobKind: string): string {
     return jobKind.replace(/_/g, ' ');
+  }
+
+  // Version history methods
+  get historyVersions() {
+    const versions = this.episodeForm.get('versions')?.value || [];
+    const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
+    return versions.filter((v: EpisodeVersion) => v.versionNumber !== currentVersionNumber);
+  }
+
+  onVersionSelect(versionNumber: number | null): void {
+    const versions = this.episodeForm.get('versions')?.value || [];
+    this.selectedVersion = versions.find((v: EpisodeVersion) => v.versionNumber === versionNumber) || null;
+    this.selectedVersionNumber = versionNumber;
+  }
+
+  copyVersionContent(): void {
+    if (!this.selectedVersion) {
+      this.messageService.warning('No version selected');
+      return;
+    }
+
+    const content = this.selectedVersion.content;
+    navigator.clipboard.writeText(content).then(
+      () => {
+        this.messageService.success('Version content copied to clipboard');
+      },
+      (err) => {
+        this.messageService.error('Failed to copy content: ' + err);
+      },
+    );
+  }
+
+  restoreVersion(): void {
+    if (!this.selectedVersionNumber) {
+      this.messageService.warning('No version selected to restore');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Restore Version',
+        message:
+          `Are you sure you want to restore version ${this.selectedVersionNumber}? ` +
+          `This will create a new version with the content from version ${this.selectedVersionNumber}.`,
+        confirmButtonText: 'Restore',
+        confirmButtonColor: 'accent',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed && this.selectedVersionNumber) {
+        this.loadingService.show();
+        this.subscriptions.add(
+          this.episodeService.revertEpisodeVersion(this.episodeUuid, this.selectedVersionNumber).subscribe({
+            next: (response) => {
+              this.messageService.success(`Version ${this.selectedVersionNumber} restored successfully`);
+              this.episodeForm.patchValue(response.episode);
+
+              const versionsFormArray = this.episodeForm.get('versions') as FormArray;
+              versionsFormArray.clear();
+              for (const version of response.episode.versions) {
+                versionsFormArray.push(this.fb.group(version));
+              }
+
+              this.selectedVersionNumber = null;
+              this.selectedVersion = null;
+              this.loadingService.hide();
+            },
+            error: (err) => {
+              this.loadingService.hide();
+              this.messageService.error(`Failed to restore version: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  getChangeTypeLabel(changeType: string): string {
+    const labels: Record<string, string> = {
+      created: 'Created',
+      validated: 'Validated',
+      edited: 'Edited',
+      regenerated: 'Regenerated',
+    };
+    return labels[changeType] || changeType;
+  }
+
+  getChangeTypeIcon(changeType: string): string {
+    const icons: Record<string, string> = {
+      created: 'add_circle',
+      validated: 'verified',
+      edited: 'edit',
+      regenerated: 'refresh',
+    };
+    return icons[changeType] || 'help';
+  }
+
+  validateEpisode(): void {
+    this.messageService.info('Starting episode validation...');
+    this.loadingService.show();
+
+    this.subscriptions.add(
+      this.episodeService.validateEpisodeManual(this.episodeUuid).subscribe({
+        next: (response) => {
+          this.jobService.addJob(response.job);
+          this.messageService.success('Episode validation started. Job will complete in the background.');
+          this.loadingService.hide();
+        },
+        error: (err) => {
+          this.loadingService.hide();
+          this.messageService.error(`Failed to start validation: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  regenerateEpisode(): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Regenerate Episode',
+        message:
+          'Are you sure you want to regenerate this episode? ' +
+          'This will create a new version with fresh content from the source articles.',
+        confirmButtonText: 'Regenerate',
+        confirmButtonColor: 'accent',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.messageService.info('Starting episode regeneration...');
+        this.loadingService.show();
+
+        this.subscriptions.add(
+          this.episodeService.regenerateEpisode(this.episodeUuid).subscribe({
+            next: (response) => {
+              this.jobService.addJob(response.job);
+              this.messageService.success('Episode regeneration started. Job will complete in the background.');
+              this.loadingService.hide();
+            },
+            error: (err) => {
+              this.loadingService.hide();
+              this.messageService.error(`Failed to start regeneration: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
   }
 }
