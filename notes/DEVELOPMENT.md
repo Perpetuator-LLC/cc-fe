@@ -233,6 +233,8 @@ node scripts/check-copyright.js
 
 ## Errors
 
+### Module Not Found
+
 ```shell
 Error: Cannot find module 'some-module'
 ```
@@ -254,6 +256,36 @@ If using nvm:
 # Use the correct Node.js version
 nvm use
 npm install
+```
+
+### Build Errors - SCSS Budget Exceeded
+
+To reproduce production build errors (like those that occur during deployment):
+
+```shell
+npm run build
+```
+
+This runs a production build with budget checks enabled. Common errors include:
+
+**SCSS Component Style Budget Exceeded:**
+- Maximum warning: 8kB per component
+- Maximum error: 16kB per component
+
+When a component's SCSS file exceeds 16kB, the build will fail. To fix:
+
+1. **Identify the large files** from the build output
+2. **Refactor the SCSS** by:
+   - Extracting common styles to shared SCSS files
+   - Removing unused styles
+   - Using more concise selectors
+   - Leveraging CSS variables instead of repeated values
+3. **Increase budgets** (last resort) in `angular.json` under `configurations.production.budgets`
+
+Example error:
+```
+✘ [ERROR] src/app/news/news.component.scss exceeded maximum budget. 
+Budget 16.38 kB was not met by 1.53 kB with a total of 17.91 kB.
 ```
 
 # GPT
