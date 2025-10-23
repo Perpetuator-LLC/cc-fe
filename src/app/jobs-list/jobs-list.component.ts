@@ -477,6 +477,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
         return 'audiotrack';
       case JobKind.PUBLISH_EPISODE_AUDIO:
         return 'cloud_upload';
+      case JobKind.VALIDATE_EPISODE:
+        return 'verified';
       case JobKind.PUBLISH_LATEST_EPISODE_CHAIN:
         return 'published_with_changes';
       case JobKind.REFRESH_STOCK_LISTINGS:

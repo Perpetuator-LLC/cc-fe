@@ -18,18 +18,18 @@
   <div class="hero-section">
     <mat-card class="hero-banner-card">
       <div class="hero-content">
+<!--        <div #p5Container id="p5Container"></div>-->
         <div class="hero-text">
           <h1>From Headlines to Audio — Seamlessly</h1>
           <p>
             AI-powered news summaries. Instant transcript generation. Effortless audio<br />
             conversion. Publish podcasts in seconds.
           </p>
-          <button mat-raised-button color="accent" routerLink="/news">Start Automating Now</button>
-          <div #p5Container id="p5Container"></div>
+          <button mat-raised-button color="accent" [routerLink]="['/podcasts']" [queryParams]="{ create: 'true' }">Start Automating Now</button>
         </div>
         <div class="hero-illustration">
           <!-- Placeholder for illustration -->
-          <img src="/assets/product-loading.png" alt="Hero Illustration" width="249" height="249" />
+          <img src="/assets/hero-image.jpg" alt="Hero Illustration" width="763" height="512" />
         </div>
       </div>
     </mat-card>
