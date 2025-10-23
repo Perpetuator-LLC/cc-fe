@@ -209,6 +209,13 @@ export interface JobResult {
   [key: string]: unknown;
 }
 
+export interface JobArgs {
+  podcast_uuid?: string;
+  episode_uuid?: string;
+  topic_uuid?: string;
+  [key: string]: unknown;
+}
+
 export interface Job {
   id: string;
   uuid: string;
@@ -216,6 +223,7 @@ export interface Job {
   status: string;
   error: string;
   result: JobResult | null;
+  args: JobArgs | null;
   createdAt: string;
   updatedAt: string;
   cost?: number;
@@ -338,6 +346,7 @@ export class JobService extends BaseService implements OnDestroy {
               status
               error
               result
+              args
               createdAt
               updatedAt
             }
@@ -443,6 +452,7 @@ export class JobService extends BaseService implements OnDestroy {
               status
               error
               result
+              args
               createdAt
               updatedAt
               cost
