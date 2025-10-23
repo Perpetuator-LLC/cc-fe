@@ -93,24 +93,74 @@
                 </div>
 
                 <div class="timeline-message">
-                  <div style="font-size: 10px; color: #aaa;">
-                    {{ getJobMessage(job) }}
-                  </div>
+                  <!-- Job details section with titles -->
+                  <div class="job-details">
+                    <!-- Error message if job failed -->
+                    @if (job.error) {
+                      <div class="job-section">
+                        <h5 class="section-title">Error</h5>
+                        <div class="error-message">{{ getCleanErrorMessage(job.error) }}</div>
+                      </div>
+                    }
 
-                  <!-- Links for podcast and episode -->
-                  @if (hasPodcastUuid(job) || hasEpisodeUuid(job)) {
-                    <div class="job-link">
-                      @if (hasPodcastUuid(job)) {
-                        <a [routerLink]="['/podcast', getPodcastUuid(job)]">{{ getPodcastName(job) }}</a>
-                      }
-                      @if (hasPodcastUuid(job) && hasEpisodeUuid(job)) {
-                        <span class="link-separator"> > </span>
-                      }
-                      @if (hasEpisodeUuid(job)) {
-                        <a [routerLink]="['/episode', getEpisodeUuid(job)]">{{ getEpisodeName(job) }}</a>
-                      }
-                    </div>
-                  }
+                    <!-- Job message section - only show if not duplicate of error -->
+                    @if (!job.error || getCleanErrorMessage(job.error) !== getCleanJobMessage(job)) {
+                      <div class="job-section">
+                        <h5 class="section-title">Message</h5>
+                        <div class="message-text" [ngClass]="{ 'error-message': isErrorMessage(getJobMessage(job)) }">
+                          {{ getCleanJobMessage(job) }}
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Resources section - colored tags with icons -->
+                    @if (hasPodcastUuid(job) || hasEpisodeUuid(job) || hasTopicUuid(job)) {
+                      <div class="job-section">
+                        <h5 class="section-title">Resources</h5>
+                        <div class="job-links">
+                          @if (hasPodcastUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag podcast-tag"
+                                [routerLink]="['/podcast', getPodcastUuid(job)]"
+                                matTooltip="Podcast"
+                                matTooltipPosition="above">
+                                <mat-icon>mic</mat-icon>
+                                {{ getPodcastName(job) }}
+                              </button>
+                            </div>
+                          }
+                          @if (hasEpisodeUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag episode-tag"
+                                [routerLink]="['/episode', getEpisodeUuid(job)]"
+                                matTooltip="Episode"
+                                matTooltipPosition="above">
+                                <mat-icon>podcasts</mat-icon>
+                                {{ getEpisodeName(job) }}
+                              </button>
+                            </div>
+                          }
+                          @if (hasTopicUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag topic-tag"
+                                [routerLink]="['/topic', getTopicUuid(job)]"
+                                matTooltip="Topic"
+                                matTooltipPosition="above">
+                                <mat-icon>topic</mat-icon>
+                                {{ getTopicName(job) }}
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
                   <!-- News UUIDs are hidden for now as requested -->
                 </div>
 

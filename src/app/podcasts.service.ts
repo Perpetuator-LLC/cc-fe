@@ -58,6 +58,8 @@ export interface PodcastsResult {
   ownerLink: string | null;
   intro: string | null;
   prompt: string | null;
+  newsPrompt: string | null;
+  researchPrompt: string | null;
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
@@ -259,6 +261,8 @@ export class PodcastsService extends BaseService {
     name: string | null = null,
     intro: string | null = null,
     prompt: string | null = null,
+    newsPrompt: string | null = null,
+    researchPrompt: string | null = null,
     outro: string | null = null,
     enabled: boolean | null = null,
     slug: string | null = null,
@@ -279,6 +283,8 @@ export class PodcastsService extends BaseService {
         $name: String
         $intro: String
         $prompt: String
+        $newsPrompt: String
+        $researchPrompt: String
         $outro: String
         $enabled: Boolean
         $slug: String
@@ -298,6 +304,8 @@ export class PodcastsService extends BaseService {
           name: $name
           intro: $intro
           prompt: $prompt
+          newsPrompt: $newsPrompt
+          researchPrompt: $researchPrompt
           outro: $outro
           enabled: $enabled
           slug: $slug
@@ -319,6 +327,8 @@ export class PodcastsService extends BaseService {
             name
             intro
             prompt
+            newsPrompt
+            researchPrompt
             outro
             enabled
             slug
@@ -377,6 +387,8 @@ export class PodcastsService extends BaseService {
         name,
         intro,
         prompt,
+        newsPrompt,
+        researchPrompt,
         outro,
         enabled,
         slug,
@@ -412,6 +424,8 @@ export class PodcastsService extends BaseService {
               name
               intro
               prompt
+              newsPrompt
+              researchPrompt
               outro
               enabled
               slug

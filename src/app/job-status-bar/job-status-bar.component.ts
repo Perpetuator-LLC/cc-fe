@@ -8,7 +8,7 @@ import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angular/material/expansion';
 import { MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { Job, JobService, JobStatus, kindToString, stringToJobStatus, statusToString } from '../job.service';
@@ -18,13 +18,20 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { JobDisplayService } from '../job-display.service';
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
+import { ResearchService } from '../research.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
   episodeName?: string;
+  topicName?: string;
 }
 
 interface Episode {
+  uuid: string;
+  title?: string;
+}
+
+interface Topic {
   uuid: string;
   title?: string;
 }
@@ -46,6 +53,7 @@ interface Episode {
     MatProgressBar,
     MatCardTitle,
     DatePipe,
+    NgClass,
     RouterLink,
     MatIcon,
   ],
@@ -62,6 +70,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     private jobDisplayService: JobDisplayService,
     private podcastsService: PodcastsService,
     private episodeService: EpisodeService,
+    private researchService: ResearchService,
   ) {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
@@ -162,17 +171,21 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   // Enrich jobs with podcast and episode names using GraphQL queries
   private async enrichJobsWithNames(jobs: Job[]): Promise<EnrichedJob[]> {
-    // Extract unique UUIDs from all jobs
+    // Extract unique UUIDs from all jobs using merged data
     const podcastUuids = new Set<string>();
     const episodeUuids = new Set<string>();
+    const topicUuids = new Set<string>();
 
     jobs.forEach((job) => {
-      const result = this.jobDisplayService.parseJobResult(job);
-      if (result?.podcast_uuid) {
-        podcastUuids.add(result.podcast_uuid);
+      const merged = this.jobDisplayService.getMergedJobData(job);
+      if (merged.podcast_uuid) {
+        podcastUuids.add(merged.podcast_uuid);
       }
-      if (result?.episode_uuid) {
-        episodeUuids.add(result.episode_uuid);
+      if (merged.episode_uuid) {
+        episodeUuids.add(merged.episode_uuid);
+      }
+      if (merged.topic_uuid) {
+        topicUuids.add(merged.topic_uuid);
       }
     });
 
@@ -187,6 +200,10 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
       queries.push(this.fetchEpisodeNames(Array.from(episodeUuids)));
     }
 
+    if (topicUuids.size > 0) {
+      queries.push(this.fetchTopicNames(Array.from(topicUuids)));
+    }
+
     // If no UUIDs to fetch, return jobs as-is
     if (queries.length === 0) {
       return jobs.map((job) => ({ ...job }));
@@ -198,9 +215,10 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
       // Create lookup maps
       const podcastNameMap = new Map<string, string>();
       const episodeNameMap = new Map<string, string>();
+      const topicNameMap = new Map<string, string>();
 
       if (results) {
-        results.forEach((result: { podcasts?: PodcastsResult[]; episodes?: Episode[] }) => {
+        results.forEach((result: { podcasts?: PodcastsResult[]; episodes?: Episode[]; topics?: Topic[] }) => {
           if (result.podcasts) {
             result.podcasts.forEach((podcast: PodcastsResult) => {
               podcastNameMap.set(podcast.uuid, podcast.name || 'Unnamed Podcast');
@@ -211,26 +229,35 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
               episodeNameMap.set(episode.uuid, episode.title || 'Untitled Episode');
             });
           }
+          if (result.topics) {
+            result.topics.forEach((topic: Topic) => {
+              topicNameMap.set(topic.uuid, topic.title || 'Untitled Topic');
+            });
+          }
         });
       }
 
-      // Enrich jobs with the fetched names
+      // Enrich jobs with the fetched names using merged data
       return jobs.map((job) => {
         const enrichedJob: EnrichedJob = { ...job };
-        const result = this.jobDisplayService.parseJobResult(job);
+        const merged = this.jobDisplayService.getMergedJobData(job);
 
-        if (result?.podcast_uuid && podcastNameMap.has(result.podcast_uuid)) {
-          enrichedJob.podcastName = podcastNameMap.get(result.podcast_uuid);
+        if (merged.podcast_uuid && podcastNameMap.has(merged.podcast_uuid)) {
+          enrichedJob.podcastName = podcastNameMap.get(merged.podcast_uuid);
         }
 
-        if (result?.episode_uuid && episodeNameMap.has(result.episode_uuid)) {
-          enrichedJob.episodeName = episodeNameMap.get(result.episode_uuid);
+        if (merged.episode_uuid && episodeNameMap.has(merged.episode_uuid)) {
+          enrichedJob.episodeName = episodeNameMap.get(merged.episode_uuid);
+        }
+
+        if (merged.topic_uuid && topicNameMap.has(merged.topic_uuid)) {
+          enrichedJob.topicName = topicNameMap.get(merged.topic_uuid);
         }
 
         return enrichedJob;
       });
     } catch (error) {
-      console.warn('Failed to fetch podcast/episode names:', error);
+      console.warn('Failed to fetch podcast/episode/topic names:', error);
       return jobs.map((job) => ({ ...job }));
     }
   }
@@ -247,6 +274,13 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const queries = uuids.map((uuid) => this.episodeService.getEpisodeById(uuid).pipe());
 
     return forkJoin(queries).pipe(map((episodes) => ({ episodes })));
+  }
+
+  // Fetch multiple topic names efficiently
+  private fetchTopicNames(uuids: string[]) {
+    const queries = uuids.map((uuid) => this.researchService.getTopicById(uuid).pipe());
+
+    return forkJoin(queries).pipe(map((topics) => ({ topics })));
   }
 
   // Delegate to shared service methods
@@ -270,6 +304,14 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     return this.jobDisplayService.getEpisodeUuid(job);
   }
 
+  getTopicUuid(job: Job): string | null {
+    return this.jobDisplayService.getTopicUuid(job);
+  }
+
+  hasTopicUuid(job: Job): boolean {
+    return this.jobDisplayService.hasTopicUuid(job);
+  }
+
   // Get podcast name from enriched job
   getPodcastName(job: EnrichedJob): string {
     return job.podcastName || 'Podcast';
@@ -278,6 +320,39 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   // Get episode name from enriched job
   getEpisodeName(job: EnrichedJob): string {
     return job.episodeName || 'Episode';
+  }
+
+  // Get topic name from enriched job
+  getTopicName(job: EnrichedJob): string {
+    return job.topicName || 'Topic';
+  }
+
+  // Check if a message is an error message
+  isErrorMessage(message: string): boolean {
+    if (!message) return false;
+    const lowerMessage = message.toLowerCase();
+    return (
+      lowerMessage.includes('error') ||
+      lowerMessage.includes('fail') ||
+      lowerMessage.includes('exception') ||
+      lowerMessage.includes('traceback')
+    );
+  }
+
+  // Clean error message by removing prefixes
+  getCleanErrorMessage(errorMessage: string): string {
+    if (!errorMessage) return '';
+
+    return errorMessage.replace(/^(Error:|ERROR:|error:)\s*/i, '').trim();
+  }
+
+  // Get clean job message with error detection
+  getCleanJobMessage(job: Job): string {
+    const message = this.getJobMessage(job);
+    if (this.isErrorMessage(message)) {
+      return this.getCleanErrorMessage(message);
+    }
+    return message;
   }
 
   private sortJobs(jobs: EnrichedJob[]): EnrichedJob[] {

@@ -180,38 +180,114 @@
     }
   }
 
+  // Job message and links styling
   .job-message {
-    margin-top: 8px;
+    margin: 8px 0;
+
+    .job-details {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .job-section {
+      .section-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--description-color);
+        text-transform: uppercase;
+        margin: 0 0 4px 0;
+        letter-spacing: 0.5px;
+      }
+    }
 
     .message-text {
-      font-size: 10px;
-      color: #aaa;
-      margin-bottom: 4px;
+      font-size: 13px;
+      color: var(--theme-color);
+
+      &.error-message {
+        color: var(--md-sys-color-error);
+        font-weight: 500;
+      }
     }
 
-    .job-link {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--description-color);
+    .job-links {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
 
-      a {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 500;
+      .job-link-item {
+        display: flex;
+        align-items: center;
 
-        &:hover {
-          text-decoration: underline;
+        .resource-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: none;
+          min-height: 22px;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+          flex-shrink: 0;
+
+          mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+          }
+
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          }
+
+          &.podcast-tag {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+
+            &:hover {
+              background: #bbdefb;
+            }
+          }
+
+          &.episode-tag {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border: 1px solid #e1bee7;
+
+            &:hover {
+              background: #e1bee7;
+            }
+          }
+
+          &.topic-tag {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+
+            &:hover {
+              background: #c8e6c9;
+            }
+          }
         }
       }
-
-      .link-separator {
-        margin: 0 6px;
-        color: var(--description-color);
-        font-weight: 400;
-      }
     }
+  }
+
+  // Error styling
+  .error {
+    color: var(--md-sys-color-error);
+    font-size: 13px;
+    font-weight: 500;
+    margin: 8px 0;
   }
 
   .job-timestamps {

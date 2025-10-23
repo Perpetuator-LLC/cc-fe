@@ -294,7 +294,15 @@ type PodcastType implements Node {
   id: ID!
   name: String!
   intro: String!
+
+  """Brand prompt that influences all episode types with tone and style"""
   prompt: String!
+
+  """Prompt for generating news episodes (3 minutes, ~450 words)"""
+  newsPrompt: String!
+
+  """Prompt for generating research episodes (5-10 minutes, ~1400 words)"""
+  researchPrompt: String!
   outro: String!
   slug: String
   enabled: Boolean!
@@ -1243,8 +1251,11 @@ type ApiMutation {
   """
   createResearchChain(podcastUuid: UUID!): CreateResearchChain
 
-  """Mutation to create an episode from a research topic."""
-  createResearchEpisode(topicUuid: UUID!): CreateResearchEpisode
+  """
+  Mutation to create a research episode with deep analysis on current topics.
+  Research episodes are 5-10 minutes / 1400 words with detailed context.
+  """
+  createResearchEpisode(podcastUuid: UUID!, topic: String): CreateResearchEpisode
 
   """
   Mutation to create a full research chain that produces a ready-to-publish episode.
@@ -1655,7 +1666,10 @@ type CreateResearchChain {
   jobs: [JobType]
 }
 
-"""Mutation to create an episode from a research topic."""
+"""
+Mutation to create a research episode with deep analysis on current topics.
+Research episodes are 5-10 minutes / 1400 words with detailed context.
+"""
 type CreateResearchEpisode {
   success: Boolean
   message: String

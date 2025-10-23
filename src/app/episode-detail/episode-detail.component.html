@@ -108,7 +108,7 @@
               </mat-form-field>
               <div>
                 @if (episodeForm.get('podcastDate')?.value) {
-                | Published to Podcast on:
+                Podcast episode went live:
                 <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
                   {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
                 </span>
