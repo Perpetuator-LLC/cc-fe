@@ -1,3 +1,31 @@
+# Changelog from v0.24.1 to v0.25.0
+
+In this update, we've introduced versioned many new AI Agents for deep research, news validation, and one to automate podcast creation. We added versioned episodes, and ability to create custom research topics for deep dives, and added research to our scheduling service.
+
+## Enhancements
+- New copy and image added to the home page.
+- Version support for episodes introduced.
+- Resource badges added to jobs.
+- Most pages now use the layout loading spinner.
+- Podcast generation from description feature added.
+- "Research" removed from Topics menu item, and News styling changed.
+- "Process News" button style matched, and topics initial status converted to "Not Started".
+- Live status now visible on the episode list.
+- News job validation support and process news GQL support added.
+- PublishResearchTopicEpisodeChain support added to research service.
+- Ability to create new topics added and job status bar moved to layout.
+- Stats switched to use no auth and landing page now uses this new API.
+- When a topic completes, it now fetches the episode title (in addition to the topic title).
+- Research topics feature added.
+
+## Cleanups
+- Home page now correctly uses the podcast thumbnail URL instead of image.
+- "Start Automating Now" button text fixed to stay white in light mode.
+- Stats titles fixed.
+- Rubberbanding when editing transcript prompt fixed and Research job name changed.
+- Research now keeps the podcasts submenu open.
+
+
 # Changelog from v0.24.0 to v0.24.1
 
 In this update, we've fixed some issues and introduced new features to enhance the user experience. The team link on the podcast page now works as expected, and the floating buttons are now visible. We've also made the news section scrollable. On the feature side, we've updated the deprecated setOptions to the new refetch and sorted jobs to show completed ones first. Additionally, selecting a podcast in the news component now triggers a fetch, and the podcast dropdown loading now has a spinner.
