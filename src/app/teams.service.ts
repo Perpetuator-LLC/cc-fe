@@ -33,6 +33,7 @@ export interface TeamsResult {
   uuid: string;
   name: string | null;
   members: MemberResult[];
+  podcasts: PodcastsResult[];
 }
 
 const GET_TEAMS = gql`
@@ -50,6 +51,11 @@ const GET_TEAMS = gql`
               username
             }
             role
+          }
+          podcasts {
+            id
+            uuid
+            name
           }
         }
       }

@@ -20,6 +20,7 @@ export enum JobKind {
   SELECT_UNUSED_NEWS = 'SELECT_UNUSED_NEWS',
   UPDATE_EPISODE_AUDIO = 'UPDATE_EPISODE_AUDIO',
   PUBLISH_EPISODE_AUDIO = 'PUBLISH_EPISODE_AUDIO',
+  VALIDATE_EPISODE = 'VALIDATE_EPISODE',
   PUBLISH_LATEST_EPISODE_CHAIN = 'PUBLISH_LATEST_EPISODE_CHAIN',
   REFRESH_STOCK_LISTINGS = 'REFRESH_STOCK_LISTINGS',
   SCHEDULE_JOB = 'SCHEDULE_JOB',
@@ -59,6 +60,8 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.UPDATE_EPISODE_AUDIO;
     case 'PUBLISH_EPISODE_AUDIO':
       return JobKind.PUBLISH_EPISODE_AUDIO;
+    case 'VALIDATE_EPISODE':
+      return JobKind.VALIDATE_EPISODE;
     case 'PUBLISH_LATEST_EPISODE_CHAIN':
       return JobKind.PUBLISH_LATEST_EPISODE_CHAIN;
     case 'REFRESH_STOCK_LISTINGS':
@@ -120,6 +123,8 @@ export const kindToString = (kind: string) => {
       return 'Update Episode Audio';
     case JobKind.PUBLISH_EPISODE_AUDIO:
       return 'Publish Episode Audio';
+    case JobKind.VALIDATE_EPISODE:
+      return 'Validate Episode';
     case JobKind.PUBLISH_LATEST_EPISODE_CHAIN:
       return 'Publish Latest News Episode Chain';
     case JobKind.REFRESH_STOCK_LISTINGS:

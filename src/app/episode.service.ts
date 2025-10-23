@@ -11,6 +11,22 @@ import { NewsResult } from './news.service';
 import { RelayConnection } from './utils/relay';
 import { TeamsResult } from './teams.service';
 
+export interface EpisodeVersion {
+  uuid: string;
+  versionNumber: number;
+  title: string;
+  description: string;
+  content: string;
+  isValidated: boolean;
+  validationNotes?: string;
+  changeType: 'created' | 'validated' | 'edited' | 'regenerated';
+  createdAt: string;
+  createdBy?: {
+    id: string;
+    username: string;
+  };
+}
+
 export interface Episode {
   id: string;
   uuid: string;
@@ -18,6 +34,9 @@ export interface Episode {
   title: string;
   description: string;
   content: string;
+  currentVersionNumber: number;
+  isCurrentValidated: boolean;
+  versions: EpisodeVersion[];
   audioUrl: string;
   isLive: boolean;
   podcastDate: string;
@@ -75,6 +94,23 @@ const GET_EPISODE = gql`
           title
           description
           content
+          currentVersionNumber
+          isCurrentValidated
+          versions {
+            uuid
+            versionNumber
+            title
+            description
+            content
+            isValidated
+            validationNotes
+            changeType
+            createdAt
+            createdBy {
+              id
+              username
+            }
+          }
           audioUrl
           isLive
           podcastDate
@@ -348,6 +384,149 @@ export class EpisodeService extends BaseService {
           throw new Error(data.deleteEpisode.message);
         }
         return data.deleteEpisode;
+      }),
+    );
+  }
+
+  validateEpisodeManual(episodeUuid: string) {
+    if (!episodeUuid) return throwError(() => new Error('Episode ID is required'));
+
+    const VALIDATE_EPISODE = gql`
+      mutation ValidateEpisodeManual($episodeUuid: UUID!) {
+        validateEpisodeManual(episodeUuid: $episodeUuid) {
+          success
+          message
+          job {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      validateEpisodeManual: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: VALIDATE_EPISODE,
+      variables: { episodeUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.validateEpisodeManual.success) {
+          throw new Error(data.validateEpisodeManual.message);
+        }
+        return data.validateEpisodeManual;
+      }),
+    );
+  }
+
+  regenerateEpisode(episodeUuid: string) {
+    if (!episodeUuid) return throwError(() => new Error('Episode ID is required'));
+
+    const REGENERATE_EPISODE = gql`
+      mutation RegenerateEpisode($episodeUuid: UUID!) {
+        regenerateEpisode(episodeUuid: $episodeUuid) {
+          success
+          message
+          job {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      regenerateEpisode: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: REGENERATE_EPISODE,
+      variables: { episodeUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.regenerateEpisode.success) {
+          throw new Error(data.regenerateEpisode.message);
+        }
+        return data.regenerateEpisode;
+      }),
+    );
+  }
+
+  revertEpisodeVersion(episodeUuid: string, versionNumber: number) {
+    if (!episodeUuid) return throwError(() => new Error('Episode ID is required'));
+    if (!versionNumber) return throwError(() => new Error('Version number is required'));
+
+    const REVERT_VERSION = gql`
+      mutation RevertEpisodeVersion($episodeUuid: UUID!, $versionNumber: Int!) {
+        revertEpisodeVersion(episodeUuid: $episodeUuid, versionNumber: $versionNumber) {
+          success
+          message
+          episode {
+            uuid
+            title
+            description
+            content
+            currentVersionNumber
+            isCurrentValidated
+            versions {
+              uuid
+              versionNumber
+              title
+              description
+              content
+              isValidated
+              validationNotes
+              changeType
+              createdAt
+              createdBy {
+                id
+                username
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      revertEpisodeVersion: {
+        success: boolean;
+        message: string;
+        episode: Episode;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: REVERT_VERSION,
+      variables: { episodeUuid, versionNumber },
+    }).pipe(
+      map((data) => {
+        if (!data.revertEpisodeVersion.success) {
+          throw new Error(data.revertEpisodeVersion.message);
+        }
+        return data.revertEpisodeVersion;
       }),
     );
   }

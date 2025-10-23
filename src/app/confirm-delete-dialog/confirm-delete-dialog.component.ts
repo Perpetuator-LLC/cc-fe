@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 export interface ConfirmDeleteDialogData {
   title: string;
   message: string;
+  confirmButtonText?: string;
+  confirmButtonColor?: 'primary' | 'accent' | 'warn';
 }
 
 @Component({
@@ -19,13 +21,30 @@ export interface ConfirmDeleteDialogData {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-flat-button color="warn" (click)="onConfirm()">Delete</button>
+      <button mat-flat-button [color]="data.confirmButtonColor || 'warn'" (click)="onConfirm()">
+        {{ data.confirmButtonText || 'Delete' }}
+      </button>
     </mat-dialog-actions>
   `,
   styles: [
     `
       mat-dialog-actions {
         gap: 8px;
+        padding: 16px 24px;
+      }
+
+      mat-dialog-content {
+        padding: 0 24px 20px;
+      }
+
+      h2[mat-dialog-title] {
+        margin: 0;
+        padding: 24px 24px 16px;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.5;
       }
     `,
   ],
