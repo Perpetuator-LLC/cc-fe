@@ -23,29 +23,69 @@
                   </mat-card-header>
                 </mat-expansion-panel-header>
                 @if (job.error) {
-                  <p class="error">Error: {{ job.error }}</p>
+                  <p class="error">{{ getCleanErrorMessage(job.error) }}</p>
                 }
 
                 <!-- Updated result section with small colored message and links -->
                 <div class="job-message">
-                  <div class="message-text">
-                    {{ getJobMessage(job) }}
-                  </div>
-
-                  <!-- Links for podcast and episode -->
-                  @if (hasPodcastUuid(job) || hasEpisodeUuid(job)) {
-                    <div class="job-link">
-                      @if (hasPodcastUuid(job)) {
-                        <a [routerLink]="['/podcast', getPodcastUuid(job)]">{{ getPodcastName(job) }}</a>
-                      }
-                      @if (hasPodcastUuid(job) && hasEpisodeUuid(job)) {
-                        <span class="link-separator"> > </span>
-                      }
-                      @if (hasEpisodeUuid(job)) {
-                        <a [routerLink]="['/episode', getEpisodeUuid(job)]">{{ getEpisodeName(job) }}</a>
-                      }
+                  <!-- Job details section with title -->
+                  <div class="job-details">
+                    <!-- Job message section -->
+                    <div class="job-section">
+                      <h4 class="section-title">Message</h4>
+                      <div class="message-text" [ngClass]="{ 'error-message': isErrorMessage(getJobMessage(job)) }">
+                        {{ getCleanJobMessage(job) }}
+                      </div>
                     </div>
-                  }
+
+                    <!-- Resources section - colored tags with icons -->
+                    @if (hasPodcastUuid(job) || hasEpisodeUuid(job) || hasTopicUuid(job)) {
+                      <div class="job-section">
+                        <h4 class="section-title">Resources</h4>
+                        <div class="job-links">
+                          @if (hasPodcastUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag podcast-tag"
+                                [routerLink]="['/podcast', getPodcastUuid(job)]"
+                                matTooltip="Podcast"
+                                matTooltipPosition="above">
+                                <mat-icon>mic</mat-icon>
+                                {{ getPodcastName(job) }}
+                              </button>
+                            </div>
+                          }
+                          @if (hasEpisodeUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag episode-tag"
+                                [routerLink]="['/episode', getEpisodeUuid(job)]"
+                                matTooltip="Episode"
+                                matTooltipPosition="above">
+                                <mat-icon>podcasts</mat-icon>
+                                {{ getEpisodeName(job) }}
+                              </button>
+                            </div>
+                          }
+                          @if (hasTopicUuid(job)) {
+                            <div class="job-link-item">
+                              <button
+                                mat-flat-button
+                                class="resource-tag topic-tag"
+                                [routerLink]="['/topic', getTopicUuid(job)]"
+                                matTooltip="Topic"
+                                matTooltipPosition="above">
+                                <mat-icon>topic</mat-icon>
+                                {{ getTopicName(job) }}
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
 
                 <!-- Updated timestamps with small colored styling -->

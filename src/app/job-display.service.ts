@@ -2,11 +2,20 @@
 import { Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { Job, JobResult, JobKind, stringToJobKind } from './job.service';
+import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './job.service';
 import { EpisodeService } from './episode.service';
 import { PodcastsService } from './podcasts.service';
 import { ResearchService } from './research.service';
 import { MessageService } from './message.service';
+
+export interface MergedJobData {
+  podcast_uuid?: string;
+  episode_uuid?: string;
+  topic_uuid?: string;
+  news_uuids?: string[];
+  message?: string;
+  [key: string]: unknown;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -19,9 +28,64 @@ export class JobDisplayService {
     private messageService: MessageService,
   ) {}
 
-  // Parse job result JSON safely - now result is already a JSON object
+  // Parse job result JSON safely - handles both string and object types
   parseJobResult(job: Job): JobResult | null {
-    return job.result;
+    if (!job.result) {
+      return null;
+    }
+
+    // If result is already an object, return it directly
+    if (typeof job.result === 'object') {
+      return job.result;
+    }
+
+    // If result is a string, try to parse it as JSON
+    if (typeof job.result === 'string') {
+      try {
+        const parsed = JSON.parse(job.result);
+        return typeof parsed === 'object' ? parsed : null;
+      } catch (error) {
+        console.warn(`Failed to parse job result as JSON for job ${job.uuid}:`, error);
+        // Return a minimal result object with the string as a message
+        return { message: job.result };
+      }
+    }
+
+    return null;
+  }
+
+  // Parse job args JSON safely - handles both string and object types
+  parseJobArgs(job: Job): JobArgs | null {
+    if (!job.args) {
+      return null;
+    }
+
+    // If args is already an object, return it directly
+    if (typeof job.args === 'object') {
+      return job.args;
+    }
+
+    // If args is a string, try to parse it as JSON
+    if (typeof job.args === 'string') {
+      try {
+        const parsed = JSON.parse(job.args);
+        return typeof parsed === 'object' ? parsed : null;
+      } catch (error) {
+        console.warn(`Failed to parse job args as JSON for job ${job.uuid}:`, error);
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  // Merge args and results, prioritizing results over args for conflicts
+  getMergedJobData(job: Job): MergedJobData {
+    const args = this.parseJobArgs(job) || {};
+    const result = this.parseJobResult(job) || {};
+
+    // Merge args and results, with results taking precedence
+    return { ...args, ...result };
   }
 
   // Get formatted message for job display
@@ -38,29 +102,40 @@ export class JobDisplayService {
     return result ? JSON.stringify(result) : 'No message available';
   }
 
-  // Check if job result has podcast UUID
+  // Check if job has podcast UUID (from args or result)
   hasPodcastUuid(job: Job): boolean {
-    return job.result?.podcast_uuid != null;
+    const merged = this.getMergedJobData(job);
+    return merged.podcast_uuid != null;
   }
 
-  // Check if job result has episode UUID
+  // Check if job has episode UUID (from args or result)
   hasEpisodeUuid(job: Job): boolean {
-    return job.result?.episode_uuid != null;
+    const merged = this.getMergedJobData(job);
+    return merged.episode_uuid != null;
   }
 
-  // Get podcast UUID from job result
+  // Check if job has topic UUID (from args or result)
+  hasTopicUuid(job: Job): boolean {
+    const merged = this.getMergedJobData(job);
+    return merged.topic_uuid != null;
+  }
+
+  // Get podcast UUID from merged data (prioritizing result over args)
   getPodcastUuid(job: Job): string | null {
-    return job.result?.podcast_uuid || null;
+    const merged = this.getMergedJobData(job);
+    return merged.podcast_uuid || null;
   }
 
-  // Get episode UUID from job result
+  // Get episode UUID from merged data (prioritizing result over args)
   getEpisodeUuid(job: Job): string | null {
-    return job.result?.episode_uuid || null;
+    const merged = this.getMergedJobData(job);
+    return merged.episode_uuid || null;
   }
 
-  // Get topic UUID from job result
+  // Get topic UUID from merged data (prioritizing result over args)
   getTopicUuid(job: Job): string | null {
-    return job.result?.topic_uuid || null;
+    const merged = this.getMergedJobData(job);
+    return merged.topic_uuid || null;
   }
 
   /**
@@ -79,6 +154,9 @@ export class JobDisplayService {
 
       case JobKind.GENERATE_RESEARCH_TRANSCRIPT:
         return this.handleResearchCompletion(job);
+
+      case JobKind.RESEARCH_TOPIC:
+        return this.handleResearchTopicCompletion(job);
 
       default:
         // For other job types, show a simple completion message
@@ -176,6 +254,31 @@ export class JobDisplayService {
       }),
       catchError((error) => {
         this.messageService.error(`Failed to load research results: ${error.message}`);
+        return of(void 0);
+      }),
+    );
+  }
+
+  /**
+   * Handle research topic job completion - shows immediate link from args
+   */
+  private handleResearchTopicCompletion(job: Job): Observable<void> {
+    const topicUuid = this.getTopicUuid(job);
+
+    if (!topicUuid) {
+      this.messageService.success('Research topic job completed');
+      return of(void 0);
+    }
+
+    return this.researchService.getTopicById(topicUuid).pipe(
+      map((topic) => {
+        const topicUrl = `/topic/${topicUuid}`;
+        const topicTitle = topic?.title === '' ? '(Blank)' : topic?.title || 'Research Topic';
+        this.messageService.success(`Research topic updated: <a href="${topicUrl}">${topicTitle}</a>`, null, true);
+      }),
+      catchError(() => {
+        const topicUrl = `/topic/${topicUuid}`;
+        this.messageService.success(`Research topic updated: <a href="${topicUrl}">View Topic</a>`, null, true);
         return of(void 0);
       }),
     );
