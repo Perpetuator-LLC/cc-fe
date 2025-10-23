@@ -1,5 +1,10 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
+  <div class="route-title">
+        <span class="website-title">Capital<br />
+        <span class="website-title-copilot">&nbsp;&nbsp;Copitol</span>
+        </span>
+  </div>
   <!--  <span class="page-title"-->
   <!--    ><img-->
   <!--      src="Capital_Copilot_Logo_Slanted.svg"-->
@@ -20,12 +25,17 @@
       <div class="hero-content">
 <!--        <div #p5Container id="p5Container"></div>-->
         <div class="hero-text">
-          <h1>From Headlines to Audio — Seamlessly</h1>
+          <h1>Your News, Your Way</h1>
           <p>
-            AI-powered news summaries. Instant transcript generation. Effortless audio<br />
-            conversion. Publish podcasts in seconds.
+            Get custom-tailored news briefings with only what you actually care about — hours of research condensed into minutes.
+            <br />
+            <br />
+            Simply describe what you care about, and our AI agents will build a podcast for you.
           </p>
-          <button mat-raised-button color="accent" [routerLink]="['/podcasts']" [queryParams]="{ create: 'true' }">Start Automating Now</button>
+          <button mat-raised-button color="accent" [routerLink]="['/podcasts']" [queryParams]="{ create: 'true' }">Create Your Podcast Now</button>
+          <p>
+            Pick your topics, choose your focus areas, and even request deep dives on specific subjects.
+          </p>
         </div>
         <div class="hero-illustration">
           <!-- Placeholder for illustration -->
@@ -43,31 +53,31 @@
         <div class="module-wrapper">
           <div class="module-header">
             <div>
-              <div class="module-title">Generate Podcast</div>
+              <div class="module-title">Create Research Topics</div>
               <div class="module-desc">
-                Create AI-powered news podcasts with automatic transcripts, seamless audio conversion, and instant
+                Create topics and have AI-powered research do a deep dive on a schedule or when you decide with automatic transcripts, seamless audio conversion, and instant
                 publishing.
               </div>
             </div>
-            <a class="module-link" [routerLink]="['/podcasts']" [queryParams]="{ create: 'true' }"
-              >Generate Podcast <app-svg-icon icon="right"></app-svg-icon
+            <a class="module-link" [routerLink]="['/topics']" [queryParams]="{ create: 'true' }"
+              >Create a Topic to Research <app-svg-icon icon="right"></app-svg-icon
             ></a>
           </div>
           <span class="image-section">
-            <img src="/assets/icons/dna.svg" alt="generate" />
+            <img src="/assets/hero-side.jpg" alt="generate" width="318" height="256" />
           </span>
         </div>
       </div>
       <div class="module-card create-episode">
         <div class="module-header">
           <div>
-            <div class="module-title">Create New Episode</div>
+            <div class="module-title">Create Episodes</div>
             <div class="module-desc">
               Turn any headline or news story into an audio episode — complete with AI-driven summaries, transcripts,
               and audio, ready to publish.
             </div>
           </div>
-          <a class="module-link" routerLink="/news">Create an Episode <app-svg-icon icon="right"></app-svg-icon></a>
+          <a class="module-link" routerLink="/news">Create an Episode from News<app-svg-icon icon="right"></app-svg-icon></a>
         </div>
       </div>
     </div>
@@ -207,7 +217,7 @@
                   <!-- Actions can be omitted or added as needed -->
                 </div>
               </div>
-              <p>{{ podcast.team?.members?.[0]?.user?.username || '(No Name)' }} - Premium (396 CPM)</p>
+              <p>{{ podcast.team?.name || '(No Team)' }}</p>
             </div>
           </mat-card-header>
           <div class="chip-header">

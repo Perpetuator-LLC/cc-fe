@@ -14,6 +14,23 @@
   /* Ensure the canvas is behind your other content */
 }
 
+.route-title {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.website-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--theme-white);
+  white-space: nowrap;
+}
+.website-title-copilot {
+  font-size: 1.5rem;
+  font-weight: 200;
+  color: var(--theme-white);
+  white-space: nowrap;
+}
 mat-card {
   position: relative;
   z-index: 1;
@@ -30,6 +47,11 @@ mat-card {
   @media screen and (max-width: 576px) {
     padding: 20px;
   }
+}
+
+.hero-text {
+  max-width: 800px;
+  padding-right: 20px;
 }
 
 .hero-section {
@@ -91,6 +113,12 @@ mat-card {
       @media screen and (max-width: 768px) {
         flex-direction: column;
       }
+    }
+
+    .hero-illustration img {
+      border-radius: 10px;
+      max-width: 100%;
+      height: auto;
     }
   }
 }
@@ -265,9 +293,9 @@ mat-card {
   }
 
   .image-section {
-    min-width: 273px;
-    max-width: 273px;
-    background: var(--purple);
+    //min-width: 273px;
+    //max-width: 273px;
+    //background: var(--blue);
     border-radius: 10px;
     display: flex;
     justify-content: center;
@@ -279,7 +307,9 @@ mat-card {
     }
 
     img {
-      width: auto;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
     }
   }
 
@@ -551,7 +581,7 @@ mat-card {
   font-weight: 500;
   font-size: 12px;
   line-height: 100%;
-  letter-spacing: 0%;
+  letter-spacing: 0;
   padding: 8px;
   color: var(--theme-color);
   display: inline-flex;
