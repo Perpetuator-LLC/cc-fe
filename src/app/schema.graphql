@@ -717,8 +717,8 @@ type EpisodeVersionType {
   validationNotes: String
   changeType: ApiEpisodeVersionChangeTypeChoices!
   createdAt: DateTime!
-  createdBy: UserDataExport
   uuid: UUID
+  createdBy: PublicUserType
 }
 
 """An enumeration."""
@@ -1646,7 +1646,7 @@ type ApiMutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
+  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, newsPrompt: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, researchPrompt: String, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """

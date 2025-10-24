@@ -75,6 +75,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   isGridView = false;
   selectedVersionNumber: number | null = null;
   selectedVersion: EpisodeVersion | null = null;
+  currentVersionCreator: string | null = null;
+  currentVersionCreatedAt: string | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -202,6 +204,13 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           versionsFormArray.clear();
           for (const version of episode.versions) {
             versionsFormArray.push(this.fb.group(version));
+          }
+
+          // Set current version creator and creation date
+          const currentVersion = episode.versions.find((v) => v.versionNumber === episode.currentVersionNumber);
+          if (currentVersion) {
+            this.currentVersionCreator = currentVersion.createdBy?.username || null;
+            this.currentVersionCreatedAt = currentVersion.createdAt || null;
           }
 
           this.audioSrc = episode.audioUrl;
