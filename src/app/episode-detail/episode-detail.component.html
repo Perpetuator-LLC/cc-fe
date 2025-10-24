@@ -152,6 +152,18 @@
                           }
                         </span>
                       </div>
+                      @if (currentVersionCreator) {
+                        <div class="info-row">
+                          <span class="info-label">Created By:</span>
+                          <span class="info-value">{{ currentVersionCreator }}</span>
+                        </div>
+                      }
+                      @if (currentVersionCreatedAt) {
+                        <div class="info-row">
+                          <span class="info-label">Created On:</span>
+                          <span class="info-value">{{ currentVersionCreatedAt | date: 'short' }}</span>
+                        </div>
+                      }
                     </div>
 
                     <!-- Action Buttons -->
@@ -185,6 +197,22 @@
                         <mat-form-field class="version-dropdown">
                           <mat-label>Select Version to View</mat-label>
                           <mat-select [(value)]="selectedVersionNumber" (selectionChange)="onVersionSelect(selectedVersionNumber)">
+                            <mat-select-trigger>
+                              @if (selectedVersion) {
+                                <div class="version-option">
+                                  <span class="version-number">Version {{ selectedVersion.versionNumber }}</span>
+                                  <span class="version-meta">
+                                    <mat-icon class="version-icon">{{ getChangeTypeIcon(selectedVersion.changeType) }}</mat-icon>
+                                    {{ getChangeTypeLabel(selectedVersion.changeType) }}
+                                    @if (selectedVersion.isValidated) {
+                                      <mat-icon class="validated-icon">verified</mat-icon>
+                                    } @else {
+                                      <mat-icon class="unvalidated-icon">warning</mat-icon>
+                                    }
+                                  </span>
+                                </div>
+                              }
+                            </mat-select-trigger>
                             @for (version of historyVersions; track version.uuid) {
                               <mat-option [value]="version.versionNumber">
                                 <div class="version-option">
