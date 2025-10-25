@@ -613,6 +613,46 @@ export class PodcastsService extends BaseService {
     );
   }
 
+  getPodcastsForFilter(first = 100): Observable<{ podcasts: PodcastsResult[] }> {
+    const GQL = gql`
+      query GetPodcastsForFilter($first: Int) {
+        podcasts(first: $first) {
+          edges {
+            node {
+              uuid
+              name
+              team {
+                uuid
+                members {
+                  user {
+                    uuid
+                  }
+                  role
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      podcasts: {
+        edges: RelayEdge<PodcastsResult>[];
+      };
+    }
+
+    return this.query<Response>({
+      query: GQL,
+      variables: { first },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map(({ podcasts }) => ({
+        podcasts: podcasts.edges.map((edge) => edge.node),
+      })),
+    );
+  }
+
   getPodcastCategories(): Observable<Record<string, string[]>> {
     const GQL = gql`
       query GetPodcastCategories {

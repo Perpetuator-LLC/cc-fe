@@ -350,6 +350,16 @@ mat-card {
   }
 }
 
+.stats-header-section {
+  width: 100%;
+  margin-top: 30px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
 .recent-podcasts-section {
   width: 100%;
   margin-top: 30px;

@@ -35,6 +35,9 @@
             </div>
           </div>
         </mat-card-content>
+        @if (shouldShowTimeoutProgress(message)) {
+          <mat-progress-bar class="timeout-progress" mode="determinate" [value]="message.timeoutProgress || 100"></mat-progress-bar>
+        }
       </mat-card>
     }
   </div>

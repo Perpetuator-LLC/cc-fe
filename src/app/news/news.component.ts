@@ -141,7 +141,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
 
     this.subscriptions.add(
-      this.podcastsService.getPodcasts().subscribe({
+      this.podcastsService.getPodcastsForFilter().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts.filter((podcast) =>
             podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),

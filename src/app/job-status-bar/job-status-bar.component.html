@@ -30,13 +30,15 @@
                 <div class="job-message">
                   <!-- Job details section with title -->
                   <div class="job-details">
-                    <!-- Job message section -->
-                    <div class="job-section">
-                      <h4 class="section-title">Message</h4>
-                      <div class="message-text" [ngClass]="{ 'error-message': isErrorMessage(getJobMessage(job)) }">
-                        {{ getCleanJobMessage(job) }}
+                    <!-- Job message section - only show if not duplicate of error -->
+                    @if (!job.error || getCleanErrorMessage(job.error) !== getCleanJobMessage(job)) {
+                      <div class="job-section">
+                        <h4 class="section-title">Message</h4>
+                        <div class="message-text" [ngClass]="{ 'error-message': isErrorMessage(getJobMessage(job)) }">
+                          {{ getCleanJobMessage(job) }}
+                        </div>
                       </div>
-                    </div>
+                    }
 
                     <!-- Resources section - colored tags with icons -->
                     @if (hasPodcastUuid(job) || hasEpisodeUuid(job) || hasTopicUuid(job)) {
