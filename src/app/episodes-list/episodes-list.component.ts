@@ -162,7 +162,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.loadingPodcasts = true;
 
     this.subscriptions.add(
-      this.podcastsService.getPodcasts().subscribe({
+      this.podcastsService.getPodcastsForFilter().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts;
           this.loadingPodcasts = false;

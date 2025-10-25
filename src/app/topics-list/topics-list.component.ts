@@ -89,7 +89,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
 
   loadPodcasts(): void {
     this.subscriptions.add(
-      this.podcastsService.getPodcasts().subscribe({
+      this.podcastsService.getPodcastsForFilter().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts;
           // If create dialog should open, open it now that podcasts are loaded
