@@ -77,6 +77,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   selectedVersion: EpisodeVersion | null = null;
   currentVersionCreator: string | null = null;
   currentVersionCreatedAt: string | null = null;
+  currentVersionValidationNotes: string | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -211,6 +212,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           if (currentVersion) {
             this.currentVersionCreator = currentVersion.createdBy?.username || null;
             this.currentVersionCreatedAt = currentVersion.createdAt || null;
+            this.currentVersionValidationNotes = currentVersion.validationNotes || null;
           }
 
           this.audioSrc = episode.audioUrl;
