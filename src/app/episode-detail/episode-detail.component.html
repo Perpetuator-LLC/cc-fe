@@ -164,6 +164,12 @@
                           <span class="info-value">{{ currentVersionCreatedAt | date: 'short' }}</span>
                         </div>
                       }
+                      @if (currentVersionValidationNotes) {
+                        <div class="validation-notes">
+                          <mat-icon>note</mat-icon>
+                          <span>{{ currentVersionValidationNotes }}</span>
+                        </div>
+                      }
                     </div>
 
                     <!-- Action Buttons -->

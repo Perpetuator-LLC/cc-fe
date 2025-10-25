@@ -660,7 +660,6 @@ type EpisodeType implements Node {
   audioSeconds: Int
   content: String!
   currentVersionNumber: Int!
-  isCurrentValidated: Boolean!
   news: [NewsType]
   podcast: PodcastType!
   isLive: Boolean!
@@ -673,6 +672,7 @@ type EpisodeType implements Node {
   uuid: UUID
   audioUrl: String
   versions: [EpisodeVersionType]
+  isCurrentValidated: Boolean
 }
 
 type NewsType implements Node {
@@ -734,6 +734,9 @@ enum ApiEpisodeVersionChangeTypeChoices {
 
   """Regenerated"""
   REGENERATED
+
+  """Restored"""
+  RESTORED
 }
 
 """OrderType is a GraphQL type that represents an order."""

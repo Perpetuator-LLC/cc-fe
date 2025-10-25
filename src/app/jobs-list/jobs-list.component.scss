@@ -270,6 +270,7 @@
 
   &.job-running {
     background: var(--md-sys-color-primary);
+    color: var(--secondary-500);
   }
 }
 
@@ -354,7 +355,7 @@
 
   &.job-running {
     background: var(--md-sys-color-primary);
-    color: var(--theme-white);
+    color: var(--secondary-dark);
   }
 }
 

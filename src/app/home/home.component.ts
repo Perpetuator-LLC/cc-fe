@@ -74,9 +74,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    // Only set toolbar when logged in (regular layout)
+    // Pre-login layout already has branding in its header
+    if (this.isLoggedIn()) {
+      const viewContainerRef = this.toolbarService.getViewContainerRef();
+      viewContainerRef.clear();
+      viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    }
 
     if (!this.p5Container || !this.p5Container.nativeElement) {
       return;
