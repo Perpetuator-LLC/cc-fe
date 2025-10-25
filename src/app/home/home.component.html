@@ -84,114 +84,9 @@
   </div>
 
   <!-- Stats Cards -->
-  <!-- Loading Skeleton -->
-  @if (loadingStats) {
-    <div class="stats-section">
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-    </div>
-  }
-
-  @if (!loadingStats && siteStats) {
-    <!-- Actual Stats -->
-    <div class="stats-section">
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="podcast"></app-svg-icon>
-          <div class="stat-label">Total Podcasts</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.total_podcasts }}</div>
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="episodes"></app-svg-icon>
-          <div class="stat-label">Total Episodes</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.total_episodes }}</div>
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="voice_selection"></app-svg-icon>
-          <div class="stat-label">Voices</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.total_voices }}</div>
-
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="published"></app-svg-icon>
-          <div class="stat-label">News Articles Processed</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.total_news_articles }}</div>
-
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="newspaper"></app-svg-icon>
-          <div class="stat-label">Summarized News</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.recent_news_processed }}</div>
-
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <mat-icon>graphic_eq</mat-icon>
-          <div class="stat-label">Minutes of Published Audio</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.total_audio_minutes_published | number: '1.0-0' }} minutes</div>
-
-<!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
-      </mat-card>
-    </div>
-  }
 
   <!-- Recent Podcasts Section -->
-  @if (isLoggedIn()) {
+  @if (isLoggedIn() && gridPodcasts.length > 0) {
     <div class="recent-podcasts-section">
       <div class="section-header">
         <h3 class="section-title">Recent Podcasts</h3>
@@ -235,4 +130,114 @@
       </div>
     </div>
   }
+
+  <!-- Loading Skeleton -->
+  <div class="stats-header-section">
+    <div class="section-header">
+      <h3 class="section-title">Stats</h3>
+    </div>
+  </div>
+  @if (loadingStats) {
+    <div class="stats-section">
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+      <mat-card class="stat-card skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-label"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-change"></div>
+      </mat-card>
+    </div>
+  } @else if (siteStats) {
+    <!-- Actual Stats -->
+    <div class="stats-section">
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="podcast"></app-svg-icon>
+          <div class="stat-label">Total Podcasts</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.total_podcasts }}</div>
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="episodes"></app-svg-icon>
+          <div class="stat-label">Total Episodes</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.total_episodes }}</div>
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="voice_selection"></app-svg-icon>
+          <div class="stat-label">Voices</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.total_voices }}</div>
+
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="published"></app-svg-icon>
+          <div class="stat-label">News Articles Processed</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.total_news_articles }}</div>
+
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <app-svg-icon icon="newspaper"></app-svg-icon>
+          <div class="stat-label">Summarized News</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.recent_news_processed }}</div>
+
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-title">
+          <mat-icon>graphic_eq</mat-icon>
+          <div class="stat-label">Minutes of Published Audio</div>
+        </div>
+
+        <div class="stat-value">{{ siteStats.total_audio_minutes_published | number: '1.0-0' }} minutes</div>
+
+        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      </mat-card>
+    </div>
+  }
+
 </div>

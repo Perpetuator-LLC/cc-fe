@@ -21,6 +21,15 @@
   margin-bottom: 5px;
   border-radius: 8px;
   overflow: hidden;
+
+  .timeout-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 0 0 8px 8px;
+  }
 }
 
 .close-button {

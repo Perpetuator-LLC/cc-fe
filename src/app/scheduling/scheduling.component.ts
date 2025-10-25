@@ -174,7 +174,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   loadPodcasts() {
     this.loadingPodcasts = true;
     this.subscriptions.add(
-      this.podcastsService.getPodcasts().subscribe({
+      this.podcastsService.getPodcastsForFilter().subscribe({
         next: (response) => {
           this.podcasts = response.podcasts;
           this.loadingPodcasts = false;
