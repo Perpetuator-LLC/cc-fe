@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
@@ -31,6 +31,13 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { LoadingService } from '../loading.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+
+interface EditableFormValues {
+  title: string;
+  description: string;
+  content: string;
+  isLive: boolean;
+}
 
 @Component({
   selector: 'app-episode-detail',
@@ -81,9 +88,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   currentVersionCreatedAt: string | null = null;
   currentVersionValidationNotes: string | null = null;
   currentVersionChangeType: string | null = null;
+  hasUnsavedChanges = false;
+  private initialFormValues: EditableFormValues | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges) {
+      $event.preventDefault();
+      $event.returnValue = true;
+    }
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -129,18 +146,16 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             if ([JobKind.UPDATE_EPISODE_AUDIO].includes(stringToJobKind(job.kind))) {
-              this.subscriptions.add(
-                this.episodeService.getEpisodeById(this.episodeUuid, 'network-only' as FetchPolicy).subscribe({
-                  next: (episode) => {
-                    if (episode.audioUrl) {
-                      this.audioSrc = episode.audioUrl;
-                    }
-                  },
-                  error: (err) => {
-                    this.messageService.error(`Failed to fetch updated audio for episode: ${err.message}`);
-                  },
-                }),
-              );
+              this.loadEpisodeData('network-only');
+            } else if (
+              [
+                JobKind.VALIDATE_EPISODE,
+                JobKind.VALIDATE_EPISODE_COMPLIANCE,
+                JobKind.VALIDATE_EPISODE_FACTS,
+                JobKind.VALIDATE_EPISODE_LENGTH,
+              ].includes(stringToJobKind(job.kind))
+            ) {
+              this.loadEpisodeData('network-only');
             } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
               // Extract episode UUID from job result JSON object
               const episodeUuid = job.result?.episode_uuid;
@@ -182,6 +197,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
     this.loadEpisodeData();
+
+    this.subscriptions.add(
+      this.episodeForm.valueChanges.subscribe(() => {
+        this.checkForUnsavedChanges();
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -190,11 +211,11 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     this.toolbarService.clearToolbarComponent();
   }
 
-  private loadEpisodeData(): void {
+  private loadEpisodeData(fetchPolicy: FetchPolicy = 'cache-first'): void {
     this.loadingService.show();
 
     this.subscriptions.add(
-      this.episodeService.getEpisodeById(this.episodeUuid).subscribe({
+      this.episodeService.getEpisodeById(this.episodeUuid, fetchPolicy).subscribe({
         next: (episode) => {
           this.episodeForm.patchValue(episode);
 
@@ -217,9 +238,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
             this.currentVersionCreatedAt = currentVersion.createdAt || null;
             this.currentVersionValidationNotes = currentVersion.validationNotes || null;
             this.currentVersionChangeType = currentVersion.changeType || null;
+            this.audioSrc = currentVersion.audioUrl || null;
+          } else {
+            this.audioSrc = episode.audioUrl;
           }
 
-          this.audioSrc = episode.audioUrl;
+          this.initialFormValues = this.getEditableFormValues();
+          this.hasUnsavedChanges = false;
+
           this.loadingService.hide();
         },
         error: (err) => {
@@ -315,7 +341,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
               return;
             }
             this.messageService.success('Episode updated successfully.');
-            this.episodeForm.patchValue(response.episode);
+            this.loadEpisodeData('network-only');
           },
           error: (err) => {
             this.messageService.error(err.message);
@@ -642,12 +668,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
   getValidationTooltip(version: EpisodeVersion): string {
     const parts: string[] = [];
-    parts.push(`Compliance: ${version.validatedCompliance ? '✓' : '✗'}`);
     parts.push(`Facts: ${version.validatedFacts ? '✓' : '✗'}`);
     parts.push(`Length: ${version.validatedLength ? '✓' : '✗'}`);
+    parts.push(`Compliance: ${version.validatedCompliance ? '✓' : '✗'}`);
 
     const status = this.isVersionFullyValidated(version) ? 'Validated' : 'Not Validated';
-    return `${status}\n${parts.join('\n')}`;
+    return `${status}\n - ${parts.join('\n - ')}`;
   }
 
   getVersionWordCount(version: EpisodeVersion): number {
@@ -661,5 +687,55 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   markdownToHtml(markdown: string): SafeHtml {
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private getEditableFormValues(): EditableFormValues {
+    const formValues = this.episodeForm.getRawValue();
+    return {
+      title: formValues.title,
+      description: formValues.description,
+      content: formValues.content,
+      isLive: formValues.isLive,
+    };
+  }
+
+  private checkForUnsavedChanges(): void {
+    if (!this.initialFormValues) {
+      return;
+    }
+    const currentValues = this.getEditableFormValues();
+    this.hasUnsavedChanges =
+      currentValues.title !== this.initialFormValues.title ||
+      currentValues.description !== this.initialFormValues.description ||
+      currentValues.content !== this.initialFormValues.content ||
+      currentValues.isLive !== this.initialFormValues.isLive;
+  }
+
+  canDeactivate(): boolean {
+    if (this.hasUnsavedChanges) {
+      return confirm('You have unsaved changes. Are you sure you want to leave this page?');
+    }
+    return true;
+  }
+
+  isGenerateAudioDisabled(): boolean {
+    return this.audioSrc !== null || this.hasUnsavedChanges;
+  }
+
+  getUpdateButtonTooltip(): string {
+    if (this.hasUnsavedChanges) {
+      return 'Save your changes';
+    }
+    return 'No changes to save';
+  }
+
+  getGenerateAudioTooltip(): string {
+    if (this.hasUnsavedChanges) {
+      return 'You have unsaved changes. Please save before generating audio';
+    }
+    if (this.audioSrc) {
+      return 'Audio already exists for current version';
+    }
+    return 'Generate audio for this episode';
   }
 }

@@ -221,6 +221,14 @@ type ApiQuery {
   podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
   rssFeeds(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, url: String, rssFeedUuid: UUID): RssFeedTypeConnection
   deleteUserResults: DeleteUserResults
+
+  """
+  Validate a podcast name against naming rules (4-5 words max, no special characters)
+  """
+  validatePodcastName(
+    """Podcast name to validate"""
+    name: String!
+  ): PodcastNameValidation
   podcastCategories: PodcastCategoriesType
   teams(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, name: String, teamUuid: UUID): TeamTypeConnection
   node(
@@ -1270,6 +1278,24 @@ type DeleteUserResults {
   leavingTeams: [TeamType]
   deletingPodcasts: [PodcastType]
   leavingPodcasts: [PodcastType]
+}
+
+"""
+Result type for podcast name validation.
+Useful for AI agents to check if a proposed podcast name meets requirements.
+"""
+type PodcastNameValidation {
+  """Whether the podcast name is valid"""
+  isValid: Boolean
+
+  """Validation message (empty if valid, error description if invalid)"""
+  message: String
+
+  """Number of words in the podcast name"""
+  wordCount: Int
+
+  """Whether the name contains special characters"""
+  hasSpecialChars: Boolean
 }
 
 type PodcastCategoriesType {

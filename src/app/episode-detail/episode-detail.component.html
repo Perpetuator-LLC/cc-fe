@@ -18,10 +18,12 @@
           Live on Podcast
         </mat-checkbox>
         }
-        <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control save-btn"
-          type="button">
-          Update
-        </button>
+        <span [matTooltip]="getUpdateButtonTooltip()" class="button-wrapper">
+          <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control save-btn"
+            type="button" [disabled]="!hasUnsavedChanges">
+            Update
+          </button>
+        </span>
         <button (click)="deleteEpisode()" mat-flat-button color="warn" class="episode-control delete-btn"
           type="button">
           Delete
@@ -76,11 +78,13 @@
                     <app-svg-icon icon="telegram"></app-svg-icon>
                     Publish to Telegram
                   </button>
-                  <button mat-raised-button color="primary" type="button" class="episode-control"
-                    (click)="generateAudio()">
-                    <app-svg-icon icon="audio"></app-svg-icon>
-                    Generate Audio
-                  </button>
+                  <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
+                    <button mat-raised-button color="primary" type="button" class="episode-control"
+                      (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">
+                      <app-svg-icon icon="audio"></app-svg-icon>
+                      Generate Audio
+                    </button>
+                  </span>
                 </div>
               </div>
               <div class="audio-card">
@@ -195,6 +199,14 @@
                           <span class="info-value">{{ currentVersionCreatedAt | date: 'short' }}</span>
                         </div>
                       }
+<!--                      <div class="version-audio">-->
+<!--                        <span class="info-label">Audio:</span>-->
+<!--                        @if (audioSrc) {-->
+<!--                          <audio controls [src]="audioSrc"></audio>-->
+<!--                        } @else {-->
+<!--                          <span class="no-audio">No audio file for this version</span>-->
+<!--                        }-->
+<!--                      </div>-->
                       @if (currentVersionValidationNotes) {
                         <div class="validation-notes">
                           <mat-icon>note</mat-icon>
@@ -314,6 +326,15 @@
                               <span class="stat-label">Character Count</span>
                               <span class="stat-value">{{ getVersionCharCount(selectedVersion) }}</span>
                             </div>
+                          </div>
+
+                          <div class="version-audio">
+                            <span class="info-label">Audio:</span>
+                            @if (selectedVersion.audioUrl) {
+                              <audio controls [src]="selectedVersion.audioUrl"></audio>
+                            } @else {
+                              <span class="no-audio">No audio file for this version</span>
+                            }
                           </div>
 
                           @if (selectedVersion.validationNotes) {

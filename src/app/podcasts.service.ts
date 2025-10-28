@@ -445,6 +445,7 @@ export class PodcastsService extends BaseService {
               slug
               url
               imageUrl
+              thumbnailUrl
               description
               ownerName
               ownerEmail
@@ -725,6 +726,7 @@ export class PodcastsService extends BaseService {
             uuid
             name
             imageUrl
+            thumbnailUrl
           }
         }
       }
@@ -769,6 +771,7 @@ export class PodcastsService extends BaseService {
             uuid
             name
             imageUrl
+            thumbnailUrl
           }
         }
       }
