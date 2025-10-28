@@ -32,6 +32,14 @@
             {{ topic.podcast.name }}
           </a>
         </span>
+        @if (topic.episode) {
+        <span class="meta-item">
+          <mat-icon>mic</mat-icon>
+          <a [routerLink]="['/episode', topic.episode.uuid]" class="episode-link">
+            {{ topic.episode.title }}
+          </a>
+        </span>
+        }
         <span class="meta-item">
           <mat-icon>calendar_today</mat-icon>
           {{ formatDate(topic.createdAt) }}

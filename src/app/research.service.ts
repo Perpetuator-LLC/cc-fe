@@ -31,6 +31,10 @@ export interface Topic {
     uuid: string;
     name: string;
   };
+  episode?: {
+    uuid: string;
+    title: string;
+  } | null;
   sources: Source[];
 }
 
@@ -100,6 +104,10 @@ export class ResearchService extends BaseService {
                 uuid
                 name
               }
+              episode {
+                uuid
+                title
+              }
               sources {
                 uuid
                 title
@@ -148,6 +156,10 @@ export class ResearchService extends BaseService {
               podcast {
                 uuid
                 name
+              }
+              episode {
+                uuid
+                title
               }
               sources {
                 uuid
