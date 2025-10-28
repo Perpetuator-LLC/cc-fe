@@ -273,6 +273,7 @@ type TopicTypeEdge {
 
 type TopicType implements Node {
   podcast: PodcastType!
+  episode: EpisodeType
   title: String!
   description: String
   researchContent: String
@@ -421,6 +422,104 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
+
+"""GraphQL type for Episode model."""
+type EpisodeType implements Node {
+  title: String!
+  description: String!
+  date: DateTime!
+  audioFile: String
+  audioSeconds: Int
+  content: String!
+  currentVersionNumber: Int!
+  news: [NewsType]
+  podcast: PodcastType!
+  isLive: Boolean!
+  podcastDate: DateTime
+  telegramDate: DateTime
+  podcastEpisodeGuid: UUID!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  audioUrl: String
+  versions: [EpisodeVersionType]
+  isCurrentValidated: Boolean
+}
+
+type NewsType implements Node {
+  """The ID of the object"""
+  id: ID!
+  title: String!
+  description: String!
+  url: String!
+  publishedAt: DateTime!
+  source: String!
+  summary: String!
+  content: String!
+  validatedSummary: String
+  validationConfidence: ApiNewsValidationConfidenceChoices
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum ApiNewsValidationConfidenceChoices {
+  """High"""
+  HIGH
+
+  """Medium"""
+  MEDIUM
+
+  """Low"""
+  LOW
+
+  """Unverified"""
+  UNVERIFIED
+}
+
+"""
+GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
+"""
+type EpisodeVersionType {
+  versionNumber: Int!
+  title: String!
+  description: String!
+  content: String!
+  validatedCompliance: Boolean!
+  validatedFacts: Boolean!
+  validatedLength: Boolean!
+  validationNotes: String
+  changeType: ApiEpisodeVersionChangeTypeChoices!
+  audioSeconds: Int
+  createdAt: DateTime!
+  uuid: UUID
+  createdBy: PublicUserType
+  audioUrl: String
+}
+
+"""An enumeration."""
+enum ApiEpisodeVersionChangeTypeChoices {
+  """Created"""
+  CREATED
+
+  """Manually Edited"""
+  EDITED
+
+  """Regenerated"""
+  REGENERATED
+
+  """Restored"""
+  RESTORED
+
+  """Compliance Adjustment"""
+  COMPLIANCE_ADJUSTMENT
+
+  """Facts Adjustment"""
+  FACTS_ADJUSTMENT
+
+  """Length Adjustment"""
+  LENGTH_ADJUSTMENT
+}
 
 type SourceType implements Node {
   topic: TopicType!
@@ -667,104 +766,6 @@ type JobType implements Node {
   id: ID!
   uuid: UUID
   cost: Int
-}
-
-"""GraphQL type for Episode model."""
-type EpisodeType implements Node {
-  title: String!
-  description: String!
-  date: DateTime!
-  audioFile: String
-  audioSeconds: Int
-  content: String!
-  currentVersionNumber: Int!
-  news: [NewsType]
-  podcast: PodcastType!
-  isLive: Boolean!
-  podcastDate: DateTime
-  telegramDate: DateTime
-  podcastEpisodeGuid: UUID!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  audioUrl: String
-  versions: [EpisodeVersionType]
-  isCurrentValidated: Boolean
-}
-
-type NewsType implements Node {
-  """The ID of the object"""
-  id: ID!
-  title: String!
-  description: String!
-  url: String!
-  publishedAt: DateTime!
-  source: String!
-  summary: String!
-  content: String!
-  validatedSummary: String
-  validationConfidence: ApiNewsValidationConfidenceChoices
-  uuid: UUID
-}
-
-"""An enumeration."""
-enum ApiNewsValidationConfidenceChoices {
-  """High"""
-  HIGH
-
-  """Medium"""
-  MEDIUM
-
-  """Low"""
-  LOW
-
-  """Unverified"""
-  UNVERIFIED
-}
-
-"""
-GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
-"""
-type EpisodeVersionType {
-  versionNumber: Int!
-  title: String!
-  description: String!
-  content: String!
-  validatedCompliance: Boolean!
-  validatedFacts: Boolean!
-  validatedLength: Boolean!
-  validationNotes: String
-  changeType: ApiEpisodeVersionChangeTypeChoices!
-  audioSeconds: Int
-  createdAt: DateTime!
-  uuid: UUID
-  createdBy: PublicUserType
-  audioUrl: String
-}
-
-"""An enumeration."""
-enum ApiEpisodeVersionChangeTypeChoices {
-  """Created"""
-  CREATED
-
-  """Manually Edited"""
-  EDITED
-
-  """Regenerated"""
-  REGENERATED
-
-  """Restored"""
-  RESTORED
-
-  """Compliance Adjustment"""
-  COMPLIANCE_ADJUSTMENT
-
-  """Facts Adjustment"""
-  FACTS_ADJUSTMENT
-
-  """Length Adjustment"""
-  LENGTH_ADJUSTMENT
 }
 
 """OrderType is a GraphQL type that represents an order."""
