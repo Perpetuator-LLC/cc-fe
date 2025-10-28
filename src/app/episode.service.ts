@@ -17,7 +17,9 @@ export interface EpisodeVersion {
   title: string;
   description: string;
   content: string;
-  isValidated: boolean;
+  validatedCompliance: boolean;
+  validatedFacts: boolean;
+  validatedLength: boolean;
   validationNotes?: string;
   changeType: 'created' | 'validated' | 'edited' | 'regenerated';
   createdAt: string;
@@ -35,7 +37,6 @@ export interface Episode {
   description: string;
   content: string;
   currentVersionNumber: number;
-  isCurrentValidated: boolean;
   versions: EpisodeVersion[];
   audioUrl: string;
   isLive: boolean;
@@ -47,8 +48,14 @@ export interface Episode {
 }
 
 const GET_EPISODES = gql`
-  query GetEpisodes($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!) {
-    episodes(podcastUuid: $podcastUuid, first: $first, after: $after, orderBy: $orderBy) {
+  query GetEpisodes($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!, $titleContains: String) {
+    episodes(
+      podcastUuid: $podcastUuid
+      first: $first
+      after: $after
+      orderBy: $orderBy
+      titleContains: $titleContains
+    ) {
       edges {
         cursor
         node {
@@ -63,6 +70,14 @@ const GET_EPISODES = gql`
           title
           content
           isLive
+          currentVersionNumber
+          versions {
+            uuid
+            versionNumber
+            validatedCompliance
+            validatedFacts
+            validatedLength
+          }
           news {
             id
             uuid
@@ -95,14 +110,15 @@ const GET_EPISODE = gql`
           description
           content
           currentVersionNumber
-          isCurrentValidated
           versions {
             uuid
             versionNumber
             title
             description
             content
-            isValidated
+            validatedCompliance
+            validatedFacts
+            validatedLength
             validationNotes
             changeType
             createdAt
@@ -167,6 +183,7 @@ export class EpisodeService extends BaseService {
     sort = 'date',
     direction = 'DESC',
     podcastUuid: string | null = null,
+    titleContains: string | null = null,
   ) {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
@@ -176,7 +193,7 @@ export class EpisodeService extends BaseService {
 
     return this.query<Response>({
       query: GET_EPISODES,
-      variables: { podcastUuid, first, after, orderBy },
+      variables: { podcastUuid, first, after, orderBy, titleContains },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ episodes }) => ({
@@ -489,14 +506,15 @@ export class EpisodeService extends BaseService {
             description
             content
             currentVersionNumber
-            isCurrentValidated
             versions {
               uuid
               versionNumber
               title
               description
               content
-              isValidated
+              validatedCompliance
+              validatedFacts
+              validatedLength
               validationNotes
               changeType
               createdAt

@@ -59,7 +59,9 @@ export interface PodcastsResult {
   intro: string | null;
   prompt: string | null;
   newsPrompt: string | null;
+  newsTargetWords: number;
   researchPrompt: string | null;
+  researchTargetWords: number;
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
@@ -262,7 +264,9 @@ export class PodcastsService extends BaseService {
     intro: string | null = null,
     prompt: string | null = null,
     newsPrompt: string | null = null,
+    newsTargetWords: number | null = null,
     researchPrompt: string | null = null,
+    researchTargetWords: number | null = null,
     outro: string | null = null,
     enabled: boolean | null = null,
     slug: string | null = null,
@@ -284,7 +288,9 @@ export class PodcastsService extends BaseService {
         $intro: String
         $prompt: String
         $newsPrompt: String
+        $newsTargetWords: Int
         $researchPrompt: String
+        $researchTargetWords: Int
         $outro: String
         $enabled: Boolean
         $slug: String
@@ -305,7 +311,9 @@ export class PodcastsService extends BaseService {
           intro: $intro
           prompt: $prompt
           newsPrompt: $newsPrompt
+          newsTargetWords: $newsTargetWords
           researchPrompt: $researchPrompt
+          researchTargetWords: $researchTargetWords
           outro: $outro
           enabled: $enabled
           slug: $slug
@@ -328,7 +336,9 @@ export class PodcastsService extends BaseService {
             intro
             prompt
             newsPrompt
+            newsTargetWords
             researchPrompt
+            researchTargetWords
             outro
             enabled
             slug
@@ -388,7 +398,9 @@ export class PodcastsService extends BaseService {
         intro,
         prompt,
         newsPrompt,
+        newsTargetWords,
         researchPrompt,
+        researchTargetWords,
         outro,
         enabled,
         slug,
@@ -425,7 +437,9 @@ export class PodcastsService extends BaseService {
               intro
               prompt
               newsPrompt
+              newsTargetWords
               researchPrompt
+              researchTargetWords
               outro
               enabled
               slug

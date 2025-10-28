@@ -298,11 +298,21 @@ type PodcastType implements Node {
   """Brand prompt that influences all episode types with tone and style"""
   prompt: String!
 
-  """Prompt for generating news episodes (3 minutes, ~450 words)"""
+  """Prompt for generating news episodes"""
   newsPrompt: String!
 
-  """Prompt for generating research episodes (5-10 minutes, ~1400 words)"""
+  """
+  Target word count for news episodes. Used to calculate max_tokens limit. Default: 450 words (~3 minutes)
+  """
+  newsTargetWords: Int!
+
+  """Prompt for generating research episodes"""
   researchPrompt: String!
+
+  """
+  Target word count for research episodes. Used to calculate max_tokens limit. Default: 1400 words (~10 minutes)
+  """
+  researchTargetWords: Int!
   outro: String!
   slug: String
   enabled: Boolean!
@@ -713,21 +723,22 @@ type EpisodeVersionType {
   title: String!
   description: String!
   content: String!
-  isValidated: Boolean!
+  validatedCompliance: Boolean!
+  validatedFacts: Boolean!
+  validatedLength: Boolean!
   validationNotes: String
   changeType: ApiEpisodeVersionChangeTypeChoices!
+  audioSeconds: Int
   createdAt: DateTime!
   uuid: UUID
   createdBy: PublicUserType
+  audioUrl: String
 }
 
 """An enumeration."""
 enum ApiEpisodeVersionChangeTypeChoices {
   """Created"""
   CREATED
-
-  """Validated"""
-  VALIDATED
 
   """Manually Edited"""
   EDITED
@@ -737,6 +748,15 @@ enum ApiEpisodeVersionChangeTypeChoices {
 
   """Restored"""
   RESTORED
+
+  """Compliance Adjustment"""
+  COMPLIANCE_ADJUSTMENT
+
+  """Facts Adjustment"""
+  FACTS_ADJUSTMENT
+
+  """Length Adjustment"""
+  LENGTH_ADJUSTMENT
 }
 
 """OrderType is a GraphQL type that represents an order."""
@@ -906,6 +926,9 @@ enum JobKind {
   SUMMARIZE_NEWS
   VALIDATE_NEWS
   VALIDATE_EPISODE
+  VALIDATE_EPISODE_COMPLIANCE
+  VALIDATE_EPISODE_FACTS
+  VALIDATE_EPISODE_LENGTH
   CREATE_EPISODE
   SELECT_UNUSED_NEWS
   PUBLISH_LATEST_EPISODE_CHAIN
@@ -1649,7 +1672,7 @@ type ApiMutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, newsPrompt: String, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, researchPrompt: String, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
+  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, newsPrompt: String, newsTargetWords: Int, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, researchPrompt: String, researchTargetWords: Int, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """

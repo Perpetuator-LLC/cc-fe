@@ -4,14 +4,13 @@ import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   Job,
-  JobKind,
   JobResult,
   JobService,
   JobStatus,
   kindToString,
   statusToString,
-  stringToJobKind,
   stringToJobStatus,
+  iconForJob,
 } from '../job.service';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -459,66 +458,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  iconForJob(kind: string): string {
-    switch (stringToJobKind(kind)) {
-      case JobKind.FETCH_NEWS:
-        return 'cloud_download';
-      case JobKind.EXTRACT_NEWS:
-        return 'auto_fix_high';
-      case JobKind.SUMMARIZE_NEWS:
-        return 'summarize';
-      case JobKind.VALIDATE_NEWS:
-        return 'fact_check';
-      case JobKind.CREATE_EPISODE:
-        return 'mic';
-      case JobKind.SELECT_UNUSED_NEWS:
-        return 'check_circle';
-      case JobKind.UPDATE_EPISODE_AUDIO:
-        return 'audiotrack';
-      case JobKind.PUBLISH_EPISODE_AUDIO:
-        return 'cloud_upload';
-      case JobKind.VALIDATE_EPISODE:
-        return 'verified';
-      case JobKind.PUBLISH_LATEST_EPISODE_CHAIN:
-        return 'published_with_changes';
-      case JobKind.REFRESH_STOCK_LISTINGS:
-        return 'refresh';
-      case JobKind.SCHEDULE_JOB:
-        return 'schedule';
-      case JobKind.CANCEL_SCHEDULED_JOB:
-        return 'cancel_schedule_send';
-      case JobKind.FETCH_COMPANY_INFO:
-        return 'business';
-      case JobKind.FETCH_STOCK_PRICES:
-        return 'trending_up';
-      case JobKind.FETCH_BALANCE_SHEET:
-        return 'account_balance';
-      case JobKind.FETCH_INCOME_STATEMENT:
-        return 'payments';
-      case JobKind.FETCH_CASH_FLOW:
-        return 'account_balance_wallet';
-      case JobKind.FETCH_EARNINGS:
-        return 'monetization_on';
-      case JobKind.CREATE_RESEARCH_TOPIC:
-        return 'topic';
-      case JobKind.RESEARCH_TOPIC:
-        return 'search';
-      case JobKind.VALIDATE_RESEARCH:
-        return 'verified';
-      case JobKind.GENERATE_RESEARCH_TRANSCRIPT:
-        return 'description';
-      case JobKind.CREATE_RESEARCH_EPISODE:
-        return 'podcasts';
-      case JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN:
-        return 'rocket_launch';
-      case JobKind.TEST_RAISE:
-        return 'bug_report';
-      case JobKind.TEST_PRINT:
-        return 'print';
-      default:
-        return 'work';
-    }
-  }
+  // Use the iconForJob function from job.service
+  iconForJob = iconForJob;
 
   // Delegate to JobDisplayService for consistent parsing
   parseJobResult(job: Job): JobResult | null {
