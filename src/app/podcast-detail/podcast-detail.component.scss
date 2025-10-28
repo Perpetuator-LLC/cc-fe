@@ -1,4 +1,8 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+.button-wrapper {
+  display: inline-block;
+}
+
 .member-row {
   display: flex;
   flex-wrap: wrap;
@@ -452,8 +456,15 @@ mat-divider {
           height: 20px;
         }
 
-        &:hover {
+        &:hover:not(:disabled) {
           opacity: 0.9;
+        }
+
+        &:disabled {
+          background-color: var(--secondary-400) !important;
+          color: var(--description-color) !important;
+          cursor: not-allowed !important;
+          opacity: 0.6;
         }
 
         @media screen and (max-width: 900px) {

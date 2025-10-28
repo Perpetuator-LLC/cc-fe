@@ -11,7 +11,16 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { Job, JobService, JobStatus, kindToString, stringToJobStatus, statusToString } from '../job.service';
+import {
+  Job,
+  JobService,
+  JobStatus,
+  JobKind,
+  kindToString,
+  stringToJobKind,
+  stringToJobStatus,
+  statusToString,
+} from '../job.service';
 import { MessageService } from '../message.service';
 import { SidePanelAccordianData } from '../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -75,7 +84,18 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-          this.messageService.success(`${kindToString(job.kind)} completed.`);
+          const jobKind = stringToJobKind(job.kind);
+          const skipMessageForKinds = [
+            JobKind.VALIDATE_EPISODE,
+            JobKind.VALIDATE_EPISODE_COMPLIANCE,
+            JobKind.VALIDATE_EPISODE_FACTS,
+            JobKind.VALIDATE_EPISODE_LENGTH,
+            JobKind.UPDATE_EPISODE_AUDIO,
+          ];
+
+          if (!skipMessageForKinds.includes(jobKind)) {
+            this.messageService.success(`${kindToString(job.kind)} completed.`);
+          }
         });
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
           this.messageService.error(`${kindToString(job.kind)} failed: ${job.error}`);
