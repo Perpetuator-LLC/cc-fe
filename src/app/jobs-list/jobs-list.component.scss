@@ -267,7 +267,7 @@
 
   &.job-pending {
     background: var(--md-sys-color-warning);
-    text-shadow: var(--secondary-dark) 2px 2px;
+    text-shadow: var(--secondary-dark) 1px 1px;
     //color: var(--secondary-dark);
     //box-shadow: 0 0 10px var(--md-sys-color-warning);
     //text-shadow: var(--secondary-light) 1px 1px;
@@ -275,7 +275,7 @@
 
   &.job-running {
     background: var(--md-sys-color-primary);
-    text-shadow: var(--secondary-dark) 2px 2px;
+    text-shadow: var(--secondary-dark) 1px 1px;
     //color: var(--secondary-dark);
     //text-shadow: var(--secondary-light) 1px 1px;
     //box-shadow: 0 0 10px var(--md-sys-color-warning);
@@ -364,14 +364,14 @@
     background: var(--md-sys-color-warning);
     //box-shadow: 0 0 10px var(--md-sys-color-warning);
     //color: var(--secondary-dark);
-    text-shadow: var(--secondary-dark) 2px 2px;
+    text-shadow: var(--secondary-dark) 1px 1px;
   }
 
   &.job-running {
     background: var(--md-sys-color-primary);
     //box-shadow: 0 0 10px var(--md-sys-color-warning);
     //color: var(--secondary-dark);
-    text-shadow: var(--secondary-dark) 2px 2px;
+    text-shadow: var(--secondary-dark) 1px 1px;
   }
 }
 

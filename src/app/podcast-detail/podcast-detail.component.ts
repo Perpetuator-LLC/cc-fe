@@ -685,12 +685,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private uploadPodcastImage(file: File) {
     this.podcastsService.uploadPodcastImage(this.podcastUuid, file).subscribe({
       next: (response) => {
-        this.messageService.success('Podcast image uploaded successfully');
-        const imageUrl = response.podcast.imageUrl;
-        const cacheBustedUrl = imageUrl + (imageUrl?.includes('?') ? '&' : '?') + 'v=' + new Date().getTime();
-        this.podcastForm.patchValue({ imageUrl: cacheBustedUrl });
-        this.selectedFile = null;
-        this.podcastForm.get('image')?.reset();
+        if (!response.success) {
+          this.messageService.success('Podcast image uploaded successfully');
+          this.selectedFile = null;
+          this.podcastForm.get('image')?.reset();
+          // Refresh podcast data to update Apollo cache with new imageUrl and thumbnailUrl
+          this.refreshPodcastData();
+        } else {
+          this.messageService.error(response.message);
+        }
       },
       error: (error) => {
         this.messageService.error(`Failed to upload podcast image: ${error.message}`);
@@ -716,9 +719,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               return;
             }
             this.messageService.success('Podcast image deleted successfully');
-            this.podcastForm.patchValue({ imageUrl: data.podcast.imageUrl });
-            this.imageUrl = data.podcast.imageUrl;
-            this.podcastForm.markAsPristine();
+            // Refresh podcast data to update Apollo cache
+            this.refreshPodcastData();
           },
           error: (err) => {
             this.messageService.error(`Failed to delete podcast image: ${err.message}`);
@@ -1065,5 +1067,16 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.podcastForm.dirty;
+  }
+
+  getEpisodeCreationButtonTooltip(): string {
+    if (this.hasUnsavedChanges()) {
+      return 'Please save your changes before creating an episode';
+    }
+    return 'Create a new episode';
   }
 }

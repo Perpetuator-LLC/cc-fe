@@ -119,6 +119,11 @@ export const routes: Routes = [
     loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
     title: 'Episode',
     canActivate: [AuthGuard],
+    canDeactivate: [
+      (component: { canDeactivate?: () => boolean }) => {
+        return component.canDeactivate ? component.canDeactivate() : true;
+      },
+    ],
   },
   {
     path: 'episodes',

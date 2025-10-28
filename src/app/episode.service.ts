@@ -22,6 +22,7 @@ export interface EpisodeVersion {
   validatedLength: boolean;
   validationNotes?: string;
   changeType: 'created' | 'validated' | 'edited' | 'regenerated';
+  audioUrl?: string;
   createdAt: string;
   createdBy?: {
     id: string;
@@ -121,6 +122,7 @@ const GET_EPISODE = gql`
             validatedLength
             validationNotes
             changeType
+            audioUrl
             createdAt
             createdBy {
               id
