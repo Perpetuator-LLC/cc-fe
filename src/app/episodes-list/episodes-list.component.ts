@@ -7,7 +7,8 @@ import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import {
@@ -37,11 +38,14 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from '../loading.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
   imports: [
+    FormsModule,
     MatButton,
     MatCard,
     SvgIconComponent,
@@ -77,6 +81,7 @@ import { LoadingService } from '../loading.service';
     MatButton,
     MatInput,
     CommonModule,
+    MatTooltip,
   ],
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
@@ -96,6 +101,8 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   podcasts: PodcastsResult[] = [];
   cursors: (string | null)[] = [null];
   isGridView = false;
+  searchTerm = '';
+  private searchSubject = new Subject<string>();
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -114,6 +121,18 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+
+    this.subscriptions.add(
+      this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((searchTerm) => {
+        this.searchTerm = searchTerm;
+        this.cursors = [null];
+        if (this.paginator) {
+          this.paginator.pageIndex = 0;
+        }
+        this.loadEpisodes();
+      }),
+    );
+
     this.loadEpisodes();
     this.loadPodcasts();
   }
@@ -127,13 +146,20 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.isGridView = isGrid;
   }
 
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.searchSubject.next(input.value);
+  }
+
   loadEpisodes(after: string | null = null, pageIndex = 0) {
     this.loadingEpisodes = true;
-    this.loadingService.show(); // Show global loading spinner
+    this.loadingService.show();
+
+    const searchTerm = this.searchTerm.trim() || null;
 
     this.subscriptions.add(
       this.episodeService
-        .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast)
+        .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast, searchTerm)
         .subscribe({
           next: ({ episodes, pageInfo }) => {
             this.episodes = episodes;
@@ -230,5 +256,26 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  isEpisodeFullyValidated(episode: Episode): boolean {
+    if (!episode.versions || episode.versions.length === 0) return false;
+    const currentVersion = episode.versions.find((v) => v.versionNumber === episode.currentVersionNumber);
+    if (!currentVersion) return false;
+    return currentVersion.validatedCompliance && currentVersion.validatedFacts && currentVersion.validatedLength;
+  }
+
+  getEpisodeValidationTooltip(episode: Episode): string {
+    if (!episode.versions || episode.versions.length === 0) return 'No version information available';
+    const currentVersion = episode.versions.find((v) => v.versionNumber === episode.currentVersionNumber);
+    if (!currentVersion) return 'No current version found';
+
+    const parts: string[] = [];
+    parts.push(`Compliance: ${currentVersion.validatedCompliance ? '✓' : '✗'}`);
+    parts.push(`Facts: ${currentVersion.validatedFacts ? '✓' : '✗'}`);
+    parts.push(`Length: ${currentVersion.validatedLength ? '✓' : '✗'}`);
+
+    const status = this.isEpisodeFullyValidated(episode) ? 'Validated' : 'Not Validated';
+    return `${status}\n${parts.join('\n')}`;
   }
 }

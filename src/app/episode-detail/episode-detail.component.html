@@ -118,10 +118,10 @@
                     <mat-panel-description>
                       <span>
                         Current: v{{ episodeForm.get('currentVersionNumber')?.value }}
-                        @if (episodeForm.get('isCurrentValidated')?.value) {
-                          <mat-icon class="status-icon validated">verified</mat-icon>
+                        @if (isCurrentVersionFullyValidated()) {
+                          <mat-icon class="status-icon validated" [matTooltip]="getCurrentVersionValidationTooltip()">verified</mat-icon>
                         } @else {
-                          <mat-icon class="status-icon unvalidated">warning</mat-icon>
+                          <mat-icon class="status-icon unvalidated" [matTooltip]="getCurrentVersionValidationTooltip()">warning</mat-icon>
                         }
                       </span>
                       @if (historyVersions.length > 0) {
@@ -133,45 +133,6 @@
                   </mat-expansion-panel-header>
 
                   <div class="version-control-content">
-                    <!-- Current Version Status -->
-                    <div class="current-version-info">
-                      <div class="info-row">
-                        <span class="info-label">Current Version:</span>
-                        <span class="info-value">
-                          Version {{ episodeForm.get('currentVersionNumber')?.value }}
-                          @if (episodeForm.get('isCurrentValidated')?.value) {
-                            <span class="validated-badge">
-                              <mat-icon>verified</mat-icon>
-                              Validated
-                            </span>
-                          } @else {
-                            <span class="unvalidated-badge">
-                              <mat-icon>warning</mat-icon>
-                              Unvalidated
-                            </span>
-                          }
-                        </span>
-                      </div>
-                      @if (currentVersionCreator) {
-                        <div class="info-row">
-                          <span class="info-label">Created By:</span>
-                          <span class="info-value">{{ currentVersionCreator }}</span>
-                        </div>
-                      }
-                      @if (currentVersionCreatedAt) {
-                        <div class="info-row">
-                          <span class="info-label">Created On:</span>
-                          <span class="info-value">{{ currentVersionCreatedAt | date: 'short' }}</span>
-                        </div>
-                      }
-                      @if (currentVersionValidationNotes) {
-                        <div class="validation-notes">
-                          <mat-icon>note</mat-icon>
-                          <span>{{ currentVersionValidationNotes }}</span>
-                        </div>
-                      }
-                    </div>
-
                     <!-- Action Buttons -->
                     <div class="action-buttons">
                       <button
@@ -194,6 +155,54 @@
                       </button>
                     </div>
 
+                    <!-- Current Version Status -->
+                    <div class="current-version-info">
+                      <div class="info-row">
+                        <span class="info-label">Current Version:</span>
+                        <span class="info-value">
+                          Version {{ episodeForm.get('currentVersionNumber')?.value }}
+                          @if (isCurrentVersionFullyValidated()) {
+                            <span class="validated-badge" [matTooltip]="getCurrentVersionValidationTooltip()">
+                              <mat-icon>verified</mat-icon>
+                              Validated
+                            </span>
+                          } @else {
+                            <span class="unvalidated-badge" [matTooltip]="getCurrentVersionValidationTooltip()">
+                              <mat-icon>warning</mat-icon>
+                              Not Validated
+                            </span>
+                          }
+                        </span>
+                      </div>
+                      @if (currentVersionChangeType) {
+                        <div class="info-row">
+                          <span class="info-label">Change Type:</span>
+                          <span class="info-value change-type-value">
+                            <mat-icon>{{ getChangeTypeIcon(currentVersionChangeType) }}</mat-icon>
+                            {{ getChangeTypeLabel(currentVersionChangeType) }}
+                          </span>
+                        </div>
+                      }
+                      @if (currentVersionCreator) {
+                        <div class="info-row">
+                          <span class="info-label">Created By:</span>
+                          <span class="info-value">{{ currentVersionCreator }}</span>
+                        </div>
+                      }
+                      @if (currentVersionCreatedAt) {
+                        <div class="info-row">
+                          <span class="info-label">Created On:</span>
+                          <span class="info-value">{{ currentVersionCreatedAt | date: 'short' }}</span>
+                        </div>
+                      }
+                      @if (currentVersionValidationNotes) {
+                        <div class="validation-notes">
+                          <mat-icon>note</mat-icon>
+                          <span [innerHTML]="markdownToHtml(currentVersionValidationNotes)"></span>
+                        </div>
+                      }
+                    </div>
+
                     <!-- Version History -->
                     @if (historyVersions.length > 0) {
                       <div class="version-history-divider"></div>
@@ -210,10 +219,10 @@
                                   <span class="version-meta">
                                     <mat-icon class="version-icon">{{ getChangeTypeIcon(selectedVersion.changeType) }}</mat-icon>
                                     {{ getChangeTypeLabel(selectedVersion.changeType) }}
-                                    @if (selectedVersion.isValidated) {
-                                      <mat-icon class="validated-icon">verified</mat-icon>
+                                    @if (isVersionFullyValidated(selectedVersion)) {
+                                      <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(selectedVersion)">verified</mat-icon>
                                     } @else {
-                                      <mat-icon class="unvalidated-icon">warning</mat-icon>
+                                      <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(selectedVersion)">warning</mat-icon>
                                     }
                                   </span>
                                 </div>
@@ -226,10 +235,10 @@
                                   <span class="version-meta">
                                     <mat-icon class="version-icon">{{ getChangeTypeIcon(version.changeType) }}</mat-icon>
                                     {{ getChangeTypeLabel(version.changeType) }}
-                                    @if (version.isValidated) {
-                                      <mat-icon class="validated-icon">verified</mat-icon>
+                                    @if (isVersionFullyValidated(version)) {
+                                      <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(version)">verified</mat-icon>
                                     } @else {
-                                      <mat-icon class="unvalidated-icon">warning</mat-icon>
+                                      <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(version)">warning</mat-icon>
                                     }
                                   </span>
                                 </div>
@@ -268,15 +277,15 @@
                           <div class="version-header">
                             <h5>
                               Version {{ selectedVersion.versionNumber }}
-                              @if (selectedVersion.isValidated) {
-                                <span class="validated-badge">
+                              @if (isVersionFullyValidated(selectedVersion)) {
+                                <span class="validated-badge" [matTooltip]="getValidationTooltip(selectedVersion)">
                                   <mat-icon>verified</mat-icon>
                                   Validated
                                 </span>
                               } @else {
-                                <span class="unvalidated-badge">
+                                <span class="unvalidated-badge" [matTooltip]="getValidationTooltip(selectedVersion)">
                                   <mat-icon>warning</mat-icon>
-                                  Unvalidated
+                                  Not Validated
                                 </span>
                               }
                             </h5>
@@ -296,10 +305,21 @@
                             </div>
                           </div>
 
+                          <div class="version-stats">
+                            <div class="stat-item">
+                              <span class="stat-label">Word Count</span>
+                              <span class="stat-value">{{ getVersionWordCount(selectedVersion) }}</span>
+                            </div>
+                            <div class="stat-item">
+                              <span class="stat-label">Character Count</span>
+                              <span class="stat-value">{{ getVersionCharCount(selectedVersion) }}</span>
+                            </div>
+                          </div>
+
                           @if (selectedVersion.validationNotes) {
                             <div class="validation-notes">
                               <mat-icon>note</mat-icon>
-                              <span>{{ selectedVersion.validationNotes }}</span>
+                              <span [innerHTML]="markdownToHtml(selectedVersion.validationNotes)"></span>
                             </div>
                           }
 
