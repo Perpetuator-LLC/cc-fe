@@ -1,4 +1,27 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.validated-icon {
+  color: var(--md-sys-color-success);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  cursor: help;
+}
+
+.unvalidated-icon {
+  color: var(--md-sys-color-warning);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  cursor: help;
+}
+
 .create-episode-card {
   background-color: var(--toolbar-container-background-color) !important;
   box-shadow: none;

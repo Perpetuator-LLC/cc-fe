@@ -195,7 +195,7 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
-    <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+    <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
       aria-label="Select page of podcasts" (page)="onPageChange($event)">
     </mat-paginator>
     }
@@ -269,8 +269,8 @@
       </mat-card>
       }
     </div>
-    <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
-      aria-label="Select page of podcasts">
+    <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+      aria-label="Select page of podcasts" (page)="onPageChange($event)">
     </mat-paginator>
     }
   </div>

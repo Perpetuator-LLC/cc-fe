@@ -56,6 +56,10 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { CommonModule } from '@angular/common';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { LoadingService } from '../loading.service';
+import { NewsService } from '../news.service';
+import { EpisodeService } from '../episode.service';
+import { JobService } from '../job.service';
+import { ResearchService } from '../research.service';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -101,6 +105,9 @@ import { LoadingService } from '../loading.service';
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
+  // Minimum words required beyond intro + outro
+  private static readonly MIN_ADDITIONAL_WORDS = 50;
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   podcastForm: FormGroup;
   private subscriptions = new Subscription();
@@ -143,6 +150,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private voicesService: VoicesService,
     protected userService: UserService,
     private loadingService: LoadingService,
+    private newsService: NewsService,
+    private episodeService: EpisodeService,
+    private jobService: JobService,
+    private researchService: ResearchService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -158,7 +169,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       intro: [''],
       prompt: [''],
       newsPrompt: [''],
+      newsTargetWords: [450, [Validators.required, Validators.min(50)]],
       researchPrompt: [''],
+      researchTargetWords: [1400, [Validators.required, Validators.min(50)]],
       outro: [''],
       enabled: [false],
       createdAt: [{ value: '', disabled: true }],
@@ -246,7 +259,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               intro,
               prompt,
               newsPrompt,
+              newsTargetWords,
               researchPrompt,
+              researchTargetWords,
               outro,
               enabled,
               slug,
@@ -267,7 +282,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
                 intro,
                 prompt,
                 newsPrompt,
+                newsTargetWords,
                 researchPrompt,
+                researchTargetWords,
                 outro,
                 enabled,
                 slug,
@@ -536,7 +553,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       intro,
       prompt,
       newsPrompt,
+      newsTargetWords,
       researchPrompt,
+      researchTargetWords,
       outro,
       enabled,
       slug,
@@ -560,7 +579,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       intro,
       prompt,
       newsPrompt,
+      newsTargetWords,
       researchPrompt,
+      researchTargetWords,
       outro,
       enabled,
       slug,
@@ -908,6 +929,41 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Helper method to count words in a string
+  private countWords(text: string | null): number {
+    if (!text) return 0;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+  }
+
+  // Calculate minimum allowed target words based on intro/outro
+  getMinimumTargetWords(): number {
+    const intro = this.podcastForm.get('intro')?.value;
+    const outro = this.podcastForm.get('outro')?.value;
+    const introWords = this.countWords(intro);
+    const outroWords = this.countWords(outro);
+    return introWords + outroWords + PodcastDetailComponent.MIN_ADDITIONAL_WORDS;
+  }
+
+  // Get error message for target words validation
+  getTargetWordsError(fieldName: string): string | null {
+    const control = this.podcastForm.get(fieldName);
+    if (!control || !control.errors) return null;
+
+    const minRequired = this.getMinimumTargetWords();
+    const value = control.value;
+
+    if (control.errors['required']) {
+      return 'Target words is required';
+    }
+    if (control.errors['min'] || (value && value < minRequired)) {
+      return `Must be at least ${minRequired} words (intro + outro + ${PodcastDetailComponent.MIN_ADDITIONAL_WORDS})`;
+    }
+    return null;
+  }
+
   protected readonly tierToString = tierToString;
 
   protected openRefreshVoicesDialog(): void {
@@ -950,5 +1006,64 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     }
 
     this.applyVoiceFilters();
+  }
+
+  createBlankEpisode() {
+    const newsUuids: string[] = [];
+    this.subscriptions.add(
+      this.newsService.createEpisode(newsUuids, this.podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.job) {
+            this.messageService.error('Failed to create episode: No job returned');
+            return;
+          }
+          this.messageService.info('Creating blank episode...');
+          this.jobService.addJob(data.job);
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  createNewsEpisode() {
+    this.subscriptions.add(
+      this.podcastsService.createLatestEpisodeChain(this.podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.jobs || data.jobs.length === 0) {
+            this.messageService.error('Failed to create latest episode: No jobs returned');
+            return;
+          }
+          this.messageService.info('Creating latest episode from news...');
+          data.jobs.forEach((job) => {
+            this.jobService.addJob(job);
+          });
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  createResearchEpisode() {
+    this.subscriptions.add(
+      this.researchService.createResearchChain(this.podcastUuid).subscribe({
+        next: (data) => {
+          if (!data.jobs || data.jobs.length === 0) {
+            this.messageService.error('Failed to start research: No jobs returned');
+            return;
+          }
+          this.messageService.info(`Research started! ${data.jobs.length} jobs created.`);
+          data.jobs.forEach((job) => {
+            this.jobService.addJob(job);
+          });
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to start research: ${err.message}`);
+        },
+      }),
+    );
   }
 }

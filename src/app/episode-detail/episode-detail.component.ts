@@ -29,6 +29,8 @@ import { SchedulingService, Schedule } from '../scheduling.service';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { LoadingService } from '../loading.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { marked } from 'marked';
 
 @Component({
   selector: 'app-episode-detail',
@@ -78,6 +80,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   currentVersionCreator: string | null = null;
   currentVersionCreatedAt: string | null = null;
   currentVersionValidationNotes: string | null = null;
+  currentVersionChangeType: string | null = null;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -93,6 +96,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private schedulingService: SchedulingService,
     private loadingService: LoadingService,
+    private sanitizer: DomSanitizer,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -108,7 +112,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       description: ['', Validators.required],
       content: ['', Validators.required],
       currentVersionNumber: [1],
-      isCurrentValidated: [false],
       versions: this.fb.array([]),
       date: ['', Validators.required],
       audioBase64: ['', Validators.required],
@@ -213,6 +216,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
             this.currentVersionCreator = currentVersion.createdBy?.username || null;
             this.currentVersionCreatedAt = currentVersion.createdAt || null;
             this.currentVersionValidationNotes = currentVersion.validationNotes || null;
+            this.currentVersionChangeType = currentVersion.changeType || null;
           }
 
           this.audioSrc = episode.audioUrl;
@@ -608,5 +612,54 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  isVersionFullyValidated(version: EpisodeVersion): boolean {
+    return version.validatedCompliance && version.validatedFacts && version.validatedLength;
+  }
+
+  isCurrentVersionFullyValidated(): boolean {
+    const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
+    const versions = this.episodeForm.get('versions')?.value;
+    if (!currentVersionNumber || !versions || versions.length === 0) return false;
+
+    const currentVersion = versions.find((v: EpisodeVersion) => v.versionNumber === currentVersionNumber);
+    if (!currentVersion) return false;
+
+    return this.isVersionFullyValidated(currentVersion);
+  }
+
+  getCurrentVersionValidationTooltip(): string {
+    const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
+    const versions = this.episodeForm.get('versions')?.value;
+    if (!currentVersionNumber || !versions || versions.length === 0) return 'No version information';
+
+    const currentVersion = versions.find((v: EpisodeVersion) => v.versionNumber === currentVersionNumber);
+    if (!currentVersion) return 'Current version not found';
+
+    return this.getValidationTooltip(currentVersion);
+  }
+
+  getValidationTooltip(version: EpisodeVersion): string {
+    const parts: string[] = [];
+    parts.push(`Compliance: ${version.validatedCompliance ? '✓' : '✗'}`);
+    parts.push(`Facts: ${version.validatedFacts ? '✓' : '✗'}`);
+    parts.push(`Length: ${version.validatedLength ? '✓' : '✗'}`);
+
+    const status = this.isVersionFullyValidated(version) ? 'Validated' : 'Not Validated';
+    return `${status}\n${parts.join('\n')}`;
+  }
+
+  getVersionWordCount(version: EpisodeVersion): number {
+    return this.countWords(version.content);
+  }
+
+  getVersionCharCount(version: EpisodeVersion): number {
+    return version.content.length;
+  }
+
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

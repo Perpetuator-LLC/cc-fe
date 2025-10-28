@@ -99,7 +99,10 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   isGridView = false; // Default to list view
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
-  currentCursor: string | null = null;
+  cursors: (string | null)[] = [null];
+  hasNextPage = false;
+  hasPreviousPage = false;
+  totalPodcasts = 0;
   allColumns: ColumnOption[] = [
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
@@ -130,7 +133,11 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
-      this.loadPodcasts(10, null, term || undefined);
+      this.cursors = [null]; // reset cursors when searching
+      if (this.paginator) {
+        this.paginator.firstPage(); // reset to first page
+      }
+      this.loadPodcasts(this.pageSize, null, term || undefined, undefined, 0);
     });
 
     // Subscribe to job updates and use centralized handler
@@ -190,7 +197,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadPodcasts(first = 10, after: string | null = null, name?: string, slug?: string): void {
+  loadPodcasts(first = 10, after: string | null = null, name?: string, slug?: string, pageIndex = 0): void {
     this.loading = true;
     this.loadingService.show();
     this.subscriptions.add(
@@ -201,10 +208,14 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
           this.dataSource = new MatTableDataSource(this.podcasts);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-          // Update currentCursor for pagination
-          if (response.pageInfo && response.pageInfo.endCursor) {
-            this.currentCursor = response.pageInfo.endCursor;
-          }
+          this.hasNextPage = response.pageInfo.hasNextPage;
+          this.hasPreviousPage = response.pageInfo.hasPreviousPage;
+          this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
+
+          // Set a large enough number to enable the next button if hasNextPage is true
+          this.totalPodcasts = response.pageInfo.hasNextPage
+            ? (pageIndex + 2) * this.pageSize
+            : (pageIndex + 1) * this.pageSize;
           this.loading = false;
           this.loadingService.hide();
         },
@@ -294,15 +305,21 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPageChange(event: PageEvent) {
-    this.pageSize = event.pageSize;
-    const searchString = this.searchString ? this.searchString : '';
+    const newPageIndex = event.pageIndex;
+    const newPageSize = event.pageSize;
 
-    if (event.pageIndex === 0) {
-      this.loadPodcasts(this.pageSize, null, searchString);
-    } else {
-      // use cursor-based pagination
-      this.loadPodcasts(this.pageSize, this.currentCursor, searchString);
+    // If pageSize changed, reset pagination entirely
+    if (newPageSize !== this.pageSize) {
+      this.pageSize = newPageSize;
+      this.cursors = [null]; // reset all known cursors
+      this.paginator.firstPage(); // back to pageIndex = 0
+      this.loadPodcasts(this.pageSize, null, this.searchString || undefined, undefined, 0);
+      return;
     }
+
+    // Otherwise, grab the cursor for the page they jumped to
+    const after = this.cursors[newPageIndex] ?? null;
+    this.loadPodcasts(this.pageSize, after, this.searchString || undefined, undefined, newPageIndex);
   }
 
   createBlankEpisode(podcastUuid: string) {

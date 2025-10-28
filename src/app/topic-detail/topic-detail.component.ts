@@ -2,7 +2,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
@@ -16,6 +16,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { JobService } from '../job.service';
 import { LoadingService } from '../loading.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { marked } from 'marked';
 
 @Component({
   selector: 'app-topic-detail',
@@ -32,6 +34,7 @@ import { LoadingService } from '../loading.service';
     CommonModule,
     MatTabsModule,
     MatChipsModule,
+    RouterLink,
   ],
   templateUrl: './topic-detail.component.html',
   styleUrls: ['./topic-detail.component.scss'],
@@ -52,6 +55,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
     private researchService: ResearchService,
     private jobService: JobService,
     private loadingService: LoadingService,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -145,5 +149,10 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

@@ -28,7 +28,9 @@
       <div class="metadata">
         <span class="meta-item">
           <mat-icon>podcasts</mat-icon>
-          {{ topic.podcast.name }}
+          <a [routerLink]="['/podcast', topic.podcast.uuid]" class="podcast-link">
+            {{ topic.podcast.name }}
+          </a>
         </span>
         <span class="meta-item">
           <mat-icon>calendar_today</mat-icon>
@@ -87,7 +89,7 @@
         </mat-card-header>
         <mat-card-content>
           <div class="content-section">
-            <pre class="content-text">{{ topic.validatedContent }}</pre>
+            <div class="content-text" [innerHTML]="markdownToHtml(topic.validatedContent)"></div>
           </div>
         </mat-card-content>
       </mat-card>
@@ -105,7 +107,7 @@
         </mat-card-header>
         <mat-card-content>
           <div class="content-section">
-            <pre class="content-text">{{ topic.researchContent }}</pre>
+            <div class="content-text" [innerHTML]="markdownToHtml(topic.researchContent)"></div>
           </div>
         </mat-card-content>
       </mat-card>
