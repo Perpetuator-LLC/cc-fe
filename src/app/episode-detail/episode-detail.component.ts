@@ -31,6 +31,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { LoadingService } from '../loading.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+import { EpisodeVersionControlComponent } from '../episode-version-control/episode-version-control.component';
 
 interface EditableFormValues {
   title: string;
@@ -69,6 +70,7 @@ interface EditableFormValues {
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
+    EpisodeVersionControlComponent,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',
