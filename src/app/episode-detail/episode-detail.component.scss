@@ -1,25 +1,152 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+// Mixins
+@mixin primary-button {
+  background: var(--primary);
+  color: var(--theme-white);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background-color: var(--secondary-400);
+    color: var(--description-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+@mixin icon-size($size: 16px) {
+  font-size: $size;
+  width: $size;
+  height: $size;
+  margin: 0;
+}
+
+@mixin card-container {
+  background: var(--secondary-light) !important;
+  color: var(--theme-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+@mixin badge($bg-color, $text-color) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: $bg-color;
+  color: $text-color;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+
+  mat-icon {
+    @include icon-size(14px);
+    color: $text-color;
+  }
+}
+
+@mixin section-title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h3 {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 100%;
+    margin: 0;
+    color: var(--theme-color);
+  }
+
+  span {
+    background: var(--secondary-dark);
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 100%;
+    padding: 0 10px;
+    height: 22px;
+    color: var(--theme-color);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@mixin version-audio-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .info-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--theme-color);
+  }
+
+  audio {
+    width: 100%;
+    max-width: 500px;
+    height: 40px;
+  }
+
+  .no-audio {
+    font-size: 13px;
+    color: var(--description-color);
+    font-style: italic;
+    padding: 8px;
+    background: var(--secondary-500);
+    border-radius: 6px;
+    display: inline-block;
+  }
+}
+
+@mixin validation-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 6px;
+  border: 1px solid var(--primary);
+  font-size: 13px;
+  color: var(--theme-color);
+  line-height: 1.5;
+
+  mat-icon {
+    color: var(--primary);
+    @include icon-size(20px);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+// Base styles
 .full-width {
   width: 100%;
 }
 
-//.episode-content {
-//  //height: calc(100vh - 200px); /* Adjust this to fit your layout needs */
-//  //height: 100%;
-//  display: flex;
-//  flex-direction: column;
-//}
-
 .episode-description textarea {
-  min-height: 100px; /* Set the minimum height */
+  min-height: 100px;
 }
 
 .episode-content textarea {
-  //  flex: 1;
   min-height: 600px;
-  /* Set the minimum height */
-  //  //height: 100%; /* Make it take up available height */
-  //  resize: vertical; /* Allow vertical resizing */
 }
 
 .content-field-wrapper {
@@ -39,32 +166,13 @@
     }
 
     .copy-content-btn {
-      background: var(--primary);
-      color: var(--theme-white);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-weight: 600;
-      font-size: 13px;
+      @include primary-button;
       padding: 8px 12px;
       height: 32px;
       min-height: 32px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
 
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        margin: 0;
-      }
-
-      &:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
+        @include icon-size(16px);
       }
     }
 
@@ -119,36 +227,13 @@
   }
 }
 
-.related-episodes {
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.related-episodes .title,
+.scheduling-section .title {
+  @include section-title-with-badge;
+}
 
-    h3 {
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 100%;
-      //letter-spacing: 0;
-      margin: 0;
-      color: var(--theme-color);
-    }
-
-    span {
-      background: var(--secondary-dark);
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 12px;
-      line-height: 100%;
-      letter-spacing: 0;
-      padding: 0 10px;
-      height: 22px;
-      color: var(--theme-color);
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
+.scheduling-section .title {
+  margin-top: 20px;
 }
 
 .audio-container {
@@ -185,10 +270,8 @@
   }
 
   .audio-card {
-    border: 1px solid var(--border-color);
+    @include card-container;
     padding: 10px;
-    border-radius: 8px;
-    background-color: var(--secondary-light);
     margin-top: 10px;
     margin-bottom: 25px;
 
@@ -197,12 +280,13 @@
     }
   }
 
-  .view-toggles{
+  .view-toggles {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 20px;
   }
+
   .view-btn {
     background-color: transparent;
     border-radius: 8px;
@@ -214,9 +298,7 @@
     cursor: pointer;
 
     .mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      @include icon-size(20px);
     }
 
     &.active {
@@ -225,15 +307,13 @@
     }
   }
 
-  .buttons {
-    button {
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      background-color: var(--secondary-light);
-      color: var(--theme-color);
-    }
+  .buttons button {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--secondary-light);
+    color: var(--theme-color);
   }
 }
 
@@ -251,17 +331,18 @@
 }
 
 .publish {
-  background: var(--md-sys-color-success);
-  border-radius: 6px;
-  color: var(--theme-white);
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--border-color);
-  padding: 0 8px;
+  @include badge(var(--md-sys-color-success), var(--theme-white));
   height: 20px;
-  display: inline-flex;
+  padding: 0 8px;
+}
+
+.empty-audio {
+  display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--theme-color);
+  gap: 10px;
+  font-size: 14px;
 }
 
 .related-grid {
@@ -284,11 +365,9 @@
 }
 
 .related-table {
+  @include card-container;
   margin-top: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--secondary-light);
-  overflow: hidden; /* Ensures rounded corners apply to content */
+  overflow: hidden;
 
   .news-table {
     width: 100%;
@@ -336,20 +415,10 @@
     }
   }
 }
-.empty-audio{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--theme-color);
-  gap: 10px;
-  font-size: 14px;
-}
+
 .related-card {
+  @include card-container;
   width: 100%;
-  /* max-width: 400px; remove max-width for grid */
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
 
   mat-card-header {
     padding-bottom: 0;
@@ -530,40 +599,6 @@
   }
 }
 
-// Scheduling section styles
-.scheduling-section {
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-
-    h3 {
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 100%;
-      letter-spacing: 0;
-      margin: 0;
-      color: var(--theme-color);
-    }
-
-    span {
-      background: var(--secondary-dark);
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 12px;
-      line-height: 100%;
-      letter-spacing: 0;
-      padding: 0 10px;
-      height: 22px;
-      color: var(--theme-color);
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-}
-
 .scheduling-grid {
   margin-top: 20px;
   display: grid;
@@ -576,9 +611,7 @@
 }
 
 .schedule-card {
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
+  @include card-container;
 
   .schedule-header {
     display: flex;
@@ -621,9 +654,7 @@
       margin-bottom: 8px;
 
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+        @include icon-size(16px);
         color: var(--description-color);
       }
 
@@ -659,8 +690,7 @@
   margin-top: 20px;
 
   mat-card {
-    background: var(--secondary-light) !important;
-    border: 1px solid var(--border-color);
+    @include card-container;
     padding: 40px 20px;
 
     mat-card-content {
@@ -670,9 +700,7 @@
       gap: 16px;
 
       mat-icon {
-        font-size: 48px;
-        width: 48px;
-        height: 48px;
+        @include icon-size(48px);
         color: var(--description-color);
       }
 
@@ -705,13 +733,11 @@
   }
 }
 
-// Version Control & Actions Section - Consolidated in expansion panel
 .version-control-section {
   margin: 20px 0;
 
   .version-control-panel {
-    background: var(--secondary-light) !important;
-    border: 1px solid var(--border-color) !important;
+    @include card-container;
     box-shadow: none !important;
 
     ::ng-deep .mat-expansion-panel-header {
@@ -734,9 +760,7 @@
       color: var(--theme-color);
 
       mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        @include icon-size(20px);
         color: var(--primary);
       }
     }
@@ -749,9 +773,7 @@
       font-size: 12px;
 
       .status-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+        @include icon-size(16px);
         margin-left: 4px;
 
         &.validated {
@@ -806,66 +828,22 @@
             font-weight: 500;
 
             mat-icon {
-              font-size: 16px;
-              width: 16px;
-              height: 16px;
+              @include icon-size(16px);
             }
           }
         }
       }
 
       .version-audio {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+        @include version-audio-player;
         margin-top: 12px;
         padding-top: 12px;
         border-top: 1px solid var(--border-color);
-
-        .info-label {
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--theme-color);
-        }
-
-        audio {
-          width: 100%;
-          max-width: 500px;
-          height: 40px;
-        }
-
-        .no-audio {
-          font-size: 13px;
-          color: var(--description-color);
-          font-style: italic;
-          padding: 8px;
-          background: var(--secondary-500);
-          border-radius: 6px;
-          display: inline-block;
-        }
       }
 
       .validation-notes {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        padding: 12px;
-        background: rgba(33, 150, 243, 0.1);
-        border-radius: 6px;
-        border: 1px solid var(--primary);
+        @include validation-notes;
         margin-top: 12px;
-        font-size: 13px;
-        color: var(--theme-color);
-        line-height: 1.5;
-
-        mat-icon {
-          color: var(--primary);
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-          flex-shrink: 0;
-          margin-top: 2px;
-        }
       }
     }
 
@@ -875,32 +853,13 @@
       flex-wrap: wrap;
 
       button {
-        background: var(--primary);
-        color: var(--theme-white);
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        font-weight: 600;
-        font-size: 13px;
+        @include primary-button;
         padding: 10px 16px;
         height: 36px;
         min-height: 36px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        transition: all 0.2s ease;
 
         mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-          margin: 0;
-        }
-
-        &:hover {
-          opacity: 0.9;
-          transform: translateY(-1px);
+          @include icon-size(18px);
         }
 
         &[color="accent"] {
@@ -952,39 +911,13 @@
         gap: 8px;
 
         button {
-          background: var(--primary);
-          color: var(--theme-white);
-          border-radius: 8px;
-          border: 1px solid var(--border-color);
-          font-weight: 600;
-          font-size: 13px;
+          @include primary-button;
           padding: 8px 12px;
           height: 32px;
           min-height: 32px;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          white-space: nowrap;
-          flex-shrink: 0;
-          transition: all 0.2s ease;
 
           mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-            margin: 0;
-          }
-
-          &:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-1px);
-          }
-
-          &:disabled {
-            background-color: var(--secondary-400);
-            color: var(--description-color);
-            cursor: not-allowed;
-            opacity: 0.6;
+            @include icon-size(16px);
           }
 
           &[color="accent"] {
@@ -1028,9 +961,7 @@
             gap: 4px;
 
             mat-icon {
-              font-size: 16px;
-              width: 16px;
-              height: 16px;
+              @include icon-size(16px);
             }
           }
 
@@ -1074,55 +1005,13 @@
       }
 
       .version-audio {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+        @include version-audio-player;
         margin-bottom: 16px;
-
-        .info-label {
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--theme-color);
-        }
-
-        audio {
-          width: 100%;
-          max-width: 500px;
-          height: 40px;
-        }
-
-        .no-audio {
-          font-size: 13px;
-          color: var(--description-color);
-          font-style: italic;
-          padding: 8px;
-          background: var(--secondary-500);
-          border-radius: 6px;
-          display: inline-block;
-        }
       }
 
       .validation-notes {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        padding: 12px;
-        background: rgba(33, 150, 243, 0.1);
-        border-radius: 6px;
-        border: 1px solid var(--primary);
+        @include validation-notes;
         margin-bottom: 16px;
-        font-size: 13px;
-        color: var(--theme-color);
-        line-height: 1.5;
-
-        mat-icon {
-          color: var(--primary);
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-          flex-shrink: 0;
-          margin-top: 2px;
-        }
       }
 
       .version-content-field {
@@ -1147,9 +1036,7 @@
       color: var(--description-color);
 
       mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        @include icon-size(24px);
         flex-shrink: 0;
       }
 
@@ -1162,46 +1049,14 @@
   }
 }
 
-// Shared badge styles
 .validated-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--md-sys-color-success);
-  color: var(--theme-white);
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-
-  mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: var(--theme-white);
-  }
+  @include badge(var(--md-sys-color-success), var(--theme-white));
 }
 
 .unvalidated-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--md-sys-color-warning);
-  color: var(--secondary-500);
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-
-  mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: var(--secondary-500);
-  }
+  @include badge(var(--md-sys-color-warning), var(--secondary-500));
 }
 
-// Version option styling in dropdown
 .version-option {
   display: flex;
   justify-content: space-between;
@@ -1222,22 +1077,16 @@
     color: var(--description-color);
 
     .version-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
+      @include icon-size(16px);
     }
 
     .validated-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
+      @include icon-size(14px);
       color: var(--md-sys-color-success);
     }
 
     .unvalidated-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
+      @include icon-size(14px);
       color: var(--md-sys-color-warning);
     }
   }

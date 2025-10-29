@@ -400,10 +400,10 @@
                 <span>{{ episodeForm.get('news')?.value?.length }} news articles</span>
               </div>
               <div class="view-btn-container">
-                <button class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
+                <button type="button" class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
                   <app-svg-icon icon="grid"></app-svg-icon>
                 </button>
-                <button class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
+                <button type="button" class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
                   <app-svg-icon icon="list"></app-svg-icon>
                 </button>
               </div>
