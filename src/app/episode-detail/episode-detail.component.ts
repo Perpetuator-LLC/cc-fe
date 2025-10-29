@@ -9,7 +9,6 @@ import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -65,7 +64,6 @@ interface EditableFormValues {
     MatTabsModule,
     MatExpansionModule,
     MatSelectModule,
-    MatOption,
     MatSlideToggle,
     MatMenu,
     MatMenuItem,
@@ -707,7 +705,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return version.content.length;
   }
 
-  markdownToHtml(markdown: string): SafeHtml {
+  markdownToHtml(markdown: string | null): SafeHtml {
+    if (!markdown) return '';
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
