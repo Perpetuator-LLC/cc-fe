@@ -37,11 +37,13 @@ import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NewsService } from '../news.service';
 import { EpisodeService } from '../episode.service';
-import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
+import { Job, JobService } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ResearchService } from '../research.service';
 import { JobDisplayService } from '../job-display.service';
 import { LoadingService } from '../loading.service';
+import { TeamsService, TeamsResult } from '../teams.service';
+import { MatSelectModule } from '@angular/material/select';
 
 export interface ColumnOption {
   id: string;
@@ -83,6 +85,7 @@ export interface ColumnOption {
     MatCheckboxModule,
     FormsModule,
     MatMenuItem,
+    MatSelectModule,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
@@ -116,6 +119,9 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   searchString: string | null = null;
   searchTerm$ = new Subject<string>();
   jobs: Job[] = [];
+  teams: TeamsResult[] = [];
+  selectedTeam: string | null = null;
+  loadingTeams = false;
 
   constructor(
     private router: Router,
@@ -130,6 +136,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private researchService: ResearchService,
     private jobDisplayService: JobDisplayService,
     private loadingService: LoadingService,
+    private teamsService: TeamsService,
   ) {
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
@@ -137,28 +144,14 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.paginator) {
         this.paginator.firstPage(); // reset to first page
       }
-      this.loadPodcasts(this.pageSize, null, term || undefined, undefined, 0);
+      this.loadPodcasts(this.pageSize, null, term || undefined, undefined, this.selectedTeam || undefined, 0);
     });
 
-    // Subscribe to job updates and use centralized handler
+    // Subscribe to job updates - no messages needed, job-status-bar handles them globally
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
-          this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            const jobKind = stringToJobKind(job.kind);
-            // Handle all supported job completions centrally
-            if (
-              [JobKind.CREATE_EPISODE, JobKind.GENERATE_PODCAST, JobKind.GENERATE_RESEARCH_TRANSCRIPT].includes(jobKind)
-            ) {
-              this.subscriptions.add(
-                this.jobDisplayService.handleJobCompletion(job).subscribe({
-                  error: (error) => {
-                    this.messageService.error(`Failed to process job completion: ${error.message}`);
-                  },
-                }),
-              );
-            }
-          });
+          // Just track jobs, no need to handle completions - job-status-bar shows all messages
           this.jobs = jobs;
         },
         error: (error) => {
@@ -173,6 +166,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.loadTeams();
     this.loadPodcasts();
 
     // Check for query parameter to auto-open create dialog
@@ -197,11 +191,18 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadPodcasts(first = 10, after: string | null = null, name?: string, slug?: string, pageIndex = 0): void {
+  loadPodcasts(
+    first = 10,
+    after: string | null = null,
+    name?: string,
+    slug?: string,
+    teamUuid?: string,
+    pageIndex = 0,
+  ): void {
     this.loading = true;
     this.loadingService.show();
     this.subscriptions.add(
-      this.podcastsService.getPodcasts(first, after, name, slug).subscribe({
+      this.podcastsService.getPodcasts(first, after, name, slug, teamUuid).subscribe({
         next: (response) => {
           this.messageService.clearMessages();
           this.podcasts = response.podcasts;
@@ -252,6 +253,37 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.loadPodcasts();
       }
     });
+  }
+
+  loadTeams(): void {
+    this.loadingTeams = true;
+    this.subscriptions.add(
+      this.teamsService.getTeams().subscribe({
+        next: (response) => {
+          this.teams = response.teams;
+          this.loadingTeams = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load teams: ${err.message}`);
+          this.loadingTeams = false;
+        },
+      }),
+    );
+  }
+
+  onTeamFilterChange(): void {
+    this.cursors = [null];
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+    this.loadPodcasts(
+      this.pageSize,
+      null,
+      this.searchString || undefined,
+      undefined,
+      this.selectedTeam || undefined,
+      0,
+    );
   }
 
   getCategoriesString(categories: Record<string, string[]> | null): string {
@@ -313,13 +345,27 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.pageSize = newPageSize;
       this.cursors = [null]; // reset all known cursors
       this.paginator.firstPage(); // back to pageIndex = 0
-      this.loadPodcasts(this.pageSize, null, this.searchString || undefined, undefined, 0);
+      this.loadPodcasts(
+        this.pageSize,
+        null,
+        this.searchString || undefined,
+        undefined,
+        this.selectedTeam || undefined,
+        0,
+      );
       return;
     }
 
     // Otherwise, grab the cursor for the page they jumped to
     const after = this.cursors[newPageIndex] ?? null;
-    this.loadPodcasts(this.pageSize, after, this.searchString || undefined, undefined, newPageIndex);
+    this.loadPodcasts(
+      this.pageSize,
+      after,
+      this.searchString || undefined,
+      undefined,
+      this.selectedTeam || undefined,
+      newPageIndex,
+    );
   }
 
   createBlankEpisode(podcastUuid: string) {

@@ -106,7 +106,7 @@ export class NewsComponent implements OnInit, OnDestroy {
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
             const jobKind = stringToJobKind(job.kind);
-            // Refresh news list when news processing jobs complete
+            // Refresh news list when news processing jobs complete (no message needed - job-status-bar handles it)
             if (
               [JobKind.FETCH_NEWS, JobKind.EXTRACT_NEWS, JobKind.SUMMARIZE_NEWS, JobKind.VALIDATE_NEWS].includes(
                 jobKind,
@@ -114,16 +114,7 @@ export class NewsComponent implements OnInit, OnDestroy {
             ) {
               this.getNews();
             }
-            // Use centralized handler for episode and podcast creation
-            else if ([JobKind.CREATE_EPISODE, JobKind.GENERATE_PODCAST].includes(jobKind)) {
-              this.subscriptions.add(
-                this.jobDisplayService.handleJobCompletion(job).subscribe({
-                  error: (error) => {
-                    this.messageService.error(`Failed to process job completion: ${error.message}`);
-                  },
-                }),
-              );
-            }
+            // No need to show messages for episode/podcast creation - job-status-bar handles it globally
           });
           this.jobs = jobs;
         },

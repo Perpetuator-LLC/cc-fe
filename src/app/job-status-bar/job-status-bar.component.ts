@@ -94,7 +94,26 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           ];
 
           if (!skipMessageForKinds.includes(jobKind)) {
-            this.messageService.success(`${kindToString(job.kind)} completed.`);
+            // Use centralized job display service for complex job types
+            const handledByDisplayService = [
+              JobKind.CREATE_EPISODE,
+              JobKind.GENERATE_PODCAST,
+              JobKind.GENERATE_RESEARCH_TRANSCRIPT,
+              JobKind.RESEARCH_TOPIC,
+            ];
+
+            if (handledByDisplayService.includes(jobKind)) {
+              this.jobDisplayService.handleJobCompletion(job).subscribe({
+                error: (error) => {
+                  console.warn(`Failed to process job completion display: ${error.message}`);
+                  // Fallback to simple message
+                  this.messageService.success(`${kindToString(job.kind)} completed.`);
+                },
+              });
+            } else {
+              // Simple success message for other job types
+              this.messageService.success(`${kindToString(job.kind)} completed.`);
+            }
           }
         });
         this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {

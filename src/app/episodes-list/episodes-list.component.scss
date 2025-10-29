@@ -96,6 +96,32 @@
   }
 }
 
+.no-results-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  background: var(--secondary-light);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--description-color);
+  margin-top: 20px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--description-color);
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
 .table-controls {
   display: flex;
   align-items: center;

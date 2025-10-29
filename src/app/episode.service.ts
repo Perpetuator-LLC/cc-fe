@@ -227,25 +227,20 @@ export class EpisodeService extends BaseService {
   }
 
   updateEpisode(
-    episodeUuid: string | null,
-    updatedTitle: string | null,
-    updatedDescription: string | null,
-    updatedContent: string | null,
-    isLive: boolean | null,
+    episodeUuid: string,
+    updatedTitle?: string,
+    updatedDescription?: string,
+    updatedContent?: string,
+    isLive?: boolean,
   ) {
-    if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
-    if (updatedTitle === null) return throwError(() => new Error('Updated title is required'));
-    if (updatedDescription === null) return throwError(() => new Error('Updated description is required'));
-    if (updatedContent === null) return throwError(() => new Error('Updated content is required'));
-    if (isLive === null) return throwError(() => new Error('Updated is live is required'));
-
+    // Build the mutation dynamically based on which fields are provided
     const GQL = gql`
       mutation UpdateEpisodes(
         $episodeUuid: UUID!
-        $title: String!
-        $description: String!
-        $content: String!
-        $isLive: Boolean!
+        $title: String
+        $description: String
+        $content: String
+        $isLive: Boolean
       ) {
         updateEpisode(
           episodeUuid: $episodeUuid
@@ -268,15 +263,16 @@ export class EpisodeService extends BaseService {
       };
     }
 
+    // Only include fields that were actually provided
+    const variables: Record<string, unknown> = { episodeUuid };
+    if (updatedTitle !== undefined) variables['title'] = updatedTitle;
+    if (updatedDescription !== undefined) variables['description'] = updatedDescription;
+    if (updatedContent !== undefined) variables['content'] = updatedContent;
+    if (isLive !== undefined) variables['isLive'] = isLive;
+
     return this.mutate<Response>({
       mutation: GQL,
-      variables: {
-        episodeUuid,
-        title: updatedTitle,
-        description: updatedDescription,
-        content: updatedContent,
-        isLive: isLive,
-      },
+      variables,
     }).pipe(
       map((data) => {
         if (!data.updateEpisode.success) {
