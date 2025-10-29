@@ -330,6 +330,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   updateEpisode(): void {
+    if (!this.hasUnsavedChanges) {
+      return;
+    }
+
     const formValues = this.episodeForm.getRawValue() as Episode;
     this.subscriptions.add(
       this.episodeService
