@@ -145,7 +145,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {
           this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
-            if ([JobKind.UPDATE_EPISODE_AUDIO].includes(stringToJobKind(job.kind))) {
+            const jobKind = stringToJobKind(job.kind);
+            // Reload episode data when relevant jobs complete (no messages - job-status-bar handles it)
+            if ([JobKind.UPDATE_EPISODE_AUDIO].includes(jobKind)) {
               this.loadEpisodeData('network-only');
             } else if (
               [
@@ -153,30 +155,11 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                 JobKind.VALIDATE_EPISODE_COMPLIANCE,
                 JobKind.VALIDATE_EPISODE_FACTS,
                 JobKind.VALIDATE_EPISODE_LENGTH,
-              ].includes(stringToJobKind(job.kind))
+              ].includes(jobKind)
             ) {
               this.loadEpisodeData('network-only');
-            } else if ([JobKind.CREATE_EPISODE].includes(stringToJobKind(job.kind))) {
-              // Extract episode UUID from job result JSON object
-              const episodeUuid = job.result?.episode_uuid;
-              if (episodeUuid) {
-                this.subscriptions.add(
-                  this.episodeService.getEpisodeById(episodeUuid).subscribe({
-                    next: (episode) => {
-                      const newEpisodeUrl = `/episode/${episodeUuid}`;
-                      this.messageService.success(
-                        `New episode: <a href="${newEpisodeUrl}">${episode.title}</a>`,
-                        null,
-                        true,
-                      );
-                    },
-                    error: (error) => {
-                      this.messageService.error(`Failed to get new episode: ${error.message}`);
-                    },
-                  }),
-                );
-              }
             }
+            // No need to show messages for episode creation - job-status-bar handles it globally
           });
           this.jobs = jobs;
         },
@@ -330,14 +313,24 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   updateEpisode(): void {
-    if (!this.hasUnsavedChanges) {
+    if (!this.hasUnsavedChanges || !this.initialFormValues) {
       return;
     }
 
     const formValues = this.episodeForm.getRawValue() as Episode;
+    const currentValues = this.getEditableFormValues();
+
+    // Optimization: Only send fields that have actually changed to reduce payload size
+    // Example: When toggling isLive, don't send 4KB+ of content that hasn't changed
+    const changedTitle = currentValues.title !== this.initialFormValues.title ? currentValues.title : undefined;
+    const changedDescription =
+      currentValues.description !== this.initialFormValues.description ? currentValues.description : undefined;
+    const changedContent = currentValues.content !== this.initialFormValues.content ? currentValues.content : undefined;
+    const changedIsLive = currentValues.isLive !== this.initialFormValues.isLive ? currentValues.isLive : undefined;
+
     this.subscriptions.add(
       this.episodeService
-        .updateEpisode(formValues.uuid, formValues.title, formValues.description, formValues.content, formValues.isLive)
+        .updateEpisode(formValues.uuid, changedTitle, changedDescription, changedContent, changedIsLive)
         .subscribe({
           next: (response) => {
             if (!response.success) {
