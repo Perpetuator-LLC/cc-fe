@@ -14,7 +14,10 @@
       </div>
       <div class="buttons">
         @if (audioSrc) {
-        <mat-checkbox formControlName="isLive" (change)="onIsLiveChange($event.checked)">
+        <mat-checkbox
+          formControlName="isLive"
+          (change)="onIsLiveChange($event.checked)"
+          matTooltip="When checked this episode will be published publicly on all associated platforms (RSS feed, website, etc.)">
           Live on Podcast
         </mat-checkbox>
         }

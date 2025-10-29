@@ -271,11 +271,11 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     if (!currentVersion) return 'No current version found';
 
     const parts: string[] = [];
-    parts.push(`Compliance: ${currentVersion.validatedCompliance ? '✓' : '✗'}`);
     parts.push(`Facts: ${currentVersion.validatedFacts ? '✓' : '✗'}`);
     parts.push(`Length: ${currentVersion.validatedLength ? '✓' : '✗'}`);
+    parts.push(`Compliance: ${currentVersion.validatedCompliance ? '✓' : '✗'}`);
 
     const status = this.isEpisodeFullyValidated(episode) ? 'Validated' : 'Not Validated';
-    return `${status}\n${parts.join('\n')}`;
+    return `${status}\n - ${parts.join('\n - ')}`;
   }
 }

@@ -6,9 +6,6 @@
 
 <app-message></app-message>
 
-@if (episodes.length === 0 && !loadingEpisodes) {
-<h2>No episodes found.</h2>
-} @else {
 <mat-card class="create-episode-card">
   <mat-card-content class="content-header">
     <div class="title">
@@ -48,6 +45,13 @@
       </button>
     </div>
   </div>
+
+  @if (episodes.length === 0 && !loadingEpisodes) {
+    <div class="no-results-message">
+      <mat-icon>info</mat-icon>
+      <p>No episodes found.@if (searchTerm || selectedPodcast) { Try adjusting your search filters.}</p>
+    </div>
+  } @else {
   <div class="episodes-container">
     @if (!isGridView) {
     <div [hidden]="loadingEpisodes">
@@ -121,15 +125,8 @@
         [showFirstLastButtons]="false" (page)="onPageChange($event)">
       </mat-paginator>
     </div>
-
-    <div [hidden]="episodes.length !== 0 || loadingEpisodes">
-      <span>
-        <strong>No episodes found.</strong>
-        If you would like to create an episode, then visit the <a routerLink="/news">News</a> page. From within the
-        News page, you can select news pages and create episodes from them.
-      </span>
-    </div>
     }
+
     @if (isGridView) {
     <div class="podcasts-grid">
       @for (episode of dataSource.data; track episode.uuid) {
@@ -183,10 +180,10 @@
       </mat-card>
       }
     </div>
+    }
     <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons
       aria-label="Select page of episodes">
     </mat-paginator>
-    }
   </div>
+  }
 </div>
-}
