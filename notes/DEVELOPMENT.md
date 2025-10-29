@@ -83,7 +83,7 @@ grep '"version":' ../package.json
 Update version in package.json:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.25.0"/' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.26.0"/' ../package.json
 grep '"version":' ../package.json
 ```
 
@@ -95,7 +95,7 @@ Update the changelog by running the script in the back-end repository:
 
 ```shell
 cd ~/projects/capital-copilot-be
-poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.25.0' 'v0.24.1'
+poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.26.0' 'v0.25.0'
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -106,15 +106,15 @@ Create the release commit:
 
 ```shell
 git add .. && \
-git commit -m "chore: bump version to 0.25.0"
+git commit -m "chore: bump version to 0.26.0"
 ```
 
 Push to main and create the release tag:
 
 ```shell
 git push origin main && \
-git tag -a v0.25.0 -m "In this update, we've introduced versioned many new AI Agents for deep research, news validation, and one to automate podcast creation. We added versioned episodes, and ability to create custom research topics for deep dives, and added research to our scheduling service." && \
-git push origin v0.25.0
+git tag -a v0.26.0 -m "This update introduces comprehensive episode management capabilities, including validation tracking, content search, and enhanced metadata display, alongside improved job list visualization and memory management features." && \
+git push origin v0.26.0
 ```
 
 #### Step 5: Clean up feature branch (if applicable)
@@ -158,7 +158,7 @@ A tribal rule in this project is to use this rule:
 - Use imperative mood or present tense: "add feature" not "added feature" or "adds feature".
 - Think to yourself: "This change will..." and complete the sentence.
 
-Follow https://gist.github.com/joshbuchea/6f47e86d25.0bce28f8e7f42ae84c716
+Follow https://gist.github.com/joshbuchea/6f47e86d26.0bce28f8e7f42ae84c716
 
 If and only if the change touches _production_ code it should be prefixed with one of the following:
 
