@@ -1,3 +1,26 @@
+# Changelog from v0.25.0 to v0.26.0
+
+This update introduces comprehensive episode management capabilities, including validation tracking, content search, and enhanced metadata display, alongside improved job list visualization and memory management features.
+
+## Enhancements
+
+- Added copy current content to memory button for improved content management
+- Implemented dirty episode checks with automatic refresh for audio and image assets
+- Added episode validation tracking including conforming status, facts verification, and length validation
+- Introduced podcast episode search functionality with pagination support for browsing podcast content
+- Added word count tracking for podcast episodes
+- Enhanced episode metadata display to show current validation notes and version creator information
+- Improved topic presentation by exposing linked episode relationships
+- Added progress indicators to message displays for better user feedback
+- Reduced height of job list resources for more compact visualization
+- Updated home page to conditionally display title based on login status
+
+## Cleanups
+
+- Fixed podcast filters to retrieve all available results
+- Increased style file error handling capacity
+
+
 # Changelog from v0.24.1 to v0.25.0
 
 In this update, we've introduced versioned many new AI Agents for deep research, news validation, and one to automate podcast creation. We added versioned episodes, and ability to create custom research topics for deep dives, and added research to our scheduling service.
