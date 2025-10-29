@@ -521,6 +521,23 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  copyCurrentContent(): void {
+    const content = this.episodeForm.get('content')?.value || '';
+    if (!content) {
+      this.messageService.warning('No content to copy');
+      return;
+    }
+
+    navigator.clipboard.writeText(content).then(
+      () => {
+        this.messageService.success('Current content copied to clipboard');
+      },
+      (err) => {
+        this.messageService.error('Failed to copy content: ' + err);
+      },
+    );
+  }
+
   restoreVersion(): void {
     if (!this.selectedVersionNumber) {
       this.messageService.warning('No version selected to restore');

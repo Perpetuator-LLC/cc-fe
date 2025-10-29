@@ -106,10 +106,23 @@
                 <mat-label>Description</mat-label>
                 <textarea matInput formControlName="description"></textarea>
               </mat-form-field>
-              <mat-form-field class="full-width episode-content">
-                <mat-label>Content</mat-label>
-                <textarea matInput formControlName="content"></textarea>
-              </mat-form-field>
+              <div class="content-field-wrapper">
+                <div class="content-field-header">
+                  <span class="content-label">Content</span>
+                  <button
+                    mat-flat-button
+                    type="button"
+                    class="copy-content-btn"
+                    (click)="copyCurrentContent()"
+                    matTooltip="Copy current content to clipboard">
+                    <mat-icon>content_copy</mat-icon>
+                    Copy Current Content
+                  </button>
+                </div>
+                <mat-form-field class="full-width episode-content">
+                  <textarea matInput formControlName="content"></textarea>
+                </mat-form-field>
+              </div>
 
               <!-- Version Control & Actions Section - Always visible in expansion panel -->
               <div class="version-control-section">
