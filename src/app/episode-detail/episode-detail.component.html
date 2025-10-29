@@ -133,7 +133,7 @@
                 [currentVersionChangeType]="currentVersionChangeType"
                 [currentVersionCreator]="currentVersionCreator"
                 [currentVersionCreatedAt]="currentVersionCreatedAt"
-                [currentVersionValidationNotes]="markdownToHtml(currentVersionValidationNotes)"
+                [currentVersionValidationNotes]="currentVersionValidationNotes ? markdownToHtml(currentVersionValidationNotes) : null"
                 [selectedVersionNumber]="selectedVersionNumber"
                 [selectedVersion]="selectedVersion"
                 (validateEpisode)="validateEpisode()"
