@@ -13,11 +13,11 @@
         <h2>{{ episodeForm.get('title')?.value || 'N/A' }}</h2>
       </div>
       <div class="buttons">
-        @if (audioSrc) {
+        @if (audioSrc || episodeForm.get('isLive')?.value) {
         <mat-checkbox
           formControlName="isLive"
           (change)="onIsLiveChange($event.checked)"
-          matTooltip="When checked this episode will be published publicly on all associated platforms (RSS feed, website, etc.)">
+          matTooltip="When checked, this episode is published publicly on all associated platforms (RSS feed, website, etc.). The RSS feed will use the most recent audio that was generated.">
           Live on Podcast
         </mat-checkbox>
         }
@@ -91,13 +91,31 @@
                 </div>
               </div>
               <div class="audio-card">
-                @if (audioSrc) {
-                <audio controls [src]="audioSrc"></audio>
-                }@else{
+                @if (hasCurrentVersionAudio()) {
+                  <div class="audio-section">
+                    <div class="audio-label">Current Version Audio:</div>
+                    <audio controls [src]="audioSrc"></audio>
+                  </div>
+                } @else {
                   <div class="empty-audio">
                     <app-svg-icon width="24" height="24" icon="music" style="cursor: pointer"></app-svg-icon>
-                    No audio found this episode</div>
-                  }
+                    No audio for current version
+                  </div>
+                }
+
+                @if (hasLiveAudioFromDifferentVersion()) {
+                  <div class="live-audio-section">
+                    <div class="live-audio-label">
+                      <mat-icon class="live-icon">radio_button_checked</mat-icon>
+                      <span>Live on RSS Feed ({{ getLiveAudioVersionText() }}):</span>
+                    </div>
+                    <audio controls [src]="liveAudioSrc"></audio>
+                    <p class="live-audio-note">
+                      This audio is currently published on your podcast RSS feed.
+                      Generate new audio for the current version to update what listeners hear.
+                    </p>
+                  </div>
+                }
               </div>
             </div>
             <div>

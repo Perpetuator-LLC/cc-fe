@@ -77,6 +77,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   episodeForm: FormGroup;
   audioSrc: string | null = null;
+  liveAudioSrc: string | null = null;
+  liveAudioVersionNumber: number | null = null;
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
@@ -223,7 +225,18 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
             this.currentVersionChangeType = currentVersion.changeType || null;
             this.audioSrc = currentVersion.audioUrl || null;
           } else {
-            this.audioSrc = episode.audioUrl;
+            this.audioSrc = null;
+          }
+
+          // Track the live/published audio (from episode.audioUrl)
+          this.liveAudioSrc = episode.audioUrl || null;
+
+          // Find which version has the live audio URL
+          if (this.liveAudioSrc) {
+            const liveAudioVersion = episode.versions.find((v) => v.audioUrl === this.liveAudioSrc);
+            this.liveAudioVersionNumber = liveAudioVersion?.versionNumber || null;
+          } else {
+            this.liveAudioVersionNumber = null;
           }
 
           this.initialFormValues = this.getEditableFormValues();
@@ -752,5 +765,44 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       return 'Audio already exists for current version';
     }
     return 'Generate audio for this episode';
+  }
+
+  hasCurrentVersionAudio(): boolean {
+    return this.audioSrc !== null;
+  }
+
+  hasLiveAudioFromDifferentVersion(): boolean {
+    // This method determines if we should show a separate "Live on RSS Feed" audio player
+    // We only show it when the published audio is different from the current version's audio
+
+    const isLive = this.episodeForm.get('isLive')?.value;
+
+    // Don't show if the episode is not marked as live
+    if (!isLive) {
+      return false;
+    }
+
+    // Don't show if there's no live audio at all
+    if (!this.liveAudioSrc) {
+      return false;
+    }
+
+    // Don't show if current version audio matches the live audio (they're the same)
+    if (this.audioSrc === this.liveAudioSrc) {
+      return false;
+    }
+
+    // Show the live audio section when:
+    // 1. Episode is marked as live, AND
+    // 2. Current version has no audio (user edited transcript after publishing), OR
+    // 3. Current version has different audio than what's live (user generated new audio but hasn't published)
+    return true;
+  }
+
+  getLiveAudioVersionText(): string {
+    if (this.liveAudioVersionNumber !== null) {
+      return `Version ${this.liveAudioVersionNumber}`;
+    }
+    return 'Previous version';
   }
 }

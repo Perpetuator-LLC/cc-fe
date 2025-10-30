@@ -292,9 +292,75 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--theme-color);
+  color: var(--description-color);
   gap: 10px;
   font-size: 14px;
+  padding: 20px;
+}
+
+.audio-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  .audio-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-color);
+  }
+
+  audio {
+    width: 100%;
+  }
+}
+
+.live-audio-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(var(--primary-rgb, 241, 74, 0), 0.1);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  margin-top: 16px;
+
+  .live-audio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+
+    .live-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+
+  audio {
+    width: 100%;
+  }
+
+  .live-audio-note {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: var(--description-color);
+    line-height: 1.5;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .related-grid {
