@@ -463,6 +463,11 @@
       @include icon-size(14px);
       color: var(--md-sys-color-warning);
     }
+
+    .audio-icon {
+      @include icon-size(14px);
+      color: var(--primary);
+    }
   }
 }
 

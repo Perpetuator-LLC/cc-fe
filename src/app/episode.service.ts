@@ -504,12 +504,15 @@ export class EpisodeService extends BaseService {
             description
             content
             currentVersionNumber
+            audioUrl
+            isLive
             versions {
               uuid
               versionNumber
               title
               description
               content
+              audioUrl
               validatedCompliance
               validatedFacts
               validatedLength

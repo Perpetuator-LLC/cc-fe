@@ -1,0 +1,125 @@
+// Copyright (c) 2025 Perpetuator LLC
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { UserService } from './user.service';
+import { PodcastsResult } from './podcasts.service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class RecentlyUsedPodcastsService {
+  private readonly HISTORY_KEY = 'podcast-selection-history';
+  private podcastHistory: string[] = [];
+  private historyLoaded = false;
+
+  constructor(private userService: UserService) {}
+
+  /**
+   * Load podcast history from user settings
+   */
+  loadHistory(): Observable<string[]> {
+    if (this.historyLoaded) {
+      return of(this.podcastHistory);
+    }
+
+    return this.userService.userSettings([this.HISTORY_KEY]).pipe(
+      map((settings) => {
+        const historySetting = settings.find((setting) => setting.key === this.HISTORY_KEY);
+        if (historySetting) {
+          try {
+            this.podcastHistory = JSON.parse(historySetting.value);
+          } catch (e) {
+            console.error('Error parsing podcast history', e);
+            this.podcastHistory = [];
+          }
+        }
+        this.historyLoaded = true;
+        return this.podcastHistory;
+      }),
+      catchError((err) => {
+        console.error('Error loading podcast history', err);
+        this.historyLoaded = true;
+        return of([]);
+      }),
+    );
+  }
+
+  /**
+   * Update podcast history when a podcast is selected
+   */
+  recordSelection(podcastUuid: string): void {
+    // Remove the selected podcast if it's already in history
+    this.podcastHistory = this.podcastHistory.filter((uuid) => uuid !== podcastUuid);
+    // Add it to the beginning (most recent)
+    this.podcastHistory.unshift(podcastUuid);
+
+    // Keep only the last 10 selections
+    if (this.podcastHistory.length > 10) {
+      this.podcastHistory = this.podcastHistory.slice(0, 10);
+    }
+
+    // Save the updated history
+    this.userService.updateUserSetting(this.HISTORY_KEY, JSON.stringify(this.podcastHistory)).subscribe({
+      error: (err) => console.error('Error saving podcast history', err),
+    });
+  }
+
+  /**
+   * Sort podcasts by recently used (most recent first)
+   */
+  sortByRecentlyUsed(podcasts: PodcastsResult[]): PodcastsResult[] {
+    if (!podcasts || podcasts.length === 0 || this.podcastHistory.length === 0) {
+      return podcasts;
+    }
+
+    // Create a map for quick lookup of podcast index in history
+    const historyMap: Record<string, number> = {};
+    this.podcastHistory.forEach((uuid, index) => {
+      historyMap[uuid] = index;
+    });
+
+    // Sort podcasts: recently selected first, then others alphabetically
+    return [...podcasts].sort((a, b) => {
+      const indexA = historyMap[a.uuid] !== undefined ? historyMap[a.uuid] : Number.MAX_SAFE_INTEGER;
+      const indexB = historyMap[b.uuid] !== undefined ? historyMap[b.uuid] : Number.MAX_SAFE_INTEGER;
+
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+
+      // If neither is in history or both have same priority, sort alphabetically
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
+  /**
+   * Get the most recently used podcast UUID, or the first podcast if only one exists
+   */
+  getDefaultSelection(podcasts: PodcastsResult[]): string | null {
+    if (!podcasts || podcasts.length === 0) {
+      return null;
+    }
+
+    // If only one podcast, select it
+    if (podcasts.length === 1) {
+      return podcasts[0].uuid;
+    }
+
+    // Check if the most recently used podcast is in the list
+    const mostRecent = this.podcastHistory[0];
+    if (mostRecent && podcasts.some((p) => p.uuid === mostRecent)) {
+      return mostRecent;
+    }
+
+    // Default to first podcast in the sorted list
+    return podcasts[0].uuid;
+  }
+
+  /**
+   * Get the current history
+   */
+  getHistory(): string[] {
+    return [...this.podcastHistory];
+  }
+}

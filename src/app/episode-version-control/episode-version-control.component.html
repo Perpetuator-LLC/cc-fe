@@ -110,6 +110,9 @@
                     <span class="version-meta">
                       <mat-icon class="version-icon">{{ getChangeTypeIcon(selectedVersion.changeType) }}</mat-icon>
                       {{ getChangeTypeLabel(selectedVersion.changeType) }}
+                      @if (hasAudio(selectedVersion)) {
+                        <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
+                      }
                       @if (isVersionFullyValidated(selectedVersion)) {
                         <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(selectedVersion)">verified</mat-icon>
                       } @else {
@@ -126,6 +129,9 @@
                     <span class="version-meta">
                       <mat-icon class="version-icon">{{ getChangeTypeIcon(version.changeType) }}</mat-icon>
                       {{ getChangeTypeLabel(version.changeType) }}
+                      @if (hasAudio(version)) {
+                        <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
+                      }
                       @if (isVersionFullyValidated(version)) {
                         <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(version)">verified</mat-icon>
                       } @else {

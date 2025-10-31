@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
@@ -79,6 +79,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   audioSrc: string | null = null;
   liveAudioSrc: string | null = null;
   liveAudioVersionNumber: number | null = null;
+  audioKey = 0;
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
@@ -92,6 +93,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   currentVersionChangeType: string | null = null;
   hasUnsavedChanges = false;
   private initialFormValues: EditableFormValues | null = null;
+  private hasAcknowledgedLiveEditWarning = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -116,6 +118,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private schedulingService: SchedulingService,
     private loadingService: LoadingService,
     private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -241,6 +244,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
           this.initialFormValues = this.getEditableFormValues();
           this.hasUnsavedChanges = false;
+          this.hasAcknowledgedLiveEditWarning = false;
 
           this.loadingService.hide();
         },
@@ -290,6 +294,15 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   onIsLiveChange(isLive: boolean) {
+    // Only prevent SETTING episode as live (checking the box) without audio
+    // Allow UNSETTING (unchecking) even without audio
+    if (isLive && !this.audioSrc && !this.liveAudioSrc) {
+      this.messageService.warning('Cannot set episode as live without audio. Please generate audio first.');
+      // Revert the checkbox to unchecked
+      this.episodeForm.patchValue({ isLive: false }, { emitEvent: false });
+      return;
+    }
+
     this.episodeForm.value.isLive = isLive;
     this.updateEpisode();
   }
@@ -572,16 +585,55 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           this.episodeService.revertEpisodeVersion(this.episodeUuid, this.selectedVersionNumber).subscribe({
             next: (response) => {
               this.messageService.success(`Version ${this.selectedVersionNumber} restored successfully`);
+
+              // Update form with restored episode data
               this.episodeForm.patchValue(response.episode);
 
+              // Update versions array
               const versionsFormArray = this.episodeForm.get('versions') as FormArray;
               versionsFormArray.clear();
               for (const version of response.episode.versions) {
                 versionsFormArray.push(this.fb.group(version));
               }
 
+              // Update audio to match the restored version
+              const currentVersion = response.episode.versions.find(
+                (v) => v.versionNumber === response.episode.currentVersionNumber,
+              );
+              if (currentVersion) {
+                this.audioSrc = currentVersion.audioUrl || null;
+                this.currentVersionCreator = currentVersion.createdBy?.username || null;
+                this.currentVersionCreatedAt = currentVersion.createdAt || null;
+                this.currentVersionValidationNotes = currentVersion.validationNotes || null;
+                this.currentVersionChangeType = currentVersion.changeType || null;
+              } else {
+                this.audioSrc = null;
+              }
+
+              // Update live audio tracking
+              this.liveAudioSrc = response.episode.audioUrl || null;
+              if (this.liveAudioSrc) {
+                const liveAudioVersion = response.episode.versions.find((v) => v.audioUrl === this.liveAudioSrc);
+                this.liveAudioVersionNumber = liveAudioVersion?.versionNumber || null;
+              } else {
+                this.liveAudioVersionNumber = null;
+              }
+
+              // Force audio element to re-render with new source
+              this.audioKey++;
+              // Force Angular to detect the audio changes immediately
+              this.cdr.detectChanges();
+
+              // Mark form as pristine and update initial values to prevent dirty state warning
+              this.episodeForm.markAsPristine();
+              this.episodeForm.markAsUntouched();
+              this.initialFormValues = this.getEditableFormValues();
+              this.hasUnsavedChanges = false;
+
+              // Clear version selection
               this.selectedVersionNumber = null;
               this.selectedVersion = null;
+
               this.loadingService.hide();
             },
             error: (err) => {
@@ -732,11 +784,59 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       return;
     }
     const currentValues = this.getEditableFormValues();
-    this.hasUnsavedChanges =
+    const hasChanges =
       currentValues.title !== this.initialFormValues.title ||
       currentValues.description !== this.initialFormValues.description ||
       currentValues.content !== this.initialFormValues.content ||
       currentValues.isLive !== this.initialFormValues.isLive;
+
+    // Check if user is editing content fields (not just toggling isLive)
+    const hasContentChanges =
+      currentValues.title !== this.initialFormValues.title ||
+      currentValues.description !== this.initialFormValues.description ||
+      currentValues.content !== this.initialFormValues.content;
+
+    // If user is making content changes for the first time on a live episode with audio, warn them
+    const isFirstContentChange = hasContentChanges && !this.hasUnsavedChanges && !this.hasAcknowledgedLiveEditWarning;
+    const shouldShowWarning = isFirstContentChange && this.shouldWarnAboutLiveEdit();
+    if (shouldShowWarning) {
+      this.showLiveEditWarning();
+    }
+
+    this.hasUnsavedChanges = hasChanges;
+  }
+
+  public shouldWarnAboutLiveEdit(): boolean {
+    const isLive = this.episodeForm.get('isLive')?.value;
+    const hasAudio = this.audioSrc !== null || this.liveAudioSrc !== null;
+    // Warn if episode is live and has audio (either current version or live audio)
+    return isLive && hasAudio;
+  }
+
+  private showLiveEditWarning(): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: {
+        title: 'Editing Live Episode',
+        message:
+          'You are about to edit a live episode with published audio.\n\n' +
+          'The current audio file will remain live until you generate a new audio version. ' +
+          'When audio is generated for the current version it will automatically replace it.\n\n' +
+          'Any edits you make can be saved but will not match the live audio until you regenerate it.',
+        confirmButtonText: 'Continue Editing',
+        confirmButtonColor: 'primary',
+        cancelButtonText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.hasAcknowledgedLiveEditWarning = true;
+      } else {
+        // User cancelled, revert the changes
+        this.episodeForm.patchValue(this.initialFormValues || {}, { emitEvent: false });
+        this.hasUnsavedChanges = false;
+      }
+    });
   }
 
   canDeactivate(): boolean {

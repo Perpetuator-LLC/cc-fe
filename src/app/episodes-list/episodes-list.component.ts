@@ -40,6 +40,15 @@ import { CommonModule } from '@angular/common';
 import { LoadingService } from '../loading.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
+import {
+  CreateEpisodeDialogComponent,
+  CreateEpisodeDialogResult,
+} from '../create-episode-dialog/create-episode-dialog.component';
+import { NewsService } from '../news.service';
+import { Job, JobService } from '../job.service';
+import { RecentlyUsedPodcastsService } from '../recently-used-podcasts.service';
+import { ResearchService, Topic } from '../research.service';
+import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-dialog.component';
 
 @Component({
   selector: 'app-episodes-list',
@@ -99,6 +108,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   loadingPodcasts = false;
   selectedPodcast: string | null = null;
   podcasts: PodcastsResult[] = [];
+  topics: Topic[] = [];
   cursors: (string | null)[] = [null];
   isGridView = false;
   searchTerm = '';
@@ -115,6 +125,10 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
     private loadingService: LoadingService,
+    private newsService: NewsService,
+    private jobService: JobService,
+    private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
+    private researchService: ResearchService,
   ) {}
 
   ngOnInit(): void {
@@ -135,6 +149,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
     this.loadEpisodes();
     this.loadPodcasts();
+    this.loadTopics();
   }
 
   ngOnDestroy() {
@@ -187,21 +202,57 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   loadPodcasts() {
     this.loadingPodcasts = true;
 
+    // Load podcast history first
     this.subscriptions.add(
-      this.podcastsService.getPodcastsForFilter().subscribe({
-        next: (response) => {
-          this.podcasts = response.podcasts;
-          this.loadingPodcasts = false;
-        },
-        error: (err: { message: string }) => {
-          this.loadingPodcasts = false;
-          this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
-        },
-        complete: () => {
-          this.loadingPodcasts = false;
+      this.recentlyUsedPodcastsService.loadHistory().subscribe({
+        next: () => {
+          // Then load podcasts
+          this.subscriptions.add(
+            this.podcastsService.getPodcastsForFilter().subscribe({
+              next: (response) => {
+                // Sort by recently used
+                this.podcasts = this.recentlyUsedPodcastsService.sortByRecentlyUsed(response.podcasts);
+
+                // Auto-select if only one podcast or use most recent
+                if (!this.selectedPodcast) {
+                  this.selectedPodcast = this.recentlyUsedPodcastsService.getDefaultSelection(this.podcasts);
+                }
+
+                this.loadingPodcasts = false;
+              },
+              error: (err: { message: string }) => {
+                this.loadingPodcasts = false;
+                this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
+              },
+              complete: () => {
+                this.loadingPodcasts = false;
+              },
+            }),
+          );
         },
       }),
     );
+  }
+
+  loadTopics(): void {
+    this.subscriptions.add(
+      this.researchService.getTopics(undefined, 100).subscribe({
+        next: (response) => {
+          this.topics = response.topics;
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to retrieve research topics: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  onPodcastChange(): void {
+    // Record podcast selection if one is selected
+    if (this.selectedPodcast) {
+      this.recentlyUsedPodcastsService.recordSelection(this.selectedPodcast);
+    }
+    this.loadEpisodes();
   }
 
   sortChange(sortState: Sort) {
@@ -251,6 +302,107 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               this.messageService.error(`Failed to delete episode: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  openCreateEpisodeDialog(): void {
+    const dialogRef = this.dialog.open(CreateEpisodeDialogComponent, {
+      width: '600px',
+      data: {
+        podcasts: this.podcasts,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: CreateEpisodeDialogResult | null) => {
+      if (result) {
+        this.handleEpisodeCreation(result);
+      }
+    });
+  }
+
+  private handleEpisodeCreation(result: CreateEpisodeDialogResult): void {
+    switch (result.episodeType) {
+      case 'blank':
+        this.createBlankEpisode(result.podcastUuid);
+        break;
+      case 'news':
+        this.createNewsEpisode(result.podcastUuid);
+        break;
+      case 'research':
+        this.createResearchEpisode(result.podcastUuid);
+        break;
+    }
+  }
+
+  private createBlankEpisode(podcastUuid: string): void {
+    const newsUuids: string[] = [];
+    this.subscriptions.add(
+      this.newsService.createEpisode(newsUuids, podcastUuid).subscribe({
+        next: (data: { job: Job | null }) => {
+          if (!data.job) {
+            this.messageService.error('Failed to create episode: No job returned');
+            return;
+          }
+          this.messageService.info('Creating blank episode...');
+          this.jobService.addJob(data.job);
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  private createNewsEpisode(podcastUuid: string): void {
+    this.subscriptions.add(
+      this.podcastsService.createLatestNewsEpisodeChain(podcastUuid).subscribe({
+        next: (data: { jobs: Job[] }) => {
+          if (!data.jobs || data.jobs.length === 0) {
+            this.messageService.error('Failed to create news episode: No jobs returned');
+            return;
+          }
+          this.messageService.info('Creating news episode from latest news...');
+          data.jobs.forEach((job) => {
+            this.jobService.addJob(job);
+          });
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(err.message);
+        },
+      }),
+    );
+  }
+
+  private createResearchEpisode(podcastUuid: string): void {
+    // Open dialog to select research topic
+    const dialogRef = this.dialog.open(SelectTopicDialogComponent, {
+      width: '600px',
+      data: {
+        podcastUuid,
+        topics: this.topics,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.topicUuid) {
+        this.subscriptions.add(
+          this.researchService.publishResearchTopicEpisodeChain(podcastUuid, result.topicUuid).subscribe({
+            next: (data) => {
+              if (!data.jobs || data.jobs.length === 0) {
+                this.messageService.error('Failed to create research episode: No jobs returned');
+                return;
+              }
+              this.messageService.info('Creating research episode from topic...');
+              data.jobs.forEach((job) => {
+                this.jobService.addJob(job);
+              });
+            },
+            error: (err: { message: string }) => {
+              this.messageService.error(err.message);
             },
           }),
         );

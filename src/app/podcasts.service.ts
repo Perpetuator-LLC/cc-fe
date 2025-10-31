@@ -875,7 +875,7 @@ export class PodcastsService extends BaseService {
     );
   }
 
-  createLatestEpisodeChain(podcastUuid: string): Observable<{ jobs: Job[] }> {
+  createLatestNewsEpisodeChain(podcastUuid: string): Observable<{ jobs: Job[] }> {
     const GQL = gql`
       mutation CreateLatestEpisodeChain($podcastUuid: UUID!) {
         createLatestEpisodeChain(podcastUuid: $podcastUuid) {

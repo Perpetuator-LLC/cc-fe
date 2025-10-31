@@ -1032,7 +1032,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   createNewsEpisode() {
     this.subscriptions.add(
-      this.podcastsService.createLatestEpisodeChain(this.podcastUuid).subscribe({
+      this.podcastsService.createLatestNewsEpisodeChain(this.podcastUuid).subscribe({
         next: (data) => {
           if (!data.jobs || data.jobs.length === 0) {
             this.messageService.error('Failed to create latest episode: No jobs returned');
