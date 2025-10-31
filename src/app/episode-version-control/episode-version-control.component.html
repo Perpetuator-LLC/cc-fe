@@ -225,7 +225,7 @@
             @if (selectedVersion.validationNotes) {
               <div class="validation-notes">
                 <mat-icon>note</mat-icon>
-                <span [innerHTML]="selectedVersion.validationNotes"></span>
+                <span [innerHTML]="markdownToHtml(selectedVersion.validationNotes)"></span>
               </div>
             }
 

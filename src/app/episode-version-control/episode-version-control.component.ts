@@ -8,8 +8,9 @@ import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
-import { SafeHtml } from '@angular/platform-browser';
+import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { EpisodeVersion } from '../episode.service';
+import { marked } from 'marked';
 
 @Component({
   selector: 'app-episode-version-control',
@@ -46,6 +47,14 @@ export class EpisodeVersionControlComponent {
   @Output() versionSelect = new EventEmitter<number>();
   @Output() copyVersionContent = new EventEmitter<void>();
   @Output() restoreVersion = new EventEmitter<void>();
+
+  constructor(private sanitizer: DomSanitizer) {}
+
+  markdownToHtml(markdown: string | null | undefined): SafeHtml {
+    if (!markdown) return '';
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
 
   getChangeTypeIcon(changeType: string | null | undefined): string {
     if (!changeType) return 'help_outline';
