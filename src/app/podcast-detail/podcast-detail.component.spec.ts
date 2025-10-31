@@ -88,6 +88,10 @@ describe('PodcastDetailComponentComponent', () => {
         categories: {},
         rssFeeds: [],
         voice: null,
+        newsPrompt: '',
+        newsTargetWords: 0,
+        researchPrompt: '',
+        researchTargetWords: 0,
       }),
     );
 

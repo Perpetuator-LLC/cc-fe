@@ -88,7 +88,7 @@
                   </div>
 
                   <span class="timeline-status" [ngClass]="statusClass(job.status)">
-                    {{ statusToString(job.status) }}
+                    {{ job.status.toUpperCase() }}
                   </span>
                 </div>
 

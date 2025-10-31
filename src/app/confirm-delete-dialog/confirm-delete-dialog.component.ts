@@ -8,6 +8,7 @@ export interface ConfirmDeleteDialogData {
   message: string;
   confirmButtonText?: string;
   confirmButtonColor?: 'primary' | 'accent' | 'warn';
+  cancelButtonText?: string;
 }
 
 @Component({
@@ -17,10 +18,10 @@ export interface ConfirmDeleteDialogData {
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
-      <p>{{ data.message }}</p>
+      <p class="message">{{ data.message }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-button (click)="onCancel()">{{ data.cancelButtonText || 'Cancel' }}</button>
       <button mat-flat-button [color]="data.confirmButtonColor || 'warn'" (click)="onConfirm()">
         {{ data.confirmButtonText || 'Delete' }}
       </button>
@@ -45,6 +46,10 @@ export interface ConfirmDeleteDialogData {
       p {
         margin: 0;
         line-height: 1.5;
+      }
+
+      p.message {
+        white-space: pre-line;
       }
     `,
   ],

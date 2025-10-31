@@ -29,6 +29,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { JobDisplayService } from '../job-display.service';
 import { LoadingService } from '../loading.service';
+import { RecentlyUsedPodcastsService } from '../recently-used-podcasts.service';
 
 // export interface News {
 //   results: NewsResult[];
@@ -78,8 +79,6 @@ export class NewsComponent implements OnInit, OnDestroy {
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
-  private podcastHistoryKey = 'news-podcast-history';
-  private podcastHistory: string[] = [];
   selectedNewsDetail: NewsResult | null = null;
   newsFetched = false;
   loadingNews = false;
@@ -100,6 +99,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private jobDisplayService: JobDisplayService,
     private loadingService: LoadingService,
+    private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
   ) {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
@@ -131,32 +131,35 @@ export class NewsComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
 
+    // Load podcast history first
     this.subscriptions.add(
-      this.podcastsService.getPodcastsForFilter().subscribe({
-        next: (response) => {
-          this.podcasts = response.podcasts.filter((podcast) =>
-            podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
-          );
-          this.sortPodcastsByHistory();
+      this.recentlyUsedPodcastsService.loadHistory().subscribe({
+        next: () => {
+          // Then load podcasts
+          this.subscriptions.add(
+            this.podcastsService.getPodcastsForFilter().subscribe({
+              next: (response) => {
+                this.podcasts = response.podcasts.filter((podcast) =>
+                  podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+                );
 
-          if (this.podcasts.length > 0) {
-            const lastSelected = this.podcastHistory[0];
-            if (lastSelected && this.podcasts.some((p) => p.uuid === lastSelected)) {
-              this.selectedPodcastUuid = lastSelected;
-            } else {
-              this.selectedPodcastUuid = this.podcasts[0].uuid;
-            }
-          }
-          this.loadingPodcasts = false;
-        },
-        error: (error) => {
-          this.messageService.error(`Failed to get podcasts: ${error.message}`);
-          this.loadingPodcasts = false;
+                // Sort by recently used
+                this.podcasts = this.recentlyUsedPodcastsService.sortByRecentlyUsed(this.podcasts);
+
+                // Auto-select default podcast
+                this.selectedPodcastUuid = this.recentlyUsedPodcastsService.getDefaultSelection(this.podcasts);
+
+                this.loadingPodcasts = false;
+              },
+              error: (error) => {
+                this.messageService.error(`Failed to get podcasts: ${error.message}`);
+                this.loadingPodcasts = false;
+              },
+            }),
+          );
         },
       }),
     );
-
-    this.loadPodcastHistory();
   }
 
   fetchNews() {
@@ -289,72 +292,15 @@ export class NewsComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Add this method to handle podcast selection
   onPodcastSelect(podcastUuid: string | null) {
     if (!podcastUuid) {
       this.messageService.warning('No podcast selected.');
       return;
     }
-    // this.onPodcastChange();
-    // Update selection history
-    this.updatePodcastHistory(podcastUuid);
+    // Record selection in history
+    this.recentlyUsedPodcastsService.recordSelection(podcastUuid);
     // Get news with the selected podcast
     this.getNews();
-  }
-
-  // Method to load podcast history
-  private loadPodcastHistory() {
-    this.userService.userSettings([this.podcastHistoryKey]).subscribe({
-      next: (settings) => {
-        const historySetting = settings.find((setting) => setting.key === this.podcastHistoryKey);
-        if (historySetting) {
-          try {
-            this.podcastHistory = JSON.parse(historySetting.value);
-            // Sort podcasts based on history when they're loaded
-            this.sortPodcastsByHistory();
-          } catch (e) {
-            console.error('Error parsing podcast history', e);
-            this.podcastHistory = [];
-          }
-        }
-      },
-      error: (err) => {
-        console.error('Error loading podcast history', err);
-      },
-    });
-  }
-
-  // Method to update podcast history
-  private updatePodcastHistory(podcastUuid: string) {
-    // Remove the selected podcast if it's already in history
-    this.podcastHistory = this.podcastHistory.filter((uuid) => uuid !== podcastUuid);
-    // Add it to the beginning (most recent)
-    this.podcastHistory.unshift(podcastUuid);
-
-    // Save the updated history
-    this.userService.updateUserSetting(this.podcastHistoryKey, JSON.stringify(this.podcastHistory)).subscribe({
-      error: (err) => console.error('Error saving podcast history', err),
-    });
-  }
-
-  // Method to sort podcasts based on history
-  private sortPodcastsByHistory() {
-    if (!this.podcasts || this.podcasts.length === 0 || this.podcastHistory.length === 0) {
-      return;
-    }
-
-    // Create a map for quick lookup of podcast index in history
-    const historyMap: Record<string, number> = {};
-    this.podcastHistory.forEach((uuid, index) => {
-      historyMap[uuid] = index;
-    });
-
-    // Sort podcasts: recently selected first, then others
-    this.podcasts.sort((a, b) => {
-      const indexA = historyMap[a.uuid] !== undefined ? historyMap[a.uuid] : Number.MAX_SAFE_INTEGER;
-      const indexB = historyMap[b.uuid] !== undefined ? historyMap[b.uuid] : Number.MAX_SAFE_INTEGER;
-      return indexA - indexB;
-    });
   }
 
   createBlankEpisode() {
