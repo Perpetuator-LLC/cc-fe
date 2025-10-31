@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
@@ -79,7 +79,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   audioSrc: string | null = null;
   liveAudioSrc: string | null = null;
   liveAudioVersionNumber: number | null = null;
-  audioKey = 0;
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
@@ -94,6 +93,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   hasUnsavedChanges = false;
   private initialFormValues: EditableFormValues | null = null;
   private hasAcknowledgedLiveEditWarning = false;
+  private isRestoring = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -118,7 +118,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private schedulingService: SchedulingService,
     private loadingService: LoadingService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -232,7 +231,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           }
 
           // Track the live/published audio (from episode.audioUrl)
-          this.liveAudioSrc = episode.audioUrl || null;
+          // If episode.audioUrl is set, use that (it's the officially published audio)
+          // Otherwise, if episode is live but audioUrl is null, find the most recent version with audio
+          if (episode.audioUrl) {
+            this.liveAudioSrc = episode.audioUrl;
+          } else if (episode.isLive) {
+            // Find the most recent version (highest version number) that has audio
+            const versionsWithAudio = episode.versions
+              .filter((v) => v.audioUrl)
+              .sort((a, b) => b.versionNumber - a.versionNumber);
+            this.liveAudioSrc = versionsWithAudio.length > 0 ? versionsWithAudio[0].audioUrl || null : null;
+          } else {
+            this.liveAudioSrc = null;
+          }
 
           // Find which version has the live audio URL
           if (this.liveAudioSrc) {
@@ -586,6 +597,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
             next: (response) => {
               this.messageService.success(`Version ${this.selectedVersionNumber} restored successfully`);
 
+              // Set flag to suppress live edit warning during restore
+              this.isRestoring = true;
+
               // Update form with restored episode data
               this.episodeForm.patchValue(response.episode);
 
@@ -619,11 +633,6 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                 this.liveAudioVersionNumber = null;
               }
 
-              // Force audio element to re-render with new source
-              this.audioKey++;
-              // Force Angular to detect the audio changes immediately
-              this.cdr.detectChanges();
-
               // Mark form as pristine and update initial values to prevent dirty state warning
               this.episodeForm.markAsPristine();
               this.episodeForm.markAsUntouched();
@@ -634,9 +643,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
               this.selectedVersionNumber = null;
               this.selectedVersion = null;
 
+              // Clear restoring flag after all updates are complete
+              this.isRestoring = false;
+
               this.loadingService.hide();
             },
             error: (err) => {
+              // Clear restoring flag on error too
+              this.isRestoring = false;
               this.loadingService.hide();
               this.messageService.error(`Failed to restore version: ${err.message}`);
             },
@@ -797,8 +811,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       currentValues.content !== this.initialFormValues.content;
 
     // If user is making content changes for the first time on a live episode with audio, warn them
+    // BUT NOT during restore operations (restore dialog already warns them)
     const isFirstContentChange = hasContentChanges && !this.hasUnsavedChanges && !this.hasAcknowledgedLiveEditWarning;
-    const shouldShowWarning = isFirstContentChange && this.shouldWarnAboutLiveEdit();
+    const shouldShowWarning = isFirstContentChange && !this.isRestoring && this.shouldWarnAboutLiveEdit();
     if (shouldShowWarning) {
       this.showLiveEditWarning();
     }
@@ -806,11 +821,13 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     this.hasUnsavedChanges = hasChanges;
   }
 
-  public shouldWarnAboutLiveEdit(): boolean {
+  protected shouldWarnAboutLiveEdit(): boolean {
     const isLive = this.episodeForm.get('isLive')?.value;
-    const hasAudio = this.audioSrc !== null || this.liveAudioSrc !== null;
-    // Warn if episode is live and has audio (either current version or live audio)
-    return isLive && hasAudio;
+    // ONLY warn if the CURRENT version has audio
+    // If current version has no audio (audioSrc is null), it means user already made edits
+    // and we've already warned them - no need to warn again on subsequent edits
+    const currentVersionHasAudio = this.audioSrc !== null;
+    return isLive && currentVersionHasAudio;
   }
 
   private showLiveEditWarning(): void {
