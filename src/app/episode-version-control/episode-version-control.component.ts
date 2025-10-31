@@ -90,6 +90,10 @@ export class EpisodeVersionControlComponent {
     return version.content ? version.content.length : 0;
   }
 
+  hasAudio(version: EpisodeVersion): boolean {
+    return !!(version.audioUrl && version.audioUrl.trim());
+  }
+
   onVersionSelect(versionNumber: number): void {
     this.versionSelect.emit(versionNumber);
   }

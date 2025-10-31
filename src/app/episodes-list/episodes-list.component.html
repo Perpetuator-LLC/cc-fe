@@ -12,6 +12,10 @@
       <h3>All Episodes</h3>
       <span>{{ episodes.length }} Episodes</span>
     </div>
+    <button mat-flat-button color="primary" type="button" (click)="openCreateEpisodeDialog()">
+      <mat-icon>add</mat-icon>
+      Create New Episode
+    </button>
   </mat-card-content>
 </mat-card>
 <div class="middle-card">
@@ -27,7 +31,7 @@
       </button>
       <mat-form-field [hidden]="loadingPodcasts">
         <mat-label>Select Podcast</mat-label>
-        <mat-select [(value)]="selectedPodcast" (selectionChange)="loadEpisodes()">
+        <mat-select [(value)]="selectedPodcast" (selectionChange)="onPodcastChange()">
           <mat-option [value]="null">All Podcasts</mat-option>
           @for (podcast of podcasts; track podcast.uuid) {
           <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
