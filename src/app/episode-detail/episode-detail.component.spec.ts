@@ -222,14 +222,15 @@ describe('EpisodeDetailComponent', () => {
       expect(component.shouldWarnAboutLiveEdit()).toBe(true);
     });
 
-    it('should warn when episode is live with previous version audio', () => {
-      // REASON: Even though current version has no audio, old audio is still being served live
-      // Editing transcript will make it further out of sync with live audio
+    it('should NOT warn when episode is live but current version has no audio (only previous version audio)', () => {
+      // REASON: Current version has no audio - user already made edits after initial audio generation
+      // We already warned them on the FIRST edit (when audioSrc was not null)
+      // No need to keep warning on subsequent edits - they know audio is out of sync
       component.episodeForm.patchValue({ isLive: true });
-      component.audioSrc = null;
-      component.liveAudioSrc = 'https://example.com/v1.mp3';
+      component.audioSrc = null; // Current version has no audio (already edited)
+      component.liveAudioSrc = 'https://example.com/v1.mp3'; // Previous version audio still live
 
-      expect(component.shouldWarnAboutLiveEdit()).toBe(true);
+      expect(component.shouldWarnAboutLiveEdit()).toBe(false);
     });
   });
 
@@ -277,8 +278,14 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v1.mp3';
       component.liveAudioSrc = 'https://example.com/v1.mp3';
 
-      // User edits transcript - backend clears current version audio
+      // User makes FIRST edit - should warn (has current version audio)
+      expect(component.shouldWarnAboutLiveEdit()).toBe(true);
+
+      // After first edit saved, backend clears current version audio
       component.audioSrc = null; // Current version audio cleared by backend
+
+      // User makes SUBSEQUENT edits - should NOT warn (no current version audio)
+      expect(component.shouldWarnAboutLiveEdit()).toBe(false);
 
       // Should show previous version is still live
       expect(component.hasCurrentVersionAudio()).toBe(false);
