@@ -94,6 +94,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   private initialFormValues: EditableFormValues | null = null;
   private hasAcknowledgedLiveEditWarning = false;
   private isRestoring = false;
+  private isUpdatingFromBackend = false;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
@@ -204,6 +205,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.episodeService.getEpisodeById(this.episodeUuid, fetchPolicy).subscribe({
         next: (episode) => {
+          // Set flag to suppress live edit warning during backend updates
+          this.isUpdatingFromBackend = true;
           this.episodeForm.patchValue(episode);
 
           const newsFormArray = this.episodeForm.get('news') as FormArray;
@@ -257,9 +260,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           this.hasUnsavedChanges = false;
           this.hasAcknowledgedLiveEditWarning = false;
 
+          // Clear the flag after all updates are complete
+          this.isUpdatingFromBackend = false;
+
           this.loadingService.hide();
         },
         error: (err) => {
+          // Clear flag on error too
+          this.isUpdatingFromBackend = false;
           this.loadingService.hide();
           this.messageService.error(`Failed to fetch episode: ${err.message}`);
         },
@@ -624,8 +632,20 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                 this.audioSrc = null;
               }
 
-              // Update live audio tracking
-              this.liveAudioSrc = response.episode.audioUrl || null;
+              // Update live audio tracking (same logic as loadEpisodeData)
+              if (response.episode.audioUrl) {
+                this.liveAudioSrc = response.episode.audioUrl;
+              } else if (response.episode.isLive) {
+                // Find the most recent version (highest version number) that has audio
+                const versionsWithAudio = response.episode.versions
+                  .filter((v) => v.audioUrl)
+                  .sort((a, b) => b.versionNumber - a.versionNumber);
+                this.liveAudioSrc = versionsWithAudio.length > 0 ? versionsWithAudio[0].audioUrl || null : null;
+              } else {
+                this.liveAudioSrc = null;
+              }
+
+              // Find which version has the live audio URL
               if (this.liveAudioSrc) {
                 const liveAudioVersion = response.episode.versions.find((v) => v.audioUrl === this.liveAudioSrc);
                 this.liveAudioVersionNumber = liveAudioVersion?.versionNumber || null;
@@ -812,8 +832,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
     // If user is making content changes for the first time on a live episode with audio, warn them
     // BUT NOT during restore operations (restore dialog already warns them)
+    // AND NOT during backend updates (validation, regeneration jobs completing)
     const isFirstContentChange = hasContentChanges && !this.hasUnsavedChanges && !this.hasAcknowledgedLiveEditWarning;
-    const shouldShowWarning = isFirstContentChange && !this.isRestoring && this.shouldWarnAboutLiveEdit();
+    const shouldShowWarning =
+      isFirstContentChange && !this.isRestoring && !this.isUpdatingFromBackend && this.shouldWarnAboutLiveEdit();
     if (shouldShowWarning) {
       this.showLiveEditWarning();
     }
@@ -821,7 +843,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     this.hasUnsavedChanges = hasChanges;
   }
 
-  protected shouldWarnAboutLiveEdit(): boolean {
+  public shouldWarnAboutLiveEdit(): boolean {
     const isLive = this.episodeForm.get('isLive')?.value;
     // ONLY warn if the CURRENT version has audio
     // If current version has no audio (audioSrc is null), it means user already made edits
