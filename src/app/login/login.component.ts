@@ -24,6 +24,8 @@ import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AffiliateService } from '../affiliate.service';
+import { AffiliateStorageService } from '../affiliate-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -53,6 +55,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription | undefined;
+  private affiliateCode: string | null = null;
+
   loginForm = new FormGroup({
     // TODO: Add validation equivalent to back-end
     password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(5)]),
@@ -71,8 +75,18 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private userService: UserService,
     private cookieConsentService: CookieConsentService,
     private dialog: MatDialog,
+    private affiliateService: AffiliateService,
+    private affiliateStorageService: AffiliateStorageService,
   ) {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+
+    const refCode = this.route.snapshot.queryParams['ref'];
+    if (refCode) {
+      this.affiliateCode = refCode;
+      this.affiliateStorageService.setAffiliateCode(refCode);
+    } else {
+      this.affiliateCode = this.affiliateStorageService.getAffiliateCode();
+    }
   }
 
   ngAfterViewInit() {
@@ -88,10 +102,11 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       .subscribe({
         next: () => {
           if (this.messageService.messageCount === 0) {
-            this.router.navigateByUrl(this.returnUrl);
-            this.themeService.loadTheme();
-            this.userService.loadUserDetails();
-            this.cookieConsentService.loadCookieConsent();
+            if (this.affiliateCode) {
+              this.joinAffiliateProgram(this.affiliateCode);
+            } else {
+              this.completeLogin();
+            }
           } else {
             this.messageService.addMessage({
               type: 'error',
@@ -104,6 +119,27 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           this.messageService.error('Login failed: ' + error.toString());
         },
       });
+  }
+
+  private joinAffiliateProgram(code: string): void {
+    this.affiliateService.joinAffiliateProgram(code).subscribe({
+      next: (response) => {
+        this.affiliateStorageService.clearAffiliateCode();
+        this.messageService.success(`You've joined ${response.relationship?.affiliateUsername}'s network!`);
+        this.completeLogin();
+      },
+      error: (err) => {
+        console.error('Failed to join affiliate program:', err);
+        this.completeLogin();
+      },
+    });
+  }
+
+  private completeLogin(): void {
+    this.router.navigateByUrl(this.returnUrl);
+    this.themeService.loadTheme();
+    this.userService.loadUserDetails();
+    this.cookieConsentService.loadCookieConsent();
   }
 
   ngOnDestroy() {

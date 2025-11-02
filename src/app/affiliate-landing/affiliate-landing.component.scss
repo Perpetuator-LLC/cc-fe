@@ -1,0 +1,138 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.affiliate-landing-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+
+  p {
+    color: var(--theme-color);
+    font-size: 16px;
+  }
+}
+
+.affiliate-card,
+.error-card {
+  max-width: 600px;
+  width: 100%;
+  background-color: var(--toolbar-container-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 30px;
+}
+
+.brand-image-container {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+.brand-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--theme-color);
+  margin: 0;
+  text-align: center;
+}
+
+.description {
+  font-size: 16px;
+  color: var(--description-color);
+  text-align: center;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+
+  button {
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
+    padding: 10px 16px;
+    font-weight: 600;
+  }
+
+  button[color="primary"] {
+    background: var(--primary);
+    color: var(--theme-white);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+  }
+}
+
+.existing-affiliate-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+
+  p {
+    color: var(--theme-color);
+    font-size: 16px;
+    margin: 0;
+
+    strong {
+      color: var(--primary);
+    }
+  }
+}
+
+.error-card {
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--md-sys-color-error);
+    margin: 0;
+    text-align: center;
+  }
+
+  p {
+    color: var(--description-color);
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  mat-card-content {
+    padding: 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+

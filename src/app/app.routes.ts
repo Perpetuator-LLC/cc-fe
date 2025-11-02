@@ -217,6 +217,22 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'affiliate',
+    loadComponent: () =>
+      import('./affiliate-dashboard/affiliate-dashboard.component').then((c) => c.AffiliateDashboardComponent),
+    title: 'Affiliate Dashboard',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'share',
+    },
+  },
+  {
+    path: 'a/:code',
+    loadComponent: () =>
+      import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
+    title: 'Join Affiliate Network',
+  },
+  {
     path: 'privacy-policy',
     loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
     title: 'Privacy',
