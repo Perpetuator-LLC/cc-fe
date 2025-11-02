@@ -16,6 +16,7 @@ import { of } from 'rxjs';
 import { signal } from '@angular/core';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('EpisodeDetailComponent', () => {
   let component: EpisodeDetailComponent;
@@ -62,7 +63,7 @@ describe('EpisodeDetailComponent', () => {
     domSanitizerSpy.bypassSecurityTrustHtml.and.callFake((html: string) => html);
 
     await TestBed.configureTestingModule({
-      imports: [EpisodeDetailComponent, ReactiveFormsModule, HttpClientTestingModule],
+      imports: [EpisodeDetailComponent, ReactiveFormsModule, HttpClientTestingModule, NoopAnimationsModule],
       providers: [
         FormBuilder,
         { provide: MessageService, useValue: messageServiceSpy },
