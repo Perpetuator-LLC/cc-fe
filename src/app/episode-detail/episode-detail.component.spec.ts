@@ -3,6 +3,19 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { EpisodeDetailComponent } from './episode-detail.component';
 import { MessageService } from '../message.service';
+import { ActivatedRoute } from '@angular/router';
+import { EpisodeService } from '../episode.service';
+import { JobService } from '../job.service';
+import { ToolbarService } from '../toolbar.service';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { SchedulingService } from '../scheduling.service';
+import { LoadingService } from '../loading.service';
+import { DomSanitizer } from '@angular/platform-browser';
+import { of } from 'rxjs';
+import { signal } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('EpisodeDetailComponent', () => {
   let component: EpisodeDetailComponent;
@@ -10,11 +23,60 @@ describe('EpisodeDetailComponent', () => {
   let messageService: jasmine.SpyObj<MessageService>;
 
   beforeEach(async () => {
-    const messageServiceSpy = jasmine.createSpyObj('MessageService', ['warning', 'error', 'success']);
+    const messageServiceSpy = jasmine.createSpyObj('MessageService', ['warning', 'error', 'success', 'info']);
+    messageServiceSpy.messages$ = of([]);
+    const activatedRouteSpy = {
+      snapshot: {
+        paramMap: {
+          get: jasmine.createSpy('get').and.returnValue('test-uuid-123'),
+        },
+      },
+    };
+    const episodeServiceSpy = jasmine.createSpyObj('EpisodeService', [
+      'getEpisodeById',
+      'updateEpisode',
+      'generateAudio',
+      'publishAudio',
+      'deleteEpisode',
+      'validateEpisodeManual',
+      'regenerateEpisode',
+      'revertEpisodeVersion',
+    ]);
+    const jobServiceSpy = jasmine.createSpyObj('JobService', ['addJob', 'addJobs', 'getJobTransitions']);
+    jobServiceSpy.jobs = signal([]);
+    const toolbarServiceSpy = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef', 'clearToolbarComponent']);
+    const viewContainerRefSpy = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
+    toolbarServiceSpy.getViewContainerRef.and.returnValue(viewContainerRefSpy);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    routerSpy.events = of(); // RouterLink needs events observable
+    const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    const schedulingServiceSpy = jasmine.createSpyObj('SchedulingService', [
+      'getSchedulesForPodcast',
+      'updateSchedule',
+      'deleteSchedule',
+      'savePodcastSchedules',
+    ]);
+    schedulingServiceSpy.getSchedulesForPodcast.and.returnValue(of([]));
+    const loadingServiceSpy = jasmine.createSpyObj('LoadingService', ['show', 'hide']);
+    const domSanitizerSpy = jasmine.createSpyObj('DomSanitizer', ['bypassSecurityTrustHtml']);
+    domSanitizerSpy.bypassSecurityTrustHtml.and.callFake((html: string) => html);
 
     await TestBed.configureTestingModule({
-      imports: [EpisodeDetailComponent, ReactiveFormsModule],
-      providers: [FormBuilder, { provide: MessageService, useValue: messageServiceSpy }],
+      imports: [EpisodeDetailComponent, ReactiveFormsModule, HttpClientTestingModule],
+      providers: [
+        FormBuilder,
+        { provide: MessageService, useValue: messageServiceSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
+        { provide: EpisodeService, useValue: episodeServiceSpy },
+        { provide: JobService, useValue: jobServiceSpy },
+        { provide: ToolbarService, useValue: toolbarServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: SchedulingService, useValue: schedulingServiceSpy },
+        { provide: LoadingService, useValue: loadingServiceSpy },
+        { provide: DomSanitizer, useValue: domSanitizerSpy },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EpisodeDetailComponent);
