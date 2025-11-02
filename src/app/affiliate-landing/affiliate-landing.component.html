@@ -1,0 +1,48 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="affiliate-landing-container">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading affiliate information...</p>
+    </div>
+  } @else if (error) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <h2>{{ error }}</h2>
+        <p>This affiliate link may be invalid or expired.</p>
+        <div class="actions">
+          <button mat-raised-button color="primary" routerLink="/register">Sign Up</button>
+          <button mat-button routerLink="/login">Sign In</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else if (affiliateData) {
+    <mat-card class="affiliate-card">
+      <mat-card-content>
+        @if (getBrandImageUrl()) {
+          <div class="brand-image-container">
+            <img [src]="getBrandImageUrl()" [alt]="affiliateData.affiliate_username + ' brand image'" class="brand-image">
+          </div>
+        }
+
+        <h1 class="title">Join {{ affiliateData.affiliate_username }}'s Network</h1>
+        <p class="description">Start your journey with Capital Copilot and become part of an affiliate network.</p>
+
+        <div class="actions">
+          @if (!isAuthenticated) {
+            <button mat-raised-button color="primary" (click)="onSignUp()">Sign Up</button>
+            <button mat-raised-button (click)="onSignIn()">Sign In</button>
+          } @else if (hasExistingAffiliate) {
+            <div class="existing-affiliate-message">
+              <p>You're already part of <strong>{{ existingAffiliateUsername }}</strong>'s network</p>
+              <button mat-button routerLink="/profile">Go to Profile</button>
+            </div>
+          } @else {
+            <button mat-raised-button color="primary" (click)="onJoinNetwork()">Join Network</button>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
+

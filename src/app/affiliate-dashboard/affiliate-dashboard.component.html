@@ -1,0 +1,189 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="affiliate-dashboard-container">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading affiliate dashboard...</p>
+    </div>
+  } @else {
+    <div class="dashboard-content">
+      <h1 class="page-title">Affiliate Dashboard</h1>
+
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>payments</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.totalAffiliateCredits || 0 }}</div>
+            <div class="stat-label">Total Earnings (Credits)</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>group</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.totalReferrals || 0 }}</div>
+            <div class="stat-label">Total Referrals</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.tier1Referrals || 0 }}</div>
+            <div class="stat-label">Direct Referrals (10%)</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>people</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.tier2Referrals || 0 }}</div>
+            <div class="stat-label">Second Level (5%)</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-card class="link-card">
+        <mat-card-content>
+          <h2>Your Affiliate Link</h2>
+          <div class="link-section">
+            <div class="link-display">
+              <span class="link-text">{{ getAffiliateLink() }}</span>
+              <button mat-icon-button (click)="copyLink()">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <div class="share-buttons">
+              <button mat-raised-button (click)="shareOnTwitter()">
+                <mat-icon>share</mat-icon>
+                Twitter
+              </button>
+              <button mat-raised-button (click)="shareOnLinkedIn()">
+                <mat-icon>share</mat-icon>
+                LinkedIn
+              </button>
+              <button mat-raised-button (click)="shareViaEmail()">
+                <mat-icon>email</mat-icon>
+                Email
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="brand-image-card">
+        <mat-card-content>
+          <h2>Brand Image</h2>
+          @if (profile && profile.brandImage) {
+            <div class="brand-image-preview">
+              <img [src]="profile.brandImage!" alt="Brand Image">
+            </div>
+          }
+          <div class="upload-section">
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+            <button mat-raised-button color="primary" (click)="fileInput.click()">
+              <mat-icon>upload</mat-icon>
+              {{ profile?.brandImage ? 'Update' : 'Upload' }} Brand Image
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="balance-card">
+        <mat-card-content>
+          <h2>Available Balance</h2>
+          <div class="balance-value">{{ getAvailableBalance() }} Credits</div>
+          <div class="conversion-actions">
+            <button mat-raised-button color="primary" (click)="openConvertDialog('credits')">
+              <mat-icon>swap_horiz</mat-icon>
+              Convert to Credits
+            </button>
+            <button mat-raised-button (click)="openConvertDialog('cash')">
+              <mat-icon>attach_money</mat-icon>
+              Request Cash Payout
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-tab-group class="history-tabs">
+        <mat-tab label="Earnings History">
+          <div class="table-container">
+            @if (credits.length > 0) {
+              <table mat-table [dataSource]="credits" class="history-table">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let credit">{{ formatDate(credit.createdAt) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="from">
+                  <th mat-header-cell *matHeaderCellDef>From</th>
+                  <td mat-cell *matCellDef="let credit">{{ credit.sourceUsername }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let credit">{{ getTierDescription(credit.tier) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let credit">{{ credit.amount }} credits</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="creditsDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: creditsDisplayedColumns;"></tr>
+              </table>
+            } @else {
+              <div class="no-data">No earnings yet</div>
+            }
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Conversion History">
+          <div class="table-container">
+            @if (conversions.length > 0) {
+              <table mat-table [dataSource]="conversions" class="history-table">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let conversion">{{ formatDate(conversion.createdAt) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let conversion">{{ getConversionTypeDisplay(conversion.conversionType) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let conversion">{{ conversion.affiliateCreditAmount }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let conversion">
+                    <span class="status-badge" [class]="conversion.status">{{ conversion.status }}</span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="conversionsDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: conversionsDisplayedColumns;"></tr>
+              </table>
+            } @else {
+              <div class="no-data">No conversions yet</div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  }
+</div>
+
