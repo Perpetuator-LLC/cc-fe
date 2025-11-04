@@ -3,6 +3,7 @@
 # Custom for this project
 /src/environments/environment.ts
 /src/environments/environment.prod.ts
+/logs
 
 # Compiled output
 /dist

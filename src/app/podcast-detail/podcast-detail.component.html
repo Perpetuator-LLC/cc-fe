@@ -168,12 +168,21 @@
             </div>
 
             <div class="member-row" style="margin-bottom: 20px">
-              <div class="file-input-wrapper">
+              <div
+                class="file-input-wrapper"
+                [class.dragging]="isDraggingImage"
+                (dragover)="onImageDragOver($event)"
+                (dragleave)="onImageDragLeave($event)"
+                (drop)="onImageDrop($event)"
+              >
                 <div class="image-preview">
                   @if (imageUrl) {
                     <img [src]="imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
                   } @else {
-                    <div></div>
+                    <div class="image-placeholder">
+                      <mat-icon>image</mat-icon>
+                      <p>No image uploaded</p>
+                    </div>
                   }
                 </div>
 
@@ -183,24 +192,25 @@
                     <span>Uploading: {{ selectedFile.name }}</span>
                   </div>
                 } @else {
-                  <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
-                    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clip-path="url(#clip0_210_6192)">
-                        <path
-                          d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
-                          fill="currentColor"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_210_6192">
-                          <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    Upload Podcast Featured Image
-                  </button>
-
-                  <span class="desc">Upload image file (PNG/JPG, max size: 1MB)</span>
+                  <div class="upload-area">
+                    <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
+                      <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_210_6192)">
+                          <path
+                            d="M5.6875 7.8125H7.3125V4.5625H9.75L6.5 1.3125L3.25 4.5625H5.6875V7.8125ZM8.125 5.98438V7.23725L11.8454 8.625L6.5 10.6181L1.15456 8.625L4.875 7.23725V5.98438L0 7.8125V11.0625L6.5 13.5L13 11.0625V7.8125L8.125 5.98438Z"
+                            fill="currentColor"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_210_6192">
+                            <rect width="13" height="13" fill="white" transform="translate(0 0.5)" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                      Upload Podcast Featured Image
+                    </button>
+                    <span class="desc">Drag & drop or click to upload image (PNG/JPG, max 1MB)</span>
+                  </div>
                 }
 
                 <input

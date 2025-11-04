@@ -9,9 +9,10 @@ import { ErrorHandlerService } from './error-handler.service';
 
 export interface AffiliateProfile {
   code: string;
-  brandImage: string | null;
+  brandImageUrl: string | null;
   isActive: boolean;
   createdAt: string;
+  username?: string;
 }
 
 export interface AffiliateRelationship {
@@ -48,6 +49,32 @@ export interface AffiliateTermsConsent {
   version: string;
   accepted: boolean;
   date: string;
+}
+
+export interface AffiliateCodeChangeInfo {
+  canChange: boolean;
+  daysUntilNextChange: number;
+  changeCount: number;
+  lastChangeDate: string | null;
+}
+
+export interface AffiliateCodeHistory {
+  uuid: string;
+  oldCode: string;
+  newCode: string;
+  changedAt: string;
+  reason: string | null;
+}
+
+export interface AffiliateCodeChangeRequest {
+  uuid: string;
+  requestedCode: string;
+  currentCode: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
+  rejectionReason: string | null;
+  requestedAt: string;
+  reviewedAt: string | null;
 }
 
 interface JoinAffiliateProgramResponse {
@@ -105,6 +132,36 @@ interface AffiliateRelationshipResponse {
 
 interface AffiliateTermsConsentsResponse {
   myAffiliateTermsConsents: AffiliateTermsConsent[];
+}
+
+interface AffiliateCodeChangeInfoResponse {
+  myCodeChangeInfo: AffiliateCodeChangeInfo | null;
+}
+
+interface AffiliateCodeHistoryResponse {
+  myCodeHistory: AffiliateCodeHistory[];
+}
+
+interface AffiliateCodeChangeRequestsResponse {
+  myCodeChangeRequests: AffiliateCodeChangeRequest[];
+}
+
+interface CheckCodeAvailabilityResponse {
+  checkCodeAvailability: {
+    success: boolean;
+    message: string;
+    available: boolean;
+    requiresReview: boolean;
+  };
+}
+
+interface RequestCodeChangeResponse {
+  requestCodeChange: {
+    success: boolean;
+    message: string;
+    requestId: string | null;
+    requiresReview: boolean;
+  };
 }
 
 @Injectable({
@@ -169,7 +226,7 @@ export class AffiliateService extends BaseService {
           affiliateProfile {
             code
             isActive
-            brandImage
+            brandImageUrl
             createdAt
           }
         }
@@ -189,19 +246,19 @@ export class AffiliateService extends BaseService {
     );
   }
 
-  updateAffiliateBrandImage(image: string): Observable<{
+  updateAffiliateBrandImage(file: File): Observable<{
     success: boolean;
     message: string;
     affiliateProfile: AffiliateProfile | null;
   }> {
     const mutation = gql`
-      mutation UpdateAffiliateBrandImage($image: String!) {
-        updateAffiliateBrandImage(image: $image) {
+      mutation UpdateAffiliateBrandImage($image: Upload!, $deleteImage: Boolean) {
+        updateAffiliateBrandImage(image: $image, deleteImage: $deleteImage) {
           success
           message
           affiliateProfile {
             code
-            brandImage
+            brandImageUrl
             isActive
             createdAt
           }
@@ -211,7 +268,46 @@ export class AffiliateService extends BaseService {
 
     return this.mutate<UpdateAffiliateBrandImageResponse>({
       mutation,
-      variables: { image },
+      variables: { image: file, deleteImage: false },
+      context: {
+        useMultipart: true,
+      },
+    }).pipe(
+      map((data) => {
+        if (!data.updateAffiliateBrandImage.success) {
+          throw new Error(data.updateAffiliateBrandImage.message);
+        }
+        return data.updateAffiliateBrandImage;
+      }),
+    );
+  }
+
+  deleteAffiliateBrandImage(): Observable<{
+    success: boolean;
+    message: string;
+    affiliateProfile: AffiliateProfile | null;
+  }> {
+    const mutation = gql`
+      mutation DeleteAffiliateBrandImage($deleteImage: Boolean!) {
+        updateAffiliateBrandImage(deleteImage: $deleteImage) {
+          success
+          message
+          affiliateProfile {
+            code
+            brandImageUrl
+            isActive
+            createdAt
+          }
+        }
+      }
+    `;
+
+    return this.mutate<UpdateAffiliateBrandImageResponse>({
+      mutation,
+      variables: { deleteImage: true },
+      context: {
+        useMultipart: true,
+      },
     }).pipe(
       map((data) => {
         if (!data.updateAffiliateBrandImage.success) {
@@ -265,7 +361,7 @@ export class AffiliateService extends BaseService {
       query GetAffiliateProfile {
         affiliateProfile {
           code
-          brandImage
+          brandImageUrl
           isActive
           createdAt
         }
@@ -361,5 +457,140 @@ export class AffiliateService extends BaseService {
     return this.query<AffiliateTermsConsentsResponse>({
       query,
     }).pipe(map((data) => data.myAffiliateTermsConsents));
+  }
+
+  getAffiliateByCode(code: string): Observable<AffiliateProfile> {
+    const query = gql`
+      query GetAffiliateByCode($code: String!) {
+        affiliateByCode(code: $code) {
+          code
+          brandImageUrl
+          isActive
+          createdAt
+          username
+        }
+      }
+    `;
+
+    interface GetAffiliateByCodeResponse {
+      affiliateByCode: AffiliateProfile;
+    }
+
+    return this.query<GetAffiliateByCodeResponse>({
+      query,
+      variables: { code },
+    }).pipe(map((data) => data.affiliateByCode));
+  }
+
+  getCodeChangeInfo(): Observable<AffiliateCodeChangeInfo | null> {
+    const query = gql`
+      query GetCodeChangeInfo {
+        myCodeChangeInfo {
+          canChange
+          daysUntilNextChange
+          changeCount
+          lastChangeDate
+        }
+      }
+    `;
+
+    return this.query<AffiliateCodeChangeInfoResponse>({
+      query,
+    }).pipe(map((data) => data.myCodeChangeInfo));
+  }
+
+  getCodeHistory(): Observable<AffiliateCodeHistory[]> {
+    const query = gql`
+      query GetCodeHistory {
+        myCodeHistory {
+          uuid
+          oldCode
+          newCode
+          changedAt
+          reason
+        }
+      }
+    `;
+
+    return this.query<AffiliateCodeHistoryResponse>({
+      query,
+    }).pipe(map((data) => data.myCodeHistory));
+  }
+
+  getCodeChangeRequests(): Observable<AffiliateCodeChangeRequest[]> {
+    const query = gql`
+      query GetCodeChangeRequests {
+        myCodeChangeRequests {
+          uuid
+          requestedCode
+          currentCode
+          status
+          reason
+          rejectionReason
+          requestedAt
+          reviewedAt
+        }
+      }
+    `;
+
+    return this.query<AffiliateCodeChangeRequestsResponse>({
+      query,
+    }).pipe(map((data) => data.myCodeChangeRequests));
+  }
+
+  checkCodeAvailability(code: string): Observable<{
+    success: boolean;
+    message: string;
+    available: boolean;
+    requiresReview: boolean;
+  }> {
+    const mutation = gql`
+      mutation CheckCodeAvailability($code: String!) {
+        checkCodeAvailability(code: $code) {
+          success
+          message
+          available
+          requiresReview
+        }
+      }
+    `;
+
+    return this.mutate<CheckCodeAvailabilityResponse>({
+      mutation,
+      variables: { code },
+    }).pipe(map((data) => data.checkCodeAvailability));
+  }
+
+  requestCodeChange(
+    newCode: string,
+    reason?: string,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    requestId: string | null;
+    requiresReview: boolean;
+  }> {
+    const mutation = gql`
+      mutation RequestCodeChange($newCode: String!, $reason: String) {
+        requestCodeChange(newCode: $newCode, reason: $reason) {
+          success
+          message
+          requestId
+          requiresReview
+        }
+      }
+    `;
+
+    return this.mutate<RequestCodeChangeResponse>({
+      mutation,
+      variables: { newCode, reason },
+    }).pipe(
+      map((data) => {
+        if (!data.requestCodeChange.success) {
+          throw new Error(data.requestCodeChange.message);
+        }
+        return data.requestCodeChange;
+      }),
+    );
   }
 }

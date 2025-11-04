@@ -10,6 +10,7 @@
 
 # High-level
 
+- Any new notes created to describe code should go into the logs/ai_edits/ directory with a descriptive filename.
 - Do not use inline styles in Angular components, use SCSS files instead.
 - Use Angular best practices.
 - Use Angular Material (MD3) components where possible.
