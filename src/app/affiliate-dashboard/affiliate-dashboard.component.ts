@@ -8,6 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import {
   AffiliateService,
@@ -20,6 +21,9 @@ import {
 import { MessageService } from '../message.service';
 import { AffiliateTermsDialogComponent } from '../affiliate-terms-dialog/affiliate-terms-dialog.component';
 import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert-credits-dialog.component';
+// eslint-disable-next-line max-len
+import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { environment } from '../../environments/environment';
 
@@ -35,6 +39,7 @@ import { environment } from '../../environments/environment';
     MatProgressSpinnerModule,
     MatDialogModule,
     MatTabsModule,
+    MatTooltipModule,
   ],
   templateUrl: './affiliate-dashboard.component.html',
   styleUrls: ['./affiliate-dashboard.component.scss'],
@@ -51,6 +56,13 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
   conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status'];
+
+  isDragging = false;
+  uploadingImage = false;
+  imagePreview: string | null = null;
+  readonly MAX_FILE_SIZE = 1024 * 1024;
+  readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
   constructor(
     private affiliateService: AffiliateService,
@@ -235,30 +247,143 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     if (!input.files || input.files.length === 0) return;
 
     const file = input.files[0];
+    this.handleFile(file);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      this.handleFile(file);
+    }
+  }
+
+  handleFile(file: File): void {
+    const validation = this.validateFile(file);
+    if (!validation.valid) {
+      this.messageService.error(validation.error || 'Invalid file');
+      return;
+    }
+
     const reader = new FileReader();
-
     reader.onload = () => {
-      const base64 = reader.result as string;
-      this.uploadBrandImage(base64);
+      this.imagePreview = reader.result as string;
+      this.uploadBrandImage(file);
     };
-
     reader.readAsDataURL(file);
   }
 
-  uploadBrandImage(image: string): void {
+  validateFile(file: File): { valid: boolean; error?: string } {
+    if (file.size > this.MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        error: `File size exceeds 1MB limit. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+      };
+    }
+
+    if (!this.ALLOWED_TYPES.includes(file.type)) {
+      return {
+        valid: false,
+        error: `Invalid file type. Allowed: JPEG, PNG, GIF, WEBP`,
+      };
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (!extension || !this.ALLOWED_EXTENSIONS.includes(extension)) {
+      return {
+        valid: false,
+        error: `Invalid file extension. Allowed: ${this.ALLOWED_EXTENSIONS.join(', ')}`,
+      };
+    }
+
+    return { valid: true };
+  }
+
+  uploadBrandImage(file: File): void {
+    this.uploadingImage = true;
     this.messageService.clearMessages();
+
     this.subscriptions.add(
-      this.affiliateService.updateAffiliateBrandImage(image).subscribe({
+      this.affiliateService.updateAffiliateBrandImage(file).subscribe({
         next: (response) => {
+          this.uploadingImage = false;
           this.messageService.success('Brand image updated successfully!');
           if (response.affiliateProfile) {
             this.profile = response.affiliateProfile;
           }
+          this.imagePreview = null;
         },
         error: (err) => {
+          this.uploadingImage = false;
+          this.imagePreview = null;
           this.messageService.error(`Failed to upload image: ${err.message}`);
         },
       }),
     );
+  }
+
+  deleteBrandImage(): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Brand Image',
+        message: 'Are you sure you want to delete your brand image?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.uploadingImage = true;
+        this.subscriptions.add(
+          this.affiliateService.deleteAffiliateBrandImage().subscribe({
+            next: (response) => {
+              this.uploadingImage = false;
+              this.messageService.success('Brand image deleted successfully!');
+              if (response.affiliateProfile) {
+                this.profile = response.affiliateProfile;
+              }
+            },
+            error: (err) => {
+              this.uploadingImage = false;
+              this.messageService.error(`Failed to delete image: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  openCodeChangeDialog(): void {
+    const dialogRef = this.dialog.open(AffiliateCodeChangeDialogComponent, {
+      width: '600px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadDashboardData();
+      }
+    });
+  }
+
+  onImageError(): void {
+    console.error('Failed to load brand image:', this.profile?.brandImageUrl);
+    this.messageService.warning('Failed to load brand image. The image may have been deleted or the URL is invalid.');
   }
 }

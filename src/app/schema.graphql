@@ -4,6 +4,17 @@ schema {
 }
 
 type ApiQuery {
+  affiliateProfile: AffiliateProfileType
+  affiliateByCode(code: String!): AffiliateProfileType
+  myAffiliateRelationship: AffiliateRelationshipType
+  myAffiliateCredits: [AffiliateCreditType]
+  myAffiliateStats: AffiliateStatsType
+  myAffiliateConversions: [AffiliateCreditConversionType]
+  myAffiliateTermsConsents: [AffiliateTermsConsentType]
+  myCodeHistory: [AffiliateCodeHistoryType]
+  myCodeChangeRequests: [AffiliateCodeChangeRequestType]
+  myCodeChangeInfo: AffiliateCodeChangeInfoType
+
   """List of Research Topics [Relay]"""
   topics(
     offset: Int
@@ -237,6 +248,130 @@ type ApiQuery {
   ): Node
 }
 
+type AffiliateProfileType {
+  code: String!
+  brandImage: String
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  userId: UUID
+  username: String
+  brandImageUrl: String
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+type AffiliateRelationshipType {
+  tier: Int!
+  createdAt: DateTime!
+  uuid: UUID
+  affiliateUsername: String
+  referredUsername: String
+}
+
+type AffiliateCreditType {
+  amount: Int!
+  tier: Int!
+  description: String!
+  createdAt: DateTime!
+  uuid: UUID
+  sourceUsername: String
+}
+
+type AffiliateStatsType {
+  totalAffiliateCredits: Int
+  totalReferrals: Int
+  tier1Referrals: Int
+  tier2Referrals: Int
+}
+
+type AffiliateCreditConversionType {
+  conversionType: AffiliatesAffiliateCreditConversionConversionTypeChoices!
+  affiliateCreditAmount: Int!
+  targetAmount: Int!
+  status: AffiliatesAffiliateCreditConversionStatusChoices!
+  createdAt: DateTime!
+  completedAt: DateTime
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum AffiliatesAffiliateCreditConversionConversionTypeChoices {
+  """To Credits"""
+  TO_CREDITS
+
+  """To Cash"""
+  TO_CASH
+}
+
+"""An enumeration."""
+enum AffiliatesAffiliateCreditConversionStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Completed"""
+  COMPLETED
+
+  """Failed"""
+  FAILED
+}
+
+type AffiliateTermsConsentType {
+  version: String
+  accepted: Boolean
+  date: DateTime
+}
+
+type AffiliateCodeHistoryType {
+  oldCode: String!
+  newCode: String!
+  changedAt: DateTime!
+  reason: String
+  uuid: UUID
+}
+
+type AffiliateCodeChangeRequestType {
+  requestedCode: String!
+  currentCode: String!
+  status: AffiliatesAffiliateCodeChangeRequestStatusChoices!
+  reason: String
+  rejectionReason: String
+  requestedAt: DateTime!
+  reviewedAt: DateTime
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum AffiliatesAffiliateCodeChangeRequestStatusChoices {
+  """Pending Review"""
+  PENDING
+
+  """Approved"""
+  APPROVED
+
+  """Rejected"""
+  REJECTED
+}
+
+type AffiliateCodeChangeInfoType {
+  canChange: Boolean
+  daysUntilNextChange: Int
+  changeCount: Int
+  lastChangeDate: DateTime
+}
+
 type TopicTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -349,12 +484,6 @@ String, Boolean, Int, Float, List or Object.
 scalar GenericScalar
 
 """
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
-"""
 Type for RssFeed model. This is used to create a new RssFeed and to get the list of RssFeeds.
 """
 type RssFeedType implements Node {
@@ -415,13 +544,6 @@ enum VoiceModel {
   ELEVENLABS_MULTILINGUAL_V2
   ELEVENLABS_FLASH_V2_5
 }
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 """GraphQL type for Episode model."""
 type EpisodeType implements Node {
@@ -1321,6 +1443,13 @@ type TeamTypeEdge {
 }
 
 type ApiMutation {
+  acceptAffiliateTerms(version: String!): AcceptAffiliateTerms
+  updateAffiliateBrandImage(deleteImage: Boolean, image: Upload): UpdateAffiliateBrandImage
+  joinAffiliateProgram(affiliateCode: String!): JoinAffiliateProgram
+  convertAffiliateCredits(amount: Int!, conversionType: String!): ConvertAffiliateCredits
+  requestCodeChange(newCode: String!, reason: String): RequestCodeChange
+  checkCodeAvailability(code: String!): CheckCodeAvailability
+
   """Mutation to create a research topic based on podcast prompt."""
   createResearchTopic(podcastUuid: UUID!): CreateResearchTopic
 
@@ -1742,6 +1871,51 @@ type ApiMutation {
 
   """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
+}
+
+type AcceptAffiliateTerms {
+  success: Boolean
+  message: String
+  consent: AffiliateTermsConsentType
+  affiliateProfile: AffiliateProfileType
+}
+
+type UpdateAffiliateBrandImage {
+  success: Boolean
+  message: String
+  affiliateProfile: AffiliateProfileType
+}
+
+"""
+Create scalar that ignores normal serialization/deserialization, since
+that will be handled by the multipart request spec
+"""
+scalar Upload
+
+type JoinAffiliateProgram {
+  success: Boolean
+  message: String
+  relationship: AffiliateRelationshipType
+}
+
+type ConvertAffiliateCredits {
+  success: Boolean
+  message: String
+  conversion: AffiliateCreditConversionType
+}
+
+type RequestCodeChange {
+  success: Boolean
+  message: String
+  requestId: UUID
+  requiresReview: Boolean
+}
+
+type CheckCodeAvailability {
+  success: Boolean
+  message: String
+  available: Boolean
+  requiresReview: Boolean
 }
 
 """Mutation to create a research topic based on podcast prompt."""
@@ -2235,12 +2409,6 @@ type UpdatePodcast {
   message: String
   podcast: PodcastType
 }
-
-"""
-Create scalar that ignores normal serialization/deserialization, since
-that will be handled by the multipart request spec
-"""
-scalar Upload
 
 type DeletePodcast {
   success: Boolean

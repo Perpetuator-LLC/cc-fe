@@ -221,6 +221,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   imageUrl: string | null = null;
+  isDraggingImage = false;
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
@@ -660,25 +661,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   onPodcastImageSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      // Check file size (1MB = 1048576 bytes)
-      const maxSizeInBytes = 1048576; // 1MB - correlates to backend limit on Podcast model save image field
-      if (file.size > maxSizeInBytes) {
-        this.messageService.error('File size exceeds the maximum limit of 1MB. Please upload a smaller image.');
-        this.selectedFile = null;
-        this.podcastForm.get('image')?.reset();
-        return;
-      }
-
-      this.selectedFile = file;
-
-      // Preview the image
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.previewImage = reader.result;
-      };
-      reader.readAsDataURL(this.selectedFile);
-
-      this.uploadPodcastImage(file);
+      this.handleImageFile(file);
     }
   }
 
@@ -729,6 +712,55 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  onImageDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingImage = true;
+  }
+
+  onImageDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingImage = false;
+  }
+
+  onImageDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingImage = false;
+
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      this.handleImageFile(file);
+    }
+  }
+
+  private handleImageFile(file: File): void {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      this.messageService.error('Please upload an image file (PNG, JPG, GIF, WEBP)');
+      return;
+    }
+
+    // Check file size (1MB = 1048576 bytes)
+    const maxSizeInBytes = 1048576;
+    if (file.size > maxSizeInBytes) {
+      this.messageService.error('File size exceeds the maximum limit of 1MB. Please upload a smaller image.');
+      return;
+    }
+
+    this.selectedFile = file;
+
+    // Preview the image
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewImage = reader.result;
+    };
+    reader.readAsDataURL(this.selectedFile);
+
+    this.uploadPodcastImage(file);
   }
 
   get rssFeeds(): FormArray {
