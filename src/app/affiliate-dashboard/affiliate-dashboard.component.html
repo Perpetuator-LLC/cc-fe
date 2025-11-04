@@ -61,6 +61,16 @@
                 <mat-icon>content_copy</mat-icon>
               </button>
             </div>
+            <div class="action-buttons">
+              <button mat-raised-button color="primary" (click)="copyLink()">
+                <mat-icon>content_copy</mat-icon>
+                Copy Link
+              </button>
+              <button mat-raised-button (click)="openCodeChangeDialog()">
+                <mat-icon>edit</mat-icon>
+                Change Code
+              </button>
+            </div>
             <div class="share-buttons">
               <button mat-raised-button (click)="shareOnTwitter()">
                 <mat-icon>share</mat-icon>
@@ -82,17 +92,85 @@
       <mat-card class="brand-image-card">
         <mat-card-content>
           <h2>Brand Image</h2>
-          @if (profile && profile.brandImage) {
+          <p class="help-text">Upload your brand logo (max 1MB, JPEG/PNG/GIF/WEBP)</p>
+
+          <!-- Current Image Display -->
+          @if (profile?.brandImageUrl && !imagePreview) {
             <div class="brand-image-preview">
-              <img [src]="profile.brandImage!" alt="Brand Image">
+              <img
+                [src]="profile!.brandImageUrl"
+                alt="Brand Image"
+                (error)="onImageError()"
+                loading="lazy"
+              >
+              <div class="image-actions">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteBrandImage()"
+                  [disabled]="uploadingImage"
+                  matTooltip="Delete image"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </div>
           }
-          <div class="upload-section">
-            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-            <button mat-raised-button color="primary" (click)="fileInput.click()">
-              <mat-icon>upload</mat-icon>
-              {{ profile?.brandImage ? 'Update' : 'Upload' }} Brand Image
-            </button>
+
+          <!-- Image Preview (during upload) -->
+          @if (imagePreview) {
+            <div class="brand-image-preview uploading">
+              <img [src]="imagePreview" alt="Preview">
+              @if (uploadingImage) {
+                <div class="upload-overlay">
+                  <mat-spinner diameter="40"></mat-spinner>
+                  <p>Uploading...</p>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Drag and Drop Area -->
+          <div
+            class="upload-dropzone"
+            [class.dragging]="isDragging"
+            [class.has-image]="profile?.brandImageUrl"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept=".jpg,.jpeg,.png,.gif,.webp"
+              style="display: none;"
+              [disabled]="uploadingImage"
+            >
+
+            <div class="dropzone-content">
+              <mat-icon>cloud_upload</mat-icon>
+              <p class="dropzone-text">Drag & drop your image here</p>
+              <p class="dropzone-or">or</p>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="fileInput.click()"
+                [disabled]="uploadingImage"
+              >
+                <mat-icon>upload</mat-icon>
+                {{ profile?.brandImageUrl ? 'Change' : 'Upload' }} Image
+              </button>
+            </div>
+          </div>
+
+          <div class="upload-requirements">
+            <p><strong>Requirements:</strong></p>
+            <ul>
+              <li>Maximum file size: 1MB</li>
+              <li>Supported formats: JPEG, PNG, GIF, WEBP</li>
+              <li>Recommended size: 512x512 pixels</li>
+            </ul>
           </div>
         </mat-card-content>
       </mat-card>
