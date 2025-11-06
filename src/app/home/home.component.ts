@@ -11,6 +11,7 @@ import { AuthService } from '../auth.service';
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef, OnInit } from '@angular/core';
 import p5 from 'p5';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { DashboardService } from '../dashboard.service';
 import { SiteStatistics } from '../interface';
 
@@ -51,26 +52,33 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
 
   ngOnInit(): void {
     if (this.isLoggedIn()) {
-      this.podcastsService.getPodcasts(3).subscribe({
-        next: (result) => {
-          this.gridPodcasts = result.podcasts;
+      forkJoin({
+        stats: this.dashboardService.getStats(),
+        podcasts: this.podcastsService.getPodcasts(3),
+      }).subscribe({
+        next: ({ stats, podcasts }) => {
+          this.siteStats = stats;
+          this.gridPodcasts = podcasts.podcasts;
+          this.loadingStats = false;
         },
-        error: () => {
+        error: (error) => {
+          console.error(':: Home data loading error :: ', error);
           this.gridPodcasts = [];
+          this.loadingStats = false;
+        },
+      });
+    } else {
+      this.dashboardService.getStats().subscribe({
+        next: (stats) => {
+          this.siteStats = stats;
+          this.loadingStats = false;
+        },
+        error: (error) => {
+          console.error(':: Stats API :: ', error);
+          this.loadingStats = false;
         },
       });
     }
-
-    this.dashboardService.getStats().subscribe({
-      next: (result) => {
-        this.siteStats = result;
-        this.loadingStats = false;
-      },
-      error: (error) => {
-        console.error(':: Stats API :: ', error);
-        this.loadingStats = false;
-      },
-    });
   }
 
   ngAfterViewInit() {

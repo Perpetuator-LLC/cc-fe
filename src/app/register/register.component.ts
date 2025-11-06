@@ -140,7 +140,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
           this.affiliateStorageService.clearAffiliateCode();
           this.messageService.addMessage({
             type: 'success',
-            text: `Registration successful! You've joined ${response.relationship?.affiliateUsername}'s network. Check
+            text: `Registration successful! You've joined ${response.relationship?.affiliate.username}'s network. Check
             your email for verification.`,
             dismissible: true,
           });

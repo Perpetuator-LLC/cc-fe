@@ -251,19 +251,19 @@
               </div>
             </div>
             <button mat-menu-item [routerLink]="['/profile']">
-              <app-svg-icon icon="setting"></app-svg-icon>
+              <mat-icon class="theme-icon">settings</mat-icon>
               <span>Account Settings</span>
             </button>
             <button mat-menu-item [routerLink]="['/orders']">
-              <app-svg-icon icon="transactions"></app-svg-icon>
+              <mat-icon class="theme-icon">paid</mat-icon>
               <span>Orders</span>
             </button>
             <button mat-menu-item [routerLink]="['/affiliate']">
-              <mat-icon>share</mat-icon>
+              <mat-icon class="theme-icon">share</mat-icon>
               <span>Affiliate Dashboard</span>
             </button>
             <button mat-menu-item (click)="openRedeemGiftCodeDialog()">
-              <app-svg-icon icon="gift"></app-svg-icon>
+              <mat-icon class="theme-icon">redeem</mat-icon>
               <span>Gift Code</span>
             </button>
             <button mat-menu-item (click)="$event.stopPropagation()" class="theme-toggle-card">

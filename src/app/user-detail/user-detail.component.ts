@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserDetails, UserService } from '../user.service';
@@ -23,11 +24,13 @@ import { DeleteAccountDialogComponent } from '../delete-account-dialog.component
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../loading.service';
+import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
 
 @Component({
   selector: 'app-user-detail',
   standalone: true,
   imports: [
+    CommonModule,
     MatCard,
     ReactiveFormsModule,
     MatFormField,
@@ -59,6 +62,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   // protected orders: UserOrders[] = [];
   protected loadingOrders = true;
   loading = false;
+  affiliateRelationship: AffiliateRelationship | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -73,6 +77,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     protected creditService: CreditService,
     private codeService: CodeService,
     private loadingService: LoadingService,
+    private affiliateService: AffiliateService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -114,6 +119,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
+    this.loadAffiliateRelationship();
 
     this.subscriptions.add(
       this.route.queryParams.subscribe((params) => {
@@ -147,6 +153,19 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       }),
     );
     this.emailChangePending = this.userService.emailChangePendingDetails;
+  }
+
+  private loadAffiliateRelationship() {
+    this.subscriptions.add(
+      this.affiliateService.getMyAffiliateRelationship().subscribe({
+        next: (relationship) => {
+          this.affiliateRelationship = relationship;
+        },
+        error: () => {
+          // Silently fail - not critical for profile page
+        },
+      }),
+    );
   }
 
   passwordMatchValidator(formGroup: FormGroup) {

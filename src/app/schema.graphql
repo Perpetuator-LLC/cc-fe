@@ -7,6 +7,7 @@ type ApiQuery {
   affiliateProfile: AffiliateProfileType
   affiliateByCode(code: String!): AffiliateProfileType
   myAffiliateRelationship: AffiliateRelationshipType
+  myAffiliateReferrals: [AffiliateRelationshipType]
   myAffiliateCredits: [AffiliateCreditType]
   myAffiliateStats: AffiliateStatsType
   myAffiliateConversions: [AffiliateCreditConversionType]
@@ -14,6 +15,7 @@ type ApiQuery {
   myCodeHistory: [AffiliateCodeHistoryType]
   myCodeChangeRequests: [AffiliateCodeChangeRequestType]
   myCodeChangeInfo: AffiliateCodeChangeInfoType
+  pendingCodeChangeRequests: [AffiliateCodeChangeRequestType]
 
   """List of Research Topics [Relay]"""
   topics(
@@ -255,8 +257,7 @@ type AffiliateProfileType {
   createdAt: DateTime!
   updatedAt: DateTime!
   uuid: UUID
-  userId: UUID
-  username: String
+  user: PublicUserType
   brandImageUrl: String
 }
 
@@ -273,12 +274,29 @@ in fields, resolvers and input.
 """
 scalar UUID
 
+"""User type that only exposes public fields (username, uuid) - no email"""
+type PublicUserType implements Node {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
 type AffiliateRelationshipType {
-  tier: Int!
   createdAt: DateTime!
   uuid: UUID
-  affiliateUsername: String
-  referredUsername: String
+  affiliate: PublicUserType
+  referredUser: PublicUserType
+  referredUserHasAffiliateProfile: Boolean
+  tier: Int
 }
 
 type AffiliateCreditType {
@@ -287,7 +305,7 @@ type AffiliateCreditType {
   description: String!
   createdAt: DateTime!
   uuid: UUID
-  sourceUsername: String
+  sourceUser: PublicUserType
 }
 
 type AffiliateStatsType {
@@ -298,34 +316,13 @@ type AffiliateStatsType {
 }
 
 type AffiliateCreditConversionType {
-  conversionType: AffiliatesAffiliateCreditConversionConversionTypeChoices!
+  conversionType: String
   affiliateCreditAmount: Int!
   targetAmount: Int!
-  status: AffiliatesAffiliateCreditConversionStatusChoices!
+  status: String
   createdAt: DateTime!
   completedAt: DateTime
   uuid: UUID
-}
-
-"""An enumeration."""
-enum AffiliatesAffiliateCreditConversionConversionTypeChoices {
-  """To Credits"""
-  TO_CREDITS
-
-  """To Cash"""
-  TO_CASH
-}
-
-"""An enumeration."""
-enum AffiliatesAffiliateCreditConversionStatusChoices {
-  """Pending"""
-  PENDING
-
-  """Completed"""
-  COMPLETED
-
-  """Failed"""
-  FAILED
 }
 
 type AffiliateTermsConsentType {
@@ -351,6 +348,9 @@ type AffiliateCodeChangeRequestType {
   requestedAt: DateTime!
   reviewedAt: DateTime
   uuid: UUID
+  user: PublicUserType
+  userReferralCount: Int
+  profileCreatedAt: DateTime
 }
 
 """An enumeration."""
@@ -363,6 +363,9 @@ enum AffiliatesAffiliateCodeChangeRequestStatusChoices {
 
   """Rejected"""
   REJECTED
+
+  """Canceled"""
+  CANCELED
 }
 
 type AffiliateCodeChangeInfoType {
@@ -422,12 +425,6 @@ type TopicType implements Node {
   id: ID!
   uuid: UUID
   sources: [SourceType]
-}
-
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
 }
 
 """
@@ -505,16 +502,6 @@ type TeamType implements Node {
 type TeamMembershipType {
   user: PublicUserType
   role: String
-}
-
-"""User type that only exposes public fields (username, uuid) - no email"""
-type PublicUserType implements Node {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
 }
 
 type VoiceType implements Node {
@@ -1449,6 +1436,9 @@ type ApiMutation {
   convertAffiliateCredits(amount: Int!, conversionType: String!): ConvertAffiliateCredits
   requestCodeChange(newCode: String!, reason: String): RequestCodeChange
   checkCodeAvailability(code: String!): CheckCodeAvailability
+  cancelCodeChangeRequest(requestId: UUID!): CancelCodeChangeRequest
+  approveCodeChangeRequest(requestId: UUID!): ApproveCodeChangeRequest
+  rejectCodeChangeRequest(rejectionReason: String, requestId: UUID!): RejectCodeChangeRequest
 
   """Mutation to create a research topic based on podcast prompt."""
   createResearchTopic(podcastUuid: UUID!): CreateResearchTopic
@@ -1916,6 +1906,24 @@ type CheckCodeAvailability {
   message: String
   available: Boolean
   requiresReview: Boolean
+}
+
+type CancelCodeChangeRequest {
+  success: Boolean
+  message: String
+  codeChangeRequest: AffiliateCodeChangeRequestType
+}
+
+type ApproveCodeChangeRequest {
+  success: Boolean
+  message: String
+  codeChangeRequest: AffiliateCodeChangeRequestType
+}
+
+type RejectCodeChangeRequest {
+  success: Boolean
+  message: String
+  codeChangeRequest: AffiliateCodeChangeRequestType
 }
 
 """Mutation to create a research topic based on podcast prompt."""

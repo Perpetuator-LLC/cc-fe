@@ -186,5 +186,26 @@ mat-form-field {
         }
       }
     }
+
+    .affiliate-network-info {
+      margin-top: 40px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      background-color: var(--secondary-400);
+      border: 1px solid var(--border-color);
+      text-align: center;
+
+      p {
+        font-size: 13px;
+        color: var(--description-color);
+        margin: 0;
+        font-weight: 400;
+
+        strong {
+          color: var(--theme-color);
+          font-weight: 600;
+        }
+      }
+    }
   }
 }

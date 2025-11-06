@@ -75,16 +75,21 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   }
 
   checkExistingAffiliate(): void {
+    if (!this.isAuthenticated) {
+      return;
+    }
+
     this.subscriptions.add(
       this.affiliateService.getMyAffiliateRelationship().subscribe({
         next: (relationship) => {
           if (relationship) {
             this.hasExistingAffiliate = true;
-            this.existingAffiliateUsername = relationship.affiliateUsername;
+            this.existingAffiliateUsername = relationship.affiliate.username;
           }
         },
-        error: (err) => {
-          console.error('Error checking existing affiliate:', err);
+        error: () => {
+          // Silently fail - this is not critical for viewing the landing page
+          // User may have an expired token, which is fine on this public page
         },
       }),
     );
@@ -107,7 +112,9 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.affiliateService.joinAffiliateProgram(this.affiliateData.affiliate_code).subscribe({
         next: (response) => {
-          this.messageService.success(`You've joined ${response.relationship?.affiliateUsername}'s affiliate network!`);
+          this.messageService.success(
+            `You've joined ${response.relationship?.affiliate.username}'s affiliate network!`,
+          );
           this.affiliateStorageService.clearAffiliateCode();
           this.loading = false;
           setTimeout(() => {
