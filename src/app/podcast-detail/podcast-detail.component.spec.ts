@@ -15,6 +15,11 @@ import { UserService } from '../user.service';
 import { ToolbarService } from '../toolbar.service';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ViewContainerRef, signal } from '@angular/core';
+import { LoadingService } from '../loading.service';
+import { NewsService } from '../news.service';
+import { EpisodeService } from '../episode.service';
+import { JobService } from '../job.service';
+import { ResearchService } from '../research.service';
 
 describe('PodcastDetailComponentComponent', () => {
   let component: PodcastDetailComponent;
@@ -28,10 +33,46 @@ describe('PodcastDetailComponentComponent', () => {
   let mockUserService: jasmine.SpyObj<UserService>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
   let mockClipboard: jasmine.SpyObj<Clipboard>;
+  let mockLoadingService: jasmine.SpyObj<LoadingService>;
+  let mockNewsService: jasmine.SpyObj<NewsService>;
+  let mockEpisodeService: jasmine.SpyObj<EpisodeService>;
+  let mockJobService: jasmine.SpyObj<JobService>;
+  let mockResearchService: jasmine.SpyObj<ResearchService>;
   let messagesSubject: BehaviorSubject<never[]>;
 
   beforeEach(async () => {
     messagesSubject = new BehaviorSubject<never[]>([]);
+
+    mockPodcastsService = jasmine.createSpyObj('PodcastsService', [
+      'deletePodcast',
+      'getPodcastById',
+      'getRssFeeds',
+      'getPodcastCategories',
+    ]);
+    mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages']);
+    Object.defineProperty(mockMessageService, 'messages$', {
+      get: () => messagesSubject.asObservable(),
+    });
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockTeamsService = jasmine.createSpyObj('TeamsService', ['getTeams']);
+    mockVoicesService = jasmine.createSpyObj('VoicesService', ['getVoices']);
+    mockUserService = jasmine.createSpyObj('UserService', ['getUser']);
+    Object.defineProperty(mockUserService, 'userDetails', {
+      get: () => signal(null),
+    });
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', [
+      'setTemplate',
+      'clearTemplate',
+      'getViewContainerRef',
+      'clearToolbarComponent',
+    ]);
+    mockClipboard = jasmine.createSpyObj('Clipboard', ['copy']);
+    mockLoadingService = jasmine.createSpyObj('LoadingService', ['show', 'hide']);
+    mockNewsService = jasmine.createSpyObj('NewsService', ['createEpisode']);
+    mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodes']);
+    mockJobService = jasmine.createSpyObj('JobService', ['addJob']);
+    mockResearchService = jasmine.createSpyObj('ResearchService', ['createResearchChain']);
 
     mockPodcastsService = jasmine.createSpyObj('PodcastsService', [
       'deletePodcast',
@@ -134,6 +175,11 @@ describe('PodcastDetailComponentComponent', () => {
         { provide: UserService, useValue: mockUserService },
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: Clipboard, useValue: mockClipboard },
+        { provide: LoadingService, useValue: mockLoadingService },
+        { provide: NewsService, useValue: mockNewsService },
+        { provide: EpisodeService, useValue: mockEpisodeService },
+        { provide: JobService, useValue: mockJobService },
+        { provide: ResearchService, useValue: mockResearchService },
         {
           provide: ActivatedRoute,
           useValue: {
