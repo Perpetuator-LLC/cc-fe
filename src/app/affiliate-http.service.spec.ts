@@ -29,16 +29,16 @@ describe('AffiliateHttpService', () => {
     it('should fetch affiliate landing data using HTTP REST endpoint (no auth required)', () => {
       const mockCode = 'TEST123';
       const mockResponse: AffiliateLandingData = {
-        affiliateCode: 'TEST123',
-        affiliateUsername: 'TestUser',
-        brandImageUrl: 'https://example.com/image.jpg',
+        affiliate_code: 'TEST123',
+        affiliate_username: 'TestUser',
+        brand_image_url: 'https://example.com/image.jpg',
       };
 
       service.getAffiliateLanding(mockCode).subscribe((data) => {
         expect(data).toEqual(mockResponse);
-        expect(data.affiliateCode).toBe('TEST123');
-        expect(data.affiliateUsername).toBe('TestUser');
-        expect(data.brandImageUrl).toBe('https://example.com/image.jpg');
+        expect(data.affiliate_code).toBe('TEST123');
+        expect(data.affiliate_username).toBe('TestUser');
+        expect(data.brand_image_url).toBe('https://example.com/image.jpg');
       });
 
       const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
@@ -61,9 +61,9 @@ describe('AffiliateHttpService', () => {
         expect('affiliate_username' in data).toBe(true);
         expect('brand_image_url' in data).toBe(true);
 
-        expect(data.affiliateCode).toBe('AFFILIATE123');
-        expect(data.affiliateUsername).toBe('JohnDoe');
-        expect(data.brandImageUrl).toBeNull();
+        expect(data.affiliate_code).toBe('AFFILIATE123');
+        expect(data.affiliate_username).toBe('JohnDoe');
+        expect(data.brand_image_url).toBeNull();
       });
 
       const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
@@ -73,13 +73,13 @@ describe('AffiliateHttpService', () => {
     it('should handle affiliate with no brand image (null)', () => {
       const mockCode = 'NOBRAND';
       const mockResponse: AffiliateLandingData = {
-        affiliateCode: 'NOBRAND',
-        affiliateUsername: 'NoBrandUser',
-        brandImageUrl: null,
+        affiliate_code: 'NOBRAND',
+        affiliate_username: 'NoBrandUser',
+        brand_image_url: null,
       };
 
       service.getAffiliateLanding(mockCode).subscribe((data) => {
-        expect(data.brandImageUrl).toBeNull();
+        expect(data.brand_image_url).toBeNull();
       });
 
       const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
@@ -142,14 +142,14 @@ describe('AffiliateHttpService', () => {
     it('should provide data for anonymous users to see affiliate name and brand before signup', () => {
       const mockCode = 'REFERRAL456';
       const mockResponse: AffiliateLandingData = {
-        affiliateCode: 'REFERRAL456',
-        affiliateUsername: 'InfluencerName',
-        brandImageUrl: 'https://cdn.example.com/brand.png',
+        affiliate_code: 'REFERRAL456',
+        affiliate_username: 'InfluencerName',
+        brand_image_url: 'https://cdn.example.com/brand.png',
       };
 
       service.getAffiliateLanding(mockCode).subscribe((data) => {
-        expect(data.affiliateUsername).toBe('InfluencerName');
-        expect(data.brandImageUrl).toBeTruthy();
+        expect(data.affiliate_username).toBe('InfluencerName');
+        expect(data.brand_image_url).toBeTruthy();
       });
 
       const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
