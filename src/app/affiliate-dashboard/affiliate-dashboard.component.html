@@ -51,6 +51,32 @@
         </mat-card>
       </div>
 
+      @if (pendingCodeChangeRequest) {
+        <mat-card class="pending-request-card">
+          <mat-card-content>
+            <div class="pending-request-content">
+              <div class="pending-request-icon">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="pending-request-info">
+                <h3>Code Change Request Pending</h3>
+                <p>Requested code: <strong>{{ pendingCodeChangeRequest.requestedCode }}</strong></p>
+                <p class="request-date">Submitted {{ formatDate(pendingCodeChangeRequest.requestedAt) }}</p>
+                @if (pendingCodeChangeRequest.reason) {
+                  <p class="request-reason">Reason: {{ pendingCodeChangeRequest.reason }}</p>
+                }
+              </div>
+              <div class="pending-request-actions">
+                <button mat-raised-button (click)="cancelPendingCodeChangeRequest()">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel Request
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
       <mat-card class="link-card">
         <mat-card-content>
           <h2>Your Affiliate Link</h2>
@@ -66,7 +92,7 @@
                 <mat-icon>content_copy</mat-icon>
                 Copy Link
               </button>
-              <button mat-raised-button (click)="openCodeChangeDialog()">
+              <button mat-raised-button (click)="openCodeChangeDialog()" [disabled]="!!pendingCodeChangeRequest">
                 <mat-icon>edit</mat-icon>
                 Change Code
               </button>
@@ -204,7 +230,7 @@
 
                 <ng-container matColumnDef="from">
                   <th mat-header-cell *matHeaderCellDef>From</th>
-                  <td mat-cell *matCellDef="let credit">{{ credit.sourceUsername }}</td>
+                  <td mat-cell *matCellDef="let credit">{{ credit.sourceUser?.username || 'System' }}</td>
                 </ng-container>
 
                 <ng-container matColumnDef="type">
@@ -261,6 +287,84 @@
           </div>
         </mat-tab>
       </mat-tab-group>
+
+      @if (canApproveCodeChanges()) {
+        <mat-card class="admin-panel-card">
+          <mat-card-content>
+            <h2>Pending Code Change Requests (Admin)</h2>
+
+            @if (loadingAdminRequests) {
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading pending requests...</p>
+              </div>
+            } @else if (adminPendingRequests.length === 0) {
+              <div class="no-data">No pending requests</div>
+            } @else {
+              <div class="admin-requests-table">
+                <table mat-table [dataSource]="adminPendingRequests" class="history-table">
+                  <ng-container matColumnDef="user">
+                    <th mat-header-cell *matHeaderCellDef>User</th>
+                    <td mat-cell *matCellDef="let request">
+                      <div class="user-info">
+                        <strong>{{ request.username }}</strong>
+                        <span class="user-email">{{ request.userEmail }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="codes">
+                    <th mat-header-cell *matHeaderCellDef>Code Change</th>
+                    <td mat-cell *matCellDef="let request">
+                      <div class="code-change">
+                        <span class="old-code">{{ request.currentCode }}</span>
+                        <mat-icon>arrow_forward</mat-icon>
+                        <span class="new-code">{{ request.requestedCode }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="referrals">
+                    <th mat-header-cell *matHeaderCellDef>Referrals</th>
+                    <td mat-cell *matCellDef="let request">{{ request.userReferralCount }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="reason">
+                    <th mat-header-cell *matHeaderCellDef>Reason</th>
+                    <td mat-cell *matCellDef="let request">
+                      <span class="reason-text">{{ request.reason || 'No reason provided' }}</span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef>Requested</th>
+                    <td mat-cell *matCellDef="let request">{{ formatDate(request.requestedAt) }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let request">
+                      <div class="action-buttons">
+                        <button mat-raised-button color="primary" (click)="approveCodeChangeRequest(request.uuid)">
+                          <mat-icon>check</mat-icon>
+                          Approve
+                        </button>
+                        <button mat-raised-button color="warn" (click)="rejectCodeChangeRequest(request.uuid)">
+                          <mat-icon>close</mat-icon>
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="['user', 'codes', 'referrals', 'reason', 'date', 'actions']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['user', 'codes', 'referrals', 'reason', 'date', 'actions'];"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   }
 </div>

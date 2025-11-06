@@ -23,7 +23,7 @@
       <h3>Account Settings</h3>
       <div class="top-btns">
         <button mat-raised-button color="primary" class="export-btn" type="button" (click)="openExportPersonalDialog()">
-          <app-svg-icon icon="export"></app-svg-icon>Export All Personal Data
+          <mat-icon>upload</mat-icon>Export All Personal Data
         </button>
       </div>
     </div>
@@ -120,30 +120,11 @@
         </div>
       </div>
 
-      <!-- <mat-card class="export">
-        <mat-card-header>
-          <mat-card-title>Data</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-accordion>
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>Export Personal Data</mat-panel-title>
-                <mat-panel-description>Export all personal data.</mat-panel-description>
-              </mat-expansion-panel-header>
-              <p>Are you sure you want to export all of your personal data?</p>
-              <div class="action-row">
-                <mat-form-field appearance="fill">
-                  <mat-label>Export Confirmation</mat-label>
-                  <input matInput type="password" autocomplete="current-password"
-                    placeholder="Type password to confirm export" [(ngModel)]="exportConfirmation" />
-                </mat-form-field>
-                <button mat-flat-button color="warn" type="button" (click)="exportDialog()">Export Account</button>
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
-        </mat-card-content>
-      </mat-card> -->
+      @if (affiliateRelationship) {
+      <div class="affiliate-network-info">
+        <p>Member of <strong>{{ affiliateRelationship.affiliate.username }}</strong>'s network</p>
+      </div>
+      }
     </div>
   </div>
 </div>

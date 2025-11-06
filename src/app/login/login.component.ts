@@ -125,7 +125,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.affiliateService.joinAffiliateProgram(code).subscribe({
       next: (response) => {
         this.affiliateStorageService.clearAffiliateCode();
-        this.messageService.success(`You've joined ${response.relationship?.affiliateUsername}'s network!`);
+        this.messageService.success(`You've joined ${response.relationship?.affiliate.username}'s network!`);
         this.completeLogin();
       },
       error: (err) => {

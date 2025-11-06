@@ -10,6 +10,7 @@
 
 # High-level
 
+- Prefer to load things in parallel with `forkJoin` or similar patterns instead of sequentially where possible.
 - Any new notes created to describe code should go into the logs/ai_edits/ directory with a descriptive filename.
 - Do not use inline styles in Angular components, use SCSS files instead.
 - Use Angular best practices.
@@ -401,3 +402,373 @@ loadData(first = 10, after: string | null = null, filters?: Filters): void {
 - **Test component logic** - mock services, verify state changes
 - **Focus on business logic** - not UI interactions
 - **Use TestBed** for component testing, standalone for services
+
+# Public Routes (Unauthenticated Access)
+
+When creating pages that should be accessible without authentication (landing pages, marketing pages, legal pages, etc.), follow these patterns:
+
+## 1. Route Configuration
+
+Public routes are defined in `src/app/app.routes.ts` **WITHOUT** the `canActivate: [AuthGuard]` directive.
+
+**Example - Public Route:**
+```typescript
+{
+  path: 'a/:code',
+  loadComponent: () =>
+    import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
+  title: 'Join Affiliate Network',
+  // NO canActivate guard - this is public
+}
+```
+
+**Example - Protected Route (for comparison):**
+```typescript
+{
+  path: 'affiliate',
+  loadComponent: () =>
+    import('./affiliate-dashboard/affiliate-dashboard.component').then((c) => c.AffiliateDashboardComponent),
+  title: 'Affiliate Dashboard',
+  canActivate: [AuthGuard], // ✅ Requires authentication
+  data: {
+    icon: 'share',
+  },
+}
+```
+
+## 2. Component Structure for Public Routes
+
+Public route components should:
+
+### a. Be Standalone Components
+```typescript
+@Component({
+  selector: 'app-affiliate-landing',
+  standalone: true,
+  imports: [CommonModule, RouterModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule],
+  templateUrl: './affiliate-landing.component.html',
+  styleUrls: ['./affiliate-landing.component.scss'],
+})
+export class AffiliateLandingComponent implements OnInit, OnDestroy {
+  // Component logic
+}
+```
+
+### b. Check Authentication State (Optional)
+Public pages can still check if a user is logged in to provide conditional UI:
+
+```typescript
+export class AffiliateLandingComponent implements OnInit, OnDestroy {
+  isAuthenticated = false;
+
+  constructor(
+    private authService: AuthService,
+    // ... other dependencies
+  ) {}
+
+  ngOnInit(): void {
+    // Check auth status to show different UI
+    this.isAuthenticated = this.authService.isLoggedIn();
+    
+    // Continue with page logic...
+  }
+}
+```
+
+### c. Handle GraphQL Errors Gracefully
+Public pages may attempt authenticated GraphQL calls, but should handle failures silently:
+
+```typescript
+checkExistingAffiliate(): void {
+  if (!this.isAuthenticated) {
+    return;
+  }
+
+  this.subscriptions.add(
+    this.affiliateService.getMyAffiliateRelationship().subscribe({
+      next: (relationship) => {
+        // Handle success
+        if (relationship) {
+          this.hasExistingAffiliate = true;
+          this.existingAffiliateUsername = relationship.affiliate.username;
+        }
+      },
+      error: () => {
+        // Silently fail - user may have expired token
+        // This is acceptable on public pages
+      },
+    }),
+  );
+}
+```
+
+### d. Use HTTP Service for Public Data
+For data that doesn't require authentication, use a dedicated HTTP service instead of GraphQL:
+
+```typescript
+export class AffiliateLandingComponent implements OnInit {
+  constructor(
+    private affiliateHttpService: AffiliateHttpService, // HTTP service
+    private affiliateService: AffiliateService,         // GraphQL service (for authenticated calls)
+  ) {}
+
+  ngOnInit(): void {
+    const code = this.route.snapshot.paramMap.get('code');
+    
+    // Public data via HTTP
+    this.subscriptions.add(
+      this.affiliateHttpService.getAffiliateLanding(code).subscribe({
+        next: (data) => {
+          this.affiliateData = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Invalid or inactive affiliate code';
+          this.loading = false;
+        },
+      }),
+    );
+  }
+}
+```
+
+## 3. Navigation to/from Public Routes
+
+### Redirecting to Login/Register with Context
+Public pages should preserve context when sending users to auth pages:
+
+```typescript
+onSignUp(): void {
+  this.router.navigate(['/register'], { 
+    queryParams: { ref: this.affiliateData?.affiliate_code } 
+  });
+}
+
+onSignIn(): void {
+  this.router.navigate(['/login'], { 
+    queryParams: { ref: this.affiliateData?.affiliate_code } 
+  });
+}
+```
+
+### Reading Query Parameters
+Auth pages should read and preserve these parameters:
+
+```typescript
+export class LoginComponent {
+  private affiliateCode: string | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private affiliateStorageService: AffiliateStorageService,
+  ) {
+    // Read ref parameter from URL
+    const refCode = this.route.snapshot.queryParams['ref'];
+    if (refCode) {
+      this.affiliateCode = refCode;
+      this.affiliateStorageService.setAffiliateCode(refCode);
+    } else {
+      this.affiliateCode = this.affiliateStorageService.getAffiliateCode();
+    }
+  }
+}
+```
+
+## 4. Layout Considerations
+
+### No Toolbar/Sidenav
+Public routes typically render WITHOUT the main application layout (toolbar, sidenav, navigation):
+
+- The component handles its own layout entirely
+- Uses Material components directly (MatCard, MatButton, etc.)
+- Provides its own navigation elements (Sign In, Sign Up buttons)
+
+### Self-Contained Styling
+Public route components should include all necessary styles in their SCSS file:
+
+```scss
+// affiliate-landing.component.scss
+.landing-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary-color);
+  padding: 20px;
+}
+
+.landing-card {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+```
+
+## 5. Template Patterns for Public Routes
+
+### Loading State
+```html
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading affiliate information...</p>
+  </div>
+}
+```
+
+### Error State
+```html
+@if (!loading && error) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <h2>Oops!</h2>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" routerLink="/home">Go Home</button>
+    </mat-card-content>
+  </mat-card>
+}
+```
+
+### Conditional UI Based on Auth State
+```html
+@if (!loading && !error && affiliateData) {
+  <mat-card class="landing-card">
+    <mat-card-header>
+      @if (affiliateData.brand_image_url) {
+        <img [src]="getBrandImageUrl()" alt="Brand" class="brand-image">
+      }
+    </mat-card-header>
+    
+    <mat-card-content>
+      <h1>Join {{ affiliateData.affiliate_username }}'s Network</h1>
+      
+      @if (!isAuthenticated) {
+        <!-- Show Sign Up / Sign In buttons -->
+        <button mat-raised-button color="primary" (click)="onSignUp()">Sign Up</button>
+        <button mat-raised-button (click)="onSignIn()">Sign In</button>
+      } @else if (hasExistingAffiliate) {
+        <!-- Already in a network -->
+        <p>You're already part of {{ existingAffiliateUsername }}'s network.</p>
+      } @else {
+        <!-- Authenticated, can join -->
+        <button mat-raised-button color="primary" (click)="onJoinNetwork()">
+          Join Network
+        </button>
+      }
+    </mat-card-content>
+  </mat-card>
+}
+```
+
+## 6. Testing Checklist for Public Routes
+
+When implementing a new public route:
+
+- [ ] Route defined in `app.routes.ts` without `canActivate` guard
+- [ ] Component is standalone with all necessary imports
+- [ ] Works when NOT logged in (primary use case)
+- [ ] Works when logged in (shows appropriate UI)
+- [ ] Handles loading states properly
+- [ ] Handles error states gracefully
+- [ ] Uses HTTP service for public data (not GraphQL with auth)
+- [ ] GraphQL errors fail silently (if applicable)
+- [ ] Navigation to login/register preserves context via query params
+- [ ] Self-contained styling (no dependency on app layout)
+- [ ] Responsive design for mobile/tablet/desktop
+- [ ] No console errors when accessed without authentication
+- [ ] Proper TypeScript types for all data
+- [ ] Subscription cleanup in `ngOnDestroy`
+
+## 7. Examples of Public Routes
+
+Current public routes in the application:
+
+| Path | Component | Purpose |
+|------|-----------|---------|
+| `/home` | HomeComponent | Landing/marketing page |
+| `/register` | RegisterComponent | User registration |
+| `/login` | LoginComponent | User login |
+| `/forgot` | ForgotPasswordComponent | Password reset request |
+| `/verify` | VerifyEmailComponent | Email verification |
+| `/reset` | ResetPasswordComponent | Password reset |
+| `/a/:code` | AffiliateLandingComponent | Affiliate network invitation |
+| `/privacy-policy` | PrivacyPolicyComponent | Privacy policy |
+| `/terms-and-conditions` | TermsAndConditionsComponent | Terms of service |
+
+## 8. HTTP Service Pattern for Public Data
+
+Create dedicated HTTP services for public endpoints that don't require authentication:
+
+```typescript
+// affiliate-http.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
+
+export interface AffiliateLandingData {
+  affiliate_code: string;
+  affiliate_username: string;
+  brand_image_url: string | null;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AffiliateHttpService {
+  private apiUrl = environment.apiUrl;
+
+  constructor(private http: HttpClient) {}
+
+  getAffiliateLanding(code: string): Observable<AffiliateLandingData> {
+    return this.http.get<AffiliateLandingData>(
+      `${this.apiUrl}/a/${code}/`
+    );
+  }
+}
+```
+
+## 9. Storage Service Pattern
+
+Use storage services to preserve state between public and authenticated routes:
+
+```typescript
+// affiliate-storage.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AffiliateStorageService {
+  private readonly STORAGE_KEY = 'pendingAffiliateCode';
+
+  setAffiliateCode(code: string): void {
+    sessionStorage.setItem(this.STORAGE_KEY, code);
+  }
+
+  getAffiliateCode(): string | null {
+    return sessionStorage.getItem(this.STORAGE_KEY);
+  }
+
+  clearAffiliateCode(): void {
+    sessionStorage.removeItem(this.STORAGE_KEY);
+  }
+}
+```
+
+---
+
+## Summary
+
+Public routes in Capital Copilot are characterized by:
+
+1. **No AuthGuard** - Route is accessible without login
+2. **Standalone component** - Self-contained with all dependencies
+3. **Dual-mode operation** - Works for both authenticated and unauthenticated users
+4. **HTTP for public data** - Use HTTP services, not authenticated GraphQL
+5. **Graceful error handling** - Silent failures for optional authenticated features
+6. **Context preservation** - Query parameters preserve state through auth flow
+7. **Self-contained layout** - No dependency on app shell/toolbar
+8. **Storage services** - Persist context across route transitions
+
+Follow these patterns when adding new public pages like marketing pages, legal pages, or public-facing features.
