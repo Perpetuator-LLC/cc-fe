@@ -9,6 +9,18 @@ mat-sidenav-content mat-toolbar {
   }
 }
 
+//.profile-menu {
+//  .mat-icon {
+//    //font-size: 64px;
+//    //width: 64px;
+//    //height: 64px;
+//    //margin-right: 16px;
+//    //color: var(--theme-color);
+//    margin: 0;
+//    color: var(--theme-color);
+//  }
+//}
+
 .main-header {
   padding: 50px 70px;
   height: auto;
@@ -612,6 +624,17 @@ mat-nav-list {
           height: 28px;
         }
 
+        mat-icon.theme-icon {
+          margin: 0;
+          color: var(--theme-white);
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
         .profile-btn {
           padding-inline: 12px;
           font-size: 14px;
@@ -624,6 +647,7 @@ mat-nav-list {
             height: 2rem;
             font-size: 2rem;
           }
+
         }
 
         @media screen and (max-width: 599px) {

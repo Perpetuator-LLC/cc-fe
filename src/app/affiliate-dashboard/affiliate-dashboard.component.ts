@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import {
   AffiliateService,
   AffiliateProfile,
@@ -17,8 +18,11 @@ import {
   AffiliateCredit,
   AffiliateConversion,
   AffiliateTermsConsent,
+  AffiliateCodeChangeRequest,
+  PendingCodeChangeRequest,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
+import { UserService } from '../user.service';
 import { AffiliateTermsDialogComponent } from '../affiliate-terms-dialog/affiliate-terms-dialog.component';
 import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert-credits-dialog.component';
 // eslint-disable-next-line max-len
@@ -53,6 +57,9 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   credits: AffiliateCredit[] = [];
   conversions: AffiliateConversion[] = [];
   termsConsents: AffiliateTermsConsent[] = [];
+  pendingCodeChangeRequest: AffiliateCodeChangeRequest | null = null;
+  adminPendingRequests: PendingCodeChangeRequest[] = [];
+  loadingAdminRequests = false;
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
   conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status'];
@@ -69,6 +76,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private dialog: MatDialog,
     private clipboard: Clipboard,
+    private router: Router,
+    protected userService: UserService,
   ) {}
 
   ngOnInit(): void {
@@ -110,7 +119,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       if (accepted) {
         this.loadDashboardData();
       } else {
-        this.messageService.error('You must accept the affiliate terms to access the dashboard');
+        this.messageService.warning('You must accept the affiliate terms to access the dashboard');
+        this.router.navigate(['/home']);
       }
     });
   }
@@ -119,59 +129,48 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
 
     this.subscriptions.add(
-      this.affiliateService.getAffiliateProfile().subscribe({
-        next: (profile) => {
+      forkJoin({
+        profile: this.affiliateService.getAffiliateProfile(),
+        stats: this.affiliateService.getAffiliateStats(),
+        credits: this.affiliateService.getAffiliateCredits(),
+        conversions: this.affiliateService.getAffiliateConversions(),
+        codeChangeRequests: this.affiliateService.getCodeChangeRequests(),
+      }).subscribe({
+        next: ({ profile, stats, credits, conversions, codeChangeRequests }) => {
           this.profile = profile;
-          this.loadStats();
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to load profile: ${err.message}`);
-          this.loading = false;
-        },
-      }),
-    );
-  }
-
-  loadStats(): void {
-    this.subscriptions.add(
-      this.affiliateService.getAffiliateStats().subscribe({
-        next: (stats) => {
           this.stats = stats;
-          this.loadCredits();
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to load stats: ${err.message}`);
-          this.loading = false;
-        },
-      }),
-    );
-  }
-
-  loadCredits(): void {
-    this.subscriptions.add(
-      this.affiliateService.getAffiliateCredits().subscribe({
-        next: (credits) => {
           this.credits = credits;
-          this.loadConversions();
+          this.conversions = conversions;
+          this.pendingCodeChangeRequest = codeChangeRequests.find((r) => r.status === 'pending') || null;
+          this.loading = false;
+
+          if (this.canApproveCodeChanges()) {
+            this.loadAdminPendingRequests();
+          }
         },
         error: (err) => {
-          this.messageService.error(`Failed to load credits: ${err.message}`);
+          this.messageService.error(`Failed to load dashboard data: ${err.message}`);
           this.loading = false;
         },
       }),
     );
   }
 
-  loadConversions(): void {
+  canApproveCodeChanges(): boolean {
+    const userDetails = this.userService.userDetails();
+    return userDetails?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false;
+  }
+
+  loadAdminPendingRequests(): void {
+    this.loadingAdminRequests = true;
     this.subscriptions.add(
-      this.affiliateService.getAffiliateConversions().subscribe({
-        next: (conversions) => {
-          this.conversions = conversions;
-          this.loading = false;
+      this.affiliateService.getPendingCodeChangeRequests().subscribe({
+        next: (requests) => {
+          this.adminPendingRequests = requests;
+          this.loadingAdminRequests = false;
         },
-        error: (err) => {
-          this.messageService.error(`Failed to load conversions: ${err.message}`);
-          this.loading = false;
+        error: () => {
+          this.loadingAdminRequests = false;
         },
       }),
     );
@@ -377,7 +376,37 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        this.messageService.clearMessages();
         this.loadDashboardData();
+      }
+    });
+  }
+
+  cancelPendingCodeChangeRequest(): void {
+    if (!this.pendingCodeChangeRequest) return;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Cancel Code Change Request',
+        message: 'Are you sure you want to cancel your pending code change request?',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed && this.pendingCodeChangeRequest) {
+        this.messageService.clearMessages();
+        this.subscriptions.add(
+          this.affiliateService.cancelCodeChangeRequest(this.pendingCodeChangeRequest.uuid).subscribe({
+            next: () => {
+              this.messageService.success('Code change request canceled successfully');
+              this.pendingCodeChangeRequest = null;
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to cancel request: ${err.message}`);
+            },
+          }),
+        );
       }
     });
   }
@@ -385,5 +414,50 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   onImageError(): void {
     console.error('Failed to load brand image:', this.profile?.brandImageUrl);
     this.messageService.warning('Failed to load brand image. The image may have been deleted or the URL is invalid.');
+  }
+
+  approveCodeChangeRequest(requestId: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Approve Code Change Request',
+        message: 'Are you sure you want to approve this code change request?',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.messageService.clearMessages();
+        this.subscriptions.add(
+          this.affiliateService.approveCodeChangeRequest(requestId).subscribe({
+            next: () => {
+              this.messageService.success('Code change request approved successfully');
+              this.loadAdminPendingRequests();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to approve request: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  rejectCodeChangeRequest(requestId: string): void {
+    const reason = prompt('Enter rejection reason (optional):');
+    if (reason === null) return;
+
+    this.messageService.clearMessages();
+    this.subscriptions.add(
+      this.affiliateService.rejectCodeChangeRequest(requestId, reason || undefined).subscribe({
+        next: () => {
+          this.messageService.success('Code change request rejected');
+          this.loadAdminPendingRequests();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to reject request: ${err.message}`);
+        },
+      }),
+    );
   }
 }

@@ -7,17 +7,27 @@ import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 
+export interface PublicUser {
+  uuid: string;
+  username: string;
+}
+
 export interface AffiliateProfile {
+  uuid: string;
+  user: PublicUser;
   code: string;
   brandImageUrl: string | null;
   isActive: boolean;
   createdAt: string;
-  username?: string;
+  updatedAt: string;
 }
 
 export interface AffiliateRelationship {
-  affiliateUsername: string;
+  uuid: string;
   tier: number;
+  affiliate: PublicUser;
+  referredUser: PublicUser;
+  referredUserHasAffiliateProfile: boolean;
   createdAt: string;
 }
 
@@ -29,9 +39,10 @@ export interface AffiliateStats {
 }
 
 export interface AffiliateCredit {
+  uuid: string;
   amount: number;
   tier: number;
-  sourceUsername: string;
+  sourceUser?: PublicUser | null;
   description: string;
   createdAt: string;
 }
@@ -68,6 +79,7 @@ export interface AffiliateCodeHistory {
 
 export interface AffiliateCodeChangeRequest {
   uuid: string;
+  user?: PublicUser | null;
   requestedCode: string;
   currentCode: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -164,6 +176,40 @@ interface RequestCodeChangeResponse {
   };
 }
 
+interface CancelCodeChangeRequestResponse {
+  cancelCodeChangeRequest: {
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  };
+}
+
+interface ApproveCodeChangeRequestResponse {
+  approveCodeChangeRequest: {
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  };
+}
+
+interface RejectCodeChangeRequestResponse {
+  rejectCodeChangeRequest: {
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  };
+}
+
+export interface PendingCodeChangeRequest extends AffiliateCodeChangeRequest {
+  user: PublicUser;
+  userReferralCount: number;
+  profileCreatedAt: string;
+}
+
+interface PendingCodeChangeRequestsResponse {
+  pendingCodeChangeRequests: PendingCodeChangeRequest[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -186,8 +232,17 @@ export class AffiliateService extends BaseService {
           success
           message
           relationship {
-            affiliateUsername
+            uuid
             tier
+            affiliate {
+              uuid
+              username
+            }
+            referredUser {
+              uuid
+              username
+            }
+            referredUserHasAffiliateProfile
             createdAt
           }
         }
@@ -224,10 +279,16 @@ export class AffiliateService extends BaseService {
             date
           }
           affiliateProfile {
+            uuid
+            user {
+              uuid
+              username
+            }
             code
-            isActive
             brandImageUrl
+            isActive
             createdAt
+            updatedAt
           }
         }
       }
@@ -257,10 +318,16 @@ export class AffiliateService extends BaseService {
           success
           message
           affiliateProfile {
+            uuid
+            user {
+              uuid
+              username
+            }
             code
             brandImageUrl
             isActive
             createdAt
+            updatedAt
           }
         }
       }
@@ -293,10 +360,16 @@ export class AffiliateService extends BaseService {
           success
           message
           affiliateProfile {
+            uuid
+            user {
+              uuid
+              username
+            }
             code
             brandImageUrl
             isActive
             createdAt
+            updatedAt
           }
         }
       }
@@ -360,10 +433,16 @@ export class AffiliateService extends BaseService {
     const query = gql`
       query GetAffiliateProfile {
         affiliateProfile {
+          uuid
+          user {
+            uuid
+            username
+          }
           code
           brandImageUrl
           isActive
           createdAt
+          updatedAt
         }
       }
     `;
@@ -394,9 +473,13 @@ export class AffiliateService extends BaseService {
     const query = gql`
       query GetAffiliateCredits {
         myAffiliateCredits {
+          uuid
           amount
           tier
-          sourceUsername
+          sourceUser {
+            uuid
+            username
+          }
           description
           createdAt
         }
@@ -431,8 +514,17 @@ export class AffiliateService extends BaseService {
     const query = gql`
       query GetMyAffiliateRelationship {
         myAffiliateRelationship {
-          affiliateUsername
+          uuid
           tier
+          affiliate {
+            uuid
+            username
+          }
+          referredUser {
+            uuid
+            username
+          }
+          referredUserHasAffiliateProfile
           createdAt
         }
       }
@@ -463,11 +555,16 @@ export class AffiliateService extends BaseService {
     const query = gql`
       query GetAffiliateByCode($code: String!) {
         affiliateByCode(code: $code) {
+          uuid
+          user {
+            uuid
+            username
+          }
           code
           brandImageUrl
           isActive
           createdAt
-          username
+          updatedAt
         }
       }
     `;
@@ -590,6 +687,132 @@ export class AffiliateService extends BaseService {
           throw new Error(data.requestCodeChange.message);
         }
         return data.requestCodeChange;
+      }),
+    );
+  }
+
+  cancelCodeChangeRequest(requestId: string): Observable<{
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  }> {
+    const mutation = gql`
+      mutation CancelCodeChangeRequest($requestId: UUID!) {
+        cancelCodeChangeRequest(requestId: $requestId) {
+          success
+          message
+          codeChangeRequest {
+            uuid
+            status
+            rejectionReason
+          }
+        }
+      }
+    `;
+
+    return this.mutate<CancelCodeChangeRequestResponse>({
+      mutation,
+      variables: { requestId },
+    }).pipe(
+      map((data) => {
+        if (!data.cancelCodeChangeRequest.success) {
+          throw new Error(data.cancelCodeChangeRequest.message);
+        }
+        return data.cancelCodeChangeRequest;
+      }),
+    );
+  }
+
+  getPendingCodeChangeRequests(): Observable<PendingCodeChangeRequest[]> {
+    const query = gql`
+      query PendingCodeChangeRequests {
+        pendingCodeChangeRequests {
+          uuid
+          user {
+            uuid
+            username
+          }
+          currentCode
+          requestedCode
+          reason
+          requestedAt
+          userReferralCount
+          profileCreatedAt
+          status
+          rejectionReason
+          reviewedAt
+        }
+      }
+    `;
+
+    return this.query<PendingCodeChangeRequestsResponse>({
+      query,
+    }).pipe(map((data) => data.pendingCodeChangeRequests));
+  }
+
+  approveCodeChangeRequest(requestId: string): Observable<{
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  }> {
+    const mutation = gql`
+      mutation ApproveCodeChangeRequest($requestId: UUID!) {
+        approveCodeChangeRequest(requestId: $requestId) {
+          success
+          message
+          codeChangeRequest {
+            uuid
+            status
+            requestedCode
+          }
+        }
+      }
+    `;
+
+    return this.mutate<ApproveCodeChangeRequestResponse>({
+      mutation,
+      variables: { requestId },
+    }).pipe(
+      map((data) => {
+        if (!data.approveCodeChangeRequest.success) {
+          throw new Error(data.approveCodeChangeRequest.message);
+        }
+        return data.approveCodeChangeRequest;
+      }),
+    );
+  }
+
+  rejectCodeChangeRequest(
+    requestId: string,
+    rejectionReason?: string,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    codeChangeRequest: AffiliateCodeChangeRequest | null;
+  }> {
+    const mutation = gql`
+      mutation RejectCodeChangeRequest($requestId: UUID!, $rejectionReason: String) {
+        rejectCodeChangeRequest(requestId: $requestId, rejectionReason: $rejectionReason) {
+          success
+          message
+          codeChangeRequest {
+            uuid
+            status
+            rejectionReason
+          }
+        }
+      }
+    `;
+
+    return this.mutate<RejectCodeChangeRequestResponse>({
+      mutation,
+      variables: { requestId, rejectionReason },
+    }).pipe(
+      map((data) => {
+        if (!data.rejectCodeChangeRequest.success) {
+          throw new Error(data.rejectCodeChangeRequest.message);
+        }
+        return data.rejectCodeChangeRequest;
       }),
     );
   }

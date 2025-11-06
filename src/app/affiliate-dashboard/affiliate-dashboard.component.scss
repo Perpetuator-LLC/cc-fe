@@ -71,6 +71,111 @@
   text-align: center;
 }
 
+.pending-request-card {
+  background-color: var(--secondary-400);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  mat-card-content {
+    padding: 20px;
+  }
+}
+
+.pending-request-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.pending-request-icon {
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--primary);
+  }
+}
+
+.pending-request-info {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--theme-color);
+    margin: 4px 0;
+
+    strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+  }
+
+  .request-date {
+    font-size: 12px;
+    color: var(--description-color);
+  }
+
+  .request-reason {
+    font-size: 13px;
+    color: var(--description-color);
+    font-style: italic;
+    margin-top: 8px;
+  }
+}
+
+.pending-request-actions {
+  flex-shrink: 0;
+
+  button {
+    white-space: nowrap;
+    background-color: var(--secondary-dark);
+    color: var(--theme-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin: 0;
+    }
+
+    &:hover {
+      background-color: var(--secondary-450);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    width: 100%;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
 .link-card,
 .brand-image-card,
 .balance-card {
@@ -494,7 +599,134 @@
 
   .link-display {
     flex-direction: column;
-    align-items: flex-start;
+  }
+}
+
+.admin-panel-card {
+  background-color: var(--toolbar-container-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 20px;
+
+  mat-card-content {
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin: 0 0 20px 0;
+  }
+}
+
+.admin-requests-table {
+  overflow-x: auto;
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      font-size: 14px;
+      color: var(--theme-color);
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--description-color);
+    }
+  }
+
+  .code-change {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+
+    .old-code {
+      font-size: 13px;
+      color: var(--description-color);
+      text-decoration: line-through;
+    }
+
+    .new-code {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--description-color);
+    }
+  }
+
+  .reason-text {
+    font-size: 13px;
+    color: var(--description-color);
+    font-style: italic;
+    max-width: 200px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+
+    button {
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      mat-icon {
+        margin: 0;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    button[color="primary"] {
+      background: var(--primary);
+      color: var(--theme-white);
+      border: 1px solid var(--border-color);
+    }
+
+    button[color="warn"] {
+      background: var(--secondary-dark);
+      color: var(--md-sys-color-error);
+      border: 1px solid var(--md-sys-color-error);
+
+      &:hover {
+        background: rgba(255, 74, 74, 0.1);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .admin-requests-table {
+    .action-buttons {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
+    }
   }
 }
 
