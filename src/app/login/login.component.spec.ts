@@ -9,6 +9,13 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createTestJWT } from '../jwt';
 import { ToolbarService } from '../toolbar.service';
+import { ThemeService } from '../theme.service';
+import { MessageService } from '../message.service';
+import { CookieConsentService } from '../cookie-consent.service';
+import { UserService } from '../user.service';
+import { MatDialog } from '@angular/material/dialog';
+import { AffiliateService } from '../affiliate.service';
+import { AffiliateStorageService } from '../affiliate-storage.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -16,13 +23,39 @@ describe('LoginComponent', () => {
   let authService: jasmine.SpyObj<AuthService>;
   let router: jasmine.SpyObj<Router>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
+  let mockThemeService: jasmine.SpyObj<ThemeService>;
+  let mockMessageService: jasmine.SpyObj<MessageService>;
+  let mockCookieConsentService: jasmine.SpyObj<CookieConsentService>;
+  let mockUserService: jasmine.SpyObj<UserService>;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
+  let mockAffiliateService: jasmine.SpyObj<AffiliateService>;
+  let mockAffiliateStorageService: jasmine.SpyObj<AffiliateStorageService>;
 
   beforeEach(async () => {
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef', 'clearToolbarComponent']);
     const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
+
+    mockThemeService = jasmine.createSpyObj('ThemeService', ['applyTheme', 'getCurrentTheme', 'loadTheme']);
+    mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages', 'addMessage']);
+    Object.defineProperty(mockMessageService, 'messageCount', {
+      get: () => 0,
+      configurable: true,
+    });
+    mockCookieConsentService = jasmine.createSpyObj('CookieConsentService', ['hasConsented', 'loadCookieConsent']);
+    mockUserService = jasmine.createSpyObj('UserService', ['getUser', 'loadUserDetails']);
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockAffiliateService = jasmine.createSpyObj('AffiliateService', ['getAffiliateByCode']);
+    mockAffiliateStorageService = jasmine.createSpyObj('AffiliateStorageService', [
+      'getCode',
+      'clearCode',
+      'getAffiliateCode',
+      'setAffiliateCode',
+    ]);
+    mockAffiliateStorageService.getAffiliateCode.and.returnValue(null);
+
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['login', 'getErrors']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
 
     await TestBed.configureTestingModule({
@@ -31,6 +64,13 @@ describe('LoginComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ToolbarService, useValue: mockToolbarService },
+        { provide: ThemeService, useValue: mockThemeService },
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: CookieConsentService, useValue: mockCookieConsentService },
+        { provide: UserService, useValue: mockUserService },
+        { provide: MatDialog, useValue: mockDialog },
+        { provide: AffiliateService, useValue: mockAffiliateService },
+        { provide: AffiliateStorageService, useValue: mockAffiliateStorageService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
       ],
     }).compileComponents();
@@ -54,7 +94,7 @@ describe('LoginComponent', () => {
   //      .toHaveBeenCalledWith(component.toolbarTemplate);
   // });
 
-  it('should call AuthService login on form submit', () => {
+  it('should call AuthService login on form submit', (done) => {
     authService.login.and.returnValue(
       of({
         access: createTestJWT({}),
@@ -65,7 +105,12 @@ describe('LoginComponent', () => {
     component.onSubmit();
 
     expect(authService.login).toHaveBeenCalledWith('test@example.com', 'testpassword');
-    expect(router.navigate).toHaveBeenCalledWith(['/charts']);
+
+    // Wait for async subscription to complete
+    setTimeout(() => {
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/home');
+      done();
+    }, 100);
   });
 
   it('should display validation errors when form is invalid', () => {
