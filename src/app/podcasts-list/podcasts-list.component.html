@@ -21,14 +21,14 @@
 <div class="middle-card">
   <div class="table-controls">
     <div class="search-filter">
-      <div class="input-search-div">
-        <mat-icon matPrefix>search</mat-icon>
-        <input [(ngModel)]="searchString" matInput placeholder="Search by podcast name"
-          (input)="onSearchChange($event)" />
-      </div>
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-icon matIconPrefix>search</mat-icon>
+        <mat-label>Search by podcast name</mat-label>
+        <input matInput [(ngModel)]="searchString" (input)="onSearchChange($event)" />
+      </mat-form-field>
 
-      <mat-form-field [hidden]="loadingTeams">
-        <mat-label>Select Team</mat-label>
+      <mat-form-field appearance="outline" [hidden]="loadingTeams">
+        <mat-label>Team</mat-label>
         <mat-select [(value)]="selectedTeam" (selectionChange)="onTeamFilterChange()">
           <mat-option [value]="null">All Teams</mat-option>
           @for (team of teams; track team.uuid) {
@@ -37,16 +37,20 @@
         </mat-select>
       </mat-form-field>
 
-      <button mat-flat-button class="filter-button">
-        <mat-icon>filter_list</mat-icon>
-        Filter
-      </button>
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(value)]="selectedLiveStatus" (selectionChange)="onLiveStatusFilterChange()">
+          <mat-option [value]="null">All Status</mat-option>
+          <mat-option value="live">Live</mat-option>
+          <mat-option value="disabled">Disabled</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
     <div class="view-toggles">
-      <button mat-flat-button class="manage-btn" [matMenuTriggerFor]="columnMenu">
+      <button mat-button [matMenuTriggerFor]="columnMenu">
         <mat-icon>view_column</mat-icon>
-        Manage Column
+        Manage Columns
       </button>
       <mat-menu #columnMenu="matMenu" class="column-menu">
         <div class="column-menu-content">
@@ -59,10 +63,10 @@
           }
         </div>
       </mat-menu>
-      <button class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
+      <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
         <app-svg-icon icon="grid"></app-svg-icon>
       </button>
-      <button class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
+      <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
         <app-svg-icon icon="list"></app-svg-icon>
       </button>
     </div>
@@ -154,15 +158,13 @@
       <ng-container matColumnDef="createEpisode">
         <th mat-header-cell *matHeaderCellDef>Create Episode</th>
         <td mat-cell *matCellDef="let podcast">
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button mat-flat-button (click)="createLatestEpisode(podcast.uuid)"
-              style="background-color: var(--primary); color: white; border-radius: 10px; white-space: nowrap; flex-shrink: 0;"
+          <div class="episode-actions">
+            <button mat-flat-button color="primary" (click)="createLatestEpisode(podcast.uuid)"
               matTooltip="Create an episode from the latest news for this podcast">
               <mat-icon>newspaper</mat-icon>
               News Episode
             </button>
-            <button mat-flat-button (click)="createResearchEpisode(podcast.uuid)"
-              style="background-color: var(--purple); color: white; border-radius: 10px; white-space: nowrap; flex-shrink: 0;"
+            <button mat-flat-button class="research-button" (click)="createResearchEpisode(podcast.uuid)"
               matTooltip="Research and create an AI-researched episode">
               <mat-icon>science</mat-icon>
               Research Episode
@@ -175,7 +177,7 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let podcast">
-          <button class="action-btn" style="color: var(--theme-color)" mat-icon-button
+          <button mat-icon-button class="action-btn"
             [matMenuTriggerFor]="podcastActionsMenu" aria-label="Podcast actions">
             <mat-icon>more_vert</mat-icon>
           </button>
@@ -214,7 +216,7 @@
       @for (podcast of dataSource.data; track podcast.uuid) {
       <mat-card class="podcast-card">
         <mat-card-header>
-          <div class="grid-header" style="width: 100%">
+          <div class="grid-header">
             <a [routerLink]="['/podcast', podcast.uuid]">
               @if (podcast.thumbnailUrl || podcast.imageUrl) {
               <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
