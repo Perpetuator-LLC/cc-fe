@@ -251,24 +251,24 @@
               </div>
             </div>
             <button mat-menu-item [routerLink]="['/profile']">
-              <mat-icon class="theme-icon">settings</mat-icon>
+              <mat-icon>settings</mat-icon>
               <span>Account Settings</span>
             </button>
             <button mat-menu-item [routerLink]="['/orders']">
-              <mat-icon class="theme-icon">paid</mat-icon>
+              <mat-icon>paid</mat-icon>
               <span>Orders</span>
             </button>
             <button mat-menu-item [routerLink]="['/affiliate']">
-              <mat-icon class="theme-icon">share</mat-icon>
+              <mat-icon>share</mat-icon>
               <span>Affiliate Dashboard</span>
             </button>
             <button mat-menu-item (click)="openRedeemGiftCodeDialog()">
-              <mat-icon class="theme-icon">redeem</mat-icon>
+              <mat-icon>redeem</mat-icon>
               <span>Gift Code</span>
             </button>
             <button mat-menu-item (click)="$event.stopPropagation()" class="theme-toggle-card">
               <div class="left">
-                <mat-icon class="theme-icon">{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+                <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
                 <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
               </div>
               <mat-slide-toggle [checked]="currentTheme() === 'dark'"

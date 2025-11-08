@@ -137,7 +137,7 @@ export class PublicPodcastPageComponent implements OnInit {
     const shareUrl = this.getShareUrl();
     const description =
       this.podcastData.description ||
-      `Listen to ${this.podcastData.name} - ${this.podcastData.totalEpisodes} episodes available`;
+      `Listen to ${this.podcastData.name} - ${this.podcastData.pagination.totalEpisodes} episodes available`;
 
     this.seoService.updateTags({
       title: `${this.podcastData.name} | Capital Copilot`,

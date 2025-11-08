@@ -26,12 +26,14 @@
       </div>
     } @else {
       <div class="categories-list">
-        @for (category of categories; track category.name) {
+        @for (category of categories; track $index) {
           <mat-card class="category-card">
             <mat-card-header>
               <div class="category-header">
                 <h2>
-                  <a [routerLink]="getCategoryUrl(category.name)">{{ category.name }}</a>
+                  <a [routerLink]="getCategoryUrl(category.name)">
+                    {{ decodeCategory(category.name) || 'Unnamed Category' }}
+                  </a>
                 </h2>
                 <span class="podcast-count">{{ category.data.podcastCount }} podcasts</span>
               </div>
@@ -41,9 +43,9 @@
                 <div class="subcategories">
                   <p class="subcategories-label">Subcategories:</p>
                   <mat-chip-set aria-label="Subcategories">
-                    @for (subcategory of category.data.subcategories; track subcategory) {
+                    @for (subcategory of category.data.subcategories; track $index) {
                       <mat-chip-option [routerLink]="getSubcategoryUrl(category.name, subcategory)">
-                        {{ subcategory }}
+                        {{ decodeCategory(subcategory) }}
                       </mat-chip-option>
                     }
                   </mat-chip-set>
