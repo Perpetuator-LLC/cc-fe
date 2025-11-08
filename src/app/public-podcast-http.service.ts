@@ -32,24 +32,14 @@ export interface PublicPodcast {
   episodeCount?: number;
   viewCount: number;
   rssLoadCount?: number;
+  imageLoadCount?: number;
+  thumbnailLoadCount?: number;
   createdAt?: string;
   updatedAt?: string;
   categories: Record<string, string[]>;
 }
 
 export interface PodcastResponse extends PublicPodcast {
-  episodes: PublicEpisode[];
-  page: number;
-  perPage: number;
-  totalEpisodes: number;
-  totalPages: number;
-  hasNext?: boolean;
-  hasPrevious?: boolean;
-  nextPage?: number;
-  previousPage?: number;
-}
-
-interface PodcastApiResponse extends PublicPodcast {
   episodes: PublicEpisode[];
   pagination: {
     page: number;
@@ -96,13 +86,14 @@ export interface PodcastsListResponse {
 }
 
 export interface Category {
-  name: string;
+  name?: string; // For backward compatibility
+  category?: string; // What the API actually returns
   subcategories: string[];
   podcastCount: number;
 }
 
 export interface CategoriesResponse {
-  categories: Record<string, Category>;
+  categories: Record<string, Category> | Category[] | string[];
 }
 
 export interface CategoryPodcastsResponse {
@@ -124,39 +115,7 @@ export class PublicPodcastHttpService {
     let params = new HttpParams();
     if (page > 1) params = params.set('page', page.toString());
     if (perPage !== 20) params = params.set('per_page', perPage.toString());
-    return this.http.get<PodcastApiResponse>(`${this.apiUrl}/podcasts/${podcastId}/`, { params }).pipe(
-      map(
-        (response): PodcastResponse => ({
-          // Spread all podcast fields
-          id: response.id,
-          name: response.name,
-          slug: response.slug,
-          description: response.description,
-          imageUrl: response.imageUrl,
-          thumbnailUrl: response.thumbnailUrl,
-          ownerName: response.ownerName,
-          ownerEmail: response.ownerEmail,
-          ownerLink: response.ownerLink,
-          rssUrl: response.rssUrl,
-          episodeCount: response.episodeCount,
-          viewCount: response.viewCount,
-          rssLoadCount: response.rssLoadCount,
-          createdAt: response.createdAt,
-          updatedAt: response.updatedAt,
-          categories: response.categories,
-          episodes: response.episodes,
-          // Flatten pagination object to top level
-          page: response.pagination.page,
-          perPage: response.pagination.perPage,
-          totalEpisodes: response.pagination.totalEpisodes,
-          totalPages: response.pagination.totalPages,
-          hasNext: response.pagination.hasNext,
-          hasPrevious: response.pagination.hasPrevious,
-          nextPage: response.pagination.nextPage,
-          previousPage: response.pagination.previousPage,
-        }),
-      ),
-    );
+    return this.http.get<PodcastResponse>(`${this.apiUrl}/podcasts/${podcastId}/`, { params });
   }
 
   getEpisode(episodeId: string): Observable<EpisodeResponse> {

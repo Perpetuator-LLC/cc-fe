@@ -35,6 +35,18 @@
               <a [routerLink]="getPodcastUrl()">{{ episodeData.podcastName }}</a>
             </p>
             <p class="episode-date">Published {{ formatDate(episodeData.date) }}</p>
+            <div class="stats">
+              <span class="stat">
+                <mat-icon>visibility</mat-icon>
+                {{ episodeData.viewCount }} views
+              </span>
+              @if (episodeData.audioPlayCount !== undefined) {
+                <span class="stat">
+                  <mat-icon>play_circle</mat-icon>
+                  {{ episodeData.audioPlayCount }} plays
+                </span>
+              }
+            </div>
           </div>
           <div class="episode-actions">
             <app-share-buttons

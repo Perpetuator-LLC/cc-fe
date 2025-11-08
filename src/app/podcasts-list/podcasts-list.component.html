@@ -183,24 +183,31 @@
           </button>
           <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
             <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
-              <app-svg-icon icon="edit"></app-svg-icon>
+              <mat-icon>edit</mat-icon>
               <span>Edit</span>
             </button>
+            <button mat-menu-item [matMenuTriggerFor]="createEpisodeMenu">
+              <mat-icon>add_circle_outline</mat-icon>
+              <span>Create Episode</span>
+            </button>
+            <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+
+          <mat-menu #createEpisodeMenu="matMenu" class="actionMenu">
             <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
               <mat-icon>newspaper</mat-icon>
-              <span>Create New Episode</span>
+              <span>News Episode</span>
             </button>
             <button mat-menu-item (click)="createResearchEpisode(podcast.uuid)">
               <mat-icon>science</mat-icon>
               <span>Research Episode</span>
             </button>
             <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
-              <mat-icon>add_circle_outline</mat-icon>
-              <span>Create Blank Episode</span>
-            </button>
-            <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
-              <app-svg-icon icon="delete"></app-svg-icon>
-              <span>Delete</span>
+              <mat-icon>note_add</mat-icon>
+              <span>Blank Episode</span>
             </button>
           </mat-menu>
         </td>
@@ -241,24 +248,31 @@
                 </button>
                 <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
                   <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
-                    <app-svg-icon icon="edit"></app-svg-icon>
+                    <mat-icon>edit</mat-icon>
                     <span>Edit</span>
                   </button>
+                  <button mat-menu-item [matMenuTriggerFor]="createEpisodeMenuGrid">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <span>Create Episode</span>
+                  </button>
+                  <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+
+                <mat-menu #createEpisodeMenuGrid="matMenu" class="actionMenu">
                   <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
                     <mat-icon>newspaper</mat-icon>
-                    <span>Create New Episode</span>
+                    <span>News Episode</span>
                   </button>
                   <button mat-menu-item (click)="createResearchEpisode(podcast.uuid)">
                     <mat-icon>science</mat-icon>
                     <span>Research Episode</span>
                   </button>
                   <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
-                    <mat-icon>add_circle_outline</mat-icon>
-                    <span>Create Blank Episode</span>
-                  </button>
-                  <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
-                    <app-svg-icon icon="delete"></app-svg-icon>
-                    <span>Delete</span>
+                    <mat-icon>note_add</mat-icon>
+                    <span>Blank Episode</span>
                   </button>
                 </mat-menu>
               </div>

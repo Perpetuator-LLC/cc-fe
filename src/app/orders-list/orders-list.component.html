@@ -67,15 +67,29 @@
         <mat-card-content class="content-header">
           <div class="title">
             <h3>My Orders</h3>
-            <span>{{ orders.length }} podcasts</span>
+            <span>{{ filteredOrders.length }} orders</span>
+          </div>
+          <div class="status-filter">
+            <span class="filter-label">Filter by status:</span>
+            <mat-chip-set aria-label="Status filter">
+              @for (status of availableStatuses; track status) {
+                <mat-chip-option
+                  [selected]="isStatusSelected(status)"
+                  (click)="toggleStatusFilter(status)"
+                  [class]="status.toLowerCase()"
+                >
+                  {{ status }}
+                </mat-chip-option>
+              }
+            </mat-chip-set>
           </div>
         </mat-card-content>
 
         <div class="orders-container">
-          @if (creditService.userOrders().length > 0) {
+          @if (filteredOrders.length > 0) {
             <table
               mat-table
-              [dataSource]="creditService.userOrders()"
+              [dataSource]="filteredOrders"
               (matSortChange)="sortChange($event)"
               matSort
               matSortActive="createdAt"
