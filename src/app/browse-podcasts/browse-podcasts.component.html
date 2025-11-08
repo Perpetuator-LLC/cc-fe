@@ -43,8 +43,8 @@
         @for (podcast of podcasts; track podcast.id) {
           <mat-card class="podcast-card">
             <a [routerLink]="getPodcastUrl(podcast)" class="podcast-link">
-              @if (podcast.image_url) {
-                <img mat-card-image [src]="podcast.image_url" [alt]="podcast.name" class="podcast-image" />
+              @if (podcast.imageUrl) {
+                <img mat-card-image [src]="podcast.imageUrl" [alt]="podcast.name" class="podcast-image" />
               } @else {
                 <div class="podcast-image-placeholder">
                   <mat-icon>podcasts</mat-icon>
@@ -58,13 +58,13 @@
               @if (podcast.description) {
                 <p class="description">{{ podcast.description }}</p>
               }
-              @if (podcast.owner_name) {
-                <p class="owner">By {{ podcast.owner_name }}</p>
+              @if (podcast.ownerName) {
+                <p class="owner">By {{ podcast.ownerName }}</p>
               }
               <div class="stats">
                 <span class="stat">
                   <mat-icon>visibility</mat-icon>
-                  {{ podcast.view_count }}
+                  {{ podcast.viewCount }}
                 </span>
                 @if (podcast.categories) {
                   <span class="categories-count">

@@ -18,9 +18,9 @@
         <mat-icon>podcasts</mat-icon>
         All Podcasts
       </a>
-      @if (episodeData.podcast_id && episodeData.podcast_name) {
+      @if (episodeData.podcastId && episodeData.podcastName) {
         <mat-icon>chevron_right</mat-icon>
-        <a [routerLink]="getPodcastUrl()" mat-button>{{ episodeData.podcast_name }}</a>
+        <a [routerLink]="getPodcastUrl()" mat-button>{{ episodeData.podcastName }}</a>
       }
       <mat-icon>chevron_right</mat-icon>
       <span>{{ episodeData.title }}</span>
@@ -32,9 +32,9 @@
           <div class="episode-info">
             <h1>{{ episodeData.title }}</h1>
             <p class="podcast-name">
-              <a [routerLink]="getPodcastUrl()">{{ episodeData.podcast_name }}</a>
+              <a [routerLink]="getPodcastUrl()">{{ episodeData.podcastName }}</a>
             </p>
-            <p class="episode-date">Published on {{ formatDate(episodeData.published_date) }}</p>
+            <p class="episode-date">Published {{ formatDate(episodeData.date) }}</p>
           </div>
           <div class="episode-actions">
             <app-share-buttons
@@ -62,7 +62,7 @@
 
         <div class="audio-player">
           <h2>Listen to Episode</h2>
-          <audio controls [src]="episodeData.audio_url">
+          <audio controls [src]="episodeData.audioUrl">
             Your browser does not support the audio element.
           </audio>
           @if (episodeData.duration) {
@@ -98,7 +98,7 @@
     <div class="back-to-podcast">
       <a [routerLink]="getPodcastUrl()" mat-raised-button color="primary">
         <mat-icon>arrow_back</mat-icon>
-        Back to {{ episodeData.podcast_name }}
+        Back to {{ episodeData.podcastName }}
       </a>
     </div>
   }
