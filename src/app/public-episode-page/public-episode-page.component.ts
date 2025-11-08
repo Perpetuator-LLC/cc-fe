@@ -12,6 +12,7 @@ import { ShareService } from '../share.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { MessageService } from '../message.service';
 import { AuthService } from '../auth.service';
+import { SeoService } from '../seo.service';
 
 @Component({
   selector: 'app-public-episode-page',
@@ -42,6 +43,7 @@ export class PublicEpisodePageComponent implements OnInit {
     private shareService: ShareService,
     private messageService: MessageService,
     private authService: AuthService,
+    private seoService: SeoService,
   ) {
     this.isAuthenticated = this.authService.isLoggedIn();
   }
@@ -58,21 +60,14 @@ export class PublicEpisodePageComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    console.log(`[PublicEpisodePage] Loading episode with ID: ${this.episodeId}`);
     this.publicPodcastService.getEpisode(this.episodeId).subscribe({
       next: (data) => {
-        console.log('[PublicEpisodePage] Episode loaded successfully:', data);
         this.episodeData = data;
         this.loading = false;
+        this.updateSeoTags();
       },
       error: (err) => {
-        console.error('[PublicEpisodePage] Failed to load episode:', {
-          episodeId: this.episodeId,
-          error: err,
-          status: err.status,
-          message: err.message,
-          url: err.url,
-        });
+        console.error('[PublicEpisodePage] Failed to load episode:', err);
         this.error = true;
         this.loading = false;
         this.messageService.error(`Failed to load episode: ${err.status} ${err.statusText || err.message}`);
@@ -86,8 +81,10 @@ export class PublicEpisodePageComponent implements OnInit {
   }
 
   getPodcastUrl(): string {
-    if (!this.episodeData?.podcast_id) return '';
-    return this.shareService.buildPodcastRoute(this.episodeData.podcast_id, this.episodeData.podcast_name);
+    if (!this.episodeData?.podcastId) {
+      return '';
+    }
+    return this.shareService.buildPodcastRoute(this.episodeData.podcastId, this.episodeData.podcastName);
   }
 
   formatDate(dateString: string): string {
@@ -105,5 +102,26 @@ export class PublicEpisodePageComponent implements OnInit {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  private updateSeoTags(): void {
+    if (!this.episodeData) return;
+
+    const shareUrl = this.getShareUrl();
+    const description =
+      this.episodeData.description || `Listen to ${this.episodeData.title} from ${this.episodeData.podcastName}`;
+
+    this.seoService.updateTags({
+      title: `${this.episodeData.title} - ${this.episodeData.podcastName} | Capital Copilot`,
+      description,
+      image: this.episodeData.podcast?.imageUrl || this.episodeData.podcast?.thumbnailUrl,
+      url: shareUrl,
+      type: 'music.song',
+      author: this.episodeData.podcastName,
+      publishedTime: this.episodeData.date,
+      twitterCard: 'player',
+      audio: this.episodeData.audioUrl,
+      audioType: 'audio/mpeg',
+    });
   }
 }

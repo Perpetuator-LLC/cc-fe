@@ -47,20 +47,13 @@ export class BrowsePodcastsComponent implements OnInit {
   loadPodcasts(): void {
     this.loading = true;
 
-    console.log(`[BrowsePodcasts] Loading podcasts: limit=${this.limit}, sort=${this.sortBy}`);
     this.publicPodcastService.getPodcasts(this.limit, this.sortBy).subscribe({
       next: (data) => {
-        console.log('[BrowsePodcasts] Podcasts loaded successfully:', data);
         this.podcasts = data.podcasts;
         this.loading = false;
       },
       error: (err) => {
-        console.error('[BrowsePodcasts] Failed to load podcasts:', {
-          error: err,
-          status: err.status,
-          message: err.message,
-          url: err.url,
-        });
+        console.error('[BrowsePodcasts] Failed to load podcasts:', err);
         this.loading = false;
         this.messageService.error(`Failed to load podcasts: ${err.status} ${err.statusText || err.message}`);
       },
