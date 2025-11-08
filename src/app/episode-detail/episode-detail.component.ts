@@ -31,6 +31,8 @@ import { LoadingService } from '../loading.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { EpisodeVersionControlComponent } from '../episode-version-control/episode-version-control.component';
+import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
+import { ShareService } from '../share.service';
 
 interface EditableFormValues {
   title: string;
@@ -69,6 +71,7 @@ interface EditableFormValues {
     MatMenuItem,
     MatMenuTrigger,
     EpisodeVersionControlComponent,
+    ShareButtonsComponent,
   ],
   templateUrl: './episode-detail.component.html',
   styleUrl: './episode-detail.component.scss',
@@ -119,6 +122,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private schedulingService: SchedulingService,
     private loadingService: LoadingService,
     private sanitizer: DomSanitizer,
+    protected shareService: ShareService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -322,8 +326,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.episodeForm.value.isLive = isLive;
-    this.updateEpisode();
+    // Mark form as dirty to enable Update button, but don't auto-save
+    this.episodeForm.markAsDirty();
   }
 
   downloadAudio(): void {
@@ -943,5 +947,18 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       return `Version ${this.liveAudioVersionNumber}`;
     }
     return 'Previous version';
+  }
+
+  getPublicShareUrl(): string {
+    const episode = this.episodeForm.getRawValue();
+    if (!episode.uuid || !episode.title) {
+      return '';
+    }
+    return this.shareService.buildEpisodeUrl(episode.uuid, episode.title);
+  }
+
+  getEpisodeDescription(): string {
+    const episode = this.episodeForm.getRawValue();
+    return episode.description || '';
   }
 }

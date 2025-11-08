@@ -1,0 +1,127 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="public-podcast-page">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading podcast...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-container">
+      <mat-icon>error</mat-icon>
+      <h2>Podcast Not Found</h2>
+      <p>The podcast you're looking for doesn't exist or is not available.</p>
+      <button mat-raised-button routerLink="/p">Browse Podcasts</button>
+    </div>
+  } @else if (podcastData) {
+    <div class="podcast-header">
+      <div class="podcast-info">
+        @if (podcastData.image_url) {
+          <img [src]="podcastData.image_url" [alt]="podcastData.name" class="podcast-image" />
+        }
+        <div class="podcast-details">
+          <h1>{{ podcastData.name }}</h1>
+          @if (podcastData.description) {
+            <p class="description">{{ podcastData.description }}</p>
+          }
+          @if (podcastData.owner_name) {
+            <p class="owner">By {{ podcastData.owner_name }}</p>
+          }
+          @if (podcastData.categories) {
+            <div class="categories">
+              @for (category of podcastData.categories | keyvalue; track category.key) {
+                <a [routerLink]="getCategoryUrl(category.key)" class="category-badge">{{ category.key }}</a>
+                @for (subcategory of category.value; track subcategory) {
+                  <a [routerLink]="getCategoryUrl(category.key, subcategory)" class="category-badge subcategory">
+                    {{ subcategory }}
+                  </a>
+                }
+              }
+            </div>
+          }
+          <div class="stats">
+            <span class="stat">
+              <mat-icon>visibility</mat-icon>
+              {{ podcastData.view_count }} views
+            </span>
+            <span class="stat">
+              <mat-icon>podcasts</mat-icon>
+              {{ podcastData.total_episodes }} episodes
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="podcast-actions">
+        <app-share-buttons
+          [shareUrl]="getShareUrl()"
+          [title]="podcastData.name"
+          [description]="podcastData.description"
+        ></app-share-buttons>
+        @if (isAuthenticated) {
+          <button mat-raised-button color="primary" [routerLink]="['/podcast', podcastId]">
+            <mat-icon>dashboard</mat-icon>
+            Manage Podcast
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="episodes-section">
+      <h2>Episodes</h2>
+      @if (podcastData.episodes.length === 0) {
+        <p class="no-episodes">No episodes available yet.</p>
+      } @else {
+        <div class="episodes-list">
+          @for (episode of podcastData.episodes; track episode.id) {
+            <mat-card class="episode-card">
+              <mat-card-content>
+                <div class="episode-header">
+                  <h3>
+                    <a [routerLink]="getEpisodeUrl(episode.id, episode.title)" class="episode-title">
+                      {{ episode.title }}
+                    </a>
+                  </h3>
+                  <span class="episode-date">{{ formatDate(episode.published_date) }}</span>
+                </div>
+                @if (episode.description) {
+                  <p class="episode-description">{{ episode.description }}</p>
+                }
+                <div class="episode-player">
+                  <audio controls [src]="episode.audio_url">
+                    Your browser does not support the audio element.
+                  </audio>
+                  @if (episode.duration) {
+                    <span class="duration">{{ formatDuration(episode.duration) }}</span>
+                  }
+                </div>
+                <div class="episode-actions">
+                  <a [routerLink]="getEpisodeUrl(episode.id, episode.title)" mat-button color="primary">
+                    View Details
+                  </a>
+                  <app-share-buttons
+                    [shareUrl]="getEpisodeShareUrl(episode.id, episode.title)"
+                    [title]="episode.title"
+                    [description]="episode.description"
+                    [compact]="true"
+                  ></app-share-buttons>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+
+        @if (podcastData.total_pages > 1) {
+          <mat-paginator
+            [length]="podcastData.total_episodes"
+            [pageSize]="perPage"
+            [pageIndex]="currentPage - 1"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPageChange($event)"
+            aria-label="Select page"
+          >
+          </mat-paginator>
+        }
+      }
+    </div>
+  }
+</div>
+

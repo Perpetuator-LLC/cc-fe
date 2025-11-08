@@ -23,6 +23,12 @@
         <p>{{ podcastForm.get('description')?.value }}</p>
       </div>
       <div class="buttons">
+        <app-share-buttons
+          [shareUrl]="getPublicShareUrl()"
+          [title]="podcastForm.get('name')?.value || ''"
+          [description]="getPodcastDescription()"
+          [compact]="true"
+        ></app-share-buttons>
         <button
           mat-flat-button
           color="primary"

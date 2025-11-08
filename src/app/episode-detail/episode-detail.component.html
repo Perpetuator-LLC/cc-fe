@@ -13,6 +13,12 @@
         <h2>{{ episodeForm.get('title')?.value || 'N/A' }}</h2>
       </div>
       <div class="buttons">
+        <app-share-buttons
+          [shareUrl]="getPublicShareUrl()"
+          [title]="episodeForm.get('title')?.value || ''"
+          [description]="getEpisodeDescription()"
+          [compact]="true"
+        ></app-share-buttons>
         @if (audioSrc || liveAudioSrc || episodeForm.get('isLive')?.value) {
         <mat-checkbox
           formControlName="isLive"
