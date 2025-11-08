@@ -135,19 +135,6 @@
             font-weight: 500;
             color: var(--description-color);
           }
-
-          mat-chip-set {
-            mat-chip-option {
-              cursor: pointer;
-              background: var(--theme-white);
-              border: 1px solid var(--border-color);
-
-              &:hover {
-                background: var(--secondary-400);
-                color: var(--theme-white);
-              }
-            }
-          }
         }
       }
 

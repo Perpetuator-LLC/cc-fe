@@ -39,6 +39,7 @@ import { AuthService } from '../auth.service';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { LoadingService } from '../loading.service';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-orders-list',
@@ -81,6 +82,7 @@ import { LoadingService } from '../loading.service';
     MatMenuTrigger,
     MatMenu,
     MatProgressBarModule,
+    MatChipsModule,
   ],
   templateUrl: './orders-list.component.html',
   styleUrl: './orders-list.component.scss',
@@ -96,6 +98,10 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   sortActive = 'createdAt';
   protected user = this.userService.userDetails;
   protected isLoggedIn = this.authService.isLoggedIn;
+
+  // Status filter - default to PAID and PENDING, hide CANCELED
+  statusFilter = new FormControl<string[]>(['PAID', 'PENDING']);
+  availableStatuses = ['PAID', 'PENDING', 'CANCELED'];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -211,6 +217,29 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       next: () => this.messageService.success('Order cancelled successfully'),
       error: (err) => this.messageService.error('Failed to cancel order: ' + err.message),
     });
+  }
+
+  get filteredOrders(): UserOrder[] {
+    const selectedStatuses = this.statusFilter.value || [];
+    return this.creditService.userOrders().filter((order) => selectedStatuses.includes(order.status));
+  }
+
+  toggleStatusFilter(status: string): void {
+    const currentFilters = this.statusFilter.value || [];
+    const index = currentFilters.indexOf(status);
+
+    if (index >= 0) {
+      // Remove from filter
+      const newFilters = currentFilters.filter((s) => s !== status);
+      this.statusFilter.setValue(newFilters);
+    } else {
+      // Add to filter
+      this.statusFilter.setValue([...currentFilters, status]);
+    }
+  }
+
+  isStatusSelected(status: string): boolean {
+    return (this.statusFilter.value || []).includes(status);
   }
 
   get calculatedCredits(): number {

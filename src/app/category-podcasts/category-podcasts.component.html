@@ -7,11 +7,11 @@
     </a>
     <mat-icon>chevron_right</mat-icon>
     @if (subcategory) {
-      <a [routerLink]="'/c/' + category" mat-button>{{ category }}</a>
+      <a [routerLink]="'/c/' + category" mat-button>{{ decodeCategory(category) }}</a>
       <mat-icon>chevron_right</mat-icon>
-      <span>{{ subcategory }}</span>
+      <span>{{ decodeCategory(subcategory) }}</span>
     } @else {
-      <span>{{ category }}</span>
+      <span>{{ decodeCategory(category) }}</span>
     }
   </div>
 
@@ -31,7 +31,7 @@
   } @else {
     @if (podcasts.length === 0) {
       <div class="empty-state">
-        <mat-icon>podcasts</mat-icon>
+        <mat-icon class="empty-icon">podcasts</mat-icon>
         <h2>No Podcasts in This Category</h2>
         <p>Check out other categories or browse all podcasts</p>
         <div class="empty-actions">
@@ -39,7 +39,10 @@
             <mat-icon>category</mat-icon>
             Browse Categories
           </a>
-          <a routerLink="/p" mat-button>View All Podcasts</a>
+          <a routerLink="/p" mat-raised-button>
+            <mat-icon>podcasts</mat-icon>
+            View All Podcasts
+          </a>
         </div>
       </div>
     } @else {

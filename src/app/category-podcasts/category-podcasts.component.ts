@@ -73,9 +73,19 @@ export class CategoryPodcastsComponent implements OnInit {
   }
 
   getPageTitle(): string {
+    const decodedCategory = this.decodeCategory(this.category);
     if (this.subcategory) {
-      return `${this.category} > ${this.subcategory}`;
+      const decodedSubcategory = this.decodeCategory(this.subcategory);
+      return `${decodedCategory} > ${decodedSubcategory}`;
     }
-    return this.category;
+    return decodedCategory;
+  }
+
+  decodeCategory(category: string): string {
+    try {
+      return decodeURIComponent(category);
+    } catch {
+      return category;
+    }
   }
 }
