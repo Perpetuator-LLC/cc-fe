@@ -4,8 +4,11 @@ import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
+import { ShareService } from '../share.service';
 import { ToolbarService } from '../toolbar.service';
 import { AuthService } from '../auth.service';
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef, OnInit } from '@angular/core';
@@ -29,6 +32,7 @@ import { SiteStatistics } from '../interface';
     RouterLink,
     MatIcon,
     SvgIconComponent,
+    ShareButtonsComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -41,13 +45,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
   siteStats: SiteStatistics | undefined;
   loadingStats = true;
 
-  gridPodcasts: PodcastsResult[] = [];
+  authPodcasts: PodcastsResult[] = [];
+  publicPodcasts: PublicPodcast[] = [];
 
   constructor(
     private toolbarService: ToolbarService,
     protected authService: AuthService,
     private podcastsService: PodcastsService,
+    private publicPodcastService: PublicPodcastHttpService,
     private dashboardService: DashboardService,
+    protected shareService: ShareService,
   ) {}
 
   ngOnInit(): void {
@@ -58,23 +65,28 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
       }).subscribe({
         next: ({ stats, podcasts }) => {
           this.siteStats = stats;
-          this.gridPodcasts = podcasts.podcasts;
+          this.authPodcasts = podcasts.podcasts;
           this.loadingStats = false;
         },
         error: (error) => {
           console.error(':: Home data loading error :: ', error);
-          this.gridPodcasts = [];
+          this.authPodcasts = [];
           this.loadingStats = false;
         },
       });
     } else {
-      this.dashboardService.getStats().subscribe({
-        next: (stats) => {
+      forkJoin({
+        stats: this.dashboardService.getStats(),
+        podcasts: this.publicPodcastService.getPodcasts(3, 'views'),
+      }).subscribe({
+        next: ({ stats, podcasts }) => {
           this.siteStats = stats;
+          this.publicPodcasts = podcasts.podcasts;
           this.loadingStats = false;
         },
         error: (error) => {
-          console.error(':: Stats API :: ', error);
+          console.error(':: Home data loading error :: ', error);
+          this.publicPodcasts = [];
           this.loadingStats = false;
         },
       });

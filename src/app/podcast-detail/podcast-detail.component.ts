@@ -60,6 +60,8 @@ import { NewsService } from '../news.service';
 import { EpisodeService } from '../episode.service';
 import { JobService } from '../job.service';
 import { ResearchService } from '../research.service';
+import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
+import { ShareService } from '../share.service';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -102,6 +104,7 @@ import { ResearchService } from '../research.service';
     MatTabsModule,
     SvgIconComponent,
     CdkTextareaAutosize,
+    ShareButtonsComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -154,6 +157,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private episodeService: EpisodeService,
     private jobService: JobService,
     private researchService: ResearchService,
+    protected shareService: ShareService,
   ) {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
@@ -1111,5 +1115,18 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       return 'Please save your changes before creating an episode';
     }
     return 'Create a new episode';
+  }
+
+  getPublicShareUrl(): string {
+    const podcast = this.podcastForm.getRawValue();
+    if (!podcast.uuid || !podcast.name) {
+      return '';
+    }
+    return this.shareService.buildPodcastUrl(podcast.uuid, podcast.name);
+  }
+
+  getPodcastDescription(): string {
+    const podcast = this.podcastForm.getRawValue();
+    return podcast.description || podcast.prompt || '';
   }
 }
