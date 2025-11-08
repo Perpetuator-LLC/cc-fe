@@ -15,16 +15,16 @@
   } @else if (podcastData) {
     <div class="podcast-header">
       <div class="podcast-info">
-        @if (podcastData.image_url) {
-          <img [src]="podcastData.image_url" [alt]="podcastData.name" class="podcast-image" />
+        @if (podcastData.imageUrl) {
+          <img [src]="podcastData.imageUrl" [alt]="podcastData.name" class="podcast-image" />
         }
         <div class="podcast-details">
           <h1>{{ podcastData.name }}</h1>
           @if (podcastData.description) {
             <p class="description">{{ podcastData.description }}</p>
           }
-          @if (podcastData.owner_name) {
-            <p class="owner">By {{ podcastData.owner_name }}</p>
+          @if (podcastData.ownerName) {
+            <p class="owner">By {{ podcastData.ownerName }}</p>
           }
           @if (podcastData.categories) {
             <div class="categories">
@@ -41,11 +41,11 @@
           <div class="stats">
             <span class="stat">
               <mat-icon>visibility</mat-icon>
-              {{ podcastData.view_count }} views
+              {{ podcastData.viewCount }} views
             </span>
             <span class="stat">
               <mat-icon>podcasts</mat-icon>
-              {{ podcastData.total_episodes }} episodes
+              {{ podcastData.totalEpisodes }} episodes
             </span>
           </div>
         </div>
@@ -80,13 +80,13 @@
                       {{ episode.title }}
                     </a>
                   </h3>
-                  <span class="episode-date">{{ formatDate(episode.published_date) }}</span>
+                  <span class="episode-date">{{ formatDate(episode.date) }}</span>
                 </div>
                 @if (episode.description) {
                   <p class="episode-description">{{ episode.description }}</p>
                 }
                 <div class="episode-player">
-                  <audio controls [src]="episode.audio_url">
+                  <audio controls [src]="episode.audioUrl">
                     Your browser does not support the audio element.
                   </audio>
                   @if (episode.duration) {
@@ -109,9 +109,9 @@
           }
         </div>
 
-        @if (podcastData.total_pages > 1) {
+        @if (podcastData.totalPages > 1) {
           <mat-paginator
-            [length]="podcastData.total_episodes"
+            [length]="podcastData.totalEpisodes"
             [pageSize]="perPage"
             [pageIndex]="currentPage - 1"
             [pageSizeOptions]="[10, 20, 50]"

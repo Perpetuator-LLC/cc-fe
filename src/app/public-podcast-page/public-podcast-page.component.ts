@@ -12,6 +12,7 @@ import { ShareService } from '../share.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { MessageService } from '../message.service';
 import { AuthService } from '../auth.service';
+import { SeoService } from '../seo.service';
 
 @Component({
   selector: 'app-public-podcast-page',
@@ -45,6 +46,7 @@ export class PublicPodcastPageComponent implements OnInit {
     private shareService: ShareService,
     private messageService: MessageService,
     private authService: AuthService,
+    private seoService: SeoService,
   ) {
     this.isAuthenticated = this.authService.isLoggedIn();
   }
@@ -68,21 +70,14 @@ export class PublicPodcastPageComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    console.log(`[PublicPodcastPage] Loading podcast with ID: ${this.podcastId}`);
     this.publicPodcastService.getPodcast(this.podcastId, this.currentPage, this.perPage).subscribe({
       next: (data) => {
-        console.log('[PublicPodcastPage] Podcast loaded successfully:', data);
         this.podcastData = data;
         this.loading = false;
+        this.updateSeoTags();
       },
       error: (err) => {
-        console.error('[PublicPodcastPage] Failed to load podcast:', {
-          podcastId: this.podcastId,
-          error: err,
-          status: err.status,
-          message: err.message,
-          url: err.url,
-        });
+        console.error('[PublicPodcastPage] Failed to load podcast:', err);
         this.error = true;
         this.loading = false;
         this.messageService.error(`Failed to load podcast: ${err.status} ${err.statusText || err.message}`);
@@ -134,5 +129,24 @@ export class PublicPodcastPageComponent implements OnInit {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  private updateSeoTags(): void {
+    if (!this.podcastData) return;
+
+    const shareUrl = this.getShareUrl();
+    const description =
+      this.podcastData.description ||
+      `Listen to ${this.podcastData.name} - ${this.podcastData.totalEpisodes} episodes available`;
+
+    this.seoService.updateTags({
+      title: `${this.podcastData.name} | Capital Copilot`,
+      description,
+      image: this.podcastData.imageUrl || this.podcastData.thumbnailUrl,
+      url: shareUrl,
+      type: 'website',
+      author: this.podcastData.ownerName,
+      twitterCard: 'summary_large_image',
+    });
   }
 }
