@@ -113,6 +113,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   isGridView = false;
   searchTerm = '';
   private searchSubject = new Subject<string>();
+  selectedLiveStatus: string | null = null; // null = all, 'live' = live only, 'draft' = draft only
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -177,8 +178,17 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
         .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast, searchTerm)
         .subscribe({
           next: ({ episodes, pageInfo }) => {
-            this.episodes = episodes;
-            this.dataSource.data = episodes;
+            let filteredEpisodes = episodes;
+
+            // Apply live status filter client-side
+            if (this.selectedLiveStatus === 'live') {
+              filteredEpisodes = filteredEpisodes.filter((e) => e.isLive);
+            } else if (this.selectedLiveStatus === 'draft') {
+              filteredEpisodes = filteredEpisodes.filter((e) => !e.isLive);
+            }
+
+            this.episodes = filteredEpisodes;
+            this.dataSource.data = filteredEpisodes;
             this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
             this.totalEpisodes = pageInfo.hasNextPage
               ? (pageIndex + 2) * this.pageSize
@@ -251,6 +261,14 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     // Record podcast selection if one is selected
     if (this.selectedPodcast) {
       this.recentlyUsedPodcastsService.recordSelection(this.selectedPodcast);
+    }
+    this.loadEpisodes();
+  }
+
+  onLiveStatusFilterChange(): void {
+    this.cursors = [null];
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
     }
     this.loadEpisodes();
   }

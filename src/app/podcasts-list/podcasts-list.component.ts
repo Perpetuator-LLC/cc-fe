@@ -122,6 +122,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   teams: TeamsResult[] = [];
   selectedTeam: string | null = null;
   loadingTeams = false;
+  selectedLiveStatus: string | null = null; // null = all, 'live' = enabled only, 'disabled' = disabled only
 
   constructor(
     private router: Router,
@@ -205,7 +206,16 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.podcastsService.getPodcasts(first, after, name, slug, teamUuid).subscribe({
         next: (response) => {
           this.messageService.clearMessages();
-          this.podcasts = response.podcasts;
+          let podcasts = response.podcasts;
+
+          // Apply live status filter client-side
+          if (this.selectedLiveStatus === 'live') {
+            podcasts = podcasts.filter((p) => p.enabled);
+          } else if (this.selectedLiveStatus === 'disabled') {
+            podcasts = podcasts.filter((p) => !p.enabled);
+          }
+
+          this.podcasts = podcasts;
           this.dataSource = new MatTableDataSource(this.podcasts);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
@@ -272,6 +282,21 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTeamFilterChange(): void {
+    this.cursors = [null];
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+    this.loadPodcasts(
+      this.pageSize,
+      null,
+      this.searchString || undefined,
+      undefined,
+      this.selectedTeam || undefined,
+      0,
+    );
+  }
+
+  onLiveStatusFilterChange(): void {
     this.cursors = [null];
     if (this.paginator) {
       this.paginator.firstPage();
