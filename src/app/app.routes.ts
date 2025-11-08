@@ -233,6 +233,46 @@ export const routes: Routes = [
     title: 'Join Affiliate Network',
   },
   {
+    path: 'p',
+    loadComponent: () => import('./browse-podcasts/browse-podcasts.component').then((c) => c.BrowsePodcastsComponent),
+    title: 'Browse Podcasts',
+  },
+  {
+    path: 'p/:id',
+    loadComponent: () =>
+      import('./public-podcast-page/public-podcast-page.component').then((c) => c.PublicPodcastPageComponent),
+    title: 'Podcast',
+  },
+  {
+    path: 'e',
+    redirectTo: 'p',
+    pathMatch: 'full',
+  },
+  {
+    path: 'e/:id',
+    loadComponent: () =>
+      import('./public-episode-page/public-episode-page.component').then((c) => c.PublicEpisodePageComponent),
+    title: 'Episode',
+  },
+  {
+    path: 'c',
+    loadComponent: () =>
+      import('./public-categories/public-categories.component').then((c) => c.PublicCategoriesComponent),
+    title: 'Browse Categories',
+  },
+  {
+    path: 'c/:category',
+    loadComponent: () =>
+      import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
+    title: 'Category',
+  },
+  {
+    path: 'c/:category/:subcategory',
+    loadComponent: () =>
+      import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
+    title: 'Category',
+  },
+  {
     path: 'privacy-policy',
     loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
     title: 'Privacy',

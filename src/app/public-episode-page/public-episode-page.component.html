@@ -1,0 +1,106 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="public-episode-page">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading episode...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-container">
+      <mat-icon>error</mat-icon>
+      <h2>Episode Not Found</h2>
+      <p>The episode you're looking for doesn't exist or is not available.</p>
+      <button mat-raised-button routerLink="/p">Browse Podcasts</button>
+    </div>
+  } @else if (episodeData) {
+    <div class="breadcrumb">
+      <a routerLink="/p" mat-button>
+        <mat-icon>podcasts</mat-icon>
+        All Podcasts
+      </a>
+      @if (episodeData.podcast_id && episodeData.podcast_name) {
+        <mat-icon>chevron_right</mat-icon>
+        <a [routerLink]="getPodcastUrl()" mat-button>{{ episodeData.podcast_name }}</a>
+      }
+      <mat-icon>chevron_right</mat-icon>
+      <span>{{ episodeData.title }}</span>
+    </div>
+
+    <mat-card class="episode-card">
+      <mat-card-header>
+        <div class="episode-header">
+          <div class="episode-info">
+            <h1>{{ episodeData.title }}</h1>
+            <p class="podcast-name">
+              <a [routerLink]="getPodcastUrl()">{{ episodeData.podcast_name }}</a>
+            </p>
+            <p class="episode-date">Published on {{ formatDate(episodeData.published_date) }}</p>
+          </div>
+          <div class="episode-actions">
+            <app-share-buttons
+              [shareUrl]="getShareUrl()"
+              [title]="episodeData.title"
+              [description]="episodeData.description"
+            ></app-share-buttons>
+            @if (isAuthenticated) {
+              <button mat-raised-button color="primary" [routerLink]="['/episode', episodeId]">
+                <mat-icon>edit</mat-icon>
+                Manage Episode
+              </button>
+            }
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (episodeData.description) {
+          <div class="description">
+            <h2>Description</h2>
+            <p>{{ episodeData.description }}</p>
+          </div>
+        }
+
+        <div class="audio-player">
+          <h2>Listen to Episode</h2>
+          <audio controls [src]="episodeData.audio_url">
+            Your browser does not support the audio element.
+          </audio>
+          @if (episodeData.duration) {
+            <p class="duration">Duration: {{ formatDuration(episodeData.duration) }}</p>
+          }
+        </div>
+
+        @if (episodeData.content) {
+          <div class="episode-content">
+            <h2>Episode Content</h2>
+            <div class="content-text">
+              {{ episodeData.content }}
+            </div>
+          </div>
+        }
+
+        @if (episodeData.transcript) {
+          <mat-expansion-panel class="transcript-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>subject</mat-icon>
+                Transcript
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="transcript-content">
+              {{ episodeData.transcript }}
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="back-to-podcast">
+      <a [routerLink]="getPodcastUrl()" mat-raised-button color="primary">
+        <mat-icon>arrow_back</mat-icon>
+        Back to {{ episodeData.podcast_name }}
+      </a>
+    </div>
+  }
+</div>
+

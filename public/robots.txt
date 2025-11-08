@@ -1,0 +1,46 @@
+# robots.txt for Capital Copilot
+# Last updated: November 7, 2025
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Explicitly allow public routes for SEO
+Allow: /home
+Allow: /p/
+Allow: /e/
+Allow: /c/
+Allow: /a/
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+
+# Disallow authentication pages (not useful for search engines)
+Disallow: /login
+Disallow: /register
+Disallow: /forgot
+Disallow: /reset
+Disallow: /verify
+Disallow: /resend
+Disallow: /change-email
+Disallow: /cancel-change-email
+
+# Disallow private/authenticated routes
+Disallow: /profile
+Disallow: /podcasts
+Disallow: /podcast/
+Disallow: /episodes
+Disallow: /episode/
+Disallow: /teams
+Disallow: /team/
+Disallow: /topics
+Disallow: /topic/
+Disallow: /jobs
+Disallow: /affiliate
+Disallow: /transactions
+Disallow: /orders
+Disallow: /scheduling
+Disallow: /news
+
+# Note: Sitemap not yet implemented
+# Future: Sitemap: https://capitalcopilot.io/sitemap.xml
+

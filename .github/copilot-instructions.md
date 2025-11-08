@@ -10,7 +10,19 @@
 - No inline styles | Angular Material MD3 | `@if`/`@for` over `ngIf`/`ngFor`
 - Components: own dir with `.ts`/`.html`/`.scss` | Tests focus on TS logic
 
+# HTML
+Copyright for HTML use:
+```html
+<!-- Copyright (c) YEAR Perpetuator LLC -->
+```
+
+
 # SCSS
+
+Copyright for SCSS use:
+```css
+/* Copyright (c) YEAR Perpetuator LLC */
+```
 
 ## Variables (Never Hardcode Colors)
 ```

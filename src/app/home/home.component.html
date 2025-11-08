@@ -86,47 +86,74 @@
   <!-- Stats Cards -->
 
   <!-- Recent Podcasts Section -->
-  @if (isLoggedIn() && gridPodcasts.length > 0) {
+  @if ((isLoggedIn() && authPodcasts.length > 0) || (!isLoggedIn() && publicPodcasts.length > 0)) {
     <div class="recent-podcasts-section">
       <div class="section-header">
-        <h3 class="section-title">Recent Podcasts</h3>
-        <a class="view-all-link" routerLink="/podcasts">View all</a>
+        <h3 class="section-title">{{ isLoggedIn() ? 'Recent Podcasts' : 'Popular Podcasts' }}</h3>
+        <a class="view-all-link" [routerLink]="isLoggedIn() ? '/podcasts' : '/p'">View all</a>
       </div>
       <div class="podcasts-grid">
-        <mat-card class="podcast-card" *ngFor="let podcast of gridPodcasts">
-          <mat-card-header>
-            <div class="grid-header" style="width: 100%">
-              <a [routerLink]="['/podcast', podcast.uuid]">
-                <img [src]="podcast.thumbnailUrl || '/image.png'" alt="img" class="img" />
-              </a>
-              <div class="response-div">
-                <span [class]="podcast.enabled ? 'enable' : 'disable'">
-                  {{ podcast.enabled ? 'Enable' : 'Disable' }}
-                </span>
-              </div>
-              <div class="grid-header-name">
-                <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
-                  {{ podcast.name }}
+        @if (isLoggedIn()) {
+          <mat-card class="podcast-card" *ngFor="let podcast of authPodcasts">
+            <mat-card-header>
+              <div class="grid-header" style="width: 100%">
+                <a [routerLink]="['/podcast', podcast.uuid]">
+                  <img [src]="podcast.thumbnailUrl || '/image.png'" alt="img" class="img" />
                 </a>
-                <div>
-                  <!-- Actions can be omitted or added as needed -->
+                <div class="response-div">
+                  <span [class]="podcast.enabled ? 'enable' : 'disable'">
+                    {{ podcast.enabled ? 'Enable' : 'Disable' }}
+                  </span>
                 </div>
+                <div class="grid-header-name">
+                  <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
+                    {{ podcast.name }}
+                  </a>
+                  <div>
+                    <!-- Actions can be omitted or added as needed -->
+                  </div>
+                </div>
+                <p>{{ podcast.team?.name || '(No Team)' }}</p>
               </div>
+            </mat-card-header>
+            <div class="chip-header">
+              <span class="chip">
+                <img src="/telegram.svg" alt="telegram" />
+                {{ podcast.tgChannelId || '(No Channel ID)' }}
+              </span>
+              <span class="days">2 days ago</span>
+            </div>
+            <div class="bottom-header">
+              <span class="chip">+4 More</span>
               <p>{{ podcast.team?.name || '(No Team)' }}</p>
             </div>
-          </mat-card-header>
-          <div class="chip-header">
-            <span class="chip">
-              <img src="/telegram.svg" alt="telegram" />
-              {{ podcast.tgChannelId || '(No Channel ID)' }}
-            </span>
-            <span class="days">2 days ago</span>
-          </div>
-          <div class="bottom-header">
-            <span class="chip">+4 More</span>
-            <p>{{ podcast.team?.name || '(No Team)' }}</p>
-          </div>
-        </mat-card>
+          </mat-card>
+        } @else {
+          <mat-card class="podcast-card public-podcast-card" *ngFor="let podcast of publicPodcasts">
+            <a [routerLink]="['/p', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
+              <img [src]="podcast.image_url || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+            </a>
+            <mat-card-content>
+              <h3>
+                <a [routerLink]="['/p', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
+                  {{ podcast.name }}
+                </a>
+              </h3>
+              @if (podcast.description) {
+                <p class="description">{{ podcast.description }}</p>
+              }
+              @if (podcast.owner_name) {
+                <p class="owner">By {{ podcast.owner_name }}</p>
+              }
+              <div class="stats">
+                <span class="stat">
+                  <mat-icon>visibility</mat-icon>
+                  {{ podcast.view_count }} views
+                </span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
       </div>
     </div>
   }
