@@ -188,7 +188,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToPurchase(): void {
-    this.router.navigate(['/purchase']);
+    this.router.navigate(['/orders']);
   }
 
   loadAdminPendingRequests(): void {
