@@ -1,10 +1,9 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { MatCard, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatAnchor } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 
 import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
@@ -21,20 +20,7 @@ import { SiteStatistics } from '../interface';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCard,
-    MatCardHeader,
-    MatCardContent,
-    MatCardTitle,
-    MatCardSubtitle,
-    MatButton,
-    MatAnchor,
-    RouterLink,
-    MatIcon,
-    SvgIconComponent,
-    ShareButtonsComponent,
-  ],
+  imports: [CommonModule, MatCard, MatCardContent, MatButton, MatAnchor, RouterLink, MatIcon, SvgIconComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -48,6 +34,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
 
   authPodcasts: PodcastsResult[] = [];
   publicPodcasts: PublicPodcast[] = [];
+  recentPodcasts: PublicPodcast[] = [];
+  loadingRecentPodcasts = true;
 
   constructor(
     private toolbarService: ToolbarService,
@@ -78,17 +66,29 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     } else {
       forkJoin({
         stats: this.dashboardService.getStats(),
-        podcasts: this.publicPodcastService.getPodcasts(3, 'views'),
+        popular: this.publicPodcastService.getPodcasts(3, 'views'),
+        recent: this.publicPodcastService.getPodcasts(6, 'recent'),
       }).subscribe({
-        next: ({ stats, podcasts }) => {
+        next: ({ stats, popular, recent }) => {
           this.siteStats = stats;
-          this.publicPodcasts = podcasts.podcasts;
+          this.publicPodcasts = popular.podcasts;
+
+          // Filter out podcasts that are in the popular list
+          const popularIds = new Set(this.publicPodcasts.map((p) => p.id));
+          const filteredRecent = recent.podcasts.filter((p) => !popularIds.has(p.id));
+
+          // Take the top 3 from filtered recent podcasts
+          this.recentPodcasts = filteredRecent.slice(0, 3);
+
           this.loadingStats = false;
+          this.loadingRecentPodcasts = false;
         },
         error: (error) => {
           console.error(':: Home data loading error :: ', error);
           this.publicPodcasts = [];
+          this.recentPodcasts = [];
           this.loadingStats = false;
+          this.loadingRecentPodcasts = false;
         },
       });
     }
