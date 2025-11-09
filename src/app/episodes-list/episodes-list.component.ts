@@ -299,7 +299,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   }
 
   viewEpisode(uuid: string) {
-    this.router.navigate(['/episode', uuid]);
+    this.router.navigate(['/e', uuid]);
   }
 
   deleteEpisode(episode: Episode) {

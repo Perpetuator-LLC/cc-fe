@@ -124,11 +124,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     protected shareService: ShareService,
   ) {
-    const uuid = this.route.snapshot.paramMap.get('uuid');
-    if (!uuid) {
+    const uuidParam = this.route.snapshot.paramMap.get('uuid');
+    if (!uuidParam) {
       throw new Error('Failed to get Episode ID from route.');
     }
-    this.episodeUuid = uuid;
+    // Extract UUID from slug (handles both 'uuid' and 'uuid-slug-name' formats)
+    this.episodeUuid = this.shareService.extractIdFromSlugParam(uuidParam);
 
     this.episodeForm = this.fb.group({
       id: [{ value: '', disabled: true }, Validators.required],
@@ -412,7 +413,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           this.episodeService.deleteEpisode(this.episodeUuid).subscribe({
             next: (response) => {
               this.messageService.success(response.message);
-              this.router.navigate(['/episodes']); // Navigate back to episodes list
+              this.router.navigate(['/e']); // Navigate back to episodes list
             },
             error: (err) => {
               this.messageService.error(`Failed to delete episode: ${err.message}`);

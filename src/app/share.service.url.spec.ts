@@ -39,20 +39,20 @@ describe('ShareService URL Generation', () => {
   describe('buildPodcastRoute', () => {
     it('should build route with id and slug', () => {
       const route = service.buildPodcastRoute('123', 'My Podcast');
-      expect(route).toBe('/p/123-my-podcast');
+      expect(route).toBe('/podcasts/123-my-podcast');
     });
 
     it('should work with UUID', () => {
       const uuid = '123e4567-e89b-12d3-a456-426614174000';
       const route = service.buildPodcastRoute(uuid, 'Tech Podcast');
-      expect(route).toBe(`/p/${uuid}-tech-podcast`);
+      expect(route).toBe(`/podcasts/${uuid}-tech-podcast`);
     });
   });
 
   describe('buildEpisodeRoute', () => {
     it('should build route with id and slug', () => {
       const route = service.buildEpisodeRoute('456', 'Episode Title');
-      expect(route).toBe('/e/456-episode-title');
+      expect(route).toBe('/episodes/456-episode-title');
     });
   });
 
@@ -90,7 +90,7 @@ describe('ShareService URL Generation', () => {
   describe('buildPodcastUrl', () => {
     it('should build full URL with domain', () => {
       const url = service.buildPodcastUrl('123', 'My Podcast');
-      expect(url).toContain('/p/123-my-podcast');
+      expect(url).toContain('/podcasts/123-my-podcast');
       expect(url).toMatch(/^https?:\/\//);
     });
   });
@@ -98,7 +98,7 @@ describe('ShareService URL Generation', () => {
   describe('buildEpisodeUrl', () => {
     it('should build full URL with domain', () => {
       const url = service.buildEpisodeUrl('456', 'Episode Title');
-      expect(url).toContain('/e/456-episode-title');
+      expect(url).toContain('/episodes/456-episode-title');
       expect(url).toMatch(/^https?:\/\//);
     });
   });

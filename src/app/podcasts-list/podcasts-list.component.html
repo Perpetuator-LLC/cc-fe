@@ -93,7 +93,7 @@
             <img src="/image.png" alt="img" />
             }
             <div class="name">
-              <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
+              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
                 {{ podcast.name }}
               </a>
               <span>2 days ago</span>
@@ -224,7 +224,7 @@
       <mat-card class="podcast-card">
         <mat-card-header>
           <div class="grid-header">
-            <a [routerLink]="['/podcast', podcast.uuid]">
+            <a [routerLink]="['/p', podcast.uuid]">
               @if (podcast.thumbnailUrl || podcast.imageUrl) {
               <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
               } @else {
@@ -238,7 +238,7 @@
             </div>
 
             <div class="grid-header-name">
-              <a [routerLink]="['/podcast', podcast.uuid]" class="podcast-name-link">
+              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
                 {{ podcast.name }}
               </a>
               <div>

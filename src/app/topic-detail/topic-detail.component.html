@@ -28,14 +28,14 @@
       <div class="metadata">
         <span class="meta-item">
           <mat-icon>podcasts</mat-icon>
-          <a [routerLink]="['/podcast', topic.podcast.uuid]" class="podcast-link">
+          <a [routerLink]="['/p', topic.podcast.uuid]" class="podcast-link">
             {{ topic.podcast.name }}
           </a>
         </span>
         @if (topic.episode) {
         <span class="meta-item">
           <mat-icon>mic</mat-icon>
-          <a [routerLink]="['/episode', topic.episode.uuid]" class="episode-link">
+          <a [routerLink]="['/e', topic.episode.uuid]" class="episode-link">
             {{ topic.episode.title }}
           </a>
         </span>

@@ -159,11 +159,12 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     private researchService: ResearchService,
     protected shareService: ShareService,
   ) {
-    const uuid = this.route.snapshot.paramMap.get('uuid');
-    if (!uuid) {
+    const uuidParam = this.route.snapshot.paramMap.get('uuid');
+    if (!uuidParam) {
       throw new Error('Failed to get Podcast ID from route.');
     }
-    this.podcastUuid = uuid;
+    // Extract UUID from slug (handles both 'uuid' and 'uuid-slug-name' formats)
+    this.podcastUuid = this.shareService.extractIdFromSlugParam(uuidParam);
 
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -612,7 +613,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           this.podcastForm.patchValue(data.podcast);
           this.podcastForm.markAsPristine();
           if (!uuid) {
-            this.router.navigate(['/podcasts']);
+            this.router.navigate(['/p']);
           }
         },
         error: (err) => {
@@ -652,7 +653,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.podcastsService.deletePodcast(this.podcastUuid, result).subscribe({
           next: () => {
             this.messageService.success('Podcast deleted successfully');
-            this.router.navigate(['/podcasts']);
+            this.router.navigate(['/p']);
           },
           error: (error) => {
             this.messageService.error(`Failed to delete podcast: ${error.message}`);

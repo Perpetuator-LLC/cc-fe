@@ -116,11 +116,11 @@ export class PublicCategoriesComponent implements OnInit {
   }
 
   getCategoryUrl(category: string): string {
-    return `/c/${encodeURIComponent(category)}`;
+    return `/categories/${encodeURIComponent(category)}`;
   }
 
   getSubcategoryUrl(category: string, subcategory: string): string {
-    return `/c/${encodeURIComponent(category)}/${encodeURIComponent(subcategory)}`;
+    return `/categories/${encodeURIComponent(category)}/${encodeURIComponent(subcategory)}`;
   }
 
   decodeCategory(category: string): string {

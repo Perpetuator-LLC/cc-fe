@@ -29,7 +29,7 @@ export class ShareService {
    */
   buildPodcastRoute(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `/p/${id}-${slug}`;
+    return `/podcasts/${id}-${slug}`;
   }
 
   /**
@@ -37,7 +37,7 @@ export class ShareService {
    */
   buildEpisodeRoute(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `/e/${id}-${slug}`;
+    return `/episodes/${id}-${slug}`;
   }
 
   /**
@@ -45,7 +45,7 @@ export class ShareService {
    */
   buildPodcastUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/p/${id}-${slug}`;
+    return `${environment.SITE_URL}/podcasts/${id}-${slug}`;
   }
 
   /**
@@ -53,7 +53,7 @@ export class ShareService {
    */
   buildEpisodeUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/e/${id}-${slug}`;
+    return `${environment.SITE_URL}/episodes/${id}-${slug}`;
   }
 
   /**
