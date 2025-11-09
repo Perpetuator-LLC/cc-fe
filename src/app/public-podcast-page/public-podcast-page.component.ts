@@ -111,7 +111,7 @@ export class PublicPodcastPageComponent implements OnInit {
   }
 
   getCategoryUrl(category: string, subcategory?: string): string {
-    return subcategory ? `/c/${category}/${subcategory}` : `/c/${category}`;
+    return subcategory ? `/categories/${category}/${subcategory}` : `/categories/${category}`;
   }
 
   formatDate(dateString: string): string {

@@ -1,13 +1,13 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="category-podcasts">
   <div class="breadcrumb">
-    <a routerLink="/c" mat-button>
+    <a routerLink="/categories" mat-button>
       <mat-icon>category</mat-icon>
       All Categories
     </a>
     <mat-icon>chevron_right</mat-icon>
     @if (subcategory) {
-      <a [routerLink]="'/c/' + category" mat-button>{{ decodeCategory(category) }}</a>
+      <a [routerLink]="'/categories/' + category" mat-button>{{ decodeCategory(category) }}</a>
       <mat-icon>chevron_right</mat-icon>
       <span>{{ decodeCategory(subcategory) }}</span>
     } @else {
@@ -35,11 +35,11 @@
         <h2>No Podcasts in This Category</h2>
         <p>Check out other categories or browse all podcasts</p>
         <div class="empty-actions">
-          <a routerLink="/c" mat-raised-button color="primary">
+          <a routerLink="/categories" mat-raised-button color="primary">
             <mat-icon>category</mat-icon>
             Browse Categories
           </a>
-          <a routerLink="/p" mat-raised-button>
+          <a routerLink="/podcasts" mat-raised-button>
             <mat-icon>podcasts</mat-icon>
             View All Podcasts
           </a>

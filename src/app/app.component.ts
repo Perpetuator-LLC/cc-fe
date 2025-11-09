@@ -54,9 +54,9 @@ export class AppComponent {
       '/privacy-policy',
       '/terms-and-conditions',
       /^\/a\/.+/, // Affiliate landing pages (/a/:code)
-      /^\/p(\/|$)/, // Public podcast pages (/p and /p/:id)
-      /^\/e(\/|$)/, // Public episode pages (/e and /e/:id)
-      /^\/c(\/|$)/, // Public category pages (/c, /c/:category, /c/:category/:subcategory)
+      /^\/podcasts(\/|$)/, // Public podcast pages
+      /^\/episodes(\/|$)/, // Public episode pages
+      /^\/categories(\/|$)/, // Public category pages
     ];
 
     // If on a conditional route and user is NOT logged in, use pre-login layout

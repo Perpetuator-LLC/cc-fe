@@ -72,7 +72,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'podcasts',
+    path: 'p',
     component: PodcastsListComponent,
     canActivate: [AuthGuard],
     title: 'Podcasts',
@@ -92,30 +92,20 @@ export const routes: Routes = [
       },
     ],
   },
-
-  // {
-  //   path: 'podcasts',
-  //   loadComponent: () => import('./podcasts-list/podcasts-list.component').then((c) => c.PodcastsListComponent),
-  //   title: 'Podcasts',
-  //   canActivate: [AuthGuard],
-  //   data: {
-  //     icon: 'graphic_eq',
-  //   },
-  // },
   {
-    path: 'podcast/new',
+    path: 'p/new',
     loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
     title: 'Create Podcast',
     canActivate: [AuthGuard],
   },
   {
-    path: 'podcast/:uuid',
+    path: 'p/:uuid',
     loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
     title: 'Podcast',
     canActivate: [AuthGuard],
   },
   {
-    path: 'episode/:uuid',
+    path: 'e/:uuid',
     loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
     title: 'Episode',
     canActivate: [AuthGuard],
@@ -126,7 +116,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'episodes',
+    path: 'e',
     loadComponent: () => import('./episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
     title: 'Episodes',
     canActivate: [AuthGuard],
@@ -134,6 +124,32 @@ export const routes: Routes = [
       icon: 'animated_images',
     },
   },
+  // Backwards compatibility redirects for old routes
+  // {
+  //   path: 'podcasts',
+  //   redirectTo: 'p',
+  //   pathMatch: 'full',
+  // },
+  // {
+  //   path: 'podcast/new',
+  //   redirectTo: 'p/new',
+  //   pathMatch: 'full',
+  // },
+  // {
+  //   path: 'podcast/:uuid',
+  //   redirectTo: 'p/:uuid',
+  //   pathMatch: 'full',
+  // },
+  // {
+  //   path: 'episodes',
+  //   redirectTo: 'e',
+  //   pathMatch: 'full',
+  // },
+  // {
+  //   path: 'episode/:uuid',
+  //   redirectTo: 'e/:uuid',
+  //   pathMatch: 'full',
+  // },
   {
     path: 'news',
     loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),
@@ -233,41 +249,41 @@ export const routes: Routes = [
     title: 'Join Affiliate Network',
   },
   {
-    path: 'p',
+    path: 'podcasts',
     loadComponent: () => import('./browse-podcasts/browse-podcasts.component').then((c) => c.BrowsePodcastsComponent),
     title: 'Browse Podcasts',
   },
   {
-    path: 'p/:id',
+    path: 'podcasts/:id',
     loadComponent: () =>
       import('./public-podcast-page/public-podcast-page.component').then((c) => c.PublicPodcastPageComponent),
     title: 'Podcast',
   },
   {
-    path: 'e',
-    redirectTo: 'p',
+    path: 'episodes',
+    redirectTo: 'podcasts',
     pathMatch: 'full',
   },
   {
-    path: 'e/:id',
+    path: 'episodes/:id',
     loadComponent: () =>
       import('./public-episode-page/public-episode-page.component').then((c) => c.PublicEpisodePageComponent),
     title: 'Episode',
   },
   {
-    path: 'c',
+    path: 'categories',
     loadComponent: () =>
       import('./public-categories/public-categories.component').then((c) => c.PublicCategoriesComponent),
     title: 'Browse Categories',
   },
   {
-    path: 'c/:category',
+    path: 'categories/:category',
     loadComponent: () =>
       import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
     title: 'Category',
   },
   {
-    path: 'c/:category/:subcategory',
+    path: 'categories/:category/:subcategory',
     loadComponent: () =>
       import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
     title: 'Category',

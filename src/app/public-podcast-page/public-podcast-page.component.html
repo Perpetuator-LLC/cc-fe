@@ -10,7 +10,7 @@
       <mat-icon>error</mat-icon>
       <h2>Podcast Not Found</h2>
       <p>The podcast you're looking for doesn't exist or is not available.</p>
-      <button mat-raised-button routerLink="/p">Browse Podcasts</button>
+      <button mat-raised-button routerLink="/podcasts">Browse Podcasts</button>
     </div>
   } @else if (podcastData) {
     <div class="podcast-header">
@@ -77,7 +77,7 @@
           [description]="podcastData.description"
         ></app-share-buttons>
         @if (isAuthenticated) {
-          <button mat-raised-button color="primary" [routerLink]="['/podcast', podcastId]">
+          <button mat-raised-button color="primary" [routerLink]="['/p', podcastId]">
             <mat-icon>dashboard</mat-icon>
             Manage Podcast
           </button>
