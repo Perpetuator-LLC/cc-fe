@@ -77,6 +77,12 @@ export interface AffiliateCodeHistory {
   reason: string | null;
 }
 
+export interface AffiliateEligibility {
+  isEligible: boolean;
+  reason: string;
+  hasPaidOrder: boolean;
+}
+
 export interface AffiliateCodeChangeRequest {
   uuid: string;
   user?: PublicUser | null;
@@ -210,6 +216,10 @@ interface PendingCodeChangeRequestsResponse {
   pendingCodeChangeRequests: PendingCodeChangeRequest[];
 }
 
+interface AffiliateEligibilityResponse {
+  affiliateProgramEligibility: AffiliateEligibility;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -219,6 +229,22 @@ export class AffiliateService extends BaseService {
     protected override errorHandler: ErrorHandlerService,
   ) {
     super(apollo, errorHandler);
+  }
+
+  checkAffiliateProgramEligibility(): Observable<AffiliateEligibility> {
+    const query = gql`
+      query CheckAffiliateProgramEligibility {
+        affiliateProgramEligibility {
+          isEligible
+          reason
+          hasPaidOrder
+        }
+      }
+    `;
+
+    return this.query<AffiliateEligibilityResponse>({
+      query,
+    }).pipe(map((data) => data.affiliateProgramEligibility));
   }
 
   joinAffiliateProgram(affiliateCode: string): Observable<{
