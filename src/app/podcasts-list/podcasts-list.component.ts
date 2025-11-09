@@ -13,7 +13,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import {
   MatTable,
-  MatTableDataSource,
   MatHeaderCell,
   MatCell,
   MatHeaderRow,
@@ -31,7 +30,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-podcast-dialog.component';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
@@ -44,6 +43,7 @@ import { JobDisplayService } from '../job-display.service';
 import { LoadingService } from '../loading.service';
 import { TeamsService, TeamsResult } from '../teams.service';
 import { MatSelectModule } from '@angular/material/select';
+import { RelayPaginatorBase } from '../utils/relay-paginator';
 
 export interface ColumnOption {
   id: string;
@@ -90,22 +90,22 @@ export interface ColumnOption {
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
 })
-export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
+export class PodcastsListComponent
+  extends RelayPaginatorBase<PodcastsResult>
+  implements OnInit, OnDestroy, AfterViewInit
+{
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   private subscriptions = new Subscription();
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
-  dataSource = new MatTableDataSource<PodcastsResult>([]);
+  // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
   displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'enabled', 'createEpisode', 'actions'];
-  isGridView = false; // Default to list view
-  pageSize = 10;
+  isGridView = false;
   pageSizeOptions = [5, 10, 25, 50];
-  cursors: (string | null)[] = [null];
   hasNextPage = false;
   hasPreviousPage = false;
-  totalPodcasts = 0;
+  totalPodcasts = 0; // Keep for template binding compatibility
   allColumns: ColumnOption[] = [
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
@@ -139,13 +139,15 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     private loadingService: LoadingService,
     private teamsService: TeamsService,
   ) {
+    super();
+
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {
       this.searchString = term;
-      this.cursors = [null]; // reset cursors when searching
+      this.cursors = [null];
       if (this.paginator) {
-        this.paginator.firstPage(); // reset to first page
+        this.paginator.firstPage();
       }
-      this.loadPodcasts(this.pageSize, null, term || undefined, undefined, this.selectedTeam || undefined, 0);
+      this.loadPage(this.pageSize, null, 0);
     });
 
     // Subscribe to job updates - no messages needed, job-status-bar handles them globally
@@ -168,78 +170,69 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadTeams();
-    this.loadPodcasts();
+    this.loadPage(this.pageSize, null, 0);
 
     // Check for query parameter to auto-open create dialog
     this.subscriptions.add(
       this.route.queryParams.subscribe((params) => {
         if (params['create'] === 'true') {
-          // Remove the query parameter from URL
           this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {},
             replaceUrl: true,
           });
-          // Open the create podcast dialog
           setTimeout(() => this.createPodcast(), 0);
         }
       }),
     );
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
+  override ngAfterViewInit() {
+    super.ngAfterViewInit();
     this.dataSource.sort = this.sort;
   }
 
-  loadPodcasts(
-    first = 10,
-    after: string | null = null,
-    name?: string,
-    slug?: string,
-    teamUuid?: string,
-    pageIndex = 0,
-  ): void {
+  protected loadPage(pageSize: number, cursor: string | null, pageIndex: number): void {
     this.loading = true;
     this.loadingService.show();
     this.subscriptions.add(
-      this.podcastsService.getPodcasts(first, after, name, slug, teamUuid).subscribe({
-        next: (response) => {
-          this.messageService.clearMessages();
-          let podcasts = response.podcasts;
+      this.podcastsService
+        .getPodcasts(pageSize, cursor, this.searchString || undefined, undefined, this.selectedTeam || undefined)
+        .subscribe({
+          next: (response) => {
+            this.messageService.clearMessages();
+            let podcasts = response.podcasts;
 
-          // Apply live status filter client-side
-          if (this.selectedLiveStatus === 'live') {
-            podcasts = podcasts.filter((p) => p.enabled);
-          } else if (this.selectedLiveStatus === 'disabled') {
-            podcasts = podcasts.filter((p) => !p.enabled);
-          }
+            // Apply live status filter client-side
+            if (this.selectedLiveStatus === 'live') {
+              podcasts = podcasts.filter((p) => p.enabled);
+            } else if (this.selectedLiveStatus === 'disabled') {
+              podcasts = podcasts.filter((p) => !p.enabled);
+            }
 
-          this.podcasts = podcasts;
-          this.dataSource = new MatTableDataSource(this.podcasts);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          this.hasNextPage = response.pageInfo.hasNextPage;
-          this.hasPreviousPage = response.pageInfo.hasPreviousPage;
-          this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
+            this.podcasts = podcasts;
+            this.hasNextPage = response.pageInfo.hasNextPage;
+            this.hasPreviousPage = response.pageInfo.hasPreviousPage;
 
-          // Set a large enough number to enable the next button if hasNextPage is true
-          this.totalPodcasts = response.pageInfo.hasNextPage
-            ? (pageIndex + 2) * this.pageSize
-            : (pageIndex + 1) * this.pageSize;
-          this.loading = false;
-          this.loadingService.hide();
-        },
-        error: (err: { message: string }) => {
-          this.loading = false;
-          this.loadingService.hide();
-          this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
-        },
-        complete: () => {
-          this.loading = false;
-          this.loadingService.hide();
-        },
-      }),
+            // Use base class method to handle pagination
+            this.handlePageData(this.podcasts, response.pageInfo, pageIndex);
+
+            // Sync totalPodcasts with base class totalItems for template compatibility
+            this.totalPodcasts = this.totalItems;
+
+            this.loading = false;
+            this.loadingService.hide();
+          },
+          error: (err: { message: string }) => {
+            this.loading = false;
+            this.loadingService.hide();
+            this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
+          },
+          complete: () => {
+            this.loading = false;
+            this.loadingService.hide();
+          },
+        }),
     );
   }
 
@@ -259,8 +252,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Refresh the podcasts list
-        this.loadPodcasts();
+        this.loadPage(this.pageSize, null, 0);
       }
     });
   }
@@ -286,14 +278,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.paginator) {
       this.paginator.firstPage();
     }
-    this.loadPodcasts(
-      this.pageSize,
-      null,
-      this.searchString || undefined,
-      undefined,
-      this.selectedTeam || undefined,
-      0,
-    );
+    this.loadPage(this.pageSize, null, 0);
   }
 
   onLiveStatusFilterChange(): void {
@@ -301,14 +286,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.paginator) {
       this.paginator.firstPage();
     }
-    this.loadPodcasts(
-      this.pageSize,
-      null,
-      this.searchString || undefined,
-      undefined,
-      this.selectedTeam || undefined,
-      0,
-    );
+    this.loadPage(this.pageSize, null, 0);
   }
 
   getCategoriesString(categories: Record<string, string[]> | null): string {
@@ -359,38 +337,6 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   onSearchChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm$.next(value);
-  }
-
-  onPageChange(event: PageEvent) {
-    const newPageIndex = event.pageIndex;
-    const newPageSize = event.pageSize;
-
-    // If pageSize changed, reset pagination entirely
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      this.cursors = [null]; // reset all known cursors
-      this.paginator.firstPage(); // back to pageIndex = 0
-      this.loadPodcasts(
-        this.pageSize,
-        null,
-        this.searchString || undefined,
-        undefined,
-        this.selectedTeam || undefined,
-        0,
-      );
-      return;
-    }
-
-    // Otherwise, grab the cursor for the page they jumped to
-    const after = this.cursors[newPageIndex] ?? null;
-    this.loadPodcasts(
-      this.pageSize,
-      after,
-      this.searchString || undefined,
-      undefined,
-      this.selectedTeam || undefined,
-      newPageIndex,
-    );
   }
 
   createBlankEpisode(podcastUuid: string) {

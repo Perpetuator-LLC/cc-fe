@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatOption } from '@angular/material/core';
@@ -10,7 +10,7 @@ import { Episode, EpisodeService } from '../episode.service';
 import { Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatIcon } from '@angular/material/icon';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import {
   MatCell,
   MatCellDef,
@@ -22,7 +22,6 @@ import {
   MatRow,
   MatRowDef,
   MatTable,
-  MatTableDataSource,
 } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
@@ -49,6 +48,7 @@ import { Job, JobService } from '../job.service';
 import { RecentlyUsedPodcastsService } from '../recently-used-podcasts.service';
 import { ResearchService, Topic } from '../research.service';
 import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-dialog.component';
+import { RelayPaginatorBase } from '../utils/relay-paginator';
 
 @Component({
   selector: 'app-episodes-list',
@@ -95,13 +95,12 @@ import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
 })
-export class EpisodesListComponent implements OnInit, OnDestroy {
+export class EpisodesListComponent extends RelayPaginatorBase<Episode> implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions = new Subscription();
   episodes: Episode[] = [];
-  dataSource = new MatTableDataSource(this.episodes);
+  // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
   displayedColumns: string[] = ['title', 'podcast', 'status', 'actions'];
-  totalEpisodes = 0;
-  pageSize = 10;
+  totalEpisodes = 0; // Keep for template binding compatibility
   sortDirection = 'DESC';
   sortActive = 'date';
   loadingEpisodes = false;
@@ -109,13 +108,11 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   selectedPodcast: string | null = null;
   podcasts: PodcastsResult[] = [];
   topics: Topic[] = [];
-  cursors: (string | null)[] = [null];
   isGridView = false;
   searchTerm = '';
   private searchSubject = new Subject<string>();
-  selectedLiveStatus: string | null = null; // null = all, 'live' = live only, 'draft' = draft only
+  selectedLiveStatus: string | null = null;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
@@ -130,7 +127,9 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
     private researchService: ResearchService,
-  ) {}
+  ) {
+    super();
+  }
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
@@ -144,18 +143,23 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
         if (this.paginator) {
           this.paginator.pageIndex = 0;
         }
-        this.loadEpisodes();
+        this.loadPage(this.pageSize, null, 0);
       }),
     );
 
-    this.loadEpisodes();
+    this.loadPage(this.pageSize, null, 0);
     this.loadPodcasts();
     this.loadTopics();
   }
 
+  override ngAfterViewInit() {
+    super.ngAfterViewInit();
+    this.dataSource.sort = this.sort;
+  }
+
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    this.loadingService.hide(); // Make sure to hide loading when component is destroyed
+    this.loadingService.hide();
   }
 
   toggleView(isGrid: boolean) {
@@ -167,7 +171,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.searchSubject.next(input.value);
   }
 
-  loadEpisodes(after: string | null = null, pageIndex = 0) {
+  protected loadPage(pageSize: number, cursor: string | null, pageIndex: number): void {
     this.loadingEpisodes = true;
     this.loadingService.show();
 
@@ -175,7 +179,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.episodeService
-        .getEpisodes(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedPodcast, searchTerm)
+        .getEpisodes(pageSize, cursor, this.sortActive, this.sortDirection, this.selectedPodcast, searchTerm)
         .subscribe({
           next: ({ episodes, pageInfo }) => {
             let filteredEpisodes = episodes;
@@ -188,22 +192,20 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
             }
 
             this.episodes = filteredEpisodes;
-            this.dataSource.data = filteredEpisodes;
-            this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-            this.totalEpisodes = pageInfo.hasNextPage
-              ? (pageIndex + 2) * this.pageSize
-              : (pageIndex + 1) * this.pageSize;
+
+            // Use base class method to handle pagination
+            this.handlePageData(this.episodes, pageInfo, pageIndex);
+
+            // Sync totalEpisodes with base class totalItems for template compatibility
+            this.totalEpisodes = this.totalItems;
+
             this.loadingEpisodes = false;
-            this.loadingService.hide(); // Hide global loading spinner
+            this.loadingService.hide();
           },
           error: (err) => {
             this.messageService.error('Failed to load episodes: ' + err);
             this.loadingEpisodes = false;
-            this.loadingService.hide(); // Hide global loading spinner on error
-          },
-          complete: () => {
-            this.loadingEpisodes = false;
-            this.loadingService.hide(); // Hide global loading spinner on complete
+            this.loadingService.hide();
           },
         }),
     );
@@ -262,7 +264,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     if (this.selectedPodcast) {
       this.recentlyUsedPodcastsService.recordSelection(this.selectedPodcast);
     }
-    this.loadEpisodes();
+    this.loadPage(this.pageSize, null, 0);
   }
 
   onLiveStatusFilterChange(): void {
@@ -270,33 +272,18 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     if (this.paginator) {
       this.paginator.pageIndex = 0;
     }
-    this.loadEpisodes();
+    this.loadPage(this.pageSize, null, 0);
   }
 
   sortChange(sortState: Sort) {
     this.sortActive = sortState.active;
     this.sortDirection = sortState.direction.toUpperCase();
-    this.cursors = [null]; // reset all known cursors
+    this.cursors = [null];
     this.paginator.firstPage();
-    this.loadEpisodes();
+    this.loadPage(this.pageSize, null, 0);
   }
 
-  onPageChange(event: PageEvent) {
-    this.loadingEpisodes = true;
-    const newPageIndex = event.pageIndex;
-    const newPageSize = event.pageSize;
-
-    // If pageSize changed, reset pagination
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      this.cursors = [null];
-      this.loadEpisodes(null, 0);
-      return;
-    }
-
-    const after = this.cursors[newPageIndex] ?? null;
-    this.loadEpisodes(after, newPageIndex);
-  }
+  // onPageChange removed - inherited from RelayPaginatorBase
 
   viewEpisode(uuid: string) {
     this.router.navigate(['/e', uuid]);
@@ -316,7 +303,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
           this.episodeService.deleteEpisode(episode.uuid).subscribe({
             next: () => {
               this.messageService.success('Episode deleted successfully');
-              this.loadEpisodes(); // Reload the episodes list
+              this.loadPage(this.pageSize, null, 0);
             },
             error: (err) => {
               this.messageService.error(`Failed to delete episode: ${err.message}`);
