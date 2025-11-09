@@ -62,13 +62,14 @@ import { JobService } from '../job.service';
 import { ResearchService } from '../research.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { ShareService } from '../share.service';
+import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
   styleUrls: ['./podcast-detail.component.scss'],
   standalone: true,
   imports: [
-    CommonModule, // <-- Added to enable *ngIf
+    CommonModule,
     MessageComponent,
     MatProgressSpinner,
     MatProgressBarModule,
@@ -105,6 +106,7 @@ import { ShareService } from '../share.service';
     SvgIconComponent,
     CdkTextareaAutosize,
     ShareButtonsComponent,
+    EpisodesTableComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -117,7 +119,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   protected loading = true;
   protected rssFeedLoading = false;
   protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
-  private podcastUuid: string;
+  protected podcastUuid: string;
   protected urlDisabled = true;
   protected deleteConfirmation = '';
   selectedFile: File | null = null;

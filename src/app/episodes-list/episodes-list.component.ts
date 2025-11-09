@@ -1,346 +1,106 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
-import { Router, RouterLink } from '@angular/router';
-import { MatOption } from '@angular/material/core';
+import { Router } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { Episode, EpisodeService } from '../episode.service';
-import { Subscription, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
-import { MatPaginator } from '@angular/material/paginator';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-} from '@angular/material/table';
-import { MatSort, Sort } from '@angular/material/sort';
-import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { PodcastsResult, PodcastsService } from '../podcasts.service';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import { LoadingService } from '../loading.service';
-import { MatTooltip } from '@angular/material/tooltip';
-import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import {
   CreateEpisodeDialogComponent,
   CreateEpisodeDialogResult,
 } from '../create-episode-dialog/create-episode-dialog.component';
 import { NewsService } from '../news.service';
 import { Job, JobService } from '../job.service';
-import { RecentlyUsedPodcastsService } from '../recently-used-podcasts.service';
 import { ResearchService, Topic } from '../research.service';
 import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-dialog.component';
-import { RelayPaginatorBase } from '../utils/relay-paginator';
+import { PodcastsService } from '../podcasts.service';
+import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
 
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
   imports: [
-    FormsModule,
     MatButton,
     MatCard,
-    SvgIconComponent,
     MatCardHeader,
     MatIcon,
     MessageComponent,
-    MatProgressBarModule,
     MatCardContent,
-    MatTable,
-    MatSort,
-    MatHeaderCell,
-    MatCell,
-    MatHeaderRow,
-    MatRow,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRowDef,
-    MatRowDef,
-    MatColumnDef,
-    MatMenuTrigger,
-    MatMenu,
-    RouterLink,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption,
-    MatPaginator,
-    MatCheckboxModule,
-    MatMenuItem,
-    MatPrefix,
-    MatIconButton,
-    MatIconButton,
-    MatButton,
-    MatInput,
     CommonModule,
-    MatTooltip,
+    EpisodesTableComponent,
   ],
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
 })
-export class EpisodesListComponent extends RelayPaginatorBase<Episode> implements OnInit, OnDestroy, AfterViewInit {
+export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
-  episodes: Episode[] = [];
-  // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
-  displayedColumns: string[] = ['title', 'podcast', 'status', 'actions'];
-  totalEpisodes = 0; // Keep for template binding compatibility
-  sortDirection = 'DESC';
-  sortActive = 'date';
-  loadingEpisodes = false;
-  loadingPodcasts = false;
-  selectedPodcast: string | null = null;
-  podcasts: PodcastsResult[] = [];
   topics: Topic[] = [];
-  isGridView = false;
-  searchTerm = '';
-  private searchSubject = new Subject<string>();
-  selectedLiveStatus: string | null = null;
-  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
     private router: Router,
     private messageService: MessageService,
     private toolbarService: ToolbarService,
-    private episodeService: EpisodeService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
-    private loadingService: LoadingService,
     private newsService: NewsService,
     private jobService: JobService,
-    private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
     private researchService: ResearchService,
-  ) {
-    super();
-  }
+  ) {}
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
-    this.subscriptions.add(
-      this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((searchTerm) => {
-        this.searchTerm = searchTerm;
-        this.cursors = [null];
-        if (this.paginator) {
-          this.paginator.pageIndex = 0;
-        }
-        this.loadPage(this.pageSize, null, 0);
-      }),
-    );
-
-    this.loadPage(this.pageSize, null, 0);
-    this.loadPodcasts();
     this.loadTopics();
-  }
-
-  override ngAfterViewInit() {
-    super.ngAfterViewInit();
-    this.dataSource.sort = this.sort;
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    this.loadingService.hide();
   }
 
-  toggleView(isGrid: boolean) {
-    this.isGridView = isGrid;
-  }
-
-  onSearch(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.searchSubject.next(input.value);
-  }
-
-  protected loadPage(pageSize: number, cursor: string | null, pageIndex: number): void {
-    this.loadingEpisodes = true;
-    this.loadingService.show();
-
-    const searchTerm = this.searchTerm.trim() || null;
-
-    this.subscriptions.add(
-      this.episodeService
-        .getEpisodes(pageSize, cursor, this.sortActive, this.sortDirection, this.selectedPodcast, searchTerm)
-        .subscribe({
-          next: ({ episodes, pageInfo }) => {
-            let filteredEpisodes = episodes;
-
-            // Apply live status filter client-side
-            if (this.selectedLiveStatus === 'live') {
-              filteredEpisodes = filteredEpisodes.filter((e) => e.isLive);
-            } else if (this.selectedLiveStatus === 'draft') {
-              filteredEpisodes = filteredEpisodes.filter((e) => !e.isLive);
-            }
-
-            this.episodes = filteredEpisodes;
-
-            // Use base class method to handle pagination
-            this.handlePageData(this.episodes, pageInfo, pageIndex);
-
-            // Sync totalEpisodes with base class totalItems for template compatibility
-            this.totalEpisodes = this.totalItems;
-
-            this.loadingEpisodes = false;
-            this.loadingService.hide();
-          },
-          error: (err) => {
-            this.messageService.error('Failed to load episodes: ' + err);
-            this.loadingEpisodes = false;
-            this.loadingService.hide();
-          },
-        }),
-    );
-  }
-
-  loadPodcasts() {
-    this.loadingPodcasts = true;
-
-    // Load podcast history first
-    this.subscriptions.add(
-      this.recentlyUsedPodcastsService.loadHistory().subscribe({
-        next: () => {
-          // Then load podcasts
-          this.subscriptions.add(
-            this.podcastsService.getPodcastsForFilter().subscribe({
-              next: (response) => {
-                // Sort by recently used
-                this.podcasts = this.recentlyUsedPodcastsService.sortByRecentlyUsed(response.podcasts);
-
-                // Auto-select if only one podcast or use most recent
-                if (!this.selectedPodcast) {
-                  this.selectedPodcast = this.recentlyUsedPodcastsService.getDefaultSelection(this.podcasts);
-                }
-
-                this.loadingPodcasts = false;
-              },
-              error: (err: { message: string }) => {
-                this.loadingPodcasts = false;
-                this.messageService.error(`Failed to retrieve podcasts data: ${err.message}`);
-              },
-              complete: () => {
-                this.loadingPodcasts = false;
-              },
-            }),
-          );
-        },
-      }),
-    );
-  }
-
-  loadTopics(): void {
+  loadTopics() {
     this.subscriptions.add(
       this.researchService.getTopics(undefined, 100).subscribe({
         next: (response) => {
           this.topics = response.topics;
         },
-        error: (err: { message: string }) => {
-          this.messageService.error(`Failed to retrieve research topics: ${err.message}`);
+        error: (err) => {
+          this.messageService.error(err.message);
         },
       }),
     );
   }
 
-  onPodcastChange(): void {
-    // Record podcast selection if one is selected
-    if (this.selectedPodcast) {
-      this.recentlyUsedPodcastsService.recordSelection(this.selectedPodcast);
-    }
-    this.loadPage(this.pageSize, null, 0);
-  }
-
-  onLiveStatusFilterChange(): void {
-    this.cursors = [null];
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-    this.loadPage(this.pageSize, null, 0);
-  }
-
-  sortChange(sortState: Sort) {
-    this.sortActive = sortState.active;
-    this.sortDirection = sortState.direction.toUpperCase();
-    this.cursors = [null];
-    this.paginator.firstPage();
-    this.loadPage(this.pageSize, null, 0);
-  }
-
-  // onPageChange removed - inherited from RelayPaginatorBase
-
-  viewEpisode(uuid: string) {
-    this.router.navigate(['/e', uuid]);
-  }
-
-  deleteEpisode(episode: Episode) {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: {
-        title: 'Delete Episode',
-        message: `Are you sure you want to delete the episode "${episode.title}"? This action cannot be undone.`,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.subscriptions.add(
-          this.episodeService.deleteEpisode(episode.uuid).subscribe({
-            next: () => {
-              this.messageService.success('Episode deleted successfully');
-              this.loadPage(this.pageSize, null, 0);
-            },
-            error: (err) => {
-              this.messageService.error(`Failed to delete episode: ${err.message}`);
-            },
-          }),
-        );
-      }
-    });
-  }
-
-  openCreateEpisodeDialog(): void {
+  openCreateEpisodeDialog() {
     const dialogRef = this.dialog.open(CreateEpisodeDialogComponent, {
       width: '600px',
       data: {
-        podcasts: this.podcasts,
+        topics: this.topics,
       },
     });
 
-    dialogRef.afterClosed().subscribe((result: CreateEpisodeDialogResult | null) => {
-      if (result) {
-        this.handleEpisodeCreation(result);
+    dialogRef.afterClosed().subscribe((result: CreateEpisodeDialogResult) => {
+      if (!result) return;
+
+      switch (result.episodeType) {
+        case 'blank':
+          this.createBlankEpisode(result.podcastUuid);
+          break;
+        case 'news':
+          this.createNewsEpisode(result.podcastUuid);
+          break;
+        case 'research':
+          this.createResearchEpisode(result.podcastUuid);
+          break;
       }
     });
-  }
-
-  private handleEpisodeCreation(result: CreateEpisodeDialogResult): void {
-    switch (result.episodeType) {
-      case 'blank':
-        this.createBlankEpisode(result.podcastUuid);
-        break;
-      case 'news':
-        this.createNewsEpisode(result.podcastUuid);
-        break;
-      case 'research':
-        this.createResearchEpisode(result.podcastUuid);
-        break;
-    }
   }
 
   private createBlankEpisode(podcastUuid: string): void {
@@ -383,7 +143,6 @@ export class EpisodesListComponent extends RelayPaginatorBase<Episode> implement
   }
 
   private createResearchEpisode(podcastUuid: string): void {
-    // Open dialog to select research topic
     const dialogRef = this.dialog.open(SelectTopicDialogComponent, {
       width: '600px',
       data: {
@@ -413,26 +172,5 @@ export class EpisodesListComponent extends RelayPaginatorBase<Episode> implement
         );
       }
     });
-  }
-
-  isEpisodeFullyValidated(episode: Episode): boolean {
-    if (!episode.versions || episode.versions.length === 0) return false;
-    const currentVersion = episode.versions.find((v) => v.versionNumber === episode.currentVersionNumber);
-    if (!currentVersion) return false;
-    return currentVersion.validatedCompliance && currentVersion.validatedFacts && currentVersion.validatedLength;
-  }
-
-  getEpisodeValidationTooltip(episode: Episode): string {
-    if (!episode.versions || episode.versions.length === 0) return 'No version information available';
-    const currentVersion = episode.versions.find((v) => v.versionNumber === episode.currentVersionNumber);
-    if (!currentVersion) return 'No current version found';
-
-    const parts: string[] = [];
-    parts.push(`Facts: ${currentVersion.validatedFacts ? '✓' : '✗'}`);
-    parts.push(`Length: ${currentVersion.validatedLength ? '✓' : '✗'}`);
-    parts.push(`Compliance: ${currentVersion.validatedCompliance ? '✓' : '✗'}`);
-
-    const status = this.isEpisodeFullyValidated(episode) ? 'Validated' : 'Not Validated';
-    return `${status}\n - ${parts.join('\n - ')}`;
   }
 }
