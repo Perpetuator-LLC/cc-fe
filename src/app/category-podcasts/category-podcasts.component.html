@@ -66,7 +66,14 @@
                 <p class="description">{{ podcast.description }}</p>
               }
               @if (podcast.ownerName) {
-                <p class="owner">By {{ podcast.ownerName }}</p>
+                <p class="owner">
+                  By
+                  @if (podcast.ownerLink) {
+                    <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
+                  } @else {
+                    {{ podcast.ownerName }}
+                  }
+                </p>
               }
               <div class="stats">
                 <span class="stat">

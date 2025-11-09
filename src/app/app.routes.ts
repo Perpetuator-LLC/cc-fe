@@ -18,6 +18,39 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'p',
+    component: PodcastsListComponent,
+    canActivate: [AuthGuard],
+    title: 'Podcasts',
+    data: {
+      icon: 'graphic_eq',
+    },
+    children: [
+      {
+        path: 'tech',
+        loadComponent: () => import('./episodes-list/episodes-list.component').then((m) => m.EpisodesListComponent),
+        title: 'Tech Podcasts',
+      },
+      {
+        path: 'music',
+        loadComponent: () => import('./episode-detail/episode-detail.component').then((m) => m.EpisodeDetailComponent),
+        title: 'Music Podcasts',
+      },
+    ],
+  },
+  {
+    path: 'p/new',
+    loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
+    title: 'Create Podcast',
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'p/:uuid',
+    loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
+    title: 'Podcast',
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'register',
     loadComponent: () => import('./register/register.component').then((c) => c.RegisterComponent),
     title: 'Register',
@@ -72,39 +105,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'p',
-    component: PodcastsListComponent,
-    canActivate: [AuthGuard],
-    title: 'Podcasts',
-    data: {
-      icon: 'graphic_eq',
-    },
-    children: [
-      {
-        path: 'tech',
-        loadComponent: () => import('./episodes-list/episodes-list.component').then((m) => m.EpisodesListComponent),
-        title: 'Tech Podcasts',
-      },
-      {
-        path: 'music',
-        loadComponent: () => import('./episode-detail/episode-detail.component').then((m) => m.EpisodeDetailComponent),
-        title: 'Music Podcasts',
-      },
-    ],
-  },
-  {
-    path: 'p/new',
-    loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
-    title: 'Create Podcast',
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'p/:uuid',
-    loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
-    title: 'Podcast',
-    canActivate: [AuthGuard],
-  },
-  {
     path: 'e/:uuid',
     loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
     title: 'Episode',
@@ -124,32 +124,6 @@ export const routes: Routes = [
       icon: 'animated_images',
     },
   },
-  // Backwards compatibility redirects for old routes
-  // {
-  //   path: 'podcasts',
-  //   redirectTo: 'p',
-  //   pathMatch: 'full',
-  // },
-  // {
-  //   path: 'podcast/new',
-  //   redirectTo: 'p/new',
-  //   pathMatch: 'full',
-  // },
-  // {
-  //   path: 'podcast/:uuid',
-  //   redirectTo: 'p/:uuid',
-  //   pathMatch: 'full',
-  // },
-  // {
-  //   path: 'episodes',
-  //   redirectTo: 'e',
-  //   pathMatch: 'full',
-  // },
-  // {
-  //   path: 'episode/:uuid',
-  //   redirectTo: 'e/:uuid',
-  //   pathMatch: 'full',
-  // },
   {
     path: 'news',
     loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),

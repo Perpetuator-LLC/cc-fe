@@ -52,9 +52,9 @@
       <div class="sidebar-content">
         <div class="second-header">
           @if (router.url.startsWith('/p') || router.url.startsWith('/news') || router.url.startsWith('/e') || router.url.startsWith('/topics') || router.url.startsWith('/topic/')) {
-          <h6>Podcasts</h6>
+            <h6>Podcasts</h6>
           } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
-          <h6>Jobs</h6>
+            <h6>Jobs</h6>
           }
           <svg class="collapseSecondSidebar" width="20" height="20" viewBox="0 0 20 20" fill="none"
             xmlns="http://www.w3.org/2000/svg" (click)="toggleSecondSidebar()">

@@ -13,6 +13,13 @@
       <button mat-raised-button routerLink="/podcasts">Browse Podcasts</button>
     </div>
   } @else if (podcastData) {
+    <div class="breadcrumb">
+      <a routerLink="/podcasts" class="breadcrumb-link">
+        <mat-icon>arrow_back</mat-icon>
+        Browse All Podcasts
+      </a>
+    </div>
+
     <div class="podcast-header">
       <div class="podcast-info">
         @if (podcastData.thumbnailUrl) {
@@ -26,7 +33,14 @@
             <p class="description">{{ podcastData.description }}</p>
           }
           @if (podcastData.ownerName) {
-            <p class="owner">By {{ podcastData.ownerName }}</p>
+            <p class="owner">
+              By
+              @if (podcastData.ownerLink) {
+                <a [href]="podcastData.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcastData.ownerName }}</a>
+              } @else {
+                {{ podcastData.ownerName }}
+              }
+            </p>
           }
           @if (podcastData.categories) {
             <div class="categories">

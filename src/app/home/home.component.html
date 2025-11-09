@@ -140,12 +140,12 @@
           </mat-card>
         } @else {
           <mat-card class="podcast-card public-podcast-card" *ngFor="let podcast of publicPodcasts">
-            <a [routerLink]="['/p', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
+            <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
               <img [src]="podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
             </a>
             <mat-card-content>
               <h3>
-                <a [routerLink]="['/p', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
+                <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
                   {{ podcast.name }}
                 </a>
               </h3>
@@ -153,9 +153,14 @@
                 <p class="description">{{ podcast.description }}</p>
               }
               @if (podcast.ownerName) {
-                <p class="owner">By {{ podcast.ownerName }}</p>
-              } @else {
-                <p class="owner placeholder">(No Owner)</p>
+                <p class="owner">
+                  By
+                  @if (podcast.ownerLink) {
+                    <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
+                  } @else {
+                    {{ podcast.ownerName }}
+                  }
+                </p>
               }
               <div class="stats">
                 @if (podcast.viewCount !== undefined) {
@@ -185,6 +190,76 @@
       }
     </div>
   </div>
+
+  <!-- Recent Episodes Section (only for non-logged-in users) -->
+  @if (!isLoggedIn()) {
+    <div class="recent-podcasts-section">
+      <div class="section-header">
+        <h3 class="section-title">Recent Episodes</h3>
+        <a class="view-all-link" routerLink="/podcasts">View all</a>
+      </div>
+      <div class="podcasts-grid">
+        @if (loadingRecentPodcasts) {
+          <!-- Loading Skeleton -->
+          @for (i of [1, 2, 3]; track i) {
+            <mat-card class="podcast-card skeleton-podcast-card">
+              <div class="skeleton-image"></div>
+              <mat-card-content>
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+                <div class="skeleton-stats">
+                  <div class="skeleton-stat"></div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        } @else if (recentPodcasts.length > 0) {
+          @for (podcast of recentPodcasts; track podcast.id) {
+            <mat-card class="podcast-card public-podcast-card">
+              <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
+                <img [src]="podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+              </a>
+              <mat-card-content>
+                <h3>
+                  <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
+                    {{ podcast.name }}
+                  </a>
+                </h3>
+                @if (podcast.description) {
+                  <p class="description">{{ podcast.description }}</p>
+                }
+                @if (podcast.ownerName) {
+                  <p class="owner">
+                    By
+                    @if (podcast.ownerLink) {
+                      <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
+                    } @else {
+                      {{ podcast.ownerName }}
+                    }
+                  </p>
+                }
+                <div class="stats">
+                  @if (podcast.viewCount !== undefined) {
+                    <span class="stat">
+                      <mat-icon>visibility</mat-icon>
+                      {{ podcast.viewCount }} views
+                    </span>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        } @else {
+          <!-- Empty State -->
+          <div class="empty-podcasts-state">
+            <mat-icon>schedule</mat-icon>
+            <p>No recent episodes available.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Loading Skeleton -->
   <div class="stats-header-section">
