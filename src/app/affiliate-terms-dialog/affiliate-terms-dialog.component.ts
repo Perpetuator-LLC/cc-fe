@@ -61,7 +61,7 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
 
   onPurchase(): void {
     this.dialogRef.close(false);
-    this.router.navigate(['/purchase']);
+    this.router.navigate(['/orders']);
   }
 
   onAccept(): void {

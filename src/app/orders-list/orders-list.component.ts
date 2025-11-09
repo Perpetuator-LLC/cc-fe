@@ -21,14 +21,12 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { PaymentService } from '../payment.service';
-import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
+import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -38,6 +36,7 @@ import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoadingService } from '../loading.service';
 import { MatChipsModule } from '@angular/material/chips';
 
@@ -54,11 +53,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatSort,
     MatColumnDef,
     MatHeaderCell,
-    MatCardHeader,
-    MatCardTitle,
     MatError,
     MatFormField,
-    MatHint,
     MatInput,
     MatLabel,
     MatCell,
@@ -70,18 +66,16 @@ import { MatChipsModule } from '@angular/material/chips';
     MatRowDef,
     MatPaginator,
     MessageComponent,
-    MatCard,
     MatCardContent,
     DecimalPipe,
-    MatProgressSpinner,
     MatIcon,
     MatIconButton,
-    MatCheckbox,
     SvgIconComponent,
     ReactiveFormsModule,
     MatMenuTrigger,
     MatMenu,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatChipsModule,
   ],
   templateUrl: './orders-list.component.html',
@@ -112,8 +106,6 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   form = new FormGroup({
     amount: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]),
-    terms: new FormControl(false, Validators.requiredTrue),
-    agreement: new FormControl(false, Validators.requiredTrue),
   });
 
   constructor(
@@ -258,8 +250,6 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   payFromInput() {
     this.submitted = true;
     this.form.get('amount')?.markAsTouched();
-    this.form.get('terms')?.markAsTouched();
-    this.form.get('agreement')?.markAsTouched();
     if (this.form.invalid) {
       return;
     }

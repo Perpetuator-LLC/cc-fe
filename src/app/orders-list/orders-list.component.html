@@ -37,17 +37,9 @@
             <button mat-raised-button color="primary" (click)="setAmount(50)">Buy 50k credits $50</button>
             <button mat-raised-button color="primary" (click)="setAmount(100)">Buy 100k credits $100</button>
           </div>
-          <div class="checkbox-container">
-            <mat-checkbox formControlName="terms">
-              <p><span>I agree with</span> terms & conditions</p>
-            </mat-checkbox>
-            <mat-checkbox formControlName="agreement">
-              <p><span>I agree with</span> the agreement on the storage for the cardholders credentials</p>
-            </mat-checkbox>
-          </div>
           @if (submitted && form.invalid) {
             <span class="error">
-              Please enter a valid amount and agree to the terms & conditions and the agreement.
+              Please enter a valid amount.
             </span>
           }
           <button
@@ -56,7 +48,6 @@
             color="primary"
             type="button"
             (click)="payFromInput()"
-            [disabled]="!form.get('terms')?.value || !form.get('agreement')?.value"
           >
             Pay
             <span> ${{ form.get('amount')?.value || 0 | number: '1.2-2' }} </span>
@@ -86,7 +77,12 @@
         </mat-card-content>
 
         <div class="orders-container">
-          @if (filteredOrders.length > 0) {
+          @if (loadingOrders) {
+            <div class="loading-state">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p class="loading-message">Loading orders...</p>
+            </div>
+          } @else if (filteredOrders.length > 0) {
             <table
               mat-table
               [dataSource]="filteredOrders"
@@ -177,10 +173,13 @@
               [pageSizeOptions]="[5, 10, 20]"
               (page)="onPageChange($event)"
             ></mat-paginator>
-          } @else if (orders.length === 0 && !loadingOrders) {
-            <div class="middle-card">
-              <h2>No orders found.</h2>
-              <p>Your order history will appear here after making purchases.</p>
+          } @else {
+            <div class="empty-state">
+              <div class="empty-state-content">
+                <mat-icon class="empty-state-icon">receipt_long</mat-icon>
+                <h3 class="empty-state-title">No orders found</h3>
+                <p class="empty-state-message">Your order history will appear here after making purchases.</p>
+              </div>
             </div>
           }
         </div>
