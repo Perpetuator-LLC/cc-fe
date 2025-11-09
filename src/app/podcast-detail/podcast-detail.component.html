@@ -658,6 +658,21 @@
         </mat-card-content>
       </mat-tab>
 
+      <mat-tab label="Episodes">
+        <mat-card-content>
+          <div class="episodes-info">
+            <p>
+              <mat-icon>info</mat-icon>All episodes created for this podcast are listed below. You can view, edit, or delete episodes from this list.
+            </p>
+          </div>
+          <app-episodes-table
+            [podcastUuid]="podcastUuid"
+            [showPodcastColumn]="false"
+            [showSearchAndFilters]="true">
+          </app-episodes-table>
+        </mat-card-content>
+      </mat-tab>
+
       <mat-tab label="Danger Zone">
         <mat-card-content>
           <h3>Danger Zone Settings</h3>
