@@ -80,6 +80,19 @@
           <a class="module-link" routerLink="/news">Create an Episode from News<app-svg-icon icon="right"></app-svg-icon></a>
         </div>
       </div>
+      <div class="module-card finance-module">
+        <div class="module-header">
+          <div>
+            <div class="module-title">AI Financial Intelligence</div>
+            <div class="module-desc">
+              Generate comprehensive financial dashboards powered by AI. DCF analysis, dividend metrics, recession monitoring, and more.
+            </div>
+          </div>
+          <a class="module-link" [routerLink]="isLoggedIn() ? '/f' : '/finance'">
+            Explore Finance<app-svg-icon icon="right"></app-svg-icon>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
