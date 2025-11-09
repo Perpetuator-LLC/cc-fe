@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UserOrder, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ToolbarService } from '../toolbar.service';
@@ -116,6 +117,8 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     protected userService: UserService,
     protected authService: AuthService,
     private loadingService: LoadingService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
@@ -135,6 +138,19 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     if (this.isLoggedIn()) {
       this.userService.loadUserDetails();
     }
+
+    // Handle payment query params from Stripe redirect
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['payment'] === 'success') {
+          this.messageService.success('Payment was successful.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        } else if (params['payment'] === 'cancel') {
+          this.messageService.warning('Payment incomplete.', 15000, true);
+          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        }
+      }),
+    );
   }
 
   ngOnDestroy() {

@@ -120,18 +120,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadAffiliateRelationship();
-
-    this.subscriptions.add(
-      this.route.queryParams.subscribe((params) => {
-        if (params['payment'] === 'success') {
-          this.messageService.success('Payment was successful.', 15000, true);
-          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-        } else if (params['payment'] === 'cancel') {
-          this.messageService.warning('Payment incomplete.', 15000, true);
-          this.router.navigate([], { queryParams: { payment: null }, queryParamsHandling: 'merge', replaceUrl: true });
-        }
-      }),
-    );
   }
 
   ngOnDestroy(): void {
