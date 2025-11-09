@@ -178,12 +178,12 @@ export class JobDisplayService {
 
     return this.episodeService.getEpisodeById(episodeUuid).pipe(
       map((episode) => {
-        const episodeUrl = `/episode/${episodeUuid}`;
+        const episodeUrl = `/e/${episodeUuid}`;
         const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
         this.messageService.success(`New episode: <a href="${episodeUrl}">${episodeTitle}</a>`, null, true);
       }),
       catchError(() => {
-        const episodeUrl = `/episode/${episodeUuid}`;
+        const episodeUrl = `/e/${episodeUuid}`;
         this.messageService.success(`New episode created: <a href="${episodeUrl}">View Episode</a>`, null, true);
         return of(void 0);
       }),
@@ -203,12 +203,12 @@ export class JobDisplayService {
 
     return this.podcastsService.getPodcastById(podcastUuid).pipe(
       map((podcast) => {
-        const podcastUrl = `/podcast/${podcastUuid}`;
+        const podcastUrl = `/p/${podcastUuid}`;
         const podcastName = podcast.name || '(Unnamed Podcast)';
         this.messageService.success(`Podcast generated: <a href="${podcastUrl}">${podcastName}</a>`, null, true);
       }),
       catchError(() => {
-        const podcastUrl = `/podcast/${podcastUuid}`;
+        const podcastUrl = `/p/${podcastUuid}`;
         this.messageService.success(`Podcast generated: <a href="${podcastUrl}">View Podcast</a>`, null, true);
         return of(void 0);
       }),
@@ -242,11 +242,11 @@ export class JobDisplayService {
         let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
 
         if (episode && episodeUuid) {
-          const episodeUrl = `/episode/${episodeUuid}`;
+          const episodeUrl = `/e/${episodeUuid}`;
           const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
           message += ` | Episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
         } else if (episodeUuid) {
-          const episodeUrl = `/episode/${episodeUuid}`;
+          const episodeUrl = `/e/${episodeUuid}`;
           message += ` | <a href="${episodeUrl}">View Episode</a>`;
         }
 

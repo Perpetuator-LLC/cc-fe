@@ -244,7 +244,7 @@ export class PodcastsListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   viewPodcast(uuid: string) {
-    this.router.navigate(['/podcast', uuid]);
+    this.router.navigate(['/p', uuid]);
   }
 
   ngOnDestroy() {

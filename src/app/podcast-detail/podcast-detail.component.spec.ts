@@ -235,7 +235,7 @@ describe('PodcastDetailComponentComponent', () => {
         expect(mockPodcastsService.deletePodcast).not.toHaveBeenCalledWith(testPodcastUuid, '');
 
         expect(mockMessageService.success).toHaveBeenCalledWith('Podcast deleted successfully');
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/podcasts']);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/p']);
 
         done();
       }, 100);
