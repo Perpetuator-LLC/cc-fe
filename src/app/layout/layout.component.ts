@@ -185,7 +185,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
 
   shouldShow(item: Route): boolean {
     // First check if the route should be hidden from main sidebar
-    if (item.path && ['news', 'episodes'].includes(item.path)) {
+    if (item.path && ['news', 'e'].includes(item.path)) {
       return false;
     }
 
