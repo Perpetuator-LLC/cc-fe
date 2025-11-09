@@ -16,6 +16,7 @@ type ApiQuery {
   myCodeChangeRequests: [AffiliateCodeChangeRequestType]
   myCodeChangeInfo: AffiliateCodeChangeInfoType
   pendingCodeChangeRequests: [AffiliateCodeChangeRequestType]
+  affiliateProgramEligibility: AffiliateEligibilityType
 
   """List of Research Topics [Relay]"""
   topics(
@@ -182,6 +183,7 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): CodeTypeConnection
+  hasPaidOrder: Boolean
   user: UserDetails
   userSettings(keys: [String]!): UserSettingsType
   users(query: String!): UserList
@@ -373,6 +375,12 @@ type AffiliateCodeChangeInfoType {
   daysUntilNextChange: Int
   changeCount: Int
   lastChangeDate: DateTime
+}
+
+type AffiliateEligibilityType {
+  isEligible: Boolean
+  reason: String
+  hasPaidOrder: Boolean
 }
 
 type TopicTypeConnection {
