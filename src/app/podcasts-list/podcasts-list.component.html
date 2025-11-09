@@ -295,8 +295,8 @@
       }
     </div>
     }
-    <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
-      aria-label="Select page of podcasts" (page)="onPageChange($event)">
+    <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="false" (page)="onPageChange($event)" aria-label="Select page of podcasts">
     </mat-paginator>
   </div>
   }
