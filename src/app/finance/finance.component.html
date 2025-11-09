@@ -1,0 +1,178 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <div class="toolbar-content">
+    <h2>Finance</h2>
+  </div>
+</ng-template>
+
+<div class="finance-container">
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="badge">
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Coming Soon</span>
+      </div>
+      <h1>Finance</h1>
+      <p class="subtitle">AI-Powered Financial Intelligence Hub</p>
+      <p class="description">
+        Your central command center for AI-driven financial analysis, custom dashboards,
+        and intelligent market insights—all powered by advanced AI technology.
+      </p>
+    </div>
+  </div>
+
+  <div class="carousel-section">
+    <mat-card class="carousel-card">
+      <mat-card-content>
+        <div class="carousel-container">
+          <!-- Main Image Display -->
+          <div class="slide-display">
+            <div class="image-container">
+              <img
+                [src]="slides[currentSlide].image"
+                [alt]="slides[currentSlide].title"
+                class="concept-image"
+              />
+              <div class="image-placeholder" *ngIf="!slides[currentSlide].image">
+                <mat-icon>image</mat-icon>
+                <p>Concept Image {{ currentSlide + 1 }}</p>
+              </div>
+            </div>
+
+            <!-- Navigation Arrows -->
+            <button
+              mat-fab
+              color="primary"
+              class="nav-button prev"
+              (click)="prevSlide()"
+              [disabled]="currentSlide === 0"
+              aria-label="Previous slide"
+            >
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button
+              mat-fab
+              color="primary"
+              class="nav-button next"
+              (click)="nextSlide()"
+              [disabled]="currentSlide === slides.length - 1"
+              aria-label="Next slide"
+            >
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+
+          <!-- Slide Content -->
+          <div class="slide-content">
+            <h2>{{ slides[currentSlide].title }}</h2>
+            <p>{{ slides[currentSlide].description }}</p>
+
+            <!-- Progress Indicators -->
+            <div class="progress-indicators">
+              <button
+                *ngFor="let i of [0, 1, 2]"
+                mat-mini-fab
+                [color]="i === currentSlide ? 'primary' : ''"
+                (click)="goToSlide(i)"
+                [attr.aria-label]="'Go to slide ' + (i + 1)"
+              >
+                {{ i + 1 }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="features-section">
+    <h2 class="section-title">What to Expect</h2>
+    <div class="features-grid">
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">trending_up</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Real-Time Analytics</h3>
+          <p>Track stocks and crypto with live data feeds and AI-powered trend analysis</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">dashboard_customize</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Smart Dashboards</h3>
+          <p>AI-generated dashboards tailored to your investment strategy and portfolio</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">mic</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Audio Briefings</h3>
+          <p>Convert analysis into podcast-quality audio for your daily commute</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">schedule</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Automated Scheduling</h3>
+          <p>Set up recurring research tasks and receive timely market insights</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">psychology</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Deep Research</h3>
+          <p>AI agents dive deep into company fundamentals and market trends</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <mat-icon class="feature-icon">notifications_active</mat-icon>
+        </mat-card-header>
+        <mat-card-content>
+          <h3>Smart Alerts</h3>
+          <p>Get notified about significant market movements and opportunities</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="cta-section">
+    <mat-card class="cta-card">
+      <mat-card-content>
+        <mat-icon class="cta-icon">rocket_launch</mat-icon>
+        <h2>Be First to Know</h2>
+        <p>
+          We're putting the finishing touches on Invest Insights.
+          Stay tuned for the launch announcement!
+        </p>
+        <div class="cta-actions">
+          <button mat-raised-button color="primary" disabled>
+            <mat-icon>notifications</mat-icon>
+            Notify Me (Coming Soon)
+          </button>
+          <button mat-raised-button routerLink="/p">
+            <mat-icon>podcasts</mat-icon>
+            Explore Podcasts
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
