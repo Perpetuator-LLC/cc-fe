@@ -101,6 +101,19 @@ const ref = this.dialog.open(Component, { width: '500px', data: {} });
 ref.afterClosed().subscribe(result => { /* handle */ });
 ```
 
+## Relay Cursor Pagination
+Use `RelayPaginatorBase<T>` from `utils/relay-paginator.ts`:
+```typescript
+export class MyComponent extends RelayPaginatorBase<MyType> {
+  protected loadPage(pageSize: number, cursor: string | null, pageIndex: number) {
+    this.service.getData(pageSize, cursor).subscribe(response => {
+      this.handlePageData(response.items, response.pageInfo, pageIndex);
+    });
+  }
+}
+```
+HTML: `[showFirstLastButtons]="false"` `(page)="onPageChange($event)"`
+
 # Public Routes
 
 ## Config
