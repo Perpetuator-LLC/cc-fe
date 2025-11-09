@@ -10,7 +10,6 @@
   <mat-card-content class="content-header">
     <div class="title">
       <h3>All Episodes</h3>
-      <span>{{ episodes.length }} Episodes</span>
     </div>
     <button mat-flat-button color="primary" type="button" (click)="openCreateEpisodeDialog()">
       <mat-icon>add</mat-icon>
@@ -18,180 +17,12 @@
     </button>
   </mat-card-content>
 </mat-card>
+
 <div class="middle-card">
-  <div class="table-controls">
-    <div class="search-filter">
-      <mat-form-field class="search-field" appearance="outline">
-        <mat-icon matIconPrefix>search</mat-icon>
-        <mat-label>Search by episode title</mat-label>
-        <input matInput [(ngModel)]="searchTerm" (input)="onSearch($event)" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" [hidden]="loadingPodcasts">
-        <mat-label>Podcast</mat-label>
-        <mat-select [(value)]="selectedPodcast" (selectionChange)="onPodcastChange()">
-          <mat-option [value]="null">All Podcasts</mat-option>
-          @for (podcast of podcasts; track podcast.uuid) {
-          <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Status</mat-label>
-        <mat-select [(value)]="selectedLiveStatus" (selectionChange)="onLiveStatusFilterChange()">
-          <mat-option [value]="null">All Status</mat-option>
-          <mat-option value="live">Live</mat-option>
-          <mat-option value="draft">Draft</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="view-toggles">
-      <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
-        <app-svg-icon icon="grid"></app-svg-icon>
-      </button>
-      <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
-        <app-svg-icon icon="list"></app-svg-icon>
-      </button>
-    </div>
-  </div>
-
-  @if (episodes.length === 0 && !loadingEpisodes) {
-    <div class="no-results-message">
-      <mat-icon>info</mat-icon>
-      <p>No episodes found.@if (searchTerm || selectedPodcast) { Try adjusting your search filters.}</p>
-    </div>
-  } @else {
-  <div class="episodes-container">
-    @if (!isGridView) {
-    <div [hidden]="loadingEpisodes">
-      <table mat-table [dataSource]="dataSource" (matSortChange)="sortChange($event)" matSort matSortActive="date"
-        matSortDirection="desc" matSortDisableClear>
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Episode Title</th>
-          <td mat-cell *matCellDef="let episode">
-            <div class="episode-title">
-              <a [routerLink]="['/e', episode.uuid]">{{ episode.title === "" ? "(Blank)" : episode.title | slice: 0 : 100 }}</a>
-              <div class="episode-date">{{ episode.date | date: 'short' : 'local' }}</div>
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="podcast">
-          <th mat-header-cell *matHeaderCellDef>Podcast</th>
-          <td mat-cell *matCellDef="let episode">
-            <div class="podcast-name">
-              <mat-icon>graphic_eq</mat-icon>
-              {{ episode.podcast.name }}
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let episode">
-            <div class="status-container">
-              <span
-                class="status-badge"
-                [class.live]="episode.isLive"
-                [class.not-live]="!episode.isLive"
-              >
-                {{ episode.isLive ? 'Live' : 'Draft' }}
-              </span>
-              @if (isEpisodeFullyValidated(episode)) {
-                <mat-icon class="validated-icon" [matTooltip]="getEpisodeValidationTooltip(episode)">verified</mat-icon>
-              } @else {
-                <mat-icon class="unvalidated-icon" [matTooltip]="getEpisodeValidationTooltip(episode)">warning</mat-icon>
-              }
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let episode">
-            <button mat-icon-button class="action-btn"
-              [matMenuTriggerFor]="podcastActionsMenu" aria-label="Podcast actions">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
-              <button mat-menu-item [routerLink]="['/e', episode.uuid]">
-                <app-svg-icon icon="edit"></app-svg-icon>
-                <span>Edit</span>
-              </button>
-              <button mat-menu-item (click)="deleteEpisode(episode)">
-                <app-svg-icon icon="delete"></app-svg-icon>
-                <span>Delete</span>
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-
-      <mat-paginator [length]="totalEpisodes" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20]"
-        [showFirstLastButtons]="false" (page)="onPageChange($event)">
-      </mat-paginator>
-    </div>
-    }
-
-    @if (isGridView) {
-    <div class="podcasts-grid">
-      @for (episode of dataSource.data; track episode.uuid) {
-      <mat-card class="podcast-card">
-        <mat-card-header>
-          <div class="grid-header">
-            <div class="grid-header-name">
-              <div>
-                <a [routerLink]="['/e', episode.uuid]" class="podcast-name-link">
-                  {{ episode.title }}
-                </a>
-                <div class="episode-date">{{ episode.date | date: 'short' : 'local' }}</div>
-              </div>
-
-              <div>
-                <button class="action-btn" mat-icon-button [matMenuTriggerFor]="podcastActionsMenu"
-                  aria-label="Podcast actions">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
-                  <button mat-menu-item [routerLink]="['/e', episode.uuid]">
-                    <app-svg-icon icon="edit"></app-svg-icon>
-                    <span>Edit</span>
-                  </button>
-                  <button mat-menu-item (click)="deleteEpisode(episode)">
-                    <app-svg-icon icon="delete"></app-svg-icon>
-                    <span>Delete</span>
-                  </button>
-                </mat-menu>
-              </div>
-            </div>
-          </div>
-        </mat-card-header>
-
-        <div class="bottom-header">
-          <div class="status-container">
-            <span class="status-badge" [class.live]="episode.isLive" [class.not-live]="!episode.isLive">
-              {{ episode.isLive ? 'Live' : 'Draft' }}
-            </span>
-            @if (isEpisodeFullyValidated(episode)) {
-              <mat-icon class="validated-icon" [matTooltip]="getEpisodeValidationTooltip(episode)">verified</mat-icon>
-            } @else {
-              <mat-icon class="unvalidated-icon" [matTooltip]="getEpisodeValidationTooltip(episode)">warning</mat-icon>
-            }
-          </div>
-          <div class="podcast-name">
-            <mat-icon>graphic_eq</mat-icon>
-            {{ episode.podcast.name }}
-          </div>
-        </div>
-      </mat-card>
-      }
-    </div>
-    }
-  </div>
-  }
+  <app-episodes-table
+    [podcastUuid]="null"
+    [showPodcastColumn]="true"
+    [showSearchAndFilters]="true">
+  </app-episodes-table>
 </div>
+

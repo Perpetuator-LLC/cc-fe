@@ -681,6 +681,18 @@ mat-divider {
   }
 }
 
+.episodes-info {
+  p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--theme-yellow);
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 0;
+  }
+}
+
 .voice-controls-container {
   .mat-mdc-form-field-subscript-wrapper {
     display: none;
