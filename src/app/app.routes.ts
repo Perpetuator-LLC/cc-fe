@@ -182,6 +182,15 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'f',
+    loadComponent: () => import('./finance/finance.component').then((c) => c.FinanceComponent),
+    title: 'Finance',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'payments',
+    },
+  },
+  {
     path: 'topic/:uuid',
     loadComponent: () => import('./topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
     title: 'Topic Detail',
@@ -221,6 +230,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
     title: 'Join Affiliate Network',
+  },
+  {
+    path: 'finance',
+    loadComponent: () => import('./finance/finance.component').then((c) => c.FinanceComponent),
+    title: 'Finance',
   },
   {
     path: 'podcasts',
