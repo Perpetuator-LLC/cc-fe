@@ -20,6 +20,7 @@ import {
   AffiliateTermsConsent,
   AffiliateCodeChangeRequest,
   PendingCodeChangeRequest,
+  AffiliateEligibility,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -52,6 +53,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
+  checkingEligibility = true;
+  eligibility: AffiliateEligibility | null = null;
   profile: AffiliateProfile | null = null;
   stats: AffiliateStats | null = null;
   credits: AffiliateCredit[] = [];
@@ -81,11 +84,34 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.checkTermsAcceptance();
+    this.checkEligibility();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  checkEligibility(): void {
+    this.checkingEligibility = true;
+    this.subscriptions.add(
+      this.affiliateService.checkAffiliateProgramEligibility().subscribe({
+        next: (eligibility) => {
+          this.eligibility = eligibility;
+          this.checkingEligibility = false;
+
+          if (!eligibility.isEligible) {
+            this.loading = false;
+          } else {
+            this.checkTermsAcceptance();
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to verify eligibility: ${err.message || 'Unknown error'}`);
+          this.checkingEligibility = false;
+          this.loading = false;
+        },
+      }),
+    );
   }
 
   checkTermsAcceptance(): void {
@@ -159,6 +185,10 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   canApproveCodeChanges(): boolean {
     const userDetails = this.userService.userDetails();
     return userDetails?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false;
+  }
+
+  navigateToPurchase(): void {
+    this.router.navigate(['/purchase']);
   }
 
   loadAdminPendingRequests(): void {

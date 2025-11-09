@@ -3,61 +3,99 @@
   <h2 mat-dialog-title>Affiliate Program Terms and Conditions</h2>
 
   <mat-dialog-content>
-    <div class="terms-content">
-      <h3>Welcome to Capital Copilot Affiliate Program</h3>
+    @if (checkingEligibility) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Checking eligibility...</p>
+      </div>
+    } @else if (eligibility && !eligibility.isEligible) {
+      <div class="eligibility-message">
+        @if (!eligibility.hasPaidOrder) {
+          <div class="info-box purchase-required">
+            <mat-icon>info</mat-icon>
+            <div>
+              <h3>Purchase Required</h3>
+              <p>{{ eligibility.reason }}</p>
+              <p class="detail">To become an affiliate, you must first make a purchase on our platform.
+                This helps ensure our affiliate program is used by active members of our community.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="info-box not-eligible">
+            <mat-icon>block</mat-icon>
+            <div>
+              <h3>Not Eligible</h3>
+              <p>{{ eligibility.reason }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="terms-content">
+        <h3>Welcome to Capital Copilot Affiliate Program</h3>
 
-      <p>By accepting these terms, you agree to the following:</p>
+        <p>By accepting these terms, you agree to the following:</p>
 
-      <ol>
-        <li>
-          <strong>Commission Structure:</strong>
-          <ul>
-            <li>Tier 1 (Direct Referrals): You earn 10% commission on purchases made by users you directly refer</li>
-            <li>Tier 2 (Second Level): You earn 5% commission on purchases made by users referred by your direct referrals</li>
-          </ul>
-        </li>
+        <ol>
+          <li>
+            <strong>Commission Structure:</strong>
+            <ul>
+              <li>Tier 1 (Direct Referrals): You earn 10% commission on purchases made by users you directly refer</li>
+              <li>Tier 2 (Second Level): You earn 5% commission on purchases made by users referred by your direct referrals</li>
+            </ul>
+          </li>
 
-        <li>
-          <strong>Affiliate Credits:</strong>
-          <ul>
-            <li>Commissions are paid in affiliate credits</li>
-            <li>Credits can be converted to regular platform credits or cash payouts</li>
-            <li>Cash payouts are subject to review and approval</li>
-          </ul>
-        </li>
+          <li>
+            <strong>Affiliate Credits:</strong>
+            <ul>
+              <li>Commissions are paid in affiliate credits</li>
+              <li>Credits can be converted to regular platform credits or cash payouts</li>
+              <li>Cash payouts are subject to review and approval</li>
+            </ul>
+          </li>
 
-        <li>
-          <strong>Code of Conduct:</strong>
-          <ul>
-            <li>Do not use spam or deceptive practices to promote your affiliate link</li>
-            <li>Do not misrepresent Capital Copilot's services or features</li>
-            <li>Do not create fake accounts or self-referrals</li>
-          </ul>
-        </li>
+          <li>
+            <strong>Code of Conduct:</strong>
+            <ul>
+              <li>Do not use spam or deceptive practices to promote your affiliate link</li>
+              <li>Do not misrepresent Capital Copilot's services or features</li>
+              <li>Do not create fake accounts or self-referrals</li>
+            </ul>
+          </li>
 
-        <li>
-          <strong>Termination:</strong>
-          <ul>
-            <li>Capital Copilot reserves the right to terminate affiliate accounts for violations of these terms</li>
-            <li>Unpaid commissions may be forfeited upon termination for cause</li>
-          </ul>
-        </li>
+          <li>
+            <strong>Termination:</strong>
+            <ul>
+              <li>Capital Copilot reserves the right to terminate affiliate accounts for violations of these terms</li>
+              <li>Unpaid commissions may be forfeited upon termination for cause</li>
+            </ul>
+          </li>
 
-        <li>
-          <strong>Changes to Terms:</strong>
-          <ul>
-            <li>Capital Copilot may update these terms at any time</li>
-            <li>Continued participation constitutes acceptance of updated terms</li>
-          </ul>
-        </li>
-      </ol>
+          <li>
+            <strong>Changes to Terms:</strong>
+            <ul>
+              <li>Capital Copilot may update these terms at any time</li>
+              <li>Continued participation constitutes acceptance of updated terms</li>
+            </ul>
+          </li>
+        </ol>
 
-      <p class="version">Version 1.0 - Effective November 1, 2025</p>
-    </div>
+        <p class="version">Version 1.0 - Effective November 1, 2025</p>
+      </div>
+    }
   </mat-dialog-content>
 
   <mat-dialog-actions>
-    @if (loading) {
+    @if (checkingEligibility) {
+      <mat-spinner diameter="30"></mat-spinner>
+    } @else if (eligibility && !eligibility.isEligible) {
+      @if (!eligibility.hasPaidOrder) {
+        <button mat-button (click)="onDecline()">Close</button>
+        <button mat-raised-button color="primary" (click)="onPurchase()">Purchase Credits</button>
+      } @else {
+        <button mat-raised-button color="primary" (click)="onDecline()">Close</button>
+      }
+    } @else if (loading) {
       <mat-spinner diameter="30"></mat-spinner>
     } @else {
       <button mat-button (click)="onDecline()">Decline</button>

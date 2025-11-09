@@ -1,6 +1,48 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="affiliate-dashboard-container">
-  @if (loading) {
+  @if (checkingEligibility) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Checking eligibility...</p>
+    </div>
+  } @else if (eligibility && !eligibility.isEligible) {
+    <div class="not-eligible-container">
+      <mat-card class="eligibility-card">
+        <mat-card-content>
+          @if (!eligibility.hasPaidOrder) {
+            <div class="eligibility-message purchase-required">
+              <mat-icon>shopping_cart</mat-icon>
+              <div class="message-content">
+                <h2>Purchase Required</h2>
+                <p class="reason">{{ eligibility.reason }}</p>
+                <p class="detail">
+                  To join our affiliate program, you must first make a purchase on our platform.
+                  This helps ensure our affiliate program is used by active members of our community.
+                </p>
+                <div class="actions">
+                  <button mat-raised-button color="primary" (click)="navigateToPurchase()">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    Purchase Credits
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="eligibility-message not-eligible">
+              <mat-icon>block</mat-icon>
+              <div class="message-content">
+                <h2>Not Eligible</h2>
+                <p class="reason">{{ eligibility.reason }}</p>
+                <p class="detail">
+                  Please contact support if you believe this is an error.
+                </p>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  } @else if (loading) {
     <div class="loading-container">
       <mat-spinner></mat-spinner>
       <p>Loading affiliate dashboard...</p>
