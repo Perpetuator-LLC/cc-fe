@@ -20,15 +20,17 @@
     <div class="top-header">
       <div class="title">
         <h2>{{ podcastForm.get('name')?.value }}</h2>
-        <p>{{ podcastForm.get('description')?.value }}</p>
+<!--        <p>{{ podcastForm.get('description')?.value }}</p>-->
       </div>
       <div class="buttons">
-        <app-share-buttons
-          [shareUrl]="getPublicShareUrl()"
-          [title]="podcastForm.get('name')?.value || ''"
-          [description]="getPodcastDescription()"
-          [compact]="true"
-        ></app-share-buttons>
+        @if (podcastForm.get('enabled')?.value) {
+          <app-share-buttons
+            [shareUrl]="getPublicShareUrl()"
+            [title]="podcastForm.get('name')?.value || ''"
+            [description]="getPodcastDescription()"
+            [compact]="true"
+          ></app-share-buttons>
+        }
         <button
           mat-flat-button
           color="primary"
@@ -105,7 +107,17 @@
   </div>
   <mat-card class="podcast-card">
     <mat-tab-group class="mat-tab-group">
-      <mat-tab label="Podcast Information">
+      <mat-tab label="Episodes">
+        <mat-card-content>
+          <app-episodes-table
+            [podcastUuid]="podcastUuid"
+            [showPodcastColumn]="false"
+            [showSearchAndFilters]="true">
+          </app-episodes-table>
+        </mat-card-content>
+      </mat-tab>
+
+      <mat-tab label="Information">
         <mat-card-content>
           <div [hidden]="!loading">
             <div class="loading-spinner">
@@ -247,7 +259,7 @@
         </mat-card-content>
       </mat-tab>
 
-      <mat-tab label="Content & Length">
+      <mat-tab label="Content">
         <mat-card-content>
           <form [formGroup]="podcastForm">
             <div class="member-row">
@@ -655,21 +667,6 @@
               }
             </div>
           </form>
-        </mat-card-content>
-      </mat-tab>
-
-      <mat-tab label="Episodes">
-        <mat-card-content>
-          <div class="episodes-info">
-            <p>
-              <mat-icon>info</mat-icon>All episodes created for this podcast are listed below. You can view, edit, or delete episodes from this list.
-            </p>
-          </div>
-          <app-episodes-table
-            [podcastUuid]="podcastUuid"
-            [showPodcastColumn]="false"
-            [showSearchAndFilters]="true">
-          </app-episodes-table>
         </mat-card-content>
       </mat-tab>
 

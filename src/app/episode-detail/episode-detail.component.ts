@@ -149,6 +149,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         id: [{ value: '', disabled: true }],
         uuid: [{ value: '', disabled: true }],
         name: [{ value: '', disabled: true }],
+        enabled: [{ value: false, disabled: true }],
       }),
     });
     this.subscriptions.add(

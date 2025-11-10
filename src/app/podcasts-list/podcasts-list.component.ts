@@ -195,29 +195,32 @@ export class PodcastsListComponent
   protected loadPage(pageSize: number, cursor: string | null, pageIndex: number): void {
     this.loading = true;
     this.loadingService.show();
+
+    let enabledFilter: boolean | null = null;
+    if (this.selectedLiveStatus === 'live') {
+      enabledFilter = true;
+    } else if (this.selectedLiveStatus === 'disabled') {
+      enabledFilter = false;
+    }
+
     this.subscriptions.add(
       this.podcastsService
-        .getPodcasts(pageSize, cursor, this.searchString || undefined, undefined, this.selectedTeam || undefined)
+        .getPodcasts(
+          pageSize,
+          cursor,
+          this.searchString || undefined,
+          undefined,
+          this.selectedTeam || undefined,
+          enabledFilter !== null ? enabledFilter : undefined,
+        )
         .subscribe({
           next: (response) => {
             this.messageService.clearMessages();
-            let podcasts = response.podcasts;
-
-            // Apply live status filter client-side
-            if (this.selectedLiveStatus === 'live') {
-              podcasts = podcasts.filter((p) => p.enabled);
-            } else if (this.selectedLiveStatus === 'disabled') {
-              podcasts = podcasts.filter((p) => !p.enabled);
-            }
-
-            this.podcasts = podcasts;
+            this.podcasts = response.podcasts;
             this.hasNextPage = response.pageInfo.hasNextPage;
             this.hasPreviousPage = response.pageInfo.hasPreviousPage;
 
-            // Use base class method to handle pagination
             this.handlePageData(this.podcasts, response.pageInfo, pageIndex);
-
-            // Sync totalPodcasts with base class totalItems for template compatibility
             this.totalPodcasts = this.totalItems;
 
             this.loading = false;

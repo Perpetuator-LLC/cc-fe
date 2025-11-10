@@ -45,17 +45,25 @@ export interface Episode {
   telegramDate: string;
   news: NewsResult[];
   team: TeamsResult;
-  podcast: { id: string; uuid: string; name: string };
+  podcast: { id: string; uuid: string; name: string; enabled: boolean };
 }
 
 const GET_EPISODES = gql`
-  query GetEpisodes($podcastUuid: UUID, $first: Int, $after: String, $orderBy: String!, $titleContains: String) {
+  query GetEpisodes(
+    $podcastUuid: UUID
+    $first: Int
+    $after: String
+    $orderBy: String!
+    $titleContains: String
+    $isLive: Boolean
+  ) {
     episodes(
       podcastUuid: $podcastUuid
       first: $first
       after: $after
       orderBy: $orderBy
       titleContains: $titleContains
+      isLive: $isLive
     ) {
       edges {
         cursor
@@ -67,6 +75,7 @@ const GET_EPISODES = gql`
             id
             uuid
             name
+            enabled
           }
           title
           content
@@ -137,6 +146,7 @@ const GET_EPISODE = gql`
             id
             uuid
             name
+            enabled
             team {
               id
               uuid
@@ -186,6 +196,7 @@ export class EpisodeService extends BaseService {
     direction = 'DESC',
     podcastUuid: string | null = null,
     titleContains: string | null = null,
+    isLive: boolean | null = null,
   ) {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
@@ -195,7 +206,7 @@ export class EpisodeService extends BaseService {
 
     return this.query<Response>({
       query: GET_EPISODES,
-      variables: { podcastUuid, first, after, orderBy, titleContains },
+      variables: { podcastUuid, first, after, orderBy, titleContains, isLive },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ episodes }) => ({
