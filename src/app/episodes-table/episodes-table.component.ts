@@ -169,20 +169,19 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
     const searchTerm = this.searchTerm.trim() || null;
     const podcastFilter = this.podcastUuid || this.selectedPodcast;
 
+    let isLiveFilter: boolean | null = null;
+    if (this.selectedLiveStatus === 'live') {
+      isLiveFilter = true;
+    } else if (this.selectedLiveStatus === 'draft') {
+      isLiveFilter = false;
+    }
+
     this.subscriptions.add(
       this.episodeService
-        .getEpisodes(pageSize, cursor, this.sortActive, this.sortDirection, podcastFilter, searchTerm)
+        .getEpisodes(pageSize, cursor, this.sortActive, this.sortDirection, podcastFilter, searchTerm, isLiveFilter)
         .subscribe({
           next: ({ episodes, pageInfo }) => {
-            let filteredEpisodes = episodes;
-
-            if (this.selectedLiveStatus === 'live') {
-              filteredEpisodes = filteredEpisodes.filter((e) => e.isLive);
-            } else if (this.selectedLiveStatus === 'draft') {
-              filteredEpisodes = filteredEpisodes.filter((e) => !e.isLive);
-            }
-
-            this.episodes = filteredEpisodes;
+            this.episodes = episodes;
             this.handlePageData(this.episodes, pageInfo, pageIndex);
             this.totalEpisodes = this.totalItems;
 
