@@ -564,10 +564,17 @@ export class PodcastsService extends BaseService {
     }).pipe(map((result) => result.podcasts));
   }
 
-  getPodcasts(first = 10, after: string | null = null, name?: string, slug?: string, teamUuid?: string) {
+  getPodcasts(
+    first = 10,
+    after: string | null = null,
+    name?: string,
+    slug?: string,
+    teamUuid?: string,
+    enabled?: boolean | null,
+  ) {
     const GQL = gql`
-      query GetPodcasts($first: Int, $after: String, $name: String, $slug: String, $teamUuid: UUID) {
-        podcasts(first: $first, after: $after, name: $name, slug: $slug, teamUuid: $teamUuid) {
+      query GetPodcasts($first: Int, $after: String, $name: String, $slug: String, $teamUuid: UUID, $enabled: Boolean) {
+        podcasts(first: $first, after: $after, name: $name, slug: $slug, teamUuid: $teamUuid, enabled: $enabled) {
           edges {
             cursor
             node {
@@ -619,6 +626,7 @@ export class PodcastsService extends BaseService {
         name: name || null,
         slug: slug || null,
         teamUuid: teamUuid || null,
+        enabled: enabled !== undefined ? enabled : null,
       },
       fetchPolicy: 'network-only',
     }).pipe(
