@@ -54,6 +54,61 @@ form {
   }
 }
 
+.error-message {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--md-sys-color-error, #f44336);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+
+  mat-icon {
+    color: var(--md-sys-color-error, #f44336);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+
+  p {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    color: var(--md-sys-color-error, #f44336);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+}
+
+.info-message {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: var(--primary);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+
+  p {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    color: var(--description-color);
+    line-height: 1.4;
+  }
+}
+
 mat-dialog-actions {
   display: flex;
   justify-content: flex-end;

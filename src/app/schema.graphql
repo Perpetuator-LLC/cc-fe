@@ -14,6 +14,7 @@ type ApiQuery {
   myAffiliateTermsConsents: [AffiliateTermsConsentType]
   myCodeHistory: [AffiliateCodeHistoryType]
   myEligibilityHistory: [AffiliateEligibilityHistoryType]
+  myNetworkStatusHistory: [AffiliateNetworkStatusHistoryType]
   myCodeChangeRequests: [AffiliateCodeChangeRequestType]
   myCodeChangeInfo: AffiliateCodeChangeInfoType
   pendingCodeChangeRequests: [AffiliateCodeChangeRequestType]
@@ -265,6 +266,14 @@ type AffiliateProfileType {
   """Custom message displayed to user when not eligible"""
   eligibilityMessage: String
   eligibilityChangedAt: DateTime
+
+  """Stripe Connect Express account ID"""
+  stripeAccountId: String
+  stripeOnboardingCompleted: Boolean!
+  stripeChargesEnabled: Boolean!
+  stripePayoutsEnabled: Boolean!
+  stripeCountry: String
+  stripeDetailsSubmitted: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   uuid: UUID
@@ -331,10 +340,18 @@ type AffiliateCreditConversionType {
   conversionType: String
   affiliateCreditAmount: Int!
   targetAmount: Int!
+  stripePayoutId: String
+  stripeTransferId: String
   status: String
+  rejectionReason: String
+
+  """Internal admin notes"""
+  adminNotes: String
+  reviewedAt: DateTime
   createdAt: DateTime!
   completedAt: DateTime
   uuid: UUID
+  reviewedBy: PublicUserType
 }
 
 type AffiliateTermsConsentType {
@@ -361,6 +378,16 @@ type AffiliateEligibilityHistoryType {
   changedBy: PublicUserType
   oldStatus: String
   newStatus: String
+}
+
+type AffiliateNetworkStatusHistoryType {
+  """Reason for network status change"""
+  reason: String
+  changedAt: DateTime!
+  uuid: UUID
+  changedBy: PublicUserType
+  oldIsActive: Boolean
+  newIsActive: Boolean
 }
 
 type AffiliateCodeChangeRequestType {
@@ -1525,9 +1552,14 @@ type TeamTypeEdge {
 
 type ApiMutation {
   acceptAffiliateTerms(version: String!): AcceptAffiliateTerms
+  createStripeConnectAccount: CreateStripeConnectAccount
+  refreshStripeAccountStatus: RefreshStripeAccountStatus
+  getStripeDashboardLink: GetStripeDashboardLink
   updateAffiliateBrandImage(deleteImage: Boolean, image: Upload): UpdateAffiliateBrandImage
   joinAffiliateProgram(affiliateCode: String!): JoinAffiliateProgram
   convertAffiliateCredits(amount: Int!, conversionType: String!): ConvertAffiliateCredits
+  approvePayoutRequest(adminNotes: String, conversionId: UUID!): ApprovePayoutRequest
+  rejectPayoutRequest(adminNotes: String, conversionId: UUID!, rejectionReason: String!): RejectPayoutRequest
   requestCodeChange(newCode: String!, reason: String): RequestCodeChange
   checkCodeAvailability(code: String!): CheckCodeAvailability
   cancelCodeChangeRequest(requestId: UUID!): CancelCodeChangeRequest
@@ -1970,6 +2002,25 @@ type AcceptAffiliateTerms {
   affiliateProfile: AffiliateProfileType
 }
 
+type CreateStripeConnectAccount {
+  success: Boolean
+  message: String
+  onboardingUrl: String
+  affiliateProfile: AffiliateProfileType
+}
+
+type RefreshStripeAccountStatus {
+  success: Boolean
+  message: String
+  affiliateProfile: AffiliateProfileType
+}
+
+type GetStripeDashboardLink {
+  success: Boolean
+  message: String
+  dashboardUrl: String
+}
+
 type UpdateAffiliateBrandImage {
   success: Boolean
   message: String
@@ -1989,6 +2040,18 @@ type JoinAffiliateProgram {
 }
 
 type ConvertAffiliateCredits {
+  success: Boolean
+  message: String
+  conversion: AffiliateCreditConversionType
+}
+
+type ApprovePayoutRequest {
+  success: Boolean
+  message: String
+  conversion: AffiliateCreditConversionType
+}
+
+type RejectPayoutRequest {
   success: Boolean
   message: String
   conversion: AffiliateCreditConversionType
