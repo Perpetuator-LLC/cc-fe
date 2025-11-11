@@ -10,6 +10,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 import { Subscription, forkJoin } from 'rxjs';
 import {
   AffiliateService,
@@ -21,6 +24,7 @@ import {
   AffiliateCodeChangeRequest,
   PendingCodeChangeRequest,
   AffiliateEligibility,
+  AffiliateUserSearchResult,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -45,6 +49,9 @@ import { environment } from '../../environments/environment';
     MatDialogModule,
     MatTabsModule,
     MatTooltipModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
   ],
   templateUrl: './affiliate-dashboard.component.html',
   styleUrls: ['./affiliate-dashboard.component.scss'],
@@ -63,6 +70,13 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   pendingCodeChangeRequest: AffiliateCodeChangeRequest | null = null;
   adminPendingRequests: PendingCodeChangeRequest[] = [];
   loadingAdminRequests = false;
+  programSettings: { isEnabled: boolean; disabledMessage: string } | null = null;
+  loadingProgramSettings = false;
+  updatingProgramSettings = false;
+  searchUsername = '';
+  searchedUsers: AffiliateUserSearchResult[] = [];
+  searchingUser = false;
+  updatingUserEligibility = false;
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
   conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status'];
@@ -79,11 +93,20 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private dialog: MatDialog,
     private clipboard: Clipboard,
+    private userService: UserService,
     private router: Router,
-    protected userService: UserService,
   ) {}
 
   ngOnInit(): void {
+    // Load admin settings first if user is admin (regardless of eligibility)
+    if (this.isAdmin()) {
+      this.loadAffiliateProgramSettings();
+    }
+
+    if (this.canApproveCodeChanges()) {
+      this.loadAdminPendingRequests();
+    }
+
     this.checkEligibility();
   }
 
@@ -96,11 +119,27 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.affiliateService.checkAffiliateProgramEligibility().subscribe({
         next: (eligibility) => {
+          console.log('=== ELIGIBILITY DEBUG ===');
+          console.log('Full eligibility object:', eligibility);
+          console.log('isEligible:', eligibility.isEligible);
+          console.log('hasPaidOrder:', eligibility.hasPaidOrder);
+          console.log('reason:', eligibility.reason);
+          console.log('typeof hasPaidOrder:', typeof eligibility.hasPaidOrder);
+          console.log('=========================');
+
           this.eligibility = eligibility;
           this.checkingEligibility = false;
 
           if (!eligibility.isEligible) {
             this.loading = false;
+            // Even if not eligible, load admin settings for admins
+            // This allows them to re-enable the program if it's disabled
+            if (this.isAdmin()) {
+              this.loadAffiliateProgramSettings();
+            }
+            if (this.canApproveCodeChanges()) {
+              this.loadAdminPendingRequests();
+            }
           } else {
             this.checkTermsAcceptance();
           }
@@ -173,6 +212,10 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
           if (this.canApproveCodeChanges()) {
             this.loadAdminPendingRequests();
           }
+
+          if (this.isAdmin()) {
+            this.loadAffiliateProgramSettings();
+          }
         },
         error: (err) => {
           this.messageService.error(`Failed to load dashboard data: ${err.message}`);
@@ -185,6 +228,15 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   canApproveCodeChanges(): boolean {
     const userDetails = this.userService.userDetails();
     return userDetails?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false;
+  }
+
+  isAdmin(): boolean {
+    const userDetails = this.userService.userDetails();
+    return (
+      (userDetails?.permissions?.includes('is_staff') ||
+        userDetails?.permissions?.includes('affiliates.change_affiliateprofile')) ??
+      false
+    );
   }
 
   navigateToPurchase(): void {
@@ -204,6 +256,228 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  loadAffiliateProgramSettings(): void {
+    if (!this.isAdmin()) {
+      return;
+    }
+
+    this.loadingProgramSettings = true;
+    this.subscriptions.add(
+      this.affiliateService.getAffiliateProgramSettings().subscribe({
+        next: (settings) => {
+          this.programSettings = settings;
+          this.loadingProgramSettings = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load program settings: ${err.message}`);
+          this.loadingProgramSettings = false;
+        },
+      }),
+    );
+  }
+
+  toggleAffiliateProgramEnabled(): void {
+    if (!this.programSettings || this.updatingProgramSettings) {
+      return;
+    }
+
+    const newState = !this.programSettings.isEnabled;
+    const action = newState ? 'enable' : 'disable';
+    const impactMessage = newState
+      ? 'Users will be able to join and earn commissions.'
+      : 'New signups will be blocked and existing affiliates will not be able to access the dashboard.';
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: `${action === 'enable' ? 'Enable' : 'Disable'} Affiliate Program`,
+        message: `Are you sure you want to ${action} the entire affiliate program? ${impactMessage}`,
+        confirmText: action === 'enable' ? 'Enable' : 'Disable',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        let disabledMessage: string | undefined;
+        const reason: string | undefined =
+          prompt('Enter internal admin reason (optional, for audit trail):') || undefined;
+
+        if (!newState) {
+          // When disabling, prompt for message
+          disabledMessage =
+            prompt('Enter message to display to users when program is disabled (optional):') || undefined;
+          if (disabledMessage === null) return; // User cancelled
+        }
+
+        if (reason === null) return; // User cancelled
+
+        this.updatingProgramSettings = true;
+        this.subscriptions.add(
+          this.affiliateService.updateAffiliateProgramEnabled(newState, disabledMessage, reason).subscribe({
+            next: (response) => {
+              this.messageService.success(response.message);
+              if (this.programSettings) {
+                this.programSettings.isEnabled = newState;
+                if (disabledMessage) {
+                  this.programSettings.disabledMessage = disabledMessage;
+                }
+              }
+              this.updatingProgramSettings = false;
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to ${action} program: ${err.message}`);
+              this.updatingProgramSettings = false;
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  searchUser(): void {
+    const query = this.searchUsername.trim();
+
+    if (query.length < 3) {
+      this.messageService.error('Please enter at least 3 characters to search');
+      return;
+    }
+
+    this.searchingUser = true;
+    this.searchedUsers = [];
+
+    this.subscriptions.add(
+      this.affiliateService.searchAffiliateUsers(query).subscribe({
+        next: (users) => {
+          this.searchedUsers = users;
+          this.searchingUser = false;
+
+          if (users.length === 0) {
+            this.messageService.info('No users found matching your search');
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Search failed: ${err.message}`);
+          this.searchingUser = false;
+          this.searchedUsers = [];
+        },
+      }),
+    );
+  }
+
+  lockUserAccount(userId: string, username: string): void {
+    // Prompt admin to choose between suspend and under review
+    const statusChoice = prompt(
+      `Choose action for ${username}:\n` +
+        `1 = Suspend (permanent, requires admin restore)\n` +
+        `2 = Under Review (temporary, being investigated)\n\n` +
+        `Enter 1 or 2:`,
+    );
+
+    if (statusChoice === null) return; // User cancelled
+
+    let newStatus: string;
+    let defaultMessage: string;
+    let actionLabel: string;
+
+    if (statusChoice === '1') {
+      newStatus = 'suspended';
+      defaultMessage = 'Your affiliate account has been suspended. Please contact support.';
+      actionLabel = 'Suspend';
+    } else if (statusChoice === '2') {
+      newStatus = 'under_review';
+      defaultMessage = 'Your affiliate account is under review. We will contact you once the review is complete.';
+      actionLabel = 'Place Under Review';
+    } else {
+      this.messageService.error('Invalid choice. Please enter 1 or 2.');
+      return;
+    }
+
+    const message =
+      `Are you sure you want to ${actionLabel.toLowerCase()} the affiliate account for ${username}? ` +
+      `They will not be able to access the affiliate dashboard until restored.`;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: `${actionLabel} User Account`,
+        message,
+        confirmText: actionLabel,
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const customMessage = prompt(`Enter message to display to user (optional, default: "${defaultMessage}"):`);
+        if (customMessage === null) return; // User cancelled
+
+        const adminReason = prompt('Enter internal admin reason (optional, for audit trail):');
+        if (adminReason === null) return; // User cancelled
+
+        this.updatingUserEligibility = true;
+        this.subscriptions.add(
+          this.affiliateService
+            .updateAffiliateEligibility(userId, newStatus, customMessage || defaultMessage, adminReason || undefined)
+            .subscribe({
+              next: () => {
+                this.messageService.success(`Account for ${username} has been ${actionLabel.toLowerCase()}ed`);
+                this.updatingUserEligibility = false;
+                // Refresh search results
+                this.searchUser();
+              },
+              error: (err) => {
+                this.messageService.error(`Failed to ${actionLabel.toLowerCase()} account: ${err.message}`);
+                this.updatingUserEligibility = false;
+              },
+            }),
+        );
+      }
+    });
+  }
+
+  restoreUserAccount(userId: string, username: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'Restore User Account',
+        message: `Are you sure you want to restore affiliate access for ${username}?`,
+        confirmText: 'Restore Access',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const adminReason = prompt('Enter internal admin reason (optional, for audit trail):');
+        if (adminReason === null) return; // User cancelled
+
+        this.updatingUserEligibility = true;
+        this.subscriptions.add(
+          this.affiliateService
+            .updateAffiliateEligibility(
+              userId,
+              'active',
+              '', // Clear any previous message
+              adminReason || undefined,
+            )
+            .subscribe({
+              next: () => {
+                this.messageService.success(`Account for ${username} has been restored`);
+                this.updatingUserEligibility = false;
+                // Refresh search results
+                this.searchUser();
+              },
+              error: (err) => {
+                this.messageService.error(`Failed to restore account: ${err.message}`);
+                this.updatingUserEligibility = false;
+              },
+            }),
+        );
+      }
+    });
   }
 
   getAffiliateLink(): string {
@@ -269,6 +543,115 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
   getConversionTypeDisplay(type: string): string {
     return type === 'to_credits' ? 'Credits' : 'Cash';
+  }
+
+  getStatusIcon(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'check_circle';
+      case 'suspended':
+        return 'block';
+      case 'under_review':
+        return 'pending';
+      default:
+        return 'help_outline';
+    }
+  }
+
+  getStatusColor(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'status-active';
+      case 'suspended':
+        return 'status-suspended';
+      case 'under_review':
+        return 'status-under-review';
+      default:
+        return '';
+    }
+  }
+
+  getStatusLabel(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'Active';
+      case 'suspended':
+        return 'Suspended';
+      case 'under_review':
+        return 'Under Review';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  isNetworkJoinable(profile: AffiliateProfile | null): boolean {
+    if (!profile) return false;
+    // Network is joinable if eligibility is active (or null/undefined, meaning no restriction)
+    // AND the network is open (isActive = true)
+    const isEligible = !profile.eligibilityStatus || profile.eligibilityStatus === 'active';
+    return isEligible && profile.isActive;
+  }
+
+  getNetworkJoiningMessage(profile: AffiliateProfile | null): string {
+    if (!profile) return '';
+
+    // Check specific restriction statuses first
+    if (profile.eligibilityStatus === 'suspended') {
+      return 'Your account is suspended. Nobody can join your network right now.';
+    }
+
+    if (profile.eligibilityStatus === 'under_review') {
+      return 'Your account is under review. Nobody can join your network right now.';
+    }
+
+    // Only show network closed message if isActive is explicitly false
+    // and there's no eligibility restriction
+    if (!profile.isActive && (!profile.eligibilityStatus || profile.eligibilityStatus === 'active')) {
+      return 'This affiliate network is currently closed. Nobody can join your network right now.';
+    }
+
+    // No restrictions
+    return '';
+  }
+
+  toggleNetworkStatus(userId: string, username: string, currentIsActive: boolean): void {
+    const newStatus = !currentIsActive;
+    const action = newStatus ? 'open' : 'close';
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: `${action === 'open' ? 'Open' : 'Close'} Affiliate Network`,
+        message: `Are you sure you want to ${action} the affiliate network for ${username}? ${
+          newStatus ? 'Users will be able to join their network.' : 'Users will NOT be able to join their network.'
+        }`,
+        confirmText: action === 'open' ? 'Open Network' : 'Close Network',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const reasonInput = prompt('Enter internal admin reason (optional, for audit trail):');
+        if (reasonInput === null) return;
+        const reason = reasonInput || undefined;
+
+        this.updatingUserEligibility = true;
+        this.subscriptions.add(
+          this.affiliateService.updateAffiliateNetworkStatus(userId, newStatus, reason).subscribe({
+            next: () => {
+              this.messageService.success(`Network ${action}ed for ${username}`);
+              this.updatingUserEligibility = false;
+              this.searchUser();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to ${action} network: ${err.message}`);
+              this.updatingUserEligibility = false;
+            },
+          }),
+        );
+      }
+    });
   }
 
   onFileSelected(event: Event): void {
