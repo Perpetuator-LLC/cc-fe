@@ -226,6 +226,15 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'affiliate/stripe/return',
+    loadComponent: () =>
+      import('./stripe-onboarding-return/stripe-onboarding-return.component').then(
+        (c) => c.StripeOnboardingReturnComponent,
+      ),
+    title: 'Stripe Setup',
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'a/:code',
     loadComponent: () =>
       import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),

@@ -364,6 +364,65 @@
         </mat-card>
       </div>
 
+      <!-- Stripe Connect Status -->
+      @if (profile) {
+        <mat-card class="stripe-status-card" [class.incomplete]="!profile.stripeOnboardingCompleted">
+          <mat-card-content>
+            <h2>Payment Account Status</h2>
+            @if (!profile.stripeAccountId) {
+              <div class="stripe-status not-setup">
+                <mat-icon>account_balance</mat-icon>
+                <div class="status-content">
+                  <h3>Stripe Account Required</h3>
+                  <p>To receive cash payouts, you need to create a Stripe Connect account. This ensures secure and compliant payments.</p>
+                  <button mat-raised-button color="primary" (click)="startStripeOnboarding()">
+                    <mat-icon>add_circle</mat-icon>
+                    Setup Payment Account
+                  </button>
+                </div>
+              </div>
+            } @else if (!profile.stripeOnboardingCompleted) {
+              <div class="stripe-status incomplete">
+                <mat-icon>pending</mat-icon>
+                <div class="status-content">
+                  <h3>Setup Incomplete</h3>
+                  <p>Your Stripe account setup is not complete. Please finish the onboarding process to enable cash payouts.</p>
+                  <button mat-raised-button color="accent" (click)="continueStripeOnboarding()">
+                    <mat-icon>arrow_forward</mat-icon>
+                    Continue Setup
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="stripe-status complete">
+                <mat-icon>check_circle</mat-icon>
+                <div class="status-content">
+                  <h3>Payment Account Active</h3>
+                  <div class="stripe-details">
+                    @if (profile.stripeCountry) {
+                      <div class="detail-item">
+                        <span class="label">Country:</span>
+                        <span class="value">{{ profile.stripeCountry }}</span>
+                      </div>
+                    }
+                    <div class="detail-item">
+                      <span class="label">Payouts:</span>
+                      <span class="value" [class.enabled]="profile.stripePayoutsEnabled" [class.disabled]="!profile.stripePayoutsEnabled">
+                        {{ profile.stripePayoutsEnabled ? 'Enabled' : 'Disabled' }}
+                      </span>
+                    </div>
+                  </div>
+                  <button mat-raised-button (click)="openStripeDashboard()">
+                    <mat-icon>open_in_new</mat-icon>
+                    View Stripe Dashboard
+                  </button>
+                </div>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+
       @if (pendingCodeChangeRequest) {
         <mat-card class="pending-request-card">
           <mat-card-content>
@@ -588,6 +647,27 @@
                   <th mat-header-cell *matHeaderCellDef>Status</th>
                   <td mat-cell *matCellDef="let conversion">
                     <span class="status-badge" [class]="conversion.status">{{ conversion.status }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="details">
+                  <th mat-header-cell *matHeaderCellDef>Details</th>
+                  <td mat-cell *matCellDef="let conversion">
+                    @if (conversion.status === 'rejected' && conversion.rejectionReason) {
+                      <span class="rejection-reason" [matTooltip]="conversion.rejectionReason">
+                        <mat-icon>info</mat-icon>
+                        {{ conversion.rejectionReason.length > 30 ? conversion.rejectionReason.substring(0, 30) + '...' : conversion.rejectionReason }}
+                      </span>
+                    } @else if (conversion.status === 'completed' && conversion.stripeTransferId) {
+                      <span class="transfer-id" [matTooltip]="'Stripe Transfer ID: ' + conversion.stripeTransferId">
+                        <mat-icon>check_circle</mat-icon>
+                        Paid
+                      </span>
+                    } @else if (conversion.status === 'under_review') {
+                      <span class="under-review">Pending admin review</span>
+                    } @else {
+                      <span class="no-details">—</span>
+                    }
                   </td>
                 </ng-container>
 
