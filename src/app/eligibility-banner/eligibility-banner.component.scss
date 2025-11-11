@@ -1,0 +1,136 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.eligibility-banner {
+  position: relative;
+  width: 100%;
+  z-index: 10;
+
+  &.blocking {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+}
+
+.banner-content {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.info-box {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 8px;
+  background: var(--secondary-light);
+  border: 2px solid var(--border-color);
+  align-items: flex-start;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  &.purchase-required {
+    border-color: var(--md-sys-color-warning);
+    background: var(--secondary-400);
+
+    mat-icon {
+      color: var(--md-sys-color-warning);
+    }
+  }
+
+  &.not-eligible {
+    border-color: var(--md-sys-color-error);
+    background: var(--secondary-400);
+
+    mat-icon {
+      color: var(--md-sys-color-error);
+    }
+  }
+}
+
+.message-content {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--theme-color);
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--theme-color);
+
+    &.detail {
+      color: var(--description-color);
+      margin-bottom: 16px;
+    }
+  }
+
+  button {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: var(--theme-white);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: 8px 16px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .info-box {
+    flex-direction: column;
+    padding: 16px;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .message-content {
+    h3 {
+      font-size: 16px;
+    }
+
+    p {
+      font-size: 13px;
+    }
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
