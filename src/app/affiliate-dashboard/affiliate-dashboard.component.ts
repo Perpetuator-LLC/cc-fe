@@ -79,7 +79,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   updatingUserEligibility = false;
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
-  conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status'];
+  conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status', 'details'];
 
   isDragging = false;
   uploadingImage = false;
@@ -163,12 +163,56 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
           if (!hasAcceptedTerms) {
             this.showTermsDialog();
           } else {
-            this.loadDashboardData();
+            // Check if Stripe onboarding is needed
+            this.checkStripeOnboarding();
           }
         },
         error: (err) => {
           console.error('Error checking terms:', err);
           this.showTermsDialog();
+        },
+      }),
+    );
+  }
+
+  checkStripeOnboarding(): void {
+    this.subscriptions.add(
+      this.affiliateService.getAffiliateProfile().subscribe({
+        next: (profile) => {
+          if (profile && !profile.stripeOnboardingCompleted) {
+            // Stripe onboarding not complete, show dialog or redirect
+            this.showStripeOnboardingDialog();
+          } else {
+            // Everything is complete, load dashboard
+            this.loadDashboardData();
+          }
+        },
+        error: () => {
+          // On error, try to load dashboard anyway
+          this.loadDashboardData();
+        },
+      }),
+    );
+  }
+
+  showStripeOnboardingDialog(): void {
+    this.messageService.info('You need to complete Stripe account setup to access the affiliate dashboard');
+    this.loading = true;
+
+    // Automatically start Stripe onboarding
+    this.subscriptions.add(
+      this.affiliateService.createStripeConnectAccount().subscribe({
+        next: (response) => {
+          if (response.onboardingUrl) {
+            window.location.href = response.onboardingUrl;
+          } else {
+            this.messageService.error('Unable to start Stripe onboarding. Please try again later.');
+            this.loading = false;
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to start Stripe onboarding: ${err.message}`);
+          this.loading = false;
         },
       }),
     );
@@ -515,6 +559,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       data: {
         type,
         availableBalance: this.getAvailableBalance(),
+        affiliateProfile: this.profile,
       },
     });
 
@@ -869,6 +914,47 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.messageService.error(`Failed to reject request: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  startStripeOnboarding(): void {
+    this.loading = true;
+    this.subscriptions.add(
+      this.affiliateService.createStripeConnectAccount().subscribe({
+        next: (response) => {
+          if (response.onboardingUrl) {
+            window.location.href = response.onboardingUrl;
+          } else {
+            this.messageService.error('Unable to start Stripe onboarding. Please try again later.');
+            this.loading = false;
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to start Stripe onboarding: ${err.message}`);
+          this.loading = false;
+        },
+      }),
+    );
+  }
+
+  continueStripeOnboarding(): void {
+    this.startStripeOnboarding();
+  }
+
+  openStripeDashboard(): void {
+    this.subscriptions.add(
+      this.affiliateService.getStripeDashboardLink().subscribe({
+        next: (response) => {
+          if (response.dashboardUrl) {
+            window.open(response.dashboardUrl, '_blank');
+          } else {
+            this.messageService.error('Unable to open Stripe dashboard. Please try again later.');
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to open Stripe dashboard: ${err.message}`);
         },
       }),
     );

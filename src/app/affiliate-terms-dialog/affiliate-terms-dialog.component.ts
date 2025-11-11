@@ -72,11 +72,35 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
       this.affiliateService.acceptAffiliateTerms('1.0').subscribe({
         next: () => {
           this.messageService.success('Affiliate terms accepted successfully!');
-          this.dialogRef.close(true);
+          // After accepting terms, create Stripe Connect account
+          this.createStripeAccount();
         },
         error: (err) => {
           this.messageService.error(`Failed to accept terms: ${err.message}`);
           this.loading = false;
+        },
+      }),
+    );
+  }
+
+  createStripeAccount(): void {
+    this.subscriptions.add(
+      this.affiliateService.createStripeConnectAccount().subscribe({
+        next: (response) => {
+          if (response.onboardingUrl) {
+            // Redirect to Stripe onboarding
+            window.location.href = response.onboardingUrl;
+          } else {
+            // If no URL, something went wrong but accept was successful
+            this.messageService.warning('Stripe setup incomplete. Please complete setup from your dashboard.');
+            this.dialogRef.close(true);
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to setup payment account: ${err.message}`);
+          this.loading = false;
+          // Still close dialog as terms were accepted
+          this.dialogRef.close(true);
         },
       }),
     );

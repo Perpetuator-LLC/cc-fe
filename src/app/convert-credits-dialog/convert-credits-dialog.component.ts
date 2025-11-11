@@ -9,12 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
-import { AffiliateService } from '../affiliate.service';
+import { AffiliateService, AffiliateProfile } from '../affiliate.service';
 import { MessageService } from '../message.service';
 
 export interface ConvertCreditsDialogData {
   type: 'credits' | 'cash';
   availableBalance: number;
+  affiliateProfile?: AffiliateProfile | null;
 }
 
 @Component({
@@ -37,6 +38,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   private subscriptions = new Subscription();
   loading = false;
   convertForm: FormGroup;
+  readonly MIN_CASH_PAYOUT = 1000; // $10.00
 
   constructor(
     private dialogRef: MatDialogRef<ConvertCreditsDialogComponent>,
@@ -45,13 +47,48 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     private affiliateService: AffiliateService,
     private messageService: MessageService,
   ) {
+    const minAmount = this.data.type === 'cash' ? this.MIN_CASH_PAYOUT : 1;
     this.convertForm = this.formBuilder.group({
-      amount: ['', [Validators.required, Validators.min(1), Validators.max(data.availableBalance)]],
+      amount: ['', [Validators.required, Validators.min(minAmount), Validators.max(data.availableBalance)]],
     });
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  canRequestPayout(): boolean {
+    if (this.data.type !== 'cash') return true;
+
+    const profile = this.data.affiliateProfile;
+    if (!profile) return false;
+
+    return !!(profile.stripeOnboardingCompleted && profile.stripePayoutsEnabled && profile.stripeCountry === 'US');
+  }
+
+  getStripeRequirementMessage(): string | null {
+    if (this.data.type !== 'cash') return null;
+
+    const profile = this.data.affiliateProfile;
+    if (!profile) return 'Affiliate profile not loaded';
+
+    if (!profile.stripeAccountId) {
+      return 'You must setup a Stripe payment account before requesting cash payouts';
+    }
+
+    if (!profile.stripeOnboardingCompleted) {
+      return 'Please complete your Stripe account setup before requesting cash payouts';
+    }
+
+    if (!profile.stripePayoutsEnabled) {
+      return 'Your Stripe account is not yet enabled for payouts. Please check your Stripe dashboard';
+    }
+
+    if (profile.stripeCountry !== 'US') {
+      return 'Cash payouts are only available for US-based affiliates';
+    }
+
+    return null;
   }
 
   getTitle(): string {
@@ -62,16 +99,35 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     if (this.data.type === 'credits') {
       return 'Convert your affiliate credits to regular platform credits that you can use for any service.';
     }
+    const minAmount = `${this.MIN_CASH_PAYOUT} credits ($${this.MIN_CASH_PAYOUT / 100})`;
     return (
-      'Request a cash payout for your affiliate credits. ' +
-      'Payouts are processed manually and may take 5-7 business days.'
+      `Request a cash payout for your affiliate credits. Minimum payout is ${minAmount}. ` +
+      'Payouts are reviewed by admins and typically processed within 5-7 business days.'
     );
   }
 
   onSubmit(): void {
     if (this.convertForm.invalid) return;
 
+    // Additional validation for cash payouts
+    if (this.data.type === 'cash' && !this.canRequestPayout()) {
+      const message = this.getStripeRequirementMessage();
+      if (message) {
+        this.messageService.error(message);
+        return;
+      }
+    }
+
     const amount = this.convertForm.value.amount;
+
+    // Check minimum for cash payout
+    if (this.data.type === 'cash' && amount < this.MIN_CASH_PAYOUT) {
+      this.messageService.error(
+        `Minimum cash payout is ${this.MIN_CASH_PAYOUT} credits ($${this.MIN_CASH_PAYOUT / 100})`,
+      );
+      return;
+    }
+
     const conversionType = this.data.type === 'credits' ? 'to_credits' : 'to_cash';
 
     this.loading = true;
@@ -85,7 +141,9 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
               `${amount} affiliate credits converted to ${response.conversion?.targetAmount} regular credits!`,
             );
           } else {
-            this.messageService.success("Payout request submitted. You'll receive an email when processed.");
+            this.messageService.success(
+              'Payout request submitted for admin review. You will receive an email when it is processed.',
+            );
           }
           this.dialogRef.close(true);
         },

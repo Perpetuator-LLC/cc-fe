@@ -20,6 +20,12 @@ export interface AffiliateProfile {
   isActive: boolean;
   eligibilityStatus?: string | null;
   eligibilityMessage?: string | null;
+  stripeAccountId?: string | null;
+  stripeOnboardingCompleted?: boolean;
+  stripeChargesEnabled?: boolean;
+  stripePayoutsEnabled?: boolean;
+  stripeCountry?: string | null;
+  stripeDetailsSubmitted?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,10 +56,14 @@ export interface AffiliateCredit {
 }
 
 export interface AffiliateConversion {
+  uuid?: string;
   conversionType: string;
   affiliateCreditAmount: number;
   targetAmount: number;
   status: string;
+  stripeTransferId?: string | null;
+  rejectionReason?: string | null;
+  adminNotes?: string | null;
   createdAt: string;
   completedAt: string | null;
 }
@@ -222,6 +232,31 @@ interface AffiliateEligibilityResponse {
   affiliateProgramEligibility: AffiliateEligibility;
 }
 
+interface CreateStripeConnectAccountResponse {
+  createStripeConnectAccount: {
+    success: boolean;
+    message: string;
+    onboardingUrl?: string;
+    affiliateProfile?: AffiliateProfile | null;
+  };
+}
+
+interface RefreshStripeAccountStatusResponse {
+  refreshStripeAccountStatus: {
+    success: boolean;
+    message: string;
+    affiliateProfile?: AffiliateProfile | null;
+  };
+}
+
+interface GetStripeDashboardLinkResponse {
+  getStripeDashboardLink: {
+    success: boolean;
+    message: string;
+    dashboardUrl?: string;
+  };
+}
+
 export interface AffiliateUserSearchResult {
   uuid: string;
   username: string;
@@ -343,6 +378,103 @@ export class AffiliateService extends BaseService {
     );
   }
 
+  createStripeConnectAccount(): Observable<{
+    success: boolean;
+    message: string;
+    onboardingUrl?: string;
+    affiliateProfile?: AffiliateProfile | null;
+  }> {
+    const mutation = gql`
+      mutation CreateStripeConnectAccount {
+        createStripeConnectAccount {
+          success
+          message
+          onboardingUrl
+          affiliateProfile {
+            uuid
+            stripeAccountId
+            stripeOnboardingCompleted
+            stripePayoutsEnabled
+            stripeCountry
+          }
+        }
+      }
+    `;
+
+    return this.mutate<CreateStripeConnectAccountResponse>({
+      mutation,
+    }).pipe(
+      map((data) => {
+        if (!data.createStripeConnectAccount.success) {
+          throw new Error(data.createStripeConnectAccount.message);
+        }
+        return data.createStripeConnectAccount;
+      }),
+    );
+  }
+
+  refreshStripeAccountStatus(): Observable<{
+    success: boolean;
+    message: string;
+    affiliateProfile?: AffiliateProfile | null;
+  }> {
+    const mutation = gql`
+      mutation RefreshStripeAccountStatus {
+        refreshStripeAccountStatus {
+          success
+          message
+          affiliateProfile {
+            uuid
+            stripeAccountId
+            stripeOnboardingCompleted
+            stripeChargesEnabled
+            stripePayoutsEnabled
+            stripeCountry
+            stripeDetailsSubmitted
+          }
+        }
+      }
+    `;
+
+    return this.mutate<RefreshStripeAccountStatusResponse>({
+      mutation,
+    }).pipe(
+      map((data) => {
+        if (!data.refreshStripeAccountStatus.success) {
+          throw new Error(data.refreshStripeAccountStatus.message);
+        }
+        return data.refreshStripeAccountStatus;
+      }),
+    );
+  }
+
+  getStripeDashboardLink(): Observable<{
+    success: boolean;
+    message: string;
+    dashboardUrl?: string;
+  }> {
+    const mutation = gql`
+      mutation GetStripeDashboardLink {
+        getStripeDashboardLink {
+          success
+          message
+          dashboardUrl
+        }
+      }
+    `;
+
+    return this.mutate<GetStripeDashboardLinkResponse>({
+      mutation,
+    }).pipe(
+      map((data) => {
+        if (!data.getStripeDashboardLink.success) {
+          throw new Error(data.getStripeDashboardLink.message);
+        }
+        return data.getStripeDashboardLink;
+      }),
+    );
+  }
+
   updateAffiliateBrandImage(file: File): Observable<{
     success: boolean;
     message: string;
@@ -441,10 +573,13 @@ export class AffiliateService extends BaseService {
           success
           message
           conversion {
+            uuid
             conversionType
             affiliateCreditAmount
             targetAmount
             status
+            stripeTransferId
+            rejectionReason
             createdAt
             completedAt
           }
@@ -479,6 +614,12 @@ export class AffiliateService extends BaseService {
           isActive
           eligibilityStatus
           eligibilityMessage
+          stripeAccountId
+          stripeOnboardingCompleted
+          stripeChargesEnabled
+          stripePayoutsEnabled
+          stripeCountry
+          stripeDetailsSubmitted
           createdAt
           updatedAt
         }
@@ -533,10 +674,13 @@ export class AffiliateService extends BaseService {
     const query = gql`
       query GetAffiliateConversions {
         myAffiliateConversions {
+          uuid
           conversionType
           affiliateCreditAmount
           targetAmount
           status
+          stripeTransferId
+          rejectionReason
           createdAt
           completedAt
         }
