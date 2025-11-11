@@ -1,5 +1,6 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="affiliate-dashboard-container">
+
   @if (checkingEligibility) {
     <div class="loading-container">
       <mat-spinner></mat-spinner>
@@ -30,16 +31,232 @@
             <div class="eligibility-message not-eligible">
               <mat-icon>block</mat-icon>
               <div class="message-content">
-                <h2>Not Eligible</h2>
+                <h2>Not Accessible</h2>
                 <p class="reason">{{ eligibility.reason }}</p>
                 <p class="detail">
-                  Please contact support if you believe this is an error.
+                  Please contact support if you require assistance.
                 </p>
               </div>
             </div>
           }
         </mat-card-content>
       </mat-card>
+
+      <!-- Admin Panel - Always Accessible for Admins Even When Not Eligible -->
+      @if (isAdmin() || canApproveCodeChanges()) {
+        <mat-card class="admin-control-panel">
+          <mat-card-content>
+            <h2>Affiliate Admin Control Panel</h2>
+            <p class="admin-notice">
+              <mat-icon>admin_panel_settings</mat-icon>
+              You have administrative access. Use the controls below to manage the affiliate program.
+            </p>
+
+            @if (isAdmin()) {
+              <!-- Global Program Settings -->
+              <div class="admin-section program-settings-section">
+                <h3>Global Program Settings</h3>
+                @if (loadingProgramSettings) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading...</span>
+                  </div>
+                } @else if (programSettings) {
+                  <div class="program-status-row">
+                    <div class="status-indicator">
+                      <mat-icon [class.enabled]="programSettings.isEnabled" [class.disabled]="!programSettings.isEnabled">
+                        {{ programSettings.isEnabled ? 'check_circle' : 'cancel' }}
+                      </mat-icon>
+                      <span class="status-text">
+                        Affiliate Program: <strong>{{ programSettings.isEnabled ? 'ENABLED' : 'DISABLED' }}</strong>
+                      </span>
+                    </div>
+                    <button
+                      mat-raised-button
+                      [color]="programSettings.isEnabled ? 'warn' : 'primary'"
+                      (click)="toggleAffiliateProgramEnabled()"
+                      [disabled]="updatingProgramSettings"
+                    >
+                      @if (updatingProgramSettings) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                      } @else {
+                        <mat-icon>{{ programSettings.isEnabled ? 'block' : 'check_circle' }}</mat-icon>
+                      }
+                      {{ programSettings.isEnabled ? 'Disable' : 'Enable' }}
+                    </button>
+                  </div>
+                  @if (!programSettings.isEnabled && programSettings.disabledMessage) {
+                    <div class="disabled-message-display">
+                      <strong>Current Disabled Message:</strong>
+                      <p>{{ programSettings.disabledMessage }}</p>
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- User Account Management -->
+              <div class="admin-section user-management-section">
+                <h3>Suspend/Restore User Accounts</h3>
+                <div class="user-search">
+                  <mat-form-field appearance="outline" class="search-field">
+                    <mat-label>Search by username (min 3 characters)</mat-label>
+                    <input matInput [(ngModel)]="searchUsername" (keyup.enter)="searchUser()" />
+                    <mat-icon matSuffix>search</mat-icon>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" (click)="searchUser()" [disabled]="searchingUser">
+                    @if (searchingUser) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      Search
+                    }
+                  </button>
+                </div>
+
+                @if (searchedUsers.length > 0) {
+                  <div class="searched-users-list">
+                    @for (user of searchedUsers; track user.uuid) {
+                      <div class="searched-user-card">
+                        <div class="user-info">
+                          <mat-icon>person</mat-icon>
+                          <div>
+                            <strong>{{ user.username }}</strong>
+                            <span class="user-status">
+                              @if (user.hasAffiliateProfile) {
+                                <span class="badge affiliate">
+                                  <mat-icon>verified</mat-icon>
+                                  Affiliate Member
+                                </span>
+                                @if (user.eligibilityStatus) {
+                                  <span class="badge status-badge"
+                                        [class.active]="user.eligibilityStatus === 'active'"
+                                        [class.suspended]="user.eligibilityStatus === 'suspended'"
+                                        [class.under-review]="user.eligibilityStatus === 'under_review'">
+                                    <mat-icon>{{ getStatusIcon(user.eligibilityStatus) }}</mat-icon>
+                                    {{ getStatusLabel(user.eligibilityStatus) }}
+                                  </span>
+                                }
+                                @if (user.isActive !== undefined) {
+                                  <span class="badge network-badge"
+                                        [class.network-open]="user.isActive"
+                                        [class.network-closed]="!user.isActive">
+                                    <mat-icon>{{ user.isActive ? 'group' : 'group_remove' }}</mat-icon>
+                                    {{ user.isActive ? 'Accepting' : 'Closed' }}
+                                  </span>
+                                }
+                              } @else {
+                                <span class="badge no-profile">Not in program</span>
+                              }
+                            </span>
+                          </div>
+                        </div>
+                        @if (user.hasAffiliateProfile) {
+                          <div class="user-actions">
+                            <button
+                              mat-raised-button
+                              color="warn"
+                              (click)="lockUserAccount(user.uuid, user.username)"
+                              [disabled]="updatingUserEligibility || user.eligibilityStatus === 'suspended' || user.eligibilityStatus === 'under_review'"
+                              matTooltip="Suspend or place account under review"
+                            >
+                              <mat-icon>lock</mat-icon>
+                              Restrict Account
+                            </button>
+                            <button
+                              mat-raised-button
+                              color="primary"
+                              (click)="restoreUserAccount(user.uuid, user.username)"
+                              [disabled]="updatingUserEligibility || user.eligibilityStatus === 'active'"
+                              matTooltip="Restore user's affiliate account"
+                            >
+                              <mat-icon>lock_open</mat-icon>
+                              Restore
+                            </button>
+                            <button
+                              mat-raised-button
+                              [color]="user.isActive ? 'accent' : 'primary'"
+                              (click)="toggleNetworkStatus(user.uuid, user.username, user.isActive ?? true)"
+                              [disabled]="updatingUserEligibility"
+                              [matTooltip]="user.isActive ? 'Close network (prevent new sign-ups)' : 'Open network (allow new sign-ups)'"
+                            >
+                              <mat-icon>{{ user.isActive ? 'group_remove' : 'group_add' }}</mat-icon>
+                              {{ user.isActive ? 'Close Network' : 'Open Network' }}
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Pending Code Change Requests -->
+            @if (canApproveCodeChanges()) {
+              <div class="admin-section code-requests-section">
+                <h3>Pending Code Change Requests</h3>
+
+                @if (loadingAdminRequests) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading requests...</span>
+                  </div>
+                } @else if (adminPendingRequests.length === 0) {
+                  <div class="no-data-small">No pending requests</div>
+                } @else {
+                  <div class="requests-table">
+                    <table mat-table [dataSource]="adminPendingRequests" class="compact-table">
+                      <ng-container matColumnDef="user">
+                        <th mat-header-cell *matHeaderCellDef>User</th>
+                        <td mat-cell *matCellDef="let request">
+                          <strong>{{ request.username }}</strong>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="codes">
+                        <th mat-header-cell *matHeaderCellDef>Code Change</th>
+                        <td mat-cell *matCellDef="let request">
+                          <div class="code-change-inline">
+                            <span class="old-code">{{ request.currentCode }}</span>
+                            <mat-icon>arrow_forward</mat-icon>
+                            <span class="new-code">{{ request.requestedCode }}</span>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let request">
+                          <div class="action-buttons-inline">
+                            <button
+                              mat-icon-button
+                              color="primary"
+                              (click)="approveCodeChangeRequest(request.uuid)"
+                              matTooltip="Approve"
+                            >
+                              <mat-icon>check</mat-icon>
+                            </button>
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              (click)="rejectCodeChangeRequest(request.uuid)"
+                              matTooltip="Reject"
+                            >
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="['user', 'codes', 'actions']"></tr>
+                      <tr mat-row *matRowDef="let row; columns: ['user', 'codes', 'actions'];"></tr>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   } @else if (loading) {
     <div class="loading-container">
@@ -49,6 +266,61 @@
   } @else {
     <div class="dashboard-content">
       <h1 class="page-title">Affiliate Dashboard</h1>
+
+      <!-- Account Status Display -->
+      @if (profile && (
+        (profile.eligibilityStatus && profile.eligibilityStatus !== 'active') ||
+        !profile.isActive
+      )) {
+        <mat-card class="status-card">
+          <mat-card-content>
+            <div class="status-display">
+              @if (profile.eligibilityStatus && profile.eligibilityStatus !== 'active') {
+                <div class="status-item">
+                  <mat-icon [class]="getStatusColor(profile.eligibilityStatus)">
+                    {{ getStatusIcon(profile.eligibilityStatus) }}
+                  </mat-icon>
+                  <div class="status-text">
+                    <strong>Account Status:</strong>
+                    <span class="status-label">{{ getStatusLabel(profile.eligibilityStatus) }}</span>
+                  </div>
+                </div>
+              }
+
+              @if (profile.isActive !== undefined) {
+                <div class="status-item">
+                  <mat-icon [class]="profile.isActive ? 'status-active' : 'status-inactive'">
+                    {{ profile.isActive ? 'group' : 'group_remove' }}
+                  </mat-icon>
+                  <div class="status-text">
+                    <strong>Network Status:</strong>
+                    <span class="status-label">{{ profile.isActive ? 'Accepting Members' : 'Closed' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Network Joining Warning -->
+            @if (!isNetworkJoinable(profile) && getNetworkJoiningMessage(profile)) {
+              <div class="network-warning"
+                   [class.suspended]="profile.eligibilityStatus === 'suspended'"
+                   [class.under-review]="profile.eligibilityStatus === 'under_review'"
+                   [class.network-closed]="!profile.isActive && (!profile.eligibilityStatus || profile.eligibilityStatus === 'active')">
+                <mat-icon>{{ getStatusIcon(profile.eligibilityStatus) || 'block' }}</mat-icon>
+                <p>{{ getNetworkJoiningMessage(profile) }}</p>
+              </div>
+            }
+
+            <!-- Eligibility Message from Admin -->
+            @if (profile.eligibilityMessage) {
+              <div class="eligibility-message-display">
+                <mat-icon>info</mat-icon>
+                <p>{{ profile.eligibilityMessage }}</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
 
       <div class="stats-grid">
         <mat-card class="stat-card">
@@ -329,78 +601,206 @@
         </mat-tab>
       </mat-tab-group>
 
-      @if (canApproveCodeChanges()) {
-        <mat-card class="admin-panel-card">
+      <!-- Admin Control Panel - At Bottom -->
+      @if (isAdmin() || canApproveCodeChanges()) {
+        <mat-card class="admin-control-panel">
           <mat-card-content>
-            <h2>Pending Code Change Requests (Admin)</h2>
+            <h2>Affiliate Admin Control Panel</h2>
 
-            @if (loadingAdminRequests) {
-              <div class="loading-container">
-                <mat-spinner diameter="40"></mat-spinner>
-                <p>Loading pending requests...</p>
+            @if (isAdmin()) {
+              <!-- Global Program Settings -->
+              <div class="admin-section program-settings-section">
+                <h3>Global Program Settings</h3>
+                @if (loadingProgramSettings) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading...</span>
+                  </div>
+            } @else if (programSettings) {
+              <div class="program-status-row">
+                <div class="status-indicator">
+                  <mat-icon [class.enabled]="programSettings.isEnabled" [class.disabled]="!programSettings.isEnabled">
+                    {{ programSettings.isEnabled ? 'check_circle' : 'cancel' }}
+                  </mat-icon>
+                  <span class="status-text">
+                    Affiliate Program: <strong>{{ programSettings.isEnabled ? 'ENABLED' : 'DISABLED' }}</strong>
+                  </span>
+                </div>
+                <button
+                  mat-raised-button
+                  [color]="programSettings.isEnabled ? 'warn' : 'primary'"
+                  (click)="toggleAffiliateProgramEnabled()"
+                  [disabled]="updatingProgramSettings"
+                >
+                  @if (updatingProgramSettings) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon>{{ programSettings.isEnabled ? 'block' : 'check_circle' }}</mat-icon>
+                  }
+                  {{ programSettings.isEnabled ? 'Disable' : 'Enable' }}
+                </button>
               </div>
-            } @else if (adminPendingRequests.length === 0) {
-              <div class="no-data">No pending requests</div>
-            } @else {
-              <div class="admin-requests-table">
-                <table mat-table [dataSource]="adminPendingRequests" class="history-table">
-                  <ng-container matColumnDef="user">
-                    <th mat-header-cell *matHeaderCellDef>User</th>
-                    <td mat-cell *matCellDef="let request">
-                      <div class="user-info">
-                        <strong>{{ request.username }}</strong>
-                        <span class="user-email">{{ request.userEmail }}</span>
+            }
+              </div>
+
+          <!-- User Account Management -->
+          <div class="admin-section user-management-section">
+            <h3>Suspend/Restore User Accounts</h3>
+            <div class="user-search">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search by username (min 3 characters)</mat-label>
+                <input matInput [(ngModel)]="searchUsername" (keyup.enter)="searchUser()" />
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="searchUser()" [disabled]="searchingUser">
+                @if (searchingUser) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  Search
+                }
+              </button>
+            </div>
+
+            @if (searchedUsers.length > 0) {
+              <div class="searched-users-list">
+                @for (user of searchedUsers; track user.uuid) {
+                  <div class="searched-user-card">
+                    <div class="user-info">
+                      <mat-icon>person</mat-icon>
+                      <div>
+                        <strong>{{ user.username }}</strong>
+                        <span class="user-status">
+                          @if (user.hasAffiliateProfile) {
+                            <span class="badge affiliate">
+                              <mat-icon>verified</mat-icon>
+                              Affiliate Member
+                            </span>
+                            @if (user.eligibilityStatus) {
+                              <span class="badge status-badge"
+                                    [class.active]="user.eligibilityStatus === 'active'"
+                                    [class.suspended]="user.eligibilityStatus === 'suspended'"
+                                    [class.under-review]="user.eligibilityStatus === 'under_review'">
+                                <mat-icon>{{ getStatusIcon(user.eligibilityStatus) }}</mat-icon>
+                                {{ getStatusLabel(user.eligibilityStatus) }}
+                              </span>
+                            }
+                            @if (user.isActive !== undefined) {
+                              <span class="badge network-badge"
+                                    [class.network-open]="user.isActive"
+                                    [class.network-closed]="!user.isActive">
+                                <mat-icon>{{ user.isActive ? 'group' : 'group_remove' }}</mat-icon>
+                                {{ user.isActive ? 'Accepting' : 'Closed' }}
+                              </span>
+                            }
+                          } @else {
+                            <span class="badge no-profile">Not in program</span>
+                          }
+                        </span>
                       </div>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="codes">
-                    <th mat-header-cell *matHeaderCellDef>Code Change</th>
-                    <td mat-cell *matCellDef="let request">
-                      <div class="code-change">
-                        <span class="old-code">{{ request.currentCode }}</span>
-                        <mat-icon>arrow_forward</mat-icon>
-                        <span class="new-code">{{ request.requestedCode }}</span>
-                      </div>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="referrals">
-                    <th mat-header-cell *matHeaderCellDef>Referrals</th>
-                    <td mat-cell *matCellDef="let request">{{ request.userReferralCount }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="reason">
-                    <th mat-header-cell *matHeaderCellDef>Reason</th>
-                    <td mat-cell *matCellDef="let request">
-                      <span class="reason-text">{{ request.reason || 'No reason provided' }}</span>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef>Requested</th>
-                    <td mat-cell *matCellDef="let request">{{ formatDate(request.requestedAt) }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let request">
-                      <div class="action-buttons">
-                        <button mat-raised-button color="primary" (click)="approveCodeChangeRequest(request.uuid)">
-                          <mat-icon>check</mat-icon>
-                          Approve
+                    </div>
+                    @if (user.hasAffiliateProfile) {
+                      <div class="user-actions">
+                        <button
+                          mat-raised-button
+                          color="warn"
+                          (click)="lockUserAccount(user.uuid, user.username)"
+                          [disabled]="updatingUserEligibility || user.eligibilityStatus === 'suspended' || user.eligibilityStatus === 'under_review'"
+                          matTooltip="Suspend or place account under review"
+                        >
+                          <mat-icon>lock</mat-icon>
+                          Restrict Account
                         </button>
-                        <button mat-raised-button color="warn" (click)="rejectCodeChangeRequest(request.uuid)">
-                          <mat-icon>close</mat-icon>
-                          Reject
+                        <button
+                          mat-raised-button
+                          color="primary"
+                          (click)="restoreUserAccount(user.uuid, user.username)"
+                          [disabled]="updatingUserEligibility || user.eligibilityStatus === 'active'"
+                          matTooltip="Restore user's affiliate account"
+                        >
+                          <mat-icon>lock_open</mat-icon>
+                          Restore
+                        </button>
+                        <button
+                          mat-raised-button
+                          [color]="user.isActive ? 'accent' : 'primary'"
+                          (click)="toggleNetworkStatus(user.uuid, user.username, user.isActive ?? true)"
+                          [disabled]="updatingUserEligibility"
+                          [matTooltip]="user.isActive ? 'Close network (prevent new sign-ups)' : 'Open network (allow new sign-ups)'"
+                        >
+                          <mat-icon>{{ user.isActive ? 'group_remove' : 'group_add' }}</mat-icon>
+                          {{ user.isActive ? 'Close Network' : 'Open Network' }}
                         </button>
                       </div>
-                    </td>
-                  </ng-container>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+            }
 
-                  <tr mat-header-row *matHeaderRowDef="['user', 'codes', 'referrals', 'reason', 'date', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['user', 'codes', 'referrals', 'reason', 'date', 'actions'];"></tr>
-                </table>
+            <!-- Pending Code Change Requests -->
+            @if (canApproveCodeChanges()) {
+              <div class="admin-section code-requests-section">
+                <h3>Pending Code Change Requests</h3>
+
+                @if (loadingAdminRequests) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading requests...</span>
+                  </div>
+                } @else if (adminPendingRequests.length === 0) {
+                  <div class="no-data-small">No pending requests</div>
+                } @else {
+                  <div class="requests-table">
+                    <table mat-table [dataSource]="adminPendingRequests" class="compact-table">
+                      <ng-container matColumnDef="user">
+                        <th mat-header-cell *matHeaderCellDef>User</th>
+                        <td mat-cell *matCellDef="let request">
+                          <strong>{{ request.username }}</strong>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="codes">
+                        <th mat-header-cell *matHeaderCellDef>Code Change</th>
+                        <td mat-cell *matCellDef="let request">
+                          <div class="code-change-inline">
+                            <span class="old-code">{{ request.currentCode }}</span>
+                            <mat-icon>arrow_forward</mat-icon>
+                            <span class="new-code">{{ request.requestedCode }}</span>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let request">
+                          <div class="action-buttons-inline">
+                            <button
+                              mat-icon-button
+                              color="primary"
+                              (click)="approveCodeChangeRequest(request.uuid)"
+                              matTooltip="Approve"
+                            >
+                              <mat-icon>check</mat-icon>
+                            </button>
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              (click)="rejectCodeChangeRequest(request.uuid)"
+                              matTooltip="Reject"
+                            >
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="['user', 'codes', 'actions']"></tr>
+                      <tr mat-row *matRowDef="let row; columns: ['user', 'codes', 'actions'];"></tr>
+                    </table>
+                  </div>
+                }
               </div>
             }
           </mat-card-content>

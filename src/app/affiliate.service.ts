@@ -18,6 +18,8 @@ export interface AffiliateProfile {
   code: string;
   brandImageUrl: string | null;
   isActive: boolean;
+  eligibilityStatus?: string | null;
+  eligibilityMessage?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -218,6 +220,14 @@ interface PendingCodeChangeRequestsResponse {
 
 interface AffiliateEligibilityResponse {
   affiliateProgramEligibility: AffiliateEligibility;
+}
+
+export interface AffiliateUserSearchResult {
+  uuid: string;
+  username: string;
+  hasAffiliateProfile: boolean;
+  eligibilityStatus: string;
+  isActive?: boolean;
 }
 
 @Injectable({
@@ -467,6 +477,8 @@ export class AffiliateService extends BaseService {
           code
           brandImageUrl
           isActive
+          eligibilityStatus
+          eligibilityMessage
           createdAt
           updatedAt
         }
@@ -839,6 +851,173 @@ export class AffiliateService extends BaseService {
           throw new Error(data.rejectCodeChangeRequest.message);
         }
         return data.rejectCodeChangeRequest;
+      }),
+    );
+  }
+
+  getAffiliateProgramSettings(): Observable<{ isEnabled: boolean; disabledMessage: string }> {
+    const query = gql`
+      query GetAffiliateSystemSettings {
+        affiliateSystemSettings {
+          isEnabled
+          disabledMessage
+        }
+      }
+    `;
+
+    interface Response {
+      affiliateSystemSettings: { isEnabled: boolean; disabledMessage: string };
+    }
+
+    return this.query<Response>({
+      query,
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.affiliateSystemSettings));
+  }
+
+  searchAffiliateUsers(query: string): Observable<AffiliateUserSearchResult[]> {
+    const searchQuery = gql`
+      query SearchAffiliateUsers($query: String!) {
+        searchAffiliateUsers(query: $query) {
+          uuid
+          username
+          hasAffiliateProfile
+          eligibilityStatus
+          isActive
+        }
+      }
+    `;
+
+    interface Response {
+      searchAffiliateUsers: AffiliateUserSearchResult[];
+    }
+
+    return this.query<Response>({
+      query: searchQuery,
+      variables: { query },
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.searchAffiliateUsers));
+  }
+
+  updateAffiliateEligibility(
+    userId: string,
+    eligibilityStatus: string,
+    eligibilityMessage?: string,
+    reason?: string,
+  ): Observable<{ success: boolean; message: string; affiliateProfile: AffiliateProfile | null }> {
+    const mutation = gql`
+      mutation UpdateAffiliateEligibility(
+        $userId: UUID!
+        $eligibilityStatus: String!
+        $eligibilityMessage: String
+        $reason: String
+      ) {
+        updateAffiliateEligibility(
+          userId: $userId
+          eligibilityStatus: $eligibilityStatus
+          eligibilityMessage: $eligibilityMessage
+          reason: $reason
+        ) {
+          success
+          message
+          affiliateProfile {
+            uuid
+            eligibilityStatus
+            eligibilityMessage
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      updateAffiliateEligibility: {
+        success: boolean;
+        message: string;
+        affiliateProfile: AffiliateProfile | null;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation,
+      variables: { userId, eligibilityStatus, eligibilityMessage, reason },
+    }).pipe(
+      map((data) => {
+        if (!data.updateAffiliateEligibility.success) {
+          throw new Error(data.updateAffiliateEligibility.message);
+        }
+        return data.updateAffiliateEligibility;
+      }),
+    );
+  }
+
+  updateAffiliateNetworkStatus(
+    userId: string,
+    isActive: boolean,
+    reason?: string,
+  ): Observable<{ success: boolean; message: string; affiliateProfile: AffiliateProfile | null }> {
+    const mutation = gql`
+      mutation UpdateAffiliateNetworkStatus($userId: UUID!, $isActive: Boolean!, $reason: String) {
+        updateAffiliateNetworkStatus(userId: $userId, isActive: $isActive, reason: $reason) {
+          success
+          message
+          affiliateProfile {
+            uuid
+            isActive
+            eligibilityStatus
+            eligibilityMessage
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      updateAffiliateNetworkStatus: {
+        success: boolean;
+        message: string;
+        affiliateProfile: AffiliateProfile | null;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation,
+      variables: { userId, isActive, reason },
+    }).pipe(
+      map((data) => {
+        if (!data.updateAffiliateNetworkStatus.success) {
+          throw new Error(data.updateAffiliateNetworkStatus.message);
+        }
+        return data.updateAffiliateNetworkStatus;
+      }),
+    );
+  }
+
+  updateAffiliateProgramEnabled(
+    isEnabled: boolean,
+    disabledMessage?: string,
+    reason?: string,
+  ): Observable<{ success: boolean; message: string }> {
+    const mutation = gql`
+      mutation UpdateAffiliateSystemSettings($isEnabled: Boolean!, $disabledMessage: String, $reason: String) {
+        updateAffiliateSystemSettings(isEnabled: $isEnabled, disabledMessage: $disabledMessage, reason: $reason) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      updateAffiliateSystemSettings: { success: boolean; message: string };
+    }
+
+    return this.mutate<Response>({
+      mutation,
+      variables: { isEnabled, disabledMessage, reason },
+    }).pipe(
+      map((data) => {
+        if (!data.updateAffiliateSystemSettings.success) {
+          throw new Error(data.updateAffiliateSystemSettings.message);
+        }
+        return data.updateAffiliateSystemSettings;
       }),
     );
   }

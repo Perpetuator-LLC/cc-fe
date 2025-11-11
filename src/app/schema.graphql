@@ -13,10 +13,15 @@ type ApiQuery {
   myAffiliateConversions: [AffiliateCreditConversionType]
   myAffiliateTermsConsents: [AffiliateTermsConsentType]
   myCodeHistory: [AffiliateCodeHistoryType]
+  myEligibilityHistory: [AffiliateEligibilityHistoryType]
   myCodeChangeRequests: [AffiliateCodeChangeRequestType]
   myCodeChangeInfo: AffiliateCodeChangeInfoType
   pendingCodeChangeRequests: [AffiliateCodeChangeRequestType]
+  searchAffiliateUsers(query: String!): [AffiliateUserSearchResultType]
   affiliateProgramEligibility: AffiliateEligibilityType
+  affiliateSystemSettings: AffiliateSystemSettingsType
+  affiliateSystemStatusHistory: [AffiliateSystemStatusHistoryType]
+  affiliateRelationshipHistory(userId: UUID): [AffiliateRelationshipHistoryType]
 
   """List of Research Topics [Relay]"""
   topics(
@@ -256,11 +261,16 @@ type AffiliateProfileType {
   code: String!
   brandImage: String
   isActive: Boolean!
+
+  """Custom message displayed to user when not eligible"""
+  eligibilityMessage: String
+  eligibilityChangedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
   uuid: UUID
   user: PublicUserType
   brandImageUrl: String
+  eligibilityStatus: String
 }
 
 """
@@ -341,6 +351,18 @@ type AffiliateCodeHistoryType {
   uuid: UUID
 }
 
+type AffiliateEligibilityHistoryType {
+  message: String
+
+  """Internal reason for status change"""
+  reason: String
+  changedAt: DateTime!
+  uuid: UUID
+  changedBy: PublicUserType
+  oldStatus: String
+  newStatus: String
+}
+
 type AffiliateCodeChangeRequestType {
   requestedCode: String!
   currentCode: String!
@@ -377,10 +399,74 @@ type AffiliateCodeChangeInfoType {
   lastChangeDate: DateTime
 }
 
+type AffiliateUserSearchResultType {
+  uuid: UUID
+  username: String
+  hasAffiliateProfile: Boolean
+  isActive: Boolean
+  eligibilityStatus: String
+}
+
 type AffiliateEligibilityType {
   isEligible: Boolean
   reason: String
   hasPaidOrder: Boolean
+}
+
+type AffiliateSystemSettingsType {
+  """
+  Global toggle for the entire affiliate system. When False, all affiliate operations are blocked.
+  """
+  isEnabled: Boolean!
+
+  """Message displayed to users when the affiliate system is disabled"""
+  disabledMessage: String!
+
+  """Internal admin notes about current system state (not visible to users)"""
+  internalNotes: String!
+  updatedAt: DateTime!
+  uuid: UUID
+  updatedBy: PublicUserType
+}
+
+type AffiliateSystemStatusHistoryType {
+  wasEnabled: Boolean!
+  isEnabled: Boolean!
+
+  """Message set when system was disabled"""
+  message: String!
+
+  """Internal reason for the status change"""
+  reason: String!
+
+  """Internal admin notes (not visible to users)"""
+  internalNotes: String!
+  changedAt: DateTime!
+  uuid: UUID
+  changedBy: PublicUserType
+}
+
+type AffiliateRelationshipHistoryType {
+  """UUID of the relationship that was created/deleted"""
+  relationshipId: UUID!
+  action: AffiliatesAffiliateRelationshipHistoryActionChoices!
+
+  """Reason for the action (especially for deletions)"""
+  reason: String!
+  changedAt: DateTime!
+  uuid: UUID
+  affiliate: PublicUserType
+  referredUser: PublicUserType
+  changedBy: PublicUserType
+}
+
+"""An enumeration."""
+enum AffiliatesAffiliateRelationshipHistoryActionChoices {
+  """Created"""
+  CREATED
+
+  """Deleted"""
+  DELETED
 }
 
 type TopicTypeConnection {
@@ -1447,6 +1533,12 @@ type ApiMutation {
   cancelCodeChangeRequest(requestId: UUID!): CancelCodeChangeRequest
   approveCodeChangeRequest(requestId: UUID!): ApproveCodeChangeRequest
   rejectCodeChangeRequest(rejectionReason: String, requestId: UUID!): RejectCodeChangeRequest
+  updateAffiliateEligibility(eligibilityMessage: String, eligibilityStatus: String!, reason: String, userId: UUID!): UpdateAffiliateEligibility
+  updateAffiliateNetworkStatus(isActive: Boolean!, reason: String, userId: UUID!): UpdateAffiliateNetworkStatus
+  updateAffiliateSystemSettings(disabledMessage: String, internalNotes: String, isEnabled: Boolean!, reason: String): UpdateAffiliateSystemSettings
+  createAffiliateRelationship(affiliateUserId: UUID!, reason: String, referredUserId: UUID!): CreateAffiliateRelationship
+  deleteAffiliateRelationship(reason: String!, relationshipId: UUID!): DeleteAffiliateRelationship
+  exportAffiliateGraph(format: String = "dot"): ExportAffiliateGraph
 
   """Mutation to create a research topic based on podcast prompt."""
   createResearchTopic(podcastUuid: UUID!): CreateResearchTopic
@@ -1932,6 +2024,43 @@ type RejectCodeChangeRequest {
   success: Boolean
   message: String
   codeChangeRequest: AffiliateCodeChangeRequestType
+}
+
+type UpdateAffiliateEligibility {
+  success: Boolean
+  message: String
+  affiliateProfile: AffiliateProfileType
+}
+
+type UpdateAffiliateNetworkStatus {
+  success: Boolean
+  message: String
+  affiliateProfile: AffiliateProfileType
+}
+
+type UpdateAffiliateSystemSettings {
+  success: Boolean
+  message: String
+  settings: AffiliateSystemSettingsType
+}
+
+type CreateAffiliateRelationship {
+  success: Boolean
+  message: String
+  relationship: AffiliateRelationshipType
+}
+
+type DeleteAffiliateRelationship {
+  success: Boolean
+  message: String
+  relationshipId: UUID
+}
+
+type ExportAffiliateGraph {
+  success: Boolean
+  message: String
+  graphData: String
+  format: String
 }
 
 """Mutation to create a research topic based on podcast prompt."""
