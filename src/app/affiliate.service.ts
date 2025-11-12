@@ -316,6 +316,21 @@ export interface AffiliateUserSearchResult {
   isActive?: boolean;
 }
 
+export interface PlatformFinancialStats {
+  stripeAvailableBalanceCents: number;
+  stripePendingBalanceCents: number;
+  stripeTotalBalanceCents: number;
+  stripeCurrency: string;
+  stripeIsLiveMode: boolean;
+  totalAffiliateCredits: number;
+  totalAffiliateCreditsCents: number;
+  totalAffiliateCreditsDollars: number;
+  pendingConversionCredits: number;
+  pendingConversionCents: number;
+  availablePayoutBufferCents: number;
+  canCoverAllOutstanding: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -1370,5 +1385,35 @@ export class AffiliateService extends BaseService {
         return data.rejectPayoutRequest;
       }),
     );
+  }
+
+  getPlatformFinancialStats(): Observable<PlatformFinancialStats> {
+    const query = gql`
+      query PlatformFinancialStats {
+        platformFinancialStats {
+          stripeAvailableBalanceCents
+          stripePendingBalanceCents
+          stripeTotalBalanceCents
+          stripeCurrency
+          stripeIsLiveMode
+          totalAffiliateCredits
+          totalAffiliateCreditsCents
+          totalAffiliateCreditsDollars
+          pendingConversionCredits
+          pendingConversionCents
+          availablePayoutBufferCents
+          canCoverAllOutstanding
+        }
+      }
+    `;
+
+    interface Response {
+      platformFinancialStats: PlatformFinancialStats;
+    }
+
+    return this.query<Response>({
+      query,
+      fetchPolicy: 'network-only', // Always get fresh data
+    }).pipe(map((data) => data.platformFinancialStats));
   }
 }
