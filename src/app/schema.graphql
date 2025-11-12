@@ -18,6 +18,8 @@ type ApiQuery {
   myCodeChangeRequests: [AffiliateCodeChangeRequestType]
   myCodeChangeInfo: AffiliateCodeChangeInfoType
   pendingCodeChangeRequests: [AffiliateCodeChangeRequestType]
+  allPayoutConversions(status: String, conversionType: String, limit: Int): [AffiliateCreditConversionType]
+  payoutConversionById(conversionId: UUID!): AffiliateCreditConversionType
   searchAffiliateUsers(query: String!): [AffiliateUserSearchResultType]
   affiliateProgramEligibility: AffiliateEligibilityType
   affiliateSystemSettings: AffiliateSystemSettingsType
@@ -351,6 +353,7 @@ type AffiliateCreditConversionType {
   createdAt: DateTime!
   completedAt: DateTime
   uuid: UUID
+  affiliate: PublicUserType
   reviewedBy: PublicUserType
 }
 

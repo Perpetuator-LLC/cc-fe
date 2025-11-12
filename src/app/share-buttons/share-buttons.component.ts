@@ -74,6 +74,10 @@ export class ShareButtonsComponent {
     this.shareService.shareToSignal(this.getShareConfig());
   }
 
+  shareToEmail(): void {
+    this.shareService.shareToEmail(this.getShareConfig());
+  }
+
   copyLink(): void {
     this.shareService.copyToClipboard(this.shareUrl);
     this.messageService.success('Link copied to clipboard!');
