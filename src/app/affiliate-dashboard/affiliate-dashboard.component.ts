@@ -26,6 +26,7 @@ import {
   AffiliateEligibility,
   AffiliateUserSearchResult,
   PayoutConversion,
+  PlatformFinancialStats,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -82,6 +83,9 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   searchedUsers: AffiliateUserSearchResult[] = [];
   searchingUser = false;
   updatingUserEligibility = false;
+  platformFinancialStats: PlatformFinancialStats | null = null;
+  loadingFinancialStats = false;
+  protected readonly Math = Math;
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
   conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status', 'details'];
@@ -106,6 +110,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     // Load admin settings first if user is admin (regardless of eligibility)
     if (this.isAdmin()) {
       this.loadAffiliateProgramSettings();
+      this.loadPlatformFinancialStats();
     }
 
     if (this.canApproveCodeChanges()) {
@@ -331,6 +336,26 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.messageService.error(`Failed to load payout requests: ${err.message}`);
           this.loadingPayoutRequests = false;
+        },
+      }),
+    );
+  }
+
+  loadPlatformFinancialStats(): void {
+    if (!this.isAdmin()) {
+      return;
+    }
+
+    this.loadingFinancialStats = true;
+    this.subscriptions.add(
+      this.affiliateService.getPlatformFinancialStats().subscribe({
+        next: (stats) => {
+          this.platformFinancialStats = stats;
+          this.loadingFinancialStats = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load platform financial stats: ${err.message}`);
+          this.loadingFinancialStats = false;
         },
       }),
     );
@@ -1090,5 +1115,28 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  formatCentsAsDollars(cents: number): string {
+    return (cents / 100).toFixed(2);
+  }
+
+  getFinancialDifference(): number {
+    if (!this.platformFinancialStats) return 0;
+    return this.platformFinancialStats.stripeTotalBalanceCents - this.platformFinancialStats.totalAffiliateCreditsCents;
+  }
+
+  getFinancialDifferenceLabel(): string {
+    const diff = this.getFinancialDifference();
+    if (diff > 0) {
+      return `Surplus: $${this.formatCentsAsDollars(diff)}`;
+    } else if (diff < 0) {
+      return `Deficit: -$${this.formatCentsAsDollars(Math.abs(diff))}`;
+    }
+    return 'Balanced: $0.00';
+  }
+
+  isFinancialHealthGood(): boolean {
+    return this.platformFinancialStats?.canCoverAllOutstanding ?? false;
   }
 }

@@ -53,6 +53,122 @@
             </p>
 
             @if (isAdmin()) {
+              <!-- Platform Financial Stats -->
+              <div class="admin-section financial-stats-section">
+                <h3>
+                  <mat-icon>account_balance</mat-icon>
+                  Platform Financial Status
+                </h3>
+                @if (loadingFinancialStats) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading financial data...</span>
+                  </div>
+                } @else if (platformFinancialStats) {
+                  <div class="financial-stats-grid">
+                    <!-- Stripe Account Balance -->
+                    <div class="stat-card stripe-balance">
+                      <div class="stat-header">
+                        <mat-icon>account_balance_wallet</mat-icon>
+                        <h4>Stripe Account Balance</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">Total Balance:</span>
+                          <span class="stat-value primary">${{ formatCentsAsDollars(platformFinancialStats.stripeTotalBalanceCents) }}</span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Available:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.stripeAvailableBalanceCents) }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Pending:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.stripePendingBalanceCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-meta">
+                          <mat-icon class="mode-icon" [class.live]="platformFinancialStats.stripeIsLiveMode">
+                            {{ platformFinancialStats.stripeIsLiveMode ? 'verified' : 'science' }}
+                          </mat-icon>
+                          <span class="mode-text">{{ platformFinancialStats.stripeIsLiveMode ? 'Live Mode' : 'Test Mode' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Outstanding Affiliate Credits -->
+                    <div class="stat-card affiliate-credits">
+                      <div class="stat-header">
+                        <mat-icon>people</mat-icon>
+                        <h4>Outstanding Affiliate Credits</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">Total Liability:</span>
+                          <span class="stat-value warning">${{ formatCentsAsDollars(platformFinancialStats.totalAffiliateCreditsCents) }}</span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Credits:</span>
+                            <span class="stat-subvalue">{{ platformFinancialStats.totalAffiliateCredits | number }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Pending Conversions:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.pendingConversionCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-info">
+                          <mat-icon class="info-icon">info</mat-icon>
+                          <span class="info-text">{{ platformFinancialStats.totalAffiliateCredits | number }} credits = ${{ platformFinancialStats.totalAffiliateCreditsDollars | number: '1.2-2' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Financial Difference -->
+                    <div class="stat-card financial-difference" [class.surplus]="getFinancialDifference() > 0" [class.deficit]="getFinancialDifference() < 0">
+                      <div class="stat-header">
+                        <mat-icon>{{ getFinancialDifference() > 0 ? 'trending_up' : getFinancialDifference() < 0 ? 'trending_down' : 'horizontal_rule' }}</mat-icon>
+                        <h4>Balance vs. Liability</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">{{ getFinancialDifference() > 0 ? 'Surplus:' : getFinancialDifference() < 0 ? 'Deficit:' : 'Difference:' }}</span>
+                          <span class="stat-value" [class.positive]="getFinancialDifference() > 0" [class.negative]="getFinancialDifference() < 0">
+                            {{ getFinancialDifference() > 0 ? '+' : '' }}${{ formatCentsAsDollars(Math.abs(getFinancialDifference())) }}
+                          </span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Available Buffer:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.availablePayoutBufferCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-status">
+                          <mat-icon [class.success]="isFinancialHealthGood()" [class.error]="!isFinancialHealthGood()">
+                            {{ isFinancialHealthGood() ? 'check_circle' : 'warning' }}
+                          </mat-icon>
+                          <span [class.success-text]="isFinancialHealthGood()" [class.error-text]="!isFinancialHealthGood()">
+                            {{ isFinancialHealthGood() ? 'Can cover all outstanding credits' : 'Insufficient funds to cover all credits' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="financial-actions">
+                    <button mat-raised-button color="primary" (click)="loadPlatformFinancialStats()">
+                      <mat-icon>refresh</mat-icon>
+                      Refresh Financial Data
+                    </button>
+                  </div>
+                } @else {
+                  <div class="empty-state-small">
+                    <mat-icon>error_outline</mat-icon>
+                    <p>Failed to load financial data</p>
+                  </div>
+                }
+              </div>
+
               <!-- Global Program Settings -->
               <div class="admin-section program-settings-section">
                 <h3>Global Program Settings</h3>
@@ -686,6 +802,122 @@
             <h2>Affiliate Admin Control Panel</h2>
 
             @if (isAdmin()) {
+              <!-- Platform Financial Stats -->
+              <div class="admin-section financial-stats-section">
+                <h3>
+                  <mat-icon>account_balance</mat-icon>
+                  Platform Financial Status
+                </h3>
+                @if (loadingFinancialStats) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading financial data...</span>
+                  </div>
+                } @else if (platformFinancialStats) {
+                  <div class="financial-stats-grid">
+                    <!-- Stripe Account Balance -->
+                    <div class="stat-card stripe-balance">
+                      <div class="stat-header">
+                        <mat-icon>account_balance_wallet</mat-icon>
+                        <h4>Stripe Account Balance</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">Total Balance:</span>
+                          <span class="stat-value primary">${{ formatCentsAsDollars(platformFinancialStats.stripeTotalBalanceCents) }}</span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Available:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.stripeAvailableBalanceCents) }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Pending:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.stripePendingBalanceCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-meta">
+                          <mat-icon class="mode-icon" [class.live]="platformFinancialStats.stripeIsLiveMode">
+                            {{ platformFinancialStats.stripeIsLiveMode ? 'verified' : 'science' }}
+                          </mat-icon>
+                          <span class="mode-text">{{ platformFinancialStats.stripeIsLiveMode ? 'Live Mode' : 'Test Mode' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Outstanding Affiliate Credits -->
+                    <div class="stat-card affiliate-credits">
+                      <div class="stat-header">
+                        <mat-icon>people</mat-icon>
+                        <h4>Outstanding Affiliate Credits</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">Total Liability:</span>
+                          <span class="stat-value warning">${{ formatCentsAsDollars(platformFinancialStats.totalAffiliateCreditsCents) }}</span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Credits:</span>
+                            <span class="stat-subvalue">{{ platformFinancialStats.totalAffiliateCredits | number }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Pending Conversions:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.pendingConversionCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-info">
+                          <mat-icon class="info-icon">info</mat-icon>
+                          <span class="info-text">{{ platformFinancialStats.totalAffiliateCredits | number }} credits = ${{ platformFinancialStats.totalAffiliateCreditsDollars | number: '1.2-2' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Financial Difference -->
+                    <div class="stat-card financial-difference" [class.surplus]="getFinancialDifference() > 0" [class.deficit]="getFinancialDifference() < 0">
+                      <div class="stat-header">
+                        <mat-icon>{{ getFinancialDifference() > 0 ? 'trending_up' : getFinancialDifference() < 0 ? 'trending_down' : 'horizontal_rule' }}</mat-icon>
+                        <h4>Balance vs. Liability</h4>
+                      </div>
+                      <div class="stat-body">
+                        <div class="stat-main">
+                          <span class="stat-label">{{ getFinancialDifference() > 0 ? 'Surplus:' : getFinancialDifference() < 0 ? 'Deficit:' : 'Difference:' }}</span>
+                          <span class="stat-value" [class.positive]="getFinancialDifference() > 0" [class.negative]="getFinancialDifference() < 0">
+                            {{ getFinancialDifference() > 0 ? '+' : '' }}${{ formatCentsAsDollars(Math.abs(getFinancialDifference())) }}
+                          </span>
+                        </div>
+                        <div class="stat-breakdown">
+                          <div class="stat-item">
+                            <span class="stat-sublabel">Available Buffer:</span>
+                            <span class="stat-subvalue">${{ formatCentsAsDollars(platformFinancialStats.availablePayoutBufferCents) }}</span>
+                          </div>
+                        </div>
+                        <div class="stat-status">
+                          <mat-icon [class.success]="isFinancialHealthGood()" [class.error]="!isFinancialHealthGood()">
+                            {{ isFinancialHealthGood() ? 'check_circle' : 'warning' }}
+                          </mat-icon>
+                          <span [class.success-text]="isFinancialHealthGood()" [class.error-text]="!isFinancialHealthGood()">
+                            {{ isFinancialHealthGood() ? 'Can cover all outstanding credits' : 'Insufficient funds to cover all credits' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="financial-actions">
+                    <button mat-raised-button color="primary" (click)="loadPlatformFinancialStats()">
+                      <mat-icon>refresh</mat-icon>
+                      Refresh Financial Data
+                    </button>
+                  </div>
+                } @else {
+                  <div class="empty-state-small">
+                    <mat-icon>error_outline</mat-icon>
+                    <p>Failed to load financial data</p>
+                  </div>
+                }
+              </div>
+
               <!-- Global Program Settings -->
               <div class="admin-section program-settings-section">
                 <h3>Global Program Settings</h3>
@@ -694,8 +926,8 @@
                     <mat-spinner diameter="30"></mat-spinner>
                     <span>Loading...</span>
                   </div>
-            } @else if (programSettings) {
-              <div class="program-status-row">
+                } @else if (programSettings) {
+                  <div class="program-status-row">
                 <div class="status-indicator">
                   <mat-icon [class.enabled]="programSettings.isEnabled" [class.disabled]="!programSettings.isEnabled">
                     {{ programSettings.isEnabled ? 'check_circle' : 'cancel' }}
@@ -718,11 +950,11 @@
                   {{ programSettings.isEnabled ? 'Disable' : 'Enable' }}
                 </button>
               </div>
-            }
+                }
               </div>
 
-          <!-- User Account Management -->
-          <div class="admin-section user-management-section">
+              <!-- User Account Management -->
+              <div class="admin-section user-management-section">
             <h3>Suspend/Restore User Accounts</h3>
             <div class="user-search">
               <mat-form-field appearance="outline" class="search-field">
