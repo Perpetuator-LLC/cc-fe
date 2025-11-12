@@ -31,13 +31,15 @@
           <mat-icon>error</mat-icon>
           <h2>Setup Incomplete</h2>
           <p class="error-message">{{ error }}</p>
+          <p class="help-text">You can retry the setup process or skip for now and complete it later.</p>
           <div class="actions">
             <button mat-raised-button color="primary" (click)="retryOnboarding()">
               <mat-icon>refresh</mat-icon>
-              Continue Setup
+              Retry Setup
             </button>
-            <button mat-stroked-button (click)="navigateToDashboard()">
-              Go to Dashboard
+            <button mat-stroked-button (click)="skipSetup()">
+              <mat-icon>home</mat-icon>
+              Skip for Now
             </button>
           </div>
         </div>

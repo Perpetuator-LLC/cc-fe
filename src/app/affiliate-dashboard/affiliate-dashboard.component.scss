@@ -1322,7 +1322,7 @@
     padding: 20px;
     border-radius: 8px;
 
-    mat-icon {
+    mat-icon:first-child {
       font-size: 48px;
       width: 48px;
       height: 48px;
@@ -1439,3 +1439,47 @@
   }
 }
 
+.payout-requests-section {
+  .affiliate-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    strong {
+      font-size: 14px;
+      color: var(--theme-color);
+    }
+    small {
+      font-size: 12px;
+      color: var(--description-color);
+    }
+  }
+  .amount-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    .usd-amount {
+      font-size: 12px;
+      color: var(--description-color);
+      font-weight: 600;
+    }
+  }
+}
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  @media (max-width: 576px) {
+    flex-direction: column;
+    width: 100%;
+    button {
+      width: 100%;
+    }
+  }
+}

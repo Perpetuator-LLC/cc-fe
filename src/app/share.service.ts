@@ -150,6 +150,16 @@ export class ShareService {
   }
 
   /**
+   * Share via Email
+   */
+  shareToEmail(config: ShareConfig): void {
+    const subject = encodeURIComponent(config.title);
+    const body = config.description
+      ? encodeURIComponent(`${config.description}\n\n${config.url}`)
+      : encodeURIComponent(config.url);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
+  /**
    * Copy URL to clipboard
    */
   copyToClipboard(text: string): void {
