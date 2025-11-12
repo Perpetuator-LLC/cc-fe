@@ -257,6 +257,57 @@ interface GetStripeDashboardLinkResponse {
   };
 }
 
+export interface PayoutConversion {
+  uuid: string;
+  affiliate: {
+    uuid: string;
+    username: string;
+    affiliateProfile?: {
+      code: string;
+      stripeAccountId: string | null;
+      stripeOnboardingCompleted: boolean;
+      stripePayoutsEnabled: boolean;
+      stripeCountry: string | null;
+    };
+  };
+  conversionType: string;
+  affiliateCreditAmount: number;
+  targetAmount: number;
+  status: string;
+  stripePayoutId?: string | null;
+  stripeTransferId?: string | null;
+  rejectionReason?: string | null;
+  adminNotes?: string | null;
+  reviewedBy?: PublicUser | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+}
+
+interface AllPayoutConversionsResponse {
+  allPayoutConversions: PayoutConversion[];
+}
+
+interface PayoutConversionByIdResponse {
+  payoutConversionById: PayoutConversion | null;
+}
+
+interface ApprovePayoutRequestResponse {
+  approvePayoutRequest: {
+    success: boolean;
+    message: string;
+    conversion: PayoutConversion | null;
+  };
+}
+
+interface RejectPayoutRequestResponse {
+  rejectPayoutRequest: {
+    success: boolean;
+    message: string;
+    conversion: PayoutConversion | null;
+  };
+}
+
 export interface AffiliateUserSearchResult {
   uuid: string;
   username: string;
@@ -1162,6 +1213,161 @@ export class AffiliateService extends BaseService {
           throw new Error(data.updateAffiliateSystemSettings.message);
         }
         return data.updateAffiliateSystemSettings;
+      }),
+    );
+  }
+
+  getAllPayoutConversions(status?: string, conversionType?: string, limit?: number): Observable<PayoutConversion[]> {
+    const query = gql`
+      query GetPayoutConversions($status: String, $conversionType: String, $limit: Int) {
+        allPayoutConversions(status: $status, conversionType: $conversionType, limit: $limit) {
+          uuid
+          affiliate {
+            uuid
+            username
+          }
+          conversionType
+          affiliateCreditAmount
+          targetAmount
+          status
+          stripePayoutId
+          stripeTransferId
+          rejectionReason
+          adminNotes
+          reviewedBy {
+            uuid
+            username
+          }
+          reviewedAt
+          createdAt
+          completedAt
+        }
+      }
+    `;
+
+    return this.query<AllPayoutConversionsResponse>({
+      query,
+      variables: { status, conversionType, limit },
+    }).pipe(map((data) => data.allPayoutConversions));
+  }
+
+  getPayoutConversionById(conversionId: string): Observable<PayoutConversion | null> {
+    const query = gql`
+      query GetPayoutById($conversionId: UUID!) {
+        payoutConversionById(conversionId: $conversionId) {
+          uuid
+          affiliate {
+            uuid
+            username
+            affiliateProfile {
+              code
+              stripeAccountId
+              stripeOnboardingCompleted
+              stripePayoutsEnabled
+              stripeCountry
+            }
+          }
+          conversionType
+          affiliateCreditAmount
+          targetAmount
+          status
+          stripePayoutId
+          stripeTransferId
+          rejectionReason
+          adminNotes
+          reviewedBy {
+            uuid
+            username
+          }
+          reviewedAt
+          createdAt
+          completedAt
+        }
+      }
+    `;
+
+    return this.query<PayoutConversionByIdResponse>({
+      query,
+      variables: { conversionId },
+    }).pipe(map((data) => data.payoutConversionById));
+  }
+
+  approvePayoutRequest(
+    conversionId: string,
+    adminNotes?: string,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    conversion: PayoutConversion | null;
+  }> {
+    const mutation = gql`
+      mutation ApprovePayoutRequest($conversionId: UUID!, $adminNotes: String) {
+        approvePayoutRequest(conversionId: $conversionId, adminNotes: $adminNotes) {
+          success
+          message
+          conversion {
+            uuid
+            status
+            stripeTransferId
+            completedAt
+            reviewedBy {
+              uuid
+              username
+            }
+          }
+        }
+      }
+    `;
+
+    return this.mutate<ApprovePayoutRequestResponse>({
+      mutation,
+      variables: { conversionId, adminNotes },
+    }).pipe(
+      map((data) => {
+        if (!data.approvePayoutRequest.success) {
+          throw new Error(data.approvePayoutRequest.message);
+        }
+        return data.approvePayoutRequest;
+      }),
+    );
+  }
+
+  rejectPayoutRequest(
+    conversionId: string,
+    rejectionReason: string,
+    adminNotes?: string,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    conversion: PayoutConversion | null;
+  }> {
+    const mutation = gql`
+      mutation RejectPayoutRequest($conversionId: UUID!, $rejectionReason: String!, $adminNotes: String) {
+        rejectPayoutRequest(conversionId: $conversionId, rejectionReason: $rejectionReason, adminNotes: $adminNotes) {
+          success
+          message
+          conversion {
+            uuid
+            status
+            rejectionReason
+            reviewedBy {
+              uuid
+              username
+            }
+          }
+        }
+      }
+    `;
+
+    return this.mutate<RejectPayoutRequestResponse>({
+      mutation,
+      variables: { conversionId, rejectionReason, adminNotes },
+    }).pipe(
+      map((data) => {
+        if (!data.rejectPayoutRequest.success) {
+          throw new Error(data.rejectPayoutRequest.message);
+        }
+        return data.rejectPayoutRequest;
       }),
     );
   }

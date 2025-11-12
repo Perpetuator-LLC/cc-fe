@@ -94,4 +94,8 @@ export class StripeOnboardingReturnComponent implements OnInit, OnDestroy {
       }),
     );
   }
+
+  skipSetup(): void {
+    this.router.navigate(['/']);
+  }
 }

@@ -31,7 +31,8 @@
   padding: 20px;
   text-align: center;
 
-  mat-icon {
+  // Large status icon (not button icons)
+  > mat-icon:first-child {
     font-size: 64px;
     width: 64px;
     height: 64px;
@@ -52,7 +53,7 @@
 }
 
 .success-state {
-  mat-icon {
+  > mat-icon:first-child {
     color: var(--md-sys-color-success, #4caf50);
   }
 
@@ -63,13 +64,19 @@
 }
 
 .error-state {
-  mat-icon {
+  > mat-icon:first-child {
     color: var(--md-sys-color-error, #f44336);
   }
 
   .error-message {
     color: var(--md-sys-color-error, #f44336);
     font-weight: 500;
+  }
+
+  .help-text {
+    font-size: 14px;
+    color: var(--description-color);
+    margin-top: 8px;
   }
 
   .actions {

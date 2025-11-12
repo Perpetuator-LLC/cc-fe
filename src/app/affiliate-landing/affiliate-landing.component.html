@@ -34,7 +34,7 @@
             <button mat-raised-button (click)="onSignIn()">Sign In</button>
           } @else if (hasExistingAffiliate) {
             <div class="existing-affiliate-message">
-              <p>You're already part of <strong>{{ existingAffiliateUsername }}</strong>'s network</p>
+              <p>You are part of <strong>{{ existingAffiliateUsername }}</strong>'s network and cannot join this one.</p>
               <button mat-button routerLink="/profile">Go to Profile</button>
             </div>
           } @else {

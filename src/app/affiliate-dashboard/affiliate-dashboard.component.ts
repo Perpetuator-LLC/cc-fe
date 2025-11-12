@@ -25,6 +25,7 @@ import {
   PendingCodeChangeRequest,
   AffiliateEligibility,
   AffiliateUserSearchResult,
+  PayoutConversion,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -33,6 +34,7 @@ import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert
 // eslint-disable-next-line max-len
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { environment } from '../../environments/environment';
 
@@ -52,6 +54,7 @@ import { environment } from '../../environments/environment';
     MatInputModule,
     MatFormFieldModule,
     FormsModule,
+    ShareButtonsComponent,
   ],
   templateUrl: './affiliate-dashboard.component.html',
   styleUrls: ['./affiliate-dashboard.component.scss'],
@@ -70,6 +73,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   pendingCodeChangeRequest: AffiliateCodeChangeRequest | null = null;
   adminPendingRequests: PendingCodeChangeRequest[] = [];
   loadingAdminRequests = false;
+  pendingPayoutRequests: PayoutConversion[] = [];
+  loadingPayoutRequests = false;
   programSettings: { isEnabled: boolean; disabledMessage: string } | null = null;
   loadingProgramSettings = false;
   updatingProgramSettings = false;
@@ -105,6 +110,10 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
     if (this.canApproveCodeChanges()) {
       this.loadAdminPendingRequests();
+    }
+
+    if (this.canManagePayouts()) {
+      this.loadPendingPayoutRequests();
     }
 
     this.checkEligibility();
@@ -274,6 +283,15 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     return userDetails?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false;
   }
 
+  canManagePayouts(): boolean {
+    const userDetails = this.userService.userDetails();
+    return (
+      (userDetails?.permissions?.includes('affiliates.change_affiliatecreditconversion') ||
+        userDetails?.permissions?.includes('is_staff')) ??
+      false
+    );
+  }
+
   isAdmin(): boolean {
     const userDetails = this.userService.userDetails();
     return (
@@ -297,6 +315,22 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.loadingAdminRequests = false;
+        },
+      }),
+    );
+  }
+
+  loadPendingPayoutRequests(): void {
+    this.loadingPayoutRequests = true;
+    this.subscriptions.add(
+      this.affiliateService.getAllPayoutConversions('under_review', 'to_cash', 100).subscribe({
+        next: (requests) => {
+          this.pendingPayoutRequests = requests;
+          this.loadingPayoutRequests = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load payout requests: ${err.message}`);
+          this.loadingPayoutRequests = false;
         },
       }),
     );
@@ -533,24 +567,6 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     const link = this.getAffiliateLink();
     this.clipboard.copy(link);
     this.messageService.success('Affiliate link copied to clipboard!');
-  }
-
-  shareOnTwitter(): void {
-    const link = this.getAffiliateLink();
-    const text = encodeURIComponent('Join me on Capital Copilot!');
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}`, '_blank');
-  }
-
-  shareOnLinkedIn(): void {
-    const link = this.getAffiliateLink();
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, '_blank');
-  }
-
-  shareViaEmail(): void {
-    const link = this.getAffiliateLink();
-    const subject = encodeURIComponent('Join me on Capital Copilot');
-    const body = encodeURIComponent(`I'd like to invite you to join Capital Copilot using my affiliate link: ${link}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
   openConvertDialog(type: 'credits' | 'cash'): void {
@@ -943,6 +959,10 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     this.startStripeOnboarding();
   }
 
+  skipStripeSetup(): void {
+    this.router.navigate(['/']);
+  }
+
   openStripeDashboard(): void {
     this.subscriptions.add(
       this.affiliateService.getStripeDashboardLink().subscribe({
@@ -955,6 +975,118 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.messageService.error(`Failed to open Stripe dashboard: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  viewPayoutDetails(conversionId: string): void {
+    this.subscriptions.add(
+      this.affiliateService.getPayoutConversionById(conversionId).subscribe({
+        next: (payout) => {
+          if (!payout) {
+            this.messageService.error('Payout request not found');
+            return;
+          }
+
+          this.dialog.open(ConfirmationDialogComponent, {
+            width: '600px',
+            data: {
+              title: 'Payout Request Details',
+              message: this.formatPayoutDetails(payout),
+              confirmText: 'Close',
+              cancelText: null,
+            },
+          });
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load payout details: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  formatPayoutDetails(payout: PayoutConversion): string {
+    const details = [
+      `Affiliate: ${payout.affiliate.username}`,
+      `User ID: ${payout.affiliate.uuid}`,
+      `Credits: ${payout.affiliateCreditAmount.toLocaleString()}`,
+      `Amount: $${(payout.targetAmount / 1000).toFixed(2)} USD`,
+      `Requested: ${new Date(payout.createdAt).toLocaleString()}`,
+      `Status: ${payout.status}`,
+    ];
+
+    if (payout.affiliate.affiliateProfile) {
+      const profile = payout.affiliate.affiliateProfile;
+      details.push('');
+      details.push('Stripe Account Status:');
+      details.push(`- Onboarding: ${profile.stripeOnboardingCompleted ? '✓ Complete' : '✗ Incomplete'}`);
+      details.push(`- Payouts: ${profile.stripePayoutsEnabled ? '✓ Enabled' : '✗ Disabled'}`);
+      details.push(`- Country: ${profile.stripeCountry || 'N/A'}`);
+    }
+
+    return details.join('\n');
+  }
+
+  approvePayoutRequest(conversionId: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'Approve Payout Request',
+        message:
+          'Are you sure you want to approve this payout? ' +
+          "This will immediately transfer funds to the affiliate's Stripe account.",
+        confirmText: 'Approve Payout',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const adminNotes = prompt('Admin notes (optional, internal only):');
+        if (adminNotes === null) return;
+
+        this.messageService.clearMessages();
+        this.subscriptions.add(
+          this.affiliateService.approvePayoutRequest(conversionId, adminNotes || undefined).subscribe({
+            next: () => {
+              this.messageService.success('Payout approved and processed successfully!');
+              this.loadPendingPayoutRequests();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to approve payout: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  rejectPayoutRequest(conversionId: string): void {
+    const rejectionReason = prompt(
+      'Enter rejection reason (will be shown to affiliate):\n\n' +
+        'Example: "Please complete your Stripe account verification before requesting payouts."',
+    );
+
+    if (!rejectionReason) {
+      if (rejectionReason === '') {
+        this.messageService.warning('Rejection reason is required');
+      }
+      return;
+    }
+
+    const adminNotes = prompt('Internal admin notes (optional, not shown to affiliate):');
+    if (adminNotes === null) return;
+
+    this.messageService.clearMessages();
+    this.subscriptions.add(
+      this.affiliateService.rejectPayoutRequest(conversionId, rejectionReason, adminNotes || undefined).subscribe({
+        next: () => {
+          this.messageService.success('Payout rejected. Affiliate has been notified.');
+          this.loadPendingPayoutRequests();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to reject payout: ${err.message}`);
         },
       }),
     );

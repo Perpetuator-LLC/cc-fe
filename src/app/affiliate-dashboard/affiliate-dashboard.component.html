@@ -364,6 +364,24 @@
         </mat-card>
       </div>
 
+      <!-- Available Balance - Moved to top for prominence -->
+      <mat-card class="balance-card">
+        <mat-card-content>
+          <h2>Available Balance</h2>
+          <div class="balance-value">{{ getAvailableBalance() }} Credits</div>
+          <div class="conversion-actions">
+            <button mat-raised-button color="primary" (click)="openConvertDialog('credits')">
+              <mat-icon>swap_horiz</mat-icon>
+              Convert to Credits
+            </button>
+            <button mat-raised-button (click)="openConvertDialog('cash')">
+              <mat-icon>attach_money</mat-icon>
+              Request Cash Payout
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
       <!-- Stripe Connect Status -->
       @if (profile) {
         <mat-card class="stripe-status-card" [class.incomplete]="!profile.stripeOnboardingCompleted">
@@ -387,10 +405,16 @@
                 <div class="status-content">
                   <h3>Setup Incomplete</h3>
                   <p>Your Stripe account setup is not complete. Please finish the onboarding process to enable cash payouts.</p>
-                  <button mat-raised-button color="accent" (click)="continueStripeOnboarding()">
-                    <mat-icon>arrow_forward</mat-icon>
-                    Continue Setup
-                  </button>
+                  <div class="button-group">
+                    <button mat-raised-button color="accent" (click)="continueStripeOnboarding()">
+                      <mat-icon>arrow_forward</mat-icon>
+                      Continue Setup
+                    </button>
+                    <button mat-stroked-button (click)="skipStripeSetup()">
+                      <mat-icon>home</mat-icon>
+                      Skip for Now
+                    </button>
+                  </div>
                 </div>
               </div>
             } @else {
@@ -469,20 +493,11 @@
                 Change Code
               </button>
             </div>
-            <div class="share-buttons">
-              <button mat-raised-button (click)="shareOnTwitter()">
-                <mat-icon>share</mat-icon>
-                Twitter
-              </button>
-              <button mat-raised-button (click)="shareOnLinkedIn()">
-                <mat-icon>share</mat-icon>
-                LinkedIn
-              </button>
-              <button mat-raised-button (click)="shareViaEmail()">
-                <mat-icon>email</mat-icon>
-                Email
-              </button>
-            </div>
+            <app-share-buttons
+              [shareUrl]="getAffiliateLink()"
+              [title]="'Join me on Capital Copilot!'"
+              [description]="'Sign up using my affiliate link and we both benefit.'"
+            ></app-share-buttons>
           </div>
         </mat-card-content>
       </mat-card>
@@ -569,23 +584,6 @@
               <li>Supported formats: JPEG, PNG, GIF, WEBP</li>
               <li>Recommended size: 512x512 pixels</li>
             </ul>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="balance-card">
-        <mat-card-content>
-          <h2>Available Balance</h2>
-          <div class="balance-value">{{ getAvailableBalance() }} Credits</div>
-          <div class="conversion-actions">
-            <button mat-raised-button color="primary" (click)="openConvertDialog('credits')">
-              <mat-icon>swap_horiz</mat-icon>
-              Convert to Credits
-            </button>
-            <button mat-raised-button (click)="openConvertDialog('cash')">
-              <mat-icon>attach_money</mat-icon>
-              Request Cash Payout
-            </button>
           </div>
         </mat-card-content>
       </mat-card>
@@ -878,6 +876,88 @@
 
                       <tr mat-header-row *matHeaderRowDef="['user', 'codes', 'actions']"></tr>
                       <tr mat-row *matRowDef="let row; columns: ['user', 'codes', 'actions'];"></tr>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Pending Payout Requests -->
+            @if (canManagePayouts()) {
+              <div class="admin-section payout-requests-section">
+                <h3>Pending Cash Payout Requests</h3>
+
+                @if (loadingPayoutRequests) {
+                  <div class="loading-container-small">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <span>Loading requests...</span>
+                  </div>
+                } @else if (pendingPayoutRequests.length === 0) {
+                  <div class="no-data-small">No pending payout requests</div>
+                } @else {
+                  <div class="requests-table">
+                    <table mat-table [dataSource]="pendingPayoutRequests" class="compact-table">
+                      <ng-container matColumnDef="affiliate">
+                        <th mat-header-cell *matHeaderCellDef>Affiliate</th>
+                        <td mat-cell *matCellDef="let payout">
+                          <div class="affiliate-info">
+                            <strong>{{ payout.affiliate.username }}</strong>
+                            <small>ID: {{ payout.affiliate.uuid }}</small>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let payout">
+                          <div class="amount-info">
+                            <div>{{ payout.affiliateCreditAmount.toLocaleString() }} credits</div>
+                            <div class="usd-amount">${{ (payout.targetAmount / 1000).toFixed(2) }} USD</div>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="requested">
+                        <th mat-header-cell *matHeaderCellDef>Requested</th>
+                        <td mat-cell *matCellDef="let payout">
+                          {{ formatDate(payout.createdAt) }}
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let payout">
+                          <div class="action-buttons-inline">
+                            <button
+                              mat-icon-button
+                              color="primary"
+                              (click)="viewPayoutDetails(payout.uuid)"
+                              matTooltip="View Details"
+                            >
+                              <mat-icon>visibility</mat-icon>
+                            </button>
+                            <button
+                              mat-icon-button
+                              color="accent"
+                              (click)="approvePayoutRequest(payout.uuid)"
+                              matTooltip="Approve"
+                            >
+                              <mat-icon>check</mat-icon>
+                            </button>
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              (click)="rejectPayoutRequest(payout.uuid)"
+                              matTooltip="Reject"
+                            >
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="['affiliate', 'amount', 'requested', 'actions']"></tr>
+                      <tr mat-row *matRowDef="let row; columns: ['affiliate', 'amount', 'requested', 'actions'];"></tr>
                     </table>
                   </div>
                 }

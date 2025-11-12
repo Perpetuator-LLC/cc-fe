@@ -38,7 +38,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   private subscriptions = new Subscription();
   loading = false;
   convertForm: FormGroup;
-  readonly MIN_CASH_PAYOUT = 1000; // $10.00
+  readonly MIN_CASH_PAYOUT = 10000; // $10.00 (10,000 credits = $10)
 
   constructor(
     private dialogRef: MatDialogRef<ConvertCreditsDialogComponent>,
@@ -99,7 +99,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     if (this.data.type === 'credits') {
       return 'Convert your affiliate credits to regular platform credits that you can use for any service.';
     }
-    const minAmount = `${this.MIN_CASH_PAYOUT} credits ($${this.MIN_CASH_PAYOUT / 100})`;
+    const minAmount = `${this.MIN_CASH_PAYOUT.toLocaleString()} credits ($${(this.MIN_CASH_PAYOUT / 1000).toFixed(2)})`;
     return (
       `Request a cash payout for your affiliate credits. Minimum payout is ${minAmount}. ` +
       'Payouts are reviewed by admins and typically processed within 5-7 business days.'
@@ -123,7 +123,9 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     // Check minimum for cash payout
     if (this.data.type === 'cash' && amount < this.MIN_CASH_PAYOUT) {
       this.messageService.error(
-        `Minimum cash payout is ${this.MIN_CASH_PAYOUT} credits ($${this.MIN_CASH_PAYOUT / 100})`,
+        `Minimum cash payout is ${this.MIN_CASH_PAYOUT.toLocaleString()} credits ($${(
+          this.MIN_CASH_PAYOUT / 1000
+        ).toFixed(2)})`,
       );
       return;
     }
