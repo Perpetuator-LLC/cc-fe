@@ -146,7 +146,7 @@
                     <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
                       {{ podcast.name }}
                     </a>
-                    <span>2 days ago</span>
+                    <span>{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span>
                   </div>
                 </div>
               </mat-cell>

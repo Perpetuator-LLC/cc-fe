@@ -65,6 +65,8 @@ export interface PodcastsResult {
   outro: string | null;
   tgChannelId: string | null;
   tgResponse: string | null;
+  latestEpisodeDate: string | null;
+  viewCount: number;
   // categories: CategoryResult[] | null;
   categories: Record<string, string[]> | null;
   rssFeeds: RssFeedResult[];
@@ -537,6 +539,8 @@ export class PodcastsService extends BaseService {
               tgChannelId
               tgResponse
               categories
+              latestEpisodeDate
+              viewCount
               rssFeeds {
                 id
                 uuid
@@ -571,10 +575,27 @@ export class PodcastsService extends BaseService {
     slug?: string,
     teamUuid?: string,
     enabled?: boolean | null,
+    orderBy = '-latest_episode_date',
   ) {
     const GQL = gql`
-      query GetPodcasts($first: Int, $after: String, $name: String, $slug: String, $teamUuid: UUID, $enabled: Boolean) {
-        podcasts(first: $first, after: $after, name: $name, slug: $slug, teamUuid: $teamUuid, enabled: $enabled) {
+      query GetPodcasts(
+        $first: Int
+        $after: String
+        $name: String
+        $slug: String
+        $teamUuid: UUID
+        $enabled: Boolean
+        $orderBy: String
+      ) {
+        podcasts(
+          first: $first
+          after: $after
+          name: $name
+          slug: $slug
+          teamUuid: $teamUuid
+          enabled: $enabled
+          orderBy: $orderBy
+        ) {
           edges {
             cursor
             node {
@@ -587,6 +608,8 @@ export class PodcastsService extends BaseService {
               tgChannelId
               tgResponse
               categories
+              latestEpisodeDate
+              viewCount
               team {
                 uuid
                 name
@@ -627,6 +650,7 @@ export class PodcastsService extends BaseService {
         slug: slug || null,
         teamUuid: teamUuid || null,
         enabled: enabled !== undefined ? enabled : null,
+        orderBy,
       },
       fetchPolicy: 'network-only',
     }).pipe(

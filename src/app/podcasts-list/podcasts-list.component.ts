@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -23,7 +23,6 @@ import {
   MatRowDef,
   MatColumnDef,
 } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -64,7 +63,6 @@ export interface ColumnOption {
     MatProgressBarModule,
     MatCardContent,
     MatTable,
-    MatSort,
     MatHeaderCell,
     MatCell,
     MatHeaderRow,
@@ -90,17 +88,21 @@ export interface ColumnOption {
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
 })
-export class PodcastsListComponent
-  extends RelayPaginatorBase<PodcastsResult>
-  implements OnInit, OnDestroy, AfterViewInit
-{
+export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  @ViewChild(MatSort) sort!: MatSort;
   private subscriptions = new Subscription();
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
   // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
-  displayedColumns: string[] = ['name', 'team', 'categories', 'tgResponse', 'enabled', 'createEpisode', 'actions'];
+  displayedColumns: string[] = [
+    'name',
+    'team',
+    'latestEpisodeDate',
+    'tgResponse',
+    'enabled',
+    'createEpisode',
+    'actions',
+  ];
   isGridView = false;
   pageSizeOptions = [5, 10, 25, 50];
   hasNextPage = false;
@@ -110,7 +112,7 @@ export class PodcastsListComponent
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
     { id: 'tgChannelId', label: 'Telegram ID', selected: false },
-    { id: 'categories', label: 'Categories', selected: true },
+    { id: 'latestEpisodeDate', label: 'Latest Episode', selected: true },
     { id: 'enabled', label: 'Live', selected: true },
     { id: 'tgResponse', label: 'Telegram Connected', selected: true },
     { id: 'createEpisode', label: 'Create Episode', selected: true },
@@ -123,6 +125,7 @@ export class PodcastsListComponent
   selectedTeam: string | null = null;
   loadingTeams = false;
   selectedLiveStatus: string | null = null; // null = all, 'live' = enabled only, 'disabled' = disabled only
+  orderBy = '-latest_episode_date'; // Default sort by latest episode, descending
 
   constructor(
     private router: Router,
@@ -187,11 +190,6 @@ export class PodcastsListComponent
     );
   }
 
-  override ngAfterViewInit() {
-    super.ngAfterViewInit();
-    this.dataSource.sort = this.sort;
-  }
-
   protected loadPage(pageSize: number, cursor: string | null, pageIndex: number): void {
     this.loading = true;
     this.loadingService.show();
@@ -212,6 +210,7 @@ export class PodcastsListComponent
           undefined,
           this.selectedTeam || undefined,
           enabledFilter !== null ? enabledFilter : undefined,
+          this.orderBy,
         )
         .subscribe({
           next: (response) => {
@@ -241,6 +240,45 @@ export class PodcastsListComponent
 
   viewPodcast(uuid: string) {
     this.router.navigate(['/p', uuid]);
+  }
+
+  protected formatTimeAgo(dateString: string | null): string {
+    if (!dateString) return 'Never';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffDays > 365) {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    } else if (diffDays > 30) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Just now';
+    }
+  }
+
+  protected formatViewCount(count: number): string {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M views`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K views`;
+    } else if (count === 1) {
+      return '1 view';
+    } else {
+      return `${count} views`;
+    }
   }
 
   ngOnDestroy() {
@@ -284,7 +322,7 @@ export class PodcastsListComponent
     this.loadPage(this.pageSize, null, 0);
   }
 
-  onLiveStatusFilterChange(): void {
+  onLiveStatusFilterChange() {
     this.cursors = [null];
     if (this.paginator) {
       this.paginator.firstPage();
@@ -292,11 +330,34 @@ export class PodcastsListComponent
     this.loadPage(this.pageSize, null, 0);
   }
 
-  getCategoriesString(categories: Record<string, string[]> | null): string {
-    if (!categories) return '-';
-    return Object.entries(categories)
-      .map(([key, values]) => `${key}: ${values.join(', ')}`)
-      .join('; ');
+  onSortChange(field: string) {
+    // Toggle between ascending and descending if clicking the same field
+    // For latest_episode_date, we need special handling to put nulls last
+    // const isLatestEpisodeField = field === 'latest_episode_date';
+
+    if (this.orderBy === field || this.orderBy === `-${field}`) {
+      // Toggle direction
+      if (this.orderBy === field) {
+        this.orderBy = `-${field}`;
+      } else {
+        this.orderBy = field;
+      }
+    } else {
+      // New field, default to descending
+      this.orderBy = `-${field}`;
+    }
+
+    this.cursors = [null];
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+    this.loadPage(this.pageSize, null, 0);
+  }
+
+  getSortDirection(field: string): 'asc' | 'desc' | null {
+    if (this.orderBy === field) return 'asc';
+    if (this.orderBy === `-${field}`) return 'desc';
+    return null;
   }
 
   toggleView(isGrid: boolean) {

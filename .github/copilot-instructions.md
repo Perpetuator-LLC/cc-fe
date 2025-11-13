@@ -65,6 +65,14 @@ super(apollo, errorHandler);
 - GraphQL: inline definitions, define response interfaces, use observables
 - Cache: register policies in owning service, use merge functions
 
+### GraphQL Naming Conventions
+**IMPORTANT:** Backend uses Django (snake_case) but Graphene auto-converts to camelCase for GraphQL
+- **Backend (Django models):** `latest_episode_date`, `view_count`, `created_at`
+- **GraphQL queries/responses:** `latestEpisodeDate`, `viewCount`, `createdAt`
+- **TypeScript interfaces:** Use camelCase to match GraphQL responses
+- **GraphQL arguments:** Use camelCase (e.g., `orderBy`, not `order_by`)
+- Apollo Client automatically handles the conversion, so always use camelCase in frontend
+
 ## Types
 - Naming: `Result` (GraphQL), `Response` (mutations), `Error` (errors)
 - Use `GenericScalar` for JSON | Relay types in `utils/relay.ts`

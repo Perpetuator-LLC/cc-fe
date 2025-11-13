@@ -1,4 +1,5 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
 .button-wrapper {
   display: inline-block;
 }
@@ -492,7 +493,7 @@ mat-divider {
     color: var(--theme-color);
     border: 1px solid var(--border-color);
     margin-top: 20px;
-    p{
+    p {
       margin: 0;
       padding: 0 20px;
       padding-bottom: 30px;
@@ -511,7 +512,7 @@ mat-divider {
       border-radius: 10px;
     }
   }
-  .danger-card-title{
+  .danger-card-title {
     padding: 10px;
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
@@ -679,6 +680,78 @@ mat-divider {
     font-style: italic;
     margin-top: 0;
   }
+}
+
+.settings-section {
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+}
+
+.podcast-image-thumbnail {
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+  margin: 0 auto;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.image-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--description-color);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.podcast-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .episodes-info {

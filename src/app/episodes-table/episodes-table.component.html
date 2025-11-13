@@ -4,8 +4,7 @@
   <div class="search-filter">
     <mat-form-field class="search-field" appearance="outline">
       <mat-icon matIconPrefix>search</mat-icon>
-      <mat-label>Search by episode title</mat-label>
-      <input matInput [(ngModel)]="searchTerm" (input)="onSearch($event)" />
+      <input matInput placeholder="Search by episode title" [(ngModel)]="searchTerm" (input)="onSearch($event)" />
     </mat-form-field>
 
     @if (!podcastUuid) {
@@ -44,7 +43,7 @@
 @if (episodes.length === 0 && !loadingEpisodes) {
 <div class="no-results-message">
   <mat-icon>info</mat-icon>
-  <p>No episodes found.@if (searchTerm || selectedPodcast) { Try adjusting your search filters.}</p>
+  <p>No episodes found.@if (searchTerm || selectedPodcast) { Try creating one or adjusting your search filters.}</p>
 </div>
 } @else {
 <div class="episodes-container">
