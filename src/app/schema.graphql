@@ -26,6 +26,9 @@ type ApiQuery {
   affiliateSystemStatusHistory: [AffiliateSystemStatusHistoryType]
   affiliateRelationshipHistory(userId: UUID): [AffiliateRelationshipHistoryType]
 
+  """Platform financial statistics (admin only)"""
+  platformFinancialStats: PlatformFinancialStatsType
+
   """List of Research Topics [Relay]"""
   topics(
     offset: Int
@@ -241,7 +244,22 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): JobTypeConnection
-  podcasts(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, enabled: Boolean, slug: String, name: String, podcastUuid: UUID, teamUuid: UUID): PodcastTypeConnection
+  podcasts(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+    id: ID
+    enabled: Boolean
+    slug: String
+    name: String
+    podcastUuid: UUID
+    teamUuid: UUID
+
+    """Ordering"""
+    orderBy: String
+  ): PodcastTypeConnection
   rssFeeds(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, url: String, rssFeedUuid: UUID): RssFeedTypeConnection
   deleteUserResults: DeleteUserResults
 
@@ -499,6 +517,47 @@ enum AffiliatesAffiliateRelationshipHistoryActionChoices {
   DELETED
 }
 
+"""Financial statistics for platform affiliate system"""
+type PlatformFinancialStatsType {
+  """Available Stripe balance in cents (e.g., 50000 = $500.00)"""
+  stripeAvailableBalanceCents: Int
+
+  """Pending Stripe balance in cents"""
+  stripePendingBalanceCents: Int
+
+  """Total Stripe balance (available + pending) in cents"""
+  stripeTotalBalanceCents: Int
+
+  """Currency code (e.g., 'USD')"""
+  stripeCurrency: String
+
+  """True if production Stripe account, False if test"""
+  stripeIsLiveMode: Boolean
+
+  """Total outstanding affiliate credits across all users"""
+  totalAffiliateCredits: Int
+
+  """
+  Total outstanding credits converted to cents (potential payout liability)
+  """
+  totalAffiliateCreditsCents: Int
+
+  """Total outstanding credits converted to dollars"""
+  totalAffiliateCreditsDollars: Float
+
+  """Credits in pending/approved conversions (not yet completed)"""
+  pendingConversionCredits: Int
+
+  """Pending conversions in cents"""
+  pendingConversionCents: Int
+
+  """Stripe balance minus pending conversions (safety buffer)"""
+  availablePayoutBufferCents: Int
+
+  """True if Stripe balance can cover all outstanding credits"""
+  canCoverAllOutstanding: Boolean
+}
+
 type TopicTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -588,6 +647,16 @@ type PodcastType implements Node {
   tgChannelId: String
   tgResponse: String
   categories: GenericScalar
+
+  """Number of times this podcast has been viewed publicly"""
+  viewCount: Int!
+
+  """
+  Date of the most recently published episode (podcast_date from is_live episodes)
+  """
+  latestEpisodeDate: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
   uuid: UUID
   rssFeeds: [RssFeedType]
   team: TeamType
@@ -678,6 +747,7 @@ type EpisodeType implements Node {
   audioUrl: String
   versions: [EpisodeVersionType]
   isCurrentValidated: Boolean
+  researchUrls: [String]
 }
 
 type NewsType implements Node {

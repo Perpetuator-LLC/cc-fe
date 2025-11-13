@@ -319,6 +319,45 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  protected formatTimeAgo(dateString: string | null): string {
+    if (!dateString) return 'Never';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffDays > 365) {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    } else if (diffDays > 30) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Just now';
+    }
+  }
+
+  protected formatViewCount(count: number): string {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M views`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K views`;
+    } else if (count === 1) {
+      return '1 view';
+    } else {
+      return `${count} views`;
+    }
+  }
+
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();

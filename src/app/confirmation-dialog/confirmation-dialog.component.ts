@@ -19,7 +19,12 @@ import { MatButton } from '@angular/material/button';
 export class ConfirmationDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { message: string },
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      message: string;
+      title?: string;
+      hideActions?: boolean;
+    },
   ) {}
 
   onCancel(): void {

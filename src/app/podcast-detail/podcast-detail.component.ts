@@ -141,6 +141,17 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   protected filteredVoices: Voice[] = [];
   isEditing = false;
   private savedScrollPosition = 0;
+  protected selectedTabIndex = 0;
+  private readonly tabNames = [
+    'episodes',
+    'settings',
+    'content',
+    'voice',
+    'categories',
+    'publishing',
+    'rss-feeds',
+    'danger-zone',
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -190,6 +201,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       ownerLink: [''],
       image: [null],
       imageUrl: [null],
+      thumbnailUrl: [null],
       rssFeeds: this.fb.array([]),
       tgBotToken: [null],
       tgChannelId: [null],
@@ -228,6 +240,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   imageUrl: string | null = null;
+  thumbnailUrl: string | null = null;
   isDraggingImage = false;
 
   ngOnInit(): void {
@@ -235,12 +248,31 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
 
+    // Initialize tab from query parameter
+    this.subscriptions.add(
+      this.route.queryParams.subscribe((params) => {
+        const tabParam = params['tab'];
+        if (tabParam) {
+          const tabIndex = this.tabNames.indexOf(tabParam);
+          if (tabIndex !== -1) {
+            this.selectedTabIndex = tabIndex;
+          }
+        }
+      }),
+    );
+
     this.loading = true;
     this.refreshPodcastData();
     this.imageUrl = this.podcastForm.get('imageUrl')?.value;
+    this.thumbnailUrl = this.podcastForm.get('thumbnailUrl')?.value;
     this.subscriptions.add(
       this.podcastForm.get('imageUrl')?.valueChanges.subscribe((value) => {
         this.imageUrl = value;
+      }),
+    );
+    this.subscriptions.add(
+      this.podcastForm.get('thumbnailUrl')?.valueChanges.subscribe((value) => {
+        this.thumbnailUrl = value;
       }),
     );
     this.loadTeams();
@@ -393,6 +425,16 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   displayVoice(voice: any): string {
     return voice ? this.getVoiceDisplayName(voice) : '';
+  }
+
+  protected onTabChange(index: number): void {
+    this.selectedTabIndex = index;
+    const tabName = this.tabNames[index];
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tabName },
+      queryParamsHandling: 'merge',
+    });
   }
 
   playVoiceSample(voice: Voice): void {
@@ -710,7 +752,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               return;
             }
             this.messageService.success('Podcast image deleted successfully');
-            // Refresh podcast data to update Apollo cache
             this.refreshPodcastData();
           },
           error: (err) => {
@@ -718,6 +759,26 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           },
         });
       }
+    });
+  }
+
+  protected viewFullImage(): void {
+    if (!this.imageUrl) return;
+
+    const imageHtml = `<img src="${this.imageUrl}"
+      style="max-width: 90vw; max-height: 80vh; width: auto; height: auto;
+      object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;"
+      alt="Podcast Image" />`;
+
+    this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: 'Podcast Image',
+        message: imageHtml,
+        hideActions: true,
+      },
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'image-dialog',
     });
   }
 
