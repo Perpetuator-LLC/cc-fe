@@ -140,13 +140,13 @@
                 <p class="team placeholder">(No Team)</p>
               }
               <div class="stats">
-                <span class="stat placeholder">
+                <span class="stat">
                   <mat-icon>schedule</mat-icon>
-                  2 days ago
+                  {{ formatTimeAgo(podcast.latestEpisodeDate) }}
                 </span>
-                <span class="stat placeholder">
-                  <mat-icon>add</mat-icon>
-                  +4 More
+                <span class="stat">
+                  <mat-icon>visibility</mat-icon>
+                  {{ formatViewCount(podcast.viewCount) }}
                 </span>
               </div>
             </mat-card-content>

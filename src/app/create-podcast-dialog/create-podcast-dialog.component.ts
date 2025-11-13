@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService } from '../podcasts.service';
 import { TeamsResult, TeamsService } from '../teams.service';
+import { UserService } from '../user.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
@@ -52,30 +53,30 @@ import { JobService } from '../job.service';
           }
         </mat-form-field>
 
-        <div class="select-new">
-          <span>Select Team </span>
-          <button mat-stroked-button type="button" (click)="selectCreateNewTeam()">
-            <app-svg-icon width="24" height="24" icon="add-icon" style="cursor: pointer"></app-svg-icon>
-            Create New Team
-          </button>
-        </div>
-        <mat-form-field>
-          <mat-label>Team</mat-label>
-          <mat-select formControlName="teamSelection">
-            @if (ownedTeams.length > 0) {
+        @if (ownedTeams.length > 0) {
+          <div class="select-new">
+            <span>Select Team </span>
+            <button mat-stroked-button type="button" (click)="selectCreateNewTeam()">
+              <app-svg-icon width="24" height="24" icon="add-icon" style="cursor: pointer"></app-svg-icon>
+              Create New Team
+            </button>
+          </div>
+          <mat-form-field>
+            <mat-label>Team</mat-label>
+            <mat-select formControlName="teamSelection">
               <mat-optgroup label="Your Owned Teams">
                 @for (team of ownedTeams; track team.uuid) {
                   <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
                 }
               </mat-optgroup>
+            </mat-select>
+            @if (isLoadingTeams) {
+              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
             }
-          </mat-select>
-          @if (isLoadingTeams) {
-            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-          }
-        </mat-form-field>
+          </mat-form-field>
+        }
 
-        @if (podcastForm.get('teamSelection')?.value === 'new') {
+        @if (ownedTeams.length === 0 || podcastForm.get('teamSelection')?.value === 'new') {
           <mat-form-field>
             <mat-label>New Team Name</mat-label>
             <input matInput formControlName="newTeamName" />
@@ -165,12 +166,14 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   titleError: string | null = null;
   ownedTeams: TeamsResult[] = [];
   isLoadingTeams = true;
+  private teamNameManuallyEdited = false;
 
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
     private podcastsService: PodcastsService,
     private teamsService: TeamsService,
+    private userService: UserService,
     public dialogRef: MatDialogRef<CreatePodcastDialogComponent>,
     private jobService: JobService,
   ) {
@@ -187,6 +190,18 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
 
     this.podcastForm.get('title')?.valueChanges.subscribe(() => {
       this.updateTitleValidation();
+    });
+
+    // Sync newTeamName with title unless user has manually edited it
+    this.podcastForm.get('title')?.valueChanges.subscribe((titleValue) => {
+      if (!this.teamNameManuallyEdited && titleValue) {
+        this.podcastForm.get('newTeamName')?.setValue(titleValue, { emitEvent: false });
+      }
+    });
+
+    // Track when user manually edits the team name
+    this.podcastForm.get('newTeamName')?.valueChanges.subscribe(() => {
+      this.teamNameManuallyEdited = true;
     });
   }
 
@@ -226,6 +241,21 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.ownedTeams = response.teams.filter((team) => team.members.some((member) => member.role === 'owner'));
           this.isLoadingTeams = false;
+
+          // If no teams exist, automatically set to create new team mode
+          if (this.ownedTeams.length === 0) {
+            this.podcastForm.get('teamSelection')?.setValue('new');
+            // Make newTeamName required when no teams exist
+            this.podcastForm.get('newTeamName')?.setValidators([Validators.required]);
+            this.podcastForm.get('newTeamName')?.updateValueAndValidity();
+
+            // Set default team name to "{username}'s Team"
+            const username = this.userService.userDetails()?.username;
+            if (username) {
+              const defaultTeamName = `${username}'s Team`;
+              this.podcastForm.get('newTeamName')?.setValue(defaultTeamName, { emitEvent: false });
+            }
+          }
         },
         error: (err) => {
           this.messageService.error(`Failed to load teams: ${err.message}`);
@@ -237,6 +267,15 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
 
   selectCreateNewTeam(): void {
     this.podcastForm.get('teamSelection')?.setValue('new');
+    this.podcastForm.get('newTeamName')?.setValidators([Validators.required]);
+    this.podcastForm.get('newTeamName')?.updateValueAndValidity();
+
+    // Reset manual edit tracking and sync with current title if exists
+    this.teamNameManuallyEdited = false;
+    const currentTitle = this.podcastForm.get('title')?.value;
+    if (currentTitle) {
+      this.podcastForm.get('newTeamName')?.setValue(currentTitle, { emitEvent: false });
+    }
   }
 
   createPodcast(): void {
