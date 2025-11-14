@@ -1365,12 +1365,12 @@
     color: var(--theme-white);
   }
 
-  &.pending {
+  &.pending, &.under-review {
     background: var(--md-sys-color-warning);
-    color: var(--theme-white);
+    color: var(--secondary-dark);
   }
 
-  &.failed {
+  &.failed, &.rejected {
     background: var(--md-sys-color-error);
     color: var(--theme-white);
   }
