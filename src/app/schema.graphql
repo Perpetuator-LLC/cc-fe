@@ -761,12 +761,12 @@ type NewsType implements Node {
   summary: String!
   content: String!
   validatedSummary: String
-  validationConfidence: ApiNewsValidationConfidenceChoices
+  validationConfidence: NewsNewsValidationConfidenceChoices
   uuid: UUID
 }
 
 """An enumeration."""
-enum ApiNewsValidationConfidenceChoices {
+enum NewsNewsValidationConfidenceChoices {
   """High"""
   HIGH
 

@@ -631,6 +631,16 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     return type === 'to_credits' ? 'Credits' : 'Cash';
   }
 
+  formatStatus(status: string): string {
+    // Convert snake_case to uppercase with spaces: under_review -> UNDER REVIEW
+    return status.replace(/_/g, ' ').toUpperCase();
+  }
+
+  getStatusClass(status: string): string {
+    // Convert snake_case to kebab-case for CSS classes: under_review -> under-review
+    return status.replace(/_/g, '-');
+  }
+
   getStatusIcon(status?: string | null): string {
     switch (status) {
       case 'active':
