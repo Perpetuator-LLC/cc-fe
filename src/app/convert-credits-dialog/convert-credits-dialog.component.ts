@@ -9,7 +9,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
-import { AffiliateService, AffiliateProfile } from '../affiliate.service';
+import {
+  AffiliateService,
+  AffiliateProfile,
+  AffiliateConversionUtils,
+  MIN_CASH_PAYOUT_CREDITS,
+} from '../affiliate.service';
 import { MessageService } from '../message.service';
 
 export interface ConvertCreditsDialogData {
@@ -38,7 +43,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   private subscriptions = new Subscription();
   loading = false;
   convertForm: FormGroup;
-  readonly MIN_CASH_PAYOUT = 10000; // $10.00 (10,000 credits = $10)
+  readonly MIN_CASH_PAYOUT = MIN_CASH_PAYOUT_CREDITS;
 
   constructor(
     private dialogRef: MatDialogRef<ConvertCreditsDialogComponent>,
@@ -55,6 +60,13 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Convert affiliate credits to dollar string for display
+   */
+  creditsToDollars(credits: number): string {
+    return AffiliateConversionUtils.creditsToDollars(credits);
   }
 
   canRequestPayout(): boolean {
@@ -99,7 +111,9 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     if (this.data.type === 'credits') {
       return 'Convert your affiliate credits to regular platform credits that you can use for any service.';
     }
-    const minAmount = `${this.MIN_CASH_PAYOUT.toLocaleString()} credits ($${(this.MIN_CASH_PAYOUT / 1000).toFixed(2)})`;
+    const minCredits = this.MIN_CASH_PAYOUT.toLocaleString();
+    const minDollars = AffiliateConversionUtils.creditsToDollars(this.MIN_CASH_PAYOUT);
+    const minAmount = `${minCredits} credits ($${minDollars})`;
     return (
       `Request a cash payout for your affiliate credits. Minimum payout is ${minAmount}. ` +
       'Payouts are reviewed by admins and typically processed within 5-7 business days.'
@@ -122,11 +136,9 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
 
     // Check minimum for cash payout
     if (this.data.type === 'cash' && amount < this.MIN_CASH_PAYOUT) {
-      this.messageService.error(
-        `Minimum cash payout is ${this.MIN_CASH_PAYOUT.toLocaleString()} credits ($${(
-          this.MIN_CASH_PAYOUT / 1000
-        ).toFixed(2)})`,
-      );
+      const minCredits = this.MIN_CASH_PAYOUT.toLocaleString();
+      const minDollars = AffiliateConversionUtils.creditsToDollars(this.MIN_CASH_PAYOUT);
+      this.messageService.error(`Minimum cash payout is ${minCredits} credits ($${minDollars})`);
       return;
     }
 
