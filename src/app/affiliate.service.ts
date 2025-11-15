@@ -7,6 +7,64 @@ import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 
+/**
+ * Affiliate Credit Conversion Constants
+ * Rate: 1,000 affiliate credits = $1.00 USD
+ */
+export const AFFILIATE_CREDITS_PER_DOLLAR = 1000;
+export const MIN_CASH_PAYOUT_CREDITS = 10000; // $10.00 minimum
+
+/**
+ * Utility functions for affiliate credit conversions
+ */
+export class AffiliateConversionUtils {
+  /**
+   * Convert affiliate credits to dollar amount
+   * @param credits - Number of affiliate credits
+   * @returns Dollar amount as string (e.g., "21.00")
+   */
+  static creditsToDollars(credits: number): string {
+    return (credits / AFFILIATE_CREDITS_PER_DOLLAR).toFixed(2);
+  }
+
+  /**
+   * Convert cents to dollar amount (for targetAmount from backend)
+   * Backend stores cash amounts in cents
+   * @param cents - Amount in cents
+   * @returns Dollar amount as string (e.g., "21.00")
+   */
+  static centsToDollars(cents: number): string {
+    return (cents / 100).toFixed(2);
+  }
+
+  /**
+   * Format affiliate credits to USD display
+   * @param credits - Number of affiliate credits
+   * @returns Formatted string (e.g., "$21.00")
+   */
+  static formatCreditsAsUSD(credits: number): string {
+    return `$${this.creditsToDollars(credits)}`;
+  }
+
+  /**
+   * Format cents to USD display
+   * @param cents - Amount in cents
+   * @returns Formatted string (e.g., "$21.00")
+   */
+  static formatCentsAsUSD(cents: number): string {
+    return `$${this.centsToDollars(cents)}`;
+  }
+
+  /**
+   * Convert dollars to affiliate credits
+   * @param dollars - Dollar amount
+   * @returns Number of affiliate credits
+   */
+  static dollarsToCredits(dollars: number): number {
+    return Math.floor(dollars * AFFILIATE_CREDITS_PER_DOLLAR);
+  }
+}
+
 export interface PublicUser {
   uuid: string;
   username: string;

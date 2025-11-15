@@ -27,6 +27,7 @@ import {
   AffiliateUserSearchResult,
   PayoutConversion,
   PlatformFinancialStats,
+  AffiliateConversionUtils,
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -623,6 +624,24 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     return new Date(dateString).toLocaleDateString();
   }
 
+  /**
+   * Convert cents to dollar string (for targetAmount from backend)
+   * @param cents - Amount in cents
+   * @returns Dollar amount as string (e.g., "21.00")
+   */
+  centsToDollars(cents: number): string {
+    return AffiliateConversionUtils.centsToDollars(cents);
+  }
+
+  /**
+   * Convert affiliate credits to dollar string
+   * @param credits - Number of affiliate credits
+   * @returns Dollar amount as string (e.g., "21.00")
+   */
+  creditsToDollars(credits: number): string {
+    return AffiliateConversionUtils.creditsToDollars(credits);
+  }
+
   getTierDescription(tier: number): string {
     return tier === 1 ? 'Tier 1 (10%)' : 'Tier 2 (5%)';
   }
@@ -1046,7 +1065,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       `Affiliate: ${payout.affiliate.username}`,
       `User ID: ${payout.affiliate.uuid}`,
       `Credits: ${payout.affiliateCreditAmount.toLocaleString()}`,
-      `Amount: $${(payout.targetAmount / 1000).toFixed(2)} USD`,
+      `Amount: $${AffiliateConversionUtils.centsToDollars(payout.targetAmount)} USD`,
       `Requested: ${new Date(payout.createdAt).toLocaleString()}`,
       `Status: ${payout.status}`,
     ];

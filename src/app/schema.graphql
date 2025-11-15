@@ -323,6 +323,9 @@ type PublicUserType implements Node {
   """The ID of the object"""
   id: ID!
   uuid: UUID
+
+  """The user's affiliate profile if they have one"""
+  affiliateProfile: AffiliateProfileType
 }
 
 """An object with an ID"""

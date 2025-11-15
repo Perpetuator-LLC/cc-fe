@@ -1144,7 +1144,7 @@
                         <td mat-cell *matCellDef="let payout">
                           <div class="amount-info">
                             <div>{{ payout.affiliateCreditAmount.toLocaleString() }} credits</div>
-                            <div class="usd-amount">${{ (payout.targetAmount / 1000).toFixed(2) }} USD</div>
+                            <div class="usd-amount">${{ centsToDollars(payout.targetAmount) }} USD</div>
                           </div>
                         </td>
                       </ng-container>
