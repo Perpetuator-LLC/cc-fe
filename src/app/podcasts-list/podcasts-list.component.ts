@@ -364,11 +364,6 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     this.isGridView = isGrid;
   }
 
-  archivePodcast(uuid: string) {
-    console.log('Archive podcast:', uuid);
-    // Implement archive podcast logic here
-  }
-
   updateDisplayedColumns(): void {
     this.displayedColumns = this.allColumns.filter((column) => column.selected).map((column) => column.id);
   }

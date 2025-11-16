@@ -80,10 +80,10 @@ export class PublicCategoriesComponent implements OnInit {
           }
         } else if (typeof categoriesData === 'object') {
           // If it's an object, use the key as the name
-          console.log('Processing as object, keys:', Object.keys(categoriesData));
+          // console.log('Processing as object, keys:', Object.keys(categoriesData));
           const categoryObject = categoriesData as Record<string, Category>;
           this.categories = Object.entries(categoryObject).map(([name, category]) => {
-            console.log(`Category key: ${name}`, 'value:', category);
+            // console.log(`Category key: ${name}`, 'value:', category);
             return {
               name: name,
               data: category,
@@ -94,7 +94,7 @@ export class PublicCategoriesComponent implements OnInit {
           this.categories = [];
         }
 
-        console.log('Final categories array:', this.categories);
+        // console.log('Final categories array:', this.categories);
         this.loading = false;
       },
       error: (err) => {

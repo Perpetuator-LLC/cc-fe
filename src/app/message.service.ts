@@ -49,22 +49,18 @@ export class MessageService {
   }
 
   warning(text: string, timeout: number | undefined | null = 8000, dismissible = true) {
-    console.warn(`[MessageService] Warning: ${text}`, '\nStack:', this.getCallerStack());
     this.addMessage({ type: 'warning', text, dismissible, timeout });
   }
 
   success(text: string, timeout: number | undefined | null = 5000, dismissible = false) {
-    console.log(`[MessageService] Success: ${text}`, '\nStack:', this.getCallerStack());
     this.addMessage({ type: 'success', text, dismissible, timeout });
   }
 
   info(text: string, timeout: number | undefined | null = 3000, dismissible = false) {
-    console.info(`[MessageService] Info: ${text}`, '\nStack:', this.getCallerStack());
     this.addMessage({ type: 'info', text, dismissible, timeout });
   }
 
   progress(text: string, progress = 0, dismissible = false): number {
-    console.log(`[MessageService] Progress: ${text} (${progress}%)`, '\nStack:', this.getCallerStack());
     const timestamp = Date.now();
     const currentMessages = this.messagesSubject.value;
     let uniqueTimestamp = timestamp;
@@ -84,22 +80,17 @@ export class MessageService {
   }
 
   updateProgress(timestamp: number, text: string, progress: number) {
-    console.log(`[MessageService] updateProgress: ${text} (${progress}%) [timestamp: ${timestamp}]`);
     const currentMessages = this.messagesSubject.value;
     const index = currentMessages.findIndex((message) => message.timestamp === timestamp);
     if (index !== -1) {
-      console.log(`[MessageService] Found message at index ${index}, updating...`);
       // Create a new array with the updated message (immutable update for change detection)
       const updatedMessages = [...currentMessages];
       updatedMessages[index] = { ...currentMessages[index], text, progress };
       this.messagesSubject.next(updatedMessages);
-    } else {
-      console.warn(`[MessageService] updateProgress: Message with timestamp ${timestamp} not found!`);
     }
   }
 
   addMessage(message: NewMessage) {
-    console.log(`[MessageService] addMessage called:`, message, '\nStack:', this.getCallerStack());
     const currentMessages = this.messagesSubject.value;
     let timestamp = Date.now(); // make sure it is unique else add 1ms
     while (currentMessages.some((m) => m.timestamp === timestamp)) {
