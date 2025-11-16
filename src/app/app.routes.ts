@@ -226,6 +226,15 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'affiliate-admin',
+    loadComponent: () => import('./affiliate-admin/affiliate-admin.component').then((c) => c.AffiliateAdminComponent),
+    title: 'Affiliate Admin',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'admin_panel_settings',
+    },
+  },
+  {
     path: 'affiliate/stripe/return',
     loadComponent: () =>
       import('./stripe-onboarding-return/stripe-onboarding-return.component').then(

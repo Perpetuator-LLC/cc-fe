@@ -104,6 +104,14 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.affiliateService.checkAffiliateProgramEligibility().subscribe({
         next: (eligibility) => {
+          console.log('=== ELIGIBILITY DEBUG ===');
+          console.log('Full eligibility object:', eligibility);
+          console.log('isEligible:', eligibility.isEligible);
+          console.log('hasPaidOrder:', eligibility.hasPaidOrder);
+          console.log('reason:', eligibility.reason);
+          console.log('typeof hasPaidOrder:', typeof eligibility.hasPaidOrder);
+          console.log('=========================');
+
           this.eligibility = eligibility;
           this.checkingEligibility = false;
 
@@ -333,45 +341,6 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     return status.replace(/_/g, '-');
   }
 
-  getStatusIcon(status?: string | null): string {
-    switch (status) {
-      case 'active':
-        return 'check_circle';
-      case 'suspended':
-        return 'block';
-      case 'under_review':
-        return 'pending';
-      default:
-        return 'help_outline';
-    }
-  }
-
-  getStatusColor(status?: string | null): string {
-    switch (status) {
-      case 'active':
-        return 'status-active';
-      case 'suspended':
-        return 'status-suspended';
-      case 'under_review':
-        return 'status-under-review';
-      default:
-        return '';
-    }
-  }
-
-  getStatusLabel(status?: string | null): string {
-    switch (status) {
-      case 'active':
-        return 'Active';
-      case 'suspended':
-        return 'Suspended';
-      case 'under_review':
-        return 'Under Review';
-      default:
-        return 'Unknown';
-    }
-  }
-
   isNetworkJoinable(profile: AffiliateProfile | null): boolean {
     if (!profile) return false;
     const isEligible = !profile.eligibilityStatus || profile.eligibilityStatus === 'active';
@@ -394,6 +363,46 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     }
 
     return '';
+  }
+
+  toggleNetworkStatus(userId: string, username: string, currentIsActive: boolean): void {
+    const newStatus = !currentIsActive;
+    const action = newStatus ? 'open' : 'close';
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: `${action === 'open' ? 'Open' : 'Close'} Affiliate Network`,
+        message: `Are you sure you want to ${action} the affiliate network for ${username}? ${
+          newStatus ? 'Users will be able to join their network.' : 'Users will NOT be able to join their network.'
+        }`,
+        confirmText: action === 'open' ? 'Open Network' : 'Close Network',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const reasonInput = prompt('Enter internal admin reason (optional, for audit trail):');
+        if (reasonInput === null) return;
+        const reason = reasonInput || undefined;
+
+        this.updatingUserEligibility = true;
+        this.subscriptions.add(
+          this.affiliateService.updateAffiliateNetworkStatus(userId, newStatus, reason).subscribe({
+            next: () => {
+              this.messageService.success(`Network ${action}ed for ${username}`);
+              this.updatingUserEligibility = false;
+              this.searchUser();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to ${action} network: ${err.message}`);
+              this.updatingUserEligibility = false;
+            },
+          }),
+        );
+      }
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -571,6 +580,51 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     this.messageService.warning('Failed to load brand image. The image may have been deleted or the URL is invalid.');
   }
 
+  approveCodeChangeRequest(requestId: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Approve Code Change Request',
+        message: 'Are you sure you want to approve this code change request?',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.messageService.clearMessages();
+        this.subscriptions.add(
+          this.affiliateService.approveCodeChangeRequest(requestId).subscribe({
+            next: () => {
+              this.messageService.success('Code change request approved successfully');
+              this.loadAdminPendingRequests();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to approve request: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  rejectCodeChangeRequest(requestId: string): void {
+    const reason = prompt('Enter rejection reason (optional):');
+    if (reason === null) return;
+
+    this.messageService.clearMessages();
+    this.subscriptions.add(
+      this.affiliateService.rejectCodeChangeRequest(requestId, reason || undefined).subscribe({
+        next: () => {
+          this.messageService.success('Code change request rejected');
+          this.loadAdminPendingRequests();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to reject request: ${err.message}`);
+        },
+      }),
+    );
+  }
+
   startStripeOnboarding(): void {
     this.loading = true;
     this.subscriptions.add(
@@ -614,5 +668,140 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  viewPayoutDetails(conversionId: string): void {
+    this.subscriptions.add(
+      this.affiliateService.getPayoutConversionById(conversionId).subscribe({
+        next: (payout) => {
+          if (!payout) {
+            this.messageService.error('Payout request not found');
+            return;
+          }
+
+          this.dialog.open(ConfirmationDialogComponent, {
+            width: '600px',
+            data: {
+              title: 'Payout Request Details',
+              message: this.formatPayoutDetails(payout),
+              confirmText: 'Close',
+              cancelText: null,
+            },
+          });
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load payout details: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  formatPayoutDetails(payout: PayoutConversion): string {
+    const details = [
+      `Affiliate: ${payout.affiliate.username}`,
+      `User ID: ${payout.affiliate.uuid}`,
+      `Credits: ${payout.affiliateCreditAmount.toLocaleString()}`,
+      `Amount: $${AffiliateConversionUtils.centsToDollars(payout.targetAmount)} USD`,
+      `Requested: ${new Date(payout.createdAt).toLocaleString()}`,
+      `Status: ${payout.status}`,
+    ];
+
+    if (payout.affiliate.affiliateProfile) {
+      const profile = payout.affiliate.affiliateProfile;
+      details.push('');
+      details.push('Stripe Account Status:');
+      details.push(`- Onboarding: ${profile.stripeOnboardingCompleted ? '✓ Complete' : '✗ Incomplete'}`);
+      details.push(`- Payouts: ${profile.stripePayoutsEnabled ? '✓ Enabled' : '✗ Disabled'}`);
+      details.push(`- Country: ${profile.stripeCountry || 'N/A'}`);
+    }
+
+    return details.join('\n');
+  }
+
+  approvePayoutRequest(conversionId: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'Approve Payout Request',
+        message:
+          'Are you sure you want to approve this payout? ' +
+          "This will immediately transfer funds to the affiliate's Stripe account.",
+        confirmText: 'Approve Payout',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const adminNotes = prompt('Admin notes (optional, internal only):');
+        if (adminNotes === null) return;
+
+        this.messageService.clearMessages();
+        this.subscriptions.add(
+          this.affiliateService.approvePayoutRequest(conversionId, adminNotes || undefined).subscribe({
+            next: () => {
+              this.messageService.success('Payout approved and processed successfully!');
+              this.loadPendingPayoutRequests();
+            },
+            error: (err) => {
+              this.messageService.error(`Failed to approve payout: ${err.message}`);
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  rejectPayoutRequest(conversionId: string): void {
+    const rejectionReason = prompt(
+      'Enter rejection reason (will be shown to affiliate):\n\n' +
+        'Example: "Please complete your Stripe account verification before requesting payouts."',
+    );
+
+    if (!rejectionReason) {
+      if (rejectionReason === '') {
+        this.messageService.warning('Rejection reason is required');
+      }
+      return;
+    }
+
+    const adminNotes = prompt('Internal admin notes (optional, not shown to affiliate):');
+    if (adminNotes === null) return;
+
+    this.messageService.clearMessages();
+    this.subscriptions.add(
+      this.affiliateService.rejectPayoutRequest(conversionId, rejectionReason, adminNotes || undefined).subscribe({
+        next: () => {
+          this.messageService.success('Payout rejected. Affiliate has been notified.');
+          this.loadPendingPayoutRequests();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to reject payout: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  formatCentsAsDollars(cents: number): string {
+    return (cents / 100).toFixed(2);
+  }
+
+  getFinancialDifference(): number {
+    if (!this.platformFinancialStats) return 0;
+    return this.platformFinancialStats.stripeTotalBalanceCents - this.platformFinancialStats.totalAffiliateCreditsCents;
+  }
+
+  getFinancialDifferenceLabel(): string {
+    const diff = this.getFinancialDifference();
+    if (diff > 0) {
+      return `Surplus: $${this.formatCentsAsDollars(diff)}`;
+    } else if (diff < 0) {
+      return `Deficit: -$${this.formatCentsAsDollars(Math.abs(diff))}`;
+    }
+    return 'Balanced: $0.00';
+  }
+
+  isFinancialHealthGood(): boolean {
+    return this.platformFinancialStats?.canCoverAllOutstanding ?? false;
   }
 }

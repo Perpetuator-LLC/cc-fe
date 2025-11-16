@@ -364,22 +364,6 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     this.isGridView = isGrid;
   }
 
-  // Placeholder methods for menu actions
-  moveToDraft(uuid: string) {
-    console.log('Move to draft:', uuid);
-    // Implement move to draft logic here
-  }
-
-  changeCategory(uuid: string) {
-    console.log('Change category:', uuid);
-    // Implement change category logic here
-  }
-
-  duplicatePodcast(uuid: string) {
-    console.log('Duplicate podcast:', uuid);
-    // Implement duplicate podcast logic here
-  }
-
   archivePodcast(uuid: string) {
     console.log('Archive podcast:', uuid);
     // Implement archive podcast logic here
