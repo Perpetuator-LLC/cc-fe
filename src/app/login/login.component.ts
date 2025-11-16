@@ -107,16 +107,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
             } else {
               this.completeLogin();
             }
-          } else {
-            this.messageService.addMessage({
-              type: 'error',
-              text: 'Login failed. Please try again.',
-              dismissible: true,
-            });
           }
-        },
-        error: (error) => {
-          this.messageService.error('Login failed: ' + error.toString());
         },
       });
   }
