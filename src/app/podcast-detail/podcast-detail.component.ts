@@ -764,22 +764,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
 
   protected viewFullImage(): void {
     if (!this.imageUrl) return;
-
-    const imageHtml = `<img src="${this.imageUrl}"
-      style="max-width: 90vw; max-height: 80vh; width: auto; height: auto;
-      object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;"
-      alt="Podcast Image" />`;
-
-    this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        title: 'Podcast Image',
-        message: imageHtml,
-        hideActions: true,
-      },
-      maxWidth: '95vw',
-      maxHeight: '90vh',
-      panelClass: 'image-dialog',
-    });
+    window.open(this.imageUrl, '_blank');
   }
 
   onImageDragOver(event: DragEvent): void {
