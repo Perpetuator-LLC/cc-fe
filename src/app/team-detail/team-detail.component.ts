@@ -445,8 +445,4 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
       }
     });
   }
-  archivePodcast(uuid: string) {
-    console.log('Archive podcast:', uuid);
-    // Implement archive podcast logic here
-  }
 }

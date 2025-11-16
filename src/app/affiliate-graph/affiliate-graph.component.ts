@@ -90,11 +90,11 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
       root.classList.contains('dark-theme') ||
       root.classList.contains('dark-mode');
 
-    console.log('Theme detection:', {
-      isDarkMode,
-      bodyClasses: Array.from(body.classList),
-      rootClasses: Array.from(root.classList),
-    });
+    // console.log('Theme detection:', {
+    //   isDarkMode,
+    //   bodyClasses: Array.from(body.classList),
+    //   rootClasses: Array.from(root.classList),
+    // });
 
     return {
       primary: getVar('--primary', isDarkMode ? '#90caf9' : '#1976d2'),
@@ -208,13 +208,13 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
     const colors = this.getThemeColors();
 
     // Debug: Log the theme colors being applied
-    console.log('===== APPLYING THEME COLORS =====');
-    console.log('Theme Colors:', colors);
-    console.log('=================================');
+    // console.log('===== APPLYING THEME COLORS =====');
+    // console.log('Theme Colors:', colors);
+    // console.log('=================================');
 
     // Style all node rectangles
     const nodeRects = svgElement.querySelectorAll('.node rect, .node polygon, .node circle');
-    console.log(`Found ${nodeRects.length} node shapes to style`);
+    // console.log(`Found ${nodeRects.length} node shapes to style`);
 
     nodeRects.forEach((rect) => {
       (rect as SVGElement).style.fill = colors.bgColor;
@@ -224,7 +224,7 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
 
     // Style all node labels/text
     const labels = svgElement.querySelectorAll('.nodeLabel, .label');
-    console.log(`Found ${labels.length} node labels to style`);
+    // console.log(`Found ${labels.length} node labels to style`);
 
     labels.forEach((label) => {
       (label as HTMLElement).style.color = colors.textColor;

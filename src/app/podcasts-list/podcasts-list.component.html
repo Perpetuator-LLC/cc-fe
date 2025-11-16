@@ -204,7 +204,7 @@
               <mat-icon>add_circle_outline</mat-icon>
               <span>Create Episode</span>
             </button>
-            <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
+            <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
               <mat-icon>delete</mat-icon>
               <span>Delete</span>
             </button>
@@ -269,7 +269,7 @@
                     <mat-icon>add_circle_outline</mat-icon>
                     <span>Create Episode</span>
                   </button>
-                  <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
+                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
                     <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>

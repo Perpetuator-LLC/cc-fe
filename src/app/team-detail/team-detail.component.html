@@ -189,7 +189,7 @@
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
-                  <button mat-menu-item (click)="archivePodcast(podcast.uuid)">
+                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
                     <app-svg-icon icon="delete"></app-svg-icon>
                     <span>Delete</span>
                   </button>
