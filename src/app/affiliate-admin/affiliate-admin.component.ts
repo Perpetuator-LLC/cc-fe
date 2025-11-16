@@ -24,6 +24,7 @@ import {
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
 
 @Component({
   selector: 'app-affiliate-admin',
@@ -616,7 +617,93 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  getStripeStatus(user: AffiliateUserSearchResult): {
+    icon: string;
+    label: string;
+    cssClass: string;
+    tooltip: string;
+  } {
+    if (!user.hasAffiliateProfile) {
+      return {
+        icon: 'person_off',
+        label: 'Not in Program',
+        cssClass: 'no-profile',
+        tooltip: 'User is not enrolled in the affiliate program',
+      };
+    }
+
+    if (!user.stripeAccountId) {
+      return {
+        icon: 'account_balance_wallet',
+        label: 'Setup Required',
+        cssClass: 'setup-required',
+        tooltip: 'Stripe Connect account not created yet',
+      };
+    }
+
+    if (!user.stripeDetailsSubmitted) {
+      return {
+        icon: 'pending',
+        label: 'Details Pending',
+        cssClass: 'details-pending',
+        tooltip: 'Affiliate has not submitted Stripe account details',
+      };
+    }
+
+    if (!user.stripeOnboardingCompleted) {
+      return {
+        icon: 'hourglass_empty',
+        label: 'Onboarding Incomplete',
+        cssClass: 'onboarding-incomplete',
+        tooltip: 'Stripe onboarding process is not complete',
+      };
+    }
+
+    const chargesEnabled = user.stripeChargesEnabled ?? false;
+    const payoutsEnabled = user.stripePayoutsEnabled ?? false;
+
+    if (chargesEnabled && payoutsEnabled) {
+      const countryInfo = user.stripeCountry ? ` (${user.stripeCountry})` : '';
+      return {
+        icon: 'verified',
+        label: 'Fully Active',
+        cssClass: 'fully-active',
+        tooltip: `Stripe account is fully operational${countryInfo}. Can receive payments and process payouts.`,
+      };
+    }
+
+    if (chargesEnabled && !payoutsEnabled) {
+      return {
+        icon: 'warning',
+        label: 'Payouts Disabled',
+        cssClass: 'payouts-disabled',
+        tooltip: 'Can receive charges but payouts are disabled. May need additional verification.',
+      };
+    }
+
+    if (!chargesEnabled && payoutsEnabled) {
+      return {
+        icon: 'warning',
+        label: 'Charges Disabled',
+        cssClass: 'charges-disabled',
+        tooltip: 'Payouts enabled but charges are disabled. Unusual state - may need review.',
+      };
+    }
+
+    return {
+      icon: 'block',
+      label: 'Account Restricted',
+      cssClass: 'restricted',
+      tooltip: 'Stripe account exists but both charges and payouts are disabled. Needs attention.',
+    };
+  }
+
   openAffiliateGraph(): void {
-    this.messageService.info('Opening affiliate network graph...');
+    this.dialog.open(AffiliateGraphComponent, {
+      width: '90vw',
+      maxWidth: '1400px',
+      height: '85vh',
+      maxHeight: '900px',
+    });
   }
 }

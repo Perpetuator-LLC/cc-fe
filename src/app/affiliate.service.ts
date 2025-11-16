@@ -369,9 +369,16 @@ interface RejectPayoutRequestResponse {
 export interface AffiliateUserSearchResult {
   uuid: string;
   username: string;
+  affiliateCode?: string;
   hasAffiliateProfile: boolean;
   eligibilityStatus: string;
   isActive?: boolean;
+  stripeAccountId?: string;
+  stripeOnboardingCompleted?: boolean;
+  stripeChargesEnabled?: boolean;
+  stripePayoutsEnabled?: boolean;
+  stripeCountry?: string;
+  stripeDetailsSubmitted?: boolean;
 }
 
 export interface PlatformFinancialStats {
@@ -1156,9 +1163,16 @@ export class AffiliateService extends BaseService {
         searchAffiliateUsers(query: $query) {
           uuid
           username
+          affiliateCode
           hasAffiliateProfile
           eligibilityStatus
           isActive
+          stripeAccountId
+          stripeOnboardingCompleted
+          stripeChargesEnabled
+          stripePayoutsEnabled
+          stripeCountry
+          stripeDetailsSubmitted
         }
       }
     `;

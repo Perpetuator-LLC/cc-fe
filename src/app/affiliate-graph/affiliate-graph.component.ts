@@ -13,6 +13,13 @@ import { AffiliateService, ExportAffiliateGraphResponse } from '../affiliate.ser
 import { MessageService } from '../message.service';
 import mermaid from 'mermaid';
 
+// Extend Window interface to include our custom callback
+// declare global {
+//   interface Window {
+//     showTooltip?: (uuid: string) => void;
+//   }
+// }
+
 @Component({
   selector: 'app-affiliate-graph',
   standalone: true,
@@ -55,6 +62,11 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
         curve: 'basis',
       },
     });
+
+    // Register the global showTooltip callback for Mermaid click events
+    // window.showTooltip = (uuid: string) => {
+    //   this.showNodeTooltip(uuid);
+    // };
   }
 
   private getThemeColors() {
@@ -106,7 +118,16 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    // Clean up the global callback
+    // delete window.showTooltip;
   }
+
+  // showNodeTooltip(uuid: string): void {
+  //   // Display the UUID in a user-friendly way
+  //   // For now, we'll show it as a message, but this could be enhanced with a custom tooltip component
+  //   this.messageService.info(`User UUID: ${uuid}`);
+  //   console.log('Node clicked - UUID:', uuid);
+  // }
 
   loadGraph(): void {
     this.loading = true;
@@ -121,10 +142,10 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
             this.loading = false;
 
             // Debug: Log the graph data to see what backend is providing
-            console.log('===== AFFILIATE GRAPH DATA =====');
-            console.log('Format:', this.format);
-            console.log('Graph Data:', this.graphData);
-            console.log('================================');
+            // console.log('===== AFFILIATE GRAPH DATA =====');
+            // console.log('Format:', this.format);
+            // console.log('Graph Data:', this.graphData);
+            // console.log('================================');
 
             setTimeout(() => this.renderGraph(), 100);
           } else {
