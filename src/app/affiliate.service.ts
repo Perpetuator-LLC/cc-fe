@@ -389,6 +389,13 @@ export interface PlatformFinancialStats {
   canCoverAllOutstanding: boolean;
 }
 
+export interface ExportAffiliateGraphResponse {
+  success: boolean;
+  message: string | null;
+  graphData: string | null;
+  format: string | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -1473,5 +1480,27 @@ export class AffiliateService extends BaseService {
       query,
       fetchPolicy: 'network-only', // Always get fresh data
     }).pipe(map((data) => data.platformFinancialStats));
+  }
+
+  exportAffiliateGraph(format = 'mermaid'): Observable<ExportAffiliateGraphResponse> {
+    const mutation = gql`
+      mutation ExportAffiliateGraph($format: String) {
+        exportAffiliateGraph(format: $format) {
+          success
+          message
+          graphData
+          format
+        }
+      }
+    `;
+
+    interface Response {
+      exportAffiliateGraph: ExportAffiliateGraphResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation,
+      variables: { format },
+    }).pipe(map((data) => data.exportAffiliateGraph));
   }
 }

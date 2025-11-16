@@ -43,21 +43,13 @@ export class PublicCategoriesComponent implements OnInit {
 
     this.publicPodcastService.getCategories().subscribe({
       next: (data) => {
-        console.log('Raw API response:', data);
-        console.log('Categories data:', data.categories);
-        console.log('Is array?', Array.isArray(data.categories));
-
         // Handle both object and array responses
         const categoriesData = data.categories;
 
         if (Array.isArray(categoriesData)) {
-          console.log('Processing as array, first item:', categoriesData[0]);
-          console.log('First item type:', typeof categoriesData[0]);
-
           // Check if it's an array of strings or Category objects
           if (categoriesData.length > 0 && typeof categoriesData[0] === 'string') {
             // Array of strings - convert to Category objects
-            console.log('Array contains strings, converting to objects');
             const stringArray = categoriesData as string[];
             this.categories = stringArray.map((categoryName) => ({
               name: categoryName,
@@ -69,7 +61,6 @@ export class PublicCategoriesComponent implements OnInit {
             }));
           } else {
             // Array of Category objects
-            console.log('Array contains objects');
             const categoryArray = categoriesData as Category[];
             this.categories = categoryArray.map((category, index) => {
               // API uses 'category' property, not 'name'
@@ -77,7 +68,6 @@ export class PublicCategoriesComponent implements OnInit {
               const categoryName =
                 (typeof asRecord['category'] === 'string' ? asRecord['category'] : category.name) ||
                 `Category ${index}`;
-              console.log(`Category ${index}:`, category, 'categoryName:', categoryName);
               return {
                 name: categoryName,
                 data: {
