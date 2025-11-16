@@ -147,7 +147,6 @@ export class LayoutComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    console.log('rootRoutes', this.rootRoutes);
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
     this.currentTheme = this.themeService.theme;
     if (this.isLoggedIn()) {
