@@ -10,22 +10,4 @@
   padding: 20px;
 }
 
-:host ::ng-deep .image-dialog {
-  .mat-mdc-dialog-container {
-    padding: 0;
-  }
-
-  [mat-dialog-content] {
-    padding: 20px;
-    overflow: hidden;
-  }
-
-  img {
-    max-width: 90vw !important;
-    max-height: 80vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-  }
-}
 
