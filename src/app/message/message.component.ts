@@ -30,7 +30,12 @@ export class MessageComponent implements OnDestroy {
         this.messages = messages.map((message) => {
           const existingMessage = this.messages.find((m) => m.timestamp === message.timestamp);
           if (existingMessage) {
-            return existingMessage;
+            // Merge updated message data with existing timeout tracking data
+            return {
+              ...message, // Use updated message data (text, progress, etc.)
+              timeoutProgress: existingMessage.timeoutProgress,
+              timeoutStartTime: existingMessage.timeoutStartTime,
+            };
           }
           const newMessage: MessageWithProgress = {
             ...message,
