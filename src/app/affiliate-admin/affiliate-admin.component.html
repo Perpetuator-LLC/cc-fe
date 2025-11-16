@@ -225,12 +225,19 @@
                     <div class="user-info">
                       <mat-icon>person</mat-icon>
                       <div>
-                        <strong>{{ user.username }}</strong>
+                        <div class="username-row">
+                          <strong>{{ user.username }}</strong>
+                          @if (user.affiliateCode) {
+                            <span class="affiliate-code">{{ user.affiliateCode }}</span>
+                          }
+                        </div>
                         <span class="user-status">
                           @if (user.hasAffiliateProfile) {
-                            <span class="badge affiliate">
-                              <mat-icon>verified</mat-icon>
-                              Affiliate Member
+                            <span class="badge affiliate-stripe-status"
+                                  [class]="getStripeStatus(user).cssClass"
+                                  [matTooltip]="getStripeStatus(user).tooltip">
+                              <mat-icon>{{ getStripeStatus(user).icon }}</mat-icon>
+                              {{ getStripeStatus(user).label }}
                             </span>
                             @if (user.eligibilityStatus) {
                               <span class="badge status-badge"
