@@ -72,6 +72,7 @@ interface Topic {
 export class JobStatusBarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   protected jobs: EnrichedJob[] = [];
+  private processedJobCompletions = new Set<string>(); // Track processed job UUIDs to prevent duplicates
 
   constructor(
     private jobService: JobService,
@@ -83,7 +84,32 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   ) {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
-        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED).forEach((job) => {
+        // Get transitions before updating this.jobs
+        const completedTransitions = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
+        const failedTransitions = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
+
+        // Update this.jobs SYNCHRONOUSLY FIRST to prevent duplicate messages
+        // This prevents race condition where signal emits again before async enrichment completes
+        this.jobs = this.sortJobs(jobs.map((job) => ({ ...job })));
+
+        // Enrich jobs asynchronously in background (this won't affect transition detection)
+        this.enrichJobsWithNames(jobs)
+          .then((enrichedJobs) => {
+            this.jobs = this.sortJobs(enrichedJobs);
+          })
+          .catch((error) => {
+            console.warn('Failed to enrich jobs with names:', error);
+            // Jobs already updated above, no need to do anything here
+          });
+
+        // Now handle transitions - these will only be shown once
+        completedTransitions.forEach((job) => {
+          // Skip if we've already processed this job completion
+          if (this.processedJobCompletions.has(job.uuid)) {
+            return;
+          }
+          this.processedJobCompletions.add(job.uuid);
+
           const jobKind = stringToJobKind(job.kind);
           const skipMessageForKinds = [
             JobKind.VALIDATE_EPISODE,
@@ -116,17 +142,16 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
             }
           }
         });
-        this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED).forEach((job) => {
+
+        failedTransitions.forEach((job) => {
+          // Skip if we've already processed this job failure
+          if (this.processedJobCompletions.has(job.uuid)) {
+            return;
+          }
+          this.processedJobCompletions.add(job.uuid);
+
           this.messageService.error(`${kindToString(job.kind)} failed: ${job.error}`);
         });
-        this.enrichJobsWithNames(jobs)
-          .then((enrichedJobs) => {
-            this.jobs = this.sortJobs(enrichedJobs);
-          })
-          .catch((error) => {
-            console.warn('Failed to enrich jobs with names:', error);
-            this.jobs = this.sortJobs(jobs.map((job) => ({ ...job })));
-          });
       },
       error: (error) => {
         this.messageService.error(`Failed to load jobs: ${error.message}`);
