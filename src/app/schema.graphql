@@ -456,6 +456,13 @@ type AffiliateUserSearchResultType {
   hasAffiliateProfile: Boolean
   isActive: Boolean
   eligibilityStatus: String
+  affiliateCode: String
+  stripeAccountId: String
+  stripeOnboardingCompleted: Boolean
+  stripeChargesEnabled: Boolean
+  stripePayoutsEnabled: Boolean
+  stripeCountry: String
+  stripeDetailsSubmitted: Boolean
 }
 
 type AffiliateEligibilityType {

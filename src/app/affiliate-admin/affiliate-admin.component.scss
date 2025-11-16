@@ -458,10 +458,22 @@
       gap: 6px;
     }
 
+    .username-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     strong {
       color: var(--theme-color);
       font-size: 16px;
       font-weight: 600;
+    }
+
+    .affiliate-code {
+      color: var(--description-color);
+      font-size: 14px;
+      font-weight: 400;
     }
 
     .user-status {
@@ -486,9 +498,37 @@
         height: 14px;
       }
 
-      &.affiliate {
-        background: var(--md-sys-color-success);
-        color: var(--theme-white);
+      &.affiliate-stripe-status {
+        &.fully-active {
+          background: var(--md-sys-color-success);
+          color: var(--theme-white);
+        }
+
+        &.setup-required {
+          background: var(--secondary-450);
+          color: var(--theme-color);
+          border: 1px solid var(--border-color);
+        }
+
+        &.details-pending {
+          background: var(--md-sys-color-warning);
+          color: var(--secondary-dark);
+        }
+
+        &.onboarding-incomplete {
+          background: var(--md-sys-color-warning);
+          color: var(--secondary-dark);
+        }
+
+        &.payouts-disabled, &.charges-disabled {
+          background: var(--md-sys-color-warning);
+          color: var(--secondary-dark);
+        }
+
+        &.restricted {
+          background: var(--md-sys-color-error);
+          color: var(--theme-white);
+        }
       }
 
       &.no-profile {
@@ -509,7 +549,7 @@
 
         &.under-review {
           background: var(--md-sys-color-warning);
-          color: var(--theme-white);
+          color: var(--secondary-dark);
         }
       }
 
