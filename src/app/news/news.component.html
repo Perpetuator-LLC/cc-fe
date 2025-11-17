@@ -130,17 +130,6 @@
             </label>
           </div>
           <button
-            mat-stroked-button
-            class="create-episode-button outlined"
-            type="button"
-            (click)="createEpisodeChainFromSelected()"
-            [disabled]="selectedNews.size === 0"
-            matTooltip="Creates an AI-generated episode using selected news articles"
-          >
-            <mat-icon>newspaper</mat-icon>
-            <span>Create News Episode</span>
-          </button>
-          <button
             mat-flat-button
             class="create-episode-button"
             type="button"
@@ -150,6 +139,17 @@
           >
             <mat-icon>graphic_eq</mat-icon>
             <span>Create Episode & Audio</span>
+          </button>
+          <button
+            mat-stroked-button
+            class="create-episode-button outlined"
+            type="button"
+            (click)="createEpisodeChainFromSelected()"
+            [disabled]="selectedNews.size === 0"
+            matTooltip="Creates an AI-generated episode using selected news articles"
+          >
+            <mat-icon>newspaper</mat-icon>
+            <span>Create News Episode</span>
           </button>
           <button
             mat-flat-button
@@ -307,6 +307,35 @@
                     </button>
                   </a>
                 </div>
+
+                <!-- Categories Display -->
+                @if (selectedNewsDetail.categories && selectedNewsDetail.categories.length > 0) {
+                  <div class="metadata-section">
+                    <h3>Categories</h3>
+                    <div class="categories-container">
+                      @for (category of selectedNewsDetail.categories; track category) {
+                        <span class="category-badge">{{ category }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Tags Display -->
+                @if (selectedNewsDetail.tags && selectedNewsDetail.tags.length > 0) {
+                  <div class="metadata-section">
+                    <h3>Metadata Tags</h3>
+                    <div class="tags-container">
+                      @for (tag of selectedNewsDetail.tags; track tag.kind + tag.value) {
+                        <span class="news-tag" [ngClass]="getTagClass(tag.kind, tag.value)"
+                              [matTooltip]="tag.kind + ': ' + tag.value">
+                          {{ getTagLabel(tag.kind, tag.value) }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <mat-divider></mat-divider>
                 <h3>RSS Description</h3>
                 <p
                   class="news-description"

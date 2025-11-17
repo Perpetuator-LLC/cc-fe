@@ -596,4 +596,70 @@ export class NewsComponent implements OnInit, OnDestroy {
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
+
+  // Get tag value by kind
+  getTagValue(news: NewsResult, kind: string): string | null {
+    const tag = news.tags?.find((t) => t.kind === kind);
+    return tag?.value ?? null;
+  }
+
+  // Get formatted tag label
+  getTagLabel(kind: string, value: string): string {
+    const labels: Record<string, Record<string, string>> = {
+      political: {
+        democratic: 'Democratic',
+        republican: 'Republican',
+        neutral: 'Neutral',
+      },
+      financial_sentiment: {
+        bullish: '📈 Bullish',
+        bearish: '📉 Bearish',
+        neutral: '➡️ Neutral',
+      },
+      tone: {
+        urgent: 'Urgent',
+        calm: 'Calm',
+        analytical: 'Analytical',
+        sensational: 'Sensational',
+      },
+      content_type: {
+        analysis: 'Analysis',
+        breaking: 'Breaking',
+        opinion: 'Opinion',
+        data: 'Data Report',
+      },
+    };
+
+    return labels[kind]?.[value] || value;
+  }
+
+  // Get CSS class for tag kind
+  getTagClass(kind: string, value: string): string {
+    const classes: Record<string, Record<string, string>> = {
+      political: {
+        democratic: 'tag-political-democratic',
+        republican: 'tag-political-republican',
+        neutral: 'tag-political-neutral',
+      },
+      financial_sentiment: {
+        bullish: 'tag-sentiment-bullish',
+        bearish: 'tag-sentiment-bearish',
+        neutral: 'tag-sentiment-neutral',
+      },
+      tone: {
+        urgent: 'tag-tone-urgent',
+        calm: 'tag-tone-calm',
+        analytical: 'tag-tone-analytical',
+        sensational: 'tag-tone-sensational',
+      },
+      content_type: {
+        analysis: 'tag-content-analysis',
+        breaking: 'tag-content-breaking',
+        opinion: 'tag-content-opinion',
+        data: 'tag-content-data',
+      },
+    };
+
+    return classes[kind]?.[value] || 'tag-default';
+  }
 }

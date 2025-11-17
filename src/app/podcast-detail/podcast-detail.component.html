@@ -648,75 +648,12 @@
             </div>
 
             <div class="rss-feeds-section">
-              @if (loading) {
-                <div class="loading-container">
-                  <mat-spinner diameter="40"></mat-spinner>
-                  <p>Loading RSS feeds...</p>
-                </div>
-              } @else if (!podcastForm.get('rssFeeds')?.value?.length) {
-                <mat-card class="no-card">
-                  <h3>No Data Found</h3>
-                </mat-card>
-              } @else {
-                <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
-                  <!-- RSS Feed Name Column -->
-                  <ng-container matColumnDef="name">
-                    <mat-header-cell *matHeaderCellDef> Feed Name </mat-header-cell>
-                    <mat-cell *matCellDef="let feed">
-                      <div class="rss-feed-name">{{ feed.name || 'Unnamed Feed' }}</div>
-                    </mat-cell>
-                  </ng-container>
-
-                  <!-- RSS Feed URL Column -->
-                  <ng-container matColumnDef="url">
-                    <mat-header-cell *matHeaderCellDef> RSS URL </mat-header-cell>
-                    <mat-cell *matCellDef="let feed">
-                      <div class="rss-feed-url">{{ feed.url }}</div>
-                    </mat-cell>
-                  </ng-container>
-
-                  <!-- Status Column -->
-                  <ng-container matColumnDef="status">
-                    <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
-                    <mat-cell *matCellDef="let feed">
-                      <div class="rss-status-badges">
-                        <span
-                          class="rss-status-badge"
-                          [class.status-success]="feed.isReachable"
-                          [class.status-error]="!feed.isReachable"
-                          [matTooltip]="feed.isReachable ? 'Feed is reachable' : 'Feed is not reachable (404, timeout, etc.)'"
-                        >
-                          <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
-                          {{ feed.isReachable ? 'Reachable' : 'Unreachable' }}
-                        </span>
-                        <span
-                          class="rss-status-badge"
-                          [class.status-success]="feed.isParsable"
-                          [class.status-error]="!feed.isParsable"
-                          [matTooltip]="feed.isParsable ? 'Feed content is valid and parsable' : 'Feed has format/parsing issues'"
-                        >
-                          <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
-                          {{ feed.isParsable ? 'Parsable' : 'Parse Error' }}
-                        </span>
-                      </div>
-                    </mat-cell>
-                  </ng-container>
-
-                  <!-- Delete Button Column -->
-                  <ng-container matColumnDef="actions">
-                    <mat-header-cell *matHeaderCellDef class="actions-column"> Actions </mat-header-cell>
-                    <mat-cell *matCellDef="let feed" class="actions-cell">
-                      <button mat-icon-button color="warn" type="button" (click)="removeRssFeed(feed.uuid)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </mat-cell>
-                  </ng-container>
-
-                  <!-- Header and Row Declarations -->
-                  <mat-header-row *matHeaderRowDef="rssFeedsDisplayedColumns"></mat-header-row>
-                  <mat-row *matRowDef="let row; columns: rssFeedsDisplayedColumns"></mat-row>
-                </mat-table>
-              }
+              <app-rss-feed-table
+                [dataSource]="podcastForm.get('rssFeeds')?.value || []"
+                [showActions]="true"
+                [loading]="loading"
+                (deleteFeed)="removeRssFeed($event)"
+              ></app-rss-feed-table>
             </div>
           </form>
         </mat-card-content>

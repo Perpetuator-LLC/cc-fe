@@ -1,0 +1,149 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+:host {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+mat-table {
+  width: 100%;
+  background: transparent;
+}
+
+.rss-feed-name {
+  font-weight: 500;
+  color: var(--theme-color);
+}
+
+.rss-feed-url {
+  a {
+    color: var(--description-color);
+    text-decoration: none;
+    font-size: 14px;
+    word-break: break-all;
+
+    &:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+.rss-status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.rss-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.status-success {
+    background: var(--md-sys-color-success);
+    color: var(--theme-white);
+  }
+
+  &.status-error {
+    background: var(--md-sys-color-error);
+    color: var(--theme-white);
+  }
+}
+
+.last-checked {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--description-color);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.actions-column {
+  width: 80px;
+  text-align: right;
+}
+
+.actions-cell {
+  text-align: right;
+}
+
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+
+  p {
+    color: var(--description-color);
+    margin: 0;
+  }
+}
+
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--description-color);
+    opacity: 0.5;
+  }
+
+  p {
+    color: var(--description-color);
+    margin: 0;
+  }
+}
+
+mat-header-cell {
+  font-weight: 600;
+  color: var(--theme-color);
+}
+
+mat-cell {
+  color: var(--description-color);
+}
+
+mat-row {
+  border-bottom: 1px solid var(--border-color);
+
+  &:hover {
+    background: rgba(var(--primary-rgb), 0.05);
+  }
+}
+
+@media (max-width: 576px) {
+  .rss-status-badges {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

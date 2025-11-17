@@ -44,6 +44,7 @@ export interface Episode {
   podcastDate: string;
   telegramDate: string;
   news: NewsResult[];
+  researchUrls: string[];
   team: TeamsResult;
   podcast: { id: string; uuid: string; name: string; enabled: boolean };
 }
@@ -94,6 +95,18 @@ const GET_EPISODES = gql`
             url
             title
             summary
+            source
+            publishedAt
+            blocked
+            rssFeeds {
+              id
+              uuid
+              url
+              name
+              isReachable
+              isParsable
+              lastFetchAttempt
+            }
           }
         }
       }
@@ -165,7 +178,20 @@ const GET_EPISODE = gql`
             url
             title
             summary
+            source
+            publishedAt
+            blocked
+            rssFeeds {
+              id
+              uuid
+              url
+              name
+              isReachable
+              isParsable
+              lastFetchAttempt
+            }
           }
+          researchUrls
         }
       }
       pageInfo {
