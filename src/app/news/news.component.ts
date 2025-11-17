@@ -197,6 +197,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.rssFeeds = [];
 
     if (this.selectedPodcastUuid !== null) {
+      // Record this podcast selection for future sorting
+      this.recentlyUsedPodcastsService.recordSelection(this.selectedPodcastUuid);
+
       // Load RSS feeds for the selected podcast
       const selectedPodcast = this.podcasts.find((p) => p.uuid === this.selectedPodcastUuid);
       if (selectedPodcast && selectedPodcast.rssFeeds) {
