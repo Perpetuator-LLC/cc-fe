@@ -105,8 +105,8 @@ export class NewsService extends BaseService {
               summary
               validatedSummary
               blocked
-              # categories
-              # tags
+              categories
+              tags
               rssFeeds {
                 id
                 uuid
@@ -138,9 +138,46 @@ export class NewsService extends BaseService {
       variables: { podcastUuid, hours, first, after, rssFeedUuid },
     }).pipe(
       map((data) => {
-        return data.news;
+        // Parse GenericScalar fields that might come as JSON strings
+        return {
+          ...data.news,
+          edges: data.news.edges.map((edge) => ({
+            ...edge,
+            node: this.parseNewsItem(edge.node),
+          })),
+        };
       }),
     );
+  }
+
+  private parseNewsItem(news: NewsResult): NewsResult {
+    const parsed = { ...news };
+
+    // Parse categories if it's a JSON string (GenericScalar field)
+    if (news.categories) {
+      if (typeof (news.categories as unknown) === 'string') {
+        try {
+          parsed.categories = JSON.parse(news.categories as unknown as string);
+        } catch (e) {
+          console.warn('Failed to parse categories:', e);
+          parsed.categories = [];
+        }
+      }
+    }
+
+    // Parse tags if it's a JSON string (GenericScalar field)
+    if (news.tags) {
+      if (typeof (news.tags as unknown) === 'string') {
+        try {
+          parsed.tags = JSON.parse(news.tags as unknown as string);
+        } catch (e) {
+          console.warn('Failed to parse tags:', e);
+          parsed.tags = [];
+        }
+      }
+    }
+
+    return parsed;
   }
 
   extractNews(podcastUuid: string, newsUuids: string[]) {
