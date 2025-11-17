@@ -221,7 +221,7 @@ type ApiQuery {
   ): EpisodeTypeConnection
 
   """Relay connection for News items, filtered by hours and podcast"""
-  news(hours: Int = 24, podcastUuid: UUID!, offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, newsUuid: UUID, titleContains: String, sourceContains: String): NewsTypeConnection
+  news(hours: Int = 24, podcastUuid: UUID!, offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, blocked: Boolean, newsUuid: UUID, rssFeedUuid: UUID, titleContains: String, sourceContains: String): NewsTypeConnection
   jobs(
     jobUuids: [UUID]
     statuses: [JobStatus]
@@ -690,6 +690,18 @@ type RssFeedType implements Node {
   """The ID of the object"""
   id: ID!
   url: String!
+
+  """Feed title/name"""
+  name: String
+
+  """Whether the RSS feed URL is reachable (not 404/timeout)"""
+  isReachable: Boolean!
+
+  """Whether the RSS feed content is valid and parsable"""
+  isParsable: Boolean!
+
+  """Last time we attempted to fetch this feed"""
+  lastFetchAttempt: DateTime
   uuid: UUID
 }
 
@@ -772,7 +784,11 @@ type NewsType implements Node {
   content: String!
   validatedSummary: String
   validationConfidence: NewsNewsValidationConfidenceChoices
+
+  """Whether this news article URL is blocked from our robots/scrapers"""
+  blocked: Boolean!
   uuid: UUID
+  rssFeeds: [RssFeedType]
 }
 
 """An enumeration."""
@@ -2042,7 +2058,8 @@ type ApiMutation {
   updatePodcastRssFeeds(podcastUuid: UUID!, rssFeedUuids: [UUID]!): UpdatePodcastRssFeeds
 
   """
-  Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
+  Create a new RSS feed. Only validates URL format - feeds are always added.
+  Status flags (is_reachable, is_parsable) are set based on validation attempt.
   """
   createRssFeed(url: String!): CreateRssFeed
 
@@ -2716,7 +2733,8 @@ type UpdatePodcastRssFeeds {
 }
 
 """
-Create a new RSS feed. Loads the RSS URL feed and validates it can be parsed.
+Create a new RSS feed. Only validates URL format - feeds are always added.
+Status flags (is_reachable, is_parsable) are set based on validation attempt.
 """
 type CreateRssFeed {
   success: Boolean

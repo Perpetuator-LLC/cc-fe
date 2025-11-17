@@ -91,6 +91,17 @@
               <mat-spinner matSuffix diameter="20"></mat-spinner>
             }
           </mat-form-field>
+          @if (rssFeeds.length > 0) {
+            <mat-form-field>
+              <mat-label>RSS Feed</mat-label>
+              <mat-select [(value)]="selectedRssFeedUuid" (selectionChange)="onRssFeedChange()">
+                <mat-option [value]="null">All Feeds</mat-option>
+                @for (feed of rssFeeds; track feed.uuid) {
+                  <mat-option [value]="feed.uuid" [matTooltip]="feed.url">{{ feed.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
           <mat-form-field class="time-field">
             <mat-label>Time</mat-label>
             <mat-select [(value)]="selectedHours" (selectionChange)="onPodcastChange()">
@@ -119,13 +130,37 @@
             </label>
           </div>
           <button
+            mat-stroked-button
+            class="create-episode-button outlined"
+            type="button"
+            (click)="createEpisodeChainFromSelected()"
+            [disabled]="selectedNews.size === 0"
+            matTooltip="Creates an AI-generated episode using selected news articles"
+          >
+            <mat-icon>newspaper</mat-icon>
+            <span>Create News Episode</span>
+          </button>
+          <button
             mat-flat-button
-            color="tertiary"
+            class="create-episode-button"
+            type="button"
+            (click)="createEpisodeAudioChainFromSelected()"
+            [disabled]="selectedNews.size === 0"
+            matTooltip="Creates episode with full audio generation from selected news"
+          >
+            <mat-icon>graphic_eq</mat-icon>
+            <span>Create Episode & Audio</span>
+          </button>
+          <button
+            mat-flat-button
+            class="blank-episode-button"
             type="button"
             (click)="createBlankEpisode()"
             [disabled]="selectedPodcastUuid === null"
+            matTooltip="Creates an empty episode that must be manually entered"
           >
-            Create Empty Episode
+            <mat-icon>add_circle_outline</mat-icon>
+            <span>Create Empty Episode</span>
           </button>
         </div>
       </mat-card-content>
@@ -177,6 +212,12 @@
                                 >
                                   {{ news.title }}
                                 </a>
+                                @if (news.blocked) {
+                                  <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                                    <mat-icon>block</mat-icon>
+                                    Blocked
+                                  </span>
+                                }
                               </div>
                               <div class="source">
                                 <mat-icon>graphic_eq</mat-icon>
@@ -231,79 +272,6 @@
               </mat-list>
             }
           </div>
-          @if (selectedNews.size > 0) {
-            <div class="bottom-sticky-buttons">
-              <div class="select-btn desktop">
-                <label
-                  class="custom-select-all"
-                  (click)="toggleSelectAll()"
-                  tabindex="0"
-                  (keydown.enter)="toggleSelectAll()"
-                  (keydown.space)="toggleSelectAll()"
-                >
-                  <input
-                    type="checkbox"
-                    [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
-                    [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
-                    (change)="toggleSelectAll()"
-                  />
-                  <span class="custom-checkbox"></span>
-                  <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
-                </label>
-              </div>
-              <div class="filters-btn">
-                @if (showMicroJobButtons) {
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="button"
-                    (click)="extractSelectedNews()"
-                    [disabled]="selectedNews.size === 0"
-                  >
-                    Retrieve (Task)
-                  </button>
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="button"
-                    (click)="summarizeSelected()"
-                    [disabled]="selectedNews.size === 0"
-                  >
-                    Summarize (Task)
-                  </button>
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="button"
-                    (click)="createEpisodeFromSelected()"
-                    [disabled]="selectedNews.size === 0"
-                  >
-                    Create Episode (Task)
-                  </button>
-                }
-                <button
-                  style="color: var(--purple)"
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="createEpisodeAudioChainFromSelected()"
-                  [disabled]="selectedNews.size === 0"
-                >
-                  Create Episode & Audio
-                </button>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="createEpisodeChainFromSelected()"
-                  [disabled]="selectedNews.size === 0"
-                >
-                  Generate Episode
-                </button>
-              </div>
-
-            </div>
-          }
         </div>
         <div class="news-detail-section" [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }">
           <div class="news-details" [ngClass]="{ newsDetailSelected: selectedNewsDetail }">

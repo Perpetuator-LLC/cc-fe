@@ -159,6 +159,118 @@
           display: none;
         }
       }
+
+      // Episode creation button styles (matching podcast detail)
+      .create-episode-button {
+        background: var(--primary);
+        color: var(--theme-white);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        font-weight: 600;
+        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: fit-content;
+
+        mat-icon {
+          margin: 0;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        &:hover:not(:disabled) {
+          opacity: 0.9;
+        }
+
+        &:disabled {
+          background-color: var(--secondary-400) !important;
+          color: var(--description-color) !important;
+          cursor: not-allowed !important;
+          opacity: 0.6;
+        }
+
+        // Outlined variant (stroked button) - less emphasis
+        &.outlined {
+          background: transparent;
+          color: var(--primary);
+          border: 2px solid var(--primary);
+          font-weight: 600;
+
+          mat-icon {
+            color: var(--primary);
+          }
+
+          &:hover:not(:disabled) {
+            background-color: rgba(241, 74, 0, 0.08);
+            opacity: 1;
+          }
+
+          &:disabled {
+            background-color: transparent !important;
+            color: var(--description-color) !important;
+            border-color: var(--border-color) !important;
+
+            mat-icon {
+              color: var(--description-color) !important;
+            }
+          }
+        }
+
+        @media screen and (max-width: 900px) {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      .blank-episode-button {
+        background: transparent;
+        color: var(--theme-color);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: fit-content;
+
+        mat-icon {
+          margin: 0;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: var(--description-color);
+        }
+
+        &:hover:not(:disabled) {
+          background-color: var(--secondary-light);
+          border-color: var(--primary);
+          color: var(--primary);
+
+          mat-icon {
+            color: var(--primary);
+          }
+        }
+
+        &:disabled {
+          background-color: transparent !important;
+          color: var(--description-color) !important;
+          cursor: not-allowed !important;
+          opacity: 0.5;
+          border-color: var(--border-color) !important;
+        }
+
+        @media screen and (max-width: 900px) {
+          width: 100%;
+          justify-content: center;
+        }
+      }
     }
 
     button {
@@ -248,6 +360,27 @@
     color: var(--theme-color);
     text-decoration: none;
     white-space: normal;
+  }
+
+  .blocked-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--md-sys-color-error);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
   }
 
   .source {
@@ -883,69 +1016,6 @@
   }
 }
 
-.bottom-sticky-buttons {
-  display: flex;
-  background: var(--secondary-500);
-  border: 1px solid var(--border-color);
-  position: sticky;
-  bottom: 0;
-  z-index: 555;
-  width: 80%;
-  max-width: 600px;
-  margin: auto;
-  border-radius: 10px;
-  height: 50px;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-
-  @media screen and (max-width: 576px) {
-    width: 90%;
-  }
-
-  .filters-btn {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-left: 10px;
-
-    @media screen and (max-width: 576px) {
-      margin-left: 0;
-      gap: 10px;
-    }
-
-    button {
-      font-size: 14px;
-      font-weight: 500;
-      padding: 0;
-      height: auto;
-      color: var(--theme-color);
-      background-color: transparent;
-      border: none;
-      outline: none;
-      box-shadow: none;
-      transition: color 0.2s;
-      white-space: nowrap;
-
-      &:disabled {
-        opacity: 0.7;
-      }
-    }
-  }
-
-  .delete-btn {
-    background-color: transparent;
-    color: var(--md-sys-color-error);
-    padding: 0;
-    font-size: 14px;
-    font-weight: 600;
-    margin-left: 10px;
-
-    @media screen and (max-width: 576px) {
-      display: none;
-    }
-  }
-}
 
 .select-btn {
   display: flex;

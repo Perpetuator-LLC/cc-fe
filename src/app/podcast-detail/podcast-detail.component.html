@@ -74,25 +74,25 @@
       </div>
 
       <div class="action-buttons">
-        <span [matTooltip]="getEpisodeCreationButtonTooltip()" class="button-wrapper">
-          <button mat-flat-button class="create-episode-button" (click)="createBlankEpisode()"
-            [disabled]="hasUnsavedChanges()">
-            <mat-icon>add_circle_outline</mat-icon>
-            <span>Blank Episode</span>
-          </button>
-        </span>
-        <span [matTooltip]="getEpisodeCreationButtonTooltip()" class="button-wrapper">
+        <span matTooltip="Creates an AI-generated episode using current news from your RSS feeds" class="button-wrapper">
           <button mat-flat-button class="create-episode-button" (click)="createNewsEpisode()"
             [disabled]="hasUnsavedChanges()">
             <mat-icon>newspaper</mat-icon>
             <span>News Episode</span>
           </button>
         </span>
-        <span [matTooltip]="getEpisodeCreationButtonTooltip()" class="button-wrapper">
-          <button mat-flat-button class="create-episode-button" (click)="createResearchEpisode()"
+        <span matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode" class="button-wrapper">
+          <button mat-flat-button class="create-episode-button research-button" (click)="createResearchEpisode()"
             [disabled]="hasUnsavedChanges()">
             <mat-icon>science</mat-icon>
             <span>Research Episode</span>
+          </button>
+        </span>
+        <span matTooltip="Creates an empty episode that must be manually entered" class="button-wrapper">
+          <button mat-button class="blank-episode-button" (click)="createBlankEpisode()"
+            [disabled]="hasUnsavedChanges()">
+            <mat-icon>add_circle_outline</mat-icon>
+            <span>Blank Episode</span>
           </button>
         </span>
       </div>
@@ -638,20 +638,68 @@
                   <mat-icon>add</mat-icon>
                   Add RSS Feed
                 </button>
+                @if (podcastForm.get('rssFeeds')?.value?.length) {
+                  <button mat-button type="button" (click)="copyAllRssFeedUrls()" matTooltip="Copy all RSS feed URLs (line-separated)">
+                    <mat-icon>content_copy</mat-icon>
+                    Copy All URLs
+                  </button>
+                }
               </div>
             </div>
 
             <div class="rss-feeds-section">
-              @if (!podcastForm.get('rssFeeds')?.value?.length) {
+              @if (loading) {
+                <div class="loading-container">
+                  <mat-spinner diameter="40"></mat-spinner>
+                  <p>Loading RSS feeds...</p>
+                </div>
+              } @else if (!podcastForm.get('rssFeeds')?.value?.length) {
                 <mat-card class="no-card">
                   <h3>No Data Found</h3>
                 </mat-card>
               } @else {
                 <mat-table [dataSource]="podcastForm.get('rssFeeds')?.value || []">
+                  <!-- RSS Feed Name Column -->
+                  <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef> Feed Name </mat-header-cell>
+                    <mat-cell *matCellDef="let feed">
+                      <div class="rss-feed-name">{{ feed.name || 'Unnamed Feed' }}</div>
+                    </mat-cell>
+                  </ng-container>
+
                   <!-- RSS Feed URL Column -->
                   <ng-container matColumnDef="url">
-                    <mat-header-cell *matHeaderCellDef> RSS Feed URL </mat-header-cell>
-                    <mat-cell *matCellDef="let feed"> {{ feed.url }} </mat-cell>
+                    <mat-header-cell *matHeaderCellDef> RSS URL </mat-header-cell>
+                    <mat-cell *matCellDef="let feed">
+                      <div class="rss-feed-url">{{ feed.url }}</div>
+                    </mat-cell>
+                  </ng-container>
+
+                  <!-- Status Column -->
+                  <ng-container matColumnDef="status">
+                    <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+                    <mat-cell *matCellDef="let feed">
+                      <div class="rss-status-badges">
+                        <span
+                          class="rss-status-badge"
+                          [class.status-success]="feed.isReachable"
+                          [class.status-error]="!feed.isReachable"
+                          [matTooltip]="feed.isReachable ? 'Feed is reachable' : 'Feed is not reachable (404, timeout, etc.)'"
+                        >
+                          <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                          {{ feed.isReachable ? 'Reachable' : 'Unreachable' }}
+                        </span>
+                        <span
+                          class="rss-status-badge"
+                          [class.status-success]="feed.isParsable"
+                          [class.status-error]="!feed.isParsable"
+                          [matTooltip]="feed.isParsable ? 'Feed content is valid and parsable' : 'Feed has format/parsing issues'"
+                        >
+                          <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                          {{ feed.isParsable ? 'Parsable' : 'Parse Error' }}
+                        </span>
+                      </div>
+                    </mat-cell>
                   </ng-container>
 
                   <!-- Delete Button Column -->
