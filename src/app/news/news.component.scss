@@ -1,58 +1,9 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-.toolbar-container {
-  display: flex;
 
-  .filter-form-field {
-    flex: 1 1 auto;
-    /* Allow the form field to grow and shrink */
-    padding-top: 8px;
-    min-width: 200px;
-    /* Set a minimum width for the form field */
-  }
-}
-
+// News container basics
 .news-container {
-  mat-form-field {
-    margin: 0 4px;
-    margin-left: 4px;
-  }
-
-  .form-container button {
-    margin: 4px;
-  }
-
-  .form-container mat-select {
-    margin-left: 4px;
-  }
-
-  .sub-menu {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 8px;
-    /* Optional: Add some space between buttons */
-  }
-
-  .sub-menu button {
-    white-space: normal;
-    /* Allow text to wrap inside buttons */
-  }
-
   mat-list-item {
     padding: 0;
-  }
-
-  mat-card.toolbar {
-    width: auto;
-  }
-
-  mat-card-content {
-    overflow: auto; // Ensures content does not overflow
-  }
-
-  mat-card-header {
-    flex-direction: row-reverse; // Reverse the order of flex items
-    align-self: start;
   }
 
   .news-item {
@@ -61,39 +12,18 @@
     height: auto;
   }
 
-  mat-card-content p {
-    white-space: normal; // Allow text to wrap
-    overflow-wrap: break-word; // Ensures long words do not cause layout issues
-    //margin-bottom: 5px;
-  }
-
-  .news-item p {
-    margin: 0;
-  }
-
-  .news-item p.news-details {
-    margin-bottom: 10px;
-  }
-
-  mat-expansion-panel h3 {
-    margin: 0;
-  }
-
-  mat-card {
-    width: 100%;
-  }
-
   ::ng-deep .news-description img {
     max-width: 200px;
     max-height: 200px;
     width: auto;
     height: auto;
-    float: left; // This makes the image float to the left, allowing text to wrap around
-    margin-right: 10px; // Adds some space between the image and the text on the right
-    margin-bottom: 10px; // Adds some space below the image for better spacing with the text
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
   }
 }
 
+// Top card header
 .create-podcast-card {
   background-color: var(--toolbar-container-background-color) !important;
   box-shadow: none;
@@ -152,15 +82,6 @@
         max-width: 100%;
       }
 
-      .select-btn {
-        margin: 0;
-
-        @media screen and (max-width: 576px) {
-          display: none;
-        }
-      }
-
-      // Episode creation button styles (matching podcast detail)
       .create-episode-button {
         background: var(--primary);
         color: var(--theme-white);
@@ -193,16 +114,10 @@
           opacity: 0.6;
         }
 
-        // Outlined variant (stroked button) - less emphasis
         &.outlined {
           background: transparent;
           color: var(--primary);
           border: 2px solid var(--primary);
-          font-weight: 600;
-
-          mat-icon {
-            color: var(--primary);
-          }
 
           &:hover:not(:disabled) {
             background-color: rgba(241, 74, 0, 0.08);
@@ -213,10 +128,6 @@
             background-color: transparent !important;
             color: var(--description-color) !important;
             border-color: var(--border-color) !important;
-
-            mat-icon {
-              color: var(--description-color) !important;
-            }
           }
         }
 
@@ -272,74 +183,10 @@
         }
       }
     }
-
-    button {
-      background: var(--theme-white);
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      color: var(--toolbar-container-background-color);
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 100%;
-      letter-spacing: 0;
-      white-space: nowrap;
-
-      @media screen and (max-width: 576px) {
-        font-weight: 400;
-        font-size: 12px;
-      }
-
-      &:disabled {
-        opacity: 0.7;
-      }
-    }
   }
 }
 
-.mobile-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 0 0 12px 0;
-  border-bottom: 1px solid var(--border-color);
-
-  @media screen and (max-width: 576px) {
-    padding: 0;
-    border-bottom: none;
-  }
-
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    h3 {
-      font-weight: 600;
-      font-size: 20px;
-      line-height: 100%;
-      letter-spacing: 0;
-      margin: 0;
-      color: var(--theme-color);
-    }
-
-    span {
-      background: var(--secondary-dark);
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 12px;
-      line-height: 100%;
-      letter-spacing: 0;
-      padding: 0 10px;
-      height: 22px;
-      color: var(--theme-color);
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-}
-
+// News list container - needed for proper flex and scrolling
 .news-list-container {
   flex: 1;
   display: flex;
@@ -348,19 +195,12 @@
   min-height: 0;
 }
 
+// Main content area
 .middle-card {
   display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-
-  .title a {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--theme-color);
-    text-decoration: none;
-    white-space: normal;
-  }
 
   .blocked-badge {
     display: inline-flex;
@@ -383,41 +223,10 @@
     }
   }
 
-  .source {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-    color: var(--theme-color);
-    gap: 6px;
-
-    p {
-      color: var(--description-color);
-      font-weight: 400;
-      font-size: 13px;
-
-      strong {
-        font-weight: 500;
-        color: var(--theme-color);
-      }
-    }
-  }
-
-  .read-btn {
-    background: transparent;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 13px;
-    height: auto;
-    box-shadow: none;
-    padding: 0;
-    color: var(--purple);
-  }
-
   .news-list {
     width: 100%;
     padding: 12px 20px;
     background-color: var(--secondary-color);
-    transition: 0.3s all ease-in;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -436,12 +245,9 @@
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
 
-    &:hover {
-      .news-card-wrapper {
-        background: var(--secondary-400);
-      }
+    &:hover .news-card-wrapper {
+      background: var(--secondary-400);
     }
 
     mat-checkbox {
@@ -479,20 +285,24 @@
       min-width: 0;
 
       .title {
-        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
 
-        a.external-link {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--theme-color);
-          text-decoration: none;
-          display: block;
-          line-height: 1.4;
+      .title a.external-link {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--theme-color);
+        text-decoration: none;
+        display: inline-block;
+        line-height: 1.4;
+        max-width: 100%;
 
-          &:hover {
-            color: var(--primary);
-            text-decoration: underline;
-          }
+        &:hover {
+          color: var(--primary);
+          text-decoration: underline;
         }
       }
 
@@ -574,17 +384,15 @@
     width: 100%;
     height: 100%;
     background-color: var(--secondary-light);
-    padding: 20px 30px;
-    padding-bottom: 40px;
+    padding: 20px 30px 40px;
     color: var(--theme-color);
     border-left: 1px solid var(--border-color);
     overflow-y: auto;
     overflow-x: hidden;
-    transition: 0.3s all ease-in-out;
+    transition: transform 0.3s ease-in-out;
     transform: translateX(100%);
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
 
     @media screen and (max-width: 576px) {
       padding: 20px;
@@ -677,22 +485,18 @@
       }
     }
 
-    .title {
-      margin-bottom: 12px;
+    .title a.external-link {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--theme-color);
+      text-decoration: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      display: block;
 
-      a.external-link {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--theme-color);
-        text-decoration: none;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        display: block;
-
-        &:hover {
-          color: var(--primary);
-          text-decoration: underline;
-        }
+      &:hover {
+        color: var(--primary);
+        text-decoration: underline;
       }
     }
 
@@ -731,6 +535,7 @@
   }
 }
 
+// Table controls
 .table-controls {
   display: flex;
   align-items: center;
@@ -793,56 +598,6 @@
     }
   }
 
-  .search-input {
-    flex-grow: 1;
-    max-width: 300px;
-
-    .mat-mdc-form-field-flex {
-      border-radius: 8px !important;
-      background-color: var(--secondary-dark);
-      padding: 0 16px;
-    }
-
-    .mat-mdc-form-field-infix {
-      padding: 12px 0;
-    }
-
-    .mat-mdc-form-field-icon-prefix > svg,
-    .mat-mdc-form-field-icon-prefix > .mat-icon {
-      margin-right: 8px;
-    }
-
-    .mat-mdc-form-field-settings {
-      display: none;
-    }
-
-    .mat-mdc-form-field-outline {
-      display: none;
-    }
-
-    .mat-mdc-form-field-subscript-wrapper {
-      display: none;
-    }
-
-    .mat-mdc-floating-label.mdc-floating-label {
-      top: 50% !important;
-      transform: translateY(-50%) !important;
-    }
-
-    .mat-focused .mat-mdc-floating-label.mdc-floating-label {
-      display: none;
-    }
-
-    input::placeholder {
-      color: var(--description-color);
-      opacity: 1;
-    }
-
-    .mat-mdc-form-field-has-icon-prefix .mat-mdc-form-field-infix {
-      padding-left: 0;
-    }
-  }
-
   .filter-button {
     background-color: var(--toolbar-container-background-color);
     color: var(--theme-color);
@@ -858,48 +613,10 @@
       padding: 0;
       min-width: auto;
     }
-
-    .mat-icon {
-      margin-right: 4px;
-    }
-  }
-
-  .view-toggles {
-    display: flex;
-    gap: 8px;
-
-    .manage-btn {
-      padding: 0;
-      background: transparent;
-      color: var(--theme-color);
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .view-btn {
-      background-color: transparent;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      color: var(--theme-color);
-      border: 1px solid transparent;
-      line-height: 0;
-      cursor: pointer;
-
-      .mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-      }
-
-      &.active {
-        background-color: var(--secondary-light);
-        border-color: var(--border-color);
-      }
-    }
   }
 }
 
+// Before select podcast state
 .before-select-podcast {
   display: flex;
   justify-content: center;
@@ -972,22 +689,15 @@
   }
 }
 
+// After select podcast state
 .after-select-podcast {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 128px); // Full viewport height minus header (64px) and footer (64px)
-  overflow: hidden; // Prevent page scroll
+  height: calc(100vh - 128px);
+  overflow: hidden;
 }
 
-.newsSelected {
-  border-color: var(--theme-color) !important;
-
-  .next-btn {
-    background-color: var(--theme-color);
-    color: var(--secondary-light);
-  }
-}
-
+// Next button
 .next-btn {
   width: 28px;
   height: 28px;
@@ -1004,19 +714,7 @@
   }
 }
 
-.date {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-
-  @media screen and (max-width: 576px) {
-    align-items: flex-start;
-    margin-top: 10px;
-  }
-}
-
-
+// Select all button
 .select-btn {
   display: flex;
   align-items: center;
@@ -1060,9 +758,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      transition:
-        background 0.2s,
-        border 0.2s;
+      transition: background 0.2s, border 0.2s;
     }
 
     input[type='checkbox']:checked + .custom-checkbox {
@@ -1106,21 +802,7 @@
   }
 }
 
-.loading-spinner {
-  animation: spin 1s linear infinite;
-  color: var(--primary);
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-// Categories and Tags Styles
+// Categories and Tags
 .metadata-section {
   margin: 20px 0;
 
@@ -1245,14 +927,14 @@
   color: white;
 }
 
-// Default tag style
+// Default tag
 .tag-default {
   background: var(--secondary-450);
   color: var(--theme-color);
   border: 1px solid var(--border-color);
 }
 
-// Responsive adjustments
+// Responsive
 @media (max-width: 576px) {
   .categories-container,
   .tags-container {
