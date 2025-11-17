@@ -70,6 +70,7 @@ export interface PodcastsResult {
   tgChannelId: string | null;
   tgResponse: string | null;
   latestEpisodeDate: string | null;
+  latestInternalEpisodeDate: string | null;
   viewCount: number;
   // categories: CategoryResult[] | null;
   categories: Record<string, string[]> | null;
@@ -547,6 +548,7 @@ export class PodcastsService extends BaseService {
               tgChannelId
               tgResponse
               categories
+              latestInternalEpisodeDate
               latestEpisodeDate
               viewCount
               rssFeeds {
@@ -620,6 +622,7 @@ export class PodcastsService extends BaseService {
               tgChannelId
               tgResponse
               categories
+              latestInternalEpisodeDate
               latestEpisodeDate
               viewCount
               team {

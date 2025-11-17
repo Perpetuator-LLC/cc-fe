@@ -97,7 +97,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
   displayedColumns: string[] = [
     'name',
     'team',
-    'latestEpisodeDate',
+    'latestInternalEpisodeDate',
     'tgResponse',
     'enabled',
     'createEpisode',
@@ -112,7 +112,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     { id: 'name', label: 'Podcast Name', selected: true },
     { id: 'team', label: 'Team', selected: true },
     { id: 'tgChannelId', label: 'Telegram ID', selected: false },
-    { id: 'latestEpisodeDate', label: 'Latest Episode', selected: true },
+    { id: 'latestInternalEpisodeDate', label: 'Latest Episode', selected: true },
     { id: 'enabled', label: 'Live', selected: true },
     { id: 'tgResponse', label: 'Telegram Connected', selected: true },
     { id: 'createEpisode', label: 'Create Episode', selected: true },
@@ -125,7 +125,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
   selectedTeam: string | null = null;
   loadingTeams = false;
   selectedLiveStatus: string | null = null; // null = all, 'live' = enabled only, 'disabled' = disabled only
-  orderBy = '-latest_episode_date'; // Default sort by latest episode, descending
+  orderBy = '-latest_internal_episode_date'; // Default sort by latest internal episode (all episodes), descending
 
   constructor(
     private router: Router,

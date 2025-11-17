@@ -221,7 +221,7 @@ type ApiQuery {
   ): EpisodeTypeConnection
 
   """Relay connection for News items, filtered by hours and podcast"""
-  news(hours: Int = 24, podcastUuid: UUID!, offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, blocked: Boolean, newsUuid: UUID, rssFeedUuid: UUID, titleContains: String, sourceContains: String): NewsTypeConnection
+  news(hours: Int = 24, podcastUuid: UUID!, offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, blocked: Boolean, newsUuid: UUID, rssFeedUuid: UUID, titleContains: String, sourceContains: String, category: String, tagKind: String, tagValue: String, political: String, financialSentiment: String): NewsTypeConnection
   jobs(
     jobUuids: [UUID]
     statuses: [JobStatus]
@@ -662,9 +662,14 @@ type PodcastType implements Node {
   viewCount: Int!
 
   """
-  Date of the most recently published episode (podcast_date from is_live episodes)
+  Date of the most recently published episode (podcast_date from is_live episodes only)
   """
   latestEpisodeDate: DateTime
+
+  """
+  Date of the most recently created episode (including non-live internal episodes)
+  """
+  latestInternalEpisodeDate: DateTime
   createdAt: DateTime
   updatedAt: DateTime
   uuid: UUID
@@ -787,6 +792,8 @@ type NewsType implements Node {
 
   """Whether this news article URL is blocked from our robots/scrapers"""
   blocked: Boolean!
+  categories: GenericScalar
+  tags: GenericScalar
   uuid: UUID
   rssFeeds: [RssFeedType]
 }
