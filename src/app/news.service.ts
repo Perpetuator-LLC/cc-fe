@@ -18,6 +18,13 @@ export interface NewsResult {
   content: string;
   summary: string;
   validatedSummary?: string;
+  blocked: boolean;
+  rssFeeds: {
+    id: string;
+    uuid: string;
+    url: string;
+    name?: string | null;
+  }[];
 }
 
 export interface NewsConnection {
@@ -70,10 +77,10 @@ export class NewsService extends BaseService {
     );
   }
 
-  news(podcastUuid: string, hours = 24, first = 100, after: string | null = null) {
+  news(podcastUuid: string, hours = 24, first = 100, after: string | null = null, rssFeedUuid: string | null = null) {
     const GET_NEWS = gql`
-      query GetNews($podcastUuid: UUID!, $hours: Int!, $first: Int!, $after: String) {
-        news(podcastUuid: $podcastUuid, hours: $hours, first: $first, after: $after) {
+      query GetNews($podcastUuid: UUID!, $hours: Int!, $first: Int!, $after: String, $rssFeedUuid: UUID) {
+        news(podcastUuid: $podcastUuid, hours: $hours, first: $first, after: $after, rssFeedUuid: $rssFeedUuid) {
           edges {
             cursor
             node {
@@ -87,6 +94,13 @@ export class NewsService extends BaseService {
               content
               summary
               validatedSummary
+              blocked
+              rssFeeds {
+                id
+                uuid
+                url
+                name
+              }
             }
           }
           pageInfo {
@@ -106,7 +120,7 @@ export class NewsService extends BaseService {
     return this.query<Response>({
       query: GET_NEWS,
       fetchPolicy: 'network-only',
-      variables: { podcastUuid, hours, first, after },
+      variables: { podcastUuid, hours, first, after, rssFeedUuid },
     }).pipe(
       map((data) => {
         return data.news;

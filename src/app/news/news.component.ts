@@ -76,6 +76,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   selectedNews = new Set<NewsResult>();
   podcasts: PodcastsResult[] = [];
   selectedPodcastUuid: string | null = null;
+  selectedRssFeedUuid: string | null = null;
   selectedHours = 24;
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
@@ -84,6 +85,7 @@ export class NewsComponent implements OnInit, OnDestroy {
   loadingNews = false;
   totalNewsCount = 0;
   loadingPodcasts = true;
+  rssFeeds: { uuid: string; name: string; url: string }[] = [];
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   protected showMicroJobButtons = false;
@@ -191,10 +193,28 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.filteredNews = [];
     this.selectedNews.clear();
     this.selectedNewsDetail = null;
+    this.selectedRssFeedUuid = null;
+    this.rssFeeds = [];
 
     if (this.selectedPodcastUuid !== null) {
+      // Load RSS feeds for the selected podcast
+      const selectedPodcast = this.podcasts.find((p) => p.uuid === this.selectedPodcastUuid);
+      if (selectedPodcast && selectedPodcast.rssFeeds) {
+        this.rssFeeds = selectedPodcast.rssFeeds.map((feed) => ({
+          uuid: feed.uuid,
+          name: feed.name || feed.url,
+          url: feed.url,
+        }));
+      }
       this.newsFetched = true;
       this.fetchNews();
+    }
+  }
+
+  onRssFeedChange() {
+    // Reload news with the selected RSS feed filter
+    if (this.selectedPodcastUuid !== null) {
+      this.getNews();
     }
   }
 
@@ -445,7 +465,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     accumulatedEdges: { cursor: string; node: NewsResult }[] = [],
   ) {
     this.subscriptions.add(
-      this.newsService.news(podcastUuid, hours, 100, after).subscribe({
+      this.newsService.news(podcastUuid, hours, 100, after, this.selectedRssFeedUuid).subscribe({
         next: (data: NewsConnection) => {
           const allEdges = [...accumulatedEdges, ...data.edges];
           this.totalNewsCount = allEdges.length;

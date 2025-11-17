@@ -40,6 +40,10 @@ export interface RssFeedResult {
   id: string;
   uuid: string;
   url: string;
+  name?: string | null;
+  isReachable: boolean;
+  isParsable: boolean;
+  lastFetchAttempt?: string | null;
 }
 
 export interface PodcastsResult {
@@ -459,6 +463,10 @@ export class PodcastsService extends BaseService {
                 id
                 uuid
                 url
+                name
+                isReachable
+                isParsable
+                lastFetchAttempt
               }
               team {
                 id
@@ -545,6 +553,10 @@ export class PodcastsService extends BaseService {
                 id
                 uuid
                 url
+                name
+                isReachable
+                isParsable
+                lastFetchAttempt
               }
             }
           }
@@ -669,6 +681,15 @@ export class PodcastsService extends BaseService {
             node {
               uuid
               name
+              rssFeeds {
+                id
+                uuid
+                url
+                name
+                isReachable
+                isParsable
+                lastFetchAttempt
+              }
               team {
                 uuid
                 members {
@@ -849,6 +870,10 @@ export class PodcastsService extends BaseService {
               id
               uuid
               url
+              name
+              isReachable
+              isParsable
+              lastFetchAttempt
             }
           }
         }
