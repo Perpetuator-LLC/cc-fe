@@ -615,4 +615,22 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       }),
     );
   }
+
+  shortCredits(value: number): string {
+    const absValue = Math.abs(value);
+    if (isNaN(absValue)) return `${value}`;
+
+    const units = ['k', 'M', 'B'];
+    let unitIndex = -1;
+    let displayValue = absValue;
+
+    while (displayValue >= 1000 && unitIndex < units.length - 1) {
+      displayValue /= 1000;
+      unitIndex++;
+    }
+
+    const digitsToShow = 3;
+    const digits = displayValue.toFixed(digitsToShow - Math.floor(displayValue).toString().length);
+    return unitIndex === -1 ? `${value.toFixed(0)}` : `${digits}${units[unitIndex]}`;
+  }
 }

@@ -24,6 +24,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { kindToString } from '../job.service';
 import { LoadingService } from '../loading.service';
 
@@ -51,6 +52,7 @@ import { LoadingService } from '../loading.service';
     MessageComponent,
     MatCard,
     MatCardContent,
+    MatProgressSpinnerModule,
     DecimalPipe,
   ],
   templateUrl: './transactions-list.component.html',
