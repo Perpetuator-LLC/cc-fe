@@ -66,10 +66,10 @@ export class RecentlyUsedPodcastsService {
   }
 
   /**
-   * Sort podcasts by recently used (most recent first)
+   * Sort podcasts by recently used (most recent first), then by latest internal episode date, then alphabetically
    */
   sortByRecentlyUsed(podcasts: PodcastsResult[]): PodcastsResult[] {
-    if (!podcasts || podcasts.length === 0 || this.podcastHistory.length === 0) {
+    if (!podcasts || podcasts.length === 0) {
       return podcasts;
     }
 
@@ -79,16 +79,25 @@ export class RecentlyUsedPodcastsService {
       historyMap[uuid] = index;
     });
 
-    // Sort podcasts: recently selected first, then others alphabetically
+    // Sort podcasts: recently selected first, then by latestInternalEpisodeDate (newest first), then alphabetically
     return [...podcasts].sort((a, b) => {
       const indexA = historyMap[a.uuid] !== undefined ? historyMap[a.uuid] : Number.MAX_SAFE_INTEGER;
       const indexB = historyMap[b.uuid] !== undefined ? historyMap[b.uuid] : Number.MAX_SAFE_INTEGER;
 
+      // Primary sort: by recently used history
       if (indexA !== indexB) {
         return indexA - indexB;
       }
 
-      // If neither is in history or both have same priority, sort alphabetically
+      // Secondary sort: by latest internal episode date (newest first)
+      const dateA = a.latestInternalEpisodeDate ? new Date(a.latestInternalEpisodeDate).getTime() : 0;
+      const dateB = b.latestInternalEpisodeDate ? new Date(b.latestInternalEpisodeDate).getTime() : 0;
+
+      if (dateA !== dateB) {
+        return dateB - dateA; // Descending (newest first)
+      }
+
+      // Tertiary sort: alphabetically by name
       return (a.name || '').localeCompare(b.name || '');
     });
   }

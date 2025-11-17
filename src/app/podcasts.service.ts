@@ -678,12 +678,13 @@ export class PodcastsService extends BaseService {
 
   getPodcastsForFilter(first = 100): Observable<{ podcasts: PodcastsResult[] }> {
     const GQL = gql`
-      query GetPodcastsForFilter($first: Int) {
-        podcasts(first: $first) {
+      query GetPodcastsForFilter($first: Int, $orderBy: String) {
+        podcasts(first: $first, orderBy: $orderBy) {
           edges {
             node {
               uuid
               name
+              latestInternalEpisodeDate
               rssFeeds {
                 id
                 uuid
@@ -716,7 +717,7 @@ export class PodcastsService extends BaseService {
 
     return this.query<Response>({
       query: GQL,
-      variables: { first },
+      variables: { first, orderBy: '-latest_internal_episode_date' },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ podcasts }) => ({
