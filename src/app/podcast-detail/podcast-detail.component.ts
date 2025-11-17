@@ -118,7 +118,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = true;
   protected rssFeedLoading = false;
-  protected rssFeedsDisplayedColumns: string[] = ['url', 'actions'];
+  protected rssFeedsDisplayedColumns: string[] = ['name', 'url', 'status', 'actions'];
   protected podcastUuid: string;
   protected urlDisabled = true;
   protected deleteConfirmation = '';
@@ -927,6 +927,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               id: [data.rssFeed.id, Validators.required],
               uuid: [data.rssFeed.uuid, Validators.required],
               url: [data.rssFeed.url, Validators.required],
+              name: [data.rssFeed.name],
+              isReachable: [data.rssFeed.isReachable],
+              isParsable: [data.rssFeed.isParsable],
+              lastFetchAttempt: [data.rssFeed.lastFetchAttempt],
             }),
           );
           resolve({ success: true });
@@ -944,6 +948,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
       this.podcastsService.setPodcastRssFeeds(this.podcastUuid, rssFeedIds).subscribe({
         next: (data) => {
           this.podcastForm.patchValue(data.podcast);
+          // Refresh RSS feeds with updated status information
+          if (data.podcast.rssFeeds) {
+            this.setRssFeeds(data.podcast.rssFeeds);
+          }
           resolve();
         },
         error: (err) => {
@@ -969,6 +977,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               id: [data.rssFeed.id, Validators.required],
               uuid: [data.rssFeed.uuid, Validators.required],
               url: [data.rssFeed.url, Validators.required],
+              name: [data.rssFeed.name],
+              isReachable: [data.rssFeed.isReachable],
+              isParsable: [data.rssFeed.isParsable],
+              lastFetchAttempt: [data.rssFeed.lastFetchAttempt],
             }),
           );
           this.updateRssFeeds();
@@ -990,6 +1002,10 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           id: [feed.id, Validators.required],
           uuid: [feed.uuid, Validators.required],
           url: [feed.url, Validators.required],
+          name: [feed.name],
+          isReachable: [feed.isReachable],
+          isParsable: [feed.isParsable],
+          lastFetchAttempt: [feed.lastFetchAttempt],
         }),
       );
     });
@@ -1000,12 +1016,34 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.updateRssFeeds();
   }
 
+  copyAllRssFeedUrls(): void {
+    const feeds = this.podcastForm.get('rssFeeds')?.value || [];
+    if (feeds.length === 0) {
+      this.messageService.warning('No RSS feeds to copy');
+      return;
+    }
+
+    const urls = feeds.map((feed: RssFeedResult) => feed.url).join('\n');
+    navigator.clipboard.writeText(urls).then(
+      () => {
+        this.messageService.success(`Copied ${feeds.length} RSS feed URL${feeds.length > 1 ? 's' : ''} to clipboard`);
+      },
+      (err) => {
+        this.messageService.error(`Failed to copy URLs: ${err.message}`);
+      },
+    );
+  }
+
   private updateRssFeeds(): void {
     this.rssFeedLoading = true;
     const rssFeedIds = this.rssFeeds.value.map((feed: RssFeedResult) => feed.uuid);
     this.podcastsService.setPodcastRssFeeds(this.podcastUuid, rssFeedIds).subscribe({
       next: (data) => {
         this.podcastForm.patchValue(data.podcast);
+        // Refresh RSS feeds with updated status information
+        if (data.podcast.rssFeeds) {
+          this.setRssFeeds(data.podcast.rssFeeds);
+        }
         this.rssFeedLoading = false;
         this.messageService.success('RSS Feeds updated successfully');
       },
