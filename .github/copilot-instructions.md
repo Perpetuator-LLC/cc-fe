@@ -4,6 +4,7 @@
 - **Component-specific** → Keep minimal, use Material APIs
 - **Utility classes** → Keep or replace with Angular CDK
 
+
 # Code Standards
 - Imports at top | Remove obvious comments | Follow existing format | Minimize assumptions
 - Use `forkJoin` for parallel ops | AI notes → `logs/ai_edits/` 

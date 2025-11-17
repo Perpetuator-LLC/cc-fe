@@ -145,6 +145,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       podcastDate: ['', Validators.required],
       telegramDate: ['', Validators.required],
       news: this.fb.array([]),
+      researchUrls: [[]],
       podcast: this.fb.group({
         id: [{ value: '', disabled: true }],
         uuid: [{ value: '', disabled: true }],
@@ -213,7 +214,25 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
         next: (episode) => {
           // Set flag to suppress live edit warning during backend updates
           this.isUpdatingFromBackend = true;
-          this.episodeForm.patchValue(episode);
+
+          // Parse researchUrls if it's a JSON string
+          const parsedEpisode = { ...episode };
+          if (episode.researchUrls) {
+            if (typeof episode.researchUrls === 'string') {
+              try {
+                parsedEpisode.researchUrls = JSON.parse(episode.researchUrls);
+              } catch (e) {
+                console.warn('Failed to parse researchUrls:', e);
+                parsedEpisode.researchUrls = [];
+              }
+            } else if (!Array.isArray(episode.researchUrls)) {
+              parsedEpisode.researchUrls = [];
+            }
+          } else {
+            parsedEpisode.researchUrls = [];
+          }
+
+          this.episodeForm.patchValue(parsedEpisode);
 
           const newsFormArray = this.episodeForm.get('news') as FormArray;
           newsFormArray.clear();

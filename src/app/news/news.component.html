@@ -97,7 +97,7 @@
               <mat-select [(value)]="selectedRssFeedUuid" (selectionChange)="onRssFeedChange()">
                 <mat-option [value]="null">All Feeds</mat-option>
                 @for (feed of rssFeeds; track feed.uuid) {
-                  <mat-option [value]="feed.uuid" [matTooltip]="feed.url">{{ feed.name }}</mat-option>
+                  <mat-option [value]="feed.uuid" [matTooltip]="feed.url" matTooltipPosition="after">{{ feed.name }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -381,7 +381,11 @@
                     Extract News
                   </button>
                   <h3>Site Content</h3>
-                  <p class="">{{ selectedNewsDetail.content || 'No news content available' }}</p>
+                  @if (selectedNewsDetail.content) {
+                    <p class="" [innerHTML]="markdownToHtml(selectedNewsDetail.content)"></p>
+                  } @else {
+                    <p class="">No news content available</p>
+                  }
                 }
               </div>
             } @else {
