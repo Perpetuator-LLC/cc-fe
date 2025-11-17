@@ -214,20 +214,59 @@
                 <mat-card-header>
                   <div class="grid-header" style="width: 100%">
                     <div class="grid-header-name">
-                      <div>
+                      <div class="news-title-wrapper">
                         <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
                           {{ referencedNews.title }}
                         </a>
+                        @if (referencedNews.blocked) {
+                          <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                            <mat-icon>block</mat-icon>
+                            Blocked
+                          </span>
+                        }
                       </div>
                     </div>
                   </div>
                 </mat-card-header>
 
-                <div class="bottom-header">
-                  <span class="publish">Published</span>
-                  <div class="podcast-name">
+                <div class="news-meta">
+                  <div class="source">
                     <mat-icon>graphic_eq</mat-icon>
-                    {{ referencedNews.__typename }}
+                    <span><strong>Source:</strong> {{ referencedNews.source }}</span>
+                  </div>
+                  @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
+                    <div class="rss-feeds-list">
+                      <mat-icon>rss_feed</mat-icon>
+                      <div class="rss-feeds-items">
+                        @for (feed of referencedNews.rssFeeds; track feed.id) {
+                          <div class="rss-feed-badge-item">
+                            <span class="rss-feed-name">{{ feed.name || feed.url }}</span>
+                            <div class="rss-feed-status-mini">
+                              <span
+                                class="status-icon"
+                                [class.success]="feed.isReachable"
+                                [class.error]="!feed.isReachable"
+                                [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
+                              >
+                                <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                              </span>
+                              <span
+                                class="status-icon"
+                                [class.success]="feed.isParsable"
+                                [class.error]="!feed.isParsable"
+                                [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
+                              >
+                                <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <div class="date">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
                   </div>
                 </div>
               </mat-card>
@@ -246,29 +285,77 @@
                 <thead>
                   <tr>
                     <th>Title</th>
-                    <th>Type</th>
-                    <th>Status</th>
+                    <th>Source</th>
+                    <th>RSS Feed</th>
+                    <th>Published</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
                   <tr>
                     <td>
-                      <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
-                        {{ referencedNews.title }}
-                      </a>
+                      <div class="news-title-cell">
+                        <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                          {{ referencedNews.title }}
+                        </a>
+                        @if (referencedNews.blocked) {
+                          <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                            <mat-icon>block</mat-icon>
+                            Blocked
+                          </span>
+                        }
+                      </div>
                     </td>
-
                     <td>
-                      {{ referencedNews.__typename }}
+                      <div class="source-cell">
+                        <mat-icon>graphic_eq</mat-icon>
+                        <span>{{ referencedNews.source }}</span>
+                      </div>
                     </td>
                     <td>
-                      <span class="publish">Published</span>
+                      @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
+                        <div class="rss-feed-cell">
+                          @for (feed of referencedNews.rssFeeds; track feed.id) {
+                            <div class="rss-feed-row">
+                              <mat-icon>rss_feed</mat-icon>
+                              <span class="feed-name" [matTooltip]="feed.url">
+                                {{ feed.name || feed.url }}
+                              </span>
+                              <div class="feed-status-icons">
+                                <span
+                                  class="status-icon-small"
+                                  [class.success]="feed.isReachable"
+                                  [class.error]="!feed.isReachable"
+                                  [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
+                                >
+                                  <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                                </span>
+                                <span
+                                  class="status-icon-small"
+                                  [class.success]="feed.isParsable"
+                                  [class.error]="!feed.isParsable"
+                                  [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
+                                >
+                                  <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                                </span>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        <span class="no-data">—</span>
+                      }
+                    </td>
+                    <td>
+                      <div class="date-cell">
+                        <mat-icon>schedule</mat-icon>
+                        <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
+                      </div>
                     </td>
                   </tr>
                   } @empty {
                   <tr>
-                    <td colspan="2" class="no-related">
+                    <td colspan="4" class="no-related">
                       <p>No referenced news articles found.</p>
                     </td>
                   </tr>
@@ -277,6 +364,34 @@
               </table>
             </div>
           }
+          </mat-card-content>
+        </mat-tab>
+        <mat-tab label="Research URLs">
+          <mat-card-content class="form-container research-urls-section">
+            <div class="title">
+              <h3>Research URLs</h3>
+              <span>{{ (episodeForm.get('researchUrls')?.value || []).length }} URLs</span>
+            </div>
+            <p class="description">URLs accessed during episode validation and fact-checking.</p>
+
+            @if ((episodeForm.get('researchUrls')?.value || []).length > 0) {
+              <div class="research-urls-list">
+                @for (url of episodeForm.get('researchUrls')?.value; track url; let i = $index) {
+                  <div class="research-url-item">
+                    <span class="url-number">{{ i + 1 }}</span>
+                    <a [href]="url" target="_blank" rel="noopener noreferrer" class="research-url">
+                      {{ url }}
+                    </a>
+                    <mat-icon class="external-icon">open_in_new</mat-icon>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="no-data">
+                <mat-icon>search</mat-icon>
+                <p>No research URLs recorded for this episode</p>
+              </div>
+            }
           </mat-card-content>
         </mat-tab>
         <mat-tab label="Scheduling">

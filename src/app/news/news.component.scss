@@ -1119,3 +1119,150 @@
     transform: rotate(360deg);
   }
 }
+
+// Categories and Tags Styles
+.metadata-section {
+  margin: 20px 0;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin-bottom: 12px;
+  }
+}
+
+.categories-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--secondary-dark);
+  color: var(--theme-color);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.news-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+// Political tags
+.tag-political-democratic {
+  background: #2196f3;
+  color: white;
+}
+
+.tag-political-republican {
+  background: #f44336;
+  color: white;
+}
+
+.tag-political-neutral {
+  background: #9e9e9e;
+  color: white;
+}
+
+// Financial sentiment tags
+.tag-sentiment-bullish {
+  background: #4caf50;
+  color: white;
+}
+
+.tag-sentiment-bearish {
+  background: #f44336;
+  color: white;
+}
+
+.tag-sentiment-neutral {
+  background: #ff9800;
+  color: white;
+}
+
+// Tone tags
+.tag-tone-urgent {
+  background: #ff5722;
+  color: white;
+}
+
+.tag-tone-calm {
+  background: #03a9f4;
+  color: white;
+}
+
+.tag-tone-analytical {
+  background: #673ab7;
+  color: white;
+}
+
+.tag-tone-sensational {
+  background: #e91e63;
+  color: white;
+}
+
+// Content type tags
+.tag-content-breaking {
+  background: #ff5722;
+  color: white;
+}
+
+.tag-content-analysis {
+  background: #3f51b5;
+  color: white;
+}
+
+.tag-content-opinion {
+  background: #9c27b0;
+  color: white;
+}
+
+.tag-content-data {
+  background: #00bcd4;
+  color: white;
+}
+
+// Default tag style
+.tag-default {
+  background: var(--secondary-450);
+  color: var(--theme-color);
+  border: 1px solid var(--border-color);
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .categories-container,
+  .tags-container {
+    gap: 6px;
+  }
+
+  .category-badge,
+  .news-tag {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+

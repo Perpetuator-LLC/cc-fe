@@ -18,7 +18,12 @@
   </mat-card>
   <div class="middle-card">
     <div class="transactions-container">
-      @if (transactions.length > 0) {
+      @if (loading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading transactions...</p>
+        </div>
+      } @else if (transactions.length > 0) {
         <table
           mat-table
           [dataSource]="dataSource"
@@ -60,7 +65,10 @@
         >
         </mat-paginator>
       } @else {
-        <p>No transactions found.</p>
+        <div class="no-data">
+          <mat-icon>receipt_long</mat-icon>
+          <p>No transactions found.</p>
+        </div>
       }
     </div>
   </div>

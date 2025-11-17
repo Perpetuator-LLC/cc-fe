@@ -21,18 +21,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-} from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
@@ -63,6 +51,7 @@ import { ResearchService } from '../research.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { ShareService } from '../share.service';
 import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
+import { RssFeedTableComponent } from '../rss-feed-table/rss-feed-table.component';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -79,20 +68,10 @@ import { EpisodesTableComponent } from '../episodes-table/episodes-table.compone
     MatButton,
     MatMenuModule,
     MatButtonModule,
-    MatTable,
-    MatHeaderCell,
-    MatCell,
-    MatColumnDef,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRow,
-    MatRow,
-    MatRowDef,
     MatIcon,
     MatLabel,
     MatInput,
     MatIconButton,
-    MatHeaderRowDef,
     MatCardContent,
     MatFabButton,
     MatCheckbox,
@@ -107,6 +86,7 @@ import { EpisodesTableComponent } from '../episodes-table/episodes-table.compone
     CdkTextareaAutosize,
     ShareButtonsComponent,
     EpisodesTableComponent,
+    RssFeedTableComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -118,7 +98,6 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = true;
   protected rssFeedLoading = false;
-  protected rssFeedsDisplayedColumns: string[] = ['name', 'url', 'status', 'actions'];
   protected podcastUuid: string;
   protected urlDisabled = true;
   protected deleteConfirmation = '';

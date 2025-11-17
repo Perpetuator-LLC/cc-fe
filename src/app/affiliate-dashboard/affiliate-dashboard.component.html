@@ -113,7 +113,11 @@
             <div class="stat-icon">
               <mat-icon>payments</mat-icon>
             </div>
-            <div class="stat-value">{{ stats?.totalAffiliateCredits || 0 }}</div>
+            <div class="stat-value"
+                 [matTooltip]="(stats?.totalAffiliateCredits || 0).toLocaleString() + ' Credits'"
+                 matTooltipPosition="above">
+              {{ shortCredits(stats?.totalAffiliateCredits || 0) }}
+            </div>
             <div class="stat-label">Total Earnings (Credits)</div>
           </mat-card-content>
         </mat-card>

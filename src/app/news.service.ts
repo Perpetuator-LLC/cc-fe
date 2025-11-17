@@ -7,6 +7,11 @@ import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { PageInfo, RelayEdge } from './utils/relay';
 
+export interface NewsTag {
+  kind: string;
+  value: string;
+}
+
 export interface NewsResult {
   id: string;
   uuid: string;
@@ -19,11 +24,16 @@ export interface NewsResult {
   summary: string;
   validatedSummary?: string;
   blocked: boolean;
+  categories?: string[];
+  tags?: NewsTag[];
   rssFeeds: {
     id: string;
     uuid: string;
     url: string;
     name?: string | null;
+    isReachable: boolean;
+    isParsable: boolean;
+    lastFetchAttempt?: string | null;
   }[];
 }
 
@@ -95,11 +105,16 @@ export class NewsService extends BaseService {
               summary
               validatedSummary
               blocked
+              # categories
+              # tags
               rssFeeds {
                 id
                 uuid
                 url
                 name
+                isReachable
+                isParsable
+                lastFetchAttempt
               }
             }
           }
