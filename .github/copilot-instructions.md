@@ -4,6 +4,17 @@
 - **Component-specific** → Keep minimal, use Material APIs
 - **Utility classes** → Keep or replace with Angular CDK
 
+## Angular Material 3 Styling Guidelines
+
+- NEVER add custom SCSS for layout, spacing, or colors
+- Use Angular Material 3 components with their default styling
+- All color references MUST use CSS custom properties from root styles.scss (e.g., var(--mat-sys-primary))
+- For layout, use Angular Flex Layout or CSS Grid/Flexbox with Material density tokens
+- Replace custom button/input styles with mat-button, mat-form-field variants
+- Use Material 3 design tokens for spacing: var(--mat-sys-level-*) or standard spacing utilities
+- Any color needed should reference: var(--mat-sys-primary), var(--mat-sys-on-surface), etc.
+- Typography MUST use Material typography tokens: var(--mat-sys-headline-medium), var(--mat-sys-body-large), etc.
+- When refactoring existing components, identify and remove custom SCSS that duplicates Material theming
 
 # Code Standards
 - Imports at top | Remove obvious comments | Follow existing format | Minimize assumptions

@@ -230,10 +230,10 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    transition: width 0.1s ease-out;
 
     &.newsListSelected {
-      width: calc(100% - 450px);
-
+      // Width is now controlled by inline style binding
       @media screen and (max-width: 576px) {
         width: 100%;
       }
@@ -364,19 +364,59 @@
     overflow: hidden;
     width: 0;
     flex-shrink: 0;
+    height: 100%;
+    z-index: 10;
+    transition: width 0.3s ease-in-out;
 
     @media screen and (max-width: 576px) {
       position: fixed;
       right: 0;
       height: 100vh;
       top: 0;
-      width: 90%;
+      width: 90% !important;
       z-index: 555;
     }
 
     &.newsDetailSelectedSection {
-      display: block;
-      width: 450px;
+      display: flex;
+      flex-direction: column;
+      // Width is now controlled by inline style binding
+    }
+  }
+
+  // Resize handle for news detail panel
+  .resize-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    background-color: transparent;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+
+    &:hover,
+    &.resizing {
+      background-color: var(--primary);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 40px;
+      background-color: var(--border-color);
+      border-radius: 2px;
+      transition: background-color 0.2s ease;
+    }
+
+    &:hover::before,
+    &.resizing::before {
+      background-color: var(--theme-white);
     }
   }
 
@@ -385,8 +425,10 @@
     height: 100%;
     background-color: var(--secondary-light);
     padding: 20px 30px 40px;
+    padding-left: 36px; // Extra padding for resize handle
     color: var(--theme-color);
     border-left: 1px solid var(--border-color);
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1); // Shadow to lift panel above content
     overflow-y: auto;
     overflow-x: hidden;
     transition: transform 0.3s ease-in-out;
