@@ -45,6 +45,12 @@
             {{ feed.lastFetchAttempt | date: 'short' }}
           </span>
         }
+        @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined) {
+          <span class="articles-per-day">
+            <mat-icon>article</mat-icon>
+            {{ feed.articlesPerDay }} articles/day
+          </span>
+        }
       </div>
     </mat-cell>
   </ng-container>
