@@ -237,7 +237,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           const newsFormArray = this.episodeForm.get('news') as FormArray;
           newsFormArray.clear();
           for (const newsSummary of episode.news) {
-            newsFormArray.push(this.fb.group(newsSummary));
+            // Use FormControl to preserve the full object structure including nested rssFeeds array
+            newsFormArray.push(this.fb.control(newsSummary));
           }
 
           const versionsFormArray = this.episodeForm.get('versions') as FormArray;
