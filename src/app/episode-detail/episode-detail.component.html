@@ -230,10 +230,10 @@
                 </mat-card-header>
 
                 <div class="news-meta">
-                  <div class="source">
-                    <mat-icon>graphic_eq</mat-icon>
-                    <span><strong>Source:</strong> {{ referencedNews.source }}</span>
-                  </div>
+<!--                  <div class="source">-->
+<!--                    <mat-icon>graphic_eq</mat-icon>-->
+<!--                    <span><strong>Source:</strong> {{ referencedNews.source }}</span>-->
+<!--                  </div>-->
                   @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
                     <div class="rss-feeds-list">
                       <mat-icon>rss_feed</mat-icon>
@@ -285,7 +285,7 @@
                 <thead>
                   <tr>
                     <th>Title</th>
-                    <th>Source</th>
+<!--                    <th>Source</th>-->
                     <th>RSS Feed</th>
                     <th>Published</th>
                   </tr>
@@ -306,12 +306,12 @@
                         }
                       </div>
                     </td>
-                    <td>
-                      <div class="source-cell">
-                        <mat-icon>graphic_eq</mat-icon>
-                        <span>{{ referencedNews.source }}</span>
-                      </div>
-                    </td>
+<!--                    <td>-->
+<!--                      <div class="source-cell">-->
+<!--                        <mat-icon>graphic_eq</mat-icon>-->
+<!--                        <span>{{ referencedNews.source }}</span>-->
+<!--                      </div>-->
+<!--                    </td>-->
                     <td>
                       @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
                         <div class="rss-feed-cell">
