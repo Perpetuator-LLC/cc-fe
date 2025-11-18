@@ -60,6 +60,10 @@ export class RssFeedTableComponent implements OnInit {
       parts.push(`Last checked: ${new Date(feed.lastFetchAttempt).toLocaleString()}`);
     }
 
+    if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined) {
+      parts.push(`Average: ${feed.articlesPerDay} articles per day`);
+    }
+
     return parts.join('\n');
   }
 }

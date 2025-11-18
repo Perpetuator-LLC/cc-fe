@@ -688,9 +688,6 @@ String, Boolean, Int, Float, List or Object.
 """
 scalar GenericScalar
 
-"""
-Type for RssFeed model. This is used to create a new RssFeed and to get the list of RssFeeds.
-"""
 type RssFeedType implements Node {
   """The ID of the object"""
   id: ID!
@@ -707,6 +704,9 @@ type RssFeedType implements Node {
 
   """Last time we attempted to fetch this feed"""
   lastFetchAttempt: DateTime
+
+  """Cached average articles per day (updated when feed is fetched)"""
+  articlesPerDay: Float!
   uuid: UUID
 }
 
