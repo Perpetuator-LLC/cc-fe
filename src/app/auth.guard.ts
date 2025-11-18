@@ -9,6 +9,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, UrlTree, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { AffiliateStorageService } from './affiliate-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private affiliateStorageService: AffiliateStorageService,
   ) {}
 
   static getAuthRequiredRoutes(): string[] {
@@ -35,6 +37,7 @@ export class AuthGuard implements CanActivate {
 
     if (!isLoggedIn) {
       console.debug('AuthGuard: Redirecting to login page');
+      this.affiliateStorageService.setReturnUrl(state.url);
       this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
       return false;
     }

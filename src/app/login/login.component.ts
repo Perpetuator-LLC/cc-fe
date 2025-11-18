@@ -78,7 +78,17 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private affiliateService: AffiliateService,
     private affiliateStorageService: AffiliateStorageService,
   ) {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+    const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+    const storedReturnUrl = this.affiliateStorageService.getReturnUrl();
+
+    if (queryReturnUrl) {
+      this.returnUrl = queryReturnUrl;
+      this.affiliateStorageService.setReturnUrl(queryReturnUrl);
+    } else if (storedReturnUrl) {
+      this.returnUrl = storedReturnUrl;
+    } else {
+      this.returnUrl = '/home';
+    }
 
     const refCode = this.route.snapshot.queryParams['ref'];
     if (refCode) {
@@ -127,6 +137,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   }
 
   private completeLogin(): void {
+    this.affiliateStorageService.clearReturnUrl();
     this.router.navigateByUrl(this.returnUrl);
     this.themeService.loadTheme();
     this.userService.loadUserDetails();

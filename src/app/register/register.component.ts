@@ -43,6 +43,7 @@ import { Subscription } from 'rxjs';
 export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = new Subscription();
   private affiliateCode: string | null = null;
+  private returnUrl = '/home';
 
   registerForm = this.fb.group({
     email: [environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
@@ -83,6 +84,18 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.affiliateCode = this.affiliateStorageService.getAffiliateCode();
       }
+
+      const queryReturnUrl = params['returnUrl'];
+      const storedReturnUrl = this.affiliateStorageService.getReturnUrl();
+
+      if (queryReturnUrl) {
+        this.returnUrl = queryReturnUrl;
+        this.affiliateStorageService.setReturnUrl(queryReturnUrl);
+      } else if (storedReturnUrl) {
+        this.returnUrl = storedReturnUrl;
+      } else {
+        this.returnUrl = '/home';
+      }
     });
   }
 
@@ -109,7 +122,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
                 text: 'Registration successful! Check your email for a verification link.',
                 dismissible: true,
               });
-              this.router.navigate(['/login']);
+              this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
             }
           } else {
             if (this.messageService.messageCount === 0) {
@@ -144,7 +157,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
             your email for verification.`,
             dismissible: true,
           });
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
         },
         error: (err) => {
           console.error('Failed to join affiliate program:', err);
@@ -153,7 +166,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
             text: 'Registration successful! Check your email for a verification link.',
             dismissible: true,
           });
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
         },
       }),
     );
