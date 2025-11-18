@@ -247,7 +247,7 @@ export const routes: Routes = [
     path: 'a/:code',
     loadComponent: () =>
       import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
-    title: 'Join Affiliate Network',
+    title: 'Join My Network',
   },
   {
     path: 'finance',

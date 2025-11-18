@@ -69,6 +69,25 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     return AffiliateConversionUtils.creditsToDollars(credits);
   }
 
+  /**
+   * Get the current conversion amount based on form input
+   */
+  getConversionAmount(): string {
+    const amount = this.convertForm.get('amount')?.value;
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return '0.00';
+    }
+    return AffiliateConversionUtils.creditsToDollars(amount);
+  }
+
+  /**
+   * Check if the conversion amount is valid for display
+   */
+  hasValidConversionAmount(): boolean {
+    const amount = this.convertForm.get('amount')?.value;
+    return !!(amount && !isNaN(amount) && amount > 0);
+  }
+
   canRequestPayout(): boolean {
     if (this.data.type !== 'cash') return true;
 
