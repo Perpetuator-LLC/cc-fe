@@ -49,6 +49,14 @@
             {{ episodeForm.get('podcast.name')?.value }}
           </a>
         </div>
+        @if (topic) {
+        <div class="status-item">
+          <span class="status-label">Research Topic</span>
+          <a [routerLink]="['/topic', topic.uuid]" class="status-value" matTooltip="View the research topic that generated this episode">
+            {{ topic.title }}
+          </a>
+        </div>
+        }
         <div class="status-item">
           <span class="status-label">Word Count</span>
           <span class="status-value">
@@ -108,7 +116,17 @@
               <div class="audio-card">
                 @if (hasCurrentVersionAudio()) {
                   <div class="audio-section">
-                    <div class="audio-label">Current Version Audio:</div>
+                    <div class="audio-label">
+                      Current Version Audio:
+                      @if (audioIsCustomUpload) {
+                        <mat-icon
+                          class="custom-upload-icon"
+                          matTooltip="Custom uploaded audio - will persist even if transcript is edited. Generate Audio to replace with AI-generated version."
+                          style="font-size: 18px; height: 18px; width: 18px; margin-left: 8px; color: var(--primary); vertical-align: middle;">
+                          upload_file
+                        </mat-icon>
+                      }
+                    </div>
                     <audio controls [src]="audioSrc"></audio>
                   </div>
                 } @else {

@@ -82,6 +82,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   audioSrc: string | null = null;
   liveAudioSrc: string | null = null;
   liveAudioVersionNumber: number | null = null;
+  audioIsCustomUpload = false;
+  topic: { uuid: string; title: string } | null = null;
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
@@ -281,6 +283,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           } else {
             this.liveAudioVersionNumber = null;
           }
+
+          // Set topic and audio custom upload status from episode
+          this.topic = episode.topic || null;
+          this.audioIsCustomUpload = episode.audioIsCustomUpload || false;
 
           this.initialFormValues = this.getEditableFormValues();
           this.hasUnsavedChanges = false;
@@ -718,6 +724,10 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
                 this.liveAudioVersionNumber = null;
               }
 
+              // Update topic and audio custom upload status
+              this.topic = response.episode.topic || null;
+              this.audioIsCustomUpload = response.episode.audioIsCustomUpload || false;
+
               // Mark form as pristine and update initial values to prevent dirty state warning
               this.episodeForm.markAsPristine();
               this.episodeForm.markAsUntouched();
@@ -951,7 +961,15 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   isGenerateAudioDisabled(): boolean {
-    return this.audioSrc !== null || this.hasUnsavedChanges;
+    // Allow generation if:
+    // - No audio exists, OR
+    // - Audio is a custom upload (user can override it)
+    // But NOT if there are unsaved changes
+    if (this.hasUnsavedChanges) {
+      return true;
+    }
+    // Allow if no audio OR if audio is custom (can be overridden)
+    return this.audioSrc !== null && !this.audioIsCustomUpload;
   }
 
   getUpdateButtonTooltip(): string {
@@ -964,6 +982,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   getGenerateAudioTooltip(): string {
     if (this.hasUnsavedChanges) {
       return 'You have unsaved changes. Please save before generating audio';
+    }
+    if (this.audioSrc && this.audioIsCustomUpload) {
+      return 'Generate audio from transcript (will replace custom uploaded audio)';
     }
     if (this.audioSrc) {
       return 'Audio already exists for current version';

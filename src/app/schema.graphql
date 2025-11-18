@@ -759,6 +759,11 @@ type EpisodeType implements Node {
   date: DateTime!
   audioFile: String
   audioSeconds: Int
+
+  """
+  True if audio was manually uploaded, False if generated from transcript
+  """
+  audioIsCustomUpload: Boolean!
   content: String!
   currentVersionNumber: Int!
   news: [NewsType]
@@ -775,6 +780,7 @@ type EpisodeType implements Node {
   versions: [EpisodeVersionType]
   isCurrentValidated: Boolean
   researchUrls: [String]
+  topic: TopicType
 }
 
 type NewsType implements Node {
