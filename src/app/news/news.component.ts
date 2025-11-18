@@ -206,12 +206,15 @@ export class NewsComponent implements OnInit, OnDestroy {
 
       // Load RSS feeds for the selected podcast
       const selectedPodcast = this.podcasts.find((p) => p.uuid === this.selectedPodcastUuid);
-      if (selectedPodcast && selectedPodcast.rssFeeds) {
+      if (selectedPodcast && selectedPodcast.rssFeeds && selectedPodcast.rssFeeds.length > 0) {
         this.rssFeeds = selectedPodcast.rssFeeds.map((feed) => ({
           uuid: feed.uuid,
           name: feed.name || feed.url,
           url: feed.url,
         }));
+      } else {
+        // No RSS feeds configured for this podcast
+        console.warn('No RSS feeds configured for podcast:', selectedPodcast?.name);
       }
       this.newsFetched = true;
       this.fetchNews();

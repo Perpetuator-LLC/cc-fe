@@ -101,6 +101,11 @@
                 }
               </mat-select>
             </mat-form-field>
+          } @else if (selectedPodcastUuid && newsFetched) {
+            <div class="no-rss-feeds-message" matTooltip="Add RSS feeds to this podcast to enable filtering by source">
+              <mat-icon style="color: var(--md-sys-color-warning); font-size: 20px; height: 20px; width: 20px;">info</mat-icon>
+              <span>No RSS feeds configured</span>
+            </div>
           }
           <mat-form-field class="time-field">
             <mat-label>Time</mat-label>

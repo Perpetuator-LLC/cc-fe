@@ -88,6 +88,29 @@
         }
       }
 
+      .no-rss-feeds-message {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        background-color: var(--secondary-400);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--description-color);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: help;
+
+        mat-icon {
+          vertical-align: middle;
+        }
+
+        @media screen and (max-width: 576px) {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
       .time-field {
         width: 134px;
         max-width: 100%;
