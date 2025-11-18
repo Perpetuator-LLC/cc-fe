@@ -361,6 +361,45 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  onAudioFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.handleAudioFile(file);
+    }
+  }
+
+  private handleAudioFile(file: File): void {
+    if (file.type !== 'audio/mpeg' && file.type !== 'audio/mp3') {
+      this.messageService.error('Please upload an MP3 file');
+      return;
+    }
+
+    const maxSizeInBytes = 52428800; // 50MB
+    if (file.size > maxSizeInBytes) {
+      this.messageService.error('File size exceeds the maximum limit of 50MB. Please upload a smaller file.');
+      return;
+    }
+
+    this.uploadAudio(file);
+  }
+
+  private uploadAudio(file: File): void {
+    this.loadingService.show();
+    this.subscriptions.add(
+      this.episodeService.uploadEpisodeAudio(this.episodeUuid, file).subscribe({
+        next: () => {
+          this.messageService.success('Audio uploaded successfully');
+          this.loadEpisodeData('network-only');
+          this.loadingService.hide();
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to upload audio: ${err.message}`);
+          this.loadingService.hide();
+        },
+      }),
+    );
+  }
+
   generateAudio(): void {
     this.subscriptions.add(
       this.episodeService.generateAudio(this.episodeUuid).subscribe({
