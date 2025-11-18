@@ -167,7 +167,9 @@
     </mat-card>
     <div class="news-list-container">
       <div class="middle-card">
-        <div class="news-list" [ngClass]="{ newsListSelected: selectedNewsDetail }">
+        <div class="news-list"
+             [ngClass]="{ newsListSelected: selectedNewsDetail }"
+             [style.width]="selectedNewsDetail ? 'calc(100% - ' + detailPanelWidth + 'px)' : '100%'">
           <div class="bottom-filters table-controls desktop">
             <p>
               @if (loadingNews) {
@@ -273,7 +275,16 @@
             }
           </div>
         </div>
-        <div class="news-detail-section" [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }">
+        <div class="news-detail-section"
+             [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
+             [style.width.px]="selectedNewsDetail ? detailPanelWidth : 0">
+          <!-- Resize Handle -->
+          @if (selectedNewsDetail) {
+            <div class="resize-handle"
+                 (mousedown)="onResizeStart($event)"
+                 [class.resizing]="isResizing">
+            </div>
+          }
           <div class="news-details" [ngClass]="{ newsDetailSelected: selectedNewsDetail }">
             @if (selectedNewsDetail) {
               <div>

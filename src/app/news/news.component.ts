@@ -86,6 +86,10 @@ export class NewsComponent implements OnInit, OnDestroy {
   totalNewsCount = 0;
   loadingPodcasts = true;
   rssFeeds: { uuid: string; name: string; url: string }[] = [];
+  detailPanelWidth = 450; // Default width in pixels
+  isResizing = false;
+  private resizeStartX = 0;
+  private resizeStartWidth = 0;
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   protected showMicroJobButtons = false;
@@ -592,6 +596,9 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
     this.toolbarService.clearToolbarComponent();
     this.loadingService.hide();
+    // Clean up resize event listeners
+    document.removeEventListener('mousemove', this.onResizeMove);
+    document.removeEventListener('mouseup', this.onResizeEnd);
   }
 
   // Method to convert markdown to safe HTML
@@ -665,4 +672,37 @@ export class NewsComponent implements OnInit, OnDestroy {
 
     return classes[kind]?.[value] || 'tag-default';
   }
+
+  // Resize handle methods
+  onResizeStart(event: MouseEvent): void {
+    this.isResizing = true;
+    this.resizeStartX = event.clientX;
+    this.resizeStartWidth = this.detailPanelWidth;
+    event.preventDefault();
+
+    // Add event listeners to document for smooth dragging
+    document.addEventListener('mousemove', this.onResizeMove);
+    document.addEventListener('mouseup', this.onResizeEnd);
+  }
+
+  private onResizeMove = (event: MouseEvent): void => {
+    if (!this.isResizing) return;
+
+    // Calculate the new width (subtract because we're dragging from the left edge)
+    const deltaX = this.resizeStartX - event.clientX;
+    let newWidth = this.resizeStartWidth + deltaX;
+
+    // Constrain width between min and max
+    const minWidth = 300;
+    const maxWidth = window.innerWidth * 0.8; // Max 80% of viewport
+    newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+
+    this.detailPanelWidth = newWidth;
+  };
+
+  private onResizeEnd = (): void => {
+    this.isResizing = false;
+    document.removeEventListener('mousemove', this.onResizeMove);
+    document.removeEventListener('mouseup', this.onResizeEnd);
+  };
 }
