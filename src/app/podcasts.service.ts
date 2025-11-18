@@ -44,6 +44,7 @@ export interface RssFeedResult {
   isReachable: boolean;
   isParsable: boolean;
   lastFetchAttempt?: string | null;
+  articlesPerDay?: number | null;
 }
 
 export interface PodcastsResult {
@@ -468,6 +469,7 @@ export class PodcastsService extends BaseService {
                 isReachable
                 isParsable
                 lastFetchAttempt
+                articlesPerDay
               }
               team {
                 id
@@ -559,6 +561,7 @@ export class PodcastsService extends BaseService {
                 isReachable
                 isParsable
                 lastFetchAttempt
+                articlesPerDay
               }
             }
           }
@@ -693,6 +696,7 @@ export class PodcastsService extends BaseService {
                 isReachable
                 isParsable
                 lastFetchAttempt
+                articlesPerDay
               }
               team {
                 uuid
@@ -878,6 +882,7 @@ export class PodcastsService extends BaseService {
               isReachable
               isParsable
               lastFetchAttempt
+              articlesPerDay
             }
           }
         }
