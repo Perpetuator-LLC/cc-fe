@@ -40,6 +40,7 @@ export interface Episode {
   currentVersionNumber: number;
   versions: EpisodeVersion[];
   audioUrl: string;
+  audioIsCustomUpload: boolean;
   isLive: boolean;
   podcastDate: string;
   telegramDate: string;
@@ -47,6 +48,7 @@ export interface Episode {
   researchUrls: string[];
   team: TeamsResult;
   podcast: { id: string; uuid: string; name: string; enabled: boolean };
+  topic?: { uuid: string; title: string } | null;
 }
 
 const GET_EPISODES = gql`
@@ -152,9 +154,14 @@ const GET_EPISODE = gql`
             }
           }
           audioUrl
+          audioIsCustomUpload
           isLive
           podcastDate
           telegramDate
+          topic {
+            uuid
+            title
+          }
           podcast {
             id
             uuid
