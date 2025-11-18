@@ -586,6 +586,11 @@ export class NewsComponent implements OnInit, OnDestroy {
 
   selectNews(news: NewsResult) {
     this.selectedNewsDetail = news;
+    // Ensure detail panel width doesn't exceed constraints
+    const maxWidth = window.innerWidth * 0.8;
+    if (this.detailPanelWidth > maxWidth) {
+      this.detailPanelWidth = Math.min(450, maxWidth);
+    }
   }
 
   clearSelectedNewsDetail() {
