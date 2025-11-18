@@ -362,6 +362,77 @@ export class EpisodeService extends BaseService {
     );
   }
 
+  uploadEpisodeAudio(episodeUuid: string, audioFile: File) {
+    if (!episodeUuid) return throwError(() => new Error('Episode ID is required'));
+    if (!audioFile) return throwError(() => new Error('Audio file is required'));
+
+    const UPLOAD_EPISODE_AUDIO = gql`
+      mutation UploadEpisodeAudio($episodeUuid: UUID!, $audioFile: Upload!) {
+        uploadEpisodeAudio(episodeUuid: $episodeUuid, audioFile: $audioFile) {
+          success
+          message
+          episode {
+            id
+            uuid
+            date
+            title
+            description
+            content
+            currentVersionNumber
+            audioUrl
+            isLive
+            podcastDate
+            telegramDate
+            versions {
+              uuid
+              versionNumber
+              title
+              description
+              content
+              audioUrl
+              validatedCompliance
+              validatedFacts
+              validatedLength
+              validationNotes
+              changeType
+              createdAt
+              createdBy {
+                id
+                username
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      uploadEpisodeAudio: {
+        success: boolean;
+        message: string;
+        episode: Episode;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: UPLOAD_EPISODE_AUDIO,
+      variables: {
+        episodeUuid,
+        audioFile,
+      },
+      context: {
+        useMultipart: true,
+      },
+    }).pipe(
+      map((data) => {
+        if (!data.uploadEpisodeAudio.success) {
+          throw new Error(data.uploadEpisodeAudio.message);
+        }
+        return data.uploadEpisodeAudio;
+      }),
+    );
+  }
+
   publishAudio(episodeUuid: string) {
     if (episodeUuid === null) return throwError(() => new Error('Episode ID is required'));
 

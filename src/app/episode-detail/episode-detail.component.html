@@ -89,6 +89,13 @@
                     <app-svg-icon icon="telegram"></app-svg-icon>
                     Publish to Telegram
                   </button>
+                  <button mat-raised-button color="primary" type="button" class="episode-control"
+                    (click)="audioFileInput.click()" [disabled]="hasUnsavedChanges"
+                    [matTooltip]="hasUnsavedChanges ? 'Please save changes before uploading audio' : 'Upload a custom MP3 file for this episode'">
+                    <mat-icon>upload_file</mat-icon>
+                    Upload Custom MP3
+                  </button>
+                  <input #audioFileInput type="file" accept="audio/mpeg,audio/mp3" (change)="onAudioFileSelected($event)" style="display: none;">
                   <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
                     <button mat-raised-button color="primary" type="button" class="episode-control"
                       (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">

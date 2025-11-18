@@ -1997,6 +1997,12 @@ type ApiMutation {
   """Mutation to update episode audio."""
   updateEpisodeAudio(episodeUuid: UUID!): UpdateEpisodeAudio
 
+  """
+  Mutation to upload a custom MP3 file for an episode.
+  The file will be stored in the same location as generated audio files.
+  """
+  uploadEpisodeAudio(audioFile: Upload!, episodeUuid: UUID!): UploadEpisodeAudio
+
   """Mutation to publish episode audio to Telegram channel."""
   publishEpisodeAudio(episodeUuid: UUID!): PublishEpisodeAudio
 
@@ -2597,6 +2603,16 @@ type UpdateEpisodeAudio {
   success: Boolean
   message: String
   job: JobType
+}
+
+"""
+Mutation to upload a custom MP3 file for an episode.
+The file will be stored in the same location as generated audio files.
+"""
+type UploadEpisodeAudio {
+  success: Boolean
+  message: String
+  episode: EpisodeType
 }
 
 """Mutation to publish episode audio to Telegram channel."""
