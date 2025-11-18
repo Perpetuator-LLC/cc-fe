@@ -118,7 +118,7 @@
                  matTooltipPosition="above">
               {{ shortCredits(stats?.totalAffiliateCredits || 0) }}
             </div>
-            <div class="stat-label">Total Earnings (Credits)</div>
+            <div class="stat-label">Total Earnings (Affiliate Credits)</div>
           </mat-card-content>
         </mat-card>
 
@@ -157,11 +157,11 @@
       <mat-card class="balance-card">
         <mat-card-content>
           <h2>Available Balance</h2>
-          <div class="balance-value">{{ getAvailableBalance() }} Credits</div>
+          <div class="balance-value">{{ getAvailableBalance().toLocaleString() }} Affiliate Credits</div>
           <div class="conversion-actions">
             <button mat-raised-button color="primary" (click)="openConvertDialog('credits')">
               <mat-icon>swap_horiz</mat-icon>
-              Convert to Credits
+              Convert to AI Credits
             </button>
             <button mat-raised-button (click)="openConvertDialog('cash')">
               <mat-icon>attach_money</mat-icon>
