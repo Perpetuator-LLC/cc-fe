@@ -27,6 +27,16 @@
           <mat-error>Amount cannot exceed available balance</mat-error>
         }
       </mat-form-field>
+
+      @if (data.type === 'cash' && hasValidConversionAmount()) {
+        <div class="conversion-display">
+          <mat-icon>monetization_on</mat-icon>
+          <div class="conversion-text">
+            <span class="label">Cash Amount:</span>
+            <span class="amount">${{ getConversionAmount() }} USD</span>
+          </div>
+        </div>
+      }
     </form>
 
     @if (data.type === 'cash' && canRequestPayout()) {
