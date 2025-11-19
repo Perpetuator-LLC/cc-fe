@@ -204,6 +204,18 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
 
     Promise.all(acceptances)
       .then(() => {
+        // Update localStorage for cookie policy to trigger banner update
+        const cookiePolicy = this.data.policies.find((p) => p.policyType === PolicyType.COOKIE_POLICY);
+        if (cookiePolicy) {
+          const updatedConsent = {
+            version: cookiePolicy.version,
+            accepted: true,
+            date: new Date().toISOString(),
+          };
+          localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+          console.debug('[PolicyDialog] ✅ Cookie policy accepted, localStorage updated');
+        }
+
         this.messageService.success('Policies accepted successfully');
         this.dialogRef.close(true);
       })

@@ -6,6 +6,7 @@ import { filter, switchMap, take } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { PolicyService, PolicyVersion } from './policy.service';
 import { AuthService } from './auth.service';
+import { CookieConsentService } from './cookie-consent.service';
 import {
   PolicyAcceptanceDialogComponent,
   PolicyAcceptanceDialogData,
@@ -23,6 +24,7 @@ export class PolicyGuardService {
     private authService: AuthService,
     private dialog: MatDialog,
     private router: Router,
+    private cookieConsentService: CookieConsentService,
   ) {
     // Check policies after navigation completes
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
@@ -168,6 +170,13 @@ export class PolicyGuardService {
               switchMap((accepted) => {
                 if (accepted) {
                   console.debug('[PolicyGuard] User accepted policies');
+
+                  // Sync cookie policy to localStorage and CookieConsentService if it was in the accepted policies
+                  const cookiePolicy = remainingPolicies.find((p) => p.policyType === 'COOKIE_POLICY');
+                  if (cookiePolicy) {
+                    this.syncCookieConsentToLocalStorage();
+                  }
+
                   return of(true);
                 } else {
                   console.debug('[PolicyGuard] User rejected policies, logging out');
@@ -235,7 +244,7 @@ export class PolicyGuardService {
   }
 
   /**
-   * Sync cookie policy from DB to localStorage
+   * Sync cookie policy from DB to localStorage and CookieConsentService
    */
   private syncCookieConsentToLocalStorage(): void {
     this.policyService
@@ -250,7 +259,9 @@ export class PolicyGuardService {
               date: new Date().toISOString(),
             };
             localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-            console.debug('[PolicyGuard] ✅ Synced cookie policy from DB to localStorage:', updatedConsent);
+            // Update the CookieConsentService signal to trigger banner update
+            this.cookieConsentService.cookieConsent.set(updatedConsent);
+            console.debug('[PolicyGuard] ✅ Synced cookie policy from DB to localStorage and signal:', updatedConsent);
           }
         },
         error: (err) => {
