@@ -8,6 +8,7 @@ import { PolicyService, PolicyType } from '../policy.service';
 import { PublicPolicyHttpService } from '../public-policy-http.service';
 import { AuthService } from '../auth.service';
 import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cookie-banner',
@@ -23,32 +24,29 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   showBanner = computed(() => {
     const serverVersion = this.serverCookiePolicyVersion();
     const isLoggedIn = this.authService.isLoggedIn();
+    const consent = this.cookieConsentService.cookieConsent();
 
-    // Show banner if user is not logged in and hasn't accepted in localStorage
-    if (!isLoggedIn) {
-      const consent = this.cookieConsentService.cookieConsent();
-
-      // If no consent exists, show banner
-      if (!consent) {
-        return true;
-      }
-
-      // If server version is available, compare against it
-      if (serverVersion) {
-        const mismatch = consent.version !== serverVersion;
-        if (mismatch) {
-          console.debug('[CookieBanner] Version mismatch - local:', consent.version, 'server:', serverVersion);
-        }
-        return mismatch;
-      }
-
-      // If server version not yet loaded, don't show banner yet (prevent flickering)
+    // Never show banner for logged-in users - the policy system handles that
+    if (isLoggedIn) {
       return false;
     }
 
-    // If logged in, show banner if cookie policy hasn't been accepted
-    const accepted = this.cookiePolicyAccepted();
-    return !accepted;
+    // For logged-out users, show banner only if they haven't accepted in localStorage
+    if (!consent) {
+      return true;
+    }
+
+    // If server version is available, compare against it
+    if (serverVersion) {
+      const mismatch = consent.version !== serverVersion;
+      if (mismatch) {
+        console.debug('[CookieBanner] Version mismatch - local:', consent.version, 'server:', serverVersion);
+      }
+      return mismatch;
+    }
+
+    // If server version not yet loaded, don't show banner yet (prevent flickering)
+    return false;
   });
 
   private cookiePolicyAccepted = signal(false);
@@ -122,6 +120,28 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
       this.policyService.hasPolicyBeenAccepted(PolicyType.COOKIE_POLICY).subscribe({
         next: (accepted) => {
           this.cookiePolicyAccepted.set(accepted);
+
+          // If user has accepted, sync to localStorage so banner doesn't show after logout
+          if (accepted) {
+            // Get the actual policy version from backend and cache to localStorage
+            this.policyService
+              .getActivePolicies()
+              .pipe(take(1))
+              .subscribe({
+                next: (policies) => {
+                  if (policies.cookiePolicy) {
+                    const updatedConsent = {
+                      version: policies.cookiePolicy.version,
+                      accepted: true,
+                      date: new Date().toISOString(),
+                    };
+                    localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+                    this.cookieConsentService.cookieConsent.set(updatedConsent);
+                    console.debug('[CookieBanner] ✅ Synced accepted cookie policy to localStorage:', updatedConsent);
+                  }
+                },
+              });
+          }
         },
         error: (err) => {
           console.error('[CookieBanner] Failed to check cookie policy acceptance:', err);
