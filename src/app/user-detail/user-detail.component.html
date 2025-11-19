@@ -52,6 +52,15 @@
                   <input matInput formControlName="email" required />
                 </mat-form-field>
 
+                <mat-form-field appearance="fill">
+                  <mat-label>Phone Number (for SMS alerts)</mat-label>
+                  <input matInput formControlName="phoneNumber" placeholder="+1234567890" />
+                  <mat-hint>Include country code (e.g., +1 for US)</mat-hint>
+                  @if (userDetailForm.get('phoneNumber')?.hasError('pattern')) {
+                    <mat-error>Invalid phone number format. Use +1234567890</mat-error>
+                  }
+                </mat-form-field>
+
                 <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>
               </form>
             </mat-card-content>
@@ -119,15 +128,11 @@
 
                 <div class="preference-section">
                   <h5>SMS Notifications</h5>
-                  <mat-checkbox formControlName="lowBalanceSms">Low Balance SMS Alerts</mat-checkbox>
-
-                  @if (notificationPreferencesForm.value.lowBalanceSms) {
-                  <mat-form-field appearance="fill">
-                    <mat-label>Phone Number</mat-label>
-                    <input matInput formControlName="phoneNumber" placeholder="+1234567890" />
-                    <mat-hint>Include country code (e.g., +1 for US)</mat-hint>
-                  </mat-form-field>
-                  }
+                  <mat-checkbox
+                    formControlName="lowBalanceSms"
+                    [matTooltip]="getLowBalanceSmsTooltip()">
+                    Low Balance SMS Alerts
+                  </mat-checkbox>
                 </div>
 
                 <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>

@@ -2,7 +2,7 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { JWT, Token } from './types';
 import { decodeJWT } from './jwt';
 import { environment } from '../environments/environment';
@@ -124,27 +124,40 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string): Observable<Token | null> {
+  register(email: string, password: string, acceptTerms = true): Observable<Token | null> {
     this.messageService.clearMessages();
     const username = 'User' + Math.floor(Math.random() * 1000000);
     const password1 = password;
     const password2 = password;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.http.post<any>(AuthUrls.register, { username, email, password1, password2 }).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      tap((response: any) => this.setSession(response)),
-      catchError((error) => {
-        console.error('Registration error: ', error);
-        Object.keys(error.error).forEach((key) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Registration error (${key}): ${error.error[key]}`,
-            dismissible: true,
+
+    return this.http
+      .post<RegisterResponse>(AuthUrls.register, {
+        username,
+        email,
+        password1,
+        password2,
+        accept_terms_of_service: acceptTerms,
+        accept_privacy_policy: acceptTerms,
+      })
+      .pipe(
+        tap((response: RegisterResponse) => {
+          if (response.access && response.refresh) {
+            this.setSession(response as Token);
+          }
+        }),
+        catchError((error) => {
+          console.error('Registration error: ', error);
+          Object.keys(error.error).forEach((key) => {
+            this.messageService.addMessage({
+              type: 'error',
+              text: `Registration error (${key}): ${error.error[key]}`,
+              dismissible: true,
+            });
           });
-        });
-        return of(null);
-      }),
-    );
+          return of(null);
+        }),
+        map((response) => (response?.access && response?.refresh ? (response as Token) : null)),
+      );
   }
 
   refreshToken(): Observable<Token | null> {
