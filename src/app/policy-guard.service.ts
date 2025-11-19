@@ -66,11 +66,6 @@ export class PolicyGuardService {
       .getMissingRequiredPolicies()
       .pipe(
         switchMap((missingPolicies) => {
-          console.debug(
-            '[PolicyGuard] checkAndShowPolicyDialog - missing policies:',
-            missingPolicies.map((p) => `${p.policyType} v${p.version}`),
-          );
-
           // Try to link localStorage cookie consent
           return this.linkLocalStorageCookieConsent(missingPolicies);
         }),
@@ -87,10 +82,7 @@ export class PolicyGuardService {
       )
       .subscribe({
         next: (accepted) => {
-          if (accepted) {
-            // Policies accepted successfully - no action needed
-            console.debug('[PolicyGuard] Required policies accepted');
-          } else if (accepted === false) {
+          if (accepted === false) {
             // User canceled (shouldn't happen if canCancel is false)
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -143,34 +135,18 @@ export class PolicyGuardService {
    * Force check policies now (useful after login)
    */
   checkPoliciesNow(): Observable<boolean> {
-    console.debug('[PolicyGuard] checkPoliciesNow called');
-
     return this.policyService.getMissingRequiredPolicies().pipe(
       switchMap((missingPolicies) => {
-        console.debug(
-          '[PolicyGuard] Missing required policies:',
-          missingPolicies.map((p) => `${p.policyType} v${p.version}`),
-        );
-
         // Try to link localStorage cookie consent before showing dialog
         return this.linkLocalStorageCookieConsent(missingPolicies).pipe(
           switchMap((remainingPolicies) => {
-            console.debug('[PolicyGuard] After linking localStorage, remaining policies:', remainingPolicies.length);
-
             if (remainingPolicies.length === 0) {
-              console.debug('[PolicyGuard] All policies satisfied');
               return of(true);
             }
 
-            console.debug(
-              '[PolicyGuard] Showing policy dialog for:',
-              remainingPolicies.map((p) => p.policyType),
-            );
             return this.showPolicyAcceptanceDialog(remainingPolicies, false).pipe(
               switchMap((accepted) => {
                 if (accepted) {
-                  console.debug('[PolicyGuard] User accepted policies');
-
                   // Sync cookie policy to localStorage and CookieConsentService if it was in the accepted policies
                   const cookiePolicy = remainingPolicies.find((p) => p.policyType === 'COOKIE_POLICY');
                   if (cookiePolicy) {
@@ -179,7 +155,6 @@ export class PolicyGuardService {
 
                   return of(true);
                 } else {
-                  console.debug('[PolicyGuard] User rejected policies, logging out');
                   // User must accept policies
                   this.authService.logout();
                   this.router.navigate(['/login']);
@@ -199,7 +174,6 @@ export class PolicyGuardService {
    */
   private linkLocalStorageCookieConsent(missingPolicies: PolicyVersion[]): Observable<PolicyVersion[]> {
     const localConsent = localStorage.getItem('cookie_consent');
-    console.debug('[PolicyGuard] Checking localStorage for cookie consent:', localConsent ? 'found' : 'not found');
 
     if (!localConsent) {
       return of(missingPolicies);
@@ -207,7 +181,6 @@ export class PolicyGuardService {
 
     const cookiePolicy = missingPolicies.find((p) => p.policyType === 'COOKIE_POLICY');
     if (!cookiePolicy) {
-      console.debug('[PolicyGuard] Cookie policy not in missing list, syncing localStorage with DB');
       // Cookie policy not missing - sync localStorage with DB
       this.syncCookieConsentToLocalStorage();
       return of(missingPolicies);
@@ -215,26 +188,16 @@ export class PolicyGuardService {
 
     try {
       const consent = JSON.parse(localConsent);
-      console.debug('[PolicyGuard] localStorage consent:', {
-        version: consent.version,
-        accepted: consent.accepted,
-        date: consent.date,
-      });
-      console.debug('[PolicyGuard] Required cookie policy version:', cookiePolicy.version);
 
       if (consent.version === cookiePolicy.version && consent.accepted) {
-        console.debug('[PolicyGuard] ✅ Linking localStorage cookie consent to user account');
         const signature = `cookie_${consent.version}_${consent.date}`;
 
         return this.policyService.acceptPolicy(cookiePolicy.id, signature).pipe(
           switchMap(() => {
             const remainingPolicies = missingPolicies.filter((p) => p.policyType !== 'COOKIE_POLICY');
-            console.debug('[PolicyGuard] ✅ Cookie policy successfully linked, remaining:', remainingPolicies.length);
             return of(remainingPolicies);
           }),
         );
-      } else {
-        console.debug('[PolicyGuard] ❌ localStorage consent version mismatch or not accepted');
       }
     } catch (e) {
       console.error('[PolicyGuard] Failed to parse localStorage cookie consent:', e);
@@ -261,7 +224,6 @@ export class PolicyGuardService {
             localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
             // Update the CookieConsentService signal to trigger banner update
             this.cookieConsentService.cookieConsent.set(updatedConsent);
-            console.debug('[PolicyGuard] ✅ Synced cookie policy from DB to localStorage and signal:', updatedConsent);
           }
         },
         error: (err) => {
