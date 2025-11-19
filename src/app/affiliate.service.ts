@@ -132,6 +132,17 @@ export interface AffiliateTermsConsent {
   date: string;
 }
 
+export interface PolicyAcceptance {
+  id: string;
+  policy: {
+    id: string;
+    policyType: string;
+    version: string;
+  };
+  signature: string;
+  acceptedAt: string;
+}
+
 export interface AffiliateCodeChangeInfo {
   canChange: boolean;
   daysUntilNextChange: number;
@@ -218,8 +229,8 @@ interface AffiliateRelationshipResponse {
   myAffiliateRelationship: AffiliateRelationship | null;
 }
 
-interface AffiliateTermsConsentsResponse {
-  myAffiliateTermsConsents: AffiliateTermsConsent[];
+interface PolicyAcceptancesResponse {
+  myPolicyAcceptances: PolicyAcceptance[];
 }
 
 interface AffiliateCodeChangeInfoResponse {
@@ -856,19 +867,44 @@ export class AffiliateService extends BaseService {
   }
 
   getAffiliateTermsConsents(): Observable<AffiliateTermsConsent[]> {
+    // DEPRECATED: Use checkAffiliateTermsAcceptance() instead
+    // This method is kept for backward compatibility but will be removed
+    return this.checkAffiliateTermsAcceptance().pipe(
+      map((hasAccepted) => {
+        // Convert new format to old format for compatibility
+        return hasAccepted ? [{ version: '1.0', accepted: true, date: new Date().toISOString() }] : [];
+      }),
+    );
+  }
+
+  /**
+   * Check if user has accepted affiliate terms using the new policy acceptance system
+   * @returns Observable<boolean> - true if affiliate terms have been accepted
+   */
+  checkAffiliateTermsAcceptance(): Observable<boolean> {
     const query = gql`
-      query GetAffiliateTermsConsents {
-        myAffiliateTermsConsents {
-          version
-          accepted
-          date
+      query CheckAffiliateTermsAcceptance {
+        myPolicyAcceptances {
+          id
+          policy {
+            id
+            policyType
+            version
+          }
+          acceptedAt
         }
       }
     `;
 
-    return this.query<AffiliateTermsConsentsResponse>({
+    return this.query<PolicyAcceptancesResponse>({
       query,
-    }).pipe(map((data) => data.myAffiliateTermsConsents));
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        // Check if user has accepted AFFILIATE_TERMS policy
+        return data.myPolicyAcceptances.some((acceptance) => acceptance.policy.policyType === 'AFFILIATE_TERMS');
+      }),
+    );
   }
 
   getAffiliateByCode(code: string): Observable<AffiliateProfile> {

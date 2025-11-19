@@ -120,6 +120,45 @@
         </div>
       </div>
 
+      <div class="details-form">
+        <div class="content">
+          <h4>Notification Preferences</h4>
+          <p>Choose how you'd like to receive notifications and updates.</p>
+        </div>
+        <div class="form">
+          <mat-card class="profile-card">
+            <mat-card-header>
+              <mat-card-title></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="notificationPreferencesForm" (ngSubmit)="onSubmitNotificationPreferences()">
+                <div class="preference-section">
+                  <h5>Email Notifications</h5>
+                  <mat-checkbox formControlName="lowBalanceAlerts">Low Balance Alerts</mat-checkbox>
+                  <mat-checkbox formControlName="newsletter">Newsletter</mat-checkbox>
+                  <mat-checkbox formControlName="marketingEmails">Marketing Emails</mat-checkbox>
+                </div>
+
+                <div class="preference-section">
+                  <h5>SMS Notifications</h5>
+                  <mat-checkbox formControlName="lowBalanceSms">Low Balance SMS Alerts</mat-checkbox>
+
+                  @if (notificationPreferencesForm.value.lowBalanceSms) {
+                  <mat-form-field appearance="fill">
+                    <mat-label>Phone Number</mat-label>
+                    <input matInput formControlName="phoneNumber" placeholder="+1234567890" />
+                    <mat-hint>Include country code (e.g., +1 for US)</mat-hint>
+                  </mat-form-field>
+                  }
+                </div>
+
+                <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
       @if (affiliateRelationship) {
       <div class="affiliate-network-info">
         <p>Member of <strong>{{ affiliateRelationship.affiliate.username }}</strong>'s network</p>

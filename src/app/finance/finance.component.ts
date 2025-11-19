@@ -2,10 +2,12 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
-import { MatButton, MatFabButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { ToolbarService } from '../toolbar.service';
+import { NewsletterDialogComponent } from '../newsletter-dialog/newsletter-dialog.component';
 
 @Component({
   selector: 'app-finance',
@@ -17,7 +19,6 @@ import { ToolbarService } from '../toolbar.service';
     MatCardHeader,
     MatButton,
     MatFabButton,
-    MatIconButton,
     MatMiniFabButton,
     MatIcon,
     RouterLink,
@@ -53,12 +54,22 @@ export class FinanceComponent implements OnInit {
     },
   ];
 
-  constructor(private toolbarService: ToolbarService) {}
+  constructor(
+    private toolbarService: ToolbarService,
+    private dialog: MatDialog,
+  ) {}
 
   ngOnInit(): void {
     const viewContainerRef = this.toolbarService.getViewContainerRef();
     viewContainerRef.clear();
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+  }
+
+  openNewsletterDialog(): void {
+    this.dialog.open(NewsletterDialogComponent, {
+      width: '500px',
+      disableClose: false,
+    });
   }
 
   nextSlide(): void {

@@ -142,3 +142,64 @@ mat-dialog-actions {
   }
 }
 
+.coming-soon-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  .coming-soon-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--primary);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    color: var(--description-color);
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+    max-width: 400px;
+
+    &.contact-info {
+      margin-top: 16px;
+      font-size: 14px;
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+.policy-meta {
+  display: flex;
+  gap: 20px;
+  padding: 10px;
+  background: var(--mat-sys-surface-variant);
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+

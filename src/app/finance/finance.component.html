@@ -1,8 +1,5 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <div class="toolbar-content">
-    <h2>Finance</h2>
-  </div>
 </ng-template>
 
 <div class="finance-container">
@@ -158,13 +155,13 @@
         <mat-icon class="cta-icon">rocket_launch</mat-icon>
         <h2>Be First to Know</h2>
         <p>
-          We're putting the finishing touches on Invest Insights.
-          Stay tuned for the launch announcement!
+          We're putting the finishing touches on the Finance feature.
+          Subscribe to our newsletter to get notified when it launches!
         </p>
         <div class="cta-actions">
-          <button mat-raised-button color="primary" disabled>
+          <button mat-raised-button color="primary" (click)="openNewsletterDialog()">
             <mat-icon>notifications</mat-icon>
-            Notify Me (Coming Soon)
+            Notify Me
           </button>
           <button mat-raised-button routerLink="/podcasts">
             <mat-icon>podcasts</mat-icon>

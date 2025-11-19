@@ -24,6 +24,31 @@ export interface StatusAndMessageData {
   message: string;
 }
 
+export enum NotificationChannel {
+  EMAIL = 'EMAIL',
+  SMS = 'SMS',
+  BOTH = 'BOTH',
+}
+
+export interface EmailPreferences {
+  lowBalanceAlerts: boolean;
+  newsletter: boolean;
+  policyUpdates: boolean;
+  marketingEmails: boolean;
+}
+
+export interface SmsPreferences {
+  phoneNumber: string | null;
+  isVerified: boolean;
+  lowBalanceSms: boolean;
+  criticalAlertsSms: boolean;
+}
+
+export interface UserPreferences {
+  email: EmailPreferences;
+  sms: SmsPreferences;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -332,6 +357,168 @@ export class UserService extends BaseService implements OnDestroy {
           throw new Error(data.deleteUser.message);
         }
         return data.deleteUser;
+      }),
+    );
+  }
+
+  getUserPreferences(): Observable<UserPreferences> {
+    const GET_PREFERENCES = gql`
+      query GetUserPreferences {
+        myEmailPreferences {
+          lowBalanceAlerts
+          newsletter
+          policyUpdates
+          marketingEmails
+        }
+        mySmsPreferences {
+          phoneNumber
+          isVerified
+          lowBalanceSms
+          criticalAlertsSms
+        }
+      }
+    `;
+
+    interface Response {
+      myEmailPreferences: EmailPreferences;
+      mySmsPreferences: SmsPreferences;
+    }
+
+    return this.query<Response>({
+      query: GET_PREFERENCES,
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map((data) => {
+        return {
+          email: data.myEmailPreferences,
+          sms: data.mySmsPreferences,
+        };
+      }),
+    );
+  }
+
+  updateEmailPreferences(
+    lowBalanceAlerts?: boolean,
+    newsletter?: boolean,
+    marketingEmails?: boolean,
+  ): Observable<BaseResponse> {
+    const UPDATE_EMAIL_PREFERENCES = gql`
+      mutation UpdateEmailPreferences(
+        $lowBalanceAlerts: Boolean
+        $newsletter: Boolean
+        $marketingEmails: Boolean
+        $policyUpdates: Boolean
+      ) {
+        updateEmailPreferences(
+          lowBalanceAlerts: $lowBalanceAlerts
+          newsletter: $newsletter
+          marketingEmails: $marketingEmails
+          policyUpdates: $policyUpdates
+        ) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      updateEmailPreferences: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: UPDATE_EMAIL_PREFERENCES,
+      variables: { lowBalanceAlerts, newsletter, marketingEmails },
+    }).pipe(
+      map((data) => {
+        if (!data.updateEmailPreferences.success) {
+          throw new Error(data.updateEmailPreferences.message);
+        }
+        return data.updateEmailPreferences;
+      }),
+    );
+  }
+
+  updateSmsPreferences(phoneNumber?: string, lowBalanceSms?: boolean): Observable<BaseResponse> {
+    const UPDATE_SMS_PREFERENCES = gql`
+      mutation UpdateSmsPreferences($phoneNumber: String, $lowBalanceSms: Boolean, $criticalAlertsSms: Boolean) {
+        updateSmsPreferences(
+          phoneNumber: $phoneNumber
+          lowBalanceSms: $lowBalanceSms
+          criticalAlertsSms: $criticalAlertsSms
+        ) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      updateSmsPreferences: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: UPDATE_SMS_PREFERENCES,
+      variables: { phoneNumber, lowBalanceSms },
+    }).pipe(
+      map((data) => {
+        if (!data.updateSmsPreferences.success) {
+          throw new Error(data.updateSmsPreferences.message);
+        }
+        return data.updateSmsPreferences;
+      }),
+    );
+  }
+
+  subscribeToNewsletter(email: string): Observable<BaseResponse> {
+    const SUBSCRIBE_NEWSLETTER = gql`
+      mutation SubscribeToNewsletter($email: String!, $source: String) {
+        subscribeToNewsletter(email: $email, source: $source) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      subscribeToNewsletter: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: SUBSCRIBE_NEWSLETTER,
+      variables: { email, source: 'user_profile' },
+    }).pipe(
+      map((data) => {
+        if (!data.subscribeToNewsletter.success) {
+          throw new Error(data.subscribeToNewsletter.message);
+        }
+        return data.subscribeToNewsletter;
+      }),
+    );
+  }
+
+  unsubscribeFromNewsletter(email: string): Observable<BaseResponse> {
+    const UNSUBSCRIBE_NEWSLETTER = gql`
+      mutation UnsubscribeFromNewsletter($email: String!) {
+        unsubscribeFromNewsletter(email: $email) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      unsubscribeFromNewsletter: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: UNSUBSCRIBE_NEWSLETTER,
+      variables: { email },
+    }).pipe(
+      map((data) => {
+        if (!data.unsubscribeFromNewsletter.success) {
+          throw new Error(data.unsubscribeFromNewsletter.message);
+        }
+        return data.unsubscribeFromNewsletter;
       }),
     );
   }
