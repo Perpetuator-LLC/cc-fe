@@ -13,7 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { MessageComponent } from '../message/message.component';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatIcon } from '@angular/material/icon';
 import { JobService } from '../job.service';
 
 @Component({
@@ -32,7 +32,7 @@ import { JobService } from '../job.service';
     MatOption,
     MatOptgroup,
     MatDialogModule,
-    SvgIconComponent,
+    MatIcon,
   ],
   template: `
     <h2 mat-dialog-title>Generate Podcast</h2>
@@ -57,7 +57,7 @@ import { JobService } from '../job.service';
           <div class="select-new">
             <span>Select Team </span>
             <button mat-stroked-button type="button" (click)="selectCreateNewTeam()">
-              <app-svg-icon width="24" height="24" icon="add-icon" style="cursor: pointer"></app-svg-icon>
+              <mat-icon>add</mat-icon>
               Create New Team
             </button>
           </div>
