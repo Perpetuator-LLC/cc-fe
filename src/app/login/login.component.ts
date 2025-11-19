@@ -8,24 +8,17 @@ import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { environment } from '../../environments/environment';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { ThemeService } from '../theme.service';
 import { CookieConsentService } from '../cookie-consent.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
+import { AffiliateService } from '../affiliate.service';
+import { PolicyGuardService } from '../policy-guard.service';
 
 @Component({
   selector: 'app-login',
@@ -42,13 +35,7 @@ import { AffiliateStorageService } from '../affiliate-storage.service';
     MatCardHeader,
     MatCardContent,
     MatCardActions,
-    MatAccordion,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatIcon,
     RouterLink,
-    MessageComponent,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -77,6 +64,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private dialog: MatDialog,
     private affiliateService: AffiliateService,
     private affiliateStorageService: AffiliateStorageService,
+    private policyGuardService: PolicyGuardService,
   ) {
     const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
     const storedReturnUrl = this.affiliateStorageService.getReturnUrl();
@@ -138,10 +126,24 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   private completeLogin(): void {
     this.affiliateStorageService.clearReturnUrl();
-    this.router.navigateByUrl(this.returnUrl);
     this.themeService.loadTheme();
     this.userService.loadUserDetails();
     this.cookieConsentService.loadCookieConsent();
+
+    // Check for required policy acceptances before navigating
+    this.policyGuardService.checkPoliciesNow().subscribe({
+      next: (policiesAccepted) => {
+        if (policiesAccepted) {
+          this.router.navigateByUrl(this.returnUrl);
+        }
+        // If not accepted, user will be logged out by PolicyGuardService
+      },
+      error: (err) => {
+        console.error('Error checking policies:', err);
+        // Still navigate on error to avoid blocking user
+        this.router.navigateByUrl(this.returnUrl);
+      },
+    });
   }
 
   ngOnDestroy() {

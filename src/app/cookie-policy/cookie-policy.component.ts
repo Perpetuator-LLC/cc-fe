@@ -11,13 +11,13 @@ import { PolicyService, PolicyVersion, PolicyType, PolicyContentType } from '../
 import { PublicPolicyHttpService, PublicPolicy } from '../public-policy-http.service';
 
 @Component({
-  selector: 'app-privacy-policy',
+  selector: 'app-cookie-policy',
   standalone: true,
   imports: [CommonModule, MatCard, MatCardContent, MatProgressSpinner],
-  templateUrl: './privacy-policy.component.html',
-  styleUrls: ['./privacy-policy.component.scss'],
+  templateUrl: './cookie-policy.component.html',
+  styleUrls: ['./cookie-policy.component.scss'],
 })
-export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly Date = Date;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
@@ -55,14 +55,14 @@ export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy 
       this.subscriptions.add(
         this.publicPolicyService.getActivePolicies().subscribe({
           next: (policies) => {
-            if (policies.privacyPolicy) {
-              this.policy = this.convertPublicToPolicy(policies.privacyPolicy);
-              this.policyContent = this.renderPublicPolicy(policies.privacyPolicy);
+            if (policies.cookiePolicy) {
+              this.policy = this.convertPublicToPolicy(policies.cookiePolicy);
+              this.policyContent = this.renderPublicPolicy(policies.cookiePolicy);
             }
             this.loading = false;
           },
           error: (err) => {
-            console.error('Failed to load privacy policy:', err);
+            console.error('Failed to load cookie policy:', err);
             this.loading = false;
           },
         }),
@@ -71,14 +71,14 @@ export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy 
       this.subscriptions.add(
         this.policyService.getActivePolicies().subscribe({
           next: (policies) => {
-            this.policy = policies.privacyPolicy;
+            this.policy = policies.cookiePolicy;
             if (this.policy) {
               this.policyContent = this.policyService.renderPolicyContent(this.policy);
             }
             this.loading = false;
           },
           error: (err) => {
-            console.error('Failed to load privacy policy:', err);
+            console.error('Failed to load cookie policy:', err);
             this.loading = false;
           },
         }),
