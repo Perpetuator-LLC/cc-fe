@@ -1,3 +1,5 @@
+Aim for efficient design, maintainability, and consistency with Angular Material 3.
+
 # Style Migration Strategy
 - **Theme-dependent** (colors, backgrounds, borders) → Move to theme
 - **Layout/structure** → Replace with Material layout utilities  
