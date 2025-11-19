@@ -218,6 +218,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
+  protected truncateDescription(description: string, maxLength = 350): string {
+    if (!description || description.length <= maxLength) {
+      return description;
+    }
+    return description.substring(0, maxLength).trim() + '...';
+  }
+
   ngOnDestroy() {
     if (this.p5Instance) {
       this.p5Instance.remove();

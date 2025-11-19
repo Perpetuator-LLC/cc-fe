@@ -163,7 +163,7 @@
                 </a>
               </h3>
               @if (podcast.description) {
-                <p class="description">{{ podcast.description }}</p>
+                <p class="description">{{ truncateDescription(podcast.description) }}</p>
               }
               @if (podcast.ownerName) {
                 <p class="owner">
@@ -240,7 +240,7 @@
                   </a>
                 </h3>
                 @if (podcast.description) {
-                  <p class="description">{{ podcast.description }}</p>
+                  <p class="description">{{ truncateDescription(podcast.description) }}</p>
                 }
                 @if (podcast.ownerName) {
                   <p class="owner">

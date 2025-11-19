@@ -90,12 +90,12 @@ describe('CookieConsentService', () => {
     });
 
     it('should handle invalid JSON in localStorage gracefully', () => {
-      localStorageSpy['cookieConsent'] = 'invalid json';
+      localStorageSpy['cookie_consent'] = 'invalid json';
       spyOn(console, 'error');
 
       service = TestBed.inject(CookieConsentService);
       expect(service.cookieConsent()).toBeNull();
-      expect(localStorage.removeItem).toHaveBeenCalledWith('cookieConsent');
+      expect(localStorage.removeItem).toHaveBeenCalledWith('cookie_consent');
     });
 
     it('should not call GraphQL when user is not logged in', () => {
@@ -327,7 +327,7 @@ describe('CookieConsentService', () => {
       authServiceMock.isLoggedIn.and.returnValue(false);
       service.setCookieConsent(true);
 
-      const savedData = localStorageSpy['cookieConsent'];
+      const savedData = localStorageSpy['cookie_consent'];
       expect(savedData).toBeDefined();
 
       const parsed = JSON.parse(savedData);
@@ -337,7 +337,7 @@ describe('CookieConsentService', () => {
     });
 
     it('should not modify localStorage when no consents exist in backend', (done) => {
-      localStorageSpy['cookieConsent'] = JSON.stringify({
+      localStorageSpy['cookie_consent'] = JSON.stringify({
         version: service.COOKIE_CONSENT_VERSION,
         accepted: true,
         date: '2025-11-06T00:00:00.000Z',
