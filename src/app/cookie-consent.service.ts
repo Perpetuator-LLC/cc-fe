@@ -11,10 +11,6 @@ interface CookieConsent {
   date: string;
 }
 
-interface GetUserCookieConsentsResponse {
-  userCookieConsents: CookieConsent[];
-}
-
 interface UpdateCookieConsentResponse {
   updateCookieConsent: {
     success: boolean;
@@ -39,8 +35,10 @@ export class CookieConsentService implements OnDestroy {
     private apollo: Apollo,
     private authService: AuthService,
   ) {
+    // Load consent from localStorage without version validation
+    // Version validation happens in the cookie banner component
     const localConsent = this.loadConsentFromLocalStorage();
-    if (localConsent && localConsent.version === this.COOKIE_CONSENT_VERSION) {
+    if (localConsent) {
       this.cookieConsentSignal.set(localConsent);
     }
     this.loadCookieConsent();
@@ -66,7 +64,7 @@ export class CookieConsentService implements OnDestroy {
   `;
 
   private loadConsentFromLocalStorage(): CookieConsent | null {
-    const storedConsent = localStorage.getItem('cookieConsent');
+    const storedConsent = localStorage.getItem('cookie_consent');
     if (!storedConsent) {
       return null;
     }
@@ -74,56 +72,56 @@ export class CookieConsentService implements OnDestroy {
       return JSON.parse(storedConsent);
     } catch (e) {
       console.error('Invalid JSON stored in localStorage:', e);
-      localStorage.removeItem('cookieConsent');
+      localStorage.removeItem('cookie_consent');
       return null;
     }
   }
 
   private saveConsentToLocalStorage(consent: CookieConsent | null): void {
     if (consent) {
-      localStorage.setItem('cookieConsent', JSON.stringify(consent));
+      localStorage.setItem('cookie_consent', JSON.stringify(consent));
     } else {
-      localStorage.removeItem('cookieConsent');
+      localStorage.removeItem('cookie_consent');
     }
   }
 
   loadCookieConsent(): void {
+    // DEPRECATED: This method is no longer used. Cookie consent is now handled via the Policy system.
+    // The PolicyGuardService automatically links localStorage cookie consent to the backend when user logs in.
+    // Keeping this method empty to avoid breaking existing calls.
+    return;
+  }
+
+  // OLD IMPLEMENTATION COMMENTED OUT - This was overwriting localStorage on login
+  // The new PolicyGuardService.checkAndShowPolicyDialog() handles linking localStorage to backend
+  /*
+  private oldLoadCookieConsent(): void {
     if (!this.authService.isLoggedIn()) {
-      return; // User not logged in, not loading cookie consent
+      return;
     }
     this.subscriptions.add(
-      this.apollo
-        .query<GetUserCookieConsentsResponse>({
-          query: this.GET_USER_COOKIE_CONSENTS,
-          fetchPolicy: 'network-only',
-        })
-        .pipe(
-          map((result) => result.data.userCookieConsents),
-          catchError((error) => {
-            console.error('GraphQL query error:', error);
-            return throwError(() => new Error(`GraphQL Query Error: ${error.message}`));
-          }),
-        )
-        .subscribe({
-          next: (consents) => {
-            if (consents && consents.length > 0) {
-              const latestConsent = consents.find((consent) => consent.version === this.COOKIE_CONSENT_VERSION);
-              if (latestConsent === undefined) {
-                console.warn('User has not signed latest cookie consent, clearing...');
-                this.cookieConsentSignal.set(null);
-                this.saveConsentToLocalStorage(null);
-                return;
-              }
-              this.cookieConsentSignal.set(latestConsent);
-              this.saveConsentToLocalStorage(latestConsent);
+      this.apollo.query<GetUserCookieConsentsResponse>({
+        query: this.GET_USER_COOKIE_CONSENTS,
+        fetchPolicy: 'network-only',
+      }).pipe(
+        map((result) => result.data.userCookieConsents),
+      ).subscribe({
+        next: (consents) => {
+          if (consents && consents.length > 0) {
+            const latestConsent = consents.find((consent) => consent.version === this.COOKIE_CONSENT_VERSION);
+            if (latestConsent === undefined) {
+              this.cookieConsentSignal.set(null);
+              this.saveConsentToLocalStorage(null);
+              return;
             }
-          },
-          error: (err) => {
-            console.error('Failed to load cookie consent:', err);
-          },
-        }),
+            this.cookieConsentSignal.set(latestConsent);
+            this.saveConsentToLocalStorage(latestConsent);
+          }
+        },
+      }),
     );
   }
+  */
 
   updateCookieConsent(
     version: string,

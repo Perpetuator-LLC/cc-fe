@@ -7,6 +7,7 @@ import { PreLoginLayoutComponent } from './pre-login-layout/pre-login-layout.com
 import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
 import { MessageComponent } from './message/message.component';
 import { AuthService } from './auth.service';
+import { PolicyGuardService } from './policy-guard.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,10 @@ export class AppComponent {
   constructor(
     public router: Router,
     private authService: AuthService,
-  ) {}
+    private policyGuardService: PolicyGuardService,
+  ) {
+    // PolicyGuardService is injected to initialize policy checking on navigation
+  }
 
   get isLoginRoute(): boolean {
     // Routes that are always pre-login layout regardless of auth state
@@ -52,6 +56,7 @@ export class AppComponent {
       '/',
       '/home',
       '/privacy-policy',
+      '/cookie-policy',
       '/terms-and-conditions',
       /^\/a\/.+/, // Affiliate landing pages (/a/:code)
       /^\/podcasts(\/|$)/, // Public podcast pages

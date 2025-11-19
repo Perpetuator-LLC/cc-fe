@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of, switchMap } from 'rxjs';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -27,6 +27,13 @@ export interface PolicyVersion {
   content: string;
   contentType: PolicyContentType;
   isActive: boolean;
+}
+
+export interface PolicyAcceptance {
+  id: string;
+  policy: PolicyVersion;
+  acceptedAt: string;
+  signature: string | null;
 }
 
 interface ActivePoliciesResult {
@@ -185,6 +192,114 @@ export class PolicyService extends BaseService {
           success: data.acceptPolicy.success,
           message: data.acceptPolicy.message,
         };
+      }),
+    );
+  }
+
+  /**
+   * Get all policy acceptances for the current user
+   */
+  getMyPolicyAcceptances(): Observable<PolicyAcceptance[]> {
+    const MY_POLICY_ACCEPTANCES = gql`
+      query MyPolicyAcceptances {
+        myPolicyAcceptances {
+          id
+          policy {
+            id
+            policyType
+            version
+            effectiveDate
+            content
+            contentType
+            isActive
+          }
+          acceptedAt
+          signature
+        }
+      }
+    `;
+
+    interface MyPolicyAcceptancesResponse {
+      myPolicyAcceptances: PolicyAcceptance[];
+    }
+
+    return this.query<MyPolicyAcceptancesResponse>({
+      query: MY_POLICY_ACCEPTANCES,
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.myPolicyAcceptances));
+  }
+
+  /**
+   * Check which required policies need to be accepted
+   * Returns active policies that the user hasn't accepted or accepted an older version
+   */
+  getMissingRequiredPolicies(): Observable<PolicyVersion[]> {
+    return this.getActivePolicies().pipe(
+      switchMap((activePolicies) => {
+        return this.getMyPolicyAcceptances().pipe(
+          map((acceptances) => {
+            const missing: PolicyVersion[] = [];
+
+            // Check each required policy (exclude AFFILIATE_TERMS as it's optional)
+            const requiredPolicies = [
+              { type: PolicyType.TERMS_OF_SERVICE, policy: activePolicies.termsOfService },
+              { type: PolicyType.PRIVACY_POLICY, policy: activePolicies.privacyPolicy },
+              { type: PolicyType.COOKIE_POLICY, policy: activePolicies.cookiePolicy },
+            ];
+
+            requiredPolicies.forEach(({ type, policy }) => {
+              if (!policy) return;
+
+              const acceptance = acceptances.find((a) => a.policy.policyType === type);
+
+              // Policy is missing if:
+              // 1. User has never accepted it, OR
+              // 2. User accepted an older version (version mismatch)
+              if (!acceptance || acceptance.policy.version !== policy.version) {
+                missing.push(policy);
+              }
+            });
+
+            return missing;
+          }),
+        );
+      }),
+    );
+  }
+
+  /**
+   * Check if a specific policy type has been accepted (current version)
+   */
+  hasPolicyBeenAccepted(policyType: PolicyType): Observable<boolean> {
+    return this.getActivePolicies().pipe(
+      switchMap((activePolicies) => {
+        let activePolicy: PolicyVersion | null = null;
+
+        switch (policyType) {
+          case PolicyType.TERMS_OF_SERVICE:
+            activePolicy = activePolicies.termsOfService;
+            break;
+          case PolicyType.PRIVACY_POLICY:
+            activePolicy = activePolicies.privacyPolicy;
+            break;
+          case PolicyType.COOKIE_POLICY:
+            activePolicy = activePolicies.cookiePolicy;
+            break;
+          case PolicyType.AFFILIATE_TERMS:
+            activePolicy = activePolicies.affiliateTerms;
+            break;
+        }
+
+        if (!activePolicy) {
+          return of(false);
+        }
+
+        return this.getMyPolicyAcceptances().pipe(
+          map((acceptances) => {
+            const acceptance = acceptances.find((a) => a.policy.policyType === policyType);
+            return acceptance?.policy.version === activePolicy?.version;
+          }),
+        );
       }),
     );
   }

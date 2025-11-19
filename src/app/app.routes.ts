@@ -303,6 +303,14 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'cookie-policy',
+    loadComponent: () => import('./cookie-policy/cookie-policy.component').then((c) => c.CookiePolicyComponent),
+    title: 'Cookie Policy',
+    data: {
+      icon: 'cookie',
+    },
+  },
+  {
     path: 'terms-and-conditions',
     loadComponent: () =>
       import('./terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
