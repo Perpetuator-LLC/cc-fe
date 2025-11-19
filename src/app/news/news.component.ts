@@ -155,6 +155,11 @@ export class NewsComponent implements OnInit, OnDestroy {
                 // Auto-select default podcast
                 this.selectedPodcastUuid = this.recentlyUsedPodcastsService.getDefaultSelection(this.podcasts);
 
+                // Initialize RSS feeds for the auto-selected podcast
+                if (this.selectedPodcastUuid) {
+                  this.onPodcastChange();
+                }
+
                 this.loadingPodcasts = false;
               },
               error: (error) => {

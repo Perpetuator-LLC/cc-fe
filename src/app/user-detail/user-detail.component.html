@@ -100,28 +100,6 @@
       </div>
       <div class="details-form">
         <div class="content">
-          <h4>Permanently remove your account</h4>
-          <p>Username is publicly visible, do not use personally identifying information in it.</p>
-        </div>
-        <div class="form">
-          <mat-card class="profile-card">
-            <mat-card-header>
-              <mat-card-title></mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <button mat-raised-button color="primary" class="remove-btn" (click)="openDeleteAccountDialog()">
-                Permanently remove My account
-              </button>
-              <div class="voice-info">
-                <p><mat-icon>info</mat-icon>Warning: This is a destructive action that cannot be reverted.</p>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </div>
-
-      <div class="details-form">
-        <div class="content">
           <h4>Notification Preferences</h4>
           <p>Choose how you'd like to receive notifications and updates.</p>
         </div>
@@ -154,6 +132,28 @@
 
                 <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>
               </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <div class="details-form">
+        <div class="content">
+          <h4>Permanently remove your account</h4>
+          <p>Username is publicly visible, do not use personally identifying information in it.</p>
+        </div>
+        <div class="form">
+          <mat-card class="profile-card">
+            <mat-card-header>
+              <mat-card-title></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <button mat-raised-button color="primary" class="remove-btn" (click)="openDeleteAccountDialog()">
+                Permanently remove My account
+              </button>
+              <div class="voice-info">
+                <p><mat-icon>info</mat-icon>Warning: This is a destructive action that cannot be reverted.</p>
+              </div>
             </mat-card-content>
           </mat-card>
         </div>
