@@ -3,11 +3,12 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UserDetails, UserService } from '../user.service';
+import { UserDetails, UserService, UserPreferences } from '../user.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
@@ -21,7 +22,6 @@ import { CreditService } from '../credit.service';
 import { CodeService } from '../code.service';
 import { MatIcon } from '@angular/material/icon';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../loading.service';
 import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
@@ -37,6 +37,7 @@ import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
     MatInput,
     MatButton,
     MatLabel,
+    MatCheckbox,
     MessageComponent,
     MatError,
     MatHint,
@@ -45,7 +46,6 @@ import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
     MatCardTitle,
     FormsModule,
     MatIcon,
-    SvgIconComponent,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -55,6 +55,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   userDetailForm: FormGroup;
   changePasswordForm: FormGroup;
+  notificationPreferencesForm: FormGroup;
   deleteConfirmation = '';
   exportConfirmation = '';
   private subscriptions = new Subscription();
@@ -94,6 +95,14 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       { validator: this.passwordMatchValidator },
     );
 
+    this.notificationPreferencesForm = this.fb.group({
+      lowBalanceAlerts: [false],
+      lowBalanceSms: [false],
+      phoneNumber: [''],
+      newsletter: [false],
+      marketingEmails: [false],
+    });
+
     this.subscriptions.add(
       toObservable(this.userService.userDetails).subscribe((userData) => {
         this.userDetailForm.patchValue({
@@ -120,6 +129,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     viewContainerRef.createEmbeddedView(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadAffiliateRelationship();
+    this.loadNotificationPreferences();
   }
 
   ngOnDestroy(): void {
@@ -151,6 +161,61 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         },
         error: () => {
           // Silently fail - not critical for profile page
+        },
+      }),
+    );
+  }
+
+  private loadNotificationPreferences() {
+    this.subscriptions.add(
+      this.userService.getUserPreferences().subscribe({
+        next: (preferences: UserPreferences) => {
+          this.notificationPreferencesForm.patchValue({
+            lowBalanceAlerts: preferences.email.lowBalanceAlerts,
+            lowBalanceSms: preferences.sms.lowBalanceSms,
+            phoneNumber: preferences.sms.phoneNumber || '',
+            newsletter: preferences.email.newsletter,
+            marketingEmails: preferences.email.marketingEmails,
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load notification preferences:', err);
+        },
+      }),
+    );
+  }
+
+  onSubmitNotificationPreferences(): void {
+    const formValue = this.notificationPreferencesForm.value;
+
+    // Update email preferences
+    this.subscriptions.add(
+      this.userService
+        .updateEmailPreferences(formValue.lowBalanceAlerts, formValue.newsletter, formValue.marketingEmails)
+        .subscribe({
+          next: () => {
+            // Then update SMS preferences if needed
+            if (formValue.lowBalanceSms || formValue.phoneNumber) {
+              this.updateSmsPrefs(formValue.phoneNumber, formValue.lowBalanceSms);
+            } else {
+              this.messageService.success('Notification preferences updated successfully');
+            }
+          },
+          error: (err) => {
+            this.messageService.error(`Failed to update email preferences: ${err.message}`);
+          },
+        }),
+    );
+  }
+
+  private updateSmsPrefs(phoneNumber: string, lowBalanceSms: boolean): void {
+    this.subscriptions.add(
+      this.userService.updateSmsPreferences(phoneNumber, lowBalanceSms).subscribe({
+        next: () => {
+          this.messageService.success('Notification preferences updated successfully');
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update SMS preferences: ${err.message}`);
         },
       }),
     );

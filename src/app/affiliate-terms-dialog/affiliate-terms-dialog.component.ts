@@ -5,9 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
 import { MessageService } from '../message.service';
+import { PolicyService, PolicyVersion } from '../policy.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -22,20 +24,44 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
   loading = false;
   checkingEligibility = true;
   eligibility: AffiliateEligibility | null = null;
+  policy: PolicyVersion | null = null;
+  policyContent: SafeHtml | null = null;
+  loadingPolicy = true;
 
   constructor(
     private dialogRef: MatDialogRef<AffiliateTermsDialogComponent>,
     private affiliateService: AffiliateService,
     private messageService: MessageService,
+    private policyService: PolicyService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.checkEligibility();
+    this.loadPolicy();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private loadPolicy(): void {
+    this.loadingPolicy = true;
+    this.subscriptions.add(
+      this.policyService.getActivePolicies().subscribe({
+        next: (policies) => {
+          this.policy = policies.affiliateTerms;
+          if (this.policy) {
+            this.policyContent = this.policyService.renderPolicyContent(this.policy);
+          }
+          this.loadingPolicy = false;
+        },
+        error: (err) => {
+          console.error('Failed to load affiliate terms:', err);
+          this.loadingPolicy = false;
+        },
+      }),
+    );
   }
 
   checkEligibility(): void {
@@ -65,11 +91,18 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
   }
 
   onAccept(): void {
+    // Check if policy is loaded
+    if (!this.policy || !this.policy.id) {
+      this.messageService.error('Policy not loaded. Please try again.');
+      return;
+    }
+
     this.loading = true;
     this.messageService.clearMessages();
 
+    // Use the new acceptPolicy mutation with the policy ID
     this.subscriptions.add(
-      this.affiliateService.acceptAffiliateTerms('1.0').subscribe({
+      this.policyService.acceptPolicy(this.policy.id).subscribe({
         next: () => {
           this.messageService.success('Affiliate terms accepted successfully!');
           // After accepting terms, create Stripe Connect account

@@ -209,3 +209,27 @@ mat-form-field {
     }
   }
 }
+
+.preference-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  h5 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+
+  mat-checkbox {
+    margin-left: 8px;
+  }
+
+  mat-form-field {
+    margin-left: 32px;
+    margin-top: 8px;
+  }
+}
+

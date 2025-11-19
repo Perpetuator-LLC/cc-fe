@@ -4,6 +4,14 @@ schema {
 }
 
 type ApiQuery {
+  activePolicies: [VersionedPolicyType]
+  policyByType(policyType: String!): VersionedPolicyType
+  policyByVersion(policyType: String!, version: String!): VersionedPolicyType
+  myEmailPreferences: EmailPreferenceType
+  myNewsletterSubscription: NewsletterSubscriberType
+  mySmsPreferences: SMSPreferenceType
+  myPolicyAcceptances: [PolicyAcceptanceType]
+  policyAcceptanceBySignature(signature: String!): PolicyAcceptanceType
   affiliateProfile: AffiliateProfileType
   affiliateByCode(code: String!): AffiliateProfileType
   myAffiliateRelationship: AffiliateRelationshipType
@@ -278,6 +286,165 @@ type ApiQuery {
   ): Node
 }
 
+"""GraphQL type for VersionedPolicy model."""
+type VersionedPolicyType {
+  id: UUID!
+  policyType: CommunicationsVersionedPolicyPolicyTypeChoices!
+
+  """Format: YYYYMMDD.# (e.g., 20251118.1)"""
+  version: String!
+  title: String!
+
+  """Full policy content (supports markdown or HTML)"""
+  content: String!
+
+  """Format of the content (for frontend rendering)"""
+  contentType: CommunicationsVersionedPolicyContentTypeChoices!
+
+  """If True, users will be emailed about this change"""
+  isMajorChange: Boolean!
+
+  """Only one version per policy type can be active"""
+  isActive: Boolean!
+  effectiveDate: DateTime!
+  createdAt: DateTime!
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""An enumeration."""
+enum CommunicationsVersionedPolicyPolicyTypeChoices {
+  """Terms Of Service"""
+  TERMS_OF_SERVICE
+
+  """Privacy Policy"""
+  PRIVACY_POLICY
+
+  """Affiliate Terms"""
+  AFFILIATE_TERMS
+
+  """Cookie Policy"""
+  COOKIE_POLICY
+
+  """Acceptable Use"""
+  ACCEPTABLE_USE
+}
+
+"""An enumeration."""
+enum CommunicationsVersionedPolicyContentTypeChoices {
+  """Markdown"""
+  MARKDOWN
+
+  """HTML"""
+  HTML
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""GraphQL type for EmailPreference model."""
+type EmailPreferenceType {
+  id: UUID!
+  user: UserDataExport!
+
+  """Receive alerts when credit balance is low"""
+  lowBalanceAlerts: Boolean!
+
+  """Receive newsletter and product updates"""
+  newsletter: Boolean!
+
+  """Receive notifications about major policy changes (always sent for ToS)"""
+  policyUpdates: Boolean!
+
+  """Receive marketing and promotional emails"""
+  marketingEmails: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""User data export schema"""
+type UserDataExport {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+  id: UUID!
+  email: String!
+  uuid: UUID
+  jobs: [JobType!]
+  teams: [TeamType!]
+  podcasts: [PodcastType!]
+  episodes: [EpisodeType!]
+  orders: [OrderType!]
+  transactions: [TransactionType!]
+  settings: [UserSettingType!]
+}
+
+"""
+JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
+"""
+type JobType implements Node {
+  taskId: UUID
+  kind: String
+  args: GenericScalar
+  status: String
+  error: String
+  result: GenericScalar
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  cost: Int
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+type TeamType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  uuid: UUID
+  members: [TeamMembershipType]
+  podcasts: [PodcastType!]
+}
+
+type TeamMembershipType {
+  user: PublicUserType
+  role: String
+}
+
+"""User type that only exposes public fields (username, uuid) - no email"""
+type PublicUserType implements Node {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+
+  """The user's affiliate profile if they have one"""
+  affiliateProfile: AffiliateProfileType
+}
+
 type AffiliateProfileType {
   code: String!
   brandImage: String
@@ -303,35 +470,364 @@ type AffiliateProfileType {
 }
 
 """
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
 """
-scalar DateTime
+type PodcastType implements Node {
+  """The ID of the object"""
+  id: ID!
+  name: String!
+  intro: String!
 
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
+  """Brand prompt that influences all episode types with tone and style"""
+  prompt: String!
 
-"""User type that only exposes public fields (username, uuid) - no email"""
-type PublicUserType implements Node {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
+  """Prompt for generating news episodes"""
+  newsPrompt: String!
+
+  """
+  Target word count for news episodes. Used to calculate max_tokens limit. Default: 450 words (~3 minutes)
+  """
+  newsTargetWords: Int!
+
+  """Prompt for generating research episodes"""
+  researchPrompt: String!
+
+  """
+  Target word count for research episodes. Used to calculate max_tokens limit. Default: 1400 words (~10 minutes)
+  """
+  researchTargetWords: Int!
+  outro: String!
+  slug: String
+  enabled: Boolean!
+  description: String
+  ownerName: String
+  ownerEmail: String
+  ownerLink: String
+  tgChannelId: String
+  tgResponse: String
+  categories: GenericScalar
+
+  """Number of times this podcast has been viewed publicly"""
+  viewCount: Int!
+
+  """
+  Date of the most recently published episode (podcast_date from is_live episodes only)
+  """
+  latestEpisodeDate: DateTime
+
+  """
+  Date of the most recently created episode (including non-live internal episodes)
+  """
+  latestInternalEpisodeDate: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+  uuid: UUID
+  rssFeeds: [RssFeedType]
+  team: TeamType
+  imageUrl: String
+  thumbnailUrl: String
+  url: String
+  voice: VoiceType
+}
+
+type RssFeedType implements Node {
+  """The ID of the object"""
+  id: ID!
+  url: String!
+
+  """Feed title/name"""
+  name: String
+
+  """Whether the RSS feed URL is reachable (not 404/timeout)"""
+  isReachable: Boolean!
+
+  """Whether the RSS feed content is valid and parsable"""
+  isParsable: Boolean!
+
+  """Last time we attempted to fetch this feed"""
+  lastFetchAttempt: DateTime
+
+  """Cached average articles per day (updated when feed is fetched)"""
+  articlesPerDay: Float!
+  uuid: UUID
+}
+
+type VoiceType implements Node {
+  """The ID of the object"""
+  id: ID!
+  model: VoiceModel
+
+  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
+  externalId: String!
+  displayName: String
+
+  """Whether this voice is available for use."""
+  enabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: GenericScalar
+  uuid: UUID
+  sampleUrl: String
+  creditsPerMillionChar: Int
+}
+
+"""An enumeration."""
+enum VoiceModel {
+  OPENAI_TTS_1
+  OPENAI_TTS_1_HD
+  OPENAI_GPT_4O_MINI_TTS
+  ELEVENLABS_MULTILINGUAL_V2
+  ELEVENLABS_FLASH_V2_5
+}
+
+"""GraphQL type for Episode model."""
+type EpisodeType implements Node {
+  title: String!
+  description: String!
+  date: DateTime!
+  audioFile: String
+  audioSeconds: Int
+
+  """
+  True if audio was manually uploaded, False if generated from transcript
+  """
+  audioIsCustomUpload: Boolean!
+  content: String!
+  currentVersionNumber: Int!
+  news: [NewsType]
+  podcast: PodcastType!
+  isLive: Boolean!
+  podcastDate: DateTime
+  telegramDate: DateTime
+  podcastEpisodeGuid: UUID!
 
   """The ID of the object"""
   id: ID!
   uuid: UUID
-
-  """The user's affiliate profile if they have one"""
-  affiliateProfile: AffiliateProfileType
+  audioUrl: String
+  versions: [EpisodeVersionType]
+  isCurrentValidated: Boolean
+  researchUrls: [String]
+  topic: TopicType
 }
 
-"""An object with an ID"""
-interface Node {
+type NewsType implements Node {
   """The ID of the object"""
   id: ID!
+  title: String!
+  description: String!
+  url: String!
+  publishedAt: DateTime!
+  source: String!
+  summary: String!
+  content: String!
+  validatedSummary: String
+  validationConfidence: NewsNewsValidationConfidenceChoices
+
+  """Whether this news article URL is blocked from our robots/scrapers"""
+  blocked: Boolean!
+  categories: GenericScalar
+  tags: GenericScalar
+  uuid: UUID
+  rssFeeds: [RssFeedType]
+}
+
+"""An enumeration."""
+enum NewsNewsValidationConfidenceChoices {
+  """High"""
+  HIGH
+
+  """Medium"""
+  MEDIUM
+
+  """Low"""
+  LOW
+
+  """Unverified"""
+  UNVERIFIED
+}
+
+"""
+GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
+"""
+type EpisodeVersionType {
+  versionNumber: Int!
+  title: String!
+  description: String!
+  content: String!
+  validatedCompliance: Boolean!
+  validatedFacts: Boolean!
+  validatedLength: Boolean!
+  validationNotes: String
+  changeType: ApiEpisodeVersionChangeTypeChoices!
+  audioSeconds: Int
+  createdAt: DateTime!
+  uuid: UUID
+  createdBy: PublicUserType
+  audioUrl: String
+}
+
+"""An enumeration."""
+enum ApiEpisodeVersionChangeTypeChoices {
+  """Created"""
+  CREATED
+
+  """Manually Edited"""
+  EDITED
+
+  """Regenerated"""
+  REGENERATED
+
+  """Restored"""
+  RESTORED
+
+  """Compliance Adjustment"""
+  COMPLIANCE_ADJUSTMENT
+
+  """Facts Adjustment"""
+  FACTS_ADJUSTMENT
+
+  """Length Adjustment"""
+  LENGTH_ADJUSTMENT
+}
+
+type TopicType implements Node {
+  podcast: PodcastType!
+  episode: EpisodeType
+  title: String!
+  description: String
+  researchContent: String
+  validatedContent: String
+  transcript: String
+  isUserCreated: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  sources: [SourceType]
+}
+
+type SourceType implements Node {
+  topic: TopicType!
+  title: String
+  url: String!
+  content: String
+  createdAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""OrderType is a GraphQL type that represents an order."""
+type OrderType implements Node {
+  user: UserDataExport
+  sessionId: String
+  amount: Int!
+  receiptUrl: String
+  sessionUrl: String
+  status: ApiOrderStatusChoices!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum ApiOrderStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Paid"""
+  PAID
+
+  """Canceled"""
+  CANCELED
+}
+
+"""TransactionType is a GraphQL type that represents a transaction."""
+type TransactionType implements Node {
+  user: UserDataExport
+  description: String!
+  creditAmount: Int!
+  createdAt: DateTime!
+  job: JobType
+  order: OrderType
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  balance: Int
+}
+
+type UserSettingType implements Node {
+  key: String
+  value: String
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""GraphQL type for NewsletterSubscriber model."""
+type NewsletterSubscriberType {
+  id: UUID!
+
+  """Encrypted email address"""
+  email: String!
+
+  """Linked user account if they sign up"""
+  user: UserDataExport
+  isSubscribed: Boolean!
+  subscribedAt: DateTime!
+  unsubscribedAt: DateTime
+
+  """Where they subscribed from (website, landing_page, etc.)"""
+  source: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""GraphQL type for SMSPreference model."""
+type SMSPreferenceType {
+  id: UUID!
+  user: UserDataExport!
+
+  """Encrypted phone number in E.164 format (e.g., +14155552671)"""
+  phoneNumber: String
+
+  """Whether phone number has been verified"""
+  isVerified: Boolean!
+  verifiedAt: DateTime
+
+  """Receive SMS for low balance alerts"""
+  lowBalanceSms: Boolean!
+
+  """Receive SMS for critical system alerts"""
+  criticalAlertsSms: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""GraphQL type for PolicyAcceptance model."""
+type PolicyAcceptanceType {
+  id: UUID!
+
+  """User who accepted (null for pre-signup acceptances)"""
+  user: UserDataExport
+  policy: VersionedPolicyType!
+
+  """
+  Unique signature stored in localStorage for tracking pre-signup acceptances
+  """
+  signature: String!
+  acceptedAt: DateTime!
+  ipAddress: String
 }
 
 type AffiliateRelationshipType {
@@ -602,279 +1098,6 @@ type TopicTypeEdge {
   cursor: String!
 }
 
-type TopicType implements Node {
-  podcast: PodcastType!
-  episode: EpisodeType
-  title: String!
-  description: String
-  researchContent: String
-  validatedContent: String
-  transcript: String
-  isUserCreated: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  sources: [SourceType]
-}
-
-"""
-Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
-"""
-type PodcastType implements Node {
-  """The ID of the object"""
-  id: ID!
-  name: String!
-  intro: String!
-
-  """Brand prompt that influences all episode types with tone and style"""
-  prompt: String!
-
-  """Prompt for generating news episodes"""
-  newsPrompt: String!
-
-  """
-  Target word count for news episodes. Used to calculate max_tokens limit. Default: 450 words (~3 minutes)
-  """
-  newsTargetWords: Int!
-
-  """Prompt for generating research episodes"""
-  researchPrompt: String!
-
-  """
-  Target word count for research episodes. Used to calculate max_tokens limit. Default: 1400 words (~10 minutes)
-  """
-  researchTargetWords: Int!
-  outro: String!
-  slug: String
-  enabled: Boolean!
-  description: String
-  ownerName: String
-  ownerEmail: String
-  ownerLink: String
-  tgChannelId: String
-  tgResponse: String
-  categories: GenericScalar
-
-  """Number of times this podcast has been viewed publicly"""
-  viewCount: Int!
-
-  """
-  Date of the most recently published episode (podcast_date from is_live episodes only)
-  """
-  latestEpisodeDate: DateTime
-
-  """
-  Date of the most recently created episode (including non-live internal episodes)
-  """
-  latestInternalEpisodeDate: DateTime
-  createdAt: DateTime
-  updatedAt: DateTime
-  uuid: UUID
-  rssFeeds: [RssFeedType]
-  team: TeamType
-  imageUrl: String
-  thumbnailUrl: String
-  url: String
-  voice: VoiceType
-}
-
-"""
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
-"""
-scalar GenericScalar
-
-type RssFeedType implements Node {
-  """The ID of the object"""
-  id: ID!
-  url: String!
-
-  """Feed title/name"""
-  name: String
-
-  """Whether the RSS feed URL is reachable (not 404/timeout)"""
-  isReachable: Boolean!
-
-  """Whether the RSS feed content is valid and parsable"""
-  isParsable: Boolean!
-
-  """Last time we attempted to fetch this feed"""
-  lastFetchAttempt: DateTime
-
-  """Cached average articles per day (updated when feed is fetched)"""
-  articlesPerDay: Float!
-  uuid: UUID
-}
-
-type TeamType implements Node {
-  """The ID of the object"""
-  id: ID!
-  name: String!
-  uuid: UUID
-  members: [TeamMembershipType]
-  podcasts: [PodcastType!]
-}
-
-type TeamMembershipType {
-  user: PublicUserType
-  role: String
-}
-
-type VoiceType implements Node {
-  """The ID of the object"""
-  id: ID!
-  model: VoiceModel
-
-  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
-  externalId: String!
-  displayName: String
-
-  """Whether this voice is available for use."""
-  enabled: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  metadata: GenericScalar
-  uuid: UUID
-  sampleUrl: String
-  creditsPerMillionChar: Int
-}
-
-"""An enumeration."""
-enum VoiceModel {
-  OPENAI_TTS_1
-  OPENAI_TTS_1_HD
-  OPENAI_GPT_4O_MINI_TTS
-  ELEVENLABS_MULTILINGUAL_V2
-  ELEVENLABS_FLASH_V2_5
-}
-
-"""GraphQL type for Episode model."""
-type EpisodeType implements Node {
-  title: String!
-  description: String!
-  date: DateTime!
-  audioFile: String
-  audioSeconds: Int
-
-  """
-  True if audio was manually uploaded, False if generated from transcript
-  """
-  audioIsCustomUpload: Boolean!
-  content: String!
-  currentVersionNumber: Int!
-  news: [NewsType]
-  podcast: PodcastType!
-  isLive: Boolean!
-  podcastDate: DateTime
-  telegramDate: DateTime
-  podcastEpisodeGuid: UUID!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  audioUrl: String
-  versions: [EpisodeVersionType]
-  isCurrentValidated: Boolean
-  researchUrls: [String]
-  topic: TopicType
-}
-
-type NewsType implements Node {
-  """The ID of the object"""
-  id: ID!
-  title: String!
-  description: String!
-  url: String!
-  publishedAt: DateTime!
-  source: String!
-  summary: String!
-  content: String!
-  validatedSummary: String
-  validationConfidence: NewsNewsValidationConfidenceChoices
-
-  """Whether this news article URL is blocked from our robots/scrapers"""
-  blocked: Boolean!
-  categories: GenericScalar
-  tags: GenericScalar
-  uuid: UUID
-  rssFeeds: [RssFeedType]
-}
-
-"""An enumeration."""
-enum NewsNewsValidationConfidenceChoices {
-  """High"""
-  HIGH
-
-  """Medium"""
-  MEDIUM
-
-  """Low"""
-  LOW
-
-  """Unverified"""
-  UNVERIFIED
-}
-
-"""
-GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
-"""
-type EpisodeVersionType {
-  versionNumber: Int!
-  title: String!
-  description: String!
-  content: String!
-  validatedCompliance: Boolean!
-  validatedFacts: Boolean!
-  validatedLength: Boolean!
-  validationNotes: String
-  changeType: ApiEpisodeVersionChangeTypeChoices!
-  audioSeconds: Int
-  createdAt: DateTime!
-  uuid: UUID
-  createdBy: PublicUserType
-  audioUrl: String
-}
-
-"""An enumeration."""
-enum ApiEpisodeVersionChangeTypeChoices {
-  """Created"""
-  CREATED
-
-  """Manually Edited"""
-  EDITED
-
-  """Regenerated"""
-  REGENERATED
-
-  """Restored"""
-  RESTORED
-
-  """Compliance Adjustment"""
-  COMPLIANCE_ADJUSTMENT
-
-  """Facts Adjustment"""
-  FACTS_ADJUSTMENT
-
-  """Length Adjustment"""
-  LENGTH_ADJUSTMENT
-}
-
-type SourceType implements Node {
-  topic: TopicType!
-  title: String
-  url: String!
-  content: String
-  createdAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
 type StockListingType {
   id: ID!
   symbol: String!
@@ -1073,94 +1296,6 @@ type DiscountedCashFlowAnalysisType implements Node {
   """"""
   predictedBookValue: BigInt
   predictedEps: Decimal
-}
-
-"""User data export schema"""
-type UserDataExport {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
-  id: UUID!
-  email: String!
-  uuid: UUID
-  jobs: [JobType!]
-  teams: [TeamType!]
-  podcasts: [PodcastType!]
-  episodes: [EpisodeType!]
-  orders: [OrderType!]
-  transactions: [TransactionType!]
-  settings: [UserSettingType!]
-}
-
-"""
-JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
-"""
-type JobType implements Node {
-  taskId: UUID
-  kind: String
-  args: GenericScalar
-  status: String
-  error: String
-  result: GenericScalar
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  cost: Int
-}
-
-"""OrderType is a GraphQL type that represents an order."""
-type OrderType implements Node {
-  user: UserDataExport
-  sessionId: String
-  amount: Int!
-  receiptUrl: String
-  sessionUrl: String
-  status: ApiOrderStatusChoices!
-  description: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
-"""An enumeration."""
-enum ApiOrderStatusChoices {
-  """Pending"""
-  PENDING
-
-  """Paid"""
-  PAID
-
-  """Canceled"""
-  CANCELED
-}
-
-"""TransactionType is a GraphQL type that represents a transaction."""
-type TransactionType implements Node {
-  user: UserDataExport
-  description: String!
-  creditAmount: Int!
-  createdAt: DateTime!
-  job: JobType
-  order: OrderType
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  balance: Int
-}
-
-type UserSettingType implements Node {
-  key: String
-  value: String
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
 }
 
 type StockPriceType {
@@ -1511,6 +1646,7 @@ type UserList {
   results: [PublicUserType]
 }
 
+"""Legacy type - now backed by PolicyAcceptance for cookie_policy."""
 type UserCookieConsentType {
   version: String
   accepted: Boolean
@@ -1663,6 +1799,29 @@ type TeamTypeEdge {
 }
 
 type ApiMutation {
+  """Update user's email preferences."""
+  updateEmailPreferences(lowBalanceAlerts: Boolean, marketingEmails: Boolean, newsletter: Boolean, policyUpdates: Boolean): UpdateEmailPreferences
+
+  """Subscribe an email to the newsletter (works for non-users too)."""
+  subscribeToNewsletter(email: String!, source: String): SubscribeToNewsletter
+
+  """Unsubscribe from newsletter."""
+  unsubscribeFromNewsletter(email: String!): UnsubscribeFromNewsletter
+
+  """Update user's SMS preferences."""
+  updateSmsPreferences(criticalAlertsSms: Boolean, lowBalanceSms: Boolean, phoneNumber: String): UpdateSMSPreferences
+
+  """Send SMS verification code to user's phone."""
+  sendSmsVerification: SendSMSVerification
+
+  """Verify phone number with code."""
+  verifyPhoneNumber(code: String!): VerifyPhoneNumber
+
+  """Accept a policy and generate a signature for tracking."""
+  acceptPolicy(policyId: UUID!, signature: String): AcceptPolicy
+
+  """Link a pre-signup policy acceptance (by signature) to a user account."""
+  linkPolicyAcceptance(signature: String!): LinkPolicyAcceptance
   acceptAffiliateTerms(version: String!): AcceptAffiliateTerms
   createStripeConnectAccount: CreateStripeConnectAccount
   refreshStripeAccountStatus: RefreshStripeAccountStatus
@@ -1951,8 +2110,11 @@ type ApiMutation {
   """Mutation to update user settings."""
   updateUserSetting(key: String!, value: String!): UpdateUserSetting
 
-  """Mutation to update user cookie consent."""
-  updateCookieConsent(accepted: Boolean!, version: String!): UpdateCookieConsent
+  """
+  Mutation to update user cookie consent.
+  Now uses PolicyAcceptance with cookie_policy type.
+  """
+  updateCookieConsent(accepted: Boolean!, signature: String, version: String!): UpdateCookieConsent
 
   """Mutation to update user information."""
   updateUser(email: String!, username: String!): UpdateUser
@@ -2112,6 +2274,61 @@ type ApiMutation {
 
   """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
+}
+
+"""Update user's email preferences."""
+type UpdateEmailPreferences {
+  success: Boolean
+  message: String
+  preferences: EmailPreferenceType
+}
+
+"""Subscribe an email to the newsletter (works for non-users too)."""
+type SubscribeToNewsletter {
+  success: Boolean
+  message: String
+  subscription: NewsletterSubscriberType
+}
+
+"""Unsubscribe from newsletter."""
+type UnsubscribeFromNewsletter {
+  success: Boolean
+  message: String
+}
+
+"""Update user's SMS preferences."""
+type UpdateSMSPreferences {
+  success: Boolean
+  message: String
+  preferences: SMSPreferenceType
+}
+
+"""Send SMS verification code to user's phone."""
+type SendSMSVerification {
+  success: Boolean
+  message: String
+}
+
+"""Verify phone number with code."""
+type VerifyPhoneNumber {
+  success: Boolean
+  message: String
+  preferences: SMSPreferenceType
+}
+
+"""Accept a policy and generate a signature for tracking."""
+type AcceptPolicy {
+  success: Boolean
+  message: String
+  acceptance: PolicyAcceptanceType
+  signature: String
+}
+
+"""Link a pre-signup policy acceptance (by signature) to a user account."""
+type LinkPolicyAcceptance {
+  success: Boolean
+  message: String
+  acceptance: PolicyAcceptanceType
 }
 
 type AcceptAffiliateTerms {
@@ -2506,7 +2723,10 @@ type UpdateUserSetting {
   userSetting: UserSettingType
 }
 
-"""Mutation to update user cookie consent."""
+"""
+Mutation to update user cookie consent.
+Now uses PolicyAcceptance with cookie_policy type.
+"""
 type UpdateCookieConsent {
   success: Boolean
   message: String
