@@ -30,8 +30,14 @@ export class DashboardService {
           runningJobs
           completedJobs
           failedJobs
+          totalVoices
+          enabledVoices
           totalAudioMinutesGenerated
           totalAudioMinutesPublished
+          recentEpisodes
+          recentNewsProcessed
+          recentDcfAnalyses
+          recentJobs
         }
       }
     `;

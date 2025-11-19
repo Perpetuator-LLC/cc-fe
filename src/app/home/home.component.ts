@@ -58,7 +58,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
           this.loadingStats = false;
         },
         error: (error) => {
-          console.error(':: Home data loading error :: ', error);
+          console.error('[Home] Logged-in data loading error:', error);
           this.authPodcasts = [];
           this.loadingStats = false;
         },
@@ -84,7 +84,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
           this.loadingRecentPodcasts = false;
         },
         error: (error) => {
-          console.error(':: Home data loading error :: ', error);
+          console.error('[Home] Logged-out data loading error:', error);
           this.publicPodcasts = [];
           this.recentPodcasts = [];
           this.loadingStats = false;
