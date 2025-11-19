@@ -11,7 +11,6 @@ import { environment } from '../../environments/environment';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { ThemeService } from '../theme.service';
-import { CookieConsentService } from '../cookie-consent.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -60,7 +59,6 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private messageService: MessageService,
     private themeService: ThemeService,
     private userService: UserService,
-    private cookieConsentService: CookieConsentService,
     private dialog: MatDialog,
     private affiliateService: AffiliateService,
     private affiliateStorageService: AffiliateStorageService,
@@ -128,7 +126,6 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.affiliateStorageService.clearReturnUrl();
     this.themeService.loadTheme();
     this.userService.loadUserDetails();
-    this.cookieConsentService.loadCookieConsent();
 
     // Check for required policy acceptances before navigating
     this.policyGuardService.checkPoliciesNow().subscribe({
