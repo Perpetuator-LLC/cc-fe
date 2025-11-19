@@ -136,7 +136,8 @@ export class LayoutComponent implements OnDestroy, OnInit {
       const url = this.router.url;
       this.isHomePage = url === '/' || url === '/home';
       this.showSecondSidebar =
-        url.startsWith('/p') ||
+        url.startsWith('/p/') ||
+        url === '/p' ||
         url.startsWith('/news') ||
         url.startsWith('/e') ||
         url.startsWith('/topics') ||
