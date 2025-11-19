@@ -20,7 +20,6 @@ import {
   AffiliateStats,
   AffiliateCredit,
   AffiliateConversion,
-  AffiliateTermsConsent,
   AffiliateCodeChangeRequest,
   AffiliateEligibility,
   AffiliateConversionUtils,
@@ -68,7 +67,6 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   stats: AffiliateStats | null = null;
   credits: AffiliateCredit[] = [];
   conversions: AffiliateConversion[] = [];
-  termsConsents: AffiliateTermsConsent[] = [];
   pendingCodeChangeRequest: AffiliateCodeChangeRequest | null = null;
   protected readonly Math = Math;
 
@@ -124,11 +122,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
   checkTermsAcceptance(): void {
     this.subscriptions.add(
-      this.affiliateService.getAffiliateTermsConsents().subscribe({
-        next: (consents) => {
-          this.termsConsents = consents;
-          const hasAcceptedTerms = consents.some((c) => c.accepted && c.version === '1.0');
-
+      this.affiliateService.checkAffiliateTermsAcceptance().subscribe({
+        next: (hasAcceptedTerms) => {
           if (!hasAcceptedTerms) {
             this.showTermsDialog();
           } else {
