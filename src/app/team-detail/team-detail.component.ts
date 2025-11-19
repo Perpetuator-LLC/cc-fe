@@ -133,7 +133,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       uuid: [{ value: '', disabled: true }],
-      name: [''],
+      name: [{ value: '', disabled: true }],
       members: this.fb.array([]),
     });
   }
@@ -273,6 +273,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (!this.editingName) {
       // Enable editing
       this.editingName = true;
+      this.teamForm.get('name')?.enable();
       setTimeout(() => {
         const input = document.querySelector('input[formcontrolname="name"]') as HTMLInputElement;
         if (input) input.focus();
@@ -280,7 +281,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     } else {
       // Save and disable editing
       this.saveTeam();
-      // saveTeam will set editingName = false after successful save
+      // saveTeam will set editingName = false and disable the control after successful save
     }
   }
 
@@ -298,6 +299,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             this.messageService.error(data.message);
             setTimeout(() => {
               this.editingName = false;
+              this.teamForm.get('name')?.disable();
             }, 2000); // 2 seconds
             return;
           }
@@ -308,11 +310,13 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
             this.router.navigate(['/teams']);
           }
           this.editingName = false;
+          this.teamForm.get('name')?.disable();
         },
         error: (err) => {
           this.messageService.error(`Failed to ${uuid ? 'update' : 'create'} team: ${err.message}`);
           setTimeout(() => {
             this.editingName = false;
+            this.teamForm.get('name')?.disable();
           }, 2000); // 2 seconds
         },
       }),

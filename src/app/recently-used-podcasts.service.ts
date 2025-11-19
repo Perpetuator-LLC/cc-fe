@@ -1,8 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { UserService } from './user.service';
 import { PodcastsResult } from './podcasts.service';
 
 @Injectable({
@@ -13,36 +11,26 @@ export class RecentlyUsedPodcastsService {
   private podcastHistory: string[] = [];
   private historyLoaded = false;
 
-  constructor(private userService: UserService) {}
-
   /**
-   * Load podcast history from user settings
+   * Load podcast history from localStorage
    */
   loadHistory(): Observable<string[]> {
     if (this.historyLoaded) {
       return of(this.podcastHistory);
     }
 
-    return this.userService.userSettings([this.HISTORY_KEY]).pipe(
-      map((settings) => {
-        const historySetting = settings.find((setting) => setting.key === this.HISTORY_KEY);
-        if (historySetting) {
-          try {
-            this.podcastHistory = JSON.parse(historySetting.value);
-          } catch (e) {
-            console.error('Error parsing podcast history', e);
-            this.podcastHistory = [];
-          }
-        }
-        this.historyLoaded = true;
-        return this.podcastHistory;
-      }),
-      catchError((err) => {
-        console.error('Error loading podcast history', err);
-        this.historyLoaded = true;
-        return of([]);
-      }),
-    );
+    try {
+      const stored = localStorage.getItem(this.HISTORY_KEY);
+      if (stored) {
+        this.podcastHistory = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Error parsing podcast history from localStorage', e);
+      this.podcastHistory = [];
+    }
+
+    this.historyLoaded = true;
+    return of(this.podcastHistory);
   }
 
   /**
@@ -59,10 +47,12 @@ export class RecentlyUsedPodcastsService {
       this.podcastHistory = this.podcastHistory.slice(0, 10);
     }
 
-    // Save the updated history
-    this.userService.updateUserSetting(this.HISTORY_KEY, JSON.stringify(this.podcastHistory)).subscribe({
-      error: (err) => console.error('Error saving podcast history', err),
-    });
+    // Save the updated history to localStorage
+    try {
+      localStorage.setItem(this.HISTORY_KEY, JSON.stringify(this.podcastHistory));
+    } catch (e) {
+      console.error('Error saving podcast history to localStorage', e);
+    }
   }
 
   /**

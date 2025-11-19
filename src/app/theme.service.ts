@@ -80,9 +80,18 @@ export class ThemeService implements OnDestroy {
       this.userSettingService.userSettings(['theme']).subscribe({
         next: (results) => {
           const themeSetting = results.find((setting) => setting.key === 'theme');
-          const theme: string | undefined = themeSetting?.value.toLowerCase();
+          if (!themeSetting?.value) {
+            // No theme preference saved, use local storage
+            const localTheme = this.loadThemeFromLocalStorage();
+            this.setTheme(localTheme);
+            return;
+          }
+          const theme: string = themeSetting.value.toLowerCase();
           if (theme !== 'light' && theme !== 'dark') {
             console.error('Invalid theme setting:', theme);
+            // Fall back to local storage
+            const localTheme = this.loadThemeFromLocalStorage();
+            this.setTheme(localTheme);
             return;
           }
           this.setTheme(theme);
