@@ -11,7 +11,6 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
@@ -33,7 +32,6 @@ import { Subscription } from 'rxjs';
     MatInput,
     MatButton,
     MatCheckbox,
-    MessageComponent,
     RouterLink,
     MatToolbarModule,
   ],
@@ -108,8 +106,9 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.registerForm.valid) {
       const email = this.registerForm.get('email')!.value!;
       const password = this.registerForm.get('password')!.value!;
+      const acceptTerms = this.registerForm.get('acceptTerms')!.value!;
 
-      this.authService.register(email, password).subscribe({
+      this.authService.register(email, password, acceptTerms).subscribe({
         next: (token) => {
           if (token) {
             console.debug('Registration successful');

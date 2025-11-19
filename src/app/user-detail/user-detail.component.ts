@@ -25,6 +25,7 @@ import { DeleteAccountDialogComponent } from '../delete-account-dialog.component
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../loading.service';
 import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-user-detail',
@@ -46,6 +47,7 @@ import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
     MatCardTitle,
     FormsModule,
     MatIcon,
+    MatTooltip,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -83,6 +85,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
       email: [{ value: '' }],
+      phoneNumber: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
     });
 
     this.changePasswordForm = this.fb.group(
@@ -98,7 +101,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.notificationPreferencesForm = this.fb.group({
       lowBalanceAlerts: [false],
       lowBalanceSms: [false],
-      phoneNumber: [''],
       newsletter: [false],
       marketingEmails: [false],
     });
@@ -170,13 +172,23 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.userService.getUserPreferences().subscribe({
         next: (preferences: UserPreferences) => {
+          const phoneNumber = preferences.sms.phoneNumber || '';
+
+          // Update notification preferences form
           this.notificationPreferencesForm.patchValue({
             lowBalanceAlerts: preferences.email.lowBalanceAlerts,
             lowBalanceSms: preferences.sms.lowBalanceSms,
-            phoneNumber: preferences.sms.phoneNumber || '',
             newsletter: preferences.email.newsletter,
             marketingEmails: preferences.email.marketingEmails,
           });
+
+          // Update phone number in user details form
+          this.userDetailForm.patchValue({
+            phoneNumber: phoneNumber,
+          });
+
+          // Update SMS checkbox state based on phone validity
+          setTimeout(() => this.updateSmsCheckboxState(), 0);
         },
         error: (err) => {
           console.error('Failed to load notification preferences:', err);
@@ -187,6 +199,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   onSubmitNotificationPreferences(): void {
     const formValue = this.notificationPreferencesForm.value;
+    const phoneNumber = this.userDetailForm.get('phoneNumber')?.value?.trim() || '';
 
     // Update email preferences
     this.subscriptions.add(
@@ -194,12 +207,8 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         .updateEmailPreferences(formValue.lowBalanceAlerts, formValue.newsletter, formValue.marketingEmails)
         .subscribe({
           next: () => {
-            // Then update SMS preferences if needed
-            if (formValue.lowBalanceSms || formValue.phoneNumber) {
-              this.updateSmsPrefs(formValue.phoneNumber, formValue.lowBalanceSms);
-            } else {
-              this.messageService.success('Notification preferences updated successfully');
-            }
+            // Then update SMS preferences
+            this.updateSmsPrefs(phoneNumber, formValue.lowBalanceSms);
           },
           error: (err) => {
             this.messageService.error(`Failed to update email preferences: ${err.message}`);
@@ -261,12 +270,27 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   onSubmitUserDetails(): void {
     if (this.userDetailForm.valid) {
-      const { username, email } = this.userDetailForm.value;
+      const { username, email, phoneNumber } = this.userDetailForm.value;
       this.subscriptions.add(
         this.userService.updateUser(username, email).subscribe({
           next: (response) => {
             if (response.success) {
-              this.messageService.success('User details updated successfully.');
+              // After updating user details, also update phone number in SMS preferences
+              const currentSmsEnabled = this.notificationPreferencesForm.get('lowBalanceSms')?.value || false;
+              const phoneValue = phoneNumber?.trim() || '';
+
+              this.subscriptions.add(
+                this.userService.updateSmsPreferences(phoneValue, currentSmsEnabled).subscribe({
+                  next: () => {
+                    this.messageService.success('User details and phone number updated successfully.');
+                  },
+                  error: (err) => {
+                    const msg = `User details updated, but failed to update phone number: ${err.message}`;
+                    this.messageService.warning(msg);
+                  },
+                }),
+              );
+
               this.userService.loadUserDetails().subscribe({
                 next: (userDetails: UserDetails) => {
                   this.userDetailForm.patchValue({
@@ -491,5 +515,45 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   deleteAccount() {
     this.deleteDialog();
+  }
+
+  /**
+   * Check if the phone number is valid (matches pattern and not empty)
+   */
+  isPhoneNumberValid(): boolean {
+    const phoneControl = this.userDetailForm.get('phoneNumber');
+    const phoneValue = phoneControl?.value?.trim();
+
+    // Phone is valid if it's not empty and has no validation errors
+    return !!phoneValue && phoneControl?.valid === true;
+  }
+
+  /**
+   * Update the SMS checkbox state based on phone number validity
+   */
+  private updateSmsCheckboxState(): void {
+    const lowBalanceSmsControl = this.notificationPreferencesForm.get('lowBalanceSms');
+
+    if (!lowBalanceSmsControl) {
+      return;
+    }
+
+    if (!this.isPhoneNumberValid()) {
+      // Disable and uncheck if phone is invalid
+      lowBalanceSmsControl.disable();
+      if (lowBalanceSmsControl.value) {
+        lowBalanceSmsControl.setValue(false);
+      }
+    } else {
+      // Enable if phone is valid
+      lowBalanceSmsControl.enable();
+    }
+  }
+
+  /**
+   * Get tooltip text for SMS checkbox
+   */
+  getLowBalanceSmsTooltip(): string {
+    return this.isPhoneNumberValid() ? '' : 'Please add a valid phone number in User Details section';
   }
 }

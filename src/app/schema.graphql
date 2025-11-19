@@ -19,7 +19,6 @@ type ApiQuery {
   myAffiliateCredits: [AffiliateCreditType]
   myAffiliateStats: AffiliateStatsType
   myAffiliateConversions: [AffiliateCreditConversionType]
-  myAffiliateTermsConsents: [AffiliateTermsConsentType]
   myCodeHistory: [AffiliateCodeHistoryType]
   myEligibilityHistory: [AffiliateEligibilityHistoryType]
   myNetworkStatusHistory: [AffiliateNetworkStatusHistoryType]
@@ -872,12 +871,6 @@ type AffiliateCreditConversionType {
   uuid: UUID
   affiliate: PublicUserType
   reviewedBy: PublicUserType
-}
-
-type AffiliateTermsConsentType {
-  version: String
-  accepted: Boolean
-  date: DateTime
 }
 
 type AffiliateCodeHistoryType {
@@ -1822,7 +1815,6 @@ type ApiMutation {
 
   """Link a pre-signup policy acceptance (by signature) to a user account."""
   linkPolicyAcceptance(signature: String!): LinkPolicyAcceptance
-  acceptAffiliateTerms(version: String!): AcceptAffiliateTerms
   createStripeConnectAccount: CreateStripeConnectAccount
   refreshStripeAccountStatus: RefreshStripeAccountStatus
   getStripeDashboardLink: GetStripeDashboardLink
@@ -2329,13 +2321,6 @@ type LinkPolicyAcceptance {
   success: Boolean
   message: String
   acceptance: PolicyAcceptanceType
-}
-
-type AcceptAffiliateTerms {
-  success: Boolean
-  message: String
-  consent: AffiliateTermsConsentType
-  affiliateProfile: AffiliateProfileType
 }
 
 type CreateStripeConnectAccount {
