@@ -213,7 +213,6 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
             date: new Date().toISOString(),
           };
           localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-          console.debug('[PolicyDialog] ✅ Cookie policy accepted, localStorage updated');
         }
 
         this.messageService.success('Policies accepted successfully');

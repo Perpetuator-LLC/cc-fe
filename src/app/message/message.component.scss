@@ -3,7 +3,7 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 3000; /* Above cookie banner (z-index: 2000) */
   width: 300px;
   color: var(--theme-color);
   border-radius: 10px;

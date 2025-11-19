@@ -38,11 +38,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
 
     // If server version is available, compare against it
     if (serverVersion) {
-      const mismatch = consent.version !== serverVersion;
-      if (mismatch) {
-        console.debug('[CookieBanner] Version mismatch - local:', consent.version, 'server:', serverVersion);
-      }
-      return mismatch;
+      return consent.version !== serverVersion;
     }
 
     // If server version not yet loaded, don't show banner yet (prevent flickering)
@@ -67,7 +63,6 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
           // If localStorage consent exists, assume accepted until backend confirms
           const localConsent = this.cookieConsentService.cookieConsent();
           if (localConsent && localConsent.accepted) {
-            console.debug('[CookieBanner] Login: optimistically accepting based on localStorage');
             this.cookiePolicyAccepted.set(true);
           }
 
@@ -137,7 +132,6 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
                     };
                     localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
                     this.cookieConsentService.cookieConsent.set(updatedConsent);
-                    console.debug('[CookieBanner] ✅ Synced accepted cookie policy to localStorage:', updatedConsent);
                   }
                 },
               });
@@ -183,7 +177,6 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
                     this.cookieConsentService.cookieConsent.set(updatedConsent);
                     localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
                     this.cookiePolicyAccepted.set(true);
-                    console.debug('[CookieBanner] ✅ Cookie policy accepted and saved');
                   },
                   error: (err) => {
                     console.error('[CookieBanner] Failed to accept cookie policy:', err);
@@ -212,7 +205,6 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
               localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
               // Update server version signal to prevent banner from reappearing
               this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
-              console.debug('[CookieBanner] ✅ Saved to localStorage (logged out)');
             }
           },
           error: (err) => {
