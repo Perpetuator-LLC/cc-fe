@@ -19,6 +19,7 @@ Aim for efficient design, maintainability, and consistency with Angular Material
 - When refactoring existing components, identify and remove custom SCSS that duplicates Material theming
 
 # Code Standards
+- This project uses yarn, and Angular Material 3 for UI components and styling.
 - Imports at top | Remove obvious comments | Follow existing format | Minimize assumptions
 - Use `forkJoin` for parallel ops | AI notes → `logs/ai_edits/` 
 - No inline styles | Angular Material MD3 | `@if`/`@for` over `ngIf`/`ngFor`

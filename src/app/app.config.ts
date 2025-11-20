@@ -3,27 +3,27 @@ import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneCha
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { graphqlProvider } from './graphql.provider';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { CustomMatPaginatorIntl } from './custom-paginator-intl';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimationsAsync(),
-    provideHttpClient(),
     graphqlProvider,
-    importProvidersFrom(MatIconModule),
+    importProvidersFrom(MatIconModule, OAuthModule.forRoot()),
     {
       provide: APP_INITIALIZER,
       useFactory: (iconRegistry: MatIconRegistry) => () => {
         iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
-        // ...so we don't have to add the font set class to every icon, but different font sets can still be used.
       },
       deps: [MatIconRegistry],
       multi: true,
