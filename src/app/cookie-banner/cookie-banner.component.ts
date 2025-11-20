@@ -20,6 +20,7 @@ import { take } from 'rxjs/operators';
 export class CookieBannerComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   private serverCookiePolicyVersion: WritableSignal<string | null> = signal(null);
+  private hasCheckedOnLogin = false; // Prevent repeated checks on login
 
   showBanner = computed(() => {
     const serverVersion = this.serverCookiePolicyVersion();
@@ -59,6 +60,12 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
         const isLoggedIn = this.authService.isLoggedIn();
 
         if (isLoggedIn) {
+          // Only check once per login session
+          if (this.hasCheckedOnLogin) {
+            return;
+          }
+          this.hasCheckedOnLogin = true;
+
           // User just logged in - be optimistic to prevent banner flash
           // If localStorage consent exists, assume accepted until backend confirms
           const localConsent = this.cookieConsentService.cookieConsent();
@@ -72,8 +79,9 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
             this.checkCookiePolicyAcceptance();
           }, 500);
         } else {
-          // User logged out, reset acceptance state
+          // User logged out, reset state
           this.cookiePolicyAccepted.set(false);
+          this.hasCheckedOnLogin = false; // Reset for next login
         }
       },
       { allowSignalWrites: true },
@@ -97,50 +105,56 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   private fetchServerCookiePolicyVersion(): void {
     // Use getActivePolicies instead of getLatestCookiePolicyVersion for consistency
     this.subscriptions.add(
-      this.publicPolicyService.getActivePolicies().subscribe({
-        next: (policies) => {
-          if (policies.cookiePolicy) {
-            this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
-          }
-        },
-        error: (err) => {
-          console.error('[CookieBanner] Failed to fetch cookie policy version:', err);
-        },
-      }),
+      this.publicPolicyService
+        .getActivePolicies()
+        .pipe(take(1)) // Complete after first emission
+        .subscribe({
+          next: (policies) => {
+            if (policies.cookiePolicy) {
+              this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
+            }
+          },
+          error: (err) => {
+            console.error('[CookieBanner] Failed to fetch cookie policy version:', err);
+          },
+        }),
     );
   }
 
   private checkCookiePolicyAcceptance(): void {
     this.subscriptions.add(
-      this.policyService.hasPolicyBeenAccepted(PolicyType.COOKIE_POLICY).subscribe({
-        next: (accepted) => {
-          this.cookiePolicyAccepted.set(accepted);
+      this.policyService
+        .hasPolicyBeenAccepted(PolicyType.COOKIE_POLICY)
+        .pipe(take(1)) // Complete after first emission
+        .subscribe({
+          next: (accepted) => {
+            this.cookiePolicyAccepted.set(accepted);
 
-          // If user has accepted, sync to localStorage so banner doesn't show after logout
-          if (accepted) {
-            // Get the actual policy version from backend and cache to localStorage
-            this.policyService
-              .getActivePolicies()
-              .pipe(take(1))
-              .subscribe({
-                next: (policies) => {
-                  if (policies.cookiePolicy) {
-                    const updatedConsent = {
-                      version: policies.cookiePolicy.version,
-                      accepted: true,
-                      date: new Date().toISOString(),
-                    };
-                    localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-                    this.cookieConsentService.cookieConsent.set(updatedConsent);
-                  }
-                },
-              });
-          }
-        },
-        error: (err) => {
-          console.error('[CookieBanner] Failed to check cookie policy acceptance:', err);
-        },
-      }),
+            // If user has accepted, sync to localStorage so banner doesn't show after logout
+            if (accepted) {
+              // Get the actual policy version from backend and cache to localStorage
+              this.policyService
+                .getActivePolicies()
+                .pipe(take(1))
+                .subscribe({
+                  next: (policies) => {
+                    if (policies.cookiePolicy) {
+                      const updatedConsent = {
+                        version: policies.cookiePolicy.version,
+                        accepted: true,
+                        date: new Date().toISOString(),
+                      };
+                      localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+                      this.cookieConsentService.cookieConsent.set(updatedConsent);
+                    }
+                  },
+                });
+            }
+          },
+          error: (err) => {
+            console.error('[CookieBanner] Failed to check cookie policy acceptance:', err);
+          },
+        }),
     );
   }
 
@@ -148,80 +162,86 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
     if (this.authService.isLoggedIn()) {
       // User is logged in - accept via backend using new policy system
       this.subscriptions.add(
-        this.policyService.getActivePolicies().subscribe({
-          next: (policies) => {
-            if (policies.cookiePolicy) {
-              // Check if there's a signature in localStorage from pre-login acceptance
-              const localConsent = localStorage.getItem('cookie_consent');
-              let signature: string | undefined;
+        this.policyService
+          .getActivePolicies()
+          .pipe(take(1)) // Complete after first emission
+          .subscribe({
+            next: (policies) => {
+              if (policies.cookiePolicy) {
+                // Check if there's a signature in localStorage from pre-login acceptance
+                const localConsent = localStorage.getItem('cookie_consent');
+                let signature: string | undefined;
 
-              if (localConsent) {
-                try {
-                  const consent = JSON.parse(localConsent);
-                  // Generate a signature based on the localStorage data
-                  signature = `cookie_${consent.version}_${consent.date}`;
-                } catch (e) {
-                  console.error('[CookieBanner] Failed to parse localStorage cookie consent:', e);
+                if (localConsent) {
+                  try {
+                    const consent = JSON.parse(localConsent);
+                    // Generate a signature based on the localStorage data
+                    signature = `cookie_${consent.version}_${consent.date}`;
+                  } catch (e) {
+                    console.error('[CookieBanner] Failed to parse localStorage cookie consent:', e);
+                  }
                 }
-              }
 
-              this.subscriptions.add(
-                this.policyService.acceptPolicy(policies.cookiePolicy.id, signature).subscribe({
-                  next: () => {
-                    // Update localStorage with server version
-                    const updatedConsent = {
-                      version: policies.cookiePolicy!.version,
-                      accepted: true,
-                      date: new Date().toISOString(),
-                    };
-                    this.cookieConsentService.cookieConsent.set(updatedConsent);
-                    localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-                    this.cookiePolicyAccepted.set(true);
-                  },
-                  error: (err) => {
-                    console.error('[CookieBanner] Failed to accept cookie policy:', err);
-                  },
-                }),
-              );
-            }
-          },
-          error: (err) => {
-            console.error('[CookieBanner] Failed to load cookie policy:', err);
-          },
-        }),
+                this.subscriptions.add(
+                  this.policyService.acceptPolicy(policies.cookiePolicy.id, signature).subscribe({
+                    next: () => {
+                      // Update localStorage with server version
+                      const updatedConsent = {
+                        version: policies.cookiePolicy!.version,
+                        accepted: true,
+                        date: new Date().toISOString(),
+                      };
+                      this.cookieConsentService.cookieConsent.set(updatedConsent);
+                      localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+                      this.cookiePolicyAccepted.set(true);
+                    },
+                    error: (err) => {
+                      console.error('[CookieBanner] Failed to accept cookie policy:', err);
+                    },
+                  }),
+                );
+              }
+            },
+            error: (err) => {
+              console.error('[CookieBanner] Failed to load cookie policy:', err);
+            },
+          }),
       );
     } else {
       // User not logged in - save to localStorage only
       this.subscriptions.add(
-        this.publicPolicyService.getActivePolicies().subscribe({
-          next: (policies) => {
-            if (policies.cookiePolicy) {
-              const updatedConsent = {
-                version: policies.cookiePolicy.version,
-                accepted: true,
-                date: new Date().toISOString(),
-              };
-              this.cookieConsentService.cookieConsent.set(updatedConsent);
-              localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-              // Update server version signal to prevent banner from reappearing
-              this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
-            }
-          },
-          error: (err) => {
-            console.error('[CookieBanner] Failed to load cookie policy for acceptance:', err);
-            // Fallback: use server version if already fetched
-            const version = this.serverCookiePolicyVersion();
-            if (version) {
-              const updatedConsent = {
-                version,
-                accepted: true,
-                date: new Date().toISOString(),
-              };
-              this.cookieConsentService.cookieConsent.set(updatedConsent);
-              localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-            }
-          },
-        }),
+        this.publicPolicyService
+          .getActivePolicies()
+          .pipe(take(1)) // Complete after first emission
+          .subscribe({
+            next: (policies) => {
+              if (policies.cookiePolicy) {
+                const updatedConsent = {
+                  version: policies.cookiePolicy.version,
+                  accepted: true,
+                  date: new Date().toISOString(),
+                };
+                this.cookieConsentService.cookieConsent.set(updatedConsent);
+                localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+                // Update server version signal to prevent banner from reappearing
+                this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
+              }
+            },
+            error: (err) => {
+              console.error('[CookieBanner] Failed to load cookie policy for acceptance:', err);
+              // Fallback: use server version if already fetched
+              const version = this.serverCookiePolicyVersion();
+              if (version) {
+                const updatedConsent = {
+                  version,
+                  accepted: true,
+                  date: new Date().toISOString(),
+                };
+                this.cookieConsentService.cookieConsent.set(updatedConsent);
+                localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+              }
+            },
+          }),
       );
     }
   }

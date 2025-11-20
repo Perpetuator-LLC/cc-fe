@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { map, Observable, of, switchMap } from 'rxjs';
+import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -180,9 +180,29 @@ export class PolicyService extends BaseService {
       };
     }
 
+    const MY_POLICY_ACCEPTANCES_REFETCH = gql`
+      query MyPolicyAcceptances {
+        myPolicyAcceptances {
+          id
+          policy {
+            id
+            policyType
+            version
+            effectiveDate
+            content
+            contentType
+            isActive
+          }
+          acceptedAt
+          signature
+        }
+      }
+    `;
+
     return this.mutate<AcceptPolicyResponse>({
       mutation: ACCEPT_POLICY,
       variables: { policyId, signature },
+      refetchQueries: [{ query: MY_POLICY_ACCEPTANCES_REFETCH }],
     }).pipe(
       map((data) => {
         if (!data.acceptPolicy.success) {
@@ -225,7 +245,7 @@ export class PolicyService extends BaseService {
 
     return this.query<MyPolicyAcceptancesResponse>({
       query: MY_POLICY_ACCEPTANCES,
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-first', // Use cache to prevent infinite loops
     }).pipe(map((data) => data.myPolicyAcceptances));
   }
 
@@ -272,7 +292,8 @@ export class PolicyService extends BaseService {
    */
   hasPolicyBeenAccepted(policyType: PolicyType): Observable<boolean> {
     return this.getActivePolicies().pipe(
-      switchMap((activePolicies) => {
+      take(1), // Complete after first emission to prevent loops
+      switchMap((activePolicies: ActivePoliciesResult) => {
         let activePolicy: PolicyVersion | null = null;
 
         switch (policyType) {

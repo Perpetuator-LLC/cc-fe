@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, switchMap, take } from 'rxjs/operators';
+import { filter, switchMap, take, debounceTime } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { PolicyService, PolicyVersion } from './policy.service';
 import { AuthService } from './auth.service';
@@ -26,10 +26,15 @@ export class PolicyGuardService {
     private router: Router,
     private cookieConsentService: CookieConsentService,
   ) {
-    // Check policies after navigation completes
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      this.checkPoliciesOnNavigation();
-    });
+    // Check policies after navigation completes (debounced to prevent rapid checks)
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        debounceTime(500), // Wait 500ms after last navigation event
+      )
+      .subscribe(() => {
+        this.checkPoliciesOnNavigation();
+      });
   }
 
   /**
@@ -136,6 +141,7 @@ export class PolicyGuardService {
    */
   checkPoliciesNow(): Observable<boolean> {
     return this.policyService.getMissingRequiredPolicies().pipe(
+      take(1), // Complete after first emission to prevent loops
       switchMap((missingPolicies) => {
         // Try to link localStorage cookie consent before showing dialog
         return this.linkLocalStorageCookieConsent(missingPolicies).pipe(
