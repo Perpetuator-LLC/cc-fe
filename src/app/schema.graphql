@@ -205,7 +205,6 @@ type ApiQuery {
   user: UserDetails
   userSettings(keys: [String]!): UserSettingsType
   users(query: String!): UserList
-  userCookieConsents: [UserCookieConsentType]
   emailChangePending: EmailChangeRequestType
 
   """List of Episodes [Relay]"""
@@ -279,6 +278,7 @@ type ApiQuery {
   ): PodcastNameValidation
   podcastCategories: PodcastCategoriesType
   teams(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, name: String, teamUuid: UUID): TeamTypeConnection
+  me: UserType
   node(
     """The ID of the object"""
     id: ID!
@@ -1639,13 +1639,6 @@ type UserList {
   results: [PublicUserType]
 }
 
-"""Legacy type - now backed by PolicyAcceptance for cookie_policy."""
-type UserCookieConsentType {
-  version: String
-  accepted: Boolean
-  date: DateTime
-}
-
 type EmailChangeRequestType {
   newEmail: String
   verified: Boolean
@@ -1789,6 +1782,14 @@ type TeamTypeEdge {
 
   """A cursor for use in pagination"""
   cursor: String!
+}
+
+"""Basic user type for authentication responses."""
+type UserType {
+  id: ID!
+  username: String!
+  email: String!
+  isVerified: Boolean!
 }
 
 type ApiMutation {
@@ -2102,12 +2103,6 @@ type ApiMutation {
   """Mutation to update user settings."""
   updateUserSetting(key: String!, value: String!): UpdateUserSetting
 
-  """
-  Mutation to update user cookie consent.
-  Now uses PolicyAcceptance with cookie_policy type.
-  """
-  updateCookieConsent(accepted: Boolean!, signature: String, version: String!): UpdateCookieConsent
-
   """Mutation to update user information."""
   updateUser(email: String!, username: String!): UpdateUser
 
@@ -2266,6 +2261,56 @@ type ApiMutation {
 
   """Mutation to add or update a user in a team."""
   upsertUserToTeam(role: String!, teamUuid: UUID!, userUuid: UUID!): UpsertUserToTeam
+
+  """
+  Register a new user account via GraphQL.
+  Replaces the REST /auth/registration/ endpoint.
+  
+  PUBLIC: Anyone can register (no authentication required).
+  """
+  register(acceptPrivacyPolicy: Boolean!, acceptTermsOfService: Boolean!, email: String!, password1: String!, password2: String!, ppSignature: String, tosSignature: String, username: String!): RegisterUser
+
+  """
+  Verify user email with token.
+  
+  PUBLIC: Anyone can verify email (no authentication required).
+  """
+  verifyEmail(token: String!): VerifyEmail
+
+  """
+  Resend email verification link.
+  
+  PUBLIC: Anyone can request verification email (no authentication required).
+  """
+  resendVerificationEmail(email: String!): ResendVerificationEmail
+
+  """
+  Login with username/email and password.
+  
+  PUBLIC: Anyone can login (no authentication required).
+  """
+  login(password: String!, username: String!): Login
+
+  """
+  Request a password reset email.
+  
+  PUBLIC: Anyone can request password reset (no authentication required).
+  """
+  requestPasswordReset(email: String!): RequestPasswordReset
+
+  """
+  Reset password with token.
+  
+  PUBLIC: Anyone can reset password with valid token (no authentication required).
+  """
+  resetPassword(password1: String!, password2: String!, token: String!): ResetPassword
+
+  """
+  Refresh access token using refresh token.
+  
+  PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
+  """
+  refreshToken(refresh: String!): RefreshAccessToken
 }
 
 """Update user's email preferences."""
@@ -2708,16 +2753,6 @@ type UpdateUserSetting {
   userSetting: UserSettingType
 }
 
-"""
-Mutation to update user cookie consent.
-Now uses PolicyAcceptance with cookie_policy type.
-"""
-type UpdateCookieConsent {
-  success: Boolean
-  message: String
-  consent: UserCookieConsentType
-}
-
 """Mutation to update user information."""
 type UpdateUser {
   success: Boolean
@@ -3025,4 +3060,89 @@ type RemoveUserFromTeam {
   success: Boolean
   message: String
   team: TeamType
+}
+
+"""
+Register a new user account via GraphQL.
+Replaces the REST /auth/registration/ endpoint.
+
+PUBLIC: Anyone can register (no authentication required).
+"""
+type RegisterUser {
+  success: Boolean
+  message: String
+  user: UserType
+  tokens: TokenType
+  verificationEmailSent: Boolean
+}
+
+"""GraphQL type for authentication tokens."""
+type TokenType {
+  access: String!
+  refresh: String!
+}
+
+"""
+Verify user email with token.
+
+PUBLIC: Anyone can verify email (no authentication required).
+"""
+type VerifyEmail {
+  success: Boolean
+  message: String
+  tokens: TokenType
+  user: UserType
+}
+
+"""
+Resend email verification link.
+
+PUBLIC: Anyone can request verification email (no authentication required).
+"""
+type ResendVerificationEmail {
+  success: Boolean
+  message: String
+}
+
+"""
+Login with username/email and password.
+
+PUBLIC: Anyone can login (no authentication required).
+"""
+type Login {
+  success: Boolean
+  message: String
+  tokens: TokenType
+  user: UserType
+}
+
+"""
+Request a password reset email.
+
+PUBLIC: Anyone can request password reset (no authentication required).
+"""
+type RequestPasswordReset {
+  success: Boolean
+  message: String
+}
+
+"""
+Reset password with token.
+
+PUBLIC: Anyone can reset password with valid token (no authentication required).
+"""
+type ResetPassword {
+  success: Boolean
+  message: String
+}
+
+"""
+Refresh access token using refresh token.
+
+PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
+"""
+type RefreshAccessToken {
+  success: Boolean
+  message: String
+  tokens: TokenType
 }

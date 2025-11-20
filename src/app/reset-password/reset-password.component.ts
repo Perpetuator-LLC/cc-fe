@@ -2,15 +2,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { MessageService } from '../message.service';
 import { MessageComponent } from '../message/message.component';
-import { NgClass } from '@angular/common';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -18,7 +16,6 @@ import { MatInput } from '@angular/material/input';
   imports: [
     ReactiveFormsModule,
     MessageComponent,
-    NgClass,
     MatCard,
     MatCardHeader,
     MatCardTitle,
@@ -35,16 +32,15 @@ import { MatInput } from '@angular/material/input';
 })
 export class ResetPasswordComponent implements OnInit {
   resetPasswordForm: FormGroup;
-  uid: string | null = null;
-  key: string | null = null;
+  token: string | null = null;
   isSubmitting = false;
 
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private http: HttpClient,
     private router: Router,
     private messageService: MessageService,
+    private graphqlAuthService: GraphqlAuthService,
   ) {
     this.resetPasswordForm = this.fb.group(
       {
@@ -56,10 +52,9 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.uid = this.route.snapshot.queryParamMap.get('uid');
-    this.key = this.route.snapshot.queryParamMap.get('token');
+    this.token = this.route.snapshot.queryParamMap.get('token');
 
-    if (!this.uid || !this.key) {
+    if (!this.token) {
       this.messageService.addMessage({
         type: 'error',
         text: 'Invalid or missing reset link.',
@@ -95,7 +90,7 @@ export class ResetPasswordComponent implements OnInit {
     const newPassword = this.resetPasswordForm.get('newPassword')?.value;
     const confirmPassword = this.resetPasswordForm.get('confirmPassword')?.value;
 
-    if (!this.uid || !this.key) {
+    if (!this.token) {
       this.messageService.addMessage({
         type: 'error',
         text: 'Invalid or missing reset link.',
@@ -106,34 +101,20 @@ export class ResetPasswordComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    const url = `${environment.API_URL}/auth/password/reset/confirm/`;
-    const payload = {
-      uid: `${this.uid}`,
-      token: this.key,
-      new_password1: newPassword,
-      new_password2: confirmPassword,
-    };
-
-    this.http.post(url, payload).subscribe({
-      next: (response) => {
-        console.debug('Password reset response:', response);
-        this.messageService.addMessage({
-          type: 'success',
-          text: 'Password reset successfully! Redirecting to login...',
-          dismissible: true,
-        });
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 3000);
+    this.graphqlAuthService.resetPassword(this.token, newPassword, confirmPassword).subscribe({
+      next: (success: boolean) => {
+        if (success) {
+          console.debug('Password reset successful');
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        } else {
+          this.isSubmitting = false;
+        }
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('Password reset error:', error);
         this.isSubmitting = false;
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Password reset failed. Please try again.',
-          dismissible: true,
-        });
       },
     });
   }

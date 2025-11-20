@@ -2,22 +2,13 @@
 import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../auth.service';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarService } from '../toolbar.service';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -26,11 +17,6 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
     MatCard,
     MatCardHeader,
     MatCardContent,
-    MatAccordion,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatIcon,
     MatInput,
     MatFormField,
     MatLabel,
@@ -38,10 +24,7 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
     MatCardTitle,
     MatButton,
     ReactiveFormsModule,
-    MessageComponent,
     MatToolbarModule,
-    RouterLink,
-    SharedFooterComponent,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',
@@ -55,7 +38,7 @@ export class ForgotPasswordComponent implements AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
-    private authService: AuthService,
+    private graphqlAuthService: GraphqlAuthService,
     private router: Router,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
@@ -75,20 +58,21 @@ export class ForgotPasswordComponent implements AfterViewInit {
 
   onSubmit() {
     this.messageService.clearMessages();
-    this.authService.forgot(this.forgotForm.value.email as string).subscribe({
-      next: () => {
-        if (this.messageService.messageCount === 0) {
+    this.graphqlAuthService.forgot(this.forgotForm.value.email as string).subscribe({
+      next: (success: boolean) => {
+        if (!success && this.messageService.messageCount === 0) {
           this.messageService.addMessage({
-            type: 'success',
-            text: 'Password reset email sent!',
+            type: 'error',
+            text: 'Password reset request failed.',
             dismissible: true,
           });
         }
       },
-      error: (error) => {
+      error: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Password reset failed';
         this.messageService.addMessage({
           type: 'error',
-          text: 'Password reset failed: ' + error.toString(),
+          text: 'Password reset failed: ' + errorMessage,
           dismissible: true,
         });
         console.error('Password reset failed', error);

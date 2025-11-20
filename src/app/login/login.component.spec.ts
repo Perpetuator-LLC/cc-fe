@@ -42,7 +42,7 @@ describe('LoginComponent', () => {
       get: () => 0,
       configurable: true,
     });
-    mockCookieConsentService = jasmine.createSpyObj('CookieConsentService', ['hasConsented', 'loadCookieConsent']);
+    mockCookieConsentService = jasmine.createSpyObj('CookieConsentService', ['hasConsented']);
     mockUserService = jasmine.createSpyObj('UserService', ['getUser', 'loadUserDetails']);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockAffiliateService = jasmine.createSpyObj('AffiliateService', ['getAffiliateByCode']);
