@@ -1,7 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../auth.service';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
@@ -14,6 +13,7 @@ import { MessageService } from '../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
+import { GraphqlAuthService } from '../graphql-auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -52,7 +52,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    private graphqlAuthService: GraphqlAuthService,
     private router: Router,
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -108,35 +108,42 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
       const password = this.registerForm.get('password')!.value!;
       const acceptTerms = this.registerForm.get('acceptTerms')!.value!;
 
-      this.authService.register(email, password, acceptTerms).subscribe({
-        next: (token) => {
+      this.graphqlAuthService.register(email, password, acceptTerms).subscribe({
+        next: (token: unknown) => {
           if (token) {
-            console.debug('Registration successful');
+            // Registration successful with tokens (email verification not required)
+            console.debug('Registration successful with tokens');
 
             if (this.affiliateCode) {
               this.joinAffiliateProgram(this.affiliateCode);
             } else {
               this.messageService.addMessage({
                 type: 'success',
+                text: 'Registration successful! Welcome!',
+                dismissible: true,
+              });
+              this.router.navigate([this.returnUrl]);
+            }
+          } else {
+            // Registration successful but email verification required
+            console.debug('Registration successful, email verification required');
+
+            if (this.messageService.messageCount === 0) {
+              this.messageService.addMessage({
+                type: 'info',
                 text: 'Registration successful! Check your email for a verification link.',
                 dismissible: true,
               });
-              this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
             }
-          } else {
-            if (this.messageService.messageCount === 0) {
-              this.messageService.addMessage({
-                type: 'error',
-                text: 'Registration failed with no token returned.',
-                dismissible: true,
-              });
-            }
+
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
           }
         },
-        error: (error) => {
+        error: (error: unknown) => {
+          const errorMessage = error instanceof Error ? error.message : 'Registration failed';
           this.messageService.addMessage({
             type: 'error',
-            text: 'Registration failed: ' + error.toString(),
+            text: 'Registration failed: ' + errorMessage,
             dismissible: true,
           });
           console.error('Registration failed', error);

@@ -1,6 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
-import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -18,6 +17,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AffiliateStorageService } from '../affiliate-storage.service';
 import { AffiliateService } from '../affiliate.service';
 import { PolicyGuardService } from '../policy-guard.service';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -52,7 +52,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
-    private authService: AuthService,
+    private graphqlAuthService: GraphqlAuthService,
     private route: ActivatedRoute,
     private router: Router,
     private toolbarService: ToolbarService,
@@ -93,7 +93,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   onSubmit() {
     this.messageService.clearMessages();
-    this.subscription = this.authService
+    this.subscription = this.graphqlAuthService
       .login(this.loginForm.value.email as string, this.loginForm.value.password as string)
       .subscribe({
         next: () => {

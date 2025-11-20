@@ -1,9 +1,8 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { MessageService } from '../message.service';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -17,9 +16,9 @@ export class VerifyEmailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient,
     private router: Router,
     private messageService: MessageService,
+    private graphqlAuthService: GraphqlAuthService,
   ) {}
 
   ngOnInit(): void {
@@ -31,22 +30,23 @@ export class VerifyEmailComponent implements OnInit {
     }
   }
 
-  verifyEmail(key: string): void {
-    const url = environment.API_URL + '/auth/registration/verify-email/';
-    this.http.post(url, { key }).subscribe({
-      next: (response) => {
-        console.debug('Email verification response:', response);
-        this.verificationStatus = 'Email verified successfully!';
-        this.messageService.addMessage({
-          type: 'success',
-          text: 'Email verified successfully!',
-          dismissible: true,
-        });
-        this.router.navigate(['/login'], {
-          state: { messages: ['Email verified successfully!'] },
-        });
+  verifyEmail(token: string): void {
+    this.graphqlAuthService.verify(token).subscribe({
+      next: (response: unknown) => {
+        if (response) {
+          console.debug('Email verification response:', response);
+          this.verificationStatus = 'Email verified successfully!';
+          this.messageService.addMessage({
+            type: 'success',
+            text: 'Email verified successfully! You can now log in.',
+            dismissible: true,
+          });
+          this.router.navigate(['/home']);
+        } else {
+          this.verificationStatus = 'Email verification failed. Please try again.';
+        }
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.debug('Email verification error:', error);
         this.verificationStatus = 'Email verification failed. Please try again.';
       },
