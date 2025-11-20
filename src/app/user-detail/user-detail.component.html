@@ -52,6 +52,7 @@
                   <input matInput formControlName="email" required />
                 </mat-form-field>
 
+                <!-- TODO: Re-enable Phone Number field when SMS functionality is ready
                 <mat-form-field appearance="fill">
                   <mat-label>Phone Number (for SMS alerts)</mat-label>
                   <input matInput formControlName="phoneNumber" placeholder="+1234567890" />
@@ -60,6 +61,7 @@
                     <mat-error>Invalid phone number format. Use +1234567890</mat-error>
                   }
                 </mat-form-field>
+                -->
 
                 <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>
               </form>
@@ -126,6 +128,7 @@
                   <mat-checkbox formControlName="marketingEmails">Marketing Emails</mat-checkbox>
                 </div>
 
+                <!-- TODO: Re-enable SMS Notifications when SMS functionality is ready
                 <div class="preference-section">
                   <h5>SMS Notifications</h5>
                   <mat-checkbox
@@ -134,6 +137,7 @@
                     Low Balance SMS Alerts
                   </mat-checkbox>
                 </div>
+                -->
 
                 <button class="save-btn" mat-raised-button color="primary" type="submit">Update</button>
               </form>

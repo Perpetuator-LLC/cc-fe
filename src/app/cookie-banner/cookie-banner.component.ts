@@ -89,13 +89,12 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Fetch the latest cookie policy version from server
-    this.fetchServerCookiePolicyVersion();
-
-    // Check cookie policy acceptance status if logged in
-    if (this.authService.isLoggedIn()) {
-      this.checkCookiePolicyAcceptance();
+    // Only fetch public policy version if NOT logged in
+    // Logged-in users get policies through PolicyGuardService and the effect()
+    if (!this.authService.isLoggedIn()) {
+      this.fetchServerCookiePolicyVersion();
     }
+    // Note: For logged-in users, checkCookiePolicyAcceptance() is called by the effect()
   }
 
   ngOnDestroy(): void {
@@ -130,25 +129,20 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
           next: (accepted) => {
             this.cookiePolicyAccepted.set(accepted);
 
-            // If user has accepted, sync to localStorage so banner doesn't show after logout
+            // If user has accepted, sync to localStorage
+            // Note: We don't need to fetch the policy again since hasPolicyBeenAccepted
+            // already checked it and the version is in Apollo cache
             if (accepted) {
-              // Get the actual policy version from backend and cache to localStorage
-              this.policyService
-                .getActivePolicies()
-                .pipe(take(1))
-                .subscribe({
-                  next: (policies) => {
-                    if (policies.cookiePolicy) {
-                      const updatedConsent = {
-                        version: policies.cookiePolicy.version,
-                        accepted: true,
-                        date: new Date().toISOString(),
-                      };
-                      localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-                      this.cookieConsentService.cookieConsent.set(updatedConsent);
-                    }
-                  },
-                });
+              // Get version from cache (already fetched by hasPolicyBeenAccepted)
+              const localConsent = localStorage.getItem('cookie_consent');
+              if (localConsent) {
+                try {
+                  const consent = JSON.parse(localConsent);
+                  this.cookieConsentService.cookieConsent.set(consent);
+                } catch (e) {
+                  console.error('[CookieBanner] Failed to parse localStorage cookie consent:', e);
+                }
+              }
             }
           },
           error: (err) => {
