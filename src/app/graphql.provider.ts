@@ -4,18 +4,18 @@ import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig } from '@angular/core';
 import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { environment } from '../environments/environment';
-import { AuthService } from './auth.service';
+import { OAuthAuthService } from './core/services/auth.service';
 import { Injectable } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
 import { cachePolicyRegistry } from './cache-policies';
 
-const uri = environment.API_URL + '/graphql/'; // GraphQL server URL
+const uri = environment.API_URL + '/graphql/';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApolloAuthMiddleware {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: OAuthAuthService) {}
 
   createAuthMiddleware() {
     // @ts-expect-error: Suppressing TS2345 due to type mismatch in ApolloLink middleware
@@ -38,14 +38,11 @@ export class ApolloAuthMiddleware {
 export function apolloOptionsFactory(apolloAuthMiddleware: ApolloAuthMiddleware): ApolloClientOptions<any> {
   const uploadLink = createUploadLink({ uri });
 
-  // Middleware for authentication
   const authMiddleware = apolloAuthMiddleware.createAuthMiddleware();
 
   return {
     link: authMiddleware.concat(uploadLink),
     cache: new InMemoryCache({
-      // Use the cache policy registry to allow modules to register their own policies
-      // This decouples the global Apollo config from feature-specific cache requirements
       typePolicies: cachePolicyRegistry.getAll(),
     }),
   };

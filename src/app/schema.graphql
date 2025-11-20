@@ -207,6 +207,12 @@ type ApiQuery {
   users(query: String!): UserList
   emailChangePending: EmailChangeRequestType
 
+  """List all API keys for the current user"""
+  apiKeys: [APIKeyType]
+
+  """Get a specific API key"""
+  apiKey(uuid: UUID!): APIKeyType
+
   """List of Episodes [Relay]"""
   episodes(
     offset: Int
@@ -1645,6 +1651,24 @@ type EmailChangeRequestType {
   canceled: Boolean
 }
 
+"""
+API Key type for GraphQL responses.
+NOTE: The actual key is NEVER exposed after creation - only the prefix.
+"""
+type APIKeyType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """Friendly name for this key"""
+  name: String!
+  prefix: String!
+  scopes: [String]
+  lastUsed: DateTime
+  createdAt: DateTime!
+  isActive: Boolean!
+  uuid: UUID
+}
+
 type EpisodeTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -2109,7 +2133,14 @@ type ApiMutation {
   """Mutation to delete a user."""
   deleteUser(confirm: String!): DeleteUser
 
-  """Mutation to change user password."""
+  """
+  Mutation to change user password.
+  
+  This will:
+  1. Change the password
+  2. Revoke all existing OAuth2 tokens (invalidate all sessions)
+  3. Return new tokens for the current session
+  """
   changePassword(password: String!): ChangePassword
 
   """Mutation to resend email change verification link."""
@@ -2117,6 +2148,24 @@ type ApiMutation {
 
   """Mutation to cancel email change request."""
   cancelEmailChange: CancelEmailChange
+
+  """
+  Create a new API key for the authenticated user.
+  NOTE: The actual key is only returned once and should be saved immediately.
+  """
+  createApiKey(
+    """Friendly name for the API key"""
+    name: String!
+
+    """List of scopes (e.g., ['read', 'write'])"""
+    scopes: [String]
+  ): CreateAPIKey
+
+  """Update an existing API key (name and scopes only)"""
+  updateApiKey(isActive: Boolean, name: String, scopes: [String], uuid: UUID!): UpdateAPIKey
+
+  """Delete an API key"""
+  deleteApiKey(uuid: UUID!): DeleteAPIKey
 
   """Mutation to create an episode."""
   createEpisode(newsUuids: [UUID]!, podcastUuid: UUID!): CreateEpisode
@@ -2290,6 +2339,16 @@ type ApiMutation {
   PUBLIC: Anyone can login (no authentication required).
   """
   login(password: String!, username: String!): Login
+
+  """
+  Logout by revoking refresh token.
+  
+  This invalidates the refresh token so it cannot be used to get new access tokens.
+  The current access token will still work until it expires (1 hour).
+  
+  PUBLIC: Anyone can logout with their refresh token.
+  """
+  logout(refresh: String!): Logout
 
   """
   Request a password reset email.
@@ -2765,7 +2824,14 @@ type DeleteUser {
   message: String
 }
 
-"""Mutation to change user password."""
+"""
+Mutation to change user password.
+
+This will:
+1. Change the password
+2. Revoke all existing OAuth2 tokens (invalidate all sessions)
+3. Return new tokens for the current session
+"""
 type ChangePassword {
   success: Boolean
   message: String
@@ -2781,6 +2847,30 @@ type ResendEmailChange {
 
 """Mutation to cancel email change request."""
 type CancelEmailChange {
+  success: Boolean
+  message: String
+}
+
+"""
+Create a new API key for the authenticated user.
+NOTE: The actual key is only returned once and should be saved immediately.
+"""
+type CreateAPIKey {
+  success: Boolean
+  message: String
+  apiKey: APIKeyType
+  key: String
+}
+
+"""Update an existing API key (name and scopes only)"""
+type UpdateAPIKey {
+  success: Boolean
+  message: String
+  apiKey: APIKeyType
+}
+
+"""Delete an API key"""
+type DeleteAPIKey {
   success: Boolean
   message: String
 }
@@ -3114,6 +3204,19 @@ type Login {
   message: String
   tokens: TokenType
   user: UserType
+}
+
+"""
+Logout by revoking refresh token.
+
+This invalidates the refresh token so it cannot be used to get new access tokens.
+The current access token will still work until it expires (1 hour).
+
+PUBLIC: Anyone can logout with their refresh token.
+"""
+type Logout {
+  success: Boolean
+  message: String
 }
 
 """
