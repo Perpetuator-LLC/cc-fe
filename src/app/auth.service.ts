@@ -1,45 +1,56 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
-import { JWT, Token } from './types';
-import { decodeJWT } from './jwt';
+import { Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { MessageService } from './message.service';
-// WARNING: Do not include an GraphQL API calls here as this will create a circular dependency with graphql.provider.ts
+import { OAuthAuthService } from './core/services/auth.service';
 
-export interface RegisterError {
-  messages: string[];
-}
+// NOTE: This service now delegates entirely to OAuth2
+// WARNING: Do not include any GraphQL API calls here as this will create a circular dependency with graphql.provider.ts
 
 export interface RegisterResponse {
-  access?: string;
   detail?: string;
-  refresh?: string;
 }
 
 export const AuthUrls = {
-  login: environment.API_URL + '/auth/login/',
-  refreshToken: environment.API_URL + '/auth/token/refresh/',
-  register: environment.API_URL + '/auth/registration/',
-  verify: environment.API_URL + '/auth/registration/verify-email/',
-  resend: environment.API_URL + '/auth/registration/resend-email/',
   forgot: environment.API_URL + '/auth/password/reset/',
+  resend: environment.API_URL + '/auth/registration/resend-email/',
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private tokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(this.getToken());
-  private loggedInSignal: WritableSignal<boolean> = signal(!this.isRefreshTokenExpired());
-
   constructor(
     private http: HttpClient,
     private messageService: MessageService,
+    private oauthService: OAuthAuthService,
   ) {}
 
+  // Delegate all auth operations to OAuth service
+  logout() {
+    this.oauthService.logout();
+  }
+
+  get isLoggedIn(): WritableSignal<boolean> {
+    return this.oauthService.isLoggedIn;
+  }
+
+  public getToken(): string | null {
+    return this.oauthService.getAccessToken();
+  }
+
+  public getTokenObservable(): Observable<string | null> {
+    return this.oauthService.getTokenObservable();
+  }
+
+  public isRefreshTokenExpired(): boolean {
+    return !this.oauthService.isAuthenticated();
+  }
+
+  // Legacy HTTP endpoints - kept for forgot password and resend verification
   forgot(email: string): Observable<RegisterResponse | null> {
     this.messageService.clearMessages();
     return this.http.post<RegisterResponse>(AuthUrls.forgot, { email }).pipe(
@@ -51,33 +62,11 @@ export class AuthService {
         });
       }),
       catchError((error) => {
-        console.error('Login error:', error);
+        console.error('Password reset error:', error);
         Object.keys(error.error).forEach((key) => {
           this.messageService.addMessage({
             type: 'error',
-            text: `Login error (${key}): ${error.error[key]}`,
-            dismissible: true,
-          });
-        });
-        return of(null); // Ensuring that we always return an Observable of the same type
-      }),
-    );
-  }
-
-  login(email: string, password: string): Observable<Token | null> {
-    this.messageService.clearMessages();
-
-    return this.http.post<Token>(AuthUrls.login, { email, password }).pipe(
-      tap((response) => {
-        this.setSession(response);
-      }),
-
-      catchError((error) => {
-        console.error('Login error:', error);
-        Object.keys(error.error).forEach((key) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Login error: ${error.error[key]}`,
+            text: `Password reset error (${key}): ${error.error[key]}`,
             dismissible: true,
           });
         });
@@ -104,175 +93,5 @@ export class AuthService {
         return of(null);
       }),
     );
-  }
-
-  verify(key: string): Observable<Token | null> {
-    this.messageService.clearMessages();
-    return this.http.post<Token>(AuthUrls.verify, { key }).pipe(
-      tap((response: Token) => this.setSession(response)),
-      catchError((error) => {
-        console.error('Registration error: ', error);
-        Object.keys(error.error).forEach((key) => {
-          this.messageService.addMessage({
-            type: 'error',
-            text: `Registration error (${key}): ${error.error[key]}`,
-            dismissible: true,
-          });
-        });
-        return of(null);
-      }),
-    );
-  }
-
-  register(email: string, password: string, acceptTerms = true): Observable<Token | null> {
-    this.messageService.clearMessages();
-    const username = 'User' + Math.floor(Math.random() * 1000000);
-    const password1 = password;
-    const password2 = password;
-
-    return this.http
-      .post<RegisterResponse>(AuthUrls.register, {
-        username,
-        email,
-        password1,
-        password2,
-        accept_terms_of_service: acceptTerms,
-        accept_privacy_policy: acceptTerms,
-      })
-      .pipe(
-        tap((response: RegisterResponse) => {
-          if (response.access && response.refresh) {
-            this.setSession(response as Token);
-          }
-        }),
-        catchError((error) => {
-          console.error('Registration error: ', error);
-          Object.keys(error.error).forEach((key) => {
-            this.messageService.addMessage({
-              type: 'error',
-              text: `Registration error (${key}): ${error.error[key]}`,
-              dismissible: true,
-            });
-          });
-          return of(null);
-        }),
-        map((response) => (response?.access && response?.refresh ? (response as Token) : null)),
-      );
-  }
-
-  refreshToken(): Observable<Token | null> {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken || this.isRefreshTokenExpired()) {
-      this.logout();
-      return of(null);
-    }
-    return this.http.post<Token>(AuthUrls.refreshToken, { refresh: refreshToken }).pipe(
-      tap((response) => this.updateSession(response)),
-      catchError((error) => {
-        console.debug('Logging out, due to error refreshing token:', error);
-        this.logout();
-        return of(null);
-      }),
-    );
-  }
-
-  setSession(authResult: Token) {
-    const accessToken = authResult.access;
-    const refreshToken = authResult.refresh;
-
-    const decodedAccessToken: JWT | null = decodeJWT(accessToken);
-    if (decodedAccessToken === null || decodedAccessToken.exp === undefined) {
-      console.error('Failed to decode access token');
-      return;
-    }
-    const accessExpiresAt = decodedAccessToken.exp * 1000;
-
-    const decodedRefreshToken: JWT | null = decodeJWT(refreshToken);
-    if (decodedRefreshToken === null || decodedRefreshToken.exp === undefined) {
-      console.error('Failed to decode refresh token');
-      return;
-    }
-    const refreshExpiresAt = decodedRefreshToken.exp * 1000;
-
-    localStorage.setItem('id_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('expires_at', JSON.stringify(accessExpiresAt));
-    localStorage.setItem('refresh_expires_at', JSON.stringify(refreshExpiresAt));
-
-    this.loggedInSignal.set(!this.isRefreshTokenExpired());
-    this.tokenSubject.next(accessToken);
-  }
-
-  private updateSession(authResult: Token) {
-    const accessToken = authResult.access;
-    const decodedAccessToken: JWT | null = decodeJWT(accessToken);
-    if (decodedAccessToken === null || decodedAccessToken.exp === undefined) {
-      console.error('Failed to decode access token');
-      return;
-    }
-    const accessExpiresAt = decodedAccessToken.exp * 1000;
-
-    localStorage.setItem('id_token', accessToken);
-    localStorage.setItem('expires_at', JSON.stringify(accessExpiresAt));
-
-    this.loggedInSignal.set(!this.isRefreshTokenExpired());
-    this.tokenSubject.next(accessToken);
-  }
-
-  logout() {
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('expires_at');
-    localStorage.removeItem('refresh_expires_at');
-    this.loggedInSignal.set(false);
-    this.tokenSubject.next(null);
-  }
-
-  get isLoggedIn(): WritableSignal<boolean> {
-    return this.loggedInSignal;
-  }
-
-  public getToken(): string | null {
-    // Tokens are not parsed here, but are sent to the back-end and if invalid, logout is called and tokens are cleared
-    return localStorage.getItem('id_token');
-  }
-
-  public getTokenObservable(): Observable<string | null> {
-    const token = this.getToken();
-    if (this.isRefreshTokenExpired()) {
-      this.logout();
-      return of(null);
-    } else if (token && !this.isTokenExpired()) {
-      return of(token);
-    }
-    return this.refreshToken().pipe(switchMap(() => of(this.getToken())));
-  }
-
-  private isTokenExpired(): boolean {
-    const expiration = localStorage.getItem('expires_at');
-    if (expiration === null || expiration === undefined) {
-      return true;
-    }
-    try {
-      return new Date().getTime() >= JSON.parse(expiration);
-    } catch (e) {
-      console.error('Failed to parse expiration, invalid JSON:', e);
-      this.logout();
-    }
-    return false;
-  }
-
-  public isRefreshTokenExpired(): boolean {
-    const refreshExpiration = localStorage.getItem('refresh_expires_at');
-    if (refreshExpiration === null || refreshExpiration === undefined) {
-      return true;
-    }
-    try {
-      return new Date().getTime() >= JSON.parse(refreshExpiration);
-    } catch (e) {
-      console.error('Failed to parse refresh expiration, invalid JSON:', e);
-      this.logout();
-    }
-    return true;
   }
 }

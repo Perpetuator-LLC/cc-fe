@@ -1,32 +1,28 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
 import { MessageService } from './message.service';
-import { AuthService } from './auth.service';
-import { Token } from './types';
+import { OAuthAuthService } from './core/services/auth.service';
 import {
   REGISTER_USER,
-  LOGIN,
-  VERIFY_EMAIL,
   RESEND_VERIFICATION,
   REQUEST_PASSWORD_RESET,
   RESET_PASSWORD,
+  VERIFY_EMAIL,
   ME,
   RegisterResponse,
-  LoginResponse,
-  VerifyEmailResponse,
   ResendVerificationResponse,
   RequestPasswordResetResponse,
   ResetPasswordResponse,
+  VerifyEmailResponse,
   MeResponse,
 } from './auth/auth.graphql';
 
 /**
- * GraphQL-based authentication service.
- * This service handles all GraphQL authentication mutations and queries.
- * It uses AuthService for token management to avoid circular dependencies.
+ * OAuth2-based authentication service.
+ * This service handles authentication using OAuth2 password grant flow.
  */
 @Injectable({
   providedIn: 'root',
@@ -35,7 +31,7 @@ export class GraphqlAuthService {
   constructor(
     private apollo: Apollo,
     private messageService: MessageService,
-    private authService: AuthService,
+    private oauthService: OAuthAuthService,
   ) {}
 
   forgot(email: string): Observable<boolean> {
@@ -75,44 +71,23 @@ export class GraphqlAuthService {
       );
   }
 
-  login(email: string, password: string): Observable<Token | null> {
+  /**
+   * Login using OAuth2 password grant flow
+   */
+  login(email: string, password: string): Observable<boolean> {
     this.messageService.clearMessages();
 
-    return this.apollo
-      .mutate<{ login: LoginResponse }>({
-        mutation: LOGIN,
-        variables: { username: email, password },
-        context: {
-          headers: {
-            Authorization: '', // No auth needed
-          },
-        },
-      })
-      .pipe(
-        map((result) => {
-          const response = result.data?.login;
-          if (response?.success && response.tokens) {
-            this.authService.setSession(response.tokens);
-            return response.tokens;
-          } else {
-            this.messageService.addMessage({
-              type: 'error',
-              text: response?.message || 'Login failed',
-              dismissible: true,
-            });
-            return null;
-          }
-        }),
-        catchError((error) => {
-          console.error('Login error:', error);
-          this.messageService.addMessage({
-            type: 'error',
-            text: error.message || 'Login failed',
-            dismissible: true,
-          });
-          return of(null);
-        }),
-      );
+    return this.oauthService.loginWithPassword(email, password).pipe(
+      catchError((error) => {
+        console.error('Login error:', error);
+        this.messageService.addMessage({
+          type: 'error',
+          text: error.message || 'Login failed',
+          dismissible: true,
+        });
+        return of(false);
+      }),
+    );
   }
 
   resend(email: string): Observable<boolean> {
@@ -152,7 +127,11 @@ export class GraphqlAuthService {
       );
   }
 
-  verify(token: string): Observable<Token | null> {
+  /**
+   * Verify email with token
+   * After successful verification, auto-login using OAuth2
+   */
+  verify(token: string): Observable<boolean> {
     this.messageService.clearMessages();
     return this.apollo
       .mutate<{ verifyEmail: VerifyEmailResponse }>({
@@ -165,18 +144,26 @@ export class GraphqlAuthService {
         },
       })
       .pipe(
-        map((result) => {
+        switchMap((result) => {
           const response = result.data?.verifyEmail;
-          if (response?.success && response.tokens) {
-            this.authService.setSession(response.tokens);
-            return response.tokens;
+          if (response?.success && response.user) {
+            // Email verified successfully
+            this.messageService.addMessage({
+              type: 'success',
+              text: response.message || 'Email verified successfully!',
+              dismissible: true,
+            });
+
+            // Note: With OAuth2, we don't get tokens from GraphQL
+            // The user should log in with their credentials
+            return of(true);
           } else {
             this.messageService.addMessage({
               type: 'error',
               text: response?.message || 'Email verification failed',
               dismissible: true,
             });
-            return null;
+            return of(false);
           }
         }),
         catchError((error) => {
@@ -186,12 +173,16 @@ export class GraphqlAuthService {
             text: error.message || 'Email verification failed',
             dismissible: true,
           });
-          return of(null);
+          return of(false);
         }),
       );
   }
 
-  register(email: string, password: string, acceptTerms = true): Observable<Token | null> {
+  /**
+   * Register a new user
+   * After successful registration, auto-login using OAuth2
+   */
+  register(email: string, password: string, acceptTerms = true): Observable<boolean> {
     this.messageService.clearMessages();
     const username = 'User' + Math.floor(Math.random() * 1000000);
 
@@ -213,21 +204,31 @@ export class GraphqlAuthService {
         },
       })
       .pipe(
-        map((result) => {
+        switchMap((result) => {
           const response = result.data?.register;
           if (response?.success) {
-            if (response.tokens) {
-              // Email verification NOT required - user can log in immediately
-              this.authService.setSession(response.tokens);
-              return response.tokens;
-            } else {
+            if (response.verificationEmailSent) {
               // Email verification required - show message
               this.messageService.addMessage({
                 type: 'info',
                 text: response.message || 'Please check your email to verify your account.',
                 dismissible: true,
               });
-              return null;
+              return of(true);
+            } else {
+              // No email verification required - auto-login with OAuth2
+              return this.oauthService.loginWithPassword(email, password).pipe(
+                map((success) => {
+                  if (success) {
+                    this.messageService.addMessage({
+                      type: 'success',
+                      text: 'Registration successful!',
+                      dismissible: true,
+                    });
+                  }
+                  return success;
+                }),
+              );
             }
           } else {
             this.messageService.addMessage({
@@ -235,7 +236,7 @@ export class GraphqlAuthService {
               text: response?.message || 'Registration failed',
               dismissible: true,
             });
-            return null;
+            return of(false);
           }
         }),
         catchError((error) => {
@@ -245,11 +246,32 @@ export class GraphqlAuthService {
             text: error.message || 'Registration failed',
             dismissible: true,
           });
+          return of(false);
+        }),
+      );
+  }
+
+  /**
+   * Get current user information
+   */
+  me(): Observable<MeResponse | null> {
+    return this.apollo
+      .query<{ me: MeResponse }>({
+        query: ME,
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data?.me || null),
+        catchError((error) => {
+          console.error('Failed to fetch user info:', error);
           return of(null);
         }),
       );
   }
 
+  /**
+   * Reset password
+   */
   resetPassword(token: string, password1: string, password2: string): Observable<boolean> {
     this.messageService.clearMessages();
     return this.apollo
@@ -268,7 +290,7 @@ export class GraphqlAuthService {
           if (response?.success) {
             this.messageService.addMessage({
               type: 'success',
-              text: response.message || 'Password reset successfully!',
+              text: response.message || 'Password reset successful',
               dismissible: true,
             });
             return true;
@@ -289,20 +311,6 @@ export class GraphqlAuthService {
             dismissible: true,
           });
           return of(false);
-        }),
-      );
-  }
-
-  me(): Observable<MeResponse | null> {
-    return this.apollo
-      .query<{ me: MeResponse }>({
-        query: ME,
-      })
-      .pipe(
-        map((result) => result.data?.me || null),
-        catchError((error) => {
-          console.error('Failed to get current user:', error);
-          return of(null);
         }),
       );
   }

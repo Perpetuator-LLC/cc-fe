@@ -96,14 +96,16 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.subscription = this.graphqlAuthService
       .login(this.loginForm.value.email as string, this.loginForm.value.password as string)
       .subscribe({
-        next: () => {
-          if (this.messageService.messageCount === 0) {
+        next: (success) => {
+          if (success) {
+            // Login successful - proceed with post-login flow
             if (this.affiliateCode) {
               this.joinAffiliateProgram(this.affiliateCode);
             } else {
               this.completeLogin();
             }
           }
+          // If not successful, error message was already shown by the service
         },
       });
   }

@@ -1,14 +1,8 @@
 // Copyright (c) 2025 Perpetuator LLC
-// import { CanActivateFn } from '@angular/router';
-//
-// export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-//   return true;
-// };
-
 import { Injectable } from '@angular/core';
 import { CanActivate, UrlTree, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
+import { OAuthAuthService } from './core/services/auth.service';
 import { AffiliateStorageService } from './affiliate-storage.service';
 
 @Injectable({
@@ -17,7 +11,7 @@ import { AffiliateStorageService } from './affiliate-storage.service';
 export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
-    private authService: AuthService,
+    private authService: OAuthAuthService,
     private affiliateStorageService: AffiliateStorageService,
   ) {}
 
@@ -33,7 +27,7 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const isLoggedIn = this.authService.isLoggedIn();
+    const isLoggedIn = this.authService.isAuthenticated();
 
     if (!isLoggedIn) {
       console.debug('AuthGuard: Redirecting to login page');

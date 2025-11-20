@@ -1,129 +1,72 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { AuthService, AuthUrls } from './auth.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { AuthService } from './auth.service';
+import { OAuthAuthService } from './core/services/auth.service';
+import { MessageService } from './message.service';
+import { of } from 'rxjs';
 
-import { createTestJWT } from './jwt';
-
-describe('AuthService', () => {
+describe('AuthService (Deprecated - OAuth Wrapper)', () => {
   let service: AuthService;
-  let httpMock: HttpTestingController;
+  let mockOAuthService: jasmine.SpyObj<OAuthAuthService>;
 
   beforeEach(() => {
+    const oauthSpy = jasmine.createSpyObj('OAuthAuthService', [
+      'logout',
+      'getAccessToken',
+      'getTokenObservable',
+      'isAuthenticated',
+    ]);
+
+    // Set up default signal for isLoggedIn
+    Object.defineProperty(oauthSpy, 'isLoggedIn', {
+      get: jasmine.createSpy('isLoggedIn').and.returnValue(() => false),
+    });
+
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [AuthService],
+      providers: [
+        AuthService,
+        { provide: OAuthAuthService, useValue: oauthSpy },
+        { provide: MessageService, useValue: jasmine.createSpyObj('MessageService', ['addMessage', 'clearMessages']) },
+      ],
     });
-    service = TestBed.inject(AuthService);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
 
-  afterEach(() => {
-    httpMock.verify();
-    localStorage.clear(); // Clear localStorage after each test to avoid conflicts
+    service = TestBed.inject(AuthService);
+    mockOAuthService = TestBed.inject(OAuthAuthService) as jasmine.SpyObj<OAuthAuthService>;
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should login and set session', () => {
-    const accessToken = createTestJWT({});
-    const refreshToken = createTestJWT({}, 3600 * 24);
-    const mockResponse = {
-      access: accessToken,
-      refresh: refreshToken,
-      expires_in: 3600,
-    };
-
-    service.login('test@example.com', 'testpassword').subscribe((response) => {
-      expect(response).toEqual(mockResponse);
-      // TODO: bring back when login is fixed...
-      // expect(localStorage.getItem('id_token')).toBe(mockResponse.access);
-      // expect(localStorage.getItem('refresh_token')).toBe(mockResponse.refresh);
-      // expect(localStorage.getItem('expires_at')).toBeTruthy();
-    });
-
-    const req = httpMock.expectOne(AuthUrls.login);
-    expect(req.request.method).toBe('POST');
-    req.flush(mockResponse);
-  });
-
-  it('should refresh token and update session', () => {
-    const token = createTestJWT({});
-    const mockResponse = {
-      access: token,
-      refresh: createTestJWT({}, 3600 * 24),
-      expires_in: 3600,
-    };
-
-    spyOn(localStorage, 'getItem').and.callFake((key: string) => {
-      if (key === 'refresh_token') {
-        return mockResponse.refresh;
-      } else if (key === 'refresh_expires_at') {
-        return JSON.stringify(mockResponse.expires_in * 1000);
-      }
-      return null;
-    });
-
-    spyOn(localStorage, 'setItem').and.callThrough();
-
-    spyOn(service, 'isRefreshTokenExpired').and.returnValue(false);
-
-    service.refreshToken().subscribe((response) => {
-      expect(response).toEqual(mockResponse);
-      expect(localStorage.setItem).toHaveBeenCalledWith('id_token', mockResponse.access);
-      expect(localStorage.setItem).toHaveBeenCalledWith('expires_at', jasmine.any(String));
-    });
-
-    const req = httpMock.expectOne(AuthUrls.refreshToken);
-    expect(req.request.method).toBe('POST');
-    req.flush(mockResponse);
-  });
-
-  it('should logout and clear session', () => {
-    localStorage.setItem('id_token', 'access-token');
-    localStorage.setItem('refresh_token', 'refresh-token');
-    localStorage.setItem('expires_at', JSON.stringify(new Date().getTime() + 3600 * 1000));
-
+  it('should delegate logout to OAuth service', () => {
     service.logout();
-
-    expect(localStorage.getItem('id_token')).toBeNull();
-    expect(localStorage.getItem('refresh_token')).toBeNull();
-    expect(localStorage.getItem('expires_at')).toBeNull();
+    expect(mockOAuthService.logout).toHaveBeenCalled();
   });
 
-  it('should return false if refresh is valid', () => {
-    localStorage.setItem('refresh_expires_at', JSON.stringify(new Date().getTime() + 3600 * 1000));
-    const service2 = TestBed.inject(AuthService);
-    expect(service2.isRefreshTokenExpired()).toBeFalse();
+  it('should delegate getToken to OAuth service', () => {
+    const token = 'test-token';
+    mockOAuthService.getAccessToken.and.returnValue(token);
+    expect(service.getToken()).toBe(token);
   });
 
-  it('should return true if refresh is expired', () => {
-    localStorage.setItem('refresh_expires_at', JSON.stringify(new Date().getTime() - 3600 * 1000));
-    const service2 = TestBed.inject(AuthService);
-    expect(service2.isRefreshTokenExpired()).toBeTrue();
+  it('should delegate getTokenObservable to OAuth service', (done) => {
+    const token = 'test-token';
+    mockOAuthService.getTokenObservable.and.returnValue(of(token));
+
+    service.getTokenObservable().subscribe((result) => {
+      expect(result).toBe(token);
+      expect(mockOAuthService.getTokenObservable).toHaveBeenCalled();
+      done();
+    });
   });
 
-  // it('should return true if the user is logged in', () => {
-  //   spyOn(service, 'isRefreshTokenExpired').and.returnValue(false);
-  //   expect(service.isLoggedIn()).toBeTrue();
-  // });
-  //
-  // it('should return false if the user is not logged in', () => {
-  //   spyOn(service, 'isRefreshTokenExpired').and.returnValue(true);
-  //   expect(service.isLoggedIn()).toBeFalse();
-  // });
+  it('should delegate isRefreshTokenExpired to OAuth isAuthenticated', () => {
+    mockOAuthService.isAuthenticated.and.returnValue(false);
+    expect(service.isRefreshTokenExpired()).toBe(true);
 
-  it('should return the token if available', () => {
-    localStorage.setItem('id_token', 'access-token');
-
-    expect(service.getToken()).toBe('access-token');
-  });
-
-  it('should return null if the token is not available', () => {
-    localStorage.removeItem('id_token');
-
-    expect(service.getToken()).toBeNull();
+    mockOAuthService.isAuthenticated.and.returnValue(true);
+    expect(service.isRefreshTokenExpired()).toBe(false);
   });
 });
