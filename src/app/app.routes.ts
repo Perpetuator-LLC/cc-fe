@@ -77,6 +77,11 @@ export const routes: Routes = [
     title: 'Verify Email',
   },
   {
+    path: 'verify-email', // Alias for backward compatibility with emails
+    loadComponent: () => import('./verify-email/verify-email.component').then((c) => c.VerifyEmailComponent),
+    title: 'Verify Email',
+  },
+  {
     path: 'resend',
     loadComponent: () =>
       import('./resend-verification/resend-verification.component').then((c) => c.ResendVerificationComponent),
@@ -95,6 +100,11 @@ export const routes: Routes = [
   },
   {
     path: 'reset',
+    loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
+    title: 'Reset Password',
+  },
+  {
+    path: 'reset-password', // Alias for backward compatibility with emails
     loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',
   },
