@@ -39,7 +39,12 @@ export interface PolicyAcceptanceDialogData {
       @for (policy of data.policies; track policy.id) {
         <div class="policy-section">
           <h3>{{ getPolicyTitle(policy.policyType) }}</h3>
-          <p class="policy-meta">Version {{ policy.version }} - Effective {{ formatDate(policy.effectiveDate) }}</p>
+          <p class="policy-meta">
+            Version {{ policy.version }}
+            @if (policy.effectiveDate) {
+              - Effective {{ formatDate(policy.effectiveDate) }}
+            }
+          </p>
 
           <div class="policy-content" [innerHTML]="renderPolicyContent(policy)"></div>
         </div>
