@@ -34,6 +34,7 @@ export class ForgotPasswordComponent implements AfterViewInit {
     email: new FormControl('', [Validators.required, Validators.email]),
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  isLoading = false; // Prevent double-submit
 
   constructor(
     private route: ActivatedRoute,
@@ -57,9 +58,16 @@ export class ForgotPasswordComponent implements AfterViewInit {
   }
 
   onSubmit() {
+    // Prevent double-submit
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
     this.messageService.clearMessages();
     this.graphqlAuthService.forgot(this.forgotForm.value.email as string).subscribe({
       next: (success: boolean) => {
+        this.isLoading = false;
         if (!success && this.messageService.messageCount === 0) {
           this.messageService.addMessage({
             type: 'error',
@@ -67,14 +75,11 @@ export class ForgotPasswordComponent implements AfterViewInit {
             dismissible: true,
           });
         }
+        // Success message already handled by GraphqlAuthService.forgot()
       },
       error: (error: unknown) => {
-        const errorMessage = error instanceof Error ? error.message : 'Password reset failed';
-        this.messageService.addMessage({
-          type: 'error',
-          text: 'Password reset failed: ' + errorMessage,
-          dismissible: true,
-        });
+        this.isLoading = false;
+        // Error message already handled by GraphqlAuthService.forgot()
         console.error('Password reset failed', error);
       },
     });

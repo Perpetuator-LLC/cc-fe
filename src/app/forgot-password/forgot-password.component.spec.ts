@@ -71,7 +71,7 @@ describe('ForgotPasswordComponent', () => {
   });
 
   it('should call authService.forgot on successful submission', () => {
-    authServiceMock.forgot.and.returnValue(of({ access: 'dummy-access-token', refresh: 'dummy-refresh-token' }));
+    authServiceMock.forgot.and.returnValue(of({ detail: 'Password reset email sent' }));
 
     component.onSubmit();
 
