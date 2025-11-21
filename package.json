@@ -5,13 +5,16 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prestart": "yarn docs:graphql",
     "build": "ng build",
+    "prebuild": "yarn docs:graphql",
     "watch": "ng build --watch --configuration development",
     "prepare": "husky install",
     "test": "ng test --watch=false",
     "serve:ssr:capital-copilot-fe": "node dist/capital-copilot-fe/server/server.mjs",
     "lint": "ng lint",
     "generate": "graphql-codegen",
+    "docs:graphql": "spectaql spectaql-config.yml 2>&1 | grep -v 'Deprecation Warning' | grep -v 'legacy-js-api' | grep -v 'More info' | grep -v '@import' | grep -v '╷' | grep -v '╵' | grep -v 'scss' || true",
     "check-copyright": "node scripts/check-copyright.js"
   },
   "lint-staged": {
@@ -58,7 +61,8 @@
     "tslib": "^2.3.0",
     "undici": "^6.19.4",
     "ws": "^8.18.0",
-    "zone.js": "~0.14.3"
+    "zone.js": "~0.14.3",
+    "spectaql": "^3.0.5"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.0.6",

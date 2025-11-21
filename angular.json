@@ -27,6 +27,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "docs/graphql",
+                "output": "/docs/graphql"
               }
             ],
             "styles": ["src/styles.scss"],
@@ -83,6 +88,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "docs/graphql",
+                "output": "/docs/graphql"
               }
             ],
             "styles": ["src/styles.scss"],
