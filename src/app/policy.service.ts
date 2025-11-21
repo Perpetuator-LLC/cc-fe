@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { map, Observable, of, switchMap, take } from 'rxjs';
+import { map, Observable, of, shareReplay, switchMap, take } from 'rxjs';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -27,6 +27,8 @@ export interface PolicyVersion {
   content: string;
   contentType: PolicyContentType;
   isActive: boolean;
+  title?: string;
+  isMajorChange?: boolean;
 }
 
 export interface PolicyAcceptance {
@@ -36,7 +38,7 @@ export interface PolicyAcceptance {
   signature: string | null;
 }
 
-interface ActivePoliciesResult {
+export interface ActivePoliciesResult {
   termsOfService: PolicyVersion | null;
   privacyPolicy: PolicyVersion | null;
   affiliateTerms: PolicyVersion | null;
@@ -47,6 +49,9 @@ interface ActivePoliciesResult {
   providedIn: 'root',
 })
 export class PolicyService extends BaseService {
+  // Cache active policies for the session
+  private activePoliciesCache$: Observable<ActivePoliciesResult> | null = null;
+
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
@@ -55,58 +60,109 @@ export class PolicyService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getActivePolicies(): Observable<ActivePoliciesResult> {
-    const ACTIVE_POLICIES_QUERY = gql`
-      query ActivePolicies {
-        activePolicies {
-          id
-          policyType
-          version
-          effectiveDate
-          content
-          contentType
-          isActive
+  /**
+   * Get active policies with session-level caching
+   * Policies are fetched once per session and cached using shareReplay
+   * @param forceRefresh - Force a fresh fetch from the server
+   */
+  getActivePolicies(forceRefresh = false): Observable<ActivePoliciesResult> {
+    // If force refresh or no cache exists, create new observable
+    if (forceRefresh || !this.activePoliciesCache$) {
+      const ACTIVE_POLICIES_QUERY = gql`
+        query ActivePolicies {
+          activePolicies {
+            id
+            policyType
+            version
+            title
+            effectiveDate
+            content
+            contentType
+            isActive
+            isMajorChange
+          }
         }
-      }
-    `;
+      `;
 
-    interface ActivePoliciesQueryResponse {
-      activePolicies: PolicyVersion[];
+      interface ActivePoliciesQueryResponse {
+        activePolicies: PolicyVersion[];
+      }
+
+      this.activePoliciesCache$ = this.query<ActivePoliciesQueryResponse>({
+        query: ACTIVE_POLICIES_QUERY,
+        fetchPolicy: 'network-only',
+      }).pipe(
+        map((data) => {
+          const policies = data?.activePolicies || [];
+          const result: ActivePoliciesResult = {
+            termsOfService: null,
+            privacyPolicy: null,
+            affiliateTerms: null,
+            cookiePolicy: null,
+          };
+
+          policies.forEach((policy) => {
+            switch (policy.policyType) {
+              case PolicyType.TERMS_OF_SERVICE:
+                result.termsOfService = policy;
+                break;
+              case PolicyType.PRIVACY_POLICY:
+                result.privacyPolicy = policy;
+                break;
+              case PolicyType.AFFILIATE_TERMS:
+                result.affiliateTerms = policy;
+                break;
+              case PolicyType.COOKIE_POLICY:
+                result.cookiePolicy = policy;
+                break;
+            }
+          });
+
+          return result;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }), // Cache for entire session
+      );
     }
 
-    return this.query<ActivePoliciesQueryResponse>({
-      query: ACTIVE_POLICIES_QUERY,
-      fetchPolicy: 'network-only',
-    }).pipe(
-      map((data) => {
-        const policies = data?.activePolicies || [];
-        const result: ActivePoliciesResult = {
-          termsOfService: null,
-          privacyPolicy: null,
-          affiliateTerms: null,
-          cookiePolicy: null,
-        };
+    return this.activePoliciesCache$;
+  }
 
-        policies.forEach((policy) => {
-          switch (policy.policyType) {
-            case PolicyType.TERMS_OF_SERVICE:
-              result.termsOfService = policy;
-              break;
-            case PolicyType.PRIVACY_POLICY:
-              result.privacyPolicy = policy;
-              break;
-            case PolicyType.AFFILIATE_TERMS:
-              result.affiliateTerms = policy;
-              break;
-            case PolicyType.COOKIE_POLICY:
-              result.cookiePolicy = policy;
-              break;
-          }
-        });
+  /**
+   * Clear the active policies cache
+   * Call this when policies are updated or user logs out
+   */
+  clearActivePoliciesCache(): void {
+    this.activePoliciesCache$ = null;
+  }
 
-        return result;
+  /**
+   * Get a specific policy by type
+   * @param policyType - The type of policy to retrieve
+   */
+  getPolicy(policyType: PolicyType): Observable<PolicyVersion | null> {
+    return this.getActivePolicies().pipe(
+      map((policies) => {
+        switch (policyType) {
+          case PolicyType.TERMS_OF_SERVICE:
+            return policies.termsOfService;
+          case PolicyType.PRIVACY_POLICY:
+            return policies.privacyPolicy;
+          case PolicyType.COOKIE_POLICY:
+            return policies.cookiePolicy;
+          case PolicyType.AFFILIATE_TERMS:
+            return policies.affiliateTerms;
+          default:
+            return null;
+        }
       }),
     );
+  }
+
+  /**
+   * Get the latest cookie policy version
+   */
+  getLatestCookiePolicyVersion(): Observable<string | null> {
+    return this.getPolicy(PolicyType.COOKIE_POLICY).pipe(map((policy) => policy?.version || null));
   }
 
   convertMarkdownToHtml(markdown: string): SafeHtml {
