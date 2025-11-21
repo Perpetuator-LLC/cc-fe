@@ -1,3 +1,57 @@
+# Changelog from v0.26.0 to v0.27.0
+
+This release introduces a comprehensive affiliate program with Stripe Connect integration, migrates authentication to OAuth2 with PKCE flow and GraphQL API, and implements a policy management system including cookie consent and terms acceptance. Additionally, the update adds public podcast pages with SEO optimization, RSS feed health monitoring for news sources, and significantly refactors URL routing to use shorter paths.
+
+## Enhancements
+
+- Implemented complete affiliate program with cash payouts via Stripe Connect, eligibility requirements, code management, credit conversion, and comprehensive admin controls
+- Migrated authentication system to OAuth2 with PKCE flow and GraphQL API with backward compatible route aliases
+- Added policy management system with cookie policy, terms acceptance tracking, newsletter subscriptions, and session-based caching
+- Introduced public podcast, episode, and category pages with SEO metadata and camelCase JSON responses
+- Added RSS feed health monitoring with status tracking, filtering capabilities, and research URL tracking for news sources
+- Implemented platform financial status dashboard and admin payout management interface
+- Added podcast view tracking and multi-level sorting criteria
+- Introduced resizable news detail panel with markdown support, categories, tags, and improved responsive layout
+- Added custom MP3 upload capability for podcast episodes with indicators
+- Implemented newsletter subscription system integrated with policy acceptance
+- Added SpectaQL for GraphQL API documentation generation
+- Enhanced registration flow with phone number collection, terms acceptance, and double-submit prevention
+- Added relay cursor pagination base class for consistent server-side pagination
+- Implemented comprehensive filtering for podcasts and episodes with default dropdowns
+- Added return URL persistence across authentication flows
+
+## Refactorings
+
+- Consolidated policy fetching into single service and migrated caching to Apollo with auth-aware clearing
+- Streamlined URL routing by shortening paths (e.g., `/episode` to `/e`, authenticated routes to short paths)
+- Migrated podcast history to localStorage and improved form controls
+- Extracted episodes table and affiliate admin features into reusable components
+- Centralized affiliate credit conversion logic and switched to PublicUser type
+- Reorganized podcast routes for better navigation consistency
+- Converted site statistics to camelCase naming convention
+- Improved cookie banner and policy guard with better logging and code organization
+- Enhanced news component styles and layout with markdown support
+- Extracted episode version control into dedicated component
+
+## Fixes
+
+- Corrected affiliate terms validation to check against current policy version
+- Prevented infinite loops in policy acceptance checks
+- Fixed sidebar visibility detection for `/p` route
+- Prevented news card title overflow with text truncation
+- Prevented duplicate job completion notifications with improved message tracking
+- Fixed markdown to HTML rendering issues
+- Corrected episode detail form submission and grid view button behaviors
+- Fixed podcast image upload response validation
+
+## Cleanups
+
+- Removed debug console.log statements throughout application
+- Removed backend sync from cookie consent service
+- Removed news source field from episode detail view
+- Removed unused code and improved code organization
+
+
 # Changelog from v0.25.0 to v0.26.0
 
 This update introduces comprehensive episode management capabilities, including validation tracking, content search, and enhanced metadata display, alongside improved job list visualization and memory management features.
