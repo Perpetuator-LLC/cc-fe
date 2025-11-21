@@ -6,6 +6,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 import { environment } from '../../environments/environment';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
@@ -34,6 +35,7 @@ import { GraphqlAuthService } from '../graphql-auth.service';
     MatCardHeader,
     MatCardContent,
     MatCardActions,
+    MatIcon,
     RouterLink,
   ],
   templateUrl: './login.component.html',
@@ -42,6 +44,7 @@ import { GraphqlAuthService } from '../graphql-auth.service';
 export class LoginComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription | undefined;
   private affiliateCode: string | null = null;
+  errorMessage: string | null = null;
 
   loginForm = new FormGroup({
     // TODO: Add validation equivalent to back-end
@@ -93,6 +96,8 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   onSubmit() {
     this.messageService.clearMessages();
+    this.errorMessage = null; // Clear previous errors
+
     this.subscription = this.graphqlAuthService
       .login(this.loginForm.value.email as string, this.loginForm.value.password as string)
       .subscribe({
@@ -107,7 +112,30 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           }
           // If not successful, error message was already shown by the service
         },
+        error: (error: Error) => {
+          // Capture the error message for display
+          this.errorMessage = error.message;
+        },
       });
+  }
+
+  /**
+   * Check if error is about unverified email
+   */
+  isEmailNotVerified(): boolean {
+    return this.errorMessage?.toLowerCase().includes('not verified') || false;
+  }
+
+  /**
+   * Navigate to resend verification page with email pre-filled
+   */
+  resendVerification(): void {
+    const email = this.loginForm.get('email')?.value;
+    if (email) {
+      this.router.navigate(['/resend-verification'], {
+        queryParams: { email },
+      });
+    }
   }
 
   private joinAffiliateProgram(code: string): void {

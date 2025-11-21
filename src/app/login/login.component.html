@@ -28,6 +28,35 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
+        <!-- Email Not Verified Alert (Special Case) -->
+        @if (isEmailNotVerified()) {
+          <div class="alert alert-warning" role="alert">
+            <div class="alert-header">
+              <mat-icon>warning</mat-icon>
+              <h4>Email Not Verified</h4>
+            </div>
+            <p>{{ errorMessage }}</p>
+            <hr />
+            <p class="alert-footer">
+              Didn't receive the verification email?
+              <button type="button" mat-button color="primary" (click)="resendVerification()">
+                Click here to resend
+              </button>
+            </p>
+          </div>
+        }
+
+        <!-- Generic Error Alert -->
+        @if (errorMessage && !isEmailNotVerified()) {
+          <div class="alert alert-error" role="alert">
+            <div class="alert-header">
+              <mat-icon>error</mat-icon>
+              <h4>Login Failed</h4>
+            </div>
+            <p>{{ errorMessage }}</p>
+          </div>
+        }
+
         <mat-form-field appearance="fill">
           <mat-label>Email</mat-label>
           <input matInput type="text" id="email" formControlName="email" autocomplete="email" />
