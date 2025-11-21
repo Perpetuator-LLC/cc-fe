@@ -4,8 +4,7 @@ import { MatButton } from '@angular/material/button';
 import { MatCardFooter } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
 import { CookieConsentService } from '../cookie-consent.service';
-import { PolicyService, PolicyType } from '../policy.service';
-import { PublicPolicyHttpService } from '../public-policy-http.service';
+import { PolicyService, PolicyType, ActivePoliciesResult } from '../policy.service';
 import { AuthService } from '../auth.service';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -51,7 +50,6 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   constructor(
     private cookieConsentService: CookieConsentService,
     private policyService: PolicyService,
-    private publicPolicyService: PublicPolicyHttpService,
     private authService: AuthService,
   ) {
     // Watch for login state changes and recheck cookie policy acceptance
@@ -104,7 +102,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   private fetchServerCookiePolicyVersion(): void {
     // Use getActivePolicies instead of getLatestCookiePolicyVersion for consistency
     this.subscriptions.add(
-      this.publicPolicyService
+      this.policyService
         .getActivePolicies()
         .pipe(take(1)) // Complete after first emission
         .subscribe({
@@ -204,11 +202,11 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
     } else {
       // User not logged in - save to localStorage only
       this.subscriptions.add(
-        this.publicPolicyService
+        this.policyService
           .getActivePolicies()
           .pipe(take(1)) // Complete after first emission
           .subscribe({
-            next: (policies) => {
+            next: (policies: ActivePoliciesResult) => {
               if (policies.cookiePolicy) {
                 const updatedConsent = {
                   version: policies.cookiePolicy.version,
@@ -221,7 +219,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
                 this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
               }
             },
-            error: (err) => {
+            error: (err: Error) => {
               console.error('[CookieBanner] Failed to load cookie policy for acceptance:', err);
               // Fallback: use server version if already fetched
               const version = this.serverCookiePolicyVersion();

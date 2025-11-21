@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable, WritableSignal } from '@angular/core';
+import { Injectable, WritableSignal, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -27,10 +27,23 @@ export class AuthService {
     private http: HttpClient,
     private messageService: MessageService,
     private oauthService: OAuthAuthService,
+    private injector: Injector,
   ) {}
 
   // Delegate all auth operations to OAuth service
   logout() {
+    // Clear policy cache on logout - get PolicyService lazily to avoid circular dependency
+    try {
+      // Dynamically get PolicyService to avoid circular dependency issues
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const policyServiceToken = this.injector.get('PolicyService' as any, null);
+      if (policyServiceToken && policyServiceToken.clearActivePoliciesCache) {
+        policyServiceToken.clearActivePoliciesCache();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_e) {
+      // PolicyService might not be available yet, that's ok
+    }
     this.oauthService.logout();
   }
 
