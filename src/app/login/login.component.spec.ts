@@ -3,11 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { AuthService } from '../auth.service';
 import { LoginComponent } from './login.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createTestJWT } from '../jwt';
 import { ToolbarService } from '../toolbar.service';
 import { ThemeService } from '../theme.service';
 import { MessageService } from '../message.service';
@@ -16,11 +14,12 @@ import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
+  let graphqlAuthService: jasmine.SpyObj<GraphqlAuthService>;
   let router: jasmine.SpyObj<Router>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
   let mockThemeService: jasmine.SpyObj<ThemeService>;
@@ -54,14 +53,14 @@ describe('LoginComponent', () => {
     ]);
     mockAffiliateStorageService.getAffiliateCode.and.returnValue(null);
 
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['login', 'getErrors']);
+    const graphqlAuthServiceSpy = jasmine.createSpyObj('GraphqlAuthService', ['login']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, LoginComponent, HttpClientTestingModule, NoopAnimationsModule],
       providers: [
-        { provide: AuthService, useValue: authServiceSpy },
+        { provide: GraphqlAuthService, useValue: graphqlAuthServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: ThemeService, useValue: mockThemeService },
@@ -77,7 +76,7 @@ describe('LoginComponent', () => {
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    graphqlAuthService = TestBed.inject(GraphqlAuthService) as jasmine.SpyObj<GraphqlAuthService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     fixture.detectChanges();
   });
@@ -94,17 +93,12 @@ describe('LoginComponent', () => {
   //      .toHaveBeenCalledWith(component.toolbarTemplate);
   // });
 
-  it('should call AuthService login on form submit', (done) => {
-    authService.login.and.returnValue(
-      of({
-        access: createTestJWT({}),
-        refresh: createTestJWT({}, 3600 * 24),
-      }),
-    );
+  it('should call GraphqlAuthService login on form submit', (done) => {
+    graphqlAuthService.login.and.returnValue(of(true));
     component.loginForm.setValue({ email: 'test@example.com', password: 'testpassword' });
     component.onSubmit();
 
-    expect(authService.login).toHaveBeenCalledWith('test@example.com', 'testpassword');
+    expect(graphqlAuthService.login).toHaveBeenCalledWith('test@example.com', 'testpassword');
 
     // Wait for async subscription to complete
     setTimeout(() => {
