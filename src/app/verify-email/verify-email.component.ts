@@ -1,7 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MessageService } from '../message.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({
@@ -17,7 +16,6 @@ export class VerifyEmailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private messageService: MessageService,
     private graphqlAuthService: GraphqlAuthService,
   ) {}
 
@@ -36,11 +34,7 @@ export class VerifyEmailComponent implements OnInit {
         if (response) {
           console.debug('Email verification response:', response);
           this.verificationStatus = 'Email verified successfully!';
-          this.messageService.addMessage({
-            type: 'success',
-            text: 'Email verified successfully! You can now log in.',
-            dismissible: true,
-          });
+          // Message already added by GraphqlAuthService.verify()
           this.router.navigate(['/home']);
         } else {
           this.verificationStatus = 'Email verification failed. Please try again.';
@@ -49,6 +43,7 @@ export class VerifyEmailComponent implements OnInit {
       error: (error: unknown) => {
         console.debug('Email verification error:', error);
         this.verificationStatus = 'Email verification failed. Please try again.';
+        // Error message already added by GraphqlAuthService.verify()
       },
     });
   }

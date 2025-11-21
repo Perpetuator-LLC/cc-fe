@@ -38,6 +38,14 @@ mat-card.register-card {
     border-radius: 10px;
     color: var(--theme-white);
     border: 1px solid var(--border-color);
+
+    &:disabled,
+    &[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--secondary-color-dark) !important;
+      color: var(--description-color) !important;
+    }
   }
 
   .forgot {

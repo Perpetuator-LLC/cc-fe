@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, switchMap, take, debounceTime } from 'rxjs/operators';
+import { filter, switchMap, take, debounceTime, catchError } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { PolicyService, PolicyVersion } from './policy.service';
 import { AuthService } from './auth.service';
@@ -146,6 +146,10 @@ export class PolicyGuardService {
         // Try to link localStorage cookie consent before showing dialog
         return this.linkLocalStorageCookieConsent(missingPolicies).pipe(
           switchMap((remainingPolicies) => {
+            // Always sync cookie consent to localStorage to ensure version is up-to-date
+            // This covers the case where user registered with acceptTerms=true
+            this.syncCookieConsentToLocalStorage();
+
             if (remainingPolicies.length === 0) {
               return of(true);
             }
@@ -153,12 +157,8 @@ export class PolicyGuardService {
             return this.showPolicyAcceptanceDialog(remainingPolicies, false).pipe(
               switchMap((accepted) => {
                 if (accepted) {
-                  // Sync cookie policy to localStorage and CookieConsentService if it was in the accepted policies
-                  const cookiePolicy = remainingPolicies.find((p) => p.policyType === 'COOKIE_POLICY');
-                  if (cookiePolicy) {
-                    this.syncCookieConsentToLocalStorage();
-                  }
-
+                  // Sync again after dialog acceptance
+                  this.syncCookieConsentToLocalStorage();
                   return of(true);
                 } else {
                   // User must accept policies
@@ -187,26 +187,40 @@ export class PolicyGuardService {
 
     const cookiePolicy = missingPolicies.find((p) => p.policyType === 'COOKIE_POLICY');
     if (!cookiePolicy) {
-      // Cookie policy not missing - sync localStorage with DB
-      this.syncCookieConsentToLocalStorage();
+      // Cookie policy not missing - user already accepted or doesn't need to
+      // Still sync localStorage to ensure it has the correct server version
       return of(missingPolicies);
     }
 
     try {
       const consent = JSON.parse(localConsent);
 
-      if (consent.version === cookiePolicy.version && consent.accepted) {
+      // Accept if user previously accepted (version matches OR is placeholder from registration)
+      if (consent.accepted) {
         const signature = `cookie_${consent.version}_${consent.date}`;
+
+        console.debug('[PolicyGuard] Linking localStorage cookie consent to backend:', {
+          version: consent.version,
+          cookiePolicyVersion: cookiePolicy.version,
+        });
 
         return this.policyService.acceptPolicy(cookiePolicy.id, signature).pipe(
           switchMap(() => {
+            console.debug('[PolicyGuard] Successfully linked cookie consent to backend');
             const remainingPolicies = missingPolicies.filter((p) => p.policyType !== 'COOKIE_POLICY');
             return of(remainingPolicies);
+          }),
+          catchError((err) => {
+            console.error('[PolicyGuard] Failed to link cookie consent:', err);
+            // On error, keep cookie policy in missing list so user can accept via dialog
+            return of(missingPolicies);
           }),
         );
       }
     } catch (e) {
       console.error('[PolicyGuard] Failed to parse localStorage cookie consent:', e);
+      // Clear invalid localStorage entry
+      localStorage.removeItem('cookie_consent');
     }
 
     return of(missingPolicies);

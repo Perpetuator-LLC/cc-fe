@@ -133,6 +133,9 @@ describe('PodcastDetailComponentComponent', () => {
         newsTargetWords: 0,
         researchPrompt: '',
         researchTargetWords: 0,
+        latestEpisodeDate: null,
+        latestInternalEpisodeDate: null,
+        viewCount: 0,
       }),
     );
 

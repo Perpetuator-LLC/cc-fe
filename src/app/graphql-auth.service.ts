@@ -207,6 +207,12 @@ export class GraphqlAuthService {
         switchMap((result) => {
           const response = result.data?.register;
           if (response?.success) {
+            // If user accepted terms, create localStorage cookie consent entry
+            // This will be linked to their account on first login by PolicyGuardService
+            if (acceptTerms) {
+              this.createInitialCookieConsent();
+            }
+
             if (response.verificationEmailSent) {
               // Email verification required - show message
               this.messageService.addMessage({
@@ -249,6 +255,21 @@ export class GraphqlAuthService {
           return of(false);
         }),
       );
+  }
+
+  /**
+   * Create initial localStorage cookie consent entry
+   * This will be synced to the backend by PolicyGuardService on first login
+   */
+  private createInitialCookieConsent(): void {
+    // Use a temporary version that PolicyGuardService will update with the actual server version
+    const initialConsent = {
+      version: '1.0.0', // Placeholder - will be updated by PolicyGuardService
+      accepted: true,
+      date: new Date().toISOString(),
+    };
+    localStorage.setItem('cookie_consent', JSON.stringify(initialConsent));
+    console.debug('[GraphqlAuthService] Created initial cookie consent in localStorage for new user');
   }
 
   /**

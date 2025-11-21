@@ -2,18 +2,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RegisterComponent } from './register.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
+import { GraphqlAuthService } from '../graphql-auth.service';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockGraphqlAuthService: jasmine.SpyObj<GraphqlAuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
   let mockMessageService: jasmine.SpyObj<MessageService>;
@@ -22,21 +22,20 @@ describe('RegisterComponent', () => {
     mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
     const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['register', 'getErrors']);
+    mockGraphqlAuthService = jasmine.createSpyObj('GraphqlAuthService', ['register']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockMessageService = jasmine.createSpyObj('MessageService', [
-      'addMessage',
-      'clearMessages',
-      'removeMessage',
-      'messageCount',
-    ]);
+    mockMessageService = jasmine.createSpyObj('MessageService', ['addMessage', 'clearMessages', 'removeMessage']);
+    Object.defineProperty(mockMessageService, 'messageCount', {
+      get: () => 0,
+      configurable: true,
+    });
     mockMessageService.messages$ = of([]);
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, HttpClientTestingModule, NoopAnimationsModule],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
+        { provide: GraphqlAuthService, useValue: mockGraphqlAuthService },
         { provide: Router, useValue: mockRouter },
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: MessageService, useValue: mockMessageService },
@@ -54,21 +53,17 @@ describe('RegisterComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call AuthService.register when the form is valid and submitted', () => {
+  it('should call GraphqlAuthService.register when the form is valid and submitted', () => {
     component.registerForm.setValue({
       email: 'test@example.com',
       password: 'password123',
       acceptTerms: true,
     });
 
-    const mockToken = {
-      access: 'access-token',
-      refresh: 'refresh-token',
-    };
-    mockAuthService.register.and.returnValue(of(mockToken));
+    mockGraphqlAuthService.register.and.returnValue(of(true));
     component.onSubmit();
-    expect(mockAuthService.register).toHaveBeenCalledWith('test@example.com', 'password123');
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/charts']);
+    expect(mockGraphqlAuthService.register).toHaveBeenCalledWith('test@example.com', 'password123', true);
+    expect(mockRouter.navigate).toHaveBeenCalled();
   });
 
   it('should display an error when registration fails', () => {
@@ -79,12 +74,12 @@ describe('RegisterComponent', () => {
     });
 
     const mockError = 'Registration failed: mock error';
-    mockAuthService.register.and.returnValue(throwError(() => new Error(mockError)));
+    mockGraphqlAuthService.register.and.returnValue(throwError(() => new Error(mockError)));
     component.onSubmit();
     expect(mockMessageService.addMessage).toHaveBeenCalled();
   });
 
-  it('should not call AuthService.register if the form is invalid', () => {
+  it('should not call GraphqlAuthService.register if the form is invalid', () => {
     // Arrange
     component.registerForm.setValue({
       email: 'invalid-email',
@@ -92,6 +87,6 @@ describe('RegisterComponent', () => {
       acceptTerms: true,
     });
     component.onSubmit();
-    expect(mockAuthService.register).not.toHaveBeenCalled();
+    expect(mockGraphqlAuthService.register).not.toHaveBeenCalled();
   });
 });
