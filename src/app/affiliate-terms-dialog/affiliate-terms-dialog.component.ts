@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { PolicyService, PolicyVersion } from '../policy.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-affiliate-terms-dialog',
@@ -34,7 +35,20 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private policyService: PolicyService,
     private router: Router,
-  ) {}
+    private authService: AuthService,
+  ) {
+    // Close dialog if user logs out - use effect to monitor signal
+    effect(
+      () => {
+        const isLoggedIn = this.authService.isLoggedIn();
+        if (!isLoggedIn) {
+          // User logged out, close the dialog
+          this.dialogRef.close(false);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit(): void {
     this.checkEligibility();
