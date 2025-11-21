@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
 import { BaseService } from './base.service';
@@ -878,11 +878,21 @@ export class AffiliateService extends BaseService {
   }
 
   /**
-   * Check if user has accepted affiliate terms using the new policy acceptance system
-   * @returns Observable<boolean> - true if affiliate terms have been accepted
+   * Check if user has accepted the current version of affiliate terms
+   * @returns Observable<boolean> - true if the current version has been accepted
    */
   checkAffiliateTermsAcceptance(): Observable<boolean> {
-    const query = gql`
+    const ACTIVE_POLICIES_QUERY = gql`
+      query ActivePoliciesMetadata {
+        activePolicies {
+          id
+          policyType
+          version
+        }
+      }
+    `;
+
+    const ACCEPTANCES_QUERY = gql`
       query CheckAffiliateTermsAcceptance {
         myPolicyAcceptances {
           id
@@ -896,13 +906,39 @@ export class AffiliateService extends BaseService {
       }
     `;
 
-    return this.query<PolicyAcceptancesResponse>({
-      query,
-      fetchPolicy: 'network-only',
+    interface ActivePoliciesResponse {
+      activePolicies: {
+        id: string;
+        policyType: string;
+        version: string;
+      }[];
+    }
+
+    return forkJoin({
+      activePolicies: this.query<ActivePoliciesResponse>({
+        query: ACTIVE_POLICIES_QUERY,
+        fetchPolicy: 'network-only',
+      }),
+      acceptances: this.query<PolicyAcceptancesResponse>({
+        query: ACCEPTANCES_QUERY,
+        fetchPolicy: 'network-only',
+      }),
     }).pipe(
-      map((data) => {
-        // Check if user has accepted AFFILIATE_TERMS policy
-        return data.myPolicyAcceptances.some((acceptance) => acceptance.policy.policyType === 'AFFILIATE_TERMS');
+      map(({ activePolicies, acceptances }) => {
+        // Find the current active affiliate terms version
+        const activeAffiliateTerms = activePolicies.activePolicies.find(
+          (policy) => policy.policyType === 'AFFILIATE_TERMS',
+        );
+
+        if (!activeAffiliateTerms) {
+          // No active affiliate terms policy exists
+          return false;
+        }
+
+        // Check if user has accepted the current version
+        const acceptance = acceptances.myPolicyAcceptances.find((a) => a.policy.policyType === 'AFFILIATE_TERMS');
+
+        return acceptance?.policy.version === activeAffiliateTerms.version;
       }),
     );
   }
