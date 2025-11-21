@@ -207,8 +207,9 @@ export class GraphqlAuthService {
         switchMap((result) => {
           const response = result.data?.register;
           if (response?.success) {
-            // If user accepted terms, create localStorage cookie consent entry
-            // This will be linked to their account on first login by PolicyGuardService
+            // If user accepted terms during registration, create localStorage cookie consent entry
+            // This represents acceptance of Cookie Policy, Privacy Policy, and Terms of Service
+            // PolicyGuardService will link this to their account on first login
             if (acceptTerms) {
               this.createInitialCookieConsent();
             }
@@ -258,8 +259,12 @@ export class GraphqlAuthService {
   }
 
   /**
-   * Create initial localStorage cookie consent entry
-   * This will be synced to the backend by PolicyGuardService on first login
+   * Create initial localStorage cookie consent entry for new registrations
+   * When user accepts terms during registration, they are also accepting:
+   * - Cookie Policy
+   * - Privacy Policy
+   * - Terms of Service
+   * This localStorage entry will be synced to the backend by PolicyGuardService on first login
    */
   private createInitialCookieConsent(): void {
     // Use a temporary version that PolicyGuardService will update with the actual server version
