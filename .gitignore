@@ -5,6 +5,9 @@
 /src/environments/environment.prod.ts
 /logs
 
+# Generated documentation
+/docs/graphql
+
 # Compiled output
 /dist
 /tmp

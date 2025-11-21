@@ -22,6 +22,12 @@ export interface OAuth2TokenResponse {
   scope: string;
 }
 
+export interface OAuth2ErrorResponse {
+  error: string; // e.g., "invalid_grant"
+  error_description?: string; // User-friendly message
+  error_uri?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -83,26 +89,13 @@ export class OAuthAuthService {
       }
     });
 
-    // Check if we have stored tokens from OAuth2 password grant
-    // OAuthService reads from sessionStorage by default
-    const storedToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token');
-    const expiresAt = sessionStorage.getItem('expires_at') || localStorage.getItem('expires_at');
+    // Check if we have stored tokens from OAuth2 password grant in localStorage
+    const storedToken = localStorage.getItem('access_token');
+    const expiresAt = localStorage.getItem('expires_at');
 
     if (storedToken && expiresAt) {
       const isExpired = Date.now() >= parseInt(expiresAt);
       if (!isExpired) {
-        // Restore to sessionStorage if it was in localStorage
-        if (!sessionStorage.getItem('access_token')) {
-          sessionStorage.setItem('access_token', storedToken);
-          sessionStorage.setItem('expires_at', expiresAt);
-          const refreshToken = localStorage.getItem('refresh_token');
-          const tokenType = localStorage.getItem('token_type');
-          const scope = localStorage.getItem('scope');
-          if (refreshToken) sessionStorage.setItem('refresh_token', refreshToken);
-          if (tokenType) sessionStorage.setItem('token_type', tokenType);
-          if (scope) sessionStorage.setItem('granted_scopes', scope);
-        }
-
         this.loggedInSignal.set(true);
         // Don't load user profile yet - will be loaded when needed
       }
@@ -141,45 +134,70 @@ export class OAuthAuthService {
         map(() => true),
         catchError((error) => {
           console.error('OAuth2 password grant login failed:', error);
-
-          // Extract error message from OAuth2 response
-          let errorMessage = 'Login failed. Please check your credentials.';
-          if (error.error?.error_description) {
-            errorMessage = error.error.error_description;
-          } else if (error.error?.error) {
-            errorMessage = error.error.error;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-
-          // Return observable that throws error so graphql-auth.service can catch it
-          return throwError(() => new Error(errorMessage));
+          return throwError(() => new Error(this.extractOAuthErrorMessage(error)));
         }),
       );
   }
 
   /**
-   * Store OAuth2 tokens properly using OAuthService methods
+   * Extract user-friendly error message from OAuth2 error response
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private extractOAuthErrorMessage(error: any): string {
+    // Check if error response has OAuth2 error format
+    if (error.error && typeof error.error === 'object') {
+      const oauthError = error.error as OAuth2ErrorResponse;
+
+      // Use error_description if available (most user-friendly)
+      if (oauthError.error_description) {
+        return oauthError.error_description;
+      }
+
+      // Fall back to error code with friendly message
+      if (oauthError.error) {
+        return this.getOAuthErrorMessage(oauthError.error);
+      }
+    }
+
+    // Handle network errors
+    if (error.status === 0) {
+      return 'Unable to connect to the server. Please check your internet connection.';
+    }
+
+    // Fallback for unexpected errors
+    return 'Login failed. Please check your credentials and try again.';
+  }
+
+  /**
+   * Get user-friendly error message for OAuth2 error codes
+   */
+  private getOAuthErrorMessage(errorCode: string): string {
+    const errorMessages: Record<string, string> = {
+      invalid_grant: 'Invalid email or password.',
+      invalid_client: 'Invalid application configuration.',
+      invalid_request: 'Invalid login request.',
+      unauthorized_client: 'This application is not authorized.',
+      unsupported_grant_type: 'Unsupported authentication method.',
+      access_denied: 'Access denied.',
+    };
+
+    return errorMessages[errorCode] || 'Authentication failed. Please try again.';
+  }
+
+  /**
+   * Store OAuth2 tokens in localStorage
    */
   private storeOAuthTokens(response: OAuth2TokenResponse): void {
     const expiresAt = Date.now() + response.expires_in * 1000;
 
-    // Store in sessionStorage using keys that OAuthService expects
-    // The library reads from sessionStorage by default
-    sessionStorage.setItem('access_token', response.access_token);
-    sessionStorage.setItem('refresh_token', response.refresh_token);
-    sessionStorage.setItem('expires_at', expiresAt.toString());
-    sessionStorage.setItem('token_type', response.token_type);
-    sessionStorage.setItem('granted_scopes', response.scope);
-
-    // Also store in localStorage for persistence across tabs
+    // Store in localStorage for persistence across browser sessions and tabs
     localStorage.setItem('access_token', response.access_token);
     localStorage.setItem('refresh_token', response.refresh_token);
     localStorage.setItem('expires_at', expiresAt.toString());
     localStorage.setItem('token_type', response.token_type);
     localStorage.setItem('scope', response.scope);
 
-    // Force the OAuthService to recognize the token by triggering an event
+    // Trigger token_received event for OAuth library
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.oauthService as any).eventsSubject.next({
       type: 'token_received',
@@ -197,14 +215,7 @@ export class OAuthAuthService {
   logout(): void {
     this.ensureInitialized();
 
-    // Clear OAuth tokens from sessionStorage (where OAuthService reads from)
-    sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('refresh_token');
-    sessionStorage.removeItem('expires_at');
-    sessionStorage.removeItem('token_type');
-    sessionStorage.removeItem('granted_scopes');
-
-    // Also clear from localStorage
+    // Clear OAuth tokens from localStorage
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('expires_at');
@@ -230,10 +241,10 @@ export class OAuthAuthService {
       return true;
     }
 
-    // Fallback: Check if we have a valid token in storage
-    const token = sessionStorage.getItem('access_token') || localStorage.getItem('access_token');
+    // Fallback: Check if we have a valid token in localStorage
+    const token = localStorage.getItem('access_token');
     if (token) {
-      const expiresAt = sessionStorage.getItem('expires_at') || localStorage.getItem('expires_at');
+      const expiresAt = localStorage.getItem('expires_at');
       if (expiresAt) {
         return Date.now() < parseInt(expiresAt);
       }
@@ -248,18 +259,14 @@ export class OAuthAuthService {
     // Try OAuth service first
     let token: string | null = this.oauthService.getAccessToken();
 
-    // Fallback: If OAuth service doesn't return token, get it directly from storage
+    // Fallback: If OAuth service doesn't return token, get it directly from localStorage
     // This handles the case where angular-oauth2-oidc doesn't recognize password grant tokens
     if (!token) {
-      const sessionToken = sessionStorage.getItem('access_token');
-      const localToken = localStorage.getItem('access_token');
-      token = sessionToken || localToken;
+      token = localStorage.getItem('access_token');
 
       if (token) {
         // Verify token hasn't expired
-        const sessionExpires = sessionStorage.getItem('expires_at');
-        const localExpires = localStorage.getItem('expires_at');
-        const expiresAt = sessionExpires || localExpires;
+        const expiresAt = localStorage.getItem('expires_at');
 
         if (expiresAt && Date.now() >= parseInt(expiresAt)) {
           // Token expired, clear it
@@ -282,20 +289,56 @@ export class OAuthAuthService {
     }
 
     // If no token at all (not logged in), return null immediately
-    // Don't try to refresh - there's nothing to refresh
-    if (!token) {
+    if (!token && !localStorage.getItem('refresh_token')) {
       return of(null);
     }
 
-    // Token exists but is expired - try to refresh
-    return from(this.oauthService.refreshToken()).pipe(
+    // Token exists but is expired - try to refresh using OAuth2 refresh token
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      this.logout();
+      return of(null);
+    }
+
+    // Use OAuth2 password grant refresh token flow
+    return this.refreshAccessToken(refreshToken).pipe(
       map(() => this.getAccessToken()),
-      catchError(() => {
+      catchError((error) => {
+        console.error('Token refresh failed:', error);
         // Refresh failed - clear session
         this.logout();
         return of(null);
       }),
     );
+  }
+
+  /**
+   * Refresh access token using OAuth2 refresh token grant
+   */
+  private refreshAccessToken(refreshToken: string): Observable<void> {
+    const body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: environment.OAUTH_CLIENT_ID,
+    });
+
+    return this.http
+      .post<OAuth2TokenResponse>(`${environment.OAUTH_ISSUER}/o/token/`, body.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+      .pipe(
+        tap((response) => {
+          // Store new tokens
+          this.storeOAuthTokens(response);
+        }),
+        map(() => void 0),
+        catchError((error) => {
+          console.error('Refresh token request failed:', error);
+          return throwError(() => new Error('Token refresh failed'));
+        }),
+      );
   }
 
   private loadUserProfile(): void {

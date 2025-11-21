@@ -1,0 +1,301 @@
+<!--
+  Copyright (c) 2025 Perpetuator LLC
+
+  This demo file is provided as-is for developers integrating with Capital Copilot's API.
+  You are free to:
+  - Copy this file
+  - Modify it for your needs
+  - Use it in your applications
+  - Distribute it with your projects
+
+  No attribution required. Use it however you need!
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capital Copilot OAuth Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    .query-box {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      margin: 10px 0;
+    }
+    .response {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    .error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .info {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>🚀 Capital Copilot OAuth2 Demo</h1>
+  <p class="info">This demo shows OAuth2 authentication with GraphQL API calls</p>
+
+  <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 15px 0;">
+    <h4 style="margin-top: 0;">Current Configuration:</h4>
+    <p class="info" style="margin: 5px 0;"><strong>API URL:</strong> <code id="config-api-url"></code></p>
+    <p class="info" style="margin: 5px 0;"><strong>Redirect URI:</strong> <code id="config-redirect-uri"></code></p>
+    <p class="info" style="margin: 5px 0;"><strong>Client ID:</strong> <code id="config-client-id"></code></p>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; color: #0066cc;">📝 How to configure</summary>
+      <div style="margin-top: 10px; font-size: 13px;">
+        <p><strong>Development:</strong></p>
+        <code style="display: block; background: white; padding: 8px; border-radius: 4px; margin: 5px 0;">
+          demo.html?apiUrl=http://127.0.0.1:8000&redirectUri=http://localhost:3000/callback&clientId=YOUR_DEV_CLIENT_ID
+        </code>
+        <p style="margin-top: 10px;"><strong>Production (defaults):</strong></p>
+        <code style="display: block; background: white; padding: 8px; border-radius: 4px; margin: 5px 0;">
+          demo.html (no params needed)
+        </code>
+      </div>
+    </details>
+  </div>
+
+  <div id="auth-section">
+    <button onclick="initiateOAuth()">Login with OAuth2</button>
+  </div>
+
+  <div id="user-section" style="display: none;">
+    <h3>✅ Authenticated Successfully!</h3>
+    <p><strong>Access Token:</strong> <code id="access-token"></code></p>
+    <p class="info">Token expires in: <span id="expires-in"></span> seconds</p>
+
+    <h3>Try GraphQL Queries:</h3>
+
+    <div class="query-box">
+      <strong>Query 1: Get My Data (requires authentication)</strong>
+      <pre>query {
+        myData {
+    id
+    name
+  }
+}</pre>
+      <button onclick="executeQuery('myData')">Execute Query</button>
+    </div>
+
+    <div class="query-box">
+      <strong>Query 2: AI Analysis (requires 'ai:analyze' scope)</strong>
+      <pre>query {
+        aiAnalysis(input: "Analyze market trends")
+}</pre>
+      <button onclick="executeQuery('aiAnalysis')">Execute Query</button>
+    </div>
+
+    <div id="response" style="display: none;"></div>
+
+    <button onclick="logout()" style="background: #dc3545; margin-top: 20px;">Logout</button>
+  </div>
+</div>
+
+<script>
+  // Parse query parameters for configuration
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // Configuration - Can be overridden via query parameters
+  // Usage: demo.html?apiUrl=http://127.0.0.1:8000&redirectUri=http://localhost:4200/callback&clientId=YOUR_ID
+
+  // Determine default redirect URI based on current location
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const defaultRedirectUri = isLocalhost
+    ? `http://localhost:4200/callback`  // Development default
+    : 'https://capitalcopilot.io/callback';  // Production default
+
+  const CONFIG = {
+    // Get clientId from query param or use placeholder
+    clientId: urlParams.get('clientId') || 'YOUR_CLIENT_ID_HERE',
+
+    // Get redirectUri from query param or use smart default
+    redirectUri: urlParams.get('redirectUri') || defaultRedirectUri,
+
+    // Get apiUrl from query param or use production default
+    apiUrl: urlParams.get('apiUrl') || 'https://api.capitalcopilot.io',
+  };
+
+  // Derive other endpoints from apiUrl
+  CONFIG.authorizationEndpoint = `${CONFIG.apiUrl}/o/authorize/`;
+  CONFIG.tokenEndpoint = `${CONFIG.apiUrl}/o/token/`;
+  CONFIG.graphqlEndpoint = `${CONFIG.apiUrl}/graphql/`;
+
+  // Log configuration for debugging
+  console.log('OAuth Demo Configuration:', {
+    apiUrl: CONFIG.apiUrl,
+    redirectUri: CONFIG.redirectUri,
+    clientId: CONFIG.clientId.substring(0, 10) + '...',
+    endpoints: {
+      authorization: CONFIG.authorizationEndpoint,
+      token: CONFIG.tokenEndpoint,
+      graphql: CONFIG.graphqlEndpoint
+    }
+  });
+
+  // Check if returning from OAuth callback
+  window.onload = function() {
+    // Populate configuration display
+    document.getElementById('config-api-url').textContent = CONFIG.apiUrl;
+    document.getElementById('config-redirect-uri').textContent = CONFIG.redirectUri;
+    document.getElementById('config-client-id').textContent =
+      CONFIG.clientId === 'YOUR_CLIENT_ID_HERE'
+        ? 'Not set (add ?clientId=... to URL)'
+        : CONFIG.clientId.substring(0, 20) + '...';
+
+    const code = urlParams.get('code');
+
+    if (code) {
+      exchangeCodeForToken(code);
+    } else {
+      checkExistingToken();
+    }
+  };
+
+  function initiateOAuth() {
+    // Save configuration to sessionStorage so it persists through OAuth redirect
+    sessionStorage.setItem('oauth_demo_apiUrl', CONFIG.apiUrl);
+    sessionStorage.setItem('oauth_demo_clientId', CONFIG.clientId);
+    sessionStorage.setItem('oauth_demo_redirectUri', CONFIG.redirectUri);
+
+    const params = new URLSearchParams({
+      client_id: CONFIG.clientId,
+      response_type: 'code',
+      redirect_uri: CONFIG.redirectUri,
+      scope: 'read write ai:analyze',
+    });
+
+    window.location.href = `${CONFIG.authorizationEndpoint}?${params}`;
+  }
+
+  async function exchangeCodeForToken(code) {
+    try {
+      const response = await fetch(CONFIG.tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: CONFIG.redirectUri,
+          client_id: CONFIG.clientId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        localStorage.setItem('expires_at', Date.now() + (data.expires_in * 1000));
+
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showAuthenticatedView(data);
+      }
+    } catch (error) {
+      console.error('Token exchange failed:', error);
+      alert('Authentication failed. Please try again.');
+    }
+  }
+
+  function checkExistingToken() {
+    const token = localStorage.getItem('access_token');
+    const expiresAt = localStorage.getItem('expires_at');
+
+    if (token && expiresAt && Date.now() < parseInt(expiresAt)) {
+      showAuthenticatedView({
+        access_token: token,
+        expires_in: Math.floor((parseInt(expiresAt) - Date.now()) / 1000)
+      });
+    }
+  }
+
+  function showAuthenticatedView(tokenData) {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('user-section').style.display = 'block';
+    document.getElementById('access-token').textContent =
+      tokenData.access_token.substring(0, 20) + '...';
+    document.getElementById('expires-in').textContent = tokenData.expires_in;
+  }
+
+  async function executeQuery(queryType) {
+    const token = localStorage.getItem('access_token');
+    let query;
+
+    if (queryType === 'myData') {
+      query = `query { myData { id name } }`;
+    } else if (queryType === 'aiAnalysis') {
+      query = `query { aiAnalysis(input: "Analyze market trends") }`;
+    }
+
+    try {
+      const response = await fetch(CONFIG.graphqlEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      const data = await response.json();
+
+      const responseDiv = document.getElementById('response');
+      responseDiv.style.display = 'block';
+      responseDiv.className = data.errors ? 'response error' : 'response';
+      responseDiv.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+      const responseDiv = document.getElementById('response');
+      responseDiv.style.display = 'block';
+      responseDiv.className = 'response error';
+      responseDiv.textContent = 'Error: ' + error.message;
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('expires_at');
+    location.reload();
+  }
+</script>
+</body>
+</html>

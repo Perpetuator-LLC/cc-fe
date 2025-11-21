@@ -1,0 +1,104 @@
+<!--
+  Copyright (c) 2025 Perpetuator LLC
+
+  This demo file is provided as-is for developers integrating with Capital Copilot's API.
+  You are free to:
+  - Copy this file
+  - Modify it for your needs
+  - Use it in your applications
+  - Distribute it with your projects
+
+  No attribution required. Use it however you need!
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth Callback - Capital Copilot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0066cc;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .error {
+      color: #dc3545;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔄 Processing OAuth Callback...</h2>
+  <div class="spinner"></div>
+  <p id="status">Redirecting back to demo...</p>
+
+  <script>
+    // Get the full URL with query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    const errorDescription = urlParams.get('error_description');
+
+    if (error) {
+      // OAuth error occurred
+      document.getElementById('status').innerHTML = `
+        <div class="error">
+          <h3>❌ OAuth Error</h3>
+          <p><strong>Error:</strong> ${error}</p>
+          ${errorDescription ? `<p><strong>Description:</strong> ${errorDescription}</p>` : ''}
+          <p><a href="/demo.html">Return to demo</a></p>
+        </div>
+      `;
+    } else if (code) {
+      // Success - redirect back to demo.html with the code
+      // Preserve any configuration query params that were used
+      const demoParams = new URLSearchParams();
+
+      // Add the authorization code
+      demoParams.set('code', code);
+
+      // Preserve config params from sessionStorage if they were set
+      const savedApiUrl = sessionStorage.getItem('oauth_demo_apiUrl');
+      const savedClientId = sessionStorage.getItem('oauth_demo_clientId');
+      const savedRedirectUri = sessionStorage.getItem('oauth_demo_redirectUri');
+
+      if (savedApiUrl) demoParams.set('apiUrl', savedApiUrl);
+      if (savedClientId) demoParams.set('clientId', savedClientId);
+      if (savedRedirectUri) demoParams.set('redirectUri', savedRedirectUri);
+
+      // Redirect back to demo with code
+      window.location.href = `/demo.html?${demoParams.toString()}`;
+    } else {
+      // No code or error - something went wrong
+      document.getElementById('status').innerHTML = `
+        <div class="error">
+          <h3>⚠️ Unexpected Response</h3>
+          <p>No authorization code or error received.</p>
+          <p><a href="/demo.html">Return to demo</a></p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
+
