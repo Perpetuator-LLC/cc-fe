@@ -24,10 +24,10 @@ export interface PolicyVersion {
   id: string;
   policyType: PolicyType;
   version: string;
-  effectiveDate: string;
-  content: string;
-  contentType: PolicyContentType;
-  isActive: boolean;
+  effectiveDate?: string;
+  content?: string;
+  contentType?: PolicyContentType;
+  isActive?: boolean;
   title?: string;
   isMajorChange?: boolean;
 }
@@ -221,7 +221,9 @@ export class PolicyService extends BaseService {
   }
 
   /**
-   * Get a specific policy by type
+   * Get a specific policy by type (full content for display)
+   * Use this only when you need to display the policy content to the user
+   * For version checks, use getActivePoliciesMetadata() instead
    * @param policyType - The type of policy to retrieve
    */
   getPolicy(policyType: PolicyType): Observable<PolicyVersion | null> {
@@ -283,6 +285,10 @@ export class PolicyService extends BaseService {
   }
 
   renderPolicyContent(policy: PolicyVersion): SafeHtml {
+    if (!policy.content) {
+      return this.sanitizer.sanitize(1, '<p>Loading policy content...</p>') as SafeHtml;
+    }
+
     if (policy.contentType === PolicyContentType.MARKDOWN) {
       return this.convertMarkdownToHtml(policy.content);
     } else {
@@ -429,9 +435,10 @@ export class PolicyService extends BaseService {
 
   /**
    * Check if a specific policy type has been accepted (current version)
+   * Uses metadata query to avoid fetching full content
    */
   hasPolicyBeenAccepted(policyType: PolicyType): Observable<boolean> {
-    return this.getActivePolicies().pipe(
+    return this.getActivePoliciesMetadata().pipe(
       take(1), // Complete after first emission to prevent loops
       switchMap((activePolicies: ActivePoliciesResult) => {
         let activePolicy: PolicyVersion | null = null;

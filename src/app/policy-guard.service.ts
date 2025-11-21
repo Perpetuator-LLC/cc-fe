@@ -2,9 +2,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, switchMap, take, debounceTime, catchError } from 'rxjs/operators';
+import { filter, switchMap, take, debounceTime, catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { PolicyService, PolicyVersion } from './policy.service';
+import { PolicyService, PolicyVersion, PolicyType } from './policy.service';
 import { AuthService } from './auth.service';
 import { CookieConsentService } from './cookie-consent.service';
 import {
@@ -82,37 +82,10 @@ export class PolicyGuardService {
           }
 
           // Fetch full content for missing policies before showing dialog
-          return this.policyService.getActivePolicies().pipe(
-            take(1),
-            switchMap((fullPolicies) => {
-              // Map missing policies to their full content versions
-              const missingWithContent: PolicyVersion[] = [];
-
-              missingPolicies.forEach((missingPolicy) => {
-                let fullPolicy: PolicyVersion | null = null;
-
-                switch (missingPolicy.policyType) {
-                  case 'TERMS_OF_SERVICE':
-                    fullPolicy = fullPolicies.termsOfService;
-                    break;
-                  case 'PRIVACY_POLICY':
-                    fullPolicy = fullPolicies.privacyPolicy;
-                    break;
-                  case 'COOKIE_POLICY':
-                    fullPolicy = fullPolicies.cookiePolicy;
-                    break;
-                  case 'AFFILIATE_TERMS':
-                    fullPolicy = fullPolicies.affiliateTerms;
-                    break;
-                }
-
-                if (fullPolicy) {
-                  missingWithContent.push(fullPolicy);
-                }
-              });
-
+          return this.fetchPoliciesWithContent(missingPolicies).pipe(
+            switchMap((policiesWithContent) => {
               // Show dialog with full content
-              return this.showPolicyAcceptanceDialog(missingWithContent, false);
+              return this.showPolicyAcceptanceDialog(policiesWithContent, false);
             }),
           );
         }),
@@ -169,6 +142,50 @@ export class PolicyGuardService {
   }
 
   /**
+   * Fetch full policy content for policies (which may only have metadata)
+   * @param policies - Policies that need full content (may be metadata-only)
+   * @returns Observable of policies with full content
+   */
+  private fetchPoliciesWithContent(policies: PolicyVersion[]): Observable<PolicyVersion[]> {
+    if (policies.length === 0) {
+      return of([]);
+    }
+
+    // Fetch all active policies with content
+    return this.policyService.getActivePolicies().pipe(
+      take(1),
+      map((fullPolicies) => {
+        const policiesWithContent: PolicyVersion[] = [];
+
+        policies.forEach((policy) => {
+          let fullPolicy: PolicyVersion | null = null;
+
+          switch (policy.policyType) {
+            case PolicyType.TERMS_OF_SERVICE:
+              fullPolicy = fullPolicies.termsOfService;
+              break;
+            case PolicyType.PRIVACY_POLICY:
+              fullPolicy = fullPolicies.privacyPolicy;
+              break;
+            case PolicyType.COOKIE_POLICY:
+              fullPolicy = fullPolicies.cookiePolicy;
+              break;
+            case PolicyType.AFFILIATE_TERMS:
+              fullPolicy = fullPolicies.affiliateTerms;
+              break;
+          }
+
+          if (fullPolicy) {
+            policiesWithContent.push(fullPolicy);
+          }
+        });
+
+        return policiesWithContent;
+      }),
+    );
+  }
+
+  /**
    * Force check policies now (useful after login)
    */
   checkPoliciesNow(): Observable<boolean> {
@@ -186,18 +203,23 @@ export class PolicyGuardService {
               return of(true);
             }
 
-            return this.showPolicyAcceptanceDialog(remainingPolicies, false).pipe(
-              switchMap((accepted) => {
-                if (accepted) {
-                  // Sync again after dialog acceptance
-                  this.syncCookieConsentToLocalStorage();
-                  return of(true);
-                } else {
-                  // User must accept policies
-                  this.authService.logout();
-                  this.router.navigate(['/login']);
-                  return of(false);
-                }
+            // Fetch full content for remaining policies
+            return this.fetchPoliciesWithContent(remainingPolicies).pipe(
+              switchMap((policiesWithContent) => {
+                return this.showPolicyAcceptanceDialog(policiesWithContent, false).pipe(
+                  switchMap((accepted) => {
+                    if (accepted) {
+                      // Sync again after dialog acceptance
+                      this.syncCookieConsentToLocalStorage();
+                      return of(true);
+                    } else {
+                      // User must accept policies
+                      this.authService.logout();
+                      this.router.navigate(['/login']);
+                      return of(false);
+                    }
+                  }),
+                );
               }),
             );
           }),
