@@ -81,8 +81,40 @@ export class PolicyGuardService {
             return of(null);
           }
 
-          // Show dialog with missing policies
-          return this.showPolicyAcceptanceDialog(missingPolicies, false);
+          // Fetch full content for missing policies before showing dialog
+          return this.policyService.getActivePolicies().pipe(
+            take(1),
+            switchMap((fullPolicies) => {
+              // Map missing policies to their full content versions
+              const missingWithContent: PolicyVersion[] = [];
+
+              missingPolicies.forEach((missingPolicy) => {
+                let fullPolicy: PolicyVersion | null = null;
+
+                switch (missingPolicy.policyType) {
+                  case 'TERMS_OF_SERVICE':
+                    fullPolicy = fullPolicies.termsOfService;
+                    break;
+                  case 'PRIVACY_POLICY':
+                    fullPolicy = fullPolicies.privacyPolicy;
+                    break;
+                  case 'COOKIE_POLICY':
+                    fullPolicy = fullPolicies.cookiePolicy;
+                    break;
+                  case 'AFFILIATE_TERMS':
+                    fullPolicy = fullPolicies.affiliateTerms;
+                    break;
+                }
+
+                if (fullPolicy) {
+                  missingWithContent.push(fullPolicy);
+                }
+              });
+
+              // Show dialog with full content
+              return this.showPolicyAcceptanceDialog(missingWithContent, false);
+            }),
+          );
         }),
       )
       .subscribe({
@@ -199,14 +231,8 @@ export class PolicyGuardService {
       if (consent.accepted) {
         const signature = `cookie_${consent.version}_${consent.date}`;
 
-        console.debug('[PolicyGuard] Linking localStorage cookie consent to backend:', {
-          version: consent.version,
-          cookiePolicyVersion: cookiePolicy.version,
-        });
-
         return this.policyService.acceptPolicy(cookiePolicy.id, signature).pipe(
           switchMap(() => {
-            console.debug('[PolicyGuard] Successfully linked cookie consent to backend');
             const remainingPolicies = missingPolicies.filter((p) => p.policyType !== 'COOKIE_POLICY');
             return of(remainingPolicies);
           }),
@@ -231,7 +257,7 @@ export class PolicyGuardService {
    */
   private syncCookieConsentToLocalStorage(): void {
     this.policyService
-      .getActivePolicies()
+      .getActivePoliciesMetadata()
       .pipe(take(1))
       .subscribe({
         next: (policies) => {

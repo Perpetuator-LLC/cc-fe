@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
@@ -72,31 +72,32 @@ export interface PolicyAcceptanceDialogData {
       .policy-intro {
         margin-bottom: 24px;
         padding: 16px;
-        background-color: var(--secondary-light);
+        background-color: var(--mat-sys-surface-variant);
         border-radius: 8px;
       }
 
       .sign-out-note {
         margin-top: 12px;
         font-size: 0.9em;
-        color: var(--description-color);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .policy-section {
         margin-bottom: 32px;
         padding: 16px;
+        background-color: var(--mat-sys-surface-container);
         border: 1px solid var(--border-color);
         border-radius: 8px;
       }
 
       .policy-section h3 {
         margin-top: 0;
-        color: var(--theme-color);
+        color: var(--mat-sys-on-surface);
       }
 
       .policy-meta {
         font-size: 0.9em;
-        color: var(--description-color);
+        color: var(--mat-sys-on-surface-variant);
         margin-bottom: 16px;
       }
 
@@ -104,12 +105,55 @@ export interface PolicyAcceptanceDialogData {
         max-height: 300px;
         overflow-y: auto;
         padding: 16px;
-        background-color: var(--theme-white);
+        background-color: var(--mat-sys-surface);
         border: 1px solid var(--border-color);
         border-radius: 4px;
         margin-bottom: 16px;
         font-size: 0.9em;
         line-height: 1.6;
+        color: var(--mat-sys-on-surface);
+      }
+
+      .policy-content ::ng-deep {
+        h1,
+        h2,
+        h3 {
+          color: var(--mat-sys-on-surface);
+          margin-top: 20px;
+          margin-bottom: 10px;
+        }
+
+        p {
+          line-height: 1.6;
+          margin-bottom: 16px;
+          color: var(--mat-sys-on-surface);
+        }
+
+        ul,
+        ol {
+          margin-bottom: 16px;
+          padding-left: 20px;
+        }
+
+        li {
+          color: var(--mat-sys-on-surface);
+        }
+
+        a {
+          color: var(--mat-sys-primary);
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .acceptance-section {
+        padding: 16px;
+        background-color: var(--mat-sys-surface-variant);
+        border-radius: 8px;
+        margin-top: 16px;
       }
 
       .error-message {
@@ -146,7 +190,19 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private authService: AuthService,
     private router: Router,
-  ) {}
+  ) {
+    // Close dialog if user logs out - use effect to monitor signal
+    effect(
+      () => {
+        const isLoggedIn = this.authService.isLoggedIn();
+        if (!isLoggedIn) {
+          // User logged out, close the dialog
+          this.dialogRef.close(false);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit(): void {
     // Prevent closing by clicking outside if canCancel is false

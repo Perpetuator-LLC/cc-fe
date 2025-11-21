@@ -100,10 +100,10 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   }
 
   private fetchServerCookiePolicyVersion(): void {
-    // Use getActivePolicies instead of getLatestCookiePolicyVersion for consistency
+    // Use metadata query to avoid fetching full policy content
     this.subscriptions.add(
       this.policyService
-        .getActivePolicies()
+        .getActivePoliciesMetadata()
         .pipe(take(1)) // Complete after first emission
         .subscribe({
           next: (policies) => {
@@ -155,7 +155,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
       // User is logged in - accept via backend using new policy system
       this.subscriptions.add(
         this.policyService
-          .getActivePolicies()
+          .getActivePoliciesMetadata()
           .pipe(take(1)) // Complete after first emission
           .subscribe({
             next: (policies) => {
@@ -203,7 +203,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
       // User not logged in - save to localStorage only
       this.subscriptions.add(
         this.policyService
-          .getActivePolicies()
+          .getActivePoliciesMetadata()
           .pipe(take(1)) // Complete after first emission
           .subscribe({
             next: (policies: ActivePoliciesResult) => {

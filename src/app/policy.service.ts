@@ -1,11 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, effect } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { map, Observable, of, shareReplay, switchMap, take } from 'rxjs';
+import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from './auth.service';
 
 export enum PolicyType {
   TERMS_OF_SERVICE = 'TERMS_OF_SERVICE',
@@ -49,90 +50,174 @@ export interface ActivePoliciesResult {
   providedIn: 'root',
 })
 export class PolicyService extends BaseService {
-  // Cache active policies for the session
-  private activePoliciesCache$: Observable<ActivePoliciesResult> | null = null;
+  private wasLoggedIn = false;
 
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
     private sanitizer: DomSanitizer,
+    private authService: AuthService,
   ) {
     super(apollo, errorHandler);
+
+    // Monitor auth state to clear cache on logout
+    this.wasLoggedIn = this.authService.isLoggedIn();
+
+    // Use effect to watch for logout events
+    effect(
+      () => {
+        const isLoggedIn = this.authService.isLoggedIn();
+
+        // If user was logged in and now is not, they logged out
+        if (this.wasLoggedIn && !isLoggedIn) {
+          this.clearActivePoliciesCache();
+        }
+
+        // Update state for next check
+        this.wasLoggedIn = isLoggedIn;
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   /**
-   * Get active policies with session-level caching
-   * Policies are fetched once per session and cached using shareReplay
+   * Get active policies metadata (minimal fields for version comparison)
+   * Use this for checking which policies need acceptance - does NOT fetch content
+   * @param forceRefresh - Force a fresh fetch from the server
+   */
+  getActivePoliciesMetadata(forceRefresh = false): Observable<ActivePoliciesResult> {
+    const ACTIVE_POLICIES_METADATA_QUERY = gql`
+      query ActivePoliciesMetadata {
+        activePolicies {
+          id
+          policyType
+          version
+          # Minimal fields - NO content, title, effectiveDate, etc.
+        }
+      }
+    `;
+
+    interface ActivePoliciesQueryResponse {
+      activePolicies: PolicyVersion[];
+    }
+
+    const fetchPolicy = forceRefresh ? 'network-only' : 'cache-first';
+
+    return this.query<ActivePoliciesQueryResponse>({
+      query: ACTIVE_POLICIES_METADATA_QUERY,
+      fetchPolicy: fetchPolicy,
+    }).pipe(
+      map((data) => {
+        const policies = data?.activePolicies || [];
+
+        const result: ActivePoliciesResult = {
+          termsOfService: null,
+          privacyPolicy: null,
+          affiliateTerms: null,
+          cookiePolicy: null,
+        };
+
+        policies.forEach((policy) => {
+          switch (policy.policyType) {
+            case PolicyType.TERMS_OF_SERVICE:
+              result.termsOfService = policy;
+              break;
+            case PolicyType.PRIVACY_POLICY:
+              result.privacyPolicy = policy;
+              break;
+            case PolicyType.AFFILIATE_TERMS:
+              result.affiliateTerms = policy;
+              break;
+            case PolicyType.COOKIE_POLICY:
+              result.cookiePolicy = policy;
+              break;
+          }
+        });
+
+        return result;
+      }),
+    );
+  }
+
+  /**
+   * Get active policies with Apollo cache
+   * Uses Apollo's built-in cache which is automatically cleared on logout
    * @param forceRefresh - Force a fresh fetch from the server
    */
   getActivePolicies(forceRefresh = false): Observable<ActivePoliciesResult> {
-    // If force refresh or no cache exists, create new observable
-    if (forceRefresh || !this.activePoliciesCache$) {
-      const ACTIVE_POLICIES_QUERY = gql`
-        query ActivePolicies {
-          activePolicies {
-            id
-            policyType
-            version
-            title
-            effectiveDate
-            content
-            contentType
-            isActive
-            isMajorChange
-          }
+    const ACTIVE_POLICIES_QUERY = gql`
+      query ActivePolicies {
+        activePolicies {
+          id
+          policyType
+          version
+          title
+          effectiveDate
+          content
+          contentType
+          isActive
+          isMajorChange
         }
-      `;
-
-      interface ActivePoliciesQueryResponse {
-        activePolicies: PolicyVersion[];
       }
+    `;
 
-      this.activePoliciesCache$ = this.query<ActivePoliciesQueryResponse>({
-        query: ACTIVE_POLICIES_QUERY,
-        fetchPolicy: 'network-only',
-      }).pipe(
-        map((data) => {
-          const policies = data?.activePolicies || [];
-          const result: ActivePoliciesResult = {
-            termsOfService: null,
-            privacyPolicy: null,
-            affiliateTerms: null,
-            cookiePolicy: null,
-          };
-
-          policies.forEach((policy) => {
-            switch (policy.policyType) {
-              case PolicyType.TERMS_OF_SERVICE:
-                result.termsOfService = policy;
-                break;
-              case PolicyType.PRIVACY_POLICY:
-                result.privacyPolicy = policy;
-                break;
-              case PolicyType.AFFILIATE_TERMS:
-                result.affiliateTerms = policy;
-                break;
-              case PolicyType.COOKIE_POLICY:
-                result.cookiePolicy = policy;
-                break;
-            }
-          });
-
-          return result;
-        }),
-        shareReplay({ bufferSize: 1, refCount: false }), // Cache for entire session
-      );
+    interface ActivePoliciesQueryResponse {
+      activePolicies: PolicyVersion[];
     }
 
-    return this.activePoliciesCache$;
+    const fetchPolicy = forceRefresh ? 'network-only' : 'cache-first';
+
+    return this.query<ActivePoliciesQueryResponse>({
+      query: ACTIVE_POLICIES_QUERY,
+      fetchPolicy: fetchPolicy,
+    }).pipe(
+      map((data) => {
+        const policies = data?.activePolicies || [];
+
+        const result: ActivePoliciesResult = {
+          termsOfService: null,
+          privacyPolicy: null,
+          affiliateTerms: null,
+          cookiePolicy: null,
+        };
+
+        policies.forEach((policy) => {
+          switch (policy.policyType) {
+            case PolicyType.TERMS_OF_SERVICE:
+              result.termsOfService = policy;
+              break;
+            case PolicyType.PRIVACY_POLICY:
+              result.privacyPolicy = policy;
+              break;
+            case PolicyType.AFFILIATE_TERMS:
+              result.affiliateTerms = policy;
+              break;
+            case PolicyType.COOKIE_POLICY:
+              result.cookiePolicy = policy;
+              break;
+          }
+        });
+
+        return result;
+      }),
+    );
   }
 
   /**
    * Clear the active policies cache
    * Call this when policies are updated or user logs out
+   * This evicts the query from Apollo's cache
    */
   clearActivePoliciesCache(): void {
-    this.activePoliciesCache$ = null;
+    try {
+      // Evict the activePolicies query from Apollo cache
+      this.apollo.client.cache.evict({ fieldName: 'activePolicies' });
+      this.apollo.client.cache.evict({ fieldName: 'myPolicyAcceptances' });
+      // Trigger garbage collection to remove evicted entries
+      this.apollo.client.cache.gc();
+    } catch (e) {
+      console.error('[PolicyService] Failed to clear cache:', e);
+    }
   }
 
   /**
@@ -236,6 +321,7 @@ export class PolicyService extends BaseService {
       };
     }
 
+    // Optimized refetch query - only fetch minimal data needed for comparison
     const MY_POLICY_ACCEPTANCES_REFETCH = gql`
       query MyPolicyAcceptances {
         myPolicyAcceptances {
@@ -244,10 +330,7 @@ export class PolicyService extends BaseService {
             id
             policyType
             version
-            effectiveDate
-            content
-            contentType
-            isActive
+            # Minimal fields only - no content to reduce payload
           }
           acceptedAt
           signature
@@ -274,6 +357,7 @@ export class PolicyService extends BaseService {
 
   /**
    * Get all policy acceptances for the current user
+   * Only fetches minimal data needed for version comparison (no content)
    */
   getMyPolicyAcceptances(): Observable<PolicyAcceptance[]> {
     const MY_POLICY_ACCEPTANCES = gql`
@@ -284,10 +368,7 @@ export class PolicyService extends BaseService {
             id
             policyType
             version
-            effectiveDate
-            content
-            contentType
-            isActive
+            # Minimal fields - no content, effectiveDate, etc. to reduce payload size
           }
           acceptedAt
           signature
@@ -310,7 +391,8 @@ export class PolicyService extends BaseService {
    * Returns active policies that the user hasn't accepted or accepted an older version
    */
   getMissingRequiredPolicies(): Observable<PolicyVersion[]> {
-    return this.getActivePolicies().pipe(
+    // Use metadata query to avoid fetching full content
+    return this.getActivePoliciesMetadata().pipe(
       switchMap((activePolicies) => {
         return this.getMyPolicyAcceptances().pipe(
           map((acceptances) => {
@@ -324,7 +406,9 @@ export class PolicyService extends BaseService {
             ];
 
             requiredPolicies.forEach(({ type, policy }) => {
-              if (!policy) return;
+              if (!policy) {
+                return;
+              }
 
               const acceptance = acceptances.find((a) => a.policy.policyType === type);
 

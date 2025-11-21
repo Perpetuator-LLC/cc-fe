@@ -26,7 +26,8 @@ import {
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
-import { AffiliateTermsDialogComponent } from '../affiliate-terms-dialog/affiliate-terms-dialog.component';
+import { PolicyAcceptanceDialogComponent } from '../policy-acceptance-dialog/policy-acceptance-dialog.component';
+import { PolicyService } from '../policy.service';
 import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert-credits-dialog.component';
 // eslint-disable-next-line max-len
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
@@ -87,6 +88,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     private clipboard: Clipboard,
     private userService: UserService,
     private router: Router,
+    private policyService: PolicyService,
   ) {}
 
   ngOnInit(): void {
@@ -183,19 +185,43 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   }
 
   showTermsDialog(): void {
-    const dialogRef = this.dialog.open(AffiliateTermsDialogComponent, {
-      width: '600px',
-      disableClose: true,
-    });
+    // Get affiliate terms policy and show in unified dialog
+    this.subscriptions.add(
+      this.policyService.getActivePolicies().subscribe({
+        next: (policies) => {
+          if (!policies.affiliateTerms) {
+            this.messageService.error('Affiliate terms are not available at this time');
+            this.router.navigate(['/home']);
+            return;
+          }
 
-    dialogRef.afterClosed().subscribe((accepted) => {
-      if (accepted) {
-        this.loadDashboardData();
-      } else {
-        this.messageService.warning('You must accept the affiliate terms to access the dashboard');
-        this.router.navigate(['/home']);
-      }
-    });
+          const dialogRef = this.dialog.open(PolicyAcceptanceDialogComponent, {
+            width: '800px',
+            maxWidth: '90vw',
+            disableClose: true,
+            data: {
+              policies: [policies.affiliateTerms],
+              canCancel: true, // User can decline affiliate terms
+            },
+          });
+
+          dialogRef.afterClosed().subscribe((accepted) => {
+            if (accepted) {
+              // After accepting affiliate terms, check if Stripe onboarding is needed
+              this.checkStripeOnboarding();
+            } else {
+              this.messageService.warning('You must accept the affiliate terms to access the dashboard');
+              this.router.navigate(['/home']);
+            }
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load affiliate terms:', err);
+          this.messageService.error('Failed to load affiliate terms');
+          this.router.navigate(['/home']);
+        },
+      }),
+    );
   }
 
   loadDashboardData(): void {
