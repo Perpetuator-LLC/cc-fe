@@ -270,7 +270,7 @@ $cc-density: (
   scale: 0,
 );
 
-/ Dark theme definition (Vibrant Orange + Capital Blue)
+// Dark theme definition (Vibrant Orange + Capital Blue)
 $dark-theme: mat.define-theme((
   color: (
     theme-type: dark,
@@ -298,6 +298,34 @@ $light-theme: mat.define-theme((
 html {
   @include mat.all-component-typographies($dark-theme);
   @include mat.all-component-densities($dark-theme);
+}
+
+// ============================================================================
+// Global Component Overrides
+// ============================================================================
+
+// Ensure all Material buttons have rounded corners (MD3 default)
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  --mdc-shape-small: var(--cc-radius-md) !important;
+  --mdc-protected-button-container-shape: var(--cc-radius-md) !important;
+  --mdc-filled-button-container-shape: var(--cc-radius-md) !important;
+  --mdc-outlined-button-container-shape: var(--cc-radius-md) !important;
+  --mdc-text-button-container-shape: var(--cc-radius-md) !important;
+
+  border-radius: var(--cc-radius-md) !important;
+}
+
+// Icon buttons (FAB) should be fully rounded
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  --mdc-shape-small: 50% !important;
+  --mdc-protected-button-container-shape: 50% !important;
+  border-radius: 50% !important;
 }
 
 // ============================================================================
