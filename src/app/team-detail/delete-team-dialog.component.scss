@@ -1,4 +1,11 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+// Utility classes
+.full-width {
+    width: 100%;
+}
+
+// Component styles
 .delete-dialog {
     padding: 28px;
 }
@@ -14,7 +21,7 @@
 
 .mat-mdc-dialog-content {
     padding: 0;
-    color: var(--description-color);
+    color: var(--cc-text-secondary);
 }
 
 .mat-mdc-dialog-content p {
@@ -22,25 +29,25 @@
 }
 
 .action-row {
-    margin-top: 20px;
+    margin-top: var(--cc-spacing-lg);
 }
 
 mat-dialog-actions {
-    padding: 20px 0 0;
+    padding: var(--cc-spacing-lg) 0 0;
 }
 
 .cancel-btn {
     background: var(--secondary-light);
-    border: 1px solid var(--border-color);
-    color: var(--theme-color);
-    border-radius: 10px;
+    border: 1px solid var(--cc-border-color);
+    color: var(--cc-text-primary);
+    border-radius: var(--cc-radius-md);
     width: 88px;
     height: 40px;
 }
 
 .savePodcastBtn {
     background: var(--primary);
-    border-radius: 10px;
+    border-radius: var(--cc-radius-md);
     color: white;
     width: 225px;
     font-size: 14px;

@@ -1,17 +1,17 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .message-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: var(--cc-spacing-lg);
+  right: var(--cc-spacing-lg);
   z-index: 3000; /* Above cookie banner (z-index: 2000) */
   width: 300px;
-  color: var(--theme-color);
-  border-radius: 10px;
+  color: var(--cc-text-primary);
+  border-radius: var(--cc-radius-md);
 }
 
 .mat-mdc-card.message-card {
   background-color: var(--secondary-500);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--cc-border-color);
   padding-top: 0;
 }
 
@@ -19,7 +19,7 @@
   position: relative;
   padding-top: 30px;
   margin-bottom: 5px;
-  border-radius: 8px;
+  border-radius: var(--cc-radius-md);
   overflow: hidden;
 
   .timeout-progress {
@@ -28,7 +28,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--cc-radius-md) var(--cc-radius-md);
   }
 }
 
@@ -39,7 +39,7 @@
   z-index: 10;
   border-radius: 50%;
   padding: 0;
-  color: var(--theme-color);
+  color: var(--cc-text-primary);
 }
 
 .message-content {
@@ -47,7 +47,7 @@
   align-items: center;
   justify-content: flex-start;
   font-size: 14px;
-  color: var(--theme-color);
+  color: var(--cc-text-primary);
   font-weight: 500;
 }
 
@@ -57,7 +57,7 @@
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  padding: 6px;
+  padding: var(--cc-spacing-sm);
   height: 30px;
   width: 30px;
   min-width: 30px;
@@ -65,20 +65,24 @@
 
 .message-text {
   flex: 1;
-  padding-left: 10px;
+  padding-left: var(--cc-spacing-sm);
   padding-right: 30px;
   word-wrap: break-word;
 }
 
+.message-progress {
+  margin-top: var(--cc-spacing-sm);
+}
+
 .mat-mdc-card-content {
-  padding: 8px;
+  padding: var(--cc-spacing-sm);
 }
 
 .mat-card-content .mat-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: var(--theme-color);
+  color: var(--cc-text-primary);
 }
 
 .message-icon-span {
@@ -92,40 +96,40 @@
 
 .error {
   .message-icon {
-    background-color: rgba(var(--md-sys-color-error), 0.15);
+    background-color: color-mix(in srgb, var(--cc-color-error) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--md-sys-color-error);
+      background-color: var(--cc-color-error);
     }
   }
 }
 
 .warning {
   .message-icon {
-    background-color: rgba(var(--md-sys-color-warning), 0.15);
+    background-color: color-mix(in srgb, var(--cc-color-warning) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--md-sys-color-warning);
+      background-color: var(--cc-color-warning);
     }
   }
 }
 
 .info {
   .message-icon {
-    background-color: rgba(255, 179, 31, 0.15);
+    background-color: color-mix(in srgb, var(--cc-color-info) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--theme-yellow);
+      background-color: var(--cc-color-info);
     }
   }
 }
 
 .success {
   .message-icon {
-    background-color: rgba(61, 255, 96, 0.15);
+    background-color: color-mix(in srgb, var(--cc-color-success) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--md-sys-color-success);
+      background-color: var(--cc-color-success);
     }
   }
 }
