@@ -9,7 +9,7 @@
 
 @if (loadingPodcasts) {
   <div class="loading-spinner">
-    <mat-progress-bar diameter="20" value="20" style="height: 2px"></mat-progress-bar>
+    <mat-progress-bar diameter="20" value="20" class="thin-progress-bar"></mat-progress-bar>
   </div>
 }
 <div class="podcast-detail-page">
@@ -81,7 +81,7 @@
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
               <mat-header-cell *matHeaderCellDef> </mat-header-cell>
-              <mat-cell *matCellDef="let member" style="text-align: right">
+              <mat-cell *matCellDef="let member" class="text-right">
                 <button
                   class="action-btn"
                   mat-icon-button
@@ -177,7 +177,6 @@
               <mat-cell *matCellDef="let podcast">
                 <button
                   class="action-btn"
-                  style="color: var(--theme-color)"
                   mat-icon-button
                   [matMenuTriggerFor]="podcastActionsMenu"
                   aria-label="Podcast actions"
@@ -218,7 +217,7 @@
       </mat-tab>
       <mat-tab label="Danger Zone">
           <mat-card-content>
-            <h3 style="margin-top: 0;">Danger Zone Settings</h3>
+            <h3 class="no-margin-top">Danger Zone Settings</h3>
             <p>Here you can find advanced and potentially destructive actions related to your team.</p>
           </mat-card-content>
           <mat-card class="danger-card">

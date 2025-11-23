@@ -1,7 +1,26 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+// Utility classes
+.thin-progress-bar {
+  height: 2px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.no-margin-top {
+  margin-top: 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Component styles
 .member-row {
   display: flex;
-  gap: 16px;
+  gap: var(--cc-spacing-md);
   width: auto;
 
   mat-form-field,
@@ -19,7 +38,7 @@
     background: transparent;
     padding: 0;
     height: auto;
-    color: var(--theme-color);
+    color: var(--cc-text-primary);
     width: auto;
     flex: auto;
 
@@ -37,11 +56,11 @@
 }
 
 mat-divider {
-  margin: 10px 0;
+  margin: var(--cc-spacing-sm) 0;
 }
 
 .container-card {
-  padding: 20px;
+  padding: var(--cc-spacing-lg);
 
   form {
     margin-bottom: 1em;
@@ -87,50 +106,52 @@ mat-divider {
 
   button {
     flex: 0 0 auto;
-    margin-left: 8px;
+    margin-left: var(--cc-spacing-sm);
   }
 }
 
 .danger-zone {
-  color: var(--md-sys-color-error);
+  color: var(--cc-color-error);
 }
 
 .danger-card {
   background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
-  margin-top: 20px;
-  p{
+  color: var(--cc-text-primary);
+  border: 1px solid var(--cc-border-color);
+  margin-top: var(--cc-spacing-lg);
+
+  p {
     margin: 0;
-    padding: 0 20px;
+    padding: 0 var(--cc-spacing-lg);
     padding-bottom: 30px;
   }
+
   .delete-btn {
-    background-color: var(--md-sys-color-error);
+    background-color: var(--cc-color-error);
     color: white;
-    padding: 0;
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
     width: fit-content;
-    margin-left: 20px;
-    padding: 10px 20px;
-    margin-bottom: 20px;
-    border-radius: 10px;
+    margin-left: var(--cc-spacing-lg);
+    padding: var(--cc-spacing-sm) var(--cc-spacing-lg);
+    margin-bottom: var(--cc-spacing-lg);
+    border-radius: var(--cc-radius-md);
   }
 }
-.danger-card-title{
-  padding: 10px;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 20px;
-  margin-inline: 10px;
+
+.danger-card-title {
+  padding: var(--cc-spacing-sm);
+  border-bottom: 1px solid var(--cc-border-color);
+  margin-bottom: var(--cc-spacing-lg);
+  margin-inline: var(--cc-spacing-sm);
 }
 
 .action-row {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  gap: 16px;
+  gap: var(--cc-spacing-md);
 
   mat-form-field,
   button {
@@ -151,7 +172,6 @@ mat-divider {
 .actions-column,
 .actions-cell {
   width: 80px;
-  /* Adjust this value as needed */
   min-width: 80px;
   max-width: 80px;
   padding: 0;
@@ -163,17 +183,17 @@ mat-divider {
 }
 
 .podcasts-card {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: var(--cc-spacing-lg);
+  margin-bottom: var(--cc-spacing-lg);
 }
 
 .action-button-container {
-  margin-top: 16px;
+  margin-top: var(--cc-spacing-md);
   text-align: right;
 }
 
 .no-podcasts-message {
-  padding: 16px;
+  padding: var(--cc-spacing-md);
   text-align: center;
 }
 
@@ -189,20 +209,20 @@ mat-divider {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 10px;
+      gap: var(--cc-spacing-sm);
       margin-bottom: 28px;
 
       .title {
         input {
           font-size: 32px;
           font-weight: 600;
-          color: var(--theme-color);
+          color: var(--cc-text-primary);
         }
 
         p {
           font-size: 14px;
           margin: 0;
-          color: var(--description-color);
+          color: var(--cc-text-secondary);
           font-weight: 400;
         }
       }
@@ -210,11 +230,11 @@ mat-divider {
       .buttons {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: var(--cc-spacing-lg);
 
         .delete-btn {
           background-color: transparent;
-          color: var(--md-sys-color-error);
+          color: var(--cc-color-error);
           padding: 0;
           font-size: 14px;
           font-weight: 600;
@@ -229,7 +249,7 @@ mat-divider {
 
   .mat-mdc-card-content {
     padding-inline: 0;
-    margin-top: 20px;
+    margin-top: var(--cc-spacing-lg);
   }
 
   .search-filter {
@@ -262,8 +282,8 @@ mat-divider {
         font-weight: 400;
         font-size: 12px;
         line-height: 100%;
-        letter-spacing: 0%;
-        color: var(--description-color);
+        letter-spacing: 0;
+        color: var(--cc-text-secondary);
       }
     }
   }
