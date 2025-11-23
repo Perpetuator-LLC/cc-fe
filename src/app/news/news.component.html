@@ -18,7 +18,7 @@
       <div class="before-select-right-podcasts">
         <div class="fields">
           <div class="podcast-field-wrapper">
-            <mat-form-field style="width: 300px; max-width: 100%">
+            <mat-form-field class="podcast-select-field">
               <mat-label>Select Podcast</mat-label>
               <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()" [disabled]="loadingPodcasts">
                 @if (loadingPodcasts) {
@@ -35,7 +35,7 @@
               <mat-spinner diameter="20" class="podcast-loading-spinner"></mat-spinner>
             }
           </div>
-          <mat-form-field style="width: 134px; max-width: 100%">
+          <mat-form-field class="time-select-field">
             <mat-label>Time</mat-label>
             <mat-select [(value)]="selectedHours" (selectionChange)="onPodcastChange()">
               <mat-option [value]="12">12 Hours</mat-option>
@@ -103,7 +103,7 @@
             </mat-form-field>
           } @else if (selectedPodcastUuid && newsFetched) {
             <div class="no-rss-feeds-message" matTooltip="Add RSS feeds to this podcast to enable filtering by source">
-              <mat-icon style="color: var(--md-sys-color-warning); font-size: 20px; height: 20px; width: 20px;">info</mat-icon>
+              <mat-icon class="warning-icon">info</mat-icon>
               <span>No RSS feeds configured</span>
             </div>
           }
@@ -135,8 +135,8 @@
             </label>
           </div>
           <button
-            mat-flat-button
-            class="create-episode-button"
+            mat-raised-button
+            color="primary"
             type="button"
             (click)="createEpisodeAudioChainFromSelected()"
             [disabled]="selectedNews.size === 0"
@@ -147,7 +147,7 @@
           </button>
           <button
             mat-stroked-button
-            class="create-episode-button outlined"
+            color="primary"
             type="button"
             (click)="createEpisodeChainFromSelected()"
             [disabled]="selectedNews.size === 0"
@@ -157,8 +157,7 @@
             <span>Create Episode</span>
           </button>
           <button
-            mat-flat-button
-            class="blank-episode-button"
+            mat-stroked-button
             type="button"
             (click)="createBlankEpisode()"
             [disabled]="selectedPodcastUuid === null"
@@ -367,11 +366,11 @@
                 </button>
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
                   <button
-                    mat-flat-button
+                    mat-stroked-button
                     color="primary"
                     type="button"
                     (click)="regenerateSummary(selectedNewsDetail.uuid)"
-                    style="margin-left: 8px"
+                    class="regenerate-summary-btn"
                   >
                     {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary (Force)
                   </button>

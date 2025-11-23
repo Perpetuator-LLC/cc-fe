@@ -16,19 +16,20 @@
   }
 
   .news-item {
-    margin-bottom: 8px;
+    margin-bottom: var(--cc-spacing-sm);
     padding-bottom: 2px;
     height: auto;
   }
 
-  ::ng-deep .news-description img {
+  // Remove ::ng-deep - scope images properly within news description
+  .news-description img {
     max-width: 200px;
     max-height: 200px;
     width: auto;
     height: auto;
     float: left;
-    margin-right: 10px;
-    margin-bottom: 10px;
+    margin-right: var(--cc-spacing-md);
+    margin-bottom: var(--cc-spacing-md);
   }
 }
 
@@ -86,20 +87,38 @@
         @media screen and (max-width: 576px) {
           width: 100%;
         }
+
+        &.podcast-select-field {
+          width: 300px;
+          max-width: 100%;
+        }
+
+        &.time-select-field {
+          width: 134px;
+          max-width: 100%;
+        }
       }
 
       .no-rss-feeds-message {
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
+        gap: var(--cc-spacing-sm);
+        padding: var(--cc-spacing-sm) var(--cc-spacing-md);
         background-color: var(--secondary-400);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        color: var(--description-color);
+        border: 1px solid var(--cc-border-color);
+        border-radius: var(--cc-radius-md);
+        color: var(--cc-text-secondary);
         font-size: 14px;
         font-weight: 500;
         cursor: help;
+
+        .warning-icon {
+          color: var(--cc-color-warning);
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          vertical-align: middle;
+        }
 
         mat-icon {
           vertical-align: middle;
@@ -114,107 +133,6 @@
       .time-field {
         width: 134px;
         max-width: 100%;
-      }
-
-      .create-episode-button {
-        background: var(--primary);
-        color: var(--theme-white);
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        font-weight: 600;
-        padding: 8px 16px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        min-width: fit-content;
-
-        mat-icon {
-          margin: 0;
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
-
-        &:hover:not(:disabled) {
-          opacity: 0.9;
-        }
-
-        &:disabled {
-          background-color: var(--secondary-400) !important;
-          color: var(--description-color) !important;
-          cursor: not-allowed !important;
-          opacity: 0.6;
-        }
-
-        &.outlined {
-          background: transparent;
-          color: var(--primary);
-          border: 2px solid var(--primary);
-
-          &:hover:not(:disabled) {
-            background-color: rgba(241, 74, 0, 0.08);
-            opacity: 1;
-          }
-
-          &:disabled {
-            background-color: transparent !important;
-            color: var(--description-color) !important;
-            border-color: var(--border-color) !important;
-          }
-        }
-
-        @media screen and (max-width: 900px) {
-          width: 100%;
-          justify-content: center;
-        }
-      }
-
-      .blank-episode-button {
-        background: transparent;
-        color: var(--theme-color);
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        font-weight: 500;
-        padding: 8px 16px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        min-width: fit-content;
-
-        mat-icon {
-          margin: 0;
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-          color: var(--description-color);
-        }
-
-        &:hover:not(:disabled) {
-          background-color: var(--secondary-light);
-          border-color: var(--primary);
-          color: var(--primary);
-
-          mat-icon {
-            color: var(--primary);
-          }
-        }
-
-        &:disabled {
-          background-color: transparent !important;
-          color: var(--description-color) !important;
-          cursor: not-allowed !important;
-          opacity: 0.5;
-          border-color: var(--border-color) !important;
-        }
-
-        @media screen and (max-width: 900px) {
-          width: 100%;
-          justify-content: center;
-        }
       }
     }
   }
@@ -284,7 +202,7 @@
   .news-card {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--cc-spacing-md);
     cursor: pointer;
 
     &:hover .news-card-wrapper {
@@ -299,9 +217,9 @@
       flex: 1;
       min-width: 0;
       background: var(--secondary-light);
-      padding: 12px 16px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+      padding: var(--cc-spacing-md) var(--cc-spacing-md);
+      border: 1px solid var(--cc-border-color);
+      border-radius: var(--cc-radius-md);
       transition: background-color 0.2s ease;
       overflow: hidden;
 
@@ -315,7 +233,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: var(--cc-spacing-md);
       min-width: 0;
 
       @media screen and (max-width: 576px) {
@@ -333,7 +251,7 @@
       .title {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: var(--cc-spacing-sm);
         flex-wrap: nowrap;
         min-width: 0;
       }
@@ -341,7 +259,7 @@
       .title a.external-link {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color);
+        color: var(--cc-text-primary);
         text-decoration: none;
         line-height: 1.4;
         flex: 1;
@@ -359,20 +277,20 @@
       .source {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-top: 4px;
+        gap: var(--cc-spacing-sm);
+        margin-top: var(--cc-spacing-xs);
 
         mat-icon {
           font-size: 16px;
           width: 16px;
           height: 16px;
-          color: var(--description-color);
+          color: var(--cc-text-secondary);
         }
 
         p {
           font-size: 12px;
           font-weight: 400;
-          color: var(--description-color);
+          color: var(--cc-text-secondary);
           margin: 0;
 
           strong {
@@ -386,10 +304,10 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: var(--cc-spacing-sm);
       flex-shrink: 0;
       min-width: fit-content;
-      padding-left: 16px;
+      padding-left: var(--cc-spacing-md);
 
       @media screen and (max-width: 576px) {
         flex-direction: row;
@@ -400,7 +318,7 @@
       }
 
       span {
-        color: var(--description-color);
+        color: var(--cc-text-secondary);
         font-size: 11px;
         font-weight: 400;
         white-space: nowrap;
@@ -518,15 +436,19 @@
     button {
       background: var(--primary);
       color: var(--theme-white);
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+      border-radius: var(--cc-radius-md);
+      border: 1px solid var(--cc-border-color);
       font-weight: 600;
-      padding: 10px 16px;
+      padding: var(--cc-spacing-sm) var(--cc-spacing-md);
       white-space: nowrap;
       flex-shrink: 0;
       min-width: fit-content;
-      margin-top: 8px;
-      margin-bottom: 12px;
+      margin-top: var(--cc-spacing-sm);
+      margin-bottom: var(--cc-spacing-md);
+
+      &.regenerate-summary-btn {
+        margin-left: var(--cc-spacing-sm);
+      }
 
       &:disabled {
         opacity: 0.7;
@@ -807,11 +729,11 @@
 .select-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--cc-spacing-sm);
   background: var(--secondary-light);
-  padding: 6px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  padding: var(--cc-spacing-sm) var(--cc-spacing-sm);
+  border: 1px solid var(--cc-border-color);
+  border-radius: var(--cc-radius-md);
 
   @media screen and (max-width: 576px) {
     background: transparent;

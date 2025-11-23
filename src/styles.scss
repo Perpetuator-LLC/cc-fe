@@ -78,158 +78,366 @@
 //  }
 //}
 
-// Mixin to extract theme colors and create CSS custom properties
-@mixin theme-colors($is-dark: false) {
-  // Declare variables in mixin scope so they are available after conditionals
-  $primary-color: null;
-  $primary-light: null;
-  $primary-dark: null;
-  $tertiary-color: null;
+// ============================================================================
+// Capital Copilot Custom Color Palettes (MD3)
+// ============================================================================
 
-  @if $is-dark {
-    // Dark theme colors - using direct Material Design color values
-    $primary-color: #ff9800; // Orange 500
-    $primary-light: #ffb74d; // Orange 300
-    $primary-dark: #f57c00; // Orange 700
-    $tertiary-color: #9c27b0; // Violet 500
-  }
+// TODO: Future migration - Capital Blue Palette (Primary) - Trust, finance, stability
+// $_capital-blue: (
+//   0: #000000,
+//   10: #001a33,
+//   20: #002d52,
+//   25: #003863,
+//   30: #004375,
+//   35: #004e87,
+//   40: #005a9a,
+//   50: #0072c1,
+//   60: #008ce8,
+//   70: #3da6ff,
+//   80: #7dc1ff,
+//   90: #b8dcff,
+//   95: #e0eeff,
+//   98: #f4f9ff,
+//   99: #fafcff,
+//   100: #ffffff,
+// );
 
-  @else {
-    // Light theme colors - using direct Material Design color values
-    $primary-color: #2196f3; // Azure/Blue 500
-    $primary-light: #64b5f6; // Blue 300
-    $primary-dark: #1976d2; // Blue 700
-    $tertiary-color: #2196f3; // Blue 500
-  }
+// Vibrant Orange Palette (Primary - Current) - Energy, action, brand
+// Based on current #f14a00 used throughout components
+$_vibrant-orange: (
+  0: #000000,
+  10: #2d0f00,
+  20: #4a1900,
+  25: #5a1f00,
+  30: #6b2600,
+  35: #7d2d00,
+  40: #8f3400,
+  50: #b54200,
+  60: #dd5100,
+  70: #f14a00,
+  80: #ff7b3d,
+  90: #ffad7a,
+  95: #ffd4ba,
+  98: #fff0e5,
+  99: #fffbf9,
+  100: #ffffff,
+);
 
-  // Create CSS custom properties
-  --md-sys-color-primary: #{$primary-color};
-  --md-sys-color-primary-light: #{$primary-light};
-  --md-sys-color-primary-dark: #{$primary-dark};
-  --md-sys-color-tertiary: #{$tertiary-color};
-  --md-sys-color-secondary: #{$primary-color};
-  --md-sys-color-success: #4caf50;
-  --md-sys-color-warning: #ffeb3b;
-  --md-sys-color-error: #df4646;
+// Prominent Purple Palette (Tertiary) - Premium, creative, innovation
+$_prominent-purple: (
+  0: #000000,
+  10: #1a0033,
+  20: #2d0052,
+  25: #380063,
+  30: #430075,
+  35: #4e0087,
+  40: #5a009a,
+  50: #7200c1,
+  60: #8c00e8,
+  70: #a63dff,
+  80: #c17dff,
+  90: #dcb8ff,
+  95: #eee0ff,
+  98: #f9f4ff,
+  99: #fcfaff,
+  100: #ffffff,
+);
+
+// Neutral palette (for surfaces, backgrounds)
+$_neutral: (
+  0: #000000,
+  4: #000a1c,
+  6: #000f2a,
+  10: #001946,
+  12: #001d4e,
+  17: #002663,
+  20: #002c70,
+  22: #023078,
+  24: #05357f,
+  25: #063783,
+  30: #1b438f,
+  35: #2a4f9c,
+  40: #385ba9,
+  50: #5375c3,
+  60: #6d8fdf,
+  70: #88a9fc,
+  80: #b1c6ff,
+  87: #cddaff,
+  90: #d9e2ff,
+  92: #e1e8ff,
+  94: #eaedff,
+  95: #eef0ff,
+  96: #f2f3ff,
+  98: #faf8ff,
+  99: #fefbff,
+  100: #ffffff,
+);
+
+// Neutral variant palette (for variant surfaces)
+$_neutral-variant: (
+  0: #000000,
+  10: #1b1b23,
+  20: #303038,
+  25: #3b3a43,
+  30: #47464f,
+  35: #52515b,
+  40: #5e5d67,
+  50: #777680,
+  60: #918f9a,
+  70: #acaab4,
+  80: #c8c5d0,
+  90: #e4e1ec,
+  95: #f2effa,
+  98: #fcf8ff,
+  99: #fffbff,
+  100: #ffffff,
+);
+
+// Error palette (for error states)
+$_error: (
+  0: #000000,
+  10: #410002,
+  20: #690005,
+  25: #7e0007,
+  30: #93000a,
+  35: #a80710,
+  40: #ba1a1a,
+  50: #de3730,
+  60: #ff5449,
+  70: #ff897d,
+  80: #ffb4ab,
+  90: #ffdad6,
+  95: #ffedea,
+  98: #fff8f7,
+  99: #fffbff,
+  100: #ffffff,
+);
+
+// Build complete palettes with all required maps
+$_rest: (
+  secondary: $_prominent-purple,
+  neutral: $_neutral,
+  neutral-variant: $_neutral-variant,
+  error: $_error,
+);
+
+$vibrant-orange-palette: map.merge($_vibrant-orange, $_rest);
+$prominent-purple-palette: map.merge($_prominent-purple, $_rest);
+// TODO: Uncomment when ready to migrate to Capital Blue
+// $capital-blue-palette: map.merge($_capital-blue, $_rest);
+
+// Define shared typography configuration
+$cc-typography: (
+  brand-family: 'DM Sans',
+  plain-family: 'DM Sans',
+  bold-weight: 900,
+  medium-weight: 700,
+  regular-weight: 500,
+);
+
+// Define shared density configuration
+$cc-density: (
+  scale: 0,
+);
+
+// Dark theme definition (Vibrant Orange + Prominent Purple)
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: $vibrant-orange-palette,
+    tertiary: $prominent-purple-palette,
+  ),
+  typography: $cc-typography,
+  density: $cc-density,
+));
+
+// Light theme definition (Vibrant Orange + Prominent Purple)
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: $vibrant-orange-palette,
+    tertiary: $prominent-purple-palette,
+  ),
+  typography: $cc-typography,
+  density: $cc-density,
+));
+
+// ============================================================================
+// Global Typography & Density (Applied Once)
+// ============================================================================
+html {
+  @include mat.all-component-typographies($dark-theme);
+  @include mat.all-component-densities($dark-theme);
 }
 
-// Dark theme definition
-$dark-theme: mat.define-theme((color: (theme-type: dark,
-        primary: mat.$orange-palette,
-        tertiary: mat.$violet-palette,
-      ),
-      typography: (brand-family: 'DM Sans',
-        plain-family: 'DM Sans',
-        bold-weight: 900,
-        medium-weight: 700,
-        regular-weight: 500,
-      ),
-      density: (scale: 0,
-      ),
-    ));
+// ============================================================================
+// Theme Application (Color-Only Per Theme)
+// ============================================================================
 
-// Light theme definition
-$light-theme: mat.define-theme((color: (theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: (brand-family: 'DM Sans',
-        plain-family: 'DM Sans',
-        bold-weight: 900,
-        medium-weight: 700,
-        regular-weight: 500,
-      ),
-      density: (scale: 0,
-      ),
-    ));
-
-//@include mat.all-component-typographies($typography);
-
-// ignore-duplication-warnings: true is used to suppress warnings about duplicate styles
-// Supposedly we can use: @include mat.all-component-colors($dark-theme); but it doesn't work
-$theme-ignore-duplication-warnings: true;
-
-//@mixin custom-card-theme($theme) {
-//  $color-config: map.get($theme, color);
-//  $is-dark-theme: map.get($color-config, 'theme-type') == 'dark';
-//  $background: map.get($color-config, 'background');
-//
-//  .mat-mdc-card {
-//    @if $is-dark-theme {
-//      background-color: mix(#ffffff, map.get($background, 'background'), 5%);
-//    } @else {
-//      background-color: mix(#000000, map.get($background, 'background'), 5%);
-//    }
-//  }
-//}
-//
-//// Apply the custom theme
-//@include custom-card-theme($dark-theme);
-//@include custom-card-theme($light-theme);
-
-//color: red;
-//color: mat.get-color-from-palette($warn);
-
-// Apply themes based on body classes
+// Dark theme - apply ONLY color tokens
 body.dark {
-  @include mat.all-component-themes($dark-theme);
-  @include theme-colors(true);
+  @include mat.all-component-colors($dark-theme);
 
-  // Dark theme specific custom properties
-  --toolbar-container-background-color: #272b32;
-  --secondary-color: #272b32;
-  --secondary-dark: #373c43;
-  --secondary-light: #373c43;
-  --theme-color: #ffffff;
-  --border-color: #ffffff1a;
-  --secondary-400: #474d55;
-  --secondary-450: #474d55;
-  --secondary-500: #424951;
-  --description-color: #b5b5b5;
-  --theme-yellow: #f5c400;
+  // Capital Copilot Custom Tokens (Dark Theme)
+  // Semantic Status Colors
+  --cc-color-success: #4caf50;
+  --cc-color-success-container: #1b5e20;
+  --cc-color-on-success: #ffffff;
+
+  --cc-color-warning: #ff9800;
+  --cc-color-warning-container: #e65100;
+  --cc-color-on-warning: #ffffff;
+
+  --cc-color-error: #ef5350;
+  --cc-color-error-container: #b71c1c;
+  --cc-color-on-error: #ffffff;
+
+  --cc-color-info: #03a9f4;
+  --cc-color-info-container: #01579b;
+  --cc-color-on-info: #ffffff;
+
+  // Custom Orange (Energy, Action, Urgency)
+  --cc-color-orange: #ff7b3d;
+  --cc-color-on-orange: #000000;
+
+  // Secondary (alias for tertiary/purple for backwards compat)
+  --cc-color-secondary: #a63dff;
+  --cc-color-on-secondary: #ffffff;
+
+  // Surface Colors
+  --cc-surface-background: #121212;
+  --cc-surface-card: #1e1e1e;
+  --cc-surface-elevated: #2a2a2a;
+  --cc-surface-toolbar: #1a1a1a;
+
+  // Border & Divider Colors
+  --cc-border-color: rgba(255, 255, 255, 0.12);
+  --cc-border-color-strong: rgba(255, 255, 255, 0.24);
+  --cc-divider-color: rgba(255, 255, 255, 0.08);
+
+  // Text Colors
+  --cc-text-primary: rgba(255, 255, 255, 0.87);
+  --cc-text-secondary: rgba(255, 255, 255, 0.60);
+  --cc-text-tertiary: rgba(255, 255, 255, 0.38);
+  --cc-text-disabled: rgba(255, 255, 255, 0.38);
+
+  // Spacing Scale
+  --cc-spacing-xs: 4px;
+  --cc-spacing-sm: 8px;
+  --cc-spacing-md: 16px;
+  --cc-spacing-lg: 24px;
+  --cc-spacing-xl: 32px;
+  --cc-spacing-2xl: 48px;
+
+  // Border Radius Scale
+  --cc-radius-sm: 4px;
+  --cc-radius-md: 8px;
+  --cc-radius-lg: 12px;
+  --cc-radius-xl: 16px;
+  --cc-radius-round: 999px;
+
+  // Legacy Variables (kept for backwards compatibility - migrate away from these)
+  --toolbar-container-background-color: var(--cc-surface-toolbar);
+  --secondary-color: var(--cc-surface-card);
+  --secondary-dark: var(--cc-surface-elevated);
+  --secondary-light: var(--cc-surface-card);
+  --theme-color: var(--cc-text-primary);
+  --border-color: var(--cc-border-color);
+  --secondary-400: var(--cc-surface-elevated);
+  --secondary-450: var(--cc-surface-elevated);
+  --secondary-500: var(--cc-surface-card);
+  --description-color: var(--cc-text-secondary);
   --theme-white: #ffffff;
   --theme-transparent: rgba(0, 0, 0, 0.4);
-  --md-sys-color-background: #1a1a1a;
-  --primary: #f14a00;
-  --purple: #8f8fff;
+  --primary: #f14a00; // TODO: Migrate to --md-sys-color-primary or --cc-color-orange
+  --purple: var(--cc-color-secondary);
 
   .mat-mdc-card {
-    background-color: rgba(111, 111, 111, 0.1);
+    background-color: var(--cc-surface-card);
     box-shadow: none;
   }
 }
 
-/* default buttons are getting their styling from input like...
-         mat-mdc-button:not(:disabled) {
-            color: var(--mdc-text-button-label-text-color, var(--mat-app-primary));
-        }
- */
-
-
+// Light theme - apply ONLY color tokens
 body.light {
-  @include mat.all-component-themes($light-theme);
-  @include theme-colors(false);
+  @include mat.all-component-colors($light-theme);
 
-  // Light theme specific custom properties
-  --toolbar-container-background-color: #ffffff;
+  // Capital Copilot Custom Tokens (Light Theme)
+  // Semantic Status Colors
+  --cc-color-success: #2e7d32;
+  --cc-color-success-container: #c8e6c9;
+  --cc-color-on-success: #000000;
+
+  --cc-color-warning: #f57c00;
+  --cc-color-warning-container: #ffe0b2;
+  --cc-color-on-warning: #000000;
+
+  --cc-color-error: #c62828;
+  --cc-color-error-container: #ffcdd2;
+  --cc-color-on-error: #ffffff;
+
+  --cc-color-info: #0288d1;
+  --cc-color-info-container: #b3e5fc;
+  --cc-color-on-info: #000000;
+
+  // Custom Orange (Energy, Action, Urgency)
+  --cc-color-orange: #ff7b3d;
+  --cc-color-on-orange: #000000;
+
+  // Secondary (alias for tertiary/purple for backwards compat)
+  --cc-color-secondary: #5a009a;
+  --cc-color-on-secondary: #ffffff;
+
+  // Surface Colors
+  --cc-surface-background: #fafafa;
+  --cc-surface-card: #ffffff;
+  --cc-surface-elevated: #ffffff;
+  --cc-surface-toolbar: #ffffff;
+
+  // Border & Divider Colors
+  --cc-border-color: rgba(0, 0, 0, 0.12);
+  --cc-border-color-strong: rgba(0, 0, 0, 0.24);
+  --cc-divider-color: rgba(0, 0, 0, 0.08);
+
+  // Text Colors
+  --cc-text-primary: rgba(0, 0, 0, 0.87);
+  --cc-text-secondary: rgba(0, 0, 0, 0.60);
+  --cc-text-tertiary: rgba(0, 0, 0, 0.38);
+  --cc-text-disabled: rgba(0, 0, 0, 0.38);
+
+  // Spacing Scale
+  --cc-spacing-xs: 4px;
+  --cc-spacing-sm: 8px;
+  --cc-spacing-md: 16px;
+  --cc-spacing-lg: 24px;
+  --cc-spacing-xl: 32px;
+  --cc-spacing-2xl: 48px;
+
+  // Border Radius Scale
+  --cc-radius-sm: 4px;
+  --cc-radius-md: 8px;
+  --cc-radius-lg: 12px;
+  --cc-radius-xl: 16px;
+  --cc-radius-round: 999px;
+
+  // Legacy Variables (kept for backwards compatibility - migrate away from these)
+  --toolbar-container-background-color: var(--cc-surface-toolbar);
   --secondary-color: #f5f5f5;
   --secondary-dark: #f5f5f5;
-  --secondary-light: #ffffff;
-  --theme-color: #262627;
-  --border-color: #e7e7e9;
+  --secondary-light: var(--cc-surface-card);
+  --theme-color: var(--cc-text-primary);
+  --border-color: var(--cc-border-color);
   --secondary-400: #f5f5f5;
-  --secondary-450: #ffffff;
+  --secondary-450: var(--cc-surface-card);
   --secondary-500: #f5f5f5;
-  --description-color: #767676;
-  --theme-yellow: #2f55eb;
-  --theme-white: #f14a00;
-  --theme-transparent: rgb(255 255 255 / 42%);
-  --md-sys-color-background: #f5f5f5;
-  --primary: #f14a00;
-  --purple: #8f8fff;
+  --description-color: var(--cc-text-secondary);
+  --theme-white: #f14a00; // Intentionally different in light theme
+  --theme-transparent: rgba(255, 255, 255, 0.42);
+  --primary: #f14a00; // TODO: Migrate to --md-sys-color-primary or --cc-color-orange
+  --purple: var(--cc-color-secondary);
 
   .mat-mdc-card {
-    background-color: rgba(111, 111, 111, 0.1);
+    background-color: var(--cc-surface-card);
     box-shadow: none;
   }
 }
@@ -267,43 +475,36 @@ body {
   //font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
-// Default theme (light) for when no body class is set
+// ============================================================================
+// Root Default (Light Theme)
+// ============================================================================
 :root {
-  @include theme-colors(false);
+  // Default to light theme colors
+  --cc-surface-background: #fafafa;
+  --cc-surface-card: #ffffff;
+  --cc-surface-elevated: #ffffff;
+  --cc-surface-toolbar: #ffffff;
+  --cc-border-color: rgba(0, 0, 0, 0.12);
+  --cc-border-color-strong: rgba(0, 0, 0, 0.24);
+  --cc-text-primary: rgba(0, 0, 0, 0.87);
+  --cc-text-secondary: rgba(0, 0, 0, 0.60);
+  --cc-text-tertiary: rgba(0, 0, 0, 0.38);
 
-  // Default light theme properties
+  // Legacy variables (default to light theme)
   --toolbar-container-background-color: #ffffff;
   --secondary-color: #f5f5f5;
   --secondary-dark: #f5f5f5;
   --secondary-light: #ffffff;
   --theme-color: #262627;
-  --border-color: #e7e7e9;
+  --border-color: rgba(0, 0, 0, 0.12);
   --secondary-400: #f5f5f5;
   --secondary-450: #ffffff;
   --secondary-500: #f5f5f5;
   --primary: #f14a00;
   --theme-white: #f14a00;
-  --theme-yellow: #2f55eb;
   --description-color: #767676;
-  --theme-transparent: rgb(255 255 255 / 42%);
-  --purple: #8f8fff;
-  --md-sys-color-background: #f5f5f5;
-}
-
-.dark {
-  --toolbar-container-background-color: #272b32;
-  --secondary-color: #272b32;
-  --secondary-dark: #373c43;
-  --secondary-light: #373c43;
-  --theme-color: #ffffff;
-  --border-color: #ffffff1a;
-  --secondary-400: #474d55;
-  --secondary-450: #474d55;
-  --secondary-500: #424951;
-  --description-color: #b5b5b5;
-  --theme-yellow: #f5c400;
-  --theme-white: #ffffff;
-  --theme-transparent: rgba(0, 0, 0, 0.4);
+  --theme-transparent: rgba(255, 255, 255, 0.42);
+  --purple: #5a009a;
 }
 
 .music-dark {
