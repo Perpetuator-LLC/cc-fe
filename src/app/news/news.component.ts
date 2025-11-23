@@ -155,9 +155,11 @@ export class NewsComponent implements OnInit, OnDestroy {
                 // Auto-select default podcast
                 this.selectedPodcastUuid = this.recentlyUsedPodcastsService.getDefaultSelection(this.podcasts);
 
-                // Initialize RSS feeds for the auto-selected podcast
+                // Initialize RSS feeds for the auto-selected podcast and load existing news
                 if (this.selectedPodcastUuid) {
                   this.onPodcastChange();
+                  // Load existing news immediately on page load (no fetch job)
+                  this.getNews();
                 }
 
                 this.loadingPodcasts = false;
@@ -221,9 +223,10 @@ export class NewsComponent implements OnInit, OnDestroy {
         // No RSS feeds configured for this podcast
         console.warn('No RSS feeds configured for podcast:', selectedPodcast?.name);
       }
-      // Don't auto-fetch news on podcast change - wait for user to click "Fetch News"
-      // this.newsFetched = true;
-      // this.fetchNews();
+
+      // Always load existing news when podcast changes (no fetch job)
+      // User must click "Fetch News" button to trigger fresh fetch
+      this.getNews();
     }
   }
 

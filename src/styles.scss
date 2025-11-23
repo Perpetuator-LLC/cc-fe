@@ -82,7 +82,7 @@
 // Capital Copilot Custom Color Palettes (MD3)
 // ============================================================================
 
-// Capital Blue Palette (Secondary) - Trust, finance, stability
+// Capital Blue Palette (Primary - NEW) - Trust, finance, stability
 $_capital-blue: (
   0: #000000,
   10: #001a33,
@@ -102,7 +102,7 @@ $_capital-blue: (
   100: #ffffff,
 );
 
-// Vibrant Orange Palette (Primary - Current) - Energy, action, brand
+// Vibrant Orange Palette (Secondary - NEW) - Energy, action, brand
 // Based on current #f14a00 used throughout components
 $_vibrant-orange: (
   0: #000000,
@@ -123,85 +123,86 @@ $_vibrant-orange: (
   100: #ffffff,
 );
 
-// TODO: Future use - Prominent Purple Palette - Premium, creative, innovation
-// $_prominent-purple: (
-//   0: #000000,
-//   10: #1a0033,
-//   20: #2d0052,
-//   25: #380063,
-//   30: #430075,
-//   35: #4e0087,
-//   40: #5a009a,
-//   50: #7200c1,
-//   60: #8c00e8,
-//   70: #a63dff,
-//   80: #c17dff,
-//   90: #dcb8ff,
-//   95: #eee0ff,
-//   98: #f9f4ff,
-//   99: #fcfaff,
-//   100: #ffffff,
-// );
-
-// TODO: Future use - Blue neutral palette (for surfaces, backgrounds)
-// $_neutral-blue: (
-//   0: #000000,
-//   4: #000a1c,
-//   6: #000f2a,
-//   10: #001946,
-//   12: #001d4e,
-//   17: #002663,
-//   20: #002c70,
-//   22: #023078,
-//   24: #05357f,
-//   25: #063783,
-//   30: #1b438f,
-//   35: #2a4f9c,
-//   40: #385ba9,
-//   50: #5375c3,
-//   60: #6d8fdf,
-//   70: #88a9fc,
-//   80: #b1c6ff,
-//   87: #cddaff,
-//   90: #d9e2ff,
-//   92: #e1e8ff,
-//   94: #eaedff,
-//   95: #eef0ff,
-//   96: #f2f3ff,
-//   98: #faf8ff,
-//   99: #fefbff,
-//   100: #ffffff,
-// );
-
-// Neutral Purple palette (for surfaces, backgrounds)
-$_neutral: (
+// Prominent Purple Palette (Tertiary - NEW) - Premium, creative, innovation
+$_prominent-purple: (
   0: #000000,
-  4: #0f0014,
-  6: #14001f,
-  10: #1f0033,
-  12: #24003a,
-  17: #2f0048,
-  20: #370052,
-  22: #3c0058,
-  24: #41005e,
-  25: #430061,
-  30: #4f006e,
-  35: #5b007c,
-  40: #680089,
-  50: #8200a6,
-  60: #9d00c4,
-  70: #b83de1,
-  80: #d27dff,
-  87: #dfb0ff,
-  90: #e5c4ff,
-  92: #ebd4ff,
-  94: #f1e3ff,
-  95: #f4e9ff,
-  96: #f7eeff,
-  98: #fdf7ff,
-  99: #fffbff,
+  10: #1a0033,
+  20: #2d0052,
+  25: #380063,
+  30: #430075,
+  35: #4e0087,
+  40: #5a009a,
+  50: #7200c1,
+  60: #8c00e8,
+  70: #a63dff,
+  80: #c17dff,
+  90: #dcb8ff,
+  95: #eee0ff,
+  98: #f9f4ff,
+  99: #fcfaff,
   100: #ffffff,
 );
+
+// Neutral Blue palette (for surfaces, backgrounds) - Complements Capital Blue primary
+$_neutral: (
+  0: #000000,
+  4: #000a1c,
+  6: #000f2a,
+  10: #001946,
+  12: #001d4e,
+  17: #002663,
+  20: #002c70,
+  22: #023078,
+  24: #05357f,
+  25: #063783,
+  30: #1b438f,
+  35: #2a4f9c,
+  40: #385ba9,
+  50: #5375c3,
+  60: #6d8fdf,
+  70: #88a9fc,
+  80: #b1c6ff,
+  87: #cddaff,
+  90: #d9e2ff,
+  92: #e1e8ff,
+  94: #eaedff,
+  95: #eef0ff,
+  96: #f2f3ff,
+  98: #faf8ff,
+  99: #fefbff,
+  100: #ffffff,
+);
+
+// TODO: Previous neutral - Neutral Purple palette (saved for future experimentation)
+// $_neutral-purple: (
+//   0: #000000,
+//   4: #0f0014,
+//   6: #14001f,
+//   10: #1f0033,
+//   12: #24003a,
+//   17: #2f0048,
+//   20: #370052,
+//   22: #3c0058,
+//   24: #41005e,
+//   25: #430061,
+//   30: #4f006e,
+//   35: #5b007c,
+//   40: #680089,
+//   50: #8200a6,
+//   60: #9d00c4,
+//   70: #b83de1,
+//   80: #d27dff,
+//   87: #dfb0ff,
+//   90: #e5c4ff,
+//   92: #ebd4ff,
+//   94: #f1e3ff,
+//   95: #f4e9ff,
+//   96: #f7eeff,
+//   98: #fdf7ff,
+//   99: #fffbff,
+//   100: #ffffff,
+// );
+
 
 // Neutral variant palette (for variant surfaces)
 $_neutral-variant: (
@@ -243,18 +244,17 @@ $_error: (
   100: #ffffff,
 );
 
-// Build complete palettes with all required maps
+// Material 3 requires complete palette maps with all required palettes
+// Build complete palettes by merging the base color with supporting palettes
 $_rest: (
-  secondary: $_capital-blue,
+  secondary: $_vibrant-orange,
   neutral: $_neutral,
   neutral-variant: $_neutral-variant,
   error: $_error,
 );
 
-$vibrant-orange-palette: map.merge($_vibrant-orange, $_rest);
 $capital-blue-palette: map.merge($_capital-blue, $_rest);
-// TODO: Uncomment when ready to use Prominent Purple
-// $prominent-purple-palette: map.merge($_prominent-purple, $_rest);
+$prominent-purple-palette: map.merge($_prominent-purple, $_rest);
 
 // Define shared typography configuration
 $cc-typography: (
@@ -270,23 +270,23 @@ $cc-density: (
   scale: 0,
 );
 
-// Dark theme definition (Vibrant Orange + Capital Blue)
+// Dark theme definition (Capital Blue primary, Vibrant Orange secondary, Prominent Purple tertiary)
 $dark-theme: mat.define-theme((
   color: (
     theme-type: dark,
-    primary: $vibrant-orange-palette,
-    tertiary: $capital-blue-palette,
+    primary: $capital-blue-palette,
+    tertiary: $prominent-purple-palette,
   ),
   typography: $cc-typography,
   density: $cc-density,
 ));
 
-// Light theme definition (Vibrant Orange + Capital Blue)
+// Light theme definition (Capital Blue primary, Vibrant Orange secondary, Prominent Purple tertiary)
 $light-theme: mat.define-theme((
   color: (
     theme-type: light,
-    primary: $vibrant-orange-palette,
-    tertiary: $capital-blue-palette,
+    primary: $capital-blue-palette,
+    tertiary: $prominent-purple-palette,
   ),
   typography: $cc-typography,
   density: $cc-density,
@@ -354,13 +354,16 @@ body.dark {
   --cc-color-info-container: #01579b;
   --cc-color-on-info: #ffffff;
 
-  // Custom Orange (Energy, Action, Urgency)
+  // Custom Orange (Energy, Action, Urgency - now secondary)
   --cc-color-orange: #ff7b3d;
   --cc-color-on-orange: #000000;
 
-  // Secondary (alias for tertiary/Capital Blue for backwards compat)
-  --cc-color-secondary: #008ce8;
-  --cc-color-on-secondary: #ffffff;
+  // Secondary (Vibrant Orange - for backwards compat, use actual secondary slot)
+  --cc-color-secondary: #ff7b3d;
+  --cc-color-on-secondary: #000000;
+
+  // Primary is now Capital Blue (#008ce8 in dark theme)
+  // Tertiary is Prominent Purple (#a63dff in dark theme)
 
   // Surface Colors
   --cc-surface-background: #121212;
@@ -438,13 +441,16 @@ body.light {
   --cc-color-info-container: #b3e5fc;
   --cc-color-on-info: #000000;
 
-  // Custom Orange (Energy, Action, Urgency)
+  // Custom Orange (Energy, Action, Urgency - now secondary)
   --cc-color-orange: #ff7b3d;
   --cc-color-on-orange: #000000;
 
-  // Secondary (alias for tertiary/Capital Blue for backwards compat)
-  --cc-color-secondary: #005a9a;
+  // Secondary (Vibrant Orange - for backwards compat, use actual secondary slot)
+  --cc-color-secondary: #f14a00;
   --cc-color-on-secondary: #ffffff;
+
+  // Primary is now Capital Blue (#005a9a in light theme)
+  // Tertiary is Prominent Purple (#5a009a in light theme)
 
   // Surface Colors
   --cc-surface-background: #fafafa;
