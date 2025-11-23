@@ -383,6 +383,8 @@
                 } @else {
                   <p class="">News not (yet) validated.</p>
                 }
+                <!-- Site Content section hidden - showing only Summary and Validated Summary -->
+                <!--
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
                   <mat-divider></mat-divider>
                   <button
@@ -400,6 +402,7 @@
                     <p class="">No news content available</p>
                   }
                 }
+                -->
               </div>
             } @else {
               <p>Select a news item to see details.</p>
