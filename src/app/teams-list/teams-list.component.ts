@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
-import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { MessageComponent } from '../message/message.component';
@@ -24,8 +24,6 @@ import {
   MatColumnDef,
 } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { MatTooltip } from '@angular/material/tooltip';
-import { SlicePipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -42,14 +40,11 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
   imports: [
     MatButton,
     MatCard,
-    MatCardTitle,
-    MatCardHeader,
+    MatCardContent,
     SvgIconComponent,
     MatIcon,
     MessageComponent,
     MatProgressBarModule,
-    MatCardContent,
-    MatCardActions,
     MatTable,
     MatSort,
     MatHeaderCell,
@@ -61,8 +56,6 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
     MatHeaderRowDef,
     MatRowDef,
     MatColumnDef,
-    MatTooltip,
-    SlicePipe,
     MatMenuTrigger,
     MatMenu,
     RouterLink,
@@ -108,6 +101,21 @@ export class TeamsListComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    // Configure filter to search team name
+    this.dataSource.filterPredicate = (data: TeamsResult, filter: string) => {
+      const searchStr = filter.toLowerCase();
+      return data.name?.toLowerCase().includes(searchStr) ?? false;
+    };
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadTeams(): void {

@@ -3,7 +3,9 @@
   width: 100%;
   height: 100%;
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-radius: var(--cc-radius-md);
+  background-color: var(--toolbar-container-background-color); // Match table background
+  border-top: 1px solid var(--cc-border-color); // Crisp line at top
   //padding-top: 8em;
   //overflow: hidden;
   //display: flex;
@@ -111,30 +113,22 @@
   }
 
   mat-progress-bar {
-    position: absolute; // Position the progress bar absolutely within the card
-    bottom: 0; // Align it to the bottom
-    left: 0; // Align it to the left
-    width: 100%; // Make it span the full width of the card
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px; // Ensure visible height
+    z-index: 10; // Ensure it's above card background
+    // Material automatically uses primary color for progress bar
   }
 
-  .pending {
-    background-color: var(--secondary-light);
-    border-left: 5px solid var(--md-sys-color-warning);
-  }
-
-  .running {
-    background-color: var(--secondary-light);
-    border-left: 5px solid var(--md-sys-color-success);
-  }
-
-  .failed {
-    background-color: var(--secondary-light);
-    border-left: 5px solid var(--md-sys-color-error);
-  }
-
+  // Job card status colors are now in global styles.scss
+  // Classes: .job-card.PENDING, .job-card.RUNNING, .job-card.FAILED, .job-card.COMPLETED
+  .pending,
+  .running,
+  .failed,
   .completed {
     background-color: var(--secondary-light);
-    border-left: 5px solid var(--md-sys-color-primary);
   }
 
   .mat-mdc-card-header {

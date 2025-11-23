@@ -1,52 +1,64 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
+// Main container
 .middle-card {
-  margin-top: 20px;
+  background-color: var(--toolbar-container-background-color);
+  border-radius: 0;
 }
 
 .topics-card {
   background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border: none; // Remove border, using separator line instead
+  border-radius: 0;
+  margin-bottom: 0;
 }
 
+// Standard list component header pattern
 .content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
+  padding-bottom: var(--cc-spacing-md);
+  padding-inline: 30px;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--cc-spacing-md);
+  border-bottom: 1px solid var(--cc-border-color); // Crisp separator line
+
+  @media screen and (max-width: 576px) {
+    padding-inline: var(--cc-spacing-lg);
+  }
 }
 
 .title {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--cc-spacing-xs);
 
   h3 {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
-    color: var(--theme-color);
+    color: var(--cc-text-primary);
+    line-height: 100%;
   }
 
   span {
     font-size: 14px;
-    color: var(--description-color);
+    color: var(--cc-text-secondary);
   }
 }
 
 .create-topic-button {
   background: var(--primary);
   color: var(--theme-white);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--cc-radius-md);
+  border: 1px solid var(--cc-border-color);
   font-weight: 600;
-  padding: 8px 16px;
+  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--cc-spacing-sm);
   white-space: nowrap;
   flex-shrink: 0;
 
@@ -64,8 +76,8 @@
 
 .topics-container {
   background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: none; // No border, clean separator lines
+  border-radius: 0; // Square like other list tables
   overflow: hidden;
 
   table {
@@ -75,16 +87,16 @@
 
   th {
     background-color: var(--secondary-color);
-    color: var(--theme-color);
+    color: var(--cc-text-primary);
     font-weight: 600;
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--cc-spacing-md);
+    border-bottom: 1px solid var(--cc-border-color);
   }
 
   td {
-    padding: 16px;
-    color: var(--theme-color);
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--cc-spacing-md);
+    color: var(--cc-text-primary);
+    border-bottom: 1px solid var(--cc-border-color);
   }
 
   .mat-mdc-row:last-child .mat-mdc-cell {
@@ -104,10 +116,10 @@
 .topic-title {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--cc-spacing-xs);
 
   .topic-link {
-    color: var(--theme-color);
+    color: var(--cc-text-primary);
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
@@ -119,7 +131,7 @@
 
   .topic-description {
     font-size: 12px;
-    color: var(--description-color);
+    color: var(--cc-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -131,8 +143,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: var(--cc-spacing-xs) var(--cc-spacing-md);
+  border-radius: var(--cc-radius-round);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;

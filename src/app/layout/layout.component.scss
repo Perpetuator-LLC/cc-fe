@@ -519,15 +519,21 @@ mat-nav-list {
       background: var(--secondary-color);
       padding: 20px 16px;
       transition: all 0.3s ease;
-      transform: translateX(0);
       border-right: 1px solid var(--border-color);
+      position: relative;
+      z-index: 60; // Above main sidebar when expanded
 
       &.hidden {
-        transform: translateX(-100%);
-        margin-left: -240px;
+        // When collapsed, stay at the left boundary (84px - main sidebar width)
+        // Don't go behind the main menu
+        width: 0;
+        min-width: 0;
+        max-width: 0;
         padding: 0;
         opacity: 0;
         visibility: hidden;
+        border-right: none;
+        overflow: hidden;
       }
 
       .sidebar-content {

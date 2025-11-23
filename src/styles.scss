@@ -651,7 +651,8 @@ body {
 
     .mat-mdc-select {
       color: var(--theme-color);
-      padding-top: 10px;
+      // Remove padding-top to prevent text cutoff at top
+      // Material handles vertical alignment automatically
     }
   }
 }
@@ -1413,7 +1414,59 @@ mat-dialog-container h3.danger {
 //@debug 'Dark Theme Keys:', map.keys(matPalette.$orange-palette);
 
 /* Custom styles for Privacy Policy Modal main container */
+// ============================================================================
+// Global Job Status Styles (Used across jobs-list and job-status-bar)
+// ============================================================================
+
+// Job status badge colors - consistent across all components
+.job-success,
+.job-completed {
+  color: var(--theme-white) !important;
+  background-color: var(--cc-color-success) !important;
+}
+
+.job-failed,
+.job-error {
+  color: var(--theme-white) !important;
+  background-color: var(--cc-color-error) !important;
+}
+
+.job-pending {
+  color: var(--theme-white) !important;
+  background-color: var(--cc-color-warning) !important;
+}
+
+.job-running {
+  color: var(--theme-white) !important;
+  background-color: var(--primary) !important; // Vibrant Orange
+}
+
+// Job card border colors for status bar
+.job-card {
+  &.PENDING,
+  &.pending {
+    border-left: 5px solid var(--cc-color-warning);
+  }
+
+  &.RUNNING,
+  &.running {
+    border-left: 5px solid var(--primary);
+  }
+
+  &.FAILED,
+  &.failed {
+    border-left: 5px solid var(--cc-color-error);
+  }
+
+  &.COMPLETED,
+  &.completed {
+    border-left: 5px solid var(--cc-color-success);
+  }
+}
+
+// ============================================================================
 // Material Design 3 Styled Scrollbars
+// ============================================================================
 // Webkit browsers (Chrome, Safari, Edge)
 * {
   scrollbar-width: thin;

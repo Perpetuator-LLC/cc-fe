@@ -221,8 +221,9 @@ export class NewsComponent implements OnInit, OnDestroy {
         // No RSS feeds configured for this podcast
         console.warn('No RSS feeds configured for podcast:', selectedPodcast?.name);
       }
-      this.newsFetched = true;
-      this.fetchNews();
+      // Don't auto-fetch news on podcast change - wait for user to click "Fetch News"
+      // this.newsFetched = true;
+      // this.fetchNews();
     }
   }
 
