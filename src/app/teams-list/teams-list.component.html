@@ -27,7 +27,7 @@
       <div class="search-filter">
         <div class="input-search-div">
           <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Search by team name" />
+          <input matInput placeholder="Search by team name" (keyup)="applyFilter($event)" (input)="applyFilter($event)" />
         </div>
         <button mat-flat-button class="filter-button">
           <mat-icon>filter_list</mat-icon>

@@ -41,9 +41,15 @@
     width: 140px;
     font-size: 12px;
 
-    // Material form field wrapper sizing
+    // Material form field wrapper sizing and rounded corners
     .mat-mdc-form-field-wrapper {
       height: 36px;
+      border-radius: var(--cc-radius-md); // Round the entire wrapper
+    }
+
+    // Material form field
+    .mat-mdc-text-field-wrapper {
+      border-radius: var(--cc-radius-md) !important; // Force rounded corners
     }
 
     // Material form field infix
@@ -52,12 +58,31 @@
       padding: var(--cc-spacing-sm) 0;
     }
 
-    // Border styling for outlined appearance
+    // Border styling for outlined appearance with rounded corners
+    .mdc-notched-outline {
+      border-radius: var(--cc-radius-md) !important; // Force rounded on container
+    }
+
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
       border-color: var(--cc-border-color);
       border-width: 1px;
+    }
+
+    // Rounded corners for leading edge
+    .mdc-notched-outline__leading {
+      border-radius: var(--cc-radius-md) 0 0 var(--cc-radius-md) !important;
+    }
+
+    // Notch should not have border radius
+    .mdc-notched-outline__notch {
+      border-radius: 0 !important;
+    }
+
+    // Rounded corners for trailing edge
+    .mdc-notched-outline__trailing {
+      border-radius: 0 var(--cc-radius-md) var(--cc-radius-md) 0 !important;
     }
 
     // Focused border styling
@@ -185,6 +210,8 @@
   gap: var(--cc-spacing-sm);
 }
 
+// Job status badge styles - extends global styles with border-radius
+// Global colors defined in styles.scss
 .job-success {
   color: var(--theme-white);
   background-color: var(--cc-color-success);
@@ -204,8 +231,8 @@
 }
 
 .job-running {
-  color: var(--theme-white);
-  background-color: var(--md-sys-color-primary);
+  color: var(--theme-white) !important;
+  background-color: var(--primary) !important;
   border-radius: var(--cc-spacing-sm);
 }
 
@@ -277,13 +304,13 @@
   }
 
   &.job-running {
-    background: var(--md-sys-color-primary);
+    background: var(--primary) !important;
+    color: var(--theme-white) !important;
     text-shadow: var(--secondary-dark) 1px 1px;
   }
 }
 
 .timeline-content {
-  background: var(--secondary-light);
   border: 1px solid var(--cc-border-color);
   border-radius: var(--cc-radius-md);
   padding: 1rem 1.5rem;
@@ -363,7 +390,8 @@
   }
 
   &.job-running {
-    background: var(--md-sys-color-primary);
+    background: var(--primary) !important;
+    color: var(--theme-white) !important;
     text-shadow: var(--secondary-dark) 1px 1px;
   }
 }
