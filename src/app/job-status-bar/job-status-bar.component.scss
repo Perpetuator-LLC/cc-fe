@@ -94,9 +94,9 @@
     flex: 1 1 150px;
     max-width: 350px;
     height: auto !important;
-    //margin-bottom: 20px;
 
-    &::ng-deep .mdc-list-item__content {
+    // Target Material list item content without ::ng-deep
+    .mdc-list-item__content {
       display: block;
       height: auto;
     }

@@ -101,6 +101,29 @@
   min-height: 600px;
 }
 
+// Custom upload icon styling
+.custom-upload-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-left: var(--cc-spacing-sm);
+  color: var(--primary);
+  vertical-align: middle;
+}
+
+// Audio label styling
+.audio-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--cc-spacing-sm);
+  font-weight: 500;
+  color: var(--theme-color);
+}
+
+.grid-header {
+  width: 100%;
+}
+
 .content-field-wrapper {
   width: 100%;
   margin-bottom: 16px;
@@ -1087,5 +1110,3 @@
     }
   }
 }
-
-
