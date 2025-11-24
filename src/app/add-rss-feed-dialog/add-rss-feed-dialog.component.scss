@@ -1,21 +1,10 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-.cancel-btn {
-  background: var(--secondary-light);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  color: var(--theme-color);
-  font-weight: 500;
-}
 
-.add-btn {
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: var(--theme-color);
-  color: var(--secondary-light);
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    pointer-events: auto;
+// Dialog content width controlled by Material
+mat-dialog-content {
+  form {
+    mat-form-field {
+      width: 100%;
+    }
   }
 }
