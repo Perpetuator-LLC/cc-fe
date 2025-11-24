@@ -103,7 +103,7 @@
                     <mat-icon>upload_file</mat-icon>
                     Upload Custom MP3
                   </button>
-                  <input #audioFileInput type="file" accept="audio/mpeg,audio/mp3" (change)="onAudioFileSelected($event)" style="display: none;">
+                  <input #audioFileInput type="file" accept="audio/mpeg,audio/mp3" (change)="onAudioFileSelected($event)" class="display-none">
                   <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
                     <button mat-raised-button color="primary" type="button" class="episode-control"
                       (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">
@@ -120,9 +120,9 @@
                       Current Version Audio:
                       @if (audioIsCustomUpload) {
                         <mat-icon
-                          class="custom-upload-icon"
+                          class="custom-upload-icon icon-sm ml-sm"
                           matTooltip="Custom uploaded audio - will persist even if transcript is edited. Generate Audio to replace with AI-generated version."
-                          style="font-size: 18px; height: 18px; width: 18px; margin-left: 8px; color: var(--primary); vertical-align: middle;">
+                          style="color: var(--primary); vertical-align: middle;">
                           upload_file
                         </mat-icon>
                       }
@@ -131,7 +131,7 @@
                   </div>
                 } @else {
                   <div class="empty-audio">
-                    <app-svg-icon width="24" height="24" icon="music" style="cursor: pointer"></app-svg-icon>
+                    <app-svg-icon width="24" height="24" icon="music" class="icon-clickable"></app-svg-icon>
                     No audio for current version
                   </div>
                 }
@@ -237,7 +237,7 @@
               @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
               <mat-card class="related-card">
                 <mat-card-header>
-                  <div class="grid-header" style="width: 100%">
+                  <div class="grid-header full-width-field">
                     <div class="grid-header-name">
                       <div class="news-title-wrapper">
                         <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">

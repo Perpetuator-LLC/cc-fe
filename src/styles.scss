@@ -1202,230 +1202,120 @@ mat-paginator {
   }
 }
 
-.mdc-icon-button__ripple,
-.mat-mdc-button-ripple {
+// ============================================================================
+// Utility Classes (MD3 Migration - Eliminate Inline Styles)
+// ============================================================================
+
+// Form Field Utilities
+.full-width-field {
+  width: 100%;
+}
+
+.constrained-field {
+  width: 100%;
+  max-width: 508px;
+}
+
+// Layout Utilities
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+// Spacing Utilities (using design tokens)
+.mb-0 { margin-bottom: 0 !important; }
+.mb-xs { margin-bottom: var(--cc-spacing-xs); }
+.mb-sm { margin-bottom: var(--cc-spacing-sm); }
+.mb-md { margin-bottom: var(--cc-spacing-md); }
+.mb-lg { margin-bottom: var(--cc-spacing-lg); }
+.mb-xl { margin-bottom: var(--cc-spacing-xl); }
+.mb-2xl { margin-bottom: var(--cc-spacing-2xl); }
+
+.mt-0 { margin-top: 0 !important; }
+.mt-xs { margin-top: var(--cc-spacing-xs); }
+.mt-sm { margin-top: var(--cc-spacing-sm); }
+.mt-md { margin-top: var(--cc-spacing-md); }
+.mt-lg { margin-top: var(--cc-spacing-lg); }
+.mt-xl { margin-top: var(--cc-spacing-xl); }
+
+.ml-sm { margin-left: var(--cc-spacing-sm); }
+.ml-md { margin-left: var(--cc-spacing-md); }
+
+.mr-sm { margin-right: var(--cc-spacing-sm); }
+.mr-md { margin-right: var(--cc-spacing-md); }
+
+// Icon Utilities
+.icon-clickable {
+  cursor: pointer;
+}
+
+.icon-sm {
+  font-size: 18px !important;
+  height: 18px !important;
+  width: 18px !important;
+}
+
+.icon-md {
+  font-size: 20px !important;
+  height: 20px !important;
+  width: 20px !important;
+}
+
+.icon-lg {
+  font-size: 24px !important;
+  height: 24px !important;
+  width: 24px !important;
+}
+
+// Button Utilities
+.primary-action-button {
+  background-color: var(--primary) !important;
+  color: white !important;
+  border-radius: var(--cc-radius-md) !important;
+  font-weight: 600;
+}
+
+// Progress Bar Utilities
+.progress-bar-thin {
+  height: 2px !important;
+}
+
+// Hidden Elements (functional)
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.display-none {
   display: none;
 }
-
-.subcategory-select {
-  width: 100%;
-
-  .mat-mdc-form-field-infix {
-    height: 40px !important;
-    min-height: 40px !important;
-
-    label {
-      font-size: 14px;
-      top: 50% !important;
-      transform: translateY(-50%) !important;
-    }
-  }
-
-  .mat-mdc-select {
-    display: none;
-  }
-}
-
-.category-chip-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-
-  .mat-mdc-chip {
-    background-color: var(--secondary-dark) !important;
-
-    .mat-mdc-chip-action-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--theme-color) !important;
-    }
-
-    .mat-icon {
-      color: var(--theme-color);
-    }
-
-    .mdc-evolution-chip__action {
-      &::before {
-        border-color: var(--border-color) !important;
-      }
-    }
-  }
-}
-
-.form-field {
-  .mat-mdc-form-field {
-    width: 100%;
-  }
-}
-
-.privacy-policy-modal {
-  .mat-mdc-dialog-surface {
-    background-color: var(--secondary-dark) !important;
-  }
-
-  .mdc-dialog__title {
-    background-color: var(--toolbar-container-background-color) !important;
-    font-size: 20px !important;
-    padding-top: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    &::before {
-      display: none;
-    }
-
-    button {
-      background-color: transparent !important;
-      padding: 0 !important;
-      color: var(--theme-color);
-      height: auto;
-
-      .mdc-button__ripple {
-        display: none;
-      }
-    }
-  }
-
-  .mdc-dialog__content {
-    padding: 20px 24px !important;
-  }
-
-  .privacy-policy-modal-content {
-    color: var(--description-color);
-  }
-}
-
-.mat-divider {
-  border-color: var(--border-color) !important;
-}
-
-.select-right-podcasts {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  @media screen and (max-width: 900px) {
-    flex-wrap: wrap;
-  }
-
-  @media screen and (max-width: 576px) {
-    .time-field {
-      width: 126px;
-    }
-
-    .fetch-btn {
-      flex: 1;
-      width: 100%;
-    }
-  }
-
-  .mat-mdc-form-field-infix {
-    min-height: 40px;
-    padding: 6px;
-    padding-top: 14px;
-
-    label {
-      top: calc(44px / 2) !important;
-    }
-  }
-
-  .mat-mdc-select {
-    font-size: 14px;
-    color: var(--theme-color);
-  }
-
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
-}
-
-.profile-page-container {
-  .user-details-form {
-    .mdc-text-field {
-      background-color: var(--secondary-450) !important;
-    }
-  }
-}
-
-a {
-  color: var(--md-sys-color-primary);
-
-  &:hover {
-    color: var(--md-sys-color-primary-hover);
-  }
-
-  &:visited {
-    color: var(--md-sys-color-primary-visited);
-  }
-}
-
-// Dialogs open outside of the normal component tree, so we have to apply the styles globally
-mat-dialog-container h3.danger {
-  color: var(--md-sys-color-error);
-}
-
-//.add-voice-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
-//  max-width: 1200px !important; // Set desired max-width
-//  width: 90vw !important;       // Adjust width relative to viewport, up to max-width
-//}
-
-// Now, debug the theme map
-//@function print-map($map, $indent: '') {
-//  @each $key, $value in $map {
-//    @if type-of($value) == 'map' {
-//      @debug $indent + '#{$key}:';
-//      @debug $indent + '{';
-//      @debug print-map($value, $indent + '  ');
-//      @debug $indent + '}';
-//    } @else {
-//      @debug $indent + '#{$key}: #{$value}';
-//    }
-//  }
-//  @return null;
-//}
-//@function print-keys($map, $indent: '') {
-//  @each $key, $value in $map {
-//    @if type-of($value) == 'map' {
-//      @debug $indent + '#{$key}:';
-//    } @else {
-//      @debug $indent + '#{$key}';
-//    }
-//  }
-//  @return null;
-//}
-//@function print-simple($map, $indent: '') {
-//  $matint: map.get($map, '_mat-theming-internals-do-not-access');
-//  //$root: map.get($matint, 'theme-type');
-//  //$root: map.get($matint, 'palettes');
-//  $root: map.get($matint, 'color-tokens');
-//  //$root: map.get($matint, 'base-tokens');
-//  @debug print-keys($root);
-//  $color: map.get($root, 'theme');
-//  @debug 'Keys:';
-//  @debug print-keys($color);
-//  //@debug 'Color Tokens:';
-//  //@debug $color;
-//  //$color-config: map.get($theme, color);
-//  //$is-dark-theme: map.get($color-config, 'theme-type') == 'dark';
-//  //$background: map.get($color-config, 'background');
-//  //
-//  //.mat-mdc-card {
-//  //  @if $is-dark-theme {
-//  //    background-color: mix(#ffffff, map.get($background, 'background'), 5%);
-//  //  } @else {
-//  //    background-color: mix(#000000, map.get($background, 'background'), 5%);
-//  //  }
-//  //}
-//  @return null;
-//}
-
-//@debug 'Map Contents:';
-//@debug print-map($dark-theme);
-//@debug print-simple($dark-theme);
-//@debug 'Dark Theme Keys:', map.keys(matPalette.$orange-palette);
 
 /* Custom styles for Privacy Policy Modal main container */
 // ============================================================================
