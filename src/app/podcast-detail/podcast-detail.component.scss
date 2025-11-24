@@ -15,6 +15,16 @@
   button {
     flex: 1 1 100%;
   }
+
+  .enabled-checkbox {
+    text-align: right;
+  }
+
+  .slug-input {
+    mat-form-field {
+      width: 100%;
+    }
+  }
 }
 
 .podcast-card,
@@ -1189,4 +1199,3 @@ mat-divider {
   display: flex;
   justify-content: center;
 }
-

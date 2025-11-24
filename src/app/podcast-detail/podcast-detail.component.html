@@ -144,7 +144,7 @@
               </div>
 
               <div class="member-row">
-                <div class="text-right">
+                <div class="enabled-checkbox">
                   <mat-checkbox
                     formControlName="enabled"
                     matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
@@ -152,7 +152,7 @@
                   >
                 </div>
                 <div class="slug-input">
-                  <mat-form-field appearance="fill" class="full-width-field">
+                  <mat-form-field appearance="fill">
                     <mat-label>Podcast Slug</mat-label>
                     <input matInput formControlName="slug" />
                     @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {

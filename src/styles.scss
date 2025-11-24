@@ -1203,46 +1203,10 @@ mat-paginator {
 }
 
 // ============================================================================
-// Utility Classes (MD3 Migration - Eliminate Inline Styles)
+// Utility Classes (MD3 Migration - Minimal, Token-Based Only)
 // ============================================================================
 
-// Form Field Utilities
-.full-width-field {
-  width: 100%;
-}
-
-.constrained-field {
-  width: 100%;
-  max-width: 508px;
-}
-
-// Layout Utilities
-.flex-row {
-  display: flex;
-  align-items: center;
-}
-
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center;
-}
-
-// Spacing Utilities (using design tokens)
+// Spacing Utilities (using design tokens) - These are legitimate utilities
 .mb-0 { margin-bottom: 0 !important; }
 .mb-xs { margin-bottom: var(--cc-spacing-xs); }
 .mb-sm { margin-bottom: var(--cc-spacing-sm); }
@@ -1264,7 +1228,7 @@ mat-paginator {
 .mr-sm { margin-right: var(--cc-spacing-sm); }
 .mr-md { margin-right: var(--cc-spacing-md); }
 
-// Icon Utilities
+// Icon Utilities - Supplement Material icons with consistent sizing
 .icon-clickable {
   cursor: pointer;
 }
@@ -1287,20 +1251,12 @@ mat-paginator {
   width: 24px !important;
 }
 
-// Button Utilities
-.primary-action-button {
-  background-color: var(--primary) !important;
-  color: white !important;
-  border-radius: var(--cc-radius-md) !important;
-  font-weight: 600;
-}
-
-// Progress Bar Utilities
-.progress-bar-thin {
+// Loading Indicator - Semantic name for progress bar styling
+.loading-indicator {
   height: 2px !important;
 }
 
-// Hidden Elements (functional)
+// Accessibility & Functional Utilities
 .visually-hidden {
   position: absolute;
   width: 1px;

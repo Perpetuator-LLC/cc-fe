@@ -126,24 +126,23 @@
   border-radius: 8px;
   overflow: hidden;
 
-  ::ng-deep {
-    .mat-mdc-tab-labels {
-      background-color: var(--secondary-color);
-      border-bottom: 1px solid var(--border-color);
-    }
+  // Target Material tab elements directly without ::ng-deep
+  .mat-mdc-tab-labels {
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+  }
 
-    .mat-mdc-tab {
-      color: var(--description-color);
-      font-weight: 500;
-    }
+  .mat-mdc-tab {
+    color: var(--description-color);
+    font-weight: 500;
+  }
 
-    .mat-mdc-tab.mat-mdc-tab-active {
-      color: var(--primary);
-    }
+  .mat-mdc-tab.mat-mdc-tab-active {
+    color: var(--primary);
+  }
 
-    .mat-mdc-tab-body-wrapper {
-      background-color: var(--toolbar-container-background-color);
-    }
+  .mat-mdc-tab-body-wrapper {
+    background-color: var(--toolbar-container-background-color);
   }
 }
 

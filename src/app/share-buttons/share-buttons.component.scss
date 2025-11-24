@@ -23,7 +23,9 @@
   }
 }
 
-::ng-deep .share-menu {
+// Menu styling - applied globally via the menu's panelClass if needed
+// Or move to global styles.scss if this is used across the app
+.share-menu {
   .mat-mdc-menu-item {
     min-height: 48px;
 
