@@ -2,7 +2,7 @@
 <h2 mat-dialog-title>Add RSS Feed(s)</h2>
 <mat-dialog-content>
   <form [formGroup]="rssFeedForm">
-    <mat-form-field appearance="fill" style="width: 100%">
+    <mat-form-field appearance="fill" class="full-width-field">
       <mat-label>RSS Feed URL(s) - One per line or comma-separated</mat-label>
       <textarea matInput formControlName="urls" rows="6" placeholder="https://example.com/feed1&#10;https://example.com/feed2, https://example.com/feed3"></textarea>
     </mat-form-field>

@@ -144,7 +144,7 @@
               </div>
 
               <div class="member-row">
-                <div style="text-align: right">
+                <div class="text-right">
                   <mat-checkbox
                     formControlName="enabled"
                     matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
@@ -152,7 +152,7 @@
                   >
                 </div>
                 <div class="slug-input">
-                  <mat-form-field appearance="fill" style="width: 100%">
+                  <mat-form-field appearance="fill" class="full-width-field">
                     <mat-label>Podcast Slug</mat-label>
                     <input matInput formControlName="slug" />
                     @if (podcastForm.get('enabled')?.value && !podcastForm.get('slug')?.value) {
@@ -232,7 +232,7 @@
             <div class="settings-section">
               <h3 class="section-title">Podcast Image</h3>
 
-              <div class="member-row" style="margin-bottom: 20px">
+              <div class="member-row mb-lg">
                 <div
                   class="file-input-wrapper"
                   [class.dragging]="isDraggingImage"
@@ -245,11 +245,10 @@
                       <img
                         [src]="thumbnailUrl || imageUrl"
                         alt="Podcast Image"
-                        class="podcast-image-thumbnail"
+                        class="podcast-image-thumbnail icon-clickable"
                         loading="lazy"
                         (click)="viewFullImage()"
                         matTooltip="Click to view full size"
-                        style="cursor: pointer;"
                       />
                     } @else {
                       <div class="image-placeholder">
@@ -628,7 +627,7 @@
           <form [formGroup]="podcastForm" class="rss-form">
             <div class="rss-info">
               <div class="voice-info">
-                <p style="margin-bottom: 0">
+                <p class="mb-0">
                   <mat-icon>info</mat-icon>Add RSS feeds to import content into your podcast. Each feed will be checked
                   periodically for new episodes.
                 </p>
