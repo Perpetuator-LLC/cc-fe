@@ -23,7 +23,7 @@
       <div class="tab-content">
         <div [formGroup]="form">
           <div class="input-field">
-            <mat-form-field appearance="fill" style="width: 100%; max-width: 508px">
+            <mat-form-field appearance="fill" class="constrained-field">
               <mat-label>Amount ($)</mat-label>
               <input matInput type="text" formControlName="amount" name="amount" autocomplete="amount" />
               <mat-error>Amount is required</mat-error>
@@ -135,7 +135,6 @@
                   @if (order.status === 'PENDING' || (order.status === 'PAID' && order.receiptUrl === null)) {
                     <button
                       class="action-btn"
-                      style="color: var(--theme-color)"
                       mat-icon-button
                       [matMenuTriggerFor]="podcastActionsMenu"
                       aria-label="Podcast actions"

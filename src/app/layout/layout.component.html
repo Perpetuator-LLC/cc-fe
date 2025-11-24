@@ -225,7 +225,7 @@
       <div class="toolbar-container">
         <div class="hamburger-icon">
           <app-svg-icon width="24" height="24" icon="hamburger" (click)="onHamburgerClick($event)"
-            style="cursor: pointer"></app-svg-icon>
+            class="icon-clickable"></app-svg-icon>
           <img src="/assets/logo-white.svg" alt="logo" />
         </div>
         <ng-container #toolbarContainer></ng-container>
@@ -289,7 +289,7 @@
     </mat-toolbar>
     @if (loading()) {
       <div class="layout-loading-spinner">
-        <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+        <mat-progress-bar mode="indeterminate" value="20" class="progress-bar-thin"></mat-progress-bar>
       </div>
     }
     <app-job-status-bar />
