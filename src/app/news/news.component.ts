@@ -191,6 +191,19 @@ export class NewsComponent implements OnInit, OnDestroy {
           this.jobService.addJob(data.job);
           // Set newsFetched to true after fetch is initiated
           this.newsFetched = true;
+
+          // Update local podcast timestamp to prevent duplicate fetches
+          // The backend will set the actual timestamp, but we update locally immediately
+          const podcast = this.podcasts.find((p) => p.uuid === this.selectedPodcastUuid);
+          if (podcast) {
+            podcast.lastNewsFetchedAt = new Date().toISOString();
+            console.log(
+              '[fetchNews] Updated local timestamp for podcast:',
+              podcast.name,
+              'to',
+              podcast.lastNewsFetchedAt,
+            );
+          }
         },
         error: (error) => {
           this.messageService.error(`Failed to fetch news: ${error.message}`);
@@ -224,10 +237,38 @@ export class NewsComponent implements OnInit, OnDestroy {
         console.warn('No RSS feeds configured for podcast:', selectedPodcast?.name);
       }
 
-      // Always load existing news when podcast changes (no fetch job)
-      // User must click "Fetch News" button to trigger fresh fetch
+      // Always load existing news to show user latest cached data
       this.getNews();
+
+      // Smart fetch: Only trigger fresh fetch if last fetch was >5 minutes ago
+      if (selectedPodcast && this.shouldFetchNews(selectedPodcast)) {
+        this.fetchNews();
+      }
     }
+  }
+
+  /**
+   * Determines if we should trigger a fresh news fetch based on last fetch time
+   * @param podcast The selected podcast
+   * @returns true if fetch is needed (>5 minutes since last fetch or never fetched)
+   */
+  private shouldFetchNews(podcast: PodcastsResult): boolean {
+    if (!podcast.lastNewsFetchedAt) {
+      console.log('[shouldFetchNews] No lastNewsFetchedAt, will fetch');
+      return true;
+    }
+
+    const lastFetchTime = new Date(podcast.lastNewsFetchedAt);
+    const now = new Date();
+    const minutesSinceLastFetch = (now.getTime() - lastFetchTime.getTime()) / (1000 * 60);
+
+    console.log('[shouldFetchNews] Last fetch:', lastFetchTime.toISOString());
+    console.log('[shouldFetchNews] Now:', now.toISOString());
+    console.log('[shouldFetchNews] Minutes since last fetch:', minutesSinceLastFetch.toFixed(2));
+    console.log('[shouldFetchNews] Will fetch?', minutesSinceLastFetch > 5);
+
+    // Fetch if >5 minutes have elapsed
+    return minutesSinceLastFetch > 5;
   }
 
   onRssFeedChange() {

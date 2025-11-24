@@ -524,6 +524,9 @@ type PodcastType implements Node {
   Date of the most recently created episode (including non-live internal episodes)
   """
   latestInternalEpisodeDate: DateTime
+
+  """Timestamp of last successful news fetch"""
+  lastNewsFetchedAt: DateTime
   createdAt: DateTime
   updatedAt: DateTime
   uuid: UUID

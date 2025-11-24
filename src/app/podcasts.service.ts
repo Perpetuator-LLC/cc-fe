@@ -73,6 +73,7 @@ export interface PodcastsResult {
   latestEpisodeDate: string | null;
   latestInternalEpisodeDate: string | null;
   viewCount: number;
+  lastNewsFetchedAt: string | null; // Timestamp of last successful news fetch (ISO 8601)
   // categories: CategoryResult[] | null;
   categories: Record<string, string[]> | null;
   rssFeeds: RssFeedResult[];
@@ -688,6 +689,7 @@ export class PodcastsService extends BaseService {
               uuid
               name
               latestInternalEpisodeDate
+              lastNewsFetchedAt
               rssFeeds {
                 id
                 uuid
