@@ -210,31 +210,8 @@
   gap: var(--cc-spacing-sm);
 }
 
-// Job status badge styles - extends global styles with border-radius
-// Global colors defined in styles.scss
-.job-success {
-  color: var(--theme-white);
-  background-color: var(--cc-color-success);
-  border-radius: var(--cc-spacing-sm);
-}
-
-.job-failed {
-  color: var(--theme-white);
-  background-color: var(--cc-color-error);
-  border-radius: var(--cc-spacing-sm);
-}
-
-.job-pending {
-  color: var(--theme-white);
-  background-color: var(--cc-color-warning);
-  border-radius: var(--cc-spacing-sm);
-}
-
-.job-running {
-  color: var(--theme-white) !important;
-  background-color: var(--primary) !important;
-  border-radius: var(--cc-spacing-sm);
-}
+// Job status badge styles are now in global styles.scss
+// No need to duplicate here - global styles handle all colors
 
 .timeline {
   position: relative;
@@ -288,24 +265,12 @@
   color: var(--theme-white);
   border: 1px solid var(--cc-border-color);
 
-  &.job-success {
-    background: var(--cc-color-success);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
-  &.job-failed {
-    background: var(--cc-color-error);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
-  &.job-pending {
-    background: var(--cc-color-warning);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
+  // Colors are defined in global styles.scss
+  // Only add component-specific styling here
+  &.job-success,
+  &.job-failed,
+  &.job-pending,
   &.job-running {
-    background: var(--primary) !important;
-    color: var(--theme-white) !important;
     text-shadow: var(--secondary-dark) 1px 1px;
   }
 }
@@ -374,24 +339,12 @@
   white-space: nowrap;
   flex-shrink: 0;
 
-  &.job-success {
-    background: var(--cc-color-success);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
-  &.job-failed {
-    background: var(--cc-color-error);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
-  &.job-pending {
-    background: var(--cc-color-warning);
-    text-shadow: var(--secondary-dark) 1px 1px;
-  }
-
+  // Colors are defined in global styles.scss
+  // Only add component-specific styling here
+  &.job-success,
+  &.job-failed,
+  &.job-pending,
   &.job-running {
-    background: var(--primary) !important;
-    color: var(--theme-white) !important;
     text-shadow: var(--secondary-dark) 1px 1px;
   }
 }
