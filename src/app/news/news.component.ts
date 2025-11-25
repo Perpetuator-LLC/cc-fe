@@ -91,6 +91,9 @@ export class NewsComponent implements OnInit, OnDestroy {
   private resizeStartX = 0;
   private resizeStartWidth = 0;
 
+  // Local cache to track fetch timestamps for podcasts (prevents duplicate fetches before backend updates)
+  private localFetchTimestamps = new Map<string, Date>();
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   protected showMicroJobButtons = false;
 
@@ -180,6 +183,17 @@ export class NewsComponent implements OnInit, OnDestroy {
       this.messageService.warning('No podcast selected.');
       return;
     }
+
+    // Record fetch timestamp in local cache IMMEDIATELY to prevent duplicate triggers
+    const fetchTime = new Date();
+    this.localFetchTimestamps.set(this.selectedPodcastUuid, fetchTime);
+    console.log(
+      '[fetchNews] Recorded local timestamp for podcast:',
+      this.selectedPodcastUuid,
+      'at',
+      fetchTime.toISOString(),
+    );
+
     this.onPodcastSelect(this.selectedPodcastUuid);
     this.subscriptions.add(
       this.newsService.fetchNews(this.selectedPodcastUuid).subscribe({
@@ -192,21 +206,12 @@ export class NewsComponent implements OnInit, OnDestroy {
           // Set newsFetched to true after fetch is initiated
           this.newsFetched = true;
 
-          // Update local podcast timestamp to prevent duplicate fetches
-          // The backend will set the actual timestamp, but we update locally immediately
-          const podcast = this.podcasts.find((p) => p.uuid === this.selectedPodcastUuid);
-          if (podcast) {
-            podcast.lastNewsFetchedAt = new Date().toISOString();
-            console.log(
-              '[fetchNews] Updated local timestamp for podcast:',
-              podcast.name,
-              'to',
-              podcast.lastNewsFetchedAt,
-            );
-          }
+          console.log('[fetchNews] News fetch job created successfully for podcast:', this.selectedPodcastUuid);
         },
         error: (error) => {
           this.messageService.error(`Failed to fetch news: ${error.message}`);
+          // Remove from local cache on error so retry is possible
+          this.localFetchTimestamps.delete(this.selectedPodcastUuid!);
         },
       }),
     );
@@ -253,6 +258,23 @@ export class NewsComponent implements OnInit, OnDestroy {
    * @returns true if fetch is needed (>5 minutes since last fetch or never fetched)
    */
   private shouldFetchNews(podcast: PodcastsResult): boolean {
+    // First check local cache (most recent, even if backend hasn't updated yet)
+    const localTimestamp = this.localFetchTimestamps.get(podcast.uuid);
+    if (localTimestamp) {
+      const now = new Date();
+      const minutesSinceLocalFetch = (now.getTime() - localTimestamp.getTime()) / (1000 * 60);
+
+      console.log('[shouldFetchNews] Local cache check for:', podcast.name);
+      console.log('[shouldFetchNews] Local last fetch:', localTimestamp.toISOString());
+      console.log('[shouldFetchNews] Minutes since local fetch:', minutesSinceLocalFetch.toFixed(2));
+
+      if (minutesSinceLocalFetch <= 5) {
+        console.log('[shouldFetchNews] Using local cache - fetch blocked (within 5 min window)');
+        return false;
+      }
+    }
+
+    // Then check backend timestamp
     if (!podcast.lastNewsFetchedAt) {
       console.log('[shouldFetchNews] No lastNewsFetchedAt, will fetch');
       return true;
@@ -262,7 +284,8 @@ export class NewsComponent implements OnInit, OnDestroy {
     const now = new Date();
     const minutesSinceLastFetch = (now.getTime() - lastFetchTime.getTime()) / (1000 * 60);
 
-    console.log('[shouldFetchNews] Last fetch:', lastFetchTime.toISOString());
+    console.log('[shouldFetchNews] Backend timestamp check for:', podcast.name);
+    console.log('[shouldFetchNews] Backend last fetch:', lastFetchTime.toISOString());
     console.log('[shouldFetchNews] Now:', now.toISOString());
     console.log('[shouldFetchNews] Minutes since last fetch:', minutesSinceLastFetch.toFixed(2));
     console.log('[shouldFetchNews] Will fetch?', minutesSinceLastFetch > 5);
