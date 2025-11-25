@@ -379,7 +379,11 @@ type EmailPreferenceType {
 type UserDataExport {
   """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
   username: String!
+
+  """Unique identifier for this user"""
   id: UUID!
+
+  """User's email address (must be unique)"""
   email: String!
   uuid: UUID
   jobs: [JobType!]
@@ -426,6 +430,8 @@ scalar GenericScalar
 type TeamType implements Node {
   """The ID of the object"""
   id: ID!
+
+  """Team name (must be unique)"""
   name: String!
   uuid: UUID
   members: [TeamMembershipType]
@@ -480,54 +486,76 @@ Type for Podcast model. This is used to create a new podcast and to get the list
 type PodcastType implements Node {
   """The ID of the object"""
   id: ID!
+
+  """Podcast name (must be unique)"""
   name: String!
+
+  """Opening spoken by the host at episode start"""
   intro: String!
 
-  """Brand prompt that influences all episode types with tone and style"""
+  """Brand voice and style guidelines applied to all episode types"""
   prompt: String!
 
-  """Prompt for generating news episodes"""
+  """Guidelines for generating news-focused episodes"""
   newsPrompt: String!
 
   """
-  Target word count for news episodes. Used to calculate max_tokens limit. Default: 450 words (~3 minutes)
+  Target word count for news episodes (used to calculate token limits). Default: 450 words (~3 min)
   """
   newsTargetWords: Int!
 
-  """Prompt for generating research episodes"""
+  """Guidelines for generating research-focused episodes"""
   researchPrompt: String!
 
   """
-  Target word count for research episodes. Used to calculate max_tokens limit. Default: 1400 words (~10 minutes)
+  Target word count for research episodes (used to calculate token limits). Default: 1400 words (~10 min)
   """
   researchTargetWords: Int!
+
+  """Closing spoken by the host at episode end"""
   outro: String!
+
+  """URL-friendly podcast identifier (e.g., 'my-podcast')"""
   slug: String
+
+  """Whether this podcast is active and accessible"""
   enabled: Boolean!
+
+  """Podcast description for RSS feed and public pages"""
   description: String
+
+  """Podcast owner name for RSS feed"""
   ownerName: String
+
+  """Podcast owner email for RSS feed"""
   ownerEmail: String
+
+  """Podcast owner website URL"""
   ownerLink: String
+
+  """Encrypted Telegram channel ID for publishing episodes"""
   tgChannelId: String
+
+  """Last response from Telegram API"""
   tgResponse: String
   categories: GenericScalar
 
-  """Number of times this podcast has been viewed publicly"""
+  """Total public page views for this podcast"""
   viewCount: Int!
 
-  """
-  Date of the most recently published episode (podcast_date from is_live episodes only)
-  """
+  """Publication date of most recent live episode"""
   latestEpisodeDate: DateTime
 
-  """
-  Date of the most recently created episode (including non-live internal episodes)
-  """
+  """Creation date of most recent episode (including drafts)"""
   latestInternalEpisodeDate: DateTime
 
-  """Timestamp of last successful news fetch"""
+  """Last successful news fetch timestamp"""
   lastNewsFetchedAt: DateTime
+
+  """When this podcast was created"""
   createdAt: DateTime
+
+  """When this podcast was last modified"""
   updatedAt: DateTime
   uuid: UUID
   rssFeeds: [RssFeedType]
@@ -565,13 +593,19 @@ type VoiceType implements Node {
   id: ID!
   model: VoiceModel
 
-  """The name (OpenAI) or ID (ElevenLabs) of the voice."""
+  """Provider's voice identifier (OpenAI voice name or ElevenLabs voice ID)"""
   externalId: String!
+
+  """Human-friendly name for this voice"""
   displayName: String
 
-  """Whether this voice is available for use."""
+  """Whether this voice is available for selection"""
   enabled: Boolean!
+
+  """When this voice was added to the system"""
   createdAt: DateTime!
+
+  """When this voice was last updated"""
   updatedAt: DateTime!
   metadata: GenericScalar
   uuid: UUID
@@ -590,23 +624,46 @@ enum VoiceModel {
 
 """GraphQL type for Episode model."""
 type EpisodeType implements Node {
+  """Episode title"""
   title: String!
+
+  """Episode description or summary"""
   description: String!
+
+  """Episode creation date"""
   date: DateTime!
+
+  """Generated or uploaded MP3 audio file"""
   audioFile: String
+
+  """Duration of audio in seconds"""
   audioSeconds: Int
 
   """
-  True if audio was manually uploaded, False if generated from transcript
+  Whether audio was manually uploaded (true) or generated from transcript (false)
   """
   audioIsCustomUpload: Boolean!
+
+  """Episode transcript or script content"""
   content: String!
+
+  """Version number of the current episode state"""
   currentVersionNumber: Int!
   news: [NewsType]
+
+  """Podcast this episode belongs to"""
   podcast: PodcastType!
+
+  """Whether this episode is published and publicly visible"""
   isLive: Boolean!
+
+  """Publication date when episode went live"""
   podcastDate: DateTime
+
+  """Date when episode was posted to Telegram"""
   telegramDate: DateTime
+
+  """Global unique identifier for RSS feed"""
   podcastEpisodeGuid: UUID!
 
   """The ID of the object"""
@@ -659,16 +716,37 @@ enum NewsNewsValidationConfidenceChoices {
 GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
 """
 type EpisodeVersionType {
+  """Sequential version number (1, 2, 3, etc.)"""
   versionNumber: Int!
+
+  """Episode title at this version"""
   title: String!
+
+  """Episode description at this version"""
   description: String!
+
+  """Episode transcript content at this version"""
   content: String!
+
+  """Whether this version passed compliance validation"""
   validatedCompliance: Boolean!
+
+  """Whether this version passed fact-checking validation"""
   validatedFacts: Boolean!
+
+  """Whether this version meets length requirements"""
   validatedLength: Boolean!
+
+  """Notes from validation process or AI adjustments"""
   validationNotes: String
+
+  """Type of change that created this version"""
   changeType: ApiEpisodeVersionChangeTypeChoices!
+
+  """Audio duration in seconds"""
   audioSeconds: Int
+
+  """When this version was created"""
   createdAt: DateTime!
   uuid: UUID
   createdBy: PublicUserType
@@ -731,14 +809,31 @@ type SourceType implements Node {
 
 """OrderType is a GraphQL type that represents an order."""
 type OrderType implements Node {
+  """User who placed this order"""
   user: UserDataExport
+
+  """Stripe checkout session ID"""
   sessionId: String
+
+  """Order amount in cents (USD only)"""
   amount: Int!
+
+  """Stripe receipt URL"""
   receiptUrl: String
+
+  """Stripe checkout session URL"""
   sessionUrl: String
+
+  """Order payment status"""
   status: ApiOrderStatusChoices!
+
+  """Order description"""
   description: String
+
+  """When this order was created"""
   createdAt: DateTime!
+
+  """When this order was last updated"""
   updatedAt: DateTime!
 
   """The ID of the object"""
@@ -760,11 +855,24 @@ enum ApiOrderStatusChoices {
 
 """TransactionType is a GraphQL type that represents a transaction."""
 type TransactionType implements Node {
+  """User this transaction belongs to"""
   user: UserDataExport
+
+  """
+  Transaction description (e.g., 'Credit purchase', 'Episode generation')
+  """
   description: String!
+
+  """Credits added (positive) or deducted (negative)"""
   creditAmount: Int!
+
+  """When this transaction occurred"""
   createdAt: DateTime!
+
+  """Job that triggered this transaction (if any)"""
   job: JobType
+
+  """Order that created this transaction (if any)"""
   order: OrderType
 
   """The ID of the object"""
@@ -1619,11 +1727,18 @@ type CodeTypeEdge {
 
 """CodeType is a GraphQL type that represents a bonus code."""
 type CodeType implements Node {
+  """Redemption code (must be unique)"""
   code: String!
   creator: PublicUserType
   consumer: PublicUserType
+
+  """When this code was created"""
   createdAt: DateTime!
+
+  """When this code was redeemed"""
   consumedAt: DateTime
+
+  """Credits awarded when code is redeemed (max 100,000)"""
   creditAmount: Int!
 
   """The ID of the object"""
@@ -1662,12 +1777,20 @@ type APIKeyType implements Node {
   """The ID of the object"""
   id: ID!
 
-  """Friendly name for this key"""
+  """Descriptive name for this key (e.g., 'Production App', 'Testing')"""
   name: String!
+
+  """First 8 characters of the key (for identification)"""
   prefix: String!
   scopes: [String]
+
+  """Last time this key was used for authentication"""
   lastUsed: DateTime
+
+  """When this key was created"""
   createdAt: DateTime!
+
+  """Whether this key is currently active and can be used"""
   isActive: Boolean!
   uuid: UUID
 }
