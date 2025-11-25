@@ -1,0 +1,286 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+// Material Design 3 SCSS Mixins and Utilities
+
+// ============================================================================
+// Responsive Breakpoints
+// ============================================================================
+@mixin mobile {
+  @media screen and (max-width: 576px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media screen and (max-width: 900px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media screen and (min-width: 901px) {
+    @content;
+  }
+}
+
+// ============================================================================
+// Card Patterns
+// ============================================================================
+@mixin card-container {
+  background: var(--cc-surface-card);
+  border: 1px solid var(--cc-border-color);
+  border-radius: var(--cc-radius-md);
+  padding: var(--cc-spacing-md);
+}
+
+@mixin card-elevated {
+  @include card-container;
+  background: var(--cc-surface-elevated);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// ============================================================================
+// Button Patterns
+// ============================================================================
+@mixin primary-button {
+  background: var(--primary);
+  color: #ffffff;
+  border-radius: var(--cc-radius-md);
+  border: 1px solid var(--cc-border-color);
+  font-weight: 600;
+  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin secondary-button {
+  background: transparent;
+  color: var(--cc-text-primary);
+  border-radius: var(--cc-radius-md);
+  border: 1px solid var(--cc-border-color);
+  font-weight: 500;
+  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--cc-surface-elevated);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// Form Field Patterns
+// ============================================================================
+@mixin form-field-full-width {
+  width: 100%;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+@mixin form-field-constrained {
+  width: 100%;
+  max-width: 508px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+// ============================================================================
+// Typography Patterns
+// ============================================================================
+@mixin section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cc-text-primary);
+  margin-top: 0;
+  margin-bottom: var(--cc-spacing-md);
+}
+
+@mixin body-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cc-text-primary);
+  line-height: 1.6;
+}
+
+@mixin secondary-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cc-text-secondary);
+  line-height: 1.5;
+}
+
+// ============================================================================
+// Layout Patterns
+// ============================================================================
+@mixin flex-row {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-spacing-md);
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-spacing-md);
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-spacing-md);
+}
+
+@mixin grid-auto-fill($min-width: 250px) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax($min-width, 1fr));
+  gap: var(--cc-spacing-md);
+}
+
+// ============================================================================
+// Icon Patterns
+// ============================================================================
+@mixin icon-size($size: 20px) {
+  font-size: $size;
+  width: $size;
+  height: $size;
+}
+
+@mixin icon-button {
+  padding: var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--cc-surface-elevated);
+  }
+}
+
+// ============================================================================
+// Badge Patterns
+// ============================================================================
+@mixin badge($bg-color, $text-color) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-spacing-xs);
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  background: $bg-color;
+  color: $text-color;
+  border-radius: var(--cc-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// ============================================================================
+// Status Badges
+// ============================================================================
+@mixin status-success {
+  @include badge(var(--cc-color-success), #ffffff);
+}
+
+@mixin status-error {
+  @include badge(var(--cc-color-error), #ffffff);
+}
+
+@mixin status-warning {
+  @include badge(var(--cc-color-warning), #ffffff);
+}
+
+@mixin status-info {
+  @include badge(var(--cc-color-info), #ffffff);
+}
+
+// ============================================================================
+// Loading States
+// ============================================================================
+@mixin loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-spacing-md);
+  padding: var(--cc-spacing-2xl) var(--cc-spacing-lg);
+
+  mat-spinner {
+    margin-bottom: var(--cc-spacing-md);
+  }
+
+  p {
+    color: var(--cc-text-secondary);
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+@mixin empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-spacing-md);
+  padding: var(--cc-spacing-2xl) var(--cc-spacing-lg);
+  text-align: center;
+
+  mat-icon {
+    @include icon-size(64px);
+    color: var(--cc-text-secondary);
+    opacity: 0.3;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--cc-text-primary);
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--cc-text-secondary);
+    max-width: 400px;
+  }
+}
+
+// ============================================================================
+// Scrollbar Styling
+// ============================================================================
+@mixin custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cc-border-color) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--cc-border-color);
+    border-radius: var(--cc-radius-sm);
+
+    &:hover {
+      background: var(--cc-text-secondary);
+    }
+  }
+}
+
