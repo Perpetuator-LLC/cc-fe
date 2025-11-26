@@ -46,9 +46,6 @@ export class CreateApiKeyDialogComponent implements OnDestroy {
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      rateLimitPerMinute: [null],
-      rateLimitPerHour: [null],
-      rateLimitPerDay: [null],
     });
   }
 
@@ -62,14 +59,8 @@ export class CreateApiKeyDialogComponent implements OnDestroy {
     }
 
     this.loading = true;
-    const formValue = this.form.value;
-
-    // Convert empty strings to null
     const input = {
-      name: formValue.name,
-      rateLimitPerMinute: formValue.rateLimitPerMinute || undefined,
-      rateLimitPerHour: formValue.rateLimitPerHour || undefined,
-      rateLimitPerDay: formValue.rateLimitPerDay || undefined,
+      name: this.form.value.name,
     };
 
     this.subscriptions.add(
