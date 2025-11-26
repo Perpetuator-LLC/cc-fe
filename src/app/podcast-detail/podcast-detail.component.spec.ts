@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { TeamsService } from '../teams.service';
 import { VoicesService } from '../voices.service';
 import { UserService } from '../user.service';
@@ -20,6 +21,7 @@ import { NewsService } from '../news.service';
 import { EpisodeService } from '../episode.service';
 import { JobService } from '../job.service';
 import { ResearchService } from '../research.service';
+import { ShareService } from '../share.service';
 
 describe('PodcastDetailComponentComponent', () => {
   let component: PodcastDetailComponent;
@@ -38,6 +40,7 @@ describe('PodcastDetailComponentComponent', () => {
   let mockEpisodeService: jasmine.SpyObj<EpisodeService>;
   let mockJobService: jasmine.SpyObj<JobService>;
   let mockResearchService: jasmine.SpyObj<ResearchService>;
+  let mockShareService: jasmine.SpyObj<ShareService>;
   let messagesSubject: BehaviorSubject<never[]>;
 
   beforeEach(async () => {
@@ -48,6 +51,7 @@ describe('PodcastDetailComponentComponent', () => {
       'getPodcastById',
       'getRssFeeds',
       'getPodcastCategories',
+      'getPodcastsForFilter',
     ]);
     mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages']);
     Object.defineProperty(mockMessageService, 'messages$', {
@@ -73,32 +77,10 @@ describe('PodcastDetailComponentComponent', () => {
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodes']);
     mockJobService = jasmine.createSpyObj('JobService', ['addJob']);
     mockResearchService = jasmine.createSpyObj('ResearchService', ['createResearchChain']);
+    mockShareService = jasmine.createSpyObj('ShareService', ['extractIdFromSlugParam']);
 
-    mockPodcastsService = jasmine.createSpyObj('PodcastsService', [
-      'deletePodcast',
-      'getPodcastById',
-      'getRssFeeds',
-      'getPodcastCategories',
-    ]);
-    mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages']);
-    Object.defineProperty(mockMessageService, 'messages$', {
-      get: () => messagesSubject.asObservable(),
-    });
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockTeamsService = jasmine.createSpyObj('TeamsService', ['getTeams']);
-    mockVoicesService = jasmine.createSpyObj('VoicesService', ['getVoices']);
-    mockUserService = jasmine.createSpyObj('UserService', ['getUser']);
-    Object.defineProperty(mockUserService, 'userDetails', {
-      get: () => signal(null),
-    });
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', [
-      'setTemplate',
-      'clearTemplate',
-      'getViewContainerRef',
-      'clearToolbarComponent',
-    ]);
-    mockClipboard = jasmine.createSpyObj('Clipboard', ['copy']);
+    // Make extractIdFromSlugParam return the test UUID
+    mockShareService.extractIdFromSlugParam.and.returnValue('test-podcast-uuid');
 
     const mockViewContainerRef = {
       clear: jasmine.createSpy('clear'),
@@ -142,6 +124,8 @@ describe('PodcastDetailComponentComponent', () => {
 
     mockPodcastsService.getPodcastCategories.and.returnValue(of({}));
 
+    mockPodcastsService.getPodcastsForFilter.and.returnValue(of({ podcasts: [] }));
+
     mockTeamsService.getTeams.and.returnValue(
       of({
         teams: [],
@@ -166,10 +150,23 @@ describe('PodcastDetailComponentComponent', () => {
       }),
     );
 
+    mockEpisodeService.getEpisodes.and.returnValue(
+      of({
+        episodes: [],
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: null,
+          endCursor: null,
+        },
+      }),
+    );
+
     await TestBed.configureTestingModule({
       imports: [PodcastDetailComponent],
       providers: [
         provideAnimations(),
+        provideHttpClient(),
         { provide: PodcastsService, useValue: mockPodcastsService },
         { provide: MessageService, useValue: mockMessageService },
         { provide: MatDialog, useValue: mockDialog },
@@ -184,10 +181,12 @@ describe('PodcastDetailComponentComponent', () => {
         { provide: EpisodeService, useValue: mockEpisodeService },
         { provide: JobService, useValue: mockJobService },
         { provide: ResearchService, useValue: mockResearchService },
+        { provide: ShareService, useValue: mockShareService },
         {
           provide: ActivatedRoute,
           useValue: {
             params: of({ uuid: 'test-podcast-uuid' }),
+            queryParams: of({}), // Add queryParams observable
             snapshot: {
               paramMap: {
                 get: (key: string) => (key === 'uuid' ? 'test-podcast-uuid' : null),
