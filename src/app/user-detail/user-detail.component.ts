@@ -14,7 +14,7 @@ import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { TeamsService } from '../teams.service';
@@ -48,6 +48,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     FormsModule,
     MatIcon,
     MatTooltip,
+    RouterLink,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],

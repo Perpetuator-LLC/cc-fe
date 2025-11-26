@@ -233,3 +233,22 @@ mat-form-field {
   }
 }
 
+.api-keys-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-spacing-md);
+
+  p {
+    margin: 0;
+    color: var(--cc-text-secondary);
+    line-height: 1.5;
+  }
+
+  button {
+    align-self: flex-start;
+
+    mat-icon {
+      margin-right: var(--cc-spacing-xs);
+    }
+  }
+}
