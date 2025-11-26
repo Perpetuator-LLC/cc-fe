@@ -23,32 +23,32 @@
     width: 64px;
     height: 64px;
     color: var(--md-sys-color-error);
-    margin-bottom: 16px;
+    margin-bottom: var(--cc-spacing-md);
   }
 
   h2 {
     color: var(--theme-color);
-    margin-bottom: 8px;
+    margin-bottom: var(--cc-spacing-sm);
   }
 
   p {
     color: var(--description-color);
-    margin-bottom: 20px;
+    margin-bottom: var(--cc-spacing-lg);
   }
 }
 
 .podcast-link-header {
-  margin-bottom: 16px;
+  margin-bottom: var(--cc-spacing-md);
 
   .podcast-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--cc-spacing-sm);
     color: var(--primary);
     font-weight: 600;
     font-size: 16px;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: var(--cc-spacing-sm) var(--cc-spacing-md);
+    border-radius: var(--cc-radius-md);
     text-decoration: none;
     transition: background-color 0.2s;
 

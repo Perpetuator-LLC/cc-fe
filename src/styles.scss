@@ -732,7 +732,7 @@ a {
     button {
       background: var(--secondary-light);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
+      border-radius: var(--cc-radius-md);
       color: var(--theme-color) !important;
       font-weight: 500;
 
@@ -1007,13 +1007,13 @@ div.mat-mdc-select-panel {
 .profile-menu {
   min-width: 300px !important;
   max-width: 300px !important;
-  border-radius: 10px !important;
+  border-radius: var(--cc-radius-md) !important;
 
   .profile-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
+    gap: var(--cc-spacing-sm);
+    padding: var(--cc-spacing-sm) var(--cc-spacing-md);
     border-bottom: 1px solid var(--border-color);
 
     .mat-icon {
