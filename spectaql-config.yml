@@ -15,7 +15,7 @@ info:
     All API requests require authentication via:
 
     - **OAuth2 Bearer Token**: `Authorization: Bearer YOUR_TOKEN`
-    - **API Key**: `Authorization: ApiKey YOUR_API_KEY`
+    - **API Key**: `Authorization: X-API-Key YOUR_API_KEY`
 
     ## Scopes
 
