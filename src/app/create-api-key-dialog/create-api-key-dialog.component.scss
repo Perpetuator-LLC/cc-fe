@@ -1,21 +1,33 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: var(--cc-spacing-lg);
-  margin-bottom: var(--cc-spacing-xs);
-  color: var(--cc-text-primary);
-}
-
-.section-description {
-  font-size: 12px;
-  color: var(--cc-text-secondary);
-  margin-bottom: var(--cc-spacing-md);
-}
-
 mat-form-field {
   width: 100%;
+}
+
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cc-spacing-sm);
+  padding: var(--cc-spacing-md);
+  background: var(--cc-surface-elevated);
+  border: 1px solid var(--cc-border-color);
+  border-radius: var(--cc-radius-md);
+  margin-top: var(--cc-spacing-md);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--cc-color-info);
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--cc-text-secondary);
+    line-height: 1.5;
+  }
 }
 
 .success-container {
