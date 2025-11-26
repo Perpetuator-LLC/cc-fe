@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
+import { Apollo } from 'apollo-angular';
 import { LoginComponent } from './login.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -15,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
+import { PolicyGuardService } from '../policy-guard.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -50,12 +52,20 @@ describe('LoginComponent', () => {
       'clearCode',
       'getAffiliateCode',
       'setAffiliateCode',
+      'getReturnUrl',
+      'setReturnUrl',
+      'clearReturnUrl',
     ]);
     mockAffiliateStorageService.getAffiliateCode.and.returnValue(null);
+    mockAffiliateStorageService.getReturnUrl.and.returnValue(null);
 
     const graphqlAuthServiceSpy = jasmine.createSpyObj('GraphqlAuthService', ['login']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
+    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
+    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
+    const mockPolicyGuardService = jasmine.createSpyObj('PolicyGuardService', ['checkPolicyAcceptance']);
+    mockPolicyGuardService.checkPolicyAcceptance.and.returnValue(of(true));
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, LoginComponent, HttpClientTestingModule, NoopAnimationsModule],
@@ -71,6 +81,8 @@ describe('LoginComponent', () => {
         { provide: AffiliateService, useValue: mockAffiliateService },
         { provide: AffiliateStorageService, useValue: mockAffiliateStorageService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: Apollo, useValue: mockApollo },
+        { provide: PolicyGuardService, useValue: mockPolicyGuardService },
       ],
     }).compileComponents();
 

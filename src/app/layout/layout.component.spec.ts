@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { LayoutComponent } from './layout.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
@@ -10,6 +11,7 @@ import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Apollo } from 'apollo-angular';
 
 describe('LayoutComponent', () => {
   let fixture: ComponentFixture<LayoutComponent>;
@@ -25,6 +27,9 @@ describe('LayoutComponent', () => {
     toolbarService = jasmine.createSpyObj('ToolbarService', ['setRootViewContainerRef', 'clearToolbarComponent']);
     breakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
 
+    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
+    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
+
     breakpointObserver.observe.and.returnValue(
       of({
         matches: true,
@@ -36,12 +41,13 @@ describe('LayoutComponent', () => {
     );
 
     await TestBed.configureTestingModule({
-      imports: [LayoutComponent, MatSidenavModule, RouterTestingModule, NoopAnimationsModule],
+      imports: [LayoutComponent, MatSidenavModule, RouterTestingModule, NoopAnimationsModule, HttpClientTestingModule],
       providers: [
         { provide: AuthService, useValue: authService },
         { provide: ThemeService, useValue: themeService },
         { provide: ToolbarService, useValue: toolbarService },
         { provide: BreakpointObserver, useValue: breakpointObserver },
+        { provide: Apollo, useValue: mockApollo },
       ],
       // schemas: [NO_ERRORS_SCHEMA], // To ignore child components like router-outlet
     }).compileComponents();

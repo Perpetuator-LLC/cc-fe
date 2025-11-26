@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CreatePodcastCategoriesComponent } from './create-podcast-categories.component';
 import { PodcastsService } from '../podcasts.service';
 import { of } from 'rxjs';
@@ -19,7 +20,7 @@ describe('CreatePodcastCategoriesComponent', () => {
     );
 
     await TestBed.configureTestingModule({
-      imports: [CreatePodcastCategoriesComponent],
+      imports: [CreatePodcastCategoriesComponent, NoopAnimationsModule],
       providers: [{ provide: PodcastsService, useValue: spy }],
     }).compileComponents();
 
