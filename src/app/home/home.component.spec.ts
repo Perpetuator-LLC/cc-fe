@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { HomeComponent } from './home.component';
 import { ToolbarService } from '../toolbar.service';
 
@@ -16,7 +17,7 @@ describe('HomeComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent, RouterTestingModule],
-      providers: [{ provide: ToolbarService, useValue: mockToolbarService }],
+      providers: [provideHttpClient(), { provide: ToolbarService, useValue: mockToolbarService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomeComponent);
