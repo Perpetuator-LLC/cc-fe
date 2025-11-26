@@ -250,6 +250,16 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'api-keys',
+    loadComponent: () =>
+      import('./api-keys-dashboard/api-keys-dashboard.component').then((c) => c.ApiKeysDashboardComponent),
+    title: 'API Keys',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'key',
+    },
+  },
+  {
     path: 'affiliate/stripe/return',
     loadComponent: () =>
       import('./stripe-onboarding-return/stripe-onboarding-return.component').then(

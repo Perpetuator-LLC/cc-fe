@@ -1,0 +1,82 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Create API Key</h2>
+
+<mat-dialog-content>
+  @if (!createdKey) {
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Key Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g., Production App" required />
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>Name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="section-title">Rate Limits</div>
+      <p class="section-description">Set to 0 for unlimited. Leave empty for defaults.</p>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Requests per Minute</mat-label>
+        <input matInput type="number" formControlName="rateLimitPerMinute" placeholder="60" />
+        <mat-hint>Default: 60 requests/minute</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Requests per Hour</mat-label>
+        <input matInput type="number" formControlName="rateLimitPerHour" placeholder="1000" />
+        <mat-hint>Default: 1,000 requests/hour</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Requests per Day</mat-label>
+        <input matInput type="number" formControlName="rateLimitPerDay" placeholder="10000" />
+        <mat-hint>Default: 10,000 requests/day</mat-hint>
+      </mat-form-field>
+    </form>
+  } @else {
+    <div class="success-container">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <h3>API Key Created!</h3>
+      <p class="warning-text">
+        <mat-icon>warning</mat-icon>
+        Copy this key now - it will only be shown once!
+      </p>
+
+      <div class="key-display">
+        <code>{{ createdKey }}</code>
+        <button mat-icon-button (click)="copyKey()" matTooltip="Copy to clipboard">
+          <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+      </div>
+
+      <div class="key-info">
+        <p><strong>Name:</strong> {{ createdApiKey?.name }}</p>
+        <p><strong>Prefix:</strong> {{ createdApiKey?.prefix }}</p>
+        <p><strong>Rate Limits:</strong></p>
+        <ul>
+          <li>{{ createdApiKey?.rateLimitPerMinute || 'Unlimited' }} requests/minute</li>
+          <li>{{ createdApiKey?.rateLimitPerHour || 'Unlimited' }} requests/hour</li>
+          <li>{{ createdApiKey?.rateLimitPerDay || 'Unlimited' }} requests/day</li>
+        </ul>
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (!createdKey) {
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="!form.valid || loading">
+      @if (loading) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Create Key
+      }
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" (click)="onClose()" cdkFocusInitial>
+      Done
+    </button>
+  }
+</mat-dialog-actions>
+
