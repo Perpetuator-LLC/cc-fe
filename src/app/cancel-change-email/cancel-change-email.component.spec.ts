@@ -1,10 +1,10 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { CancelChangeEmailComponent } from './cancel-change-email.component';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CancelChangeEmailComponent } from './cancel-change-email.component';
+import { ToolbarService } from '../toolbar.service';
 
 describe('VerifyEmailComponent', () => {
   let component: CancelChangeEmailComponent;
@@ -19,9 +19,20 @@ describe('VerifyEmailComponent', () => {
       },
     };
 
+    const mockToolbarService = {
+      getViewContainerRef: jasmine.createSpy('getViewContainerRef').and.returnValue({
+        clear: jasmine.createSpy('clear'),
+        createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
+      }),
+    };
+
     await TestBed.configureTestingModule({
       imports: [CancelChangeEmailComponent, HttpClientTestingModule],
-      providers: [{ provide: ActivatedRoute, useValue: mockActivatedRoute }, FormBuilder],
+      providers: [
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: ToolbarService, useValue: mockToolbarService },
+        FormBuilder,
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CancelChangeEmailComponent);

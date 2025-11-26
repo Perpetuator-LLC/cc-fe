@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { of } from 'rxjs';
 import { OAuthAuthService } from './auth.service';
@@ -30,6 +31,7 @@ describe('OAuthAuthService', () => {
     oauthSpy.events = of({ type: 'token_received' }) as any;
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         OAuthAuthService,
         { provide: OAuthService, useValue: oauthSpy },
