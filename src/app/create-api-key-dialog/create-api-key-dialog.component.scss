@@ -1,0 +1,109 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: var(--cc-spacing-lg);
+  margin-bottom: var(--cc-spacing-xs);
+  color: var(--cc-text-primary);
+}
+
+.section-description {
+  font-size: 12px;
+  color: var(--cc-text-secondary);
+  margin-bottom: var(--cc-spacing-md);
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.success-container {
+  text-align: center;
+  padding: var(--cc-spacing-md);
+
+  .success-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--cc-color-success);
+    margin-bottom: var(--cc-spacing-sm);
+  }
+
+  h3 {
+    margin: 0 0 var(--cc-spacing-md) 0;
+    color: var(--cc-text-primary);
+  }
+
+  .warning-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cc-spacing-xs);
+    color: var(--cc-color-warning);
+    font-weight: 500;
+    margin-bottom: var(--cc-spacing-md);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .key-display {
+    display: flex;
+    align-items: center;
+    gap: var(--cc-spacing-sm);
+    background: var(--cc-surface-elevated);
+    border: 1px solid var(--cc-border-color);
+    border-radius: var(--cc-radius-md);
+    padding: var(--cc-spacing-md);
+    margin-bottom: var(--cc-spacing-lg);
+
+    code {
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      word-break: break-all;
+      color: var(--cc-text-primary);
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+
+  .key-info {
+    text-align: left;
+    background: var(--cc-surface-card);
+    border: 1px solid var(--cc-border-color);
+    border-radius: var(--cc-radius-md);
+    padding: var(--cc-spacing-md);
+
+    p {
+      margin: var(--cc-spacing-xs) 0;
+      color: var(--cc-text-primary);
+    }
+
+    ul {
+      margin: var(--cc-spacing-xs) 0;
+      padding-left: var(--cc-spacing-lg);
+      color: var(--cc-text-secondary);
+
+      li {
+        margin: var(--cc-spacing-xs) 0;
+      }
+    }
+  }
+}
+
+mat-dialog-actions {
+  button {
+    mat-spinner {
+      display: inline-block;
+      margin-right: var(--cc-spacing-xs);
+    }
+  }
+}
+
