@@ -213,6 +213,12 @@ type ApiQuery {
   """Get a specific API key"""
   apiKey(uuid: UUID!): APIKeyType
 
+  """Get usage records for a specific API key"""
+  apiKeyUsage(apiKeyUuid: UUID!, limit: Int = 100): [APIKeyUsageType]
+
+  """Get analytics summary for a specific API key"""
+  apiKeyAnalytics(apiKeyUuid: UUID!): APIKeyAnalyticsType
+
   """List of Episodes [Relay]"""
   episodes(
     offset: Int
@@ -1784,6 +1790,15 @@ type APIKeyType implements Node {
   prefix: String!
   scopes: [String]
 
+  """Maximum number of requests allowed per minute (0 = unlimited)"""
+  rateLimitPerMinute: Int!
+
+  """Maximum number of requests allowed per hour (0 = unlimited)"""
+  rateLimitPerHour: Int!
+
+  """Maximum number of requests allowed per day (0 = unlimited)"""
+  rateLimitPerDay: Int!
+
   """Last time this key was used for authentication"""
   lastUsed: DateTime
 
@@ -1793,6 +1808,67 @@ type APIKeyType implements Node {
   """Whether this key is currently active and can be used"""
   isActive: Boolean!
   uuid: UUID
+}
+
+"""API Key usage record for analytics"""
+type APIKeyUsageType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """When the request was made"""
+  timestamp: DateTime!
+
+  """GraphQL operation name or endpoint accessed"""
+  endpoint: String!
+
+  """Whether the request was successful"""
+  success: Boolean!
+
+  """Error message if request failed"""
+  errorMessage: String
+
+  """IP address of the request"""
+  ipAddress: String
+
+  """User agent string from the request"""
+  userAgent: String
+  uuid: UUID
+}
+
+"""Analytics summary for an API key"""
+type APIKeyAnalyticsType {
+  """UUID of the API key"""
+  apiKeyUuid: UUID
+
+  """Total number of requests"""
+  totalRequests: Int
+
+  """Number of successful requests"""
+  successfulRequests: Int
+
+  """Number of failed requests"""
+  failedRequests: Int
+
+  """Requests in the last 24 hours"""
+  requestsLast24h: Int
+
+  """Requests in the last 7 days"""
+  requestsLast7d: Int
+
+  """Requests in the last 30 days"""
+  requestsLast30d: Int
+
+  """Most frequently used endpoints"""
+  mostUsedEndpoints: [String]
+
+  """Number of unique IP addresses"""
+  uniqueIps: Int
+
+  """First time the key was used"""
+  firstUsed: DateTime
+
+  """Most recent time the key was used"""
+  lastUsed: DateTime
 }
 
 type EpisodeTypeConnection {
@@ -2283,12 +2359,21 @@ type ApiMutation {
     """Friendly name for the API key"""
     name: String!
 
+    """Max requests per day (default: 10000, 0 = unlimited)"""
+    rateLimitPerDay: Int
+
+    """Max requests per hour (default: 1000, 0 = unlimited)"""
+    rateLimitPerHour: Int
+
+    """Max requests per minute (default: 60, 0 = unlimited)"""
+    rateLimitPerMinute: Int
+
     """List of scopes (e.g., ['read', 'write'])"""
     scopes: [String]
   ): CreateAPIKey
 
-  """Update an existing API key (name and scopes only)"""
-  updateApiKey(isActive: Boolean, name: String, scopes: [String], uuid: UUID!): UpdateAPIKey
+  """Update an existing API key (name, scopes, is_active, and rate limits)"""
+  updateApiKey(isActive: Boolean, name: String, rateLimitPerDay: Int, rateLimitPerHour: Int, rateLimitPerMinute: Int, scopes: [String], uuid: UUID!): UpdateAPIKey
 
   """Delete an API key"""
   deleteApiKey(uuid: UUID!): DeleteAPIKey
@@ -2988,7 +3073,7 @@ type CreateAPIKey {
   key: String
 }
 
-"""Update an existing API key (name and scopes only)"""
+"""Update an existing API key (name, scopes, is_active, and rate limits)"""
 type UpdateAPIKey {
   success: Boolean
   message: String

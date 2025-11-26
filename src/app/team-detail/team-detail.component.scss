@@ -1,22 +1,5 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
-// Utility classes
-.thin-progress-bar {
-  height: 2px;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.no-margin-top {
-  margin-top: 0;
-}
-
-.full-width {
-  width: 100%;
-}
-
 // Component styles
 .member-row {
   display: flex;
@@ -123,7 +106,7 @@ mat-divider {
   p {
     margin: 0;
     padding: 0 var(--cc-spacing-lg);
-    padding-bottom: 30px;
+    padding-bottom: var(--cc-spacing-2xl);
   }
 
   .delete-btn {
@@ -198,19 +181,19 @@ mat-divider {
 }
 
 .podcast-detail-page {
-  padding: 32px 72px;
+  padding: var(--cc-spacing-xl) var(--cc-spacing-2xl);
   background-color: var(--secondary-color);
-  margin-top: -20px;
+  margin-top: var(--cc-spacing-lg);
 
   .detail-header {
-    margin-bottom: 40px;
+    margin-bottom: var(--cc-spacing-2xl);
 
     .top-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: var(--cc-spacing-sm);
-      margin-bottom: 28px;
+      margin-bottom: var(--cc-spacing-xl);
 
       .title {
         input {
@@ -258,7 +241,7 @@ mat-divider {
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    margin: 20px 0;
+    margin: var(--cc-spacing-lg) 0;
   }
 
   .p_name {
