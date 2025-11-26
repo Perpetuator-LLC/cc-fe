@@ -14,7 +14,7 @@ describe('DashboardService', () => {
     mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
     mockErrorHandler = jasmine.createSpyObj('ErrorHandlerService', ['handleError']);
 
-    mockApollo.query.and.returnValue(of({ data: {} }));
+    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
     mockApollo.mutate.and.returnValue(of({ data: {} }));
 
     TestBed.configureTestingModule({
