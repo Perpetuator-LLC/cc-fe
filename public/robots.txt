@@ -7,9 +7,9 @@ Allow: /
 
 # Explicitly allow public routes for SEO
 Allow: /home
-Allow: /p/
-Allow: /e/
-Allow: /c/
+Allow: /podcasts/
+Allow: /episodes/
+Allow: /categories/
 Allow: /a/
 Allow: /privacy-policy
 Allow: /terms-and-conditions
@@ -26,10 +26,10 @@ Disallow: /cancel-change-email
 
 # Disallow private/authenticated routes
 Disallow: /profile
-Disallow: /podcasts
-Disallow: /podcast/
-Disallow: /episodes
-Disallow: /episode/
+Disallow: /p
+Disallow: /p/
+Disallow: /e
+Disallow: /e/
 Disallow: /teams
 Disallow: /team/
 Disallow: /topics

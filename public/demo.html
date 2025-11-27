@@ -106,20 +106,60 @@
     <div class="query-box">
       <strong>Query 1: Get My Data (requires authentication)</strong>
       <pre>query {
-        myData {
+  me {
     id
-    name
+    username
   }
 }</pre>
-      <button onclick="executeQuery('myData')">Execute Query</button>
+      <button onclick="executeQuery('me')">Execute Query</button>
     </div>
 
     <div class="query-box">
-      <strong>Query 2: AI Analysis (requires 'ai:analyze' scope)</strong>
+      <strong>Query 2: Get My Podcasts (Top 3 by Recent Content)</strong>
       <pre>query {
-        aiAnalysis(input: "Analyze market trends")
+  podcasts(
+    first: 3
+    orderBy: "-latest_internal_episode_date"
+  ) {
+    edges {
+      node {
+        id
+        uuid
+        name
+        latestInternalEpisodeDate
+      }
+    }
+  }
 }</pre>
-      <button onclick="executeQuery('aiAnalysis')">Execute Query</button>
+      <button onclick="executeQuery('podcasts')">Execute Query</button>
+    </div>
+
+    <div class="query-box">
+      <strong>Query 3: Get News for a Podcast</strong>
+      <p class="info" style="margin: 5px 0;">
+        <small>After running Query 2, this will auto-populate with your first podcast UUID</small>
+      </p>
+      <div style="margin: 10px 0;">
+        <label for="podcast-id-input" style="display: block; margin-bottom: 5px;">Podcast UUID:</label>
+        <input
+          type="text"
+          id="podcast-id-input"
+          placeholder="Enter podcast UUID or run Query 2 first"
+          style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Courier New', monospace;"
+        />
+      </div>
+      <pre>query {
+  news(podcastUuid: "<span id="podcast-id-preview">YOUR_PODCAST_UUID</span>") {
+    edges {
+      node {
+        id
+        title
+        publishedAt
+      }
+    }
+  }
+}</pre>
+      <button onclick="executeQuery('news')">Execute Query</button>
     </div>
 
     <div id="response" style="display: none;"></div>
@@ -140,6 +180,9 @@
   const defaultRedirectUri = isLocalhost
     ? `http://localhost:4200/callback`  // Development default
     : 'https://capitalcopilot.io/callback';  // Production default
+  const defaultApiUri = isLocalhost
+    ? `http://127.0.0.1:8000`  // Development default
+    : 'https://api.capitalcopilot.io';  // Production default
 
   const CONFIG = {
     // Get clientId from query param or use placeholder
@@ -149,7 +192,7 @@
     redirectUri: urlParams.get('redirectUri') || defaultRedirectUri,
 
     // Get apiUrl from query param or use production default
-    apiUrl: urlParams.get('apiUrl') || 'https://api.capitalcopilot.io',
+    apiUrl: urlParams.get('apiUrl') || defaultApiUri,
   };
 
   // Derive other endpoints from apiUrl
@@ -185,6 +228,17 @@
       exchangeCodeForToken(code);
     } else {
       checkExistingToken();
+    }
+
+    // Add listener to podcast ID input to update preview
+    const podcastIdInput = document.getElementById('podcast-id-input');
+    if (podcastIdInput) {
+      podcastIdInput.addEventListener('input', function(e) {
+        const preview = document.getElementById('podcast-id-preview');
+        if (preview) {
+          preview.textContent = e.target.value || 'YOUR_PODCAST_UUID';
+        }
+      });
     }
   };
 
@@ -237,14 +291,62 @@
   }
 
   function checkExistingToken() {
-    const token = localStorage.getItem('access_token');
-    const expiresAt = localStorage.getItem('expires_at');
+    // Try to find access token from multiple sources
+    // 1. Demo's own OAuth flow
+    let token = localStorage.getItem('access_token');
+    let expiresAt = localStorage.getItem('expires_at');
+    let source = 'Demo OAuth Flow';
+
+    // 2. Angular app's OAuthService (angular-oauth2-oidc library)
+    // The library stores tokens directly in localStorage with the same keys
+    // but also stores additional metadata
+    if (!token) {
+      // Check if there's a token stored by angular-oauth2-oidc
+      token = localStorage.getItem('access_token');
+
+      // Check various expiry keys used by the library
+      expiresAt = localStorage.getItem('expires_at') ||
+                  localStorage.getItem('access_token_stored_at');
+
+      // If we found a stored_at timestamp, calculate expiry
+      if (token && expiresAt && !localStorage.getItem('expires_at')) {
+        const expiresIn = localStorage.getItem('expires_in');
+        if (expiresIn) {
+          expiresAt = parseInt(expiresAt) + (parseInt(expiresIn) * 1000);
+        }
+      }
+
+      if (token) {
+        source = 'Angular App (OAuthService)';
+      }
+    }
+
+    // 3. Check sessionStorage as fallback
+    if (!token) {
+      token = sessionStorage.getItem('access_token');
+      expiresAt = sessionStorage.getItem('expires_at');
+      if (token) {
+        source = 'Session Storage';
+      }
+    }
 
     if (token && expiresAt && Date.now() < parseInt(expiresAt)) {
+      console.log(`Found existing valid token from: ${source}`);
       showAuthenticatedView({
         access_token: token,
-        expires_in: Math.floor((parseInt(expiresAt) - Date.now()) / 1000)
+        expires_in: Math.floor((parseInt(expiresAt) - Date.now()) / 1000),
+        source: source
       });
+    } else if (token && expiresAt) {
+      console.log('Found token but it has expired');
+      // Clear expired tokens
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('expires_at');
+      localStorage.removeItem('refresh_token');
+    } else {
+      console.log('No existing token found');
+      console.log('localStorage keys:', Object.keys(localStorage));
+      console.log('sessionStorage keys:', Object.keys(sessionStorage));
     }
   }
 
@@ -254,16 +356,74 @@
     document.getElementById('access-token').textContent =
       tokenData.access_token.substring(0, 20) + '...';
     document.getElementById('expires-in').textContent = tokenData.expires_in;
+
+    // Show where token came from if provided
+    if (tokenData.source) {
+      const sourceInfo = document.createElement('p');
+      sourceInfo.className = 'info';
+      sourceInfo.innerHTML = `<strong>Token Source:</strong> ${tokenData.source}`;
+      sourceInfo.style.color = '#0066cc';
+      document.getElementById('user-section').insertBefore(
+        sourceInfo,
+        document.querySelector('#user-section h3').nextSibling
+      );
+    }
   }
 
   async function executeQuery(queryType) {
-    const token = localStorage.getItem('access_token');
+    // Try to find token from multiple sources
+    let token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+
+    if (!token) {
+      alert('No access token found. Please log in first.');
+      console.error('No access token in localStorage or sessionStorage');
+      console.log('localStorage keys:', Object.keys(localStorage));
+      console.log('sessionStorage keys:', Object.keys(sessionStorage));
+      return;
+    }
+
     let query;
 
-    if (queryType === 'myData') {
-      query = `query { myData { id name } }`;
-    } else if (queryType === 'aiAnalysis') {
-      query = `query { aiAnalysis(input: "Analyze market trends") }`;
+    if (queryType === 'me') {
+      query = `query {
+        me {
+          id
+          username
+        }
+      }`;
+    } else if (queryType === 'podcasts') {
+      query = `query {
+        podcasts(
+          first: 3
+          orderBy: "-latest_internal_episode_date"
+        ) {
+          edges {
+            node {
+              id
+              uuid
+              name
+              latestInternalEpisodeDate
+            }
+          }
+        }
+      }`;
+    } else if (queryType === 'news') {
+      const podcastUuid = document.getElementById('podcast-id-input').value;
+      if (!podcastUuid) {
+        alert('Please enter a podcast UUID or run Query 2 first to auto-populate');
+        return;
+      }
+      query = `query {
+        news(podcastUuid: "${podcastUuid}") {
+          edges {
+            node {
+              id
+              title
+              publishedAt
+            }
+          }
+        }
+      }`;
     }
 
     try {
@@ -278,10 +438,34 @@
 
       const data = await response.json();
 
-      const responseDiv = document.getElementById('response');
-      responseDiv.style.display = 'block';
-      responseDiv.className = data.errors ? 'response error' : 'response';
-      responseDiv.textContent = JSON.stringify(data, null, 2);
+      // If this was a podcasts query and we got results, auto-populate the podcast ID input
+      if (queryType === 'podcasts' && data.data?.podcasts?.edges?.length > 0) {
+        const firstPodcastUuid = data.data.podcasts.edges[0].node.uuid;
+        const firstPodcastName = data.data.podcasts.edges[0].node.name;
+
+        document.getElementById('podcast-id-input').value = firstPodcastUuid;
+        document.getElementById('podcast-id-preview').textContent = firstPodcastUuid;
+
+        // Add helpful message to response
+        const responseDiv = document.getElementById('response');
+        responseDiv.style.display = 'block';
+        responseDiv.className = data.errors ? 'response error' : 'response';
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+
+        // Add success message
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = 'background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 10px;';
+        successMsg.textContent = `✅ Auto-populated Query 3 with: "${firstPodcastName}" (UUID: ${firstPodcastUuid})`;
+        responseDiv.parentNode.insertBefore(successMsg, responseDiv);
+
+        // Scroll to the news query
+        document.getElementById('podcast-id-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const responseDiv = document.getElementById('response');
+        responseDiv.style.display = 'block';
+        responseDiv.className = data.errors ? 'response error' : 'response';
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+      }
     } catch (error) {
       const responseDiv = document.getElementById('response');
       responseDiv.style.display = 'block';
