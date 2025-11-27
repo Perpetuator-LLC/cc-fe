@@ -28,7 +28,13 @@ describe('LayoutComponent', () => {
     breakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
 
     const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
+    const mockQueryRef = {
+      valueChanges: of({ data: {}, loading: false, networkStatus: 7 }),
+      refetch: jasmine.createSpy('refetch').and.returnValue(Promise.resolve({ data: {} })),
+    };
     mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
+    mockApollo.watchQuery.and.returnValue(mockQueryRef);
+    mockApollo.mutate.and.returnValue(of({ data: {} }));
 
     breakpointObserver.observe.and.returnValue(
       of({
