@@ -4,6 +4,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HomeComponent } from './home.component';
 import { ToolbarService } from '../toolbar.service';
+import { OAuthService } from 'angular-oauth2-oidc';
+import { of } from 'rxjs';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -15,9 +17,27 @@ describe('HomeComponent', () => {
     const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
 
+    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
+      'configure',
+      'loadDiscoveryDocumentAndTryLogin',
+      'hasValidAccessToken',
+      'getAccessToken',
+      'refreshToken',
+      'logOut',
+      'initCodeFlow',
+    ]);
+    mockOAuthService.hasValidAccessToken.and.returnValue(false);
+    mockOAuthService.getAccessToken.and.returnValue('');
+    mockOAuthService.loadDiscoveryDocumentAndTryLogin.and.returnValue(Promise.resolve());
+    mockOAuthService.events = of({});
+
     await TestBed.configureTestingModule({
       imports: [HomeComponent, RouterTestingModule],
-      providers: [provideHttpClient(), { provide: ToolbarService, useValue: mockToolbarService }],
+      providers: [
+        provideHttpClient(),
+        { provide: ToolbarService, useValue: mockToolbarService },
+        { provide: OAuthService, useValue: mockOAuthService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomeComponent);

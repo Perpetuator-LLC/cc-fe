@@ -5,12 +5,28 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { OAuthService } from 'angular-oauth2-oidc';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
+    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
+      'configure',
+      'loadDiscoveryDocumentAndTryLogin',
+      'hasValidAccessToken',
+      'getAccessToken',
+      'refreshToken',
+      'logOut',
+      'initCodeFlow',
+    ]);
+    mockOAuthService.hasValidAccessToken.and.returnValue(false);
+    mockOAuthService.getAccessToken.and.returnValue('');
+    mockOAuthService.loadDiscoveryDocumentAndTryLogin.and.returnValue(Promise.resolve());
+    mockOAuthService.events = of({});
+
     await TestBed.configureTestingModule({
       imports: [AppComponent, HttpClientTestingModule, NoopAnimationsModule],
-      providers: [AuthService],
+      providers: [AuthService, { provide: OAuthService, useValue: mockOAuthService }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });

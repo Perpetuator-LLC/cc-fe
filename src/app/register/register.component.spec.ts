@@ -9,6 +9,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
+import { Apollo } from 'apollo-angular';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -32,6 +33,10 @@ describe('RegisterComponent', () => {
     mockMessageService.messages$ = of([]);
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
 
+    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
+    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
+    mockApollo.mutate.and.returnValue(of({ data: {} }));
+
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, HttpClientTestingModule, NoopAnimationsModule],
       providers: [
@@ -40,6 +45,7 @@ describe('RegisterComponent', () => {
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: MessageService, useValue: mockMessageService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: Apollo, useValue: mockApollo },
         FormBuilder,
       ],
     }).compileComponents();
