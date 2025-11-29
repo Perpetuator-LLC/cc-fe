@@ -21,7 +21,7 @@
 
 .mat-mdc-dialog-content {
     padding: 0;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
 }
 
 .mat-mdc-dialog-content p {
@@ -29,28 +29,17 @@
 }
 
 .action-row {
-    margin-top: var(--cc-spacing-lg);
+    margin-top: 24px;
 }
 
 mat-dialog-actions {
-    padding: var(--cc-spacing-lg) 0 0;
+    padding: 24px 0 0;
 }
 
 .cancel-btn {
-    background: var(--secondary-light);
-    border: 1px solid var(--cc-border-color);
-    color: var(--cc-text-primary);
-    border-radius: var(--cc-radius-md);
-    width: 88px;
-    height: 40px;
+    // Let Material handle button styling via mat-button directive
 }
 
 .savePodcastBtn {
-    background: var(--primary);
-    border-radius: var(--cc-radius-md);
-    color: white;
-    width: 225px;
-    font-size: 14px;
-    font-weight: 600;
-    height: 40px;
+    // Let Material handle button styling via mat-flat-button color="primary"
 }

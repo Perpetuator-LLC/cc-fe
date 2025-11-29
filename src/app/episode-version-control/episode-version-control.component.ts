@@ -74,7 +74,35 @@ export class EpisodeVersionControlComponent {
 
   getChangeTypeLabel(changeType: string | null | undefined): string {
     if (!changeType) return 'Unknown';
-    return changeType.charAt(0).toUpperCase() + changeType.slice(1).toLowerCase();
+
+    // Map technical names to user-friendly labels
+    const labelMap: Record<string, string> = {
+      Length_adjustment: 'Length Adjustment',
+      length_adjustment: 'Length Adjustment',
+      Facts_adjustment: 'Facts Adjustment',
+      facts_adjustment: 'Facts Adjustment',
+      Compliance_adjustment: 'Compliance Adjustment',
+      compliance_adjustment: 'Compliance Adjustment',
+      Content_update: 'Content Update',
+      content_update: 'Content Update',
+      Manual_edit: 'Manual Edit',
+      manual_edit: 'Manual Edit',
+      Regeneration: 'Regeneration',
+      regeneration: 'Regeneration',
+      Initial_creation: 'Initial Creation',
+      initial_creation: 'Initial Creation',
+    };
+
+    // Check if we have a mapped label
+    if (labelMap[changeType]) {
+      return labelMap[changeType];
+    }
+
+    // Fallback: convert underscores to spaces and capitalize each word
+    return changeType
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   isVersionFullyValidated(version: EpisodeVersion): boolean {

@@ -434,10 +434,7 @@
     }
 
     button {
-      background: var(--primary);
-      color: var(--theme-white);
       border-radius: var(--cc-radius-md);
-      border: 1px solid var(--cc-border-color);
       font-weight: 600;
       padding: var(--cc-spacing-sm) var(--cc-spacing-md);
       white-space: nowrap;
@@ -445,6 +442,7 @@
       min-width: fit-content;
       margin-top: var(--cc-spacing-sm);
       margin-bottom: var(--cc-spacing-md);
+      // Let Material color directive handle background and text colors
 
       &.regenerate-summary-btn {
         margin-left: var(--cc-spacing-sm);
@@ -693,8 +691,7 @@
 
       button {
         border-radius: 10px;
-        background-color: var(--primary);
-        color: white;
+        // Let Material color directive handle background and text colors
       }
     }
   }

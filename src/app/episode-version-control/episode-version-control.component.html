@@ -10,9 +10,9 @@
         <span>
           Current: v{{ currentVersionNumber }}
           @if (isCurrentVersionFullyValidated) {
-            <mat-icon class="status-icon validated" [matTooltip]="currentVersionValidationTooltip">verified</mat-icon>
+            <mat-icon class="status-icon validated md3-icon-success" [matTooltip]="currentVersionValidationTooltip">verified</mat-icon>
           } @else {
-            <mat-icon class="status-icon unvalidated" [matTooltip]="currentVersionValidationTooltip">warning</mat-icon>
+            <mat-icon class="status-icon unvalidated md3-icon-warning" [matTooltip]="currentVersionValidationTooltip">warning</mat-icon>
           }
         </span>
         @if (historyVersions.length > 0) {
@@ -53,13 +53,13 @@
           <span class="info-value">
             Version {{ currentVersionNumber }}
             @if (isCurrentVersionFullyValidated) {
-              <span class="validated-badge" [matTooltip]="currentVersionValidationTooltip">
-                <mat-icon>verified</mat-icon>
+              <span class="validated-badge md3-badge-success" [matTooltip]="currentVersionValidationTooltip">
+                <mat-icon class="md3-icon-success">verified</mat-icon>
                 Validated
               </span>
             } @else {
-              <span class="unvalidated-badge" [matTooltip]="currentVersionValidationTooltip">
-                <mat-icon>warning</mat-icon>
+              <span class="unvalidated-badge md3-badge-warning" [matTooltip]="currentVersionValidationTooltip">
+                <mat-icon class="md3-icon-warning">warning</mat-icon>
                 Not Validated
               </span>
             }
@@ -133,9 +133,9 @@
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
                       @if (isVersionFullyValidated(version)) {
-                        <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(version)">verified</mat-icon>
+                        <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getValidationTooltip(version)">verified</mat-icon>
                       } @else {
-                        <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(version)">warning</mat-icon>
+                        <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="getValidationTooltip(version)">warning</mat-icon>
                       }
                     </span>
                   </div>
@@ -147,7 +147,7 @@
           <div class="version-actions">
             <button
               mat-raised-button
-              color="primary"
+              color="accent"
               type="button"
               [disabled]="!selectedVersionNumber"
               (click)="onCopyVersionContent()"
@@ -157,7 +157,7 @@
             </button>
             <button
               mat-raised-button
-              color="accent"
+              color="warn"
               type="button"
               [disabled]="!selectedVersionNumber"
               (click)="onRestoreVersion()"

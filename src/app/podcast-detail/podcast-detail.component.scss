@@ -357,22 +357,7 @@ mat-divider {
         gap: 20px;
 
         .save-btn {
-          background-color: var(--primary);
-          border-radius: 10px;
-          color: var(--theme-white);
-          border: 1px solid var(--border-color);
-          font-size: 14px;
-          font-weight: 600;
-          white-space: nowrap;
-
-          &:disabled,
-          &[disabled] {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-            background-color: var(--secondary-dark);
-            color: var(--description-color);
-          }
+          // Let Material color="primary" directive handle all styling including disabled state
         }
       }
     }
@@ -405,12 +390,13 @@ mat-divider {
         }
 
         .enable {
-          background: var(--md-sys-color-success);
-          border-radius: 6px;
-          color: var(--theme-white);
+          color: var(--md-extended-color-success-color) !important;
+          background-color: var(--md-extended-color-success-color-container) !important;
+          border: 1px solid var(--md-extended-color-success-color);
+          padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+          border-radius: var(--cc-radius-sm);
           font-size: 12px;
-          font-weight: 500;
-          border: 1px solid var(--border-color);
+          font-weight: 600;
           width: 90px;
           height: 20px;
           display: inline-flex;
@@ -419,11 +405,13 @@ mat-divider {
         }
 
         .disable {
-          border-radius: 6px;
-          color: var(--theme-color);
+          color: var(--md-sys-color-on-surface-variant) !important;
+          background-color: var(--md-sys-color-surface-container-high) !important;
+          border: 1px solid var(--md-sys-color-outline-variant);
+          padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+          border-radius: var(--cc-radius-sm);
           font-size: 12px;
-          font-weight: 500;
-          border: 1px solid var(--border-color);
+          font-weight: 600;
           background: var(--secondary-dark);
           width: 90px;
           height: 20px;
@@ -471,12 +459,7 @@ mat-divider {
           opacity: 0.9;
         }
 
-        &:disabled {
-          background-color: var(--secondary-400) !important;
-          color: var(--description-color) !important;
-          cursor: not-allowed !important;
-          opacity: 0.6;
-        }
+        // Let Material handle disabled state styling
 
         &.research-button {
           background-color: var(--purple);
