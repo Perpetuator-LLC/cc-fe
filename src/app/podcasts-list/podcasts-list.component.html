@@ -173,12 +173,12 @@
         <th mat-header-cell *matHeaderCellDef>Create Episode</th>
         <td mat-cell *matCellDef="let podcast">
           <div class="episode-actions">
-            <button mat-flat-button (click)="createLatestEpisode(podcast.uuid)"
+            <button mat-flat-button color="accent" (click)="createLatestEpisode(podcast.uuid)"
               matTooltip="Creates an AI-generated episode using current news from your RSS feeds">
               <mat-icon>newspaper</mat-icon>
               News Episode
             </button>
-            <button mat-flat-button class="research-button" (click)="createResearchEpisode(podcast.uuid)"
+            <button mat-flat-button color="accent" class="research-button" (click)="createResearchEpisode(podcast.uuid)"
               matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode">
               <mat-icon>science</mat-icon>
               Research Episode
