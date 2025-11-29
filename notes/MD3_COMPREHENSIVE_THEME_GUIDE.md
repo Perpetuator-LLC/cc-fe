@@ -1,3 +1,23 @@
+# Generating Theme
+
+Visit: https://material-foundation.github.io/material-theme-builder/
+
+- Primary: #3DA6FF
+- Secondary: #F14A00
+- Tertiary: #8C00E8
+- Error: #FF5449
+  - Job Failed & Message Error
+- Success:
+  - Job Succeeded & Message Success
+- Warnings:
+  - Job Pending & Message Warnings
+- Info: #3DA6FF
+  - Job Running & Message Info
+
+Font:
+- Lexend
+- Roboto
+
 # Material Design 3 Theme Guide - Capital Copilot
 **Last Updated:** November 25, 2025  
 **Status:** MD3 Migration 83% Complete  

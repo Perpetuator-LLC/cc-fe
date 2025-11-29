@@ -5,13 +5,13 @@
   right: var(--cc-spacing-lg);
   z-index: 3000; /* Above cookie banner (z-index: 2000) */
   width: 300px;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   border-radius: var(--cc-radius-md);
 }
 
 .mat-mdc-card.message-card {
-  background-color: var(--secondary-500);
-  border: 1px solid var(--cc-border-color);
+  background-color: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
   padding-top: 0;
 }
 
@@ -39,7 +39,7 @@
   z-index: 10;
   border-radius: 50%;
   padding: 0;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
 }
 
 .message-content {
@@ -47,7 +47,7 @@
   align-items: center;
   justify-content: flex-start;
   font-size: 14px;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   font-weight: 500;
 }
 
@@ -82,7 +82,7 @@
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
 }
 
 .message-icon-span {
@@ -94,42 +94,46 @@
   justify-content: center;
 }
 
+// ============================================================================
+// Message Type Colors (Using MD3 Extended Colors)
+// ============================================================================
+
 .error {
   .message-icon {
-    background-color: color-mix(in srgb, var(--cc-color-error) 15%, transparent);
+    background-color: color-mix(in srgb, var(--md-sys-color-error) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--cc-color-error);
+      background-color: var(--md-sys-color-error);
     }
   }
 }
 
 .warning {
   .message-icon {
-    background-color: color-mix(in srgb, var(--cc-color-warning) 15%, transparent);
+    background-color: color-mix(in srgb, var(--md-extended-color-warning-color) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--cc-color-warning);
+      background-color: var(--md-extended-color-warning-color);
     }
   }
 }
 
 .info {
   .message-icon {
-    background-color: color-mix(in srgb, var(--cc-color-info) 15%, transparent);
+    background-color: color-mix(in srgb, var(--md-extended-color-info-color) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--cc-color-info);
+      background-color: var(--md-extended-color-info-color);
     }
   }
 }
 
 .success {
   .message-icon {
-    background-color: color-mix(in srgb, var(--cc-color-success) 15%, transparent);
+    background-color: color-mix(in srgb, var(--md-extended-color-success-color) 15%, transparent);
 
     .message-icon-span {
-      background-color: var(--cc-color-success);
+      background-color: var(--md-extended-color-success-color);
     }
   }
 }

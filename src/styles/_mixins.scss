@@ -23,29 +23,29 @@
 }
 
 // ============================================================================
-// Card Patterns
+// Card Patterns (Using MD3 Surface Tokens)
 // ============================================================================
 @mixin card-container {
-  background: var(--cc-surface-card);
-  border: 1px solid var(--cc-border-color);
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--cc-radius-md);
   padding: var(--cc-spacing-md);
 }
 
 @mixin card-elevated {
   @include card-container;
-  background: var(--cc-surface-elevated);
+  background: var(--md-sys-color-surface-container-high);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 // ============================================================================
-// Button Patterns
+// Button Patterns (Using MD3 Color Tokens)
 // ============================================================================
 @mixin primary-button {
-  background: var(--primary);
-  color: #ffffff;
+  background: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
   border-radius: var(--cc-radius-md);
-  border: 1px solid var(--cc-border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   font-weight: 600;
   padding: var(--cc-spacing-sm) var(--cc-spacing-md);
   transition: all 0.2s ease;
@@ -63,15 +63,15 @@
 
 @mixin secondary-button {
   background: transparent;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   border-radius: var(--cc-radius-md);
-  border: 1px solid var(--cc-border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   font-weight: 500;
   padding: var(--cc-spacing-sm) var(--cc-spacing-md);
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: var(--cc-surface-elevated);
+    background: var(--md-sys-color-surface-container-high);
   }
 
   &:disabled {
@@ -101,12 +101,12 @@
 }
 
 // ============================================================================
-// Typography Patterns
+// Typography Patterns (Using MD3 Text Tokens)
 // ============================================================================
 @mixin section-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   margin-top: 0;
   margin-bottom: var(--cc-spacing-md);
 }
@@ -114,14 +114,14 @@
 @mixin body-text {
   font-size: 14px;
   font-weight: 400;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   line-height: 1.6;
 }
 
 @mixin secondary-text {
   font-size: 14px;
   font-weight: 400;
-  color: var(--cc-text-secondary);
+  color: var(--md-sys-color-on-surface-variant);
   line-height: 1.5;
 }
 
@@ -190,22 +190,22 @@
 }
 
 // ============================================================================
-// Status Badges
+// Status Badges (Using MD3 Extended Colors)
 // ============================================================================
 @mixin status-success {
-  @include badge(var(--cc-color-success), #ffffff);
+  @include badge(var(--md-extended-color-success-color), var(--md-extended-color-success-on-color));
 }
 
 @mixin status-error {
-  @include badge(var(--cc-color-error), #ffffff);
+  @include badge(var(--md-sys-color-error), var(--md-sys-color-on-error));
 }
 
 @mixin status-warning {
-  @include badge(var(--cc-color-warning), #ffffff);
+  @include badge(var(--md-extended-color-warning-color), var(--md-extended-color-warning-on-color));
 }
 
 @mixin status-info {
-  @include badge(var(--cc-color-info), #ffffff);
+  @include badge(var(--md-extended-color-info-color), var(--md-extended-color-info-on-color));
 }
 
 // ============================================================================
@@ -224,7 +224,7 @@
   }
 
   p {
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     font-size: 14px;
     margin: 0;
   }
@@ -241,19 +241,19 @@
 
   mat-icon {
     @include icon-size(64px);
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     opacity: 0.3;
   }
 
   h3 {
     margin: 0;
-    color: var(--cc-text-primary);
+    color: var(--md-sys-color-on-surface);
     font-weight: 600;
   }
 
   p {
     margin: 0;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     max-width: 400px;
   }
 }
@@ -263,7 +263,7 @@
 // ============================================================================
 @mixin custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--cc-border-color) transparent;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
 
   &::-webkit-scrollbar {
     width: 8px;

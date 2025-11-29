@@ -82,7 +82,7 @@
       <div style="margin-top: 10px; font-size: 13px;">
         <p><strong>Development:</strong></p>
         <code style="display: block; background: white; padding: 8px; border-radius: 4px; margin: 5px 0;">
-          demo.html?apiUrl=http://127.0.0.1:8000&redirectUri=http://localhost:3000/callback&clientId=YOUR_DEV_CLIENT_ID
+          demo.html?apiUrl=http://127.0.0.1:8000&redirectUri=http://localhost:3000/login&clientId=YOUR_DEV_CLIENT_ID
         </code>
         <p style="margin-top: 10px;"><strong>Production (defaults):</strong></p>
         <code style="display: block; background: white; padding: 8px; border-radius: 4px; margin: 5px 0;">
@@ -93,7 +93,60 @@
   </div>
 
   <div id="auth-section">
-    <button onclick="initiateOAuth()">Login with OAuth2</button>
+    <h3>🔐 Choose Authentication Method:</h3>
+
+    <!-- Option 1: OAuth2 Authorization Code Flow -->
+    <div class="auth-option" style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 10px 0;">
+      <h4 style="margin-top: 0;">Option 1: OAuth2 Code Flow (Recommended for Production)</h4>
+      <p class="info">Redirects to authorization server, then returns with a code to exchange for tokens</p>
+      <button onclick="initiateOAuth()">Login with OAuth2 Code Flow</button>
+      <p class="info" style="margin-top: 10px; font-size: 12px;">
+        <strong>Note:</strong> Requires client_id configuration via query parameter
+      </p>
+    </div>
+
+    <!-- Option 2: Password Grant (SSO Demo) -->
+    <div class="auth-option" style="background: #fff3e0; padding: 15px; border-radius: 4px; margin: 10px 0;">
+      <h4 style="margin-top: 0;">Option 2: Password Grant (SSO Demo)</h4>
+      <p class="info">Direct username/password login - matches main Angular app behavior</p>
+
+      <form id="password-login-form" onsubmit="loginWithPassword(event); return false;">
+        <div style="margin: 10px 0;">
+          <label for="username-input" style="display: block; margin-bottom: 5px;">Email:</label>
+          <input
+            type="email"
+            id="username-input"
+            placeholder="your.email@example.com"
+            required
+            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+          />
+        </div>
+
+        <div style="margin: 10px 0;">
+          <label for="password-input" style="display: block; margin-bottom: 5px;">Password:</label>
+          <input
+            type="password"
+            id="password-input"
+            placeholder="Enter your password"
+            required
+            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+          />
+        </div>
+
+        <div id="password-error" class="error" style="display: none; padding: 10px; margin: 10px 0; border-radius: 4px;"></div>
+
+        <button type="submit" style="background: #ff9800;">Login with Password</button>
+      </form>
+
+      <p class="info" style="margin-top: 10px; font-size: 12px;">
+        <strong>Note:</strong> This demonstrates the same OAuth2 Password Grant flow used by the main Angular application
+      </p>
+    </div>
+
+    <!-- Status Message -->
+    <div id="token-check-status" style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 15px 0; display: none;">
+      <p class="info" style="margin: 0;"></p>
+    </div>
   </div>
 
   <div id="user-section" style="display: none;">
@@ -178,15 +231,15 @@
   // Determine default redirect URI based on current location
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const defaultRedirectUri = isLocalhost
-    ? `http://localhost:4200/callback`  // Development default
-    : 'https://capitalcopilot.io/callback';  // Production default
+    ? `http://localhost:4200/login`  // Development default
+    : 'https://capitalcopilot.io/login';  // Production default
   const defaultApiUri = isLocalhost
     ? `http://127.0.0.1:8000`  // Development default
     : 'https://api.capitalcopilot.io';  // Production default
 
   const CONFIG = {
     // Get clientId from query param or use placeholder
-    clientId: urlParams.get('clientId') || 'YOUR_CLIENT_ID_HERE',
+    clientId: urlParams.get('clientId') || 'BCZ0upsNuX9nZu0HxxYdpP6Fq1ZQGbICCuLzgDME',
 
     // Get redirectUri from query param or use smart default
     redirectUri: urlParams.get('redirectUri') || defaultRedirectUri,
@@ -332,6 +385,14 @@
 
     if (token && expiresAt && Date.now() < parseInt(expiresAt)) {
       console.log(`Found existing valid token from: ${source}`);
+
+      // Show status message
+      const statusDiv = document.getElementById('token-check-status');
+      const statusText = statusDiv.querySelector('.info');
+      statusText.textContent = `✅ Found existing valid token from: ${source}`;
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = '#d4edda';
+
       showAuthenticatedView({
         access_token: token,
         expires_in: Math.floor((parseInt(expiresAt) - Date.now()) / 1000),
@@ -339,12 +400,28 @@
       });
     } else if (token && expiresAt) {
       console.log('Found token but it has expired');
+
+      // Show status message
+      const statusDiv = document.getElementById('token-check-status');
+      const statusText = statusDiv.querySelector('.info');
+      statusText.textContent = `⚠️ Found expired token - please log in again`;
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = '#fff3cd';
+
       // Clear expired tokens
       localStorage.removeItem('access_token');
       localStorage.removeItem('expires_at');
       localStorage.removeItem('refresh_token');
     } else {
       console.log('No existing token found');
+
+      // Show status message
+      const statusDiv = document.getElementById('token-check-status');
+      const statusText = statusDiv.querySelector('.info');
+      statusText.textContent = `ℹ️ No token found - please log in using one of the methods above`;
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = '#e3f2fd';
+
       console.log('localStorage keys:', Object.keys(localStorage));
       console.log('sessionStorage keys:', Object.keys(sessionStorage));
     }
@@ -471,6 +548,107 @@
       responseDiv.style.display = 'block';
       responseDiv.className = 'response error';
       responseDiv.textContent = 'Error: ' + error.message;
+    }
+  }
+
+  /**
+   * OAuth2 Password Grant Login
+   * This matches the behavior of the main Angular app's OAuthAuthService.loginWithPassword()
+   */
+  async function loginWithPassword(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username-input').value;
+    const password = document.getElementById('password-input').value;
+    const errorDiv = document.getElementById('password-error');
+
+    // Clear previous errors
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+
+    // Show loading state
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+    submitButton.textContent = 'Logging in...';
+    submitButton.disabled = true;
+
+    try {
+      console.log('Attempting password grant login to:', CONFIG.tokenEndpoint);
+
+      const response = await fetch(CONFIG.tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'password',
+          username: username,
+          password: password,
+          client_id: CONFIG.clientId,
+          scope: 'read write ai:analyze',
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log('Token response status:', response.status);
+
+      if (response.ok && data.access_token) {
+        // Success! Store tokens exactly like OAuthAuthService does
+        const expiresAt = Date.now() + (data.expires_in * 1000);
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        localStorage.setItem('expires_at', expiresAt.toString());
+        localStorage.setItem('token_type', data.token_type || 'Bearer');
+        localStorage.setItem('scope', data.scope || 'read write ai:analyze');
+
+        console.log('✅ Password grant login successful');
+        console.log('Token stored in localStorage, expires in:', data.expires_in, 'seconds');
+
+        // Show authenticated view
+        showAuthenticatedView({
+          ...data,
+          source: 'Password Grant (SSO Demo)'
+        });
+      } else {
+        // Handle OAuth2 error response
+        let errorMessage = 'Login failed. Please check your credentials.';
+
+        if (data.error_description) {
+          errorMessage = data.error_description;
+        } else if (data.error) {
+          // Map OAuth2 error codes to friendly messages
+          const errorMessages = {
+            'invalid_grant': 'Invalid email or password.',
+            'invalid_client': 'Invalid application configuration.',
+            'invalid_request': 'Invalid login request.',
+            'unauthorized_client': 'This application is not authorized.',
+            'unsupported_grant_type': 'Password grant not supported.',
+            'access_denied': 'Access denied.'
+          };
+          errorMessage = errorMessages[data.error] || 'Authentication failed. Please try again.';
+        }
+
+        console.error('Login failed:', data.error, '-', errorMessage);
+        errorDiv.textContent = `❌ ${errorMessage}`;
+        errorDiv.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+
+      // Handle network errors
+      let errorMessage = 'Unable to connect to the server. Please check your connection.';
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      errorDiv.textContent = `❌ ${errorMessage}`;
+      errorDiv.style.display = 'block';
+    } finally {
+      // Reset button state
+      submitButton.textContent = originalButtonText;
+      submitButton.disabled = false;
     }
   }
 
