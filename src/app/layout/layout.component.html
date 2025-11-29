@@ -266,13 +266,15 @@
               <mat-icon>redeem</mat-icon>
               <span>Gift Code</span>
             </button>
-            <button mat-menu-item (click)="$event.stopPropagation()" class="theme-toggle-card">
-              <div class="left">
+            <button mat-menu-item class="theme-toggle-card">
+              <div class="left" (click)="$event.stopPropagation()">
                 <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
                 <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
               </div>
-              <mat-slide-toggle [checked]="currentTheme() === 'dark'"
-                (change)="switchTheme($event.checked ? 'dark' : 'light')" aria-label="Theme toggle">
+              <mat-slide-toggle
+                [checked]="currentTheme() === 'dark'"
+                (change)="switchTheme($event.checked ? 'dark' : 'light')"
+                aria-label="Theme toggle">
               </mat-slide-toggle>
             </button>
             <button class="logout-btn" mat-menu-item (click)="logout()">

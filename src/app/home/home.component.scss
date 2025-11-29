@@ -22,13 +22,13 @@
 .website-title {
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--theme-white);
+  color: var(--md-sys-color-on-secondary);
   white-space: nowrap;
 }
 .website-title-copilot {
   font-size: 1.5rem;
   font-weight: 200;
-  color: var(--theme-white);
+  color: var(--md-sys-color-on-secondary);
   white-space: nowrap;
 }
 mat-card {
@@ -59,14 +59,14 @@ mat-card {
 
   .hero-banner-card {
     padding: 8px 40px;
-    background-color: var(--secondary-light);
+    background-color: var(--md-sys-color-surface-container);
 
     @media screen and (max-width: 576px) {
       padding: 8px 20px;
     }
 
     h1 {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       font-size: 40px;
       font-weight: 700;
       margin: 0;
@@ -82,7 +82,7 @@ mat-card {
 
     p {
       font-size: 18px;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       font-weight: 500;
       margin: 12px 0 20px;
 
@@ -92,16 +92,16 @@ mat-card {
     }
 
     button {
-      background-color: var(--primary) !important;
+      background-color: var(--md-sys-color-secondary) !important;
       border-radius: 10px;
-      color: #ffffff !important;
+      color: var(--md-sys-color-on-secondary) !important;
       font-size: 16px;
       font-weight: 500;
       box-shadow: none;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--md-sys-color-outline-variant);
 
       .mdc-button__label {
-        color: #ffffff !important;
+        color: var(--md-sys-color-on-secondary) !important;
       }
     }
 
@@ -139,9 +139,9 @@ mat-card {
   }
 
   .stat-card {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     width: 100%;
-    background-color: var(--secondary-light) !important;
+    background-color: var(--md-sys-color-surface-container) !important;
     padding: 20px;
     box-shadow: none;
 
@@ -154,32 +154,32 @@ mat-card {
       .stat-label {
         font-size: 14px;
         font-weight: 400;
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
 
     .stat-value {
       font-size: 30px;
       font-weight: 600;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       margin-bottom: 12px;
     }
 
     .stat-change.positive {
       font-size: 14px;
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface-variant);
 
       span {
-        color: var(--md-sys-color-success);
+        color: var(--md-extended-color-success-color);
       }
     }
   }
 
   // Skeleton loading styles
   .skeleton-card {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     width: 100%;
-    background-color: var(--secondary-light) !important;
+    background-color: var(--md-sys-color-surface-container) !important;
     padding: 20px;
     box-shadow: none;
 
@@ -241,7 +241,7 @@ mat-card {
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
   margin-top: 0;
   margin-bottom: 18px;
 }
@@ -272,9 +272,9 @@ mat-card {
   }
 
   .module-card {
-    background-color: var(--secondary-light);
+    background-color: var(--md-sys-color-surface-container);
     border-radius: 10px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     padding: 20px;
   }
 
@@ -322,7 +322,7 @@ mat-card {
 
     a,
     button {
-      color: var(--purple);
+      color: var(--md-sys-color-tertiary);
       background-color: transparent;
       box-shadow: none;
       border: 0;
@@ -338,14 +338,14 @@ mat-card {
 
   .module-title {
     font-size: 16px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     font-weight: 600;
     margin-bottom: 6px;
   }
 
   .module-desc {
     font-size: 14px;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
@@ -369,7 +369,7 @@ mat-card {
   }
 
   .view-all-link {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;

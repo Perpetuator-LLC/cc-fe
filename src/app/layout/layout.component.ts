@@ -222,7 +222,7 @@ export class LayoutComponent implements OnDestroy, OnInit {
   }
 
   switchTheme(theme: Theme): void {
-    this.currentTheme.set(theme);
+    // Only use the theme service - don't maintain a separate signal
     this.themeService.setTheme(theme);
   }
 

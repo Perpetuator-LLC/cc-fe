@@ -111,12 +111,12 @@
       }
 
       input {
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
 
       .mat-mdc-select-value,
       .mat-mdc-select-arrow {
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
     }
   }
@@ -127,20 +127,20 @@
     align-items: center;
 
     button[mat-icon-button] {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       border-radius: 8px;
       border: 1px solid transparent;
 
       &.active {
-        background-color: var(--secondary-light);
-        border-color: var(--border-color);
+        background-color: var(--md-sys-color-surface-container-high);
+        border-color: var(--md-sys-color-outline-variant);
       }
     }
   }
 }
 
 .action-btn {
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 }
 
 .episodes-container {
@@ -168,29 +168,29 @@
 
   .mat-mdc-header-cell {
     font-weight: 600;
-    color: var(--theme-color);
-    background: var(--secondary-dark);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
 
   .mat-mdc-row {
     &:hover {
-      background-color: var(--secondary-light);
+      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 
   .mat-mdc-cell {
     padding: 16px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     background: var(--toolbar-container-background-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
 
   .status-badge {
-    border-radius: 6px;
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    border-radius: var(--cc-radius-sm);
     width: 90px;
     height: 20px;
     display: inline-flex;
@@ -198,25 +198,32 @@
     justify-content: center;
 
     &.live {
-      background: var(--md-sys-color-success);
-      color: var(--theme-white);
+      color: var(--md-extended-color-success-color) !important;
+      background-color: var(--md-extended-color-success-color-container) !important;
+      border: 1px solid var(--md-extended-color-success-color);
     }
 
     &.not-live {
-      background: var(--secondary-dark);
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface-variant) !important;
+      background-color: var(--md-sys-color-surface-container-high) !important;
+      border: 1px solid var(--md-sys-color-outline-variant);
     }
   }
 
   .episode-title {
     a {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       text-decoration: none;
+
+      &:hover {
+        color: var(--md-sys-color-primary);
+        text-decoration: underline;
+      }
     }
   }
 
   .episode-date {
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
     font-size: 12px;
   }
 
@@ -230,7 +237,20 @@
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--md-sys-color-primary);
+      text-decoration: underline;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
   }
 
   .podcasts-grid {
@@ -247,38 +267,26 @@
     }
 
     .chip {
-      background-color: var(--secondary-400);
+      background-color: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
     }
   }
 
-  &.grid-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 16px;
-    background: none;
-    overflow: visible;
-  }
+  // ...existing code...
 }
 
 .podcast-card {
   width: 100%;
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
+  background: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
 
-  mat-card-header {
-    padding-bottom: 0;
-  }
-
-  .grid-header {
-    width: 100%;
-  }
+  // ...existing code...
 
   .grid-header-name {
     display: flex;
     gap: 28px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
     padding-bottom: 16px;
   }
 
@@ -288,11 +296,16 @@
     text-decoration: none;
     margin-bottom: 6px;
     display: block;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
+
+    &:hover {
+      color: var(--md-sys-color-primary);
+      text-decoration: underline;
+    }
   }
 
   mat-card-title {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   mat-card-actions {
