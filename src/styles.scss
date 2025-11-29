@@ -673,6 +673,161 @@ a {
   --purple: #005a9a; // Legacy reference, now points to Capital Blue
 }
 
+// ============================================================================
+// MD3 Utility Classes - Reusable Semantic Color Classes
+// ============================================================================
+// Use these classes instead of custom styling for consistency
+
+// Text Colors
+.md3-text-primary { color: var(--md-sys-color-on-surface) !important; }
+.md3-text-secondary { color: var(--md-sys-color-on-surface-variant) !important; }
+
+// Material Button Color Overrides (Fix white text in light mode globally)
+button.mat-mdc-button,
+button.mat-mdc-raised-button,
+button.mat-mdc-unelevated-button,
+button.mat-mdc-flat-button,
+button.mat-mdc-icon-button {
+  &.mat-primary {
+    .mdc-button__label,
+    mat-icon {
+      color: var(--md-sys-color-on-primary) !important;
+    }
+  }
+
+  &.mat-accent,
+  &.mat-secondary {
+    .mdc-button__label,
+    mat-icon {
+      color: var(--md-sys-color-on-secondary) !important;
+    }
+  }
+
+  &.mat-warn {
+    .mdc-button__label,
+    mat-icon {
+      color: var(--md-sys-color-on-error) !important;
+    }
+  }
+}
+
+// Fix button colors when background is set
+button {
+  &[style*="background"] {
+    .mdc-button__label,
+    mat-icon {
+      color: inherit !important;
+    }
+  }
+}
+
+// Ensure icons in all buttons respect theme
+button {
+  mat-icon {
+    color: inherit;
+  }
+}
+
+// Status/Semantic Colors
+.md3-success {
+  color: var(--md-extended-color-success-on-color) !important;
+  background-color: var(--md-extended-color-success-color) !important;
+}
+
+.md3-error,
+.md3-danger {
+  color: var(--md-sys-color-on-error) !important;
+  background-color: var(--md-sys-color-error) !important;
+}
+
+.md3-warning {
+  color: var(--md-extended-color-warning-on-color) !important;
+  background-color: var(--md-extended-color-warning-color) !important;
+}
+
+.md3-info {
+  color: var(--md-extended-color-info-on-color) !important;
+  background-color: var(--md-extended-color-info-color) !important;
+}
+
+// Muted/Disabled
+.md3-muted {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  opacity: 0.6;
+}
+
+// Badge variants (outline style)
+.md3-badge-success {
+  color: var(--md-extended-color-success-color) !important;
+  background-color: var(--md-extended-color-success-color-container) !important;
+  border: 1px solid var(--md-extended-color-success-color);
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.md3-badge-error,
+.md3-badge-danger {
+  color: var(--md-sys-color-error) !important;
+  background-color: var(--md-sys-color-error-container) !important;
+  border: 1px solid var(--md-sys-color-error);
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.md3-badge-warning {
+  color: var(--md-extended-color-warning-color) !important;
+  background-color: var(--md-extended-color-warning-color-container) !important;
+  border: 1px solid var(--md-extended-color-warning-color);
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.md3-badge-muted {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// Icon colors for validation states
+.md3-icon-success { color: var(--md-extended-color-success-color) !important; }
+.md3-icon-error { color: var(--md-sys-color-error) !important; }
+.md3-icon-warning { color: var(--md-extended-color-warning-color) !important; }
+.md3-icon-muted { color: var(--md-sys-color-on-surface-variant) !important; }
+
+// Danger zones / Warning sections
+.md3-danger-zone {
+  border: 2px solid var(--md-sys-color-error) !important;
+  background-color: var(--md-sys-color-error-container) !important;
+  color: var(--md-sys-color-on-error-container) !important;
+  padding: var(--cc-spacing-md);
+  border-radius: var(--cc-radius-md);
+
+  h2, h3, h4, h5, h6 {
+    color: var(--md-sys-color-on-error-container) !important;
+  }
+
+  button.md3-danger-action {
+    background-color: var(--md-sys-color-error) !important;
+    color: var(--md-sys-color-on-error) !important;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+// ============================================================================
+
 .music-dark {
   display: none;
 }
@@ -703,7 +858,7 @@ a {
   .actionMenu {
     button {
       &:hover {
-        background-color: #f5f5f5 !important;
+        background-color: var(--md-sys-color-surface-container-high) !important;
       }
     }
   }
@@ -720,15 +875,15 @@ a {
 }
 
 .mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
-  border-color: var(--border-color) !important;
+  border-color: var(--md-sys-color-outline-variant) !important;
 }
 
 .mat-mdc-chip-action-label {
-  color: var(--theme-color) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
-  color: var(--theme-color) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .search-filter {
@@ -750,15 +905,15 @@ a {
     }
 
     .mat-mdc-select-arrow {
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface-variant);
 
       svg {
-        fill: var(--description-color);
+        fill: var(--md-sys-color-on-surface-variant);
       }
     }
 
     .mat-mdc-select {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       // Remove padding-top to prevent text cutoff at top
       // Material handles vertical alignment automatically
     }
@@ -766,25 +921,25 @@ a {
 }
 
 .mat-mdc-dialog-content {
-  color: var(--description-color) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
 }
 
 .mdc-dialog__surface .deleteModal {
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 }
 
 .mdc-dialog__surface:has(.deleteModal) {
   .mdc-dialog__actions {
     button {
-      background: var(--secondary-light);
-      border: 1px solid var(--border-color);
+      background: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: var(--cc-radius-md);
-      color: var(--theme-color) !important;
+      color: var(--md-sys-color-on-surface) !important;
       font-weight: 500;
 
       &:nth-child(2) {
-        background: var(--theme-white) !important;
-        color: var(--toolbar-container-background-color) !important;
+        background: var(--md-sys-color-error) !important;
+        color: var(--md-sys-color-on-error) !important;
       }
     }
   }
@@ -796,7 +951,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 
   @media screen and (max-width: 600px) {
     display: none;
@@ -809,7 +964,7 @@ a {
   .page-title-secondary {
     font-size: 13px;
     font-weight: 500;
-    color: #b5b5b5;
+    color: var(--md-sys-color-on-surface-variant);
 
     @media screen and (max-width: 576px) {
       display: none;
@@ -904,21 +1059,21 @@ a {
 }
 
 div.mat-mdc-autocomplete-panel {
-  background: var(--secondary-color) !important;
-  color: var(--theme-color) !important;
+  background: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .mat-expansion-panel {
-  background: var(--secondary-light) !important;
-  color: var(--theme-color) !important;
+  background: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .mat-mdc-checkbox .mat-internal-form-field {
-  color: var(--theme-color) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .mdc-checkbox__background {
-  border-color: var(--theme-color) !important;
+  border-color: var(--md-sys-color-on-surface) !important;
 }
 
 .mat-mdc-checkbox-checked .mdc-checkbox__background {
@@ -964,11 +1119,11 @@ div.mat-mdc-autocomplete-panel {
 
 .mat-mdc-form-field {
   .mat-mdc-form-field-error {
-    color: #ff7171;
+    color: var(--md-sys-color-error);
   }
 
   .mat-mdc-input-element {
-    color: var(--theme-color) !important;
+    color: var(--md-sys-color-on-surface) !important;
     caret-color: var(--primary) !important;
   }
 
@@ -995,12 +1150,12 @@ div.mat-mdc-autocomplete-panel {
 }
 
 .mat-mdc-dialog-surface {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
   border-radius: 8px !important;
 }
 
 .mat-mdc-dialog-title {
-  color: var(--theme-color) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 .mat-app-background {
@@ -1011,7 +1166,7 @@ div.mat-mdc-autocomplete-panel {
   padding: 0 !important;
   height: auto !important;
   line-height: 0;
-  color: var(--theme-color) !important;
+  color: var(--md-sys-color-on-surface) !important;
 }
 
 div.mat-mdc-select-panel {
@@ -1040,15 +1195,15 @@ div.mat-mdc-select-panel {
   }
 
   .mdc-list-item__primary-text {
-    color: var(--theme-color) !important;
+    color: var(--md-sys-color-on-surface) !important;
     font-size: 14px;
     font-weight: 400;
   }
 }
 
 .mat-mdc-menu-panel {
-  background-color: var(--secondary-light) !important;
-  border: 1px solid var(--border-color);
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .voice-info {
@@ -1067,7 +1222,7 @@ div.mat-mdc-select-panel {
     align-items: center;
     gap: var(--cc-spacing-sm);
     padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
     .mat-icon {
       font-size: 32px;
@@ -1079,11 +1234,11 @@ div.mat-mdc-select-panel {
       p {
         margin: 0;
         font-size: 14px;
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
 
       span {
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
         font-size: 12px;
         font-weight: 500;
       }
@@ -1091,7 +1246,7 @@ div.mat-mdc-select-panel {
   }
 
   .mat-mdc-menu-item {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
 
     span {
       font-size: 13px;
@@ -1099,8 +1254,8 @@ div.mat-mdc-select-panel {
     }
 
     .mat-icon {
-      margin-right: 12px;
-      color: var(--theme-color);
+      margin-right: var(--cc-spacing-sm);
+      color: var(--md-sys-color-on-surface);
       font-size: 20px;
       width: 20px;
       height: 20px;
@@ -1110,51 +1265,53 @@ div.mat-mdc-select-panel {
   .mat-mdc-menu-item-text {
     display: flex;
     align-items: center;
-    gap: 12px;
   }
 }
 
 .theme-toggle-card {
   .mat-mdc-menu-item-text {
+    width: 100%;
     justify-content: space-between;
   }
 
   .left {
     display: flex;
     align-items: center;
-    gap: 12px;
+  }
+
+  // Remove extra spacing - icon already has margin-right from parent
+  .mat-icon {
+    margin-right: var(--cc-spacing-sm) !important;
   }
 }
 
 .logout-btn {
   &:hover {
-    background-color: #ff4a4a66 !important;
-    color: #ff4a4a;
+    background-color: var(--md-sys-color-error-container) !important;
+    color: var(--md-sys-color-on-error-container);
 
     .mat-icon {
-      color: #ff4a4a !important;
+      color: var(--md-sys-color-on-error-container) !important;
     }
   }
 
   .mat-mdc-menu-item-text {
+    width: 100%;
     justify-content: space-between;
   }
 
   .left {
     display: flex;
     align-items: center;
-    gap: 12px;
+  }
 
-    .mat-icon {
-      color: var(--theme-color);
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
+  // Remove extra spacing - icon already has margin-right from parent
+  .mat-icon {
+    margin-right: var(--cc-spacing-sm) !important;
   }
 
   .email {
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
     font-size: 11px;
     font-weight: 500;
   }
@@ -1165,7 +1322,7 @@ div.mat-mdc-select-panel {
 }
 
 .light .mat-mdc-card.message-card {
-  background-color: #f5f5f5 !important;
+  background-color: var(--md-sys-color-surface-container) !important;
 }
 
 .main-content {
@@ -1197,18 +1354,18 @@ div.mat-mdc-select-panel {
 }
 
 .actionMenu {
-  background-color: var(--secondary-light) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
   border-radius: 8px !important;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   min-width: 200px !important;
 
   .mat-mdc-menu-item {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     min-height: 40px;
 
     .mat-icon {
       margin-right: 12px;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       font-size: 20px;
       width: 20px;
       height: 20px;
@@ -1220,7 +1377,7 @@ div.mat-mdc-select-panel {
     }
 
     &:hover {
-      background-color: var(--secondary-dark);
+      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 
@@ -1254,7 +1411,7 @@ table,
 
   .mat-mdc-row {
     &:hover {
-      background-color: #2a2a2a;
+      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 
