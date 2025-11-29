@@ -22,6 +22,24 @@
 // Be sure that you only ever include this mixin once!
 @include mat.core();
 
+// ============================================================================
+// MD3 Generated Themes - Easy Theme Switching
+// ============================================================================
+// To switch MD3 theme variants, change ONLY the filename in the @import below.
+// The imported theme will apply to body.dark or body.light classes.
+//
+// Available dark themes:  dark, dark-hc, dark-mc
+// Available light themes: light, light-hc, light-mc
+// ============================================================================
+
+// DARK THEME: Change 'dark' to 'dark-hc' or 'dark-mc' to switch variants
+@import 'theme/dark';
+
+// LIGHT THEME: Change 'light' to 'light-hc' or 'light-mc' to switch variants
+@import 'theme/light';
+
+// ============================================================================
+
 //$typography: (
 //  brand-family: 'lexend, sans-serif',
 //  //brand-family: 'roboto, sans-serif',
@@ -261,7 +279,9 @@ $prominent-purple-palette: map.merge($_prominent-purple, $_rest);
 
 // Define shared typography configuration
 $cc-typography: (
-  brand-family: 'DM Sans',
+  brand-family: 'lexend, sans-serif',
+  //brand-family: 'DM Sans',
+  //brand-family: 'roboto, sans-serif',
   plain-family: 'DM Sans',
   bold-weight: 900,
   medium-weight: 700,
@@ -339,57 +359,57 @@ html {
 body.dark {
   @include mat.all-component-colors($dark-theme);
 
-  // Capital Copilot Custom Tokens (Dark Theme)
-  // Semantic Status Colors
-  --cc-color-success: #4caf50;
-  --cc-color-success-container: #1b5e20;
-  --cc-color-on-success: #ffffff;
+  // ============================================================================
+  // MD3 THEME COLORS (from theme/dark.scss)
+  // ============================================================================
+  // All color tokens now come from the imported MD3 theme file.
+  // The following variables are COMMENTED OUT and replaced by MD3 tokens.
+  // ============================================================================
 
-  --cc-color-warning: #ff9800;
-  --cc-color-warning-container: #e65100;
-  --cc-color-on-warning: #ffffff;
+  // CUSTOM TOKENS REPLACED BY MD3:
+  // --cc-color-success: #4caf50;                    → use --md-extended-color-success-color
+  // --cc-color-success-container: #1b5e20;          → use --md-extended-color-success-color-container
+  // --cc-color-on-success: #ffffff;                 → use --md-extended-color-success-on-color
 
-  --cc-color-error: #ef5350;
-  --cc-color-error-container: #b71c1c;
-  --cc-color-on-error: #ffffff;
+  // --cc-color-warning: #ff9800;                    → use --md-extended-color-warning-color
+  // --cc-color-warning-container: #e65100;          → use --md-extended-color-warning-color-container
+  // --cc-color-on-warning: #ffffff;                 → use --md-extended-color-warning-on-color
 
-  --cc-color-info: #03a9f4;
-  --cc-color-info-container: #01579b;
-  --cc-color-on-info: #ffffff;
+  // --cc-color-error: #ef5350;                      → use --md-sys-color-error
+  // --cc-color-error-container: #b71c1c;            → use --md-sys-color-error-container
+  // --cc-color-on-error: #ffffff;                   → use --md-sys-color-on-error
 
-  // Capital Blue (Primary color - used for running jobs, progress indicators)
-  --cc-color-primary: #008ce8;
-  --cc-color-on-primary: #ffffff;
+  // --cc-color-info: #03a9f4;                       → use --md-extended-color-info-color
+  // --cc-color-info-container: #01579b;             → use --md-extended-color-info-color-container
+  // --cc-color-on-info: #ffffff;                    → use --md-extended-color-info-on-color
 
-  // Custom Orange (Energy, Action, Urgency - now secondary)
-  --cc-color-orange: #ff7b3d;
-  --cc-color-on-orange: #000000;
+  // --cc-color-primary: #008ce8;                    → use --md-sys-color-primary
+  // --cc-color-on-primary: #ffffff;                 → use --md-sys-color-on-primary
 
-  // Secondary (Vibrant Orange - for backwards compat, use actual secondary slot)
-  --cc-color-secondary: #ff7b3d;
-  --cc-color-on-secondary: #000000;
+  // --cc-color-orange: #ff7b3d;                     → use --md-sys-color-secondary
+  // --cc-color-on-orange: #000000;                  → use --md-sys-color-on-secondary
 
-  // Primary is now Capital Blue (#008ce8 in dark theme)
-  // Tertiary is Prominent Purple (#a63dff in dark theme)
+  // --cc-color-secondary: #ff7b3d;                  → use --md-sys-color-secondary
+  // --cc-color-on-secondary: #000000;               → use --md-sys-color-on-secondary
 
-  // Surface Colors
-  --cc-surface-background: #121212;
-  --cc-surface-card: #1e1e1e;
-  --cc-surface-elevated: #2a2a2a;
-  --cc-surface-toolbar: #1a1a1a;
+  // Surface Colors (now from MD3)
+  // --cc-surface-background: #121212;               → use --md-sys-color-background
+  // --cc-surface-card: #1e1e1e;                     → use --md-sys-color-surface-container
+  // --cc-surface-elevated: #2a2a2a;                 → use --md-sys-color-surface-container-high
+  // --cc-surface-toolbar: #1a1a1a;                  → use --md-sys-color-surface-container-low
 
-  // Border & Divider Colors
-  --cc-border-color: rgba(255, 255, 255, 0.12);
-  --cc-border-color-strong: rgba(255, 255, 255, 0.24);
-  --cc-divider-color: rgba(255, 255, 255, 0.08);
+  // Border & Divider Colors (now from MD3)
+  // --cc-border-color: rgba(255, 255, 255, 0.12);   → use --md-sys-color-outline-variant
+  // --cc-border-color-strong: rgba(255, 255, 255, 0.24); → use --md-sys-color-outline
+  // --cc-divider-color: rgba(255, 255, 255, 0.08);  → use --md-sys-color-outline-variant
 
-  // Text Colors
-  --cc-text-primary: rgba(255, 255, 255, 0.87);
-  --cc-text-secondary: rgba(255, 255, 255, 0.60);
-  --cc-text-tertiary: rgba(255, 255, 255, 0.38);
-  --cc-text-disabled: rgba(255, 255, 255, 0.38);
+  // Text Colors (now from MD3)
+  // --cc-text-primary: rgba(255, 255, 255, 0.87);   → use --md-sys-color-on-surface
+  // --cc-text-secondary: rgba(255, 255, 255, 0.60); → use --md-sys-color-on-surface-variant
+  // --cc-text-tertiary: rgba(255, 255, 255, 0.38);  → use --md-sys-color-on-surface-variant
+  // --cc-text-disabled: rgba(255, 255, 255, 0.38);  → use --md-sys-color-on-surface-variant
 
-  // Spacing Scale
+  // Spacing Scale (unchanged - these are not theme colors)
   --cc-spacing-xs: 4px;
   --cc-spacing-sm: 8px;
   --cc-spacing-md: 16px;
@@ -397,32 +417,45 @@ body.dark {
   --cc-spacing-xl: 32px;
   --cc-spacing-2xl: 48px;
 
-  // Border Radius Scale
+  // Border Radius Scale (unchanged - these are not theme colors)
   --cc-radius-sm: 4px;
   --cc-radius-md: 8px;
   --cc-radius-lg: 12px;
   --cc-radius-xl: 16px;
   --cc-radius-round: 999px;
 
-  // Legacy Variables (kept for backwards compatibility - migrate away from these)
-  --toolbar-container-background-color: var(--cc-surface-toolbar);
-  --secondary-color: var(--cc-surface-card);
-  --secondary-dark: var(--cc-surface-elevated);
-  --secondary-light: var(--cc-surface-card);
-  --theme-color: var(--cc-text-primary);
-  --border-color: var(--cc-border-color);
-  --secondary-400: var(--cc-surface-elevated);
-  --secondary-450: var(--cc-surface-elevated);
-  --secondary-500: var(--cc-surface-card);
-  --description-color: var(--cc-text-secondary);
+  // Legacy Variables (map to MD3 tokens for backwards compatibility)
+  --toolbar-container-background-color: var(--md-sys-color-surface-container-low);
+  --secondary-color: var(--md-sys-color-surface-container);
+  --secondary-dark: var(--md-sys-color-surface-container-high);
+  --secondary-light: var(--md-sys-color-surface-container);
+  --theme-color: var(--md-sys-color-on-surface);
+  --border-color: var(--md-sys-color-outline-variant);
+  --secondary-400: var(--md-sys-color-surface-container-high);
+  --secondary-450: var(--md-sys-color-surface-container-high);
+  --secondary-500: var(--md-sys-color-surface-container);
+  --description-color: var(--md-sys-color-on-surface-variant);
   --theme-white: #ffffff;
   --theme-transparent: rgba(0, 0, 0, 0.4);
-  --primary: #f14a00; // TODO: Migrate to --md-sys-color-primary or --cc-color-orange
-  --purple: var(--cc-color-secondary);
+  --primary: var(--md-sys-color-secondary); // Orange for links/accents
+  --purple: var(--md-sys-color-tertiary);
 
   .mat-mdc-card {
-    background-color: var(--cc-surface-card);
+    background-color: var(--md-sys-color-surface-container);
     box-shadow: none;
+  }
+
+  // Fix input field contrast in dark mode
+  .mdc-text-field {
+    background-color: var(--md-sys-color-surface-container) !important;
+
+    &.mdc-text-field--focused {
+      background-color: var(--md-sys-color-surface-container) !important;
+    }
+  }
+
+  .mat-mdc-input-element {
+    color: var(--md-sys-color-on-surface) !important;
   }
 }
 
@@ -430,57 +463,57 @@ body.dark {
 body.light {
   @include mat.all-component-colors($light-theme);
 
-  // Capital Copilot Custom Tokens (Light Theme)
-  // Semantic Status Colors
-  --cc-color-success: #2e7d32;
-  --cc-color-success-container: #c8e6c9;
-  --cc-color-on-success: #000000;
+  // ============================================================================
+  // MD3 THEME COLORS (from theme/light.scss)
+  // ============================================================================
+  // All color tokens now come from the imported MD3 theme file.
+  // The following variables are COMMENTED OUT and replaced by MD3 tokens.
+  // ============================================================================
 
-  --cc-color-warning: #f57c00;
-  --cc-color-warning-container: #ffe0b2;
-  --cc-color-on-warning: #000000;
+  // CUSTOM TOKENS REPLACED BY MD3:
+  // --cc-color-success: #2e7d32;                    → use --md-extended-color-success-color
+  // --cc-color-success-container: #c8e6c9;          → use --md-extended-color-success-color-container
+  // --cc-color-on-success: #000000;                 → use --md-extended-color-success-on-color
 
-  --cc-color-error: #c62828;
-  --cc-color-error-container: #ffcdd2;
-  --cc-color-on-error: #ffffff;
+  // --cc-color-warning: #f57c00;                    → use --md-extended-color-warning-color
+  // --cc-color-warning-container: #ffe0b2;          → use --md-extended-color-warning-color-container
+  // --cc-color-on-warning: #000000;                 → use --md-extended-color-warning-on-color
 
-  --cc-color-info: #0288d1;
-  --cc-color-info-container: #b3e5fc;
-  --cc-color-on-info: #000000;
+  // --cc-color-error: #c62828;                      → use --md-sys-color-error
+  // --cc-color-error-container: #ffcdd2;            → use --md-sys-color-error-container
+  // --cc-color-on-error: #ffffff;                   → use --md-sys-color-on-error
 
-  // Capital Blue (Primary color - used for running jobs, progress indicators)
-  --cc-color-primary: #005a9a;
-  --cc-color-on-primary: #ffffff;
+  // --cc-color-info: #0288d1;                       → use --md-extended-color-info-color
+  // --cc-color-info-container: #b3e5fc;             → use --md-extended-color-info-color-container
+  // --cc-color-on-info: #000000;                    → use --md-extended-color-info-on-color
 
-  // Custom Orange (Energy, Action, Urgency - now secondary)
-  --cc-color-orange: #ff7b3d;
-  --cc-color-on-orange: #000000;
+  // --cc-color-primary: #005a9a;                    → use --md-sys-color-primary
+  // --cc-color-on-primary: #ffffff;                 → use --md-sys-color-on-primary
 
-  // Secondary (Vibrant Orange - for backwards compat, use actual secondary slot)
-  --cc-color-secondary: #f14a00;
-  --cc-color-on-secondary: #ffffff;
+  // --cc-color-orange: #ff7b3d;                     → use --md-sys-color-secondary
+  // --cc-color-on-orange: #000000;                  → use --md-sys-color-on-secondary
 
-  // Primary is now Capital Blue (#005a9a in light theme)
-  // Tertiary is Prominent Purple (#5a009a in light theme)
+  // --cc-color-secondary: #f14a00;                  → use --md-sys-color-secondary
+  // --cc-color-on-secondary: #ffffff;               → use --md-sys-color-on-secondary
 
-  // Surface Colors
-  --cc-surface-background: #fafafa;
-  --cc-surface-card: #ffffff;
-  --cc-surface-elevated: #ffffff;
-  --cc-surface-toolbar: #ffffff;
+  // Surface Colors (now from MD3)
+  // --cc-surface-background: #fafafa;               → use --md-sys-color-background
+  // --cc-surface-card: #ffffff;                     → use --md-sys-color-surface-container-lowest
+  // --cc-surface-elevated: #ffffff;                 → use --md-sys-color-surface-container
+  // --cc-surface-toolbar: #ffffff;                  → use --md-sys-color-surface
 
-  // Border & Divider Colors
-  --cc-border-color: rgba(0, 0, 0, 0.12);
-  --cc-border-color-strong: rgba(0, 0, 0, 0.24);
-  --cc-divider-color: rgba(0, 0, 0, 0.08);
+  // Border & Divider Colors (now from MD3)
+  // --cc-border-color: rgba(0, 0, 0, 0.12);         → use --md-sys-color-outline-variant
+  // --cc-border-color-strong: rgba(0, 0, 0, 0.24);  → use --md-sys-color-outline
+  // --cc-divider-color: rgba(0, 0, 0, 0.08);        → use --md-sys-color-outline-variant
 
-  // Text Colors
-  --cc-text-primary: rgba(0, 0, 0, 0.87);
-  --cc-text-secondary: rgba(0, 0, 0, 0.60);
-  --cc-text-tertiary: rgba(0, 0, 0, 0.38);
-  --cc-text-disabled: rgba(0, 0, 0, 0.38);
+  // Text Colors (now from MD3)
+  // --cc-text-primary: rgba(0, 0, 0, 0.87);         → use --md-sys-color-on-surface
+  // --cc-text-secondary: rgba(0, 0, 0, 0.60);       → use --md-sys-color-on-surface-variant
+  // --cc-text-tertiary: rgba(0, 0, 0, 0.38);        → use --md-sys-color-on-surface-variant
+  // --cc-text-disabled: rgba(0, 0, 0, 0.38);        → use --md-sys-color-on-surface-variant
 
-  // Spacing Scale
+  // Spacing Scale (unchanged - these are not theme colors)
   --cc-spacing-xs: 4px;
   --cc-spacing-sm: 8px;
   --cc-spacing-md: 16px;
@@ -488,32 +521,45 @@ body.light {
   --cc-spacing-xl: 32px;
   --cc-spacing-2xl: 48px;
 
-  // Border Radius Scale
+  // Border Radius Scale (unchanged - these are not theme colors)
   --cc-radius-sm: 4px;
   --cc-radius-md: 8px;
   --cc-radius-lg: 12px;
   --cc-radius-xl: 16px;
   --cc-radius-round: 999px;
 
-  // Legacy Variables (kept for backwards compatibility - migrate away from these)
-  --toolbar-container-background-color: var(--cc-surface-toolbar);
+  // Legacy Variables (map to MD3 tokens for backwards compatibility)
+  --toolbar-container-background-color: var(--md-sys-color-surface);
   --secondary-color: #f5f5f5;
   --secondary-dark: #f5f5f5;
-  --secondary-light: var(--cc-surface-card);
-  --theme-color: var(--cc-text-primary);
-  --border-color: var(--cc-border-color);
+  --secondary-light: var(--md-sys-color-surface-container-lowest);
+  --theme-color: var(--md-sys-color-on-surface);
+  --border-color: var(--md-sys-color-outline-variant);
   --secondary-400: #f5f5f5;
-  --secondary-450: var(--cc-surface-card);
+  --secondary-450: var(--md-sys-color-surface-container-lowest);
   --secondary-500: #f5f5f5;
-  --description-color: var(--cc-text-secondary);
-  --theme-white: #f14a00; // Intentionally different in light theme
+  --description-color: var(--md-sys-color-on-surface-variant);
+  --theme-white: var(--md-sys-color-secondary); // Orange in light theme
   --theme-transparent: rgba(255, 255, 255, 0.42);
-  --primary: #f14a00; // TODO: Migrate to --md-sys-color-primary or --cc-color-orange
-  --purple: var(--cc-color-secondary);
+  --primary: var(--md-sys-color-secondary); // Orange for links/accents
+  --purple: var(--md-sys-color-tertiary);
 
   .mat-mdc-card {
-    background-color: var(--cc-surface-card);
+    background-color: var(--md-sys-color-surface-container-lowest);
     box-shadow: none;
+  }
+
+  // Ensure proper contrast in light mode
+  .mdc-text-field {
+    background-color: var(--md-sys-color-surface-container-lowest) !important;
+
+    &.mdc-text-field--focused {
+      background-color: var(--md-sys-color-surface-container-lowest) !important;
+    }
+  }
+
+  .mat-mdc-input-element {
+    color: var(--md-sys-color-on-surface) !important;
   }
 }
 
@@ -901,6 +947,8 @@ div.mat-mdc-autocomplete-panel {
 
   &.mdc-text-field--focused {
     border-color: var(--primary);
+    // Ensure background stays consistent in dark mode (no light purple)
+    background: var(--secondary-light) !important;
 
     .mdc-floating-label {
       color: var(--primary) !important;
@@ -922,6 +970,11 @@ div.mat-mdc-autocomplete-panel {
   .mat-mdc-input-element {
     color: var(--theme-color) !important;
     caret-color: var(--primary) !important;
+  }
+
+  // Hide the focus overlay that causes light purple background in dark mode
+  .mat-mdc-form-field-focus-overlay {
+    display: none !important;
   }
 
   .mdc-line-ripple {
@@ -1326,33 +1379,38 @@ mat-paginator {
 
 /* Custom styles for Privacy Policy Modal main container */
 // ============================================================================
-// Global Job Status Styles (Used across jobs-list and job-status-bar)
+// Global Job Status Styles (Using MD3 Extended Colors)
 // ============================================================================
+// Job statuses now map to MD3 semantic colors:
+// - Success/Completed: MD3 Extended Success Color (green)
+// - Failed/Error: MD3 System Error Color (red)
+// - Pending: MD3 Extended Warning Color (orange/yellow)
+// - Running: MD3 Extended Info Color (blue)
 
 // Job status badge colors - consistent across all components
 .job-success,
 .job-completed {
-  color: var(--theme-white) !important;
-  background-color: var(--cc-color-success) !important;
+  color: var(--md-extended-color-success-on-color) !important;
+  background-color: var(--md-extended-color-success-color) !important;
   border-radius: var(--cc-spacing-sm);
 }
 
 .job-failed,
 .job-error {
-  color: var(--theme-white) !important;
-  background-color: var(--cc-color-error) !important;
+  color: var(--md-sys-color-on-error) !important;
+  background-color: var(--md-sys-color-error) !important;
   border-radius: var(--cc-spacing-sm);
 }
 
 .job-pending {
-  color: var(--theme-white) !important;
-  background-color: var(--cc-color-warning) !important;
+  color: var(--md-extended-color-warning-on-color) !important;
+  background-color: var(--md-extended-color-warning-color) !important;
   border-radius: var(--cc-spacing-sm);
 }
 
 .job-running {
-  color: var(--theme-white) !important;
-  background-color: var(--cc-color-primary) !important; // Capital Blue
+  color: var(--md-extended-color-info-on-color) !important;
+  background-color: var(--md-extended-color-info-color) !important;
   border-radius: var(--cc-spacing-sm);
 }
 
@@ -1360,22 +1418,22 @@ mat-paginator {
 .job-card {
   &.PENDING,
   &.pending {
-    border-left: 5px solid var(--cc-color-warning);
+    border-left: 5px solid var(--md-extended-color-warning-color);
   }
 
   &.RUNNING,
   &.running {
-    border-left: 5px solid var(--cc-color-primary); // Capital Blue
+    border-left: 5px solid var(--md-extended-color-info-color);
   }
 
   &.FAILED,
   &.failed {
-    border-left: 5px solid var(--cc-color-error);
+    border-left: 5px solid var(--md-sys-color-error);
   }
 
   &.COMPLETED,
   &.completed {
-    border-left: 5px solid var(--cc-color-success);
+    border-left: 5px solid var(--md-extended-color-success-color);
   }
 }
 

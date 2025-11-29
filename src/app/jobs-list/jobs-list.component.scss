@@ -66,7 +66,7 @@
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-color: var(--cc-border-color);
+      border-color: var(--md-sys-color-outline-variant);
       border-width: 1px;
     }
 
@@ -101,7 +101,7 @@
     // Select value text styling
     .mat-mdc-select-value {
       font-size: 12px;
-      color: var(--cc-text-secondary);
+      color: var(--md-sys-color-on-surface-variant);
     }
 
     @media screen and (max-width: 576px) {
@@ -118,7 +118,7 @@
 .timeline-date-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   margin-bottom: var(--cc-spacing-lg);
 }
 
@@ -138,20 +138,20 @@
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     margin-bottom: var(--cc-spacing-md);
   }
 
   .empty-state-title {
     font-size: 24px;
     font-weight: 600;
-    color: var(--cc-text-primary);
+    color: var(--md-sys-color-on-surface);
     margin: 0 0 var(--cc-spacing-md) 0;
   }
 
   .empty-state-message {
     font-size: 16px;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     line-height: 1.5;
     margin: 0;
   }
@@ -172,7 +172,7 @@
 
   .loading-message {
     font-size: 16px;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
     margin: 0;
     font-weight: 500;
   }
@@ -197,13 +197,13 @@
 }
 
 .chip {
-  background: var(--secondary-dark);
+.status-badge {
   border-radius: var(--cc-radius-round);
   font-weight: 500;
   font-size: 12px;
   line-height: 100%;
   padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -243,7 +243,7 @@
     content: '';
     position: absolute;
     left: var(--cc-spacing-lg);
-    border-left: 1px solid var(--cc-border-color);
+    border-left: 1px solid var(--md-sys-color-outline-variant);
     width: 2px;
     height: calc(100% + var(--cc-spacing-lg));
   }
@@ -276,7 +276,7 @@
 }
 
 .timeline-content {
-  border: 1px solid var(--cc-border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--cc-radius-md);
   padding: 1rem 1.5rem;
   width: 300px;
@@ -326,7 +326,7 @@
 .timeline-title {
   font-weight: 600;
   font-size: 14px;
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -354,7 +354,7 @@
   align-items: center;
   gap: var(--cc-spacing-sm);
   font-size: 11px;
-  color: var(--cc-text-secondary);
+  color: var(--md-sys-color-on-surface-variant);
   flex-wrap: wrap;
 
   &.mobile {
@@ -445,7 +445,7 @@
 }
 
 .timeline-message {
-  color: var(--cc-text-primary);
+  color: var(--md-sys-color-on-surface);
   font-size: 14px;
   font-weight: 400;
   margin-top: var(--cc-spacing-sm);
@@ -464,7 +464,7 @@
     .section-title {
       font-size: 10px;
       font-weight: 600;
-      color: var(--cc-text-secondary);
+      color: var(--md-sys-color-on-surface-variant);
       text-transform: uppercase;
       margin: 0 0 3px 0;
       letter-spacing: 0.5px;
@@ -473,17 +473,17 @@
 
   .message-text {
     font-size: 10px;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
 
     &.error-message {
-      color: var(--cc-color-error);
+      color: var(--md-sys-color-error);
       font-weight: 500;
     }
   }
 
   .error-message {
     font-size: 10px;
-    color: var(--cc-color-error);
+    color: var(--md-sys-color-error);
     font-weight: 500;
   }
 
@@ -554,6 +554,7 @@
             background: #c8e6c9;
           }
         }
+      }
       }
     }
   }
