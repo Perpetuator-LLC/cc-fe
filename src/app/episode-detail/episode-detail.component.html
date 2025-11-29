@@ -87,17 +87,17 @@
               <div class="audio-header">
                 <h4>Episode Audio</h4>
                 <div class="buttons">
-                  <button mat-raised-button color="primary" type="button" class="episode-control" [hidden]="!audioSrc"
+                  <button mat-raised-button color="accent" type="button" class="episode-control" [hidden]="!audioSrc"
                     (click)="downloadAudio()">
                     <mat-icon>download</mat-icon>
                     Download MP3
                   </button>
-                  <button mat-raised-button color="primary" type="button" class="episode-control" [hidden]="!audioSrc"
+                  <button mat-raised-button color="accent" type="button" class="episode-control" [hidden]="!audioSrc"
                     (click)="publishAudio()">
                     <app-svg-icon icon="telegram"></app-svg-icon>
                     Publish to Telegram
                   </button>
-                  <button mat-raised-button color="primary" type="button" class="episode-control"
+                  <button mat-raised-button color="accent" type="button" class="episode-control"
                     (click)="audioFileInput.click()" [disabled]="hasUnsavedChanges"
                     [matTooltip]="hasUnsavedChanges ? 'Please save changes before uploading audio' : 'Upload a custom MP3 file for this episode'">
                     <mat-icon>upload_file</mat-icon>
@@ -105,7 +105,7 @@
                   </button>
                   <input #audioFileInput type="file" accept="audio/mpeg,audio/mp3" (change)="onAudioFileSelected($event)" class="display-none">
                   <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
-                    <button mat-raised-button color="primary" type="button" class="episode-control"
+                    <button mat-raised-button color="accent" type="button" class="episode-control"
                       (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">
                       <app-svg-icon icon="audio"></app-svg-icon>
                       Generate Audio
@@ -268,17 +268,17 @@
                             <span class="rss-feed-name">{{ feed.name || feed.url }}</span>
                             <div class="rss-feed-status-mini">
                               <span
-                                class="status-icon"
-                                [class.success]="feed.isReachable"
-                                [class.error]="!feed.isReachable"
+                                class="status-icon status-success"
+                                [class.status-success]="feed.isReachable"
+                                [class.status-error]="!feed.isReachable"
                                 [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
                               >
                                 <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
                               </span>
                               <span
                                 class="status-icon"
-                                [class.success]="feed.isParsable"
-                                [class.error]="!feed.isParsable"
+                                [class.status-success]="feed.isParsable"
+                                [class.status-error]="!feed.isParsable"
                                 [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
                               >
                                 <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
@@ -349,16 +349,16 @@
                               <div class="feed-status-icons">
                                 <span
                                   class="status-icon-small"
-                                  [class.success]="feed.isReachable"
-                                  [class.error]="!feed.isReachable"
+                                  [class.status-success]="feed.isReachable"
+                                  [class.status-error]="!feed.isReachable"
                                   [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
                                 >
                                   <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
                                 </span>
                                 <span
                                   class="status-icon-small"
-                                  [class.success]="feed.isParsable"
-                                  [class.error]="!feed.isParsable"
+                                  [class.status-success]="feed.isParsable"
+                                  [class.status-error]="!feed.isParsable"
                                   [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
                                 >
                                   <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
