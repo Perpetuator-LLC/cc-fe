@@ -54,13 +54,15 @@ mat-table {
   }
 
   &.status-success {
-    background: var(--md-sys-color-success);
-    color: var(--theme-white);
+    color: var(--md-extended-color-success-color) !important;
+    background-color: var(--md-extended-color-success-color-container) !important;
+    border: 1px solid var(--md-extended-color-success-color);
   }
 
   &.status-error {
-    background: var(--md-sys-color-error);
-    color: var(--theme-white);
+    color: var(--md-sys-color-error) !important;
+    background-color: var(--md-sys-color-error-container) !important;
+    border: 1px solid var(--md-sys-color-error);
   }
 }
 
