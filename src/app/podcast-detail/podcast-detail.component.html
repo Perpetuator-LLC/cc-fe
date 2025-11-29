@@ -75,14 +75,14 @@
 
       <div class="action-buttons">
         <span matTooltip="Creates an AI-generated episode using current news from your RSS feeds" class="button-wrapper">
-          <button mat-flat-button class="create-episode-button" (click)="createNewsEpisode()"
+          <button mat-flat-button color="accent" class="create-episode-button" (click)="createNewsEpisode()"
             [disabled]="hasUnsavedChanges()">
             <mat-icon>newspaper</mat-icon>
             <span>News Episode</span>
           </button>
         </span>
         <span matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode" class="button-wrapper">
-          <button mat-flat-button class="create-episode-button research-button" (click)="createResearchEpisode()"
+          <button mat-flat-button color="accent" class="create-episode-button research-button" (click)="createResearchEpisode()"
             [disabled]="hasUnsavedChanges()">
             <mat-icon>science</mat-icon>
             <span>Research Episode</span>
@@ -663,10 +663,10 @@
           <h3>Danger Zone Settings</h3>
           <p>Here you can find advanced and potentially destructive actions related to your podcast.</p>
         </mat-card-content>
-        <mat-card class="danger-card">
+        <mat-card class="danger-card md3-danger-zone">
           <div class="danger-card-title">Delete Podcast</div>
           <p>Once you delete a podcast, it will be permanently removed. This action cannot be undone.</p>
-          <button mat-flat-button class="delete-btn" (click)="deletePodcastDialog()">
+          <button mat-flat-button class="delete-btn md3-danger-action" (click)="deletePodcastDialog()">
             Delete this Podcast
           </button>
         </mat-card>
