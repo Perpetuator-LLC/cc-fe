@@ -97,13 +97,13 @@
     }
 
     button[mat-icon-button] {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       border-radius: 8px;
       border: 1px solid transparent;
 
       &.active {
-        background-color: var(--secondary-light);
-        border-color: var(--border-color);
+        background-color: var(--md-sys-color-surface-container-high);
+        border-color: var(--md-sys-color-outline-variant);
       }
     }
   }
@@ -169,7 +169,8 @@
     }
 
     .chip {
-      background-color: var(--secondary-400);
+      background-color: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
     }
   }
 
@@ -197,13 +198,15 @@
     }
   }
 
+  // Use MD3 colors directly for enable/disable badges
   .enable {
-    background: var(--md-sys-color-success);
-    border-radius: 6px;
-    color: var(--theme-white);
+    color: var(--md-extended-color-success-color) !important;
+    background-color: var(--md-extended-color-success-color-container) !important;
+    border: 1px solid var(--md-extended-color-success-color);
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    border-radius: var(--cc-radius-sm);
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
+    font-weight: 600;
     width: 90px;
     height: 20px;
     display: inline-flex;
@@ -212,12 +215,13 @@
   }
 
   .disable {
-    border-radius: 6px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface-variant) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    border-radius: var(--cc-radius-sm);
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
-    background: var(--secondary-dark);
+    font-weight: 600;
     width: 90px;
     height: 20px;
     display: inline-flex;
@@ -272,14 +276,14 @@
   }
 
   .chip {
-    background: var(--secondary-dark);
+    background: var(--md-sys-color-surface-container-high);
     border-radius: 20px;
     font-weight: 500;
     font-size: 12px;
     line-height: 100%;
     letter-spacing: 0;
     padding: 8px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -445,7 +449,7 @@
   background: var(--secondary-light);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: var(--description-color);
+  color: var(--md-sys-color-on-surface-variant);
   margin-top: 20px;
 
   mat-icon {
@@ -453,7 +457,7 @@
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   p {
