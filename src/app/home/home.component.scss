@@ -22,14 +22,15 @@
 .website-title {
   font-size: 1.5rem;
   font-weight: 400;
-  color: var(--md-sys-color-on-secondary);
   white-space: nowrap;
+  // Let MD3 theme handle text color naturally
 }
+
 .website-title-copilot {
   font-size: 1.5rem;
   font-weight: 200;
-  color: var(--md-sys-color-on-secondary);
   white-space: nowrap;
+  // Let MD3 theme handle text color naturally
 }
 mat-card {
   position: relative;

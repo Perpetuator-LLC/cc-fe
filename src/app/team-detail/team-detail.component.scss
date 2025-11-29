@@ -3,7 +3,7 @@
 // Component styles
 .member-row {
   display: flex;
-  gap: var(--cc-spacing-md);
+  gap: 16px;
   width: auto;
 
   mat-form-field,
@@ -21,7 +21,7 @@
     background: transparent;
     padding: 0;
     height: auto;
-    color: var(--cc-text-primary);
+    color: var(--md-sys-color-on-surface);
     width: auto;
     flex: auto;
 
@@ -39,11 +39,11 @@
 }
 
 mat-divider {
-  margin: var(--cc-spacing-sm) 0;
+  margin: 8px 0;
 }
 
 .container-card {
-  padding: var(--cc-spacing-lg);
+  padding: 24px;
 
   form {
     margin-bottom: 1em;
@@ -89,52 +89,27 @@ mat-divider {
 
   button {
     flex: 0 0 auto;
-    margin-left: var(--cc-spacing-sm);
+    margin-left: 8px;
   }
 }
 
 .danger-zone {
-  color: var(--cc-color-error);
+  color: var(--md-sys-color-error);
 }
 
 .danger-card {
-  background: var(--secondary-light) !important;
-  color: var(--cc-text-primary);
-  border: 1px solid var(--cc-border-color);
-  margin-top: var(--cc-spacing-lg);
-
-  p {
-    margin: 0;
-    padding: 0 var(--cc-spacing-lg);
-    padding-bottom: var(--cc-spacing-2xl);
-  }
-
-  .delete-btn {
-    background-color: var(--cc-color-error);
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    width: fit-content;
-    margin-left: var(--cc-spacing-lg);
-    padding: var(--cc-spacing-sm) var(--cc-spacing-lg);
-    margin-bottom: var(--cc-spacing-lg);
-    border-radius: var(--cc-radius-md);
-  }
+  // Use MD3 danger zone utility class instead - no custom styling needed
 }
 
 .danger-card-title {
-  padding: var(--cc-spacing-sm);
-  border-bottom: 1px solid var(--cc-border-color);
-  margin-bottom: var(--cc-spacing-lg);
-  margin-inline: var(--cc-spacing-sm);
+  // Styled by md3-danger-zone utility class
 }
 
 .action-row {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  gap: var(--cc-spacing-md);
+  gap: 16px;
 
   mat-form-field,
   button {
@@ -166,46 +141,46 @@ mat-divider {
 }
 
 .podcasts-card {
-  margin-top: var(--cc-spacing-lg);
-  margin-bottom: var(--cc-spacing-lg);
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 .action-button-container {
-  margin-top: var(--cc-spacing-md);
+  margin-top: 16px;
   text-align: right;
 }
 
 .no-podcasts-message {
-  padding: var(--cc-spacing-md);
+  padding: 16px;
   text-align: center;
 }
 
 .podcast-detail-page {
-  padding: var(--cc-spacing-xl) var(--cc-spacing-2xl);
-  background-color: var(--secondary-color);
-  margin-top: var(--cc-spacing-lg);
+  padding: 32px 48px;
+  background-color: var(--md-sys-color-surface);
+  margin-top: 24px;
 
   .detail-header {
-    margin-bottom: var(--cc-spacing-2xl);
+    margin-bottom: 48px;
 
     .top-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--cc-spacing-sm);
-      margin-bottom: var(--cc-spacing-xl);
+      gap: 8px;
+      margin-bottom: 32px;
 
       .title {
         input {
           font-size: 32px;
           font-weight: 600;
-          color: var(--cc-text-primary);
+          color: var(--md-sys-color-on-surface);
         }
 
         p {
           font-size: 14px;
           margin: 0;
-          color: var(--cc-text-secondary);
+          color: var(--md-sys-color-on-surface-variant);
           font-weight: 400;
         }
       }
@@ -213,14 +188,10 @@ mat-divider {
       .buttons {
         display: flex;
         align-items: center;
-        gap: var(--cc-spacing-lg);
+        gap: 24px;
 
         .delete-btn {
-          background-color: transparent;
-          color: var(--cc-color-error);
-          padding: 0;
-          font-size: 14px;
-          font-weight: 600;
+          // Let Material color="warn" handle styling
         }
       }
     }
@@ -232,7 +203,7 @@ mat-divider {
 
   .mat-mdc-card-content {
     padding-inline: 0;
-    margin-top: var(--cc-spacing-lg);
+    margin-top: 24px;
   }
 
   .search-filter {
@@ -241,7 +212,7 @@ mat-divider {
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    margin: var(--cc-spacing-lg) 0;
+    margin: 24px 0;
   }
 
   .p_name {
@@ -266,13 +237,13 @@ mat-divider {
         font-size: 12px;
         line-height: 100%;
         letter-spacing: 0;
-        color: var(--cc-text-secondary);
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
   }
 
   .podcast-name-link {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -282,13 +253,15 @@ mat-divider {
     }
   }
 
+  // Status badges - match podcasts list styling
   .enable {
-    background: var(--md-sys-color-success);
-    border-radius: 6px;
-    color: var(--theme-white);
+    color: var(--md-extended-color-success-color) !important;
+    background-color: var(--md-extended-color-success-color-container) !important;
+    border: 1px solid var(--md-extended-color-success-color);
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
     width: 50px;
     height: 20px;
     display: inline-flex;
@@ -297,12 +270,13 @@ mat-divider {
   }
 
   .disable {
-    border-radius: 6px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface-variant) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant);
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
-    background: var(--secondary-dark);
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
     width: 50px;
     height: 20px;
     display: inline-flex;
@@ -311,14 +285,14 @@ mat-divider {
   }
 
   .input-search-div {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     display: flex;
     align-items: center;
     gap: 8px;
     width: 322px;
     border-radius: 10px;
     padding: 0 10px;
-    background-color: var(--toolbar-container-background-color);
+    background-color: var(--md-sys-color-surface-container);
 
     @media screen and (max-width: 576px) {
       width: auto;
@@ -327,18 +301,13 @@ mat-divider {
     input {
       border: 0;
       background: transparent;
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface);
       height: 36px;
       width: 100%;
     }
   }
 
   .save-btn {
-    background-color: var(--primary);
-    border-radius: 10px;
-    color: var(--theme-white);
-    border: 1px solid var(--border-color);
-    font-size: 14px;
-    font-weight: 600;
+    // Let Material color directive handle styling
   }
 }
