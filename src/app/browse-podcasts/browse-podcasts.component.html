@@ -28,7 +28,7 @@
 
   @if (loading) {
     <div class="loading-container">
-      <mat-spinner diameter="50"></mat-spinner>
+      <mat-spinner diameter="50" />
       <p>Loading podcasts...</p>
     </div>
   } @else {
@@ -81,7 +81,7 @@
                 [title]="podcast.name"
                 [description]="podcast.description"
                 [compact]="true"
-              ></app-share-buttons>
+              />
             </mat-card-actions>
           </mat-card>
         }

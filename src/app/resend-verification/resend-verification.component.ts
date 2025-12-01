@@ -14,7 +14,6 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 
 @Component({
@@ -36,7 +35,6 @@ import { MessageService } from '../message.service';
     MatCardTitle,
     MatButton,
     ReactiveFormsModule,
-    MessageComponent,
   ],
   templateUrl: './resend-verification.component.html',
   styleUrl: './resend-verification.component.scss',

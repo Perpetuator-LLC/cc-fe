@@ -53,7 +53,7 @@
     </a>
 
     <div class="header-actions">
-      <ng-container #toolbarContainer></ng-container>
+      <ng-container #toolbarContainer />
 
       <a mat-button [routerLink]="['/register']" color="primary" class="auth-link register-link">
         <mat-icon>person_add</mat-icon>
@@ -77,10 +77,10 @@
   </div>
 
   <div class="content-area">
-    <router-outlet></router-outlet>
+    <router-outlet />
   </div>
 
-  <app-shared-footer></app-shared-footer>
+  <app-shared-footer />
 </div>
 
 <!--<div class="layout-container">-->

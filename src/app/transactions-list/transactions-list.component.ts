@@ -22,7 +22,6 @@ import {
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { kindToString } from '../job.service';
@@ -49,7 +48,7 @@ import { LoadingService } from '../loading.service';
     MatHeaderRow,
     MatRowDef,
     MatPaginator,
-    MessageComponent,
+
     MatCard,
     MatCardContent,
     MatProgressSpinnerModule,

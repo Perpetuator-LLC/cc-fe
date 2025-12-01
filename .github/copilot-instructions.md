@@ -4,49 +4,86 @@ Aim for efficient design, maintainability, and consistency with Angular Material
 
 **Current State:** MD3 Migration 83% complete. Use Material components, design tokens, and SCSS mixins.
 
-# Material Design 3 Guidelines
+## TL;DR for AI/Copilot (READ THIS FIRST)
 
-## Core Principles (MUST FOLLOW)
-1. **Use Material component variants** - Never create custom buttons/forms when Material provides them
-2. **Use design tokens** - Never hardcode colors, spacing, or border-radius
-3. **Use SCSS mixins** - Available in `src/styles/_mixins.scss` for common patterns
-4. **NO inline styles** - Use component SCSS or utility classes
-5. **NO ::ng-deep** - Target Material classes directly (they're not encapsulated)
-6. **NO hardcoded px values** - Always use design tokens
+**ALL styling via `@include mat.theme()` on root using MD3 design tokens.**
+- **NO custom SCSS** selectors/overrides except via mixins in `styles.scss`
+- **NO inline styles** or direct component styling - ever
+- **NO ::ng-deep** - theme changes go in `styles.scss` via theme overrides
+- **Use Material variants** - `mat-flat-button color="primary"` not custom classes
+- **Design tokens ONLY** - `var(--md-sys-color-primary)` not hex colors
+- **MD3 4px grid** - spacing must be 4, 8, 16, 24, 32, 48, 64 (no 18px, 14px, etc.)
+- **Mixins for layout** - `@include mixins.flex-row` instead of custom flex styles
+- **Component SCSS = layout only** - let Material handle colors/typography
 
-## Material Component Usage
+**If you're setting colors or using ::ng-deep, you're doing it wrong.**
 
-### Buttons - Use Material Variants
+# Material Design 3 (MD3) Theming: Root-Controlled Architecture
+
+## Core Principles (ABSOLUTE RULES)
+1. **ALL theming via `@include mat.theme()` on root** - Never style components directly
+2. **NO component-level overrides** - No `::ng-deep`, no manual selectors, no Material class targeting
+3. **Use Material variants** - Buttons, forms, dialogs use built-in Material components only
+4. **Design tokens only** - Never hardcode colors/spacing, use `var(--md-sys-color-*)` or mixins
+5. **NO inline styles** - Ever. Component SCSS or global mixins only
+6. **MD3 4px grid** - Spacing must be 4, 8, 12, 16, 24, 32, 48, 64 (use mixins for layout)
+
+## MD3 Theming Architecture
+
+### Theme Definition (styles.scss - SINGLE SOURCE OF TRUTH)
+```scss
+@use '@angular/material' as mat;
+@use 'm3-theme' as theme;
+
+// ONE theme definition on root - Material emits CSS custom properties for all components
+html {
+  @include mat.all-component-themes(theme.$dark-theme);
+}
+
+// Multi-theme: ONLY swap colors, never re-include full theme (causes duplication)
+body.light {
+  @include mat.all-component-colors(theme.$light-color);
+}
+```
+
+### Token Customization (ONLY via mixins, never direct)
+```scss
+// ✅ GOOD - Override tokens via mixin
+html {
+  @include mat.theme-overrides((
+    primary-container: #custom-color,
+  ));
+}
+
+// ❌ BAD - Direct variable override
+html {
+  --md-sys-color-primary: #custom-color; // Never do this
+}
+```
+
+## Component Usage Patterns
+
+### Material Variants (Use These, Not Custom Classes)
 ```html
-<!-- ✅ GOOD - Material variants -->
+<!-- ✅ Buttons -->
 <button mat-button>Text</button>
 <button mat-flat-button color="primary">Primary</button>
 <button mat-raised-button>Contained</button>
 <button mat-stroked-button>Outlined</button>
 <button mat-icon-button><mat-icon>menu</mat-icon></button>
 
-<!-- ❌ BAD - Custom classes -->
-<button class="primary-action-button">Save</button>
-```
-
-### Dialogs - Use Material Layout Features
-```html
-<!-- ✅ GOOD - Material handles layout -->
+<!-- ✅ Dialogs -->
 <mat-dialog-content>
-  <mat-form-field>...</mat-form-field>
+  <mat-form-field appearance="outline">...</mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button>Cancel</button>
   <button mat-flat-button color="primary">Save</button>
 </mat-dialog-actions>
 
-<!-- ❌ BAD - Custom utilities -->
-<div class="full-width-field">
-  <mat-form-field>...</mat-form-field>
-</div>
-<div class="flex-between">
-  <button class="cancel-btn">Cancel</button>
-</div>
+<!-- ❌ NEVER custom component styling -->
+<button class="custom-btn">Bad</button>
+<div class="custom-dialog-layout">Bad</div>
 ```
 
 # Code Standards
@@ -65,16 +102,20 @@ Aim for efficient design, maintainability, and consistency with Angular Material
 - **File Structure:** Each component in own directory with `.ts`/`.html`/`.scss`
 
 ## Styling Rules (MUST FOLLOW)
+
 ✅ **DO:**
 - Use Material component variants (`mat-flat-button color="primary"`)
-- Use design tokens (`var(--cc-spacing-md)`, `var(--cc-text-primary)`)
-- Use SCSS mixins for common patterns (`@include mixins.mobile { }`)
-- Use component-specific SCSS (not inline styles)
+- Use MD3 design tokens (`var(--md-sys-color-primary)`, `var(--md-sys-color-on-surface)`)
+- Use SCSS mixins for layout/responsive (`@include mixins.flex-row`)
+- Use component SCSS only for layout/spacing (let Material handle colors)
+- Use MD3 4px grid values (4, 8, 16, 24, 32, 48, 64)
 
 ❌ **DON'T:**
-- NO inline styles (`style="..."`)
-- NO `::ng-deep` selectors
-- NO hardcoded px values (`padding: 16px` → `padding: var(--cc-spacing-md)`)
+- NO inline styles (`style="..."`) - Ever
+- NO `::ng-deep` selectors - Theme changes go in `styles.scss` via mixins
+- NO hardcoded colors - Use `var(--md-sys-color-*)` tokens
+- NO custom --cc-* variables - Being phased out, use MD3 tokens
+- NO arbitrary px values - Must be on 4px grid (padding: 18px ❌ → 16px ✅)
 - NO hardcoded colors (`#fff` → `var(--cc-text-primary)`)
 - NO custom button/form classes when Material provides variants
 
@@ -91,52 +132,6 @@ Copyright for SCSS use:
 /* Copyright (c) YEAR Perpetuator LLC */
 ```
 
-## Design Tokens (Use These, Never Hardcode)
-
-### Colors
-```scss
-// Text colors (theme-aware)
---cc-text-primary      // Main text
---cc-text-secondary    // Descriptions, secondary text
---cc-text-tertiary     // Disabled, placeholders
-
-// Semantic colors
---cc-color-success     // Green (#4caf50)
---cc-color-error       // Red (#f44336)
---cc-color-warning     // Orange/Yellow (#ff9800)
---cc-color-info        // Cyan
---cc-color-secondary   // Capital Blue (#008ce8 / #005a9a)
-
-// Borders
---cc-border-color       // Standard borders
---cc-border-color-strong // Emphasized borders
-
-// Legacy (keep for compatibility)
---primary               // Vibrant Orange (#f14a00)
---theme-white           // Context-aware white/primary
---theme-color           // Main theme color
---description-color     // Legacy secondary text
-```
-
-### Spacing
-```scss
---cc-spacing-xs: 4px;   // Minimal gaps, icon spacing
---cc-spacing-sm: 8px;   // Small gaps, button padding
---cc-spacing-md: 16px;  // Medium padding, card spacing
---cc-spacing-lg: 24px;  // Large sections, headers
---cc-spacing-xl: 32px;  // Extra large sections
---cc-spacing-2xl: 48px; // Huge sections, page margins
-```
-
-### Border Radius
-```scss
---cc-radius-sm: 4px;     // Small elements, badges
---cc-radius-md: 8px;     // Buttons, cards, inputs (default)
---cc-radius-lg: 12px;    // Large cards, dialogs
---cc-radius-xl: 16px;    // Hero elements
---cc-radius-round: 999px; // Pills, fully rounded
-```
-
 # SCSS
 
 Copyright for SCSS use:
@@ -144,35 +139,62 @@ Copyright for SCSS use:
 /* Copyright (c) YEAR Perpetuator LLC */
 ```
 
-## Design Tokens - Quick Reference
+## MD3 Design Tokens (Use These, Never Hardcode)
 
-### Colors (Theme-Aware)
+### System Color Tokens (Read from theme, never set directly)
 ```scss
-// Text colors
---cc-text-primary       // Main text (rgba(255,255,255,0.87) dark / rgba(0,0,0,0.87) light)
---cc-text-secondary     // Descriptions, secondary text
---cc-text-tertiary      // Disabled, placeholders
+// Primary/Secondary/Tertiary
+--md-sys-color-primary
+--md-sys-color-on-primary
+--md-sys-color-primary-container
+--md-sys-color-on-primary-container
 
-// Semantic colors (status badges, alerts)
---cc-color-success      // Green (#4caf50 dark, #2e7d32 light)
---cc-color-error        // Red (#ef5350 dark, #c62828 light)
---cc-color-warning      // Orange (#ff9800 dark, #f57c00 light)
---cc-color-info         // Blue (#03a9f4 dark, #0288d1 light)
+// Surface colors (backgrounds)
+--md-sys-color-surface
+--md-sys-color-on-surface
+--md-sys-color-surface-container-lowest
+--md-sys-color-surface-container-low
+--md-sys-color-surface-container
+--md-sys-color-surface-container-high
+--md-sys-color-surface-container-highest
 
-// Brand colors
---cc-color-primary      // Capital Blue (#008ce8 dark, #005a9a light)
---cc-color-orange       // Brand Orange (#ff7b3d dark, #f14a00 light)
---primary               // Legacy orange (#f14a00) - use for links, accents
+// Semantic
+--md-sys-color-error
+--md-sys-color-on-error
+--md-sys-color-error-container
+--md-sys-color-on-error-container
 
-// Surfaces (backgrounds)
---cc-surface-background // Page background
---cc-surface-card       // Cards, panels
---cc-surface-elevated   // Elevated surfaces
---cc-surface-toolbar    // Toolbar/header background
+// Extended (custom success/warning/info)
+--md-extended-color-success-color
+--md-extended-color-success-on-color
+--md-extended-color-success-color-container
+--md-extended-color-success-on-color-container
+// (same pattern for warning, info)
 
-// Borders
---cc-border-color       // Standard borders (1px solid)
---cc-border-color-strong // Emphasized borders
+// Outline/Shadow
+--md-sys-color-outline
+--md-sys-color-outline-variant
+--md-sys-color-shadow
+```
+
+### Spacing (Use SCSS Mixins, Not Direct Values)
+```scss
+// ✅ GOOD - Use mixins from styles/_mixins.scss
+@include mixins.flex-row;      // Auto gap: 16px
+@include mixins.flex-column;   // Auto gap: 16px
+@include mixins.mobile { }     // Responsive
+
+// ❌ BAD - Direct hardcoded values
+padding: 16px;
+gap: 8px;
+```
+
+### MD3 4px Grid (When Direct Values Needed)
+```scss
+// Approved values ONLY: 4, 8, 12, 16, 24, 32, 40, 48, 56, 64
+padding: 16px;  // ✅
+gap: 24px;      // ✅
+margin: 18px;   // ❌ Not on grid
 ```
 
 ### Spacing (Never Hardcode px)
@@ -194,81 +216,74 @@ Copyright for SCSS use:
 --cc-radius-round: 999px; // Pills, fully rounded
 ```
 
-## SCSS Mixins (Use for Common Patterns)
+## SCSS Mixins (Use for Layout/Responsive, NOT Theming)
 
-Import mixins: `@use 'styles/mixins' as mixins;`
+Import: `@use 'styles/mixins' as mixins;`
 
 ```scss
-// Responsive
+// Responsive (ONLY use for layout adjustments)
 @include mixins.mobile { }    // max-width: 576px
 @include mixins.tablet { }    // max-width: 900px
 @include mixins.desktop { }   // min-width: 901px
 
-// Cards
-@include mixins.card-container;  // Standard card styling
-@include mixins.card-elevated;   // Elevated card with shadow
+// Layout (auto-applies MD3 spacing)
+@include mixins.flex-row;        // display: flex, gap: 16px
+@include mixins.flex-column;     // column + gap: 16px
+@include mixins.flex-between;    // justify-content: space-between
+@include mixins.grid-auto-fill(256px);  // Responsive grid
 
-// Buttons (if not using Material variants)
-@include mixins.primary-button;
-@include mixins.secondary-button;
-
-// Layout
-@include mixins.flex-row;
-@include mixins.flex-column;
-@include mixins.flex-between;
-@include mixins.grid-auto-fill(250px);
-
-// Status badges
-@include mixins.status-success;
-@include mixins.status-error;
-@include mixins.status-warning;
-@include mixins.status-info;
+// Status badges (use MD3 extended colors)
+@include mixins.status-success;  // --md-extended-color-success-*
+@include mixins.status-error;    // --md-sys-color-error-*
+@include mixins.status-warning;  // --md-extended-color-warning-*
+@include mixins.status-info;     // --md-extended-color-info-*
 
 // States
 @include mixins.loading-container;
 @include mixins.empty-state;
 ```
 
-## Component SCSS Pattern
+## Component SCSS Pattern (Minimal Custom Styles)
 
 ```scss
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
 
 .my-component {
-  padding: var(--cc-spacing-lg);
+  // Layout only - let Material handle colors/typography
+  @include mixins.flex-column;
+  
+  padding: 16px;  // MD3 4px grid value
   
   .header {
-    margin-bottom: var(--cc-spacing-md);
-    color: var(--cc-text-primary);
+    margin-bottom: 16px;
+    color: var(--md-sys-color-on-surface);  // Use MD3 token
   }
   
   .content {
-    background: var(--cc-surface-card);
-    border: 1px solid var(--cc-border-color);
-    border-radius: var(--cc-radius-md);
-    padding: var(--cc-spacing-md);
+    background: var(--md-sys-color-surface-container);  // MD3 token
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;  // MD3 standard
+    padding: 16px;
     
-    // Responsive
     @include mixins.mobile {
-      padding: var(--cc-spacing-sm);
+      padding: 8px;  // MD3 grid
     }
   }
 }
 ```
 
-## Legacy Variables (Being Phased Out)
-
-These still work but prefer design tokens in new code:
-```scss
---theme-color       → Use: var(--cc-text-primary)
---description-color → Use: var(--cc-text-secondary)
---secondary-color   → Use: var(--cc-surface-card)
---border-color      → Use: var(--cc-border-color)
-```
+**Key Rules:**
+- Use MD3 tokens (`--md-sys-color-*`) not custom variables
+- Spacing: 4px grid values only (4, 8, 16, 24, 32, 48)
+- Let Material components handle most styling
+- Component SCSS = layout/spacing only, not colors/typography
 
 ## Common Patterns (Copy/Paste Ready)
 
-### Card Component
+## Common Patterns (Copy/Paste Ready)
+
+### Card Component (Let Material Handle Styling)
 ```html
 <mat-card>
   <mat-card-header>
@@ -299,22 +314,22 @@ These still work but prefer design tokens in new code:
 ```
 
 ```scss
+@use 'styles/mixins' as mixins;
+
 form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cc-spacing-md);
+  @include mixins.flex-column;  // Auto gap: 16px
   
   mat-form-field { width: 100%; }
   
   .actions {
     display: flex;
-    gap: var(--cc-spacing-sm);
+    gap: 8px;  // MD3 4px grid
     justify-content: flex-end;
   }
 }
 ```
 
-### Status Badge
+### Status Badge (Use Mixins, Not Custom Styles)
 ```html
 <span class="status-badge success">Active</span>
 ```
@@ -326,15 +341,16 @@ form {
   &.success { @include mixins.status-success; }
   &.error { @include mixins.status-error; }
   &.warning { @include mixins.status-warning; }
+  &.info { @include mixins.status-info; }
 }
 ```
 
-### Responsive Grid
+### Responsive Grid (Use Mixin)
 ```scss
+@use 'styles/mixins' as mixins;
+
 .grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--cc-spacing-md);
+  @include mixins.grid-auto-fill(256px);  // MD3 grid value
   
   @include mixins.mobile {
     grid-template-columns: 1fr;

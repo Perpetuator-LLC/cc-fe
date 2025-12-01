@@ -4,14 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { ToolbarService } from '../toolbar.service';
 
 @Component({
   selector: 'app-cancel-verify-email',
   standalone: true,
-  imports: [MessageComponent, MatCard, MatCardHeader, MatCardContent, MatCardTitle],
+  imports: [MatCard, MatCardHeader, MatCardContent, MatCardTitle],
   templateUrl: './cancel-change-email.component.html',
   styleUrl: './cancel-change-email.component.scss',
 })

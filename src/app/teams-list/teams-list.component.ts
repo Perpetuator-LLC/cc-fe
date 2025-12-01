@@ -3,7 +3,6 @@ import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewI
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
-import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { TeamsResult, TeamsService } from '../teams.service';
@@ -43,7 +42,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
     MatCardContent,
     SvgIconComponent,
     MatIcon,
-    MessageComponent,
+
     MatProgressBarModule,
     MatTable,
     MatSort,

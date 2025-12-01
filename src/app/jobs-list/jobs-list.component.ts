@@ -21,7 +21,6 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { RouterLink } from '@angular/router';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { EpisodeService } from '../episode.service';
@@ -56,7 +55,7 @@ interface Episode {
     MatIcon,
     MatIconButton,
     MatButton,
-    MessageComponent,
+
     DecimalPipe,
     NgClass,
     RouterLink,

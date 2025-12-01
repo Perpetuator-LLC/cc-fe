@@ -20,9 +20,11 @@ mat-form-field {
 .forgot-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   height: 100vh;
+
   background-color: var(--background-color);
   filter: brightness(150%);
 }
@@ -34,8 +36,8 @@ mat-form-field {
 .error-message {
   display: flex;
   align-items: center;
-  color: var(--md-sys-color-error);
   margin: 10px 0;
+  color: var(--md-sys-color-error);
 }
 
 mat-icon {

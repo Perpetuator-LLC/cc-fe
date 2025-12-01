@@ -1,128 +1,75 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 // Material Design 3 SCSS Mixins and Utilities
+// All spacing uses direct px values from MD3's 4px grid
+// All colors use MD3 design tokens from theme files
 
 // ============================================================================
 // Responsive Breakpoints
 // ============================================================================
 @mixin mobile {
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     @content;
   }
 }
 
 @mixin tablet {
-  @media screen and (max-width: 900px) {
+  @media screen and (width <= 900px) {
     @content;
   }
 }
 
 @mixin desktop {
-  @media screen and (min-width: 901px) {
+  @media screen and (width >= 901px) {
     @content;
   }
 }
 
 // ============================================================================
-// Card Patterns (Using MD3 Surface Tokens)
+// Card Patterns (Let Material Card handle most styling)
 // ============================================================================
 @mixin card-container {
-  background: var(--md-sys-color-surface-container);
+  padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--cc-radius-md);
-  padding: var(--cc-spacing-md);
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
 }
 
 @mixin card-elevated {
-  @include card-container;
+  @include card-container();
+
   background: var(--md-sys-color-surface-container-high);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-// ============================================================================
-// Button Patterns (Using MD3 Color Tokens)
-// ============================================================================
-@mixin primary-button {
-  background: var(--md-sys-color-secondary);
-  color: var(--md-sys-color-on-secondary);
-  border-radius: var(--cc-radius-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  font-weight: 600;
-  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-@mixin secondary-button {
-  background: transparent;
-  color: var(--md-sys-color-on-surface);
-  border-radius: var(--cc-radius-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  font-weight: 500;
-  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--md-sys-color-surface-container-high);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-// ============================================================================
-// Form Field Patterns
-// ============================================================================
-@mixin form-field-full-width {
-  width: 100%;
-
-  mat-form-field {
-    width: 100%;
-  }
-}
-
-@mixin form-field-constrained {
-  width: 100%;
-  max-width: 508px;
-
-  mat-form-field {
-    width: 100%;
-  }
+  box-shadow: 0 4px 8px var(--md-sys-color-shadow);
 }
 
 // ============================================================================
 // Typography Patterns (Using MD3 Text Tokens)
+// Line-height uses unitless ratios (not px values) - this is correct CSS practice
 // ============================================================================
 @mixin section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--md-sys-color-on-surface);
   margin-top: 0;
-  margin-bottom: var(--cc-spacing-md);
+  margin-bottom: 16px;
+
+  font-size: 16px;
+  font-weight: 600;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.5; // Unitless ratio - correct for responsive typography
+  color: var(--md-sys-color-on-surface);
 }
 
 @mixin body-text {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.5; // Unitless ratio - correct for responsive typography
   color: var(--md-sys-color-on-surface);
-  line-height: 1.6;
 }
 
 @mixin secondary-text {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.5; // Unitless ratio - correct for responsive typography
   color: var(--md-sys-color-on-surface-variant);
-  line-height: 1.5;
 }
 
 // ============================================================================
@@ -130,131 +77,153 @@
 // ============================================================================
 @mixin flex-row {
   display: flex;
+  gap: 16px;
   align-items: center;
-  gap: var(--cc-spacing-md);
 }
 
 @mixin flex-column {
   display: flex;
   flex-direction: column;
-  gap: var(--cc-spacing-md);
+  gap: 16px;
 }
 
 @mixin flex-between {
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
-  gap: var(--cc-spacing-md);
 }
 
-@mixin grid-auto-fill($min-width: 250px) {
+@mixin grid-auto-fill($min-width: 256px) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax($min-width, 1fr));
-  gap: var(--cc-spacing-md);
+  gap: 16px;
 }
 
 // ============================================================================
 // Icon Patterns
 // ============================================================================
-@mixin icon-size($size: 20px) {
-  font-size: $size;
+@mixin icon-size($size: 24px) {
   width: $size;
   height: $size;
-}
-
-@mixin icon-button {
-  padding: var(--cc-spacing-sm);
-  border-radius: var(--cc-radius-md);
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--cc-surface-elevated);
-  }
+  font-size: $size;
 }
 
 // ============================================================================
-// Badge Patterns
+// Status Badge Base (Using MD3 Extended Colors)
 // ============================================================================
-@mixin badge($bg-color, $text-color) {
+@mixin status-badge-base {
   display: inline-flex;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  gap: var(--cc-spacing-xs);
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  background: $bg-color;
-  color: $text-color;
-  border-radius: var(--cc-radius-sm);
-  font-size: 12px;
+
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  font-size: 12px; // Small text for badges - exception to 16px rule
   font-weight: 600;
+  white-space: nowrap;
 }
 
 // ============================================================================
-// Status Badges (Using MD3 Extended Colors)
+// Status Badge Variants (Consistent across all components)
+// !important used to ensure status colors override component-specific styles
 // ============================================================================
+/* stylelint-disable declaration-no-important */
 @mixin status-success {
-  @include badge(var(--md-extended-color-success-color), var(--md-extended-color-success-on-color));
+  @include status-badge-base();
+
+  border: 1px solid var(--md-extended-color-success-color);
+  color: var(--md-extended-color-success-color) !important;
+  background-color: var(--md-extended-color-success-color-container) !important;
 }
 
 @mixin status-error {
-  @include badge(var(--md-sys-color-error), var(--md-sys-color-on-error));
+  @include status-badge-base();
+
+  border: 1px solid var(--md-sys-color-error);
+  color: var(--md-sys-color-error) !important;
+  background-color: var(--md-sys-color-error-container) !important;
 }
 
 @mixin status-warning {
-  @include badge(var(--md-extended-color-warning-color), var(--md-extended-color-warning-on-color));
+  @include status-badge-base();
+
+  border: 1px solid var(--md-extended-color-warning-color);
+  color: var(--md-extended-color-warning-color) !important;
+  background-color: var(--md-extended-color-warning-color-container) !important;
 }
 
 @mixin status-info {
-  @include badge(var(--md-extended-color-info-color), var(--md-extended-color-info-on-color));
+  @include status-badge-base();
+
+  border: 1px solid var(--md-extended-color-info-color);
+  color: var(--md-extended-color-info-color) !important;
+  background-color: var(--md-extended-color-info-color-container) !important;
 }
 
+@mixin status-muted {
+  @include status-badge-base();
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+}
+/* stylelint-enable declaration-no-important */
+
 // ============================================================================
-// Loading States
+// Loading & Empty States
 // ============================================================================
 @mixin loading-container {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   align-items: center;
   justify-content: center;
-  gap: var(--cc-spacing-md);
-  padding: var(--cc-spacing-2xl) var(--cc-spacing-lg);
+
+  padding: 48px 24px;
 
   mat-spinner {
-    margin-bottom: var(--cc-spacing-md);
+    margin-bottom: 16px;
   }
 
   p {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 14px;
     margin: 0;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 @mixin empty-state {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   align-items: center;
   justify-content: center;
-  gap: var(--cc-spacing-md);
-  padding: var(--cc-spacing-2xl) var(--cc-spacing-lg);
+
+  padding: 48px 24px;
+
   text-align: center;
 
   mat-icon {
     @include icon-size(64px);
+
     color: var(--md-sys-color-on-surface-variant);
     opacity: 0.3;
   }
 
   h3 {
     margin: 0;
-    color: var(--md-sys-color-on-surface);
     font-weight: 600;
+    color: var(--md-sys-color-on-surface);
   }
 
   p {
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+    max-width: 400px; // Content width constraint, not spacing
     margin: 0;
     color: var(--md-sys-color-on-surface-variant);
-    max-width: 400px;
   }
 }
 
@@ -262,11 +231,11 @@
 // Scrollbar Styling
 // ============================================================================
 @mixin custom-scrollbar {
-  scrollbar-width: thin;
   scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+  scrollbar-width: thin;
 
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 8px; // Thin scrollbar for component-specific use
     height: 8px;
   }
 
@@ -275,11 +244,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--cc-border-color);
-    border-radius: var(--cc-radius-sm);
+    border-radius: 4px;
+    background: var(--md-sys-color-outline-variant);
 
     &:hover {
-      background: var(--cc-text-secondary);
+      background: var(--md-sys-color-outline);
     }
   }
 }

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.angular/
+coverage/
+*.min.css
+
+# Auto-generated Angular Material M3 theme (contains palette definitions with hex colors)
+src/m3-theme.scss

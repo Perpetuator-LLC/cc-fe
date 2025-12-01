@@ -1,0 +1,131 @@
+{
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-clean-order"],
+  "plugins": ["stylelint-scss"],
+  "rules": {
+    "scss/comment-no-empty": null,
+    "scss/double-slash-comment-whitespace-inside": null,
+    "comment-empty-line-before": null,
+    "no-descending-specificity": null,
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "scss/dollar-variable-pattern": null,
+    "scss/at-mixin-pattern": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "no-duplicate-selectors": true,
+    "color-hex-length": "long",
+    "length-zero-no-unit": true,
+    "declaration-no-important": [
+      true,
+      {
+        "severity": "warning",
+        "message": "Avoid !important - use specificity or Material component variants instead"
+      }
+    ],
+    "max-nesting-depth": [
+      4,
+      {
+        "severity": "warning",
+        "message": "Nesting too deep - consider refactoring or using Material components"
+      }
+    ],
+    "selector-max-id": [
+      0,
+      {
+        "severity": "warning"
+      }
+    ],
+    "scss/at-import-partial-extension": null,
+    "import-notation": null,
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": true,
+    "scss/no-global-function-names": null,
+    "alpha-value-notation": "number",
+
+    "comment-word-disallowed-list": [
+      ["/ng-deep/", "/::ng-deep/", "::v-deep"],
+      {
+        "severity": "error",
+        "message": "::ng-deep is deprecated and breaks encapsulation. Target Material classes directly or use CSS variables."
+      }
+    ],
+
+    "selector-pseudo-element-disallowed-list": [
+      "ng-deep",
+      {
+        "severity": "error",
+        "message": "::ng-deep is deprecated. Use CSS custom properties (--md-sys-color-*) or target Material classes directly."
+      }
+    ],
+
+    "declaration-property-value-disallowed-list": [
+      {
+        "/^(margin|padding|gap|top|right|bottom|left|width|height|border-radius)$/": [
+          "/^(?!(0|4px|8px|12px|16px|20px|24px|32px|40px|48px|56px|64px|calc\\())[0-9]+(px|rem|em)$/"
+        ],
+        "/^font-size$/": ["/^(?!(0|12px|14px|16px|18px|20px|24px|32px|40px|48px|calc\\())[0-9]+(px|rem|em)$/"]
+      },
+      {
+        "severity": "warning",
+        "message": "Use MD3 4px grid values (4, 8, 16, 24, 32, 48) instead of arbitrary values. For dynamic values, use calc() with design tokens."
+      }
+    ],
+
+    "color-no-hex": [
+      true,
+      {
+        "severity": "warning",
+        "message": "Use MD3 design tokens (--md-sys-color-*) instead of hex colors for theme support."
+      }
+    ],
+
+    "function-disallowed-list": [
+      ["rgb", "rgba", "hsl", "hsla"],
+      {
+        "severity": "warning",
+        "message": "Use MD3 design tokens (--md-sys-color-*) instead of color functions for theme support."
+      }
+    ],
+
+    "selector-pseudo-class-disallowed-list": [
+      "/^ng-deep$/",
+      {
+        "severity": "error",
+        "message": "::ng-deep is deprecated. Use CSS custom properties or target Material classes directly."
+      }
+    ],
+
+    "property-disallowed-list": [
+      ["clip"],
+      {
+        "severity": "error",
+        "message": "The 'clip' property is deprecated. Use 'clip-path' instead."
+      }
+    ],
+
+    "scss/at-mixin-argumentless-call-parentheses": "always",
+
+    "declaration-block-no-duplicate-properties": [
+      true,
+      {
+        "severity": "error",
+        "message": "Duplicate property found. Remove the duplicate."
+      }
+    ],
+
+    "block-no-empty": [
+      true,
+      {
+        "severity": "error",
+        "message": "Empty blocks should be removed."
+      }
+    ],
+
+    "font-family-no-missing-generic-family-keyword": [
+      true,
+      {
+        "severity": "warning",
+        "message": "Add a generic font family fallback (e.g., sans-serif)"
+      }
+    ]
+  }
+}

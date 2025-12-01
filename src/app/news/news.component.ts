@@ -10,7 +10,6 @@ import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatInput } from '@angular/material/input';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -56,7 +55,7 @@ export interface SidePanelAccordianData {
     MatCheckbox,
     MatCardContent,
     MatInput,
-    MessageComponent,
+
     MatButton,
     MatProgressSpinner,
     MatTooltip,

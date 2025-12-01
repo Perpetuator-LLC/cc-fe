@@ -1,60 +1,68 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 @mixin primary-button {
-  background: var(--primary);
-  color: var(--theme-white);
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  font-weight: 600;
-  font-size: 13px;
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
   flex-shrink: 0;
+  gap: 6px;
+  align-items: center;
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+
+  background: var(--md-sys-color-secondary);
+
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    opacity: 0.9;
     transform: translateY(-1px);
+    opacity: 0.9;
   }
 
   &:disabled {
-    background-color: var(--secondary-400);
-    color: var(--description-color);
     cursor: not-allowed;
+    color: var(--md-sys-color-on-surface-variant);
     opacity: 0.6;
+    background-color: var(--md-sys-color-surface-container-high);
   }
 }
 
 @mixin icon-size($size: 16px) {
-  font-size: $size;
   width: $size;
   height: $size;
   margin: 0;
+  font-size: $size;
 }
 
 @mixin card-container {
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container) !important;
 }
 
 @mixin badge($bg-color, $text-color) {
   display: inline-flex;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+
   padding: 4px 8px;
-  background: $bg-color;
-  color: $text-color;
   border-radius: 6px;
+
   font-size: 12px;
   font-weight: 600;
+  color: $text-color;
+
+  background: $bg-color;
 
   mat-icon {
     @include icon-size(14px);
+
     color: $text-color;
   }
 }
@@ -67,7 +75,7 @@
   .info-label {
     font-size: 14px;
     font-weight: 600;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   audio {
@@ -77,33 +85,40 @@
   }
 
   .no-audio {
-    font-size: 13px;
-    color: var(--description-color);
-    font-style: italic;
-    padding: 8px;
-    background: var(--secondary-500);
-    border-radius: 6px;
     display: inline-block;
+
+    padding: 8px;
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-style: italic;
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: var(--md-sys-color-surface-container);
   }
 }
 
 @mixin validation-notes {
   display: flex;
-  align-items: flex-start;
   gap: 8px;
+  align-items: flex-start;
+
   padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid var(--md-sys-color-secondary);
   border-radius: 6px;
-  border: 1px solid var(--primary);
+
   font-size: 13px;
-  color: var(--theme-color);
   line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+
+  background: rgb(33 150 243 / 0.1);
 
   mat-icon {
-    color: var(--primary);
-    @include icon-size(20px);
     flex-shrink: 0;
     margin-top: 2px;
+    color: var(--md-sys-color-secondary);
+
+    @include icon-size(20px);
   }
 }
 
@@ -111,15 +126,16 @@
   margin: 20px 0;
 
   .version-control-panel {
-    @include card-container;
+    @include card-container ();
+
     box-shadow: none !important;
 
-    // Target Material expansion panel elements directly without ::ng-deep
+    // Target Material expansion panel elements directly
     .mat-expansion-panel-header {
-      background: var(--secondary-light) !important;
+      background: var(--md-sys-color-surface-container) !important;
 
       &:hover {
-        background: var(--secondary-400) !important;
+        background: var(--md-sys-color-surface-container-high) !important;
       }
     }
 
@@ -129,26 +145,30 @@
 
     .mat-panel-title {
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
+
       font-weight: 600;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
 
       mat-icon {
         @include icon-size(20px);
-        color: var(--primary);
+
+        color: var(--md-sys-color-secondary);
       }
     }
 
     .mat-panel-description {
       display: flex;
-      align-items: center;
       gap: 8px;
-      color: var(--description-color);
+      align-items: center;
+
       font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
 
       .status-icon {
         @include icon-size(16px);
+
         margin-left: 4px;
 
         &.validated {
@@ -173,16 +193,18 @@
 
     .current-version-info {
       padding: 12px;
-      background: var(--secondary-400);
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 6px;
-      border: 1px solid var(--border-color);
+      background: var(--md-sys-color-surface-container-high);
 
       .info-row {
         display: flex;
-        align-items: center;
         gap: 12px;
-        font-size: 14px;
+        align-items: center;
+
         margin-bottom: 8px;
+
+        font-size: 14px;
 
         &:last-child {
           margin-bottom: 0;
@@ -190,14 +212,14 @@
 
         .info-label {
           font-weight: 600;
-          color: var(--theme-color);
+          color: var(--md-sys-color-on-surface);
         }
 
         .info-value {
           display: flex;
-          align-items: center;
           gap: 8px;
-          color: var(--theme-color);
+          align-items: center;
+          color: var(--md-sys-color-on-surface);
 
           &.change-type-value {
             font-weight: 500;
@@ -210,75 +232,78 @@
       }
 
       .version-audio {
-        @include version-audio-player;
+        @include version-audio-player ();
+
         margin-top: 12px;
         padding-top: 12px;
-        border-top: 1px solid var(--border-color);
+        border-top: 1px solid var(--md-sys-color-outline-variant);
       }
 
       .validation-notes {
-        @include validation-notes;
+        @include validation-notes ();
+
         margin-top: 12px;
       }
     }
 
     .action-buttons {
       display: flex;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 12px;
 
       button {
-        @include primary-button;
-        padding: 10px 16px;
+        @include primary-button ();
+
         height: 36px;
         min-height: 36px;
+        padding: 10px 16px;
 
         mat-icon {
           @include icon-size(18px);
         }
 
         &[color="accent"] {
+          color: #ffffff;
           background: var(--md-sys-color-success);
-          color: var(--theme-white);
         }
       }
 
-      @media screen and (max-width: 576px) {
+      @media screen and (width <= 576px) {
         flex-direction: column;
 
         button {
-          width: 100%;
           justify-content: center;
+          width: 100%;
         }
       }
     }
 
     .version-history-divider {
       height: 1px;
-      background: var(--border-color);
       margin: 8px 0;
+      background: var(--md-sys-color-outline-variant);
     }
 
     .section-heading {
-      margin: 0 0 12px 0;
+      margin: 0 0 12px;
       font-size: 16px;
       font-weight: 600;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
     }
 
     .version-selector {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       align-items: flex-start;
-      flex-wrap: wrap;
 
       .version-dropdown {
         flex: 1;
         min-width: 250px;
 
-        // Target Material select value directly without ::ng-deep
+        // Target Material select value directly
         .mat-mdc-select-value {
-          color: var(--theme-color);
+          color: var(--md-sys-color-on-surface);
         }
       }
 
@@ -287,18 +312,19 @@
         gap: 8px;
 
         button {
-          @include primary-button;
-          padding: 8px 12px;
+          @include primary-button ();
+
           height: 32px;
           min-height: 32px;
+          padding: 8px 12px;
 
           mat-icon {
             @include icon-size(16px);
           }
 
           &[color="accent"] {
+            color: #ffffff;
             background: var(--md-sys-color-success);
-            color: var(--theme-white);
           }
         }
       }
@@ -306,35 +332,38 @@
 
     .selected-version-info {
       padding: 16px;
-      background: var(--secondary-400);
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 8px;
-      border: 1px solid var(--border-color);
+      background: var(--md-sys-color-surface-container-high);
 
       .version-header {
         margin-bottom: 16px;
 
         h5 {
           display: flex;
-          align-items: center;
           gap: 8px;
-          margin: 0 0 8px 0;
+          align-items: center;
+
+          margin: 0 0 8px;
+
           font-size: 16px;
           font-weight: 600;
-          color: var(--theme-color);
+          color: var(--md-sys-color-on-surface);
         }
 
         .version-metadata {
           display: flex;
-          align-items: center;
-          gap: 12px;
           flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+
           font-size: 13px;
-          color: var(--description-color);
+          color: var(--md-sys-color-on-surface-variant);
 
           > span {
             display: flex;
-            align-items: center;
             gap: 4px;
+            align-items: center;
 
             mat-icon {
               @include icon-size(16px);
@@ -342,8 +371,8 @@
           }
 
           .change-type {
-            color: var(--theme-color);
             font-weight: 500;
+            color: var(--md-sys-color-on-surface);
           }
         }
       }
@@ -351,10 +380,12 @@
       .version-stats {
         display: flex;
         gap: 40px;
+
         margin-bottom: 16px;
         padding: 12px;
-        background: var(--secondary-500);
         border-radius: 6px;
+
+        background: var(--md-sys-color-surface-container);
 
         .stat-item {
           display: flex;
@@ -363,56 +394,64 @@
 
           .stat-label {
             font-size: 12px;
-            color: var(--description-color);
             font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
           }
 
           .stat-value {
             font-size: 16px;
-            color: var(--theme-color);
             font-weight: 600;
+            color: var(--md-sys-color-on-surface);
           }
         }
 
-        @media screen and (max-width: 576px) {
+        @media screen and (width <= 576px) {
           flex-direction: column;
           gap: 12px;
         }
       }
 
       .version-audio {
-        @include version-audio-player;
+        @include version-audio-player ();
+
         margin-bottom: 16px;
       }
 
       .validation-notes {
-        @include validation-notes;
+        @include validation-notes ();
+
         margin-bottom: 16px;
       }
 
       .version-content-field {
         textarea {
-          background: var(--secondary-500);
           cursor: not-allowed;
-          opacity: 0.95;
+
           font-family: monospace;
           font-size: 13px;
           line-height: 1.5;
+
+          opacity: 0.95;
+          background: var(--md-sys-color-surface-container);
         }
       }
     }
 
     .no-history-message {
       display: flex;
-      align-items: center;
       gap: 12px;
+      align-items: center;
+
       padding: 20px;
-      background: var(--secondary-400);
       border-radius: 6px;
-      color: var(--description-color);
+
+      color: var(--md-sys-color-on-surface-variant);
+
+      background: var(--md-sys-color-surface-container-high);
 
       mat-icon {
         @include icon-size(24px);
+
         flex-shrink: 0;
       }
 
@@ -426,31 +465,33 @@
 }
 
 .validated-badge {
-  @include badge(var(--md-sys-color-success), var(--theme-white));
+  @include badge(var(--md-sys-color-success), #ffffff);
 }
 
 .unvalidated-badge {
-  @include badge(var(--md-sys-color-warning), var(--secondary-500));
+  @include badge(var(--md-sys-color-warning), var(--md-sys-color-surface-container));
 }
 
 .version-option {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
   gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
 
   .version-number {
     font-weight: 600;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   .version-meta {
     display: flex;
-    align-items: center;
     gap: 6px;
+    align-items: center;
+
     font-size: 12px;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
 
     .version-icon {
       @include icon-size(16px);
@@ -458,17 +499,20 @@
 
     .validated-icon {
       @include icon-size(14px);
+
       color: var(--md-sys-color-success);
     }
 
     .unvalidated-icon {
       @include icon-size(14px);
+
       color: var(--md-sys-color-warning);
     }
 
     .audio-icon {
       @include icon-size(14px);
-      color: var(--primary);
+
+      color: var(--md-sys-color-secondary);
     }
   }
 }

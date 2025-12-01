@@ -14,7 +14,7 @@
 
 .mat-mdc-dialog-content {
     padding: 0;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
 }
 
 .mat-mdc-dialog-content p {
@@ -30,16 +30,18 @@ mat-dialog-actions {
 }
 
 .cancel-btn {
-    background: var(--secondary-light);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    color: var(--theme-color);
+
     font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface-container);
 }
 
 .export-btn {
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background: var(--primary);
-    color: var(--theme-white);
+    color: #ffffff;
+    background: var(--md-sys-color-secondary);
 }

@@ -2,7 +2,6 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { Router } from '@angular/router';
-import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { Subscription } from 'rxjs';
@@ -24,16 +23,7 @@ import { EpisodesTableComponent } from '../episodes-table/episodes-table.compone
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
-  imports: [
-    MatButton,
-    MatCard,
-    MatCardHeader,
-    MatIcon,
-    MessageComponent,
-    MatCardContent,
-    CommonModule,
-    EpisodesTableComponent,
-  ],
+  imports: [MatButton, MatCard, MatCardHeader, MatIcon, MatCardContent, CommonModule, EpisodesTableComponent],
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
 })

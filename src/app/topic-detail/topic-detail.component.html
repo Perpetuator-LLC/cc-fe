@@ -1,13 +1,18 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"><mat-icon>science</mat-icon>Research Topics <span>></span>
-    <span class="page-title-secondary">{{ topic?.title || 'Topic Detail' }}</span></span>
+  <div class="toolbar-title-wrapper">
+    <span class="page-title">
+      <mat-icon>science</mat-icon>
+      <span class="breadcrumb-text">Research Topics</span>
+      <span class="separator">></span>
+      <span class="page-title-secondary">{{ topic?.title || 'Topic Detail' }}</span>
+    </span>
+  </div>
 </ng-template>
-<app-message></app-message>
 @if (!topic && !loading) {
 <div class="middle-card">
   <h2>Topic not found.</h2>
-  <button mat-flat-button (click)="goBack()" style="background-color: var(--primary); color: white;">
+  <button mat-flat-button color="primary" (click)="goBack()">
     <mat-icon>arrow_back</mat-icon>
     Back to Topics
   </button>
@@ -58,7 +63,7 @@
         [disabled]="isGeneratingResearch"
         class="generate-button">
         @if (isGeneratingResearch) {
-          <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          <mat-progress-spinner diameter="20" mode="indeterminate" />
         } @else {
           <mat-icon>auto_awesome</mat-icon>
         }

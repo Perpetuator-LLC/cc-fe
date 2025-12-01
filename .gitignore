@@ -3,7 +3,15 @@
 # Custom for this project
 /src/environments/environment.ts
 /src/environments/environment.prod.ts
-/logs
+/logs/*
+# But allow CSS size reports (except dev snapshots)
+!/logs/css-size-reports/
+/logs/css-size-reports/*.dev.json
+# And allow SCSS size tracking baseline
+!/logs/scss-sizes/
+!/logs/scss-sizes/*.dev.json
+/logs/scss-sizes/*
+!/logs/scss-sizes/*.dev.json
 
 # Generated documentation
 /docs/graphql

@@ -22,20 +22,24 @@ mat-dialog-actions {
 }
 
 .cancel-btn {
-  background: var(--secondary-light);
-  border: 1px solid var(--border-color);
-  color: var(--theme-color);
-  border-radius: 10px;
   width: 88px;
   height: 40px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 10px;
+
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container);
 }
 
 .savePodcastBtn {
-  background: var(--theme-white);
-  border-radius: 10px;
-  color: var(--toolbar-container-background-color);
   width: 225px;
+  height: 40px;
+  border-radius: 10px;
+
   font-size: 14px;
   font-weight: 600;
-  height: 40px;
+  color: var(--md-sys-color-surface-container-low);
+
+  background: #ffffff;
 }

@@ -2,94 +2,102 @@
 
 .middle-card {
   padding-inline: 30px;
-  background-color: var(--secondary-color);
+  background-color: var(--md-sys-color-surface-container);
 
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     padding-inline: 20px;
   }
 }
 
 .create-schedule-card {
-  background-color: var(--toolbar-container-background-color) !important;
-  box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  box-shadow: none;
 
   .content-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-inline: 30px;
-    padding-top: 0;
-    height: 40px;
 
-    @media screen and (max-width: 576px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      padding-inline: 20px;
-      height: auto;
-    }
+    height: 40px;
+    padding-top: 0;
+    padding-inline: 30px;
 
     .title {
       display: flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
 
       h3 {
-        font-weight: 600;
-        font-size: 20px;
-        line-height: 100%;
-        letter-spacing: 0;
         margin: 0;
-        color: var(--theme-color);
+
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
+        letter-spacing: 0;
       }
 
       span {
-        background: var(--secondary-dark);
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 100%;
-        letter-spacing: 0;
-        padding: 0 10px;
-        height: 22px;
-        color: var(--theme-color);
         display: inline-flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
+
+        height: 22px;
+        padding: 0 10px;
+        border-radius: 20px;
+
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
+        letter-spacing: 0;
+
+        background: var(--md-sys-color-surface-container-high);
       }
     }
 
     button {
-      background: var(--primary);
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 10px;
-      border: 1px solid var(--border-color);
-      color: var(--theme-white);
-      font-weight: 600;
+
       font-size: 14px;
+      font-weight: 600;
       line-height: 100%;
+      color: #ffffff;
       letter-spacing: 0;
+
+      background: var(--md-sys-color-secondary);
+    }
+
+    @media screen and (width <= 576px) {
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+
+      height: auto;
+      padding-inline: 20px;
     }
   }
 }
 
 .create-form-card {
   margin: 20px 30px;
-  background-color: var(--secondary-light) !important;
-  border: 1px solid var(--border-color);
-
-  @media screen and (max-width: 576px) {
-    margin: 20px 20px;
-  }
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background-color: var(--md-sys-color-surface-container) !important;
 
   mat-card-header {
     h3 {
       margin: 0;
-      color: var(--theme-color);
-      font-weight: 600;
       font-size: 18px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
     }
+  }
+
+  @media screen and (width <= 576px) {
+    margin: 20px;
   }
 }
 
@@ -99,11 +107,6 @@
     gap: 16px;
     margin-bottom: 16px;
 
-    @media screen and (max-width: 768px) {
-      flex-direction: column;
-      gap: 8px;
-    }
-
     mat-form-field {
       flex: 1;
 
@@ -111,46 +114,52 @@
         width: 100%;
       }
     }
+
+    @media screen and (width <= 768px) {
+      flex-direction: column;
+      gap: 8px;
+    }
   }
 
   .form-actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
   }
 }
 
 .schedules-container {
+  overflow: hidden;
   margin-top: 20px;
   border-radius: 8px;
-  overflow: hidden;
 
   table {
     width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
-    border: 1px solid var(--border-color);
 
     .mat-mdc-header-cell {
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
       font-weight: 600;
-      color: var(--theme-color);
-      background: var(--secondary-dark);
-      border-bottom: 1px solid var(--border-color);
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface-container-high);
     }
 
     .mat-mdc-row {
       &:hover {
-        background-color: var(--secondary-light);
+        background-color: var(--md-sys-color-surface-container);
       }
     }
 
     .mat-mdc-cell {
       padding: 16px;
-      color: var(--theme-color);
-      background: var(--toolbar-container-background-color);
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface-container-low);
     }
   }
 }
@@ -159,41 +168,47 @@
   strong {
     display: block;
     margin-bottom: 4px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   .schedule-description {
     font-size: 12px;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 .job-kind-chip {
-  background: var(--secondary-dark);
-  border-radius: 20px;
-  font-weight: 500;
-  font-size: 12px;
-  padding: 4px 12px;
-  color: var(--theme-color);
   display: inline-flex;
   align-items: center;
+
+  padding: 4px 12px;
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-high);
 }
 
 .schedule-type-chip {
-  background: var(--primary);
-  border-radius: 20px;
-  font-weight: 500;
-  font-size: 12px;
-  padding: 4px 12px;
-  color: white;
   display: inline-flex;
   align-items: center;
+
+  padding: 4px 12px;
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+
+  background: var(--md-sys-color-secondary);
 }
 
 .action-btn {
-  background: transparent;
   border: 0;
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
+  background: transparent;
 }
 
 .no-schedules {
@@ -201,17 +216,17 @@
   text-align: center;
 
   mat-card {
-    background-color: var(--secondary-light) !important;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    background-color: var(--md-sys-color-surface-container) !important;
 
     h3 {
-      color: var(--theme-color);
       margin-bottom: 12px;
+      color: var(--md-sys-color-on-surface);
     }
 
     p {
-      color: var(--description-color);
       margin-bottom: 20px;
+      color: var(--md-sys-color-on-surface-variant);
     }
   }
 }
@@ -224,44 +239,51 @@
 .crontab-section {
   .timezone-info {
     display: flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
+
     padding: 8px 12px;
-    background: var(--secondary-dark);
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 6px;
-    border: 1px solid var(--border-color);
-    color: var(--theme-color);
+
     font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface-container-high);
 
     mat-icon {
-      font-size: 16px;
       width: 16px;
       height: 16px;
-      color: var(--primary);
+      font-size: 16px;
+      color: var(--md-sys-color-secondary);
     }
   }
 
   .advanced-cron {
-    margin-top: 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
     overflow: hidden;
+    margin-top: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
 
     .advanced-toggle {
-      width: 100%;
-      padding: 12px 16px;
-      background: var(--secondary-dark);
-      border: none;
-      color: var(--theme-color);
-      font-size: 14px;
       display: flex;
+      gap: 8px;
       align-items: center;
       justify-content: flex-start;
-      gap: 8px;
+
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface);
+
+      background: var(--md-sys-color-surface-container-high);
+
       transition: background-color 0.2s;
 
       &:hover {
-        background: var(--secondary-light);
+        background: var(--md-sys-color-surface-container);
       }
 
       mat-icon {
@@ -275,7 +297,7 @@
 
     .form-row {
       padding: 0 16px 16px;
-      background: var(--toolbar-container-background-color);
+      background: var(--md-sys-color-surface-container-low);
     }
   }
 
@@ -283,34 +305,37 @@
     margin-top: 20px;
 
     mat-card {
-      background: var(--secondary-light) !important;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface-container) !important;
 
       mat-card-content {
         padding: 16px;
 
         h4 {
-          margin: 0 0 12px 0;
-          color: var(--theme-color);
+          margin: 0 0 12px;
           font-size: 16px;
           font-weight: 600;
+          color: var(--md-sys-color-on-surface);
         }
 
         .preview-text {
-          margin: 0 0 8px 0;
-          color: var(--theme-color);
+          margin: 0 0 8px;
           font-size: 14px;
+          color: var(--md-sys-color-on-surface);
         }
 
         .cron-expression {
+          display: inline-block;
+
           margin: 0;
-          color: var(--description-color);
-          font-size: 12px;
-          font-family: monospace;
-          background: var(--secondary-dark);
           padding: 4px 8px;
           border-radius: 4px;
-          display: inline-block;
+
+          font-family: monospace;
+          font-size: 12px;
+          color: var(--md-sys-color-on-surface-variant);
+
+          background: var(--md-sys-color-surface-container-high);
         }
       }
     }

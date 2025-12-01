@@ -3,7 +3,6 @@
   <span class="page-title"><mat-icon>science</mat-icon>Topics <span>></span>
     <span class="page-title-secondary">All Topics</span></span>
 </ng-template>
-<app-message></app-message>
 @if (topics.length === 0 && !loading) {
 <div class="middle-card">
   <h2>No research topics found.</h2>
@@ -16,7 +15,7 @@
       <h3>All Research Topics</h3>
       <span>{{ topics.length }} topics</span>
     </div>
-    <button mat-flat-button type="button" (click)="createTopic()" class="create-topic-button">
+    <button mat-flat-button color="primary" type="button" (click)="createTopic()" class="create-topic-button">
       <mat-icon>add</mat-icon>
       Create Topic
     </button>

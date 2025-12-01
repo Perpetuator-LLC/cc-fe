@@ -3,7 +3,6 @@ import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@an
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
@@ -59,7 +58,7 @@ export interface ColumnOption {
     SvgIconComponent,
     MatCardHeader,
     MatIcon,
-    MessageComponent,
+
     MatProgressBarModule,
     MatCardContent,
     MatTable,

@@ -2,8 +2,10 @@
 .pre-login-layout {
   display: flex;
   flex-direction: column;
+
   min-height: 100vh;
-  background: linear-gradient(120.17deg, rgba(22, 4, 22, 0.96) -98.63%, rgba(22, 4, 22, 0) 100%);
+
+  background: linear-gradient(120.17deg, rgb(22 4 22 / 0.96) -98.63%, rgb(22 4 22 / 0) 100%);
   backdrop-filter: blur(10px);
 
   .header {
@@ -11,98 +13,101 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 20px 0 10px;
-    //margin-top: 30px;
-
-    @media screen and (max-width: 768px) {
-      padding: 20px 20px;
-      flex-direction: column;
-      gap: 16px;
-    }
 
     .website-logo {
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
+
+      color: #ffffff;
       text-decoration: none;
-      color: var(--theme-white);
 
       .website-title {
         font-size: 1.5rem;
         font-weight: 400;
-        color: var(--theme-white);
+        color: #ffffff;
         white-space: nowrap;
       }
+
       .website-title-copilot {
         font-size: 1.5rem;
         font-weight: 200;
-        color: var(--theme-white);
+        color: #ffffff;
         white-space: nowrap;
       }
     }
 
     .header-actions {
       display: flex;
-      align-items: center;
       gap: 16px;
+      align-items: center;
 
       .auth-link {
         display: inline-flex;
-        align-items: center;
+        flex-shrink: 0;
         gap: 8px;
-        text-decoration: none;
-        color: var(--theme-white);
+        align-items: center;
+
+        padding: 8px 16px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 10px;
+
         font-size: 14px;
         font-weight: 500;
-        padding: 8px 16px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        background: rgba(255, 255, 255, 0.05);
-        transition: all 0.2s ease;
+        color: #ffffff;
+        text-decoration: none;
         white-space: nowrap;
-        flex-shrink: 0;
+
+        background: rgb(255 255 255 / 0.05);
+
+        transition: all 0.2s ease;
 
         .mat-icon {
-          color: var(--theme-white);
-          font-size: 20px;
           width: 20px;
           height: 20px;
           margin: 0;
+
+          font-size: 20px;
+          color: #ffffff;
         }
 
         &:hover {
-          background: rgba(255, 255, 255, 0.1);
           transform: translateY(-2px);
+          background: rgb(255 255 255 / 0.1);
         }
 
         &.login-link {
-          background: rgba(241, 74, 0, 0.15);
-          border: 1px solid var(--primary);
+          border: 1px solid var(--md-sys-color-secondary);
+          background: rgb(241 74 0 / 0.15);
 
           &:hover {
-            background: rgba(241, 74, 0, 0.25);
+            background: rgb(241 74 0 / 0.25);
           }
         }
       }
 
       .theme-toggle {
-        color: var(--theme-white);
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
         width: 40px;
         height: 40px;
+        border-radius: 50%;
+
+        color: #ffffff;
+
+        background: rgb(255 255 255 / 0.1);
+
         transition: all 0.2s ease;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.2);
           transform: scale(1.05);
+          background: rgb(255 255 255 / 0.2);
         }
 
         .mat-icon {
-          color: var(--theme-white);
+          color: #ffffff;
         }
       }
 
-      @media screen and (max-width: 768px) {
+      @media screen and (width <= 768px) {
         gap: 12px;
 
         .auth-link span {
@@ -110,19 +115,28 @@
         }
 
         .auth-link {
-          padding: 8px;
-          min-width: 40px;
           justify-content: center;
+          min-width: 40px;
+          padding: 8px;
         }
       }
+    }
+
+    //margin-top: 30px;
+
+    @media screen and (width <= 768px) {
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px;
     }
   }
 
   .content-area {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     justify-content: center;
+
     padding: 20px;
   }
 
@@ -133,24 +147,28 @@
     }
 
     .before-login-sidebar {
-      width: 90%;
       flex-direction: row;
       justify-content: space-between;
+
+      width: 90%;
       margin: 0 auto;
       padding-top: 50px;
       border: 0;
+
       background: transparent;
 
       .navbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         width: 100%;
         padding: 20px 54px;
-        backdrop-filter: blur(8px);
-        box-shadow: -5px -5px 250px 0px var(--border-color) inset;
         border-radius: 200px;
-        background: radial-gradient(100% 100% at 0% 0%, rgba(255, 255, 255, 0.07) 0.68%, rgba(255, 255, 255, 0.07) 100%);
+
+        background: radial-gradient(100% 100% at 0% 0%, rgb(255 255 255 / 0.07) 0.68%, rgb(255 255 255 / 0.07) 100%);
+        backdrop-filter: blur(8px);
+        box-shadow: -5px -5px 250px 0 var(--md-sys-color-outline-variant) inset;
       }
 
       .website-logo {
@@ -158,8 +176,8 @@
 
         .header-logo {
           display: flex;
-          align-items: center;
           gap: 4px;
+          align-items: center;
           text-decoration: none;
         }
       }
@@ -186,14 +204,14 @@
       }
 
       .mat-link {
-        padding: 0;
         overflow: unset;
+        padding: 0;
 
         &:hover::before {
           background-color: transparent;
         }
 
-        &:hover::focus {
+        &:hover:focus {
           background-color: transparent;
         }
 
@@ -207,14 +225,16 @@
       }
 
       .loginBtn {
-        border-radius: 50px !important;
-        height: 48px !important;
         width: 142px !important;
         min-width: 142px;
-        font-family: 'Sarabun';
+        height: 48px !important;
+        border-radius: 50px !important;
+
+        font-family: Sarabun;
         font-size: 16px;
         font-weight: 400;
-        background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--purple) 0%, var(--primary) 50.58%, var(--purple) 100%);
+
+        background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--md-sys-color-tertiary) 0%, var(--md-sys-color-secondary) 50.58%, var(--md-sys-color-tertiary) 100%);
       }
     }
 

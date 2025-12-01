@@ -76,7 +76,21 @@ function checkCopyright(filePath) {
       process.exit(1);
     }
   } else if (filePath.endsWith('.ts') || filePath.endsWith('.js')) {
-    if (!content.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_JS_TS) && !COPYRIGHT_NOTICE_REGEX_JS_TS.test(content)) {
+    // Allow shebang line before copyright notice
+    const lines = content.split('\n');
+    let copyrightLineIndex = 0;
+
+    // If first line is shebang, check second line for copyright
+    if (lines[0].trim().startsWith('#!')) {
+      copyrightLineIndex = 1;
+    }
+
+    const copyrightLine = lines[copyrightLineIndex] || '';
+
+    if (
+      !copyrightLine.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_JS_TS) &&
+      !COPYRIGHT_NOTICE_REGEX_JS_TS.test(copyrightLine)
+    ) {
       console.error(`Missing or incorrect copyright notice in ${filePath}`);
       process.exit(1);
     }

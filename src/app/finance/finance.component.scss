@@ -5,9 +5,9 @@
   padding: 20px;
 
   .hero-section {
-    text-align: center;
-    padding: 60px 20px;
     margin-bottom: 40px;
+    padding: 60px 20px;
+    text-align: center;
 
     .hero-content {
       max-width: 800px;
@@ -15,43 +15,47 @@
 
       .badge {
         display: inline-flex;
-        align-items: center;
         gap: 8px;
-        padding: 8px 16px;
-        background: var(--primary);
-        color: var(--theme-white);
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 14px;
+        align-items: center;
+
         margin-bottom: 20px;
+        padding: 8px 16px;
+        border-radius: 20px;
+
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+
+        background: var(--md-sys-color-secondary);
 
         mat-icon {
-          font-size: 20px;
           width: 20px;
           height: 20px;
+          font-size: 20px;
         }
       }
 
       h1 {
-        margin: 0 0 12px 0;
+        margin: 0 0 12px;
+
         font-size: 48px;
         font-weight: 700;
-        color: var(--primary);
         line-height: 1.2;
+        color: var(--md-sys-color-secondary);
       }
 
       .subtitle {
+        margin: 0 0 20px;
         font-size: 24px;
         font-weight: 600;
-        color: var(--description-color);
-        margin: 0 0 20px 0;
+        color: var(--md-sys-color-on-surface-variant);
       }
 
       .description {
-        font-size: 18px;
-        color: var(--description-color);
-        line-height: 1.6;
         margin: 0;
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
   }
@@ -60,9 +64,9 @@
     margin-bottom: 60px;
 
     .carousel-card {
-      border-radius: 20px;
-      border: 1px solid var(--border-color);
       overflow: hidden;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 20px;
 
       mat-card-content {
         padding: 0;
@@ -75,50 +79,53 @@
         .slide-display {
           position: relative;
           width: 100%;
-          background: var(--toolbar-container-background-color);
+          background: var(--md-sys-color-surface-container-low);
 
           .image-container {
-            width: 100%;
-            height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--secondary-400) 0%, var(--secondary-500) 100%);
+
+            width: 100%;
+            height: 600px;
+
+            background: linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%);
 
             .concept-image {
               width: 100%;
               height: 100%;
-              object-fit: contain;
               padding: 20px;
+              object-fit: contain;
             }
 
             .image-placeholder {
               display: flex;
               flex-direction: column;
-              align-items: center;
               gap: 16px;
-              color: var(--theme-white);
+              align-items: center;
+
+              color: #ffffff;
 
               mat-icon {
-                font-size: 120px;
                 width: 120px;
                 height: 120px;
+                font-size: 120px;
                 opacity: 0.5;
               }
 
               p {
+                margin: 0;
                 font-size: 24px;
                 font-weight: 600;
-                margin: 0;
               }
             }
           }
 
           .nav-button {
             position: absolute;
+            z-index: 10;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 10;
 
 
             &.prev {
@@ -136,27 +143,28 @@
           text-align: center;
 
           h2 {
-            margin: 0 0 16px 0;
+            margin: 0 0 16px;
             font-size: 32px;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--md-sys-color-secondary);
           }
 
           p {
-            font-size: 18px;
-            color: var(--description-color);
-            line-height: 1.6;
-            margin: 0 0 32px 0;
             max-width: 700px;
-            margin-left: auto;
+            margin: 0 0 32px;
             margin-right: auto;
+            margin-left: auto;
+
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--md-sys-color-on-surface-variant);
           }
 
           .progress-indicators {
             display: flex;
             gap: 12px;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
 
             button {
               font-weight: 600;
@@ -176,11 +184,12 @@
     margin-bottom: 60px;
 
     .section-title {
-      text-align: center;
+      margin: 0 0 40px;
+
       font-size: 36px;
       font-weight: 700;
-      color: var(--primary);
-      margin: 0 0 40px 0;
+      color: var(--md-sys-color-secondary);
+      text-align: center;
     }
 
     .features-grid {
@@ -189,14 +198,14 @@
       gap: 20px;
 
       .feature-card {
+        border: 1px solid var(--md-sys-color-outline-variant);
         border-radius: 10px;
-        border: 1px solid var(--border-color);
         text-align: center;
         transition: transform 0.2s, box-shadow 0.2s;
 
         &:hover {
           transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 8px 24px rgb(0 0 0 / 0.1);
         }
 
         mat-card-header {
@@ -205,10 +214,10 @@
           padding: 24px 16px 0;
 
           .feature-icon {
-            font-size: 48px;
             width: 48px;
             height: 48px;
-            color: var(--primary);
+            font-size: 48px;
+            color: var(--md-sys-color-secondary);
           }
         }
 
@@ -216,17 +225,17 @@
           padding: 16px 24px 24px;
 
           h3 {
-            margin: 0 0 12px 0;
+            margin: 0 0 12px;
             font-size: 20px;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--md-sys-color-secondary);
           }
 
           p {
             margin: 0;
             font-size: 14px;
-            color: var(--description-color);
             line-height: 1.5;
+            color: var(--md-sys-color-on-surface-variant);
           }
         }
       }
@@ -237,60 +246,65 @@
     margin-bottom: 40px;
 
     .cta-card {
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 20px;
-      border: 1px solid var(--border-color);
-      background: linear-gradient(135deg, var(--secondary-450) 0%, var(--secondary-500) 100%);
       text-align: center;
+      background: linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%);
 
       mat-card-content {
         padding: 60px 40px;
 
         .cta-icon {
-          font-size: 80px;
           width: 80px;
           height: 80px;
-          color: var(--theme-white);
           margin-bottom: 20px;
+
+          font-size: 80px;
+          color: #ffffff;
         }
 
         h2 {
-          margin: 0 0 16px 0;
+          margin: 0 0 16px;
           font-size: 36px;
           font-weight: 700;
-          color: var(--theme-white);
+          color: #ffffff;
         }
 
         p {
-          font-size: 18px;
-          color: var(--theme-white);
-          line-height: 1.6;
-          margin: 0 0 32px 0;
           max-width: 600px;
-          margin-left: auto;
+          margin: 0 0 32px;
           margin-right: auto;
+          margin-left: auto;
+
+          font-size: 18px;
+          line-height: 1.6;
+          color: #ffffff;
+
           opacity: 0.95;
         }
 
         .cta-actions {
           display: flex;
+          flex-wrap: wrap;
           gap: 16px;
           justify-content: center;
-          flex-wrap: wrap;
 
           button {
             display: inline-flex;
-            align-items: center;
             gap: 8px;
+            align-items: center;
+
             padding: 12px 24px;
+            border-radius: 10px;
+
             font-size: 16px;
             font-weight: 600;
             white-space: nowrap;
-            border-radius: 10px;
 
             mat-icon {
-              font-size: 20px;
               width: 20px;
               height: 20px;
+              font-size: 20px;
             }
           }
         }
@@ -299,7 +313,7 @@
   }
 
   // Responsive styles
-  @media (max-width: 991px) {
+  @media (width <= 991px) {
     .hero-section {
       padding: 40px 20px;
 
@@ -327,7 +341,6 @@
             }
 
             .nav-button {
-
               &.prev {
                 left: 10px;
               }
@@ -369,9 +382,9 @@
           padding: 40px 24px;
 
           .cta-icon {
-            font-size: 60px;
             width: 60px;
             height: 60px;
+            font-size: 60px;
           }
 
           h2 {
@@ -394,7 +407,7 @@
     }
   }
 
-  @media (max-width: 576px) {
+  @media (width <= 576px) {
     padding: 10px;
 
     .hero-section {
