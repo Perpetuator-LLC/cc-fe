@@ -22,8 +22,8 @@ mat-dialog-actions {
 }
 
 .cancel-btn {
-  width: 96px; // Adjusted from 88px to MD3 grid (96 = 24*4)
-  height: 40px;
+  min-width: 96px;
+  height: 48px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -33,8 +33,8 @@ mat-dialog-actions {
 }
 
 .savePodcastBtn {
-  width: 224px; // Width for text, consider using auto or min-width
-  height: 40px;
+  min-width: 224px;
+  height: 48px;
   border-radius: 8px;
 
   font-size: 16px;

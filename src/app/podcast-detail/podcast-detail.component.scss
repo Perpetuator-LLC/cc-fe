@@ -51,7 +51,7 @@
 }
 
 mat-divider {
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .container-card {
@@ -170,13 +170,13 @@ mat-divider {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 
 .voice-select {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
   /* Add space between controls and dropdown */
 }
 
@@ -207,7 +207,7 @@ mat-divider {
   .voice-buttons {
     .apply-btn {
       border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 10px;
+      border-radius: 8px;
 
       font-weight: 500;
       color: var(--md-sys-color-on-surface);
@@ -222,9 +222,9 @@ mat-divider {
 
     .add-voice-btn {
       border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 10px;
+      border-radius: 8px;
 
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--md-sys-color-surface-container);
 
@@ -246,8 +246,8 @@ mat-divider {
   }
 
   p {
-    margin-top: 6px;
-    margin-bottom: 30px;
+    margin-top: 8px;
+    margin-bottom: 32px;
     font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
   }
@@ -309,7 +309,7 @@ mat-divider {
 
     .top-header {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: flex-start;
       justify-content: space-between;
 
@@ -350,12 +350,12 @@ mat-divider {
 
     .status-summary {
       display: flex;
-      gap: 60px;
+      gap: 64px;
 
       .status-item {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
 
         .status-label {
           font-size: 14px;
@@ -410,14 +410,14 @@ mat-divider {
 
       @media screen and (width <= 900px) {
         flex-wrap: wrap;
-        gap: 30px;
+        gap: 32px;
       }
     }
 
     .action-buttons {
       display: flex;
       flex-shrink: 0;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
 
       margin-left: auto;
@@ -431,7 +431,7 @@ mat-divider {
         min-width: fit-content;
         padding: 8px 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
 
         font-weight: 600;
         color: #ffffff;
@@ -472,7 +472,7 @@ mat-divider {
         min-width: fit-content;
         padding: 8px 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
 
         font-weight: 500;
         color: var(--md-sys-color-on-surface);
@@ -544,15 +544,15 @@ mat-divider {
     p {
       margin: 0;
       padding: 0 20px;
-      padding-bottom: 30px;
+      padding-bottom: 32px;
     }
 
     .delete-btn {
       width: fit-content;
       margin-bottom: 20px;
       margin-left: 20px;
-      padding: 10px 20px;
-      border-radius: 10px;
+      padding: 8px 20px;
+      border-radius: 8px;
 
       font-size: 14px;
       font-weight: 600;
@@ -565,8 +565,8 @@ mat-divider {
 
   .danger-card-title {
     margin-bottom: 20px;
-    margin-inline: 10px;
-    padding: 10px;
+    margin-inline: 8px;
+    padding: 8px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
 
@@ -594,7 +594,7 @@ mat-divider {
 
       .upload-btn {
         display: inline-flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
 
         width: fit-content;
@@ -605,7 +605,7 @@ mat-divider {
         margin-inline: auto;
         padding-inline: 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 6px;
+        border-radius: 8px;
 
         font-size: 12px;
         font-weight: 500;
@@ -614,7 +614,7 @@ mat-divider {
         background-color: var(--md-sys-color-surface-container-high);
 
         svg {
-          margin-right: 6px;
+          margin-right: 8px;
         }
       }
 
@@ -627,7 +627,7 @@ mat-divider {
 
     .form-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
 
       @media screen and (width <= 576px) {
         flex-direction: column;
@@ -683,7 +683,7 @@ mat-divider {
 
     min-height: 56px;
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     color: #ffffff;
 
@@ -720,7 +720,7 @@ mat-divider {
 .voice-info {
   p {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
 
     margin-top: 0;
@@ -733,7 +733,7 @@ mat-divider {
 
 .settings-section {
   margin-bottom: 40px;
-  padding-bottom: 30px;
+  padding-bottom: 32px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
   &:last-child {

@@ -59,10 +59,18 @@
 
     "declaration-property-value-disallowed-list": [
       {
-        "/^(margin|padding|gap|top|right|bottom|left|width|height|border-radius)$/": [
-          "/^(?!(0|4px|8px|12px|16px|20px|24px|32px|40px|48px|56px|64px|calc\\())[0-9]+(px|rem|em)$/"
+        "/^(margin|padding|gap|top|right|bottom|left)$/": [
+          "/^(?!(0|4px|8px|12px|16px|20px|24px|28px|32px|36px|40px|44px|48px|52px|56px|60px|64px|68px|72px|76px|80px|calc\\(|auto|inherit|initial|unset))[0-9]+(px|rem|em)$/"
         ],
-        "/^font-size$/": ["/^(?!(0|12px|14px|16px|18px|20px|24px|32px|40px|48px|calc\\())[0-9]+(px|rem|em)$/"]
+        "/^border-radius$/": [
+          "/^(?!(0|4px|8px|12px|16px|20px|24px|28px|32px|36px|40px|48px|64px|999px|calc\\(|auto|inherit|initial|unset))[0-9]+(px|rem|em)$/"
+        ],
+        "/^(width|height|min-width|max-width|min-height|max-height)$/": [
+          "/^(?!(0|4px|8px|12px|16px|20px|24px|28px|32px|36px|40px|44px|48px|52px|56px|60px|64px|68px|72px|76px|80px|84px|88px|92px|96px|100px|112px|128px|144px|160px|176px|192px|208px|224px|240px|256px|272px|288px|304px|320px|336px|352px|368px|384px|400px|416px|432px|448px|464px|480px|496px|512px|calc\\(|auto|100%|inherit|initial|unset))[0-9]+(px|rem|em|%)$/"
+        ],
+        "/^font-size$/": [
+          "/^(?!(0|10px|11px|12px|13px|14px|15px|16px|17px|18px|19px|20px|22px|24px|26px|28px|30px|32px|36px|40px|44px|48px|calc\\())[0-9]+(px|rem|em)$/"
+        ]
       },
       {
         "severity": "warning",
