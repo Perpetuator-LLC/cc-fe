@@ -82,7 +82,7 @@
       font-size: 14px;
       font-weight: 600;
       line-height: 100%;
-      color: #ffffff;
+      color: var(--md-sys-color-on-secondary);
       letter-spacing: 0;
 
       background: var(--md-sys-color-secondary);
@@ -268,7 +268,7 @@
     font-weight: 500;
 
     &.live {
-      color: #ffffff;
+      color: var(--md-extended-color-success-on-color);
       background: var(--md-sys-color-success);
     }
 
@@ -426,7 +426,7 @@
 
   font-size: 12px;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--md-extended-color-success-on-color);
 
   background: var(--md-sys-color-success);
 }

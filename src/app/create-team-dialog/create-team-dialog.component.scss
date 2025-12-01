@@ -9,8 +9,8 @@ mat-dialog-content {
 }
 
 .cancel-btn {
-    width: 96px; // Adjusted from 88px to MD3 grid
-    height: 40px;
+    width: 96px; // MD3 4px grid (24 * 4)
+    height: 40px; // MD3 4px grid (10 * 4)
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
 

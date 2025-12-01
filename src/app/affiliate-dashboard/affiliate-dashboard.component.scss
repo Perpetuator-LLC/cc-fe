@@ -236,9 +236,9 @@
     align-items: center;
 
     mat-icon {
-      width: 28px;
-      height: 28px;
-      font-size: 28px;
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
 
       &.status-active {
         color: var(--md-sys-color-success);
@@ -404,7 +404,7 @@
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
 }
@@ -1074,10 +1074,10 @@
       white-space: nowrap;
 
       mat-icon {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         margin: 0;
-        font-size: 18px;
+        font-size: 16px;
       }
     }
 
