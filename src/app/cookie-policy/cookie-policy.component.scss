@@ -9,32 +9,33 @@
 .error-container {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   align-items: center;
   justify-content: center;
+
   min-height: 300px;
-  gap: 16px;
 }
 
 .policy-header {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--md-sys-color-outline-variant);
 }
 
 .policy-header h1 {
-  margin: 0 0 8px 0;
-  color: var(--theme-color);
+  margin: 0 0 8px;
+  color: var(--md-sys-color-on-surface);
 }
 
 .policy-version {
   margin: 0;
   font-size: 0.9em;
-  color: var(--description-color);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .policy-content {
   line-height: 1.8;
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 }
 
 .policy-content h1 {
@@ -70,11 +71,11 @@
 }
 
 .policy-content a {
-  color: var(--primary);
+  color: var(--md-sys-color-secondary);
   text-decoration: underline;
 }
 
 .policy-content a:hover {
-  color: var(--secondary-color);
+  color: var(--md-sys-color-surface-container);
 }
 

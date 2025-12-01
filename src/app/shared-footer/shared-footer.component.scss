@@ -2,25 +2,29 @@
 .footer {
   position: static;
   bottom: 0;
+
   width: 100%;
+
   text-align: center;
-  background-color: var(--toolbar-container-background-color);
+
+  background-color: var(--md-sys-color-surface-container-low);
 
   p {
     margin-inline: auto;
-    color: var(--description-color);
+
+    font-size: 11px;
     font-weight: 400;
     line-height: 16px;
-    font-size: 11px;
-
-    @media screen and (max-width: 599px) {
-      font-size: 15px;
-      white-space: normal;
-    }
+    color: var(--md-sys-color-on-surface-variant);
 
     a {
-      color: var(--primary);
+      color: var(--md-sys-color-secondary);
       text-decoration: none;
+    }
+
+    @media screen and (width <= 599px) {
+      font-size: 15px;
+      white-space: normal;
     }
   }
 }

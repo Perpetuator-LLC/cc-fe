@@ -11,7 +11,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageComponent } from '../message/message.component';
 import { MatCard } from '@angular/material/card';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 
@@ -25,7 +24,7 @@ import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
     MatInput,
     MatButton,
     MatLabel,
-    MessageComponent,
+
     MatCard,
     MatError,
     MatSelect,

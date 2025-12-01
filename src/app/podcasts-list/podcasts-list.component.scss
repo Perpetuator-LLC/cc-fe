@@ -1,64 +1,63 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 .sortable-header {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   cursor: pointer;
   user-select: none;
+
+  display: flex;
+  gap: 4px;
+  align-items: center;
 
   &:hover {
     opacity: 0.8;
   }
 
   mat-icon {
-    font-size: 18px;
     width: 18px;
     height: 18px;
+    font-size: 18px;
   }
 }
 
 .table-controls {
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 16px;
-  padding-top: 12px;
 
-  @media screen and (max-width: 576px) {
-    flex-direction: column;
-  }
+  margin-bottom: 20px;
+  padding-top: 12px;
 
   .search-filter {
     display: flex;
-    align-items: center;
-    gap: 10px;
     flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
 
     mat-form-field {
+      min-width: 150px;
+
       &.search-field {
         min-width: 300px;
 
-        @media screen and (max-width: 576px) {
+        @media screen and (width <= 576px) {
           min-width: 100%;
         }
       }
 
-      min-width: 150px;
-
-      // Target Material form field elements directly without ::ng-deep
+      // Target Material form field elements directly
       .mat-mdc-text-field-wrapper {
-        background-color: var(--toolbar-container-background-color);
         height: 60px;
+        background-color: var(--md-sys-color-surface-container-low);
       }
 
       .mat-mdc-form-field-infix {
+        display: flex;
+        align-items: center;
+
         min-height: 60px;
         padding-top: 0;
         padding-bottom: 0;
-        display: flex;
-        align-items: center;
       }
 
       .mat-mdc-form-field-focus-overlay {
@@ -68,20 +67,20 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--border-color) !important;
+        border-color: var(--md-sys-color-outline-variant) !important;
       }
 
       .mat-mdc-form-field-icon-prefix {
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
       }
 
       input {
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
 
       .mat-mdc-select-value,
       .mat-mdc-select-arrow {
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
     }
   }
@@ -92,141 +91,156 @@
     align-items: center;
 
     button[mat-button] {
-      color: var(--theme-color);
       font-weight: 500;
+      color: var(--md-sys-color-on-surface);
     }
 
     button[mat-icon-button] {
-      color: var(--md-sys-color-on-surface);
-      border-radius: 8px;
       border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--md-sys-color-on-surface);
 
       &.active {
-        background-color: var(--md-sys-color-surface-container-high);
         border-color: var(--md-sys-color-outline-variant);
+        background-color: var(--md-sys-color-surface-container-high);
       }
     }
   }
-}
 
-.episode-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-
-  button {
-    background: var(--primary);
-    color: var(--theme-white);
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    font-weight: 600;
-    padding: 8px 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    min-width: fit-content;
-
-    mat-icon {
-      margin: 0;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-
-  .research-button {
-    background-color: var(--purple);
-    color: var(--theme-white);
+  @media screen and (width <= 576px) {
+    flex-direction: column;
   }
 }
+
+//.episode-actions {
+//  display: flex;
+//  gap: 8px;
+//  align-items: center;
+//
+//  button {
+//    display: inline-flex;
+//    flex-shrink: 0;
+//    gap: 8px;
+//    align-items: center;
+//
+//    min-width: fit-content;
+//    padding: 8px 16px;
+//    border: 1px solid var(--md-sys-color-outline-variant);
+//    border-radius: 10px;
+//
+//    font-weight: 600;
+//    color: #ffffff;
+//    white-space: nowrap;
+//
+//    background: var(--md-sys-color-secondary);
+//
+//    mat-icon {
+//      width: 20px;
+//      height: 20px;
+//      margin: 0;
+//      font-size: 20px;
+//    }
+//
+//    &:hover {
+//      opacity: 0.9;
+//    }
+//  }
+//
+//  .research-button {
+//    color: #ffffff;
+//    background-color: var(--md-sys-color-tertiary);
+//  }
+//}
 
 .action-btn {
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 }
 
 .podcasts-container {
+  overflow: hidden;
   margin-top: 20px;
   border-radius: 8px;
-  overflow: hidden;
 
   .podcasts-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
 
-    @media screen and (max-width: 991px) {
+    .chip {
+      color: var(--md-sys-color-on-surface);
+      background-color: var(--md-sys-color-surface-container-high);
+    }
+
+    @media screen and (width <= 991px) {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       grid-template-columns: repeat(1, 1fr);
-    }
-
-    .chip {
-      background-color: var(--md-sys-color-surface-container-high);
-      color: var(--md-sys-color-on-surface);
     }
   }
 
   &.grid-view {
+    overflow: visible;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
+
     padding: 16px;
+
     background: none;
-    overflow: visible;
   }
 
   table {
     width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
-    border: 1px solid var(--border-color);
-
-    @media screen and (max-width: 576px) {
-      overflow: auto;
-      display: block;
-    }
 
     .mdc-data-table__row:last-child .mat-mdc-cell {
       border-bottom: 0;
+    }
+
+    @media screen and (width <= 576px) {
+      overflow: auto;
+      display: block;
     }
   }
 
   // Use MD3 colors directly for enable/disable badges
   .enable {
-    color: var(--md-extended-color-success-color) !important;
-    background-color: var(--md-extended-color-success-color-container) !important;
-    border: 1px solid var(--md-extended-color-success-color);
-    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-    border-radius: var(--cc-radius-sm);
-    font-size: 12px;
-    font-weight: 600;
-    width: 90px;
-    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    width: 90px;
+    height: 20px;
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    border: 1px solid var(--md-extended-color-success-color);
+    border-radius: var(--cc-radius-sm);
+
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--md-extended-color-success-color) !important;
+
+    background-color: var(--md-extended-color-success-color-container) !important;
   }
 
   .disable {
-    color: var(--md-sys-color-on-surface-variant) !important;
-    background-color: var(--md-sys-color-surface-container-high) !important;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-    border-radius: var(--cc-radius-sm);
-    font-size: 12px;
-    font-weight: 600;
-    width: 90px;
-    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    width: 90px;
+    height: 20px;
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--cc-radius-sm);
+
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant) !important;
+
+    background-color: var(--md-sys-color-surface-container-high) !important;
   }
 
   .response-div {
@@ -236,58 +250,63 @@
   }
 
   .mat-mdc-header-cell {
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
     font-weight: 600;
-    color: var(--theme-color);
-    background: var(--secondary-dark);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
   }
 
   .mat-mdc-row {
     &:hover {
-      background-color: var(--secondary-light);
+      background-color: var(--md-sys-color-surface-container);
     }
   }
 
   .mat-mdc-cell {
     padding: 16px;
-    color: var(--theme-color);
-    background: var(--toolbar-container-background-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-low);
 
     button[mat-flat-button] {
-      white-space: nowrap;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+
       min-width: fit-content;
       padding: 8px 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+
+      white-space: nowrap;
 
       mat-icon {
-        margin: 0;
-        font-size: 20px;
         width: 20px;
         height: 20px;
+        margin: 0;
+        font-size: 20px;
       }
     }
   }
 
   .mat-mdc-button {
-    color: var(--primary);
+    color: var(--md-sys-color-secondary);
   }
 
   .chip {
-    background: var(--md-sys-color-surface-container-high);
-    border-radius: 20px;
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 100%;
-    letter-spacing: 0;
-    padding: 8px;
-    color: var(--md-sys-color-on-surface);
     display: inline-flex;
-    justify-content: center;
-    align-items: center;
     gap: 6px;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px;
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 100%;
+    color: var(--md-sys-color-on-surface);
+    letter-spacing: 0;
+
+    background: var(--md-sys-color-surface-container-high);
   }
 
   .p_name {
@@ -308,19 +327,19 @@
       gap: 2px;
 
       span {
-        font-weight: 400;
         font-size: 12px;
+        font-weight: 400;
         line-height: 100%;
+        color: var(--md-sys-color-on-surface-variant);
         letter-spacing: 0;
-        color: var(--description-color);
       }
     }
   }
 
   .podcast-name-link {
-    color: var(--theme-color);
-    font-weight: 600;
     cursor: pointer;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
     text-decoration: none;
 
     &:hover {
@@ -332,11 +351,12 @@
     width: 100%;
 
     p {
-      font-size: 13px;
       margin-top: 6px !important;
       margin-bottom: 12px !important;
-      color: var(--theme-color);
+
+      font-size: 13px;
       font-weight: 500;
+      color: var(--md-sys-color-on-surface);
     }
   }
 
@@ -346,9 +366,9 @@
     justify-content: space-between;
 
     button {
-      padding: 0;
       height: auto;
-      color: var(--theme-color);
+      padding: 0;
+      color: var(--md-sys-color-on-surface);
 
       span {
         display: none;
@@ -357,70 +377,73 @@
   }
 
   .chip-header {
-    padding-inline: 16px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color);
+    padding-inline: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
     .days {
       font-size: 12px;
-      color: var(--description-color);
       font-weight: 400;
+      color: var(--md-sys-color-on-surface-variant);
     }
   }
 
   .bottom-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     padding: 16px;
 
     p {
-      font-size: 13px;
-      color: var(--theme-color);
-      font-weight: 500;
       margin: 0 !important;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
     }
   }
 }
 
 .podcast-card {
   width: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
   /* max-width: 400px; remove max-width for grid */
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
+  background: var(--md-sys-color-surface-container) !important;
 
   mat-card-header {
     padding-bottom: 0;
   }
 
   mat-card-title {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   mat-card-actions {
-    padding-top: 0;
     display: flex;
     justify-content: flex-end;
+    padding-top: 0;
   }
 
   .mat-mdc-button {
-    color: var(--primary);
+    color: var(--md-sys-color-secondary);
   }
 
   .img {
-    width: auto;
-    height: 157px;
-    max-width: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    margin-bottom: 12px;
     display: block;
-    margin-left: auto;
+
+    width: auto;
+    max-width: 100%;
+    height: 157px;
     margin-right: auto;
+    margin-bottom: 12px;
+    margin-left: auto;
+    border-radius: 8px;
+
+    object-fit: contain;
   }
 
   .mat-mdc-card-header p {
@@ -434,29 +457,34 @@
 
 .middle-card {
   padding-inline: 30px;
-  background-color: var(--secondary-color);
+  background-color: var(--md-sys-color-surface-container);
 
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     padding-inline: 20px;
   }
 }
 
 .no-results-message {
   display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 40px 20px;
-  background: var(--secondary-light);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--md-sys-color-on-surface-variant);
+  align-items: center;
+
   margin-top: 20px;
+  padding: 40px 20px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    font-size: 24px;
+    flex-shrink: 0;
+
     width: 24px;
     height: 24px;
-    flex-shrink: 0;
+
+    font-size: 24px;
     color: var(--md-sys-color-on-surface-variant);
   }
 
@@ -468,100 +496,113 @@
 }
 
 .create-podcast-card {
-  background-color: var(--toolbar-container-background-color) !important;
-  box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  box-shadow: none;
 
   .content-header {
     display: flex;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
-    padding-inline: 30px;
+
     padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
     padding-bottom: var(--cc-spacing-md);
-    gap: 16px;
-
-    @media screen and (max-width: 576px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      padding-inline: 20px;
-      height: auto;
-    }
+    padding-inline: 30px;
 
     .title {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      min-width: 0;
       flex: 1;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+
+      min-width: 0;
 
       h3 {
-        font-weight: 600;
-        font-size: 20px;
-        line-height: 100%;
+        overflow: hidden;
+
         //letter-spacing: 0;
         margin: 0;
-        color: var(--theme-color);
-        white-space: nowrap;
-        overflow: hidden;
+
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
         text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       span {
-        background: var(--secondary-dark);
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        height: 22px;
+
         //letter-spacing: 0;
         padding: 0 10px;
-        height: 22px;
-        color: var(--theme-color);
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
+        border-radius: 20px;
+
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
         white-space: nowrap;
+
+        background: var(--md-sys-color-surface-container-high);
       }
     }
 
-    button {
-      background: var(--primary);
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      color: var(--theme-white);
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 100%;
-      //letter-spacing: 0;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: fit-content;
-      padding: 10px 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    //button {
+    //  display: inline-flex;
+    //  flex-shrink: 0;
+    //  gap: 8px;
+    //  align-items: center;
+    //
+    //  min-width: fit-content;
+    //  padding: 10px 16px;
+    //  border: 1px solid var(--md-sys-color-outline-variant);
+    //  border-radius: 10px;
+    //
+    //  font-size: 14px;
+    //  font-weight: 600;
+    //  line-height: 100%;
+    //  color: #ffffff;
+    //
+    //  //letter-spacing: 0;
+    //  white-space: nowrap;
+    //
+    //  background: var(--md-sys-color-secondary);
+    //
+    //  mat-icon {
+    //    width: 20px;
+    //    height: 20px;
+    //    margin: 0;
+    //    font-size: 20px;
+    //  }
+    //
+    //  @media screen and (width <= 576px) {
+    //    justify-content: center;
+    //    width: 100%;
+    //  }
+    //}
 
-      @media screen and (max-width: 576px) {
-        width: 100%;
-        justify-content: center;
-      }
+    @media screen and (width <= 576px) {
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
 
-      mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-        margin: 0;
-      }
+      height: auto;
+      padding-inline: 20px;
     }
   }
 }
 
 .column-menu-content {
-  padding: 16px;
   min-width: 200px;
+  padding: 16px;
 
   mat-checkbox {
     display: block;

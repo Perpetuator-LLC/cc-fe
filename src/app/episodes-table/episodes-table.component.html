@@ -31,10 +31,10 @@
 
   <div class="view-toggles">
     <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
-      <app-svg-icon icon="grid"></app-svg-icon>
+      <app-svg-icon icon="grid" />
     </button>
     <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
-      <app-svg-icon icon="list"></app-svg-icon>
+      <app-svg-icon icon="list" />
     </button>
   </div>
 </div>
@@ -102,11 +102,11 @@
           </button>
           <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
             <button mat-menu-item [routerLink]="['/e', episode.uuid]">
-              <app-svg-icon icon="edit"></app-svg-icon>
+              <app-svg-icon icon="edit" />
               <span>Edit</span>
             </button>
             <button mat-menu-item (click)="deleteEpisode(episode)">
-              <app-svg-icon icon="delete"></app-svg-icon>
+              <app-svg-icon icon="delete" />
               <span>Delete</span>
             </button>
           </mat-menu>
@@ -118,8 +118,7 @@
     </table>
 
     <mat-paginator [length]="totalEpisodes" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 20]"
-      [showFirstLastButtons]="false" (page)="onPageChange($event)">
-    </mat-paginator>
+      [showFirstLastButtons]="false" (page)="onPageChange($event)" />
   </div>
   }
 
@@ -144,11 +143,11 @@
               </button>
               <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
                 <button mat-menu-item [routerLink]="['/e', episode.uuid]">
-                  <app-svg-icon icon="edit"></app-svg-icon>
+                  <app-svg-icon icon="edit" />
                   <span>Edit</span>
                 </button>
                 <button mat-menu-item (click)="deleteEpisode(episode)">
-                  <app-svg-icon icon="delete"></app-svg-icon>
+                  <app-svg-icon icon="delete" />
                   <span>Delete</span>
                 </button>
               </mat-menu>

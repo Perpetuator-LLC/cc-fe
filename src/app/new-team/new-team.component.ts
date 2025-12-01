@@ -10,23 +10,12 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageComponent } from '../message/message.component';
 import { MatCard } from '@angular/material/card';
 
 @Component({
   selector: 'app-new-team',
   standalone: true,
-  imports: [
-    MatProgressSpinner,
-    ReactiveFormsModule,
-    MatFormField,
-    MatInput,
-    MatButton,
-    MatLabel,
-    MessageComponent,
-    MatCard,
-    MatError,
-  ],
+  imports: [MatProgressSpinner, ReactiveFormsModule, MatFormField, MatInput, MatButton, MatLabel, MatCard, MatError],
   templateUrl: './new-team.component.html',
   styleUrls: ['./new-team.component.scss'],
 })

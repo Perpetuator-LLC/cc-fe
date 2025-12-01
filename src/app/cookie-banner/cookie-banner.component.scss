@@ -1,18 +1,22 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .cookie-banner {
   position: fixed;
+  z-index: 2000; /* Higher z-index to be above nav */
+  right: 0;
   bottom: 0;
   left: 0;
-  right: 0;
-  background-color: var(--secondary-500); /* Ensure background is opaque */
-  color: var(--theme-white);
-  text-align: left;
-  padding: 1em;
-  z-index: 2000; /* Higher z-index to be above nav */
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow to separate from content */
+  justify-content: space-between;
+
+  padding: 1em;
+
+  color: #ffffff;
+  text-align: left;
+
+  background-color: var(--md-sys-color-surface-container); /* Ensure background is opaque */
+  box-shadow: 0 -2px 5px rgb(0 0 0 / 0.3); /* Subtle shadow to separate from content */
 }
 
 .cookie-text {
@@ -25,7 +29,7 @@
 }
 
 .privacy-link {
-  color: var(--purple); /* Material Design secondary color */
+  color: var(--md-sys-color-tertiary); /* Material Design secondary color */
 }
 
 /* Adjust margin or padding on the main content */

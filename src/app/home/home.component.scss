@@ -1,682 +1,443 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-#p5Container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  //width: 100vw;
-  //height: 100vh;
-  //width: 100%;
-  //height: 200px;
-  overflow: hidden;
-  z-index: 0;
-  /* Ensure the canvas is behind your other content */
-}
 
-.route-title {
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.website-title {
-  font-size: 1.5rem;
-  font-weight: 400;
-  white-space: nowrap;
-  // Let MD3 theme handle text color naturally
-}
-
-.website-title-copilot {
-  font-size: 1.5rem;
-  font-weight: 200;
-  white-space: nowrap;
-  // Let MD3 theme handle text color naturally
-}
-mat-card {
-  position: relative;
-  z-index: 1;
-}
-
-.home-container {
-  padding: 20px 72px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  z-index: 50;
-
-  @media screen and (max-width: 576px) {
-    padding: 20px;
-  }
-}
-
-.hero-text {
-  max-width: 800px;
-  padding-right: 20px;
-}
-
-.hero-section {
-  width: 100%;
-
-  .hero-banner-card {
-    padding: 8px 40px;
-    background-color: var(--md-sys-color-surface-container);
-
-    @media screen and (max-width: 576px) {
-      padding: 8px 20px;
-    }
-
-    h1 {
-      color: var(--md-sys-color-on-surface);
-      font-size: 40px;
-      font-weight: 700;
-      margin: 0;
-
-      @media screen and (max-width: 991px) {
-        font-size: 30px;
-      }
-
-      @media screen and (max-width: 576px) {
-        font-size: 28px;
-      }
-    }
-
-    p {
-      font-size: 18px;
-      color: var(--md-sys-color-on-surface);
-      font-weight: 500;
-      margin: 12px 0 20px;
-
-      @media screen and (max-width: 991px) {
-        font-size: 16px;
-      }
-    }
-
-    button {
-      background-color: var(--md-sys-color-secondary) !important;
-      border-radius: 10px;
-      color: var(--md-sys-color-on-secondary) !important;
-      font-size: 16px;
-      font-weight: 500;
-      box-shadow: none;
-      border: 1px solid var(--md-sys-color-outline-variant);
-
-      .mdc-button__label {
-        color: var(--md-sys-color-on-secondary) !important;
-      }
-    }
-
-    .hero-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      @media screen and (max-width: 768px) {
-        flex-direction: column;
-      }
-    }
-
-    .hero-illustration img {
-      border-radius: 10px;
-      max-width: 100%;
-      height: auto;
-    }
-  }
-}
-
-.stats-section {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 22px;
-  width: 100%;
-
-  @media screen and (max-width: 991px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media screen and (max-width: 576px) {
-    grid-template-columns: repeat(1, 1fr);
-  }
-
-  .stat-card {
-    border: 1px solid var(--md-sys-color-outline-variant);
-    width: 100%;
-    background-color: var(--md-sys-color-surface-container) !important;
-    padding: 20px;
-    box-shadow: none;
-
-    .stat-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 10px;
-
-      .stat-label {
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--md-sys-color-on-surface-variant);
-      }
-    }
-
-    .stat-value {
-      font-size: 30px;
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface);
-      margin-bottom: 12px;
-    }
-
-    .stat-change.positive {
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface-variant);
-
-      span {
-        color: var(--md-extended-color-success-color);
-      }
-    }
-  }
-
-  // Skeleton loading styles
-  .skeleton-card {
-    border: 1px solid var(--md-sys-color-outline-variant);
-    width: 100%;
-    background-color: var(--md-sys-color-surface-container) !important;
-    padding: 20px;
-    box-shadow: none;
-
-    .skeleton-icon {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-      margin-bottom: 6px;
-    }
-
-    .skeleton-label {
-      width: 80px;
-      height: 14px;
-      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
-
-    .skeleton-value {
-      width: 60px;
-      height: 30px;
-      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-      margin-bottom: 12px;
-    }
-
-    .skeleton-change {
-      width: 120px;
-      height: 14px;
-      background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-    }
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.module-section-container {
-  margin-top: 30px;
-}
-
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--md-sys-color-on-surface);
-  margin-top: 0;
-  margin-bottom: 18px;
-}
-
-.modules-section {
-  width: 100%;
-  display: flex;
-  gap: 12px;
-
-  @media screen and (max-width: 768px) {
-    flex-direction: column;
-  }
-
-  .generate-podcast {
-    width: 60%;
-
-    @media screen and (max-width: 768px) {
-      width: auto;
-    }
-  }
-
-  .create-episode {
-    width: 40%;
-
-    @media screen and (max-width: 768px) {
-      width: auto;
-    }
-  }
-
-  .module-card {
-    background-color: var(--md-sys-color-surface-container);
-    border-radius: 10px;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    padding: 20px;
-  }
-
-  .module-wrapper {
-    display: flex;
-    gap: 40px;
-    justify-content: space-between;
-
-    @media screen and (max-width: 768px) {
-      flex-direction: column;
-    }
-
-    .module-header {
-      height: auto;
-    }
-  }
-
-  .image-section {
-    //min-width: 273px;
-    //max-width: 273px;
-    //background: var(--blue);
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    @media screen and (max-width: 768px) {
-      min-width: auto;
-      max-width: 100%;
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-    }
-  }
-
-  .module-header {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 20px;
-    height: 100%;
-
-    a,
-    button {
-      color: var(--md-sys-color-tertiary);
-      background-color: transparent;
-      box-shadow: none;
-      border: 0;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      line-height: 0;
-      gap: 8px;
-    }
-  }
-
-  .module-title {
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface);
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .module-desc {
-    font-size: 14px;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-}
-
-.stats-header-section {
-  width: 100%;
-  margin-top: 30px;
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-  }
-}
-
-.recent-podcasts-section {
-  width: 100%;
-  margin-top: 30px;
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .view-all-link {
-    color: var(--md-sys-color-on-surface);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-  }
-}
-
-.hero-card {
-  width: 100%;
-  max-width: 900px;
-  //margin-bottom: 40px;
-  text-align: center;
-}
-
-.hero-card h1 {
-  font-size: 36px;
-  margin-bottom: 16px;
-}
-
-.hero-card p {
-  font-size: 18px;
-}
-
-.hero-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 auto;
-  /* Center the list */
-  max-width: 600px;
-}
-
-.hero-card li {
-  margin-bottom: 10px;
-  /* Optional: Add some space between list items */
-}
-
-.feature-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  width: 100%;
-  max-width: 900px;
-  margin-top: 10px;
-}
-
-.feature-card {
-  padding: 1em;
-  width: 100%;
-  max-width: 430px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.feature-card p {
-  padding-top: 10px;
-  font-size: 16px;
-}
-
-.cta-section {
-  margin-top: 10px;
-  width: 100%;
-  max-width: 900px;
-  text-align: center;
-}
-
-.cta-card h2 {
-  font-size: 28px;
-  margin-bottom: 16px;
-}
-
-.cta-card p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-.podcasts-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-
-  @media screen and (max-width: 991px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media screen and (max-width: 576px) {
-    grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-.podcast-card {
-  width: 100%;
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-
-  .podcast-link {
-    display: block;
-    text-decoration: none;
-    position: relative;
-  }
-
-  .podcast-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px 10px 0 0;
-    display: block;
-  }
-
-  mat-card-content {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
-
-  .status-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border: 1px solid var(--border-color);
-    z-index: 1;
-
-    &.enabled {
-      background: var(--md-sys-color-success);
-      color: var(--theme-white);
-    }
-
-    &.disabled {
-      background: var(--secondary-dark);
-      color: var(--theme-color);
-    }
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--theme-color);
-
-    a {
-      color: var(--theme-color);
-      text-decoration: none;
-
-      &:hover {
-        color: var(--primary);
-      }
-    }
-  }
-
-  .description,
-  .owner,
-  .team {
-    font-size: 14px;
-    color: var(--description-color);
-    margin: 0;
-    line-height: 1.4;
-
-    &.placeholder {
-      opacity: 0.6;
-      font-style: italic;
-    }
-
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      transition: opacity 0.2s;
-
-      &:hover {
-        opacity: 0.7;
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .stats {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 8px;
-
-    .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-      color: var(--description-color);
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: var(--description-color);
-      }
-
-      &.placeholder {
-        opacity: 0.6;
-        font-style: italic;
-      }
-    }
-  }
-
-  // Remove old styles
-  mat-card-header,
-  mat-card-actions,
-  .mat-mdc-card-header,
-  .grid-header,
-  .grid-header-name,
-  .response-div,
-  .chip-header,
-  .bottom-header {
-    display: none;
-  }
-}
-
-// Skeleton Loading Card
-.skeleton-podcast-card {
-  .skeleton-image {
-    width: 100%;
-    height: 200px;
-    background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 10px 10px 0 0;
-  }
-
-  mat-card-content {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .skeleton-title {
-    width: 70%;
-    height: 20px;
-    background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
-  }
-
-  .skeleton-text {
-    width: 100%;
-    height: 14px;
-    background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
-
-    &.short {
-      width: 60%;
-    }
-  }
-
-  .skeleton-stats {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-  }
-
-  .skeleton-stat {
-    width: 80px;
-    height: 14px;
-    background: linear-gradient(90deg, var(--secondary-400) 25%, var(--secondary-450) 50%, var(--secondary-400) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
-  }
-}
-
-// Empty State
-.empty-podcasts-state {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  color: var(--description-color);
-
-  mat-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
-    color: var(--secondary-450);
-    margin-bottom: 16px;
-  }
-
-  p {
-    font-size: 16px;
-    margin-bottom: 20px;
-    color: var(--description-color);
-  }
-
-  a {
-    margin-top: 10px;
-  }
-}
-
+// Minimal layout styles - let MD3 components handle everything else
+
+//.route-title {
+//  font-size: 16px;
+//  font-weight: 400;
+//}
+//
+//.website-title {
+//  font-size: 1.5rem;
+//  font-weight: 400;
+//  white-space: nowrap;
+//}
+//
+//.website-title-copilot {
+//  font-size: 1.5rem;
+//  font-weight: 200;
+//  white-space: nowrap;
+//}
+//
+//// Container - just centering and padding
+//.home-container {
+//  max-width: 1400px;
+//  margin: 0 auto;
+//  padding: 24px 72px;
+//
+//  @media screen and (width <= 576px) {
+//    padding: 16px;
+//  }
+//}
+//
+//// Grid layouts only - MD3 mat-card handles all visual styling
+//.stats-section {
+//  display: grid;
+//  grid-template-columns: repeat(3, 1fr);
+//  gap: 16px;
+//  margin: 32px 0;
+//
+//  @media screen and (width <= 991px) {
+//    grid-template-columns: repeat(2, 1fr);
+//  }
+//
+//  @media screen and (width <= 576px) {
+//    grid-template-columns: 1fr;
+//  }
+//}
+//
+//.modules-section {
+//  display: grid;
+//  grid-template-columns: 1.5fr 1fr;
+//  gap: 16px;
+//  margin: 32px 0;
+//
+//  .generate-podcast {
+//    grid-row: span 2;
+//  }
+//
+//  @media screen and (width <= 768px) {
+//    grid-template-columns: 1fr;
+//  }
+//}
+//
+//.podcasts-grid {
+//  display: grid;
+//  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+//  gap: 16px;
+//
+//  @media screen and (width <= 576px) {
+//    grid-template-columns: 1fr;
+//  }
+//}
+//
+//// Skeleton loading animations
+//@keyframes shimmer {
+//  0% {
+//    background-position: -200% 0;
+//  }
+//
+//  100% {
+//    background-position: 200% 0;
+//  }
+//}
+//
+//.skeleton-card,
+//.skeleton-podcast-card {
+//  .skeleton-icon,
+//  .skeleton-label,
+//  .skeleton-value,
+//  .skeleton-change,
+//  .skeleton-title,
+//  .skeleton-text,
+//  .skeleton-stat,
+//  .skeleton-image {
+//    border-radius: 4px;
+//    background: linear-gradient(
+//      90deg,
+//      var(--md-sys-color-surface-container) 25%,
+//      var(--md-sys-color-surface-container-high) 50%,
+//      var(--md-sys-color-surface-container) 75%
+//    );
+//    background-size: 200% 100%;
+//    animation: shimmer 1.5s infinite;
+//  }
+//
+//  .skeleton-icon {
+//    width: 24px;
+//    height: 24px;
+//    margin-bottom: 8px;
+//  }
+//
+//  .skeleton-label {
+//    width: 80px;
+//    height: 14px;
+//    margin-bottom: 8px;
+//  }
+//
+//  .skeleton-value {
+//    width: 60px;
+//    height: 30px;
+//    margin-bottom: 8px;
+//  }
+//
+//  .skeleton-change {
+//    width: 120px;
+//    height: 14px;
+//  }
+//
+//  .skeleton-image {
+//    aspect-ratio: 16/9;
+//    width: 100%;
+//  }
+//
+//  .skeleton-title {
+//    width: 80%;
+//    height: 20px;
+//    margin-bottom: 8px;
+//  }
+//
+//  .skeleton-text {
+//    width: 100%;
+//    height: 14px;
+//    margin-bottom: 8px;
+//
+//    &.short {
+//      width: 60%;
+//    }
+//  }
+//
+//  .skeleton-stats {
+//    display: flex;
+//    gap: 16px;
+//    margin-top: 16px;
+//  }
+//
+//  .skeleton-stat {
+//    width: 80px;
+//    height: 18px;
+//  }
+//}
+//
+//
+////}
+////
+////.hero-card li {
+////  margin-bottom: 10px;
+////  /* Optional: Add some space between list items */
+////}
+////
+////.feature-section {
+////  display: flex;
+////  flex-wrap: wrap;
+////  justify-content: space-around;
+////  width: 100%;
+////  max-width: 900px;
+////  margin-top: 10px;
+////}
+////
+////.feature-card {
+////  padding: 1em;
+////  width: 100%;
+////  max-width: 430px;
+////  margin-top: 10px;
+////  margin-bottom: 10px;
+////}
+////
+////.feature-card p {
+////  padding-top: 10px;
+////  font-size: 16px;
+////}
+////
+////.cta-section {
+////  margin-top: 10px;
+////  width: 100%;
+////  max-width: 900px;
+////  text-align: center;
+////}
+////
+////.cta-card h2 {
+////  font-size: 28px;
+////  margin-bottom: 16px;
+////}
+////
+////.cta-card p {
+////  font-size: 18px;
+////  margin-bottom: 20px;
+////}
+////
+////.podcasts-grid {
+////  display: grid;
+////  grid-template-columns: repeat(3, 1fr);
+////  gap: 16px;
+////
+////  @media screen and (max-width: 991px) {
+////    grid-template-columns: repeat(2, 1fr);
+////  }
+////
+////  @media screen and (max-width: 576px) {
+////    grid-template-columns: repeat(1, 1fr);
+////  }
+////}
+////
+////.podcast-card {
+////  width: 100%;
+////  background: var(--md-sys-color-surface-container) !important;
+////  color: var(--md-sys-color-on-surface);
+////  border: 1px solid var(--md-sys-color-outline-variant);
+////  border-radius: 10px;
+////  display: flex;
+////  flex-direction: column;
+////
+////  .podcast-link {
+////    display: block;
+////    text-decoration: none;
+////    position: relative;
+////  }
+////
+////  .podcast-image {
+////    width: 100%;
+////    height: 200px;
+////    object-fit: cover;
+////    border-radius: 10px 10px 0 0;
+////    display: block;
+////  }
+////
+////  mat-card-content {
+////    padding: 16px;
+////    display: flex;
+////    flex-direction: column;
+////    gap: 8px;
+////    flex: 1;
+////  }
+////
+////  .status-badge {
+////    position: absolute;
+////    top: 12px;
+////    left: 12px;
+////    border-radius: 6px;
+////    font-size: 12px;
+////    font-weight: 500;
+////    padding: 4px 12px;
+////    border: 1px solid var(--md-sys-color-outline-variant);
+////    z-index: 1;
+////
+////    &.enabled {
+////      background: var(--md-sys-color-success);
+////      color: #ffffff;
+////    }
+////
+////    &.disabled {
+////      background: var(--md-sys-color-surface-container-high);
+////      color: var(--md-sys-color-on-surface);
+////    }
+////  }
+////
+////  h3 {
+////    margin: 0;
+////    font-size: 16px;
+////    font-weight: 600;
+////    color: var(--md-sys-color-on-surface);
+////
+////    a {
+////      color: var(--md-sys-color-on-surface);
+////      text-decoration: none;
+////
+////      &:hover {
+////        color: var(--md-sys-color-secondary);
+////      }
+////    }
+////  }
+////
+////  .description,
+////  .owner,
+////  .team {
+////    font-size: 14px;
+////    color: var(--md-sys-color-on-surface-variant);
+////    margin: 0;
+////    line-height: 1.4;
+////
+////    &.placeholder {
+////      opacity: 0.6;
+////      font-style: italic;
+////    }
+////
+////    a {
+////      color: var(--md-sys-color-secondary);
+////      text-decoration: none;
+////      transition: opacity 0.2s;
+////
+////      &:hover {
+////        opacity: 0.7;
+////        text-decoration: underline;
+////      }
+////    }
+////  }
+////
+////  .stats {
+////    display: flex;
+////    gap: 16px;
+////    align-items: center;
+////    margin-top: auto;
+////    padding-top: 8px;
+////
+////    .stat {
+////      display: flex;
+////      align-items: center;
+////      gap: 4px;
+////      font-size: 13px;
+////      color: var(--md-sys-color-on-surface-variant);
+////
+////      mat-icon {
+////        font-size: 18px;
+////        width: 18px;
+////        height: 18px;
+////        color: var(--md-sys-color-on-surface-variant);
+////      }
+////
+////      &.placeholder {
+////        opacity: 0.6;
+////        font-style: italic;
+////      }
+////    }
+////  }
+////
+////  // Remove old styles
+////  mat-card-header,
+////  mat-card-actions,
+////  .mat-mdc-card-header,
+////  .grid-header,
+////  .grid-header-name,
+////  .response-div,
+////  .chip-header,
+////  .bottom-header {
+////    display: none;
+////  }
+////}
+////
+////// Skeleton Loading Card
+////.skeleton-podcast-card {
+////  .skeleton-image {
+////    width: 100%;
+////    height: 200px;
+////    background: linear-gradient(90deg, var(--md-sys-color-surface-container-high) 25%, var(--md-sys-color-surface-container-high) 50%, var(--md-sys-color-surface-container-high) 75%);
+////    background-size: 200% 100%;
+////    animation: shimmer 1.5s infinite;
+////    border-radius: 10px 10px 0 0;
+////  }
+////
+////  mat-card-content {
+////    padding: 16px;
+////    display: flex;
+////    flex-direction: column;
+////    gap: 12px;
+////  }
+////
+////  .skeleton-title {
+////    width: 70%;
+////    height: 20px;
+////    background: linear-gradient(90deg, var(--md-sys-color-surface-container-high) 25%, var(--md-sys-color-surface-container-high) 50%, var(--md-sys-color-surface-container-high) 75%);
+////    background-size: 200% 100%;
+////    animation: shimmer 1.5s infinite;
+////    border-radius: 4px;
+////  }
+////
+////  .skeleton-text {
+////    width: 100%;
+////    height: 14px;
+////    background: linear-gradient(90deg, var(--md-sys-color-surface-container-high) 25%, var(--md-sys-color-surface-container-high) 50%, var(--md-sys-color-surface-container-high) 75%);
+////    background-size: 200% 100%;
+////    animation: shimmer 1.5s infinite;
+////    border-radius: 4px;
+////
+////    &.short {
+////      width: 60%;
+////    }
+////  }
+////
+////  .skeleton-stats {
+////    display: flex;
+////    gap: 16px;
+////    margin-top: 8px;
+////  }
+////
+////  .skeleton-stat {
+////    width: 80px;
+////    height: 14px;
+////    background: linear-gradient(90deg, var(--md-sys-color-surface-container-high) 25%, var(--md-sys-color-surface-container-high) 50%, var(--md-sys-color-surface-container-high) 75%);
+////    background-size: 200% 100%;
+////    animation: shimmer 1.5s infinite;
+////    border-radius: 4px;
+////  }
+////}
+////
+////// Empty State
+////.empty-podcasts-state {
+////  grid-column: 1 / -1;
+////  display: flex;
+////  flex-direction: column;
+////  align-items: center;
+////  justify-content: center;
+////  padding: 60px 20px;
+////  text-align: center;
+////  color: var(--md-sys-color-on-surface-variant);
+////
+////  mat-icon {
+////    font-size: 64px;
+////    width: 64px;
+////    height: 64px;
+////    color: var(--md-sys-color-surface-container-high);
+////    margin-bottom: 16px;
+////  }
+////
+////  p {
+////    font-size: 16px;
+////    margin-bottom: 20px;
+////    color: var(--md-sys-color-on-surface-variant);
+////  }
+////
+////  a {
+////    margin-top: 10px;
+////  }
+////}
+////

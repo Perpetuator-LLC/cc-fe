@@ -2,101 +2,84 @@
 
 // Main container
 .middle-card {
-  background-color: var(--toolbar-container-background-color);
   border-radius: 0;
+  background-color: var(--md-sys-color-surface-container);
 }
 
 .topics-card {
-  background-color: var(--toolbar-container-background-color);
-  border: none; // Remove border, using separator line instead
-  border-radius: 0;
   margin-bottom: 0;
+  border: none;
+  border-radius: 0;
+  background-color: var(--md-sys-color-surface-container);
 }
 
 // Standard list component header pattern
 .content-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
-  padding-bottom: var(--cc-spacing-md);
-  padding-inline: 30px;
   flex-wrap: wrap;
-  gap: var(--cc-spacing-md);
-  border-bottom: 1px solid var(--cc-border-color); // Crisp separator line
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
 
-  @media screen and (max-width: 576px) {
-    padding-inline: var(--cc-spacing-lg);
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-inline: 30px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  @media screen and (width <= 576px) {
+    padding-inline: 24px;
   }
 }
 
 .title {
   display: flex;
   flex-direction: column;
-  gap: var(--cc-spacing-xs);
+  gap: 4px;
 
   h3 {
     margin: 0;
+
     font-size: 20px;
     font-weight: 600;
-    color: var(--cc-text-primary);
     line-height: 100%;
+    color: var(--md-sys-color-on-surface);
   }
 
   span {
     font-size: 14px;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 .create-topic-button {
-  background: var(--primary);
-  color: var(--theme-white);
-  border-radius: var(--cc-radius-md);
-  border: 1px solid var(--cc-border-color);
-  font-weight: 600;
-  padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cc-spacing-sm);
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin: 0;
-  }
-
-  &:hover {
-    opacity: 0.9;
-  }
+  // Let Material color="primary" directive handle styling
 }
 
 .topics-container {
-  background-color: var(--toolbar-container-background-color);
-  border: none; // No border, clean separator lines
-  border-radius: 0; // Square like other list tables
   overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background-color: var(--md-sys-color-surface-container);
 
   table {
     width: 100%;
-    background-color: var(--toolbar-container-background-color);
+    background-color: var(--md-sys-color-surface-container);
   }
 
   th {
-    background-color: var(--secondary-color);
-    color: var(--cc-text-primary);
+    padding: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
     font-weight: 600;
-    padding: var(--cc-spacing-md);
-    border-bottom: 1px solid var(--cc-border-color);
+    color: var(--md-sys-color-on-surface);
+
+    background-color: var(--md-sys-color-surface);
   }
 
   td {
-    padding: var(--cc-spacing-md);
-    color: var(--cc-text-primary);
-    border-bottom: 1px solid var(--cc-border-color);
+    padding: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface);
   }
 
   .mat-mdc-row:last-child .mat-mdc-cell {
@@ -108,7 +91,7 @@
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: var(--secondary-dark);
+      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 }
@@ -116,57 +99,64 @@
 .topic-title {
   display: flex;
   flex-direction: column;
-  gap: var(--cc-spacing-xs);
+  gap: 4px;
 
   .topic-link {
-    color: var(--cc-text-primary);
-    text-decoration: none;
-    font-weight: 600;
     font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    text-decoration: none;
 
     &:hover {
-      color: var(--primary);
+      color: var(--md-sys-color-primary);
     }
   }
 
   .topic-description {
-    font-size: 12px;
-    color: var(--cc-text-secondary);
     overflow: hidden;
+
+    max-width: 400px;
+
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 400px;
   }
 }
 
+// Status badges using MD3 job status colors
 .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--cc-spacing-xs) var(--cc-spacing-md);
-  border-radius: var(--cc-radius-round);
+
+  padding: 4px 16px;
+  border-radius: 999px;
+
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 
+  // Complete = Success (green)
   &.status-complete {
-    background-color: var(--md-sys-color-success);
-    color: var(--theme-white);
+    border: 1px solid var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color) !important;
+    background-color: var(--md-extended-color-success-color-container) !important;
   }
 
+  // Validated = Info (blue)
   &.status-validated {
-    background-color: var(--purple);
-    color: var(--theme-white);
+    border: 1px solid var(--md-extended-color-info-color);
+    color: var(--md-extended-color-info-color) !important;
+    background-color: var(--md-extended-color-info-color-container) !important;
   }
 
-  &.status-researched {
-    background-color: var(--secondary-dark);
-    color: var(--theme-color);
-  }
-
+  // Researched/In Progress = Warning (orange)
+  &.status-researched,
   &.status-progress {
-    background-color: var(--secondary-400);
-    color: var(--description-color);
+    border: 1px solid var(--md-extended-color-warning-color);
+    color: var(--md-extended-color-warning-color) !important;
+    background-color: var(--md-extended-color-warning-color-container) !important;
   }
 }
 
@@ -174,14 +164,14 @@
   margin-top: 20px;
 }
 
-@media screen and (max-width: 576px) {
+@media screen and (width <= 576px) {
   .content-header {
     flex-direction: column;
     align-items: stretch;
   }
 
   .create-topic-button {
-    width: 100%;
     justify-content: center;
+    width: 100%;
   }
 }

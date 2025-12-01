@@ -21,7 +21,6 @@ import {
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
-import { MessageComponent } from '../message/message.component';
 import { MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -66,7 +65,7 @@ import { MatChipsModule } from '@angular/material/chips';
     MatHeaderRow,
     MatRowDef,
     MatPaginator,
-    MessageComponent,
+
     MatCardContent,
     DecimalPipe,
     MatIcon,

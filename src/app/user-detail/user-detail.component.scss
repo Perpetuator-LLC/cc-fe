@@ -27,16 +27,16 @@ mat-form-field {
 }
 
 .danger-zone {
-  color: red;
   max-width: 1016px;
   margin: 1rem 8px;
+  color: red;
 }
 
 .action-row {
   display: flex;
   flex-wrap: wrap;
-  width: 100%;
   gap: 16px;
+  width: 100%;
 
   mat-form-field,
   button {
@@ -45,20 +45,21 @@ mat-form-field {
 }
 
 .button-container {
-  margin-top: 16px;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  margin-top: 16px;
 }
 
 .user-details {
   display: flex;
   flex-wrap: wrap;
-  width: 100%;
   gap: 16px;
-  max-width: 1032px;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  max-width: 1032px;
 
   mat-card {
     flex: 1 1 auto;
@@ -72,63 +73,63 @@ mat-form-field {
   padding: 0 30px;
 
   .save-btn {
-    background-color: var(--theme-white);
-    color: var(--toolbar-container-background-color);
     border-radius: 10px;
     font-weight: 500;
+    color: var(--md-sys-color-surface-container-low);
+    background-color: #ffffff;
   }
 
   .export-btn {
-    background-color: transparent;
-    color: var(--theme-color);
     border-radius: 10px;
+    color: var(--md-sys-color-on-surface);
+    background-color: transparent;
     box-shadow: none;
 
     &:hover {
-      background-color: var(--secondary-light) !important;
+      background-color: var(--md-sys-color-surface-container) !important;
     }
   }
 
   .remove-btn {
-    background-color: var(--md-sys-color-error) !important;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    color: var(--theme-white) !important;
+    color: #ffffff !important;
+    background-color: var(--md-sys-color-error) !important;
   }
 
   .profile-header {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
-
-    @media screen and (max-width: 800px) {
-      flex-wrap: wrap;
-      padding-bottom: 20px;
-    }
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
     h3 {
-      color: var(--theme-color);
       font-size: 32px;
       font-weight: 600;
+      color: var(--md-sys-color-on-surface);
 
-      @media screen and (max-width: 800px) {
+      @media screen and (width <= 800px) {
         margin-bottom: 20px;
       }
 
-      @media screen and (max-width: 450px) {
+      @media screen and (width <= 450px) {
         font-size: 24px;
       }
     }
 
     .top-btns {
       display: flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
 
-      @media screen and (max-width: 450px) {
+      @media screen and (width <= 450px) {
         flex-wrap: wrap;
       }
+    }
+
+    @media screen and (width <= 800px) {
+      flex-wrap: wrap;
+      padding-bottom: 20px;
     }
   }
 
@@ -142,12 +143,14 @@ mat-form-field {
 
       p {
         display: flex;
-        align-items: center;
         gap: 5px;
-        color: var(--theme-yellow);
+        align-items: center;
+
+        margin-top: 0;
+
         font-size: 14px;
         font-style: italic;
-        margin-top: 0;
+        color: var(--theme-yellow);
       }
     }
 
@@ -156,54 +159,56 @@ mat-form-field {
       grid-template-columns: repeat(2, 1fr);
       gap: 60px;
 
-      @media screen and (max-width: 800px) {
-        grid-template-columns: repeat(1, 1fr);
-        gap: 30px;
-      }
-
       .content {
         h4 {
           font-size: 14px;
           font-weight: 600;
-          color: var(--theme-color);
+          color: var(--md-sys-color-on-surface);
         }
 
         p {
           font-size: 14px;
           font-weight: 600;
-          color: var(--description-color);
+          color: var(--md-sys-color-on-surface-variant);
         }
       }
 
       .form {
         .profile-card {
-          border: 1px solid var(--border-color);
-          background-color: var(--secondary-light);
+          border: 1px solid var(--md-sys-color-outline-variant);
+          background-color: var(--md-sys-color-surface-container);
         }
 
         .mdc-text-field {
-          background-color: var(--secondary-450) !important;
+          background-color: var(--md-sys-color-surface-container-high) !important;
         }
+      }
+
+      @media screen and (width <= 800px) {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 30px;
       }
     }
 
     .affiliate-network-info {
       margin-top: 40px;
       padding: 16px 20px;
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 8px;
-      background-color: var(--secondary-400);
-      border: 1px solid var(--border-color);
+
       text-align: center;
 
+      background-color: var(--md-sys-color-surface-container-high);
+
       p {
-        font-size: 13px;
-        color: var(--description-color);
         margin: 0;
+        font-size: 13px;
         font-weight: 400;
+        color: var(--md-sys-color-on-surface-variant);
 
         strong {
-          color: var(--theme-color);
           font-weight: 600;
+          color: var(--md-sys-color-on-surface);
         }
       }
     }
@@ -217,7 +222,7 @@ mat-form-field {
   margin-bottom: 20px;
 
   h5 {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
     font-size: 16px;
     font-weight: 600;
     color: var(--mat-sys-on-surface);
@@ -228,8 +233,8 @@ mat-form-field {
   }
 
   mat-form-field {
-    margin-left: 32px;
     margin-top: 8px;
+    margin-left: 32px;
   }
 }
 
@@ -239,16 +244,16 @@ mat-form-field {
   gap: var(--cc-spacing-md);
 
   .info-container {
-    background-color: var(--md-sys-color-surface-container-high);
+    padding: var(--cc-spacing-md);
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: var(--cc-radius-md);
-    padding: var(--cc-spacing-md);
+    background-color: var(--md-sys-color-surface-container-high);
   }
 
   p {
     margin: 0;
-    color: var(--md-sys-color-on-surface);
     line-height: 1.5;
+    color: var(--md-sys-color-on-surface);
   }
 
   button {

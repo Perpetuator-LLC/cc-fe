@@ -4,11 +4,10 @@
       class="page-title-secondary">Automated Tasks</span></span>
 </ng-template>
 
-<app-message></app-message>
 
 @if (loading) {
 <div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" style="height: 2px"></mat-progress-bar>
+  <mat-progress-bar mode="indeterminate" value="20" />
 </div>
 } @else {
 <mat-card class="create-schedule-card">
@@ -271,8 +270,7 @@
           <mat-slide-toggle
             [checked]="schedule.enabled"
             (change)="toggleSchedule(schedule, $event.checked)"
-            color="primary">
-          </mat-slide-toggle>
+            color="primary" />
         </td>
       </ng-container>
 
@@ -285,11 +283,11 @@
           </button>
           <mat-menu #scheduleActionsMenu="matMenu">
             <button mat-menu-item (click)="editSchedule(schedule)">
-              <app-svg-icon icon="edit"></app-svg-icon>
+              <app-svg-icon icon="edit" />
               <span>Edit</span>
             </button>
             <button mat-menu-item (click)="deleteSchedule(schedule)">
-              <app-svg-icon icon="delete"></app-svg-icon>
+              <app-svg-icon icon="delete" />
               <span>Delete</span>
             </button>
           </mat-menu>
@@ -318,8 +316,7 @@
       [pageSize]="10"
       [pageSizeOptions]="[5, 10, 20]"
       showFirstLastButtons
-      aria-label="Select page of schedules">
-    </mat-paginator>
+      aria-label="Select page of schedules" />
   </div>
 </div>
 }

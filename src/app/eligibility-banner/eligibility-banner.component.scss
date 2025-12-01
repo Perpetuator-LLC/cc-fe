@@ -2,20 +2,22 @@
 
 .eligibility-banner {
   position: relative;
-  width: 100%;
   z-index: 10;
+  width: 100%;
 
   &.blocking {
     position: fixed;
+    z-index: 9999;
     top: 0;
-    left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    left: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+
+    background: rgb(0 0 0 / 0.8);
   }
 }
 
@@ -29,22 +31,24 @@
 .info-box {
   display: flex;
   gap: 16px;
-  padding: 24px;
-  border-radius: 8px;
-  background: var(--secondary-light);
-  border: 2px solid var(--border-color);
   align-items: flex-start;
 
+  padding: 24px;
+  border: 2px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
   mat-icon {
-    font-size: 32px;
+    flex-shrink: 0;
     width: 32px;
     height: 32px;
-    flex-shrink: 0;
+    font-size: 32px;
   }
 
   &.purchase-required {
     border-color: var(--md-sys-color-warning);
-    background: var(--secondary-400);
+    background: var(--md-sys-color-surface-container-high);
 
     mat-icon {
       color: var(--md-sys-color-warning);
@@ -53,7 +57,7 @@
 
   &.not-eligible {
     border-color: var(--md-sys-color-error);
-    background: var(--secondary-400);
+    background: var(--md-sys-color-surface-container-high);
 
     mat-icon {
       color: var(--md-sys-color-error);
@@ -65,56 +69,59 @@
   flex: 1;
 
   h3 {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
     font-size: 18px;
     font-weight: 600;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   p {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
     font-size: 14px;
     line-height: 1.5;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
 
     &.detail {
-      color: var(--description-color);
       margin-bottom: 16px;
+      color: var(--md-sys-color-on-surface-variant);
     }
   }
 
   button {
-    margin-top: 8px;
     display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--primary);
-    color: var(--theme-white);
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    font-weight: 600;
-    padding: 8px 16px;
-    white-space: nowrap;
     flex-shrink: 0;
+    gap: 8px;
+    align-items: center;
+
     min-width: fit-content;
+    margin-top: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 10px;
+
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+
+    background: var(--md-sys-color-secondary);
 
     mat-icon {
-      font-size: 20px;
       width: 20px;
       height: 20px;
+      font-size: 20px;
     }
   }
 }
 
-@media screen and (max-width: 576px) {
+@media screen and (width <= 576px) {
   .info-box {
     flex-direction: column;
     padding: 16px;
 
     mat-icon {
-      font-size: 24px;
       width: 24px;
       height: 24px;
+      font-size: 24px;
     }
   }
 
@@ -128,8 +135,8 @@
     }
 
     button {
-      width: 100%;
       justify-content: center;
+      width: 100%;
     }
   }
 }

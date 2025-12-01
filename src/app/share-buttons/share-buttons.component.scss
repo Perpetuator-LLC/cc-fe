@@ -1,59 +1,56 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+
 .share-buttons {
   display: inline-flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 
   &.compact {
     gap: 4px;
   }
 
   .share-button {
-    background: var(--primary);
-    color: var(--theme-white);
-    font-weight: 600;
-
-    mat-icon {
-      margin-right: 4px;
-    }
+    // Let Material handle button styling via mat-raised-button
   }
 
   .share-menu-button {
-    color: var(--primary);
+    // Let Material handle icon button styling
   }
 }
 
-// Menu styling - applied globally via the menu's panelClass if needed
-// Or move to global styles.scss if this is used across the app
+// Menu styling
 .share-menu {
   .mat-mdc-menu-item {
     min-height: 48px;
 
     .mat-icon {
-      margin-right: 12px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--theme-color);
+
+      margin-right: 12px;
+
+      color: var(--md-sys-color-on-surface);
 
       svg {
+        display: block;
         width: 20px;
         height: 20px;
-        display: block;
+        fill: currentcolor;
       }
     }
 
     span {
       font-size: 14px;
       font-weight: 500;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
     }
   }
 
   .mat-mdc-menu-item-text {
     display: flex;
-    align-items: center;
     gap: 12px;
+    align-items: center;
   }
 }
 

@@ -1,15 +1,20 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"
-    ><mat-icon>graphic_eq</mat-icon>Teams <span>> </span>
-    <span class="page-title-secondary">All Team List > {{ teamForm.get('name')?.value || '...' }} </span></span
-  >
+  <div class="toolbar-title-wrapper">
+    <span class="page-title">
+      <mat-icon>graphic_eq</mat-icon>
+      <span class="breadcrumb-text">Teams</span>
+      <span class="separator">></span>
+      <span class="breadcrumb-text">All Team List</span>
+      <span class="separator">></span>
+      <span class="page-title-secondary">{{ teamForm.get('name')?.value || '...' }}</span>
+    </span>
+  </div>
 </ng-template>
-<app-message></app-message>
 
 @if (loadingPodcasts) {
   <div class="loading-spinner">
-    <mat-progress-bar diameter="20" value="20" class="thin-progress-bar"></mat-progress-bar>
+    <mat-progress-bar diameter="20" value="20" class="thin-progress-bar" />
   </div>
 }
 <div class="podcast-detail-page">
@@ -80,7 +85,7 @@
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+              <mat-header-cell *matHeaderCellDef />
               <mat-cell *matCellDef="let member" class="text-right">
                 <button
                   class="action-btn"
@@ -93,12 +98,12 @@
                 <mat-menu #teamActionsMenu="matMenu" class="actionMenu">
                   @if (member.role === 'owner') {
                     <button mat-menu-item (click)="openAddMemberDialog(member)">
-                      <app-svg-icon icon="edit"></app-svg-icon>
+                      <app-svg-icon icon="edit" />
                       <span>Edit</span>
                     </button>
                   }
                   <button mat-menu-item (click)="removeUserFromTeam(member.user.uuid)">
-                    <app-svg-icon icon="delete"></app-svg-icon>
+                    <app-svg-icon icon="delete" />
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -106,16 +111,15 @@
             </ng-container>
 
             <!-- Header and Row Declarations -->
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+            <mat-header-row *matHeaderRowDef="displayedColumns" />
+            <mat-row *matRowDef="let row; columns: displayedColumns" />
           </mat-table>
           <mat-paginator
             [pageSize]="pageSize"
             [pageSizeOptions]="pageSizeOptions"
             showFirstLastButtons
             aria-label="Select page of podcasts"
-          >
-          </mat-paginator>
+          />
         </mat-card-content>
       </mat-tab>
       <mat-tab label="Podcasts">
@@ -173,7 +177,7 @@
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <mat-header-cell *matHeaderCellDef></mat-header-cell>
+              <mat-header-cell *matHeaderCellDef />
               <mat-cell *matCellDef="let podcast">
                 <button
                   class="action-btn"
@@ -189,7 +193,7 @@
                     <span>View Details</span>
                   </button>
                   <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
-                    <app-svg-icon icon="delete"></app-svg-icon>
+                    <app-svg-icon icon="delete" />
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -197,16 +201,15 @@
             </ng-container>
 
             <!-- Header and Row Declarations -->
-            <mat-header-row *matHeaderRowDef="podcastsDisplayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: podcastsDisplayedColumns"></mat-row>
+            <mat-header-row *matHeaderRowDef="podcastsDisplayedColumns" />
+            <mat-row *matRowDef="let row; columns: podcastsDisplayedColumns" />
           </mat-table>
           <mat-paginator
             [pageSize]="pageSize"
             [pageSizeOptions]="pageSizeOptions"
             showFirstLastButtons
             aria-label="Select page of podcasts"
-          >
-          </mat-paginator>
+          />
 
           @if (!loadingPodcasts && podcasts.length === 0) {
             <div class="no-podcasts-message">

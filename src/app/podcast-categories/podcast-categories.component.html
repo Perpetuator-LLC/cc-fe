@@ -21,9 +21,7 @@
           <mat-label>Select Sub-categories</mat-label>
           <mat-select (selectionChange)="onSubcategorySelectionChange(parent, $event.value)"
             [value]="getSelectedSubcategories(parent)" multiple>
-            <mat-select-trigger>
-              <!-- Empty to hide default chips -->
-            </mat-select-trigger>
+            <mat-select-trigger />
             <div class="heading-div">
               <h3 class="category-heading">{{ parent }} Category</h3>
               <mat-checkbox [checked]="areAllSubcategoriesSelected(parent)"

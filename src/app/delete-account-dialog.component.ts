@@ -21,7 +21,7 @@ import { MatInputModule } from '@angular/material/input';
             visible, do not use personally identifying information in it.
           </p>
           <div class="action-row">
-            <mat-form-field appearance="fill" style="width:100%">
+            <mat-form-field appearance="fill">
               <mat-label>Delete Confirmation</mat-label>
               <input
                 matInput

@@ -1,12 +1,13 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 [mat-dialog-content] {
+  overflow: auto;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   min-height: 100px;
   max-height: 80vh;
-  overflow: auto;
   padding: 20px;
 }
 

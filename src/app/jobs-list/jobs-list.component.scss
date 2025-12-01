@@ -1,12 +1,12 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 .middle-card {
+  position: relative;
   padding-top: 1.5em;
   padding-inline: 30px;
-  background-color: var(--secondary-color);
-  position: relative;
+  background-color: var(--md-sys-color-surface-container);
 
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     padding-inline: var(--cc-spacing-lg);
   }
 }
@@ -18,24 +18,19 @@
 
   mat-progress-bar {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     z-index: 1000;
+    top: 0;
+    right: 0;
+    left: 0;
   }
 }
 
 // Compact filter in upper right corner
 .filter-container-top-right {
   position: absolute;
+  z-index: 10;
   top: 0;
   right: 0;
-  z-index: 10;
-
-  @media screen and (max-width: 576px) {
-    right: var(--cc-spacing-lg);
-    top: 15px;
-  }
 
   .status-filter-compact {
     width: 140px;
@@ -89,7 +84,7 @@
     .mdc-notched-outline--focused .mdc-notched-outline__leading,
     .mdc-notched-outline--focused .mdc-notched-outline__notch,
     .mdc-notched-outline--focused .mdc-notched-outline__trailing {
-      border-color: var(--primary);
+      border-color: var(--md-sys-color-secondary);
       border-width: 1px;
     }
 
@@ -104,7 +99,7 @@
       color: var(--md-sys-color-on-surface-variant);
     }
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       width: 120px;
       font-size: 11px;
 
@@ -113,21 +108,28 @@
       }
     }
   }
+
+  @media screen and (width <= 576px) {
+    top: 15px;
+    right: var(--cc-spacing-lg);
+  }
 }
 
 .timeline-date-title {
+  margin-bottom: var(--cc-spacing-lg);
   font-size: 20px;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
-  margin-bottom: var(--cc-spacing-lg);
 }
 
 // Empty state styling
 .empty-state {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   padding: 60px var(--cc-spacing-lg);
+
   text-align: center;
 
   .empty-state-content {
@@ -135,25 +137,26 @@
   }
 
   .empty-state-icon {
-    font-size: 64px;
     width: 64px;
     height: 64px;
-    color: var(--md-sys-color-on-surface-variant);
     margin-bottom: var(--cc-spacing-md);
+
+    font-size: 64px;
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   .empty-state-title {
+    margin: 0 0 var(--cc-spacing-md) 0;
     font-size: 24px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
-    margin: 0 0 var(--cc-spacing-md) 0;
   }
 
   .empty-state-message {
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface-variant);
-    line-height: 1.5;
     margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
@@ -161,9 +164,11 @@
 .loading-state {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   padding: 80px var(--cc-spacing-lg);
+
   text-align: center;
 
   mat-spinner {
@@ -171,18 +176,19 @@
   }
 
   .loading-message {
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface-variant);
     margin: 0;
+    font-size: 16px;
     font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 // Legacy filter container (kept for compatibility)
 .filter-container {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
+  justify-content: flex-start;
+
   margin-bottom: var(--cc-spacing-lg);
   padding-top: var(--cc-spacing-lg);
 
@@ -190,7 +196,7 @@
     width: 200px;
     font-size: 14px;
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       width: 100%;
     }
   }
@@ -198,16 +204,18 @@
 
 .chip {
 .status-badge {
-  border-radius: var(--cc-radius-round);
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 100%;
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  color: var(--md-sys-color-on-surface);
   display: inline-flex;
-  justify-content: center;
-  align-items: center;
   gap: var(--cc-spacing-sm);
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-round);
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  color: var(--md-sys-color-on-surface);
 }
 
 // Job status badge styles are now in global styles.scss
@@ -215,10 +223,10 @@
 
 .timeline {
   position: relative;
-  margin: -20px auto 0;
   max-width: 1140px;
+  margin: -20px auto 0;
 
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     margin: 1rem auto;
   }
 }
@@ -228,42 +236,48 @@
 }
 
 .timeline-item {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  position: relative;
   margin-bottom: var(--cc-spacing-lg);
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    left: var(--cc-spacing-lg);
+
+    width: 2px;
+    height: calc(100% + var(--cc-spacing-lg));
+    border-left: 1px solid var(--md-sys-color-outline-variant);
+  }
 
   &:last-child {
     &::before {
       display: none;
     }
   }
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: var(--cc-spacing-lg);
-    border-left: 1px solid var(--md-sys-color-outline-variant);
-    width: 2px;
-    height: calc(100% + var(--cc-spacing-lg));
-  }
 }
 
 .timeline-icon {
   position: relative;
   z-index: 1;
-  width: 46px;
-  min-width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--secondary-500);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
   margin-right: 1.2rem;
-  font-size: 1.5rem;
-  color: var(--theme-white);
   border: 1px solid var(--cc-border-color);
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  color: #ffffff;
+
+  background: var(--md-sys-color-surface-container);
 
   // Colors are defined in global styles.scss
   // Only add component-specific styling here
@@ -271,73 +285,79 @@
   &.job-failed,
   &.job-pending,
   &.job-running {
-    text-shadow: var(--secondary-dark) 1px 1px;
+    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
   }
 }
 
 .timeline-content {
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--cc-radius-md);
-  padding: 1rem 1.5rem;
-  width: 300px;
-  max-width: 100%;
   flex: 1;
 
-  @media screen and (max-width: 576px) {
+  width: 300px;
+  max-width: 100%;
+  padding: 1rem 1.5rem;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--cc-radius-md);
+
+  @media screen and (width <= 576px) {
     padding: 1rem;
   }
 }
 
 .timeline-header {
   display: flex;
+  gap: var(--cc-spacing-md);
   align-items: flex-start;
   justify-content: space-between;
+
   margin-bottom: 0.5rem;
-  gap: var(--cc-spacing-md);
 
   .timeline-left-content {
     display: flex;
-    align-items: center;
+    flex: 1;
     flex-wrap: wrap;
     gap: var(--cc-spacing-sm);
-    flex: 1;
-    min-width: 0;
+    align-items: center;
 
-    @media screen and (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--cc-spacing-sm);
-    }
+    min-width: 0;
 
     // Add bullet separator between timeline-title and timeline-meta
     .timeline-meta::before {
       //content: '-';
       //margin-right: var(--cc-spacing-lg);
-      //color: var(--secondary-500);
+      //color: var(--md-sys-color-surface-container);
       //font-weight: bold;
 
-      @media screen and (max-width: 768px) {
+      @media screen and (width <= 768px) {
         display: none; // Hide on mobile when stacked vertically
       }
+    }
+
+    @media screen and (width <= 768px) {
+      flex-direction: column;
+      gap: var(--cc-spacing-sm);
+      align-items: flex-start;
     }
   }
 }
 
 .timeline-title {
-  font-weight: 600;
+  flex-shrink: 0;
+
   font-size: 14px;
+  font-weight: 600;
   color: var(--md-sys-color-on-surface);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .timeline-status {
+  flex-shrink: 0;
+
   padding: 0.2rem 0.8rem;
   border-radius: var(--cc-spacing-sm);
+
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
-  flex-shrink: 0;
 
   // Colors are defined in global styles.scss
   // Only add component-specific styling here
@@ -345,23 +365,96 @@
   &.job-failed,
   &.job-pending,
   &.job-running {
-    text-shadow: var(--secondary-dark) 1px 1px;
+    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
   }
 }
 
 .timeline-meta {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: var(--cc-spacing-sm);
+  align-items: center;
+
   font-size: 11px;
   color: var(--md-sys-color-on-surface-variant);
-  flex-wrap: wrap;
 
   &.mobile {
     display: none;
   }
 
-  @media screen and (max-width: 768px) {
+  > span {
+    display: flex;
+    gap: var(--cc-spacing-xs);
+    align-items: center;
+    white-space: nowrap;
+
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: var(--cc-spacing-sm);
+      font-weight: bold;
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+
+  .timeline-cost {
+    display: flex;
+    gap: var(--cc-spacing-xs);
+    align-items: center;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    // Ensure the bullet separator applies to timeline-cost
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: var(--cc-spacing-sm);
+      font-weight: bold;
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+
+  .timeline-date {
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .dot-div {
+    display: flex;
+    gap: var(--cc-spacing-md);
+    align-items: center;
+  }
+
+  .dot {
+    display: inline-block;
+
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+
+    background-color: var(--md-sys-color-surface-container);
+  }
+
+  .timeline-actions {
+    display: flex;
+    gap: var(--cc-spacing-sm);
+    align-items: center;
+    margin-left: auto;
+
+    button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+      }
+    }
+  }
+
+  @media screen and (width <= 768px) {
     &.desktop {
       display: none;
     }
@@ -372,87 +465,13 @@
       width: 100%;
     }
   }
-
-  > span {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: var(--cc-spacing-xs);
-
-    &:not(:last-child)::after {
-      content: '•';
-      margin-left: var(--cc-spacing-sm);
-      color: var(--secondary-500);
-      font-weight: bold;
-    }
-  }
-
-  .timeline-cost {
-    display: flex;
-    align-items: center;
-    gap: var(--cc-spacing-xs);
-
-    svg {
-      flex-shrink: 0;
-    }
-
-    // Ensure the bullet separator applies to timeline-cost
-    &:not(:last-child)::after {
-      content: '•';
-      margin-left: var(--cc-spacing-sm);
-      color: var(--secondary-500);
-      font-weight: bold;
-    }
-  }
-
-  .timeline-date {
-    font-weight: 400;
-    font-size: 11px;
-  }
-
-  .dot-div {
-    display: flex;
-    align-items: center;
-    gap: var(--cc-spacing-md);
-  }
-
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--secondary-500);
-    display: inline-block;
-  }
-
-  .timeline-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--cc-spacing-sm);
-    margin-left: auto;
-
-    button {
-      width: 32px;
-      height: 32px;
-      line-height: 32px;
-
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
-    }
-  }
 }
 
 .timeline-message {
-  color: var(--md-sys-color-on-surface);
+  margin-top: var(--cc-spacing-sm);
   font-size: 14px;
   font-weight: 400;
-  margin-top: var(--cc-spacing-sm);
-
-  @media screen and (max-width: 576px) {
-    margin-bottom: var(--cc-spacing-sm);
-  }
+  color: var(--md-sys-color-on-surface);
 
   .job-details {
     display: flex;
@@ -462,11 +481,12 @@
 
   .job-section {
     .section-title {
+      margin: 0 0 3px;
+
       font-size: 10px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface-variant);
       text-transform: uppercase;
-      margin: 0 0 3px 0;
       letter-spacing: 0.5px;
     }
   }
@@ -476,15 +496,15 @@
     color: var(--md-sys-color-on-surface-variant);
 
     &.error-message {
-      color: var(--md-sys-color-error);
       font-weight: 500;
+      color: var(--md-sys-color-error);
     }
   }
 
   .error-message {
     font-size: 10px;
-    color: var(--md-sys-color-error);
     font-weight: 500;
+    color: var(--md-sys-color-error);
   }
 
   .job-links {
@@ -497,38 +517,42 @@
       align-items: center;
 
       .resource-tag {
+        cursor: pointer;
+
         display: inline-flex;
-        align-items: center;
+        flex-shrink: 0;
         gap: var(--cc-spacing-xs);
+        align-items: center;
+
+        height: 22px;
+        min-height: 22px;
         padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+        border: none;
         border-radius: var(--cc-spacing-sm);
+
         font-size: 12px;
         font-weight: 600;
         text-transform: none;
-        height: 22px;
-        min-height: 22px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
         white-space: nowrap;
-        flex-shrink: 0;
+
+        transition: all 0.2s ease;
 
         mat-icon {
-          font-size: 14px;
           width: 14px;
           height: 14px;
           margin: 0;
+          font-size: 14px;
         }
 
         &:hover {
           transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
         }
 
         &.podcast-tag {
-          background: #e3f2fd;
-          color: #1565c0;
           border: 1px solid #bbdefb;
+          color: #1565c0;
+          background: #e3f2fd;
 
           &:hover {
             background: #bbdefb;
@@ -536,9 +560,9 @@
         }
 
         &.episode-tag {
-          background: #f3e5f5;
-          color: #7b1fa2;
           border: 1px solid #e1bee7;
+          color: #7b1fa2;
+          background: #f3e5f5;
 
           &:hover {
             background: #e1bee7;
@@ -546,9 +570,9 @@
         }
 
         &.topic-tag {
-          background: #e8f5e8;
-          color: #2e7d32;
           border: 1px solid #c8e6c9;
+          color: #2e7d32;
+          background: #e8f5e8;
 
           &:hover {
             background: #c8e6c9;
@@ -557,41 +581,49 @@
       }
       }
     }
+
+  @media screen and (width <= 576px) {
+    margin-bottom: var(--cc-spacing-sm);
+  }
   }
 }
 
 .load-more-container {
   display: flex;
   justify-content: center;
-  background-color: var(--secondary-color);
+  background-color: var(--md-sys-color-surface-container);
 
   .load-more-btn {
-    background: var(--primary);
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    border-radius: var(--cc-radius-md);
-    border: 1px solid var(--primary);
-    padding: var(--cc-spacing-md) var(--cc-spacing-lg);
     display: flex;
-    align-items: center;
     gap: var(--cc-spacing-sm);
+    align-items: center;
+
+    padding: var(--cc-spacing-md) var(--cc-spacing-lg);
+    border: 1px solid var(--md-sys-color-secondary);
+    border-radius: var(--cc-radius-md);
+
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+
+    background: var(--md-sys-color-secondary);
+
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: var(--primary-dark, var(--primary));
       transform: translateY(-1px);
+      background: var(--primary-dark, var(--md-sys-color-secondary));
     }
 
     &:disabled {
-      opacity: 0.7;
       cursor: not-allowed;
+      opacity: 0.7;
     }
 
     mat-icon {
-      font-size: 18px;
       width: 18px;
       height: 18px;
+      font-size: 18px;
       animation: spin 1s linear infinite;
     }
 

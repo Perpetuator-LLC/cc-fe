@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { MessageComponent } from '../message/message.component';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { ResearchService, Topic } from '../research.service';
@@ -24,7 +23,7 @@ import { LoadingService } from '../loading.service';
     MatButton,
     MatCard,
     MatIcon,
-    MessageComponent,
+
     MatProgressBarModule,
     MatCardContent,
     MatTableModule,

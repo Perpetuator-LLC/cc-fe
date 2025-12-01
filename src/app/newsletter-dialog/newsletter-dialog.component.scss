@@ -2,8 +2,9 @@
 .loading-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 16px;
+  align-items: center;
+
   padding: 20px;
 }
 
@@ -16,7 +17,7 @@ mat-dialog-content {
   padding: 20px;
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   mat-dialog-content {
     min-width: 300px;
   }

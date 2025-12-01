@@ -9,7 +9,6 @@ import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
@@ -39,7 +38,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     MatButton,
     MatLabel,
     MatCheckbox,
-    MessageComponent,
+
     MatError,
     MatHint,
     MatCardContent,

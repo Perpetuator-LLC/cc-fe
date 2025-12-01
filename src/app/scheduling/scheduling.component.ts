@@ -21,7 +21,6 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MessageComponent } from '../message/message.component';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { parseScheduleArgs } from '../utils/schedule';
 
@@ -51,7 +50,7 @@ import { parseScheduleArgs } from '../utils/schedule';
     MatMenuItem,
     MatMenuTrigger,
     MatTooltip,
-    MessageComponent,
+
     SvgIconComponent,
   ],
   templateUrl: './scheduling.component.html',
