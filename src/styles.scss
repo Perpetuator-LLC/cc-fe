@@ -187,53 +187,52 @@ body.light {
 
 // ============================================================================
 // TOOLBAR TITLE TRUNCATION - Critical for long titles not pushing buttons off screen
-// !important used here because these are global overrides for dynamically inserted content
-// that needs to work across all components regardless of specificity
+// Using higher specificity to ensure these styles work across all components
 // ============================================================================
-.toolbar-title-wrapper {
-  overflow: hidden !important;
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
+body .toolbar-title-wrapper {
+  overflow: hidden;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
-.page-title {
-  overflow: hidden !important;
-  display: flex !important;
-  gap: 8px !important; // MD3 4px grid
-  align-items: center !important;
+body .page-title {
+  overflow: hidden;
+  display: flex;
+  gap: 8px; // MD3 4px grid
+  align-items: center;
 
-  min-width: 0 !important;
-  max-width: 100% !important;
+  min-width: 0;
+  max-width: 100%;
 
   mat-icon {
-    flex-shrink: 0 !important;
+    flex-shrink: 0;
   }
 
   .breadcrumb-text,
   .separator {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .page-title-secondary {
-    overflow: hidden !important;
-    flex: 1 1 0 !important;
+    overflow: hidden;
+    flex: 1 1 0;
 
-    min-width: 0 !important;
-    max-width: 100% !important;
+    min-width: 0;
+    max-width: 100%;
 
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
-.toolbar-container {
+body .toolbar-container {
   .hamburger-icon {
-    flex-shrink: 0 !important;
+    flex-shrink: 0;
   }
 
   .push-right {
-    flex-shrink: 0 !important;
+    flex-shrink: 0;
   }
 }

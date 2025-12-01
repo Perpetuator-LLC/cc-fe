@@ -2,8 +2,8 @@
 .message-container {
   position: fixed;
   z-index: 3000; /* Above cookie banner (z-index: 2000) */
-  right: 24px; // MD3 spacing
-  bottom: 24px; // MD3 spacing
+  right: 24px;
+  bottom: 24px;
 
   width: 360px; // Slightly wider for better readability
   border-radius: 12px; // MD3 medium radius
@@ -14,7 +14,7 @@
 .mat-mdc-card.message-card {
   padding-top: 0;
   border: 1px solid var(--md-sys-color-outline-variant);
-  background-color: var(--md-sys-color-surface-container-high) !important; // Solid background like dialog
+  background-color: var(--md-sys-color-surface-container-high);
   box-shadow: var(--md-sys-elevation-level3); // Elevated like a dialog
 }
 
@@ -24,7 +24,7 @@
   overflow: hidden;
 
   margin-bottom: 8px; // MD3 spacing
-  padding-top: 30px;
+  padding-top: 32px;
   border-radius: 12px; // MD3 medium radius
 
   .timeout-progress {
@@ -66,26 +66,26 @@
   align-items: center;
   justify-content: center;
 
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-  padding: var(--cc-spacing-sm);
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 8px;
   border-radius: 50%;
 }
 
 .message-text {
   flex: 1;
-  padding-right: 30px;
-  padding-left: var(--cc-spacing-sm);
+  padding-right: 32px;
+  padding-left: 8px;
   overflow-wrap: break-word;
 }
 
 .message-progress {
-  margin-top: var(--cc-spacing-sm);
+  margin-top: 8px;
 }
 
 .mat-mdc-card-content {
-  padding: var(--cc-spacing-sm);
+  padding: 8px;
 }
 
 .mat-card-content .mat-icon {
@@ -120,7 +120,7 @@
       background-color: var(--md-sys-color-error);
 
       mat-icon {
-        color: var(--md-sys-color-on-error) !important;
+        color: var(--md-sys-color-on-error);
       }
     }
   }
@@ -134,7 +134,7 @@
       background-color: var(--md-extended-color-warning-color);
 
       mat-icon {
-        color: var(--md-extended-color-warning-on-color) !important;
+        color: var(--md-extended-color-warning-on-color);
       }
     }
   }
@@ -148,7 +148,7 @@
       background-color: var(--md-extended-color-info-color);
 
       mat-icon {
-        color: var(--md-extended-color-info-on-color) !important;
+        color: var(--md-extended-color-info-on-color);
       }
     }
   }
@@ -162,7 +162,7 @@
       background-color: var(--md-extended-color-success-color);
 
       mat-icon {
-        color: var(--md-extended-color-success-on-color) !important;
+        color: var(--md-extended-color-success-on-color);
       }
     }
   }

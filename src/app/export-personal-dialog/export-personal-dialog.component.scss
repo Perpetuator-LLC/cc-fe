@@ -1,11 +1,11 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .export-dialog {
-    padding: 28px;
+    padding: 24px;
 }
 
 .export-dialog .mat-mdc-dialog-title {
     padding: 0;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .export-dialog .mat-mdc-dialog-title::before {
@@ -22,16 +22,16 @@
 }
 
 .action-row {
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
 mat-dialog-actions {
-    padding: 20px 0 0;
+    padding: 16px 0 0;
 }
 
 .cancel-btn {
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
@@ -41,7 +41,7 @@ mat-dialog-actions {
 
 .export-btn {
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
-    color: #ffffff;
+    border-radius: 8px;
+    color: var(--md-sys-color-on-secondary);
     background: var(--md-sys-color-secondary);
 }
