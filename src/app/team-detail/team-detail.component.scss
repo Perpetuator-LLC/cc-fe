@@ -29,16 +29,16 @@
     background: transparent;
 
     .mat-icon {
-      width: 30px;
-      height: 30px;
-      font-size: 30px;
+      width: 28px;
+      height: 28px;
+      font-size: 28px;
     }
   }
 }
 
 .team-card,
 .members-card {
-  margin-bottom: 1em;
+  margin-bottom: 16px;
 }
 
 mat-divider {
@@ -49,7 +49,7 @@ mat-divider {
   padding: 24px;
 
   form {
-    margin-bottom: 1em;
+    margin-bottom: 16px;
   }
 }
 
@@ -122,7 +122,7 @@ mat-divider {
 
 .file-input-wrapper {
   div {
-    margin-bottom: 1em;
+    margin-bottom: 16px;
 
     img {
       max-width: 300px;
