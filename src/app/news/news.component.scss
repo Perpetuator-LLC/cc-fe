@@ -1008,18 +1008,18 @@
 }
 
 .tag-content-analysis {
-  color: white;
-  background: #3f51b5;
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
 }
 
 .tag-content-opinion {
-  color: white;
-  background: #9c27b0;
+  color: var(--md-sys-color-on-tertiary);
+  background: var(--md-sys-color-tertiary);
 }
 
 .tag-content-data {
-  color: white;
-  background: #00bcd4;
+  color: var(--md-sys-color-on-secondary);
+  background: var(--md-sys-color-secondary);
 }
 
 // Default tag

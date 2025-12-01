@@ -521,7 +521,7 @@
 
       &.affiliate-stripe-status {
         &.fully-active {
-          color: #ffffff;
+          color: var(--md-sys-color-on-success);
           background: var(--md-sys-color-success);
         }
 
@@ -532,22 +532,22 @@
         }
 
         &.details-pending {
-          color: var(--md-sys-color-surface-container-high);
+          color: var(--md-sys-color-on-warning);
           background: var(--md-sys-color-warning);
         }
 
         &.onboarding-incomplete {
-          color: var(--md-sys-color-surface-container-high);
+          color: var(--md-sys-color-on-warning);
           background: var(--md-sys-color-warning);
         }
 
         &.payouts-disabled, &.charges-disabled {
-          color: var(--md-sys-color-surface-container-high);
+          color: var(--md-sys-color-on-warning);
           background: var(--md-sys-color-warning);
         }
 
         &.restricted {
-          color: #ffffff;
+          color: var(--md-sys-color-on-error);
           background: var(--md-sys-color-error);
         }
       }
@@ -559,12 +559,12 @@
 
       &.status-badge {
         &.active {
-          color: #ffffff;
+          color: var(--md-sys-color-on-success);
           background: var(--md-sys-color-success);
         }
 
         &.suspended {
-          color: #ffffff;
+          color: var(--md-sys-color-on-error);
           background: var(--md-sys-color-error);
         }
 
