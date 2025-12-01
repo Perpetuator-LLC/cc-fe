@@ -84,7 +84,7 @@
           border: 1px solid var(--md-sys-color-outline-variant);
           border-radius: 8px;
 
-          background: #ffffff;
+          background: var(--md-sys-color-surface);
 
           .zoom-level {
             min-width: 50px;
@@ -160,7 +160,7 @@
       border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 10px;
 
-      background: #ffffff;
+      background: var(--md-sys-color-surface);
 
       &.mermaid-graph {
         overflow: auto;
@@ -344,10 +344,10 @@
       padding: 2px 4px;
       border-radius: 3px;
       font-size: 12px;
-      background-color: #ffffff;
+      background-color: var(--md-sys-color-surface);
 
       rect {
-        fill: #ffffff;
+        fill: var(--md-sys-color-surface);
         stroke: var(--md-sys-color-outline-variant);
       }
     }

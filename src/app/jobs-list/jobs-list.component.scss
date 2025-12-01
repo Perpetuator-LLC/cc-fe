@@ -275,7 +275,7 @@
   border-radius: 50%;
 
   font-size: 1.5rem;
-  color: #ffffff;
+  color: var(--md-sys-color-on-surface-variant);
 
   background: var(--md-sys-color-surface-container);
 
@@ -550,32 +550,32 @@
         }
 
         &.podcast-tag {
-          border: 1px solid #bbdefb;
-          color: #1565c0;
-          background: #e3f2fd;
+          border: 1px solid var(--md-sys-color-primary-container);
+          color: var(--md-sys-color-primary);
+          background: var(--md-sys-color-primary-container);
 
           &:hover {
-            background: #bbdefb;
+            background: var(--md-sys-color-primary-container);
           }
         }
 
         &.episode-tag {
-          border: 1px solid #e1bee7;
-          color: #7b1fa2;
-          background: #f3e5f5;
+          border: 1px solid var(--md-sys-color-tertiary-container);
+          color: var(--md-sys-color-tertiary);
+          background: var(--md-sys-color-tertiary-container);
 
           &:hover {
-            background: #e1bee7;
+            background: var(--md-sys-color-tertiary-container);
           }
         }
 
         &.topic-tag {
-          border: 1px solid #c8e6c9;
-          color: #2e7d32;
-          background: #e8f5e8;
+          border: 1px solid var(--md-extended-color-success-color-container);
+          color: var(--md-extended-color-success-color);
+          background: var(--md-extended-color-success-color-container);
 
           &:hover {
-            background: #c8e6c9;
+            background: var(--md-extended-color-success-color-container);
           }
         }
       }
