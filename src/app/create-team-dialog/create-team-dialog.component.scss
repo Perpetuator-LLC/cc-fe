@@ -9,7 +9,7 @@ mat-dialog-content {
 }
 
 .cancel-btn {
-    width: 88px;
+    width: 96px; // Adjusted from 88px to MD3 grid
     height: 40px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
@@ -20,7 +20,7 @@ mat-dialog-content {
 }
 
 .saveTeamBtn {
-    width: 224px;
+    min-width: 224px; // Changed to min-width for flexibility
     height: 40px;
     border-radius: 8px;
 
