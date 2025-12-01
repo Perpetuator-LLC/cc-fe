@@ -485,7 +485,7 @@
 
         padding: 4px 8px;
         border: 1px solid rgb(244 67 54 / 0.3);
-        border-radius: 6px;
+        border-radius: 8px;
 
         font-size: 11px;
         font-weight: 500;
@@ -505,7 +505,7 @@
       .rss-feed-cell,
       .date-cell {
         display: flex;
-        gap: 6px;
+        gap: 8px;
         align-items: center;
         color: var(--md-sys-color-on-surface-variant);
 
@@ -920,7 +920,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
 
   .rss-feed-badge-item {

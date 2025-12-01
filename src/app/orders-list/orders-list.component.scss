@@ -93,16 +93,16 @@
 
     .button-container {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
       margin-bottom: var(--cc-spacing-lg);
 
       button {
         cursor: pointer;
 
-        padding: 6px 10px;
+        padding: 8px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 6px;
+        border-radius: 8px;
 
         font-size: 12px;
         font-weight: 500;
@@ -141,7 +141,7 @@
       max-width: 508px;
       padding: 12px;
       border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 10px;
+      border-radius: 8px;
 
       font-size: 14px;
       font-weight: 600;
@@ -156,8 +156,8 @@
 
       span {
         margin-left: 10px;
-        padding: 6px 10px;
-        border-radius: 6px;
+        padding: 8px;
+        border-radius: 8px;
 
         font-size: 12px;
         font-weight: 600;
@@ -223,7 +223,7 @@
       justify-content: center;
 
       height: 24px;
-      padding: 0 10px;
+      padding: 0 8px;
       border-radius: 16px;
 
       font-size: 12px;

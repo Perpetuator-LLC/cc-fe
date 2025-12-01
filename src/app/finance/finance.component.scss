@@ -199,7 +199,7 @@
 
       .feature-card {
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
         text-align: center;
         transition: transform 0.2s, box-shadow 0.2s;
 
@@ -295,7 +295,7 @@
             align-items: center;
 
             padding: 12px 24px;
-            border-radius: 10px;
+            border-radius: 8px;
 
             font-size: 16px;
             font-weight: 600;
@@ -411,7 +411,7 @@
     padding: 8px;
 
     .hero-section {
-      padding: 32px 10px;
+      padding: 32px 8px;
 
       .hero-content {
         h1 {
