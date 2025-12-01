@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 
 .affiliate-dashboard-container {
-  padding: 20px;
+  padding: 16px;
 }
 
 .admin-link-card {
@@ -11,12 +11,12 @@
   background: var(--md-sys-color-surface-container);
 
   mat-card-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   .admin-link-content {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
 
     > mat-icon {
@@ -75,7 +75,7 @@
 
 .loading-container-small {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
 
   padding: 16px;
@@ -93,10 +93,10 @@
 .loading-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 
-  margin-top: 50px;
+  margin-top: 48px;
 
   p {
     font-size: 16px;
@@ -106,7 +106,7 @@
 
 .not-eligible-container {
   max-width: 800px;
-  margin: 50px auto;
+  margin: 48px auto;
 }
 
 .eligibility-card {
@@ -115,13 +115,13 @@
   background-color: var(--md-sys-color-surface-container-low);
 
   mat-card-content {
-    padding: 30px;
+    padding: 32px;
   }
 }
 
 .eligibility-message {
   display: flex;
-  gap: 20px;
+  gap: 16px;
 
   mat-icon {
     flex-shrink: 0;
@@ -148,7 +148,7 @@
     }
 
     p.detail {
-      margin: 0 0 20px;
+      margin: 0 0 16px;
       font-size: 14px;
       line-height: 1.6;
       color: var(--md-sys-color-on-surface-variant);
@@ -156,7 +156,7 @@
 
     .actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
 
       button {
         display: inline-flex;
@@ -167,10 +167,10 @@
         min-width: fit-content;
         padding: 8px 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
 
         font-weight: 600;
-        color: #ffffff;
+        color: var(--md-sys-color-on-secondary);
         white-space: nowrap;
 
         background: var(--md-sys-color-secondary);
@@ -207,20 +207,20 @@
 }
 
 .page-title {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   font-size: 24px;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
 }
 
 .status-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background-color: var(--md-sys-color-surface-container-low);
 
   mat-card-content {
-    padding: 20px;
+    padding: 16px;
   }
 }
 
@@ -277,11 +277,11 @@
 
 .network-warning {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: flex-start;
 
   margin-top: 16px;
-  padding: 12px 16px;
+  padding: 16px;
   border-left: 4px solid var(--md-sys-color-error);
   border-radius: 4px;
 
@@ -302,7 +302,7 @@
   // Default: suspended (red)
   &.suspended {
     border-left-color: var(--md-sys-color-error);
-    background: rgb(255 74 74 / 0.1);
+    background: var(--md-sys-color-error-container);
 
     mat-icon {
       color: var(--md-sys-color-error);
@@ -316,21 +316,21 @@
   // Under review (yellow/orange)
   &.under-review {
     border-left-color: var(--md-sys-color-warning);
-    background: rgb(255 193 7 / 0.1);
+    background: var(--md-extended-color-warning-color-container);
 
     mat-icon {
       color: var(--md-sys-color-warning);
     }
 
     p {
-      color: #f57c00; // Darker orange for better readability
+      color: var(--md-sys-color-warning);
     }
   }
 
   // Network closed (gray)
   &.network-closed {
     border-left-color: var(--md-sys-color-surface-container-high);
-    background: rgb(158 158 158 / 0.1);
+    background: var(--md-sys-color-surface-container);
 
     mat-icon {
       color: var(--md-sys-color-surface-container-high);
@@ -344,11 +344,11 @@
 
 .eligibility-message-display {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: flex-start;
 
   margin-top: 16px;
-  padding: 12px 16px;
+  padding: 16px;
   border-left: 4px solid var(--md-sys-color-secondary);
   border-radius: 4px;
 
@@ -375,7 +375,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .stat-card {
@@ -386,7 +386,7 @@
   mat-card-content {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 
     padding: 16px;
@@ -409,25 +409,25 @@
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--md-sys-color-on-surface-variant);
   text-align: center;
 }
 
 .pending-request-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background-color: var(--md-sys-color-surface-container-high);
 
   mat-card-content {
-    padding: 20px;
+    padding: 16px;
   }
 }
 
 .pending-request-content {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 
   @media screen and (width <= 768px) {
@@ -476,7 +476,7 @@
 
   .request-reason {
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-style: italic;
     color: var(--md-sys-color-on-surface-variant);
   }
@@ -491,9 +491,9 @@
     align-items: center;
 
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 6px;
+    border-radius: 8px;
 
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
     white-space: nowrap;
@@ -525,13 +525,13 @@
 .link-card,
 .brand-image-card,
 .balance-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background-color: var(--md-sys-color-surface-container-low);
 
   mat-card-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   h2 {
@@ -550,10 +550,10 @@
 
 .link-display {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 
-  padding: 12px 16px;
+  padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -573,7 +573,7 @@
 .action-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 
   button {
     display: inline-flex;
@@ -581,8 +581,8 @@
     gap: 8px;
     align-items: center;
 
-    padding: 10px 16px;
-    border-radius: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
 
     font-weight: 600;
     white-space: nowrap;
@@ -599,7 +599,7 @@
 .share-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 
   button {
     display: inline-flex;
@@ -608,7 +608,7 @@
     align-items: center;
 
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     white-space: nowrap;
 
@@ -626,7 +626,7 @@
 .brand-image-card {
   .help-text {
     margin: 0 0 16px;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
   }
 }
@@ -658,11 +658,11 @@
     transition: opacity 0.2s;
 
     button {
-      color: white;
-      background: rgb(0 0 0 / 0.7);
+      color: var(--md-sys-color-on-primary);
+      background: var(--md-sys-color-scrim);
 
       &:hover {
-        background: rgb(0 0 0 / 0.9);
+        background: var(--md-sys-color-shadow);
       }
     }
   }
@@ -683,18 +683,18 @@
 
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
       justify-content: center;
 
       border-radius: 8px;
 
-      background: rgb(0 0 0 / 0.7);
+      background: var(--md-sys-color-scrim);
 
       p {
         margin: 0;
         font-weight: 600;
-        color: white;
+        color: var(--md-sys-color-on-primary);
       }
     }
   }
@@ -715,7 +715,7 @@
   &.dragging {
     transform: scale(1.02);
     border-color: var(--md-sys-color-secondary);
-    background: rgb(241 74 0 / 0.05);
+    background: var(--md-sys-color-secondary-container);
 
     .dropzone-content {
       mat-icon {
@@ -732,7 +732,7 @@
   .dropzone-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
 
     mat-icon {
@@ -754,7 +754,7 @@
 
     .dropzone-or {
       margin: 0;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
     }
 
@@ -763,8 +763,8 @@
       gap: 8px;
       align-items: center;
 
-      padding: 10px 20px;
-      border-radius: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
 
       font-weight: 600;
       white-space: nowrap;
@@ -791,22 +791,22 @@
 }
 
 .upload-requirements {
-  padding: 12px 16px;
+  padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background: var(--md-sys-color-surface-container-high);
 
   p {
     margin: 0 0 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
   }
 
   ul {
     margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
+    padding-left: 16px;
+    font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
 
     li {
@@ -822,10 +822,10 @@
     align-items: center;
 
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 600;
-    color: #ffffff;
+    color: var(--md-sys-color-on-secondary);
     white-space: nowrap;
 
     background: var(--md-sys-color-secondary);
@@ -849,7 +849,7 @@
 .conversion-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 
   button {
     display: inline-flex;
@@ -858,7 +858,7 @@
     align-items: center;
 
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 600;
     white-space: nowrap;
@@ -872,7 +872,7 @@
   }
 
   button[color="primary"] {
-    color: #ffffff;
+    color: var(--md-sys-color-on-secondary);
     background: var(--md-sys-color-secondary);
   }
 }
@@ -885,7 +885,7 @@
 }
 
 .table-container {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .history-table {
@@ -918,15 +918,15 @@
   align-items: center;
   justify-content: center;
 
-  height: 22px;
-  padding: 0 10px;
+  height: 24px;
+  padding: 0 8px;
   border-radius: 20px;
 
   font-size: 12px;
   font-weight: 500;
 
   &.completed {
-    color: #ffffff;
+    color: var(--md-sys-color-on-primary);
     background: var(--md-sys-color-success);
   }
 
@@ -936,7 +936,7 @@
   }
 
   &.failed, &.rejected {
-    color: #ffffff;
+    color: var(--md-sys-color-on-primary);
     background: var(--md-sys-color-error);
   }
 }
@@ -956,7 +956,7 @@
 
 @media screen and (width <= 576px) {
   .affiliate-dashboard-container {
-    padding: 10px;
+    padding: 8px;
   }
 
   .stats-grid {
@@ -979,17 +979,17 @@
 }
 
 .admin-panel-card {
-  margin-top: 20px;
+  margin-top: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background-color: var(--md-sys-color-surface-container-low);
 
   mat-card-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   h2 {
-    margin: 0 0 20px;
+    margin: 0 0 16px;
     font-size: 18px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
@@ -1022,7 +1022,7 @@
     white-space: nowrap;
 
     .old-code {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
       text-decoration: line-through;
     }
@@ -1047,7 +1047,7 @@
 
     max-width: 200px;
 
-    font-size: 13px;
+    font-size: 12px;
     font-style: italic;
     color: var(--md-sys-color-on-surface-variant);
     text-overflow: ellipsis;
@@ -1062,13 +1062,13 @@
     button {
       display: inline-flex;
       flex-shrink: 0;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
 
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
 
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       white-space: nowrap;
 
@@ -1082,7 +1082,7 @@
 
     button[color="primary"] {
       border: 1px solid var(--md-sys-color-outline-variant);
-      color: #ffffff;
+      color: var(--md-sys-color-on-secondary);
       background: var(--md-sys-color-secondary);
     }
 
@@ -1092,7 +1092,7 @@
       background: var(--md-sys-color-surface-container-high);
 
       &:hover {
-        background: rgb(255 74 74 / 0.1);
+        background: var(--md-sys-color-error-container);
       }
     }
   }
@@ -1111,12 +1111,12 @@
 }
 
 .stripe-status-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border-radius: 8px;
 
   &.incomplete {
-    border-color: var(--md-sys-color-warning, #ff9800);
+    border-color: var(--md-sys-color-warning);
   }
 
   h2 {
@@ -1131,7 +1131,7 @@
     gap: 16px;
     align-items: flex-start;
 
-    padding: 20px;
+    padding: 16px;
     border-radius: 8px;
 
     mat-icon:first-child {
@@ -1165,7 +1165,7 @@
 
         padding: 8px 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
 
         font-weight: 600;
         white-space: nowrap;
@@ -1182,20 +1182,20 @@
     }
 
     &.incomplete {
-      border: 1px solid var(--md-sys-color-warning, #ff9800);
-      background: rgb(255 152 0 / 0.1);
+      border: 1px solid var(--md-sys-color-warning);
+      background: var(--md-extended-color-warning-color-container);
 
       mat-icon {
-        color: var(--md-sys-color-warning, #ff9800);
+        color: var(--md-sys-color-warning);
       }
     }
 
     &.complete {
-      border: 1px solid var(--md-sys-color-success, #4caf50);
-      background: rgb(76 175 80 / 0.1);
+      border: 1px solid var(--md-sys-color-success);
+      background: var(--md-extended-color-success-color-container);
 
       mat-icon {
-        color: var(--md-sys-color-success, #4caf50);
+        color: var(--md-sys-color-success);
       }
     }
   }
@@ -1221,12 +1221,12 @@
 
         &.enabled {
           font-weight: 600;
-          color: var(--md-sys-color-success, #4caf50);
+          color: var(--md-sys-color-success);
         }
 
         &.disabled {
           font-weight: 600;
-          color: var(--md-sys-color-error, #f44336);
+          color: var(--md-sys-color-error);
         }
       }
     }

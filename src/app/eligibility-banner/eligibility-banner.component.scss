@@ -97,10 +97,10 @@
     margin-top: 8px;
     padding: 8px 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 600;
-    color: #ffffff;
+    color: var(--md-sys-color-on-secondary);
     white-space: nowrap;
 
     background: var(--md-sys-color-secondary);
@@ -131,7 +131,7 @@
     }
 
     p {
-      font-size: 13px;
+      font-size: 12px;
     }
 
     button {

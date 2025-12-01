@@ -31,19 +31,19 @@
   background-color: var(--md-sys-color-surface-container-low);
 }
 
-mat-card-content {
+.landing-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 
-  padding: 30px;
+  padding: 32px;
 }
 
 .brand-image-container {
   width: 100%;
   max-width: 512px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .brand-image {
@@ -81,7 +81,7 @@ mat-card-content {
     flex-shrink: 0;
 
     min-width: fit-content;
-    padding: 10px 16px;
+    padding: 8px 16px;
 
     font-weight: 600;
     white-space: nowrap;
@@ -89,8 +89,8 @@ mat-card-content {
 
   button[color="primary"] {
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
-    color: #ffffff;
+    border-radius: 8px;
+    color: var(--md-sys-color-on-primary);
     background: var(--md-sys-color-secondary);
   }
 }
@@ -98,7 +98,7 @@ mat-card-content {
 .existing-affiliate-message {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 
   text-align: center;

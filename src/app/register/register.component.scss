@@ -36,9 +36,9 @@ mat-card.register-card {
   .login-btn {
     width: 100%;
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
-    color: #ffffff;
+    color: var(--md-sys-color-on-tertiary);
 
     background: var(--md-sys-color-tertiary);
 
@@ -47,7 +47,7 @@ mat-card.register-card {
       cursor: not-allowed;
       color: var(--md-sys-color-on-surface-variant) !important;
       opacity: 0.5;
-      background: var(--secondary-color-dark) !important;
+      background: var(--md-sys-color-secondary-container) !important;
     }
   }
 
