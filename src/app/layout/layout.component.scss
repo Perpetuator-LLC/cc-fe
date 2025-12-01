@@ -57,7 +57,7 @@ mat-sidenav-content mat-toolbar {
       width: 142px;
       height: 48px;
 
-      font-family: Sarabun;
+      font-family: Sarabun, sans-serif;
       font-size: 16px;
       font-weight: 400;
 
@@ -300,7 +300,7 @@ mat-nav-list {
   cursor: pointer;
 
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 
   text-align: center;
@@ -630,8 +630,8 @@ mat-nav-list {
         gap: 8px;
         align-items: center;
 
-        padding: 13px 10px;
-        border-radius: 10px;
+        padding: 12px 8px;
+        border-radius: 8px;
 
         color: #ffffff;
         text-decoration: none;
@@ -711,7 +711,7 @@ mat-nav-list {
           height: 28px;
           padding-inline: 6px;
           border: 1px solid var(--md-sys-color-outline-variant);
-          border-radius: 6px;
+          border-radius: 8px;
 
           font-size: 12px;
           font-weight: 500;

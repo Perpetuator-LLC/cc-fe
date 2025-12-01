@@ -106,7 +106,7 @@
 
 .episode-card {
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--md-sys-color-surface-container) !important;
 
   .episode-header {
@@ -208,7 +208,7 @@
   margin-bottom: 24px;
   padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border-radius: 8px;
 
   background: var(--md-sys-color-surface-container-high);
 
@@ -235,7 +235,7 @@
   margin-bottom: 24px;
   padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
 
@@ -301,7 +301,7 @@
     align-items: center;
 
     padding: 12px 20px;
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 600;
     color: var(--md-sys-color-on-secondary);

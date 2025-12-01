@@ -126,7 +126,7 @@
 //    min-width: fit-content;
 //    padding: 8px 16px;
 //    border: 1px solid var(--md-sys-color-outline-variant);
-//    border-radius: 10px;
+//    border-radius: 8px;
 //
 //    font-weight: 600;
 //    color: #ffffff;
@@ -293,7 +293,7 @@
 
   .chip {
     display: inline-flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
     justify-content: center;
 
@@ -317,7 +317,7 @@
     img {
       width: 36px;
       height: 36px;
-      border-radius: 6px;
+      border-radius: 8px;
       object-fit: cover;
     }
 
@@ -542,7 +542,7 @@
         height: 24px;
 
         //letter-spacing: 0;
-        padding: 0 10px;
+        padding: 0 8px;
         border-radius: 16px;
 
         font-size: 12px;
@@ -564,7 +564,7 @@
     //  min-width: fit-content;
     //  padding: 8px 16px;
     //  border: 1px solid var(--md-sys-color-outline-variant);
-    //  border-radius: 10px;
+    //  border-radius: 8px;
     //
     //  font-size: 14px;
     //  font-weight: 600;

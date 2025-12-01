@@ -805,7 +805,7 @@ mat-divider {
 .podcast-image-preview {
   width: 100%;
   height: 100%;
-  border-radius: 6px;
+  border-radius: 8px;
   object-fit: contain;
 }
 
@@ -832,9 +832,9 @@ mat-divider {
   align-items: center;
 
   width: 322px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border-radius: 8px;
 
   background-color: var(--md-sys-color-surface-container-low);
 
@@ -1005,7 +1005,7 @@ mat-divider {
     align-items: center;
 
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: 8px;
 
     font-size: 12px;
     font-weight: 500;
