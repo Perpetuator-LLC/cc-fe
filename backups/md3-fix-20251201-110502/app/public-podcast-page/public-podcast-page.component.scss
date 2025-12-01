@@ -1,0 +1,311 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.public-podcast-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+
+  .breadcrumb {
+    margin-bottom: 20px;
+
+    .breadcrumb-link {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+
+      font-weight: 500;
+      color: var(--md-sys-color-secondary);
+      text-decoration: none;
+
+      transition: opacity 0.2s;
+
+      mat-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+      }
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .loading-container,
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 400px;
+
+    text-align: center;
+
+    mat-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 64px;
+      color: var(--md-sys-color-error);
+    }
+  }
+
+  .podcast-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+    .podcast-info {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+
+      .podcast-image {
+        flex-shrink: 0;
+
+        width: 200px;
+        height: 200px;
+        border-radius: 10px;
+
+        object-fit: cover;
+      }
+
+      .podcast-details {
+        flex: 1;
+
+        h1 {
+          margin: 0 0 12px;
+          font-size: 28px;
+          font-weight: 700;
+          color: var(--md-sys-color-secondary);
+        }
+
+        .description {
+          margin: 0 0 12px;
+          line-height: 1.6;
+          color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .owner {
+          margin: 0 0 12px;
+          font-weight: 500;
+          color: var(--md-sys-color-on-surface-variant);
+
+          a {
+            color: var(--md-sys-color-secondary);
+            text-decoration: none;
+            transition: opacity 0.2s;
+
+            &:hover {
+              text-decoration: underline;
+              opacity: 0.7;
+            }
+          }
+        }
+
+        .categories {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 16px;
+
+          .category-badge {
+            display: inline-block;
+
+            padding: 4px 12px;
+            border-radius: 16px;
+
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+
+            background: var(--md-sys-color-surface-container-high);
+
+            transition: background 0.2s;
+
+            &:hover {
+              background: var(--md-sys-color-surface-container);
+            }
+
+            &.subcategory {
+              background: var(--md-sys-color-surface-container-high);
+            }
+          }
+        }
+
+        .stats {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          align-items: center;
+
+          .stat {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+
+            mat-icon {
+              width: 18px;
+              height: 18px;
+              font-size: 18px;
+            }
+          }
+        }
+      }
+    }
+
+    .podcast-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .episodes-section {
+    h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--md-sys-color-secondary);
+    }
+
+    .no-episodes {
+      padding: 40px;
+      color: var(--md-sys-color-on-surface-variant);
+      text-align: center;
+    }
+
+    .episodes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .episode-card {
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 10px;
+
+        .episode-header {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+          justify-content: space-between;
+
+          margin-bottom: 12px;
+
+          h3 {
+            flex: 1;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+
+            .episode-title {
+              color: var(--md-sys-color-secondary);
+              text-decoration: none;
+              transition: color 0.2s;
+
+              &:hover {
+                color: var(--md-sys-color-surface-container);
+              }
+            }
+          }
+
+          .episode-date {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: nowrap;
+          }
+        }
+
+        .episode-description {
+          margin-bottom: 16px;
+          line-height: 1.6;
+          color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .episode-player {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 16px;
+
+          audio {
+            flex: 1;
+            height: 40px;
+          }
+
+          .duration {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: nowrap;
+          }
+        }
+
+        .episode-actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          padding-top: 12px;
+          border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+      }
+    }
+
+    mat-paginator {
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      background: transparent;
+    }
+  }
+
+  @media (width <= 768px) {
+    padding-inline: 20px;
+
+    .podcast-header {
+      .podcast-info {
+        flex-direction: column;
+
+        .podcast-image {
+          aspect-ratio: 1;
+          width: 100%;
+          max-width: 300px;
+          height: auto;
+        }
+      }
+
+      .podcast-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+
+    .episodes-section {
+      .episode-card {
+        .episode-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .episode-player {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .episode-actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    }
+  }
+}
+

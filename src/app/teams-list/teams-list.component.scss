@@ -6,12 +6,12 @@
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding-top: 12px;
 
   .search-filter {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
   }
 
@@ -82,9 +82,9 @@
       background-color: transparent;
 
       .mat-icon {
-        width: 20px;
-        height: 20px;
-        font-size: 20px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
       }
 
       &.active {
@@ -101,7 +101,7 @@
 
 .teams-container {
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
   border-radius: 8px;
 
   table {
@@ -145,7 +145,7 @@
 
   .t_name {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 
     .name {
@@ -184,7 +184,7 @@
   background-color: var(--md-sys-color-surface-container);
 
   @media screen and (width <= 576px) {
-    padding-inline: 20px;
+    padding-inline: 16px;
   }
 }
 
@@ -205,13 +205,13 @@
 
     .title {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
 
       h3 {
         margin: 0;
 
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 600;
         line-height: 100%;
         color: var(--md-sys-color-on-surface);
@@ -223,9 +223,9 @@
         align-items: center;
         justify-content: center;
 
-        height: 22px;
+        height: 24px;
         padding: 0 10px;
-        border-radius: 20px;
+        border-radius: 16px;
 
         font-size: 12px;
         font-weight: 500;
@@ -252,11 +252,11 @@
 
     @media screen and (width <= 576px) {
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       align-items: flex-start;
 
       height: auto;
-      padding-inline: 20px;
+      padding-inline: 16px;
     }
   }
 }

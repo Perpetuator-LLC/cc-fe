@@ -1,0 +1,37 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Add or Update Member</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="newUserForm" (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <div class="form-field">
+        <app-user-autocomplete
+          [users]="users"
+          (userSelected)="onUserSelected($event)"
+          (searchValueChanged)="searchUsers($event)"
+          [initialUser]="data.member?.user"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <mat-form-field appearance="fill">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @for (role of data.supportedRoles; track role) {
+              <mat-option [value]="role">{{ role | titlecase }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
+  <button class="savePodcastBtn" mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!newUserForm.valid">
+    {{ data.member ? 'Update Member' : 'Add Member' }}
+  </button>
+</mat-dialog-actions>

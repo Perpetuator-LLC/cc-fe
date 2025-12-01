@@ -1,0 +1,26 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.categories-container {
+    margin-top: 1rem;
+}
+
+.category-select {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.selected-chips {
+    margin-bottom: 1rem;
+}
+
+.selected-chips mat-chip {
+    margin: 0.25rem;
+}
+
+.parent-option {
+    font-weight: bold;
+    background-color: var(--md-sys-color-surface-container);
+}
+
+.subcategory-option {
+    font-weight: normal;
+}

@@ -1,0 +1,169 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.message-container {
+  position: fixed;
+  z-index: 3000; /* Above cookie banner (z-index: 2000) */
+  right: 24px;
+  bottom: 24px;
+
+  width: 360px; // Slightly wider for better readability
+  border-radius: 12px; // MD3 medium radius
+
+  color: var(--md-sys-color-on-surface);
+}
+
+.mat-mdc-card.message-card {
+  padding-top: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background-color: var(--md-sys-color-surface-container-high);
+  box-shadow: var(--md-sys-elevation-level3); // Elevated like a dialog
+}
+
+.message-card {
+  position: relative;
+
+  overflow: hidden;
+
+  margin-bottom: 8px; // MD3 spacing
+  padding-top: 32px;
+  border-radius: 12px; // MD3 medium radius
+
+  .timeout-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    height: 4px;
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+.close-button {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+
+  padding: 0;
+  border-radius: 50%;
+
+  color: var(--md-sys-color-on-surface);
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.message-icon {
+  display: flex;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.message-text {
+  flex: 1;
+  padding-right: 32px;
+  padding-left: 8px;
+  overflow-wrap: break-word;
+}
+
+.message-progress {
+  margin-top: 8px;
+}
+
+.mat-mdc-card-content {
+  padding: 8px;
+}
+
+.mat-card-content .mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.message-icon-span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  mat-icon {
+    color: var(--md-sys-color-on-error) !important; // White/high contrast on colored backgrounds
+  }
+}
+
+// ============================================================================
+// Message Type Colors (Using MD3 Extended Colors)
+// ============================================================================
+
+.error {
+  .message-icon {
+    background-color: color-mix(in srgb, var(--md-sys-color-error) 15%, transparent);
+
+    .message-icon-span {
+      background-color: var(--md-sys-color-error);
+
+      mat-icon {
+        color: var(--md-sys-color-on-error);
+      }
+    }
+  }
+}
+
+.warning {
+  .message-icon {
+    background-color: color-mix(in srgb, var(--md-extended-color-warning-color) 15%, transparent);
+
+    .message-icon-span {
+      background-color: var(--md-extended-color-warning-color);
+
+      mat-icon {
+        color: var(--md-extended-color-warning-on-color);
+      }
+    }
+  }
+}
+
+.info {
+  .message-icon {
+    background-color: color-mix(in srgb, var(--md-extended-color-info-color) 15%, transparent);
+
+    .message-icon-span {
+      background-color: var(--md-extended-color-info-color);
+
+      mat-icon {
+        color: var(--md-extended-color-info-on-color);
+      }
+    }
+  }
+}
+
+.success {
+  .message-icon {
+    background-color: color-mix(in srgb, var(--md-extended-color-success-color) 15%, transparent);
+
+    .message-icon-span {
+      background-color: var(--md-extended-color-success-color);
+
+      mat-icon {
+        color: var(--md-extended-color-success-on-color);
+      }
+    }
+  }
+}

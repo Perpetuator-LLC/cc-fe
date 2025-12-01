@@ -1,0 +1,86 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<script src="../resend-verification/resend-verification.component.ts"></script>
+<ng-template #toolbarTemplate />
+<!--<app-message></app-message>-->
+<!--<link rel="stylesheet" href="login.component.scss" />-->
+<div class="login-container">
+<!--  <div class="header">-->
+<!--    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">-->
+<!--      <img-->
+<!--        src="Capital_Copilot_Logo_Slanted.svg"-->
+<!--        aria-label="Side nav toggle icon"-->
+<!--        alt="Capital Copilot"-->
+<!--        width="24"-->
+<!--        height="24"-->
+<!--        matTooltip="Capital Copilot"-->
+<!--      />-->
+<!--      <div class="route-title">Capital Copilot</div>-->
+<!--    </a>-->
+<!--    <p>Don’t have an account? <a href="/register">Sign up</a></p>-->
+<!--  </div>-->
+  <form class="form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <mat-card class="login-card">
+      <mat-card-header>
+        <mat-card-title>
+          <h3>Login to Capital Copilot</h3>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Email Not Verified Alert (Special Case) -->
+        @if (isEmailNotVerified()) {
+          <div class="alert alert-warning" role="alert">
+            <div class="alert-header">
+              <mat-icon>warning</mat-icon>
+              <h4>Email Not Verified</h4>
+            </div>
+            <p>{{ errorMessage }}</p>
+            <hr />
+            <p class="alert-footer">
+              Didn't receive the verification email?
+              <button type="button" mat-button color="primary" (click)="resendVerification()">
+                Click here to resend
+              </button>
+            </p>
+          </div>
+        }
+
+        <!-- Generic Error Alert -->
+        @if (errorMessage && !isEmailNotVerified()) {
+          <div class="alert alert-error" role="alert">
+            <div class="alert-header">
+              <mat-icon>error</mat-icon>
+              <h4>Login Failed</h4>
+            </div>
+            <p>{{ errorMessage }}</p>
+          </div>
+        }
+
+        <mat-form-field appearance="fill">
+          <mat-label>Email</mat-label>
+          <input matInput type="text" id="email" formControlName="email" autocomplete="email" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" id="password" formControlName="password" autocomplete="current-password" />
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions>
+        <button class="login-btn" mat-raised-button color="primary" type="submit" [disabled]="!loginForm.valid">
+          Login
+        </button>
+      </mat-card-actions>
+      <mat-card-actions>
+        <button
+          class="forgot"
+          mat-button
+          color="accent"
+          type="button"
+          [routerLink]="['/forgot']"
+          [queryParams]="{ email: loginForm.get('email')?.value }"
+        >
+          Forgot Password
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div>

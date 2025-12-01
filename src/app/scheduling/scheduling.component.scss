@@ -5,7 +5,7 @@
   background-color: var(--md-sys-color-surface-container);
 
   @media screen and (width <= 576px) {
-    padding-inline: 20px;
+    padding-inline: 16px;
   }
 }
 
@@ -26,13 +26,13 @@
 
     .title {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
 
       h3 {
         margin: 0;
 
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 600;
         line-height: 100%;
         color: var(--md-sys-color-on-surface);
@@ -44,9 +44,9 @@
         align-items: center;
         justify-content: center;
 
-        height: 22px;
+        height: 24px;
         padding: 0 10px;
-        border-radius: 20px;
+        border-radius: 16px;
 
         font-size: 12px;
         font-weight: 500;
@@ -73,31 +73,31 @@
 
     @media screen and (width <= 576px) {
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       align-items: flex-start;
 
       height: auto;
-      padding-inline: 20px;
+      padding-inline: 16px;
     }
   }
 }
 
 .create-form-card {
-  margin: 20px 30px;
+  margin: 16px 30px;
   border: 1px solid var(--md-sys-color-outline-variant);
   background-color: var(--md-sys-color-surface-container) !important;
 
   mat-card-header {
     h3 {
       margin: 0;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface);
     }
   }
 
   @media screen and (width <= 576px) {
-    margin: 20px;
+    margin: 16px;
   }
 }
 
@@ -134,7 +134,7 @@
 
 .schedules-container {
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
   border-radius: 8px;
 
   table {
@@ -182,7 +182,7 @@
   align-items: center;
 
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 16px;
 
   font-size: 12px;
   font-weight: 500;
@@ -196,7 +196,7 @@
   align-items: center;
 
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 16px;
 
   font-size: 12px;
   font-weight: 500;
@@ -225,14 +225,14 @@
     }
 
     p {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       color: var(--md-sys-color-on-surface-variant);
     }
   }
 }
 
 .loading-spinner {
-  margin: 20px 0;
+  margin: 16px 0;
 }
 
 // Enhanced crontab styles
@@ -302,7 +302,7 @@
   }
 
   .schedule-preview {
-    margin-top: 20px;
+    margin-top: 16px;
 
     mat-card {
       border: 1px solid var(--md-sys-color-outline-variant);

@@ -2,7 +2,7 @@
 .public-categories {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
 
   .header {
     margin-bottom: 32px;
@@ -36,10 +36,10 @@
 
     a[mat-raised-button] {
       mat-icon {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
         margin-right: 8px;
-        font-size: 20px;
+        font-size: 16px;
       }
     }
   }
@@ -88,7 +88,7 @@
   .categories-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
+    gap: 16px;
 
     .category-card {
       border: 1px solid var(--md-sys-color-outline-variant);
@@ -97,11 +97,11 @@
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
       }
 
       mat-card-header {
-        padding: 20px 20px 12px;
+        padding: 16px 20px 12px;
 
         .category-header {
           display: flex;
@@ -113,7 +113,7 @@
 
           h2 {
             margin: 0;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 600;
 
             a {
@@ -164,7 +164,7 @@
   }
 
   @media (width <= 768px) {
-    padding-inline: 20px;
+    padding-inline: 16px;
 
     .header h1 {
       font-size: 28px;

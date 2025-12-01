@@ -1,0 +1,92 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="browse-podcasts">
+  <div class="header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>podcasts</mat-icon>
+        Browse Podcasts
+      </h1>
+      <p>Discover amazing podcasts from our community</p>
+    </div>
+    <div class="header-actions">
+      <mat-button-toggle-group [value]="sortBy" (change)="onSortChange($event.value)" aria-label="Sort by">
+        <mat-button-toggle value="views">
+          <mat-icon>trending_up</mat-icon>
+          Most Popular
+        </mat-button-toggle>
+        <mat-button-toggle value="recent">
+          <mat-icon>schedule</mat-icon>
+          Most Recent
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+      <a routerLink="/categories" mat-raised-button color="primary">
+        <mat-icon>category</mat-icon>
+        Browse by Category
+      </a>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50" />
+      <p>Loading podcasts...</p>
+    </div>
+  } @else {
+    @if (podcasts.length === 0) {
+      <div class="empty-state">
+        <mat-icon>podcasts</mat-icon>
+        <h2>No Podcasts Found</h2>
+        <p>Check back soon for new podcasts!</p>
+      </div>
+    } @else {
+      <div class="podcasts-grid">
+        @for (podcast of podcasts; track podcast.id) {
+          <mat-card class="podcast-card">
+            <a [routerLink]="getPodcastUrl(podcast)" class="podcast-link">
+              @if (podcast.imageUrl) {
+                <img mat-card-image [src]="podcast.imageUrl" [alt]="podcast.name" class="podcast-image" />
+              } @else {
+                <div class="podcast-image-placeholder">
+                  <mat-icon>podcasts</mat-icon>
+                </div>
+              }
+            </a>
+            <mat-card-content>
+              <h3>
+                <a [routerLink]="getPodcastUrl(podcast)">{{ podcast.name }}</a>
+              </h3>
+              @if (podcast.description) {
+                <p class="description">{{ podcast.description }}</p>
+              }
+              @if (podcast.ownerName) {
+                <p class="owner">By {{ podcast.ownerName }}</p>
+              }
+              <div class="stats">
+                <span class="stat">
+                  <mat-icon>visibility</mat-icon>
+                  {{ podcast.viewCount }}
+                </span>
+                @if (podcast.categories) {
+                  <span class="categories-count">
+                    <mat-icon>category</mat-icon>
+                    {{ (podcast.categories | keyvalue).length }} categories
+                  </span>
+                }
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <a [routerLink]="getPodcastUrl(podcast)" mat-button color="primary">View Podcast</a>
+              <app-share-buttons
+                [shareUrl]="getShareUrl(podcast)"
+                [title]="podcast.name"
+                [description]="podcast.description"
+                [compact]="true"
+              />
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>
+

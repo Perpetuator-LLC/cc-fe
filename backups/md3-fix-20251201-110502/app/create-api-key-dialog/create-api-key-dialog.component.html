@@ -1,0 +1,66 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Create API Key</h2>
+
+<mat-dialog-content>
+  @if (!createdKey) {
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Key Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g., Production App" required />
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>Name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="info-note">
+        <mat-icon>info</mat-icon>
+        <p>Default rate limits will be applied: 60/min, 1,000/hour, 10,000/day</p>
+      </div>
+    </form>
+  } @else {
+    <div class="success-container">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <h3>API Key Created!</h3>
+      <p class="warning-text">
+        <mat-icon>warning</mat-icon>
+        Copy this key now - it will only be shown once!
+      </p>
+
+      <div class="key-display">
+        <code>{{ createdKey }}</code>
+        <button mat-icon-button (click)="copyKey()" matTooltip="Copy to clipboard">
+          <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+      </div>
+
+      <div class="key-info">
+        <p><strong>Name:</strong> {{ createdApiKey?.name }}</p>
+        <p><strong>Prefix:</strong> {{ createdApiKey?.prefix }}</p>
+        <p><strong>Rate Limits:</strong></p>
+        <ul>
+          <li>{{ createdApiKey?.rateLimitPerMinute || 'Unlimited' }} requests/minute</li>
+          <li>{{ createdApiKey?.rateLimitPerHour || 'Unlimited' }} requests/hour</li>
+          <li>{{ createdApiKey?.rateLimitPerDay || 'Unlimited' }} requests/day</li>
+        </ul>
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (!createdKey) {
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="!form.valid || loading">
+      @if (loading) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Create Key
+      }
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" (click)="onClose()" cdkFocusInitial>
+      Done
+    </button>
+  }
+</mat-dialog-actions>
+

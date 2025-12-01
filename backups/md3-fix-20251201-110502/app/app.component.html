@@ -1,0 +1,12 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<app-message />
+<app-cookie-banner />
+@if (!isLoginRoute) {
+  <app-layout>
+    <router-outlet />
+  </app-layout>
+} @else {
+  <app-pre-login-layout>
+    <router-outlet />
+  </app-pre-login-layout>
+}

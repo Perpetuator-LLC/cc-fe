@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 .topic-header-card {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .back-button {
@@ -26,11 +26,11 @@
 .topic-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
   align-items: flex-start;
   justify-content: space-between;
 
-  padding: 30px;
+  padding: 32px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -58,7 +58,7 @@
   .metadata {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
 
     .meta-item {
       display: inline-flex;
@@ -69,9 +69,9 @@
       color: var(--md-sys-color-on-surface-variant);
 
       mat-icon {
-        width: 18px;
-        height: 18px;
-        font-size: 18px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
         color: var(--md-sys-color-secondary);
       }
 
@@ -97,7 +97,7 @@
     gap: 8px;
     align-items: center;
 
-    padding: 10px 16px;
+    padding: 8px 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
 
@@ -108,10 +108,10 @@
     background: var(--md-sys-color-secondary);
 
     mat-icon {
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       margin: 0;
-      font-size: 20px;
+      font-size: 16px;
     }
 
     mat-progress-spinner {
@@ -156,7 +156,7 @@
 }
 
 .tab-content {
-  padding: 20px;
+  padding: 16px;
 
   mat-card {
     border: 1px solid var(--md-sys-color-outline-variant);
@@ -166,7 +166,7 @@
 
     mat-card-header {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
 
       padding: 16px;
@@ -181,14 +181,14 @@
 
       h3 {
         margin: 0;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
         color: var(--md-sys-color-on-surface);
       }
     }
 
     mat-card-content {
-      padding: 20px;
+      padding: 16px;
     }
   }
 }
@@ -208,7 +208,7 @@
   }
 
   .transcript-content {
-    padding: 20px;
+    padding: 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
     background-color: var(--md-sys-color-surface-container-high);
@@ -218,7 +218,7 @@
 .sources-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 
   .source-item {
     padding: 16px;
@@ -278,12 +278,12 @@
 }
 
 .loading-spinner {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .middle-card {
-  margin-top: 20px;
-  padding: 30px;
+  margin-top: 16px;
+  padding: 32px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -292,19 +292,19 @@
   background-color: var(--md-sys-color-surface-container-low);
 
   h2 {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     color: var(--md-sys-color-on-surface);
   }
 }
 
 @media screen and (width <= 576px) {
   .topic-header {
-    padding: 20px;
+    padding: 16px;
   }
 
   .header-content {
     h1 {
-      font-size: 22px;
+      font-size: 24px;
     }
 
     .metadata {
@@ -314,7 +314,7 @@
   }
 
   .tab-content {
-    padding: 10px;
+    padding: 8px;
   }
 }
 

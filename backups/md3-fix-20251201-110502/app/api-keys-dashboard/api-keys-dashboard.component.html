@@ -1,0 +1,96 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="api-keys-dashboard">
+  <div class="header">
+    <div class="title-section">
+      <h1>API Keys</h1>
+      <p class="subtitle">Manage your API keys and monitor usage</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="onCreateKey()">
+      <mat-icon>add</mat-icon>
+      Create API Key
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40" />
+      <p>Loading API keys...</p>
+    </div>
+  } @else if (apiKeys.length === 0) {
+    <div class="empty-state">
+      <mat-icon>key</mat-icon>
+      <h2>No API Keys Yet</h2>
+      <p>Create your first API key to start integrating with the Capital Copilot API</p>
+      <button mat-flat-button color="primary" (click)="onCreateKey()">
+        <mat-icon>add</mat-icon>
+        Create Your First API Key
+      </button>
+    </div>
+  } @else {
+    <div class="api-keys-grid">
+      @for (key of apiKeys; track key.uuid) {
+        <mat-card class="api-key-card" [class.inactive]="!key.isActive">
+          <mat-card-header>
+            <mat-card-title>
+              <div class="card-title-row">
+                <span>{{ key.name }}</span>
+                <mat-chip [class.active]="key.isActive" [class.inactive]="!key.isActive">
+                  {{ key.isActive ? 'Active' : 'Inactive' }}
+                </mat-chip>
+              </div>
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="key-info">
+              <div class="info-row">
+                <span class="label">Prefix:</span>
+                <code>{{ key.prefix }}...</code>
+              </div>
+              <div class="info-row">
+                <span class="label">Created:</span>
+                <span>{{ key.createdAt | date: 'short' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Last Used:</span>
+                <span>{{ key.lastUsed ? (key.lastUsed | date: 'short') : 'Never' }}</span>
+              </div>
+            </div>
+
+            <mat-divider />
+
+            <div class="rate-limits-compact">
+              <h4>Rate Limits</h4>
+              <div class="limits">
+                <span>{{ key.rateLimitPerMinute || '∞' }}/min</span>
+                <span>{{ key.rateLimitPerHour || '∞' }}/hr</span>
+                <span>{{ key.rateLimitPerDay || '∞' }}/day</span>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button (click)="onViewDetails(key)">
+              <mat-icon>analytics</mat-icon>
+              View Details
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="more-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="onToggleActive(key)">
+                <mat-icon>{{ key.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                <span>{{ key.isActive ? 'Deactivate' : 'Activate' }}</span>
+              </button>
+              <button mat-menu-item (click)="onDelete(key)">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
+

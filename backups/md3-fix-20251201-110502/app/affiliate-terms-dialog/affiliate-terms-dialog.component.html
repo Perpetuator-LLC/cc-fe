@@ -1,0 +1,82 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="terms-dialog">
+  <h2 mat-dialog-title>Affiliate Program Terms and Conditions</h2>
+
+  <mat-dialog-content>
+    @if (checkingEligibility) {
+      <div class="loading-container">
+        <mat-spinner diameter="40" />
+        <p>Checking eligibility...</p>
+      </div>
+    } @else if (eligibility && !eligibility.isEligible) {
+      <div class="eligibility-message">
+        @if (!eligibility.hasPaidOrder) {
+          <div class="info-box purchase-required">
+            <mat-icon>info</mat-icon>
+            <div>
+              <h3>Purchase Required</h3>
+              <p>{{ eligibility.reason }}</p>
+              <p class="detail">To become an affiliate, you must first make a purchase on our platform.
+                This helps ensure our affiliate program is used by active members of our community.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="info-box not-eligible">
+            <mat-icon>block</mat-icon>
+            <div>
+              <h3>Not Accessible</h3>
+              <p>{{ eligibility.reason }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="terms-content">
+        @if (loadingPolicy) {
+        <div class="loading-container">
+          <mat-spinner diameter="40" />
+          <p>Loading terms...</p>
+        </div>
+        } @else if (policyContent) {
+        @if (policy) {
+        <div class="policy-meta">
+          <p><strong>Version:</strong> {{ policy.version }}</p>
+          <p><strong>Effective Date:</strong> {{ policy.effectiveDate | date }}</p>
+        </div>
+        }
+        <div [innerHTML]="policyContent"></div>
+        } @else {
+        <div class="coming-soon-message">
+          <mat-icon class="coming-soon-icon">schedule</mat-icon>
+          <h3>Affiliate Program Terms Coming Soon</h3>
+          <p>We're finalizing the affiliate program terms and conditions. Please check back soon!</p>
+          <p class="contact-info">If you have questions, please <a href="mailto:support@capitalcopilot.com">contact support</a>.</p>
+        </div>
+        }
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    @if (checkingEligibility) {
+      <mat-spinner diameter="30" />
+    } @else if (eligibility && !eligibility.isEligible) {
+      @if (!eligibility.hasPaidOrder) {
+        <button mat-button (click)="onDecline()">Close</button>
+        <button mat-raised-button color="primary" (click)="onPurchase()">Purchase Credits</button>
+      } @else {
+        <button mat-raised-button color="primary" (click)="onDecline()">Close</button>
+      }
+    } @else if (loading || loadingPolicy) {
+      <mat-spinner diameter="30" />
+    } @else if (!policyContent) {
+      <!-- Policy not available - only show close button -->
+      <button mat-raised-button color="primary" (click)="onDecline()">Close</button>
+    } @else {
+      <!-- Policy available - show accept/decline -->
+      <button mat-button (click)="onDecline()">Decline</button>
+      <button mat-raised-button color="primary" (click)="onAccept()">Accept Terms</button>
+    }
+  </mat-dialog-actions>
+</div>
+

@@ -1,0 +1,203 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.convert-dialog {
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+mat-dialog-content {
+  min-width: 400px;
+  padding: 24px;
+}
+
+.description {
+  margin-bottom: 24px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface);
+}
+
+form {
+  margin-bottom: 16px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.conversion-display {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  margin-top: 16px;
+  padding: 16px;
+  border: 2px solid var(--md-sys-color-secondary);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    margin: 0;
+
+    font-size: 32px;
+    color: var(--md-sys-color-secondary);
+  }
+
+  .conversion-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+
+    .label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--md-sys-color-secondary);
+    }
+  }
+}
+
+.warning-message {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+
+    font-size: 24px;
+    color: var(--md-sys-color-secondary);
+  }
+
+  p {
+    flex: 1;
+
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.error-message {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-error);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-error-container);
+
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+
+    font-size: 24px;
+    color: var(--md-sys-color-error);
+  }
+
+  p {
+    flex: 1;
+
+    margin: 0;
+
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--md-sys-color-error);
+  }
+}
+
+.info-message {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+
+    font-size: 24px;
+    color: var(--md-sys-color-secondary);
+  }
+
+  p {
+    flex: 1;
+
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+mat-dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 16px;
+
+  button {
+    flex-shrink: 0;
+    min-width: fit-content;
+    white-space: nowrap;
+  }
+
+  button[color="primary"] {
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+
+    font-weight: 600;
+    color: var(--md-sys-color-on-secondary);
+
+    background: var(--md-sys-color-secondary);
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
+@media screen and (width <= 576px) {
+  mat-dialog-content {
+    min-width: unset;
+  }
+}
+

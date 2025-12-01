@@ -90,8 +90,8 @@
     display: flex;
     flex-wrap: wrap;
 
-    //gap: 20px;
-    //padding: 20px;
+    //gap: 16px;
+    //padding: 16px;
 
     .mat-mdc-list-item {
       flex: 1 1 auto;
@@ -180,11 +180,11 @@
     }
 
     .error {
-      background-color: rgb(255 205 210 / 0.27);
+      background-color: color-mix(in srgb, var(--md-sys-color-error-container) 27%, transparent);
     }
 
     .result {
-      background-color: rgb(200 230 201 / 0.27);
+      background-color: color-mix(in srgb, var(--md-extended-color-success-color-container) 27%, transparent);
     }
   }
 
@@ -237,7 +237,7 @@
           gap: 4px;
           align-items: center;
 
-          min-height: 22px;
+          min-height: 24px;
           padding: 4px 8px;
           border: none;
           border-radius: 6px;

@@ -1,0 +1,23 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate />
+<link rel="stylesheet" href="resend-verification.component.scss" />
+<div class="forgot-container">
+  <form [formGroup]="resendForm" (ngSubmit)="onSubmit()">
+    <mat-card class="forgot-card">
+      <mat-card-header>
+        <mat-card-title>Resend Verification Email</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="fill">
+          <mat-label>Email</mat-label>
+          <input matInput type="text" id="email" formControlName="email" autocomplete="email" />
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!resendForm.valid">
+          Send verification email
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div>

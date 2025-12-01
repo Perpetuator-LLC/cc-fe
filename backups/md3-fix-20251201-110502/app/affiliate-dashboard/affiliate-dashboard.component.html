@@ -1,0 +1,493 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="affiliate-dashboard-container">
+
+  @if (checkingEligibility) {
+    <div class="loading-container">
+      <mat-spinner />
+      <p>Checking eligibility...</p>
+    </div>
+  } @else if (eligibility && !eligibility.isEligible) {
+    <div class="not-eligible-container">
+      <mat-card class="eligibility-card">
+        <mat-card-content>
+          @if (!eligibility.hasPaidOrder) {
+            <div class="eligibility-message purchase-required">
+              <mat-icon>shopping_cart</mat-icon>
+              <div class="message-content">
+                <h2>Purchase Required</h2>
+                <p class="reason">{{ eligibility.reason }}</p>
+                <p class="detail">
+                  To join our affiliate program, you must first make a purchase on our platform.
+                  This helps ensure our affiliate program is used by active members of our community.
+                </p>
+                <div class="actions">
+                  <button mat-raised-button color="primary" (click)="navigateToPurchase()">
+                    Purchase Credits
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="eligibility-message not-eligible">
+              <mat-icon>block</mat-icon>
+              <div class="message-content">
+                <h2>Not Accessible</h2>
+                <p class="reason">{{ eligibility.reason }}</p>
+                <p class="detail">
+                  Please contact support if you require assistance.
+                </p>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  } @else if (loading) {
+    <div class="loading-container">
+      <mat-spinner />
+      <p>Loading affiliate dashboard...</p>
+    </div>
+  } @else {
+    <div class="dashboard-content">
+      <h1 class="page-title">Affiliate Dashboard</h1>
+
+      <!-- Account Status Display -->
+      @if (profile && (
+        (profile.eligibilityStatus && profile.eligibilityStatus !== 'active') ||
+        !profile.isActive
+      )) {
+        <mat-card class="status-card">
+          <mat-card-content>
+            <div class="status-display">
+              @if (profile.eligibilityStatus && profile.eligibilityStatus !== 'active') {
+                <div class="status-item">
+                  <mat-icon [class]="getStatusColor(profile.eligibilityStatus)">
+                    {{ getStatusIcon(profile.eligibilityStatus) }}
+                  </mat-icon>
+                  <div class="status-text">
+                    <strong>Account Status:</strong>
+                    <span class="status-label">{{ getStatusLabel(profile.eligibilityStatus) }}</span>
+                  </div>
+                </div>
+              }
+
+              @if (profile.isActive !== undefined) {
+                <div class="status-item">
+                  <mat-icon [class]="profile.isActive ? 'status-active' : 'status-inactive'">
+                    {{ profile.isActive ? 'group' : 'group_remove' }}
+                  </mat-icon>
+                  <div class="status-text">
+                    <strong>Network Status:</strong>
+                    <span class="status-label">{{ profile.isActive ? 'Accepting Members' : 'Closed' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Network Joining Warning -->
+            @if (!isNetworkJoinable(profile) && getNetworkJoiningMessage(profile)) {
+              <div class="network-warning"
+                   [class.suspended]="profile.eligibilityStatus === 'suspended'"
+                   [class.under-review]="profile.eligibilityStatus === 'under_review'"
+                   [class.network-closed]="!profile.isActive && (!profile.eligibilityStatus || profile.eligibilityStatus === 'active')">
+                <mat-icon>{{ getStatusIcon(profile.eligibilityStatus) || 'block' }}</mat-icon>
+                <p>{{ getNetworkJoiningMessage(profile) }}</p>
+              </div>
+            }
+
+            <!-- Eligibility Message from Admin -->
+            @if (profile.eligibilityMessage) {
+              <div class="eligibility-message-display">
+                <mat-icon>info</mat-icon>
+                <p>{{ profile.eligibilityMessage }}</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>payments</mat-icon>
+            </div>
+            <div class="stat-value"
+                 [matTooltip]="(stats?.totalAffiliateCredits || 0).toLocaleString() + ' Credits'"
+                 matTooltipPosition="above">
+              {{ shortCredits(stats?.totalAffiliateCredits || 0) }}
+            </div>
+            <div class="stat-label">Total Earnings (Affiliate Credits)</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>group</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.totalReferrals || 0 }}</div>
+            <div class="stat-label">Total Referrals</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.tier1Referrals || 0 }}</div>
+            <div class="stat-label">Direct Referrals (10%)</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-icon">
+              <mat-icon>people</mat-icon>
+            </div>
+            <div class="stat-value">{{ stats?.tier2Referrals || 0 }}</div>
+            <div class="stat-label">Second Level (5%)</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Available Balance - Moved to top for prominence -->
+      <mat-card class="balance-card">
+        <mat-card-content>
+          <h2>Available Balance</h2>
+          <div class="balance-value">{{ getAvailableBalance().toLocaleString() }} Affiliate Credits</div>
+          <div class="conversion-actions">
+            <button mat-raised-button color="primary" (click)="openConvertDialog('credits')">
+              <mat-icon>swap_horiz</mat-icon>
+              Convert to AI Credits
+            </button>
+            <button mat-raised-button (click)="openConvertDialog('cash')">
+              <mat-icon>attach_money</mat-icon>
+              Request Cash Payout
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Stripe Connect Status -->
+      @if (profile) {
+        <mat-card class="stripe-status-card" [class.incomplete]="!profile.stripeOnboardingCompleted">
+          <mat-card-content>
+            <h2>Payment Account Status</h2>
+            @if (!profile.stripeAccountId) {
+              <div class="stripe-status not-setup">
+                <mat-icon>account_balance</mat-icon>
+                <div class="status-content">
+                  <h3>Stripe Account Required</h3>
+                  <p>To receive cash payouts, you need to create a Stripe Connect account. This ensures secure and compliant payments.</p>
+                  <button mat-raised-button color="primary" (click)="startStripeOnboarding()">
+                    <mat-icon>add_circle</mat-icon>
+                    Setup Payment Account
+                  </button>
+                </div>
+              </div>
+            } @else if (!profile.stripeOnboardingCompleted) {
+              <div class="stripe-status incomplete">
+                <mat-icon>pending</mat-icon>
+                <div class="status-content">
+                  <h3>Setup Incomplete</h3>
+                  <p>Your Stripe account setup is not complete. Please finish the onboarding process to enable cash payouts.</p>
+                  <div class="button-group">
+                    <button mat-raised-button color="accent" (click)="continueStripeOnboarding()">
+                      <mat-icon>arrow_forward</mat-icon>
+                      Continue Setup
+                    </button>
+                    <button mat-stroked-button (click)="skipStripeSetup()">
+                      <mat-icon>home</mat-icon>
+                      Skip for Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="stripe-status complete">
+                <mat-icon>check_circle</mat-icon>
+                <div class="status-content">
+                  <h3>Payment Account Active</h3>
+                  <div class="stripe-details">
+                    @if (profile.stripeCountry) {
+                      <div class="detail-item">
+                        <span class="label">Country:</span>
+                        <span class="value">{{ profile.stripeCountry }}</span>
+                      </div>
+                    }
+                    <div class="detail-item">
+                      <span class="label">Payouts:</span>
+                      <span class="value" [class.enabled]="profile.stripePayoutsEnabled" [class.disabled]="!profile.stripePayoutsEnabled">
+                        {{ profile.stripePayoutsEnabled ? 'Enabled' : 'Disabled' }}
+                      </span>
+                    </div>
+                  </div>
+                  <button mat-raised-button (click)="openStripeDashboard()">
+                    <mat-icon>open_in_new</mat-icon>
+                    View Stripe Dashboard
+                  </button>
+                </div>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (pendingCodeChangeRequest) {
+        <mat-card class="pending-request-card">
+          <mat-card-content>
+            <div class="pending-request-content">
+              <div class="pending-request-icon">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="pending-request-info">
+                <h3>Code Change Request Pending</h3>
+                <p>Requested code: <strong>{{ pendingCodeChangeRequest.requestedCode }}</strong></p>
+                <p class="request-date">Submitted {{ formatDate(pendingCodeChangeRequest.requestedAt) }}</p>
+                @if (pendingCodeChangeRequest.reason) {
+                  <p class="request-reason">Reason: {{ pendingCodeChangeRequest.reason }}</p>
+                }
+              </div>
+              <div class="pending-request-actions">
+                <button mat-raised-button (click)="cancelPendingCodeChangeRequest()">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel Request
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card class="link-card">
+        <mat-card-content>
+          <h2>Your Affiliate Link</h2>
+          <div class="link-section">
+            <div class="link-display">
+              <span class="link-text">{{ getAffiliateLink() }}</span>
+              <button mat-icon-button (click)="copyLink()">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <div class="action-buttons">
+              <button mat-raised-button color="primary" (click)="copyLink()">
+                <mat-icon>content_copy</mat-icon>
+                Copy Link
+              </button>
+              <button mat-raised-button (click)="openCodeChangeDialog()" [disabled]="!!pendingCodeChangeRequest">
+                <mat-icon>edit</mat-icon>
+                Change Code
+              </button>
+            </div>
+            <app-share-buttons
+              [shareUrl]="getAffiliateLink()"
+              [title]="'Join me on Capital Copilot!'"
+              [description]="'Sign up using my affiliate link and we both benefit.'"
+            />
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="brand-image-card">
+        <mat-card-content>
+          <h2>Brand Image</h2>
+          <p class="help-text">Upload your brand logo (max 1MB, JPEG/PNG/GIF/WEBP)</p>
+
+          <!-- Current Image Display -->
+          @if (profile?.brandImageUrl && !imagePreview) {
+            <div class="brand-image-preview">
+              <img
+                [src]="profile!.brandImageUrl"
+                alt="Brand Image"
+                (error)="onImageError()"
+                loading="lazy"
+              >
+              <div class="image-actions">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteBrandImage()"
+                  [disabled]="uploadingImage"
+                  matTooltip="Delete image"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Image Preview (during upload) -->
+          @if (imagePreview) {
+            <div class="brand-image-preview uploading">
+              <img [src]="imagePreview" alt="Preview">
+              @if (uploadingImage) {
+                <div class="upload-overlay">
+                  <mat-spinner diameter="40" />
+                  <p>Uploading...</p>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Drag and Drop Area -->
+          <div
+            class="upload-dropzone"
+            [class.dragging]="isDragging"
+            [class.has-image]="profile?.brandImageUrl"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept=".jpg,.jpeg,.png,.gif,.webp"
+
+              [disabled]="uploadingImage"
+            >
+
+            <div class="dropzone-content">
+              <mat-icon>cloud_upload</mat-icon>
+              <p class="dropzone-text">Drag & drop your image here</p>
+              <p class="dropzone-or">or</p>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="fileInput.click()"
+                [disabled]="uploadingImage"
+              >
+                <mat-icon>upload</mat-icon>
+                {{ profile?.brandImageUrl ? 'Change' : 'Upload' }} Image
+              </button>
+            </div>
+          </div>
+
+          <div class="upload-requirements">
+            <p><strong>Requirements:</strong></p>
+            <ul>
+              <li>Maximum file size: 1MB</li>
+              <li>Supported formats: JPEG, PNG, GIF, WEBP</li>
+              <li>Recommended size: 512x512 pixels</li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-tab-group class="history-tabs">
+        <mat-tab label="Earnings History">
+          <div class="table-container">
+            @if (credits.length > 0) {
+              <table mat-table [dataSource]="credits" class="history-table">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let credit">{{ formatDate(credit.createdAt) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="from">
+                  <th mat-header-cell *matHeaderCellDef>From</th>
+                  <td mat-cell *matCellDef="let credit">{{ credit.sourceUser?.username || 'System' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let credit">{{ getTierDescription(credit.tier) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let credit">{{ credit.amount }} credits</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="creditsDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: creditsDisplayedColumns;"></tr>
+              </table>
+            } @else {
+              <div class="no-data">No earnings yet</div>
+            }
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Conversion History">
+          <div class="table-container">
+            @if (conversions.length > 0) {
+              <table mat-table [dataSource]="conversions" class="history-table">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let conversion">{{ formatDate(conversion.createdAt) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let conversion">{{ getConversionTypeDisplay(conversion.conversionType) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let conversion">{{ conversion.affiliateCreditAmount }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let conversion">
+                    <span class="status-badge" [ngClass]="getStatusClass(conversion.status)">{{ formatStatus(conversion.status) }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="details">
+                  <th mat-header-cell *matHeaderCellDef>Details</th>
+                  <td mat-cell *matCellDef="let conversion">
+                    @if (conversion.status === 'rejected' && conversion.rejectionReason) {
+                      <span class="rejection-reason" [matTooltip]="conversion.rejectionReason">
+                        <mat-icon>info</mat-icon>
+                        {{ conversion.rejectionReason.length > 30 ? conversion.rejectionReason.substring(0, 30) + '...' : conversion.rejectionReason }}
+                      </span>
+                    } @else if (conversion.status === 'completed' && conversion.stripeTransferId) {
+                      <span class="transfer-id" [matTooltip]="'Stripe Transfer ID: ' + conversion.stripeTransferId">
+                        <mat-icon>check_circle</mat-icon>
+                        Paid
+                      </span>
+                    } @else if (conversion.status === 'under_review') {
+                      <span class="under-review">Pending admin review</span>
+                    } @else {
+                      <span class="no-details">—</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="conversionsDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: conversionsDisplayedColumns;"></tr>
+              </table>
+            } @else {
+              <div class="no-data">No conversions yet</div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  }
+
+  <!-- Shared Admin Link - Displayed after eligible/not-eligible sections -->
+  @if (hasAnyAdminPermission()) {
+    <div class="dashboard-content">
+      <mat-card class="admin-link-card">
+        <mat-card-content>
+          <div class="admin-link-content">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <div class="admin-link-info">
+              <h3>Affiliate Administration</h3>
+              <p>You have admin permissions. Access the admin panel to manage the affiliate program.</p>
+            </div>
+            <button mat-raised-button color="primary" (click)="navigateToAdminPanel()">
+              <mat-icon>arrow_forward</mat-icon>
+              Open Admin Panel
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

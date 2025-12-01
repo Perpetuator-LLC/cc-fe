@@ -1,0 +1,311 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.category-podcasts {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+
+    margin-bottom: 24px;
+
+    a {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      color: var(--md-sys-color-secondary);
+      text-decoration: none;
+
+      mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+      }
+    }
+
+    > mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    > span {
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+
+  .header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+    h1 {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+
+      margin: 0 0 8px;
+
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--md-sys-color-secondary);
+
+      mat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 36px;
+      }
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 400px;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 400px;
+
+    text-align: center;
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 64px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--md-sys-color-secondary);
+    }
+
+    p {
+      margin: 0;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .empty-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+
+      margin-top: 8px;
+
+      a[mat-raised-button] {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        white-space: nowrap;
+
+        mat-icon {
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+        }
+      }
+    }
+  }
+
+  .podcasts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+
+    .podcast-card {
+      display: flex;
+      flex-direction: column;
+
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 10px;
+
+      transition: box-shadow 0.3s, transform 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
+      }
+
+      .podcast-link {
+        position: relative;
+        overflow: hidden;
+        display: block;
+
+        .podcast-image {
+          aspect-ratio: 1;
+          width: 100%;
+          object-fit: cover;
+          transition: transform 0.3s;
+        }
+
+        .podcast-image-placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          aspect-ratio: 1;
+          width: 100%;
+
+          background: var(--md-sys-color-surface-container-high);
+
+          mat-icon {
+            width: 80px;
+            height: 80px;
+            font-size: 80px;
+            color: var(--md-sys-color-on-primary);
+          }
+        }
+
+        &:hover .podcast-image {
+          transform: scale(1.05);
+        }
+      }
+
+      mat-card-content {
+        flex: 1;
+        padding: 16px;
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 18px;
+          font-weight: 600;
+
+          a {
+            color: var(--md-sys-color-secondary);
+            text-decoration: none;
+
+            &:hover {
+              color: var(--md-sys-color-surface-container);
+            }
+          }
+        }
+
+        .description {
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 3;
+
+          margin: 0 0 8px;
+
+          font-size: 14px;
+          line-height: 1.5;
+          color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .owner {
+          margin: 0 0 12px;
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--md-sys-color-surface-container);
+
+          a {
+            color: var(--md-sys-color-secondary);
+            text-decoration: none;
+            transition: opacity 0.2s;
+
+            &:hover {
+              text-decoration: underline;
+              opacity: 0.7;
+            }
+          }
+        }
+
+        .stats {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+
+          .stat {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+
+            font-size: 13px;
+            color: var(--md-sys-color-on-surface-variant);
+
+            mat-icon {
+              width: 16px;
+              height: 16px;
+              font-size: 16px;
+            }
+          }
+        }
+      }
+
+      mat-card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 8px 16px;
+        border-top: 1px solid var(--md-sys-color-outline-variant);
+      }
+    }
+  }
+
+  @media (width <= 768px) {
+    padding-inline: 20px;
+
+    .breadcrumb {
+      font-size: 14px;
+
+      a mat-icon,
+      > mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+      }
+    }
+
+    .header h1 {
+      font-size: 28px;
+
+      mat-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 32px;
+      }
+    }
+
+    .podcasts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .empty-state .empty-actions {
+      flex-direction: column;
+      width: 100%;
+
+      a {
+        width: 100%;
+      }
+    }
+  }
+}
+
