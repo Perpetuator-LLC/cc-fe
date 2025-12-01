@@ -10,11 +10,11 @@
 
 mat-dialog-content {
   min-width: 400px;
-  padding: 20px;
+  padding: 24px;
 }
 
 .description {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   line-height: 1.6;
   color: var(--md-sys-color-on-surface);
 }
@@ -29,22 +29,22 @@ form {
 
 .conversion-display {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 
   margin-top: 16px;
   padding: 16px;
   border: 2px solid var(--md-sys-color-secondary);
-  border-radius: 10px;
+  border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     margin: 0;
 
-    font-size: 28px;
+    font-size: 32px;
     color: var(--md-sys-color-secondary);
   }
 
@@ -72,22 +72,22 @@ form {
 
 .warning-message {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
 
   margin-top: 16px;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     margin: 0;
 
-    font-size: 20px;
+    font-size: 24px;
     color: var(--md-sys-color-secondary);
   }
 
@@ -96,7 +96,7 @@ form {
 
     margin: 0;
 
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
     color: var(--md-sys-color-on-surface-variant);
   }
@@ -104,23 +104,23 @@ form {
 
 .error-message {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
 
   margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid var(--md-sys-color-error, #f44336);
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-error);
   border-radius: 8px;
 
-  background: rgb(244 67 54 / 0.1);
+  background: var(--md-sys-color-error-container);
 
   mat-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     margin: 0;
 
-    font-size: 20px;
-    color: var(--md-sys-color-error, #f44336);
+    font-size: 24px;
+    color: var(--md-sys-color-error);
   }
 
   p {
@@ -128,31 +128,31 @@ form {
 
     margin: 0;
 
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
-    color: var(--md-sys-color-error, #f44336);
+    color: var(--md-sys-color-error);
   }
 }
 
 .info-message {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
 
   margin-top: 16px;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     margin: 0;
 
-    font-size: 20px;
+    font-size: 24px;
     color: var(--md-sys-color-secondary);
   }
 
@@ -161,7 +161,7 @@ form {
 
     margin: 0;
 
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
     color: var(--md-sys-color-on-surface-variant);
   }
@@ -169,7 +169,7 @@ form {
 
 mat-dialog-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
   padding: 16px;
 
@@ -181,10 +181,10 @@ mat-dialog-actions {
 
   button[color="primary"] {
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-weight: 600;
-    color: #ffffff;
+    color: var(--md-sys-color-on-secondary);
 
     background: var(--md-sys-color-secondary);
 
