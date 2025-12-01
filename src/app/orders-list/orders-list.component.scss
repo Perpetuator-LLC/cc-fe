@@ -145,9 +145,9 @@
 
       font-size: 14px;
       font-weight: 600;
-      color: var(--md-sys-color-surface-container-low);
+      color: var(--md-sys-color-on-surface);
 
-      background-color: #ffffff;
+      background-color: var(--md-sys-color-surface);
 
       &:disabled {
         cursor: not-allowed;
@@ -163,7 +163,7 @@
         font-weight: 600;
         color: var(--md-sys-color-on-surface);
 
-        background-color: rgb(0 0 0 / 0.4);
+        background-color: color-mix(in srgb, var(--md-sys-color-surface) 60%, transparent);
       }
     }
   }
@@ -177,17 +177,17 @@
   font-weight: 500;
 
   &.paid {
-    color: #ffffff;
-    background-color: var(--md-sys-color-success);
+    color: var(--md-extended-color-success-on-color);
+    background-color: var(--md-extended-color-success-color);
   }
 
   &.pending {
-    color: #664d03;
-    background-color: #ffc107;
+    color: var(--md-extended-color-warning-on-color);
+    background-color: var(--md-extended-color-warning-color);
   }
 
   &.cancelled {
-    color: #ffffff;
+    color: var(--md-sys-color-on-error);
     background-color: var(--md-sys-color-error);
   }
 }
@@ -265,19 +265,19 @@
       font-weight: 600;
 
       &.paid {
-        border: 1px solid var(--md-sys-color-success);
-        color: var(--md-sys-color-success);
+        border: 1px solid var(--md-extended-color-success-color);
+        color: var(--md-extended-color-success-color);
         background: var(--md-sys-color-surface-container);
 
         &.mat-mdc-chip-selected {
-          color: #ffffff;
-          background: var(--md-sys-color-success);
+          color: var(--md-extended-color-success-on-color);
+          background: var(--md-extended-color-success-color);
         }
       }
 
       &.pending {
-        border: 1px solid #ffeaa7;
-        color: #664d03;
+        border: 1px solid var(--md-extended-color-warning-color);
+        color: var(--md-extended-color-warning-on-color);
 
         &.mat-mdc-chip-selected {
           border: 1px solid var(--md-extended-color-warning-color);
@@ -292,7 +292,7 @@
         background: var(--md-sys-color-surface-container);
 
         &.mat-mdc-chip-selected {
-          color: #ffffff;
+          color: var(--md-sys-color-on-error);
           background: var(--md-sys-color-error);
         }
       }

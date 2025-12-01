@@ -75,8 +75,8 @@ mat-form-field {
   .save-btn {
     border-radius: 8px;
     font-weight: 500;
-    color: var(--md-sys-color-surface-container-low);
-    background-color: #ffffff;
+    color: var(--md-sys-color-on-surface);
+    background-color: var(--md-sys-color-surface);
   }
 
   .export-btn {
@@ -86,15 +86,15 @@ mat-form-field {
     box-shadow: none;
 
     &:hover {
-      background-color: var(--md-sys-color-surface-container) !important;
+      background-color: var(--md-sys-color-surface-container);
     }
   }
 
   .remove-btn {
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
-    color: #ffffff !important;
-    background-color: var(--md-sys-color-error) !important;
+    color: var(--md-sys-color-on-error);
+    background-color: var(--md-sys-color-error);
   }
 
   .profile-header {
