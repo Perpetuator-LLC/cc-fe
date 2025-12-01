@@ -6,10 +6,9 @@ import { Subscription } from 'rxjs';
 import { MessageService } from '../message.service';
 import { MemberResult, TeamsService } from '../teams.service';
 import { ToolbarService } from '../toolbar.service';
-import { MessageComponent } from '../message/message.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatPrefix } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCell,
@@ -39,7 +38,7 @@ import {
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { RelayConnection } from '../utils/relay';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -54,7 +53,6 @@ import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-po
   styleUrls: ['./team-detail.component.scss'],
   standalone: true,
   imports: [
-    MessageComponent,
     MatProgressBarModule,
     MatCard,
     ReactiveFormsModule,
@@ -95,6 +93,8 @@ import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-po
     MatTabsModule,
     DeleteTeamDialogComponent,
     AddMemberDialogComponent,
+    MatMenuItem,
+    MatPrefix,
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {

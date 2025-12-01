@@ -2,7 +2,7 @@
 <div class="public-episode-page">
   @if (loading) {
     <div class="loading-container">
-      <mat-spinner diameter="50"></mat-spinner>
+      <mat-spinner diameter="50" />
       <p>Loading episode...</p>
     </div>
   } @else if (error) {
@@ -53,7 +53,7 @@
               [shareUrl]="getShareUrl()"
               [title]="episodeData.title"
               [description]="episodeData.description"
-            ></app-share-buttons>
+            />
             @if (isAuthenticated) {
               <button mat-raised-button color="primary" [routerLink]="['/e', episodeId]">
                 <mat-icon>edit</mat-icon>

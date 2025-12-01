@@ -5,7 +5,6 @@
   >
 </ng-template>
 
-<app-message></app-message>
 
 @if (!newsFetched) {
   <div class="before-select-podcast">
@@ -32,7 +31,7 @@
               </mat-select>
             </mat-form-field>
             @if (loadingPodcasts) {
-              <mat-spinner diameter="20" class="podcast-loading-spinner"></mat-spinner>
+              <mat-spinner diameter="20" class="podcast-loading-spinner" />
             }
           </div>
           <mat-form-field class="time-select-field">
@@ -88,7 +87,7 @@
               }
             </mat-select>
             @if (loadingPodcasts) {
-              <mat-spinner matSuffix diameter="20"></mat-spinner>
+              <mat-spinner matSuffix diameter="20" />
             }
           </mat-form-field>
           @if (rssFeeds.length > 0) {
@@ -201,7 +200,7 @@
                         <mat-checkbox
                           (click)="$event.stopPropagation(); toggleSelection(news)"
                           [checked]="isSelected(news)"
-                        ></mat-checkbox>
+                        />
                         <div class="news-card-wrapper" [ngClass]="{ newsSelected: selectedNewsDetail === news }">
                           <div class="news-content">
                             <div class="news-header">
@@ -293,7 +292,7 @@
                 <div class="description-title">
                   <div class="cross-icon">
                     <span tabindex="0" (click)="clearSelectedNewsDetail()" (keydown.enter)="clearSelectedNewsDetail()">
-                      <app-svg-icon icon="cross"></app-svg-icon>
+                      <app-svg-icon icon="cross" />
                     </span>
                   </div>
                   <div class="title">
@@ -316,7 +315,7 @@
                     [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
                     matTooltipPosition="above">
                     <button mat-raised-button color="primary" type="button" class="read-btn">
-                      Read More <app-svg-icon icon="right"></app-svg-icon>
+                      Read More <app-svg-icon icon="right" />
                     </button>
                   </a>
                 </div>
@@ -348,13 +347,13 @@
                   </div>
                 }
 
-                <mat-divider></mat-divider>
+                <mat-divider />
                 <h3>RSS Description</h3>
                 <p
                   class="news-description"
                   [innerHTML]="selectedNewsDetail.description || 'No description provided'"
                 ></p>
-                <mat-divider></mat-divider>
+                <mat-divider />
                 <h3>AI Summary</h3>
                 <button
                   mat-flat-button
@@ -376,7 +375,7 @@
                   </button>
                 }
                 <p class="" [innerHTML]="selectedNewsDetail.summary ? markdownToHtml(selectedNewsDetail.summary) : 'No news summary available'"></p>
-                <mat-divider></mat-divider>
+                <mat-divider />
                 <h3>Validated Summary</h3>
                 @if (selectedNewsDetail.validatedSummary) {
                   <p class="" [innerHTML]="markdownToHtml(selectedNewsDetail.validatedSummary)"></p>

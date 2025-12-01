@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, Input } from '@
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatOption } from '@angular/material/core';
-import { MessageComponent } from '../message/message.component';
 import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
 import { Subscription, Subject } from 'rxjs';
@@ -50,7 +49,7 @@ import { RelayPaginatorBase } from '../utils/relay-paginator';
     SvgIconComponent,
     MatCardHeader,
     MatIcon,
-    MessageComponent,
+
     MatProgressBarModule,
     MatCardContent,
     MatTable,

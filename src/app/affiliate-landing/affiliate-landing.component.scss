@@ -2,8 +2,9 @@
 
 .affiliate-landing-container {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   min-height: 80vh;
   padding: 20px;
 }
@@ -11,29 +12,31 @@
 .loading-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 20px;
+  align-items: center;
 
   p {
-    color: var(--theme-color);
     font-size: 16px;
+    color: var(--md-sys-color-on-surface);
   }
 }
 
 .affiliate-card,
 .error-card {
-  max-width: 600px;
   width: 100%;
-  background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
+  max-width: 600px;
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
+
+  background-color: var(--md-sys-color-surface-container-low);
 }
 
 mat-card-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 20px;
+  align-items: center;
+
   padding: 30px;
 }
 
@@ -46,82 +49,88 @@ mat-card-content {
 .brand-image {
   width: 100%;
   height: auto;
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
-  border: 1px solid var(--border-color);
 }
 
 .title {
+  margin: 0;
+
   font-size: 24px;
   font-weight: 600;
-  color: var(--theme-color);
-  margin: 0;
+  color: var(--md-sys-color-on-surface);
   text-align: center;
 }
 
 .description {
-  font-size: 16px;
-  color: var(--description-color);
-  text-align: center;
   margin: 0;
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
 }
 
 .actions {
   display: flex;
-  gap: 16px;
   flex-wrap: wrap;
+  gap: 16px;
   justify-content: center;
+
   width: 100%;
 
   button {
-    white-space: nowrap;
     flex-shrink: 0;
+
     min-width: fit-content;
     padding: 10px 16px;
+
     font-weight: 600;
+    white-space: nowrap;
   }
 
   button[color="primary"] {
-    background: var(--primary);
-    color: var(--theme-white);
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    border: 1px solid var(--border-color);
+    color: #ffffff;
+    background: var(--md-sys-color-secondary);
   }
 }
 
 .existing-affiliate-message {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
+  align-items: center;
+
   text-align: center;
 
   p {
-    color: var(--theme-color);
-    font-size: 16px;
     margin: 0;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface);
 
     strong {
-      color: var(--primary);
+      color: var(--md-sys-color-secondary);
     }
   }
 }
 
 .error-card {
   h2 {
+    margin: 0;
+
     font-size: 20px;
     font-weight: 600;
     color: var(--md-sys-color-error);
-    margin: 0;
     text-align: center;
   }
 
   p {
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
     text-align: center;
   }
 }
 
-@media screen and (max-width: 576px) {
+@media screen and (width <= 576px) {
   mat-card-content {
     padding: 20px;
   }
@@ -130,8 +139,8 @@ mat-card-content {
     flex-direction: column;
 
     button {
-      width: 100%;
       justify-content: center;
+      width: 100%;
     }
   }
 }

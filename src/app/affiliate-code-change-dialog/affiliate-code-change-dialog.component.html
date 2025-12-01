@@ -6,7 +6,7 @@
   <mat-dialog-content>
     @if (loading) {
       <div class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
+        <mat-spinner diameter="40" />
         <p>Loading...</p>
       </div>
     } @else {
@@ -44,10 +44,10 @@
               formControlName="newCode"
               placeholder="MY-BRAND-CODE"
               maxlength="50"
-              style="text-transform: uppercase"
+
             />
             @if (checking) {
-              <mat-spinner matSuffix diameter="20"></mat-spinner>
+              <mat-spinner matSuffix diameter="20" />
             }
             @if (availabilityStatus?.checked && !checking) {
               <mat-icon matSuffix [class]="getValidationClass()">
@@ -128,7 +128,7 @@
         [disabled]="!codeForm.valid || !availabilityStatus?.available || submitting"
       >
         @if (submitting) {
-          <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+          <mat-spinner diameter="20" class="inline-spinner" />
           Requesting...
         } @else {
           Request Change

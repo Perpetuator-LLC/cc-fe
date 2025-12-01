@@ -1,13 +1,12 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<ng-template #toolbarTemplate>
-</ng-template>
+<ng-template #toolbarTemplate />
 
 <div class="page-container">
 <mat-card class="cookie-policy">
   <mat-card-content>
     @if (loading) {
       <div class="loading-container">
-        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <mat-progress-spinner mode="indeterminate" diameter="50" />
         <p>Loading Cookie Policy...</p>
       </div>
     } @else if (policy && policyContent) {

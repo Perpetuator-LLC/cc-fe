@@ -2,16 +2,18 @@
 
 Visit: https://material-foundation.github.io/material-theme-builder/
 
-- Primary: #3DA6FF
-- Secondary: #F14A00
-- Tertiary: #8C00E8
-- Error: #FF5449
+- Primary: #3F97FF
+- Secondary: #8391AC (gen) or #F14A00
+- Tertiary: #A784B3 (gen)
+- Error: #FF5449 (gen)
   - Job Failed & Message Error
-- Success:
+- Neutral: #909094 (gen)
+- Neutral vibrant: #8D9199 (gen)
+- Success: #00B116
   - Job Succeeded & Message Success
-- Warnings:
+- Warnings: #FFFF00
   - Job Pending & Message Warnings
-- Info: #3DA6FF
+- Info: #3F97FF
   - Job Running & Message Info
 
 Font:

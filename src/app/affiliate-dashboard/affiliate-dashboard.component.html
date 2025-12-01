@@ -3,7 +3,7 @@
 
   @if (checkingEligibility) {
     <div class="loading-container">
-      <mat-spinner></mat-spinner>
+      <mat-spinner />
       <p>Checking eligibility...</p>
     </div>
   } @else if (eligibility && !eligibility.isEligible) {
@@ -45,7 +45,7 @@
     </div>
   } @else if (loading) {
     <div class="loading-container">
-      <mat-spinner></mat-spinner>
+      <mat-spinner />
       <p>Loading affiliate dashboard...</p>
     </div>
   } @else {
@@ -286,7 +286,7 @@
               [shareUrl]="getAffiliateLink()"
               [title]="'Join me on Capital Copilot!'"
               [description]="'Sign up using my affiliate link and we both benefit.'"
-            ></app-share-buttons>
+            />
           </div>
         </mat-card-content>
       </mat-card>
@@ -325,7 +325,7 @@
               <img [src]="imagePreview" alt="Preview">
               @if (uploadingImage) {
                 <div class="upload-overlay">
-                  <mat-spinner diameter="40"></mat-spinner>
+                  <mat-spinner diameter="40" />
                   <p>Uploading...</p>
                 </div>
               }
@@ -346,7 +346,7 @@
               #fileInput
               (change)="onFileSelected($event)"
               accept=".jpg,.jpeg,.png,.gif,.webp"
-              style="display: none;"
+
               [disabled]="uploadingImage"
             >
 

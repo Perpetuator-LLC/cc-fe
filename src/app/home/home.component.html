@@ -60,8 +60,7 @@
               </div>
             </div>
             <a class="module-link" [routerLink]="['/topics']" [queryParams]="{ create: 'true' }"
-              >Create a Topic to Research <app-svg-icon icon="right"></app-svg-icon
-            ></a>
+              >Create a Topic to Research <app-svg-icon icon="right" /></a>
           </div>
           <span class="image-section">
             <img src="/assets/hero-side.jpg" alt="generate" width="318" height="256" />
@@ -77,7 +76,7 @@
               and audio, ready to publish.
             </div>
           </div>
-          <a class="module-link" routerLink="/news">Create an Episode from News<app-svg-icon icon="right"></app-svg-icon></a>
+          <a class="module-link" routerLink="/news">Create an Episode from News<app-svg-icon icon="right" /></a>
         </div>
       </div>
       <div class="module-card finance-module">
@@ -89,14 +88,65 @@
             </div>
           </div>
           <a class="module-link" [routerLink]="isLoggedIn() ? '/f' : '/finance'">
-            Explore Finance<app-svg-icon icon="right"></app-svg-icon>
+            Explore Finance<app-svg-icon icon="right" />
           </a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats Cards - Using MD3 mat-card components -->
+  <div class="stats-section">
+    @if (loadingStats) {
+      <!-- Skeleton Loading Cards -->
+      @for (item of [1, 2, 3]; track item) {
+        <mat-card class="stat-card skeleton-card">
+          <mat-card-content>
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-label"></div>
+            <div class="skeleton-value"></div>
+            <div class="skeleton-change"></div>
+          </mat-card-content>
+        </mat-card>
+      }
+    } @else if (siteStats) {
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>podcasts</mat-icon>
+            <span class="stat-label">Total Podcasts</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
+          <div class="stat-change positive">
+            <span>{{ siteStats.enabledPodcasts }}</span> enabled
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>library_music</mat-icon>
+            <span class="stat-label">Total Episodes</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
+          <div class="stat-change positive">
+            <span>{{ siteStats.liveEpisodes }}</span> live
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>article</mat-icon>
+            <span class="stat-label">News Articles</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
 
   <!-- Recent Podcasts Section -->
   <div class="recent-podcasts-section">
@@ -324,7 +374,7 @@
     <div class="stats-section">
       <mat-card class="stat-card">
         <div class="stat-title">
-          <app-svg-icon icon="podcast"></app-svg-icon>
+          <app-svg-icon icon="podcast" />
           <div class="stat-label">Total Podcasts</div>
         </div>
 
@@ -333,7 +383,7 @@
       </mat-card>
       <mat-card class="stat-card">
         <div class="stat-title">
-          <app-svg-icon icon="episodes"></app-svg-icon>
+          <app-svg-icon icon="episodes" />
           <div class="stat-label">Total Episodes</div>
         </div>
 
@@ -342,7 +392,7 @@
       </mat-card>
       <mat-card class="stat-card">
         <div class="stat-title">
-          <app-svg-icon icon="voice_selection"></app-svg-icon>
+          <app-svg-icon icon="voice_selection" />
           <div class="stat-label">Voices</div>
         </div>
 
@@ -352,7 +402,7 @@
       </mat-card>
       <mat-card class="stat-card">
         <div class="stat-title">
-          <app-svg-icon icon="published"></app-svg-icon>
+          <app-svg-icon icon="published" />
           <div class="stat-label">News Articles Processed</div>
         </div>
 
@@ -362,7 +412,7 @@
       </mat-card>
       <mat-card class="stat-card">
         <div class="stat-title">
-          <app-svg-icon icon="newspaper"></app-svg-icon>
+          <app-svg-icon icon="newspaper" />
           <div class="stat-label">Summarized News</div>
         </div>
 

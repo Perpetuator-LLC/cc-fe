@@ -9,17 +9,19 @@
 
     .breadcrumb-link {
       display: inline-flex;
-      align-items: center;
       gap: 8px;
-      color: var(--primary);
-      text-decoration: none;
+      align-items: center;
+
       font-weight: 500;
+      color: var(--md-sys-color-secondary);
+      text-decoration: none;
+
       transition: opacity 0.2s;
 
       mat-icon {
-        font-size: 20px;
         width: 20px;
         height: 20px;
+        font-size: 20px;
       }
 
       &:hover {
@@ -32,16 +34,18 @@
   .error-container {
     display: flex;
     flex-direction: column;
+    gap: 16px;
     align-items: center;
     justify-content: center;
+
     min-height: 400px;
-    gap: 16px;
+
     text-align: center;
 
     mat-icon {
-      font-size: 64px;
       width: 64px;
       height: 64px;
+      font-size: 64px;
       color: var(--md-sys-color-error);
     }
   }
@@ -49,7 +53,7 @@
   .podcast-header {
     margin-bottom: 32px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
     .podcast-info {
       display: flex;
@@ -57,42 +61,44 @@
       margin-bottom: 20px;
 
       .podcast-image {
+        flex-shrink: 0;
+
         width: 200px;
         height: 200px;
-        object-fit: cover;
         border-radius: 10px;
-        flex-shrink: 0;
+
+        object-fit: cover;
       }
 
       .podcast-details {
         flex: 1;
 
         h1 {
-          margin: 0 0 12px 0;
+          margin: 0 0 12px;
           font-size: 28px;
           font-weight: 700;
-          color: var(--primary);
+          color: var(--md-sys-color-secondary);
         }
 
         .description {
-          margin: 0 0 12px 0;
-          color: var(--description-color);
+          margin: 0 0 12px;
           line-height: 1.6;
+          color: var(--md-sys-color-on-surface-variant);
         }
 
         .owner {
-          margin: 0 0 12px 0;
+          margin: 0 0 12px;
           font-weight: 500;
-          color: var(--description-color);
+          color: var(--md-sys-color-on-surface-variant);
 
           a {
-            color: var(--primary);
+            color: var(--md-sys-color-secondary);
             text-decoration: none;
             transition: opacity 0.2s;
 
             &:hover {
-              opacity: 0.7;
               text-decoration: underline;
+              opacity: 0.7;
             }
           }
         }
@@ -105,42 +111,47 @@
 
           .category-badge {
             display: inline-block;
+
             padding: 4px 12px;
-            background: var(--secondary-400);
-            color: var(--theme-white);
             border-radius: 16px;
+
             font-size: 12px;
             font-weight: 600;
+            color: #ffffff;
             text-decoration: none;
+
+            background: var(--md-sys-color-surface-container-high);
+
             transition: background 0.2s;
 
             &:hover {
-              background: var(--secondary-500);
+              background: var(--md-sys-color-surface-container);
             }
 
             &.subcategory {
-              background: var(--secondary-450);
+              background: var(--md-sys-color-surface-container-high);
             }
           }
         }
 
         .stats {
           display: flex;
+          flex-wrap: wrap;
           gap: 20px;
           align-items: center;
-          flex-wrap: wrap;
 
           .stat {
             display: flex;
-            align-items: center;
             gap: 4px;
-            color: var(--description-color);
+            align-items: center;
+
             font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
 
             mat-icon {
-              font-size: 18px;
               width: 18px;
               height: 18px;
+              font-size: 18px;
             }
           }
         }
@@ -149,24 +160,24 @@
 
     .podcast-actions {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
       gap: 16px;
+      align-items: center;
+      justify-content: space-between;
     }
   }
 
   .episodes-section {
     h2 {
+      margin-bottom: 20px;
       font-size: 24px;
       font-weight: 600;
-      margin-bottom: 20px;
-      color: var(--primary);
+      color: var(--md-sys-color-secondary);
     }
 
     .no-episodes {
-      text-align: center;
       padding: 40px;
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface-variant);
+      text-align: center;
     }
 
     .episodes-list {
@@ -176,50 +187,51 @@
       margin-bottom: 24px;
 
       .episode-card {
+        border: 1px solid var(--md-sys-color-outline-variant);
         border-radius: 10px;
-        border: 1px solid var(--border-color);
 
         .episode-header {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
           gap: 16px;
+          align-items: flex-start;
+          justify-content: space-between;
+
           margin-bottom: 12px;
 
           h3 {
+            flex: 1;
             margin: 0;
             font-size: 18px;
             font-weight: 600;
-            flex: 1;
 
             .episode-title {
-              color: var(--primary);
+              color: var(--md-sys-color-secondary);
               text-decoration: none;
               transition: color 0.2s;
 
               &:hover {
-                color: var(--secondary-color);
+                color: var(--md-sys-color-surface-container);
               }
             }
           }
 
           .episode-date {
             font-size: 14px;
-            color: var(--description-color);
+            color: var(--md-sys-color-on-surface-variant);
             white-space: nowrap;
           }
         }
 
         .episode-description {
-          color: var(--description-color);
-          line-height: 1.6;
           margin-bottom: 16px;
+          line-height: 1.6;
+          color: var(--md-sys-color-on-surface-variant);
         }
 
         .episode-player {
           display: flex;
-          align-items: center;
           gap: 12px;
+          align-items: center;
           margin-bottom: 16px;
 
           audio {
@@ -229,28 +241,29 @@
 
           .duration {
             font-size: 14px;
-            color: var(--description-color);
+            color: var(--md-sys-color-on-surface-variant);
             white-space: nowrap;
           }
         }
 
         .episode-actions {
           display: flex;
-          justify-content: space-between;
           align-items: center;
+          justify-content: space-between;
+
           padding-top: 12px;
-          border-top: 1px solid var(--border-color);
+          border-top: 1px solid var(--md-sys-color-outline-variant);
         }
       }
     }
 
     mat-paginator {
+      border-top: 1px solid var(--md-sys-color-outline-variant);
       background: transparent;
-      border-top: 1px solid var(--border-color);
     }
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     padding-inline: 20px;
 
     .podcast-header {
@@ -258,10 +271,10 @@
         flex-direction: column;
 
         .podcast-image {
+          aspect-ratio: 1;
           width: 100%;
           max-width: 300px;
           height: auto;
-          aspect-ratio: 1;
         }
       }
 

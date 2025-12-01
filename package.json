@@ -13,6 +13,16 @@
     "test": "ng test --watch=false",
     "serve:ssr:capital-copilot-fe": "node dist/capital-copilot-fe/server/server.mjs",
     "lint": "ng lint",
+    "lint:scss": "stylelint \"**/*.scss\"",
+    "lint:scss:fix": "stylelint \"**/*.scss\" --fix",
+    "lint:md3": "node scripts/check-md3-compliance.js",
+    "lint:md3:component": "node scripts/check-md3-compliance.js --checklist",
+    "lint:all": "yarn lint && yarn lint:scss && yarn lint:md3",
+    "scss:track": "scripts/track-scss-size.sh",
+    "css:analyze": "node scripts/analyze-css-size.js",
+    "css:baseline": "yarn build && node scripts/analyze-css-size.js --baseline",
+    "css:dev": "yarn build && node scripts/analyze-css-size.js --dev",
+    "css:compare": "node scripts/analyze-css-size.js --compare",
     "generate": "graphql-codegen",
     "docs:graphql": "spectaql spectaql-config.yml 2>&1 | grep -v 'Deprecation Warning' | grep -v 'legacy-js-api' | grep -v 'More info' | grep -v '@import' | grep -v '╷' | grep -v '╵' | grep -v 'scss' || true",
     "check-copyright": "node scripts/check-copyright.js"
@@ -32,6 +42,7 @@
       "yarn check-copyright"
     ],
     "*.scss": [
+      "stylelint --fix",
       "yarn check-copyright"
     ]
   },
@@ -58,11 +69,11 @@
     "mermaid": "^11.12.1",
     "p5": "^1.11.3",
     "rxjs": "~7.8.0",
+    "spectaql": "^3.0.5",
     "tslib": "^2.3.0",
     "undici": "^6.19.4",
     "ws": "^8.18.0",
-    "zone.js": "~0.14.3",
-    "spectaql": "^3.0.5"
+    "zone.js": "~0.14.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.0.6",
@@ -70,6 +81,7 @@
     "@angular/compiler-cli": "^18.0.6",
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
+    "@fullhuman/postcss-purgecss": "^7.0.2",
     "@graphql-codegen/cli": "^5.0.3",
     "@graphql-codegen/typescript": "^4.1.1",
     "@graphql-codegen/typescript-apollo-angular": "^4.0.0",
@@ -89,7 +101,14 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^15.2.8",
+    "postcss": "^8.5.6",
     "prettier": "^3.3.3",
+    "purgecss": "^7.0.2",
+    "stylelint": "^16.26.1",
+    "stylelint-config-clean-order": "^8.0.0",
+    "stylelint-config-standard-scss": "^16.0.0",
+    "stylelint-order": "6",
+    "stylelint-scss": "^6.12.1",
     "typescript": "~5.4.2",
     "typescript-eslint": "8.15.0"
   },

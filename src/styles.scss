@@ -1,1658 +1,239 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-// System variables for Angular Material: https://angular-material.dev/episodes/angular-material-theming-css-vars
-@use 'sass:map';
-@use 'sass:color';
-@use '@angular/material' as mat;
 
-// Import custom mixins
+@use '@angular/material' as mat;
 @use 'styles/mixins' as mixins;
 
-// Import MD3 variables
-//@use '@angular/material/core/theming/palettes' as matPalette;
-//@use '@angular/material/core/theming/palette-md' as mdPalette;
+//@use '@angular/material' as mat;
+@use 'm3-theme' as customTheme;
 
-// Plus imports for other components in your app.
-//@use 'invest-theme/m3-theme';
-//@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
-
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
 
-// ============================================================================
-// MD3 Generated Themes - Easy Theme Switching
-// ============================================================================
-// To switch MD3 theme variants, change ONLY the filename in the @import below.
-// The imported theme will apply to body.dark or body.light classes.
-//
-// Available dark themes:  dark, dark-hc, dark-mc
-// Available light themes: light, light-hc, light-mc
-// ============================================================================
-
-// DARK THEME: Change 'dark' to 'dark-hc' or 'dark-mc' to switch variants
-@import 'theme/dark';
-
-// LIGHT THEME: Change 'light' to 'light-hc' or 'light-mc' to switch variants
-@import 'theme/light';
-
-// ============================================================================
-
-//$typography: (
-//  brand-family: 'lexend, sans-serif',
-//  //brand-family: 'roboto, sans-serif',
-//  bold-weight: 900,
-//);
-
-//$dark-color-scheme: (
-//  theme-type: dark,
-//  primary: #6750A4,
-//  on-primary: #FFFFFF,
-//  primary-container: #EADDFF,
-//  on-primary-container: #21005D,
-//  secondary: #625B71,
-//  on-secondary: #FFFFFF,
-//  secondary-container: #E8DEF8,
-//  on-secondary-container: #1D192B,
-//  tertiary: #7D5260,
-//  on-tertiary: #FFFFFF,
-//  tertiary-container: #FFD8E4,
-//  on-tertiary-container: #31111D,
-//  error: #B3261E,
-//  on-error: #FFFFFF,
-//  error-container: #F9DEDC,
-//  on-error-container: #410E0B,
-//  background: #FFFBFE,
-//  on-background: #1C1B1F,
-//  surface: #FFFBFE,
-//  on-surface: #1C1B1F,
-//  outline: #79747E,
-//  surface-variant: #E7E0EC,
-//  on-surface-variant: #49454F,
-//);
-//
-//// Create the theme object
-//$theme: mat.define-theme((
-//  color: $dark-color-scheme,
-//  typography: $typography,
-//  density: 0,
-//));
-//
-//// Apply the theme
-//@include mat.core();
-//@include mat.all-component-themes($theme);
-//
-//// Define CSS custom properties
-//// Use these like:
-////.my-component {
-////  background-color: var(--md-sys-color-primary);
-////  color: var(--md-sys-color-on-primary);
-////}
-//
-//// Dynamically change the theme:
-////document.documentElement.style.setProperty('--md-sys-color-primary', '#newColorValue');
-//:root {
-//  @each $key, $value in $dark-color-scheme {
-//    --md-sys-color-#{$key}: #{$value};
-//  }
-//}
-
-// ============================================================================
-// Capital Copilot Custom Color Palettes (MD3)
-// ============================================================================
-
-// Capital Blue Palette (Primary - NEW) - Trust, finance, stability
-$_capital-blue: (
-  0: #000000,
-  10: #001a33,
-  20: #002d52,
-  25: #003863,
-  30: #004375,
-  35: #004e87,
-  40: #005a9a,
-  50: #0072c1,
-  60: #008ce8,
-  70: #3da6ff,
-  80: #7dc1ff,
-  90: #b8dcff,
-  95: #e0eeff,
-  98: #f4f9ff,
-  99: #fafcff,
-  100: #ffffff,
-);
-
-// Vibrant Orange Palette (Secondary - NEW) - Energy, action, brand
-// Based on current #f14a00 used throughout components
-$_vibrant-orange: (
-  0: #000000,
-  10: #2d0f00,
-  20: #4a1900,
-  25: #5a1f00,
-  30: #6b2600,
-  35: #7d2d00,
-  40: #8f3400,
-  50: #b54200,
-  60: #dd5100,
-  70: #f14a00,
-  80: #ff7b3d,
-  90: #ffad7a,
-  95: #ffd4ba,
-  98: #fff0e5,
-  99: #fffbf9,
-  100: #ffffff,
-);
-
-// Prominent Purple Palette (Tertiary - NEW) - Premium, creative, innovation
-$_prominent-purple: (
-  0: #000000,
-  10: #1a0033,
-  20: #2d0052,
-  25: #380063,
-  30: #430075,
-  35: #4e0087,
-  40: #5a009a,
-  50: #7200c1,
-  60: #8c00e8,
-  70: #a63dff,
-  80: #c17dff,
-  90: #dcb8ff,
-  95: #eee0ff,
-  98: #f9f4ff,
-  99: #fcfaff,
-  100: #ffffff,
-);
-
-// Neutral Blue palette (for surfaces, backgrounds) - Complements Capital Blue primary
-$_neutral: (
-  0: #000000,
-  4: #000a1c,
-  6: #000f2a,
-  10: #001946,
-  12: #001d4e,
-  17: #002663,
-  20: #002c70,
-  22: #023078,
-  24: #05357f,
-  25: #063783,
-  30: #1b438f,
-  35: #2a4f9c,
-  40: #385ba9,
-  50: #5375c3,
-  60: #6d8fdf,
-  70: #88a9fc,
-  80: #b1c6ff,
-  87: #cddaff,
-  90: #d9e2ff,
-  92: #e1e8ff,
-  94: #eaedff,
-  95: #eef0ff,
-  96: #f2f3ff,
-  98: #faf8ff,
-  99: #fefbff,
-  100: #ffffff,
-);
-
-// TODO: Previous neutral - Neutral Purple palette (saved for future experimentation)
-// $_neutral-purple: (
-//   0: #000000,
-//   4: #0f0014,
-//   6: #14001f,
-//   10: #1f0033,
-//   12: #24003a,
-//   17: #2f0048,
-//   20: #370052,
-//   22: #3c0058,
-//   24: #41005e,
-//   25: #430061,
-//   30: #4f006e,
-//   35: #5b007c,
-//   40: #680089,
-//   50: #8200a6,
-//   60: #9d00c4,
-//   70: #b83de1,
-//   80: #d27dff,
-//   87: #dfb0ff,
-//   90: #e5c4ff,
-//   92: #ebd4ff,
-//   94: #f1e3ff,
-//   95: #f4e9ff,
-//   96: #f7eeff,
-//   98: #fdf7ff,
-//   99: #fffbff,
-//   100: #ffffff,
-// );
-
-
-// Neutral variant palette (for variant surfaces)
-$_neutral-variant: (
-  0: #000000,
-  10: #1b1b23,
-  20: #303038,
-  25: #3b3a43,
-  30: #47464f,
-  35: #52515b,
-  40: #5e5d67,
-  50: #777680,
-  60: #918f9a,
-  70: #acaab4,
-  80: #c8c5d0,
-  90: #e4e1ec,
-  95: #f2effa,
-  98: #fcf8ff,
-  99: #fffbff,
-  100: #ffffff,
-);
-
-// Error palette (for error states)
-$_error: (
-  0: #000000,
-  10: #410002,
-  20: #690005,
-  25: #7e0007,
-  30: #93000a,
-  35: #a80710,
-  40: #ba1a1a,
-  50: #de3730,
-  60: #ff5449,
-  70: #ff897d,
-  80: #ffb4ab,
-  90: #ffdad6,
-  95: #ffedea,
-  98: #fff8f7,
-  99: #fffbff,
-  100: #ffffff,
-);
-
-// Material 3 requires complete palette maps with all required palettes
-// Build complete palettes by merging the base color with supporting palettes
-$_rest: (
-  secondary: $_vibrant-orange,
-  neutral: $_neutral,
-  neutral-variant: $_neutral-variant,
-  error: $_error,
-);
-
-$capital-blue-palette: map.merge($_capital-blue, $_rest);
-$prominent-purple-palette: map.merge($_prominent-purple, $_rest);
-
-// Define shared typography configuration
-$cc-typography: (
-  brand-family: 'Lexend, sans-serif',
-  //brand-family: 'DM Sans',
-  plain-family: 'Roboto, sans-serif',
-  //plain-family: 'DM Sans',
-  bold-weight: 900,
-  medium-weight: 700,
-  regular-weight: 500,
-);
-
-// Define shared density configuration
-$cc-density: (
-  scale: 0,
-);
-
-// Dark theme definition (Capital Blue primary, Vibrant Orange secondary, Prominent Purple tertiary)
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: $capital-blue-palette,
-    tertiary: $prominent-purple-palette,
-  ),
-  typography: $cc-typography,
-  density: $cc-density,
-));
-
-// Light theme definition (Capital Blue primary, Vibrant Orange secondary, Prominent Purple tertiary)
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: $capital-blue-palette,
-    tertiary: $prominent-purple-palette,
-  ),
-  typography: $cc-typography,
-  density: $cc-density,
-));
-
-// ============================================================================
-// Global Typography & Density (Applied Once)
-// ============================================================================
-:root {
-  // Define CSS custom properties for typography that Material can use
-  --md-sys-typescale-brand-family: 'Lexend', sans-serif;
-  --md-sys-typescale-plain-family: 'Roboto', sans-serif;
-
-  --mdc-typography-font-family: 'Roboto', sans-serif;
-  --mat-app-title-large-font: 'Lexend', sans-serif;
-  --mat-app-title-medium-font: 'Lexend', sans-serif;
-  --mat-app-title-small-font: 'Lexend', sans-serif;
-  --mat-app-headline-large-font: 'Lexend', sans-serif;
-  --mat-app-headline-medium-font: 'Lexend', sans-serif;
-  --mat-app-headline-small-font: 'Lexend', sans-serif;
-  --mat-app-body-large-font: 'Roboto', sans-serif;
-  --mat-app-body-medium-font: 'Roboto', sans-serif;
-  --mat-app-body-small-font: 'Roboto', sans-serif;
-}
-
 html {
-  @include mat.all-component-typographies($dark-theme);
-  @include mat.all-component-densities($dark-theme);
+  @include mat.all-component-themes(customTheme.$dark-theme);
 }
 
-// ============================================================================
-// Global Component Overrides
-// ============================================================================
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 
-// Ensure all Material buttons have rounded corners (MD3 default)
-.mat-mdc-button,
-.mat-mdc-raised-button,
-.mat-mdc-outlined-button,
-.mat-mdc-unelevated-button,
-.mat-mdc-fab,
-.mat-mdc-mini-fab {
-  --mdc-shape-small: var(--cc-radius-md) !important;
-  --mdc-protected-button-container-shape: var(--cc-radius-md) !important;
-  --mdc-filled-button-container-shape: var(--cc-radius-md) !important;
-  --mdc-outlined-button-container-shape: var(--cc-radius-md) !important;
-  --mdc-text-button-container-shape: var(--cc-radius-md) !important;
-
-  border-radius: var(--cc-radius-md) !important;
-}
-
-// Icon buttons (FAB) should be fully rounded
-.mat-mdc-fab,
-.mat-mdc-mini-fab {
-  --mdc-shape-small: 50% !important;
-  --mdc-protected-button-container-shape: 50% !important;
-  border-radius: 50% !important;
-}
-
-// ============================================================================
-// Theme Application (Color-Only Per Theme)
-// ============================================================================
-
-// Dark theme - apply ONLY color tokens
-body.dark {
-  @include mat.all-component-colors($dark-theme);
-
-  // ============================================================================
-  // MD3 THEME COLORS (from theme/dark.scss)
-  // ============================================================================
-  // All color tokens now come from the imported MD3 theme file.
-  // The following variables are COMMENTED OUT and replaced by MD3 tokens.
-  // ============================================================================
-
-  // CUSTOM TOKENS REPLACED BY MD3:
-  // --cc-color-success: #4caf50;                    → use --md-extended-color-success-color
-  // --cc-color-success-container: #1b5e20;          → use --md-extended-color-success-color-container
-  // --cc-color-on-success: #ffffff;                 → use --md-extended-color-success-on-color
-
-  // --cc-color-warning: #ff9800;                    → use --md-extended-color-warning-color
-  // --cc-color-warning-container: #e65100;          → use --md-extended-color-warning-color-container
-  // --cc-color-on-warning: #ffffff;                 → use --md-extended-color-warning-on-color
-
-  // --cc-color-error: #ef5350;                      → use --md-sys-color-error
-  // --cc-color-error-container: #b71c1c;            → use --md-sys-color-error-container
-  // --cc-color-on-error: #ffffff;                   → use --md-sys-color-on-error
-
-  // --cc-color-info: #03a9f4;                       → use --md-extended-color-info-color
-  // --cc-color-info-container: #01579b;             → use --md-extended-color-info-color-container
-  // --cc-color-on-info: #ffffff;                    → use --md-extended-color-info-on-color
-
-  // --cc-color-primary: #008ce8;                    → use --md-sys-color-primary
-  // --cc-color-on-primary: #ffffff;                 → use --md-sys-color-on-primary
-
-  // --cc-color-orange: #ff7b3d;                     → use --md-sys-color-secondary
-  // --cc-color-on-orange: #000000;                  → use --md-sys-color-on-secondary
-
-  // --cc-color-secondary: #ff7b3d;                  → use --md-sys-color-secondary
-  // --cc-color-on-secondary: #000000;               → use --md-sys-color-on-secondary
-
-  // Surface Colors (now from MD3)
-  // --cc-surface-background: #121212;               → use --md-sys-color-background
-  // --cc-surface-card: #1e1e1e;                     → use --md-sys-color-surface-container
-  // --cc-surface-elevated: #2a2a2a;                 → use --md-sys-color-surface-container-high
-  // --cc-surface-toolbar: #1a1a1a;                  → use --md-sys-color-surface-container-low
-
-  // Border & Divider Colors (now from MD3)
-  // --cc-border-color: rgba(255, 255, 255, 0.12);   → use --md-sys-color-outline-variant
-  // --cc-border-color-strong: rgba(255, 255, 255, 0.24); → use --md-sys-color-outline
-  // --cc-divider-color: rgba(255, 255, 255, 0.08);  → use --md-sys-color-outline-variant
-
-  // Text Colors (now from MD3)
-  // --cc-text-primary: rgba(255, 255, 255, 0.87);   → use --md-sys-color-on-surface
-  // --cc-text-secondary: rgba(255, 255, 255, 0.60); → use --md-sys-color-on-surface-variant
-  // --cc-text-tertiary: rgba(255, 255, 255, 0.38);  → use --md-sys-color-on-surface-variant
-  // --cc-text-disabled: rgba(255, 255, 255, 0.38);  → use --md-sys-color-on-surface-variant
-
-  // Spacing Scale (unchanged - these are not theme colors)
-  --cc-spacing-xs: 4px;
-  --cc-spacing-sm: 8px;
-  --cc-spacing-md: 16px;
-  --cc-spacing-lg: 24px;
-  --cc-spacing-xl: 32px;
-  --cc-spacing-2xl: 48px;
-
-  // Border Radius Scale (unchanged - these are not theme colors)
-  --cc-radius-sm: 4px;
-  --cc-radius-md: 8px;
-  --cc-radius-lg: 12px;
-  --cc-radius-xl: 16px;
-  --cc-radius-round: 999px;
-
-  // Legacy Variables (map to MD3 tokens for backwards compatibility)
-  --toolbar-container-background-color: var(--md-sys-color-surface-container-low);
-  --secondary-color: var(--md-sys-color-surface-container);
-  --secondary-dark: var(--md-sys-color-surface-container-high);
-  --secondary-light: var(--md-sys-color-surface-container);
-  --theme-color: var(--md-sys-color-on-surface);
-  --border-color: var(--md-sys-color-outline-variant);
-  --secondary-400: var(--md-sys-color-surface-container-high);
-  --secondary-450: var(--md-sys-color-surface-container-high);
-  --secondary-500: var(--md-sys-color-surface-container);
-  --description-color: var(--md-sys-color-on-surface-variant);
-  --theme-white: #ffffff;
-  --theme-transparent: rgba(0, 0, 0, 0.4);
-  --primary: var(--md-sys-color-secondary); // Orange for links/accents
-  --purple: var(--md-sys-color-tertiary);
-
-  .mat-mdc-card {
-    background-color: var(--md-sys-color-surface-container);
-    box-shadow: none;
-  }
-
-  // Fix input field contrast in dark mode
-  .mdc-text-field {
-    background-color: var(--md-sys-color-surface-container) !important;
-
-    &.mdc-text-field--focused {
-      background-color: var(--md-sys-color-surface-container) !important;
-    }
-  }
-
-  .mat-mdc-input-element {
-    color: var(--md-sys-color-on-surface) !important;
+  * {
+    scrollbar-color: var(--md-sys-color-on-surface) transparent;
   }
 }
 
-// Light theme - apply ONLY color tokens
 body.light {
-  @include mat.all-component-colors($light-theme);
+  @include mat.all-component-colors(customTheme.$light-color);
 
-  // ============================================================================
-  // MD3 THEME COLORS (from theme/light.scss)
-  // ============================================================================
-  // All color tokens now come from the imported MD3 theme file.
-  // The following variables are COMMENTED OUT and replaced by MD3 tokens.
-  // ============================================================================
-
-  // CUSTOM TOKENS REPLACED BY MD3:
-  // --cc-color-success: #2e7d32;                    → use --md-extended-color-success-color
-  // --cc-color-success-container: #c8e6c9;          → use --md-extended-color-success-color-container
-  // --cc-color-on-success: #000000;                 → use --md-extended-color-success-on-color
-
-  // --cc-color-warning: #f57c00;                    → use --md-extended-color-warning-color
-  // --cc-color-warning-container: #ffe0b2;          → use --md-extended-color-warning-color-container
-  // --cc-color-on-warning: #000000;                 → use --md-extended-color-warning-on-color
-
-  // --cc-color-error: #c62828;                      → use --md-sys-color-error
-  // --cc-color-error-container: #ffcdd2;            → use --md-sys-color-error-container
-  // --cc-color-on-error: #ffffff;                   → use --md-sys-color-on-error
-
-  // --cc-color-info: #0288d1;                       → use --md-extended-color-info-color
-  // --cc-color-info-container: #b3e5fc;             → use --md-extended-color-info-color-container
-  // --cc-color-on-info: #000000;                    → use --md-extended-color-info-on-color
-
-  // --cc-color-primary: #005a9a;                    → use --md-sys-color-primary
-  // --cc-color-on-primary: #ffffff;                 → use --md-sys-color-on-primary
-
-  // --cc-color-orange: #ff7b3d;                     → use --md-sys-color-secondary
-  // --cc-color-on-orange: #000000;                  → use --md-sys-color-on-secondary
-
-  // --cc-color-secondary: #f14a00;                  → use --md-sys-color-secondary
-  // --cc-color-on-secondary: #ffffff;               → use --md-sys-color-on-secondary
-
-  // Surface Colors (now from MD3)
-  // --cc-surface-background: #fafafa;               → use --md-sys-color-background
-  // --cc-surface-card: #ffffff;                     → use --md-sys-color-surface-container-lowest
-  // --cc-surface-elevated: #ffffff;                 → use --md-sys-color-surface-container
-  // --cc-surface-toolbar: #ffffff;                  → use --md-sys-color-surface
-
-  // Border & Divider Colors (now from MD3)
-  // --cc-border-color: rgba(0, 0, 0, 0.12);         → use --md-sys-color-outline-variant
-  // --cc-border-color-strong: rgba(0, 0, 0, 0.24);  → use --md-sys-color-outline
-  // --cc-divider-color: rgba(0, 0, 0, 0.08);        → use --md-sys-color-outline-variant
-
-  // Text Colors (now from MD3)
-  // --cc-text-primary: rgba(0, 0, 0, 0.87);         → use --md-sys-color-on-surface
-  // --cc-text-secondary: rgba(0, 0, 0, 0.60);       → use --md-sys-color-on-surface-variant
-  // --cc-text-tertiary: rgba(0, 0, 0, 0.38);        → use --md-sys-color-on-surface-variant
-  // --cc-text-disabled: rgba(0, 0, 0, 0.38);        → use --md-sys-color-on-surface-variant
-
-  // Spacing Scale (unchanged - these are not theme colors)
-  --cc-spacing-xs: 4px;
-  --cc-spacing-sm: 8px;
-  --cc-spacing-md: 16px;
-  --cc-spacing-lg: 24px;
-  --cc-spacing-xl: 32px;
-  --cc-spacing-2xl: 48px;
-
-  // Border Radius Scale (unchanged - these are not theme colors)
-  --cc-radius-sm: 4px;
-  --cc-radius-md: 8px;
-  --cc-radius-lg: 12px;
-  --cc-radius-xl: 16px;
-  --cc-radius-round: 999px;
-
-  // Legacy Variables (map to MD3 tokens for backwards compatibility)
-  --toolbar-container-background-color: var(--md-sys-color-surface);
-  --secondary-color: #f5f5f5;
-  --secondary-dark: #f5f5f5;
-  --secondary-light: var(--md-sys-color-surface-container-lowest);
-  --theme-color: var(--md-sys-color-on-surface);
-  --border-color: var(--md-sys-color-outline-variant);
-  --secondary-400: #f5f5f5;
-  --secondary-450: var(--md-sys-color-surface-container-lowest);
-  --secondary-500: #f5f5f5;
-  --description-color: var(--md-sys-color-on-surface-variant);
-  --theme-white: var(--md-sys-color-secondary); // Orange in light theme
-  --theme-transparent: rgba(255, 255, 255, 0.42);
-  --primary: var(--md-sys-color-secondary); // Orange for links/accents
-  --purple: var(--md-sys-color-tertiary);
-
-  .mat-mdc-card {
-    background-color: var(--md-sys-color-surface-container-lowest);
-    box-shadow: none;
-  }
-
-  // Ensure proper contrast in light mode
-  .mdc-text-field {
-    background-color: var(--md-sys-color-surface-container-lowest) !important;
-
-    &.mdc-text-field--focused {
-      background-color: var(--md-sys-color-surface-container-lowest) !important;
-    }
-  }
-
-  .mat-mdc-input-element {
-    color: var(--md-sys-color-on-surface) !important;
+  * {
+    scrollbar-color: var(--md-sys-color-on-surface) transparent;
   }
 }
 
-//@mixin set-css-variables($theme) {
-//  $color-config: map.get($theme, color);
-//  @if $color-config == null {
-//    @warn 'No color configuration found in the theme map.';
-//  } else {
-//    :root {
-//      --md-sys-color-primary: #{map.get($color-config, primary)};
-//      --md-sys-color-secondary: #{map.get($color-config, secondary)};
-//      --md-sys-color-tertiary: #{map.get($color-config, tertiary)};
-//      --md-sys-color-error: #{map.get($color-config, error)};
-//      --md-sys-color-success: #{map.get($color-config, success)};
-//      --md-sys-color-warning: #{map.get($color-config, warning)};
-//      --md-sys-color-background: #{map.get($color-config, background)};
-//    }
-//  }
+// Import MD3 theme CSS files (they contain ALL the color tokens we need)
+//@import 'theme/dark';
+//@import 'theme/light';
+
+// Minimal Material theme just to initialize components
+// The actual colors come from the CSS files above via CSS variables
+//$theme: mat.define-theme((
+//  color: (
+//    theme-type: dark,
+//    primary: mat.$azure-palette,
+//    tertiary: mat.$violet-palette,
+//  ),
+//  typography: (
+//    brand-family: 'Lexend, sans-serif',
+//    plain-family: 'Roboto, sans-serif',
+//  ),
+//  density: (
+//    scale: 0,
+//  ),
+//));
+
+//html {
+//  @include mat.all-component-themes($theme);
+//}
+
+// Apply MD3 colors from imported theme files
+//body.dark,
+//body.light {
+//  background-color: var(--md-sys-color-background);
+//  color: var(--md-sys-color-on-background);
+//
+//  // Override Material component CSS vars to use MD3 tokens
+//  --mdc-filled-button-container-color: var(--md-sys-color-primary);
+//  --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary);
+//  --mdc-filled-text-field-input-text-color: var(--md-sys-color-on-surface);
+//  --mdc-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
 //}
 //
-//// Apply the mixin for both themes
-//@include set-css-variables($dark-theme);
-//@include set-css-variables($light-theme);
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  // Apply plain font family from $cc-typography with high specificity
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: 500;
-  font-optical-sizing: auto;
-  font-style: normal;
-}
-
-// Apply brand font to headers with high specificity
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Lexend', sans-serif !important;
-  font-weight: 900;
-  font-optical-sizing: auto;
-  font-style: normal;
-}
-
-// Apply medium weight to certain elements
-strong, b {
-  font-weight: 700;
-}
-
-// ============================================================================
-// Material Icons Global Styling
-// ============================================================================
-.mat-icon {
-  font-family: 'Material Symbols Outlined' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: 'liga';
-}
-
-// ============================================================================
-// Global Link Styling
-// ============================================================================
-a {
-  color: var(--primary); // Orange color for unvisited links
-  text-decoration: none;
-  transition: color 0.2s ease, opacity 0.2s ease;
-
-  &:hover {
-    text-decoration: underline;
-    opacity: 0.9;
-  }
-
-  &:visited {
-    color: var(--cc-color-orange); // Lighter orange for visited links
-    opacity: 0.7;
-  }
-
-  &:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-  }
-}
-
-// ============================================================================
-// Root Default (Light Theme)
-// ============================================================================
-:root {
-  // Default to light theme colors
-  --cc-surface-background: #fafafa;
-  --cc-surface-card: #ffffff;
-  --cc-surface-elevated: #ffffff;
-  --cc-surface-toolbar: #ffffff;
-  --cc-border-color: rgba(0, 0, 0, 0.12);
-  --cc-border-color-strong: rgba(0, 0, 0, 0.24);
-  --cc-text-primary: rgba(0, 0, 0, 0.87);
-  --cc-text-secondary: rgba(0, 0, 0, 0.60);
-  --cc-text-tertiary: rgba(0, 0, 0, 0.38);
-
-  // Legacy variables (default to light theme)
-  --toolbar-container-background-color: #ffffff;
-  --secondary-color: #f5f5f5;
-  --secondary-dark: #f5f5f5;
-  --secondary-light: #ffffff;
-  --theme-color: #262627;
-  --border-color: rgba(0, 0, 0, 0.12);
-  --secondary-400: #f5f5f5;
-  --secondary-450: #ffffff;
-  --secondary-500: #f5f5f5;
-  --primary: #f14a00;
-  --theme-white: #f14a00;
-  --description-color: #767676;
-  --theme-transparent: rgba(255, 255, 255, 0.42);
-  --purple: #005a9a; // Legacy reference, now points to Capital Blue
-}
-
-// ============================================================================
-// MD3 Utility Classes - Reusable Semantic Color Classes
-// ============================================================================
-// Use these classes instead of custom styling for consistency
-
-// Text Colors
-.md3-text-primary { color: var(--md-sys-color-on-surface) !important; }
-.md3-text-secondary { color: var(--md-sys-color-on-surface-variant) !important; }
-
-// Material Button Color Overrides (Fix white text in light mode globally)
-button.mat-mdc-button,
-button.mat-mdc-raised-button,
-button.mat-mdc-unelevated-button,
-button.mat-mdc-flat-button,
-button.mat-mdc-icon-button {
-  &.mat-primary {
-    .mdc-button__label,
-    mat-icon {
-      color: var(--md-sys-color-on-primary) !important;
-    }
-  }
-
-  &.mat-accent,
-  &.mat-secondary {
-    .mdc-button__label,
-    mat-icon {
-      color: var(--md-sys-color-on-secondary) !important;
-    }
-  }
-
-  &.mat-warn {
-    .mdc-button__label,
-    mat-icon {
-      color: var(--md-sys-color-on-error) !important;
-    }
-  }
-}
-
-// Fix button colors when background is set
-button {
-  &[style*="background"] {
-    .mdc-button__label,
-    mat-icon {
-      color: inherit !important;
-    }
-  }
-}
-
-// Ensure icons in all buttons respect theme
-button {
-  mat-icon {
-    color: inherit;
-  }
-}
-
-// Status/Semantic Colors
-.md3-success {
-  color: var(--md-extended-color-success-on-color) !important;
-  background-color: var(--md-extended-color-success-color) !important;
-}
-
-.md3-error,
-.md3-danger {
-  color: var(--md-sys-color-on-error) !important;
-  background-color: var(--md-sys-color-error) !important;
-}
-
-.md3-warning {
-  color: var(--md-extended-color-warning-on-color) !important;
-  background-color: var(--md-extended-color-warning-color) !important;
-}
-
-.md3-info {
-  color: var(--md-extended-color-info-on-color) !important;
-  background-color: var(--md-extended-color-info-color) !important;
-}
-
-// Muted/Disabled
-.md3-muted {
-  color: var(--md-sys-color-on-surface-variant) !important;
-  opacity: 0.6;
-}
-
-// Badge variants (outline style)
-.md3-badge-success {
-  color: var(--md-extended-color-success-color) !important;
-  background-color: var(--md-extended-color-success-color-container) !important;
-  border: 1px solid var(--md-extended-color-success-color);
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  border-radius: var(--cc-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.md3-badge-error,
-.md3-badge-danger {
-  color: var(--md-sys-color-error) !important;
-  background-color: var(--md-sys-color-error-container) !important;
-  border: 1px solid var(--md-sys-color-error);
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  border-radius: var(--cc-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.md3-badge-warning {
-  color: var(--md-extended-color-warning-color) !important;
-  background-color: var(--md-extended-color-warning-color-container) !important;
-  border: 1px solid var(--md-extended-color-warning-color);
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  border-radius: var(--cc-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.md3-badge-muted {
-  color: var(--md-sys-color-on-surface-variant) !important;
-  background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
-  border-radius: var(--cc-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-// Icon colors for validation states
-.md3-icon-success { color: var(--md-extended-color-success-color) !important; }
-.md3-icon-error { color: var(--md-sys-color-error) !important; }
-.md3-icon-warning { color: var(--md-extended-color-warning-color) !important; }
-.md3-icon-muted { color: var(--md-sys-color-on-surface-variant) !important; }
-
-// Danger zones / Warning sections
-.md3-danger-zone {
-  border: 2px solid var(--md-sys-color-error) !important;
-  background-color: var(--md-sys-color-error-container) !important;
-  color: var(--md-sys-color-on-error-container) !important;
-  padding: var(--cc-spacing-md);
-  border-radius: var(--cc-radius-md);
-
-  h2, h3, h4, h5, h6 {
-    color: var(--md-sys-color-on-error-container) !important;
-  }
-
-  button.md3-danger-action {
-    background-color: var(--md-sys-color-error) !important;
-    color: var(--md-sys-color-on-error) !important;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-}
-
-// ============================================================================
-
-.music-dark {
-  display: none;
-}
-
-.music-white,
-.music-dark {
-  width: 30px !important;
-  height: 30px !important;
-}
-
-.light {
-  .bottom-sticky-buttons {
-    background-color: white !important;
-  }
-
-  .news-card-wrapper.newsSelected {
-    border-color: var(--purple) !important;
-  }
-
-  .music-dark {
-    display: block;
-  }
-
-  .music-white {
-    display: none;
-  }
-
-  .actionMenu {
-    button {
-      &:hover {
-        background-color: var(--md-sys-color-surface-container-high) !important;
-      }
-    }
-  }
-
-  .savePodcastBtn {
-    background: #f14a00 !important;
-  }
-}
-
-.url-btn {
-  .mdc-fab__ripple {
-    display: none;
-  }
-}
-
-.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
-  border-color: var(--md-sys-color-outline-variant) !important;
-}
-
-.mat-mdc-chip-action-label {
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.mat-mdc-standard-chip .mdc-evolution-chip__icon--trailing {
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.search-filter {
-  .mat-mdc-form-field-bottom-align {
-    display: none;
-  }
-
-  .mat-mdc-form-field-infix {
-    min-height: 40px;
-    padding: 0;
-
-    label {
-      top: 20px !important;
-      font-size: 14px;
-    }
-
-    .mat-mdc-select-arrow-wrapper {
-      transform: translate(0) !important;
-    }
-
-    .mat-mdc-select-arrow {
-      color: var(--md-sys-color-on-surface-variant);
-
-      svg {
-        fill: var(--md-sys-color-on-surface-variant);
-      }
-    }
-
-    .mat-mdc-select {
-      color: var(--md-sys-color-on-surface);
-      // Remove padding-top to prevent text cutoff at top
-      // Material handles vertical alignment automatically
-    }
-  }
-}
-
-.mat-mdc-dialog-content {
-  color: var(--md-sys-color-on-surface-variant) !important;
-}
-
-.mdc-dialog__surface .deleteModal {
-  color: var(--md-sys-color-on-surface);
-}
-
-.mdc-dialog__surface:has(.deleteModal) {
-  .mdc-dialog__actions {
-    button {
-      background: var(--md-sys-color-surface-container);
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: var(--cc-radius-md);
-      color: var(--md-sys-color-on-surface) !important;
-      font-weight: 500;
-
-      &:nth-child(2) {
-        background: var(--md-sys-color-error) !important;
-        color: var(--md-sys-color-on-error) !important;
-      }
-    }
-  }
-}
-
-.page-title {
-  font-size: 15px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--md-sys-color-on-surface);
-
-  @media screen and (max-width: 600px) {
-    display: none;
-
-    .arrow {
-      display: none;
-    }
-  }
-
-  .page-title-secondary {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface-variant);
-
-    @media screen and (max-width: 576px) {
-      display: none;
-    }
-  }
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: -20px;
-  margin-bottom: 16px;
-}
-
-.mdc-linear-progress__bar-inner {
-  border-color: var(--primary) !important;
-}
-
-.team-title {
-  .mat-mdc-text-field-wrapper {
-    padding: 0;
-    background: transparent !important;
-    border: 0;
-  }
-
-  .mat-mdc-form-field-infix {
-    padding: 0;
-    min-height: 0;
-    width: auto;
-  }
-
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
-
-  .mat-mdc-form-field-focus-overlay {
-    display: none;
-  }
-
-  label {
-    display: none !important;
-  }
-}
-
-.mat-mdc-tooltip-surface {
-  background-color: var(--secondary-light) !important;
-  color: var(--theme-color) !important;
-  border: 1px solid var(--border-color);
-  padding: 10px !important;
-  font-size: 12px !important;
-}
-
-.mdc-button__label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 0;
-}
-
-.mat-tab-group {
-  .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-    color: var(--purple) !important;
-  }
-
-  .mat-mdc-tab .mdc-tab__text-label {
-    color: var(--theme-color);
-  }
-
-  .mat-mdc-tab .mdc-tab-indicator__content--underline {
-    border-color: var(--purple) !important;
-  }
-
-  .mat-mdc-tab-label-container {
-    border-bottom-color: var(--border-color);
-  }
-
-  .mat-mdc-tab:hover .mdc-tab__ripple::before {
-    background-color: transparent;
-  }
-
-  .mat-mdc-tab-labels {
-    gap: 24px;
-  }
-
-  .mat-mdc-tab.mdc-tab {
-    padding: 0;
-    justify-content: flex-start;
-    flex-grow: 0 !important;
-    min-width: auto;
-  }
-}
-
-div.mat-mdc-autocomplete-panel {
-  background: var(--md-sys-color-surface-container) !important;
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.mat-expansion-panel {
-  background: var(--md-sys-color-surface-container) !important;
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.mat-mdc-checkbox .mat-internal-form-field {
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.mdc-checkbox__background {
-  border-color: var(--md-sys-color-on-surface) !important;
-}
-
-.mat-mdc-checkbox-checked .mdc-checkbox__background {
-  border-color: var(--md-sys-color-primary) !important;
-  background-color: var(--md-sys-color-primary) !important;
-
-  svg {
-    color: var(--md-sys-color-on-primary) !important;
-  }
-
-  .mdc-checkbox__mixedmark {
-    color: var(--md-sys-color-on-primary) !important;
-  }
-}
-
-.episodes-container {
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
-}
-
-.mdc-text-field {
-  background: var(--secondary-light) !important;
-  border: 1px solid var(--border-color);
-  border-radius: 8px !important;
-
-  &.mdc-text-field--focused {
-    border-color: var(--primary);
-    // Ensure background stays consistent in dark mode (no light purple)
-    background: var(--secondary-light) !important;
-
-    .mdc-floating-label {
-      color: var(--primary) !important;
-      opacity: 0.7;
-    }
-  }
-
-  .mdc-floating-label {
-    color: var(--theme-color) !important;
-    opacity: 0.7;
-  }
-}
-
-.mat-mdc-form-field {
-  .mat-mdc-form-field-error {
-    color: var(--md-sys-color-error);
-  }
-
-  .mat-mdc-input-element {
-    color: var(--md-sys-color-on-surface) !important;
-    caret-color: var(--primary) !important;
-  }
-
-  // Hide the focus overlay that causes light purple background in dark mode
-  .mat-mdc-form-field-focus-overlay {
-    display: none !important;
-  }
-
-  .mdc-line-ripple {
-    display: none;
-
-    &::before {
-      border-bottom-color: var(--border-color) !important;
-    }
-  }
-
-  &.mat-focused {
-    .mdc-line-ripple {
-      &::after {
-        border-bottom-color: var(--primary) !important;
-      }
-    }
-  }
-}
-
-.mat-mdc-dialog-surface {
-  background-color: var(--md-sys-color-surface-container) !important;
-  border-radius: 8px !important;
-}
-
-.mat-mdc-dialog-title {
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-.mat-app-background {
-  background-color: var(--toolbar-container-background-color);
-}
-
-.action-btn {
-  padding: 0 !important;
-  height: auto !important;
-  line-height: 0;
-  color: var(--md-sys-color-on-surface) !important;
-}
-
-div.mat-mdc-select-panel {
-  background-color: var(--secondary-light) !important;
-  border-radius: 8px !important;
-  padding: 12px !important;
-
-  .mat-mdc-option {
-    border-radius: 8px;
-
-    &.mat-mdc-option-active {
-      background-color: var(--secondary-500);
-    }
-  }
-
-  .mat-pseudo-checkbox {
-    border-color: var(--border-color);
-
-    &.mat-pseudo-checkbox-checked {
-      background-color: var(--primary);
-
-      &::after {
-        color: white;
-      }
-    }
-  }
-
-  .mdc-list-item__primary-text {
-    color: var(--md-sys-color-on-surface) !important;
-    font-size: 14px;
-    font-weight: 400;
-  }
-}
-
-.mat-mdc-menu-panel {
-  background-color: var(--md-sys-color-surface-container) !important;
-  border: 1px solid var(--md-sys-color-outline-variant);
-}
-
-.voice-info {
-  .mat-icon {
-    min-width: 24px;
-  }
-}
-
-.profile-menu {
-  min-width: 300px !important;
-  max-width: 300px !important;
-  border-radius: var(--cc-radius-md) !important;
-
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: var(--cc-spacing-sm);
-    padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-
-    .mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-    }
-
-    .profile-name {
-      p {
-        margin: 0;
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface);
-      }
-
-      span {
-        color: var(--md-sys-color-on-surface-variant);
-        font-size: 12px;
-        font-weight: 500;
-      }
-    }
-  }
-
-  .mat-mdc-menu-item {
-    color: var(--md-sys-color-on-surface);
-
-    span {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .mat-icon {
-      margin-right: var(--cc-spacing-sm);
-      color: var(--md-sys-color-on-surface);
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  .mat-mdc-menu-item-text {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.theme-toggle-card {
-  .mat-mdc-menu-item-text {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .left {
-    display: flex;
-    align-items: center;
-  }
-
-  // Remove extra spacing - icon already has margin-right from parent
-  .mat-icon {
-    margin-right: var(--cc-spacing-sm) !important;
-  }
-}
-
-.logout-btn {
-  &:hover {
-    background-color: var(--md-sys-color-error-container) !important;
-    color: var(--md-sys-color-on-error-container);
-
-    .mat-icon {
-      color: var(--md-sys-color-on-error-container) !important;
-    }
-  }
-
-  .mat-mdc-menu-item-text {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .left {
-    display: flex;
-    align-items: center;
-  }
-
-  // Remove extra spacing - icon already has margin-right from parent
-  .mat-icon {
-    margin-right: var(--cc-spacing-sm) !important;
-  }
-
-  .email {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 11px;
-    font-weight: 500;
-  }
-}
-
-.mdc-switch__track::after {
-  background: var(--primary) !important;
-}
-
-.light .mat-mdc-card.message-card {
-  background-color: var(--md-sys-color-surface-container) !important;
-}
-
-.main-content {
-  .toolbar-container-section {
-    .push-right {
-      @media screen and (max-width: 576px) {
-        .profile-btn {
-          padding: 0 !important;
-
-          .mdc-button__label {
-            display: none;
-          }
-        }
-      }
-
-      @media screen and (max-width: 576px) {
-        button {
-          &.credit-btn {
-            min-width: 40px !important;
-          }
-
-          .mat-icon {
-            margin-right: 0;
-          }
-        }
-      }
-    }
-  }
-}
-
-.actionMenu {
-  background-color: var(--md-sys-color-surface-container) !important;
-  border-radius: 8px !important;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  min-width: 200px !important;
-
-  .mat-mdc-menu-item {
-    color: var(--md-sys-color-on-surface);
-    min-height: 40px;
-
-    .mat-icon {
-      margin-right: 12px;
-      color: var(--md-sys-color-on-surface);
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    span {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    &:hover {
-      background-color: var(--md-sys-color-surface-container-high);
-    }
-  }
-
-  .mat-mdc-menu-item-text {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-}
-
-// table css
-
-table,
-.mat-mdc-table {
-  width: 100%;
-  background: transparent !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 8px;
-
-  @media screen and (max-width: 576px) {
-    overflow: auto;
-    display: block;
-  }
-
-  .mat-mdc-header-cell {
-    font-weight: 600;
-    color: var(--theme-color);
-    background: var(--secondary-dark) !important;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .mat-mdc-row {
-    &:hover {
-      background-color: var(--md-sys-color-surface-container-high);
-    }
-  }
-
-  .mat-mdc-cell {
-    padding: 16px;
-    color: var(--theme-color);
-    background: var(--toolbar-container-background-color);
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .mdc-data-table__row:last-child .mat-mdc-cell {
-    border-bottom: 0;
-  }
-}
-
-.toolbar-container {
-  h1 {
-    color: var(--theme-color);
-  }
-}
-
-mat-paginator {
-  margin-top: 1rem;
-  background: transparent !important;
-
-  .mat-mdc-paginator-page-size-label {
-    color: var(--theme-color);
-  }
-
-  .mdc-text-field {
-    background-color: var(--secondary-light) !important;
-    color: var(--theme-color) !important;
-  }
-
-  .mat-mdc-paginator-touch-target {
-    color: var(--theme-color);
-  }
-
-  .mat-mdc-icon-button {
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-  }
-
-  .mat-mdc-paginator-range-actions {
-    gap: 6px;
-  }
-}
-
-// ============================================================================
-// Utility Classes (MD3 Migration - Minimal, Token-Based Only)
-// ============================================================================
-
-// Spacing Utilities (using design tokens) - These are legitimate utilities
-.mb-0 { margin-bottom: 0 !important; }
-.mb-xs { margin-bottom: var(--cc-spacing-xs); }
-.mb-sm { margin-bottom: var(--cc-spacing-sm); }
-.mb-md { margin-bottom: var(--cc-spacing-md); }
-.mb-lg { margin-bottom: var(--cc-spacing-lg); }
-.mb-xl { margin-bottom: var(--cc-spacing-xl); }
-.mb-2xl { margin-bottom: var(--cc-spacing-2xl); }
-
-.mt-0 { margin-top: 0 !important; }
-.mt-xs { margin-top: var(--cc-spacing-xs); }
-.mt-sm { margin-top: var(--cc-spacing-sm); }
-.mt-md { margin-top: var(--cc-spacing-md); }
-.mt-lg { margin-top: var(--cc-spacing-lg); }
-.mt-xl { margin-top: var(--cc-spacing-xl); }
-
-.ml-sm { margin-left: var(--cc-spacing-sm); }
-.ml-md { margin-left: var(--cc-spacing-md); }
-
-.mr-sm { margin-right: var(--cc-spacing-sm); }
-.mr-md { margin-right: var(--cc-spacing-md); }
-
-// Icon Utilities - Supplement Material icons with consistent sizing
-.icon-clickable {
-  cursor: pointer;
-}
-
-.icon-sm {
-  font-size: 18px !important;
-  height: 18px !important;
-  width: 18px !important;
-  line-height: 18px !important;
-}
-
-.icon-md {
-  font-size: 20px !important;
-  height: 20px !important;
-  width: 20px !important;
-  line-height: 20px !important;
-}
-
-.icon-lg {
-  font-size: 24px !important;
-  height: 24px !important;
-  width: 24px !important;
-  line-height: 24px !important;
-}
-
-// Loading Indicator - Semantic name for progress bar styling
-.loading-indicator {
-  height: 2px !important;
-}
-
-// Accessibility & Functional Utilities
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.display-none {
-  display: none;
-}
-
-/* Custom styles for Privacy Policy Modal main container */
-// ============================================================================
-// Global Job Status Styles (Using MD3 Extended Colors)
-// ============================================================================
-// Job statuses now map to MD3 semantic colors:
-// - Success/Completed: MD3 Extended Success Color (green)
-// - Failed/Error: MD3 System Error Color (red)
-// - Pending: MD3 Extended Warning Color (orange/yellow)
-// - Running: MD3 Extended Info Color (blue)
-
+//html, body { height: 100%; margin: 0; }
+//body { font-family: Roboto, sans-serif; }
+//* { box-sizing: border-box; }
+//
+//.md3-badge-success { @include mixins.status-success; }
+//.md3-badge-error, .md3-badge-danger { @include mixins.status-error; }
+//.md3-badge-warning { @include mixins.status-warning; }
+//.md3-badge-info { @include mixins.status-info; }
+//.md3-badge-muted { @include mixins.status-muted; }
+//
+//.md3-icon-success { color: var(--md-extended-color-success-color); }
+//.md3-icon-error { color: var(--md-sys-color-error); }
+//.md3-icon-warning { color: var(--md-extended-color-warning-color); }
+//.md3-icon-muted { color: var(--md-sys-color-on-surface-variant); }
+//
+//.md3-danger-zone {
+//  padding: 16px;
+//  border: 2px solid var(--md-sys-color-error);
+//  border-radius: 8px;
+//  background-color: var(--md-sys-color-error-container);
+//  color: var(--md-sys-color-on-error-container);
+//}
+//
+//.icon-clickable { cursor: pointer; }
+//.icon-sm { width: 18px; height: 18px; font-size: 18px; }
+//.icon-md { width: 24px; height: 24px; font-size: 24px; }
+//.icon-lg { width: 36px; height: 36px; font-size: 36px; }
+//.icon-xl { width: 48px; height: 48px; font-size: 48px; }
+//
 // Job status badge colors - consistent across all components
+// !important required to override component-specific status styling
 .job-success,
 .job-completed {
+  border-radius: 8px;
   color: var(--md-extended-color-success-on-color) !important;
   background-color: var(--md-extended-color-success-color) !important;
-  border-radius: var(--cc-spacing-sm);
 }
 
 .job-failed,
 .job-error {
+  border-radius: 8px;
   color: var(--md-sys-color-on-error) !important;
   background-color: var(--md-sys-color-error) !important;
-  border-radius: var(--cc-spacing-sm);
 }
 
 .job-pending {
+  border-radius: 8px;
   color: var(--md-extended-color-warning-on-color) !important;
   background-color: var(--md-extended-color-warning-color) !important;
-  border-radius: var(--cc-spacing-sm);
 }
 
 .job-running {
+  border-radius: 8px;
   color: var(--md-extended-color-info-on-color) !important;
   background-color: var(--md-extended-color-info-color) !important;
-  border-radius: var(--cc-spacing-sm);
 }
+
 
 // Job card border colors for status bar
 .job-card {
   &.PENDING,
   &.pending {
-    border-left: 5px solid var(--md-extended-color-warning-color);
+    border-left: 4px solid var(--md-extended-color-warning-color);
   }
 
   &.RUNNING,
   &.running {
-    border-left: 5px solid var(--md-extended-color-info-color);
+    border-left: 4px solid var(--md-extended-color-info-color);
   }
 
   &.FAILED,
   &.failed {
-    border-left: 5px solid var(--md-sys-color-error);
+    border-left: 4px solid var(--md-sys-color-error);
   }
 
   &.COMPLETED,
   &.completed {
-    border-left: 5px solid var(--md-extended-color-success-color);
+    border-left: 4px solid var(--md-extended-color-success-color);
   }
 }
 
 // ============================================================================
-// Material Design 3 Styled Scrollbars
+// Custom Scrollbars (MD3 Themed)
 // ============================================================================
+
 // Webkit browsers (Chrome, Safari, Edge)
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
-}
 *::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 16px; // MD3 4px grid - scrollbar width
+  height: 16px; // MD3 4px grid - scrollbar height
 }
+
 *::-webkit-scrollbar-track {
+  border-radius: 8px;
   background: transparent;
-  border-radius: 10px;
 }
+
 *::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 10px;
-  border: 3px solid var(--secondary-color);
+  border: 3px solid var(--md-sys-color-surface-container-low);
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-highest);
   transition: background 0.2s ease;
 }
+
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--description-color);
+  background: var(--md-sys-color-outline);
 }
+
 *::-webkit-scrollbar-corner {
   background: transparent;
 }
+
 // Firefox
 * {
+  scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
   scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
+}
+
+// ============================================================================
+// TOOLBAR TITLE TRUNCATION - Critical for long titles not pushing buttons off screen
+// !important used here because these are global overrides for dynamically inserted content
+// that needs to work across all components regardless of specificity
+// ============================================================================
+.toolbar-title-wrapper {
+  overflow: hidden !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.page-title {
+  overflow: hidden !important;
+  display: flex !important;
+  gap: 8px !important; // MD3 4px grid
+  align-items: center !important;
+
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  mat-icon {
+    flex-shrink: 0 !important;
+  }
+
+  .breadcrumb-text,
+  .separator {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .page-title-secondary {
+    overflow: hidden !important;
+    flex: 1 1 0 !important;
+
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+.toolbar-container {
+  .hamburger-icon {
+    flex-shrink: 0 !important;
+  }
+
+  .push-right {
+    flex-shrink: 0 !important;
+  }
 }

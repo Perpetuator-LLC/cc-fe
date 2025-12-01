@@ -52,7 +52,7 @@
     <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="!form.valid || loading">
       @if (loading) {
-        <mat-spinner diameter="20"></mat-spinner>
+        <mat-spinner diameter="20" />
       } @else {
         Create Key
       }

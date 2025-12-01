@@ -49,23 +49,18 @@ import { MatIcon } from '@angular/material/icon';
         </div>
       </mat-card-header>
       <mat-card-content>
-        <mat-form-field appearance="fill" style="width:100%">
+        <mat-form-field appearance="fill">
           <mat-label>Redeem Code</mat-label>
           <input matInput [(ngModel)]="code" (ngModelChange)="codeError = false" placeholder="Enter code" />
         </mat-form-field>
         @if (codeError) {
-          <div
-            class="error-message"
-            style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
-          >
-            Please enter a code before redeeming.
-          </div>
+          <div class="error-message">Please enter a code before redeeming.</div>
         }
         <div class="btn-container">
           <button mat-raised-button class="cancel-btn" color="primary" (click)="onCancel()">Cancel</button>
           <button mat-raised-button class="redeem-btn" color="primary" (click)="redeemCode()">
             @if (redeeming) {
-              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+              <mat-progress-spinner diameter="20" mode="indeterminate" />
             }
             @if (!redeeming) {
               <span>Redeem</span>
@@ -92,7 +87,7 @@ import { MatIcon } from '@angular/material/icon';
 
             @if (loadingCodes) {
               <div class="loading-container">
-                <mat-spinner></mat-spinner>
+                <mat-spinner />
               </div>
             }
             @if (!loadingCodes && codes.length > 0) {
@@ -153,8 +148,7 @@ import { MatIcon } from '@angular/material/icon';
                   [pageSizeOptions]="[5, 10, 20]"
                   [showFirstLastButtons]="false"
                   (page)="onCodesPageChange($event)"
-                >
-                </mat-paginator>
+                />
               </div>
             }
             @if (!loadingCodes && codes.length === 0) {

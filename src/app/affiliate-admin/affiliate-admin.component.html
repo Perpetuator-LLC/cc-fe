@@ -3,7 +3,7 @@
 <div class="affiliate-admin-container">
   @if (loading) {
     <div class="loading-container">
-      <mat-spinner></mat-spinner>
+      <mat-spinner />
       <p>Loading admin panel...</p>
     </div>
   } @else if (!hasAnyAdminPermission()) {
@@ -36,7 +36,7 @@
             </h2>
             @if (loadingFinancialStats) {
               <div class="loading-container-small">
-                <mat-spinner diameter="30"></mat-spinner>
+                <mat-spinner diameter="30" />
                 <span>Loading financial data...</span>
               </div>
             } @else if (platformFinancialStats) {
@@ -167,7 +167,7 @@
             </h2>
             @if (loadingProgramSettings) {
               <div class="loading-container-small">
-                <mat-spinner diameter="30"></mat-spinner>
+                <mat-spinner diameter="30" />
                 <span>Loading...</span>
               </div>
             } @else if (programSettings) {
@@ -187,7 +187,7 @@
                   [disabled]="updatingProgramSettings"
                 >
                   @if (updatingProgramSettings) {
-                    <mat-spinner diameter="20"></mat-spinner>
+                    <mat-spinner diameter="20" />
                   } @else {
                     <mat-icon>{{ programSettings.isEnabled ? 'block' : 'check_circle' }}</mat-icon>
                   }
@@ -211,7 +211,7 @@
               </mat-form-field>
               <button mat-raised-button color="primary" (click)="searchUser()" [disabled]="searchingUser">
                 @if (searchingUser) {
-                  <mat-spinner diameter="20"></mat-spinner>
+                  <mat-spinner diameter="20" />
                 } @else {
                   Search
                 }
@@ -313,7 +313,7 @@
 
             @if (loadingAdminRequests) {
               <div class="loading-container-small">
-                <mat-spinner diameter="30"></mat-spinner>
+                <mat-spinner diameter="30" />
                 <span>Loading requests...</span>
               </div>
             } @else if (adminPendingRequests.length === 0) {
@@ -381,7 +381,7 @@
 
             @if (loadingPayoutRequests) {
               <div class="loading-container-small">
-                <mat-spinner diameter="30"></mat-spinner>
+                <mat-spinner diameter="30" />
                 <span>Loading requests...</span>
               </div>
             } @else if (pendingPayoutRequests.length === 0) {

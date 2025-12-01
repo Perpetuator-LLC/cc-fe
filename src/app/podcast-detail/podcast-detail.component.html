@@ -1,12 +1,15 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"
-    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span>
-    <span class="page-title-secondary">All Podcast List > {{ podcastForm.get('name')?.value }}</span></span
-  >
+  <span class="page-title">
+    <mat-icon>graphic_eq</mat-icon>
+    <span class="breadcrumb-text">Podcasts</span>
+    <span class="separator">></span>
+    <span class="breadcrumb-text">All Podcast List</span>
+    <span class="separator">></span>
+    <span class="page-title-secondary">{{ podcastForm.get('name')?.value }}</span>
+  </span>
 </ng-template>
 
-<app-message></app-message>
 
 <div class="podcast-detail-page">
   <div class="detail-header">
@@ -22,7 +25,7 @@
             [title]="podcastForm.get('name')?.value || ''"
             [description]="getPodcastDescription()"
             [compact]="true"
-          ></app-share-buttons>
+          />
         }
         <button
           mat-flat-button
@@ -105,8 +108,7 @@
           <app-episodes-table
             [podcastUuid]="podcastUuid"
             [showPodcastColumn]="false"
-            [showSearchAndFilters]="true">
-          </app-episodes-table>
+            [showSearchAndFilters]="true" />
         </mat-card-content>
       </mat-tab>
 
@@ -260,7 +262,7 @@
 
                   @if (selectedFile) {
                     <div class="upload-progress upload-btn">
-                      <mat-spinner diameter="20"></mat-spinner>
+                      <mat-spinner diameter="20" />
                       <span>Uploading: {{ selectedFile.name }}</span>
                     </div>
                   } @else {
@@ -526,7 +528,7 @@
                         </ng-container>
                       } @else {
                         <ng-container #playIcon>
-                          <app-svg-icon icon="play"></app-svg-icon>
+                          <app-svg-icon icon="play" />
                         </ng-container>
                       }
                     </button>
@@ -652,7 +654,7 @@
                 [showActions]="true"
                 [loading]="loading"
                 (deleteFeed)="removeRssFeed($event)"
-              ></app-rss-feed-table>
+              />
             </div>
           </form>
         </mat-card-content>

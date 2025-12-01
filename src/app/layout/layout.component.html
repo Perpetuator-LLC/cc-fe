@@ -225,15 +225,15 @@
       <div class="toolbar-container">
         <div class="hamburger-icon">
           <app-svg-icon width="24" height="24" icon="hamburger" (click)="onHamburgerClick($event)"
-            class="icon-clickable"></app-svg-icon>
+            class="icon-clickable" />
           <img height="36" src="/Capital_Copilot_Logo_Slanted.svg" alt="logo" />
         </div>
-        <ng-container #toolbarContainer></ng-container>
+        <ng-container #toolbarContainer />
         @if (this.authService.isLoggedIn()) {
         <span class="push-right">
           <button class="credit-btn" mat-button matTooltip="{{ this.userCredits | number: '1.0-0' }}"
             [routerLink]="['/transactions']">
-            <app-svg-icon icon="wallet"></app-svg-icon>
+            <app-svg-icon icon="wallet" />
             {{ shortCredits(this.userCredits) }} Credits
           </button>
 
@@ -267,15 +267,21 @@
               <span>Gift Code</span>
             </button>
             <button mat-menu-item class="theme-toggle-card">
-              <div class="left" (click)="$event.stopPropagation()">
+              <div
+                class="left"
+                tabindex="0"
+                role="button"
+                (click)="$event.stopPropagation()"
+                (keyup.enter)="$event.stopPropagation()"
+                (keyup.space)="$event.stopPropagation()"
+              >
                 <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
                 <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
               </div>
               <mat-slide-toggle
                 [checked]="currentTheme() === 'dark'"
                 (change)="switchTheme($event.checked ? 'dark' : 'light')"
-                aria-label="Theme toggle">
-              </mat-slide-toggle>
+                aria-label="Theme toggle" />
             </button>
             <button class="logout-btn" mat-menu-item (click)="logout()">
               <div class="left">
@@ -291,17 +297,17 @@
     </mat-toolbar>
     @if (loading()) {
       <div class="layout-loading-spinner">
-        <mat-progress-bar mode="indeterminate" value="20" class="loading-indicator"></mat-progress-bar>
+        <mat-progress-bar mode="indeterminate" value="20" class="loading-indicator" />
       </div>
     }
     <app-job-status-bar />
     <div class="content-area">
       <div class="content-wrapper">
         <div class="content">
-          <ng-content></ng-content>
+          <ng-content />
         </div>
       </div>
     </div>
-    <app-shared-footer></app-shared-footer>
+    <app-shared-footer />
   </div>
 </div>

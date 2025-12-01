@@ -8,7 +8,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageComponent } from '../message/message.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
@@ -32,7 +31,7 @@ export interface CreateTopicDialogData {
     MatInput,
     MatButton,
     MatLabel,
-    MessageComponent,
+
     MatError,
     MatDialogModule,
     MatSelect,
@@ -42,7 +41,6 @@ export interface CreateTopicDialogData {
   template: `
     <h2 mat-dialog-title>Create Custom Topic</h2>
     <mat-dialog-content>
-      <app-message></app-message>
       <form [formGroup]="topicForm" (ngSubmit)="createTopic()">
         <mat-form-field>
           <mat-label>Select Podcast</mat-label>
@@ -74,7 +72,7 @@ export interface CreateTopicDialogData {
       <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
       <button class="create-btn" mat-flat-button (click)="createTopic()" [disabled]="!topicForm.valid || isCreating">
         @if (isCreating) {
-          <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          <mat-progress-spinner diameter="20" mode="indeterminate" />
         }
         Create Topic
       </button>

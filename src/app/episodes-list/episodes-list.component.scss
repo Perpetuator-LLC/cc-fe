@@ -2,117 +2,134 @@
 
 .status-container {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .validated-icon {
-  color: var(--md-sys-color-success);
-  font-size: 20px;
+  cursor: help;
+
   width: 20px;
   height: 20px;
-  cursor: help;
+
+  font-size: 20px;
+  color: var(--md-sys-color-success);
 }
 
 .unvalidated-icon {
-  color: var(--md-sys-color-warning);
-  font-size: 20px;
+  cursor: help;
+
   width: 20px;
   height: 20px;
-  cursor: help;
+
+  font-size: 20px;
+  color: var(--md-sys-color-warning);
 }
 
 .create-episode-card {
-  background-color: var(--toolbar-container-background-color) !important;
-  box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  box-shadow: none;
 
   .content-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-inline: 30px;
+
     padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
     padding-bottom: var(--cc-spacing-md);
-
-    @media screen and (max-width: 576px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      padding-inline: 20px;
-      height: auto;
-    }
+    padding-inline: 30px;
 
     .title {
       display: flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
 
       h3 {
-        font-weight: 600;
-        font-size: 20px;
-        line-height: 100%;
-        letter-spacing: 0;
         margin: 0;
-        color: var(--theme-color);
+
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
+        letter-spacing: 0;
       }
 
       span {
-        background: var(--secondary-dark);
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 100%;
-        letter-spacing: 0;
-        padding: 0 10px;
-        height: 22px;
-        color: var(--theme-color);
         display: inline-flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
+
+        height: 22px;
+        padding: 0 10px;
+        border-radius: 20px;
+
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 100%;
+        color: var(--md-sys-color-on-surface);
+        letter-spacing: 0;
+
+        background: var(--md-sys-color-surface-container-high);
       }
     }
 
     button {
-      background: var(--primary);
+      border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 10px;
-      border: 1px solid var(--border-color);
-      color: var(--theme-white);
-      font-weight: 600;
+
       font-size: 14px;
+      font-weight: 600;
       line-height: 100%;
+      color: #ffffff;
       letter-spacing: 0;
+
+      background: var(--md-sys-color-secondary);
+    }
+
+    @media screen and (width <= 576px) {
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+
+      height: auto;
+      padding-inline: 20px;
     }
   }
 }
 
 .middle-card {
   padding-inline: 30px;
-  background-color: var(--secondary-color);
+  background-color: var(--md-sys-color-surface-container);
 
-  @media screen and (max-width: 576px) {
+  @media screen and (width <= 576px) {
     padding-inline: 20px;
   }
 }
 
 .no-results-message {
   display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 40px 20px;
-  background: var(--secondary-light);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--description-color);
+  align-items: center;
+
   margin-top: 20px;
+  padding: 40px 20px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    font-size: 24px;
+    flex-shrink: 0;
+
     width: 24px;
     height: 24px;
-    flex-shrink: 0;
-    color: var(--description-color);
+
+    font-size: 24px;
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   p {
@@ -124,41 +141,33 @@
 
 .table-controls {
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 16px;
-  padding-top: 12px;
 
-  @media screen and (max-width: 900px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  margin-bottom: 20px;
+  padding-top: 12px;
 
   .search-filter {
     display: flex;
-    align-items: center;
-    gap: 10px;
     flex-wrap: wrap;
-
-    @media screen and (max-width: 991px) {
-      flex-wrap: wrap;
-    }
+    gap: 10px;
+    align-items: center;
 
     mat-form-field {
+      min-width: 150px;
+
       &.search-field {
         min-width: 300px;
 
-        @media screen and (max-width: 576px) {
+        @media screen and (width <= 576px) {
           min-width: 100%;
         }
       }
 
-      min-width: 150px;
-
-      // Target Material form field elements directly without ::ng-deep
+      // Target Material form field elements directly
       .mat-mdc-text-field-wrapper {
-        background-color: var(--toolbar-container-background-color);
+        background-color: var(--md-sys-color-surface-container-low);
       }
 
       .mat-mdc-form-field-focus-overlay {
@@ -168,21 +177,18 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--border-color) !important;
+        border-color: var(--md-sys-color-outline-variant) !important;
       }
 
-      .mat-mdc-form-field-icon-prefix {
-        color: var(--description-color);
-      }
-
-      input {
-        color: var(--theme-color);
-      }
 
       .mat-mdc-select-value,
       .mat-mdc-select-arrow {
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
+    }
+
+    @media screen and (width <= 991px) {
+      flex-wrap: wrap;
     }
   }
 
@@ -192,39 +198,36 @@
     align-items: center;
 
     button[mat-icon-button] {
-      color: var(--theme-color);
-      border-radius: 8px;
       border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--md-sys-color-on-surface);
 
       &.active {
-        background-color: var(--secondary-light);
-        border-color: var(--border-color);
+        border-color: var(--md-sys-color-outline-variant);
+        background-color: var(--md-sys-color-surface-container);
       }
     }
+  }
+
+  @media screen and (width <= 900px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
 .action-btn {
-  color: var(--theme-color);
+  color: var(--md-sys-color-on-surface);
 }
 
 .episodes-container {
+  overflow: hidden;
   margin-top: 20px;
   border-radius: 8px;
-  overflow: hidden;
-
-  @media screen and (max-width: 900px) {
-    table {
-      overflow: auto;
-      display: block;
-      white-space: nowrap;
-    }
-  }
 
   table {
     width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
-    border: 1px solid var(--border-color);
 
     .mdc-data-table__row:last-child .mat-mdc-cell {
       border-bottom: 0;
@@ -232,70 +235,73 @@
   }
 
   .mat-mdc-header-cell {
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
     font-weight: 600;
-    color: var(--theme-color);
-    background: var(--secondary-dark);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
   }
 
   .mat-mdc-row {
     &:hover {
-      background-color: var(--secondary-light);
+      background-color: var(--md-sys-color-surface-container);
     }
   }
 
   .mat-mdc-cell {
     padding: 16px;
-    color: var(--theme-color);
-    background: var(--toolbar-container-background-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-low);
   }
 
   .status-badge {
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
-    width: 90px;
-    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
+    width: 90px;
+    height: 20px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 500;
+
     &.live {
+      color: #ffffff;
       background: var(--md-sys-color-success);
-      color: var(--theme-white);
     }
 
     &.not-live {
-      background: var(--secondary-dark);
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface-container-high);
     }
   }
 
   .episode-title {
     a {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
       text-decoration: none;
     }
   }
 
   .episode-date {
-    color: var(--description-color);
     font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   .action-btn {
-    background: transparent;
     border: 0;
+    background: transparent;
   }
 
   .podcast-name {
     display: flex;
-    align-items: center;
     gap: 6px;
+    align-items: center;
+
     font-size: 13px;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   .podcasts-grid {
@@ -303,35 +309,45 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
 
-    @media screen and (max-width: 991px) {
+    .chip {
+      background-color: var(--md-sys-color-surface-container-high);
+    }
+
+    @media screen and (width <= 991px) {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       grid-template-columns: repeat(1, 1fr);
-    }
-
-    .chip {
-      background-color: var(--secondary-400);
     }
   }
 
   &.grid-view {
+    overflow: visible;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
+
     padding: 16px;
+
     background: none;
-    overflow: visible;
+  }
+
+  @media screen and (width <= 900px) {
+    table {
+      overflow: auto;
+      display: block;
+      white-space: nowrap;
+    }
   }
 }
 
 .podcast-card {
   width: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
   /* max-width: 400px; remove max-width for grid */
-  background: var(--secondary-light) !important;
-  color: var(--theme-color);
-  border: 1px solid var(--border-color);
+  background: var(--md-sys-color-surface-container) !important;
 
   mat-card-header {
     padding-bottom: 0;
@@ -344,39 +360,42 @@
   .grid-header-name {
     display: flex;
     gap: 28px;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
 
   .podcast-name-link {
+    display: block;
+
+    margin-bottom: 6px;
+
     font-size: 16px !important;
     font-weight: 600;
+    color: var(--md-sys-color-on-surface);
     text-decoration: none;
-    margin-bottom: 6px;
-    display: block;
-    color: var(--theme-color);
   }
 
   mat-card-title {
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   mat-card-actions {
-    padding-top: 0;
     display: flex;
     justify-content: flex-end;
+    padding-top: 0;
   }
 
   .mat-mdc-button {
-    color: var(--primary);
+    color: var(--md-sys-color-secondary);
   }
 
   .img {
     width: 100%;
     height: 157px;
-    object-fit: cover;
-    border-radius: 8px;
     margin-bottom: 12px;
+    border-radius: 8px;
+
+    object-fit: cover;
   }
 
   .mat-mdc-card-header p {
@@ -396,15 +415,18 @@
 }
 
 .publish {
-  background: var(--md-sys-color-success);
-  border-radius: 6px;
-  color: var(--theme-white);
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--border-color);
-  padding: 0 8px;
-  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+
+  background: var(--md-sys-color-success);
 }

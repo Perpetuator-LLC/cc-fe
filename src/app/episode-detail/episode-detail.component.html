@@ -1,11 +1,17 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> Episodes ><span
-      class="page-title-secondary">
-      {{ episodeForm.get('title')?.value }}</span></span>
+  <div class="toolbar-title-wrapper">
+    <span class="page-title">
+      <mat-icon>graphic_eq</mat-icon>
+      <span class="breadcrumb-text">Podcasts</span>
+      <span class="separator">></span>
+      <span class="breadcrumb-text">Episodes</span>
+      <span class="separator">></span>
+      <span class="page-title-secondary">{{ episodeForm.get('title')?.value }}</span>
+    </span>
+  </div>
 </ng-template>
 
-<app-message></app-message>
 <form [formGroup]="episodeForm" (ngSubmit)="updateEpisode()" class="podcast-detail-page">
   <div class="detail-header">
     <div class="top-header">
@@ -19,9 +25,9 @@
             [title]="episodeForm.get('title')?.value || ''"
             [description]="getEpisodeDescription()"
             [compact]="true"
-          ></app-share-buttons>
+          />
         }
-        @if (audioSrc || liveAudioSrc || episodeForm.get('isLive')?.value) {
+        @if (hasAnyVersionWithAudio() || episodeForm.get('isLive')?.value) {
         <mat-checkbox
           formControlName="isLive"
           (change)="onIsLiveChange($event.checked)"
@@ -94,7 +100,7 @@
                   </button>
                   <button mat-raised-button color="accent" type="button" class="episode-control" [hidden]="!audioSrc"
                     (click)="publishAudio()">
-                    <app-svg-icon icon="telegram"></app-svg-icon>
+                    <app-svg-icon icon="telegram" />
                     Publish to Telegram
                   </button>
                   <button mat-raised-button color="accent" type="button" class="episode-control"
@@ -107,7 +113,7 @@
                   <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
                     <button mat-raised-button color="accent" type="button" class="episode-control"
                       (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">
-                      <app-svg-icon icon="audio"></app-svg-icon>
+                      <app-svg-icon icon="audio" />
                       Generate Audio
                     </button>
                   </span>
@@ -131,7 +137,7 @@
                   </div>
                 } @else {
                   <div class="empty-audio">
-                    <app-svg-icon width="24" height="24" icon="music" class="icon-clickable"></app-svg-icon>
+                    <app-svg-icon width="24" height="24" icon="music" class="icon-clickable" />
                     No audio for current version
                   </div>
                 }
@@ -194,8 +200,7 @@
                 (regenerateEpisode)="regenerateEpisode()"
                 (versionSelect)="onVersionSelect($event)"
                 (copyVersionContent)="copyVersionContent()"
-                (restoreVersion)="restoreVersion()">
-              </app-episode-version-control>
+                (restoreVersion)="restoreVersion()" />
 
               <div>
                 @if (episodeForm.get('podcastDate')?.value) {
@@ -225,10 +230,10 @@
               </div>
               <div class="view-btn-container">
                 <button type="button" class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
-                  <app-svg-icon icon="grid"></app-svg-icon>
+                  <app-svg-icon icon="grid" />
                 </button>
                 <button type="button" class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
-                  <app-svg-icon icon="list"></app-svg-icon>
+                  <app-svg-icon icon="list" />
                 </button>
               </div>
             </div>
@@ -439,8 +444,7 @@
                       <mat-slide-toggle
                         [checked]="schedule.enabled"
                         (change)="toggleScheduleEnabled(schedule, $event.checked)"
-                        color="primary">
-                      </mat-slide-toggle>
+                        color="primary" />
                       <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
                         <mat-icon>more_vert</mat-icon>
                       </button>

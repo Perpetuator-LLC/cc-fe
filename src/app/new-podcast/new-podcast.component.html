@@ -2,7 +2,6 @@
 <ng-template #toolbarTemplate>
   <span>New Podcast</span>
 </ng-template>
-<app-message></app-message>
 
 <mat-card>
   <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
@@ -27,7 +26,7 @@
         }
       </mat-select>
       @if (isLoadingTeams) {
-        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
       }
     </mat-form-field>
 

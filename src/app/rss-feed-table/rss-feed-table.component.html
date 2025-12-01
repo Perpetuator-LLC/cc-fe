@@ -74,13 +74,13 @@
   }
 
   <!-- Header and Row Declarations -->
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  <mat-header-row *matHeaderRowDef="displayedColumns" />
+  <mat-row *matRowDef="let row; columns: displayedColumns" />
 </mat-table>
 
 @if (loading) {
   <div class="loading-overlay">
-    <mat-spinner diameter="40"></mat-spinner>
+    <mat-spinner diameter="40" />
     <p>Loading RSS feeds...</p>
   </div>
 }

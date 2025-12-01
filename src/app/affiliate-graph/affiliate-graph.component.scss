@@ -2,62 +2,67 @@
 .affiliate-graph-dialog {
   display: flex;
   flex-direction: column;
-  height: 85vh;
-  max-height: 900px;
+
   width: 90vw;
   max-width: 1400px;
+  height: 85vh;
+  max-height: 900px;
 
   .dialog-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
     h2 {
-      margin: 0;
       display: flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
+
+      margin: 0;
+
       font-size: 20px;
       font-weight: 600;
-      color: var(--primary);
+      color: var(--md-sys-color-secondary);
 
       mat-icon {
-        font-size: 24px;
         width: 24px;
         height: 24px;
+        font-size: 24px;
       }
     }
 
     .close-button {
       mat-icon {
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
   }
 
   .dialog-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
-    padding: 20px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     gap: 16px;
+
+    padding: 20px;
 
     .toolbar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
       flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
 
       .toolbar-left {
         display: flex;
-        align-items: center;
         gap: 16px;
+        align-items: center;
 
         .format-selector {
           min-width: 200px;
@@ -67,46 +72,50 @@
 
       .toolbar-right {
         display: flex;
-        align-items: center;
         gap: 10px;
+        align-items: center;
 
         .zoom-controls {
           display: flex;
-          align-items: center;
           gap: 4px;
+          align-items: center;
+
           padding: 4px 8px;
-          border: 1px solid var(--border-color);
+          border: 1px solid var(--md-sys-color-outline-variant);
           border-radius: 8px;
-          background: var(--theme-white);
+
+          background: #ffffff;
 
           .zoom-level {
+            min-width: 50px;
+
             font-size: 14px;
             font-weight: 600;
-            min-width: 50px;
+            color: var(--md-sys-color-secondary);
             text-align: center;
-            color: var(--primary);
           }
 
           button {
             mat-icon {
-              font-size: 20px;
               width: 20px;
               height: 20px;
+              font-size: 20px;
             }
           }
         }
 
         button {
-          white-space: nowrap;
-          flex-shrink: 0;
           display: inline-flex;
-          align-items: center;
+          flex-shrink: 0;
           gap: 8px;
+          align-items: center;
+
+          white-space: nowrap;
 
           mat-icon {
-            font-size: 20px;
             width: 20px;
             height: 20px;
+            font-size: 20px;
           }
         }
       }
@@ -115,24 +124,25 @@
     .loading-container,
     .error-container,
     .empty-container {
-      flex: 1;
       display: flex;
+      flex: 1;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       gap: 16px;
-      color: var(--description-color);
+      align-items: center;
+      justify-content: center;
+
+      color: var(--md-sys-color-on-surface-variant);
 
       mat-icon {
-        font-size: 64px;
         width: 64px;
         height: 64px;
-        color: var(--secondary-color);
+        font-size: 64px;
+        color: var(--md-sys-color-surface-container);
       }
 
       p {
-        font-size: 16px;
         margin: 0;
+        font-size: 16px;
       }
     }
 
@@ -143,24 +153,27 @@
     }
 
     .graph-container {
-      flex: 1;
       overflow: auto;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background: var(--theme-white);
+      flex: 1;
+
       padding: 20px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 10px;
+
+      background: #ffffff;
 
       &.mermaid-graph {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
         overflow: auto;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+
         padding: 40px 20px;
 
         .mermaid-container {
-          min-width: 100%;
           display: flex;
           justify-content: center;
+          min-width: 100%;
 
           svg {
             max-width: 100%;
@@ -174,50 +187,53 @@
       &.text-view {
         pre {
           margin: 0;
+
           font-family: 'Courier New', monospace;
           font-size: 12px;
           line-height: 1.5;
+          color: var(--md-sys-color-secondary);
+          overflow-wrap: break-word;
           white-space: pre-wrap;
-          word-wrap: break-word;
-          color: var(--primary);
         }
       }
 
       &.json-view pre {
-        background: var(--toolbar-container-background-color);
         padding: 16px;
         border-radius: 8px;
+        background: var(--md-sys-color-surface-container-low);
       }
     }
   }
 
   .dialog-footer {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border-color);
     flex-shrink: 0;
+    padding: 16px 20px;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
 
     .info-text {
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
+
       margin: 0;
+
       font-size: 14px;
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface-variant);
 
       mat-icon {
-        font-size: 20px;
         width: 20px;
         height: 20px;
-        color: var(--secondary-color);
+        font-size: 20px;
+        color: var(--md-sys-color-surface-container);
       }
     }
   }
 }
 
-@media (max-width: 991px) {
+@media (width <= 991px) {
   .affiliate-graph-dialog {
-    height: 90vh;
     width: 95vw;
+    height: 90vh;
 
     .dialog-content {
       .toolbar {
@@ -226,8 +242,8 @@
 
         .toolbar-left,
         .toolbar-right {
-          width: 100%;
           flex-direction: column;
+          width: 100%;
 
           .format-selector {
             width: 100%;
@@ -246,12 +262,12 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .affiliate-graph-dialog {
-    height: 100vh;
     width: 100vw;
-    max-height: 100vh;
     max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
 
     .dialog-header {
       padding: 16px;
@@ -273,7 +289,7 @@
 
 // Enhanced Mermaid-specific styling (as per education document)
 // These styles target the SVG elements generated by Mermaid
-// Using :host selector without ::ng-deep since Angular doesn't encapsulate dynamically generated SVG content
+// Using :host selector for dynamically generated SVG content
 :host {
   .mermaid-container {
     // Target all nodes
@@ -299,10 +315,10 @@
 
     // Target node labels
     .nodeLabel {
-      font-family: 'Arial', sans-serif;
+      pointer-events: none;
+      font-family: Arial, sans-serif;
       font-size: 14px;
       line-height: 1.4;
-      pointer-events: none;
 
       // Enhanced label styling for multi-line nodes
       tspan {
@@ -313,26 +329,26 @@
     // Target edges (arrows)
     .edgePath {
       path {
-        stroke-width: 2px;
         fill: none;
+        stroke-width: 2px;
       }
     }
 
     // Target arrow markers
     .arrowheadPath {
-      fill: var(--border-color);
+      fill: var(--md-sys-color-outline-variant);
     }
 
     // Target edge labels
     .edgeLabel {
-      background-color: var(--theme-white);
       padding: 2px 4px;
       border-radius: 3px;
       font-size: 12px;
+      background-color: #ffffff;
 
       rect {
-        fill: var(--theme-white);
-        stroke: var(--border-color);
+        fill: #ffffff;
+        stroke: var(--md-sys-color-outline-variant);
       }
     }
 

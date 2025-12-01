@@ -10,7 +10,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageComponent } from '../message/message.component';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -26,7 +25,7 @@ import { JobService } from '../job.service';
     MatInput,
     MatButton,
     MatLabel,
-    MessageComponent,
+
     MatError,
     MatSelect,
     MatOption,
@@ -37,7 +36,6 @@ import { JobService } from '../job.service';
   template: `
     <h2 mat-dialog-title>Generate Podcast</h2>
     <mat-dialog-content>
-      <app-message></app-message>
       <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
         <mat-form-field>
           <mat-label>Description (Required)</mat-label>
@@ -71,7 +69,7 @@ import { JobService } from '../job.service';
               </mat-optgroup>
             </mat-select>
             @if (isLoadingTeams) {
-              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+              <mat-progress-spinner diameter="20" mode="indeterminate" />
             }
           </mat-form-field>
         }

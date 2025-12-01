@@ -2,7 +2,7 @@
 <div class="public-podcast-page">
   @if (loading) {
     <div class="loading-container">
-      <mat-spinner diameter="50"></mat-spinner>
+      <mat-spinner diameter="50" />
       <p>Loading podcast...</p>
     </div>
   } @else if (error) {
@@ -89,7 +89,7 @@
           [shareUrl]="getShareUrl()"
           [title]="podcastData.name"
           [description]="podcastData.description"
-        ></app-share-buttons>
+        />
         @if (isAuthenticated) {
           <button mat-raised-button color="primary" [routerLink]="['/p', podcastId]">
             <mat-icon>dashboard</mat-icon>
@@ -136,7 +136,7 @@
                     [title]="episode.title"
                     [description]="episode.description"
                     [compact]="true"
-                  ></app-share-buttons>
+                  />
                 </div>
               </mat-card-content>
             </mat-card>
@@ -151,8 +151,7 @@
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPageChange($event)"
             aria-label="Select page"
-          >
-          </mat-paginator>
+          />
         }
       }
     </div>

@@ -5,7 +5,6 @@ import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
-import { MessageComponent } from '../message/message.component';
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -46,7 +45,7 @@ interface EditableFormValues {
   standalone: true,
   imports: [
     FormsModule,
-    MessageComponent,
+
     MatCardContent,
     MatCard,
     MatLabel,
@@ -347,7 +346,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   onIsLiveChange(isLive: boolean) {
     // Only prevent SETTING episode as live (checking the box) without audio
     // Allow UNSETTING (unchecking) even without audio
-    if (isLive && !this.audioSrc && !this.liveAudioSrc) {
+    if (isLive && !this.hasAnyVersionWithAudio()) {
       this.messageService.warning('Cannot set episode as live without audio. Please generate audio first.');
       // Revert the checkbox to unchecked
       this.episodeForm.patchValue({ isLive: false }, { emitEvent: false });
@@ -1029,6 +1028,15 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       return `Version ${this.liveAudioVersionNumber}`;
     }
     return 'Previous version';
+  }
+
+  /**
+   * Checks if ANY version of the episode has audio
+   * Used to determine if the "Live" checkbox should be shown
+   */
+  hasAnyVersionWithAudio(): boolean {
+    const versions = this.episodeForm.get('versions')?.value || [];
+    return versions.some((version: EpisodeVersion) => version.audioUrl !== null && version.audioUrl !== undefined);
   }
 
   getPublicShareUrl(): string {

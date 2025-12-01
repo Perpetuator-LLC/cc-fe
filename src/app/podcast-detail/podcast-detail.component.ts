@@ -14,7 +14,6 @@ import { Subscription, debounceTime, filter, switchMap, map } from 'rxjs';
 import { MessageService } from '../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../toolbar.service';
-import { MessageComponent } from '../message/message.component';
 import { TeamsResult, TeamsService } from '../teams.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -59,7 +58,7 @@ import { RssFeedTableComponent } from '../rss-feed-table/rss-feed-table.componen
   standalone: true,
   imports: [
     CommonModule,
-    MessageComponent,
+
     MatProgressSpinner,
     MatProgressBarModule,
     ReactiveFormsModule,

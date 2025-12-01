@@ -3,63 +3,66 @@ mat-card {
   margin: 2rem auto;
   padding: 20px;
 
-  @media screen and (max-width: 576px) {
-    padding-inline: 10px;
-  }
-
   .mat-mdc-card-header {
     justify-content: center;
   }
 
   .mat-mdc-card-actions {
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       padding-inline: 16px;
     }
+  }
+
+  @media screen and (width <= 576px) {
+    padding-inline: 10px;
   }
 }
 
 mat-card.register-card {
   max-width: 800px;
-  background-color: var(--secondary-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
+  background-color: var(--md-sys-color-surface-container);
 
   h3 {
+    margin-top: 0;
+
     font-size: 18px;
     font-weight: 600;
-    color: var(--theme-color);
-    margin-top: 0;
+    color: var(--md-sys-color-on-surface);
     text-align: center;
   }
 
   .login-btn {
-    background: var(--purple);
     width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    color: var(--theme-white);
-    border: 1px solid var(--border-color);
+
+    color: #ffffff;
+
+    background: var(--md-sys-color-tertiary);
 
     &:disabled,
     &[disabled] {
-      opacity: 0.5;
       cursor: not-allowed;
+      color: var(--md-sys-color-on-surface-variant) !important;
+      opacity: 0.5;
       background: var(--secondary-color-dark) !important;
-      color: var(--description-color) !important;
     }
   }
 
   .forgot {
-    text-align: center;
     width: 100%;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
     background-color: transparent !important;
-    color: var(--description-color);
   }
 
   .resend {
-    text-align: center;
     width: 100%;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
     background-color: transparent !important;
-    color: var(--description-color);
   }
 }
 
@@ -70,32 +73,32 @@ form {
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 30px;
   width: 90%;
+  padding: 30px;
 
   .website-logo {
     display: flex;
-    align-items: center;
     gap: 10px;
+    align-items: center;
     text-decoration: none;
   }
 
   .route-title {
     font-size: 20px;
-    color: var(--theme-color);
     font-weight: 600;
+    color: var(--md-sys-color-on-surface);
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       display: none;
     }
   }
 
   p {
     margin: 0;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
 
     a {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
     }
   }
 }
@@ -126,8 +129,8 @@ mat-form-field {
 .error-message {
   display: flex;
   align-items: center;
-  color: var(--md-sys-color-error);
   margin: 10px 0;
+  color: var(--md-sys-color-error);
 }
 
 mat-icon {
@@ -135,32 +138,36 @@ mat-icon {
 }
 
 .footer {
-  background-color: transparent;
   text-align: center;
+  background-color: transparent;
 
   .link-button {
-    background-color: transparent;
-    border: 0;
-    box-shadow: none;
-    color: var(--primary);
     cursor: pointer;
-  }
 
-  @media screen and (max-width: 599px) {
-    height: auto;
-    white-space: normal;
+    border: 0;
+
+    color: var(--md-sys-color-secondary);
+
+    background-color: transparent;
+    box-shadow: none;
   }
 
   p {
     margin-inline: auto;
-    color: var(--description-color);
+
+    font-size: 11px;
     font-weight: 400;
     line-height: 16px;
-    font-size: 11px;
+    color: var(--md-sys-color-on-surface-variant);
 
     a {
-      color: var(--md-sys-color-primary-dark);
       font-weight: 500;
+      color: var(--md-sys-color-primary-dark);
     }
+  }
+
+  @media screen and (width <= 599px) {
+    height: auto;
+    white-space: normal;
   }
 }

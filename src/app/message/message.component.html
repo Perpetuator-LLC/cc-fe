@@ -30,13 +30,13 @@
             <div class="message-text">
               <div [innerHTML]="message.text"></div>
               @if (message.type === 'progress' && message.progress !== undefined) {
-                <mat-progress-bar mode="determinate" [value]="message.progress" class="message-progress"></mat-progress-bar>
+                <mat-progress-bar mode="determinate" [value]="message.progress" class="message-progress" />
               }
             </div>
           </div>
         </mat-card-content>
         @if (shouldShowTimeoutProgress(message)) {
-          <mat-progress-bar class="timeout-progress" mode="determinate" [value]="message.timeoutProgress || 100"></mat-progress-bar>
+          <mat-progress-bar class="timeout-progress" mode="determinate" [value]="message.timeoutProgress || 100" />
         }
       </mat-card>
     }

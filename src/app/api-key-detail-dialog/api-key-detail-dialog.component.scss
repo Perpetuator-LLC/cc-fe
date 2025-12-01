@@ -2,22 +2,22 @@
 
 .title-row {
   display: flex;
-  align-items: center;
   gap: var(--cc-spacing-md);
+  align-items: center;
 
   mat-chip {
+    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
     font-size: 12px;
     font-weight: 500;
-    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
 
     &.active {
-      background: var(--cc-color-success);
       color: white;
+      background: var(--cc-color-success);
     }
 
     &.inactive {
-      background: var(--cc-text-tertiary);
       color: white;
+      background: var(--cc-text-tertiary);
     }
   }
 }
@@ -64,10 +64,12 @@ mat-divider {
       display: flex;
       flex-direction: column;
       gap: var(--cc-spacing-xs);
+
       padding: var(--cc-spacing-md);
-      background: var(--cc-surface-card);
       border: 1px solid var(--cc-border-color);
       border-radius: var(--cc-radius-md);
+
+      background: var(--cc-surface-card);
 
       .limit-label {
         font-size: 12px;
@@ -84,8 +86,8 @@ mat-divider {
 }
 
 .loading-container {
-  text-align: center;
   padding: var(--cc-spacing-xl);
+  text-align: center;
 
   mat-spinner {
     margin: 0 auto var(--cc-spacing-md);
@@ -121,10 +123,12 @@ mat-divider {
       display: flex;
       flex-direction: column;
       gap: var(--cc-spacing-xs);
+
       padding: var(--cc-spacing-md);
-      background: var(--cc-surface-card);
       border: 1px solid var(--cc-border-color);
       border-radius: var(--cc-radius-md);
+
+      background: var(--cc-surface-card);
 
       &.success {
         border-color: var(--cc-color-success);
@@ -158,9 +162,11 @@ mat-divider {
     .time-stat {
       display: flex;
       justify-content: space-between;
+
       padding: var(--cc-spacing-sm);
-      background: var(--cc-surface-card);
       border-radius: var(--cc-radius-sm);
+
+      background: var(--cc-surface-card);
 
       .label {
         color: var(--cc-text-secondary);
@@ -182,10 +188,12 @@ mat-divider {
       .endpoint-item {
         display: flex;
         align-items: center;
+
         padding: var(--cc-spacing-sm);
-        background: var(--cc-surface-card);
         border: 1px solid var(--cc-border-color);
         border-radius: var(--cc-radius-sm);
+
+        background: var(--cc-surface-card);
 
         code {
           flex: 1;
@@ -199,17 +207,18 @@ mat-divider {
 
   .recent-usage {
     .usage-table {
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: var(--cc-spacing-xs);
+
       max-height: 300px;
-      overflow-y: auto;
 
       .usage-row {
         padding: var(--cc-spacing-sm);
-        background: var(--cc-surface-card);
         border: 1px solid var(--cc-border-color);
         border-radius: var(--cc-radius-sm);
+        background: var(--cc-surface-card);
 
         &.failed {
           border-color: var(--cc-color-error);
@@ -218,14 +227,14 @@ mat-divider {
 
         .usage-endpoint {
           display: flex;
-          align-items: center;
           gap: var(--cc-spacing-sm);
+          align-items: center;
           margin-bottom: var(--cc-spacing-xs);
 
           mat-icon {
-            font-size: 16px;
             width: 16px;
             height: 16px;
+            font-size: 16px;
 
             &.success {
               color: var(--cc-color-success);
@@ -245,8 +254,9 @@ mat-divider {
 
         .usage-meta {
           display: flex;
-          gap: var(--cc-spacing-md);
           flex-wrap: wrap;
+          gap: var(--cc-spacing-md);
+
           font-size: 11px;
           color: var(--cc-text-secondary);
 
@@ -259,8 +269,8 @@ mat-divider {
           }
 
           .error-msg {
-            color: var(--cc-color-error);
             flex-basis: 100%;
+            color: var(--cc-color-error);
           }
         }
       }

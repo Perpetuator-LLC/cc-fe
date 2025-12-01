@@ -8,7 +8,7 @@ mat-card {
   }
 
   .mat-mdc-card-actions {
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       padding-inline: 16px;
     }
   }
@@ -17,32 +17,32 @@ mat-card {
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 30px 0;
   width: 90%;
+  padding: 30px 0;
 
   .website-logo {
     display: flex;
-    align-items: center;
     gap: 10px;
+    align-items: center;
     text-decoration: none;
   }
 
   .route-title {
     font-size: 20px;
-    color: var(--theme-color);
     font-weight: 600;
+    color: var(--md-sys-color-on-surface);
 
-    @media screen and (max-width: 576px) {
+    @media screen and (width <= 576px) {
       display: none;
     }
   }
 
   p {
     margin: 0;
-    color: var(--description-color);
+    color: var(--md-sys-color-on-surface-variant);
 
     a {
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
     }
   }
 
@@ -54,35 +54,38 @@ form {
 
 mat-card.login-card {
   max-width: 489px;
-  background-color: var(--secondary-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
-
-  @media screen and (max-width: 576px) {
-    padding-inline: 0;
-  }
+  background-color: var(--md-sys-color-surface-container);
 
   h3 {
+    margin-top: 0;
+
     font-size: 18px;
     font-weight: 600;
-    color: var(--theme-color);
-    margin-top: 0;
+    color: var(--md-sys-color-on-surface);
     text-align: center;
   }
 
   .login-btn {
-    background: var(--purple);
     width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 10px;
-    color: var(--theme-white);
-    border: 1px solid var(--border-color);
+
+    color: #ffffff;
+
+    background: var(--md-sys-color-tertiary);
   }
 
   .forgot {
-    text-align: center;
     width: 100%;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
     background-color: transparent !important;
-    color: var(--description-color);
+  }
+
+  @media screen and (width <= 576px) {
+    padding-inline: 0;
   }
 }
 
@@ -97,15 +100,15 @@ mat-form-field {
 
 // Error alerts
 .alert {
-  padding: 16px;
   margin-bottom: 16px;
-  border-radius: 8px;
+  padding: 16px;
   border: 1px solid;
+  border-radius: 8px;
 
   .alert-header {
     display: flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
     margin-bottom: 8px;
 
     mat-icon {
@@ -133,23 +136,24 @@ mat-form-field {
   }
 
   .alert-footer {
-    margin-bottom: 0;
     display: flex;
-    align-items: center;
-    gap: 4px;
     flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+
+    margin-bottom: 0;
 
     button {
-      padding: 0;
-      margin: 0;
       min-width: auto;
+      margin: 0;
+      padding: 0;
     }
   }
 
   &.alert-warning {
-    background-color: var(--md-sys-color-warning-container, #fff4e5);
     border-color: var(--md-sys-color-warning, #f59e0b);
     color: var(--md-sys-color-on-warning-container, #663c00);
+    background-color: var(--md-sys-color-warning-container, #fff4e5);
 
     .alert-header mat-icon {
       color: var(--md-sys-color-warning, #f59e0b);
@@ -161,9 +165,9 @@ mat-form-field {
   }
 
   &.alert-error {
-    background-color: var(--md-sys-color-error-container, #fef1f1);
     border-color: var(--md-sys-color-error, #dc2626);
     color: var(--md-sys-color-on-error-container, #5f1515);
+    background-color: var(--md-sys-color-error-container, #fef1f1);
 
     .alert-header mat-icon {
       color: var(--md-sys-color-error, #dc2626);
@@ -178,8 +182,8 @@ mat-form-field {
 .error-message {
   display: flex;
   align-items: center;
-  color: var(--md-sys-color-error);
   margin: 10px 0;
+  color: var(--md-sys-color-error);
 }
 
 mat-icon {
@@ -187,32 +191,36 @@ mat-icon {
 }
 
 .footer {
-  background-color: transparent;
   text-align: center;
+  background-color: transparent;
 
   .link-button {
-    background-color: transparent;
-    border: 0;
-    box-shadow: none;
-    color: var(--primary);
     cursor: pointer;
-  }
 
-  @media screen and (max-width: 599px) {
-    height: auto;
-    white-space: normal;
+    border: 0;
+
+    color: var(--md-sys-color-secondary);
+
+    background-color: transparent;
+    box-shadow: none;
   }
 
   p {
     margin-inline: auto;
-    color: var(--description-color);
+
+    font-size: 11px;
     font-weight: 400;
     line-height: 16px;
-    font-size: 11px;
+    color: var(--md-sys-color-on-surface-variant);
 
     a {
-      color: var(--md-sys-color-primary-dark);
       font-weight: 500;
+      color: var(--md-sys-color-primary-dark);
     }
+  }
+
+  @media screen and (width <= 599px) {
+    height: auto;
+    white-space: normal;
   }
 }

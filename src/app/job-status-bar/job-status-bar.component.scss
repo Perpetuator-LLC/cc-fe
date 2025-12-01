@@ -2,21 +2,26 @@
 .jobs-container {
   width: 100%;
   height: 100%;
-  transition: all 0.3s ease;
-  border-radius: var(--cc-radius-md);
-  background-color: var(--toolbar-container-background-color); // Match table background
   border-top: 1px solid var(--md-sys-color-outline-variant); // Crisp line at top
   border-bottom: 1px solid var(--md-sys-color-outline-variant); // Crisp line at bottom
+  border-radius: var(--cc-radius-md);
+
+  background-color: var(--md-sys-color-surface-container-low); // Match table background
+
+  transition: all 0.3s ease;
+
   //padding-top: 8em;
   //overflow: hidden;
   //display: flex;
 
   .job-header {
     display: flex;
-    justify-content: space-between;
     align-items: stretch;
+    justify-content: space-between;
+
     width: 100%;
     padding: 0 1rem;
+
     //padding-right: 1rem; // Add padding to the right to avoid overlap with the accordion button
 
     .job-status {
@@ -24,21 +29,21 @@
     }
   }
 
-  mat_content {
-  }
 
   .mat-mdc-card-header-text {
     width: 100%;
   }
 
   mat-card-header.job-type {
+    flex: 1;
+    flex-direction: row;
+    align-self: start;
+
     //display: flex;
     //align-items: left;
     width: 100%;
-    flex: 1;
+
     text-align: left;
-    flex-direction: row;
-    align-self: start;
 
     //mat-checkbox {
     //  margin-right: auto; // Pushes the checkbox to the far left
@@ -47,13 +52,15 @@
 
   mat-card-header.job-status {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
     flex: 1;
-    text-align: right;
-    margin-right: 1rem;
     flex-direction: row-reverse;
+    align-items: center;
     align-self: start;
+    justify-content: flex-end;
+
+    margin-right: 1rem;
+
+    text-align: right;
 
     .job-status {
       margin-left: auto;
@@ -70,33 +77,36 @@
 
   mat-expansion-panel-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+
+    min-width: 0; // Allow flex items to shrink if necessary
     height: auto;
     padding: 0 0.5rem 0 0;
-    min-width: 0; // Allow flex items to shrink if necessary
     border-radius: 0;
   }
 
   .mat-mdc-list {
     display: flex;
     flex-wrap: wrap;
+
     //gap: 20px;
     //padding: 20px;
 
     .mat-mdc-list-item {
       flex: 1 1 auto;
+
       //box-sizing: border-box;
     }
   }
 
   .mat-mdc-list-item {
-    padding: 0;
     flex: 1 1 150px;
     max-width: 350px;
     height: auto !important;
+    padding: 0;
 
-    // Target Material list item content without ::ng-deep
+    // Target Material list item content directly
     .mdc-list-item__content {
       display: block;
       height: auto;
@@ -109,17 +119,18 @@
   //}
 
   mat-card {
-    border-radius: 0;
     position: relative; // Ensure the card is positioned relative to its container
+    border-radius: 0;
   }
 
   mat-progress-bar {
     position: absolute;
+    z-index: 10; // Ensure it's above card background
     bottom: 0;
     left: 0;
+
     width: 100%;
     height: 1px; // Ensure visible height
-    z-index: 10; // Ensure it's above card background
     // Material automatically uses primary color for progress bar
   }
 
@@ -129,25 +140,27 @@
   .running,
   .failed,
   .completed {
-    background-color: var(--secondary-light);
+    background-color: var(--md-sys-color-surface-container);
   }
 
   .mat-mdc-card-header {
     width: 100%;
     padding: 0;
+
     //padding: 16px 16px 0;
   }
 
   .mat-mdc-card-title {
     font-size: 1.2em;
+
     //margin-bottom: 8px;
   }
 
   .mat-mdc-card-subtitle {
+    margin-left: 8px;
     font-size: 0.9em;
     font-weight: bold;
     text-transform: uppercase;
-    margin-left: 8px;
   }
 
   .mat-mdc-card-content {
@@ -167,11 +180,11 @@
     }
 
     .error {
-      background-color: rgba(255, 205, 210, 0.27);
+      background-color: rgb(255 205 210 / 0.27);
     }
 
     .result {
-      background-color: rgba(200, 230, 201, 0.27);
+      background-color: rgb(200 230 201 / 0.27);
     }
   }
 
@@ -187,22 +200,23 @@
 
     .job-section {
       .section-title {
+        margin: 0 0 4px;
+
         font-size: 12px;
         font-weight: 600;
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
         text-transform: uppercase;
-        margin: 0 0 4px 0;
         letter-spacing: 0.5px;
       }
     }
 
     .message-text {
       font-size: 13px;
-      color: var(--theme-color);
+      color: var(--md-sys-color-on-surface);
 
       &.error-message {
-        color: var(--md-sys-color-error);
         font-weight: 500;
+        color: var(--md-sys-color-error);
       }
     }
 
@@ -216,37 +230,41 @@
         align-items: center;
 
         .resource-tag {
+          cursor: pointer;
+
           display: inline-flex;
-          align-items: center;
+          flex-shrink: 0;
           gap: 4px;
+          align-items: center;
+
+          min-height: 22px;
           padding: 4px 8px;
+          border: none;
           border-radius: 6px;
+
           font-size: 12px;
           font-weight: 600;
           text-transform: none;
-          min-height: 22px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.2s ease;
           white-space: nowrap;
-          flex-shrink: 0;
+
+          transition: all 0.2s ease;
 
           mat-icon {
-            font-size: 14px;
             width: 14px;
             height: 14px;
             margin: 0;
+            font-size: 14px;
           }
 
           &:hover {
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
           }
 
           &.podcast-tag {
-            background: #e3f2fd;
-            color: #1565c0;
             border: 1px solid #bbdefb;
+            color: #1565c0;
+            background: #e3f2fd;
 
             &:hover {
               background: #bbdefb;
@@ -254,9 +272,9 @@
           }
 
           &.episode-tag {
-            background: #f3e5f5;
-            color: #7b1fa2;
             border: 1px solid #e1bee7;
+            color: #7b1fa2;
+            background: #f3e5f5;
 
             &:hover {
               background: #e1bee7;
@@ -264,9 +282,9 @@
           }
 
           &.topic-tag {
-            background: #e8f5e8;
-            color: #2e7d32;
             border: 1px solid #c8e6c9;
+            color: #2e7d32;
+            background: #e8f5e8;
 
             &:hover {
               background: #c8e6c9;
@@ -279,17 +297,17 @@
 
   // Error styling
   .error {
-    color: var(--md-sys-color-error);
+    margin: 8px 0;
     font-size: 13px;
     font-weight: 500;
-    margin: 8px 0;
+    color: var(--md-sys-color-error);
   }
 
   .job-timestamps {
-    margin-top: 8px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
 
     .timestamp-container {
       display: flex;
@@ -297,9 +315,9 @@
     }
 
     .timestamp-text {
-      font-size: 10px;
-      color: #aaa;
       margin-bottom: 2px;
+      font-size: 10px;
+      color: #aaaaaa;
 
       strong {
         font-weight: 500;
@@ -309,8 +327,8 @@
 
   .timeline-actions {
     display: flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
 
     button {
       width: 32px;
@@ -318,9 +336,9 @@
       line-height: 32px;
 
       mat-icon {
-        font-size: 16px;
         width: 16px;
         height: 16px;
+        font-size: 16px;
       }
     }
   }
@@ -331,8 +349,8 @@
     }
 
     p {
+      overflow-wrap: break-word;
       white-space: normal;
-      word-wrap: break-word;
     }
   }
 }

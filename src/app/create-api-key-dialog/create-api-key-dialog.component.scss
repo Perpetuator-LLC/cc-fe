@@ -6,40 +6,45 @@ mat-form-field {
 
 .info-note {
   display: flex;
-  align-items: flex-start;
   gap: var(--cc-spacing-sm);
+  align-items: flex-start;
+
+  margin-top: var(--cc-spacing-md);
   padding: var(--cc-spacing-md);
-  background: var(--cc-surface-elevated);
   border: 1px solid var(--cc-border-color);
   border-radius: var(--cc-radius-md);
-  margin-top: var(--cc-spacing-md);
+
+  background: var(--cc-surface-elevated);
 
   mat-icon {
-    font-size: 20px;
+    flex-shrink: 0;
+
     width: 20px;
     height: 20px;
+
+    font-size: 20px;
     color: var(--cc-color-info);
-    flex-shrink: 0;
   }
 
   p {
     margin: 0;
     font-size: 14px;
-    color: var(--cc-text-secondary);
     line-height: 1.5;
+    color: var(--cc-text-secondary);
   }
 }
 
 .success-container {
-  text-align: center;
   padding: var(--cc-spacing-md);
+  text-align: center;
 
   .success-icon {
-    font-size: 48px;
     width: 48px;
     height: 48px;
-    color: var(--cc-color-success);
     margin-bottom: var(--cc-spacing-sm);
+
+    font-size: 48px;
+    color: var(--cc-color-success);
   }
 
   h3 {
@@ -49,36 +54,41 @@ mat-form-field {
 
   .warning-text {
     display: flex;
+    gap: var(--cc-spacing-xs);
     align-items: center;
     justify-content: center;
-    gap: var(--cc-spacing-xs);
-    color: var(--cc-color-warning);
-    font-weight: 500;
+
     margin-bottom: var(--cc-spacing-md);
 
+    font-weight: 500;
+    color: var(--cc-color-warning);
+
     mat-icon {
-      font-size: 20px;
       width: 20px;
       height: 20px;
+      font-size: 20px;
     }
   }
 
   .key-display {
     display: flex;
-    align-items: center;
     gap: var(--cc-spacing-sm);
-    background: var(--cc-surface-elevated);
+    align-items: center;
+
+    margin-bottom: var(--cc-spacing-lg);
+    padding: var(--cc-spacing-md);
     border: 1px solid var(--cc-border-color);
     border-radius: var(--cc-radius-md);
-    padding: var(--cc-spacing-md);
-    margin-bottom: var(--cc-spacing-lg);
+
+    background: var(--cc-surface-elevated);
 
     code {
       flex: 1;
+
       font-family: 'Courier New', monospace;
       font-size: 14px;
-      word-break: break-all;
       color: var(--cc-text-primary);
+      word-break: break-all;
     }
 
     button {
@@ -87,11 +97,13 @@ mat-form-field {
   }
 
   .key-info {
-    text-align: left;
-    background: var(--cc-surface-card);
+    padding: var(--cc-spacing-md);
     border: 1px solid var(--cc-border-color);
     border-radius: var(--cc-radius-md);
-    padding: var(--cc-spacing-md);
+
+    text-align: left;
+
+    background: var(--cc-surface-card);
 
     p {
       margin: var(--cc-spacing-xs) 0;

@@ -3,7 +3,6 @@
   <span class="page-title"><mat-icon>graphic_eq</mat-icon>My Podcasts <span>></span>
     <span class="page-title-secondary">Podcast List</span></span>
 </ng-template>
-<app-message></app-message>
 
 <mat-card class="create-podcast-card">
   <mat-card-content class="content-header">
@@ -11,7 +10,7 @@
       <h3>All Podcasts</h3>
       <span>{{ podcasts.length }} podcasts</span>
     </div>
-    <button mat-flat-button color="primary" type="button" (click)="createPodcast()">
+    <button mat-button color="secondary" type="button" (click)="createPodcast()">
       <mat-icon>add</mat-icon>
       Create Podcast
     </button>
@@ -64,10 +63,10 @@
         </div>
       </mat-menu>
       <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
-        <app-svg-icon icon="grid"></app-svg-icon>
+        <app-svg-icon icon="grid" />
       </button>
       <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
-        <app-svg-icon icon="list"></app-svg-icon>
+        <app-svg-icon icon="list" />
       </button>
     </div>
   </div>
@@ -310,8 +309,7 @@
     </div>
     }
     <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
-      [showFirstLastButtons]="false" (page)="onPageChange($event)" aria-label="Select page of podcasts">
-    </mat-paginator>
+      [showFirstLastButtons]="false" (page)="onPageChange($event)" aria-label="Select page of podcasts" />
   </div>
   }
 </div>

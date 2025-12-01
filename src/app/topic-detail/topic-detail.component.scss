@@ -5,31 +5,36 @@
 }
 
 .back-button {
-  background-color: var(--secondary-dark);
-  color: var(--theme-color);
-  border-radius: 10px;
-  margin-bottom: 16px;
   display: inline-flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
+
+  margin-bottom: 16px;
   padding: 8px 16px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 10px;
+
+  color: var(--md-sys-color-on-surface);
+
+  background-color: var(--md-sys-color-surface-container-high);
 
   &:hover {
-    background-color: var(--secondary-light);
+    background-color: var(--md-sys-color-surface-container);
   }
 }
 
 .topic-header {
-  background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 30px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding: 30px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background-color: var(--md-sys-color-surface-container-low);
 }
 
 .header-content {
@@ -37,43 +42,44 @@
   min-width: 0;
 
   h1 {
-    margin: 0 0 16px 0;
+    margin: 0 0 16px;
     font-size: 28px;
     font-weight: 600;
-    color: var(--theme-color);
+    color: var(--md-sys-color-on-surface);
   }
 
   .description {
-    margin: 0 0 20px 0;
+    margin: 0 0 20px;
     font-size: 16px;
-    color: var(--description-color);
     line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   .metadata {
     display: flex;
-    gap: 20px;
     flex-wrap: wrap;
+    gap: 20px;
 
     .meta-item {
       display: inline-flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
+
       font-size: 14px;
-      color: var(--description-color);
+      color: var(--md-sys-color-on-surface-variant);
 
       mat-icon {
-        font-size: 18px;
         width: 18px;
         height: 18px;
-        color: var(--primary);
+        font-size: 18px;
+        color: var(--md-sys-color-secondary);
       }
 
       .podcast-link,
       .episode-link {
-        color: var(--primary);
-        text-decoration: none;
         font-weight: 500;
+        color: var(--md-sys-color-secondary);
+        text-decoration: none;
 
         &:hover {
           text-decoration: underline;
@@ -87,22 +93,25 @@
   flex-shrink: 0;
 
   .generate-button {
-    background: var(--primary);
-    color: var(--theme-white);
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    font-weight: 600;
-    padding: 10px 16px;
     display: inline-flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
+
+    padding: 10px 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 10px;
+
+    font-weight: 600;
+    color: #ffffff;
     white-space: nowrap;
 
+    background: var(--md-sys-color-secondary);
+
     mat-icon {
-      font-size: 20px;
       width: 20px;
       height: 20px;
       margin: 0;
+      font-size: 20px;
     }
 
     mat-progress-spinner {
@@ -110,8 +119,8 @@
     }
 
     &:disabled {
-      opacity: 0.6;
       cursor: not-allowed;
+      opacity: 0.6;
     }
 
     &:hover:not(:disabled) {
@@ -121,28 +130,28 @@
 }
 
 .topic-tabs {
-  background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  background-color: var(--md-sys-color-surface-container-low);
 
-  // Target Material tab elements directly without ::ng-deep
+  // Target Material tab elements directly
   .mat-mdc-tab-labels {
-    background-color: var(--secondary-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    background-color: var(--md-sys-color-surface-container);
   }
 
   .mat-mdc-tab {
-    color: var(--description-color);
     font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
   }
 
   .mat-mdc-tab.mat-mdc-tab-active {
-    color: var(--primary);
+    color: var(--md-sys-color-secondary);
   }
 
   .mat-mdc-tab-body-wrapper {
-    background-color: var(--toolbar-container-background-color);
+    background-color: var(--md-sys-color-surface-container-low);
   }
 }
 
@@ -150,30 +159,31 @@
   padding: 20px;
 
   mat-card {
-    background-color: var(--toolbar-container-background-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
+    background-color: var(--md-sys-color-surface-container-low);
     box-shadow: none;
 
     mat-card-header {
       display: flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
+
       padding: 16px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
       mat-icon {
-        color: var(--primary);
-        font-size: 24px;
         width: 24px;
         height: 24px;
+        font-size: 24px;
+        color: var(--md-sys-color-secondary);
       }
 
       h3 {
         margin: 0;
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
     }
 
@@ -186,21 +196,22 @@
 .content-section {
   .content-text,
   .transcript-content {
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    margin: 0;
+    padding: 0;
+
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     font-size: 14px;
     line-height: 1.6;
-    color: var(--theme-color);
-    margin: 0;
-    padding: 0;
+    color: var(--md-sys-color-on-surface);
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
   }
 
   .transcript-content {
-    background-color: var(--secondary-dark);
     padding: 20px;
+    border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
-    border: 1px solid var(--border-color);
+    background-color: var(--md-sys-color-surface-container-high);
   }
 }
 
@@ -210,10 +221,10 @@
   gap: 20px;
 
   .source-item {
-    background-color: var(--secondary-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
     padding: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+    background-color: var(--md-sys-color-surface-container-high);
 
     .source-header {
       display: flex;
@@ -225,22 +236,23 @@
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: var(--theme-color);
+        color: var(--md-sys-color-on-surface);
       }
 
       .source-link {
         display: inline-flex;
-        align-items: center;
         gap: 4px;
-        color: var(--primary);
-        text-decoration: none;
+        align-items: center;
+
         font-size: 13px;
+        color: var(--md-sys-color-secondary);
+        text-decoration: none;
         word-break: break-all;
 
         mat-icon {
-          font-size: 16px;
           width: 16px;
           height: 16px;
+          font-size: 16px;
         }
 
         &:hover {
@@ -250,7 +262,7 @@
 
       .source-date {
         font-size: 12px;
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
 
@@ -259,7 +271,7 @@
         margin: 0;
         font-size: 14px;
         line-height: 1.6;
-        color: var(--description-color);
+        color: var(--md-sys-color-on-surface-variant);
       }
     }
   }
@@ -272,18 +284,20 @@
 .middle-card {
   margin-top: 20px;
   padding: 30px;
-  background-color: var(--toolbar-container-background-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
+
   text-align: center;
 
+  background-color: var(--md-sys-color-surface-container-low);
+
   h2 {
-    color: var(--theme-color);
     margin-bottom: 20px;
+    color: var(--md-sys-color-on-surface);
   }
 }
 
-@media screen and (max-width: 576px) {
+@media screen and (width <= 576px) {
   .topic-header {
     padding: 20px;
   }
@@ -304,7 +318,7 @@
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .topic-header {
     flex-direction: column;
     align-items: stretch;
@@ -312,8 +326,8 @@
 
   .header-actions {
     .generate-button {
-      width: 100%;
       justify-content: center;
+      width: 100%;
     }
   }
 }

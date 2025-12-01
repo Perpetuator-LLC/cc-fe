@@ -1,3 +1,2 @@
-# npm test
-# TODO: Re-enable once test infrastructure is fixed (missing Apollo, HttpClient, etc. providers)
+npm test
 
