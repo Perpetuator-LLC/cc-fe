@@ -1,0 +1,394 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.affiliate-graph-dialog {
+  display: flex;
+  flex-direction: column;
+
+  width: 90vw;
+  max-width: 1400px;
+  height: 85vh;
+  max-height: 900px;
+
+  .dialog-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+    h2 {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      margin: 0;
+
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--md-sys-color-secondary);
+
+      mat-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+      }
+    }
+
+    .close-button {
+      mat-icon {
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+  }
+
+  .dialog-content {
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 16px;
+
+    padding: 20px;
+
+    .toolbar {
+      display: flex;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+
+      .toolbar-left {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .format-selector {
+          min-width: 200px;
+          margin: 0;
+        }
+      }
+
+      .toolbar-right {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .zoom-controls {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+
+          padding: 4px 8px;
+          border: 1px solid var(--md-sys-color-outline-variant);
+          border-radius: 8px;
+
+          background: var(--md-sys-color-surface);
+
+          .zoom-level {
+            min-width: 50px;
+
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--md-sys-color-secondary);
+            text-align: center;
+          }
+
+          button {
+            mat-icon {
+              width: 20px;
+              height: 20px;
+              font-size: 20px;
+            }
+          }
+        }
+
+        button {
+          display: inline-flex;
+          flex-shrink: 0;
+          gap: 8px;
+          align-items: center;
+
+          white-space: nowrap;
+
+          mat-icon {
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+          }
+        }
+      }
+    }
+
+    .loading-container,
+    .error-container,
+    .empty-container {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 64px;
+        color: var(--md-sys-color-surface-container);
+      }
+
+      p {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+
+    .error-container {
+      mat-icon {
+        color: var(--md-sys-color-error);
+      }
+    }
+
+    .graph-container {
+      overflow: auto;
+      flex: 1;
+
+      padding: 20px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 10px;
+
+      background: var(--md-sys-color-surface);
+
+      &.mermaid-graph {
+        overflow: auto;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+
+        padding: 40px 20px;
+
+        .mermaid-container {
+          display: flex;
+          justify-content: center;
+          min-width: 100%;
+
+          svg {
+            max-width: 100%;
+            height: auto;
+            transition: transform 0.2s ease;
+          }
+        }
+      }
+
+      &.json-view,
+      &.text-view {
+        pre {
+          margin: 0;
+
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          line-height: 1.5;
+          color: var(--md-sys-color-secondary);
+          overflow-wrap: break-word;
+          white-space: pre-wrap;
+        }
+      }
+
+      &.json-view pre {
+        padding: 16px;
+        border-radius: 8px;
+        background: var(--md-sys-color-surface-container-low);
+      }
+    }
+  }
+
+  .dialog-footer {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+
+    .info-text {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      margin: 0;
+
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        color: var(--md-sys-color-surface-container);
+      }
+    }
+  }
+}
+
+@media (width <= 991px) {
+  .affiliate-graph-dialog {
+    width: 95vw;
+    height: 90vh;
+
+    .dialog-content {
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+
+        .toolbar-left,
+        .toolbar-right {
+          flex-direction: column;
+          width: 100%;
+
+          .format-selector {
+            width: 100%;
+          }
+
+          button {
+            width: 100%;
+          }
+        }
+
+        .toolbar-right .zoom-controls {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+@media (width <= 576px) {
+  .affiliate-graph-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+
+    .dialog-header {
+      padding: 16px;
+
+      h2 {
+        font-size: 18px;
+      }
+    }
+
+    .dialog-content {
+      padding: 16px;
+
+      .graph-container {
+        padding: 10px;
+      }
+    }
+  }
+}
+
+// Enhanced Mermaid-specific styling (as per education document)
+// These styles target the SVG elements generated by Mermaid
+// Using :host selector for dynamically generated SVG content
+:host {
+  .mermaid-container {
+    // Target all nodes
+    .node {
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      rect,
+      polygon,
+      circle {
+        transition: all 0.2s ease;
+      }
+
+      &:hover {
+        rect,
+        polygon,
+        circle {
+          filter: brightness(1.05);
+          stroke-width: 2.5px !important;
+        }
+      }
+    }
+
+    // Target node labels
+    .nodeLabel {
+      pointer-events: none;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+
+      // Enhanced label styling for multi-line nodes
+      tspan {
+        font-weight: 500;
+      }
+    }
+
+    // Target edges (arrows)
+    .edgePath {
+      path {
+        fill: none;
+        stroke-width: 2px;
+      }
+    }
+
+    // Target arrow markers
+    .arrowheadPath {
+      fill: var(--md-sys-color-outline-variant);
+    }
+
+    // Target edge labels
+    .edgeLabel {
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 12px;
+      background-color: var(--md-sys-color-surface);
+
+      rect {
+        fill: var(--md-sys-color-surface);
+        stroke: var(--md-sys-color-outline-variant);
+      }
+    }
+
+    // Active/highlighted nodes (if backend adds classes)
+    .active {
+      rect,
+      polygon,
+      circle {
+        fill: var(--md-sys-color-success) !important;
+        fill-opacity: 0.15;
+        stroke: var(--md-sys-color-success) !important;
+      }
+    }
+
+    .inactive {
+      rect,
+      polygon,
+      circle {
+        fill: var(--md-sys-color-error) !important;
+        fill-opacity: 0.15;
+        stroke: var(--md-sys-color-error) !important;
+      }
+    }
+
+    .under-review,
+    .review {
+      rect,
+      polygon,
+      circle {
+        fill: var(--md-sys-color-warning) !important;
+        fill-opacity: 0.15;
+        stroke: var(--md-sys-color-warning) !important;
+      }
+    }
+
+    // Style for root/parent nodes (if we want to highlight them)
+    .flowchart-node-root {
+      rect {
+        stroke-width: 3px !important;
+      }
+    }
+  }
+}

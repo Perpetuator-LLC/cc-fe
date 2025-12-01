@@ -1,0 +1,94 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<mat-table [dataSource]="dataSource">
+  <!-- RSS Feed Name Column -->
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>Feed Name</mat-header-cell>
+    <mat-cell *matCellDef="let feed">
+      <div class="rss-feed-name">{{ feed.name || 'Unnamed Feed' }}</div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- RSS Feed URL Column -->
+  <ng-container matColumnDef="url">
+    <mat-header-cell *matHeaderCellDef>RSS URL</mat-header-cell>
+    <mat-cell *matCellDef="let feed">
+      <div class="rss-feed-url">
+        <a [href]="feed.url" target="_blank" rel="noopener noreferrer">{{ feed.url }}</a>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Status Column -->
+  <ng-container matColumnDef="status">
+    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+    <mat-cell *matCellDef="let feed">
+      <div class="rss-status-badges" [matTooltip]="getTooltipText(feed)">
+        <span
+          class="rss-status-badge"
+          [class.status-success]="feed.isReachable"
+          [class.status-error]="!feed.isReachable"
+        >
+          <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+          {{ feed.isReachable ? 'Reachable' : 'Unreachable' }}
+        </span>
+        <span
+          class="rss-status-badge"
+          [class.status-success]="feed.isParsable"
+          [class.status-error]="!feed.isParsable"
+        >
+          <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+          {{ feed.isParsable ? 'Parsable' : 'Parse Error' }}
+        </span>
+        @if (feed.lastFetchAttempt) {
+          <span class="last-checked">
+            <mat-icon>schedule</mat-icon>
+            {{ feed.lastFetchAttempt | date: 'short' }}
+          </span>
+        }
+        @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined) {
+          <span class="articles-per-day">
+            <mat-icon>article</mat-icon>
+            {{ feed.articlesPerDay }} articles/day
+          </span>
+        }
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Actions Column (optional) -->
+  @if (showActions) {
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef class="actions-column">Actions</mat-header-cell>
+      <mat-cell *matCellDef="let feed" class="actions-cell">
+        <button
+          mat-icon-button
+          color="warn"
+          type="button"
+          (click)="onDelete(feed.uuid)"
+          matTooltip="Remove RSS feed"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+  }
+
+  <!-- Header and Row Declarations -->
+  <mat-header-row *matHeaderRowDef="displayedColumns" />
+  <mat-row *matRowDef="let row; columns: displayedColumns" />
+</mat-table>
+
+@if (loading) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="40" />
+    <p>Loading RSS feeds...</p>
+  </div>
+}
+
+@if (!loading && dataSource.length === 0) {
+  <div class="no-data">
+    <mat-icon>rss_feed</mat-icon>
+    <p>No RSS feeds found</p>
+  </div>
+}
+

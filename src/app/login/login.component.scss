@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 mat-card {
   margin: 2rem auto;
-  padding: 20px;
+  padding: 16px;
 
   .mat-mdc-card-header {
     justify-content: center;
@@ -28,7 +28,7 @@ mat-card {
   }
 
   .route-title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
 
@@ -61,7 +61,7 @@ mat-card.login-card {
   h3 {
     margin-top: 0;
 
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-align: center;

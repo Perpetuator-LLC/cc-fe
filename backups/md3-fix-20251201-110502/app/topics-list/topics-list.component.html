@@ -1,0 +1,85 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span class="page-title"><mat-icon>science</mat-icon>Topics <span>></span>
+    <span class="page-title-secondary">All Topics</span></span>
+</ng-template>
+@if (topics.length === 0 && !loading) {
+<div class="middle-card">
+  <h2>No research topics found.</h2>
+  <p>Research topics will appear here after running the "Research Episode" workflow.</p>
+</div>
+} @else {
+<mat-card class="topics-card">
+  <mat-card-content class="content-header">
+    <div class="title">
+      <h3>All Research Topics</h3>
+      <span>{{ topics.length }} topics</span>
+    </div>
+    <button mat-flat-button color="primary" type="button" (click)="createTopic()" class="create-topic-button">
+      <mat-icon>add</mat-icon>
+      Create Topic
+    </button>
+  </mat-card-content>
+</mat-card>
+
+<div class="middle-card">
+  <div class="topics-container">
+    <table mat-table [dataSource]="dataSource">
+      <!-- Title Column -->
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Topic Title</th>
+        <td mat-cell *matCellDef="let topic">
+          <div class="topic-title">
+            <a [routerLink]="['/topic', topic.uuid]" class="topic-link">
+              {{ topic.title }}
+            </a>
+            @if (topic.description) {
+            <span class="topic-description">{{ topic.description }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Podcast Column -->
+      <ng-container matColumnDef="podcast">
+        <th mat-header-cell *matHeaderCellDef>Podcast</th>
+        <td mat-cell *matCellDef="let topic">
+          {{ topic.podcast.name }}
+        </td>
+      </ng-container>
+
+      <!-- Created Column -->
+      <ng-container matColumnDef="created">
+        <th mat-header-cell *matHeaderCellDef>Created</th>
+        <td mat-cell *matCellDef="let topic">
+          {{ formatDate(topic.createdAt) }}
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let topic">
+          <span class="status-badge" [ngClass]="getStatusClass(topic)">
+            {{ getTopicStatus(topic) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let topic">
+          <button mat-flat-button color="primary" (click)="viewTopic(topic.uuid)">
+            <mat-icon>visibility</mat-icon>
+            View
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns" class="topic-row"></tr>
+    </table>
+  </div>
+</div>
+}

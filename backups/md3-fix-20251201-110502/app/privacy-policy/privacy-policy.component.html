@@ -1,0 +1,28 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  @if (authService.isLoggedIn()) {
+    <h1>Privacy Policy</h1>
+  }
+</ng-template>
+<mat-card class="privacy-policy">
+  <mat-card-content>
+    @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50" />
+      <p>Loading privacy policy...</p>
+    </div>
+    } @else if (policyContent) {
+    <div class="policy-content">
+      @if (policy) {
+      <div class="policy-meta">
+        <p><strong>Version:</strong> {{ policy.version }}</p>
+        <p><strong>Effective Date:</strong> {{ policy.effectiveDate | date }}</p>
+      </div>
+      }
+      <div [innerHTML]="policyContent"></div>
+    </div>
+    } @else {
+    <p>Privacy Policy is currently unavailable.</p>
+    }
+  </mat-card-content>
+</mat-card>

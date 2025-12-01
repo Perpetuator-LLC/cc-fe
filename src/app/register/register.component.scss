@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 mat-card {
   margin: 2rem auto;
-  padding: 20px;
+  padding: 16px;
 
   .mat-mdc-card-header {
     justify-content: center;
@@ -27,7 +27,7 @@ mat-card.register-card {
   h3 {
     margin-top: 0;
 
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-align: center;
@@ -74,17 +74,17 @@ form {
   display: flex;
   justify-content: space-between;
   width: 90%;
-  padding: 30px;
+  padding: 32px;
 
   .website-logo {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     text-decoration: none;
   }
 
   .route-title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
 
@@ -129,7 +129,7 @@ mat-form-field {
 .error-message {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: 8px 0;
   color: var(--md-sys-color-error);
 }
 

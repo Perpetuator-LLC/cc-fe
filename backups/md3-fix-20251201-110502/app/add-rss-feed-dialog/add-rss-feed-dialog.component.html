@@ -1,0 +1,16 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Add RSS Feed(s)</h2>
+<mat-dialog-content>
+  <form [formGroup]="rssFeedForm">
+    <mat-form-field appearance="fill">
+      <mat-label>RSS Feed URL(s) - One per line or comma-separated</mat-label>
+      <textarea matInput formControlName="urls" rows="6" placeholder="https://example.com/feed1&#10;https://example.com/feed2, https://example.com/feed3"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onAdd()" [disabled]="!rssFeedForm.valid">
+    Add
+  </button>
+</mat-dialog-actions>

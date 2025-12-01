@@ -1,0 +1,635 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.middle-card {
+  position: relative;
+  padding-top: 1.5em;
+  padding-inline: 30px;
+  background-color: var(--md-sys-color-surface-container);
+
+  @media screen and (width <= 576px) {
+    padding-inline: var(--cc-spacing-lg);
+  }
+}
+
+// Top-level loading spinner (matching podcasts component)
+.loading-spinner {
+  position: relative;
+  width: 100%;
+
+  mat-progress-bar {
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+}
+
+// Compact filter in upper right corner
+.filter-container-top-right {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+
+  .status-filter-compact {
+    width: 140px;
+    font-size: 12px;
+
+    // Material form field wrapper sizing and rounded corners
+    .mat-mdc-form-field-wrapper {
+      height: 36px;
+      border-radius: var(--cc-radius-md); // Round the entire wrapper
+    }
+
+    // Material form field
+    .mat-mdc-text-field-wrapper {
+      border-radius: var(--cc-radius-md) !important; // Force rounded corners
+    }
+
+    // Material form field infix
+    .mat-mdc-form-field-infix {
+      min-height: 20px;
+      padding: var(--cc-spacing-sm) 0;
+    }
+
+    // Border styling for outlined appearance with rounded corners
+    .mdc-notched-outline {
+      border-radius: var(--cc-radius-md) !important; // Force rounded on container
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--md-sys-color-outline-variant);
+      border-width: 1px;
+    }
+
+    // Rounded corners for leading edge
+    .mdc-notched-outline__leading {
+      border-radius: var(--cc-radius-md) 0 0 var(--cc-radius-md) !important;
+    }
+
+    // Notch should not have border radius
+    .mdc-notched-outline__notch {
+      border-radius: 0 !important;
+    }
+
+    // Rounded corners for trailing edge
+    .mdc-notched-outline__trailing {
+      border-radius: 0 var(--cc-radius-md) var(--cc-radius-md) 0 !important;
+    }
+
+    // Focused border styling
+    .mdc-notched-outline--focused .mdc-notched-outline__leading,
+    .mdc-notched-outline--focused .mdc-notched-outline__notch,
+    .mdc-notched-outline--focused .mdc-notched-outline__trailing {
+      border-color: var(--md-sys-color-secondary);
+      border-width: 1px;
+    }
+
+    // Hide subscript (hint/error area)
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    // Select value text styling
+    .mat-mdc-select-value {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    @media screen and (width <= 576px) {
+      width: 120px;
+      font-size: 11px;
+
+      .mat-mdc-select-value {
+        font-size: 11px;
+      }
+    }
+  }
+
+  @media screen and (width <= 576px) {
+    top: 15px;
+    right: var(--cc-spacing-lg);
+  }
+}
+
+.timeline-date-title {
+  margin-bottom: var(--cc-spacing-lg);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Empty state styling
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 60px var(--cc-spacing-lg);
+
+  text-align: center;
+
+  .empty-state-content {
+    max-width: 400px;
+  }
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--cc-spacing-md);
+
+    font-size: 64px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .empty-state-title {
+    margin: 0 0 var(--cc-spacing-md) 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .empty-state-message {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Loading state styling
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 80px var(--cc-spacing-lg);
+
+  text-align: center;
+
+  mat-spinner {
+    margin-bottom: var(--cc-spacing-lg);
+  }
+
+  .loading-message {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Legacy filter container (kept for compatibility)
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  margin-bottom: var(--cc-spacing-lg);
+  padding-top: var(--cc-spacing-lg);
+
+  .status-filter {
+    width: 200px;
+    font-size: 14px;
+
+    @media screen and (width <= 576px) {
+      width: 100%;
+    }
+  }
+}
+
+.chip {
+.status-badge {
+  display: inline-flex;
+  gap: var(--cc-spacing-sm);
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+  border-radius: var(--cc-radius-round);
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Job status badge styles are now in global styles.scss
+// No need to duplicate here - global styles handle all colors
+
+.timeline {
+  position: relative;
+  max-width: 1140px;
+  margin: -20px auto 0;
+
+  @media screen and (width <= 576px) {
+    margin: 1rem auto;
+  }
+}
+
+.timeline-spacing {
+  margin-bottom: 40px;
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: var(--cc-spacing-lg);
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    left: var(--cc-spacing-lg);
+
+    width: 2px;
+    height: calc(100% + var(--cc-spacing-lg));
+    border-left: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  &:last-child {
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.timeline-icon {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  margin-right: 1.2rem;
+  border: 1px solid var(--cc-border-color);
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  // Colors are defined in global styles.scss
+  // Only add component-specific styling here
+  &.job-success,
+  &.job-failed,
+  &.job-pending,
+  &.job-running {
+    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
+  }
+}
+
+.timeline-content {
+  flex: 1;
+
+  width: 300px;
+  max-width: 100%;
+  padding: 1rem 1.5rem;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--cc-radius-md);
+
+  @media screen and (width <= 576px) {
+    padding: 1rem;
+  }
+}
+
+.timeline-header {
+  display: flex;
+  gap: var(--cc-spacing-md);
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+
+  .timeline-left-content {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: var(--cc-spacing-sm);
+    align-items: center;
+
+    min-width: 0;
+
+    // Add bullet separator between timeline-title and timeline-meta
+    .timeline-meta::before {
+      //content: '-';
+      //margin-right: var(--cc-spacing-lg);
+      //color: var(--md-sys-color-surface-container);
+      //font-weight: bold;
+
+      @media screen and (width <= 768px) {
+        display: none; // Hide on mobile when stacked vertically
+      }
+    }
+
+    @media screen and (width <= 768px) {
+      flex-direction: column;
+      gap: var(--cc-spacing-sm);
+      align-items: flex-start;
+    }
+  }
+}
+
+.timeline-title {
+  flex-shrink: 0;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+
+.timeline-status {
+  flex-shrink: 0;
+
+  padding: 0.2rem 0.8rem;
+  border-radius: var(--cc-spacing-sm);
+
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  // Colors are defined in global styles.scss
+  // Only add component-specific styling here
+  &.job-success,
+  &.job-failed,
+  &.job-pending,
+  &.job-running {
+    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
+  }
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-spacing-sm);
+  align-items: center;
+
+  font-size: 11px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  &.mobile {
+    display: none;
+  }
+
+  > span {
+    display: flex;
+    gap: var(--cc-spacing-xs);
+    align-items: center;
+    white-space: nowrap;
+
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: var(--cc-spacing-sm);
+      font-weight: bold;
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+
+  .timeline-cost {
+    display: flex;
+    gap: var(--cc-spacing-xs);
+    align-items: center;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    // Ensure the bullet separator applies to timeline-cost
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: var(--cc-spacing-sm);
+      font-weight: bold;
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+
+  .timeline-date {
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .dot-div {
+    display: flex;
+    gap: var(--cc-spacing-md);
+    align-items: center;
+  }
+
+  .dot {
+    display: inline-block;
+
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+
+    background-color: var(--md-sys-color-surface-container);
+  }
+
+  .timeline-actions {
+    display: flex;
+    gap: var(--cc-spacing-sm);
+    align-items: center;
+    margin-left: auto;
+
+    button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+      }
+    }
+  }
+
+  @media screen and (width <= 768px) {
+    &.desktop {
+      display: none;
+    }
+
+    &.mobile {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+  }
+}
+
+.timeline-message {
+  margin-top: var(--cc-spacing-sm);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface);
+
+  .job-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cc-spacing-sm);
+  }
+
+  .job-section {
+    .section-title {
+      margin: 0 0 3px;
+
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .message-text {
+    font-size: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    &.error-message {
+      font-weight: 500;
+      color: var(--md-sys-color-error);
+    }
+  }
+
+  .error-message {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--md-sys-color-error);
+  }
+
+  .job-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cc-spacing-sm);
+
+    .job-link-item {
+      display: flex;
+      align-items: center;
+
+      .resource-tag {
+        cursor: pointer;
+
+        display: inline-flex;
+        flex-shrink: 0;
+        gap: var(--cc-spacing-xs);
+        align-items: center;
+
+        height: 22px;
+        min-height: 22px;
+        padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+        border: none;
+        border-radius: var(--cc-spacing-sm);
+
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: none;
+        white-space: nowrap;
+
+        transition: all 0.2s ease;
+
+        mat-icon {
+          width: 14px;
+          height: 14px;
+          margin: 0;
+          font-size: 14px;
+        }
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+        }
+
+        &.podcast-tag {
+          border: 1px solid var(--md-sys-color-primary-container);
+          color: var(--md-sys-color-primary);
+          background: var(--md-sys-color-primary-container);
+
+          &:hover {
+            background: var(--md-sys-color-primary-container);
+          }
+        }
+
+        &.episode-tag {
+          border: 1px solid var(--md-sys-color-tertiary-container);
+          color: var(--md-sys-color-tertiary);
+          background: var(--md-sys-color-tertiary-container);
+
+          &:hover {
+            background: var(--md-sys-color-tertiary-container);
+          }
+        }
+
+        &.topic-tag {
+          border: 1px solid var(--md-extended-color-success-color-container);
+          color: var(--md-extended-color-success-color);
+          background: var(--md-extended-color-success-color-container);
+
+          &:hover {
+            background: var(--md-extended-color-success-color-container);
+          }
+        }
+      }
+      }
+    }
+
+  @media screen and (width <= 576px) {
+    margin-bottom: var(--cc-spacing-sm);
+  }
+  }
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  background-color: var(--md-sys-color-surface-container);
+
+  .load-more-btn {
+    display: flex;
+    gap: var(--cc-spacing-sm);
+    align-items: center;
+
+    padding: var(--cc-spacing-md) var(--cc-spacing-lg);
+    border: 1px solid var(--md-sys-color-secondary);
+    border-radius: var(--cc-radius-md);
+
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+
+    background: var(--md-sys-color-secondary);
+
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: var(--primary-dark, var(--md-sys-color-secondary));
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  }
+}

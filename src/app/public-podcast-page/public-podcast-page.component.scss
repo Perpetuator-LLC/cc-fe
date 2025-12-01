@@ -2,10 +2,10 @@
 .public-podcast-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
 
   .breadcrumb {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 
     .breadcrumb-link {
       display: inline-flex;
@@ -19,9 +19,9 @@
       transition: opacity 0.2s;
 
       mat-icon {
-        width: 20px;
-        height: 20px;
-        font-size: 20px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
       }
 
       &:hover {
@@ -58,7 +58,7 @@
     .podcast-info {
       display: flex;
       gap: 24px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
 
       .podcast-image {
         flex-shrink: 0;
@@ -137,7 +137,7 @@
         .stats {
           display: flex;
           flex-wrap: wrap;
-          gap: 20px;
+          gap: 16px;
           align-items: center;
 
           .stat {
@@ -149,9 +149,9 @@
             color: var(--md-sys-color-on-surface-variant);
 
             mat-icon {
-              width: 18px;
-              height: 18px;
-              font-size: 18px;
+              width: 16px;
+              height: 16px;
+              font-size: 16px;
             }
           }
         }
@@ -168,7 +168,7 @@
 
   .episodes-section {
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       font-size: 24px;
       font-weight: 600;
       color: var(--md-sys-color-secondary);
@@ -201,7 +201,7 @@
           h3 {
             flex: 1;
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
 
             .episode-title {
@@ -264,7 +264,7 @@
   }
 
   @media (width <= 768px) {
-    padding-inline: 20px;
+    padding-inline: 16px;
 
     .podcast-header {
       .podcast-info {

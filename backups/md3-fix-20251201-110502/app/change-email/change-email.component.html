@@ -1,0 +1,18 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <h1>Email Verification</h1>
+</ng-template>
+<mat-card class="change-email-card">
+  <mat-card-header>
+    <mat-card-title>Email Verification</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="verification-container">
+      @if (changeStatus) {
+        <p>{{ changeStatus }}</p>
+      } @else {
+        <p>Verifying your email, please wait...</p>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

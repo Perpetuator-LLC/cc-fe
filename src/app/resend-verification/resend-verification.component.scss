@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 mat-card {
   margin: 2rem auto;
-  padding: 20px;
+  padding: 16px;
 }
 
 mat-card.forgot-card {
@@ -36,7 +36,7 @@ mat-form-field {
 .error-message {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: 8px 0;
   color: var(--md-sys-color-error);
 }
 

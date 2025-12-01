@@ -9,20 +9,20 @@
 .validated-icon {
   cursor: help;
 
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 
-  font-size: 20px;
+  font-size: 16px;
   color: var(--md-sys-color-success);
 }
 
 .unvalidated-icon {
   cursor: help;
 
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 
-  font-size: 20px;
+  font-size: 16px;
   color: var(--md-sys-color-warning);
 }
 
@@ -31,7 +31,7 @@
   gap: 12px;
   align-items: center;
 
-  margin-top: 20px;
+  margin-top: 16px;
   padding: 40px 20px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
@@ -63,13 +63,13 @@
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding-top: 12px;
 
   .search-filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 
     mat-form-field {
@@ -85,7 +85,7 @@
 
       // Target Material form field elements directly
       .mat-mdc-text-field-wrapper {
-        height: 60px;
+        height: 64px;
         background-color: var(--md-sys-color-surface-container-low);
       }
 
@@ -93,7 +93,7 @@
         display: flex;
         align-items: center;
 
-        min-height: 60px;
+        min-height: 64px;
         padding-top: 0;
         padding-bottom: 0;
       }
@@ -156,7 +156,7 @@
 
 .episodes-container {
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
   border-radius: 8px;
 
   table {
@@ -195,7 +195,7 @@
     justify-content: center;
 
     width: 90px;
-    height: 20px;
+    height: 16px;
     padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
     border-radius: var(--cc-radius-sm);
 
@@ -254,9 +254,9 @@
     }
 
     mat-icon {
-      width: 18px;
-      height: 18px;
-      font-size: 18px;
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
     }
   }
 
@@ -365,7 +365,7 @@
   align-items: center;
   justify-content: center;
 
-  height: 20px;
+  height: 16px;
   padding: 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 6px;

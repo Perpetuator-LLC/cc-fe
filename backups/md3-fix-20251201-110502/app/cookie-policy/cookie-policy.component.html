@@ -1,0 +1,26 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate />
+
+<div class="page-container">
+<mat-card class="cookie-policy">
+  <mat-card-content>
+    @if (loading) {
+      <div class="loading-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50" />
+        <p>Loading Cookie Policy...</p>
+      </div>
+    } @else if (policy && policyContent) {
+      <div class="policy-header">
+        <h1>Cookie Policy</h1>
+        <p class="policy-version">Version {{ policy.version }} - Effective {{ policy.effectiveDate | date: 'longDate' }}</p>
+      </div>
+      <div class="policy-content" [innerHTML]="policyContent"></div>
+    } @else {
+      <div class="error-container">
+        <p>Cookie Policy not available at this time.</p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
+</div>
+

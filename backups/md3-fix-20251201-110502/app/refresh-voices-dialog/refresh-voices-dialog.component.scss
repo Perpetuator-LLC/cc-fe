@@ -1,0 +1,18 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin-bottom: 8px;
+}
+
+mat-spinner {
+  margin: 10px auto; /* Center spinner */
+}
