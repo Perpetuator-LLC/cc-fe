@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px 0 10px;
+    padding: 16px 16px 0 8px;
 
     .website-logo {
       display: flex;
@@ -50,7 +50,7 @@
 
         padding: 8px 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 10px;
+        border-radius: 8px;
 
         font-size: 14px;
         font-weight: 500;
@@ -230,7 +230,7 @@
         height: 48px !important;
         border-radius: 50px !important;
 
-        font-family: Sarabun;
+        font-family: Sarabun, sans-serif;
         font-size: 16px;
         font-weight: 400;
 
