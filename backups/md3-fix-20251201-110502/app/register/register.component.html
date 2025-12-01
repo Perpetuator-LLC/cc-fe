@@ -1,0 +1,116 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate />
+<!--<app-message></app-message>-->
+<div class="register-container">
+<!--  <div class="header">-->
+<!--    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">-->
+<!--      <img-->
+<!--        src="Capital_Copilot_Logo_Slanted.svg"-->
+<!--        aria-label="Side nav toggle icon"-->
+<!--        alt="Capital Copilot"-->
+<!--        width="24"-->
+<!--        height="24"-->
+<!--        matTooltip="Capital Copilot"-->
+<!--      />-->
+<!--      <div class="route-title">Capital Copilot</div>-->
+<!--    </a>-->
+<!--    <p>Already have an account? <a href="/login">Login</a></p>-->
+<!--  </div>-->
+  <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <mat-card class="register-card">
+      <mat-card-header>
+        <mat-card-title>
+          <h3>Register</h3>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="fill">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (registerForm.controls.email.errors?.['required']) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (registerForm.controls.email.errors?.['email']) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="new-password" />
+          @if (registerForm.controls.password.errors?.['minLength']) {
+            <mat-error>Password must be at least 6 characters</mat-error>
+          }
+          @if (registerForm.controls.password.errors?.['required']) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Disclaimers Section -->
+        <div class="disclaimers">
+          <mat-card class="disclaimer-card">
+            <mat-card-header>
+              <mat-card-title>Important Disclaimers</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>
+                Capital Copilot AI is an educational and informational tool designed to assist in research and analysis.
+                We do not provide personalized financial advice or recommend specific investments. All investment
+                strategies carry risk, and past performance is not indicative of future results. Always consult with a
+                professional financial advisor before making any investment decisions.
+              </p>
+              <p>
+                The content provided by Capital Copilot AI, including any analysis, insights, or projections, is for
+                informational purposes only and should not be construed as legal, tax, or financial advice. Please seek
+                independent advice from a qualified professional.
+              </p>
+              <p>
+                Investing in cryptocurrencies, securities, and other assets involves substantial risk, including the
+                risk of losing your entire investment. Market conditions can change rapidly, and all information
+                presented is subject to change without notice.
+              </p>
+              <p>
+                Capital Copilot AI is not a registered investment advisor, broker, dealer, or exchange with any
+                regulatory authority. The platform is solely an educational and research resource.
+              </p>
+              <p>
+                By registering, you agree to our
+                <a tabindex="0" routerLink="/terms-and-conditions">Terms of Service</a>,
+                <a tabindex="0" routerLink="/privacy-policy">Privacy Policy</a>, and
+                <a tabindex="0" routerLink="/cookie-policy">Cookie Policy</a>.
+              </p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Acceptance Checkbox -->
+          <mat-checkbox formControlName="acceptTerms" class="terms-checkbox">
+            I have read and accept the Terms of Service, Privacy Policy, and Cookie Policy
+          </mat-checkbox>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button
+          class="login-btn"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!registerForm.valid || !registerForm.controls['acceptTerms'].value"
+        >
+          Register
+        </button>
+      </mat-card-actions>
+      <mat-card-actions>
+        <button
+          class="resend"
+          mat-button
+          color="accent"
+          type="button"
+          [routerLink]="['/resend']"
+          [queryParams]="{ email: registerForm.get('email')?.value }"
+        >
+          Resend Verification Email
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div>

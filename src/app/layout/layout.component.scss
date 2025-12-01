@@ -49,7 +49,7 @@ mat-sidenav-content mat-toolbar {
 
     .right-nav {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -70,7 +70,7 @@ mat-sidenav-content mat-toolbar {
       .flex-list {
         display: flex;
         align-items: center;
-        padding-right: 20px;
+        padding-right: 16px;
 
         a {
           font-family: Sarabun, sans-serif;
@@ -163,7 +163,7 @@ mat-sidenav-content mat-toolbar {
 }
 
 .filter {
-  padding-top: 20px;
+  padding-top: 16px;
   padding-left: 10px;
 }
 
@@ -359,7 +359,7 @@ mat-nav-list {
   align-items: center;
   justify-content: space-between;
 
-  padding: 60px 70px;
+  padding: 64px 70px;
 
   font-family: Sarabun, sans-serif;
   font-size: 16px;
@@ -370,14 +370,14 @@ mat-nav-list {
 
   .footer-links-item {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
 
     a {
       font-family: Sarabun, sans-serif;
       font-size: 16px;
       font-weight: 400;
-      line-height: 20px;
+      line-height: 16px;
       color: var(--md-sys-color-on-surface);
       text-decoration: none;
     }
@@ -464,7 +464,7 @@ mat-nav-list {
       justify-content: space-between;
 
       width: 100%;
-      padding: 20px 54px;
+      padding: 16px 54px;
       border-radius: 200px;
 
       background: radial-gradient(100% 100% at 0% 0%, rgb(255 255 255 / 0.07) 0.68%, rgb(255 255 255 / 0.07) 100%);
@@ -578,7 +578,7 @@ mat-nav-list {
       width: 128px;
       min-width: 128px;
       max-width: 128px;
-      padding: 20px 16px;
+      padding: 16px;
       border-right: 1px solid var(--md-sys-color-outline-variant);
 
       background: var(--md-sys-color-surface-container);
@@ -627,7 +627,7 @@ mat-nav-list {
 
       .s-link {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
 
         padding: 13px 10px;
@@ -641,9 +641,9 @@ mat-nav-list {
         }
 
         .mat-icon {
-          width: 18px;
-          height: 18px;
-          font-size: 18px;
+          width: 16px;
+          height: 16px;
+          font-size: 16px;
         }
 
         .website-title {
@@ -725,11 +725,11 @@ mat-nav-list {
           align-items: center;
           justify-content: center;
 
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
           margin: 0;
 
-          font-size: 20px;
+          font-size: 16px;
           color: #ffffff;
         }
 
@@ -752,7 +752,7 @@ mat-nav-list {
 
         @media screen and (width <= 599px) {
           display: flex;
-          gap: 10px;
+          gap: 8px;
           align-items: center;
           padding-right: 0;
 

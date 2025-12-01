@@ -1,0 +1,140 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+
+<div class="affiliate-code-change-dialog">
+  <h2 mat-dialog-title>Change Your Affiliate Code</h2>
+
+  <mat-dialog-content>
+    @if (loading) {
+      <div class="loading-container">
+        <mat-spinner diameter="40" />
+        <p>Loading...</p>
+      </div>
+    } @else {
+      <!-- Pending Requests Alert -->
+      @if (pendingRequests.length > 0) {
+        <div class="pending-alert">
+          <mat-icon>schedule</mat-icon>
+          <div class="pending-content">
+            <strong>Code change pending review</strong>
+            <p>Requested code: <code>{{ pendingRequests[0].requestedCode }}</code></p>
+            <p class="pending-meta">
+              You'll receive an email when your request is processed.
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Cooldown Warning -->
+      @if (!canChange) {
+        <div class="cooldown-warning">
+          <mat-icon>access_time</mat-icon>
+          <div class="cooldown-content">
+            <strong>Code change temporarily unavailable</strong>
+            <p>You can change your code in <strong>{{ daysUntilNextChange }}</strong> days.</p>
+            <p class="cooldown-info">Changes are allowed every 30 days to prevent abuse.</p>
+          </div>
+        </div>
+      } @else {
+        <!-- Code Change Form -->
+        <form [formGroup]="codeForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Code</mat-label>
+            <input
+              matInput
+              formControlName="newCode"
+              placeholder="MY-BRAND-CODE"
+              maxlength="50"
+
+            />
+            @if (checking) {
+              <mat-spinner matSuffix diameter="20" />
+            }
+            @if (availabilityStatus?.checked && !checking) {
+              <mat-icon matSuffix [class]="getValidationClass()">
+                {{ getValidationIcon() }}
+              </mat-icon>
+            }
+            @if (codeForm.get('newCode')?.hasError('required') && codeForm.get('newCode')?.touched) {
+              <mat-error>Code is required</mat-error>
+            }
+            @if (codeForm.get('newCode')?.hasError('minlength')) {
+              <mat-error>Code must be at least 3 characters</mat-error>
+            }
+            @if (codeForm.get('newCode')?.hasError('maxlength')) {
+              <mat-error>Code cannot exceed 50 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Availability Status -->
+          @if (availabilityStatus?.checked && !checking) {
+            <div class="availability-status" [class]="getValidationClass()">
+              @if (availabilityStatus?.available) {
+                @if (availabilityStatus?.requiresReview) {
+                  <div class="status-message warning">
+                    <mat-icon>warning</mat-icon>
+                    <div>
+                      <strong>Available (requires admin review)</strong>
+                      <p>Premium keywords require manual approval</p>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="status-message success">
+                    <mat-icon>check_circle</mat-icon>
+                    <strong>{{ availabilityStatus?.message }}</strong>
+                  </div>
+                }
+              } @else {
+                <div class="status-message error">
+                  <mat-icon>error</mat-icon>
+                  <strong>{{ availabilityStatus?.message }}</strong>
+                </div>
+              }
+            </div>
+          }
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Reason for change (optional)</mat-label>
+            <textarea
+              matInput
+              formControlName="reason"
+              placeholder="Why do you want to change your code?"
+              rows="3"
+            ></textarea>
+          </mat-form-field>
+
+          <div class="help-text">
+            <p><strong>Requirements:</strong></p>
+            <ul>
+              <li>3-50 characters</li>
+              <li>Letters, numbers, hyphens, and underscores only</li>
+              <li>Premium keywords may require admin review</li>
+              <li>Changes allowed every 30 days</li>
+            </ul>
+          </div>
+        </form>
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="submitting">
+      Cancel
+    </button>
+    @if (canChange && !loading) {
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="!codeForm.valid || !availabilityStatus?.available || submitting"
+      >
+        @if (submitting) {
+          <mat-spinner diameter="20" class="inline-spinner" />
+          Requesting...
+        } @else {
+          Request Change
+        }
+      </button>
+    }
+  </mat-dialog-actions>
+</div>
+

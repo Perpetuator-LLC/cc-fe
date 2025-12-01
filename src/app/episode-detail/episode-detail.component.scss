@@ -209,7 +209,7 @@
 }
 
 .scheduling-section .title {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .audio-container {
@@ -237,7 +237,7 @@
 
   .audio-border {
     margin-bottom: 30px;
-    padding-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid var(--md-sys-color-outline-variant);
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
@@ -274,7 +274,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 20px;
+    margin-top: 16px;
   }
 
   .view-btn {
@@ -326,7 +326,7 @@
 .publish {
   @include badge(var(--md-sys-color-success), var(--md-sys-color-on-success));
 
-  height: 20px;
+  height: 16px;
   padding: 0 8px;
 }
 
@@ -336,7 +336,7 @@
   align-items: center;
   justify-content: center;
 
-  padding: 20px;
+  padding: 16px;
 
   font-size: 14px;
   color: var(--md-sys-color-on-surface-variant);
@@ -417,7 +417,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 16px;
 
   .chip {
     background-color: var(--md-sys-color-surface-container-high);
@@ -436,7 +436,7 @@
   @include card-container ();
 
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
 
   .news-table {
     border-collapse: collapse;
@@ -510,9 +510,9 @@
         color: var(--md-sys-color-on-surface-variant);
 
         mat-icon {
-          width: 18px;
-          height: 18px;
-          font-size: 18px;
+          width: 16px;
+          height: 16px;
+          font-size: 16px;
           color: var(--md-sys-color-on-surface-variant);
         }
 
@@ -532,7 +532,7 @@
     }
 
     .no-related {
-      padding: 20px;
+      padding: 16px;
       color: var(--md-sys-color-on-surface-variant);
       text-align: center;
     }
@@ -700,7 +700,7 @@
 
       .buttons {
         display: flex;
-        gap: 20px;
+        gap: 16px;
         align-items: center;
 
         .delete-btn {
@@ -770,7 +770,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 16px;
 
   @media screen and (width <= 576px) {
     grid-template-columns: 1fr;
@@ -854,7 +854,7 @@
 }
 
 .no-schedules {
-  margin-top: 20px;
+  margin-top: 16px;
   text-align: center;
 
   mat-card {
@@ -891,7 +891,7 @@
 }
 
 .schedule-actions-footer {
-  margin-top: 20px;
+  margin-top: 16px;
   text-align: center;
 
   button {
@@ -1066,7 +1066,7 @@
   }
 
   .description {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
   }

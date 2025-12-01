@@ -1,0 +1,56 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.share-buttons {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+
+  &.compact {
+    gap: 4px;
+  }
+
+  .share-button {
+    // Let Material handle button styling via mat-raised-button
+  }
+
+  .share-menu-button {
+    // Let Material handle icon button styling
+  }
+}
+
+// Menu styling
+.share-menu {
+  .mat-mdc-menu-item {
+    min-height: 48px;
+
+    .mat-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      margin-right: 12px;
+
+      color: var(--md-sys-color-on-surface);
+
+      svg {
+        display: block;
+        width: 20px;
+        height: 20px;
+        fill: currentcolor;
+      }
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+
+  .mat-mdc-menu-item-text {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+}
+

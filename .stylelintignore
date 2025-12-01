@@ -3,6 +3,7 @@ dist/
 .angular/
 coverage/
 *.min.css
+backups/
 
 # Auto-generated Angular Material M3 theme (contains palette definitions with hex colors)
 src/m3-theme.scss

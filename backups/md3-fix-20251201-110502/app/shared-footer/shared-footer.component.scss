@@ -1,0 +1,30 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+.footer {
+  position: static;
+  bottom: 0;
+
+  width: 100%;
+
+  text-align: center;
+
+  background-color: var(--md-sys-color-surface-container-low);
+
+  p {
+    margin-inline: auto;
+
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    a {
+      color: var(--md-sys-color-secondary);
+      text-decoration: none;
+    }
+
+    @media screen and (width <= 599px) {
+      font-size: 16px;
+      white-space: normal;
+    }
+  }
+}

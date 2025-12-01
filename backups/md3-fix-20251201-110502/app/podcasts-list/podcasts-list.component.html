@@ -1,0 +1,315 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span class="page-title"><mat-icon>graphic_eq</mat-icon>My Podcasts <span>></span>
+    <span class="page-title-secondary">Podcast List</span></span>
+</ng-template>
+
+<mat-card class="create-podcast-card">
+  <mat-card-content class="content-header">
+    <div class="title">
+      <h3>All Podcasts</h3>
+      <span>{{ podcasts.length }} podcasts</span>
+    </div>
+    <button mat-button color="secondary" type="button" (click)="createPodcast()">
+      <mat-icon>add</mat-icon>
+      Create Podcast
+    </button>
+  </mat-card-content>
+</mat-card>
+
+<div class="middle-card">
+  <div class="table-controls">
+    <div class="search-filter">
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-icon matIconPrefix>search</mat-icon>
+        <mat-label>Search by podcast name</mat-label>
+        <input matInput [(ngModel)]="searchString" (input)="onSearchChange($event)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" [hidden]="loadingTeams">
+        <mat-label>Team</mat-label>
+        <mat-select [(value)]="selectedTeam" (selectionChange)="onTeamFilterChange()">
+          <mat-option [value]="null">All Teams</mat-option>
+          @for (team of teams; track team.uuid) {
+          <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(value)]="selectedLiveStatus" (selectionChange)="onLiveStatusFilterChange()">
+          <mat-option [value]="null">All Status</mat-option>
+          <mat-option value="live">Live</mat-option>
+          <mat-option value="disabled">Disabled</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="view-toggles">
+      <button mat-button [matMenuTriggerFor]="columnMenu">
+        <mat-icon>view_column</mat-icon>
+        Manage Columns
+      </button>
+      <mat-menu #columnMenu="matMenu" class="column-menu">
+        <div class="column-menu-content">
+          @for (column of allColumns; track column.id) {
+            <div class="column-item" mat-menu-item>
+              <mat-checkbox [(ngModel)]="column.selected" (change)="updateDisplayedColumns()">
+                {{ column.label }}
+              </mat-checkbox>
+            </div>
+          }
+        </div>
+      </mat-menu>
+      <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
+        <app-svg-icon icon="grid" />
+      </button>
+      <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
+        <app-svg-icon icon="list" />
+      </button>
+    </div>
+  </div>
+
+  @if (podcasts.length === 0 && !loading) {
+    <div class="no-results-message">
+      <mat-icon>info</mat-icon>
+      <p>No podcasts found.@if (searchString) { Try adjusting your search filters.}</p>
+    </div>
+  } @else {
+  <div class="podcasts-container">
+    @if (!isGridView) {
+    <table mat-table [dataSource]="dataSource">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="sortable-header" (click)="onSortChange('name')">
+            <span>Podcast Name</span>
+            @if (getSortDirection('name')) {
+              <mat-icon>{{ getSortDirection('name') === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+            }
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let podcast">
+          <div class="p_name">
+            @if (podcast.thumbnailUrl || podcast.imageUrl) {
+            <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview"
+              loading="lazy" />
+            } @else {
+            <img src="/image.png" alt="img" />
+            }
+            <div class="name">
+              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
+                {{ podcast.name }}
+              </a>
+              <span>{{ formatViewCount(podcast.viewCount) }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Team Column -->
+      <ng-container matColumnDef="team">
+        <th mat-header-cell *matHeaderCellDef>Team</th>
+        <td mat-cell *matCellDef="let podcast">{{ podcast.team?.name || '-' }}
+        </td>
+      </ng-container>
+
+      <!-- Telegram Channel ID Column -->
+      <ng-container matColumnDef="tgChannelId">
+        <th mat-header-cell *matHeaderCellDef>Telegram ID</th>
+        <td mat-cell *matCellDef="let podcast">
+          <span class="chip"><img src="/telegram.svg" alt="telegram" /> {{ podcast?.tgChannelId || '1002282842326'
+            }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Latest Internal Episode Date Column -->
+      <ng-container matColumnDef="latestInternalEpisodeDate">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="sortable-header" (click)="onSortChange('latest_internal_episode_date')">
+            <span>Latest Episode</span>
+            @if (getSortDirection('latest_internal_episode_date')) {
+              <mat-icon>{{ getSortDirection('latest_internal_episode_date') === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+            }
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let podcast">
+          {{ formatTimeAgo(podcast.latestInternalEpisodeDate) }}
+        </td>
+      </ng-container>
+
+      <!-- Live Status Column -->
+      <ng-container matColumnDef="enabled">
+        <th mat-header-cell *matHeaderCellDef>Live</th>
+        <td mat-cell *matCellDef="let podcast">
+          <span
+            class="status-badge"
+            [class.enable]="podcast?.enabled"
+            [class.disable]="!podcast?.enabled"
+          >
+            {{ podcast?.enabled ? 'Live' : 'Disabled' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Telegram Connected Column -->
+      <ng-container matColumnDef="tgResponse">
+        <th mat-header-cell *matHeaderCellDef>Telegram Connected</th>
+        <td mat-cell *matCellDef="let podcast">
+          <span
+            class="status-badge"
+            [class.enable]="podcast?.tgResponse && podcast?.tgResponse.startsWith('Success.')"
+            [class.disable]="!podcast?.tgResponse || !podcast?.tgResponse.startsWith('Success.')"
+          >
+            {{ (podcast?.tgResponse && podcast?.tgResponse.startsWith('Success.')) ? 'Connected' : 'Disconnected' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Create Episode Column -->
+      <ng-container matColumnDef="createEpisode">
+        <th mat-header-cell *matHeaderCellDef>Create Episode</th>
+        <td mat-cell *matCellDef="let podcast">
+          <div class="episode-actions">
+            <button mat-flat-button color="accent" (click)="createLatestEpisode(podcast.uuid)"
+              matTooltip="Creates an AI-generated episode using current news from your RSS feeds">
+              <mat-icon>newspaper</mat-icon>
+              News Episode
+            </button>
+            <button mat-flat-button color="accent" class="research-button" (click)="createResearchEpisode(podcast.uuid)"
+              matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode">
+              <mat-icon>science</mat-icon>
+              Research Episode
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let podcast">
+          <button mat-icon-button class="action-btn"
+            [matMenuTriggerFor]="podcastActionsMenu" aria-label="Podcast actions">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+            <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item [matMenuTriggerFor]="createEpisodeMenu">
+              <mat-icon>add_circle_outline</mat-icon>
+              <span>Create Episode</span>
+            </button>
+            <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+
+          <mat-menu #createEpisodeMenu="matMenu" class="actionMenu">
+            <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
+              <mat-icon>newspaper</mat-icon>
+              <span>News Episode</span>
+            </button>
+            <button mat-menu-item (click)="createResearchEpisode(podcast.uuid)">
+              <mat-icon>science</mat-icon>
+              <span>Research Episode</span>
+            </button>
+            <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
+              <mat-icon>note_add</mat-icon>
+              <span>Blank Episode</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    }
+
+    @if (isGridView) {
+    <div class="podcasts-grid">
+      @for (podcast of dataSource.data; track podcast.uuid) {
+      <mat-card class="podcast-card">
+        <mat-card-header>
+          <div class="grid-header">
+            <a [routerLink]="['/p', podcast.uuid]">
+              @if (podcast.thumbnailUrl || podcast.imageUrl) {
+              <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
+              } @else {
+              <img src="/image.png" alt="img" class="img" />
+              }
+            </a>
+            <div class="response-div">
+              <span [class]="podcast.enabled ? 'enable' : 'disable'">{{
+                podcast.enabled ? 'Enable' : 'Disable'
+                }}</span>
+            </div>
+
+            <div class="grid-header-name">
+              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
+                {{ podcast.name }}
+              </a>
+              <div>
+                <button class="action-btn" mat-icon-button [matMenuTriggerFor]="podcastActionsMenu"
+                  aria-label="Podcast actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+                  <button mat-menu-item (click)="viewPodcast(podcast.uuid)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item [matMenuTriggerFor]="createEpisodeMenuGrid">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <span>Create Episode</span>
+                  </button>
+                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+
+                <mat-menu #createEpisodeMenuGrid="matMenu" class="actionMenu">
+                  <button mat-menu-item (click)="createLatestEpisode(podcast.uuid)">
+                    <mat-icon>newspaper</mat-icon>
+                    <span>News Episode</span>
+                  </button>
+                  <button mat-menu-item (click)="createResearchEpisode(podcast.uuid)">
+                    <mat-icon>science</mat-icon>
+                    <span>Research Episode</span>
+                  </button>
+                  <button mat-menu-item (click)="createBlankEpisode(podcast.uuid)">
+                    <mat-icon>note_add</mat-icon>
+                    <span>Blank Episode</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+            <p>Daniel - Premium (396 CPM)</p>
+          </div>
+        </mat-card-header>
+        <div class="chip-header">
+          @if (isColumnSelected('tgChannelId')) {
+          <span class="chip"><img src="/telegram.svg" alt="telegram" /> {{ podcast?.tgChannelId || '1002282842326'
+            }}</span>
+          }
+          <span class="days">{{ formatViewCount(podcast.viewCount) }}</span>
+        </div>
+        <div class="bottom-header">
+          <span class="chip">+4 More</span>
+          <p>Perpetuator LLC</p>
+        </div>
+      </mat-card>
+      }
+    </div>
+    }
+    <mat-paginator [length]="totalPodcasts" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="false" (page)="onPageChange($event)" aria-label="Select page of podcasts" />
+  </div>
+  }
+</div>

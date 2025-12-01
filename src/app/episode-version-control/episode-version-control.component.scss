@@ -123,7 +123,7 @@
 }
 
 .version-control-section {
-  margin: 20px 0;
+  margin: 16px 0;
 
   .version-control-panel {
     @include card-container ();
@@ -140,7 +140,7 @@
     }
 
     .mat-expansion-panel-body {
-      padding: 20px !important;
+      padding: 16px !important;
     }
 
     .mat-panel-title {
@@ -189,7 +189,7 @@
   .version-control-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 
     .current-version-info {
       padding: 12px;
@@ -256,7 +256,7 @@
 
         height: 36px;
         min-height: 36px;
-        padding: 10px 16px;
+        padding: 8px 16px;
 
         mat-icon {
           @include icon-size(18px);
@@ -442,7 +442,7 @@
       gap: 12px;
       align-items: center;
 
-      padding: 20px;
+      padding: 16px;
       border-radius: 6px;
 
       color: var(--md-sys-color-on-surface-variant);

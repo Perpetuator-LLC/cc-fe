@@ -2,8 +2,6 @@
 
 @use '@angular/material' as mat;
 @use 'styles/mixins' as mixins;
-
-//@use '@angular/material' as mat;
 @use 'm3-theme' as customTheme;
 
 @include mat.core();
@@ -30,99 +28,35 @@ body.light {
   }
 }
 
-// Import MD3 theme CSS files (they contain ALL the color tokens we need)
-//@import 'theme/dark';
-//@import 'theme/light';
-
-// Minimal Material theme just to initialize components
-// The actual colors come from the CSS files above via CSS variables
-//$theme: mat.define-theme((
-//  color: (
-//    theme-type: dark,
-//    primary: mat.$azure-palette,
-//    tertiary: mat.$violet-palette,
-//  ),
-//  typography: (
-//    brand-family: 'Lexend, sans-serif',
-//    plain-family: 'Roboto, sans-serif',
-//  ),
-//  density: (
-//    scale: 0,
-//  ),
-//));
-
-//html {
-//  @include mat.all-component-themes($theme);
-//}
-
-// Apply MD3 colors from imported theme files
-//body.dark,
-//body.light {
-//  background-color: var(--md-sys-color-background);
-//  color: var(--md-sys-color-on-background);
-//
-//  // Override Material component CSS vars to use MD3 tokens
-//  --mdc-filled-button-container-color: var(--md-sys-color-primary);
-//  --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary);
-//  --mdc-filled-text-field-input-text-color: var(--md-sys-color-on-surface);
-//  --mdc-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
-//}
-//
-//html, body { height: 100%; margin: 0; }
-//body { font-family: Roboto, sans-serif; }
-//* { box-sizing: border-box; }
-//
-//.md3-badge-success { @include mixins.status-success; }
-//.md3-badge-error, .md3-badge-danger { @include mixins.status-error; }
-//.md3-badge-warning { @include mixins.status-warning; }
-//.md3-badge-info { @include mixins.status-info; }
-//.md3-badge-muted { @include mixins.status-muted; }
-//
-//.md3-icon-success { color: var(--md-extended-color-success-color); }
-//.md3-icon-error { color: var(--md-sys-color-error); }
-//.md3-icon-warning { color: var(--md-extended-color-warning-color); }
-//.md3-icon-muted { color: var(--md-sys-color-on-surface-variant); }
-//
-//.md3-danger-zone {
-//  padding: 16px;
-//  border: 2px solid var(--md-sys-color-error);
-//  border-radius: 8px;
-//  background-color: var(--md-sys-color-error-container);
-//  color: var(--md-sys-color-on-error-container);
-//}
-//
-//.icon-clickable { cursor: pointer; }
-//.icon-sm { width: 18px; height: 18px; font-size: 18px; }
-//.icon-md { width: 24px; height: 24px; font-size: 24px; }
-//.icon-lg { width: 36px; height: 36px; font-size: 36px; }
-//.icon-xl { width: 48px; height: 48px; font-size: 48px; }
-//
 // Job status badge colors - consistent across all components
-// !important required to override component-specific status styling
-.job-success,
-.job-completed {
+// Use specific selector to override component styles without !important
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
   border-radius: 8px;
-  color: var(--md-extended-color-success-on-color) !important;
-  background-color: var(--md-extended-color-success-color) !important;
-}
+  font-weight: 500;
 
-.job-failed,
-.job-error {
-  border-radius: 8px;
-  color: var(--md-sys-color-on-error) !important;
-  background-color: var(--md-sys-color-error) !important;
-}
+  &.job-success,
+  &.job-completed {
+    color: var(--md-extended-color-success-on-color);
+    background-color: var(--md-extended-color-success-color);
+  }
 
-.job-pending {
-  border-radius: 8px;
-  color: var(--md-extended-color-warning-on-color) !important;
-  background-color: var(--md-extended-color-warning-color) !important;
-}
+  &.job-failed,
+  &.job-error {
+    color: var(--md-sys-color-on-error);
+    background-color: var(--md-sys-color-error);
+  }
 
-.job-running {
-  border-radius: 8px;
-  color: var(--md-extended-color-info-on-color) !important;
-  background-color: var(--md-extended-color-info-color) !important;
+  &.job-pending {
+    color: var(--md-extended-color-warning-on-color);
+    background-color: var(--md-extended-color-warning-color);
+  }
+
+  &.job-running {
+    color: var(--md-extended-color-info-on-color);
+    background-color: var(--md-extended-color-info-color);
+  }
 }
 
 

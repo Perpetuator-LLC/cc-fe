@@ -9,20 +9,20 @@
 .validated-icon {
   cursor: help;
 
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 
-  font-size: 20px;
+  font-size: 16px;
   color: var(--md-sys-color-success);
 }
 
 .unvalidated-icon {
   cursor: help;
 
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 
-  font-size: 20px;
+  font-size: 16px;
   color: var(--md-sys-color-warning);
 }
 
@@ -43,13 +43,13 @@
 
     .title {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
 
       h3 {
         margin: 0;
 
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 600;
         line-height: 100%;
         color: var(--md-sys-color-on-surface);
@@ -61,9 +61,9 @@
         align-items: center;
         justify-content: center;
 
-        height: 22px;
+        height: 24px;
         padding: 0 10px;
-        border-radius: 20px;
+        border-radius: 16px;
 
         font-size: 12px;
         font-weight: 500;
@@ -90,11 +90,11 @@
 
     @media screen and (width <= 576px) {
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       align-items: flex-start;
 
       height: auto;
-      padding-inline: 20px;
+      padding-inline: 16px;
     }
   }
 }
@@ -104,7 +104,7 @@
   background-color: var(--md-sys-color-surface-container);
 
   @media screen and (width <= 576px) {
-    padding-inline: 20px;
+    padding-inline: 16px;
   }
 }
 
@@ -113,7 +113,7 @@
   gap: 12px;
   align-items: center;
 
-  margin-top: 20px;
+  margin-top: 16px;
   padding: 40px 20px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
@@ -145,13 +145,13 @@
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding-top: 12px;
 
   .search-filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 
     mat-form-field {
@@ -221,7 +221,7 @@
 
 .episodes-container {
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
   border-radius: 8px;
 
   table {
@@ -260,7 +260,7 @@
     justify-content: center;
 
     width: 90px;
-    height: 20px;
+    height: 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 6px;
 
@@ -419,7 +419,7 @@
   align-items: center;
   justify-content: center;
 
-  height: 20px;
+  height: 16px;
   padding: 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 6px;

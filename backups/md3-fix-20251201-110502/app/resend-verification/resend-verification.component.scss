@@ -1,0 +1,45 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+mat-card {
+  margin: 2rem auto;
+  padding: 20px;
+}
+
+mat-card.forgot-card {
+  min-width: 400px;
+}
+
+mat-error {
+  font-size: 0.8em;
+  color: var(--md-sys-color-error);
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.forgot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+
+  background-color: var(--background-color);
+  filter: brightness(150%);
+}
+
+.error-container {
+  min-width: 300px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  color: var(--md-sys-color-error);
+}
+
+mat-icon {
+  margin-right: 8px;
+}
