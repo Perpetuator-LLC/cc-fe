@@ -31,19 +31,19 @@ mat-sidenav-content mat-toolbar {
     justify-content: space-between;
 
     width: 100%;
-    padding: 11px 54px;
+    padding: 12px 56px; // MD3 4px grid: 11px → 12px, 54px → 56px
     border-radius: 200px;
 
-    background: radial-gradient(100% 100% at 0% 0%, rgb(255 255 255 / 0.07) 0.68%, rgb(255 255 255 / 0.07) 100%);
+    background: color-mix(in srgb, var(--md-sys-color-surface) 7%, transparent);
     backdrop-filter: blur(8px);
     box-shadow: -5px -5px 250px 0 var(--md-sys-color-outline-variant) inset;
 
     .header-logo {
       display: flex;
-      gap: 5px;
+      gap: 4px; // MD3 4px grid: 5px → 4px
       align-items: center;
 
-      color: #ffffff;
+      color: var(--md-sys-color-on-surface);
       text-decoration: none;
     }
 
@@ -254,12 +254,12 @@ mat-nav-list {
 }
 
 .route-title {
-  display: flex !important;
-  align-items: center !important;
+  display: flex;
+  align-items: center;
 
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--md-sys-color-on-surface);
 
   .mat-icon {
     margin-right: 16px;
@@ -273,7 +273,7 @@ mat-nav-list {
 .website-logo {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px; // MD3 4px grid: 3px → 4px
   align-items: center;
   justify-content: center;
 
@@ -281,19 +281,19 @@ mat-nav-list {
 
   &.active-link {
     border-left: 3px solid var(--md-sys-color-tertiary);
-    background-color: var(--md-sys-color-surface-container-high) !important;
+    background-color: var(--md-sys-color-surface-container-high);
   }
 }
 
 .mat-link {
-  height: auto !important;
+  height: auto;
   padding: 12px;
-  border-radius: 0 !important;
+  border-radius: 0;
 }
 
 .mat-link.mdc-list-item--activated {
   border-left: 3px solid var(--md-sys-color-tertiary);
-  background-color: var(--md-sys-color-surface-container-high) !important;
+  background-color: var(--md-sys-color-surface-container-high);
 }
 
 .theme-toggle-card {
@@ -319,7 +319,7 @@ mat-nav-list {
 
 .log-out-btn {
   .mat-icon {
-    color: var(--md-sys-color-error) !important;
+    color: var(--md-sys-color-error);
   }
 
   .route-title {
@@ -328,9 +328,9 @@ mat-nav-list {
 }
 
 .route-link {
-  display: flex !important;
+  display: flex;
   flex-direction: column;
-  align-items: center !important;
+  align-items: center;
   width: auto;
   /* Adjust width to fit content */
   //padding: 0 16px !important;
@@ -339,7 +339,7 @@ mat-nav-list {
     width: 24px;
     /* Set the width of the icon */
     height: 24px;
-    color: #ffffff;
+    color: var(--md-sys-color-on-surface);
     /* Set the height of the icon */
     //margin-right: 16px; /* Space between icon and text */
   }
@@ -352,7 +352,7 @@ mat-nav-list {
 }
 
 .active-link {
-  background-color: rgb(0 0 0 / 0.4);
+  background-color: color-mix(in srgb, var(--md-sys-color-surface) 60%, transparent);
 }
 
 .footer-links {
@@ -386,7 +386,7 @@ mat-nav-list {
 
 .menuLink {
   padding: 0;
-  background-color: transparent !important;
+  background-color: transparent;
 }
 
 .nav-list-row {
@@ -407,7 +407,7 @@ mat-nav-list {
   flex-direction: column;
 
   width: 84px;
-  min-width: 84px !important;
+  min-width: 84px;
   border-right: 1px solid var(--md-sys-color-outline-variant);
 
   background: var(--md-sys-color-surface-container);
@@ -464,16 +464,16 @@ mat-nav-list {
       justify-content: space-between;
 
       width: 100%;
-      padding: 16px 54px;
+      padding: 16px 56px; // MD3 4px grid: 54px → 56px
       border-radius: 200px;
 
-      background: radial-gradient(100% 100% at 0% 0%, rgb(255 255 255 / 0.07) 0.68%, rgb(255 255 255 / 0.07) 100%);
+      background: color-mix(in srgb, var(--md-sys-color-surface) 7%, transparent);
       backdrop-filter: blur(8px);
       box-shadow: -5px -5px 250px 0 var(--md-sys-color-outline-variant) inset;
     }
 
     .website-logo {
-      padding: 0 !important;
+      padding: 0;
 
       .header-logo {
         display: flex;
@@ -491,7 +491,7 @@ mat-nav-list {
 
     .keep-up {
       display: flex;
-      gap: 30px;
+      gap: 32px; // MD3 4px grid: 30px → 32px
       align-items: center;
     }
 
@@ -526,10 +526,10 @@ mat-nav-list {
     }
 
     .loginBtn {
-      width: 142px !important;
+      width: 142px;
       min-width: 142px;
-      height: 48px !important;
-      border-radius: 50px !important;
+      height: 48px;
+      border-radius: 50px;
 
       font-family: Sarabun, serif;
       font-size: 16px;
@@ -552,8 +552,8 @@ mat-nav-list {
   .openCollapseSidebar {
     cursor: pointer;
     position: absolute;
-    top: 10px;
-    right: -15px;
+    top: 8px; // MD3 4px grid: 10px → 8px
+    right: -16px; // MD3 4px grid: -15px → -16px
 
     &.hidden {
       pointer-events: none;
@@ -633,7 +633,7 @@ mat-nav-list {
         padding: 12px 8px;
         border-radius: 8px;
 
-        color: #ffffff;
+        color: var(--md-sys-color-on-surface);
         text-decoration: none;
 
         &.active {
@@ -647,13 +647,13 @@ mat-nav-list {
         }
 
         .website-title {
-          font-size: 14px !important;
+          font-size: 14px;
         }
       }
 
       .links {
-        margin-top: 30px;
-        color: #ffffff;
+        margin-top: 32px; // MD3 4px grid: 30px → 32px
+        color: var(--md-sys-color-on-surface);
       }
     }
 
@@ -698,7 +698,7 @@ mat-nav-list {
     }
 
     .toolbar-container-section {
-      padding-inline: 30px;
+      padding-inline: 32px; // MD3 4px grid: 30px → 32px
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
       background-color: var(--md-sys-color-surface-container-low);
 
@@ -709,7 +709,7 @@ mat-nav-list {
 
         .credit-btn {
           height: 28px;
-          padding-inline: 6px;
+          padding-inline: 8px; // MD3 4px grid: 6px → 8px
           border: 1px solid var(--md-sys-color-outline-variant);
           border-radius: 8px;
 
@@ -730,7 +730,7 @@ mat-nav-list {
           margin: 0;
 
           font-size: 16px;
-          color: #ffffff;
+          color: var(--md-sys-color-on-surface);
         }
 
         .profile-btn {
@@ -740,7 +740,7 @@ mat-nav-list {
           font-weight: 500;
           color: var(--md-sys-color-on-surface);
 
-          background: transparent !important;
+          background: transparent;
 
           .profile-icon {
             width: 2rem;
@@ -796,7 +796,7 @@ mat-nav-list {
 .arrow-left {
   rotate: 90deg;
   margin-left: 4px;
-  font-size: 20px
+  font-size: 20px;
 }
 
 .layout-loading-spinner {
