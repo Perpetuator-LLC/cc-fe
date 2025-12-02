@@ -45,9 +45,9 @@ mat-card.register-card {
     &:disabled,
     &[disabled] {
       cursor: not-allowed;
-      color: var(--md-sys-color-on-surface-variant) !important;
+      color: var(--md-sys-color-on-surface-variant);
       opacity: 0.5;
-      background: var(--md-sys-color-secondary-container) !important;
+      background: var(--md-sys-color-secondary-container);
     }
   }
 
@@ -55,14 +55,14 @@ mat-card.register-card {
     width: 100%;
     color: var(--md-sys-color-on-surface-variant);
     text-align: center;
-    background-color: transparent !important;
+    background-color: transparent;
   }
 
   .resend {
     width: 100%;
     color: var(--md-sys-color-on-surface-variant);
     text-align: center;
-    background-color: transparent !important;
+    background-color: transparent;
   }
 }
 

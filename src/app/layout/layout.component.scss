@@ -467,7 +467,7 @@ mat-nav-list {
 
       width: 100%;
       padding: 16px 48px; // MD3 standard spacing token
-      border-radius: 9999px; // MD3: Use large value for pill shape
+      border-radius: 9999px; // Design requirement: pill shape (effectively infinite radius)
 
       background: color-mix(in srgb, var(--md-sys-color-surface) 7%, transparent);
       backdrop-filter: blur(8px);
