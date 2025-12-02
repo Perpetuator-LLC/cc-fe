@@ -357,9 +357,9 @@
       rect,
       polygon,
       circle {
-        fill: var(--md-sys-color-success) !important;
+        fill: var(--md-sys-color-success);
         fill-opacity: 0.15;
-        stroke: var(--md-sys-color-success) !important;
+        stroke: var(--md-sys-color-success);
       }
     }
 
@@ -367,9 +367,9 @@
       rect,
       polygon,
       circle {
-        fill: var(--md-sys-color-error) !important;
+        fill: var(--md-sys-color-error);
         fill-opacity: 0.15;
-        stroke: var(--md-sys-color-error) !important;
+        stroke: var(--md-sys-color-error);
       }
     }
 
@@ -378,16 +378,16 @@
       rect,
       polygon,
       circle {
-        fill: var(--md-sys-color-warning) !important;
+        fill: var(--md-sys-color-warning);
         fill-opacity: 0.15;
-        stroke: var(--md-sys-color-warning) !important;
+        stroke: var(--md-sys-color-warning);
       }
     }
 
     // Style for root/parent nodes (if we want to highlight them)
     .flowchart-node-root {
       rect {
-        stroke-width: 3px !important;
+        stroke-width: 3px;
       }
     }
   }

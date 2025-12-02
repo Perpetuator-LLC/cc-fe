@@ -128,19 +128,19 @@
   .version-control-panel {
     @include card-container ();
 
-    box-shadow: none !important;
+    box-shadow: none;
 
     // Target Material expansion panel elements directly
     .mat-expansion-panel-header {
-      background: var(--md-sys-color-surface-container) !important;
+      background: var(--md-sys-color-surface-container);
 
       &:hover {
-        background: var(--md-sys-color-surface-container-high) !important;
+        background: var(--md-sys-color-surface-container-high);
       }
     }
 
     .mat-expansion-panel-body {
-      padding: 16px !important;
+      padding: 16px;
     }
 
     .mat-panel-title {
