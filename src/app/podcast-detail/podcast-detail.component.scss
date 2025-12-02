@@ -191,7 +191,7 @@ mat-divider {
 
 .voice-controls-container {
   display: flex;
-  flex-wrap: nowrap !important;
+  flex-wrap: nowrap;
   /* Align items to the top */
   gap: 16px;
   /* Allow items to wrap */
@@ -383,9 +383,9 @@ mat-divider {
 
           font-size: 12px;
           font-weight: 600;
-          color: var(--md-extended-color-success-color) !important;
+          color: var(--md-extended-color-success-color);
 
-          background-color: var(--md-extended-color-success-color-container) !important;
+          background-color: var(--md-extended-color-success-color-container);
         }
 
         .disable {
@@ -401,10 +401,9 @@ mat-divider {
 
           font-size: 12px;
           font-weight: 600;
-          color: var(--md-sys-color-on-surface-variant) !important;
+          color: var(--md-sys-color-on-surface-variant);
 
-          background: var(--md-sys-color-surface-container-high);
-          background-color: var(--md-sys-color-surface-container-high) !important;
+          background-color: var(--md-sys-color-surface-container-high);
         }
       }
 
@@ -500,14 +499,14 @@ mat-divider {
         }
 
         &:disabled {
-          cursor: not-allowed !important;
+          cursor: not-allowed;
 
-          border-color: var(--md-sys-color-outline-variant) !important;
+          border-color: var(--md-sys-color-outline-variant);
 
-          color: var(--md-sys-color-on-surface-variant) !important;
+          color: var(--md-sys-color-on-surface-variant);
 
           opacity: 0.5;
-          background-color: transparent !important;
+          background-color: transparent;
         }
 
         @media screen and (width <= 900px) {
@@ -539,7 +538,7 @@ mat-divider {
     margin-top: 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
     color: var(--md-sys-color-on-surface);
-    background: var(--md-sys-color-surface-container) !important;
+    background: var(--md-sys-color-surface-container);
 
     p {
       margin: 0;
@@ -599,7 +598,7 @@ mat-divider {
 
         width: fit-content;
         height: 28px;
-        min-height: 28px !important;
+        min-height: 28px;
         max-height: 28px;
         margin-bottom: 14px;
         margin-inline: auto;
@@ -674,8 +673,8 @@ mat-divider {
 
 .custom-dark-field {
   .mdc-text-field {
-    padding: 0 !important;
-    background: transparent !important;
+    padding: 0;
+    background: transparent;
   }
 
   .mat-form-field-flex {
@@ -768,7 +767,7 @@ mat-divider {
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent);
   }
 }
 
@@ -812,7 +811,7 @@ mat-divider {
 .episodes-info {
   p {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
 
     margin-top: 0;
@@ -827,7 +826,7 @@ mat-divider {
 
 .input-search-div {
   display: flex;
-  flex: auto !important;
+  flex: auto;
   gap: 8px;
   align-items: center;
 
@@ -908,7 +907,7 @@ mat-divider {
     }
 
     button {
-      flex: auto !important;
+      flex: auto;
 
       width: 24px;
       min-width: 24px;
@@ -1018,15 +1017,15 @@ mat-divider {
     }
 
     &.status-success {
-      border: 1px solid rgb(76 175 80 / 0.3);
-      color: var(--md-sys-color-success);
-      background-color: rgb(76 175 80 / 0.1);
+      border: 1px solid color-mix(in srgb, var(--md-extended-color-success-color) 30%, transparent);
+      color: var(--md-extended-color-success-color);
+      background-color: color-mix(in srgb, var(--md-extended-color-success-color) 10%, transparent);
     }
 
     &.status-error {
-      border: 1px solid rgb(244 67 54 / 0.3);
+      border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
       color: var(--md-sys-color-error);
-      background-color: rgb(244 67 54 / 0.1);
+      background-color: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
     }
   }
 
@@ -1080,7 +1079,7 @@ mat-divider {
 
   color: var(--md-sys-color-on-surface);
 
-  background-color: var(--md-sys-color-surface-container) !important;
+  background-color: var(--md-sys-color-surface-container);
 }
 
 .image-actions {
@@ -1109,7 +1108,7 @@ mat-divider {
   &.dragging {
     transform: scale(1.01);
     border-color: var(--md-sys-color-secondary);
-    background: rgb(241 74 0 / 0.05);
+    background: color-mix(in srgb, var(--md-sys-color-secondary) 5%, transparent);
 
     .image-placeholder mat-icon {
       color: var(--md-sys-color-secondary);
