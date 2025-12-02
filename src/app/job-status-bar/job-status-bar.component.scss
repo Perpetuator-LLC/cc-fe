@@ -258,7 +258,7 @@
 
           &:hover {
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+            box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
           }
 
           &.podcast-tag {
@@ -317,7 +317,7 @@
     .timestamp-text {
       margin-bottom: 2px;
       font-size: 10px;
-      color: #aaaaaa;
+      color: var(--md-sys-color-on-surface-variant);
 
       strong {
         font-weight: 500;
