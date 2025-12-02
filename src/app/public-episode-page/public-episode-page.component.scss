@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
 
-  padding: 64px 20px;
+  padding: 64px 16px;
 
   text-align: center;
 
@@ -107,7 +107,7 @@
 .episode-card {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
-  background: var(--md-sys-color-surface-container) !important;
+  background: var(--md-sys-color-surface-container);
 
   .episode-header {
     display: flex;
@@ -256,14 +256,14 @@
 
 .transcript-panel {
   border: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container) !important;
-  box-shadow: none !important;
+  background: var(--md-sys-color-surface-container);
+  box-shadow: none;
 
   .mat-expansion-panel-header {
-    background: var(--md-sys-color-surface-container-high) !important;
+    background: var(--md-sys-color-surface-container-high);
 
     &:hover {
-      background: var(--md-sys-color-surface-container-high) !important;
+      background: var(--md-sys-color-surface-container-high);
     }
   }
 
