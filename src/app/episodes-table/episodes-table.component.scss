@@ -105,7 +105,7 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--md-sys-color-outline-variant) !important;
+        border-color: var(--md-sys-color-outline-variant);
       }
 
       .mat-mdc-form-field-icon-prefix {
@@ -204,14 +204,14 @@
 
     &.live {
       border: 1px solid var(--md-extended-color-success-color);
-      color: var(--md-extended-color-success-color) !important;
-      background-color: var(--md-extended-color-success-color-container) !important;
+      color: var(--md-extended-color-success-color);
+      background-color: var(--md-extended-color-success-color-container);
     }
 
     &.not-live {
       border: 1px solid var(--md-sys-color-outline-variant);
-      color: var(--md-sys-color-on-surface-variant) !important;
-      background-color: var(--md-sys-color-surface-container-high) !important;
+      color: var(--md-sys-color-on-surface-variant);
+      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 
@@ -294,7 +294,7 @@
   width: 100%;
   border: 1px solid var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface-container) !important;
+  background: var(--md-sys-color-surface-container);
 
   // ...existing code...
 
@@ -310,7 +310,7 @@
 
     margin-bottom: 6px;
 
-    font-size: 16px !important;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-decoration: none;
