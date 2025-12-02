@@ -46,7 +46,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface-container) !important;
+  background: var(--md-sys-color-surface-container);
 }
 
 @mixin badge($bg-color, $text-color) {
@@ -190,10 +190,10 @@
   margin-bottom: 1em;
 
   &:disabled {
-    cursor: not-allowed !important;
-    color: var(--md-sys-color-on-surface-variant) !important;
+    cursor: not-allowed;
+    color: var(--md-sys-color-on-surface-variant);
     opacity: 0.6;
-    background-color: var(--md-sys-color-surface-container-high) !important;
+    background-color: var(--md-sys-color-surface-container-high);
   }
 }
 
@@ -221,7 +221,7 @@
 
 .form-container {
   margin-bottom: 2em;
-  padding-top: 0 !important;
+  padding-top: 0;
 
   button {
     margin: 4px;
@@ -460,7 +460,7 @@
       font-size: 14px;
 
       a {
-        font-size: 14px !important;
+        font-size: 14px;
         font-weight: 600;
         color: var(--md-sys-color-on-surface);
         text-decoration: none;
