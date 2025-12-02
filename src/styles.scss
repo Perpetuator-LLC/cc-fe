@@ -2,6 +2,8 @@
 
 @use '@angular/material' as mat;
 @use 'styles/mixins' as mixins;
+@use 'styles/material-overrides' as material-overrides;
+@use 'styles/component-overrides' as component-overrides;
 @use 'm3-theme' as customTheme;
 
 @include mat.core();

@@ -1,0 +1,456 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+// ============================================================================
+// MD3 Material Component Override Mixins
+// ============================================================================
+// Purpose: Centralize Material Design 3 component overrides to reduce nesting
+// depth and improve maintainability.
+//
+// Usage: @use 'styles/material-overrides' as md3;
+//        @include md3.button-custom-states;
+// ============================================================================
+
+@use '@angular/material' as mat;
+
+// ============================================================================
+// BUTTON MIXINS
+// ============================================================================
+
+/// Custom button hover/focus states
+@mixin button-custom-states {
+  &:hover:not(:disabled) {
+    border-color: var(--md-sys-color-secondary);
+
+    mat-icon {
+      color: var(--md-sys-color-secondary);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/// CTA (Call-to-Action) button styling
+@mixin button-cta {
+  padding: 12px 24px;
+  border-radius: 8px;
+
+  font-weight: 500;
+  color: var(--md-sys-color-on-primary);
+
+  background: var(--md-sys-color-primary);
+
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--md-sys-color-primary-container);
+  }
+}
+
+/// Icon button with container
+@mixin icon-button-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container);
+
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-high);
+  }
+}
+
+// ============================================================================
+// CAROUSEL / SLIDER MIXINS
+// ============================================================================
+
+/// Hero carousel container
+@mixin carousel-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--md-sys-color-surface-container);
+}
+
+/// Carousel navigation buttons
+@mixin carousel-nav-button {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+
+  color: var(--md-sys-color-on-surface);
+
+  background: color-mix(in srgb, var(--md-sys-color-surface) 90%, transparent);
+
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &.prev {
+    left: 16px;
+  }
+
+  &.next {
+    right: 16px;
+  }
+}
+
+/// Carousel image display
+@mixin carousel-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+// ============================================================================
+// HERO SECTION MIXINS
+// ============================================================================
+
+/// Full hero section layout
+@mixin hero-section {
+  position: relative;
+
+  display: flex;
+  gap: 32px;
+  align-items: center;
+
+  min-height: 400px;
+  padding: 48px;
+  border-radius: 16px;
+
+  background: linear-gradient(
+    135deg,
+    var(--md-sys-color-surface-container-low) 0%,
+    var(--md-sys-color-surface-container) 100%
+  );
+}
+
+/// Hero content area
+@mixin hero-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+
+  max-width: 600px;
+}
+
+/// Hero title styling
+@mixin hero-title {
+  margin: 0;
+
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--md-sys-color-on-surface);
+}
+
+/// Hero description styling
+@mixin hero-description {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+// ============================================================================
+// EMPTY STATE MIXINS
+// ============================================================================
+
+/// Empty state container
+@mixin empty-state-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 64px 24px;
+
+  text-align: center;
+}
+
+/// Empty state icon
+@mixin empty-state-icon {
+  width: 120px;
+  height: 120px;
+  color: var(--md-sys-color-outline);
+  opacity: 0.5;
+}
+
+/// Empty state text
+@mixin empty-state-text {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+// ============================================================================
+// TABLE / DATA GRID MIXINS
+// ============================================================================
+
+/// Data table row hover state
+@mixin table-row-hover {
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container);
+  }
+}
+
+/// Data table header styling
+@mixin table-header {
+  padding: 16px;
+
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: left;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+/// Data table cell styling
+@mixin table-cell {
+  padding: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+// ============================================================================
+// RESPONSIVE MIXINS
+// ============================================================================
+
+/// Mobile-specific hero adjustments
+@mixin hero-mobile {
+  flex-direction: column;
+  min-height: auto;
+  padding: 24px;
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+}
+
+/// Mobile carousel adjustments
+@mixin carousel-mobile {
+  .carousel-nav-button {
+    width: 40px;
+    height: 40px;
+
+    &.prev {
+      left: 8px;
+    }
+
+    &.next {
+      right: 8px;
+    }
+  }
+}
+
+// ============================================================================
+// DIALOG / MODAL MIXINS
+// ============================================================================
+
+/// Dialog header with actions
+@mixin dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/// Dialog content area
+@mixin dialog-content {
+  padding: 24px;
+}
+
+/// Dialog footer with actions
+@mixin dialog-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+
+  padding: 16px 24px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+// ============================================================================
+// CARD MIXINS
+// ============================================================================
+
+/// Material card with elevation
+@mixin card-elevated {
+  padding: 24px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+
+  background: var(--md-sys-color-surface-container);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
+}
+
+/// Card header section
+@mixin card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+// ============================================================================
+// STATUS BADGE MIXINS
+// ============================================================================
+
+/// Base badge styling
+@mixin badge-base {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  padding: 4px 8px;
+  border-radius: 8px;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/// Success badge
+@mixin badge-success {
+  @include badge-base ();
+
+  color: var(--md-extended-color-success-on-color);
+  background: var(--md-extended-color-success-color);
+}
+
+/// Error badge
+@mixin badge-error {
+  @include badge-base ();
+
+  color: var(--md-sys-color-on-error);
+  background: var(--md-sys-color-error);
+}
+
+/// Warning badge
+@mixin badge-warning {
+  @include badge-base ();
+
+  color: var(--md-extended-color-warning-on-color);
+  background: var(--md-extended-color-warning-color);
+}
+
+/// Info badge
+@mixin badge-info {
+  @include badge-base ();
+
+  color: var(--md-extended-color-info-on-color);
+  background: var(--md-extended-color-info-color);
+}
+
+// ============================================================================
+// FORM FIELD MIXINS
+// ============================================================================
+
+/// Form field container
+@mixin form-field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/// Form field label
+@mixin form-field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/// Form field error message
+@mixin form-field-error {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-error);
+}
+
+// ============================================================================
+// LOADING STATE MIXINS
+// ============================================================================
+
+/// Loading spinner container
+@mixin loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/// Loading text
+@mixin loading-text {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+// ============================================================================
+// UTILITY MIXINS
+// ============================================================================
+
+/// Truncate text with ellipsis
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Multi-line truncate
+@mixin text-truncate-multiline($lines: 2) {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+}
+
+/// Focus ring
+@mixin focus-ring {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/// Smooth transition
+@mixin smooth-transition($properties: all, $duration: 0.2s) {
+  transition: $properties $duration ease;
+}
+
