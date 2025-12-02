@@ -126,7 +126,6 @@ $_palettes: (
     100: #ffffff,
   ),
 );
-
 $_rest: (
   secondary: map.get($_palettes, secondary),
   neutral: map.get($_palettes, neutral),
@@ -135,7 +134,6 @@ $_rest: (
 );
 $_primary: map.merge(map.get($_palettes, primary), $_rest);
 $_tertiary: map.merge(map.get($_palettes, tertiary), $_rest);
-
 $light-color: mat.define-colors((
     theme-type: light,
     primary: $_primary,

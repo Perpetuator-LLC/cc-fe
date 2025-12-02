@@ -146,7 +146,7 @@ form {
 
     &.success {
       border-color: var(--md-sys-color-success);
-      background: rgb(16 185 129 / 0.1);
+      background: color-mix(in srgb, var(--md-sys-color-success) 10%, transparent);
 
       mat-icon {
         color: var(--md-sys-color-success);
@@ -155,7 +155,7 @@ form {
 
     &.warning {
       border-color: var(--md-sys-color-warning);
-      background: rgb(245 158 11 / 0.1);
+      background: color-mix(in srgb, var(--md-sys-color-warning) 10%, transparent);
 
       mat-icon {
         color: var(--md-sys-color-warning);
@@ -164,7 +164,7 @@ form {
 
     &.error {
       border-color: var(--md-sys-color-error);
-      background: rgb(239 68 68 / 0.1);
+      background: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
 
       mat-icon {
         color: var(--md-sys-color-error);

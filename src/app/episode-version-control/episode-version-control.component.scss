@@ -11,7 +11,7 @@
 
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--md-sys-color-on-secondary);
   white-space: nowrap;
 
   background: var(--md-sys-color-secondary);
@@ -111,7 +111,7 @@
   line-height: 1.5;
   color: var(--md-sys-color-on-surface);
 
-  background: rgb(33 150 243 / 0.1);
+  background: color-mix(in srgb, var(--md-sys-color-secondary) 10%, transparent);
 
   mat-icon {
     flex-shrink: 0;

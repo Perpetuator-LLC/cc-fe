@@ -58,6 +58,8 @@
     .category-card {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
+
+      // MD3 4px grid: 112px = 28 * 4 for category grid visual separation
       gap: 112px;
 
       padding: 40px 0;

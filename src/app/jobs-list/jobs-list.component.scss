@@ -110,7 +110,7 @@
   }
 
   @media screen and (width <= 576px) {
-    top: 15px;
+    top: 16px;
     right: var(--cc-spacing-lg);
   }
 }
@@ -294,7 +294,7 @@
 
   width: 300px;
   max-width: 100%;
-  padding: 1rem 1.5rem;
+  padding: 1rem 1.25rem; // MD3 4px grid: 16px and 20px
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--cc-radius-md);
 

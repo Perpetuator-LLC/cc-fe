@@ -1,4 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
 .display-none {
   display: none;
 }
@@ -484,7 +486,7 @@
         align-items: center;
 
         padding: 4px 8px;
-        border: 1px solid rgb(244 67 54 / 0.3);
+        border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
         border-radius: 8px;
 
         font-size: 11px;
@@ -492,7 +494,7 @@
         color: var(--md-sys-color-error);
         white-space: nowrap;
 
-        background-color: rgb(244 67 54 / 0.1);
+        background-color: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
 
         mat-icon {
           width: 14px;
