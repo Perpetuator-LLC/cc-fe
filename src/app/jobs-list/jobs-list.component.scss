@@ -44,7 +44,7 @@
 
     // Material form field
     .mat-mdc-text-field-wrapper {
-      border-radius: var(--cc-radius-md) !important; // Force rounded corners
+      border-radius: var(--cc-radius-md);
     }
 
     // Material form field infix
@@ -55,7 +55,7 @@
 
     // Border styling for outlined appearance with rounded corners
     .mdc-notched-outline {
-      border-radius: var(--cc-radius-md) !important; // Force rounded on container
+      border-radius: var(--cc-radius-md);
     }
 
     .mdc-notched-outline__leading,
@@ -67,17 +67,17 @@
 
     // Rounded corners for leading edge
     .mdc-notched-outline__leading {
-      border-radius: var(--cc-radius-md) 0 0 var(--cc-radius-md) !important;
+      border-radius: var(--cc-radius-md) 0 0 var(--cc-radius-md);
     }
 
     // Notch should not have border radius
     .mdc-notched-outline__notch {
-      border-radius: 0 !important;
+      border-radius: 0;
     }
 
     // Rounded corners for trailing edge
     .mdc-notched-outline__trailing {
-      border-radius: 0 var(--cc-radius-md) var(--cc-radius-md) 0 !important;
+      border-radius: 0 var(--cc-radius-md) var(--cc-radius-md) 0;
     }
 
     // Focused border styling
