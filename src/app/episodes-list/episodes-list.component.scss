@@ -29,7 +29,7 @@
 .create-episode-card {
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
-  background-color: var(--md-sys-color-surface-container-low) !important;
+  background-color: var(--md-sys-color-surface-container-low);
   box-shadow: none;
 
   .content-header {
@@ -177,7 +177,7 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--md-sys-color-outline-variant) !important;
+        border-color: var(--md-sys-color-outline-variant);
       }
 
 
@@ -347,7 +347,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface);
   /* max-width: 400px; remove max-width for grid */
-  background: var(--md-sys-color-surface-container) !important;
+  background: var(--md-sys-color-surface-container);
 
   mat-card-header {
     padding-bottom: 0;
@@ -369,7 +369,7 @@
 
     margin-bottom: 6px;
 
-    font-size: 16px !important;
+    font-size: 16px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-decoration: none;
