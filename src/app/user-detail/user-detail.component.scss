@@ -139,11 +139,11 @@ mat-form-field {
     gap: 16px;
 
     .voice-info {
-      margin-top: 10px;
+      margin-top: 8px;
 
       p {
         display: flex;
-        gap: 5px;
+        gap: 4px;
         align-items: center;
 
         margin-top: 0;
@@ -180,13 +180,13 @@ mat-form-field {
         }
 
         .mdc-text-field {
-          background-color: var(--md-sys-color-surface-container-high) !important;
+          background-color: var(--md-sys-color-surface-container-high);
         }
       }
 
       @media screen and (width <= 800px) {
         grid-template-columns: repeat(1, 1fr);
-        gap: 30px;
+        gap: 32px;
       }
     }
 

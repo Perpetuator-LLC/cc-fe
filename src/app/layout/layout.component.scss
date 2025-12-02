@@ -31,8 +31,8 @@ mat-sidenav-content mat-toolbar {
     justify-content: space-between;
 
     width: 100%;
-    padding: 12px 56px; // MD3 4px grid: 11px → 12px, 54px → 56px
-    border-radius: 200px;
+    padding: 12px 48px; // MD3 standard spacing token
+    border-radius: 9999px; // MD3: Use large value for pill shape
 
     background: color-mix(in srgb, var(--md-sys-color-surface) 7%, transparent);
     backdrop-filter: blur(8px);
@@ -438,7 +438,9 @@ mat-nav-list {
 
 .before-login-layout {
   display: block;
-  background: linear-gradient(120.17deg, rgb(22 4 22 / 0.96) -98.63%, rgb(22 4 22 / 0) 100%);
+
+  // MD3: Use design tokens instead of rgb() functions for theme support
+  background: linear-gradient(120.17deg, color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%, transparent 100%);
   backdrop-filter: blur(10px);
 
   .main-content {
@@ -464,8 +466,8 @@ mat-nav-list {
       justify-content: space-between;
 
       width: 100%;
-      padding: 16px 56px; // MD3 4px grid: 54px → 56px
-      border-radius: 200px;
+      padding: 16px 48px; // MD3 standard spacing token
+      border-radius: 9999px; // MD3: Use large value for pill shape
 
       background: color-mix(in srgb, var(--md-sys-color-surface) 7%, transparent);
       backdrop-filter: blur(8px);
@@ -529,7 +531,7 @@ mat-nav-list {
       width: 142px;
       min-width: 142px;
       height: 48px;
-      border-radius: 50px;
+      border-radius: 48px; // MD3 4px grid: 50px → 48px
 
       font-family: Sarabun, serif;
       font-size: 16px;
@@ -741,14 +743,15 @@ mat-nav-list {
           color: var(--md-sys-color-on-surface);
 
           background: transparent;
-
-          .profile-icon {
-            width: 2rem;
-            height: 2rem;
-            font-size: 2rem;
-          }
-
         }
+
+        // Extracted to reduce nesting depth
+        .profile-btn .profile-icon {
+          width: 32px; // MD3: 2rem = 32px
+          height: 32px; // MD3: 2rem = 32px
+          font-size: 32px; // MD3: 2rem = 32px
+        }
+
 
         @media screen and (width <= 599px) {
           display: flex;

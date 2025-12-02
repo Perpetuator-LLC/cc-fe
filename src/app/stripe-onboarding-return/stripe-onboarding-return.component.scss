@@ -14,11 +14,11 @@
   border-radius: 8px;
 
   &.success {
-    border: 2px solid var(--md-sys-color-success, #4caf50);
+    border: 2px solid var(--md-sys-color-success-color);
   }
 
   &.error {
-    border: 2px solid var(--md-sys-color-error, #f44336);
+    border: 2px solid var(--md-sys-color-error);
   }
 }
 
@@ -57,7 +57,7 @@
 
 .success-state {
   > mat-icon:first-child {
-    color: var(--md-sys-color-success, #4caf50);
+    color: var(--md-sys-color-success);
   }
 
   .redirect-message {
@@ -68,12 +68,12 @@
 
 .error-state {
   > mat-icon:first-child {
-    color: var(--md-sys-color-error, #f44336);
+    color: var(--md-sys-color-error);
   }
 
   .error-message {
     font-weight: 500;
-    color: var(--md-sys-color-error, #f44336);
+    color: var(--md-sys-color-error);
   }
 
   .help-text {

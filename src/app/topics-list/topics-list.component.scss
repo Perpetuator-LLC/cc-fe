@@ -140,23 +140,23 @@
   // Complete = Success (green)
   &.status-complete {
     border: 1px solid var(--md-extended-color-success-color);
-    color: var(--md-extended-color-success-color) !important;
-    background-color: var(--md-extended-color-success-color-container) !important;
+    color: var(--md-extended-color-success-color);
+    background-color: var(--md-extended-color-success-color-container);
   }
 
   // Validated = Info (blue)
   &.status-validated {
     border: 1px solid var(--md-extended-color-info-color);
-    color: var(--md-extended-color-info-color) !important;
-    background-color: var(--md-extended-color-info-color-container) !important;
+    color: var(--md-extended-color-info-color);
+    background-color: var(--md-extended-color-info-color-container);
   }
 
   // Researched/In Progress = Warning (orange)
   &.status-researched,
   &.status-progress {
     border: 1px solid var(--md-extended-color-warning-color);
-    color: var(--md-extended-color-warning-color) !important;
-    background-color: var(--md-extended-color-warning-color-container) !important;
+    color: var(--md-extended-color-warning-color);
+    background-color: var(--md-extended-color-warning-color-container);
   }
 }
 

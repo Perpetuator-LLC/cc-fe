@@ -12,7 +12,7 @@
 .create-schedule-card {
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
-  background-color: var(--md-sys-color-surface-container-low) !important;
+  background-color: var(--md-sys-color-surface-container-low);
   box-shadow: none;
 
   .content-header {
@@ -65,7 +65,7 @@
       font-size: 14px;
       font-weight: 600;
       line-height: 100%;
-      color: #ffffff;
+      color: var(--md-sys-color-on-secondary);
       letter-spacing: 0;
 
       background: var(--md-sys-color-secondary);
@@ -85,7 +85,7 @@
 .create-form-card {
   margin: 16px 30px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  background-color: var(--md-sys-color-surface-container) !important;
+  background-color: var(--md-sys-color-surface-container);
 
   mat-card-header {
     h3 {
@@ -217,7 +217,7 @@
 
   mat-card {
     border: 1px solid var(--md-sys-color-outline-variant);
-    background-color: var(--md-sys-color-surface-container) !important;
+    background-color: var(--md-sys-color-surface-container);
 
     h3 {
       margin-bottom: 12px;
@@ -306,7 +306,7 @@
 
     mat-card {
       border: 1px solid var(--md-sys-color-outline-variant);
-      background: var(--md-sys-color-surface-container) !important;
+      background: var(--md-sys-color-surface-container);
 
       mat-card-content {
         padding: 16px;
