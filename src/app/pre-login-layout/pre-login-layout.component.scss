@@ -163,7 +163,7 @@
         justify-content: space-between;
 
         width: 100%;
-        padding: 16px 54px;
+        padding: 16px 56px;
         border-radius: 200px;
 
         background: radial-gradient(100% 100% at 0% 0%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%);
@@ -172,7 +172,7 @@
       }
 
       .website-logo {
-        padding: 0 !important;
+        padding: 0;
 
         .header-logo {
           display: flex;
@@ -190,7 +190,7 @@
 
       .keep-up {
         display: flex;
-        gap: 30px;
+        gap: 32px;
         align-items: center;
       }
 
@@ -225,10 +225,10 @@
       }
 
       .loginBtn {
-        width: 142px !important;
+        width: 142px;
         min-width: 142px;
-        height: 48px !important;
-        border-radius: 50px !important;
+        height: 48px;
+        border-radius: 48px; // MD3 grid: pill shape
 
         font-family: Sarabun, sans-serif;
         font-size: 16px;

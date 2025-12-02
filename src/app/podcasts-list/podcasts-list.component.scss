@@ -67,7 +67,7 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--md-sys-color-outline-variant) !important;
+        border-color: var(--md-sys-color-outline-variant);
       }
 
       .mat-mdc-form-field-icon-prefix {
@@ -220,9 +220,9 @@
 
     font-size: 12px;
     font-weight: 600;
-    color: var(--md-extended-color-success-color) !important;
+    color: var(--md-extended-color-success-color);
 
-    background-color: var(--md-extended-color-success-color-container) !important;
+    background-color: var(--md-extended-color-success-color-container);
   }
 
   .disable {
@@ -238,9 +238,9 @@
 
     font-size: 12px;
     font-weight: 600;
-    color: var(--md-sys-color-on-surface-variant) !important;
+    color: var(--md-sys-color-on-surface-variant);
 
-    background-color: var(--md-sys-color-surface-container-high) !important;
+    background-color: var(--md-sys-color-surface-container-high);
   }
 
   .response-div {
@@ -324,7 +324,7 @@
     .name {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
 
       span {
         font-size: 12px;
@@ -351,8 +351,8 @@
     width: 100%;
 
     p {
-      margin-top: 6px !important;
-      margin-bottom: 12px !important;
+      margin-top: 6px;
+      margin-bottom: 12px;
 
       font-size: 13px;
       font-weight: 500;
@@ -399,7 +399,7 @@
     padding: 16px;
 
     p {
-      margin: 0 !important;
+      margin: 0;
       font-size: 13px;
       font-weight: 500;
       color: var(--md-sys-color-on-surface);
@@ -412,7 +412,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface);
   /* max-width: 400px; remove max-width for grid */
-  background: var(--md-sys-color-surface-container) !important;
+  background: var(--md-sys-color-surface-container);
 
   mat-card-header {
     padding-bottom: 0;
@@ -498,7 +498,7 @@
 .create-podcast-card {
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 0;
-  background-color: var(--md-sys-color-surface-container-low) !important;
+  background-color: var(--md-sys-color-surface-container-low);
   box-shadow: none;
 
   .content-header {
