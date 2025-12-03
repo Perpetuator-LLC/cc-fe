@@ -209,11 +209,30 @@ mat-nav-list {
 .footer {
   position: static;
   bottom: 0;
+
   width: 100%;
+
   text-align: center;
 
+  background-color: var(--md-sys-color-surface-container-low);
+
   p {
+    margin-inline: auto;
+
     font-size: 15px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    a {
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
 
@@ -758,11 +777,6 @@ mat-nav-list {
           gap: 8px;
           align-items: center;
           padding-right: 0;
-
-          button {
-            min-width: fit-content;
-            padding: 0;
-          }
         }
       }
 
@@ -770,29 +784,19 @@ mat-nav-list {
         padding-inline: 16px;
       }
     }
+  }
+}
 
-    .footer {
-      background-color: var(--md-sys-color-surface-container-low);
+// Flattened mobile button styles
+@media screen and (width <= 599px) {
+  .toolbar .toolbar-right button {
+    min-width: fit-content;
+    padding: 0;
+  }
 
-      p {
-        margin-inline: auto;
-
-        font-size: 11px;
-        font-weight: 400;
-        line-height: 16px;
-        color: var(--md-sys-color-on-surface-variant);
-
-        a {
-          font-weight: 500;
-          color: var(--md-sys-color-secondary);
-        }
-      }
-
-      @media screen and (width <= 599px) {
-        height: auto;
-        white-space: normal;
-      }
-    }
+  .footer p {
+    height: auto;
+    white-space: normal;
   }
 }
 

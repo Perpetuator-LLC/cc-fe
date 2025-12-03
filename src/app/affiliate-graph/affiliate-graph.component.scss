@@ -85,71 +85,40 @@
           border-radius: 8px;
 
           background: var(--md-sys-color-surface);
-
-          .zoom-level {
-            min-width: 50px;
-
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--md-sys-color-secondary);
-            text-align: center;
-          }
-
-          button {
-            mat-icon {
-              width: 16px;
-              height: 16px;
-              font-size: 16px;
-            }
-          }
-        }
-
-        button {
-          display: inline-flex;
-          flex-shrink: 0;
-          gap: 8px;
-          align-items: center;
-
-          white-space: nowrap;
-
-          mat-icon {
-            width: 16px;
-            height: 16px;
-            font-size: 16px;
-          }
         }
       }
     }
 
-    .loading-container,
-    .error-container,
-    .empty-container {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      gap: 16px;
+    .graph-toolbar button {
+      display: inline-flex;
+      flex-shrink: 0;
+      gap: 8px;
       align-items: center;
-      justify-content: center;
 
-      color: var(--md-sys-color-on-surface-variant);
+      white-space: nowrap;
+    }
 
-      mat-icon {
-        width: 64px;
-        height: 64px;
-        font-size: 64px;
-        color: var(--md-sys-color-surface-container);
+    .zoom-controls {
+      .zoom-level {
+        min-width: 50px;
+
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--md-sys-color-secondary);
+        text-align: center;
       }
 
-      p {
-        margin: 0;
+      button mat-icon {
+        width: 16px;
+        height: 16px;
         font-size: 16px;
       }
     }
 
-    .error-container {
-      mat-icon {
-        color: var(--md-sys-color-error);
-      }
+    .toolbar-right button mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
     }
 
     .graph-container {
@@ -169,18 +138,6 @@
         justify-content: center;
 
         padding: 40px 20px;
-
-        .mermaid-container {
-          display: flex;
-          justify-content: center;
-          min-width: 100%;
-
-          svg {
-            max-width: 100%;
-            height: auto;
-            transition: transform 0.2s ease;
-          }
-        }
       }
 
       &.json-view,
@@ -192,16 +149,39 @@
           font-size: 12px;
           line-height: 1.5;
           color: var(--md-sys-color-secondary);
-          overflow-wrap: break-word;
-          white-space: pre-wrap;
         }
       }
+    }
+  }
 
-      &.json-view pre {
-        padding: 16px;
-        border-radius: 8px;
-        background: var(--md-sys-color-surface-container-low);
+  .error-container mat-icon {
+    color: var(--md-sys-color-error);
+  }
+
+  .mermaid-graph .mermaid-container {
+    display: flex;
+    justify-content: center;
+    min-width: 100%;
+  }
+
+  .mermaid-container svg {
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.2s ease;
+  }
+
+  .message-content {
+    .text-content {
+      pre {
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
       }
+    }
+
+    &.json-view pre {
+      padding: 16px;
+      border-radius: 8px;
+      background: var(--md-sys-color-surface-container-low);
     }
   }
 
@@ -235,28 +215,26 @@
     width: 95vw;
     height: 90vh;
 
-    .dialog-content {
-      .toolbar {
+    .dialog-content .toolbar {
+      flex-direction: column;
+      align-items: stretch;
+
+      .toolbar-left,
+      .toolbar-right {
         flex-direction: column;
-        align-items: stretch;
+        width: 100%;
 
-        .toolbar-left,
-        .toolbar-right {
-          flex-direction: column;
+        .format-selector {
           width: 100%;
-
-          .format-selector {
-            width: 100%;
-          }
-
-          button {
-            width: 100%;
-          }
         }
 
-        .toolbar-right .zoom-controls {
-          justify-content: center;
+        button {
+          width: 100%;
         }
+      }
+
+      .toolbar-right .zoom-controls {
+        justify-content: center;
       }
     }
   }

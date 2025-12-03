@@ -215,11 +215,6 @@
           gap: 12px;
           align-items: center;
           margin-bottom: 16px;
-
-          audio {
-            flex: 1;
-            height: 40px;
-          }
         }
 
         .episode-actions {
@@ -232,6 +227,11 @@
         }
       }
     }
+  }
+
+  .episode-player audio {
+    flex: 1;
+    height: 40px;
   }
 
   // Flattened episode header styles
@@ -272,50 +272,47 @@
     border-top: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
   }
+}
 
-  @media (width <= 768px) {
+// Media queries with flattened selectors
+@media (width <= 768px) {
+  .public-podcast-page {
     padding-inline: 16px;
+  }
 
-    .podcast-header {
-      .podcast-info {
-        flex-direction: column;
+  .public-podcast-page .podcast-header .podcast-info {
+    flex-direction: column;
+  }
 
-        .podcast-image {
-          aspect-ratio: 1;
-          width: 100%;
-          max-width: 300px;
-          height: auto;
-        }
-      }
+  .public-podcast-page .podcast-info .podcast-image {
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
 
-      .podcast-actions {
-        flex-direction: column;
-        align-items: stretch;
+  .public-podcast-page .podcast-header .podcast-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-        button {
-          width: 100%;
-        }
-      }
-    }
+  .public-podcast-page .podcast-actions button {
+    width: 100%;
+  }
 
-    .episodes-section {
-      .episode-card {
-        .episode-header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+  .public-podcast-page .episode-card .episode-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-        .episode-player {
-          flex-direction: column;
-          align-items: stretch;
-        }
+  .public-podcast-page .episode-card .episode-player {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-        .episode-actions {
-          flex-direction: column;
-          gap: 8px;
-        }
-      }
-    }
+  .public-podcast-page .episode-card .episode-actions {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 

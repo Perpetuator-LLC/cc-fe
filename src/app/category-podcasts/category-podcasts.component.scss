@@ -175,13 +175,6 @@
           width: 100%;
 
           background: var(--md-sys-color-surface-container-high);
-
-          mat-icon {
-            width: 80px;
-            height: 80px;
-            font-size: 80px;
-            color: var(--md-sys-color-on-primary);
-          }
         }
 
         &:hover .podcast-image {
@@ -197,15 +190,6 @@
           margin: 0 0 8px;
           font-size: 16px;
           font-weight: 600;
-
-          a {
-            color: var(--md-sys-color-secondary);
-            text-decoration: none;
-
-            &:hover {
-              color: var(--md-sys-color-surface-container);
-            }
-          }
         }
 
         .description {
@@ -226,53 +210,55 @@
           font-size: 14px;
           font-weight: 500;
           color: var(--md-sys-color-surface-container);
-
-          a {
-            color: var(--md-sys-color-secondary);
-            text-decoration: none;
-            transition: opacity 0.2s;
-
-            &:hover {
-              text-decoration: underline;
-              opacity: 0.7;
-            }
-          }
         }
-
-        .stats {
-          display: flex;
-          gap: 16px;
-          align-items: center;
-
-          .stat {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-
-            font-size: 13px;
-            color: var(--md-sys-color-on-surface-variant);
-
-            mat-icon {
-              width: 16px;
-              height: 16px;
-              font-size: 16px;
-            }
-          }
-        }
-      }
-
-      mat-card-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        padding: 8px 16px;
-        border-top: 1px solid var(--md-sys-color-outline-variant);
       }
     }
   }
+}
 
-  @media (width <= 768px) {
+// Flattened: Owner links
+.podcasts-grid mat-card mat-card-content .owner a {
+  color: var(--md-sys-color-secondary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.7;
+  }
+}
+
+// Flattened: Stats
+.podcasts-grid mat-card mat-card-content .stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.podcasts-grid mat-card mat-card-content .stats .stat {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// Flattened: Card actions
+.podcasts-grid mat-card mat-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (width <= 768px) {
+  .category-podcasts {
     padding-inline: 16px;
 
     .breadcrumb {
@@ -280,9 +266,9 @@
 
       a mat-icon,
       > mat-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
       }
     }
 
@@ -311,3 +297,23 @@
   }
 }
 
+// Flattened selectors to avoid deep nesting
+.category-podcasts-container {
+  .placeholder-icon mat-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 80px;
+    color: var(--md-sys-color-on-primary);
+  }
+
+  mat-card-content {
+    h3 a {
+      color: var(--md-sys-color-secondary);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--md-sys-color-surface-container);
+      }
+    }
+  }
+}

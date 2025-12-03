@@ -164,9 +164,9 @@
 
         width: 100%;
 
-        // MD3 4px grid: 56px = 14 * 4 for navigation pill horizontal padding
-        padding: 16px 56px;
-        border-radius: 200px; // MD3 4px grid: 200px = 50 * 4 for pill shape
+        // MD3 4px grid: 44px = 11 * 4px for navigation pill horizontal padding
+        padding: 16px calc(11 * 4px); // 44px pill shape padding
+        border-radius: 9999px; // Pill shape (effectively infinite radius)
 
         background: radial-gradient(100% 100% at 0% 0%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%);
         backdrop-filter: blur(8px);
