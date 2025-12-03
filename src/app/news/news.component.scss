@@ -305,22 +305,11 @@
         align-items: center;
         margin-top: 4px;
 
-        mat-icon {
-          width: 16px;
-          height: 16px;
-          font-size: 16px;
-          color: var(--md-sys-color-on-surface-variant);
-        }
-
         p {
           margin: 0;
           font-size: 12px;
           font-weight: 400;
           color: var(--md-sys-color-on-surface-variant);
-
-          strong {
-            font-weight: 500;
-          }
         }
       }
     }
@@ -1043,3 +1032,18 @@
   }
 }
 
+// Flattened selectors to avoid deep nesting
+.news-item {
+  .source {
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    p strong {
+      font-weight: 500;
+    }
+  }
+}

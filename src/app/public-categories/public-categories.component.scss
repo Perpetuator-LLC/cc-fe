@@ -115,15 +115,6 @@
             margin: 0;
             font-size: 24px;
             font-weight: 600;
-
-            a {
-              color: var(--md-sys-color-secondary);
-              text-decoration: none;
-
-              &:hover {
-                color: var(--md-sys-color-surface-container);
-              }
-            }
           }
 
           .podcast-count {
@@ -146,13 +137,11 @@
       mat-card-content {
         padding: 0 20px 16px;
 
-        .subcategories {
-          .subcategories-label {
-            margin: 0 0 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface-variant);
-          }
+        .subcategories-label {
+          margin: 0 0 8px;
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--md-sys-color-on-surface-variant);
         }
       }
 
@@ -163,7 +152,18 @@
     }
   }
 
-  @media (width <= 768px) {
+  mat-card-header h2 a {
+    color: var(--md-sys-color-secondary);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+}
+
+@media (width <= 768px) {
+  .public-categories {
     padding-inline: 16px;
 
     .header h1 {
