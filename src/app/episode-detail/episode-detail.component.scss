@@ -686,79 +686,77 @@
           font-size: 32px;
           font-weight: 600;
           color: var(--md-sys-color-on-surface);
-
-          @media screen and (width <= 450px) {
-            font-size: 24px;
-          }
         }
-
-        p {
-          margin: 0;
-          font-size: 14px;
-          font-weight: 400;
-          color: var(--md-sys-color-on-surface-variant);
-        }
-      }
-
-      .buttons {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-
-        .delete-btn {
-          // Let Material color="warn" handle styling
-        }
-
-        .save-btn {
-          // Let Material color directive handle styling
-        }
-      }
-
-      @media screen and (width <= 900px) {
-        flex-wrap: wrap;
-      }
-    }
-
-    .status-summary {
-      display: flex;
-      gap: 64px;
-
-      .status-item {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .status-label {
-          font-size: 14px;
-          font-weight: 400;
-          color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .status-value {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--md-sys-color-on-surface);
-          text-decoration: none;
-        }
-      }
-
-      @media screen and (width <= 900px) {
-        flex-wrap: wrap;
-        gap: 32px;
       }
     }
   }
+}
 
-  .podcast-card {
-    border: 0;
-    background-color: transparent;
-    box-shadow: none;
-
-    .mat-mdc-card-content {
-      padding-inline: 0;
-    }
+// Flattened: Empty state selectors
+.empty-state .content h1 {
+  @media screen and (width <= 450px) {
+    font-size: 24px;
   }
+}
 
+.empty-state .content p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state .buttons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  @media screen and (width <= 900px) {
+    flex-wrap: wrap;
+  }
+}
+
+.empty-state .status-summary {
+  display: flex;
+  gap: 64px;
+
+  @media screen and (width <= 900px) {
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+}
+
+.empty-state .status-summary .status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state .status-summary .status-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state .status-summary .status-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+}
+
+// Episode detail specific
+.episode-detail .podcast-card {
+  border: 0;
+  background-color: transparent;
+  box-shadow: none;
+
+  .mat-mdc-card-content {
+    padding-inline: 0;
+  }
+}
+
+.episode-detail {
   @media screen and (width <= 600px) {
     padding: 32px 40px;
   }

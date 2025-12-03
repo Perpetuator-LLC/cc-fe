@@ -4,29 +4,6 @@ schema {
 }
 
 type ApiQuery {
-  """Get all registered permissions in the system"""
-  allPermissions: [PermissionDefinitionType]
-
-  """Get permissions of a specific type"""
-  permissionsByType(permissionType: PermissionTypeEnum!): [PermissionDefinitionType]
-
-  """Get all permissions for the current user"""
-  myPermissions: UserPermissionsType
-
-  """Check if current user has a specific Django permission"""
-  hasPermission(permission: String!): Boolean
-
-  """Get your role in a specific team"""
-  myTeamRole(teamUuid: UUID!): TeamRoleEnum
-
-  """Get field-level edit permissions for episodes in a podcast"""
-  episodeFieldPermissions(podcastUuid: UUID!): EpisodeFieldPermissionsType
-
-  """Get field-level edit permissions for a podcast"""
-  podcastFieldPermissions(podcastUuid: UUID!): PodcastFieldPermissionsType
-
-  """Get field-level edit permissions for a team"""
-  teamFieldPermissions(teamUuid: UUID!): TeamFieldPermissionsType
   activePolicies: [VersionedPolicyType]
   policyByType(policyType: String!): VersionedPolicyType
   policyByVersion(policyType: String!, version: String!): VersionedPolicyType
@@ -320,92 +297,6 @@ type ApiQuery {
   ): Node
 }
 
-"""A permission definition"""
-type PermissionDefinitionType {
-  """Permission code (e.g., 'api.add_voice')"""
-  code: String!
-
-  """Human-readable name"""
-  name: String!
-
-  """Category of permission"""
-  permissionType: PermissionTypeEnum!
-
-  """What this permission allows"""
-  description: String!
-
-  """Operations that require this permission"""
-  requiredFor: [String]
-}
-
-"""Permission category types"""
-enum PermissionTypeEnum {
-  DJANGO_MODEL
-  TEAM_ROLE
-  API_SCOPE
-  CUSTOM
-}
-
-"""All permissions a user has"""
-type UserPermissionsType {
-  """Django model permissions"""
-  djangoPermissions: [String]
-
-  """Roles in teams"""
-  teamRoles: [TeamRoleInfo]
-
-  """Whether user is staff"""
-  isStaff: Boolean
-
-  """Whether user is superuser"""
-  isSuperuser: Boolean
-}
-
-"""User's role in a specific team"""
-type TeamRoleInfo {
-  teamUuid: UUID!
-  teamName: String!
-  role: TeamRoleEnum!
-}
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
-"""Team membership roles"""
-enum TeamRoleEnum {
-  READER
-  EDITOR
-  PUBLISHER
-  OWNER
-}
-
-"""Field-level permissions for an episode"""
-type EpisodeFieldPermissionsType {
-  podcastUuid: UUID!
-  permissions: [FieldPermissionsType]!
-}
-
-"""Field-level edit permissions"""
-type FieldPermissionsType {
-  fieldName: String!
-  canEdit: Boolean!
-}
-
-"""Field-level permissions for a podcast"""
-type PodcastFieldPermissionsType {
-  podcastUuid: UUID!
-  permissions: [FieldPermissionsType]!
-}
-
-"""Field-level permissions for a team"""
-type TeamFieldPermissionsType {
-  teamUuid: UUID!
-  permissions: [FieldPermissionsType]!
-}
-
 """GraphQL type for VersionedPolicy model."""
 type VersionedPolicyType {
   id: UUID!
@@ -429,6 +320,12 @@ type VersionedPolicyType {
   effectiveDate: DateTime!
   createdAt: DateTime!
 }
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
 
 """An enumeration."""
 enum CommunicationsVersionedPolicyPolicyTypeChoices {

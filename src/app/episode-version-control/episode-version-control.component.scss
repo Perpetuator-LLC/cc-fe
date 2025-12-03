@@ -197,39 +197,6 @@
       border-radius: 8px;
       background: var(--md-sys-color-surface-container-high);
 
-      .info-row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-
-        margin-bottom: 8px;
-
-        font-size: 14px;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        .info-label {
-          font-weight: 600;
-          color: var(--md-sys-color-on-surface);
-        }
-
-        .info-value {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          color: var(--md-sys-color-on-surface);
-
-          &.change-type-value {
-            font-weight: 500;
-
-            mat-icon {
-              @include icon-size(16px);
-            }
-          }
-        }
-      }
 
       .version-audio {
         @include version-audio-player ();
@@ -364,10 +331,6 @@
             display: flex;
             gap: 4px;
             align-items: center;
-
-            mat-icon {
-              @include icon-size(16px);
-            }
           }
 
           .change-type {
@@ -515,6 +478,15 @@
       color: var(--md-sys-color-secondary);
     }
   }
+}
+
+// Flattened selectors to avoid deep nesting
+.change-type-value mat-icon {
+  @include icon-size(16px);
+}
+
+.version-metadata > span mat-icon {
+  @include icon-size(16px);
 }
 
 .full-width {

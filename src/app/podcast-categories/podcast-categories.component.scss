@@ -59,8 +59,8 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
 
-      // MD3 4px grid: 112px = 28 * 4 for category grid visual separation
-      gap: 112px;
+      // MD3 4px grid: 64px = 16 * 4 for category grid visual separation
+      gap: 64px;
 
       padding: 40px 0;
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
