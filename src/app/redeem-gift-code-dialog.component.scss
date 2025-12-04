@@ -1,0 +1,162 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.btn-container {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.redeem-btn {
+  min-width: 225px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  /* stylelint-disable-next-line declaration-no-important */
+  color: var(--md-sys-color-on-primary) !important;
+  /* stylelint-disable-next-line declaration-no-important */
+  background: var(--md-sys-color-primary) !important;
+}
+
+/* Create Bonus Code form styling */
+form {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-high);
+
+  button[type='submit'] {
+    margin-top: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+
+    font-weight: 500;
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--md-sys-color-on-primary) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    background: var(--md-sys-color-primary) !important;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+/* Filter controls styling */
+.filter-controls {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+
+  mat-button-toggle-group {
+    overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+  }
+
+  mat-button-toggle {
+    /* stylelint-disable-next-line declaration-no-important */
+    border: none !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-right: 1px solid var(--md-sys-color-outline-variant) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-radius: 0 !important;
+
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface-container-high);
+
+    &:last-child {
+      /* stylelint-disable-next-line declaration-no-important */
+      border-right: none !important;
+    }
+
+    &.mat-button-toggle-checked {
+      /* stylelint-disable-next-line declaration-no-important */
+      color: var(--md-sys-color-on-primary) !important;
+      /* stylelint-disable-next-line declaration-no-important */
+      background: var(--md-sys-color-primary) !important;
+    }
+
+    &:hover:not(.mat-button-toggle-checked) {
+      background: var(--md-sys-color-surface-container-highest);
+    }
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      font-size: 18px;
+    }
+  }
+}
+
+.mat-mdc-card-title {
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.description {
+  margin-top: 12px;
+  margin-bottom: 18px;
+
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Admin view specific styles */
+.admin-view {
+  width: 800px;
+  min-width: 600px;
+  max-width: 90vw;
+}
+
+.admin-section {
+  margin-top: 20px;
+}
+
+.admin-title {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.codes-table {
+  min-width: 500px;
+}
+
+.no-codes {
+  margin: 20px 0;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+

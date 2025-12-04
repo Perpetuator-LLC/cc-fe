@@ -1,0 +1,12 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <p class="message">{{ data.message }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">{{ data.cancelButtonText || 'Cancel' }}</button>
+  <button mat-flat-button [color]="data.confirmButtonColor || 'warn'" (click)="onConfirm()">
+    {{ data.confirmButtonText || 'Delete' }}
+  </button>
+</mat-dialog-actions>
+

@@ -8,24 +8,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-auth-callback',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="callback-container">
-      <h2>Completing login...</h2>
-      <p>Please wait while we redirect you.</p>
-    </div>
-  `,
-  styles: [
-    `
-      .callback-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        gap: 16px;
-      }
-    `,
-  ],
+  templateUrl: './auth-callback.component.html',
+  styleUrl: './auth-callback.component.scss',
 })
 export class AuthCallbackComponent implements OnInit {
   constructor(

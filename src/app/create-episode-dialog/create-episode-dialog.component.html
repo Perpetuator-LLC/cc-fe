@@ -1,0 +1,51 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Create New Episode</h2>
+<mat-dialog-content>
+  <p class="dialog-description">Select a podcast to create an episode for:</p>
+  <mat-form-field class="full-width">
+    <mat-label>Select Podcast</mat-label>
+    <mat-select [(value)]="selectedPodcast" placeholder="Choose a podcast">
+      @for (podcast of data.podcasts; track podcast.uuid) {
+        <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="episode-type-section">
+    <p class="section-label">Choose episode type:</p>
+    <div class="episode-type-buttons">
+      <button mat-flat-button class="episode-type-btn" [disabled]="!selectedPodcast" (click)="createEpisode('blank')">
+        <mat-icon>article</mat-icon>
+        <div class="btn-content">
+          <span class="btn-title">Blank Episode</span>
+          <span class="btn-description">Start with empty content</span>
+        </div>
+      </button>
+
+      <button mat-flat-button class="episode-type-btn" [disabled]="!selectedPodcast" (click)="createEpisode('news')">
+        <mat-icon>newspaper</mat-icon>
+        <div class="btn-content">
+          <span class="btn-title">News Episode</span>
+          <span class="btn-description">Create from latest news</span>
+        </div>
+      </button>
+
+      <button
+        mat-flat-button
+        class="episode-type-btn"
+        [disabled]="!selectedPodcast"
+        (click)="createEpisode('research')"
+      >
+        <mat-icon>science</mat-icon>
+        <div class="btn-content">
+          <span class="btn-title">Research Episode</span>
+          <span class="btn-description">Create from research topic</span>
+        </div>
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+</mat-dialog-actions>
+

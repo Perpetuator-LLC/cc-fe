@@ -1,0 +1,117 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.policy-intro {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.sign-out-note {
+  margin-top: 12px;
+  font-size: 0.9em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.policy-section {
+  margin-bottom: 32px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background-color: var(--md-sys-color-surface-container);
+
+  h3 {
+    margin-top: 0;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.policy-meta {
+  margin-bottom: 16px;
+  font-size: 0.9em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.policy-content {
+  overflow-y: auto;
+
+  max-height: 300px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 4px;
+
+  font-size: 0.9em;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface);
+
+  background-color: var(--md-sys-color-surface);
+
+  /* stylelint-disable selector-pseudo-element-disallowed-list, selector-pseudo-element-no-unknown -- Required for styling dynamic HTML content from innerHTML */
+  ::ng-deep {
+    h1,
+    h2,
+    h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    p {
+      margin-bottom: 16px;
+      /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+      line-height: 1.6;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    ul,
+    ol {
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+
+    li {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    a {
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  /* stylelint-enable selector-pseudo-element-disallowed-list, selector-pseudo-element-no-unknown */
+}
+
+.acceptance-section {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.error-message {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--md-sys-color-error);
+  border-radius: 4px;
+
+  color: var(--md-sys-color-error);
+
+  background-color: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
+}
+
+mat-checkbox {
+  margin-top: 12px;
+}
+
+mat-dialog-content {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
