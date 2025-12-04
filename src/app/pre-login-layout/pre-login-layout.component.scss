@@ -167,6 +167,7 @@
 
         // MD3 4px grid: 48px = 12 * 4px for navigation pill horizontal padding
         padding: 16px 48px; // 48px pill shape padding (12 * 4px)
+        /* stylelint-disable-next-line declaration-property-value-disallowed-list */
         border-radius: 9999px; // Pill shape (effectively infinite radius)
 
         background: radial-gradient(100% 100% at 0% 0%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%);
