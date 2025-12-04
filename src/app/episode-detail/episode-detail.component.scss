@@ -950,7 +950,7 @@
         align-items: center;
 
         padding: 2px 8px;
-        border-radius: var(--cc-radius-sm);
+        border-radius: 4px;
 
         mat-icon {
           width: 16px;
@@ -962,24 +962,25 @@
           border: 1px solid var(--md-extended-color-success-color);
           color: var(--md-extended-color-success-color);
           background-color: var(--md-extended-color-success-color-container);
-
-          mat-icon {
-            color: var(--md-extended-color-success-color);
-          }
         }
 
         &.status-error {
           border: 1px solid var(--md-sys-color-error);
           color: var(--md-sys-color-error);
           background-color: var(--md-sys-color-error-container);
-
-          mat-icon {
-            color: var(--md-sys-color-error);
-          }
         }
       }
     }
   }
+}
+
+// Extracted to reduce nesting depth
+.rss-feed-badge-item .rss-feed-status-mini .status-icon.status-success mat-icon {
+  color: var(--md-extended-color-success-color);
+}
+
+.rss-feed-badge-item .rss-feed-status-mini .status-icon.status-error mat-icon {
+  color: var(--md-sys-color-error);
 }
 
 // RSS feed table view
@@ -1016,7 +1017,7 @@
   display: flex;
   align-items: center;
   padding: 2px 4px;
-  border-radius: var(--cc-radius-sm);
+  border-radius: 4px;
 
   mat-icon {
     width: 16px;
@@ -1028,21 +1029,22 @@
     border: 1px solid var(--md-extended-color-success-color);
     color: var(--md-extended-color-success-color);
     background-color: var(--md-extended-color-success-color-container);
-
-    mat-icon {
-      color: var(--md-extended-color-success-color);
-    }
   }
 
   &.status-error {
     border: 1px solid var(--md-sys-color-error);
     color: var(--md-sys-color-error);
     background-color: var(--md-sys-color-error-container);
-
-    mat-icon {
-      color: var(--md-sys-color-error);
-    }
   }
+}
+
+// Extracted to reduce nesting depth
+.rss-feed-cell .status-icon-small.status-success mat-icon {
+  color: var(--md-extended-color-success-color);
+}
+
+.rss-feed-cell .status-icon-small.status-error mat-icon {
+  color: var(--md-sys-color-error);
 }
 
 
