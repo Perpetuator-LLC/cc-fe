@@ -1,4 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
 .jobs-container {
   width: 100%;
   height: 100%;
@@ -224,74 +226,6 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-
-      .job-link-item {
-        display: flex;
-        align-items: center;
-
-        .resource-tag {
-          cursor: pointer;
-
-          display: inline-flex;
-          flex-shrink: 0;
-          gap: 4px;
-          align-items: center;
-
-          min-height: 24px;
-          padding: 4px 8px;
-          border: none;
-          border-radius: 8px;
-
-          font-size: 12px;
-          font-weight: 600;
-          text-transform: none;
-          white-space: nowrap;
-
-          transition: all 0.2s ease;
-
-          mat-icon {
-            width: 14px;
-            height: 14px;
-            margin: 0;
-            font-size: 14px;
-          }
-
-          &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
-          }
-
-          &.podcast-tag {
-            border: 1px solid var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-primary);
-            background: var(--md-sys-color-primary-container);
-
-            &:hover {
-              background: var(--md-sys-color-primary-container);
-            }
-          }
-
-          &.episode-tag {
-            border: 1px solid var(--md-sys-color-tertiary-container);
-            color: var(--md-sys-color-tertiary);
-            background: var(--md-sys-color-tertiary-container);
-
-            &:hover {
-              background: var(--md-sys-color-tertiary-container);
-            }
-          }
-
-          &.topic-tag {
-            border: 1px solid var(--md-extended-color-success-color-container);
-            color: var(--md-extended-color-success-color);
-            background: var(--md-extended-color-success-color-container);
-
-            &:hover {
-              background: var(--md-extended-color-success-color-container);
-            }
-          }
-        }
-      }
     }
   }
 
@@ -302,55 +236,85 @@
     font-weight: 500;
     color: var(--md-sys-color-error);
   }
+}
 
-  .job-timestamps {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 8px;
+// Resource tags - extracted to reduce nesting depth
+.jobs-container .job-link-item {
+  display: flex;
+  align-items: center;
+}
 
-    .timestamp-container {
-      display: flex;
-      flex-direction: column;
-    }
+.jobs-container .resource-tag {
+  cursor: pointer;
 
-    .timestamp-text {
-      margin-bottom: 2px;
-      font-size: 10px;
-      color: var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 4px;
+  align-items: center;
 
-      strong {
-        font-weight: 500;
-      }
-    }
+  min-height: 24px;
+
+  &.podcast-tag {
+    @include mixins.podcast-tag();
   }
 
-  .timeline-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-
-    button {
-      width: 32px;
-      height: 32px;
-      line-height: 32px;
-
-      mat-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-      }
-    }
+  &.episode-tag {
+    @include mixins.episode-tag();
   }
 
-  .job-card {
-    button {
-      margin-right: 1em;
-    }
+  &.topic-tag {
+    @include mixins.topic-tag();
+  }
+}
 
-    p {
-      overflow-wrap: break-word;
-      white-space: normal;
+// Job timestamps and actions - extracted to reduce nesting depth
+.jobs-container .job-timestamps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.jobs-container .timestamp-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.jobs-container .timestamp-text {
+  margin-bottom: 2px;
+  font-size: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+.jobs-container .timeline-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  button {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
     }
+  }
+}
+
+.jobs-container .job-card {
+  button {
+    margin-right: 1em;
+  }
+
+  p {
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 }

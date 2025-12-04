@@ -79,11 +79,12 @@
         &.login-link {
           border: 1px solid var(--md-sys-color-secondary);
           background: color-mix(in srgb, var(--md-sys-color-secondary-container) 15%, transparent);
-
-          &:hover {
-            background: color-mix(in srgb, var(--md-sys-color-secondary-container) 25%, transparent);
-          }
         }
+      }
+
+      // Extracted to reduce nesting depth
+      .nav-link.login-link:hover {
+        background: color-mix(in srgb, var(--md-sys-color-secondary-container) 25%, transparent);
       }
 
       .theme-toggle {
@@ -164,13 +165,13 @@
 
         width: 100%;
 
-        // MD3 4px grid: 44px = 11 * 4px for navigation pill horizontal padding
-        padding: 16px calc(11 * 4px); // 44px pill shape padding
+        // MD3 4px grid: 48px = 12 * 4px for navigation pill horizontal padding
+        padding: 16px 48px; // 48px pill shape padding (12 * 4px)
         border-radius: 9999px; // Pill shape (effectively infinite radius)
 
         background: radial-gradient(100% 100% at 0% 0%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%);
         backdrop-filter: blur(8px);
-        box-shadow: -5px -5px 250px 0 var(--md-sys-color-outline-variant) inset;
+        box-shadow: -4px -4px 256px 0 var(--md-sys-color-outline-variant) inset; // MD3 4px grid: -4px, 256px = 64 * 4px
       }
 
       .website-logo {

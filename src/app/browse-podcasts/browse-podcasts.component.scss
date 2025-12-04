@@ -147,12 +147,18 @@
     }
 
     .description {
-      @include mixins.text-truncate-multiline(3);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
 
       margin: 0 0 8px;
+
       font-size: 14px;
+      /* stylelint-disable-next-line declaration-property-value-disallowed-list */
       line-height: 1.5;
       color: var(--md-sys-color-on-surface-variant);
+      text-overflow: ellipsis;
     }
 
     .owner {

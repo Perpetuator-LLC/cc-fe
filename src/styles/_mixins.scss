@@ -253,3 +253,237 @@
   }
 }
 
+// ============================================================================
+// Button Patterns (Reduce deep nesting in components)
+// ============================================================================
+@mixin primary-button {
+  height: 32px;
+  min-height: 32px;
+  padding: 8px 12px;
+}
+
+@mixin tag-button-base {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  white-space: nowrap;
+
+  transition: all 0.2s ease;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+  }
+}
+
+@mixin podcast-tag {
+  @include tag-button-base();
+
+  border: 1px solid var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+
+  &:hover {
+    background: var(--md-sys-color-primary-container);
+  }
+}
+
+@mixin episode-tag {
+  @include tag-button-base();
+
+  border: 1px solid var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-tertiary);
+  background: var(--md-sys-color-tertiary-container);
+
+  &:hover {
+    background: var(--md-sys-color-tertiary-container);
+  }
+}
+
+@mixin topic-tag {
+  @include tag-button-base();
+
+  border: 1px solid var(--md-extended-color-success-color-container);
+  color: var(--md-extended-color-success-color);
+  background: var(--md-extended-color-success-color-container);
+
+  &:hover {
+    background: var(--md-extended-color-success-color-container);
+  }
+}
+
+// ============================================================================
+// Version Control Patterns (For episode-version-control.component)
+// ============================================================================
+@mixin version-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+@mixin version-header-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  > span {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .change-type {
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+
+// ============================================================================
+// Button with Icon Pattern (Reduce nesting in version controls, actions, etc.)
+// ============================================================================
+@mixin action-button-with-icon {
+  height: 32px;
+  min-height: 32px;
+  padding: 8px 12px;
+
+  mat-icon {
+    @include icon-size(16px);
+  }
+
+  &[color="accent"] {
+    color: var(--md-sys-color-on-success);
+    background: var(--md-sys-color-success);
+  }
+}
+
+// ============================================================================
+// Card Action Buttons Pattern (For dialogs, forms, etc.)
+// ============================================================================
+@mixin card-action-buttons {
+  display: flex;
+  gap: 8px;
+
+  button {
+    @include action-button-with-icon();
+  }
+}
+
+// ============================================================================
+// Stats Grid Pattern (For finance, analytics components)
+// ============================================================================
+@mixin stats-container {
+  display: flex;
+  gap: 40px;
+
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  @include mobile {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+// ============================================================================
+// List Item Action Buttons (For jobs-list, etc.)
+// ============================================================================
+@mixin list-item-actions {
+  display: flex;
+  gap: 4px;
+
+  button {
+    min-width: 32px;
+    padding: 4px 8px;
+
+    mat-icon {
+      @include icon-size(16px);
+    }
+  }
+}
+
+// ============================================================================
+// Category/Tag Filter Button (For public-categories, browse-podcasts)
+// ============================================================================
+@mixin category-filter-button {
+  padding: 8px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+
+  background: var(--md-sys-color-surface-container);
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+  }
+
+  &.active {
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-primary);
+  }
+}
+
+// ============================================================================
+// Article/News Card Pattern (For news component)
+// ============================================================================
+@mixin article-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  margin-top: 12px;
+
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  .author,
+  .date {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
+    mat-icon {
+      @include icon-size(16px);
+    }
+  }
+}
