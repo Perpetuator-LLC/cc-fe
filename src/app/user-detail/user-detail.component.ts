@@ -20,7 +20,7 @@ import { TeamsService } from '../teams.service';
 import { CreditService } from '../credit.service';
 import { CodeService } from '../code.service';
 import { MatIcon } from '@angular/material/icon';
-import { DeleteAccountDialogComponent } from '../delete-account-dialog.component';
+import { DeleteAccountDialogComponent } from '../delete-account-dialog/delete-account-dialog.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../loading.service';
 import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
