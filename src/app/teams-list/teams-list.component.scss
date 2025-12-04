@@ -199,8 +199,8 @@
     align-items: center;
     justify-content: space-between;
 
-    padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
-    padding-bottom: var(--cc-spacing-md);
+    padding-top: 16px; // 16px to prevent overlap with layout header
+    padding-bottom: 16px;
     padding-inline: 30px;
 
     .title {

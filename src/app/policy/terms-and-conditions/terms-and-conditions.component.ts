@@ -5,19 +5,18 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
-import { ToolbarService } from '../toolbar.service';
-import { AuthService } from '../auth.service';
-import { PolicyService, PolicyVersion } from '../policy.service';
+import { ToolbarService } from '../../toolbar.service';
+import { AuthService } from '../../auth.service';
+import { PolicyService, PolicyVersion } from '../services/policy.service';
 
 @Component({
-  selector: 'app-privacy-policy',
+  selector: 'app-eula',
   standalone: true,
   imports: [CommonModule, MatCard, MatCardContent, MatProgressSpinner],
-  templateUrl: './privacy-policy.component.html',
-  styleUrls: ['./privacy-policy.component.scss'],
+  templateUrl: './terms-and-conditions.component.html',
+  styleUrl: './terms-and-conditions.component.scss',
 })
-export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy {
-  protected readonly Date = Date;
+export class TermsAndConditionsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
   loading = true;
@@ -52,14 +51,14 @@ export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy 
     this.subscriptions.add(
       this.policyService.getActivePolicies().subscribe({
         next: (policies) => {
-          this.policy = policies.privacyPolicy;
+          this.policy = policies.termsOfService;
           if (this.policy) {
             this.policyContent = this.policyService.renderPolicyContent(this.policy);
           }
           this.loading = false;
         },
         error: (err) => {
-          console.error('Failed to load privacy policy:', err);
+          console.error('Failed to load terms of service:', err);
           this.loading = false;
         },
       }),

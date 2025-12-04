@@ -10,7 +10,7 @@ Do not use command line tools to edit or read files, use your functions that you
 **📖 Complete Theme Guide:** See `notes/MD3_COMPREHENSIVE_THEME_GUIDE.md` for full documentation.
 
 **🚫 NO INLINE TEMPLATES/STYLES:** ESLint enforces external `templateUrl` and `styleUrl` only. See `docs/eslint-no-inline-templates-styles.md`
-* It is to hard to do SCSS linting and MD3 compliance checks with inline styles.
+* It is too hard to do SCSS linting and MD3 compliance checks with inline styles.
 
 **Current State:** MD3 Migration 83% complete. Use Material components, design tokens, and SCSS mixins.
 

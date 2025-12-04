@@ -13,7 +13,7 @@ import {
   CreateEpisodeDialogComponent,
   CreateEpisodeDialogResult,
 } from '../create-episode-dialog/create-episode-dialog.component';
-import { NewsService } from '../news.service';
+import { NewsService } from '../news/services/news.service';
 import { Job, JobService } from '../job.service';
 import { ResearchService, Topic } from '../research.service';
 import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-dialog.component';

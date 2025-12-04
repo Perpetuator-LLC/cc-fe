@@ -8,10 +8,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { AuthService } from '../auth.service';
-import { UserService } from '../user.service';
-import { NewsletterHttpService } from '../newsletter-http.service';
-import { MessageService } from '../message.service';
+import { AuthService } from '../../../auth.service';
+import { UserService } from '../../../user.service';
+import { NewsletterHttpService } from '../../services/newsletter-http.service';
+import { MessageService } from '../../../message.service';
 
 @Component({
   selector: 'app-newsletter-dialog',

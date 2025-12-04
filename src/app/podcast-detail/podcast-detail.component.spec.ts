@@ -17,7 +17,7 @@ import { ToolbarService } from '../toolbar.service';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ViewContainerRef, signal } from '@angular/core';
 import { LoadingService } from '../loading.service';
-import { NewsService } from '../news.service';
+import { NewsService } from '../news/services/news.service';
 import { EpisodeService } from '../episode.service';
 import { JobService } from '../job.service';
 import { ResearchService } from '../research.service';

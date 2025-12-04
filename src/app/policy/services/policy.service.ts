@@ -1,12 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, effect } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { map, Observable, of, switchMap, take } from 'rxjs';
-import { BaseService } from './base.service';
-import { ErrorHandlerService } from './error-handler.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AuthService } from './auth.service';
+import { BaseService } from '../../base.service';
+import { ErrorHandlerService } from '../../error-handler.service';
+import { AuthService } from '../../auth.service';
 
 export enum PolicyType {
   TERMS_OF_SERVICE = 'TERMS_OF_SERVICE',
