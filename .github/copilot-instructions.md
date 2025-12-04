@@ -1,5 +1,12 @@
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
+Redirect STDERR to STDOUT and pipe to tee and capture command output in a logs file e.g.
+```bash 
+cd REPO_DIR && yarn build 2>&1 | tee logs/build.log
+```
+
+Do not use command line tools to edit or read files, use your functions that you have for file operations.
+
 **📖 Complete Theme Guide:** See `notes/MD3_COMPREHENSIVE_THEME_GUIDE.md` for full documentation.
 
 **Current State:** MD3 Migration 83% complete. Use Material components, design tokens, and SCSS mixins.
