@@ -9,6 +9,9 @@ Do not use command line tools to edit or read files, use your functions that you
 
 **📖 Complete Theme Guide:** See `notes/MD3_COMPREHENSIVE_THEME_GUIDE.md` for full documentation.
 
+**🚫 NO INLINE TEMPLATES/STYLES:** ESLint enforces external `templateUrl` and `styleUrl` only. See `docs/eslint-no-inline-templates-styles.md`
+* It is to hard to do SCSS linting and MD3 compliance checks with inline styles.
+
 **Current State:** MD3 Migration 83% complete. Use Material components, design tokens, and SCSS mixins.
 
 ## TL;DR for AI/Copilot (READ THIS FIRST)
@@ -16,6 +19,8 @@ Do not use command line tools to edit or read files, use your functions that you
 **ALL styling via `@include mat.theme()` on root using MD3 design tokens.**
 - **NO custom SCSS** selectors/overrides except via mixins in `styles.scss`
 - **NO inline styles** or direct component styling - ever
+- **NO inline templates** - enforced by ESLint (templateUrl required)
+- **NO inline styles arrays** - enforced by ESLint (styleUrl required)
 - **NO ::ng-deep** - theme changes go in `styles.scss` via theme overrides
 - **Use Material variants** - `mat-flat-button color="primary"` not custom classes
 - **Design tokens ONLY** - `var(--md-sys-color-primary)` not hex colors
@@ -23,7 +28,7 @@ Do not use command line tools to edit or read files, use your functions that you
 - **Mixins for layout** - `@include mixins.flex-row` instead of custom flex styles
 - **Component SCSS = layout only** - let Material handle colors/typography
 
-**If you're setting colors or using ::ng-deep, you're doing it wrong.**
+**If you're using inline template/styles or setting colors directly, you're doing it wrong.**
 
 # Material Design 3 (MD3) Theming: Root-Controlled Architecture
 
