@@ -1,0 +1,26 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 16px 24px;
+}
+
+mat-dialog-content {
+  padding: 0 24px 20px;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 24px 24px 16px;
+}
+
+p {
+  margin: 0;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.5;
+
+  &.message {
+    white-space: pre-line;
+  }
+}
+

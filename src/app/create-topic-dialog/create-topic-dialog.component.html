@@ -1,0 +1,40 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Create Custom Topic</h2>
+<mat-dialog-content>
+  <form [formGroup]="topicForm" (ngSubmit)="createTopic()">
+    <mat-form-field>
+      <mat-label>Select Podcast</mat-label>
+      <mat-select formControlName="podcastUuid" required>
+        @for (podcast of data.podcasts; track podcast.uuid) {
+          <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+        }
+      </mat-select>
+      @if (podcastError) {
+        <mat-error>{{ podcastError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Topic Title</mat-label>
+      <input matInput formControlName="title" required />
+      @if (titleError) {
+        <mat-error>{{ titleError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description (optional)</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
+  <button class="create-btn" mat-flat-button (click)="createTopic()" [disabled]="!topicForm.valid || isCreating">
+    @if (isCreating) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    }
+    Create Topic
+  </button>
+</mat-dialog-actions>
+

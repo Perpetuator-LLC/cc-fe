@@ -1,0 +1,65 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+.mat-mdc-dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.select-new {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  span {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  button {
+    height: auto;
+    padding: 0;
+    border: 0;
+
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
+  }
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-dialog-content {
+  overflow-y: auto;
+  min-width: 400px;
+  max-height: 70vh;
+}
+
+.cancel-btn {
+  width: 88px;
+  height: 40px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.savePodcastBtn {
+  width: 225px;
+  height: 40px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-primary);
+
+  background: var(--md-sys-color-primary);
+}
+
+.mat-mdc-select {
+  color: var(--md-sys-color-on-surface);
+}
+

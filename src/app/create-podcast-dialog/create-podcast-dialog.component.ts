@@ -25,7 +25,6 @@ import { JobService } from '../job.service';
     MatInput,
     MatButton,
     MatLabel,
-
     MatError,
     MatSelect,
     MatOption,
@@ -33,129 +32,8 @@ import { JobService } from '../job.service';
     MatDialogModule,
     MatIcon,
   ],
-  template: `
-    <h2 mat-dialog-title>Generate Podcast</h2>
-    <mat-dialog-content>
-      <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
-        <mat-form-field>
-          <mat-label>Description (Required)</mat-label>
-          <textarea
-            matInput
-            formControlName="description"
-            required
-            rows="4"
-            placeholder="Describe your podcast... (e.g., 'A daily tech news podcast covering AI and startups')"
-          ></textarea>
-          @if (descriptionError) {
-            <mat-error>{{ descriptionError }}</mat-error>
-          }
-        </mat-form-field>
-
-        @if (ownedTeams.length > 0) {
-          <div class="select-new">
-            <span>Select Team </span>
-            <button mat-stroked-button type="button" (click)="selectCreateNewTeam()">
-              <mat-icon>add</mat-icon>
-              Create New Team
-            </button>
-          </div>
-          <mat-form-field>
-            <mat-label>Team</mat-label>
-            <mat-select formControlName="teamSelection">
-              <mat-optgroup label="Your Owned Teams">
-                @for (team of ownedTeams; track team.uuid) {
-                  <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
-                }
-              </mat-optgroup>
-            </mat-select>
-            @if (isLoadingTeams) {
-              <mat-progress-spinner diameter="20" mode="indeterminate" />
-            }
-          </mat-form-field>
-        }
-
-        @if (ownedTeams.length === 0 || podcastForm.get('teamSelection')?.value === 'new') {
-          <mat-form-field>
-            <mat-label>New Team Name</mat-label>
-            <input matInput formControlName="newTeamName" />
-          </mat-form-field>
-        }
-
-        <mat-form-field>
-          <mat-label>Title (Optional)</mat-label>
-          <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
-          @if (titleError) {
-            <mat-error>{{ titleError }}</mat-error>
-          }
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
-      <button
-        class="savePodcastBtn"
-        mat-flat-button
-        color="primary"
-        (click)="createPodcast()"
-        [disabled]="!podcastForm.valid"
-      >
-        Generate Podcast
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [
-    `
-      .mat-mdc-dialog-title {
-        font-size: 18px;
-        font-weight: 600;
-      }
-      .select-new {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-      }
-      .select-new span {
-        color: var(--theme-color);
-      }
-      .select-new button {
-        padding: 0;
-        border: 0;
-        height: auto;
-        color: #8f8fff;
-        font-weight: 500;
-      }
-      mat-form-field {
-        width: 100%;
-        margin-bottom: 1rem;
-      }
-      mat-dialog-content {
-        min-width: 400px;
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-      .cancel-btn {
-        background: var(--secondary-light);
-        border: 1px solid var(--border-color);
-        color: var(--theme-color);
-        border-radius: 10px;
-        width: 88px;
-        height: 40px;
-      }
-      .savePodcastBtn {
-        background: #f14a00;
-        border-radius: 10px;
-        color: white;
-        width: 225px;
-        font-size: 14px;
-        font-weight: 600;
-        height: 40px;
-      }
-      .mat-mdc-select {
-        color: var(--theme-color);
-      }
-    `,
-  ],
+  templateUrl: './create-podcast-dialog.component.html',
+  styleUrl: './create-podcast-dialog.component.scss',
 })
 export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   podcastForm: FormGroup;

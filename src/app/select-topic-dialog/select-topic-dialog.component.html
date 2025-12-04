@@ -1,0 +1,36 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Create Research Episode</h2>
+<mat-dialog-content>
+  @if (filteredTopics.length > 0) {
+    <p class="dialog-description">Select a research topic to create an episode from:</p>
+    <mat-form-field class="full-width">
+      <mat-label>Select Research Topic</mat-label>
+      <mat-select [(value)]="selectedTopicUuid" placeholder="Choose a topic">
+        @for (topic of filteredTopics; track topic.uuid) {
+          <mat-option [value]="topic.uuid">
+            {{ topic.title }}
+            @if (topic.episode) {
+              <span class="has-episode-badge">(Episode exists)</span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  } @else {
+    <div class="no-topics-message">
+      <mat-icon>info</mat-icon>
+      <p>No research topics available for this podcast.</p>
+      <p class="suggestion">Create a research topic first from the Research Topics page.</p>
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  @if (filteredTopics.length > 0) {
+    <button mat-flat-button color="primary" [disabled]="!selectedTopicUuid" (click)="onCreate()">
+      <mat-icon>article</mat-icon>
+      Create Episode
+    </button>
+  }
+</mat-dialog-actions>
+

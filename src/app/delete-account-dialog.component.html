@@ -1,0 +1,31 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="delete-dialog">
+  <h2 mat-dialog-title>Permanently remove your account</h2>
+  <mat-dialog-content>
+    <div class="danger-zone">
+      <p>
+        Username is publicly visible, do not use personally identifying information in it. Username is publicly
+        visible, do not use personally identifying information in it.
+      </p>
+      <div class="action-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Delete Confirmation</mat-label>
+          <input matInput [placeholder]="placeholderText" [(ngModel)]="deleteConfirmation" />
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="cancel-btn" mat-button (click)="onCancel()">Cancel</button>
+    <button
+      class="delete-btn"
+      mat-flat-button
+      color="warn"
+      (click)="onDelete()"
+      [disabled]="deleteConfirmation !== email"
+    >
+      Delete Account
+    </button>
+  </mat-dialog-actions>
+</div>
+
