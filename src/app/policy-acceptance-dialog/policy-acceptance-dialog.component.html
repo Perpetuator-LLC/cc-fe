@@ -1,0 +1,51 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<h2 mat-dialog-title>Updated Policies - Your Acceptance Required</h2>
+<mat-dialog-content>
+  <div class="policy-intro">
+    <p>
+      We've updated our policies. Please review and accept the following
+      {{ data.policies.length === 1 ? 'policy' : 'policies' }} to continue using our service:
+    </p>
+    @if (!data.canCancel) {
+      <p class="sign-out-note">
+        <strong>Note:</strong> You may sign out if you do not wish to accept these policies at this time.
+      </p>
+    }
+  </div>
+
+  @for (policy of data.policies; track policy.id) {
+    <div class="policy-section">
+      <h3>{{ getPolicyTitle(policy.policyType) }}</h3>
+      <p class="policy-meta">
+        Version {{ policy.version }}
+        @if (policy.effectiveDate) {
+          - Effective {{ formatDate(policy.effectiveDate) }}
+        }
+      </p>
+
+      <div class="policy-content" [innerHTML]="renderPolicyContent(policy)"></div>
+    </div>
+  }
+
+  <div class="acceptance-section">
+    <mat-checkbox [(ngModel)]="acceptAll" [required]="true">
+      I have read and accept all of the policies listed above
+    </mat-checkbox>
+  </div>
+
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (!data.canCancel) {
+    <button mat-button color="warn" (click)="onSignOut()">Sign Out</button>
+  }
+  @if (data.canCancel) {
+    <button mat-button (click)="onCancel()">Cancel</button>
+  }
+  <button mat-raised-button color="primary" [disabled]="!acceptAll || accepting" (click)="onAccept()">
+    {{ accepting ? 'Accepting...' : 'Accept' }}
+  </button>
+</mat-dialog-actions>
+

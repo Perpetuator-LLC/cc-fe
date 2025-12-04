@@ -31,93 +31,14 @@ export interface CreateTopicDialogData {
     MatInput,
     MatButton,
     MatLabel,
-
     MatError,
     MatDialogModule,
     MatSelect,
     MatOption,
     CommonModule,
   ],
-  template: `
-    <h2 mat-dialog-title>Create Custom Topic</h2>
-    <mat-dialog-content>
-      <form [formGroup]="topicForm" (ngSubmit)="createTopic()">
-        <mat-form-field>
-          <mat-label>Select Podcast</mat-label>
-          <mat-select formControlName="podcastUuid" required>
-            @for (podcast of data.podcasts; track podcast.uuid) {
-              <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-            }
-          </mat-select>
-          @if (podcastError) {
-            <mat-error>{{ podcastError }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field>
-          <mat-label>Topic Title</mat-label>
-          <input matInput formControlName="title" required />
-          @if (titleError) {
-            <mat-error>{{ titleError }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field>
-          <mat-label>Description (optional)</mat-label>
-          <textarea matInput formControlName="description" rows="4"></textarea>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
-      <button class="create-btn" mat-flat-button (click)="createTopic()" [disabled]="!topicForm.valid || isCreating">
-        @if (isCreating) {
-          <mat-progress-spinner diameter="20" mode="indeterminate" />
-        }
-        Create Topic
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [
-    `
-      .mat-mdc-dialog-title {
-        font-size: 18px;
-        font-weight: 600;
-      }
-
-      mat-form-field {
-        width: 100%;
-        margin-bottom: 16px;
-      }
-
-      .mat-mdc-dialog-content {
-        min-width: 500px;
-      }
-
-      .cancel-btn {
-        border: 1px solid var(--border-color);
-        color: var(--theme-color);
-      }
-
-      .create-btn {
-        background: var(--primary);
-        color: var(--theme-white);
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      mat-progress-spinner {
-        display: inline-block;
-      }
-
-      @media screen and (max-width: 576px) {
-        .mat-mdc-dialog-content {
-          min-width: 300px;
-        }
-      }
-    `,
-  ],
+  templateUrl: './create-topic-dialog.component.html',
+  styleUrl: './create-topic-dialog.component.scss',
 })
 export class CreateTopicDialogComponent implements OnDestroy {
   topicForm: FormGroup;

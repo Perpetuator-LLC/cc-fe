@@ -1,0 +1,97 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+mat-dialog-content {
+  min-width: 500px;
+  padding: 0 24px 20px;
+
+  @media screen and (width <= 576px) {
+    min-width: auto;
+  }
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 16px 24px;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 24px 24px 16px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.dialog-description {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.has-episode-badge {
+  margin-left: 8px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.no-topics-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+
+  padding: 40px 20px;
+
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .suggestion {
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+button[mat-flat-button] {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-weight: 600;
+  color: var(--md-sys-color-on-primary);
+  white-space: nowrap;
+
+  background: var(--md-sys-color-primary);
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.6;
+    background-color: var(--md-sys-color-surface-container-highest);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    font-size: 18px;
+  }
+}
+

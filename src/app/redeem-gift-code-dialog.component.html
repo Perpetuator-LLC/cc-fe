@@ -1,0 +1,118 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<mat-card class="codes" [ngClass]="{ 'admin-view': permissions.includes('api.add_bonuscode') }">
+  <mat-card-header>
+    <div>
+      <mat-card-title>Redeem Gift Code</mat-card-title>
+      <p class="description">
+        Have a gift code? Enter it below and enjoy your exclusive benefits - it's our way of saying thank you!
+      </p>
+    </div>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-form-field appearance="fill">
+      <mat-label>Redeem Code</mat-label>
+      <input matInput [(ngModel)]="code" (ngModelChange)="codeError = false" placeholder="Enter code" />
+    </mat-form-field>
+    @if (codeError) {
+      <div class="error-message">Please enter a code before redeeming.</div>
+    }
+    <div class="btn-container">
+      <button mat-raised-button class="cancel-btn" color="primary" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button class="redeem-btn" color="primary" (click)="redeemCode()">
+        @if (redeeming) {
+          <mat-progress-spinner diameter="20" mode="indeterminate" />
+        }
+        @if (!redeeming) {
+          <span>Redeem</span>
+        }
+      </button>
+    </div>
+
+    @if (permissions.includes('api.add_bonuscode')) {
+      <div class="admin-section">
+        <h3 class="admin-title">Admin: Bonus Code Management</h3>
+        <form [formGroup]="createCodeForm" (ngSubmit)="createCode()">
+          <div class="form-row">
+            <mat-form-field appearance="fill">
+              <mat-label>Bonus Code</mat-label>
+              <input matInput formControlName="code" required />
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Credit Amount</mat-label>
+              <input matInput formControlName="creditAmount" type="number" required />
+            </mat-form-field>
+          </div>
+          <button mat-raised-button color="primary" type="submit">Create Bonus Code</button>
+        </form>
+
+        @if (loadingCodes) {
+          <div class="loading-container">
+            <mat-spinner />
+          </div>
+        }
+        @if (!loadingCodes && codes.length > 0) {
+          <div class="filter-controls">
+            <mat-button-toggle-group [value]="activeCodesFilter">
+              <mat-button-toggle [value]="true" (click)="toggleActiveFilter(true)">
+                <mat-icon>check_circle</mat-icon> Unused Codes
+              </mat-button-toggle>
+              <mat-button-toggle [value]="false" (click)="toggleActiveFilter(false)">
+                <mat-icon>cancel</mat-icon> Used Codes
+              </mat-button-toggle>
+              <mat-button-toggle [value]="null" (click)="toggleActiveFilter(null)">
+                <mat-icon>all_inclusive</mat-icon> All Codes
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="dataSource" class="codes-table">
+              <ng-container matColumnDef="code">
+                <th mat-header-cell *matHeaderCellDef>Code</th>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.code }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="creditAmount">
+                <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creditAmount }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="creator">
+                <th mat-header-cell *matHeaderCellDef>Creator</th>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.creator.username }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="consumer">
+                <th mat-header-cell *matHeaderCellDef>Consumer</th>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumer?.username || 'N/A' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="consumedAt">
+                <th mat-header-cell *matHeaderCellDef>Consumed At</th>
+                <td mat-cell *matCellDef="let giftCode">{{ giftCode.consumedAt | date: 'short' : 'local' }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: ['code', 'creditAmount', 'creator', 'consumer', 'consumedAt']"
+              ></tr>
+            </table>
+            <mat-paginator
+              [length]="totalCodes"
+              [pageIndex]="currentPage"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="[5, 10, 20]"
+              [showFirstLastButtons]="false"
+              (page)="onCodesPageChange($event)"
+            />
+          </div>
+        }
+        @if (!loadingCodes && codes.length === 0) {
+          <p class="no-codes">No codes found.</p>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
+

@@ -1,0 +1,121 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+
+mat-dialog-content {
+  min-width: 500px;
+  padding: 0 24px 20px;
+
+  @media screen and (width <= 576px) {
+    min-width: auto;
+  }
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 16px 24px;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 24px 24px 16px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.dialog-description {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.episode-type-section {
+  margin-top: 24px;
+}
+
+.section-label {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.episode-type-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.episode-type-btn {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  width: 100%;
+  min-height: 80px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  color: var(--md-sys-color-on-surface);
+  text-align: left;
+
+  background: var(--md-sys-color-surface-container);
+
+  transition: all 0.2s ease;
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-surface-container-high);
+    box-shadow: 0 4px 8px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+
+    width: 32px;
+    height: 32px;
+    margin-top: 4px;
+
+    font-size: 32px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .btn-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    align-self: center;
+
+    min-width: 0;
+  }
+
+  .btn-title {
+    font-size: 16px;
+    font-weight: 600;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+    line-height: 1.3;
+    color: var(--md-sys-color-on-surface);
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .btn-description {
+    font-size: 13px;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+    line-height: 1.4;
+    color: var(--md-sys-color-on-surface-variant);
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+}
+
