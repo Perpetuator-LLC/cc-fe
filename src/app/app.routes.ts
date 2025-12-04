@@ -321,7 +321,8 @@ export const routes: Routes = [
   },
   {
     path: 'privacy-policy',
-    loadComponent: () => import('./privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
+    loadComponent: () =>
+      import('./policy/privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
     title: 'Privacy',
     data: {
       icon: 'policy',
@@ -329,7 +330,7 @@ export const routes: Routes = [
   },
   {
     path: 'cookie-policy',
-    loadComponent: () => import('./cookie-policy/cookie-policy.component').then((c) => c.CookiePolicyComponent),
+    loadComponent: () => import('./policy/cookie-policy/cookie-policy.component').then((c) => c.CookiePolicyComponent),
     title: 'Cookie Policy',
     data: {
       icon: 'cookie',
@@ -338,7 +339,7 @@ export const routes: Routes = [
   {
     path: 'terms-and-conditions',
     loadComponent: () =>
-      import('./terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
+      import('./policy/terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
     title: 'Terms',
     data: {
       icon: 'gavel',

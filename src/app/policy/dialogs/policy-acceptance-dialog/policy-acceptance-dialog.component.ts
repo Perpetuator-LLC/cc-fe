@@ -5,11 +5,11 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/materia
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
-import { PolicyService, PolicyVersion, PolicyType } from '../policy.service';
+import { PolicyService, PolicyVersion, PolicyType } from '../../services/policy.service';
 import { Subscription } from 'rxjs';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../../message.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../../auth.service';
 import { Router } from '@angular/router';
 
 export interface PolicyAcceptanceDialogData {

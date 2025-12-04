@@ -346,9 +346,9 @@ Monitor these key indicators:
 
 ## Related Documentation
 
-- **[MD3_COMPREHENSIVE_THEME_GUIDE.md](../notes/MD3_COMPREHENSIVE_THEME_GUIDE.md)** - How to use MD3 correctly
-- **[MD3_LINTING_GUIDE.md](../notes/MD3_LINTING_GUIDE.md)** - Linting rules for MD3 compliance
-- **[copilot-instructions.md](../.github/copilot-instructions.md)** - AI coding guidelines
+- **[MD3_COMPREHENSIVE_THEME_GUIDE.md](./MD3_COMPREHENSIVE_THEME_GUIDE.md)** - How to use MD3 correctly
+- **[MD3_LINTING_GUIDE.md](./MD3_LINTING_GUIDE.md)** - Linting rules for MD3 compliance
+- **[copilot-instructions.md](../../.github/copilot-instructions.md)** - AI coding guidelines
 
 ## Success Criteria
 

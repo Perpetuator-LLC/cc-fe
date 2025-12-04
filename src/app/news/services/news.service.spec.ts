@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';
 import { NewsService } from './news.service';
-import { ErrorHandlerService } from './error-handler.service';
+import { ErrorHandlerService } from '../../error-handler.service';
 
 describe('NewsService', () => {
   let service: NewsService;

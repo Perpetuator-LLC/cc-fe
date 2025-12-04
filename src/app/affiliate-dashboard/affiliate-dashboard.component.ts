@@ -26,8 +26,9 @@ import {
 } from '../affiliate.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
-import { PolicyAcceptanceDialogComponent } from '../policy-acceptance-dialog/policy-acceptance-dialog.component';
-import { PolicyService } from '../policy.service';
+// eslint-disable-next-line max-len
+import { PolicyAcceptanceDialogComponent } from '../policy/dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
+import { PolicyService } from '../policy/services/policy.service';
 import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert-credits-dialog.component';
 // eslint-disable-next-line max-len
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';

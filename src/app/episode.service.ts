@@ -7,7 +7,7 @@ import { BaseService } from './base.service';
 import { Job } from './job.service';
 import { FetchPolicy } from '@apollo/client';
 import { ErrorHandlerService } from './error-handler.service';
-import { NewsResult } from './news.service';
+import { NewsResult } from './news/services/news.service';
 import { RelayConnection } from './utils/relay';
 import { TeamsResult } from './teams.service';
 

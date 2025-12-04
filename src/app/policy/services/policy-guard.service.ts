@@ -5,12 +5,12 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter, switchMap, take, debounceTime, catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { PolicyService, PolicyVersion, PolicyType } from './policy.service';
-import { AuthService } from './auth.service';
+import { AuthService } from '../../auth.service';
 import { CookieConsentService } from './cookie-consent.service';
 import {
   PolicyAcceptanceDialogComponent,
   PolicyAcceptanceDialogData,
-} from './policy-acceptance-dialog/policy-acceptance-dialog.component';
+} from '../dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
 
 @Injectable({
   providedIn: 'root',

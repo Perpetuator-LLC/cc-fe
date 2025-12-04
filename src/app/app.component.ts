@@ -4,10 +4,10 @@ import { RouterOutlet, Router } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { CommonModule } from '@angular/common';
 import { PreLoginLayoutComponent } from './pre-login-layout/pre-login-layout.component';
-import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
+import { CookieBannerComponent } from './policy/cookie-banner/cookie-banner.component';
 import { MessageComponent } from './message/message.component';
 import { AuthService } from './auth.service';
-import { PolicyGuardService } from './policy-guard.service';
+import { PolicyGuardService } from './policy/services/policy-guard.service';
 
 @Component({
   selector: 'app-root',

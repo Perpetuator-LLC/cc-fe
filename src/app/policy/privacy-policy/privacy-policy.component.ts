@@ -5,18 +5,18 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
-import { ToolbarService } from '../toolbar.service';
-import { AuthService } from '../auth.service';
-import { PolicyService, PolicyVersion } from '../policy.service';
+import { ToolbarService } from '../../toolbar.service';
+import { AuthService } from '../../auth.service';
+import { PolicyService, PolicyVersion } from '../services/policy.service';
 
 @Component({
-  selector: 'app-cookie-policy',
+  selector: 'app-privacy-policy',
   standalone: true,
   imports: [CommonModule, MatCard, MatCardContent, MatProgressSpinner],
-  templateUrl: './cookie-policy.component.html',
-  styleUrls: ['./cookie-policy.component.scss'],
+  templateUrl: './privacy-policy.component.html',
+  styleUrls: ['./privacy-policy.component.scss'],
 })
-export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PrivacyPolicyComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly Date = Date;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
@@ -52,14 +52,14 @@ export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.policyService.getActivePolicies().subscribe({
         next: (policies) => {
-          this.policy = policies.cookiePolicy;
+          this.policy = policies.privacyPolicy;
           if (this.policy) {
             this.policyContent = this.policyService.renderPolicyContent(this.policy);
           }
           this.loading = false;
         },
         error: (err) => {
-          console.error('Failed to load cookie policy:', err);
+          console.error('Failed to load privacy policy:', err);
           this.loading = false;
         },
       }),

@@ -108,6 +108,6 @@ The script builds the project before analyzing. If build fails:
 3. Then re-run `yarn scss:track`
 
 ## See Also
-- [MD3 Comprehensive Theme Guide](../notes/MD3_COMPREHENSIVE_THEME_GUIDE.md)
+- [MD3 Comprehensive Theme Guide](./MD3_COMPREHENSIVE_THEME_GUIDE.md)
 - [CSS Size Analysis](./css-size-analysis.md) (existing tool for runtime analysis)
 

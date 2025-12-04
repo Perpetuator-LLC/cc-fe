@@ -10,13 +10,13 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarService } from '../toolbar.service';
 import { ThemeService } from '../theme.service';
 import { MessageService } from '../message.service';
-import { CookieConsentService } from '../cookie-consent.service';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
-import { PolicyGuardService } from '../policy-guard.service';
+import { PolicyGuardService } from '../policy/services/policy-guard.service';
+import { CookieConsentService } from '../policy/services/cookie-consent.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
