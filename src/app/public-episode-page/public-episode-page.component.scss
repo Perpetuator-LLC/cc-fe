@@ -23,33 +23,33 @@
   mat-icon {
     width: 64px;
     height: 64px;
-    margin-bottom: var(--cc-spacing-md);
+    margin-bottom: 16px;
 
     font-size: 64px;
     color: var(--md-sys-color-error);
   }
 
   h2 {
-    margin-bottom: var(--cc-spacing-sm);
+    margin-bottom: 8px;
     color: var(--md-sys-color-on-surface);
   }
 
   p {
-    margin-bottom: var(--cc-spacing-lg);
+    margin-bottom: 24px;
     color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 .podcast-link-header {
-  margin-bottom: var(--cc-spacing-md);
+  margin-bottom: 16px;
 
   .podcast-link {
     display: inline-flex;
-    gap: var(--cc-spacing-sm);
+    gap: 8px;
     align-items: center;
 
-    padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-    border-radius: var(--cc-radius-md);
+    padding: 8px 16px;
+    border-radius: 8px;
 
     font-size: 16px;
     font-weight: 600;

@@ -9,7 +9,7 @@ import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
 import { MessageService } from '../message.service';
-import { PolicyService, PolicyVersion } from '../policy.service';
+import { PolicyService, PolicyVersion } from '../policy/services/policy.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 

@@ -214,9 +214,9 @@
 
     width: 90px;
     height: 16px;
-    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    padding: 4px 8px;
     border: 1px solid var(--md-extended-color-success-color);
-    border-radius: var(--cc-radius-sm);
+    border-radius: 4px;
 
     font-size: 12px;
     font-weight: 600;
@@ -232,9 +232,9 @@
 
     width: 90px;
     height: 16px;
-    padding: var(--cc-spacing-xs) var(--cc-spacing-sm);
+    padding: 4px 8px;
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: var(--cc-radius-sm);
+    border-radius: 4px;
 
     font-size: 12px;
     font-weight: 600;
@@ -507,8 +507,8 @@
     align-items: center;
     justify-content: space-between;
 
-    padding-top: var(--cc-spacing-md); // 16px to prevent overlap with layout header
-    padding-bottom: var(--cc-spacing-md);
+    padding-top: 16px; // 16px to prevent overlap with layout header
+    padding-bottom: 16px;
     padding-inline: 30px;
 
     .title {

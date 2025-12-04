@@ -6,15 +6,15 @@ mat-form-field {
 
 .info-note {
   display: flex;
-  gap: var(--cc-spacing-sm);
+  gap: 8px;
   align-items: flex-start;
 
-  margin-top: var(--cc-spacing-md);
-  padding: var(--cc-spacing-md);
-  border: 1px solid var(--cc-border-color);
-  border-radius: var(--cc-radius-md);
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
 
-  background: var(--cc-surface-elevated);
+  background: var(--md-sys-color-surface-container-high);
 
   mat-icon {
     flex-shrink: 0;
@@ -23,45 +23,45 @@ mat-form-field {
     height: 16px;
 
     font-size: 16px;
-    color: var(--cc-color-info);
+    color: var(--md-extended-color-info-color);
   }
 
   p {
     margin: 0;
     font-size: 14px;
     line-height: 1.5;
-    color: var(--cc-text-secondary);
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
 .success-container {
-  padding: var(--cc-spacing-md);
+  padding: 16px;
   text-align: center;
 
   .success-icon {
     width: 48px;
     height: 48px;
-    margin-bottom: var(--cc-spacing-sm);
+    margin-bottom: 8px;
 
     font-size: 48px;
-    color: var(--cc-color-success);
+    color: var(--md-extended-color-success-color);
   }
 
   h3 {
-    margin: 0 0 var(--cc-spacing-md) 0;
-    color: var(--cc-text-primary);
+    margin: 0 0 16px;
+    color: var(--md-sys-color-on-surface);
   }
 
   .warning-text {
     display: flex;
-    gap: var(--cc-spacing-xs);
+    gap: 4px;
     align-items: center;
     justify-content: center;
 
-    margin-bottom: var(--cc-spacing-md);
+    margin-bottom: 16px;
 
     font-weight: 500;
-    color: var(--cc-color-warning);
+    color: var(--md-extended-color-warning-color);
 
     mat-icon {
       width: 16px;
@@ -72,22 +72,22 @@ mat-form-field {
 
   .key-display {
     display: flex;
-    gap: var(--cc-spacing-sm);
+    gap: 8px;
     align-items: center;
 
-    margin-bottom: var(--cc-spacing-lg);
-    padding: var(--cc-spacing-md);
-    border: 1px solid var(--cc-border-color);
-    border-radius: var(--cc-radius-md);
+    margin-bottom: 24px;
+    padding: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
 
-    background: var(--cc-surface-elevated);
+    background: var(--md-sys-color-surface-container-high);
 
     code {
       flex: 1;
 
       font-family: 'Courier New', monospace;
       font-size: 14px;
-      color: var(--cc-text-primary);
+      color: var(--md-sys-color-on-surface);
       word-break: break-all;
     }
 
@@ -97,26 +97,26 @@ mat-form-field {
   }
 
   .key-info {
-    padding: var(--cc-spacing-md);
-    border: 1px solid var(--cc-border-color);
-    border-radius: var(--cc-radius-md);
+    padding: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
 
     text-align: left;
 
-    background: var(--cc-surface-card);
+    background: var(--md-sys-color-surface-container);
 
     p {
-      margin: var(--cc-spacing-xs) 0;
-      color: var(--cc-text-primary);
+      margin: 4px 0;
+      color: var(--md-sys-color-on-surface);
     }
 
     ul {
-      margin: var(--cc-spacing-xs) 0;
-      padding-left: var(--cc-spacing-lg);
-      color: var(--cc-text-secondary);
+      margin: 4px 0;
+      padding-left: 24px;
+      color: var(--md-sys-color-on-surface-variant);
 
       li {
-        margin: var(--cc-spacing-xs) 0;
+        margin: 4px 0;
       }
     }
   }
@@ -126,7 +126,7 @@ mat-dialog-actions {
   button {
     mat-spinner {
       display: inline-block;
-      margin-right: var(--cc-spacing-xs);
+      margin-right: 4px;
     }
   }
 }

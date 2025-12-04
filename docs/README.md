@@ -1,270 +1,46 @@
-# Demo App
+# Product Documentation Directory
 
-```
-http://localhost:4200/demo.html
-```
+> **Reserved for product-facing documentation** (Coming Soon)
 
-# GraphQL Documentation Setup
+## Current Contents
 
-## Overview
+### GraphQL API Documentation (`graphql/`)
 
-This project uses [SpectaQL](https://github.com/anvilco/spectaql) to automatically generate beautiful, interactive GraphQL API documentation from the GraphQL schema.
+Auto-generated GraphQL API documentation using SpectaQL.
 
-## How It Works
+- **Access:** `/docs/graphql/index.html`
+- **Generated:** Automatically on each build
+- **Source:** `src/app/schema.graphql` + `spectaql-config.yml`
+- **Not in Git:** Generated files are gitignored
 
-### 1. Generation Process
+See [notes/integrations/GRAPHQL_DOCS.md](../notes/integrations/GRAPHQL_DOCS.md) for setup and usage.
 
-The documentation is automatically generated on every build:
+## Developer & Stakeholder Documentation
 
-```bash
-# Manually generate docs
-yarn docs:graphql
+For developer and stakeholder documentation, see the **[`notes/`](../notes/)** directory:
 
-# Automatically generated before build
-yarn build  # runs prebuild hook which generates docs
-```
+- **Architecture** - System design and patterns
+- **Development** - Workflows and standards
+- **Reference** - Technical guides and standards
+- **Integrations** - OAuth, GraphQL, third-party services
+- **Production** - Deployment and operations
+- **Product** - Features, user stories, personas
 
-### 2. Serving the Documentation
+See [notes/README.md](../notes/README.md) for complete index.
 
-The generated HTML documentation is served by Angular as static assets:
+## Future: Product Documentation
 
-- **Direct URL**: `/docs/graphql/index.html`
-- **Development**: Available at `http://localhost:4200/docs/graphql/index.html`
-- **Production**: Available at `https://your-domain.com/docs/graphql/index.html`
+This directory is reserved for **product-facing** documentation such as:
 
-**Note**: The documentation is a standalone HTML file, not an Angular component. Access it directly via the URL above.
+- User guides
+- Feature documentation
+- Help articles
+- Tutorials
+- FAQ
 
-### 3. Configuration
+Currently, all documentation is for developers and stakeholders in the `notes/` directory.
 
-**File**: `spectaql-config.yml` (project root)
+---
 
-Key settings:
-- **Source**: `src/app/schema.graphql` - Your GraphQL schema file
-- **Output**: `docs/graphql/` - Generated documentation directory
-- **Logo**: Uses Capital Copilot logo from `public/`
-- **Servers**: Configured for both development and production APIs
-
-## Making Changes
-
-### Update API Information
-
-Edit `spectaql-config.yml`:
-
-```yaml
-info:
-  title: Capital Copilot API
-  description: |
-    Your API description here...
-  contact:
-    name: API Support
-    email: api@capitalcopilot.io
-```
-
-### Update Server URLs
-
-```yaml
-servers:
-  - url: https://api.capitalcopilot.io/graphql/
-    description: Production API
-    production: true
-```
-
-### Regenerate Documentation
-
-After making changes to:
-- `src/app/schema.graphql`
-- `spectaql-config.yml`
-
-Run:
-```bash
-yarn docs:graphql
-```
-
-## Deployment
-
-### CI/CD Integration
-
-The documentation is automatically generated during the build process:
-
-```yaml
-# Example CI/CD config
-- run: yarn install
-- run: yarn build  # This runs prebuild -> docs:graphql
-- run: deploy dist/
-```
-
-### What Gets Deployed
-
-The `dist/` folder includes:
-```
-dist/
-  capital-copilot-fe/
-    browser/
-      docs/
-        graphql/
-          index.html       # Main docs page
-          stylesheets/     # Styles
-          javascripts/     # Interactive features
-          images/          # Assets
-```
-
-## Version Control
-
-### Ignored Files
-
-The generated docs are NOT committed to git:
-- `docs/graphql/` is in `.gitignore`
-- Only source files are committed:
-  - `spectaql-config.yml`
-  - `src/app/schema.graphql`
-
-### Why?
-
-- Generated files are large and change frequently
-- Prevents merge conflicts
-- Reduces repository size
-- Documentation is always fresh from the latest schema
-
-## Architecture
-
-### Angular Integration
-
-**angular.json** assets configuration:
-```json
-"assets": [
-  {
-    "glob": "**/*",
-    "input": "docs/graphql",
-    "output": "/docs/graphql"
-  }
-]
-```
-
-This copies the generated docs to the Angular build output.
-
-### Direct Static Access
-
-The documentation is served as a static HTML file, **not** through Angular routing. This means:
-
-1. ✅ **No Angular route needed**: Access directly via `/docs/graphql/index.html`
-2. ✅ **Works immediately**: No component loading or redirect
-3. ✅ **Better performance**: Static file served directly by the web server
-4. ✅ **SEO friendly**: Search engines can index the documentation
-
-### Why This Approach?
-
-1. **No nginx config needed**: Angular serves everything
-2. **Works in development**: Available during `ng serve`
-3. **Single deployment**: Docs bundled with app
-4. **Always in sync**: Regenerated on every build
-
-## Linking to Documentation
-
-### In Angular Components
-
-```typescript
-// Navigate to docs via window.location (opens in same tab)
-window.location.href = '/docs/graphql/index.html';
-
-// Or open in new tab
-window.open('/docs/graphql/index.html', '_blank');
-```
-
-### In Templates
-
-```html
-<!-- Direct link to static HTML -->
-<a href="/docs/graphql/index.html">API Documentation</a>
-
-<!-- Open in new tab -->
-<a href="/docs/graphql/index.html" target="_blank">API Documentation</a>
-```
-
-### In Navigation Menu
-
-Add to your navigation:
-```typescript
-{
-  label: 'API Docs',
-  icon: 'api',
-  link: '/docs/graphql/index.html', // Direct link, not a route
-  external: true
-}
-```
-
-## Customization
-
-### Styling
-
-SpectaQL uses customizable themes. Edit `spectaql-config.yml`:
-
-```yaml
-spectaql:
-  themeDir: ./custom-theme  # Optional custom theme
-  logoFile: ./path/to/logo.png
-```
-
-### Examples
-
-Add example queries in your schema:
-```graphql
-"""
-Example:
-```graphql
-query {
-  podcasts(first: 10) {
-    edges {
-      node {
-        id
-        title
-      }
-    }
-  }
-}
-```
-"""
-type Query {
-  podcasts: PodcastConnection
-}
-```
-
-## Troubleshooting
-
-### Docs not showing after build
-
-1. Check that `prebuild` script ran:
-   ```bash
-   yarn docs:graphql
-   ```
-
-2. Verify files exist:
-   ```bash
-   ls -la docs/graphql/
-   ```
-
-3. Check Angular assets config in `angular.json`
-
-### Schema not updating
-
-1. Ensure schema file is correct:
-   ```bash
-   cat src/app/schema.graphql
-   ```
-
-2. Manually regenerate:
-   ```bash
-   yarn docs:graphql
-   ```
-
-### 404 on /docs/graphql
-
-1. Check that route exists in `app.routes.ts`
-2. Verify assets are copied to `dist/`
-3. Clear browser cache
-
-## Resources
-
-- [SpectaQL Documentation](https://github.com/anvilco/spectaql)
-- [GraphQL Schema Best Practices](https://graphql.org/learn/schema/)
-- [Angular Assets Configuration](https://angular.io/guide/workspace-config#assets-configuration)
+**Note:** Do not add developer documentation here. Use the `notes/` directory instead.
 

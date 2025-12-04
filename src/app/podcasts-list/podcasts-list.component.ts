@@ -32,7 +32,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { NewsService } from '../news.service';
+import { NewsService } from '../news/services/news.service';
 import { EpisodeService } from '../episode.service';
 import { Job, JobService } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';

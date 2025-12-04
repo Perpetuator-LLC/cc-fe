@@ -18,7 +18,7 @@
 
   .news-item {
     height: auto;
-    margin-bottom: var(--cc-spacing-sm);
+    margin-bottom: 8px;
     padding-bottom: 2px;
   }
 
@@ -30,8 +30,8 @@
     max-width: 200px;
     height: auto;
     max-height: 200px;
-    margin-right: var(--cc-spacing-md);
-    margin-bottom: var(--cc-spacing-md);
+    margin-right: 16px;
+    margin-bottom: 16px;
   }
 }
 
@@ -89,16 +89,16 @@
         cursor: help;
 
         display: flex;
-        gap: var(--cc-spacing-sm);
+        gap: 8px;
         align-items: center;
 
-        padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-        border: 1px solid var(--cc-border-color);
-        border-radius: var(--cc-radius-md);
+        padding: 8px 16px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 8px;
 
         font-size: 14px;
         font-weight: 500;
-        color: var(--cc-text-secondary);
+        color: var(--md-sys-color-on-surface-variant);
 
         background-color: var(--md-sys-color-surface-container-high);
 
@@ -107,7 +107,7 @@
           height: 16px;
 
           font-size: 16px;
-          color: var(--cc-color-warning);
+          color: var(--md-extended-color-warning-color);
           vertical-align: middle;
         }
 
@@ -221,7 +221,7 @@
   .news-card {
     cursor: pointer;
     display: flex;
-    gap: var(--cc-spacing-md);
+    gap: 16px;
     align-items: center;
 
     &:hover .news-card-wrapper {
@@ -237,9 +237,9 @@
       flex: 1;
 
       min-width: 0;
-      padding: var(--cc-spacing-md) var(--cc-spacing-md);
-      border: 1px solid var(--cc-border-color);
-      border-radius: var(--cc-radius-md);
+      padding: 16px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 8px;
 
       background: var(--md-sys-color-surface-container);
 
@@ -253,7 +253,7 @@
 
     .news-content {
       display: flex;
-      gap: var(--cc-spacing-md);
+      gap: 16px;
       align-items: center;
       justify-content: space-between;
 
@@ -274,7 +274,7 @@
       .title {
         display: flex;
         flex-wrap: nowrap;
-        gap: var(--cc-spacing-sm);
+        gap: 8px;
         align-items: center;
 
         min-width: 0;
@@ -466,10 +466,10 @@
       flex-shrink: 0;
 
       min-width: fit-content;
-      margin-top: var(--cc-spacing-sm);
-      margin-bottom: var(--cc-spacing-md);
-      padding: var(--cc-spacing-sm) var(--cc-spacing-md);
-      border-radius: var(--cc-radius-md);
+      margin-top: 8px;
+      margin-bottom: 16px;
+      padding: 8px 16px;
+      border-radius: 8px;
 
       font-weight: 600;
       white-space: nowrap;
@@ -477,7 +477,7 @@
       // Let Material color directive handle background and text colors
 
       &.regenerate-summary-btn {
-        margin-left: var(--cc-spacing-sm);
+        margin-left: 8px;
       }
 
       &:disabled {
@@ -782,12 +782,12 @@
 // Select all button
 .select-btn {
   display: flex;
-  gap: var(--cc-spacing-sm);
+  gap: 8px;
   align-items: center;
 
-  padding: var(--cc-spacing-sm) var(--cc-spacing-sm);
-  border: 1px solid var(--cc-border-color);
-  border-radius: var(--cc-radius-md);
+  padding: 8px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
 

@@ -43,7 +43,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { CommonModule } from '@angular/common';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { LoadingService } from '../loading.service';
-import { NewsService } from '../news.service';
+import { NewsService } from '../news/services/news.service';
 import { EpisodeService } from '../episode.service';
 import { JobService } from '../job.service';
 import { ResearchService } from '../research.service';

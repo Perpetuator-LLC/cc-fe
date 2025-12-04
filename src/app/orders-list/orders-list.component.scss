@@ -11,7 +11,7 @@
     .header {
       display: flex;
       justify-content: space-between;
-      margin-top: var(--cc-spacing-2xl);
+      margin-top: 48px;
       margin-bottom: 34px;
 
       .title {
@@ -35,7 +35,7 @@
       .credits {
         h4 {
           margin: 0;
-          font-size: var(--cc-spacing-xl);
+          font-size: 32px;
           font-weight: 700;
           color: var(--theme-yellow);
         }
@@ -52,17 +52,17 @@
 
       @media screen and (width <= 600px) {
         flex-wrap: wrap;
-        margin-top: var(--cc-spacing-lg);
+        margin-top: 24px;
       }
     }
   }
 
   .tab-content {
-    margin-top: var(--cc-spacing-2xl);
+    margin-top: 48px;
 
     .input-field {
       display: flex;
-      gap: var(--cc-spacing-lg);
+      gap: 24px;
       align-items: center;
 
       mat-form-field {
@@ -95,7 +95,7 @@
       display: flex;
       gap: 8px;
       align-items: center;
-      margin-bottom: var(--cc-spacing-lg);
+      margin-bottom: 24px;
 
       button {
         cursor: pointer;
@@ -120,7 +120,7 @@
     .checkbox-container {
       display: flex;
       flex-direction: column;
-      margin-bottom: var(--cc-spacing-lg);
+      margin-bottom: 24px;
 
       p {
         margin: 0;

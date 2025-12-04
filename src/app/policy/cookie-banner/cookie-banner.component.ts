@@ -3,9 +3,9 @@ import { Component, computed, OnInit, OnDestroy, signal, WritableSignal, effect 
 import { MatButton } from '@angular/material/button';
 import { MatCardFooter } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
-import { CookieConsentService } from '../cookie-consent.service';
-import { PolicyService, PolicyType, ActivePoliciesResult } from '../policy.service';
-import { AuthService } from '../auth.service';
+import { CookieConsentService } from '../services/cookie-consent.service';
+import { PolicyService, PolicyType, ActivePoliciesResult } from '../services/policy.service';
+import { AuthService } from '../../auth.service';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { NewsConnection, NewsService, NewsResult } from '../news.service';
+import { NewsConnection, NewsService, NewsResult } from './services/news.service';
 import { DatePipe } from '@angular/common';
 import { NgClass } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
