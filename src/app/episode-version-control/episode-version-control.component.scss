@@ -1,71 +1,5 @@
 /* Copyright (c) 2025 Perpetuator LLC */
-
-@mixin primary-button {
-  display: inline-flex;
-  flex-shrink: 0;
-  gap: 8px;
-  align-items: center;
-
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
-
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--md-sys-color-on-secondary);
-  white-space: nowrap;
-
-  background: var(--md-sys-color-secondary);
-
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    color: var(--md-sys-color-on-surface-variant);
-    opacity: 0.6;
-    background-color: var(--md-sys-color-surface-container-high);
-  }
-}
-
-@mixin icon-size($size: 16px) {
-  width: $size;
-  height: $size;
-  margin: 0;
-  font-size: $size;
-}
-
-@mixin card-container {
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
-  color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface-container);
-}
-
-@mixin badge($bg-color, $text-color) {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-  justify-content: center;
-
-  padding: 4px 8px;
-  border-radius: 8px;
-
-  font-size: 12px;
-  font-weight: 600;
-  color: $text-color;
-
-  background: $bg-color;
-
-  mat-icon {
-    @include icon-size(14px);
-
-    color: $text-color;
-  }
-}
+@use 'styles/mixins' as mixins;
 
 @mixin version-audio-player {
   display: flex;
@@ -108,6 +42,7 @@
   border-radius: 8px;
 
   font-size: 13px;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   line-height: 1.5;
   color: var(--md-sys-color-on-surface);
 
@@ -118,7 +53,7 @@
     margin-top: 2px;
     color: var(--md-sys-color-secondary);
 
-    @include icon-size(20px);
+    @include mixins.icon-size(20px);
   }
 }
 
@@ -126,7 +61,7 @@
   margin: 16px 0;
 
   .version-control-panel {
-    @include card-container ();
+    @include mixins.card-container ();
 
     box-shadow: none;
 
@@ -152,7 +87,7 @@
       color: var(--md-sys-color-on-surface);
 
       mat-icon {
-        @include icon-size(20px);
+        @include mixins.icon-size(20px);
 
         color: var(--md-sys-color-secondary);
       }
@@ -167,7 +102,7 @@
       color: var(--md-sys-color-on-surface-variant);
 
       .status-icon {
-        @include icon-size(16px);
+        @include mixins.icon-size(16px);
 
         margin-left: 4px;
 
@@ -219,14 +154,14 @@
       gap: 12px;
 
       button {
-        @include primary-button ();
+        @include mixins.primary-button ();
 
         height: 36px;
         min-height: 36px;
         padding: 8px 16px;
 
         mat-icon {
-          @include icon-size(18px);
+          @include mixins.icon-size(18px);
         }
 
         &[color="accent"] {
@@ -275,25 +210,7 @@
       }
 
       .version-actions {
-        display: flex;
-        gap: 8px;
-
-        button {
-          @include primary-button ();
-
-          height: 32px;
-          min-height: 32px;
-          padding: 8px 12px;
-
-          mat-icon {
-            @include icon-size(16px);
-          }
-
-          &[color="accent"] {
-            color: var(--md-sys-color-on-success);
-            background: var(--md-sys-color-success);
-          }
-        }
+        @include mixins.card-action-buttons();
       }
     }
 
@@ -319,59 +236,12 @@
         }
 
         .version-metadata {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          align-items: center;
-
-          font-size: 13px;
-          color: var(--md-sys-color-on-surface-variant);
-
-          > span {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-          }
-
-          .change-type {
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-          }
+          @include mixins.version-header-metadata();
         }
       }
 
       .version-stats {
-        display: flex;
-        gap: 40px;
-
-        margin-bottom: 16px;
-        padding: 12px;
-        border-radius: 8px;
-
-        background: var(--md-sys-color-surface-container);
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-
-          .stat-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface-variant);
-          }
-
-          .stat-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--md-sys-color-on-surface);
-          }
-        }
-
-        @media screen and (width <= 576px) {
-          flex-direction: column;
-          gap: 12px;
-        }
+        @include mixins.stats-container();
       }
 
       .version-audio {
@@ -413,7 +283,7 @@
       background: var(--md-sys-color-surface-container-high);
 
       mat-icon {
-        @include icon-size(24px);
+        @include mixins.icon-size(24px);
 
         flex-shrink: 0;
       }
@@ -421,18 +291,24 @@
       p {
         margin: 0;
         font-size: 14px;
+        /* stylelint-disable-next-line declaration-property-value-disallowed-list */
         line-height: 1.5;
       }
     }
   }
 }
 
+// Extracted to reduce nesting depth
+.version-control-section .stat-item {
+  @include mixins.version-stat-item();
+}
+
 .validated-badge {
-  @include badge(var(--md-sys-color-success), #ffffff);
+  @include mixins.status-success();
 }
 
 .unvalidated-badge {
-  @include badge(var(--md-sys-color-warning), var(--md-sys-color-surface-container));
+  @include mixins.status-warning();
 }
 
 .version-option {
@@ -457,23 +333,23 @@
     color: var(--md-sys-color-on-surface-variant);
 
     .version-icon {
-      @include icon-size(16px);
+      @include mixins.icon-size(16px);
     }
 
     .validated-icon {
-      @include icon-size(14px);
+      @include mixins.icon-size(14px);
 
       color: var(--md-sys-color-success);
     }
 
     .unvalidated-icon {
-      @include icon-size(14px);
+      @include mixins.icon-size(14px);
 
       color: var(--md-sys-color-warning);
     }
 
     .audio-icon {
-      @include icon-size(14px);
+      @include mixins.icon-size(14px);
 
       color: var(--md-sys-color-secondary);
     }
@@ -482,11 +358,11 @@
 
 // Flattened selectors to avoid deep nesting
 .change-type-value mat-icon {
-  @include icon-size(16px);
+  @include mixins.icon-size(16px);
 }
 
 .version-metadata > span mat-icon {
-  @include icon-size(16px);
+  @include mixins.icon-size(16px);
 }
 
 .full-width {

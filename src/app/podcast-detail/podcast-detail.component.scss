@@ -464,8 +464,6 @@ mat-divider {
       }
 
       .blank-episode-button {
-        @include md3.md3-custom-button-states ();
-
         display: inline-flex;
         flex-shrink: 0;
         gap: 8px;

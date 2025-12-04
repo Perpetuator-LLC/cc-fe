@@ -987,60 +987,60 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
 
-  .rss-feed-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+.rss-feed-cell .rss-feed-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  .feed-name {
+    flex: 1;
+    font-size: 12px;
+  }
+}
+
+.rss-feed-cell .feed-status-icons {
+  display: flex;
+  gap: 4px;
+}
+
+.rss-feed-cell .status-icon-small {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  border-radius: var(--cc-radius-sm);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &.status-success {
+    border: 1px solid var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color);
+    background-color: var(--md-extended-color-success-color-container);
 
     mat-icon {
-      flex-shrink: 0;
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
+      color: var(--md-extended-color-success-color);
     }
+  }
 
-    .feed-name {
-      flex: 1;
-      font-size: 12px;
-    }
+  &.status-error {
+    border: 1px solid var(--md-sys-color-error);
+    color: var(--md-sys-color-error);
+    background-color: var(--md-sys-color-error-container);
 
-    .feed-status-icons {
-      display: flex;
-      gap: 4px;
-
-      .status-icon-small {
-        display: flex;
-        align-items: center;
-        padding: 2px 4px;
-        border-radius: var(--cc-radius-sm);
-
-        mat-icon {
-          width: 16px;
-          height: 16px;
-          font-size: 16px;
-        }
-
-        &.status-success {
-          border: 1px solid var(--md-extended-color-success-color);
-          color: var(--md-extended-color-success-color);
-          background-color: var(--md-extended-color-success-color-container);
-
-          mat-icon {
-            color: var(--md-extended-color-success-color);
-          }
-        }
-
-        &.status-error {
-          border: 1px solid var(--md-sys-color-error);
-          color: var(--md-sys-color-error);
-          background-color: var(--md-sys-color-error-container);
-
-          mat-icon {
-            color: var(--md-sys-color-error);
-          }
-        }
-      }
+    mat-icon {
+      color: var(--md-sys-color-error);
     }
   }
 }
