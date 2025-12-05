@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
-import { AffiliateService } from '../affiliate.service';
+import { AffiliateService } from '../affiliate/affiliate.service';
 import { MessageService } from '../message.service';
 
 @Component({

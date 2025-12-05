@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
+import { AffiliateService, AffiliateEligibility } from '../affiliate/affiliate.service';
 import { Router } from '@angular/router';
 
 @Component({

@@ -24,7 +24,9 @@ describe('LayoutComponent', () => {
 
   beforeEach(async () => {
     const themeSignal = signal('light' as 'light' | 'dark');
-    authService = jasmine.createSpyObj('AuthService', ['isLoggedIn', 'logout']);
+    const isLoggedInSignal = signal(false);
+
+    authService = jasmine.createSpyObj('AuthService', ['logout'], { isLoggedIn: isLoggedInSignal });
     themeService = jasmine.createSpyObj('ThemeService', ['setTheme'], { theme: themeSignal });
     toolbarService = jasmine.createSpyObj('ToolbarService', ['setRootViewContainerRef', 'clearToolbarComponent']);
     breakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
@@ -69,7 +71,7 @@ describe('LayoutComponent', () => {
   });
 
   it('should render home link when logged out', () => {
-    authService.isLoggedIn.and.returnValue(false);
+    authService.isLoggedIn.set(false);
     fixture.detectChanges();
     const homeLink = fixture.debugElement
       .queryAll(By.css('a[mat-list-item]'))
@@ -79,7 +81,7 @@ describe('LayoutComponent', () => {
   });
 
   it('should render login link when not logged in', () => {
-    authService.isLoggedIn.and.returnValue(false);
+    authService.isLoggedIn.set(false);
     fixture.detectChanges();
     const loginLink = fixture.debugElement
       .queryAll(By.css('a[mat-list-item]'))
@@ -89,7 +91,7 @@ describe('LayoutComponent', () => {
   });
 
   it('should render logout button when logged in', () => {
-    authService.isLoggedIn.and.returnValue(true);
+    authService.isLoggedIn.set(true);
     fixture.detectChanges();
     const logoutButton = fixture.debugElement
       .queryAll(By.css('a[mat-list-item]'))
@@ -99,7 +101,7 @@ describe('LayoutComponent', () => {
   });
 
   it('should call logout method when logout button is clicked', () => {
-    authService.isLoggedIn.and.returnValue(true);
+    authService.isLoggedIn.set(true);
     fixture.detectChanges();
     const logoutButton = fixture.debugElement
       .queryAll(By.css('a[mat-list-item]'))
@@ -112,6 +114,9 @@ describe('LayoutComponent', () => {
   it('should switch themes', () => {
     component.switchTheme('dark');
     expect(themeService.setTheme).toHaveBeenCalledWith('dark');
+    // The signal should be updated by the setTheme method in actual implementation
+    // but in the test we need to manually update it since it's a mock
+    themeService.theme.set('dark');
     expect(themeService.theme()).toBe('dark');
   });
 

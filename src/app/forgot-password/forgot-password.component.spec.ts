@@ -101,6 +101,7 @@ describe('ForgotPasswordComponent', () => {
 
     expect(graphqlAuthService.forgot).toHaveBeenCalledWith('test@example.com');
     expect(routerMock.navigate).not.toHaveBeenCalled();
-    expect(messageServiceMock.addMessage).toHaveBeenCalled();
+    // Error message is handled by GraphqlAuthService, not by component
+    expect(component.isLoading).toBe(false);
   });
 });

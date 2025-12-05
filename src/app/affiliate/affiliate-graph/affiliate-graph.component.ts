@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { AffiliateService, ExportAffiliateGraphResponse } from '../affiliate.service';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 import mermaid from 'mermaid';
 
 // Extend Window interface to include our custom callback

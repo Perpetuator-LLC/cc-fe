@@ -24,19 +24,19 @@ import {
   AffiliateEligibility,
   AffiliateConversionUtils,
 } from '../affiliate.service';
-import { MessageService } from '../message.service';
-import { UserService } from '../user.service';
+import { MessageService } from '../../message.service';
+import { UserService } from '../../user.service';
 // eslint-disable-next-line max-len
-import { PolicyAcceptanceDialogComponent } from '../policy/dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
-import { PolicyService } from '../policy/services/policy.service';
-import { ConvertCreditsDialogComponent } from '../convert-credits-dialog/convert-credits-dialog.component';
+import { PolicyAcceptanceDialogComponent } from '../../policy/dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
+import { PolicyService, ActivePoliciesResult } from '../../policy/services/policy.service';
+import { ConvertCreditsDialogComponent } from '../../convert-credits-dialog/convert-credits-dialog.component';
 // eslint-disable-next-line max-len
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
 import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
+import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
+import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-affiliate-dashboard',
@@ -189,7 +189,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     // Get affiliate terms policy and show in unified dialog
     this.subscriptions.add(
       this.policyService.getActivePolicies().subscribe({
-        next: (policies) => {
+        next: (policies: ActivePoliciesResult) => {
           if (!policies.affiliateTerms) {
             this.messageService.error('Affiliate terms are not available at this time');
             this.router.navigate(['/home']);
@@ -216,7 +216,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
             }
           });
         },
-        error: (err) => {
+        error: (err: Error) => {
           console.error('Failed to load affiliate terms:', err);
           this.messageService.error('Failed to load affiliate terms');
           this.router.navigate(['/home']);
