@@ -1,9 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { Router } from '@angular/router';
-import { ToolbarService } from '../toolbar.service';
-import { MessageService } from '../message.service';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -13,17 +11,19 @@ import {
   CreateEpisodeDialogComponent,
   CreateEpisodeDialogResult,
 } from '../create-episode-dialog/create-episode-dialog.component';
-import { NewsService } from '../news/services/news.service';
-import { Job, JobService } from '../job.service';
-import { ResearchService, Topic } from '../research.service';
-import { SelectTopicDialogComponent } from '../select-topic-dialog/select-topic-dialog.component';
-import { PodcastsService } from '../podcasts.service';
+import { SelectTopicDialogComponent } from '../../select-topic-dialog/select-topic-dialog.component';
 import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
+import { MessageService } from '../../message.service';
+import { ToolbarService } from '../../toolbar.service';
+import { PodcastsService } from '../../podcasts.service';
+import { ResearchService, Topic } from '../../research.service';
+import { NewsService } from '../../news/services/news.service';
+import { Job, JobService } from '../../job.service';
 
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
-  imports: [MatButton, MatCard, MatCardHeader, MatIcon, MatCardContent, CommonModule, EpisodesTableComponent],
+  imports: [MatButton, MatCard, MatIcon, MatCardContent, CommonModule, EpisodesTableComponent],
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
 })

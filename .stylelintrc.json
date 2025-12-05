@@ -17,21 +17,22 @@
     "declaration-no-important": [
       true,
       {
-        "severity": "warning",
-        "message": "Avoid !important - use specificity or Material component variants instead"
+        "severity": "error",
+        "message": "!important is prohibited - use specificity or Material component variants instead"
       }
     ],
     "max-nesting-depth": [
       4,
       {
-        "severity": "warning",
-        "message": "Nesting too deep - consider refactoring or using Material components"
+        "severity": "error",
+        "message": "Nesting too deep (max 4 levels) - refactor or use Material components"
       }
     ],
     "selector-max-id": [
       0,
       {
-        "severity": "warning"
+        "severity": "error",
+        "message": "ID selectors are prohibited - use classes instead"
       }
     ],
     "scss/at-import-partial-extension": null,
@@ -70,24 +71,24 @@
         ]
       },
       {
-        "severity": "warning",
-        "message": "Use MD3 4px grid spacing (4px, 8px, 12px, 16px, 20px, 24px, etc.). For dynamic values, use calc() with design tokens."
+        "severity": "error",
+        "message": "MUST use MD3 4px grid spacing (4px, 8px, 12px, 16px, 20px, 24px, etc.). For dynamic values, use calc() with design tokens."
       }
     ],
 
     "color-no-hex": [
       true,
       {
-        "severity": "warning",
-        "message": "Use MD3 design tokens (--md-sys-color-*) instead of hex colors for theme support."
+        "severity": "error",
+        "message": "Hex colors are prohibited - MUST use MD3 design tokens (--md-sys-color-*) for theme support."
       }
     ],
 
     "function-disallowed-list": [
       ["rgb", "rgba", "hsl", "hsla"],
       {
-        "severity": "warning",
-        "message": "Use MD3 design tokens (--md-sys-color-*) instead of color functions for theme support."
+        "severity": "error",
+        "message": "Color functions are prohibited - MUST use MD3 design tokens (--md-sys-color-*) for theme support."
       }
     ],
 
@@ -128,8 +129,66 @@
     "font-family-no-missing-generic-family-keyword": [
       true,
       {
-        "severity": "warning",
-        "message": "Add a generic font family fallback (e.g., sans-serif)"
+        "severity": "error",
+        "message": "Font family MUST include a generic fallback (e.g., sans-serif, serif, monospace)"
+      }
+    ],
+
+    "selector-max-compound-selectors": [
+      5,
+      {
+        "severity": "error",
+        "message": "Too many compound selectors (max 5) - simplify your selector"
+      }
+    ],
+
+    "selector-max-specificity": [
+      "0,5,0",
+      {
+        "severity": "error",
+        "message": "Selector specificity too high - avoid overly specific selectors"
+      }
+    ],
+
+    "declaration-block-no-shorthand-property-overrides": [
+      true,
+      {
+        "severity": "error",
+        "message": "Shorthand property overriding longhand - remove the duplicate"
+      }
+    ],
+
+    "no-unknown-animations": [
+      true,
+      {
+        "severity": "error",
+        "message": "Unknown animation name - define @keyframes or remove animation"
+      }
+    ],
+
+    "keyframe-block-no-duplicate-selectors": [
+      true,
+      {
+        "severity": "error",
+        "message": "Duplicate keyframe selector - merge or remove duplicate"
+      }
+    ],
+
+    "scss/at-extend-no-missing-placeholder": [
+      true,
+      {
+        "severity": "error",
+        "message": "@extend should only extend placeholders (%) not classes (.)"
+      }
+    ],
+
+    "scss/dollar-variable-empty-line-before": null,
+
+    "scss/at-if-no-null": [
+      true,
+      {
+        "severity": "error",
+        "message": "Comparing to null is unreliable - use 'not' or comparison operators"
       }
     ]
   }

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './job.service';
-import { EpisodeService } from './episode.service';
+import { EpisodeService } from './episode/episode.service';
 import { PodcastsService } from './podcasts.service';
 import { ResearchService } from './research.service';
 import { MessageService } from './message.service';

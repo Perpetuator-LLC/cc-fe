@@ -1,9 +1,8 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardHeader } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatOption } from '@angular/material/core';
-import { MessageService } from '../message.service';
 import { Episode, EpisodeService } from '../episode.service';
 import { Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -24,34 +23,32 @@ import {
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { PodcastsResult, PodcastsService } from '../podcasts.service';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog/confirm-delete-dialog.component';
+import { MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
-import { LoadingService } from '../loading.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { RelayPaginatorBase } from '../utils/relay-paginator';
+import { RelayPaginatorBase } from '../../utils/relay-paginator';
+import { PodcastsResult, PodcastsService } from '../../podcasts.service';
+import { MessageService } from '../../message.service';
+import { LoadingService } from '../../loading.service';
 
 @Component({
   selector: 'app-episodes-table',
   standalone: true,
   imports: [
     FormsModule,
-    MatButton,
     MatCard,
     SvgIconComponent,
     MatCardHeader,
     MatIcon,
-
     MatProgressBarModule,
-    MatCardContent,
     MatTable,
     MatSort,
     MatHeaderCell,
@@ -75,7 +72,6 @@ import { RelayPaginatorBase } from '../utils/relay-paginator';
     MatMenuItem,
     MatPrefix,
     MatIconButton,
-    MatButton,
     MatInput,
     CommonModule,
     MatTooltip,

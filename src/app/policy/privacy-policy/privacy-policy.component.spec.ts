@@ -2,8 +2,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { PrivacyPolicyComponent } from './privacy-policy.component';
-import { ToolbarService } from '../toolbar.service';
-import { AuthService } from '../auth.service';
+import { ToolbarService } from '../../toolbar.service';
+import { AuthService } from '../../auth.service';
 import { ViewContainerRef } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';

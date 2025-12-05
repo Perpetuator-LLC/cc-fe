@@ -5,7 +5,7 @@ import { JobService } from '../job.service';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
 import { PodcastsService } from '../podcasts.service';
-import { EpisodeService } from '../episode.service';
+import { EpisodeService } from '../episode/episode.service';
 import { JobDisplayService } from '../job-display.service';
 import { ResearchService } from '../research.service';
 import { LoadingService } from '../loading.service';
