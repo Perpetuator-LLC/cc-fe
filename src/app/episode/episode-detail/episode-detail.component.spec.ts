@@ -223,7 +223,7 @@ describe('EpisodeDetailComponent', () => {
       component.onIsLiveChange(true);
 
       expect(messageService.warning).not.toHaveBeenCalled();
-      expect(component.updateEpisode).toHaveBeenCalled();
+      expect(component.episodeForm.dirty).toBe(true);
     });
 
     it('should allow setting episode as live when live audio exists (even if current has none)', () => {
@@ -235,7 +235,7 @@ describe('EpisodeDetailComponent', () => {
       component.onIsLiveChange(true);
 
       expect(messageService.warning).not.toHaveBeenCalled();
-      expect(component.updateEpisode).toHaveBeenCalled();
+      expect(component.episodeForm.dirty).toBe(true);
     });
 
     it('should allow unsetting episode from live (setting to false) even without audio', () => {
@@ -247,7 +247,7 @@ describe('EpisodeDetailComponent', () => {
       component.onIsLiveChange(false);
 
       expect(messageService.warning).not.toHaveBeenCalled();
-      expect(component.updateEpisode).toHaveBeenCalled();
+      expect(component.episodeForm.dirty).toBe(true);
     });
   });
 
@@ -315,9 +315,8 @@ describe('EpisodeDetailComponent', () => {
 
       // Step 3: Set episode live (should succeed)
       component.episodeForm = new FormBuilder().group({ isLive: [false] });
-      spyOn(component, 'updateEpisode');
       component.onIsLiveChange(true);
-      expect(component.updateEpisode).toHaveBeenCalled();
+      expect(component.episodeForm.dirty).toBe(true);
       expect(messageService.warning).not.toHaveBeenCalled();
     });
 
@@ -356,9 +355,8 @@ describe('EpisodeDetailComponent', () => {
       expect(component.getLiveAudioVersionText()).toBe('Previous version');
 
       // User can still uncheck isLive
-      spyOn(component, 'updateEpisode');
       component.onIsLiveChange(false);
-      expect(component.updateEpisode).toHaveBeenCalled();
+      expect(component.episodeForm.dirty).toBe(true);
     });
 
     it('Scenario 4: Restoring old version of live episode', () => {

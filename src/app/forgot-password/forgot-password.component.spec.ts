@@ -82,20 +82,24 @@ describe('ForgotPasswordComponent', () => {
   });
 
   it('should call authService.forgot on successful submission', () => {
-    authServiceMock.forgot.and.returnValue(of({ detail: 'Password reset email sent' }));
+    const graphqlAuthService = TestBed.inject(GraphqlAuthService) as jasmine.SpyObj<GraphqlAuthService>;
+    graphqlAuthService.forgot.and.returnValue(of(true));
 
+    component.forgotForm.setValue({ email: 'test@example.com' });
     component.onSubmit();
 
-    expect(authServiceMock.forgot).toHaveBeenCalledWith(component.forgotForm.value.email as string);
+    expect(graphqlAuthService.forgot).toHaveBeenCalledWith('test@example.com');
   });
 
   it('should handle errors and not navigate on failed submission', () => {
+    const graphqlAuthService = TestBed.inject(GraphqlAuthService) as jasmine.SpyObj<GraphqlAuthService>;
     const errorResponse = 'A special error occurred';
-    authServiceMock.forgot.and.returnValue(throwError(() => new Error(errorResponse)));
+    graphqlAuthService.forgot.and.returnValue(throwError(() => new Error(errorResponse)));
 
+    component.forgotForm.setValue({ email: 'test@example.com' });
     component.onSubmit();
 
-    expect(authServiceMock.forgot).toHaveBeenCalledWith(component.forgotForm.value.email as string);
+    expect(graphqlAuthService.forgot).toHaveBeenCalledWith('test@example.com');
     expect(routerMock.navigate).not.toHaveBeenCalled();
     expect(messageServiceMock.addMessage).toHaveBeenCalled();
   });

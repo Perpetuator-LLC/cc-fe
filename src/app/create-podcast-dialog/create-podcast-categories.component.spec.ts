@@ -62,7 +62,12 @@ describe('CreatePodcastCategoriesComponent', () => {
 
   it('should handle parent category selection', () => {
     const onChangeSpy = spyOn(component as unknown as { onChange: (...args: unknown[]) => void }, 'onChange');
-    component.onCategorySelectionChange(['parent:Technology']);
+    // Parent selection is handled by the mat-select - component only processes sub: values
+    component.onCategorySelectionChange([
+      'sub:Technology:AI',
+      'sub:Technology:Programming',
+      'sub:Technology:Cybersecurity',
+    ]);
 
     expect(component.value['Technology']).toEqual(['AI', 'Programming', 'Cybersecurity']);
     expect(onChangeSpy).toHaveBeenCalled();
@@ -78,7 +83,12 @@ describe('CreatePodcastCategoriesComponent', () => {
 
   it('should handle mixed selection', () => {
     const onChangeSpy = spyOn(component as unknown as { onChange: (...args: unknown[]) => void }, 'onChange');
-    component.onCategorySelectionChange(['parent:Technology', 'sub:Business:Startups']);
+    component.onCategorySelectionChange([
+      'sub:Technology:AI',
+      'sub:Technology:Programming',
+      'sub:Technology:Cybersecurity',
+      'sub:Business:Startups',
+    ]);
 
     expect(component.value['Technology']).toEqual(['AI', 'Programming', 'Cybersecurity']);
     expect(component.value['Business']).toEqual(['Startups']);
@@ -92,10 +102,10 @@ describe('CreatePodcastCategoriesComponent', () => {
     };
 
     const selectedValues = component.getSelectedValues();
-    expect(selectedValues).toContain('parent:Technology');
     expect(selectedValues).toContain('sub:Technology:AI');
     expect(selectedValues).toContain('sub:Technology:Programming');
     expect(selectedValues).toContain('sub:Business:Startups');
+    expect(selectedValues.length).toBe(3); // Only subcategories, no parent
   });
 
   it('should get all selected categories for display', () => {
