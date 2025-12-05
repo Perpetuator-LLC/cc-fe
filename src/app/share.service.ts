@@ -21,6 +21,7 @@ export class ShareService {
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
       .trim();
   }
 

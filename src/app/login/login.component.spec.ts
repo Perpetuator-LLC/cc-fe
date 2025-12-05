@@ -64,8 +64,12 @@ describe('LoginComponent', () => {
     const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
     const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
     mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
-    const mockPolicyGuardService = jasmine.createSpyObj('PolicyGuardService', ['checkPolicyAcceptance']);
+    const mockPolicyGuardService = jasmine.createSpyObj('PolicyGuardService', [
+      'checkPolicyAcceptance',
+      'checkPoliciesNow',
+    ]);
     mockPolicyGuardService.checkPolicyAcceptance.and.returnValue(of(true));
+    mockPolicyGuardService.checkPoliciesNow.and.returnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, LoginComponent, HttpClientTestingModule, NoopAnimationsModule],

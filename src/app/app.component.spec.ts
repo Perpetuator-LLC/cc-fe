@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { of } from 'rxjs';
+import { ApolloTestingModule } from 'apollo-angular/testing';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -25,7 +26,7 @@ describe('AppComponent', () => {
     mockOAuthService.events = of({});
 
     await TestBed.configureTestingModule({
-      imports: [AppComponent, HttpClientTestingModule, NoopAnimationsModule],
+      imports: [AppComponent, HttpClientTestingModule, NoopAnimationsModule, ApolloTestingModule],
       providers: [AuthService, { provide: OAuthService, useValue: mockOAuthService }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
