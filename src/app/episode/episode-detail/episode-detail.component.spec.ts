@@ -2,21 +2,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { EpisodeDetailComponent } from './episode-detail.component';
-import { MessageService } from '../message.service';
 import { ActivatedRoute } from '@angular/router';
 import { EpisodeService } from '../episode.service';
-import { JobService } from '../job.service';
-import { ToolbarService } from '../toolbar.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { SchedulingService } from '../scheduling.service';
-import { LoadingService } from '../loading.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { signal } from '@angular/core';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MessageService } from '../../message.service';
+import { JobService } from '../../job.service';
+import { ToolbarService } from '../../toolbar.service';
+import { SchedulingService } from '../../scheduling.service';
+import { LoadingService } from '../../loading.service';
 
 describe('EpisodeDetailComponent', () => {
   let component: EpisodeDetailComponent;

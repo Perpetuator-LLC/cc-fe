@@ -18,7 +18,7 @@ import { MatDivider } from '@angular/material/divider';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
-import { EpisodeService } from '../episode.service';
+import { EpisodeService } from '../episode/episode.service';
 import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
