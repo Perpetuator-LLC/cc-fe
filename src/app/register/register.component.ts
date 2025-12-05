@@ -11,8 +11,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { ToolbarService } from '../toolbar.service';
 import { MessageService } from '../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AffiliateService } from '../affiliate.service';
-import { AffiliateStorageService } from '../affiliate-storage.service';
+import { AffiliateService } from '../affiliate/affiliate.service';
+import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 import { Subscription } from 'rxjs';
 

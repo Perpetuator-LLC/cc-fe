@@ -13,18 +13,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
 import {
+  AffiliateConversionUtils,
   AffiliateService,
-  PendingCodeChangeRequest,
   AffiliateUserSearchResult,
   PayoutConversion,
+  PendingCodeChangeRequest,
   PlatformFinancialStats,
-  AffiliateConversionUtils,
 } from '../affiliate.service';
-import { MessageService } from '../message.service';
-import { UserService } from '../user.service';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
+import { MessageService } from '../../message.service';
+import { UserService } from '../../user.service';
+import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-affiliate-admin',

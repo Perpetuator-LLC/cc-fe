@@ -2,8 +2,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, UrlTree, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { OAuthAuthService } from './core/services/auth.service';
-import { AffiliateStorageService } from './affiliate-storage.service';
+import { OAuthAuthService } from './core/auth.service';
+import { AffiliateStorageService } from './affiliate/affiliate-storage.service';
 
 @Injectable({
   providedIn: 'root',

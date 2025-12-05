@@ -4,7 +4,7 @@ import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 
 export interface UserProfile {
@@ -360,3 +360,6 @@ export class OAuthAuthService {
     return this.currentUserSubject.value;
   }
 }
+
+// Export alias for backward compatibility
+export { OAuthAuthService as AuthService };

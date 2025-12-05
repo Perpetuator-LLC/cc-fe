@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { OAuthAuthService } from '../services/auth.service';
+import { OAuthAuthService } from '../auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Skip adding token for OAuth2 endpoints

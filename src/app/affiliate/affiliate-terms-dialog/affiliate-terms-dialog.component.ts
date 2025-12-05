@@ -8,10 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
-import { MessageService } from '../message.service';
-import { PolicyService, PolicyVersion } from '../policy/services/policy.service';
+import { MessageService } from '../../message.service';
+import { PolicyService, PolicyVersion } from '../../policy/services/policy.service';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-affiliate-terms-dialog',
@@ -63,14 +63,14 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
     this.loadingPolicy = true;
     this.subscriptions.add(
       this.policyService.getActivePolicies().subscribe({
-        next: (policies) => {
+        next: (policies: { affiliateTerms?: PolicyVersion }) => {
           this.policy = policies.affiliateTerms;
           if (this.policy) {
             this.policyContent = this.policyService.renderPolicyContent(this.policy);
           }
           this.loadingPolicy = false;
         },
-        error: (err) => {
+        error: (err: Error) => {
           console.error('Failed to load affiliate terms:', err);
           this.loadingPolicy = false;
         },
@@ -122,7 +122,7 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
           // After accepting terms, create Stripe Connect account
           this.createStripeAccount();
         },
-        error: (err) => {
+        error: (err: Error) => {
           this.messageService.error(`Failed to accept terms: ${err.message}`);
           this.loading = false;
         },

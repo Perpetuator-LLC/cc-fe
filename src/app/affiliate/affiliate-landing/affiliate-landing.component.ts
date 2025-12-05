@@ -9,8 +9,8 @@ import { Subscription } from 'rxjs';
 import { AffiliateHttpService, AffiliateLandingData } from '../affiliate-http.service';
 import { AffiliateService } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
-import { AuthService } from '../auth.service';
-import { MessageService } from '../message.service';
+import { AuthService } from '../../core/auth.service';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-affiliate-landing',
