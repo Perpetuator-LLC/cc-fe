@@ -5,7 +5,7 @@ import { JobService, Job, JobStatus } from '../job.service';
 import { MessageService } from '../message.service';
 import { JobDisplayService } from '../job-display.service';
 import { PodcastsService } from '../podcasts.service';
-import { EpisodeService } from '../episode.service';
+import { EpisodeService } from '../episode/episode.service';
 import { ResearchService } from '../research.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';

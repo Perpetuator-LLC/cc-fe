@@ -28,12 +28,14 @@ export const routes: Routes = [
     children: [
       {
         path: 'tech',
-        loadComponent: () => import('./episodes-list/episodes-list.component').then((m) => m.EpisodesListComponent),
+        loadComponent: () =>
+          import('./episode/episodes-list/episodes-list.component').then((m) => m.EpisodesListComponent),
         title: 'Tech Podcasts',
       },
       {
         path: 'music',
-        loadComponent: () => import('./episode-detail/episode-detail.component').then((m) => m.EpisodeDetailComponent),
+        loadComponent: () =>
+          import('./episode/episode-detail/episode-detail.component').then((m) => m.EpisodeDetailComponent),
         title: 'Music Podcasts',
       },
     ],
@@ -121,7 +123,8 @@ export const routes: Routes = [
   },
   {
     path: 'e/:uuid',
-    loadComponent: () => import('./episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
+    loadComponent: () =>
+      import('./episode/episode-detail/episode-detail.component').then((c) => c.EpisodeDetailComponent),
     title: 'Episode',
     canActivate: [AuthGuard],
     canDeactivate: [
@@ -132,7 +135,7 @@ export const routes: Routes = [
   },
   {
     path: 'e',
-    loadComponent: () => import('./episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
+    loadComponent: () => import('./episode/episodes-list/episodes-list.component').then((c) => c.EpisodesListComponent),
     title: 'Episodes',
     canActivate: [AuthGuard],
     data: {
