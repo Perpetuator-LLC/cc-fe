@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { OAuthAuthService } from '../../core/services/auth.service';
+import { OAuthAuthService } from '../../core/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({

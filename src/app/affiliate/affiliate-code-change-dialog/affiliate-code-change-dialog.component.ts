@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AffiliateService, AffiliateCodeChangeInfo, AffiliateCodeChangeRequest } from '../affiliate.service';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-affiliate-code-change-dialog',

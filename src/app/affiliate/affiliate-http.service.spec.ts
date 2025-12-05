@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AffiliateHttpService, AffiliateLandingData } from './affiliate-http.service';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 describe('AffiliateHttpService', () => {
   let service: AffiliateHttpService;

@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
 import { MessageService } from './message.service';
-import { OAuthAuthService } from './core/services/auth.service';
+import { OAuthAuthService } from './core/auth.service';
 import {
   REGISTER_USER,
   RESEND_VERIFICATION,

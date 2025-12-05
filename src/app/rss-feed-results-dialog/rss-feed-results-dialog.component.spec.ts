@@ -10,10 +10,8 @@ describe('RssFeedResultsDialogComponent', () => {
   beforeEach(async () => {
     const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     const mockData = {
-      results: {
-        episodes: [],
-        summary: { total: 0, new: 0, updated: 0, errors: 0 },
-      },
+      successful: [],
+      failed: [],
     };
 
     await TestBed.configureTestingModule({

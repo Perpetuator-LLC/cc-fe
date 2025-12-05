@@ -12,8 +12,8 @@ import { ThemeService } from '../theme.service';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { AffiliateService } from '../affiliate.service';
-import { AffiliateStorageService } from '../affiliate-storage.service';
+import { AffiliateService } from '../affiliate/affiliate.service';
+import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 import { PolicyGuardService } from '../policy/services/policy-guard.service';
 import { CookieConsentService } from '../policy/services/cookie-consent.service';
@@ -69,7 +69,7 @@ describe('LoginComponent', () => {
       'checkPoliciesNow',
     ]);
     mockPolicyGuardService.checkPolicyAcceptance.and.returnValue(of(true));
-    mockPolicyGuardService.checkPoliciesNow.and.returnValue(Promise.resolve(true));
+    mockPolicyGuardService.checkPoliciesNow.and.returnValue(of(true)); // Returns Observable not Promise
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, LoginComponent, HttpClientTestingModule, NoopAnimationsModule],

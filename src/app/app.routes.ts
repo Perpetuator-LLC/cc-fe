@@ -236,7 +236,9 @@ export const routes: Routes = [
   {
     path: 'affiliate',
     loadComponent: () =>
-      import('./affiliate-dashboard/affiliate-dashboard.component').then((c) => c.AffiliateDashboardComponent),
+      import('./affiliate/affiliate-dashboard/affiliate-dashboard.component').then(
+        (c) => c.AffiliateDashboardComponent,
+      ),
     title: 'Affiliate Dashboard',
     canActivate: [AuthGuard],
     data: {
@@ -245,7 +247,8 @@ export const routes: Routes = [
   },
   {
     path: 'affiliate-admin',
-    loadComponent: () => import('./affiliate-admin/affiliate-admin.component').then((c) => c.AffiliateAdminComponent),
+    loadComponent: () =>
+      import('./affiliate/affiliate-admin/affiliate-admin.component').then((c) => c.AffiliateAdminComponent),
     title: 'Affiliate Admin',
     canActivate: [AuthGuard],
     data: {
@@ -274,7 +277,7 @@ export const routes: Routes = [
   {
     path: 'a/:code',
     loadComponent: () =>
-      import('./affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
+      import('./affiliate/affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
     title: 'Join My Network',
   },
   {

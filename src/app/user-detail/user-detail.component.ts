@@ -23,7 +23,7 @@ import { MatIcon } from '@angular/material/icon';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog/delete-account-dialog.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../loading.service';
-import { AffiliateService, AffiliateRelationship } from '../affiliate.service';
+import { AffiliateService, AffiliateRelationship } from '../affiliate/affiliate.service';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({

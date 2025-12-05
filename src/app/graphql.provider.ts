@@ -4,7 +4,7 @@ import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig } from '@angular/core';
 import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { environment } from '../environments/environment';
-import { OAuthAuthService } from './core/services/auth.service';
+import { OAuthAuthService } from './core/auth.service';
 import { Injectable } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
 import { cachePolicyRegistry } from './cache-policies';

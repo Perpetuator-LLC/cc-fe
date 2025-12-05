@@ -220,6 +220,11 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v2.mp3';
       component.liveAudioSrc = null;
 
+      // Set up versions array with audio
+      component.episodeForm.patchValue({
+        versions: [{ audioUrl: 'https://example.com/v2.mp3' }],
+      });
+
       component.onIsLiveChange(true);
 
       expect(messageService.warning).not.toHaveBeenCalled();
@@ -231,6 +236,11 @@ describe('EpisodeDetailComponent', () => {
       // This allows re-publishing after editing without regenerating audio
       component.audioSrc = null;
       component.liveAudioSrc = 'https://example.com/v1.mp3';
+
+      // Set up versions array with audio
+      component.episodeForm.patchValue({
+        versions: [{ audioUrl: 'https://example.com/v1.mp3' }],
+      });
 
       component.onIsLiveChange(true);
 
@@ -307,14 +317,17 @@ describe('EpisodeDetailComponent', () => {
       // Step 1: Episode created with no audio
       component.audioSrc = null;
       component.liveAudioSrc = null;
+      component.episodeForm.patchValue({ versions: [] });
       expect(component.hasCurrentVersionAudio()).toBe(false);
 
       // Step 2: Generate audio for current version
       component.audioSrc = 'https://example.com/v1.mp3';
+      component.episodeForm.patchValue({
+        versions: [{ audioUrl: 'https://example.com/v1.mp3' }],
+      });
       expect(component.hasCurrentVersionAudio()).toBe(true);
 
       // Step 3: Set episode live (should succeed)
-      component.episodeForm = new FormBuilder().group({ isLive: [false] });
       component.onIsLiveChange(true);
       expect(component.episodeForm.dirty).toBe(true);
       expect(messageService.warning).not.toHaveBeenCalled();

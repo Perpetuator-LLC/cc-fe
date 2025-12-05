@@ -15,8 +15,8 @@ import { Subscription } from 'rxjs';
 import { UserService } from '../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AffiliateStorageService } from '../affiliate-storage.service';
-import { AffiliateService } from '../affiliate.service';
+import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
+import { AffiliateService } from '../affiliate/affiliate.service';
 import { PolicyGuardService } from '../policy/services/policy-guard.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 

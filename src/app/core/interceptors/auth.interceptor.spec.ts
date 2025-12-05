@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
-import { OAuthAuthService } from '../services/auth.service';
+import { OAuthAuthService } from '../auth.service';
 import { of } from 'rxjs';
 
 describe('authInterceptor', () => {
