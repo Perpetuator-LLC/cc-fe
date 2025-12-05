@@ -12,6 +12,7 @@ import { of } from 'rxjs';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Apollo } from 'apollo-angular';
+import { signal } from '@angular/core';
 
 describe('LayoutComponent', () => {
   let fixture: ComponentFixture<LayoutComponent>;
@@ -22,8 +23,9 @@ describe('LayoutComponent', () => {
   let breakpointObserver: jasmine.SpyObj<BreakpointObserver>;
 
   beforeEach(async () => {
+    const themeSignal = signal('light' as 'light' | 'dark');
     authService = jasmine.createSpyObj('AuthService', ['isLoggedIn', 'logout']);
-    themeService = jasmine.createSpyObj('ThemeService', ['setTheme'], { currentTheme: 'light' });
+    themeService = jasmine.createSpyObj('ThemeService', ['setTheme'], { theme: themeSignal });
     toolbarService = jasmine.createSpyObj('ToolbarService', ['setRootViewContainerRef', 'clearToolbarComponent']);
     breakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
 
@@ -110,7 +112,7 @@ describe('LayoutComponent', () => {
   it('should switch themes', () => {
     component.switchTheme('dark');
     expect(themeService.setTheme).toHaveBeenCalledWith('dark');
-    expect(component['currentTheme']).toBe('dark');
+    expect(themeService.theme()).toBe('dark');
   });
 
   it('should correctly handle handset layout', (done) => {

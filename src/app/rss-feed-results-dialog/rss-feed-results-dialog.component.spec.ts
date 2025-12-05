@@ -9,12 +9,18 @@ describe('RssFeedResultsDialogComponent', () => {
 
   beforeEach(async () => {
     const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+    const mockData = {
+      results: {
+        episodes: [],
+        summary: { total: 0, new: 0, updated: 0, errors: 0 },
+      },
+    };
 
     await TestBed.configureTestingModule({
       imports: [RssFeedResultsDialogComponent],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { results: { episodes: [] } } },
+        { provide: MAT_DIALOG_DATA, useValue: mockData },
       ],
     }).compileComponents();
 
