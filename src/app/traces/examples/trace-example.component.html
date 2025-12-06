@@ -1,0 +1,41 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Trace Integration Example</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>This component demonstrates trace tracking:</p>
+    <ul>
+      <li>Page views are tracked on init</li>
+      <li>Form submissions are tracked</li>
+      <li>Validation errors are tracked</li>
+      <li>Button clicks are tracked</li>
+      <li>Custom errors are tracked</li>
+    </ul>
+
+    <form (ngSubmit)="onSubmit()">
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput type="email" [(ngModel)]="email" name="email" required />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Message</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="message"
+          name="message"
+          rows="4"
+          required
+        ></textarea>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-button type="button" (click)="onButtonClick('cancel')">Cancel</button>
+        <button mat-flat-button color="primary" type="submit">Submit</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+

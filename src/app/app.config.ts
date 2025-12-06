@@ -1,5 +1,11 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  ErrorHandler,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -11,21 +17,37 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { CustomMatPaginatorIntl } from './custom-paginator-intl';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorTrackingInterceptor } from './core/interceptors/error-tracking.interceptor';
+import { GlobalErrorHandler } from './core/global-error-handler';
+import { RouterErrorTracker } from './core/router-error-tracker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor, errorTrackingInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimationsAsync(),
     graphqlProvider,
     importProvidersFrom(MatIconModule, OAuthModule.forRoot()),
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: (iconRegistry: MatIconRegistry) => () => {
         iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
       },
       deps: [MatIconRegistry],
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (routerErrorTracker: RouterErrorTracker) => () => {
+        // RouterErrorTracker is instantiated and starts tracking automatically
+        void routerErrorTracker;
+      },
+      deps: [RouterErrorTracker],
       multi: true,
     },
     {

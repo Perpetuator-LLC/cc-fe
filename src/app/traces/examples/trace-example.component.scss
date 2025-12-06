@@ -1,0 +1,30 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+mat-card {
+  max-width: 600px;
+  margin: 24px auto;
+
+  mat-card-content {
+    @include mixins.flex-column ();
+
+    gap: 16px;
+
+    form {
+      @include mixins.flex-column ();
+
+      gap: 16px;
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+
