@@ -1,11 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal, Injector } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { TraceService } from '../traces/services/trace.service';
 
 export interface UserProfile {
   id: string;
@@ -36,6 +37,7 @@ export class OAuthAuthService {
   public currentUser$: Observable<UserProfile | null> = this.currentUserSubject.asObservable();
   private loggedInSignal: WritableSignal<boolean> = signal(false);
   private initialized = false;
+  private traceService?: TraceService; // Lazy-loaded to avoid circular dependency with Apollo
 
   private authConfig: AuthConfig = {
     issuer: environment.OAUTH_ISSUER,
@@ -61,9 +63,24 @@ export class OAuthAuthService {
     private oauthService: OAuthService,
     private router: Router,
     private http: HttpClient,
+    private injector: Injector,
   ) {
     // Don't initialize in constructor to avoid circular dependency
     // Will be initialized on first use
+  }
+
+  private getTraceService(): TraceService | null {
+    try {
+      // Lazy injection to avoid circular dependency with Apollo
+      if (!this.traceService) {
+        this.traceService = this.injector.get(TraceService);
+      }
+      return this.traceService;
+    } catch (error) {
+      // TraceService not available yet (during Apollo initialization)
+      console.warn('[OAuthAuthService] TraceService not available:', error);
+      return null;
+    }
   }
 
   private ensureInitialized(): void {
@@ -130,11 +147,29 @@ export class OAuthAuthService {
           this.loggedInSignal.set(true);
           // Don't load user profile here - it will be loaded when needed
           // This prevents blocking login if /o/userinfo/ has issues
+
+          // Track successful login (if TraceService is available)
+          const traceService = this.getTraceService();
+          if (traceService) {
+            traceService.trackAuthSuccess(username).subscribe({
+              error: (err) => console.error('[OAuthAuthService] Failed to track auth success:', err),
+            });
+          }
         }),
         map(() => true),
         catchError((error) => {
           console.error('OAuth2 password grant login failed:', error);
-          return throwError(() => new Error(this.extractOAuthErrorMessage(error)));
+          const errorMessage = this.extractOAuthErrorMessage(error);
+
+          // Track failed login (if TraceService is available)
+          const traceService = this.getTraceService();
+          if (traceService) {
+            traceService.trackAuthFailure(username, errorMessage).subscribe({
+              error: (err) => console.error('[OAuthAuthService] Failed to track auth failure:', err),
+            });
+          }
+
+          return throwError(() => new Error(errorMessage));
         }),
       );
   }
