@@ -10,6 +10,23 @@
 
 html {
   @include mat.all-component-themes(customTheme.$dark-theme);
+
+  // MD3 Extended Colors - Dark Theme
+  // Custom success, warning, and info colors for semantic UI states
+  // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
+  --md-extended-color-success-color: rgb(161 211 154);
+  --md-extended-color-success-on-color: rgb(10 57 15);
+  --md-extended-color-success-color-container: rgb(35 80 36);
+  --md-extended-color-success-on-color-container: rgb(188 240 180);
+  --md-extended-color-warning-color: rgb(253 185 117);
+  --md-extended-color-warning-on-color: rgb(74 40 0);
+  --md-extended-color-warning-color-container: rgb(105 60 0);
+  --md-extended-color-warning-on-color-container: rgb(255 220 190);
+  --md-extended-color-info-color: rgb(159 202 252);
+  --md-extended-color-info-on-color: rgb(0 50 87);
+  --md-extended-color-info-color-container: rgb(22 73 116);
+  --md-extended-color-info-on-color-container: rgb(208 228 255);
+  // stylelint-enable function-disallowed-list
 }
 
 body {
@@ -24,6 +41,23 @@ body {
 
 body.light {
   @include mat.all-component-colors(customTheme.$light-color);
+
+  // MD3 Extended Colors - Light Theme
+  // Custom success, warning, and info colors for semantic UI states
+  // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
+  --md-extended-color-success-color: rgb(4 52 11);
+  --md-extended-color-success-on-color: rgb(255 255 255);
+  --md-extended-color-success-color-container: rgb(38 83 38);
+  --md-extended-color-success-on-color-container: rgb(255 255 255);
+  --md-extended-color-warning-color: rgb(68 37 0);
+  --md-extended-color-warning-on-color: rgb(255 255 255);
+  --md-extended-color-warning-color-container: rgb(108 62 2);
+  --md-extended-color-warning-on-color-container: rgb(255 255 255);
+  --md-extended-color-info-color: rgb(0 46 80);
+  --md-extended-color-info-on-color: rgb(255 255 255);
+  --md-extended-color-info-color-container: rgb(26 76 119);
+  --md-extended-color-info-on-color-container: rgb(255 255 255);
+  // stylelint-enable function-disallowed-list
 
   * {
     scrollbar-color: var(--md-sys-color-on-surface) transparent;
