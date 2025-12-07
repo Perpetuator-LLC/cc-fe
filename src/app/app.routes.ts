@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/auth.guard';
-import { PodcastsListComponent } from './podcasts-list/podcasts-list.component';
+import { PodcastsListComponent } from './podcast/podcasts-list/podcasts-list.component';
 
 export const routes: Routes = [
   {
@@ -42,13 +42,14 @@ export const routes: Routes = [
   },
   {
     path: 'p/new',
-    loadComponent: () => import('./new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
+    loadComponent: () => import('./podcast/new-podcast/new-podcast.component').then((c) => c.NewPodcastComponent),
     title: 'Create Podcast',
     canActivate: [AuthGuard],
   },
   {
     path: 'p/:uuid',
-    loadComponent: () => import('./podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
+    loadComponent: () =>
+      import('./podcast/podcast-detail/podcast-detail.component').then((c) => c.PodcastDetailComponent),
     title: 'Podcast',
     canActivate: [AuthGuard],
   },
@@ -154,7 +155,7 @@ export const routes: Routes = [
   },
   {
     path: 'teams',
-    loadComponent: () => import('./teams-list/teams-list.component').then((c) => c.TeamsListComponent),
+    loadComponent: () => import('./team/teams-list/teams-list.component').then((c) => c.TeamsListComponent),
     title: 'Teams',
     canActivate: [AuthGuard],
     data: {
@@ -172,13 +173,13 @@ export const routes: Routes = [
   },
   {
     path: 'team/new',
-    loadComponent: () => import('./new-team/new-team.component').then((c) => c.NewTeamComponent),
+    loadComponent: () => import('./team/new-team/new-team.component').then((c) => c.NewTeamComponent),
     title: 'Create Team',
     canActivate: [AuthGuard],
   },
   {
     path: 'team/:uuid',
-    loadComponent: () => import('./team-detail/team-detail.component').then((c) => c.TeamDetailComponent),
+    loadComponent: () => import('./team/team-detail/team-detail.component').then((c) => c.TeamDetailComponent),
     title: 'Team',
     canActivate: [AuthGuard],
   },
@@ -317,13 +318,13 @@ export const routes: Routes = [
   {
     path: 'categories/:category',
     loadComponent: () =>
-      import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
+      import('./podcast/category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
     title: 'Category',
   },
   {
     path: 'categories/:category/:subcategory',
     loadComponent: () =>
-      import('./category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
+      import('./podcast/category-podcasts/category-podcasts.component').then((c) => c.CategoryPodcastsComponent),
     title: 'Category',
   },
   {

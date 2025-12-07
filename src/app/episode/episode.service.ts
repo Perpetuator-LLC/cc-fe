@@ -9,7 +9,7 @@ import { FetchPolicy } from '@apollo/client';
 import { ErrorHandlerService } from '../error-handler.service';
 import { NewsResult } from '../news/services/news.service';
 import { RelayConnection } from '../utils/relay';
-import { TeamsResult } from '../teams.service';
+import { TeamsResult } from '../team/teams.service';
 
 export interface EpisodeVersion {
   uuid: string;

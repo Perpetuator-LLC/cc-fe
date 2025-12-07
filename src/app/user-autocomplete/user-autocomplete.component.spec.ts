@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UserAutocompleteComponent } from './user-autocomplete.component';
-import { TeamsService } from '../teams.service';
+import { TeamsService } from '../team/teams.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { User } from '../types';
 import { SimpleChange } from '@angular/core';

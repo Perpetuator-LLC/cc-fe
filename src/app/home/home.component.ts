@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
-import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
 import { ShareService } from '../share.service';
 import { ToolbarService } from '../toolbar.service';

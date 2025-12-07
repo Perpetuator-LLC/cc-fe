@@ -13,7 +13,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTopicDialogComponent } from '../create-topic-dialog/create-topic-dialog.component';
-import { PodcastsService, PodcastsResult } from '../podcasts.service';
+import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { LoadingService } from '../loading.service';
 
 @Component({

@@ -8,8 +8,8 @@ import { MatOption } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PodcastsResult } from '../../podcasts.service';
-import { RecentlyUsedPodcastsService } from '../../recently-used-podcasts.service';
+import { PodcastsResult } from '../../podcast/podcasts.service';
+import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
 
 export interface CreateEpisodeDialogData {
   podcasts: PodcastsResult[];
