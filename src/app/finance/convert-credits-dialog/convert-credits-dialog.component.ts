@@ -14,8 +14,8 @@ import {
   AffiliateProfile,
   AffiliateConversionUtils,
   MIN_CASH_PAYOUT_CREDITS,
-} from '../affiliate/affiliate.service';
-import { MessageService } from '../message.service';
+} from '../../affiliate/affiliate.service';
+import { MessageService } from '../../message.service';
 
 export interface ConvertCreditsDialogData {
   type: 'credits' | 'cash';

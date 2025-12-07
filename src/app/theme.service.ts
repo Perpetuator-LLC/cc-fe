@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, Renderer2, RendererFactory2, signal, WritableSignal, OnDestroy } from '@angular/core';
 
-import { UserService } from './user.service';
+import { UserService } from './user/user.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 

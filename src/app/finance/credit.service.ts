@@ -3,14 +3,14 @@ import { Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/
 import { Apollo, QueryRef } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
-import { BaseService } from './base.service';
-import { mapQueryResult } from './utils/error-handler';
+import { BaseService } from '../base.service';
+import { mapQueryResult } from '../utils/error-handler';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ErrorHandlerService } from './error-handler.service';
-import { MessageService } from './message.service';
-import { RelayConnection } from './utils/relay';
+import { ErrorHandlerService } from '../error-handler.service';
+import { MessageService } from '../message.service';
+import { RelayConnection } from '../utils/relay';
 
 export interface UserOrder {
   id: string;

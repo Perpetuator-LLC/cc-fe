@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, TitleCasePipe } from '@angular/common';
-import { UserAutocompleteComponent } from '../../user-autocomplete/user-autocomplete.component';
+import { UserAutocompleteComponent } from '../../user/user-autocomplete/user-autocomplete.component';
 import { User } from '../../types';
 import { Subscription } from 'rxjs';
 import { TeamsService } from '../teams.service';

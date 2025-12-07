@@ -10,7 +10,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarService } from '../../toolbar.service';
 import { ThemeService } from '../../theme.service';
 import { MessageService } from '../../message.service';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AffiliateService } from '../../affiliate/affiliate.service';
 import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';

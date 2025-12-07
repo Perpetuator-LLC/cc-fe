@@ -3,8 +3,8 @@ import { Injectable, signal, WritableSignal, OnDestroy } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { map, Observable, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
-import { BaseResponse, BaseService, CommonResponse } from './base.service';
-import { ErrorHandlerService } from './error-handler.service';
+import { BaseResponse, BaseService, CommonResponse } from '../base.service';
+import { ErrorHandlerService } from '../error-handler.service';
 
 export interface UserDetails {
   id: string;
