@@ -90,7 +90,12 @@ describe('OAuthAuthService', () => {
     });
 
     it('should return false when OAuth service does not have valid access token', () => {
+      // Clear localStorage to avoid fallback check
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+
       oauthServiceSpy.hasValidAccessToken.and.returnValue(false);
+      oauthServiceSpy.getAccessToken.and.returnValue('');
       expect(service.isAuthenticated()).toBe(false);
     });
   });

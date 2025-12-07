@@ -1,14 +1,16 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { VerifyEmailComponent } from './verify-email.component';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ChangeEmailComponent } from './change-email.component';
-import { ToolbarService } from '../toolbar.service';
+import { Apollo } from 'apollo-angular';
+import { of } from 'rxjs';
+import { getCommonTestProviders } from '../../testing/test-helpers';
 
 describe('VerifyEmailComponent', () => {
-  let component: ChangeEmailComponent;
-  let fixture: ComponentFixture<ChangeEmailComponent>;
+  let component: VerifyEmailComponent;
+  let fixture: ComponentFixture<VerifyEmailComponent>;
 
   beforeEach(async () => {
     const mockActivatedRoute = {
@@ -19,23 +21,21 @@ describe('VerifyEmailComponent', () => {
       },
     };
 
-    const mockToolbarService = {
-      getViewContainerRef: jasmine.createSpy('getViewContainerRef').and.returnValue({
-        clear: jasmine.createSpy('clear'),
-        createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-      }),
-    };
+    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
+    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
+    mockApollo.mutate.and.returnValue(of({ data: {} }));
 
     await TestBed.configureTestingModule({
-      imports: [ChangeEmailComponent, HttpClientTestingModule],
+      imports: [VerifyEmailComponent, HttpClientTestingModule],
       providers: [
+        ...getCommonTestProviders(),
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: ToolbarService, useValue: mockToolbarService },
+        { provide: Apollo, useValue: mockApollo },
         FormBuilder,
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ChangeEmailComponent);
+    fixture = TestBed.createComponent(VerifyEmailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

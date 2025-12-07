@@ -3,10 +3,10 @@ import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core'
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../../toolbar.service';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { GraphqlAuthService } from '../graphql-auth.service';
 

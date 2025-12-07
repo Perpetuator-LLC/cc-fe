@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { BaseService } from './base.service';
 import { mapQueryResult } from './utils/error-handler';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';

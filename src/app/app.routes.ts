@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Routes } from '@angular/router';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './auth/auth.guard';
 import { PodcastsListComponent } from './podcasts-list/podcasts-list.component';
 
 export const routes: Routes = [
@@ -54,7 +54,7 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    loadComponent: () => import('./register/register.component').then((c) => c.RegisterComponent),
+    loadComponent: () => import('./auth/register/register.component').then((c) => c.RegisterComponent),
     title: 'Register',
     data: {
       icon: 'person_add',
@@ -62,7 +62,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./login/login.component').then((c) => c.LoginComponent),
+    loadComponent: () => import('./auth/login/login.component').then((c) => c.LoginComponent),
     title: 'Login',
     data: {
       icon: 'login',
@@ -75,44 +75,45 @@ export const routes: Routes = [
   },
   {
     path: 'forgot',
-    loadComponent: () => import('./forgot-password/forgot-password.component').then((c) => c.ForgotPasswordComponent),
+    loadComponent: () =>
+      import('./auth/forgot-password/forgot-password.component').then((c) => c.ForgotPasswordComponent),
     title: 'Forgot Password',
   },
   {
     path: 'verify',
-    loadComponent: () => import('./verify-email/verify-email.component').then((c) => c.VerifyEmailComponent),
+    loadComponent: () => import('./auth/verify-email/verify-email.component').then((c) => c.VerifyEmailComponent),
     title: 'Verify Email',
   },
   {
     path: 'verify-email', // Alias for backward compatibility with emails
-    loadComponent: () => import('./verify-email/verify-email.component').then((c) => c.VerifyEmailComponent),
+    loadComponent: () => import('./auth/verify-email/verify-email.component').then((c) => c.VerifyEmailComponent),
     title: 'Verify Email',
   },
   {
     path: 'resend',
     loadComponent: () =>
-      import('./resend-verification/resend-verification.component').then((c) => c.ResendVerificationComponent),
+      import('./auth/resend-verification/resend-verification.component').then((c) => c.ResendVerificationComponent),
     title: 'Resend Verification',
   },
   {
     path: 'change-email',
-    loadComponent: () => import('./change-email/change-email.component').then((c) => c.ChangeEmailComponent),
+    loadComponent: () => import('./auth/change-email/change-email.component').then((c) => c.ChangeEmailComponent),
     title: 'Change Email',
   },
   {
     path: 'cancel-change-email',
     loadComponent: () =>
-      import('./cancel-change-email/cancel-change-email.component').then((c) => c.CancelChangeEmailComponent),
+      import('./auth/cancel-change-email/cancel-change-email.component').then((c) => c.CancelChangeEmailComponent),
     title: 'Cancel Change Email',
   },
   {
     path: 'reset',
-    loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
+    loadComponent: () => import('./auth/reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',
   },
   {
     path: 'reset-password', // Alias for backward compatibility with emails
-    loadComponent: () => import('./reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
+    loadComponent: () => import('./auth/reset-password/reset-password.component').then((c) => c.ResetPasswordComponent),
     title: 'Reset Password',
   },
   {

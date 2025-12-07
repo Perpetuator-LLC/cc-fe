@@ -3,7 +3,7 @@ import { Injectable, Renderer2, RendererFactory2, signal, WritableSignal, OnDest
 
 import { UserService } from './user.service';
 import { Subscription } from 'rxjs';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 
 export type Theme = 'light' | 'dark';
 

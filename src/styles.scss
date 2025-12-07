@@ -44,20 +44,19 @@ body.light {
 
   // MD3 Extended Colors - Light Theme
   // Custom success, warning, and info colors for semantic UI states
-  // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
-  --md-extended-color-success-color: rgb(4 52 11);
-  --md-extended-color-success-on-color: rgb(255 255 255);
-  --md-extended-color-success-color-container: rgb(38 83 38);
-  --md-extended-color-success-on-color-container: rgb(255 255 255);
-  --md-extended-color-warning-color: rgb(68 37 0);
-  --md-extended-color-warning-on-color: rgb(255 255 255);
-  --md-extended-color-warning-color-container: rgb(108 62 2);
-  --md-extended-color-warning-on-color-container: rgb(255 255 255);
-  --md-extended-color-info-color: rgb(0 46 80);
-  --md-extended-color-info-on-color: rgb(255 255 255);
-  --md-extended-color-info-color-container: rgb(26 76 119);
-  --md-extended-color-info-on-color-container: rgb(255 255 255);
-  // stylelint-enable function-disallowed-list
+  // Note: Values stored as RGB triplets for use with rgb() function
+  --md-extended-color-success-color: 4 52 11;
+  --md-extended-color-success-on-color: 255 255 255;
+  --md-extended-color-success-color-container: 38 83 38;
+  --md-extended-color-success-on-color-container: 255 255 255;
+  --md-extended-color-warning-color: 68 37 0;
+  --md-extended-color-warning-on-color: 255 255 255;
+  --md-extended-color-warning-color-container: 108 62 2;
+  --md-extended-color-warning-on-color-container: 255 255 255;
+  --md-extended-color-info-color: 0 46 80;
+  --md-extended-color-info-on-color: 255 255 255;
+  --md-extended-color-info-color-container: 26 76 119;
+  --md-extended-color-info-on-color-container: 255 255 255;
 
   * {
     scrollbar-color: var(--md-sys-color-on-surface) transparent;

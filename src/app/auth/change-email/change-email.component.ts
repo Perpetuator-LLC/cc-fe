@@ -2,10 +2,10 @@
 import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { MessageService } from '../message.service';
+import { environment } from '../../../environments/environment';
+import { MessageService } from '../../message.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../../toolbar.service';
 
 @Component({
   selector: 'app-verify-email',

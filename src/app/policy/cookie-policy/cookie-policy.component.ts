@@ -6,7 +6,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { ToolbarService } from '../../toolbar.service';
-import { AuthService } from '../../auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { PolicyService, PolicyVersion } from '../services/policy.service';
 
 @Component({

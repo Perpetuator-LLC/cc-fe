@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from '../../base.service';
 import { ErrorHandlerService } from '../../error-handler.service';
-import { AuthService } from '../../auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 export enum PolicyType {
   TERMS_OF_SERVICE = 'TERMS_OF_SERVICE',

@@ -6,6 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { UserDetailComponent } from './user-detail.component';
 import { UserService } from '../user.service';
 import { ToolbarService } from '../toolbar.service';
+import { provideMockOAuthService, provideMockApollo } from '../testing/test-providers';
 import { of } from 'rxjs';
 
 describe('UserDetailComponent', () => {
@@ -13,15 +14,23 @@ describe('UserDetailComponent', () => {
   let fixture: ComponentFixture<UserDetailComponent>;
 
   beforeEach(async () => {
-    const mockUserService = jasmine.createSpyObj('UserService', ['getUserDetails', 'getUserPreferences']);
+    const mockUserService = jasmine.createSpyObj('UserService', [
+      'getUserDetails',
+      'getUserPreferences',
+      'loadUserDetails',
+      'loadUserEmailChangePending',
+    ]);
     mockUserService.getUserDetails.and.returnValue(of({}));
     mockUserService.getUserPreferences.and.returnValue(of({}));
+    mockUserService.loadUserDetails.and.returnValue(of({}));
+    mockUserService.loadUserEmailChangePending.and.returnValue(of(null));
 
     const mockToolbarService = {
       getViewContainerRef: jasmine.createSpy('getViewContainerRef').and.returnValue({
         clear: jasmine.createSpy('clear'),
         createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
       }),
+      clearToolbarComponent: jasmine.createSpy('clearToolbarComponent'),
     };
 
     await TestBed.configureTestingModule({
@@ -30,6 +39,8 @@ describe('UserDetailComponent', () => {
         provideRouter([]),
         { provide: UserService, useValue: mockUserService },
         { provide: ToolbarService, useValue: mockToolbarService },
+        provideMockOAuthService(),
+        provideMockApollo(),
       ],
     }).compileComponents();
 

@@ -3,9 +3,9 @@ import { Injectable, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { environment } from '../environments/environment';
-import { MessageService } from './message.service';
-import { OAuthAuthService } from './core/auth.service';
+import { environment } from '../../environments/environment';
+import { MessageService } from '../message.service';
+import { OAuthAuthService } from '../core/auth.service';
 
 // NOTE: This service now delegates entirely to OAuth2
 // WARNING: Do not inject services that might create circular dependencies (like PolicyService)
