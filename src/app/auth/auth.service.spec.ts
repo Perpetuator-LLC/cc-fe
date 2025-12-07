@@ -2,8 +2,8 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
-import { OAuthAuthService } from './core/auth.service';
-import { MessageService } from './message.service';
+import { OAuthAuthService } from '../core/auth.service';
+import { MessageService } from '../message.service';
 import { of } from 'rxjs';
 
 describe('AuthService (Deprecated - OAuth Wrapper)', () => {

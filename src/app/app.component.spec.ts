@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { of } from 'rxjs';

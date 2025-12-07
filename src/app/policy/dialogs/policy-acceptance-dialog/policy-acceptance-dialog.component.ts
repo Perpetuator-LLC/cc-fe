@@ -9,7 +9,7 @@ import { PolicyService, PolicyVersion, PolicyType } from '../../services/policy.
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../../message.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AuthService } from '../../../auth.service';
+import { AuthService } from '../../../auth/auth.service';
 import { Router } from '@angular/router';
 
 export interface PolicyAcceptanceDialogData {

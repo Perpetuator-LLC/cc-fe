@@ -7,17 +7,17 @@ import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { environment } from '../../environments/environment';
-import { ToolbarService } from '../toolbar.service';
-import { MessageService } from '../message.service';
-import { ThemeService } from '../theme.service';
+import { environment } from '../../../environments/environment';
+import { ToolbarService } from '../../toolbar.service';
+import { MessageService } from '../../message.service';
+import { ThemeService } from '../../theme.service';
 import { Subscription } from 'rxjs';
-import { UserService } from '../user.service';
+import { UserService } from '../../user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
-import { AffiliateService } from '../affiliate/affiliate.service';
-import { PolicyGuardService } from '../policy/services/policy-guard.service';
+import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';
+import { AffiliateService } from '../../affiliate/affiliate.service';
+import { PolicyGuardService } from '../../policy/services/policy-guard.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 
 @Component({

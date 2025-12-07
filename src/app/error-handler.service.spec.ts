@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { ErrorHandlerService } from './error-handler.service';
+import { getCommonTestProviders } from './testing/test-helpers';
 
 describe('ErrorHandlerService', () => {
   let service: ErrorHandlerService;
@@ -10,7 +11,7 @@ describe('ErrorHandlerService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [provideRouter([])],
+      providers: [...getCommonTestProviders(), provideRouter([])],
     });
     service = TestBed.inject(ErrorHandlerService);
   });

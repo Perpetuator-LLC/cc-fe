@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormArray, FormGroup, FormControl } from '@angular/forms';
 import { EpisodeDetailComponent } from './episode-detail.component';
 import { ActivatedRoute } from '@angular/router';
 import { EpisodeService } from '../episode.service';
@@ -220,10 +220,19 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v2.mp3';
       component.liveAudioSrc = null;
 
-      // Set up versions array with audio
-      component.episodeForm.patchValue({
-        versions: [{ audioUrl: 'https://example.com/v2.mp3' }],
-      });
+      // Initialize versions FormArray if it doesn't exist
+      if (!component.episodeForm.get('versions')) {
+        component.episodeForm.addControl('versions', new FormArray([]));
+      }
+
+      // Set up versions FormArray with audio
+      const versionsArray = component.episodeForm.get('versions') as FormArray;
+      versionsArray.clear();
+      versionsArray.push(
+        new FormGroup({
+          audioUrl: new FormControl('https://example.com/v2.mp3'),
+        }),
+      );
 
       component.onIsLiveChange(true);
 
@@ -237,10 +246,19 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = null;
       component.liveAudioSrc = 'https://example.com/v1.mp3';
 
-      // Set up versions array with audio
-      component.episodeForm.patchValue({
-        versions: [{ audioUrl: 'https://example.com/v1.mp3' }],
-      });
+      // Initialize versions FormArray if it doesn't exist
+      if (!component.episodeForm.get('versions')) {
+        component.episodeForm.addControl('versions', new FormArray([]));
+      }
+
+      // Set up versions FormArray with audio
+      const versionsArray = component.episodeForm.get('versions') as FormArray;
+      versionsArray.clear();
+      versionsArray.push(
+        new FormGroup({
+          audioUrl: new FormControl('https://example.com/v1.mp3'),
+        }),
+      );
 
       component.onIsLiveChange(true);
 
@@ -317,14 +335,17 @@ describe('EpisodeDetailComponent', () => {
       // Step 1: Episode created with no audio
       component.audioSrc = null;
       component.liveAudioSrc = null;
-      component.episodeForm.patchValue({ versions: [] });
+      const versionsArray = component.episodeForm.get('versions') as FormArray;
+      versionsArray.clear();
       expect(component.hasCurrentVersionAudio()).toBe(false);
 
       // Step 2: Generate audio for current version
       component.audioSrc = 'https://example.com/v1.mp3';
-      component.episodeForm.patchValue({
-        versions: [{ audioUrl: 'https://example.com/v1.mp3' }],
-      });
+      versionsArray.push(
+        new FormGroup({
+          audioUrl: new FormControl('https://example.com/v1.mp3'),
+        }),
+      );
       expect(component.hasCurrentVersionAudio()).toBe(true);
 
       // Step 3: Set episode live (should succeed)

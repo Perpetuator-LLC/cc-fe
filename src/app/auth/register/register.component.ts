@@ -2,17 +2,17 @@
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { ToolbarService } from '../toolbar.service';
-import { MessageService } from '../message.service';
+import { ToolbarService } from '../../toolbar.service';
+import { MessageService } from '../../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AffiliateService } from '../affiliate/affiliate.service';
-import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
+import { AffiliateService } from '../../affiliate/affiliate.service';
+import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 import { Subscription } from 'rxjs';
 

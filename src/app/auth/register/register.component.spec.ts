@@ -2,14 +2,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RegisterComponent } from './register.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ToolbarService } from '../toolbar.service';
-import { MessageService } from '../message.service';
+import { ToolbarService } from '../../toolbar.service';
+import { MessageService } from '../../message.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
-import { Apollo } from 'apollo-angular';
+import { getCommonTestProviders } from '../../testing/test-helpers';
+import { provideMockApollo, provideMockRouter, provideMockActivatedRoute } from '../../testing/test-providers';
+import { Router } from '@angular/router';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -24,34 +25,30 @@ describe('RegisterComponent', () => {
     const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
     mockGraphqlAuthService = jasmine.createSpyObj('GraphqlAuthService', ['register']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockMessageService = jasmine.createSpyObj('MessageService', ['addMessage', 'clearMessages', 'removeMessage']);
     Object.defineProperty(mockMessageService, 'messageCount', {
       get: () => 0,
       configurable: true,
     });
     mockMessageService.messages$ = of([]);
-    const mockActivatedRoute = { snapshot: { queryParams: of({}) } };
-
-    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
-    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
-    mockApollo.mutate.and.returnValue(of({ data: {} }));
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, HttpClientTestingModule, NoopAnimationsModule],
       providers: [
+        ...getCommonTestProviders(),
         { provide: GraphqlAuthService, useValue: mockGraphqlAuthService },
-        { provide: Router, useValue: mockRouter },
+        provideMockRouter(),
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: MessageService, useValue: mockMessageService },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: Apollo, useValue: mockApollo },
+        provideMockActivatedRoute(),
+        provideMockApollo(),
         FormBuilder,
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
+    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     fixture.detectChanges();
   });
 

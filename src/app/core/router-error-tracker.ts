@@ -41,8 +41,6 @@ export class RouterErrorTracker {
           traceService.trackNavigationError(event.url, event.error).subscribe({
             error: (err) => console.error('[RouterErrorTracker] Failed to track navigation error:', err),
           });
-        } else {
-          console.warn('[RouterErrorTracker] Cannot track navigation error - TraceService not ready');
         }
       });
   }

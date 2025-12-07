@@ -6,7 +6,7 @@ import { map, Subscription } from 'rxjs';
 import { BaseService } from './base.service';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { MessageService } from './message.service';
 import { RelayConnection } from './utils/relay';

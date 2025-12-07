@@ -4,39 +4,26 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HomeComponent } from './home.component';
 import { ToolbarService } from '../toolbar.service';
-import { OAuthService } from 'angular-oauth2-oidc';
-import { of } from 'rxjs';
+import { provideMockOAuthService, provideMockApollo } from '../testing/test-providers';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
+  let mockViewContainerRef: jasmine.SpyObj<{ clear: () => void; createEmbeddedView: (template: unknown) => void }>;
 
   beforeEach(async () => {
+    mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
-    const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
-
-    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
-      'configure',
-      'loadDiscoveryDocumentAndTryLogin',
-      'hasValidAccessToken',
-      'getAccessToken',
-      'refreshToken',
-      'logOut',
-      'initCodeFlow',
-    ]);
-    mockOAuthService.hasValidAccessToken.and.returnValue(false);
-    mockOAuthService.getAccessToken.and.returnValue('');
-    mockOAuthService.loadDiscoveryDocumentAndTryLogin.and.returnValue(Promise.resolve());
-    mockOAuthService.events = of({});
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent, RouterTestingModule],
       providers: [
         provideHttpClient(),
         { provide: ToolbarService, useValue: mockToolbarService },
-        { provide: OAuthService, useValue: mockOAuthService },
+        provideMockOAuthService(),
+        provideMockApollo(),
       ],
     }).compileComponents();
 
@@ -50,9 +37,16 @@ describe('HomeComponent', () => {
   });
 
   it('should set up the toolbar with the toolbar template', () => {
+    // Mock the AuthService's isLoggedIn signal to return true
+    const mockIsLoggedInSignal = jasmine.createSpy('isLoggedIn').and.returnValue(true);
+    (component as Record<string, unknown>).isLoggedIn = mockIsLoggedInSignal;
+
     fixture.detectChanges();
+    // Trigger ngAfterViewInit
+    component.ngAfterViewInit();
+
     expect(mockToolbarService.getViewContainerRef).toHaveBeenCalled();
-    expect(mockToolbarService.getViewContainerRef().clear).toHaveBeenCalled();
-    expect(mockToolbarService.getViewContainerRef().createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
+    expect(mockViewContainerRef.clear).toHaveBeenCalled();
+    expect(mockViewContainerRef.createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
   });
 });
