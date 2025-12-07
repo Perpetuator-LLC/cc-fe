@@ -23,7 +23,7 @@ import {
   PlatformFinancialStats,
 } from '../affiliate.service';
 import { MessageService } from '../../message.service';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
 @Component({

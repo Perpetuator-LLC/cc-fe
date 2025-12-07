@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
-import { UserService } from '../../../user.service';
+import { UserService } from '../../../user/user.service';
 import { NewsletterHttpService } from '../../services/newsletter-http.service';
 import { MessageService } from '../../../message.service';
 

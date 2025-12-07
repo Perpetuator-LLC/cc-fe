@@ -9,22 +9,22 @@ import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MessageService } from '../message.service';
-import { ToolbarService } from '../toolbar.service';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { MessageService } from '../../message.service';
+import { ToolbarService } from '../../toolbar.service';
+import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
+import { TeamsService } from '../../team/teams.service';
+import { CreditService } from '../../finance/credit.service';
+import { CodeService } from '../../finance/code.service';
 import { Subscription } from 'rxjs';
-import { AuthService } from '../auth/auth.service';
-import { TeamsService } from '../team/teams.service';
-import { CreditService } from '../credit.service';
-import { CodeService } from '../code.service';
-import { MatIcon } from '@angular/material/icon';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog/delete-account-dialog.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
-import { LoadingService } from '../loading.service';
-import { AffiliateService, AffiliateRelationship } from '../affiliate/affiliate.service';
+import { LoadingService } from '../../loading.service';
+import { AffiliateService, AffiliateRelationship } from '../../affiliate/affiliate.service';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-user-detail',

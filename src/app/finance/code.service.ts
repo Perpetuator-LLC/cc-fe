@@ -3,9 +3,9 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
-import { BaseService } from './base.service';
-import { ErrorHandlerService } from './error-handler.service';
-import { RelayConnection } from './utils/relay';
+import { BaseService } from '../base.service';
+import { ErrorHandlerService } from '../error-handler.service';
+import { RelayConnection } from '../utils/relay';
 
 export interface Code {
   id: string;

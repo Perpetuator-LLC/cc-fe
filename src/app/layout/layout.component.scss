@@ -741,19 +741,6 @@ mat-nav-list {
           background: var(--md-sys-color-surface-container-high);
         }
 
-        mat-icon.theme-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-
-          width: 16px;
-          height: 16px;
-          margin: 0;
-
-          font-size: 16px;
-          color: var(--md-sys-color-on-surface);
-        }
-
         .profile-btn {
           padding-inline: 12px;
 
@@ -762,13 +749,6 @@ mat-nav-list {
           color: var(--md-sys-color-on-surface);
 
           background: transparent;
-        }
-
-        // Extracted to reduce nesting depth
-        .profile-btn .profile-icon {
-          width: 32px; // MD3: 2rem = 32px
-          height: 32px; // MD3: 2rem = 32px
-          font-size: 32px; // MD3: 2rem = 32px
         }
 
 
@@ -785,6 +765,26 @@ mat-nav-list {
       }
     }
   }
+}
+
+// Flattened selectors to reduce specificity
+.toolbar-container-section .push-right mat-icon.theme-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 16px;
+  height: 16px;
+  margin: 0;
+
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.toolbar-container-section .push-right .profile-btn .profile-icon {
+  width: 32px; // MD3: 2rem = 32px
+  height: 32px; // MD3: 2rem = 32px
+  font-size: 32px; // MD3: 2rem = 32px
 }
 
 // Flattened mobile button styles

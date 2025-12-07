@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserOrder, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../../toolbar.service';
 import {
   MatCell,
   MatCellDef,
@@ -20,24 +20,24 @@ import {
 } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 import { MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { PaymentService } from '../payment.service';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { UserService } from '../user.service';
-import { AuthService } from '../auth/auth.service';
+import { UserService } from '../../user/user.service';
+import { AuthService } from '../../auth/auth.service';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../../loading.service';
 import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
