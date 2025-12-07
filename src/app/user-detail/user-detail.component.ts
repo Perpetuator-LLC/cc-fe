@@ -16,7 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { TeamsService } from '../teams.service';
+import { TeamsService } from '../team/teams.service';
 import { CreditService } from '../credit.service';
 import { CodeService } from '../code.service';
 import { MatIcon } from '@angular/material/icon';

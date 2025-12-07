@@ -108,6 +108,11 @@ describe('OAuthAuthService', () => {
     });
 
     it('should return null if no token available', () => {
+      // Clear localStorage to avoid fallback mechanism returning a token
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('expires_at');
+
       oauthServiceSpy.getAccessToken.and.returnValue('');
       expect(service.getAccessToken()).toBe(null);
     });

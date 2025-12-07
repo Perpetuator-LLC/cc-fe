@@ -15,7 +15,7 @@ import { SelectTopicDialogComponent } from '../../select-topic-dialog/select-top
 import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
 import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../toolbar.service';
-import { PodcastsService } from '../../podcasts.service';
+import { PodcastsService } from '../../podcast/podcasts.service';
 import { ResearchService, Topic } from '../../research.service';
 import { NewsService } from '../../news/services/news.service';
 import { Job, JobService } from '../../job.service';

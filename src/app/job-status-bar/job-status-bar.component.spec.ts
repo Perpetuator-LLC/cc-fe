@@ -4,7 +4,7 @@ import { JobStatusBarComponent } from './job-status-bar.component';
 import { JobService, Job, JobStatus } from '../job.service';
 import { MessageService } from '../message.service';
 import { JobDisplayService } from '../job-display.service';
-import { PodcastsService } from '../podcasts.service';
+import { PodcastsService } from '../podcast/podcasts.service';
 import { EpisodeService } from '../episode/episode.service';
 import { ResearchService } from '../research.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
