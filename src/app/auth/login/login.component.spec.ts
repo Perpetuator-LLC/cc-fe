@@ -7,16 +7,16 @@ import { Apollo } from 'apollo-angular';
 import { LoginComponent } from './login.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ToolbarService } from '../toolbar.service';
-import { ThemeService } from '../theme.service';
-import { MessageService } from '../message.service';
-import { UserService } from '../user.service';
+import { ToolbarService } from '../../toolbar.service';
+import { ThemeService } from '../../theme.service';
+import { MessageService } from '../../message.service';
+import { UserService } from '../../user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { AffiliateService } from '../affiliate/affiliate.service';
-import { AffiliateStorageService } from '../affiliate/affiliate-storage.service';
+import { AffiliateService } from '../../affiliate/affiliate.service';
+import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
-import { PolicyGuardService } from '../policy/services/policy-guard.service';
-import { CookieConsentService } from '../policy/services/cookie-consent.service';
+import { PolicyGuardService } from '../../policy/services/policy-guard.service';
+import { CookieConsentService } from '../../policy/services/cookie-consent.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;

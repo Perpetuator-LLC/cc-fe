@@ -3,12 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { CancelChangeEmailComponent } from './cancel-change-email.component';
-import { ToolbarService } from '../toolbar.service';
+import { ChangeEmailComponent } from './change-email.component';
+import { ToolbarService } from '../../toolbar.service';
 
 describe('VerifyEmailComponent', () => {
-  let component: CancelChangeEmailComponent;
-  let fixture: ComponentFixture<CancelChangeEmailComponent>;
+  let component: ChangeEmailComponent;
+  let fixture: ComponentFixture<ChangeEmailComponent>;
 
   beforeEach(async () => {
     const mockActivatedRoute = {
@@ -27,7 +27,7 @@ describe('VerifyEmailComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CancelChangeEmailComponent, HttpClientTestingModule],
+      imports: [ChangeEmailComponent, HttpClientTestingModule],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: ToolbarService, useValue: mockToolbarService },
@@ -35,7 +35,7 @@ describe('VerifyEmailComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CancelChangeEmailComponent);
+    fixture = TestBed.createComponent(ChangeEmailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

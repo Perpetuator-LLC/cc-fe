@@ -355,7 +355,7 @@ type TraceType {
   jobId: UUID
 
   """Celery task ID"""
-  taskId: String!
+  taskId: String
 }
 
 """

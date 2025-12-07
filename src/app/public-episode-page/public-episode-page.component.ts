@@ -11,7 +11,7 @@ import { PublicPodcastHttpService, EpisodeResponse } from '../public-podcast-htt
 import { ShareService } from '../share.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { MessageService } from '../message.service';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { SeoService } from '../seo.service';
 
 @Component({

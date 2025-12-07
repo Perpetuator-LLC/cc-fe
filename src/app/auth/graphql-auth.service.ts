@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
-import { MessageService } from './message.service';
-import { OAuthAuthService } from './core/auth.service';
+import { MessageService } from '../message.service';
+import { OAuthAuthService } from '../core/auth.service';
 import {
   REGISTER_USER,
   RESEND_VERIFICATION,
@@ -18,7 +18,7 @@ import {
   ResetPasswordResponse,
   VerifyEmailResponse,
   MeResponse,
-} from './auth/auth.graphql';
+} from './auth.graphql';
 
 /**
  * OAuth2-based authentication service.

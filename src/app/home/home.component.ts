@@ -9,7 +9,7 @@ import { PodcastsService, PodcastsResult } from '../podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
 import { ShareService } from '../share.service';
 import { ToolbarService } from '../toolbar.service';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, TemplateRef, OnInit } from '@angular/core';
 import p5 from 'p5';
 import { CommonModule } from '@angular/common';

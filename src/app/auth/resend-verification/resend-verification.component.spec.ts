@@ -1,26 +1,23 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ForgotPasswordComponent } from './forgot-password.component';
+import { ResendVerificationComponent } from './resend-verification.component';
 import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../../toolbar.service';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ViewContainerRef } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MessageService } from '../message.service';
-import { Apollo } from 'apollo-angular';
-import { GraphqlAuthService } from '../graphql-auth.service';
+import { MessageService } from '../../message.service';
 
-describe('ForgotPasswordComponent', () => {
-  let component: ForgotPasswordComponent;
-  let fixture: ComponentFixture<ForgotPasswordComponent>;
+describe('ResendVerificationComponent', () => {
+  let component: ResendVerificationComponent;
+  let fixture: ComponentFixture<ResendVerificationComponent>;
   let authServiceMock: jasmine.SpyObj<AuthService>;
   let routerMock: jasmine.SpyObj<Router>;
   let toolbarServiceMock: jasmine.SpyObj<ToolbarService>;
   let viewContainerRefMock: jasmine.SpyObj<ViewContainerRef>;
-  let messageServiceMock: jasmine.SpyObj<MessageService>;
+  let mockMessageService: jasmine.SpyObj<MessageService>;
   let activatedRouteMock: jasmine.SpyObj<ActivatedRoute>;
 
   beforeEach(async () => {
@@ -28,37 +25,31 @@ describe('ForgotPasswordComponent', () => {
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
     toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
     viewContainerRefMock = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-    messageServiceMock = jasmine.createSpyObj('MessageService', [
+    mockMessageService = jasmine.createSpyObj('MessageService', [
       'addMessage',
       'clearMessages',
       'removeMessage',
       'messageCount',
     ]);
-    messageServiceMock.messages$ = of([]);
+    mockMessageService.messages$ = of([]);
+
     activatedRouteMock = jasmine.createSpyObj('ActivatedRoute', ['snapshot', 'queryParams']);
     activatedRouteMock.queryParams = of({});
+
     toolbarServiceMock.getViewContainerRef.and.returnValue(viewContainerRefMock);
 
-    const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
-    mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));
-    mockApollo.mutate.and.returnValue(of({ data: {} }));
-
-    const mockGraphqlAuthService = jasmine.createSpyObj('GraphqlAuthService', ['forgot', 'resetPassword']);
-
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, NoopAnimationsModule, ForgotPasswordComponent, HttpClientTestingModule],
+      imports: [ReactiveFormsModule, NoopAnimationsModule, ResendVerificationComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: AuthService, useValue: authServiceMock },
         { provide: Router, useValue: routerMock },
         { provide: ToolbarService, useValue: toolbarServiceMock },
-        { provide: MessageService, useValue: messageServiceMock },
-        { provide: Apollo, useValue: mockApollo },
-        { provide: GraphqlAuthService, useValue: mockGraphqlAuthService },
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ForgotPasswordComponent);
+    fixture = TestBed.createComponent(ResendVerificationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -68,7 +59,7 @@ describe('ForgotPasswordComponent', () => {
   });
 
   it('should initialize the form with an email control and validators', () => {
-    const emailControl = component.forgotForm.get('email');
+    const emailControl = component.resendForm.get('email');
     expect(emailControl).toBeTruthy();
     expect(emailControl?.hasValidator(Validators.required)).toBeTrue();
     expect(emailControl?.hasValidator(Validators.email)).toBeTrue();
@@ -81,27 +72,22 @@ describe('ForgotPasswordComponent', () => {
     expect(viewContainerRefMock.createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
   });
 
-  it('should call authService.forgot on successful submission', () => {
-    const graphqlAuthService = TestBed.inject(GraphqlAuthService) as jasmine.SpyObj<GraphqlAuthService>;
-    graphqlAuthService.forgot.and.returnValue(of(true));
+  it('should call authService.resend and navigate to login on successful submission', () => {
+    authServiceMock.resend.and.returnValue(of(null));
 
-    component.forgotForm.setValue({ email: 'test@example.com' });
     component.onSubmit();
 
-    expect(graphqlAuthService.forgot).toHaveBeenCalledWith('test@example.com');
+    expect(authServiceMock.resend).toHaveBeenCalledWith(component.resendForm.value.email as string);
   });
 
   it('should handle errors and not navigate on failed submission', () => {
-    const graphqlAuthService = TestBed.inject(GraphqlAuthService) as jasmine.SpyObj<GraphqlAuthService>;
     const errorResponse = 'A special error occurred';
-    graphqlAuthService.forgot.and.returnValue(throwError(() => new Error(errorResponse)));
+    authServiceMock.resend.and.returnValue(throwError(() => new Error(errorResponse)));
 
-    component.forgotForm.setValue({ email: 'test@example.com' });
     component.onSubmit();
 
-    expect(graphqlAuthService.forgot).toHaveBeenCalledWith('test@example.com');
+    expect(authServiceMock.resend).toHaveBeenCalledWith(component.resendForm.value.email as string);
     expect(routerMock.navigate).not.toHaveBeenCalled();
-    // Error message is handled by GraphqlAuthService, not by component
-    expect(component.isLoading).toBe(false);
+    expect(mockMessageService.addMessage).toHaveBeenCalled();
   });
 });
