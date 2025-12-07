@@ -4,7 +4,7 @@ import { JobsListComponent } from './jobs-list.component';
 import { JobService } from '../job.service';
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../toolbar.service';
-import { PodcastsService } from '../podcasts.service';
+import { PodcastsService } from '../podcast/podcasts.service';
 import { EpisodeService } from '../episode/episode.service';
 import { JobDisplayService } from '../job-display.service';
 import { ResearchService } from '../research.service';

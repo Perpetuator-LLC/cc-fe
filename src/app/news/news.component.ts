@@ -15,7 +15,7 @@ import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
-import { PodcastsResult, PodcastsService } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcast/podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user.service';
 import { EpisodeService } from '../episode/episode.service';
@@ -28,7 +28,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { JobDisplayService } from '../job-display.service';
 import { LoadingService } from '../loading.service';
-import { RecentlyUsedPodcastsService } from '../recently-used-podcasts.service';
+import { RecentlyUsedPodcastsService } from '../podcast/recently-used-podcasts.service';
 
 // export interface News {
 //   results: NewsResult[];

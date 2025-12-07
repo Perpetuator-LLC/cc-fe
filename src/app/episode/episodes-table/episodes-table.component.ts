@@ -35,7 +35,7 @@ import { CommonModule } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';
-import { PodcastsResult, PodcastsService } from '../../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { MessageService } from '../../message.service';
 import { LoadingService } from '../../loading.service';
 

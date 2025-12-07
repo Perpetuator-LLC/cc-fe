@@ -22,7 +22,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { RouterLink } from '@angular/router';
-import { PodcastsResult, PodcastsService } from '../podcasts.service';
+import { PodcastsResult, PodcastsService } from '../podcast/podcasts.service';
 import { EpisodeService } from '../episode/episode.service';
 import { JobDisplayService } from '../job-display.service';
 import { ResearchService, Topic } from '../research.service';

@@ -22,7 +22,8 @@ describe('UserDetailComponent', () => {
     ]);
     mockUserService.getUserDetails.and.returnValue(of({}));
     mockUserService.getUserPreferences.and.returnValue(of({}));
-    mockUserService.loadUserDetails.and.returnValue(of({}));
+    // loadUserDetails is a void method, not returning anything
+    mockUserService.loadUserDetails.and.stub();
     mockUserService.loadUserEmailChangePending.and.returnValue(of(null));
 
     const mockToolbarService = {
