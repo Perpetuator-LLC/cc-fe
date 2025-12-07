@@ -12,7 +12,7 @@ import { ToolbarService } from '../../toolbar.service';
 import { MessageService } from '../../message.service';
 import { ThemeService } from '../../theme.service';
 import { Subscription } from 'rxjs';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';

@@ -33,7 +33,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { PodcastCategoriesComponent } from '../podcast-categories/podcast-categories.component';
 import { tierToString, Voice, VoicesService, VoiceTier, voiceToTier } from '../voices.service';
 import { AddVoiceDialogComponent } from '../add-voice-dialog/add-voice-dialog.component';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 import { RefreshVoicesDialogComponent } from '../refresh-voices-dialog/refresh-voices-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';

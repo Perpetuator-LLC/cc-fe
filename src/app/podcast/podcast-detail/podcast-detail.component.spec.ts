@@ -12,7 +12,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { TeamsService } from '../../team/teams.service';
 import { VoicesService } from '../voices.service';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 import { ToolbarService } from '../../toolbar.service';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ViewContainerRef, signal } from '@angular/core';

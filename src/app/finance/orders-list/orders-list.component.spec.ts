@@ -6,10 +6,10 @@ import {
   provideMockOAuthService,
   provideMockActivatedRoute,
   provideMockToolbarService,
-} from '../testing/test-providers';
+} from '../../testing/test-providers';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { UserService } from '../user.service';
+import { UserService } from '../../user/user.service';
 
 describe('OrdersListComponent', () => {
   let component: OrdersListComponent;

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransactionsListComponent } from './transactions-list.component';
-import { provideMockApollo, provideMockOAuthService, provideMockToolbarService } from '../testing/test-providers';
+import { provideMockApollo, provideMockOAuthService, provideMockToolbarService } from '../../testing/test-providers';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 

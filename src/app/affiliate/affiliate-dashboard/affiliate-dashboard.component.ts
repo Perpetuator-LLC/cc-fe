@@ -25,11 +25,11 @@ import {
   AffiliateConversionUtils,
 } from '../affiliate.service';
 import { MessageService } from '../../message.service';
-import { UserService } from '../../user.service';
+import { UserService } from '../../user/user.service';
 // eslint-disable-next-line max-len
 import { PolicyAcceptanceDialogComponent } from '../../policy/dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
 import { PolicyService, ActivePoliciesResult } from '../../policy/services/policy.service';
-import { ConvertCreditsDialogComponent } from '../../convert-credits-dialog/convert-credits-dialog.component';
+import { ConvertCreditsDialogComponent } from '../../finance/convert-credits-dialog/convert-credits-dialog.component';
 // eslint-disable-next-line max-len
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
 import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';

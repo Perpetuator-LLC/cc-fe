@@ -82,10 +82,6 @@
         }
       }
 
-      // Extracted to reduce nesting depth
-      .nav-link.login-link:hover {
-        background: color-mix(in srgb, var(--md-sys-color-secondary-container) 25%, transparent);
-      }
 
       .theme-toggle {
         width: 40px;
@@ -250,3 +246,9 @@
       justify-content: center;
     }
 }
+
+// Flattened to reduce specificity
+.header-actions .auth-link.login-link:hover {
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 25%, transparent);
+}
+

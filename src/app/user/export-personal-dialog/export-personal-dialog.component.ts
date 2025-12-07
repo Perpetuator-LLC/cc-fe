@@ -7,8 +7,8 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MessageService } from '../message.service';
-import { TeamsService } from '../team/teams.service';
+import { MessageService } from '../../message.service';
+import { TeamsService } from '../../team/teams.service';
 
 @Component({
   selector: 'app-export-personal-dialog',

@@ -4,9 +4,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { map } from 'rxjs';
-import { BaseService } from './base.service';
-import { environment } from '../environments/environment';
-import { ErrorHandlerService } from './error-handler.service';
+import { BaseService } from '../base.service';
+import { environment } from '../../environments/environment';
+import { ErrorHandlerService } from '../error-handler.service';
 import { UserOrder } from './credit.service';
 
 @Injectable({

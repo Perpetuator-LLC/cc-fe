@@ -5,8 +5,8 @@ import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { UserDetailComponent } from './user-detail.component';
 import { UserService } from '../user.service';
-import { ToolbarService } from '../toolbar.service';
-import { provideMockOAuthService, provideMockApollo } from '../testing/test-providers';
+import { ToolbarService } from '../../toolbar.service';
+import { provideMockOAuthService, provideMockApollo } from '../../testing/test-providers';
 import { of } from 'rxjs';
 
 describe('UserDetailComponent', () => {
