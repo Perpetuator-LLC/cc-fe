@@ -223,7 +223,7 @@ export const routes: Routes = [
     title: 'Transactions',
     canActivate: [AuthGuard],
     data: {
-      icon: 'work',
+      icon: 'receipt_long',
     },
   },
   {
