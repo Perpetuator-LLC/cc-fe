@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs/operators';
-import { Job } from '../../job.service';
+import { Job } from '../../jobs/job.service';
 import { BaseService } from '../../base.service';
 import { ErrorHandlerService } from '../../error-handler.service';
 import { PageInfo, RelayEdge } from '../../utils/relay';

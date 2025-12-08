@@ -9,7 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subscription } from 'rxjs';
 import { ApiKeyService, ApiKey, ApiKeyAnalytics, ApiKeyUsage } from '../api-key.service';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 
 export interface ApiKeyDetailDialogData {
   apiKey: ApiKey;

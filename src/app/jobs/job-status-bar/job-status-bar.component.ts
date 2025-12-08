@@ -21,13 +21,13 @@ import {
   stringToJobStatus,
   statusToString,
 } from '../job.service';
-import { MessageService } from '../message.service';
-import { SidePanelAccordianData } from '../news/news.component';
+import { MessageService } from '../../message.service';
+import { SidePanelAccordianData } from '../../news/news.component';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { JobDisplayService } from '../job-display.service';
-import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
-import { EpisodeService } from '../episode/episode.service';
-import { ResearchService } from '../research.service';
+import { JobDisplayService } from '../../job-display.service';
+import { PodcastsService, PodcastsResult } from '../../podcast/podcasts.service';
+import { EpisodeService } from '../../episode/episode.service';
+import { ResearchService } from '../../research.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;

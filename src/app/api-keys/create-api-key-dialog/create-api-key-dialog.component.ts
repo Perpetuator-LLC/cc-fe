@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { ApiKeyService, ApiKey } from '../api-key.service';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-create-api-key-dialog',

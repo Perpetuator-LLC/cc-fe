@@ -14,23 +14,23 @@ import {
 } from '../job.service';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../../toolbar.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 import { RouterLink } from '@angular/router';
-import { PodcastsResult, PodcastsService } from '../podcast/podcasts.service';
-import { EpisodeService } from '../episode/episode.service';
-import { JobDisplayService } from '../job-display.service';
-import { ResearchService, Topic } from '../research.service';
+import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
+import { EpisodeService } from '../../episode/episode.service';
+import { JobDisplayService } from '../../job-display.service';
+import { ResearchService, Topic } from '../../research.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../../loading.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;
