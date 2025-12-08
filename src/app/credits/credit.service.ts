@@ -8,7 +8,7 @@ import { mapQueryResult } from '../utils/error-handler';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 import { MessageService } from '../message.service';
 import { RelayConnection } from '../utils/relay';
 

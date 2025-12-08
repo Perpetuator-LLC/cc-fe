@@ -1,7 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { NewsConnection, NewsService, NewsResult } from './services/news.service';
 import { DatePipe } from '@angular/common';
 import { NgClass } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -9,26 +8,27 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatInput } from '@angular/material/input';
-import { MessageService } from '../message.service';
-import { ToolbarService } from '../toolbar.service';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
-import { PodcastsResult, PodcastsService } from '../podcast/podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { UserService } from '../user/user.service';
-import { EpisodeService } from '../episode/episode.service';
-import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
-import { JobDisplayService } from '../job-display.service';
-import { LoadingService } from '../loading.service';
-import { RecentlyUsedPodcastsService } from '../podcast/recently-used-podcasts.service';
+import { MessageService } from '../../message.service';
+import { ToolbarService } from '../../toolbar.service';
+import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
+import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
+import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
+import { UserService } from '../../user/user.service';
+import { EpisodeService } from '../../episode/episode.service';
+import { JobDisplayService } from '../../job-display.service';
+import { LoadingService } from '../../loading.service';
+import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
+import { NewsConnection, NewsResult, NewsService } from '../news.service';
 
 // export interface News {
 //   results: NewsResult[];
@@ -65,10 +65,10 @@ export interface SidePanelAccordianData {
     SvgIconComponent,
     MatProgressBarModule,
   ],
-  templateUrl: './news.component.html',
-  styleUrl: './news.component.scss',
+  templateUrl: './news-list.component.html',
+  styleUrl: './news-list.component.scss',
 })
-export class NewsComponent implements OnInit, OnDestroy {
+export class NewsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   news: NewsConnection | null = null;
   filteredNews: NewsResult[] = [];
@@ -196,18 +196,14 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.onPodcastSelect(this.selectedPodcastUuid);
     this.subscriptions.add(
       this.newsService.fetchNews(this.selectedPodcastUuid).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to fetch news, no job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.jobService.addJob(data.job);
           // Set newsFetched to true after fetch is initiated
           this.newsFetched = true;
 
           console.log('[fetchNews] News fetch job created successfully for podcast:', this.selectedPodcastUuid);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.messageService.error(`Failed to fetch news: ${error.message}`);
           // Remove from local cache on error so retry is possible
           this.localFetchTimestamps.delete(this.selectedPodcastUuid!);
@@ -318,14 +314,10 @@ export class NewsComponent implements OnInit, OnDestroy {
     }
     this.subscriptions.add(
       this.newsService.extractNews(this.selectedPodcastUuid, newsUuids).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to extract news: No job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.jobService.addJob(data.job);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.messageService.error(`Failed to extract news: ${error.message}`);
         },
       }),
@@ -363,14 +355,10 @@ export class NewsComponent implements OnInit, OnDestroy {
     this.messageService.info('Processing news item (this may take a while)...');
     this.subscriptions.add(
       this.newsService.processNewsChain(this.selectedPodcastUuid, [uuid]).subscribe({
-        next: (data) => {
-          if (!data.jobs) {
-            this.messageService.error('Failed to process news: No jobs returned');
-            return;
-          }
+        next: (data: { jobs: Job[] }) => {
           this.jobService.addJobs(data.jobs);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.messageService.error(`Failed to process news: ${error.message}`);
         },
       }),
@@ -380,14 +368,10 @@ export class NewsComponent implements OnInit, OnDestroy {
   private summarizeNews(podcastUuid: string, newsUuids: string[], force = false) {
     this.subscriptions.add(
       this.newsService.summarizeNews(podcastUuid, newsUuids, force).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to summarize news data: No job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.jobService.addJob(data.job);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.messageService.error(`Failed to summarize news data: ${error.message}`);
         },
       }),
@@ -414,15 +398,11 @@ export class NewsComponent implements OnInit, OnDestroy {
     const newsUuids: string[] = [];
     this.subscriptions.add(
       this.newsService.createEpisode(newsUuids, this.selectedPodcastUuid).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to create episode: No job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.messageService.info('Creating blank episode...');
           this.jobService.addJob(data.job);
         },
-        error: (err: { message: string }) => {
+        error: (err: Error) => {
           this.messageService.error(err.message);
         },
       }),
@@ -443,14 +423,10 @@ export class NewsComponent implements OnInit, OnDestroy {
     const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
       this.newsService.createEpisodeChain(newsUuids, this.selectedPodcastUuid).subscribe({
-        next: (data) => {
-          if (!data.jobs) {
-            this.messageService.error('Failed to create episode: No jobs returned');
-            return;
-          }
+        next: (data: { jobs: Job[] }) => {
           this.jobService.addJobs(data.jobs);
         },
-        error: (err) => {
+        error: (err: Error) => {
           this.messageService.error(err.message);
         },
       }),
@@ -471,14 +447,10 @@ export class NewsComponent implements OnInit, OnDestroy {
     const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
       this.newsService.createEpisodeAudioChain(newsUuids, this.selectedPodcastUuid).subscribe({
-        next: (data) => {
-          if (!data.jobs) {
-            this.messageService.error('Failed to create audio: No jobs returned');
-            return;
-          }
+        next: (data: { jobs: Job[] }) => {
           this.jobService.addJobs(data.jobs);
         },
-        error: (err) => {
+        error: (err: Error) => {
           this.messageService.error(err.message);
         },
       }),
@@ -498,15 +470,11 @@ export class NewsComponent implements OnInit, OnDestroy {
     const newsUuids = [...this.selectedNews].map((entry) => entry.uuid);
     this.subscriptions.add(
       this.newsService.createEpisode(newsUuids, this.selectedPodcastUuid).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to create episode: No job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.messageService.info('Creating episode from selected news items (this may take a while)...');
           this.jobService.addJob(data.job);
         },
-        error: (err: { message: string }) => {
+        error: (err: Error) => {
           this.messageService.error(err.message);
         },
       }),

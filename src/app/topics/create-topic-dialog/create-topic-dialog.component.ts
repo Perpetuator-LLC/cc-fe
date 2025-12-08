@@ -3,7 +3,7 @@ import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
-import { ResearchService } from '../../research.service';
+import { ResearchService } from '../research.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';

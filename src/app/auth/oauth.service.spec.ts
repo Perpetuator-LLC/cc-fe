@@ -2,17 +2,17 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { OAuthService as AngularOAuthService } from 'angular-oauth2-oidc';
 import { of } from 'rxjs';
-import { OAuthAuthService } from './auth.service';
+import { OAuthService } from './oauth.service';
 
-describe('OAuthAuthService', () => {
-  let service: OAuthAuthService;
-  let oauthServiceSpy: jasmine.SpyObj<OAuthService>;
+describe('OAuthService', () => {
+  let service: OAuthService;
+  let angularOAuthServiceSpy: jasmine.SpyObj<AngularOAuthService>;
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const oauthSpy = jasmine.createSpyObj('OAuthService', [
+    const oauthSpy = jasmine.createSpyObj('AngularOAuthService', [
       'configure',
       'loadDiscoveryDocumentAndTryLogin',
       'hasValidAccessToken',
@@ -33,14 +33,14 @@ describe('OAuthAuthService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        OAuthAuthService,
-        { provide: OAuthService, useValue: oauthSpy },
+        OAuthService,
+        { provide: AngularOAuthService, useValue: oauthSpy },
         { provide: Router, useValue: routerSpyObj },
       ],
     });
 
-    service = TestBed.inject(OAuthAuthService);
-    oauthServiceSpy = TestBed.inject(OAuthService) as jasmine.SpyObj<OAuthService>;
+    service = TestBed.inject(OAuthService);
+    angularOAuthServiceSpy = TestBed.inject(AngularOAuthService) as jasmine.SpyObj<AngularOAuthService>;
     routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -52,27 +52,27 @@ describe('OAuthAuthService', () => {
     it('should configure OAuth service on initialization', () => {
       // Trigger initialization by calling a method that uses ensureInitialized
       service.isAuthenticated();
-      expect(oauthServiceSpy.configure).toHaveBeenCalled();
+      expect(angularOAuthServiceSpy.configure).toHaveBeenCalled();
     });
 
     it('should load discovery document and try login', () => {
       // Trigger initialization
       service.isAuthenticated();
-      expect(oauthServiceSpy.configure).toHaveBeenCalled();
+      expect(angularOAuthServiceSpy.configure).toHaveBeenCalled();
     });
   });
 
   describe('login', () => {
     it('should initiate OAuth code flow', () => {
       service.login();
-      expect(oauthServiceSpy.initCodeFlow).toHaveBeenCalled();
+      expect(angularOAuthServiceSpy.initCodeFlow).toHaveBeenCalled();
     });
   });
 
   describe('logout', () => {
     it('should call OAuth logout and navigate to home', () => {
       service.logout();
-      expect(oauthServiceSpy.logOut).toHaveBeenCalled();
+      expect(angularOAuthServiceSpy.logOut).toHaveBeenCalled();
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
     });
 
@@ -85,7 +85,7 @@ describe('OAuthAuthService', () => {
 
   describe('isAuthenticated', () => {
     it('should return true when OAuth service has valid access token', () => {
-      oauthServiceSpy.hasValidAccessToken.and.returnValue(true);
+      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(true);
       expect(service.isAuthenticated()).toBe(true);
     });
 
@@ -94,8 +94,8 @@ describe('OAuthAuthService', () => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
 
-      oauthServiceSpy.hasValidAccessToken.and.returnValue(false);
-      oauthServiceSpy.getAccessToken.and.returnValue('');
+      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
+      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
       expect(service.isAuthenticated()).toBe(false);
     });
   });
@@ -103,7 +103,7 @@ describe('OAuthAuthService', () => {
   describe('getAccessToken', () => {
     it('should return access token from OAuth service', () => {
       const token = 'test-access-token';
-      oauthServiceSpy.getAccessToken.and.returnValue(token);
+      angularOAuthServiceSpy.getAccessToken.and.returnValue(token);
       expect(service.getAccessToken()).toBe(token);
     });
 
@@ -113,7 +113,7 @@ describe('OAuthAuthService', () => {
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('expires_at');
 
-      oauthServiceSpy.getAccessToken.and.returnValue('');
+      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
       expect(service.getAccessToken()).toBe(null);
     });
   });
@@ -128,8 +128,8 @@ describe('OAuthAuthService', () => {
       const token = 'valid-token';
       localStorage.setItem('access_token', token);
       localStorage.setItem('expires_at', String(Date.now() + 10000)); // Future expiry
-      oauthServiceSpy.getAccessToken.and.returnValue(token);
-      oauthServiceSpy.hasValidAccessToken.and.returnValue(true);
+      angularOAuthServiceSpy.getAccessToken.and.returnValue(token);
+      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(true);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBe(token);
@@ -138,8 +138,8 @@ describe('OAuthAuthService', () => {
     });
 
     it('should return null if no token and no refresh token', (done) => {
-      oauthServiceSpy.getAccessToken.and.returnValue('');
-      oauthServiceSpy.hasValidAccessToken.and.returnValue(false);
+      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
+      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBeNull();
@@ -150,8 +150,8 @@ describe('OAuthAuthService', () => {
     it('should logout and return null if refresh token missing', (done) => {
       localStorage.setItem('access_token', 'expired-token');
       localStorage.setItem('expires_at', String(Date.now() - 10000)); // Past expiry
-      oauthServiceSpy.getAccessToken.and.returnValue('');
-      oauthServiceSpy.hasValidAccessToken.and.returnValue(false);
+      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
+      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBeNull();

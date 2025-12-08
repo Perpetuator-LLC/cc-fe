@@ -4,10 +4,10 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BaseService } from './base.service';
-import { ErrorHandlerService } from './error-handler.service';
-import { Job } from './jobs/job.service';
-import { RelayConnection } from './utils/relay';
+import { BaseService } from '../base.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
+import { Job } from '../jobs/job.service';
+import { RelayConnection } from '../utils/relay';
 
 export interface Source {
   uuid: string;

@@ -2,19 +2,19 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
-import { OAuthAuthService } from '../auth.service';
+import { OAuthService } from '../oauth.service';
 import { of } from 'rxjs';
 
 describe('authInterceptor', () => {
-  let mockAuthService: jasmine.SpyObj<OAuthAuthService>;
+  let mockAuthService: jasmine.SpyObj<OAuthService>;
   let mockNext: jasmine.Spy<HttpHandlerFn>;
 
   beforeEach(() => {
-    mockAuthService = jasmine.createSpyObj('OAuthAuthService', ['getAccessToken']);
+    mockAuthService = jasmine.createSpyObj('OAuthService', ['getAccessToken']);
     mockNext = jasmine.createSpy('HttpHandlerFn').and.returnValue(of({}));
 
     TestBed.configureTestingModule({
-      providers: [{ provide: OAuthAuthService, useValue: mockAuthService }],
+      providers: [{ provide: OAuthService, useValue: mockAuthService }],
     });
   });
 

@@ -7,7 +7,7 @@ import { BaseService } from '../base.service';
 import { User } from '../types';
 import { Episode } from '../episode/episode.service';
 import { Job } from '../jobs/job.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PodcastsResult } from '../podcast/podcasts.service';
 import { RelayConnection } from '../utils/relay';
 

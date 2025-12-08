@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Apollo } from 'apollo-angular';
 import { CodeService } from './code.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 
 describe('BonusService', () => {
   let service: CodeService;

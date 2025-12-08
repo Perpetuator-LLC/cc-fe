@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ErrorHandler, Injectable, Injector } from '@angular/core';
-import { TraceService } from '../traces/services/trace.service';
+import { TraceService } from '../traces/trace.service';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {

@@ -5,7 +5,7 @@ import { map, catchError } from 'rxjs/operators';
 import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './jobs/job.service';
 import { EpisodeService } from './episode/episode.service';
 import { PodcastsService } from './podcast/podcasts.service';
-import { ResearchService } from './research.service';
+import { ResearchService } from './topics/research.service';
 import { MessageService } from './message.service';
 
 export interface MergedJobData {

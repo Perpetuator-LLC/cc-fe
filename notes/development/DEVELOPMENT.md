@@ -283,7 +283,7 @@ When a component's SCSS file exceeds 16kB, the build will fail. To fix:
 
 Example error:
 ```
-✘ [ERROR] src/app/news/news.component.scss exceeded maximum budget. 
+✘ [ERROR] src/app/news/news-list.component.scss exceeded maximum budget. 
 Budget 16.38 kB was not met by 1.53 kB with a total of 17.91 kB.
 ```
 
