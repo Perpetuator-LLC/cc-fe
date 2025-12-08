@@ -1,12 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, signal, WritableSignal, Injector } from '@angular/core';
-import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import { AuthConfig, OAuthService as AngularOAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { TraceService } from '../traces/services/trace.service';
+import { TraceService } from '../traces/trace.service';
 
 export interface UserProfile {
   id: string;
@@ -29,10 +29,14 @@ export interface OAuth2ErrorResponse {
   error_uri?: string;
 }
 
+/**
+ * OAuth2 Authentication Service
+ * Handles OAuth2 password grant and authorization code flows
+ */
 @Injectable({
   providedIn: 'root',
 })
-export class OAuthAuthService {
+export class OAuthService {
   private currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
   public currentUser$: Observable<UserProfile | null> = this.currentUserSubject.asObservable();
   private loggedInSignal: WritableSignal<boolean> = signal(false);
@@ -60,7 +64,7 @@ export class OAuthAuthService {
   };
 
   constructor(
-    private oauthService: OAuthService,
+    private angularOAuthService: AngularOAuthService,
     private router: Router,
     private http: HttpClient,
     private injector: Injector,
@@ -78,7 +82,7 @@ export class OAuthAuthService {
       return this.traceService;
     } catch (error) {
       // TraceService not available yet (during Apollo initialization)
-      console.warn('[OAuthAuthService] TraceService not available:', error);
+      console.warn('[OAuthService] TraceService not available:', error);
       return null;
     }
   }
@@ -93,10 +97,10 @@ export class OAuthAuthService {
 
   private configureOAuth(): void {
     // Just configure OAuth, don't load discovery document yet to avoid HTTP requests
-    this.oauthService.configure(this.authConfig);
+    this.angularOAuthService.configure(this.authConfig);
 
     // Subscribe to OAuth events
-    this.oauthService.events.subscribe((event) => {
+    this.angularOAuthService.events.subscribe((event) => {
       if (event.type === 'token_received') {
         this.loggedInSignal.set(true);
         // Don't load user profile automatically - it will be loaded when needed
@@ -152,7 +156,7 @@ export class OAuthAuthService {
           const traceService = this.getTraceService();
           if (traceService) {
             traceService.trackAuthSuccess(username).subscribe({
-              error: (err) => console.error('[OAuthAuthService] Failed to track auth success:', err),
+              error: (err) => console.error('[OAuthService] Failed to track auth success:', err),
             });
           }
         }),
@@ -165,7 +169,7 @@ export class OAuthAuthService {
           const traceService = this.getTraceService();
           if (traceService) {
             traceService.trackAuthFailure(username, errorMessage).subscribe({
-              error: (err) => console.error('[OAuthAuthService] Failed to track auth failure:', err),
+              error: (err) => console.error('[OAuthService] Failed to track auth failure:', err),
             });
           }
 
@@ -234,7 +238,7 @@ export class OAuthAuthService {
 
     // Trigger token_received event for OAuth library
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.oauthService as any).eventsSubject.next({
+    (this.angularOAuthService as any).eventsSubject.next({
       type: 'token_received',
     });
   }
@@ -244,7 +248,7 @@ export class OAuthAuthService {
    */
   login(): void {
     this.ensureInitialized();
-    this.oauthService.initCodeFlow();
+    this.angularOAuthService.initCodeFlow();
   }
 
   logout(): void {
@@ -257,7 +261,7 @@ export class OAuthAuthService {
     localStorage.removeItem('token_type');
     localStorage.removeItem('scope');
 
-    this.oauthService.logOut();
+    this.angularOAuthService.logOut();
     this.loggedInSignal.set(false);
     this.currentUserSubject.next(null);
     this.router.navigate(['/']);
@@ -272,7 +276,7 @@ export class OAuthAuthService {
     this.ensureInitialized();
 
     // Try OAuth service first
-    if (this.oauthService.hasValidAccessToken()) {
+    if (this.angularOAuthService.hasValidAccessToken()) {
       return true;
     }
 
@@ -292,7 +296,7 @@ export class OAuthAuthService {
     this.ensureInitialized();
 
     // Try OAuth service first
-    let token: string | null = this.oauthService.getAccessToken();
+    let token: string | null = this.angularOAuthService.getAccessToken();
 
     // Fallback: If OAuth service doesn't return token, get it directly from localStorage
     // This handles the case where angular-oauth2-oidc doesn't recognize password grant tokens
@@ -377,7 +381,7 @@ export class OAuthAuthService {
   }
 
   private loadUserProfile(): void {
-    from(this.oauthService.loadUserProfile())
+    from(this.angularOAuthService.loadUserProfile())
       .pipe(
         map((profile) => profile as UserProfile),
         tap((profile: UserProfile) => {
@@ -395,6 +399,3 @@ export class OAuthAuthService {
     return this.currentUserSubject.value;
   }
 }
-
-// Export alias for backward compatibility
-export { OAuthAuthService as AuthService };

@@ -7,7 +7,7 @@ import { ToolbarService } from '../../toolbar.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
-import { ResearchService } from '../../research.service';
+import { ResearchService } from '../../topics/research.service';
 import { LoadingService } from '../../loading.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject } from 'rxjs';

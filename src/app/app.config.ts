@@ -16,7 +16,7 @@ import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { CustomMatPaginatorIntl } from './custom-paginator-intl';
 import { OAuthModule } from 'angular-oauth2-oidc';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { authInterceptor } from './auth/interceptors/auth.interceptor';
 import { errorTrackingInterceptor } from './core/interceptors/error-tracking.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { RouterErrorTracker } from './core/router-error-tracker';

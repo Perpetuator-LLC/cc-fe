@@ -2,11 +2,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';
-import { PaymentService } from './payment.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { NewsService } from './news.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 
-describe('PaymentService', () => {
-  let service: PaymentService;
+describe('NewsService', () => {
+  let service: NewsService;
   let mockApollo: jasmine.SpyObj<Apollo>;
   let mockErrorHandler: jasmine.SpyObj<ErrorHandlerService>;
 
@@ -19,12 +19,12 @@ describe('PaymentService', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        PaymentService,
+        NewsService,
         { provide: Apollo, useValue: mockApollo },
         { provide: ErrorHandlerService, useValue: mockErrorHandler },
       ],
     });
-    service = TestBed.inject(PaymentService);
+    service = TestBed.inject(NewsService);
   });
 
   it('should be created', () => {

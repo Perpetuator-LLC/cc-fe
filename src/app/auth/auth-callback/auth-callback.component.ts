@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { OAuthAuthService } from '../../core/auth.service';
+import { OAuthService } from '../oauth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AuthCallbackComponent implements OnInit {
   constructor(
-    private authService: OAuthAuthService,
+    private authService: OAuthService,
     private router: Router,
   ) {}
 

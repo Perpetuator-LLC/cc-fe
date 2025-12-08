@@ -4,7 +4,7 @@ import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig } from '@angular/core';
 import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { environment } from '../environments/environment';
-import { OAuthAuthService } from './core/auth.service';
+import { OAuthService } from './auth/oauth.service';
 import { Injectable } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
 import { cachePolicyRegistry } from './cache-policies';
@@ -15,7 +15,7 @@ const uri = environment.API_URL + '/graphql/';
   providedIn: 'root',
 })
 export class ApolloAuthMiddleware {
-  constructor(private authService: OAuthAuthService) {}
+  constructor(private authService: OAuthService) {}
 
   createAuthMiddleware() {
     // @ts-expect-error: Suppressing TS2345 due to type mismatch in ApolloLink middleware

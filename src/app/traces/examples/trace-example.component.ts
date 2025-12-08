@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { TraceService } from '../services/trace.service';
+import { TraceService } from '../trace.service';
 
 @Component({
   selector: 'app-trace-example',

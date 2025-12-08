@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CreditService } from './credit.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 import { getCommonTestProviders } from '../testing/test-helpers';
 import { provideMockApollo } from '../testing/test-providers';
 

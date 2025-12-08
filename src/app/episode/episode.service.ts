@@ -6,8 +6,8 @@ import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
 import { Job } from '../jobs/job.service';
 import { FetchPolicy } from '@apollo/client';
-import { ErrorHandlerService } from '../error-handler.service';
-import { NewsResult } from '../news/services/news.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
+import { NewsResult } from '../news/news.service';
 import { RelayConnection } from '../utils/relay';
 import { TeamsResult } from '../team/teams.service';
 

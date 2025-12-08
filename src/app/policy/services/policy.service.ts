@@ -5,7 +5,7 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from '../../base.service';
-import { ErrorHandlerService } from '../../error-handler.service';
+import { ErrorHandlerService } from '../../utils/error-handler.service';
 import { AuthService } from '../../auth/auth.service';
 
 export enum PolicyType {

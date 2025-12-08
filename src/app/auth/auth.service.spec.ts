@@ -2,16 +2,16 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
-import { OAuthAuthService } from '../core/auth.service';
+import { OAuthService } from './oauth.service';
 import { MessageService } from '../message.service';
 import { of } from 'rxjs';
 
-describe('AuthService (Deprecated - OAuth Wrapper)', () => {
+describe('AuthService (OAuth Facade)', () => {
   let service: AuthService;
-  let mockOAuthService: jasmine.SpyObj<OAuthAuthService>;
+  let mockOAuthService: jasmine.SpyObj<OAuthService>;
 
   beforeEach(() => {
-    const oauthSpy = jasmine.createSpyObj('OAuthAuthService', [
+    const oauthSpy = jasmine.createSpyObj('OAuthService', [
       'logout',
       'getAccessToken',
       'getTokenObservable',
@@ -27,13 +27,13 @@ describe('AuthService (Deprecated - OAuth Wrapper)', () => {
       imports: [HttpClientTestingModule],
       providers: [
         AuthService,
-        { provide: OAuthAuthService, useValue: oauthSpy },
+        { provide: OAuthService, useValue: oauthSpy },
         { provide: MessageService, useValue: jasmine.createSpyObj('MessageService', ['addMessage', 'clearMessages']) },
       ],
     });
 
     service = TestBed.inject(AuthService);
-    mockOAuthService = TestBed.inject(OAuthAuthService) as jasmine.SpyObj<OAuthAuthService>;
+    mockOAuthService = TestBed.inject(OAuthService) as jasmine.SpyObj<OAuthService>;
   });
 
   it('should be created', () => {

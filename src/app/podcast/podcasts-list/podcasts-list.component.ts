@@ -32,11 +32,11 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
-import { NewsService } from '../../news/services/news.service';
+import { NewsService } from '../../news/news.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { Job, JobService } from '../../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ResearchService } from '../../research.service';
+import { ResearchService } from '../../topics/research.service';
 import { JobDisplayService } from '../../job-display.service';
 import { LoadingService } from '../../loading.service';
 import { TeamsService, TeamsResult } from '../../team/teams.service';
@@ -385,15 +385,11 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     const newsUuids: string[] = [];
     this.subscriptions.add(
       this.newsService.createEpisode(newsUuids, podcastUuid).subscribe({
-        next: (data) => {
-          if (!data.job) {
-            this.messageService.error('Failed to create episode: No job returned');
-            return;
-          }
+        next: (data: { job: Job }) => {
           this.messageService.info('Creating blank episode...');
           this.jobService.addJob(data.job);
         },
-        error: (err: { message: string }) => {
+        error: (err: Error) => {
           this.messageService.error(err.message);
         },
       }),

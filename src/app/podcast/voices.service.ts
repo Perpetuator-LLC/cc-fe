@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo, RelayEdge } from '../utils/relay';
 
 export enum VoiceTier {

@@ -146,7 +146,7 @@ export const routes: Routes = [
   },
   {
     path: 'news',
-    loadComponent: () => import('./news/news.component').then((c) => c.NewsComponent),
+    loadComponent: () => import('./news/news-list/news-list.component').then((c) => c.NewsListComponent),
     title: 'News',
     canActivate: [AuthGuard],
     data: {
@@ -219,7 +219,7 @@ export const routes: Routes = [
   {
     path: 'transactions',
     loadComponent: () =>
-      import('./finance/transactions-list/transactions-list.component').then((c) => c.TransactionsListComponent),
+      import('./credits/transactions-list/transactions-list.component').then((c) => c.TransactionsListComponent),
     title: 'Transactions',
     canActivate: [AuthGuard],
     data: {
@@ -228,7 +228,7 @@ export const routes: Routes = [
   },
   {
     path: 'orders',
-    loadComponent: () => import('./finance/orders-list/orders-list.component').then((c) => c.OrdersListComponent),
+    loadComponent: () => import('./credits/orders-list/orders-list.component').then((c) => c.OrdersListComponent),
     title: 'Orders',
     canActivate: [AuthGuard],
     data: {
@@ -270,7 +270,7 @@ export const routes: Routes = [
   {
     path: 'affiliate/stripe/return',
     loadComponent: () =>
-      import('./finance/stripe-onboarding-return/stripe-onboarding-return.component').then(
+      import('./credits/stripe-onboarding-return/stripe-onboarding-return.component').then(
         (c) => c.StripeOnboardingReturnComponent,
       ),
     title: 'Stripe Setup',

@@ -4,7 +4,7 @@ import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo, RelayConnection, RelayEdge } from '../utils/relay';
 import { TeamsResult } from '../team/teams.service';
 import { Voice } from './voices.service';

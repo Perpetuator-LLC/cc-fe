@@ -25,7 +25,7 @@ import { RouterLink } from '@angular/router';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
-import { ResearchService, Topic } from '../../research.service';
+import { ResearchService, Topic } from '../../topics/research.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';

@@ -4,7 +4,7 @@ import { Apollo } from 'apollo-angular';
 import { map, Observable, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseResponse, BaseService, CommonResponse } from '../base.service';
-import { ErrorHandlerService } from '../error-handler.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
 
 export interface UserDetails {
   id: string;

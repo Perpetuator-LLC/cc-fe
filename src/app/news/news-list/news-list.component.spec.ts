@@ -2,20 +2,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { NewsComponent } from './news.component';
-import { provideMockApollo, provideMockOAuthService, provideMockToolbarService } from '../testing/test-providers';
+import { NewsListComponent } from './news-list.component';
+import { provideMockApollo, provideMockOAuthService, provideMockToolbarService } from '../../testing/test-providers';
 
 describe('NewsComponent', () => {
-  let component: NewsComponent;
-  let fixture: ComponentFixture<NewsComponent>;
+  let component: NewsListComponent;
+  let fixture: ComponentFixture<NewsListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewsComponent, HttpClientTestingModule, NoopAnimationsModule],
+      imports: [NewsListComponent, HttpClientTestingModule, NoopAnimationsModule],
       providers: [provideMockApollo(), provideMockOAuthService(), provideMockToolbarService()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NewsComponent);
+    fixture = TestBed.createComponent(NewsListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

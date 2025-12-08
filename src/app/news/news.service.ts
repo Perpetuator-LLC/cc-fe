@@ -2,10 +2,10 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs/operators';
-import { Job } from '../../jobs/job.service';
-import { BaseService } from '../../base.service';
-import { ErrorHandlerService } from '../../error-handler.service';
-import { PageInfo, RelayEdge } from '../../utils/relay';
+import { Job } from '../jobs/job.service';
+import { BaseService } from '../base.service';
+import { ErrorHandlerService } from '../utils/error-handler.service';
+import { PageInfo, RelayEdge } from '../utils/relay';
 
 export interface NewsTag {
   kind: string;
@@ -365,8 +365,10 @@ export class NewsService extends BaseService {
             status
             error
             result
+            args
             createdAt
             updatedAt
+            cost
           }
         }
       }
