@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
-import { JobService } from './job.service';
+import { JobService } from './jobs/job.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { getCommonTestProviders } from './testing/test-helpers';

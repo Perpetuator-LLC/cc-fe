@@ -4,8 +4,8 @@ import { Apollo } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
-import { BaseService } from './base.service';
-import { ErrorHandlerService } from './error-handler.service';
+import { BaseService } from '../base.service';
+import { ErrorHandlerService } from '../error-handler.service';
 
 export interface ApiKey {
   uuid: string;

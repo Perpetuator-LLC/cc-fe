@@ -13,7 +13,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MessageService } from '../../message.service';
-import { JobService } from '../../job.service';
+import { JobService } from '../../jobs/job.service';
 import { ToolbarService } from '../../toolbar.service';
 import { SchedulingService } from '../../scheduling.service';
 import { LoadingService } from '../../loading.service';

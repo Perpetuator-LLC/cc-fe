@@ -11,7 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { ApiKeyService, ApiKey } from '../api-key.service';
-import { MessageService } from '../message.service';
+import { MessageService } from '../../message.service';
 import { CreateApiKeyDialogComponent } from '../create-api-key-dialog/create-api-key-dialog.component';
 import {
   ApiKeyDetailDialogComponent,

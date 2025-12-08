@@ -185,7 +185,7 @@ export const routes: Routes = [
   },
   {
     path: 'jobs',
-    loadComponent: () => import('./jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
+    loadComponent: () => import('./jobs/jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
     title: 'Jobs',
     canActivate: [AuthGuard],
     data: {
@@ -194,7 +194,7 @@ export const routes: Routes = [
   },
   {
     path: 'topics',
-    loadComponent: () => import('./topics-list/topics-list.component').then((c) => c.TopicsListComponent),
+    loadComponent: () => import('./topics/topics-list/topics-list.component').then((c) => c.TopicsListComponent),
     title: 'Topics',
     canActivate: [AuthGuard],
     data: {
@@ -212,7 +212,7 @@ export const routes: Routes = [
   },
   {
     path: 'topic/:uuid',
-    loadComponent: () => import('./topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
+    loadComponent: () => import('./topics/topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
     title: 'Topic Detail',
     canActivate: [AuthGuard],
   },
@@ -260,7 +260,7 @@ export const routes: Routes = [
   {
     path: 'api-keys',
     loadComponent: () =>
-      import('./api-keys-dashboard/api-keys-dashboard.component').then((c) => c.ApiKeysDashboardComponent),
+      import('./api-keys/api-keys-dashboard/api-keys-dashboard.component').then((c) => c.ApiKeysDashboardComponent),
     title: 'API Keys',
     canActivate: [AuthGuard],
     data: {
@@ -289,7 +289,8 @@ export const routes: Routes = [
   },
   {
     path: 'podcasts',
-    loadComponent: () => import('./browse-podcasts/browse-podcasts.component').then((c) => c.BrowsePodcastsComponent),
+    loadComponent: () =>
+      import('./browse/browse-podcasts/browse-podcasts.component').then((c) => c.BrowsePodcastsComponent),
     title: 'Browse Podcasts',
   },
   {

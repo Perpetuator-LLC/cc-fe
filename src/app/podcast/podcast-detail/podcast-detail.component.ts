@@ -45,7 +45,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { LoadingService } from '../../loading.service';
 import { NewsService } from '../../news/services/news.service';
 import { EpisodeService } from '../../episode/episode.service';
-import { JobService } from '../../job.service';
+import { JobService } from '../../jobs/job.service';
 import { ResearchService } from '../../research.service';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
 import { ShareService } from '../../share.service';

@@ -24,7 +24,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../../message.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { kindToString } from '../../job.service';
+import { kindToString } from '../../jobs/job.service';
 import { LoadingService } from '../../loading.service';
 
 @Component({
