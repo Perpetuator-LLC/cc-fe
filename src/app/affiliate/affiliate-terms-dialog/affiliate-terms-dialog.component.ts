@@ -11,7 +11,7 @@ import { AffiliateService, AffiliateEligibility } from '../affiliate.service';
 import { MessageService } from '../../message.service';
 import { PolicyService, PolicyVersion } from '../../policy/services/policy.service';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-affiliate-terms-dialog',

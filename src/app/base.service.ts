@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { FetchResult, MutationOptions, QueryOptions } from '@apollo/client';
 import { Injectable } from '@angular/core';
-import { ErrorHandlerService } from './error-handler.service';
+import { ErrorHandlerService } from './utils/error-handler.service';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MutationResult<TData = any> = FetchResult<TData> & {

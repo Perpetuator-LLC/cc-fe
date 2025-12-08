@@ -16,8 +16,8 @@ import { EpisodesTableComponent } from '../episodes-table/episodes-table.compone
 import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../toolbar.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
-import { ResearchService, Topic } from '../../research.service';
-import { NewsService } from '../../news/services/news.service';
+import { ResearchService, Topic } from '../../topics/research.service';
+import { NewsService } from '../../news/news.service';
 import { JobService, Job } from '../../jobs/job.service';
 
 @Component({

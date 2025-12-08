@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpLink } from 'apollo-angular/http';
 import { ApolloLink } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
-import { TraceService } from '../traces/services/trace.service';
+import { TraceService } from '../traces/trace.service';
 
 @Injectable({
   providedIn: 'root',

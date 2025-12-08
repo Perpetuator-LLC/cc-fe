@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
 import { MessageService } from '../message.service';
-import { OAuthAuthService } from '../core/auth.service';
+import { OAuthService } from './oauth.service';
 import {
   REGISTER_USER,
   RESEND_VERIFICATION,
@@ -31,7 +31,7 @@ export class GraphqlAuthService {
   constructor(
     private apollo: Apollo,
     private messageService: MessageService,
-    private oauthService: OAuthAuthService,
+    private oauthService: OAuthService,
   ) {}
 
   forgot(email: string): Observable<boolean> {

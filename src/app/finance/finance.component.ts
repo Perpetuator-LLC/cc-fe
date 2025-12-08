@@ -7,7 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { ToolbarService } from '../toolbar.service';
-import { NewsletterDialogComponent } from '../news/dialogs/newsletter-dialog/newsletter-dialog.component';
+import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-dialog.component';
 
 @Component({
   selector: 'app-finance',

@@ -8,10 +8,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { AuthService } from '../../../auth/auth.service';
-import { UserService } from '../../../user/user.service';
-import { NewsletterHttpService } from '../../services/newsletter-http.service';
-import { MessageService } from '../../../message.service';
+import { AuthService } from '../../auth/auth.service';
+import { UserService } from '../../user/user.service';
+import { NewsletterHttpService, NewsletterResponse } from '../newsletter-http.service';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-newsletter-dialog',
@@ -77,7 +77,7 @@ export class NewsletterDialogComponent implements OnDestroy {
             this.messageService.success('Successfully subscribed to newsletter!');
             this.dialogRef.close(true);
           },
-          error: (err) => {
+          error: (err: Error) => {
             this.messageService.error(`Subscription failed: ${err.message}`);
             this.loading = false;
           },
@@ -86,7 +86,7 @@ export class NewsletterDialogComponent implements OnDestroy {
     } else {
       this.subscriptions.add(
         this.newsletterHttpService.subscribe(email).subscribe({
-          next: (response) => {
+          next: (response: NewsletterResponse) => {
             if (response.success) {
               this.messageService.success(response.message || 'Successfully subscribed to newsletter!');
               this.dialogRef.close(true);
@@ -95,7 +95,7 @@ export class NewsletterDialogComponent implements OnDestroy {
               this.loading = false;
             }
           },
-          error: (err) => {
+          error: (err: Error) => {
             this.messageService.error(`Subscription failed: ${err.message || 'Unknown error'}`);
             this.loading = false;
           },

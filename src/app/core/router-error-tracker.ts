@@ -2,7 +2,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { Router, NavigationError } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { TraceService } from '../traces/services/trace.service';
+import { TraceService } from '../traces/trace.service';
 
 @Injectable({
   providedIn: 'root',

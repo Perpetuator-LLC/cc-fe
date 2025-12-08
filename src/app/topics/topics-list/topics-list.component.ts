@@ -5,7 +5,7 @@ import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ToolbarService } from '../../toolbar.service';
 import { MessageService } from '../../message.service';
-import { ResearchService, Topic } from '../../research.service';
+import { ResearchService, Topic } from '../research.service';
 import { Subscription } from 'rxjs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';

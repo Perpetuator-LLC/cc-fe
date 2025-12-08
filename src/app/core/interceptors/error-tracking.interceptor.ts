@@ -2,7 +2,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { TraceService } from '../../traces/services/trace.service';
+import { TraceService } from '../../traces/trace.service';
 
 export const errorTrackingInterceptor: HttpInterceptorFn = (req, next) => {
   const traceService = inject(TraceService);

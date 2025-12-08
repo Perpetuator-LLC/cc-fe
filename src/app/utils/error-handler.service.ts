@@ -1,11 +1,11 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from './auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { EMPTY, throwError } from 'rxjs';
-import { MessageService } from './message.service';
-import { handleApolloError } from './utils/error-handler';
-import { TraceService } from './traces/services/trace.service';
+import { MessageService } from '../message.service';
+import { handleApolloError } from './error-handler';
+import { TraceService } from '../traces/trace.service';
 
 @Injectable({
   providedIn: 'root',

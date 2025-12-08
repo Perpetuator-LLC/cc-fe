@@ -8,7 +8,7 @@ import { MatOption } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Topic } from '../../research.service';
+import { Topic } from '../research.service';
 
 export interface SelectTopicDialogData {
   podcastUuid: string;

@@ -5,9 +5,10 @@ import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { MessageService } from '../message.service';
-import { OAuthAuthService } from '../core/auth.service';
+import { OAuthService } from './oauth.service';
 
-// NOTE: This service now delegates entirely to OAuth2
+// NOTE: This service is a facade that delegates to OAuthService for backward compatibility
+// It also provides legacy HTTP endpoints for password reset and email verification
 // WARNING: Do not inject services that might create circular dependencies (like PolicyService)
 
 export interface RegisterResponse {
@@ -26,7 +27,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private messageService: MessageService,
-    private oauthService: OAuthAuthService,
+    private oauthService: OAuthService,
   ) {}
 
   // Delegate all auth operations to OAuth service

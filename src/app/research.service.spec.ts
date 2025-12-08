@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
-import { ResearchService } from './research.service';
+import { ResearchService } from './topics/research.service';
 import { Apollo } from 'apollo-angular';
-import { ErrorHandlerService } from './error-handler.service';
+import { ErrorHandlerService } from './utils/error-handler.service';
 
 describe('ResearchService', () => {
   let service: ResearchService;
