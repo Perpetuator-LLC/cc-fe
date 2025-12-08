@@ -38,6 +38,7 @@ type ApiQuery {
   mySmsPreferences: SMSPreferenceType
   myPolicyAcceptances: [PolicyAcceptanceType]
   policyAcceptanceBySignature(signature: String!): PolicyAcceptanceType
+  affiliateLanding(affiliateCode: String!): AffiliateLandingType
   affiliateProfile: AffiliateProfileType
   affiliateByCode(code: String!): AffiliateProfileType
   myAffiliateRelationship: AffiliateRelationshipType
@@ -1152,6 +1153,12 @@ type PolicyAcceptanceType {
   ipAddress: String
 }
 
+type AffiliateLandingType {
+  affiliateCode: String
+  affiliateUsername: String
+  brandImageUrl: String
+}
+
 type AffiliateRelationshipType {
   createdAt: DateTime!
   uuid: UUID
@@ -2220,7 +2227,23 @@ type ApiMutation {
   Non-authenticated mutation for recording traces from frontend or backend.
   Use this to capture errors, analytics, and telemetry from any source.
   """
-  recordTrace(exceptionMessage: String, exceptionType: String, functionName: String, inputs: JSONString, kind: String!, message: String, moduleName: String, outputs: JSONString, requestId: String, severity: String, stackTrace: String, tags: JSONString): RecordTraceMutation
+  recordTrace(
+    exceptionMessage: String
+    exceptionType: String
+    functionName: String
+    inputs: JSONString
+    kind: String!
+    message: String
+    moduleName: String
+    outputs: JSONString
+    requestId: String
+    severity: String
+
+    """Source of trace: 'frontend' or 'backend'"""
+    source: String
+    stackTrace: String
+    tags: JSONString
+  ): RecordTraceMutation
 
   """Update user's email preferences."""
   updateEmailPreferences(lowBalanceAlerts: Boolean, marketingEmails: Boolean, newsletter: Boolean, policyUpdates: Boolean): UpdateEmailPreferences

@@ -6,11 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { AffiliateHttpService, AffiliateLandingData } from '../affiliate-http.service';
-import { AffiliateService } from '../affiliate.service';
+import { AffiliateService, AffiliateLanding } from '../affiliate.service';
 import { AffiliateStorageService } from '../affiliate-storage.service';
 import { AuthService } from '../../auth/auth.service';
 import { MessageService } from '../../message.service';
+import { TraceService } from '../../traces/trace.service';
 
 @Component({
   selector: 'app-affiliate-landing',
@@ -23,7 +23,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
-  affiliateData: AffiliateLandingData | null = null;
+  affiliateData: AffiliateLanding | null = null;
   error: string | null = null;
   isAuthenticated = false;
   hasExistingAffiliate = false;
@@ -32,11 +32,11 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private affiliateHttpService: AffiliateHttpService,
     private affiliateService: AffiliateService,
     private affiliateStorageService: AffiliateStorageService,
     private authService: AuthService,
     private messageService: MessageService,
+    private traceService: TraceService,
   ) {}
 
   ngOnInit(): void {
@@ -51,8 +51,9 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
 
     this.affiliateStorageService.setAffiliateCode(code);
 
+    // Use GraphQL public query (no auth required)
     this.subscriptions.add(
-      this.affiliateHttpService.getAffiliateLanding(code).subscribe({
+      this.affiliateService.getAffiliateLanding(code).subscribe({
         next: (data) => {
           this.affiliateData = data;
           this.loading = false;
@@ -64,7 +65,9 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.error = 'Invalid or inactive affiliate code';
           this.loading = false;
-          console.error('Error loading affiliate data:', err);
+
+          // Record trace for GraphQL error
+          this.traceService.trackGraphQLError('getAffiliateLanding', err, { affiliateCode: code }).subscribe();
         },
       }),
     );
@@ -96,11 +99,11 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   }
 
   onSignUp(): void {
-    this.router.navigate(['/register'], { queryParams: { ref: this.affiliateData?.affiliate_code } });
+    this.router.navigate(['/register'], { queryParams: { ref: this.affiliateData?.affiliateCode } });
   }
 
   onSignIn(): void {
-    this.router.navigate(['/login'], { queryParams: { ref: this.affiliateData?.affiliate_code } });
+    this.router.navigate(['/login'], { queryParams: { ref: this.affiliateData?.affiliateCode } });
   }
 
   onJoinNetwork(): void {
@@ -110,7 +113,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     this.messageService.clearMessages();
 
     this.subscriptions.add(
-      this.affiliateService.joinAffiliateProgram(this.affiliateData.affiliate_code).subscribe({
+      this.affiliateService.joinAffiliateProgram(this.affiliateData.affiliateCode).subscribe({
         next: (response) => {
           this.messageService.success(
             `You've joined ${response.relationship?.affiliate.username}'s affiliate network!`,
@@ -130,7 +133,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   }
 
   getBrandImageUrl(): string | null {
-    if (!this.affiliateData?.brand_image_url) return null;
-    return this.affiliateData.brand_image_url;
+    if (!this.affiliateData?.brandImageUrl) return null;
+    return this.affiliateData.brandImageUrl;
   }
 }
