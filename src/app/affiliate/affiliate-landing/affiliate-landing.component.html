@@ -21,11 +21,11 @@
       <mat-card-content>
         @if (getBrandImageUrl()) {
           <div class="brand-image-container">
-            <img [src]="getBrandImageUrl()" [alt]="affiliateData.affiliate_username + ' brand image'" class="brand-image">
+            <img [src]="getBrandImageUrl()" [alt]="affiliateData.affiliateUsername + ' brand image'" class="brand-image">
           </div>
         }
 
-        <h1 class="title">Join {{ affiliateData.affiliate_username }}'s Network</h1>
+        <h1 class="title">Join {{ affiliateData.affiliateUsername }}'s Network</h1>
         <p class="description">Start your journey with Capital Copilot and become part of an affiliate network.</p>
 
         <div class="actions">

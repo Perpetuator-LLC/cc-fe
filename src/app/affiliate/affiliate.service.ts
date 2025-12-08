@@ -8,6 +8,20 @@ import { BaseService } from '../base.service';
 import { ErrorHandlerService } from '../utils/error-handler.service';
 
 /**
+ * Affiliate Service (GraphQL)
+ *
+ * PURPOSE: Provides GraphQL operations for affiliate functionality.
+ * - Public queries (e.g., affiliateLanding) - No auth required
+ * - Authenticated queries/mutations - Require valid auth token
+ *
+ * ARCHITECTURE NOTE:
+ * - AffiliateService: GraphQL for both public and authenticated operations
+ * - AffiliateHttpService: DEPRECATED - Use GraphQL instead
+ *
+ * Migration from HTTP to GraphQL complete as of Dec 2025.
+ */
+
+/**
  * Affiliate Credit Conversion Constants
  * Rate: 1,000 affiliate credits = $1.00 USD
  */
@@ -68,6 +82,12 @@ export class AffiliateConversionUtils {
 export interface PublicUser {
   uuid: string;
   username: string;
+}
+
+export interface AffiliateLanding {
+  affiliateCode: string;
+  affiliateUsername: string;
+  brandImageUrl: string | null;
 }
 
 export interface AffiliateProfile {
@@ -211,6 +231,10 @@ interface ConvertAffiliateCreditsResponse {
 
 interface AffiliateProfileResponse {
   affiliateProfile: AffiliateProfile | null;
+}
+
+interface AffiliateLandingResponse {
+  affiliateLanding: AffiliateLanding;
 }
 
 interface AffiliateStatsResponse {
@@ -423,6 +447,30 @@ export class AffiliateService extends BaseService {
     protected override errorHandler: ErrorHandlerService,
   ) {
     super(apollo, errorHandler);
+  }
+
+  /**
+   * Get public affiliate landing page data
+   * PUBLIC QUERY - Does not require authentication
+   * Used by /a/:code route which is accessible without login
+   */
+  getAffiliateLanding(affiliateCode: string): Observable<AffiliateLanding> {
+    const query = gql`
+      query GetAffiliateLanding($affiliateCode: String!) {
+        affiliateLanding(affiliateCode: $affiliateCode) {
+          affiliateCode
+          affiliateUsername
+          brandImageUrl
+        }
+      }
+    `;
+
+    return this.query<AffiliateLandingResponse>({
+      query,
+      variables: { affiliateCode },
+      fetchPolicy: 'no-cache', // Don't cache public queries
+      errorPolicy: 'all', // Return both data and errors
+    }).pipe(map((data) => data.affiliateLanding));
   }
 
   checkAffiliateProgramEligibility(): Observable<AffiliateEligibility> {
