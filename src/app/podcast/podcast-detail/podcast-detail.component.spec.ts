@@ -19,7 +19,7 @@ import { ViewContainerRef, signal } from '@angular/core';
 import { LoadingService } from '../../loading.service';
 import { NewsService } from '../../news/services/news.service';
 import { EpisodeService } from '../../episode/episode.service';
-import { JobService } from '../../job.service';
+import { JobService } from '../../jobs/job.service';
 import { ResearchService } from '../../research.service';
 import { ShareService } from '../../share.service';
 

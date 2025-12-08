@@ -3,13 +3,13 @@ import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
 import { map, Subscription } from 'rxjs';
-import { BaseService } from './base.service';
+import { BaseService } from '../base.service';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth/auth.service';
-import { ErrorHandlerService } from './error-handler.service';
-import { MessageService } from './message.service';
-import { RelayConnection } from './utils/relay';
+import { AuthService } from '../auth/auth.service';
+import { ErrorHandlerService } from '../error-handler.service';
+import { MessageService } from '../message.service';
+import { RelayConnection } from '../utils/relay';
 
 export enum JobKind {
   FETCH_NEWS = 'FETCH_NEWS',

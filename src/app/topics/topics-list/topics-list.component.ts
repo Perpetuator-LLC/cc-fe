@@ -3,9 +3,9 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { ToolbarService } from '../toolbar.service';
-import { MessageService } from '../message.service';
-import { ResearchService, Topic } from '../research.service';
+import { ToolbarService } from '../../toolbar.service';
+import { MessageService } from '../../message.service';
+import { ResearchService, Topic } from '../../research.service';
 import { Subscription } from 'rxjs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
@@ -13,8 +13,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTopicDialogComponent } from '../create-topic-dialog/create-topic-dialog.component';
-import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
-import { LoadingService } from '../loading.service';
+import { PodcastsService, PodcastsResult } from '../../podcast/podcasts.service';
+import { LoadingService } from '../../loading.service';
 
 @Component({
   selector: 'app-topics-list',

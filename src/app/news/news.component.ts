@@ -19,7 +19,7 @@ import { PodcastsResult, PodcastsService } from '../podcast/podcasts.service';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { UserService } from '../user/user.service';
 import { EpisodeService } from '../episode/episode.service';
-import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../job.service';
+import { Job, JobService, JobStatus, JobKind, stringToJobKind } from '../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';

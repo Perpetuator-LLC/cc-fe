@@ -7,10 +7,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
-import { ShareService } from '../share.service';
-import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
-import { MessageService } from '../message.service';
+import { PublicPodcastHttpService, PublicPodcast } from '../../public-podcast-http.service';
+import { ShareService } from '../../share.service';
+import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-browse-podcasts',

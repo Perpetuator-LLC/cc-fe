@@ -9,7 +9,7 @@ import { PageInfo, RelayConnection, RelayEdge } from '../utils/relay';
 import { TeamsResult } from '../team/teams.service';
 import { Voice } from './voices.service';
 import { cachePolicyRegistry } from '../cache-policies';
-import { Job } from '../job.service';
+import { Job } from '../jobs/job.service';
 
 // Register cache policies for PodcastType
 // This keeps cache configuration modular and decoupled from global Apollo config

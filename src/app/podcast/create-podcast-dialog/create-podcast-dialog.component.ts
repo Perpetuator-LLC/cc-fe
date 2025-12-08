@@ -13,7 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
-import { JobService } from '../../job.service';
+import { JobService } from '../../jobs/job.service';
 
 @Component({
   selector: 'app-create-podcast-dialog',

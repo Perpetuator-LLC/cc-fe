@@ -11,14 +11,14 @@ import {
   CreateEpisodeDialogComponent,
   CreateEpisodeDialogResult,
 } from '../create-episode-dialog/create-episode-dialog.component';
-import { SelectTopicDialogComponent } from '../../select-topic-dialog/select-topic-dialog.component';
+import { SelectTopicDialogComponent } from '../../topics/select-topic-dialog/select-topic-dialog.component';
 import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
 import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../toolbar.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
 import { ResearchService, Topic } from '../../research.service';
 import { NewsService } from '../../news/services/news.service';
-import { Job, JobService } from '../../job.service';
+import { JobService, Job } from '../../jobs/job.service';
 
 @Component({
   selector: 'app-episodes-list',

@@ -26,7 +26,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { EpisodeVersionControlComponent } from '../episode-version-control/episode-version-control.component';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
-import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../job.service';
+import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { Schedule, SchedulingService } from '../../scheduling.service';
 import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../toolbar.service';

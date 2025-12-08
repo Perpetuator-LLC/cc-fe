@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
 import { ErrorHandlerService } from './error-handler.service';
-import { Job } from './job.service';
+import { Job } from './jobs/job.service';
 import { RelayConnection } from './utils/relay';
 
 export interface Source {
