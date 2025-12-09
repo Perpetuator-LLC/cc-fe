@@ -103,58 +103,6 @@
     </div>
   </div>
 
-  <!-- Stats Cards - Using MD3 mat-card components -->
-  <div class="stats-section">
-    @if (loadingStats) {
-      <!-- Skeleton Loading Cards -->
-      @for (item of [1, 2, 3]; track item) {
-        <mat-card class="stat-card skeleton-card">
-          <mat-card-content>
-            <div class="skeleton-icon"></div>
-            <div class="skeleton-label"></div>
-            <div class="skeleton-value"></div>
-            <div class="skeleton-change"></div>
-          </mat-card-content>
-        </mat-card>
-      }
-    } @else if (siteStats) {
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>podcasts</mat-icon>
-            <span class="stat-label">Total Podcasts</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
-          <div class="stat-change positive">
-            <span>{{ siteStats.enabledPodcasts }}</span> enabled
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>library_music</mat-icon>
-            <span class="stat-label">Total Episodes</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
-          <div class="stat-change positive">
-            <span>{{ siteStats.liveEpisodes }}</span> live
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>article</mat-icon>
-            <span class="stat-label">News Articles</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
 
   <!-- Recent Podcasts Section -->
   <div class="recent-podcasts-section">
@@ -212,7 +160,7 @@
         } @else {
           <mat-card class="podcast-card public-podcast-card" *ngFor="let podcast of publicPodcasts">
             <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
-              <img [src]="podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+              <img [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
             </a>
             <mat-card-content>
               <h3>
@@ -289,7 +237,7 @@
           @for (podcast of recentPodcasts; track podcast.id) {
             <mat-card class="podcast-card public-podcast-card">
               <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
-                <img [src]="podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+                <img [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
               </a>
               <mat-card-content>
                 <h3>
@@ -332,7 +280,7 @@
     </div>
   }
 
-  <!-- Loading Skeleton -->
+  <!-- Stats Section -->
   <div class="stats-header-section">
     <div class="section-header">
       <h3 class="section-title">Stats</h3>
@@ -340,103 +288,86 @@
   </div>
   @if (loadingStats) {
     <div class="stats-section">
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
-      <mat-card class="stat-card skeleton-card">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-label"></div>
-        <div class="skeleton-value"></div>
-        <div class="skeleton-change"></div>
-      </mat-card>
+      @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+        <mat-card class="stat-card skeleton-card">
+          <mat-card-content>
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-label"></div>
+            <div class="skeleton-value"></div>
+            <div class="skeleton-change"></div>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   } @else if (siteStats) {
     <!-- Actual Stats -->
     <div class="stats-section">
+      <!-- First Row - Primary Stats with change indicators -->
       <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="podcast" />
-          <div class="stat-label">Total Podcasts</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>podcasts</mat-icon>
+            <span class="stat-label">Total Podcasts</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
+          <div class="stat-change positive">
+            <span>{{ siteStats.enabledPodcasts }}</span> enabled
+          </div>
+        </mat-card-content>
       </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="episodes" />
-          <div class="stat-label">Total Episodes</div>
-        </div>
 
-        <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>library_music</mat-icon>
+            <span class="stat-label">Total Episodes</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
+          <div class="stat-change positive">
+            <span>{{ siteStats.liveEpisodes }}</span> live
+          </div>
+        </mat-card-content>
       </mat-card>
+
       <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="voice_selection" />
-          <div class="stat-label">Voices</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.totalVoices }}</div>
-
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>article</mat-icon>
+            <span class="stat-label">News Articles</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
+        </mat-card-content>
       </mat-card>
+
+      <!-- Second Row - Additional Stats -->
       <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="published" />
-          <div class="stat-label">News Articles Processed</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
-
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+        <mat-card-content>
+          <div class="stat-title">
+            <app-svg-icon icon="voice_selection" />
+            <span class="stat-label">Voices</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalVoices }}</div>
+        </mat-card-content>
       </mat-card>
+
       <mat-card class="stat-card">
-        <div class="stat-title">
-          <app-svg-icon icon="newspaper" />
-          <div class="stat-label">Summarized News</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
-
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+        <mat-card-content>
+          <div class="stat-title">
+            <app-svg-icon icon="newspaper" />
+            <span class="stat-label">Summarized News</span>
+          </div>
+          <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
+        </mat-card-content>
       </mat-card>
+
       <mat-card class="stat-card">
-        <div class="stat-title">
-          <mat-icon>graphic_eq</mat-icon>
-          <div class="stat-label">Minutes of Published Audio</div>
-        </div>
-
-        <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number: '1.0-0' }} minutes</div>
-
-        <!--        <div class="stat-change positive"><span>+12%</span> from last month</div>-->
+        <mat-card-content>
+          <div class="stat-title">
+            <mat-icon>graphic_eq</mat-icon>
+            <span class="stat-label">Audio Published</span>
+          </div>
+          <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number: '1.0-0' }} min</div>
+        </mat-card-content>
       </mat-card>
     </div>
   }
