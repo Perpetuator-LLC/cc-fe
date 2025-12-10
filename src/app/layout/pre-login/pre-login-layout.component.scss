@@ -12,7 +12,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 16px 0 8px;
+
+    padding: 16px 32px;
+
+    // Match the logged-in layout's toolbar line
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+    background-color: var(--md-sys-color-surface-container-low);
 
     .website-logo {
       display: flex;

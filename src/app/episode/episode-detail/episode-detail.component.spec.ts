@@ -14,9 +14,9 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MessageService } from '../../message.service';
 import { JobService } from '../../jobs/job.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { SchedulingService } from '../../scheduling.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 
 describe('EpisodeDetailComponent', () => {
   let component: EpisodeDetailComponent;
@@ -45,9 +45,7 @@ describe('EpisodeDetailComponent', () => {
     ]);
     const jobServiceSpy = jasmine.createSpyObj('JobService', ['addJob', 'addJobs', 'getJobTransitions']);
     jobServiceSpy.jobs = signal([]);
-    const toolbarServiceSpy = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef', 'clearToolbarComponent']);
-    const viewContainerRefSpy = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-    toolbarServiceSpy.getViewContainerRef.and.returnValue(viewContainerRefSpy);
+    const toolbarServiceSpy = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     routerSpy.events = of(); // RouterLink needs events observable
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);

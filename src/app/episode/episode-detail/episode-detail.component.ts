@@ -29,8 +29,8 @@ import { ShareButtonsComponent } from '../../share-buttons/share-buttons.compone
 import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { Schedule, SchedulingService } from '../../scheduling.service';
 import { MessageService } from '../../message.service';
-import { ToolbarService } from '../../toolbar.service';
-import { LoadingService } from '../../loading.service';
+import { ToolbarService } from '../../layout/toolbar.service';
+import { LoadingService } from '../../layout/loading.service';
 import { ShareService } from '../../share.service';
 
 interface EditableFormValues {

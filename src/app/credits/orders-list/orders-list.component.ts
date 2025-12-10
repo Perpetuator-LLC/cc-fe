@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserOrder, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import {
   MatCell,
   MatCellDef,
@@ -37,7 +37,7 @@ import { AuthService } from '../../auth/auth.service';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 import { MatChipsModule } from '@angular/material/chips';
 
 @Component({

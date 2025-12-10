@@ -862,6 +862,16 @@ mat-nav-list {
 .layout-loading-spinner {
   position: relative;
   z-index: 1000;
+
   width: 100%;
-  margin-top: -2px;
+  height: 1px;
+  margin-top: -1px;
+
+  // Make the progress bar 1px tall
+  .mat-mdc-progress-bar {
+    --mdc-linear-progress-track-height: 1px;
+    --mdc-linear-progress-active-indicator-height: 1px;
+
+    height: 1px;
+  }
 }

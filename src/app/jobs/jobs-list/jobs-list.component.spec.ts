@@ -3,15 +3,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { JobsListComponent } from './jobs-list.component';
 import { JobService } from '../job.service';
 import { MessageService } from '../../message.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
 import { ResearchService } from '../../topics/research.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject } from 'rxjs';
-import { ViewContainerRef } from '@angular/core';
 
 describe('JobsListComponent', () => {
   let component: JobsListComponent;
@@ -31,12 +30,7 @@ describe('JobsListComponent', () => {
     Object.defineProperty(mockMessageService, 'messages$', {
       get: () => new BehaviorSubject([]).asObservable(),
     });
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', [
-      'setTemplate',
-      'clearTemplate',
-      'getViewContainerRef',
-      'clearToolbarComponent',
-    ]);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     mockPodcastsService = jasmine.createSpyObj('PodcastsService', ['getPodcastById']);
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisode']);
     mockJobDisplayService = jasmine.createSpyObj('JobDisplayService', ['openJobStatusDialog']);
@@ -54,12 +48,6 @@ describe('JobsListComponent', () => {
         },
       }),
     );
-
-    const mockViewContainerRef = {
-      clear: jasmine.createSpy('clear'),
-      createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-    };
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef as unknown as ViewContainerRef);
 
     await TestBed.configureTestingModule({
       imports: [JobsListComponent],

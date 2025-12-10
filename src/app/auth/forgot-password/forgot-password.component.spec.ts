@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ForgotPasswordComponent } from './forgot-password.component';
 import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ViewContainerRef } from '@angular/core';
@@ -26,7 +26,7 @@ describe('ForgotPasswordComponent', () => {
   beforeEach(async () => {
     authServiceMock = jasmine.createSpyObj('AuthService', ['forgot', 'getErrors', 'resend']);
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
-    toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
+    toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     viewContainerRefMock = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     messageServiceMock = jasmine.createSpyObj('MessageService', [
       'addMessage',
@@ -37,7 +37,6 @@ describe('ForgotPasswordComponent', () => {
     messageServiceMock.messages$ = of([]);
     activatedRouteMock = jasmine.createSpyObj('ActivatedRoute', ['snapshot', 'queryParams']);
     activatedRouteMock.queryParams = of({});
-    toolbarServiceMock.getViewContainerRef.and.returnValue(viewContainerRefMock);
 
     const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
     mockApollo.query.and.returnValue(of({ data: {}, loading: false, networkStatus: 7 }));

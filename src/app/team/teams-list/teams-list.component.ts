@@ -3,7 +3,7 @@ import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewI
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { TeamsResult, TeamsService } from '../teams.service';
 import { Subscription } from 'rxjs';

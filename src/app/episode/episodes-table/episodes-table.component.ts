@@ -37,7 +37,7 @@ import { FormsModule } from '@angular/forms';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { MessageService } from '../../message.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 
 @Component({
   selector: 'app-episodes-table',

@@ -14,11 +14,12 @@ import {
 import { SelectTopicDialogComponent } from '../../topics/select-topic-dialog/select-topic-dialog.component';
 import { EpisodesTableComponent } from '../episodes-table/episodes-table.component';
 import { MessageService } from '../../message.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
 import { ResearchService, Topic } from '../../topics/research.service';
 import { NewsService } from '../../news/news.service';
 import { JobService, Job } from '../../jobs/job.service';
+import { LoadingService } from '../../layout/loading.service';
 
 @Component({
   selector: 'app-episodes-list',
@@ -41,6 +42,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     private newsService: NewsService,
     private jobService: JobService,
     private researchService: ResearchService,
+    private loadingService: LoadingService,
   ) {}
 
   ngOnInit(): void {

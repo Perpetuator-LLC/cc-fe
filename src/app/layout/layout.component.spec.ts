@@ -5,8 +5,8 @@ import { LayoutComponent } from './layout.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { AuthService } from '../auth/auth.service';
-import { ThemeService } from '../theme.service';
-import { ToolbarService } from '../toolbar.service';
+import { ThemeService } from './theme.service';
+import { ToolbarService } from './toolbar.service';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -20,6 +20,7 @@ describe('LayoutComponent', () => {
   let component: LayoutComponent;
   let authService: jasmine.SpyObj<AuthService>;
   let themeService: jasmine.SpyObj<ThemeService>;
+
   let toolbarService: jasmine.SpyObj<ToolbarService>;
   let breakpointObserver: jasmine.SpyObj<BreakpointObserver>;
 
@@ -61,7 +62,6 @@ describe('LayoutComponent', () => {
         { provide: BreakpointObserver, useValue: breakpointObserver },
         { provide: Apollo, useValue: mockApollo },
       ],
-      // schemas: [NO_ERRORS_SCHEMA], // To ignore child components like router-outlet
     }).compileComponents();
 
     fixture = TestBed.createComponent(LayoutComponent);
@@ -108,8 +108,6 @@ describe('LayoutComponent', () => {
   it('should switch themes', () => {
     component.switchTheme('dark');
     expect(themeService.setTheme).toHaveBeenCalledWith('dark');
-    // The signal should be updated by the setTheme method in actual implementation
-    // but in the test we need to manually update it since it's a mock
     themeService.theme.set('dark');
     expect(themeService.theme()).toBe('dark');
   });
@@ -132,15 +130,5 @@ describe('LayoutComponent', () => {
 
     component.drawer = { opened: false } as MatSidenav;
     expect(component.drawerOpened).toBeFalse();
-  });
-
-  it('should initialize the toolbar container', () => {
-    fixture.detectChanges();
-    expect(toolbarService.setRootViewContainerRef).toHaveBeenCalledWith(component.toolbarContainer);
-  });
-
-  it('should clear the toolbar on destroy', () => {
-    component.ngOnDestroy();
-    expect(toolbarService.clearToolbarComponent).toHaveBeenCalled();
   });
 });

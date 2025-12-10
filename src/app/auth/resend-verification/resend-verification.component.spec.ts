@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResendVerificationComponent } from './resend-verification.component';
 import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ViewContainerRef } from '@angular/core';
@@ -23,7 +23,7 @@ describe('ResendVerificationComponent', () => {
   beforeEach(async () => {
     authServiceMock = jasmine.createSpyObj('AuthService', ['forgot', 'getErrors', 'resend']);
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
-    toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
+    toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     viewContainerRefMock = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockMessageService = jasmine.createSpyObj('MessageService', [
       'addMessage',
@@ -35,8 +35,6 @@ describe('ResendVerificationComponent', () => {
 
     activatedRouteMock = jasmine.createSpyObj('ActivatedRoute', ['snapshot', 'queryParams']);
     activatedRouteMock.queryParams = of({});
-
-    toolbarServiceMock.getViewContainerRef.and.returnValue(viewContainerRefMock);
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, NoopAnimationsModule, ResendVerificationComponent],

@@ -3,7 +3,7 @@ import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@an
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { PodcastsResult, PodcastsService } from '../podcasts.service';
 import { Subject, Subscription } from 'rxjs';
@@ -38,7 +38,7 @@ import { Job, JobService } from '../../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ResearchService } from '../../topics/research.service';
 import { JobDisplayService } from '../../job-display.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 import { TeamsService, TeamsResult } from '../../team/teams.service';
 import { MatSelectModule } from '@angular/material/select';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';

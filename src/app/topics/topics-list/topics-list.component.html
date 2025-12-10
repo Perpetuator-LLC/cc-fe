@@ -1,8 +1,4 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<ng-template #toolbarTemplate>
-  <span class="page-title"><mat-icon>science</mat-icon>Topics <span>></span>
-    <span class="page-title-secondary">All Topics</span></span>
-</ng-template>
 @if (topics.length === 0 && !loading) {
 <div class="middle-card">
   <h2>No research topics found.</h2>
@@ -80,6 +76,15 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns" class="topic-row"></tr>
     </table>
+
+    <mat-paginator
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      [showFirstLastButtons]="false"
+      (page)="onPageChange($event)"
+      aria-label="Select page of topics" />
   </div>
 </div>
 }

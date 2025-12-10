@@ -19,14 +19,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { MessageService } from '../../message.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { UserService } from '../../user/user.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
 import { NewsConnection, NewsResult, NewsService } from '../news.service';
 

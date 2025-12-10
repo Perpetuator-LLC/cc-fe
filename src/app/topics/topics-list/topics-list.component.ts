@@ -1,11 +1,10 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { ToolbarService } from '../../toolbar.service';
 import { MessageService } from '../../message.service';
-import { ResearchService, Topic } from '../research.service';
+import { ResearchService, Topic, GetTopicsResult } from '../research.service';
 import { Subscription } from 'rxjs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
@@ -14,7 +13,9 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTopicDialogComponent } from '../create-topic-dialog/create-topic-dialog.component';
 import { PodcastsService, PodcastsResult } from '../../podcast/podcasts.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { PageInfo } from '../../utils/relay';
 
 @Component({
   selector: 'app-topics-list',
@@ -23,19 +24,19 @@ import { LoadingService } from '../../loading.service';
     MatButton,
     MatCard,
     MatIcon,
-
     MatProgressBarModule,
     MatCardContent,
     MatTableModule,
     RouterLink,
     MatButtonModule,
     CommonModule,
+    MatPaginatorModule,
   ],
   templateUrl: './topics-list.component.html',
   styleUrls: ['./topics-list.component.scss'],
 })
 export class TopicsListComponent implements OnInit, OnDestroy {
-  @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   private subscriptions = new Subscription();
   protected loading = false;
   dataSource = new MatTableDataSource<Topic>([]);
@@ -44,11 +45,17 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   podcasts: PodcastsResult[] = [];
   private shouldOpenCreateDialog = false;
 
+  // Pagination state
+  pageSize = 10;
+  pageIndex = 0;
+  totalCount = 0;
+  private pageInfo: PageInfo | null = null;
+  private cursorStack: (string | null)[] = [null]; // Stack of cursors for previous pages
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService,
-    private toolbarService: ToolbarService,
     private researchService: ResearchService,
     private podcastsService: PodcastsService,
     private dialog: MatDialog,
@@ -57,7 +64,6 @@ export class TopicsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     // Check for query parameter to auto-open create dialog
     this.subscriptions.add(
@@ -102,15 +108,23 @@ export class TopicsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadTopics(): void {
+  loadTopics(after: string | null = null): void {
     this.loading = true;
     this.loadingService.show();
     this.subscriptions.add(
-      this.researchService.getTopics(undefined, 50).subscribe({
-        next: (response) => {
+      this.researchService.getTopics(undefined, this.pageSize, after).subscribe({
+        next: (response: GetTopicsResult) => {
           this.messageService.clearMessages();
           this.topics = response.topics;
+          this.pageInfo = response.pageInfo;
           this.dataSource = new MatTableDataSource(this.topics);
+          // Estimate total count based on current page and hasNextPage
+          // This is an approximation since GraphQL relay doesn't provide total count
+          if (this.pageInfo.hasNextPage) {
+            this.totalCount = Math.max(this.totalCount, (this.pageIndex + 2) * this.pageSize);
+          } else {
+            this.totalCount = this.pageIndex * this.pageSize + this.topics.length;
+          }
           this.loading = false;
           this.loadingService.hide();
         },
@@ -126,6 +140,30 @@ export class TopicsListComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  onPageChange(event: PageEvent): void {
+    const previousPageIndex = this.pageIndex;
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+
+    if (event.pageIndex > previousPageIndex) {
+      // Going forward - use endCursor from current page
+      if (this.pageInfo?.endCursor) {
+        this.cursorStack.push(this.pageInfo.endCursor);
+        this.loadTopics(this.pageInfo.endCursor);
+      }
+    } else if (event.pageIndex < previousPageIndex) {
+      // Going backward - pop the stack and use previous cursor
+      this.cursorStack.pop();
+      const cursor = this.cursorStack[this.cursorStack.length - 1] || null;
+      this.loadTopics(cursor);
+    } else {
+      // Page size changed - reload from start
+      this.pageIndex = 0;
+      this.cursorStack = [null];
+      this.loadTopics(null);
+    }
   }
 
   viewTopic(uuid: string) {

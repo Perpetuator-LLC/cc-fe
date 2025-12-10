@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { PodcastsService } from '../podcasts.service';
 import { TeamsResult, TeamsService } from '../../team/teams.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
