@@ -27,10 +27,7 @@ describe('UserDetailComponent', () => {
     mockUserService.loadUserEmailChangePending.and.returnValue(of(null));
 
     const mockToolbarService = {
-      getViewContainerRef: jasmine.createSpy('getViewContainerRef').and.returnValue({
-        clear: jasmine.createSpy('clear'),
-        createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-      }),
+      setToolbarTemplate: jasmine.createSpy('setToolbarTemplate'),
       clearToolbarComponent: jasmine.createSpy('clearToolbarComponent'),
     };
 

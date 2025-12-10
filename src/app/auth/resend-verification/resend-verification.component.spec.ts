@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { of, throwError } from 'rxjs';
-import { ViewContainerRef } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MessageService } from '../../message.service';
 
@@ -16,7 +15,6 @@ describe('ResendVerificationComponent', () => {
   let authServiceMock: jasmine.SpyObj<AuthService>;
   let routerMock: jasmine.SpyObj<Router>;
   let toolbarServiceMock: jasmine.SpyObj<ToolbarService>;
-  let viewContainerRefMock: jasmine.SpyObj<ViewContainerRef>;
   let mockMessageService: jasmine.SpyObj<MessageService>;
   let activatedRouteMock: jasmine.SpyObj<ActivatedRoute>;
 
@@ -24,7 +22,6 @@ describe('ResendVerificationComponent', () => {
     authServiceMock = jasmine.createSpyObj('AuthService', ['forgot', 'getErrors', 'resend']);
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
     toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
-    viewContainerRefMock = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     mockMessageService = jasmine.createSpyObj('MessageService', [
       'addMessage',
       'clearMessages',
@@ -65,9 +62,7 @@ describe('ResendVerificationComponent', () => {
 
   it('should render the toolbar template in ngAfterViewInit', () => {
     fixture.detectChanges();
-    expect(toolbarServiceMock.getViewContainerRef).toHaveBeenCalled();
-    expect(viewContainerRefMock.clear).toHaveBeenCalled();
-    expect(viewContainerRefMock.createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
+    expect(toolbarServiceMock.setToolbarTemplate).toHaveBeenCalled();
   });
 
   it('should call authService.resend and navigate to login on successful submission', () => {

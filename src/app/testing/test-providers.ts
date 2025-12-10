@@ -98,14 +98,7 @@ export function provideMockRouter() {
  * Creates a mock ToolbarService provider for testing
  */
 export function provideMockToolbarService() {
-  const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-  const mockToolbarService = jasmine.createSpyObj('ToolbarService', [
-    'getViewContainerRef',
-    'clearToolbarComponent',
-    'setTemplate',
-    'clearTemplate',
-  ]);
-  mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
+  const mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
   mockToolbarService.clearToolbarComponent.and.stub(); // No-op for cleanup
   return { provide: ToolbarService, useValue: mockToolbarService };
 }

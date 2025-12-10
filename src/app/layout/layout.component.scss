@@ -153,7 +153,7 @@ mat-sidenav-content mat-toolbar {
 
   mat-icon {
     flex-shrink: 0;
-    color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-surface);
   }
 
   .page-title-text {
@@ -339,7 +339,7 @@ mat-nav-list {
   text-decoration: none;
 
   &.active-link {
-    border-left: 3px solid var(--md-sys-color-tertiary);
+    border-left: 3px solid var(--md-sys-color-primary);
     background-color: var(--md-sys-color-surface-container-high);
   }
 }
@@ -351,7 +351,7 @@ mat-nav-list {
 }
 
 .mat-link.mdc-list-item--activated {
-  border-left: 3px solid var(--md-sys-color-tertiary);
+  border-left: 3px solid var(--md-sys-color-primary);
   background-color: var(--md-sys-color-surface-container-high);
 }
 
@@ -505,6 +505,11 @@ mat-nav-list {
   // When used with footer, content fills remaining space
   .content {
     flex: 1;
+  }
+
+  // Home page: use gradient background to match pre-login layout's glass effect
+  &.home-page {
+    background: linear-gradient(120.17deg, color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%, transparent 100%);
   }
 }
 
@@ -776,49 +781,57 @@ mat-nav-list {
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
       background-color: var(--md-sys-color-surface-container-low);
 
-      .push-right {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-
-        .credit-btn {
-          height: 28px;
-          padding-inline: 8px; // MD3 4px grid: 6px → 8px
-          border: 1px solid var(--md-sys-color-outline-variant);
-          border-radius: 8px;
-
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--md-sys-color-on-surface);
-
-          background: var(--md-sys-color-surface-container-high);
-        }
-
-        .profile-btn {
-          padding-inline: 12px;
-
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--md-sys-color-on-surface);
-
-          background: transparent;
-        }
-
-
-        @media screen and (width <= 599px) {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          padding-right: 0;
-        }
-      }
-
       @media screen and (width <= 576px) {
         padding-inline: 16px;
       }
     }
   }
 }
+
+// Flattened toolbar button styles to reduce nesting depth
+.toolbar-container-section .push-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  @media screen and (width <= 599px) {
+    gap: 8px;
+    padding-right: 0;
+  }
+}
+
+.toolbar-container-section .credit-btn {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  height: 28px;
+  padding-inline: 8px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-high);
+
+  app-svg-icon {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.toolbar-container-section .profile-btn {
+  padding-inline: 12px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: transparent;
+}
+
 
 // Flattened selectors to reduce specificity
 .toolbar-container-section .push-right mat-icon.theme-icon {
