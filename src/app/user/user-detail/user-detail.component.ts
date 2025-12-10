@@ -10,7 +10,7 @@ import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MessageService } from '../../message.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -21,7 +21,7 @@ import { CodeService } from '../../credits/code.service';
 import { Subscription } from 'rxjs';
 import { DeleteAccountDialogComponent } from '../delete-account-dialog/delete-account-dialog.component';
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 import { AffiliateService, AffiliateRelationship } from '../../affiliate/affiliate.service';
 import { MatIcon } from '@angular/material/icon';
 

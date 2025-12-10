@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
 import { ErrorHandlerService } from '../utils/error-handler.service';
 import { Job } from '../jobs/job.service';
-import { RelayConnection } from '../utils/relay';
+import { RelayConnection, PageInfo } from '../utils/relay';
 
 export interface Source {
   uuid: string;
@@ -15,6 +15,11 @@ export interface Source {
   url: string;
   content: string | null;
   createdAt: string;
+}
+
+export interface GetTopicsResult {
+  topics: Topic[];
+  pageInfo: PageInfo;
 }
 
 export interface Topic {
@@ -85,7 +90,7 @@ export class ResearchService extends BaseService {
     super(apollo, errorHandler);
   }
 
-  getTopics(podcastUuid?: string, first = 10, after: string | null = null): Observable<{ topics: Topic[] }> {
+  getTopics(podcastUuid?: string, first = 10, after: string | null = null): Observable<GetTopicsResult> {
     const GET_TOPICS = gql`
       query GetTopics($podcastUuid: UUID, $first: Int, $after: String) {
         topics(podcastUuid: $podcastUuid, first: $first, after: $after) {
@@ -134,6 +139,7 @@ export class ResearchService extends BaseService {
     }).pipe(
       map((data) => ({
         topics: data.topics.edges.map((edge) => edge.node),
+        pageInfo: data.topics.pageInfo,
       })),
     );
   }

@@ -2,9 +2,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { PrivacyPolicyComponent } from './privacy-policy.component';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { AuthService } from '../../auth/auth.service';
-import { ViewContainerRef } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';
 
@@ -15,19 +14,9 @@ describe('PrivacyPolicyComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', [
-      'setTemplate',
-      'clearTemplate',
-      'getViewContainerRef',
-      'clearToolbarComponent',
-    ]);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     mockAuthService = jasmine.createSpyObj('AuthService', ['isLoggedIn']);
 
-    const mockViewContainerRef = {
-      clear: jasmine.createSpy('clear'),
-      createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-    };
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef as unknown as ViewContainerRef);
     mockAuthService.isLoggedIn.and.returnValue(false);
 
     const mockApollo = jasmine.createSpyObj('Apollo', ['query', 'mutate', 'watchQuery']);
@@ -44,7 +33,6 @@ describe('PrivacyPolicyComponent', () => {
 
     fixture = TestBed.createComponent(PrivacyPolicyComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

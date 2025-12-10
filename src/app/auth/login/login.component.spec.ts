@@ -7,8 +7,8 @@ import { Apollo } from 'apollo-angular';
 import { LoginComponent } from './login.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ToolbarService } from '../../toolbar.service';
-import { ThemeService } from '../../theme.service';
+import { ToolbarService } from '../../layout/toolbar.service';
+import { ThemeService } from '../../layout/theme.service';
 import { MessageService } from '../../message.service';
 import { UserService } from '../../user/user.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,9 +33,7 @@ describe('LoginComponent', () => {
   let mockAffiliateStorageService: jasmine.SpyObj<AffiliateStorageService>;
 
   beforeEach(async () => {
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef', 'clearToolbarComponent']);
-    const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
 
     mockThemeService = jasmine.createSpyObj('ThemeService', ['applyTheme', 'getCurrentTheme', 'loadTheme']);
     mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages', 'addMessage']);

@@ -8,7 +8,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
 import { ShareService } from '../share.service';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../layout/toolbar.service';
 import { AuthService } from '../auth/auth.service';
 import { Component, AfterViewInit, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';

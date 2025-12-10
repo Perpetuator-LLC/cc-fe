@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/c
 import { Subscription } from 'rxjs';
 import { UserTransaction, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatCell,
@@ -25,7 +25,7 @@ import { MessageService } from '../../message.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { kindToString } from '../../jobs/job.service';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 
 @Component({
   selector: 'app-transactions-list',

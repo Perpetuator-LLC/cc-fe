@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from '../app.routes';
-import { Theme, ThemeService } from '../theme.service';
+import { Theme, ThemeService } from './theme.service';
 import { AuthService } from '../auth/auth.service';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { PageTitleService } from './page-title.service';
@@ -28,9 +28,9 @@ import { MessageService } from '../message.service';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
 import { RedeemGiftCodeDialogComponent } from '../credits/redeem-gift-code-dialog/redeem-gift-code-dialog.component';
-import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
+import { SharedFooterComponent } from './shared-footer/shared-footer.component';
 import { JobStatusBarComponent } from '../jobs/job-status-bar/job-status-bar.component';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from './loading.service';
 
 @Component({
   selector: 'app-layout',
