@@ -20,10 +20,8 @@ describe('VerifyEmailComponent', () => {
     };
 
     const mockToolbarService = {
-      getViewContainerRef: jasmine.createSpy('getViewContainerRef').and.returnValue({
-        clear: jasmine.createSpy('clear'),
-        createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-      }),
+      setToolbarTemplate: jasmine.createSpy('setToolbarTemplate'),
+      clearToolbarComponent: jasmine.createSpy('clearToolbarComponent'),
     };
 
     await TestBed.configureTestingModule({

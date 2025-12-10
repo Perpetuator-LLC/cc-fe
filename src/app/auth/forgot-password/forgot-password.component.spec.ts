@@ -7,7 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { of, throwError } from 'rxjs';
-import { ViewContainerRef } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MessageService } from '../../message.service';
 import { Apollo } from 'apollo-angular';
@@ -19,7 +18,6 @@ describe('ForgotPasswordComponent', () => {
   let authServiceMock: jasmine.SpyObj<AuthService>;
   let routerMock: jasmine.SpyObj<Router>;
   let toolbarServiceMock: jasmine.SpyObj<ToolbarService>;
-  let viewContainerRefMock: jasmine.SpyObj<ViewContainerRef>;
   let messageServiceMock: jasmine.SpyObj<MessageService>;
   let activatedRouteMock: jasmine.SpyObj<ActivatedRoute>;
 
@@ -27,7 +25,6 @@ describe('ForgotPasswordComponent', () => {
     authServiceMock = jasmine.createSpyObj('AuthService', ['forgot', 'getErrors', 'resend']);
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
     toolbarServiceMock = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
-    viewContainerRefMock = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
     messageServiceMock = jasmine.createSpyObj('MessageService', [
       'addMessage',
       'clearMessages',
@@ -75,9 +72,7 @@ describe('ForgotPasswordComponent', () => {
 
   it('should render the toolbar template in ngAfterViewInit', () => {
     fixture.detectChanges();
-    expect(toolbarServiceMock.getViewContainerRef).toHaveBeenCalled();
-    expect(viewContainerRefMock.clear).toHaveBeenCalled();
-    expect(viewContainerRefMock.createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
+    expect(toolbarServiceMock.setToolbarTemplate).toHaveBeenCalled();
   });
 
   it('should call authService.forgot on successful submission', () => {
