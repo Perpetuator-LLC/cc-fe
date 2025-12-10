@@ -167,7 +167,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   }
 
   viewTopic(uuid: string) {
-    this.router.navigate(['/topic', uuid]);
+    this.router.navigate(['/media/topics', uuid]);
   }
 
   getTopicStatus(topic: Topic): string {

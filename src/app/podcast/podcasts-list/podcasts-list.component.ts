@@ -93,15 +93,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
   @Input() podcasts: PodcastsResult[] = [];
   protected loading = false;
   // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
-  displayedColumns: string[] = [
-    'name',
-    'team',
-    'latestInternalEpisodeDate',
-    'tgResponse',
-    'enabled',
-    'createEpisode',
-    'actions',
-  ];
+  displayedColumns: string[] = ['name', 'team', 'latestInternalEpisodeDate', 'enabled', 'createEpisode', 'actions'];
   isGridView = false;
   pageSizeOptions = [5, 10, 25, 50];
   hasNextPage = false;
@@ -113,7 +105,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     { id: 'tgChannelId', label: 'Telegram ID', selected: false },
     { id: 'latestInternalEpisodeDate', label: 'Latest Episode', selected: true },
     { id: 'enabled', label: 'Live', selected: true },
-    { id: 'tgResponse', label: 'Telegram Connected', selected: true },
+    { id: 'tgResponse', label: 'Telegram Connected', selected: false },
     { id: 'createEpisode', label: 'Create Episode', selected: true },
     { id: 'actions', label: 'Actions', selected: true },
   ];

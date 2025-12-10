@@ -134,8 +134,8 @@
             </label>
           </div>
           <button
-            mat-raised-button
-            color="primary"
+           mat-flat-button
+            class="btn-secondary"
             type="button"
             (click)="createEpisodeAudioChainFromSelected()"
             [disabled]="selectedNews.size === 0"
@@ -146,7 +146,7 @@
           </button>
           <button
             mat-stroked-button
-            color="primary"
+            class="btn-secondary-outlined"
             type="button"
             (click)="createEpisodeChainFromSelected()"
             [disabled]="selectedNews.size === 0"
@@ -156,7 +156,8 @@
             <span>Create Episode</span>
           </button>
           <button
-            mat-stroked-button
+            mat-button
+            class="btn-surface-text"
             type="button"
             (click)="createBlankEpisode()"
             [disabled]="selectedPodcastUuid === null"
