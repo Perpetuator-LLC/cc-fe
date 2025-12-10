@@ -1,109 +1,302 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="button-showcase">
-  <h1>MD3 Button Styling Showcase</h1>
-  <p class="description">
-    Click any button to log its computed styles to the console. This helps debug border-radius and other style issues.
-  </p>
+  <header class="showcase-header">
+    <h1>MD3 Button Showcase</h1>
+    <p class="subtitle">
+      Angular Material Design 3 button variants with all color combinations.
+      Click any button to inspect its computed styles in the console.
+    </p>
+  </header>
 
-  <div class="showcase-grid">
-    <!-- Header row with column labels -->
-    <div class="header-row">
-      <div class="row-label header-cell">Class / Directive →</div>
-      @for (type of buttonTypes; track type.directive) {
-        <div class="column-header">{{ type.name }}</div>
-      }
-    </div>
+  <!-- Filter Controls -->
+  <section class="controls">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Variant</mat-label>
+      <mat-select [(ngModel)]="selectedVariant">
+        <mat-option value="all">All Variants</mat-option>
+        @for (variant of variants; track variant.id) {
+          <mat-option [value]="variant.id">{{ variant.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-    <!-- Data rows -->
-    @for (btnClass of buttonClasses; track btnClass.class) {
-      <div class="button-row">
-        <div class="row-label">{{ btnClass.name }}</div>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Color</mat-label>
+      <mat-select [(ngModel)]="selectedColor">
+        <mat-option value="all">All Colors</mat-option>
+        @for (color of colorRoles; track color.id) {
+          <mat-option [value]="color.id">{{ color.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-        <!-- mat-button -->
-        <div class="button-cell">
-          <button mat-button [class]="btnClass.class" (click)="inspectButton($event)">
-            Button
-          </button>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>State</mat-label>
+      <mat-select [(ngModel)]="selectedState">
+        @for (state of states; track state.id) {
+          <mat-option [value]="state.id">{{ state.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </section>
+
+  <!-- Legend -->
+  <section class="legend">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>MD3 Button Mapping</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="legend-grid">
+          <div class="legend-item">
+            <strong>Filled</strong> → <code>mat-flat-button</code> + color class
+          </div>
+          <div class="legend-item">
+            <strong>Tonal</strong> → <code>mat-flat-button</code> + <code>*-tonal</code> class
+          </div>
+          <div class="legend-item">
+            <strong>Outlined</strong> → <code>mat-stroked-button</code> + <code>*-outlined</code> class
+          </div>
+          <div class="legend-item">
+            <strong>Text</strong> → <code>mat-button</code> + <code>*-text</code> class
+          </div>
+          <div class="legend-item">
+            <strong>Elevated</strong> → <code>mat-raised-button</code> + color class
+          </div>
+          <div class="legend-item">
+            <strong>Icon</strong> → <code>mat-icon-button</code> + color class
+          </div>
+          <div class="legend-item">
+            <strong>FAB</strong> → <code>mat-fab</code> + color class
+          </div>
+          <div class="legend-item">
+            <strong>Mini FAB</strong> → <code>mat-mini-fab</code> + color class
+          </div>
         </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
 
-        <!-- mat-flat-button -->
-        <div class="button-cell">
-          <button mat-flat-button [class]="btnClass.class" (click)="inspectButton($event)">
-            Flat
-          </button>
+  <!-- Main Showcase Table -->
+  <section class="showcase-table-container">
+    <table class="showcase-table">
+      <thead>
+        <tr>
+          <th class="variant-header">Variant / Directive</th>
+          @for (color of visibleColors; track color.id) {
+            <th class="color-header">
+              <span class="color-name">{{ color.name }}</span>
+              <span class="color-desc">{{ color.description }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (variant of visibleVariants; track variant.id) {
+          <tr class="variant-row">
+            <td class="variant-label">
+              <div class="variant-info">
+                <strong>{{ variant.name }}</strong>
+                <code>{{ variant.directive }}</code>
+                <small>{{ variant.description }}</small>
+              </div>
+            </td>
+            @for (color of visibleColors; track color.id) {
+              <td class="button-cell">
+                <div class="button-wrapper">
+                  <!-- Filled Button (mat-flat-button) -->
+                  @if (variant.id === 'filled') {
+                    <button
+                      mat-flat-button
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
+                    >
+                      Button
+                    </button>
+                  }
+
+                  <!-- Tonal Button (mat-flat-button + *-tonal) -->
+                  @if (variant.id === 'tonal') {
+                    <button
+                      mat-flat-button
+                      [class]="color.cssClass + '-tonal'"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-tonal'"
+                    >
+                      Tonal
+                    </button>
+                  }
+
+                  <!-- Outlined Button (mat-stroked-button + *-outlined) -->
+                  @if (variant.id === 'outlined') {
+                    <button
+                      mat-stroked-button
+                      [class]="color.cssClass + '-outlined'"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-outlined'"
+                    >
+                      Outlined
+                    </button>
+                  }
+
+                  <!-- Text Button (mat-button + *-text) -->
+                  @if (variant.id === 'text') {
+                    <button
+                      mat-button
+                      [class]="color.cssClass + '-text'"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-text'"
+                    >
+                      Text
+                    </button>
+                  }
+
+                  <!-- Elevated Button (mat-raised-button) -->
+                  @if (variant.id === 'elevated') {
+                    <button
+                      mat-raised-button
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
+                    >
+                      Elevated
+                    </button>
+                  }
+
+                  <!-- Icon Button (mat-icon-button) -->
+                  @if (variant.id === 'icon') {
+                    <button
+                      mat-icon-button
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
+                    >
+                      <mat-icon>favorite</mat-icon>
+                    </button>
+                  }
+
+                  <!-- FAB (mat-fab) -->
+                  @if (variant.id === 'fab') {
+                    <button
+                      mat-fab
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
+                    >
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  }
+
+                  <!-- Mini FAB (mat-mini-fab) -->
+                  @if (variant.id === 'mini-fab') {
+                    <button
+                      mat-mini-fab
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
+                    >
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  }
+
+                  <!-- Extended FAB (mat-fab extended) -->
+                  @if (variant.id === 'extended-fab') {
+                    <button
+                      mat-fab extended
+                      [class]="color.cssClass"
+                      [disabled]="selectedState === 'disabled'"
+                      (click)="inspectButton($event)"
+                      [matTooltip]="variant.directive + ' extended + ' + color.cssClass"
+                    >
+                      <mat-icon>edit</mat-icon>
+                      Create
+                    </button>
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Color Classes Reference -->
+  <section class="reference-section">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>CSS Class Reference</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="reference-grid">
+          <div class="reference-column">
+            <h4>Primary (Blue)</h4>
+            <ul>
+              <li><code>.btn-primary</code> - Filled</li>
+              <li><code>.btn-primary-tonal</code> - Tonal</li>
+              <li><code>.btn-primary-outlined</code> - Outlined</li>
+              <li><code>.btn-primary-text</code> - Text</li>
+            </ul>
+          </div>
+          <div class="reference-column">
+            <h4>Secondary (Orange)</h4>
+            <ul>
+              <li><code>.btn-secondary</code> - Filled</li>
+              <li><code>.btn-secondary-tonal</code> - Tonal</li>
+              <li><code>.btn-secondary-outlined</code> - Outlined</li>
+              <li><code>.btn-secondary-text</code> - Text</li>
+            </ul>
+          </div>
+          <div class="reference-column">
+            <h4>Tertiary (Purple)</h4>
+            <ul>
+              <li><code>.btn-tertiary</code> - Filled</li>
+              <li><code>.btn-tertiary-tonal</code> - Tonal</li>
+              <li><code>.btn-tertiary-outlined</code> - Outlined</li>
+              <li><code>.btn-tertiary-text</code> - Text</li>
+            </ul>
+          </div>
+          <div class="reference-column">
+            <h4>Surface (Neutral)</h4>
+            <ul>
+              <li><code>.btn-surface</code> - Filled</li>
+              <li><code>.btn-surface-outlined</code> - Outlined</li>
+            </ul>
+          </div>
         </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
 
-        <!-- mat-raised-button -->
-        <div class="button-cell">
-          <button mat-raised-button [class]="btnClass.class" (click)="inspectButton($event)">
-            Raised
-          </button>
-        </div>
-
-        <!-- mat-stroked-button -->
-        <div class="button-cell">
-          <button mat-stroked-button [class]="btnClass.class" (click)="inspectButton($event)">
-            Stroked
-          </button>
-        </div>
-
-        <!-- mat-fab -->
-        <div class="button-cell">
-          <button mat-fab [class]="btnClass.class" (click)="inspectButton($event)">
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
-
-        <!-- mat-mini-fab -->
-        <div class="button-cell">
-          <button mat-mini-fab [class]="btnClass.class" (click)="inspectButton($event)">
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
-
-        <!-- mat-icon-button -->
-        <div class="button-cell">
-          <button mat-icon-button [class]="btnClass.class" (click)="inspectButton($event)">
-            <mat-icon>home</mat-icon>
-          </button>
-        </div>
-      </div>
-    }
-  </div>
-
-  <mat-card class="debug-section">
-    <mat-card-header>
-      <mat-card-title>Debug Console Script</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <p>Run this in the browser console to inspect any button's computed styles:</p>
-      <pre><code>// Select the Create Your Podcast Now button and inspect its styles
+  <!-- Debug Info -->
+  <section class="debug-section">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Debug Console Script</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Run this in the browser console to inspect any button's computed styles:</p>
+        <pre><code>// Inspect a specific button
 const btn = document.querySelector('button.btn-secondary');
 const styles = getComputedStyle(btn);
-console.log('Border Radius:', styles.borderRadius);
-console.log('Background:', styles.backgroundColor);
-console.log('All applied styles:', Object.fromEntries(
-  ['borderRadius', 'backgroundColor', 'color', 'border', 'boxShadow']
-    .map(p => [p, styles[p]])
-));</code></pre>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="notes-section">
-    <mat-card-header>
-      <mat-card-title>Expected Behavior</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <ul>
-        <li><strong>Border Radius:</strong> All buttons should have 8px border-radius (not pill-shaped)</li>
-        <li><strong>.btn-primary:</strong> Blue background (#73adff dark / #005fb0 light)</li>
-        <li><strong>.btn-secondary:</strong> Orange background (vibrant CTA)</li>
-        <li><strong>.btn-tertiary:</strong> Purple background (AI features)</li>
-        <li><strong>-outlined variants:</strong> Colored border, transparent/tinted background</li>
-        <li><strong>-text variants:</strong> Just colored text, no background</li>
-        <li><strong>-tonal variants:</strong> Container background color</li>
-      </ul>
-    </mat-card-content>
-  </mat-card>
+console.table({{'{'}}
+  borderRadius: styles.borderRadius,
+  backgroundColor: styles.backgroundColor,
+  color: styles.color,
+  border: styles.border,
+  boxShadow: styles.boxShadow,
+{{'}'}});</code></pre>
+      </mat-card-content>
+    </mat-card>
+  </section>
 </div>
 

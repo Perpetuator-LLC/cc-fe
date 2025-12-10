@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   static getAuthRequiredRoutes(): string[] {
-    return ['logout', 'news', 'p', 'e', 'teams', 'jobs', 'f'];
+    return ['logout', 'media', 'teams', 'jobs'];
   }
 
   static getLoggedOutRoutes(): string[] {
