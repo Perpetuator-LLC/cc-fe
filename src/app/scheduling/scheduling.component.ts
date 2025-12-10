@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { SchedulingService, Schedule, ScheduleType, SolarEvent } from '../scheduling.service';
 import { MessageService } from '../message.service';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../layout/toolbar.service';
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';

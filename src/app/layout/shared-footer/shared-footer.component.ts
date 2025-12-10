@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../environments/environment';
-import { AuthService } from '../auth/auth.service';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../auth/auth.service';
 
 interface FooterLink {
   label: string;

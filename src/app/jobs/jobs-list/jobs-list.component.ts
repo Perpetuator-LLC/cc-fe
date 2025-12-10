@@ -14,7 +14,7 @@ import {
 } from '../job.service';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -30,7 +30,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { LoadingService } from '../../loading.service';
+import { LoadingService } from '../../layout/loading.service';
 
 interface EnrichedJob extends Job {
   podcastName?: string;

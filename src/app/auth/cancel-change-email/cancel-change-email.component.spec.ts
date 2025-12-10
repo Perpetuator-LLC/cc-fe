@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CancelChangeEmailComponent } from './cancel-change-email.component';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 
 describe('VerifyEmailComponent', () => {
   let component: CancelChangeEmailComponent;

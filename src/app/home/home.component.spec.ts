@@ -3,20 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HomeComponent } from './home.component';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../layout/toolbar.service';
 import { provideMockOAuthService, provideMockApollo } from '../testing/test-providers';
-import { ViewContainerRef } from '@angular/core';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
-  let mockViewContainerRef: jasmine.SpyObj<ViewContainerRef>;
 
   beforeEach(async () => {
-    mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent, RouterTestingModule],
@@ -45,8 +41,6 @@ describe('HomeComponent', () => {
 
     fixture.detectChanges();
 
-    expect(mockToolbarService.getViewContainerRef).toHaveBeenCalled();
-    expect(mockViewContainerRef.clear).toHaveBeenCalled();
-    expect(mockViewContainerRef.createEmbeddedView).toHaveBeenCalledWith(component.toolbarTemplate);
+    expect(mockToolbarService.setToolbarTemplate).toHaveBeenCalled();
   });
 });

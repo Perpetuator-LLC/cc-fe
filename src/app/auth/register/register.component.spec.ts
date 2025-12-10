@@ -5,7 +5,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 import { getCommonTestProviders } from '../../testing/test-helpers';
@@ -21,9 +21,7 @@ describe('RegisterComponent', () => {
   let mockMessageService: jasmine.SpyObj<MessageService>;
 
   beforeEach(async () => {
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['getViewContainerRef']);
-    const mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['clear', 'createEmbeddedView']);
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     mockGraphqlAuthService = jasmine.createSpyObj('GraphqlAuthService', ['register']);
     mockMessageService = jasmine.createSpyObj('MessageService', ['addMessage', 'clearMessages', 'removeMessage']);
     Object.defineProperty(mockMessageService, 'messageCount', {

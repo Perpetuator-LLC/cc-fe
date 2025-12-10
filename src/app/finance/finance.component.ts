@@ -6,7 +6,7 @@ import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/but
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../layout/toolbar.service';
 import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-dialog.component';
 
 @Component({

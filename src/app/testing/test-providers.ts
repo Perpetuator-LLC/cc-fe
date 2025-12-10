@@ -3,7 +3,7 @@ import { Apollo } from 'apollo-angular';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { ToolbarService } from '../toolbar.service';
+import { ToolbarService } from '../layout/toolbar.service';
 
 /**
  * Creates a mock Apollo provider for testing

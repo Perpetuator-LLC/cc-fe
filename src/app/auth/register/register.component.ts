@@ -8,7 +8,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AffiliateService } from '../../affiliate/affiliate.service';

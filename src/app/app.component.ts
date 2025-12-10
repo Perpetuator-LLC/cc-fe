@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { CommonModule } from '@angular/common';
-import { PreLoginLayoutComponent } from './pre-login-layout/pre-login-layout.component';
+import { PreLoginLayoutComponent } from './layout/pre-login/pre-login-layout.component';
 import { CookieBannerComponent } from './policy/cookie-banner/cookie-banner.component';
 import { MessageComponent } from './message/message.component';
 import { AuthService } from './auth/auth.service';

@@ -84,8 +84,9 @@ html {
   --md-sys-color-surface-container-rgb: 39, 42, 49;   // matches #272a31
   --md-sys-color-surface-container-high-rgb: 49, 53, 60; // matches #31353c
   // Glass morphism backgrounds with transparency (pre-computed for component use)
-  --md-sys-color-glass-surface: rgb(39 42 49 / 0.75);
-  --md-sys-color-glass-surface-high: rgb(49 53 60 / 0.75);
+  // "Dirty smoked glass" - darker with 0.85 opacity
+  --md-sys-color-glass-surface: rgb(39 42 49 / 0.85);
+  --md-sys-color-glass-surface-high: rgb(49 53 60 / 0.85);
   // stylelint-enable function-disallowed-list
 }
 
@@ -174,9 +175,10 @@ body.light {
   --md-sys-color-surface-container-high-rgb: 224, 226, 231;
 
   // Glass morphism backgrounds with transparency (pre-computed for component use)
+  // "Dirty smoked glass" - darker with 0.85 opacity
   // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
-  --md-sys-color-glass-surface: rgb(235 237 242 / 0.75);
-  --md-sys-color-glass-surface-high: rgb(224 226 231 / 0.75);
+  --md-sys-color-glass-surface: rgb(235 237 242 / 0.85);
+  --md-sys-color-glass-surface-high: rgb(224 226 231 / 0.85);
   // stylelint-enable function-disallowed-list
 
   * {

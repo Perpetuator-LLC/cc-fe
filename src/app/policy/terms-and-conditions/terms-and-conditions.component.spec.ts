@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TermsAndConditionsComponent } from './terms-and-conditions.component';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { PolicyService } from '../services/policy.service';
 import { provideMockOAuthService } from '../../testing/test-providers';
 import { of } from 'rxjs';

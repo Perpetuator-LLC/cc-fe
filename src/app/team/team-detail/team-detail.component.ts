@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { MemberResult, TeamsService } from '../teams.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatFormField, MatPrefix } from '@angular/material/form-field';

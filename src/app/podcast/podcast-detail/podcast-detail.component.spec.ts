@@ -13,10 +13,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { TeamsService } from '../../team/teams.service';
 import { VoicesService } from '../voices.service';
 import { UserService } from '../../user/user.service';
-import { ToolbarService } from '../../toolbar.service';
+import { ToolbarService } from '../../layout/toolbar.service';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ViewContainerRef, signal } from '@angular/core';
-import { LoadingService } from '../../loading.service';
+import { signal } from '@angular/core';
+import { LoadingService } from '../../layout/loading.service';
 import { NewsService } from '../../news/news.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobService } from '../../jobs/job.service';
@@ -65,12 +65,7 @@ describe('PodcastDetailComponentComponent', () => {
     Object.defineProperty(mockUserService, 'userDetails', {
       get: () => signal(null),
     });
-    mockToolbarService = jasmine.createSpyObj('ToolbarService', [
-      'setTemplate',
-      'clearTemplate',
-      'getViewContainerRef',
-      'clearToolbarComponent',
-    ]);
+    mockToolbarService = jasmine.createSpyObj('ToolbarService', ['setToolbarTemplate', 'clearToolbarComponent']);
     mockClipboard = jasmine.createSpyObj('Clipboard', ['copy']);
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['show', 'hide']);
     mockNewsService = jasmine.createSpyObj('NewsService', ['createEpisode']);
@@ -81,12 +76,6 @@ describe('PodcastDetailComponentComponent', () => {
 
     // Make extractIdFromSlugParam return the test UUID
     mockShareService.extractIdFromSlugParam.and.returnValue('test-podcast-uuid');
-
-    const mockViewContainerRef = {
-      clear: jasmine.createSpy('clear'),
-      createEmbeddedView: jasmine.createSpy('createEmbeddedView'),
-    };
-    mockToolbarService.getViewContainerRef.and.returnValue(mockViewContainerRef as unknown as ViewContainerRef);
 
     mockPodcastsService.getPodcastById.and.returnValue(
       of({
