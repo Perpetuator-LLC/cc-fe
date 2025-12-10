@@ -1,15 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import {
-  Component,
-  inject,
-  OnInit,
-  ViewChild,
-  OnDestroy,
-  ViewContainerRef,
-  ElementRef,
-  Renderer2,
-  HostListener,
-} from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ElementRef, Renderer2, HostListener } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -27,7 +17,7 @@ import { routes } from '../app.routes';
 import { Theme, ThemeService } from '../theme.service';
 import { AuthService } from '../auth/auth.service';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { ToolbarService } from '../toolbar.service';
+import { PageTitleService } from './page-title.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from '../user/user.service';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -67,8 +57,7 @@ import { LoadingService } from '../loading.service';
     JobStatusBarComponent,
   ],
 })
-export class LayoutComponent implements OnDestroy, OnInit {
-  // @ViewChild('toolbar', { read: ElementRef }) toolbar!: ElementRef;
+export class LayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
   protected loading = this.loadingService.loading;
   rootRoutes = routes.filter((r) => r.path);
@@ -88,13 +77,17 @@ export class LayoutComponent implements OnDestroy, OnInit {
   showSecondSidebar = false;
   showMobileSidebar = false;
 
-  @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
+  // Page title from the new signal-based service
+  protected pageTitle = this.pageTitleService.title;
+  protected pageIcon = this.pageTitleService.icon;
+  protected pageBreadcrumb = this.pageTitleService.breadcrumb;
+
   @ViewChild('afterHeader', { static: false, read: ElementRef }) afterHeaderRef!: ElementRef;
 
   constructor(
     protected themeService: ThemeService,
     protected authService: AuthService,
-    private toolbarService: ToolbarService,
+    protected pageTitleService: PageTitleService,
     protected router: Router,
     protected userService: UserService,
     private renderer: Renderer2,
@@ -148,15 +141,10 @@ export class LayoutComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
     this.currentTheme = this.themeService.theme;
     if (this.isLoggedIn()) {
       this.userService.loadUserDetails();
     }
-  }
-
-  ngOnDestroy() {
-    this.toolbarService.clearToolbarComponent();
   }
 
   // ngAfterViewInit() {

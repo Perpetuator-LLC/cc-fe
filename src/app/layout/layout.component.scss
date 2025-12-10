@@ -128,7 +128,47 @@ mat-sidenav-content mat-toolbar {
   max-width: 100%; // Ensure it doesn't exceed container
 }
 
-// Page title styles with text truncation
+// New signal-based page title container
+.page-title-container {
+  overflow: hidden;
+  display: flex;
+  flex: 1 1 0;
+  gap: 8px;
+  align-items: center;
+
+  min-width: 0;
+  max-width: 100%;
+
+  .breadcrumb-text {
+    flex-shrink: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    white-space: nowrap;
+  }
+
+  .separator {
+    flex-shrink: 0;
+    color: var(--md-sys-color-outline);
+    white-space: nowrap;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
+  }
+
+  .page-title-text {
+    overflow: hidden;
+    flex: 1 1 0;
+
+    min-width: 0;
+
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Page title styles with text truncation (legacy - can be removed after migration)
 .page-title {
   overflow: hidden;
   display: flex;

@@ -53,8 +53,6 @@
     </a>
 
     <div class="header-actions">
-      <ng-container #toolbarContainer />
-
       <a mat-flat-button [routerLink]="['/register']" class="auth-link register-link btn-primary">
         <mat-icon>person_add</mat-icon>
         <span>Register</span>
@@ -76,8 +74,10 @@
     </div>
   </div>
 
-  <div class="content-area with-footer">
-    <router-outlet />
+  <div class="content-area" [class.with-footer]="true" [class.is-home-page]="isHomePage">
+    <div class="content-wrapper">
+      <router-outlet />
+    </div>
     <app-shared-footer [compactMode]="!isHomePage" />
   </div>
 </div>
