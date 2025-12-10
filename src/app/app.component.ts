@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
-import { LayoutComponent } from './layout/layout.component';
+import { PostLoginLayoutComponent } from './layout/post-login/post-login-layout.component';
 import { CommonModule } from '@angular/common';
 import { PreLoginLayoutComponent } from './layout/pre-login/pre-login-layout.component';
 import { CookieBannerComponent } from './policy/cookie-banner/cookie-banner.component';
@@ -15,7 +15,7 @@ import { PolicyGuardService } from './policy/services/policy-guard.service';
   imports: [
     CommonModule,
     RouterOutlet,
-    LayoutComponent,
+    PostLoginLayoutComponent,
     PreLoginLayoutComponent,
     CookieBannerComponent,
     MessageComponent,

@@ -84,9 +84,9 @@ html {
   --md-sys-color-surface-container-rgb: 39, 42, 49;   // matches #272a31
   --md-sys-color-surface-container-high-rgb: 49, 53, 60; // matches #31353c
   // Glass morphism backgrounds with transparency (pre-computed for component use)
-  // "Dirty smoked glass" - darker with 0.85 opacity
-  --md-sys-color-glass-surface: rgb(39 42 49 / 0.85);
-  --md-sys-color-glass-surface-high: rgb(49 53 60 / 0.85);
+  // "Dirty smoked glass" - darker with higher opacity for more visible effect
+  --md-sys-color-glass-surface: rgb(25 28 33 / 0.92);
+  --md-sys-color-glass-surface-high: rgb(35 38 45 / 0.92);
   // stylelint-enable function-disallowed-list
 }
 
@@ -94,10 +94,6 @@ body {
   margin: 0;
   padding: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
-
-  * {
-    scrollbar-color: var(--md-sys-color-on-surface) transparent;
-  }
 
   // Default link styling - uses primary color
   a {
@@ -214,10 +210,6 @@ body.light {
   --md-sys-color-glass-surface: rgb(235 237 242 / 0.85);
   --md-sys-color-glass-surface-high: rgb(224 226 231 / 0.85);
   // stylelint-enable function-disallowed-list
-
-  * {
-    scrollbar-color: var(--md-sys-color-on-surface) transparent;
-  }
 }
 
 // Job status badge colors - consistent across all components
@@ -273,6 +265,50 @@ body.light {
   &.completed {
     border-left: 4px solid var(--md-extended-color-success-color);
   }
+}
+
+// ============================================================================
+// MD3 Validation Icon Utility Classes
+// ============================================================================
+// Global utility classes for styling validation status icons consistently.
+// Use these classes directly on mat-icon elements.
+// ============================================================================
+
+.md3-icon-success {
+  color: var(--md-extended-color-success-color);
+}
+
+.md3-icon-warning {
+  color: var(--md-extended-color-warning-color);
+}
+
+.md3-icon-error {
+  color: var(--md-sys-color-error);
+}
+
+.md3-icon-info {
+  color: var(--md-extended-color-info-color);
+}
+
+// MD3 Badge Utility Classes (for status badges)
+.md3-badge-success {
+  color: var(--md-extended-color-success-on-color);
+  background-color: var(--md-extended-color-success-color);
+}
+
+.md3-badge-warning {
+  color: var(--md-extended-color-warning-on-color);
+  background-color: var(--md-extended-color-warning-color);
+}
+
+.md3-badge-error {
+  color: var(--md-sys-color-on-error);
+  background-color: var(--md-sys-color-error);
+}
+
+.md3-badge-info {
+  color: var(--md-extended-color-info-on-color);
+  background-color: var(--md-extended-color-info-color);
 }
 
 // ============================================================================
@@ -934,6 +970,268 @@ body .toolbar-container {
   }
 }
 
+// ============================================================================
+// SEMANTIC COLOR BUTTON CLASSES
+// ============================================================================
+// Success, Warning, Error, Info buttons using extended color palette
+// ============================================================================
+
+// Success Button Classes
+.btn-success {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-extended-color-success-color);
+    --mdc-filled-button-label-text-color: var(--md-extended-color-success-on-color);
+
+    color: var(--md-extended-color-success-on-color) !important;
+    background-color: var(--md-extended-color-success-color) !important;
+  }
+
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-extended-color-success-color);
+    --mat-fab-foreground-color: var(--md-extended-color-success-on-color);
+
+    color: var(--md-extended-color-success-on-color) !important;
+    background-color: var(--md-extended-color-success-color) !important;
+  }
+
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-extended-color-success-color) !important;
+  }
+}
+
+.btn-success-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    color: var(--md-extended-color-success-on-color-container) !important;
+    background-color: var(--md-extended-color-success-color-container) !important;
+  }
+}
+
+.btn-success-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    border-color: var(--md-extended-color-success-color) !important;
+    color: var(--md-extended-color-success-color) !important;
+    background-color: transparent !important;
+  }
+}
+
+.btn-success-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    color: var(--md-extended-color-success-color) !important;
+    background-color: transparent !important;
+  }
+}
+
+// Warning Button Classes
+.btn-warning {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-extended-color-warning-color);
+    --mdc-filled-button-label-text-color: var(--md-extended-color-warning-on-color);
+
+    color: var(--md-extended-color-warning-on-color) !important;
+    background-color: var(--md-extended-color-warning-color) !important;
+  }
+
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-extended-color-warning-color);
+    --mat-fab-foreground-color: var(--md-extended-color-warning-on-color);
+
+    color: var(--md-extended-color-warning-on-color) !important;
+    background-color: var(--md-extended-color-warning-color) !important;
+  }
+
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-extended-color-warning-color) !important;
+  }
+}
+
+.btn-warning-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    color: var(--md-extended-color-warning-on-color-container) !important;
+    background-color: var(--md-extended-color-warning-color-container) !important;
+  }
+}
+
+.btn-warning-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    border-color: var(--md-extended-color-warning-color) !important;
+    color: var(--md-extended-color-warning-color) !important;
+    background-color: transparent !important;
+  }
+}
+
+.btn-warning-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    color: var(--md-extended-color-warning-color) !important;
+    background-color: transparent !important;
+  }
+}
+
+// Error Button Classes
+.btn-error {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-error);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-error);
+
+    color: var(--md-sys-color-on-error) !important;
+    background-color: var(--md-sys-color-error) !important;
+  }
+
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-error);
+    --mat-fab-foreground-color: var(--md-sys-color-on-error);
+
+    color: var(--md-sys-color-on-error) !important;
+    background-color: var(--md-sys-color-error) !important;
+  }
+
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-error) !important;
+  }
+}
+
+.btn-error-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    color: var(--md-sys-color-on-error-container) !important;
+    background-color: var(--md-sys-color-error-container) !important;
+  }
+}
+
+.btn-error-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    border-color: var(--md-sys-color-error) !important;
+    color: var(--md-sys-color-error) !important;
+    background-color: transparent !important;
+  }
+}
+
+.btn-error-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    color: var(--md-sys-color-error) !important;
+    background-color: transparent !important;
+  }
+}
+
+// Info Button Classes
+.btn-info {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-extended-color-info-color);
+    --mdc-filled-button-label-text-color: var(--md-extended-color-info-on-color);
+
+    color: var(--md-extended-color-info-on-color) !important;
+    background-color: var(--md-extended-color-info-color) !important;
+  }
+
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-extended-color-info-color);
+    --mat-fab-foreground-color: var(--md-extended-color-info-on-color);
+
+    color: var(--md-extended-color-info-on-color) !important;
+    background-color: var(--md-extended-color-info-color) !important;
+  }
+
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-extended-color-info-color) !important;
+  }
+}
+
+.btn-info-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    color: var(--md-extended-color-info-on-color-container) !important;
+    background-color: var(--md-extended-color-info-color-container) !important;
+  }
+}
+
+.btn-info-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    border-color: var(--md-extended-color-info-color) !important;
+    color: var(--md-extended-color-info-color) !important;
+    background-color: transparent !important;
+  }
+}
+
+.btn-info-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    color: var(--md-extended-color-info-color) !important;
+    background-color: transparent !important;
+  }
+}
+
 /* stylelint-enable declaration-no-important */
 
 // ============================================================================
@@ -953,17 +1251,18 @@ mat-nav-list {
   // Hover state for navigation items
   .mat-mdc-list-item:hover {
     border-radius: 0;
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
 
     .mdc-list-item__ripple::before {
       border-radius: 0;
     }
   }
 
-  // Active/selected state uses left border
+  // Active/selected state uses left border with primary blue background
   .mdc-list-item--activated {
     border-left: 3px solid var(--md-sys-color-primary);
     border-radius: 0;
-    background-color: var(--md-sys-color-surface-container-high);
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
 
     .mdc-list-item__ripple::before {
       border-radius: 0;

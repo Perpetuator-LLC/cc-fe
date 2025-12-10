@@ -113,13 +113,13 @@
             <mat-icon>science</mat-icon>
             <span class="website-title">Topics</span>
           </a>
-          } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+          } @else if (router.url.startsWith('/jobs')) {
           <!-- Jobs section links -->
-          <a [routerLink]="['/jobs']" class="header-logo s-link" routerLinkActive="active">
+          <a [routerLink]="['/jobs/list']" class="header-logo s-link" routerLinkActive="active">
             <mat-icon>work</mat-icon>
             <span class="website-title">Jobs</span>
           </a>
-          <a [routerLink]="['/scheduling']" class="header-logo s-link" routerLinkActive="active">
+          <a [routerLink]="['/jobs/scheduling']" class="header-logo s-link" routerLinkActive="active">
             <mat-icon>schedule</mat-icon>
             <span class="website-title">Scheduling</span>
           </a>

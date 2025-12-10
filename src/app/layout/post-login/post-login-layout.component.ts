@@ -13,29 +13,29 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { routes } from '../app.routes';
-import { Theme, ThemeService } from './theme.service';
-import { AuthService } from '../auth/auth.service';
+import { routes } from '../../app.routes';
+import { Theme, ThemeService } from '../theme.service';
+import { AuthService } from '../../auth/auth.service';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { PageTitleService } from './page-title.service';
-import { AuthGuard } from '../auth/auth.guard';
-import { UserService } from '../user/user.service';
+import { PageTitleService } from '../page-title.service';
+import { AuthGuard } from '../../auth/auth.guard';
+import { UserService } from '../../user/user.service';
 import { MatTooltip } from '@angular/material/tooltip';
-import { CreditService } from '../credits/credit.service';
-import { Job, JobService, JobStatus } from '../jobs/job.service';
+import { CreditService } from '../../credits/credit.service';
+import { Job, JobService, JobStatus } from '../../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { MessageService } from '../message.service';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MessageService } from '../../message.service';
+import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
-import { RedeemGiftCodeDialogComponent } from '../credits/redeem-gift-code-dialog/redeem-gift-code-dialog.component';
-import { SharedFooterComponent } from './shared-footer/shared-footer.component';
-import { JobStatusBarComponent } from '../jobs/job-status-bar/job-status-bar.component';
-import { LoadingService } from './loading.service';
+import { RedeemGiftCodeDialogComponent } from '../../credits/redeem-gift-code-dialog/redeem-gift-code-dialog.component';
+import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
+import { JobStatusBarComponent } from '../../jobs/job-status-bar/job-status-bar.component';
+import { LoadingService } from '../loading.service';
 
 @Component({
-  selector: 'app-layout',
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss'],
+  selector: 'app-post-login-layout',
+  templateUrl: './post-login-layout.component.html',
+  styleUrls: ['./post-login-layout.component.scss'],
   standalone: true,
   imports: [
     SvgIconComponent,
@@ -57,7 +57,7 @@ import { LoadingService } from './loading.service';
     JobStatusBarComponent,
   ],
 })
-export class LayoutComponent implements OnInit {
+export class PostLoginLayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
   protected loading = this.loadingService.loading;
   rootRoutes = routes.filter((r) => r.path && r.data?.['icon'] && !r.redirectTo);
@@ -128,7 +128,7 @@ export class LayoutComponent implements OnInit {
     this.router.events.subscribe(() => {
       const url = this.router.url;
       this.isHomePage = url === '/' || url === '/home';
-      this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/jobs') || url.startsWith('/scheduling');
+      this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/jobs');
     });
   }
 

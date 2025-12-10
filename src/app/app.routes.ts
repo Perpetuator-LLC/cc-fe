@@ -201,13 +201,33 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'scheduling',
-    loadComponent: () => import('./scheduling/scheduling.component').then((c) => c.SchedulingComponent),
-    title: 'Scheduling',
+    path: 'jobs',
+    pathMatch: 'full',
+    redirectTo: 'jobs/list',
+  },
+  {
+    path: 'jobs',
     canActivate: [AuthGuard],
+    title: 'Jobs',
     data: {
-      icon: 'schedule',
+      icon: 'work',
     },
+    children: [
+      {
+        path: 'list',
+        loadComponent: () => import('./jobs/jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
+        title: 'Jobs List',
+      },
+      {
+        path: 'scheduling',
+        loadComponent: () => import('./scheduling/scheduling.component').then((c) => c.SchedulingComponent),
+        title: 'Scheduling',
+        data: {
+          // Hidden from menu - accessed via jobs section
+          hidden: true,
+        },
+      },
+    ],
   },
   {
     path: 'team/new',
@@ -220,15 +240,6 @@ export const routes: Routes = [
     loadComponent: () => import('./team/team-detail/team-detail.component').then((c) => c.TeamDetailComponent),
     title: 'Team',
     canActivate: [AuthGuard],
-  },
-  {
-    path: 'jobs',
-    loadComponent: () => import('./jobs/jobs-list/jobs-list.component').then((c) => c.JobsListComponent),
-    title: 'Jobs',
-    canActivate: [AuthGuard],
-    data: {
-      icon: 'work',
-    },
   },
   {
     path: 'transactions',

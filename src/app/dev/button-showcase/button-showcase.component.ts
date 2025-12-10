@@ -4,92 +4,281 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 
-interface ButtonClass {
+/**
+ * MD3 Button Variants as defined by Material Design 3
+ * @see https://m3.material.io/components/buttons/specs
+ */
+interface ButtonVariant {
+  id: string;
   name: string;
-  class: string;
+  description: string;
+  directive: string; // Angular Material directive
+  iconOnly?: boolean;
 }
 
-interface ButtonType {
+/**
+ * Color roles available for buttons
+ */
+interface ColorRole {
+  id: string;
   name: string;
-  directive: string;
+  cssClass: string;
+  description: string;
+}
+
+/**
+ * Button states
+ */
+interface ButtonState {
+  id: string;
+  name: string;
+  description: string;
 }
 
 @Component({
   selector: 'app-button-showcase',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    FormsModule,
+  ],
   templateUrl: './button-showcase.component.html',
   styleUrls: ['./button-showcase.component.scss'],
 })
 export class ButtonShowcaseComponent implements AfterViewInit {
-  // Row headers - our custom button classes
-  buttonClasses: ButtonClass[] = [
-    { name: 'No class (default)', class: '' },
-    { name: '.btn-primary', class: 'btn-primary' },
-    { name: '.btn-primary-outlined', class: 'btn-primary-outlined' },
-    { name: '.btn-primary-text', class: 'btn-primary-text' },
-    { name: '.btn-primary-tonal', class: 'btn-primary-tonal' },
-    { name: '.btn-secondary', class: 'btn-secondary' },
-    { name: '.btn-secondary-outlined', class: 'btn-secondary-outlined' },
-    { name: '.btn-secondary-text', class: 'btn-secondary-text' },
-    { name: '.btn-secondary-tonal', class: 'btn-secondary-tonal' },
-    { name: '.btn-tertiary', class: 'btn-tertiary' },
-    { name: '.btn-tertiary-outlined', class: 'btn-tertiary-outlined' },
-    { name: '.btn-tertiary-text', class: 'btn-tertiary-text' },
-    { name: '.btn-tertiary-tonal', class: 'btn-tertiary-tonal' },
-    { name: '.btn-surface', class: 'btn-surface' },
-    { name: '.btn-surface-outlined', class: 'btn-surface-outlined' },
+  /**
+   * MD3 Button Variants
+   * These map to Angular Material button directives
+   */
+  variants: ButtonVariant[] = [
+    {
+      id: 'filled',
+      name: 'Filled',
+      description: 'High emphasis, for primary actions',
+      directive: 'mat-flat-button',
+    },
+    {
+      id: 'tonal',
+      name: 'Tonal (Filled Tonal)',
+      description: 'Medium-high emphasis, alternative to filled',
+      directive: 'mat-flat-button', // Uses tonal class
+    },
+    {
+      id: 'outlined',
+      name: 'Outlined',
+      description: 'Medium emphasis, for secondary actions',
+      directive: 'mat-stroked-button',
+    },
+    {
+      id: 'text',
+      name: 'Text',
+      description: 'Low emphasis, for less prominent actions',
+      directive: 'mat-button',
+    },
+    {
+      id: 'elevated',
+      name: 'Elevated',
+      description: 'Medium emphasis with shadow, for actions needing visual lift',
+      directive: 'mat-raised-button',
+    },
+    {
+      id: 'icon',
+      name: 'Icon',
+      description: 'Icon-only buttons for compact actions',
+      directive: 'mat-icon-button',
+      iconOnly: true,
+    },
+    {
+      id: 'fab',
+      name: 'FAB',
+      description: 'Floating Action Button for primary screen action',
+      directive: 'mat-fab',
+      iconOnly: true,
+    },
+    {
+      id: 'mini-fab',
+      name: 'Mini FAB',
+      description: 'Smaller FAB for secondary actions',
+      directive: 'mat-mini-fab',
+      iconOnly: true,
+    },
+    {
+      id: 'extended-fab',
+      name: 'Extended FAB',
+      description: 'FAB with icon and text label',
+      directive: 'mat-fab',
+    },
   ];
 
-  // Column headers - Material button directives
-  buttonTypes: ButtonType[] = [
-    { name: 'mat-button', directive: 'mat-button' },
-    { name: 'mat-flat-button', directive: 'mat-flat-button' },
-    { name: 'mat-raised-button', directive: 'mat-raised-button' },
-    { name: 'mat-stroked-button', directive: 'mat-stroked-button' },
-    { name: 'mat-fab', directive: 'mat-fab' },
-    { name: 'mat-mini-fab', directive: 'mat-mini-fab' },
-    { name: 'mat-icon-button', directive: 'mat-icon-button' },
+  /**
+   * Color roles - maps to our btn-* CSS classes
+   */
+  colorRoles: ColorRole[] = [
+    {
+      id: 'primary',
+      name: 'Primary',
+      cssClass: 'btn-primary',
+      description: 'Brand color (blue), for main actions',
+    },
+    {
+      id: 'secondary',
+      name: 'Secondary',
+      cssClass: 'btn-secondary',
+      description: 'CTA color (orange), for call-to-action',
+    },
+    {
+      id: 'tertiary',
+      name: 'Tertiary',
+      cssClass: 'btn-tertiary',
+      description: 'AI/Premium color (purple), for special features',
+    },
+    {
+      id: 'surface',
+      name: 'Surface/Default',
+      cssClass: 'btn-surface',
+      description: 'Neutral color, for low-emphasis actions',
+    },
+    {
+      id: 'success',
+      name: 'Success',
+      cssClass: 'btn-success',
+      description: 'Success semantic color (green)',
+    },
+    {
+      id: 'warning',
+      name: 'Warning',
+      cssClass: 'btn-warning',
+      description: 'Warning semantic color (amber)',
+    },
+    {
+      id: 'error',
+      name: 'Error',
+      cssClass: 'btn-error',
+      description: 'Error semantic color (red)',
+    },
+    {
+      id: 'info',
+      name: 'Info',
+      cssClass: 'btn-info',
+      description: 'Info semantic color (blue)',
+    },
   ];
+
+  /**
+   * Button states
+   */
+  states: ButtonState[] = [
+    { id: 'enabled', name: 'Enabled', description: 'Default interactive state' },
+    { id: 'disabled', name: 'Disabled', description: 'Non-interactive state' },
+    { id: 'hovered', name: 'Hovered', description: 'Mouse over state (hover to see)' },
+    { id: 'focused', name: 'Focused', description: 'Keyboard focus state (tab to see)' },
+  ];
+
+  // Filter selections
+  selectedVariant = 'all';
+  selectedColor = 'all';
+  selectedState = 'enabled';
+
+  // Toggle state for demo
+  toggleStates: Record<string, boolean> = {};
 
   ngAfterViewInit(): void {
-    // Log button class info after view is initialized
+    // Log some debug info
     setTimeout(() => {
-      const sampleBtn = document.querySelector('button.btn-secondary');
-      if (sampleBtn) {
-        console.log('[ButtonShowcase] Sample .btn-secondary button:');
-        console.log('  All classes:', sampleBtn.className);
-        console.log('  Has mat-mdc-button-base:', sampleBtn.classList.contains('mat-mdc-button-base'));
-        const styles = getComputedStyle(sampleBtn);
-        console.log('  Computed background:', styles.backgroundColor);
-        console.log('  Computed color:', styles.color);
-      }
-    }, 500);
+      console.log('[ButtonShowcase] Component initialized');
+      console.log('Variants:', this.variants.length);
+      console.log('Colors:', this.colorRoles.length);
+    }, 100);
   }
 
-  // Helper to get computed styles for debugging
+  /**
+   * Get CSS class for a variant + color combination
+   */
+  getButtonClass(variant: ButtonVariant, color: ColorRole): string {
+    // Base class for the color
+    let cssClass = color.cssClass;
+
+    // Add variant-specific suffix for tonal/outlined/text
+    if (variant.id === 'tonal') {
+      cssClass = `${color.cssClass}-tonal`;
+    } else if (variant.id === 'outlined') {
+      cssClass = `${color.cssClass}-outlined`;
+    } else if (variant.id === 'text') {
+      cssClass = `${color.cssClass}-text`;
+    }
+
+    return cssClass;
+  }
+
+  /**
+   * Check if a variant should be shown based on filter
+   */
+  shouldShowVariant(variant: ButtonVariant): boolean {
+    return this.selectedVariant === 'all' || this.selectedVariant === variant.id;
+  }
+
+  /**
+   * Check if a color should be shown based on filter
+   */
+  shouldShowColor(color: ColorRole): boolean {
+    return this.selectedColor === 'all' || this.selectedColor === color.id;
+  }
+
+  /**
+   * Toggle a button's active state
+   */
+  toggleButton(key: string): void {
+    this.toggleStates[key] = !this.toggleStates[key];
+  }
+
+  /**
+   * Check if button is toggled
+   */
+  isToggled(key: string): boolean {
+    return this.toggleStates[key] || false;
+  }
+
+  /**
+   * Inspect button styles (for debugging)
+   */
   inspectButton(event: Event): void {
-    const button = event.target as HTMLElement;
+    const button = event.currentTarget as HTMLElement;
     const styles = window.getComputedStyle(button);
+
     console.log('=== Button Inspection ===');
     console.log('Element:', button);
-    console.log('All classes:', button.className);
-    console.log('Has mat-mdc-button-base:', button.classList.contains('mat-mdc-button-base'));
-    console.log('borderRadius:', styles.borderRadius);
-    console.log('backgroundColor:', styles.backgroundColor);
-    console.log('color:', styles.color);
-    console.log('border:', styles.border);
+    console.log('Classes:', button.className);
+    console.log('Styles:', {
+      borderRadius: styles.borderRadius,
+      backgroundColor: styles.backgroundColor,
+      color: styles.color,
+      border: styles.border,
+      boxShadow: styles.boxShadow,
+    });
+  }
 
-    // Check for MDC CSS variables
-    console.log('MDC Variables on element:');
-    console.log(
-      '  --mdc-filled-button-container-color:',
-      styles.getPropertyValue('--mdc-filled-button-container-color'),
-    );
-    console.log(
-      '  --mdc-filled-button-label-text-color:',
-      styles.getPropertyValue('--mdc-filled-button-label-text-color'),
-    );
+  /**
+   * Get the visible colors based on filter
+   */
+  get visibleColors(): ColorRole[] {
+    return this.colorRoles.filter((c) => this.shouldShowColor(c));
+  }
+
+  /**
+   * Get the visible variants based on filter
+   */
+  get visibleVariants(): ButtonVariant[] {
+    return this.variants.filter((v) => this.shouldShowVariant(v));
   }
 }

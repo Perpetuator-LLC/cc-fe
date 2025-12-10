@@ -1,23 +1,23 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { LayoutComponent } from './layout.component';
+import { PostLoginLayoutComponent } from './post-login-layout.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { AuthService } from '../auth/auth.service';
-import { ThemeService } from './theme.service';
-import { ToolbarService } from './toolbar.service';
+import { AuthService } from '../../auth/auth.service';
+import { ThemeService } from '../theme.service';
+import { ToolbarService } from '../toolbar.service';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Apollo } from 'apollo-angular';
 import { signal } from '@angular/core';
-import { getCommonTestProviders } from '../testing/test-helpers';
+import { getCommonTestProviders } from '../../testing/test-helpers';
 
-describe('LayoutComponent', () => {
-  let fixture: ComponentFixture<LayoutComponent>;
-  let component: LayoutComponent;
+describe('PostLoginLayoutComponent', () => {
+  let fixture: ComponentFixture<PostLoginLayoutComponent>;
+  let component: PostLoginLayoutComponent;
   let authService: jasmine.SpyObj<AuthService>;
   let themeService: jasmine.SpyObj<ThemeService>;
 
@@ -53,7 +53,13 @@ describe('LayoutComponent', () => {
     );
 
     await TestBed.configureTestingModule({
-      imports: [LayoutComponent, MatSidenavModule, RouterTestingModule, NoopAnimationsModule, HttpClientTestingModule],
+      imports: [
+        PostLoginLayoutComponent,
+        MatSidenavModule,
+        RouterTestingModule,
+        NoopAnimationsModule,
+        HttpClientTestingModule,
+      ],
       providers: [
         ...getCommonTestProviders(),
         { provide: AuthService, useValue: authService },
@@ -64,11 +70,11 @@ describe('LayoutComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LayoutComponent);
+    fixture = TestBed.createComponent(PostLoginLayoutComponent);
     component = fixture.componentInstance;
   });
 
-  it('should create the layout component', () => {
+  it('should create the post-login layout component', () => {
     expect(component).toBeTruthy();
   });
 
