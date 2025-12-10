@@ -126,6 +126,23 @@ $_palettes: (
     100: #ffffff,
   ),
 );
+
+// ============================================================================
+// Exported palette accessors for use in styles.scss
+// These allow dynamic color extraction from palettes
+// ============================================================================
+$primary-palette: map.get($_palettes, primary);
+$secondary-palette: map.get($_palettes, secondary);
+$tertiary-palette: map.get($_palettes, tertiary);
+$neutral-palette: map.get($_palettes, neutral);
+$neutral-variant-palette: map.get($_palettes, neutral-variant);
+$error-palette: map.get($_palettes, error);
+
+// Helper function to get color from palette by tone
+@function get-color($palette, $tone) {
+  @return map.get($palette, $tone);
+}
+
 $_rest: (
   secondary: map.get($_palettes, secondary),
   neutral: map.get($_palettes, neutral),

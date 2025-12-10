@@ -281,13 +281,29 @@
 
   background: var(--md-sys-color-surface-container);
 
-  // Colors are defined in global styles.scss
-  // Only add component-specific styling here
-  &.job-success,
-  &.job-failed,
-  &.job-pending,
+  // Job status colors - matching MD3 extended colors
+  &.job-success {
+    border-color: var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color);
+    background: var(--md-extended-color-success-color-container);
+  }
+
+  &.job-failed {
+    border-color: var(--md-sys-color-error);
+    color: var(--md-sys-color-error);
+    background: var(--md-sys-color-error-container);
+  }
+
+  &.job-pending {
+    border-color: var(--md-extended-color-warning-color);
+    color: var(--md-extended-color-warning-color);
+    background: var(--md-extended-color-warning-color-container);
+  }
+
   &.job-running {
-    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
+    border-color: var(--md-extended-color-info-color);
+    color: var(--md-extended-color-info-color);
+    background: var(--md-extended-color-info-color-container);
   }
 }
 
@@ -354,20 +370,32 @@
 .timeline-status {
   flex-shrink: 0;
 
-  padding: 0.2rem 0.8rem;
+  padding: 4px 12px;
   border-radius: 8px;
 
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 
-  // Colors are defined in global styles.scss
-  // Only add component-specific styling here
-  &.job-success,
-  &.job-failed,
-  &.job-pending,
+  // Job status badge colors - matching MD3 extended colors
+  &.job-success {
+    color: var(--md-extended-color-success-on-color);
+    background: var(--md-extended-color-success-color);
+  }
+
+  &.job-failed {
+    color: var(--md-sys-color-on-error);
+    background: var(--md-sys-color-error);
+  }
+
+  &.job-pending {
+    color: var(--md-extended-color-warning-on-color);
+    background: var(--md-extended-color-warning-color);
+  }
+
   &.job-running {
-    text-shadow: var(--md-sys-color-surface-container-high) 1px 1px;
+    color: var(--md-extended-color-info-on-color);
+    background: var(--md-extended-color-info-color);
   }
 }
 
