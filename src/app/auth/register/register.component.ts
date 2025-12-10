@@ -46,7 +46,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   registerForm = this.fb.group({
     email: [environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
     password: [environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]],
-    acceptTerms: [false, Validators.requiredTrue],
+    acceptTerms: [false as boolean, Validators.requiredTrue],
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
@@ -68,11 +68,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.registerForm = this.fb.group({
-      email: [environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
-      password: [environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]],
-      acceptTerms: [false, Validators.requiredTrue],
-    });
+    // Form already initialized in class property
 
     this.route.queryParams.subscribe((params) => {
       const refCode = params['ref'];
