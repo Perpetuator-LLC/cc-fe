@@ -63,6 +63,7 @@ export class AppComponent {
       /^\/episodes(\/|$)/, // Public episode pages
       /^\/categories(\/|$)/, // Public category pages
       /^\/finance(\/|$)/, // Public finance page
+      /^\/dev\//, // Dev tools (buttons showcase, etc.)
     ];
 
     // If on a conditional route and user is NOT logged in, use pre-login layout

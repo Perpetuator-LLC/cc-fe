@@ -98,6 +98,40 @@ body {
   * {
     scrollbar-color: var(--md-sys-color-on-surface) transparent;
   }
+
+  // Default link styling - uses primary color
+  a {
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:visited {
+      // Slightly darker/lighter primary for visited links
+      color: color-mix(in srgb, var(--md-sys-color-primary) 70%, var(--md-sys-color-on-surface));
+    }
+
+    // Reset for links that use Material components or explicit styling
+    &.mat-mdc-button,
+    &.mat-mdc-raised-button,
+    &.mat-mdc-flat-button,
+    &.mat-mdc-stroked-button,
+    &.mat-mdc-icon-button,
+    &.mat-mdc-fab,
+    &.mat-mdc-mini-fab,
+    &[mat-button],
+    &[mat-raised-button],
+    &[mat-flat-button],
+    &[mat-stroked-button] {
+      color: inherit;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 body.light {
@@ -245,10 +279,14 @@ body.light {
 // Custom Scrollbars (MD3 Themed)
 // ============================================================================
 
+// Global Scrollbar Styling
+// Uses on-surface color with transparency for good contrast in both light/dark modes
+// Matches the custom-scrollbar mixin in _mixins.scss
+
 // Webkit browsers (Chrome, Safari, Edge)
 *::-webkit-scrollbar {
-  width: 16px; // MD3 4px grid - scrollbar width
-  height: 16px; // MD3 4px grid - scrollbar height
+  width: 12px; // MD3 4px grid - scrollbar width
+  height: 12px; // MD3 4px grid - scrollbar height
 }
 
 *::-webkit-scrollbar-track {
@@ -257,14 +295,18 @@ body.light {
 }
 
 *::-webkit-scrollbar-thumb {
-  border: 3px solid var(--md-sys-color-surface-container-low);
+  border: 2px solid transparent;
   border-radius: 8px;
-  background: var(--md-sys-color-surface-container-highest);
+
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 40%, transparent);
+  background-clip: padding-box;
+
   transition: background 0.2s ease;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--md-sys-color-outline);
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 60%, transparent);
+  background-clip: padding-box;
 }
 
 *::-webkit-scrollbar-corner {
@@ -273,7 +315,7 @@ body.light {
 
 // Firefox
 * {
-  scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
+  scrollbar-color: color-mix(in srgb, var(--md-sys-color-on-surface) 40%, transparent) transparent;
   scrollbar-width: thin;
 }
 
@@ -893,4 +935,39 @@ body .toolbar-container {
 }
 
 /* stylelint-enable declaration-no-important */
+
+// ============================================================================
+// NAVIGATION LIST ITEM STYLING
+// ============================================================================
+// Removes Material's default rounded selection indicator and applies
+// the left-border active state pattern used throughout the app.
+// ============================================================================
+
+// Remove rounded state layer from all list items in navigation
+mat-nav-list {
+  .mdc-list-item__ripple::before,
+  .mat-mdc-list-item-ripple {
+    border-radius: 0;
+  }
+
+  // Hover state for navigation items
+  .mat-mdc-list-item:hover {
+    border-radius: 0;
+
+    .mdc-list-item__ripple::before {
+      border-radius: 0;
+    }
+  }
+
+  // Active/selected state uses left border
+  .mdc-list-item--activated {
+    border-left: 3px solid var(--md-sys-color-primary);
+    border-radius: 0;
+    background-color: var(--md-sys-color-surface-container-high);
+
+    .mdc-list-item__ripple::before {
+      border-radius: 0;
+    }
+  }
+}
 

@@ -40,7 +40,7 @@
             <br />
             Simply describe what you care about, and our AI agents will build a podcast for you.
           </p>
-          <button mat-flat-button class="btn-secondary" [routerLink]="['/p']" [queryParams]="{ create: 'true' }">Create Your Podcast Now</button>
+          <button mat-flat-button class="btn-secondary" [routerLink]="['/media/podcasts']" [queryParams]="{ create: 'true' }">Create Your Podcast Now</button>
           <p>
             Pick your topics, choose your focus areas, and even request deep dives on specific subjects.
           </p>
@@ -67,7 +67,7 @@
                 publishing.
               </div>
             </div>
-            <a class="module-link" [routerLink]="['/topics']" [queryParams]="{ create: 'true' }"
+            <a class="module-link" [routerLink]="['/media/topics']" [queryParams]="{ create: 'true' }"
               >Create a Topic to Research <app-svg-icon icon="right" /></a>
           </div>
           <span class="image-section">
@@ -108,7 +108,7 @@
   <div class="recent-podcasts-section">
     <div class="section-header">
       <h3 class="section-title">{{ isLoggedIn() ? 'Recent Podcasts' : 'Popular Podcasts' }}</h3>
-      <a class="view-all-link" [routerLink]="isLoggedIn() ? '/p' : '/podcasts'">View all</a>
+      <a class="view-all-link" [routerLink]="isLoggedIn() ? '/media/podcasts' : '/podcasts'">View all</a>
     </div>
     <div class="podcasts-grid">
       @if (loadingStats) {
@@ -130,7 +130,7 @@
       } @else if ((isLoggedIn() && authPodcasts.length > 0) || (!isLoggedIn() && publicPodcasts.length > 0)) {
         @if (isLoggedIn()) {
           <mat-card class="podcast-card" *ngFor="let podcast of authPodcasts">
-            <a [routerLink]="['/p', podcast.uuid]" class="podcast-link">
+            <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-link">
               <img [src]="podcast.thumbnailUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
             </a>
             <mat-card-content>
@@ -138,7 +138,7 @@
                 {{ podcast.enabled ? 'Enabled' : 'Disabled' }}
               </div>
               <h3>
-                <a [routerLink]="['/p', podcast.uuid]">{{ podcast.name }}</a>
+                <a [routerLink]="['/media/podcasts', podcast.uuid]">{{ podcast.name }}</a>
               </h3>
               @if (podcast.team && podcast.team.name) {
                 <p class="team">Team: {{ podcast.team.name }}</p>

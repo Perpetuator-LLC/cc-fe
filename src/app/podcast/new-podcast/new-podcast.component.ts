@@ -138,7 +138,7 @@ export class NewPodcastComponent implements OnInit, OnDestroy {
       this.podcastsService.createPodcast(name, teamUuid).subscribe({
         next: (created) => {
           this.messageService.success('Podcast created successfully');
-          this.router.navigate(['/p', created.podcast.uuid]);
+          this.router.navigate(['/media/podcasts', created.podcast.uuid]);
         },
         error: (err) => {
           this.messageService.error(`Failed to create podcast: ${err.message}`);

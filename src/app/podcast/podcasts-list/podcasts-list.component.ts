@@ -236,7 +236,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
   }
 
   viewPodcast(uuid: string) {
-    this.router.navigate(['/p', uuid]);
+    this.router.navigate(['/media/podcasts', uuid]);
   }
 
   protected formatTimeAgo(dateString: string | null): string {
