@@ -1,11 +1,10 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, ViewChild, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, RouterOutlet, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { ToolbarService } from '../toolbar.service';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 import { ThemeService, Theme } from '../theme.service';
 import { filter } from 'rxjs/operators';
@@ -29,20 +28,17 @@ import { Subscription } from 'rxjs';
 })
 export class PreLoginLayoutComponent implements OnInit, OnDestroy {
   protected currentTheme = this.themeService.theme;
-  @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
   isHomePage = false;
   private subscriptions = new Subscription();
 
   constructor(
     private themeService: ThemeService,
-    private toolbarService: ToolbarService,
     private router: Router,
   ) {
     this.checkHomePage();
   }
 
   ngOnInit() {
-    this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
     this.currentTheme = this.themeService.theme;
 
     this.subscriptions.add(
@@ -51,7 +47,6 @@ export class PreLoginLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.toolbarService.clearToolbarComponent();
     this.subscriptions.unsubscribe();
   }
 

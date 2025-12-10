@@ -134,18 +134,23 @@
 
     padding: 16px;
 
-    // When footer is present, content should fill remaining space
-    &.with-footer {
-      justify-content: flex-start;
-
-      > :first-child {
-        flex: 1;
-      }
-    }
-
-    &:not(.with-footer) {
+    // Content wrapper centers its content, footer at bottom
+    .content-wrapper {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
+
+      width: 100%;
     }
+
+    // Home page needs different layout - content flows naturally
+    &.is-home-page .content-wrapper {
+      justify-content: flex-start;
+    }
+
+    // Footer uses margin-top: auto to stick to bottom (defined in shared-footer)
   }
 
     .main-content {

@@ -6,7 +6,7 @@ import {
   importProvidersFrom,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, TitleStrategy } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
@@ -20,6 +20,7 @@ import { authInterceptor } from './auth/interceptors/auth.interceptor';
 import { errorTrackingInterceptor } from './core/interceptors/error-tracking.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { RouterErrorTracker } from './core/router-error-tracker';
+import { AppTitleStrategy } from './layout/app-title.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -53,6 +54,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: MatPaginatorIntl,
       useClass: CustomMatPaginatorIntl,
+    },
+    {
+      provide: TitleStrategy,
+      useClass: AppTitleStrategy,
     },
   ],
 };

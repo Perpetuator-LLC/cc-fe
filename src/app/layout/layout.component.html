@@ -228,7 +228,16 @@
             class="icon-clickable" />
           <img height="36" src="/Capital_Copilot_Logo_Slanted.svg" alt="logo" />
         </div>
-        <ng-container #toolbarContainer />
+        <div class="page-title-container">
+          @if (pageBreadcrumb()) {
+            <span class="breadcrumb-text">{{ pageBreadcrumb() }}</span>
+            <span class="separator">&gt;</span>
+          }
+          @if (pageIcon()) {
+            <mat-icon>{{ pageIcon() }}</mat-icon>
+          }
+          <span class="page-title-text">{{ pageTitle() }}</span>
+        </div>
         @if (this.authService.isLoggedIn()) {
         <span class="push-right">
           <button class="credit-btn" mat-button matTooltip="{{ this.userCredits | number: '1.0-0' }}"
