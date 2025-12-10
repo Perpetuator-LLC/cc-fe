@@ -58,7 +58,7 @@
         @if (topic) {
         <div class="status-item">
           <span class="status-label">Research Topic</span>
-          <a [routerLink]="['/topic', topic.uuid]" class="status-value" matTooltip="View the research topic that generated this episode">
+          <a [routerLink]="['/media/topics', topic.uuid]" class="status-value" matTooltip="View the research topic that generated this episode">
             {{ topic.title }}
           </a>
         </div>

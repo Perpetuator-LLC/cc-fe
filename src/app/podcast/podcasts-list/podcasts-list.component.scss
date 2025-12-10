@@ -112,7 +112,14 @@
   }
 }
 
-//.episode-actions {
+.episode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; // MD3 4px grid spacing between buttons
+  align-items: center;
+}
+
+//.episode-actions-old {
 //  display: flex;
 //  gap: 8px;
 //  align-items: center;
