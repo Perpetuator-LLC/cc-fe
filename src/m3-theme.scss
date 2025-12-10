@@ -1,6 +1,7 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 // Angular Material 20 Theme
-// Base colors defined at top - pre-generated HCT palettes still required for Material compatibility
+// Core palettes use pre-generated HCT values for Material compatibility
+// Extended palettes (success, warning, info) use generate-palette() from base colors
 
 @use 'sass:map';
 @use 'sass:color';
@@ -8,8 +9,8 @@
 
 // ============================================================================
 // Base Colors - Single source of truth for brand identity
-// To change theme colors, update these values then regenerate palettes with:
-//   ng generate @angular/material:m3-theme --primary=#NEW_HEX --secondary=#NEW_HEX
+// Core colors require HCT palettes (regenerate with ng generate @angular/material:m3-theme)
+// Extended colors (success, warning, info) auto-generate from base values
 // ============================================================================
 $base-primary: #3f97ff;    // Capital Blue
 $base-secondary: #f14a00;  // Vibrant Orange
@@ -20,8 +21,8 @@ $base-warning: #ed6c02;    // Warning Amber/Orange
 $base-info: #0288d1;       // Info Blue
 
 // ============================================================================
-// Palette Generation Function
-// For extended semantic colors (success, warning, info) not part of core theme
+// Palette Generation Function for Extended Colors
+// Uses color.change() - works for non-Material-validated palettes
 // ============================================================================
 @function generate-palette($base-color) {
   @return (
@@ -45,8 +46,9 @@ $base-info: #0288d1;       // Info Blue
 }
 
 // ============================================================================
-// Core Material Palettes (HCT-generated from base colors)
-// Generated using: ng generate @angular/material:m3-theme
+// Core Material Palettes (HCT-generated)
+// These use Material Design's HCT algorithm for accessibility compliance.
+// To regenerate: ng generate @angular/material:m3-theme --primary=#HEX --secondary=#HEX
 // ============================================================================
 $_palettes: (
   primary: (
@@ -76,7 +78,7 @@ $_palettes: (
     35: #4c535f, 40: #585f6b, 50: #717784, 60: #8b919e, 70: #a5abb9,
     80: #c0c6d5, 90: #dde2f1, 95: #ebf1ff, 98: #f9f9ff, 99: #fdfbff, 100: #ffffff,
   ),
-  // Extended palettes - generated from base colors
+  // Extended semantic palettes - generated from base colors (not validated by Material)
   error: generate-palette($base-error),
   success: generate-palette($base-success),
   warning: generate-palette($base-warning),
