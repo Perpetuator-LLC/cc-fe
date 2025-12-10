@@ -38,8 +38,6 @@ module.exports = tseslint.config(
           style: 'kebab-case',
         },
       ],
-      // MD3 Best Practices - Component Architecture
-      '@angular-eslint/prefer-standalone-component': 'error',
       '@angular-eslint/component-max-inline-declarations': [
         'error',
         {
