@@ -2,9 +2,9 @@
 <app-message />
 <app-cookie-banner />
 @if (!isLoginRoute) {
-  <app-layout>
+  <app-post-login-layout>
     <router-outlet />
-  </app-layout>
+  </app-post-login-layout>
 } @else {
   <app-pre-login-layout>
     <router-outlet />

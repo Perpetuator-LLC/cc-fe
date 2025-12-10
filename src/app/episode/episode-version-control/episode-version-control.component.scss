@@ -338,14 +338,12 @@
 
     .validated-icon {
       @include mixins.icon-size(14px);
-
-      color: var(--md-sys-color-success);
+      @include mixins.validation-icon-success();
     }
 
     .unvalidated-icon {
       @include mixins.icon-size(14px);
-
-      color: var(--md-sys-color-warning);
+      @include mixins.validation-icon-warning();
     }
 
     .audio-icon {
