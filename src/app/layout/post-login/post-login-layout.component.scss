@@ -394,10 +394,11 @@ mat-nav-list {
 .route-link {
   display: flex;
   flex-direction: column;
+  gap: 4px; // MD3 4px grid spacing between icon and text
   align-items: center;
+
   width: auto;
-  /* Adjust width to fit content */
-  //padding: 0 16px !important;
+  padding: 8px 0; // Vertical padding for breathing room
 
   .mat-icon {
     width: 24px;

@@ -561,24 +561,26 @@
 @mixin episode-tag {
   @include tag-button-base();
 
-  border: 1px solid var(--md-sys-color-tertiary-container);
+  // Outlined style for dark mode visibility
+  border: 1px solid var(--md-sys-color-tertiary);
   color: var(--md-sys-color-tertiary);
-  background: var(--md-sys-color-tertiary-container);
+  background: transparent;
 
   &:hover {
-    background: var(--md-sys-color-tertiary-container);
+    background: color-mix(in srgb, var(--md-sys-color-tertiary) 10%, transparent);
   }
 }
 
 @mixin topic-tag {
   @include tag-button-base();
 
-  border: 1px solid var(--md-extended-color-success-color-container);
+  // Outlined style for dark mode visibility
+  border: 1px solid var(--md-extended-color-success-color);
   color: var(--md-extended-color-success-color);
-  background: var(--md-extended-color-success-color-container);
+  background: transparent;
 
   &:hover {
-    background: var(--md-extended-color-success-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-success-color) 10%, transparent);
   }
 }
 
