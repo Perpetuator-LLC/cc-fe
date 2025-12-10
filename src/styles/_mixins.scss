@@ -283,7 +283,7 @@
 // Glass Morphism / Backdrop Blur Effects
 // ============================================================================
 @mixin glass-card {
-  background: rgba(var(--md-sys-color-surface-container-rgb), 0.7);
+  background: rgba(var(--md-sys-color-surface-container-rgb), 0.99);
   backdrop-filter: blur(12px);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
