@@ -340,6 +340,11 @@ mat-nav-list {
 
   text-decoration: none;
 
+  // Hide the "Home" text - just show the logo icon
+  .route-title {
+    display: none;
+  }
+
   &.active-link {
     @include mixins.nav-item-active();
   }
@@ -411,7 +416,8 @@ mat-nav-list {
 }
 
 .active-link {
-  background-color: color-mix(in srgb, var(--md-sys-color-surface) 60%, transparent);
+  // Use mixin for consistent active state styling
+  @include mixins.nav-item-active();
 }
 
 .footer-links {

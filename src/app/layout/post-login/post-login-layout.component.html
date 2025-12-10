@@ -249,7 +249,6 @@
           <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
             <mat-icon class="profile-icon">account_circle</mat-icon>
             {{ this.userService.userDetails()?.username }}
-            <span class="arrow-left">></span>
           </button>
           <mat-menu #profileMenu="matMenu" class="profile-menu">
             <div class="profile-header">
