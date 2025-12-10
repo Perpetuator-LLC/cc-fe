@@ -46,9 +46,7 @@ export class ForgotPasswordComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.route.queryParams.subscribe((params) => {
       const email = params['email'];
       if (email) {

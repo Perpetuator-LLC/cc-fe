@@ -301,13 +301,13 @@
       </div>
     }
     <app-job-status-bar />
-    <div class="content-area">
+    <div class="content-area with-footer">
       <div class="content-wrapper">
         <div class="content">
           <ng-content />
         </div>
+        <app-shared-footer [compactMode]="!isHomePage" />
       </div>
     </div>
-    <app-shared-footer />
   </div>
 </div>

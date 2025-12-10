@@ -447,12 +447,25 @@ mat-nav-list {
   overflow: auto;
   flex: 1;
   padding: 0;
+
+  // When footer is present, ensure wrapper fills the viewport
+  &.with-footer {
+    .content-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 
 .content-wrapper {
   width: 100%;
   min-height: 100%;
   background-color: var(--md-sys-color-surface-container);
+
+  // When used with footer, content fills remaining space
+  .content {
+    flex: 1;
+  }
 }
 
 .before-login-layout {

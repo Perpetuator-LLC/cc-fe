@@ -89,9 +89,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
   }
 
   onSubmit() {

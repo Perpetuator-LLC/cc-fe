@@ -122,9 +122,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   // imageUrl: string | null = null;
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     this.loading = true;
     this.refreshTeamData();

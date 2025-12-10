@@ -57,9 +57,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     // Check for query parameter to auto-open create dialog
     this.subscriptions.add(

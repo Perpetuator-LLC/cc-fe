@@ -1,0 +1,123 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.button-showcase {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 24px;
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .description {
+    margin: 0 0 24px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.showcase-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  min-width: max-content;
+  margin-bottom: 32px;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .header-cell {
+    font-weight: 600;
+  }
+
+  .column-header {
+    flex: 0 0 120px;
+
+    padding: 8px;
+    border-radius: 8px;
+
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    text-align: center;
+
+    background: var(--md-sys-color-surface-container);
+  }
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.row-label {
+  flex: 0 0 180px;
+
+  padding: 8px;
+  border-radius: 4px;
+
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.button-cell {
+  display: flex;
+  flex: 0 0 120px;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 64px;
+  padding: 8px;
+}
+
+.debug-section,
+.notes-section {
+  margin-top: 24px;
+  background: var(--md-sys-color-surface-container);
+
+  pre {
+    overflow-x: auto;
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-container-highest);
+
+    code {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 24px;
+
+    li {
+      margin-bottom: 8px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      strong {
+        color: var(--md-sys-color-on-surface);
+      }
+    }
+  }
+}
+
