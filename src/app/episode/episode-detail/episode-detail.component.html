@@ -51,7 +51,7 @@
       <div class="status-summary">
         <div class="status-item">
           <span class="status-label">Podcast</span>
-          <a [routerLink]="['/p', episodeForm.get('podcast.uuid')?.value]" class="status-value">
+          <a [routerLink]="['/media/podcasts', episodeForm.get('podcast.uuid')?.value]" class="status-value">
             {{ episodeForm.get('podcast.name')?.value }}
           </a>
         </div>

@@ -102,7 +102,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/topics']);
+    this.router.navigate(['/media/topics']);
   }
 
   generateResearch(): void {

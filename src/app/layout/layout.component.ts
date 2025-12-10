@@ -60,7 +60,7 @@ import { LoadingService } from './loading.service';
 export class LayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
   protected loading = this.loadingService.loading;
-  rootRoutes = routes.filter((r) => r.path);
+  rootRoutes = routes.filter((r) => r.path && r.data?.['icon'] && !r.redirectTo);
   private breakpointObserver = inject(BreakpointObserver);
   protected currentTheme = this.themeService.theme;
   protected isLoggedIn = this.authService.isLoggedIn;
@@ -128,15 +128,7 @@ export class LayoutComponent implements OnInit {
     this.router.events.subscribe(() => {
       const url = this.router.url;
       this.isHomePage = url === '/' || url === '/home';
-      this.showSecondSidebar =
-        url.startsWith('/p/') ||
-        url === '/p' ||
-        url.startsWith('/news') ||
-        url.startsWith('/e') ||
-        url.startsWith('/topics') ||
-        url.startsWith('/topic/') ||
-        url.startsWith('/jobs') ||
-        url.startsWith('/scheduling');
+      this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/jobs') || url.startsWith('/scheduling');
     });
   }
 

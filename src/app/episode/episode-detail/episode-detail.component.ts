@@ -476,7 +476,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           this.episodeService.deleteEpisode(this.episodeUuid).subscribe({
             next: (response) => {
               this.messageService.success(response.message);
-              this.router.navigate(['/e']); // Navigate back to episodes list
+              this.router.navigate(['/media/episodes']); // Navigate back to episodes list
             },
             error: (err) => {
               this.messageService.error(`Failed to delete episode: ${err.message}`);

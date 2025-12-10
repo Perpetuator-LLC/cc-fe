@@ -50,7 +50,7 @@
                               <button
                                 mat-flat-button
                                 class="resource-tag podcast-tag"
-                                [routerLink]="['/p', getPodcastUuid(job)]"
+                                [routerLink]="['/media/podcasts', getPodcastUuid(job)]"
                                 matTooltip="Podcast"
                                 matTooltipPosition="above">
                                 <mat-icon>mic</mat-icon>
@@ -63,7 +63,7 @@
                               <button
                                 mat-flat-button
                                 class="resource-tag episode-tag"
-                                [routerLink]="['/e', getEpisodeUuid(job)]"
+                                [routerLink]="['/media/episodes', getEpisodeUuid(job)]"
                                 matTooltip="Episode"
                                 matTooltipPosition="above">
                                 <mat-icon>podcasts</mat-icon>

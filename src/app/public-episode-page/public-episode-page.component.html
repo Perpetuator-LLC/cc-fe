@@ -55,7 +55,7 @@
               [description]="episodeData.description"
             />
             @if (isAuthenticated) {
-              <button mat-raised-button color="primary" [routerLink]="['/e', episodeId]">
+              <button mat-raised-button color="primary" [routerLink]="['/media/episodes', episodeId]">
                 <mat-icon>edit</mat-icon>
                 Manage Episode
               </button>
