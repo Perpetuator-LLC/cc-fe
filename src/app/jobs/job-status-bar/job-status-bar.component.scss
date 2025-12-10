@@ -138,6 +138,54 @@
 
   // Job card status colors are now in global styles.scss
   // Classes: .job-card.PENDING, .job-card.RUNNING, .job-card.FAILED, .job-card.COMPLETED
+  // Add border-left and subtitle colors based on status
+  .job-card {
+    &.PENDING,
+    &.pending {
+      border-left: 4px solid var(--md-extended-color-warning-color);
+
+      .mat-mdc-card-subtitle {
+        color: var(--md-extended-color-warning-color);
+      }
+    }
+
+    &.RUNNING,
+    &.running {
+      border-left: 4px solid var(--md-extended-color-info-color);
+
+      .mat-mdc-card-subtitle {
+        color: var(--md-extended-color-info-color);
+      }
+    }
+
+    &.FAILED,
+    &.failed {
+      border-left: 4px solid var(--md-sys-color-error);
+
+      .mat-mdc-card-subtitle {
+        color: var(--md-sys-color-error);
+      }
+    }
+
+    &.COMPLETED,
+    &.completed {
+      border-left: 4px solid var(--md-extended-color-success-color);
+
+      .mat-mdc-card-subtitle {
+        color: var(--md-extended-color-success-color);
+      }
+    }
+
+    button {
+      margin-right: 1em;
+    }
+
+    p {
+      overflow-wrap: break-word;
+      white-space: normal;
+    }
+  }
+
   .pending,
   .running,
   .failed,
@@ -308,13 +356,3 @@
   }
 }
 
-.jobs-container .job-card {
-  button {
-    margin-right: 1em;
-  }
-
-  p {
-    overflow-wrap: break-word;
-    white-space: normal;
-  }
-}
