@@ -10,6 +10,12 @@ export const routes: Routes = [
     redirectTo: 'home',
   },
   {
+    path: 'dev/buttons',
+    loadComponent: () =>
+      import('./dev/button-showcase/button-showcase.component').then((c) => c.ButtonShowcaseComponent),
+    title: 'Button Showcase',
+  },
+  {
     path: 'home',
     loadComponent: () => import('./home/home.component').then((c) => c.HomeComponent),
     title: 'Home',

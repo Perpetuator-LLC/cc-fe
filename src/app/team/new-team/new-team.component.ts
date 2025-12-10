@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { TeamsService } from '../teams.service';
 import { ToolbarService } from '../../toolbar.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
@@ -15,7 +14,7 @@ import { MatCard } from '@angular/material/card';
 @Component({
   selector: 'app-new-team',
   standalone: true,
-  imports: [MatProgressSpinner, ReactiveFormsModule, MatFormField, MatInput, MatButton, MatLabel, MatCard, MatError],
+  imports: [ReactiveFormsModule, MatFormField, MatInput, MatButton, MatLabel, MatCard, MatError],
   templateUrl: './new-team.component.html',
   styleUrls: ['./new-team.component.scss'],
 })
@@ -64,9 +63,7 @@ export class NewTeamComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
   }
 
   // get members(): FormArray {

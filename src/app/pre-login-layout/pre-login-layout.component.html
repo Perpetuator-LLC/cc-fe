@@ -55,12 +55,12 @@
     <div class="header-actions">
       <ng-container #toolbarContainer />
 
-      <a mat-button [routerLink]="['/register']" color="primary" class="auth-link register-link">
+      <a mat-flat-button [routerLink]="['/register']" class="auth-link register-link btn-primary">
         <mat-icon>person_add</mat-icon>
         <span>Register</span>
       </a>
 
-      <a mat-button [routerLink]="['/login']" class="auth-link login-link">
+      <a mat-stroked-button [routerLink]="['/login']" class="auth-link login-link btn-secondary-outlined">
         <mat-icon>login</mat-icon>
         <span>Sign In</span>
       </a>
@@ -76,11 +76,10 @@
     </div>
   </div>
 
-  <div class="content-area">
+  <div class="content-area with-footer">
     <router-outlet />
+    <app-shared-footer [compactMode]="!isHomePage" />
   </div>
-
-  <app-shared-footer />
 </div>
 
 <!--<div class="layout-container">-->

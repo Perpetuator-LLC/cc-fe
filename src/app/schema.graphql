@@ -4,6 +4,32 @@ schema {
 }
 
 type ApiQuery {
+  traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
+  trace(id: UUID!): TraceType
+
+  """Get all registered permissions in the system"""
+  allPermissions: [PermissionDefinitionType]
+
+  """Get permissions of a specific type"""
+  permissionsByType(permissionType: PermissionTypeEnum!): [PermissionDefinitionType]
+
+  """Get all permissions for the current user"""
+  myPermissions: UserPermissionsType
+
+  """Check if current user has a specific Django permission"""
+  hasPermission(permission: String!): Boolean
+
+  """Get your role in a specific team"""
+  myTeamRole(teamUuid: UUID!): TeamRoleEnum
+
+  """Get field-level edit permissions for episodes in a podcast"""
+  episodeFieldPermissions(podcastUuid: UUID!): EpisodeFieldPermissionsType
+
+  """Get field-level edit permissions for a podcast"""
+  podcastFieldPermissions(podcastUuid: UUID!): PodcastFieldPermissionsType
+
+  """Get field-level edit permissions for a team"""
+  teamFieldPermissions(teamUuid: UUID!): TeamFieldPermissionsType
   activePolicies: [VersionedPolicyType]
   policyByType(policyType: String!): VersionedPolicyType
   policyByVersion(policyType: String!, version: String!): VersionedPolicyType
@@ -298,6 +324,193 @@ type ApiQuery {
   ): Node
 }
 
+type TraceType {
+  id: UUID!
+  createdAt: DateTime!
+  kind: TracesTraceKindChoices!
+  severity: TracesTraceSeverityChoices!
+  functionName: String!
+  moduleName: String!
+  message: String!
+  exceptionType: String!
+  exceptionMessage: String!
+  aiModel: String!
+
+  """First 500 chars of prompt for quick reference"""
+  aiPromptPreview: String!
+
+  """First 500 chars of response for quick reference"""
+  aiResponsePreview: String!
+  aiTokenCount: Int
+  aiCost: Decimal
+
+  """
+  Flexible key-value pairs for filtering (e.g., {'job_id': 'xxx', 'task_name': 'yyy'})
+  """
+  tags: JSONString!
+
+  """Request/correlation ID"""
+  requestId: String!
+
+  """Related Job UUID"""
+  jobId: UUID
+
+  """Celery task ID"""
+  taskId: String
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""An enumeration."""
+enum TracesTraceKindChoices {
+  """Error"""
+  ERROR
+
+  """AI Call"""
+  AI_CALL
+
+  """Auth Failure"""
+  AUTH_FAILURE
+
+  """Auth Success"""
+  AUTH_SUCCESS
+
+  """Token Rotation"""
+  TOKEN_ROTATION
+
+  """Validation Error"""
+  VALIDATION_ERROR
+
+  """Task Failure"""
+  TASK_FAILURE
+
+  """API Error"""
+  API_ERROR
+
+  """Frontend Error"""
+  FRONTEND_ERROR
+}
+
+"""An enumeration."""
+enum TracesTraceSeverityChoices {
+  """Debug"""
+  DEBUG
+
+  """Info"""
+  INFO
+
+  """Warning"""
+  WARNING
+
+  """Error"""
+  ERROR
+
+  """Critical"""
+  CRITICAL
+}
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+"""A permission definition"""
+type PermissionDefinitionType {
+  """Permission code (e.g., 'api.add_voice')"""
+  code: String!
+
+  """Human-readable name"""
+  name: String!
+
+  """Category of permission"""
+  permissionType: PermissionTypeEnum!
+
+  """What this permission allows"""
+  description: String!
+
+  """Operations that require this permission"""
+  requiredFor: [String]
+}
+
+"""Permission category types"""
+enum PermissionTypeEnum {
+  DJANGO_MODEL
+  TEAM_ROLE
+  API_SCOPE
+  CUSTOM
+}
+
+"""All permissions a user has"""
+type UserPermissionsType {
+  """Django model permissions"""
+  djangoPermissions: [String]
+
+  """Roles in teams"""
+  teamRoles: [TeamRoleInfo]
+
+  """Whether user is staff"""
+  isStaff: Boolean
+
+  """Whether user is superuser"""
+  isSuperuser: Boolean
+}
+
+"""User's role in a specific team"""
+type TeamRoleInfo {
+  teamUuid: UUID!
+  teamName: String!
+  role: TeamRoleEnum!
+}
+
+"""Team membership roles"""
+enum TeamRoleEnum {
+  READER
+  EDITOR
+  PUBLISHER
+  OWNER
+}
+
+"""Field-level permissions for an episode"""
+type EpisodeFieldPermissionsType {
+  podcastUuid: UUID!
+  permissions: [FieldPermissionsType]!
+}
+
+"""Field-level edit permissions"""
+type FieldPermissionsType {
+  fieldName: String!
+  canEdit: Boolean!
+}
+
+"""Field-level permissions for a podcast"""
+type PodcastFieldPermissionsType {
+  podcastUuid: UUID!
+  permissions: [FieldPermissionsType]!
+}
+
+"""Field-level permissions for a team"""
+type TeamFieldPermissionsType {
+  teamUuid: UUID!
+  permissions: [FieldPermissionsType]!
+}
+
 """GraphQL type for VersionedPolicy model."""
 type VersionedPolicyType {
   id: UUID!
@@ -321,12 +534,6 @@ type VersionedPolicyType {
   effectiveDate: DateTime!
   createdAt: DateTime!
 }
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
 
 """An enumeration."""
 enum CommunicationsVersionedPolicyPolicyTypeChoices {
@@ -354,13 +561,6 @@ enum CommunicationsVersionedPolicyContentTypeChoices {
   """HTML"""
   HTML
 }
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 """GraphQL type for EmailPreference model."""
 type EmailPreferenceType {
@@ -1349,9 +1549,6 @@ type IncomeStatementType {
   epsReported: Decimal
 }
 
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
-
 type CashFlowType {
   id: ID!
   company: CompanyType!
@@ -2026,6 +2223,28 @@ type UserType {
 }
 
 type ApiMutation {
+  """
+  Non-authenticated mutation for recording traces from frontend or backend.
+  Use this to capture errors, analytics, and telemetry from any source.
+  """
+  recordTrace(
+    exceptionMessage: String
+    exceptionType: String
+    functionName: String
+    inputs: JSONString
+    kind: String!
+    message: String
+    moduleName: String
+    outputs: JSONString
+    requestId: String
+    severity: String
+
+    """Source of trace: 'frontend' or 'backend'"""
+    source: String
+    stackTrace: String
+    tags: JSONString
+  ): RecordTraceMutation
+
   """Update user's email preferences."""
   updateEmailPreferences(lowBalanceAlerts: Boolean, marketingEmails: Boolean, newsletter: Boolean, policyUpdates: Boolean): UpdateEmailPreferences
 
@@ -2588,6 +2807,16 @@ type ApiMutation {
   PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
   """
   refreshToken(refresh: String!): RefreshAccessToken
+}
+
+"""
+Non-authenticated mutation for recording traces from frontend or backend.
+Use this to capture errors, analytics, and telemetry from any source.
+"""
+type RecordTraceMutation {
+  success: Boolean
+  message: String
+  traceId: UUID
 }
 
 """Update user's email preferences."""

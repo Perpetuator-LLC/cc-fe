@@ -222,9 +222,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   isDraggingImage = false;
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     // Initialize tab from query parameter
     this.subscriptions.add(

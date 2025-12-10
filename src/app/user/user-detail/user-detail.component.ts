@@ -23,7 +23,6 @@ import { DeleteAccountDialogComponent } from '../delete-account-dialog/delete-ac
 import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-personal-dialog.component';
 import { LoadingService } from '../../loading.service';
 import { AffiliateService, AffiliateRelationship } from '../../affiliate/affiliate.service';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
@@ -46,7 +45,6 @@ import { MatIcon } from '@angular/material/icon';
     MatCardTitle,
     FormsModule,
     MatIcon,
-    MatTooltip,
     RouterLink,
   ],
   templateUrl: './user-detail.component.html',
@@ -126,9 +124,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.loadUserDetails();
     this.loadAffiliateRelationship();
     this.loadNotificationPreferences();

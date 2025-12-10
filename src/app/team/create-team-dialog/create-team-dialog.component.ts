@@ -4,28 +4,15 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { TeamsService } from '../teams.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MatCard } from '@angular/material/card';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-create-team-dialog',
   standalone: true,
-  imports: [
-    MatProgressSpinner,
-    ReactiveFormsModule,
-    MatFormField,
-    MatInput,
-    MatButton,
-    MatLabel,
-
-    MatCard,
-    MatError,
-    MatDialogModule,
-  ],
+  imports: [ReactiveFormsModule, MatFormField, MatInput, MatButton, MatLabel, MatError, MatDialogModule],
   templateUrl: './create-team-dialog.component.html',
   styleUrls: ['./create-team-dialog.component.scss'],
 })

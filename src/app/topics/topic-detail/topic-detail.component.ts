@@ -59,9 +59,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     this.topicUuid = this.route.snapshot.paramMap.get('uuid');
     if (this.topicUuid) {

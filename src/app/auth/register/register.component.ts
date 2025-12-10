@@ -62,9 +62,7 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
   }
 
   ngOnInit(): void {

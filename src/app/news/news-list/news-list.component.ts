@@ -134,9 +134,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
 
     // Load podcast history first
