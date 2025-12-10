@@ -310,8 +310,8 @@
       </div>
     }
     <app-job-status-bar />
-    <div class="content-area with-footer">
-      <div class="content-wrapper">
+    <div class="content-area with-footer" [class.is-home-page]="isHomePage">
+      <div class="content-wrapper" [class.home-page]="isHomePage">
         <div class="content">
           <ng-content />
         </div>
