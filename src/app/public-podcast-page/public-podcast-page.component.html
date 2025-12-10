@@ -91,7 +91,7 @@
           [description]="podcastData.description"
         />
         @if (isAuthenticated) {
-          <button mat-raised-button color="primary" [routerLink]="['/p', podcastId]">
+          <button mat-raised-button color="primary" [routerLink]="['/media/podcasts', podcastId]">
             <mat-icon>dashboard</mat-icon>
             Manage Podcast
           </button>

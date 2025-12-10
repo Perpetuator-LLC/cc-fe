@@ -403,6 +403,44 @@
 }
 
 // ============================================================================
+// Validation Icon Styling
+// ============================================================================
+// Use these mixins to style validation status icons consistently.
+// Success: all validations passed
+// Warning: some validations failed
+// ============================================================================
+
+/// Validation icon - success state (all passed)
+@mixin validation-icon-success {
+  color: var(--md-extended-color-success-color);
+
+  mat-icon,
+  .mat-icon {
+    color: var(--md-extended-color-success-color);
+  }
+}
+
+/// Validation icon - warning state (some failed)
+@mixin validation-icon-warning {
+  color: var(--md-extended-color-warning-color);
+
+  mat-icon,
+  .mat-icon {
+    color: var(--md-extended-color-warning-color);
+  }
+}
+
+/// Validation icon - error state (critical failures)
+@mixin validation-icon-error {
+  color: var(--md-sys-color-error);
+
+  mat-icon,
+  .mat-icon {
+    color: var(--md-sys-color-error);
+  }
+}
+
+// ============================================================================
 // Section Header Pattern
 // ============================================================================
 @mixin section-header {
@@ -448,8 +486,11 @@
 // ============================================================================
 // Scrollbar Styling
 // ============================================================================
+// Use this mixin for consistent scrollbar styling across the app.
+// The thumb color uses on-surface with transparency for good contrast.
+// ============================================================================
 @mixin custom-scrollbar {
-  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+  scrollbar-color: color-mix(in srgb, var(--md-sys-color-on-surface) 40%, transparent) transparent;
   scrollbar-width: thin;
 
   &::-webkit-scrollbar {
@@ -463,10 +504,10 @@
 
   &::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background: var(--md-sys-color-outline-variant);
+    background: color-mix(in srgb, var(--md-sys-color-on-surface) 40%, transparent);
 
     &:hover {
-      background: var(--md-sys-color-outline);
+      background: color-mix(in srgb, var(--md-sys-color-on-surface) 60%, transparent);
     }
   }
 }
@@ -969,3 +1010,44 @@ $button-border-radius: 8px;
     opacity: 0.38;
   }
 }
+
+// ============================================================================
+// NAVIGATION ITEM ACTIVE STATE
+// ============================================================================
+// Provides consistent active state styling for sidebar navigation items.
+// Uses a left border indicator with primary color (matching home page style).
+// Removes Material's default rounded selection indicator.
+//
+// Usage in SCSS:
+//   .mat-link.active-link { @include nav-item-active; }
+//   .mdc-list-item--activated { @include nav-item-active; }
+// ============================================================================
+
+/// Active navigation item - left border with primary color
+@mixin nav-item-active {
+  position: relative;
+
+  border-left: 3px solid var(--md-sys-color-primary);
+  border-radius: 0;
+
+  // Use primary color with transparency for blue background
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
+
+  // Remove Material's default rounded state layer
+  &::before {
+    border-radius: 0;
+  }
+
+  // Override MDC ripple/state layer to match
+  .mat-mdc-focus-indicator,
+  .mdc-list-item__ripple {
+    border-radius: 0;
+  }
+}
+
+/// Hover state for navigation items (complementary to active)
+@mixin nav-item-hover {
+  border-radius: 0;
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+

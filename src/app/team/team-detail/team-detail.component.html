@@ -147,7 +147,7 @@
                     <img src="/image.png" alt="img" />
                   }
                   <div class="name">
-                    <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
+                   <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                       {{ podcast.name }}
                     </a>
                     <span>{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span>
@@ -188,11 +188,11 @@
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
-                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]">
+                  <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]">
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
-                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+                  <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
                     <app-svg-icon icon="delete" />
                     <span>Delete</span>
                   </button>

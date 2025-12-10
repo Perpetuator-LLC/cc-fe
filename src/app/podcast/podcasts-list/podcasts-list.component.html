@@ -99,7 +99,7 @@
             <img src="/image.png" alt="img" />
             }
             <div class="name">
-              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
+              <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                 {{ podcast.name }}
               </a>
               <span>{{ formatViewCount(podcast.viewCount) }}</span>
@@ -203,7 +203,7 @@
               <mat-icon>add_circle_outline</mat-icon>
               <span>Create Episode</span>
             </button>
-            <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+            <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
               <mat-icon>delete</mat-icon>
               <span>Delete</span>
             </button>
@@ -237,7 +237,7 @@
       <mat-card class="podcast-card">
         <mat-card-header>
           <div class="grid-header">
-            <a [routerLink]="['/p', podcast.uuid]">
+            <a [routerLink]="['/media/podcasts', podcast.uuid]">
               @if (podcast.thumbnailUrl || podcast.imageUrl) {
               <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="Podcast Image" class="img" loading="lazy" />
               } @else {
@@ -251,7 +251,7 @@
             </div>
 
             <div class="grid-header-name">
-              <a [routerLink]="['/p', podcast.uuid]" class="podcast-name-link">
+              <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                 {{ podcast.name }}
               </a>
               <div>
@@ -268,7 +268,7 @@
                     <mat-icon>add_circle_outline</mat-icon>
                     <span>Create Episode</span>
                   </button>
-                  <button mat-menu-item [routerLink]="['/p', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+                  <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
                     <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>

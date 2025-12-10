@@ -1,4 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
 mat-sidenav-content mat-toolbar {
   align-items: start;
   height: auto;
@@ -339,8 +341,7 @@ mat-nav-list {
   text-decoration: none;
 
   &.active-link {
-    border-left: 3px solid var(--md-sys-color-primary);
-    background-color: var(--md-sys-color-surface-container-high);
+    @include mixins.nav-item-active();
   }
 }
 
@@ -351,8 +352,7 @@ mat-nav-list {
 }
 
 .mat-link.mdc-list-item--activated {
-  border-left: 3px solid var(--md-sys-color-primary);
-  background-color: var(--md-sys-color-surface-container-high);
+  @include mixins.nav-item-active();
 }
 
 .theme-toggle-card {
@@ -813,12 +813,21 @@ mat-nav-list {
   font-size: 12px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
+  text-decoration: none;
 
   background: var(--md-sys-color-surface-container-high);
 
-  app-svg-icon {
-    display: flex;
+  // Override Material button inner layout to keep icon and text inline
+  .mdc-button__label {
+    display: inline-flex;
+    gap: 4px;
     align-items: center;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
   }
 }
 
@@ -831,6 +840,7 @@ mat-nav-list {
 
   background: transparent;
 }
+
 
 
 // Flattened selectors to reduce specificity

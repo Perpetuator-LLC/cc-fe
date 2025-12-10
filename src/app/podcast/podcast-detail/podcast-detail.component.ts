@@ -633,7 +633,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           this.podcastForm.patchValue(data.podcast);
           this.podcastForm.markAsPristine();
           if (!uuid) {
-            this.router.navigate(['/p']);
+            this.router.navigate(['/media/podcasts']);
           }
         },
         error: (err) => {
@@ -673,7 +673,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.podcastsService.deletePodcast(this.podcastUuid, result).subscribe({
           next: () => {
             this.messageService.success('Podcast deleted successfully');
-            this.router.navigate(['/p']);
+            this.router.navigate(['/media/podcasts']);
           },
           error: (error) => {
             this.messageService.error(`Failed to delete podcast: ${error.message}`);
