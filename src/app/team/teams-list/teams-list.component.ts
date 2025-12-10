@@ -91,9 +91,7 @@ export class TeamsListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.loadTeams();
   }
 

@@ -34,9 +34,7 @@ export class TermsAndConditionsComponent implements OnInit, AfterViewInit, OnDes
   }
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
   }
 
   ngOnDestroy(): void {

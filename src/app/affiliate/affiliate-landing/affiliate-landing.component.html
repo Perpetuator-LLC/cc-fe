@@ -11,8 +11,8 @@
         <h2>{{ error }}</h2>
         <p>This affiliate link may be invalid or expired.</p>
         <div class="actions">
-          <button mat-raised-button color="primary" routerLink="/register">Sign Up</button>
-          <button mat-button routerLink="/login">Sign In</button>
+          <button mat-flat-button class="btn-secondary" routerLink="/register">Sign Up</button>
+          <button mat-stroked-button class="btn-secondary-outlined" routerLink="/login">Sign In</button>
         </div>
       </mat-card-content>
     </mat-card>
@@ -30,15 +30,15 @@
 
         <div class="actions">
           @if (!isAuthenticated) {
-            <button mat-raised-button color="primary" (click)="onSignUp()">Sign Up</button>
-            <button mat-raised-button (click)="onSignIn()">Sign In</button>
+            <button mat-flat-button class="btn-secondary" (click)="onSignUp()">Sign Up</button>
+            <button mat-stroked-button class="btn-secondary-outlined" (click)="onSignIn()">Sign In</button>
           } @else if (hasExistingAffiliate) {
             <div class="existing-affiliate-message">
               <p>You are part of <strong>{{ existingAffiliateUsername }}</strong>'s network and cannot join this one.</p>
-              <button mat-button routerLink="/profile">Go to Profile</button>
+              <button mat-button class="btn-primary-text" routerLink="/profile">Go to Profile</button>
             </div>
           } @else {
-            <button mat-raised-button color="primary" (click)="onJoinNetwork()">Join Network</button>
+            <button mat-flat-button class="btn-secondary" (click)="onJoinNetwork()">Join Network</button>
           }
         </div>
       </mat-card-content>

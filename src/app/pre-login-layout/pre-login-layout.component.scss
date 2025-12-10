@@ -127,12 +127,25 @@
   }
 
   .content-area {
+    overflow: auto;
     display: flex;
     flex: 1;
     flex-direction: column;
-    justify-content: center;
 
     padding: 16px;
+
+    // When footer is present, content should fill remaining space
+    &.with-footer {
+      justify-content: flex-start;
+
+      > :first-child {
+        flex: 1;
+      }
+    }
+
+    &:not(.with-footer) {
+      justify-content: center;
+    }
   }
 
     .main-content {

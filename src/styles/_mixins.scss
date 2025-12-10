@@ -651,57 +651,321 @@
 }
 
 // ============================================================================
-// Category/Tag Filter Button (For public-categories, browse-podcasts)
+// MD3 BUTTON STYLING SYSTEM
 // ============================================================================
-@mixin category-filter-button {
-  padding: 8px 16px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
+// Provides consistent button styling across the entire application.
+// Uses MD3 design tokens and supports primary (blue), secondary (orange CTA),
+// and tertiary (purple AI) color roles with multiple variants.
+//
+// IMPORTANT: Must use MDC custom properties to override Material button styles.
+// Regular CSS properties like `background-color` are overridden by Material.
+//
+// Variants:
+// - Filled (default): Solid background, high emphasis
+// - Outlined: Border only, medium emphasis (like Sign In button)
+// - Text: No background/border, low emphasis
+// - Tonal: Container color background, medium emphasis
+//
+// Usage in HTML:
+//   <button mat-flat-button class="btn-secondary">CTA Button</button>
+//   <button mat-stroked-button class="btn-secondary-outlined">Sign In</button>
+//   <button mat-flat-button class="btn-tertiary">AI Feature</button>
+// ============================================================================
 
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--md-sys-color-on-surface);
-  white-space: nowrap;
+// Base button radius - smaller rounded corners for all buttons
+$button-border-radius: 8px;
 
-  background: var(--md-sys-color-surface-container);
-  cursor: pointer;
+// ----------------------------------------------------------------------------
+// PRIMARY (Blue) - Common actions, default brand color
+// ----------------------------------------------------------------------------
 
-  transition: all 0.2s ease;
+/// Primary filled button - solid blue background
+@mixin btn-primary {
+  // MDC custom properties for Material buttons
+  --mdc-filled-button-container-color: var(--md-sys-color-primary);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary);
+  --mdc-protected-button-container-color: var(--md-sys-color-primary);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-primary);
 
-  &:hover {
-    border-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-primary);
-    background: var(--md-sys-color-primary-container);
+  // Fallback for non-MDC contexts
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-primary);
+  background-color: var(--md-sys-color-primary);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 90%, white);
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 90%, white);
   }
 
-  &.active {
-    border-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    background: var(--md-sys-color-primary);
+  &:disabled {
+    opacity: 0.38;
   }
 }
 
-// ============================================================================
-// Article/News Card Pattern (For news component)
-// ============================================================================
-@mixin article-meta {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+/// Primary outlined button - blue border, transparent background
+@mixin btn-primary-outlined {
+  --mdc-outlined-button-outline-color: var(--md-sys-color-primary);
+  --mdc-outlined-button-label-text-color: var(--md-sys-color-primary);
 
-  margin-top: 12px;
+  border: 1px solid var(--md-sys-color-primary);
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-primary);
+  background-color: transparent;
 
-  font-size: 13px;
-  color: var(--md-sys-color-on-surface-variant);
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  }
 
-  .author,
-  .date {
-    display: flex;
-    gap: 4px;
-    align-items: center;
+  &:disabled {
+    opacity: 0.38;
+  }
+}
 
-    mat-icon {
-      @include icon-size(16px);
-    }
+/// Primary text button - no background/border
+@mixin btn-primary-text {
+  --mdc-text-button-label-text-color: var(--md-sys-color-primary);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-primary);
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Primary tonal button - light primary container background
+@mixin btn-primary-tonal {
+  --mdc-filled-button-container-color: var(--md-sys-color-primary-container);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary-container);
+  --mdc-protected-button-container-color: var(--md-sys-color-primary-container);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-primary-container);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-primary-container);
+  background-color: var(--md-sys-color-primary-container);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-primary-container) 90%, var(--md-sys-color-primary));
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-primary-container) 90%, var(--md-sys-color-primary));
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// SECONDARY (Orange) - CTA, high-emphasis actions
+// ----------------------------------------------------------------------------
+
+/// Secondary filled button - solid orange background (main CTA)
+@mixin btn-secondary {
+  --mdc-filled-button-container-color: var(--md-sys-color-secondary);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-secondary);
+  --mdc-protected-button-container-color: var(--md-sys-color-secondary);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-secondary);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-secondary);
+  background-color: var(--md-sys-color-secondary);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary) 85%, white);
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary) 85%, white);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Secondary outlined button - orange border, transparent bg (like Sign In)
+@mixin btn-secondary-outlined {
+  --mdc-outlined-button-outline-color: var(--md-sys-color-secondary);
+  --mdc-outlined-button-label-text-color: var(--md-sys-color-secondary);
+
+  border: 1px solid var(--md-sys-color-secondary);
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-secondary);
+  background-color: color-mix(in srgb, var(--md-sys-color-secondary) 8%, transparent);
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--md-sys-color-secondary) 80%, white);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Secondary text button - no background/border
+@mixin btn-secondary-text {
+  --mdc-text-button-label-text-color: var(--md-sys-color-secondary);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-secondary);
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary) 8%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Secondary tonal button - light orange container background
+@mixin btn-secondary-tonal {
+  --mdc-filled-button-container-color: var(--md-sys-color-secondary-container);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-secondary-container);
+  --mdc-protected-button-container-color: var(--md-sys-color-secondary-container);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-secondary-container);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-secondary-container);
+  background-color: var(--md-sys-color-secondary-container);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 90%, var(--md-sys-color-secondary));
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 90%, var(--md-sys-color-secondary));
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TERTIARY (Purple) - AI features, premium/special actions
+// ----------------------------------------------------------------------------
+
+/// Tertiary filled button - solid purple background
+@mixin btn-tertiary {
+  --mdc-filled-button-container-color: var(--md-sys-color-tertiary);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-tertiary);
+  --mdc-protected-button-container-color: var(--md-sys-color-tertiary);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-tertiary);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-tertiary);
+  background-color: var(--md-sys-color-tertiary);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary) 85%, white);
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary) 85%, white);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Tertiary outlined button - purple border, transparent bg
+@mixin btn-tertiary-outlined {
+  --mdc-outlined-button-outline-color: var(--md-sys-color-tertiary);
+  --mdc-outlined-button-label-text-color: var(--md-sys-color-tertiary);
+
+  border: 1px solid var(--md-sys-color-tertiary);
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-tertiary);
+  background-color: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--md-sys-color-tertiary) 80%, white);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Tertiary text button - no background/border
+@mixin btn-tertiary-text {
+  --mdc-text-button-label-text-color: var(--md-sys-color-tertiary);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-tertiary);
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Tertiary tonal button - light purple container background
+@mixin btn-tertiary-tonal {
+  --mdc-filled-button-container-color: var(--md-sys-color-tertiary-container);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-tertiary-container);
+  --mdc-protected-button-container-color: var(--md-sys-color-tertiary-container);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-tertiary-container);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-tertiary-container);
+  background-color: var(--md-sys-color-tertiary-container);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 90%, var(--md-sys-color-tertiary));
+    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 90%, var(--md-sys-color-tertiary));
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// SURFACE BUTTONS - Neutral, low-emphasis actions
+// ----------------------------------------------------------------------------
+
+/// Surface button - uses surface container colors
+@mixin btn-surface {
+  --mdc-filled-button-container-color: var(--md-sys-color-surface-container-high);
+  --mdc-filled-button-label-text-color: var(--md-sys-color-on-surface);
+  --mdc-protected-button-container-color: var(--md-sys-color-surface-container-high);
+  --mdc-protected-button-label-text-color: var(--md-sys-color-on-surface);
+
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-surface);
+  background-color: var(--md-sys-color-surface-container-high);
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: var(--md-sys-color-surface-container-highest);
+    --mdc-protected-button-container-color: var(--md-sys-color-surface-container-highest);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/// Surface outlined button
+@mixin btn-surface-outlined {
+  --mdc-outlined-button-outline-color: var(--md-sys-color-outline-variant);
+  --mdc-outlined-button-label-text-color: var(--md-sys-color-on-surface);
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: $button-border-radius;
+  color: var(--md-sys-color-on-surface);
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: var(--md-sys-color-surface-container);
+    border-color: var(--md-sys-color-outline);
+  }
+
+  &:disabled {
+    opacity: 0.38;
   }
 }

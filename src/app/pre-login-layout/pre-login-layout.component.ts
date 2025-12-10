@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Component, ViewChild, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
-import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterOutlet, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,8 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToolbarService } from '../toolbar.service';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 import { ThemeService, Theme } from '../theme.service';
-import { MatDialog } from '@angular/material/dialog';
-import { MatListItem, MatNavList } from '@angular/material/list';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pre-login-layout',
@@ -23,8 +23,6 @@ import { MatListItem, MatNavList } from '@angular/material/list';
     MatIconModule,
     MatButtonModule,
     SharedFooterComponent,
-    MatListItem,
-    MatNavList,
   ],
   templateUrl: './pre-login-layout.component.html',
   styleUrls: ['./pre-login-layout.component.scss'],
@@ -32,42 +30,38 @@ import { MatListItem, MatNavList } from '@angular/material/list';
 export class PreLoginLayoutComponent implements OnInit, OnDestroy {
   protected currentTheme = this.themeService.theme;
   @ViewChild('toolbarContainer', { read: ViewContainerRef, static: true }) toolbarContainer!: ViewContainerRef;
+  isHomePage = false;
+  private subscriptions = new Subscription();
 
   constructor(
     private themeService: ThemeService,
     private toolbarService: ToolbarService,
-    private dialog: MatDialog,
-  ) {}
+    private router: Router,
+  ) {
+    this.checkHomePage();
+  }
 
   ngOnInit() {
     this.toolbarService.setRootViewContainerRef(this.toolbarContainer);
     this.currentTheme = this.themeService.theme;
+
+    this.subscriptions.add(
+      this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => this.checkHomePage()),
+    );
   }
 
   ngOnDestroy() {
     this.toolbarService.clearToolbarComponent();
+    this.subscriptions.unsubscribe();
+  }
+
+  private checkHomePage(): void {
+    const url = this.router.url;
+    this.isHomePage = url === '/' || url === '/home' || url.startsWith('/home?');
   }
 
   switchTheme(theme: Theme): void {
     this.currentTheme.set(theme);
     this.themeService.setTheme(theme);
   }
-
-  // openTermsModal(event: Event) {
-  //   event.preventDefault();
-  //   this.dialog.open(TermsAndConditionsModalComponent, {
-  //     width: '80vw',
-  //     maxWidth: '900px',
-  //     panelClass: 'privacy-policy-modal',
-  //   });
-  // }
-  //
-  // openPrivacyModal(event: Event) {
-  //   event.preventDefault();
-  //   this.dialog.open(PrivacyPolicyModalComponent, {
-  //     width: '80vw',
-  //     maxWidth: '900px',
-  //     panelClass: 'privacy-policy-modal',
-  //   });
-  // }
 }

@@ -168,9 +168,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
 
   ngOnInit(): void {
     this.messageService.clearMessages();
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.loadTeams();
     this.loadPage(this.pageSize, null, 0);
 

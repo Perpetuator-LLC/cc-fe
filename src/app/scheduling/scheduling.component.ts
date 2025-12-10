@@ -138,9 +138,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     this.loadSchedules();
     this.loadPodcasts();

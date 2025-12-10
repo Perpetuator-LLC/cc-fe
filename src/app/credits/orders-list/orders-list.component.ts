@@ -130,9 +130,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.loadOrders();
     if (this.isLoggedIn()) {
       this.userService.loadUserDetails();

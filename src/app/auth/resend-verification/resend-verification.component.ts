@@ -5,13 +5,6 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AuthService } from '../auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarService } from '../../toolbar.service';
-import {
-  MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageService } from '../../message.service';
@@ -23,11 +16,6 @@ import { MessageService } from '../../message.service';
     MatCard,
     MatCardHeader,
     MatCardContent,
-    MatAccordion,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
-    MatIcon,
     MatInput,
     MatFormField,
     MatLabel,
@@ -54,9 +42,7 @@ export class ResendVerificationComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    const viewContainerRef = this.toolbarService.getViewContainerRef();
-    viewContainerRef.clear();
-    viewContainerRef.createEmbeddedView(this.toolbarTemplate);
+    this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.route.queryParams.subscribe((params) => {
       const email = params['email'];
       if (email) {

@@ -326,3 +326,569 @@ body .toolbar-container {
     flex-shrink: 0;
   }
 }
+
+// ============================================================================
+// MD3 GLOBAL BUTTON STYLING
+// ============================================================================
+// These classes provide consistent button styling across the entire application.
+// Apply to Material buttons: <button mat-flat-button class="btn-secondary">
+//
+// Color Roles:
+// - Primary (blue): Default brand actions
+// - Secondary (orange): CTA, high-emphasis actions
+// - Tertiary (purple): AI features, premium actions
+//
+// Variants:
+// - .btn-{color}: Filled button (high emphasis)
+// - .btn-{color}-outlined: Outlined button (medium emphasis)
+// - .btn-{color}-text: Text button (low emphasis)
+// - .btn-{color}-tonal: Tonal button (medium emphasis)
+// ============================================================================
+
+// Global button border radius - smaller corners for all Material buttons
+// Uses all MDC custom properties to ensure proper override
+:root {
+  // MDC button shape tokens
+  --mdc-filled-button-container-shape: 8px;
+  --mdc-outlined-button-container-shape: 8px;
+  --mdc-text-button-container-shape: 8px;
+  --mdc-protected-button-container-shape: 8px;
+
+  // FAB shape tokens
+  --mdc-fab-container-shape: 8px;
+  --mdc-fab-small-container-shape: 8px;
+
+  // Extended FAB
+  --mdc-extended-fab-container-shape: 8px;
+}
+
+// Apply to all button types with direct border-radius as fallback
+// ============================================================================
+// Button Border Radius (MD3 standard 8px)
+// ============================================================================
+/* stylelint-disable declaration-no-important */
+
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button {
+  --mdc-filled-button-container-shape: 8px;
+  --mdc-outlined-button-container-shape: 8px;
+  --mdc-text-button-container-shape: 8px;
+  --mdc-protected-button-container-shape: 8px;
+
+  border-radius: 8px !important;
+
+  // Also target the inner button state layer
+  .mat-mdc-button-persistent-ripple,
+  .mdc-button__ripple {
+    border-radius: 8px;
+  }
+}
+
+// Icon buttons keep circular shape
+.mat-mdc-icon-button {
+  // Icon buttons should remain circular - don't override
+}
+
+// FABs with smaller radius
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  --mdc-fab-container-shape: 8px;
+  --mdc-fab-small-container-shape: 8px;
+
+  border-radius: 8px !important;
+}
+
+// ============================================================================
+// Button Color Classes
+// ============================================================================
+// These override Material's default colors. Using !important is necessary
+// because Material buttons have high-specificity internal styles.
+// All button types (regular, FAB, icon) consolidated into single selectors.
+// ============================================================================
+
+// Primary (Blue) Button Classes
+.btn-primary {
+  // Regular buttons
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-unelevated-button,
+  &.mat-mdc-outlined-button,
+  &.mdc-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button],
+  &[mat-stroked-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-primary);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary);
+    --mdc-protected-button-container-color: var(--md-sys-color-primary);
+    --mdc-protected-button-label-text-color: var(--md-sys-color-on-primary);
+
+    color: var(--md-sys-color-on-primary) !important;
+    background-color: var(--md-sys-color-primary) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-primary);
+    --mat-fab-foreground-color: var(--md-sys-color-on-primary);
+    --mat-fab-state-layer-color: var(--md-sys-color-on-primary);
+
+    color: var(--md-sys-color-on-primary) !important;
+    background-color: var(--md-sys-color-primary) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    --mat-icon-button-state-layer-color: var(--md-sys-color-primary);
+
+    color: var(--md-sys-color-primary) !important;
+  }
+}
+
+.btn-primary-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    --mdc-outlined-button-outline-color: var(--md-sys-color-primary);
+    --mdc-outlined-button-label-text-color: var(--md-sys-color-primary);
+
+    border-color: var(--md-sys-color-primary) !important;
+    color: var(--md-sys-color-primary) !important;
+    background-color: transparent !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-primary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-primary-container);
+
+    color: var(--md-sys-color-on-primary-container) !important;
+    background-color: var(--md-sys-color-primary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-primary) !important;
+  }
+}
+
+.btn-primary-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    --mdc-text-button-label-text-color: var(--md-sys-color-primary);
+
+    color: var(--md-sys-color-primary) !important;
+    background-color: transparent !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-primary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-primary-container);
+
+    color: var(--md-sys-color-on-primary-container) !important;
+    background-color: var(--md-sys-color-primary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-primary) !important;
+  }
+}
+
+.btn-primary-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-primary-container);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-primary-container);
+
+    color: var(--md-sys-color-on-primary-container) !important;
+    background-color: var(--md-sys-color-primary-container) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-primary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-primary-container);
+
+    color: var(--md-sys-color-on-primary-container) !important;
+    background-color: var(--md-sys-color-primary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-primary) !important;
+  }
+}
+
+// Secondary (Orange) Button Classes - CTA
+.btn-secondary {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-unelevated-button,
+  &.mdc-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button],
+  &[mat-stroked-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-secondary);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-secondary);
+    --mdc-protected-button-container-color: var(--md-sys-color-secondary);
+    --mdc-protected-button-label-text-color: var(--md-sys-color-on-secondary);
+
+    color: var(--md-sys-color-on-secondary) !important;
+    background-color: var(--md-sys-color-secondary) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-secondary);
+    --mat-fab-foreground-color: var(--md-sys-color-on-secondary);
+    --mat-fab-state-layer-color: var(--md-sys-color-on-secondary);
+
+    color: var(--md-sys-color-on-secondary) !important;
+    background-color: var(--md-sys-color-secondary) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    --mat-icon-button-state-layer-color: var(--md-sys-color-secondary);
+
+    color: var(--md-sys-color-secondary) !important;
+  }
+}
+
+.btn-secondary-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    --mdc-outlined-button-outline-color: var(--md-sys-color-secondary);
+    --mdc-outlined-button-label-text-color: var(--md-sys-color-secondary);
+
+    border-color: var(--md-sys-color-secondary) !important;
+    color: var(--md-sys-color-secondary) !important;
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary) 8%, transparent) !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-secondary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-secondary-container);
+
+    color: var(--md-sys-color-on-secondary-container) !important;
+    background-color: var(--md-sys-color-secondary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-secondary) !important;
+  }
+}
+
+.btn-secondary-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    --mdc-text-button-label-text-color: var(--md-sys-color-secondary);
+
+    color: var(--md-sys-color-secondary) !important;
+    background-color: transparent !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-secondary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-secondary-container);
+
+    color: var(--md-sys-color-on-secondary-container) !important;
+    background-color: var(--md-sys-color-secondary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-secondary) !important;
+  }
+}
+
+.btn-secondary-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-secondary-container);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-secondary-container);
+
+    color: var(--md-sys-color-on-secondary-container) !important;
+    background-color: var(--md-sys-color-secondary-container) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-secondary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-secondary-container);
+
+    color: var(--md-sys-color-on-secondary-container) !important;
+    background-color: var(--md-sys-color-secondary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-secondary) !important;
+  }
+}
+
+// Tertiary (Purple) Button Classes - AI/Premium
+.btn-tertiary {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-unelevated-button,
+  &.mdc-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button],
+  &[mat-stroked-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-tertiary);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-tertiary);
+    --mdc-protected-button-container-color: var(--md-sys-color-tertiary);
+    --mdc-protected-button-label-text-color: var(--md-sys-color-on-tertiary);
+
+    color: var(--md-sys-color-on-tertiary) !important;
+    background-color: var(--md-sys-color-tertiary) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-tertiary);
+    --mat-fab-foreground-color: var(--md-sys-color-on-tertiary);
+    --mat-fab-state-layer-color: var(--md-sys-color-on-tertiary);
+
+    color: var(--md-sys-color-on-tertiary) !important;
+    background-color: var(--md-sys-color-tertiary) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    --mat-icon-button-state-layer-color: var(--md-sys-color-tertiary);
+
+    color: var(--md-sys-color-tertiary) !important;
+  }
+}
+
+.btn-tertiary-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    --mdc-outlined-button-outline-color: var(--md-sys-color-tertiary);
+    --mdc-outlined-button-label-text-color: var(--md-sys-color-tertiary);
+
+    border-color: var(--md-sys-color-tertiary) !important;
+    color: var(--md-sys-color-tertiary) !important;
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent) !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-tertiary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-tertiary-container);
+
+    color: var(--md-sys-color-on-tertiary-container) !important;
+    background-color: var(--md-sys-color-tertiary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-tertiary) !important;
+  }
+}
+
+.btn-tertiary-text {
+  &.mat-mdc-button,
+  &[mat-button] {
+    --mdc-text-button-label-text-color: var(--md-sys-color-tertiary);
+
+    color: var(--md-sys-color-tertiary) !important;
+    background-color: transparent !important;
+  }
+
+  // FAB buttons use container color
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-tertiary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-tertiary-container);
+
+    color: var(--md-sys-color-on-tertiary-container) !important;
+    background-color: var(--md-sys-color-tertiary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-tertiary) !important;
+  }
+}
+
+.btn-tertiary-tonal {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-tertiary-container);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-tertiary-container);
+
+    color: var(--md-sys-color-on-tertiary-container) !important;
+    background-color: var(--md-sys-color-tertiary-container) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-tertiary-container);
+    --mat-fab-foreground-color: var(--md-sys-color-on-tertiary-container);
+
+    color: var(--md-sys-color-on-tertiary-container) !important;
+    background-color: var(--md-sys-color-tertiary-container) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-tertiary) !important;
+  }
+}
+
+// Surface Button Classes - Neutral
+.btn-surface {
+  &.mat-mdc-button,
+  &.mat-mdc-raised-button,
+  &.mat-mdc-flat-button,
+  &[mat-button],
+  &[mat-flat-button],
+  &[mat-raised-button] {
+    --mdc-filled-button-container-color: var(--md-sys-color-surface-container-high);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-surface);
+
+    color: var(--md-sys-color-on-surface) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-surface-container-high);
+    --mat-fab-foreground-color: var(--md-sys-color-on-surface);
+
+    color: var(--md-sys-color-on-surface) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-on-surface) !important;
+  }
+}
+
+.btn-surface-outlined {
+  &.mat-mdc-button,
+  &.mat-mdc-stroked-button,
+  &.mat-mdc-outlined-button,
+  &[mat-button],
+  &[mat-stroked-button] {
+    --mdc-outlined-button-outline-color: var(--md-sys-color-outline-variant);
+    --mdc-outlined-button-label-text-color: var(--md-sys-color-on-surface);
+
+    border-color: var(--md-sys-color-outline-variant) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    background-color: transparent !important;
+  }
+
+  // FAB buttons
+  &.mat-mdc-fab,
+  &.mat-mdc-mini-fab,
+  &[mat-fab],
+  &[mat-mini-fab] {
+    --mdc-fab-container-color: var(--md-sys-color-surface-container-high);
+    --mat-fab-foreground-color: var(--md-sys-color-on-surface);
+
+    color: var(--md-sys-color-on-surface) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+  }
+
+  // Icon buttons
+  &.mat-mdc-icon-button,
+  &[mat-icon-button] {
+    color: var(--md-sys-color-on-surface) !important;
+  }
+}
+
+/* stylelint-enable declaration-no-important */
+
