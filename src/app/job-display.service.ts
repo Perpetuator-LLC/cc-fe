@@ -223,7 +223,7 @@ export class JobDisplayService {
     const episodeUuid = this.getEpisodeUuid(job);
 
     if (!topicUuid) {
-      this.messageService.success(`Research complete! <a href="/topics">View Research Topics</a>`, null, true);
+      this.messageService.success(`Research complete! <a href="/media/topics">View Research Topics</a>`, null, true);
       return of(void 0);
     }
 
@@ -236,17 +236,17 @@ export class JobDisplayService {
 
     return forkJoin({ topic: topic$, episode: episode$ }).pipe(
       map(({ topic, episode }) => {
-        const topicUrl = `/topic/${topicUuid}`;
+        const topicUrl = `/media/topics/${topicUuid}`;
         const topicTitle = topic?.title === '' ? '(Blank)' : topic?.title || 'Topic';
 
         let message = `Research complete: <a href="${topicUrl}">${topicTitle}</a>`;
 
         if (episode && episodeUuid) {
-          const episodeUrl = `/e/${episodeUuid}`;
+          const episodeUrl = `/media/episodes/${episodeUuid}`;
           const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
           message += ` | Episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
         } else if (episodeUuid) {
-          const episodeUrl = `/e/${episodeUuid}`;
+          const episodeUrl = `/media/episodes/${episodeUuid}`;
           message += ` | <a href="${episodeUrl}">View Episode</a>`;
         }
 
@@ -272,12 +272,12 @@ export class JobDisplayService {
 
     return this.researchService.getTopicById(topicUuid).pipe(
       map((topic) => {
-        const topicUrl = `/topic/${topicUuid}`;
+        const topicUrl = `/media/topics/${topicUuid}`;
         const topicTitle = topic?.title === '' ? '(Blank)' : topic?.title || 'Research Topic';
         this.messageService.success(`Research topic updated: <a href="${topicUrl}">${topicTitle}</a>`, null, true);
       }),
       catchError(() => {
-        const topicUrl = `/topic/${topicUuid}`;
+        const topicUrl = `/media/topics/${topicUuid}`;
         this.messageService.success(`Research topic updated: <a href="${topicUrl}">View Topic</a>`, null, true);
         return of(void 0);
       }),

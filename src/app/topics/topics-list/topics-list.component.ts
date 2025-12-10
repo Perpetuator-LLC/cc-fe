@@ -40,7 +40,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   dataSource = new MatTableDataSource<Topic>([]);
-  displayedColumns: string[] = ['title', 'podcast', 'created', 'status', 'actions'];
+  displayedColumns: string[] = ['title', 'podcast', 'created', 'status'];
   topics: Topic[] = [];
   podcasts: PodcastsResult[] = [];
   private shouldOpenCreateDialog = false;
