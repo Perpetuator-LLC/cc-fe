@@ -7,6 +7,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { TraceService } from '../traces/trace.service';
+import { TokenStorageService } from './token-storage.service';
 
 export interface UserProfile {
   id: string;
@@ -31,7 +32,13 @@ export interface OAuth2ErrorResponse {
 
 /**
  * OAuth2 Authentication Service
- * Handles OAuth2 password grant and authorization code flows
+ *
+ * Architecture (per AUTH_COOKIE_CROSS_DOMAIN.md):
+ * - Tokens are returned in response body (NOT in HTTP-only cookies)
+ * - Tokens are stored in localStorage via TokenStorageService
+ * - Frontend sends Authorization: Bearer <token> header
+ * - Backend sets `logged_in` cookie for cross-subdomain session detection
+ * - `withCredentials: true` ensures cookies are sent/received
  */
 @Injectable({
   providedIn: 'root',
@@ -68,8 +75,8 @@ export class OAuthService {
     private router: Router,
     private http: HttpClient,
     private injector: Injector,
+    private tokenStorage: TokenStorageService,
   ) {
-    // Don't initialize in constructor to avoid circular dependency
     // Will be initialized on first use
   }
 
@@ -103,29 +110,23 @@ export class OAuthService {
     this.angularOAuthService.events.subscribe((event) => {
       if (event.type === 'token_received') {
         this.loggedInSignal.set(true);
-        // Don't load user profile automatically - it will be loaded when needed
       } else if (event.type === 'logout' || event.type === 'session_terminated') {
         this.loggedInSignal.set(false);
         this.currentUserSubject.next(null);
       }
     });
 
-    // Check if we have stored tokens from OAuth2 password grant in localStorage
-    const storedToken = localStorage.getItem('access_token');
-    const expiresAt = localStorage.getItem('expires_at');
-
-    if (storedToken && expiresAt) {
-      const isExpired = Date.now() >= parseInt(expiresAt);
-      if (!isExpired) {
-        this.loggedInSignal.set(true);
-        // Don't load user profile yet - will be loaded when needed
-      }
+    // Check if we have a valid session
+    if (this.tokenStorage.hasSession()) {
+      this.loggedInSignal.set(true);
     }
   }
 
   /**
    * OAuth2 Password Grant login
    * Uses username/password to get OAuth2 tokens directly
+   * Tokens are returned in response body and stored in localStorage
+   * Backend also sets `logged_in` cookie for cross-subdomain detection
    */
   loginWithPassword(username: string, password: string): Observable<boolean> {
     this.ensureInitialized();
@@ -143,14 +144,19 @@ export class OAuthService {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        withCredentials: true, // Receive logged_in cookie from backend
       })
       .pipe(
         tap((response) => {
-          // Store tokens using OAuth service
+          // Store tokens in localStorage
           this.storeOAuthTokens(response);
           this.loggedInSignal.set(true);
-          // Don't load user profile here - it will be loaded when needed
-          // This prevents blocking login if /o/userinfo/ has issues
+
+          // Trigger token_received event for OAuth library
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this.angularOAuthService as any).eventsSubject.next({
+            type: 'token_received',
+          });
 
           // Track successful login (if TraceService is available)
           const traceService = this.getTraceService();
@@ -176,6 +182,20 @@ export class OAuthService {
           return throwError(() => new Error(errorMessage));
         }),
       );
+  }
+
+  /**
+   * Store OAuth2 tokens in localStorage
+   */
+  private storeOAuthTokens(response: OAuth2TokenResponse): void {
+    const expiresAt = Date.now() + response.expires_in * 1000;
+    this.tokenStorage.storeTokens({
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token,
+      expiresAt: expiresAt,
+      tokenType: response.token_type,
+      scope: response.scope,
+    });
   }
 
   /**
@@ -219,28 +239,7 @@ export class OAuthService {
       unsupported_grant_type: 'Unsupported authentication method.',
       access_denied: 'Access denied.',
     };
-
-    return errorMessages[errorCode] || 'Authentication failed. Please try again.';
-  }
-
-  /**
-   * Store OAuth2 tokens in localStorage
-   */
-  private storeOAuthTokens(response: OAuth2TokenResponse): void {
-    const expiresAt = Date.now() + response.expires_in * 1000;
-
-    // Store in localStorage for persistence across browser sessions and tabs
-    localStorage.setItem('access_token', response.access_token);
-    localStorage.setItem('refresh_token', response.refresh_token);
-    localStorage.setItem('expires_at', expiresAt.toString());
-    localStorage.setItem('token_type', response.token_type);
-    localStorage.setItem('scope', response.scope);
-
-    // Trigger token_received event for OAuth library
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.angularOAuthService as any).eventsSubject.next({
-      type: 'token_received',
-    });
+    return errorMessages[errorCode] || 'An authentication error occurred.';
   }
 
   /**
@@ -251,15 +250,15 @@ export class OAuthService {
     this.angularOAuthService.initCodeFlow();
   }
 
+  /**
+   * Logout - clear tokens from localStorage
+   * Backend clears `logged_in` cookie via the logout endpoint
+   */
   logout(): void {
     this.ensureInitialized();
 
-    // Clear OAuth tokens from localStorage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('expires_at');
-    localStorage.removeItem('token_type');
-    localStorage.removeItem('scope');
+    // Clear tokens from localStorage
+    this.tokenStorage.clearTokens();
 
     this.angularOAuthService.logOut();
     this.loggedInSignal.set(false);
@@ -272,79 +271,57 @@ export class OAuthService {
     return this.loggedInSignal;
   }
 
+  /**
+   * Check if user is authenticated
+   * Checks both localStorage token and backend-set cookie
+   */
   isAuthenticated(): boolean {
     this.ensureInitialized();
-
-    // Try OAuth service first
-    if (this.angularOAuthService.hasValidAccessToken()) {
-      return true;
-    }
-
-    // Fallback: Check if we have a valid token in localStorage
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      const expiresAt = localStorage.getItem('expires_at');
-      if (expiresAt) {
-        return Date.now() < parseInt(expiresAt);
-      }
-    }
-
-    return false;
+    return this.tokenStorage.hasSession();
   }
 
+  /**
+   * Get access token from localStorage
+   * Returns the token for Authorization header
+   */
   getAccessToken(): string | null {
-    this.ensureInitialized();
+    const token = this.tokenStorage.getAccessToken();
 
-    // Try OAuth service first
-    let token: string | null = this.angularOAuthService.getAccessToken();
-
-    // Fallback: If OAuth service doesn't return token, get it directly from localStorage
-    // This handles the case where angular-oauth2-oidc doesn't recognize password grant tokens
-    if (!token) {
-      token = localStorage.getItem('access_token');
-
-      if (token) {
-        // Verify token hasn't expired
-        const expiresAt = localStorage.getItem('expires_at');
-
-        if (expiresAt && Date.now() >= parseInt(expiresAt)) {
-          // Token expired, clear it
-          this.logout();
-          return null;
-        }
-      }
+    // Check if token is expired
+    if (token && this.tokenStorage.isAccessTokenExpired()) {
+      // Token expired - could trigger refresh here
+      // For now, return null to indicate need for re-auth
+      return null;
     }
 
     return token;
   }
 
+  /**
+   * Get token observable for Apollo and other consumers
+   * Returns the access token or attempts refresh
+   */
   getTokenObservable(): Observable<string | null> {
     this.ensureInitialized();
+
     const token = this.getAccessToken();
 
     // If we have a valid token, return it
-    if (token && this.isAuthenticated()) {
+    if (token) {
       return of(token);
     }
 
-    // If no token at all (not logged in), return null immediately
-    if (!token && !localStorage.getItem('refresh_token')) {
-      return of(null);
-    }
-
-    // Token exists but is expired - try to refresh using OAuth2 refresh token
-    const refreshToken = localStorage.getItem('refresh_token');
+    // Check if we can refresh
+    const refreshToken = this.tokenStorage.getRefreshToken();
     if (!refreshToken) {
-      this.logout();
       return of(null);
     }
 
-    // Use OAuth2 password grant refresh token flow
+    // Attempt to refresh the token
     return this.refreshAccessToken(refreshToken).pipe(
-      map(() => this.getAccessToken()),
+      map(() => this.tokenStorage.getAccessToken()),
       catchError((error) => {
         console.error('Token refresh failed:', error);
-        // Refresh failed - clear session
         this.logout();
         return of(null);
       }),
@@ -366,10 +343,10 @@ export class OAuthService {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        withCredentials: true, // Receive updated logged_in cookie
       })
       .pipe(
         tap((response) => {
-          // Store new tokens
           this.storeOAuthTokens(response);
         }),
         map(() => void 0),
