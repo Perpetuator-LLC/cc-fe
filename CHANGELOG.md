@@ -1,3 +1,37 @@
+# Changelog from v0.27.0 to v0.28.0
+
+This release focuses on a comprehensive migration to Material Design 3 (MD3), modernization of the authentication system, and significant architectural improvements including an upgrade to Angular 20.
+
+## Enhancements
+
+- **Material Design 3 Migration**: Complete redesign using MD3 color tokens, spacing system (8px/4px grid), and design patterns across all components, with automated theme generation from HCT palettes
+- **Angular 20 Upgrade**: Migrated from Angular 19 to Angular 20 with Material 20, requiring Node 22
+- **Authentication Overhaul**: Simplified auth system to use localStorage with Bearer tokens, replacing previous token storage implementation
+- **Navigation Improvements**: Added finance module to main navigation, standardized all routes under `/media` prefix, and implemented signal-based page title system with automatic route integration
+- **API Key Management**: Added comprehensive API key management system with simplified creation form (removed rate limit fields)
+- **UI Redesigns**: 
+  - Redesigned episode header with improved action layout and conditional sharing
+  - Updated buttons to outlined style with smoked glass elevation
+  - Transformed resource links into styled clickable tags
+  - Improved hero section with contained CSS orbs animation (replaced p5.js)
+  - Redesigned profile menu with better UI consistency
+- **Error Tracking**: Added comprehensive frontend error tracking system
+- **News Features**: Added fetch deduplication and improved site content handling in detail panels
+- **GraphQL Migration**: Migrated affiliate landing page to GraphQL with error tracking
+
+## Cleanups
+
+- **Code Organization**: Major restructuring into feature-based directories (auth, finance, user, podcast, team, affiliate modules) and consolidated layout components
+- **SCSS Improvements**: Enforced strict linting, flattened nested selectors, extracted reusable mixins for elevation and validation icons, removed `!important` declarations and `::ng-deep` usage
+- **Style Standardization**: Consolidated metadata display using Material icons, standardized border-radius values, replaced inline styles with utility classes, migrated to CSS custom properties
+- **Routing Cleanup**: Removed route icons, standardized navigation item heights, added explicit menu visibility controls
+- **Component Cleanup**: Moved all dialog components to dedicated folders with external template and style files, consolidated job status styles
+- **Documentation**: Reorganized documentation structure, consolidated MD3 theme documentation, improved README
+- **Testing**: Enhanced test coverage with proper mocks for services (TokenStorageService, ToolbarService, Apollo queries) and component dependencies
+- **Build Tools**: Added CSS size tracking tools, palette generator script (`yarn theme:generate`), and MD3 linting
+- **Removed**: Deleted backup directories, archived application code, and deprecated CSS utility classes
+
+
 # Changelog from v0.26.0 to v0.27.0
 
 This release introduces a comprehensive affiliate program with Stripe Connect integration, migrates authentication to OAuth2 with PKCE flow and GraphQL API, and implements a policy management system including cookie consent and terms acceptance. Additionally, the update adds public podcast pages with SEO optimization, RSS feed health monitoring for news sources, and significantly refactors URL routing to use shorter paths.

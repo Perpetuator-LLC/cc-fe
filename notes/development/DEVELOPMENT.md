@@ -77,14 +77,14 @@ Check the last versions:
 
 ```shell
 git tag --sort=-creatordate | head -n 3
-grep '"version":' ../package.json
+grep '"version":' ../../package.json
 ```
 
 Update version in package.json:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.27.0"/' ../package.json
-grep '"version":' ../package.json
+sed -i '' 's/"version": ".*"/"version": "0.28.0"/' ../../package.json
+grep '"version":' ../../package.json
 ```
 
 Make sure the changelog script is up to date:
@@ -94,7 +94,7 @@ Make sure the changelog script is up to date:
 Update the changelog by running the script in the back-end repository:
 
 ```shell
-(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.27.0' 'v0.26.0')
+(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.28.0' 'v0.27.0')
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -104,16 +104,16 @@ Review and update the new changelog entry to make sure it is correct.
 Create the release commit:
 
 ```shell
-git add .. && \
-git commit -m "chore: bump version to 0.27.0"
+git add ../.. && \
+git commit -m "chore: bump version to 0.28.0"
 ```
 
 Push to main and create the release tag:
 
 ```shell
 git push origin main && \
-git tag -a v0.27.0 -m "This release introduces a comprehensive affiliate program with Stripe Connect integration, migrates authentication to OAuth2 with PKCE flow and GraphQL API, and implements a policy management system including cookie consent and terms acceptance. Additionally, the update adds public podcast pages with SEO optimization, RSS feed health monitoring for news sources, and significantly refactors URL routing to use shorter paths." && \
-git push origin v0.27.0
+git tag -a v0.28.0 -m "This release focuses on a comprehensive migration to Material Design 3 (MD3), modernization of the authentication system, and significant architectural improvements including an upgrade to Angular 20." && \
+git push origin v0.28.0
 ```
 
 #### Step 5: Clean up feature branch (if applicable)
@@ -157,7 +157,7 @@ A tribal rule in this project is to use this rule:
 - Use imperative mood or present tense: "add feature" not "added feature" or "adds feature".
 - Think to yourself: "This change will..." and complete the sentence.
 
-Follow https://gist.github.com/joshbuchea/6f47e86d26.0bce28f8e7f42ae84c716
+Follow https://gist.github.com/joshbuchea/6f47e86d27.0bce28f8e7f42ae84c716
 
 If and only if the change touches _production_ code it should be prefixed with one of the following:
 
