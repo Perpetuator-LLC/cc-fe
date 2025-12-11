@@ -1,4 +1,6 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
 .topic-header-card {
   margin-top: 16px;
   margin-bottom: 16px;
@@ -56,34 +58,14 @@
   }
 
   .metadata {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    @include mixins.metadata-section();
 
     .meta-item {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface-variant);
-
-      mat-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        color: var(--md-sys-color-secondary);
-      }
+      @include mixins.metadata-item();
 
       .podcast-link,
       .episode-link {
-        font-weight: 500;
-        color: var(--md-sys-color-secondary);
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
-        }
+        @include mixins.metadata-link();
       }
     }
   }
