@@ -166,6 +166,20 @@ export class PostLoginLayoutComponent implements OnInit {
   }
 
   shouldShow(item: Route): boolean {
+    // Check for explicit showInMenu property - this takes priority
+    if (item.data && item.data['showInMenu'] !== undefined) {
+      if (!item.data['showInMenu']) {
+        return false;
+      }
+      // If showInMenu is true, continue with auth checks below
+    } else {
+      // Legacy behavior: if no showInMenu property, check for icon (but this is being phased out)
+      // Routes without showInMenu and without icon should be hidden
+      if (!item.data || !item.data['icon']) {
+        return false;
+      }
+    }
+
     // First check if the route should be hidden from main sidebar
     if (item.path && ['news', 'e'].includes(item.path)) {
       return false;

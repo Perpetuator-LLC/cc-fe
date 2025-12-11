@@ -21,6 +21,7 @@ export const routes: Routes = [
     title: 'Home',
     data: {
       icon: 'home',
+      showInMenu: true,
     },
   },
   {
@@ -34,6 +35,7 @@ export const routes: Routes = [
     title: 'Media',
     data: {
       icon: 'perm_media',
+      showInMenu: true,
     },
     children: [
       {
@@ -118,6 +120,7 @@ export const routes: Routes = [
     title: 'Register',
     data: {
       icon: 'person_add',
+      showInMenu: true,
     },
   },
   {
@@ -126,6 +129,7 @@ export const routes: Routes = [
     title: 'Login',
     data: {
       icon: 'login',
+      showInMenu: true,
     },
   },
   {
@@ -198,6 +202,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: {
       icon: 'groups',
+      showInMenu: true,
     },
   },
   {
@@ -211,6 +216,7 @@ export const routes: Routes = [
     title: 'Jobs',
     data: {
       icon: 'work',
+      showInMenu: true,
     },
     children: [
       {
@@ -223,8 +229,7 @@ export const routes: Routes = [
         loadComponent: () => import('./scheduling/scheduling.component').then((c) => c.SchedulingComponent),
         title: 'Scheduling',
         data: {
-          // Hidden from menu - accessed via jobs section
-          hidden: true,
+          showInMenu: false,
         },
       },
     ],
@@ -358,26 +363,28 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./policy/privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
     title: 'Privacy',
-    // data: {
-    //   icon: 'policy',
-    // },
+    data: {
+      icon: 'policy',
+      showInMenu: false,
+    },
   },
   {
     path: 'cookie-policy',
     loadComponent: () => import('./policy/cookie-policy/cookie-policy.component').then((c) => c.CookiePolicyComponent),
     title: 'Cookie Policy',
-    // data: {
-    //   icon: 'cookie',
-    // },
+    data: {
+      icon: 'cookie',
+    },
   },
   {
     path: 'terms-and-conditions',
     loadComponent: () =>
       import('./policy/terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
     title: 'Terms',
-    // data: {
-    //   icon: 'gavel',
-    // },
+    data: {
+      icon: 'gavel',
+      showInMenu: false,
+    },
   },
 ];
 
