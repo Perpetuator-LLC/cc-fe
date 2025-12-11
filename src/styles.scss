@@ -1336,3 +1336,34 @@ mat-nav-list {
   }
 }
 
+// ============================================================================
+// PROFILE MENU STYLING
+// ============================================================================
+// Override the disabled state for the profile header in the profile menu.
+// Material applies opacity to disabled menu items, but we want the icon and
+// username to remain prominent while only deemphasizing the email.
+// ============================================================================
+
+// High specificity to override Material's disabled styles on mat-menu-item
+.mat-mdc-menu-panel .profile-header.mat-mdc-menu-item-disabled,
+.mat-mdc-menu-panel .profile-header[disabled] {
+  opacity: 1;
+
+  .profile-avatar-icon {
+    color: var(--md-sys-color-primary);
+    opacity: 1;
+  }
+
+  .profile-info {
+    .profile-username {
+      color: var(--md-sys-color-on-surface);
+      opacity: 1;
+    }
+
+    .profile-email {
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.7;
+    }
+  }
+}
+
