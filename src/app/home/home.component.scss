@@ -5,6 +5,8 @@
 // Container - Centered column with fixed max-width
 // ============================================================================
 .home-container {
+  overflow: visible;
+
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -24,21 +26,31 @@
 // ============================================================================
 .hero-section {
   position: relative;
+  overflow: visible;
   margin-bottom: 48px;
 }
 
 .hero-banner-card {
+
+  // Override Angular Material's mat-card background
+  --mdc-elevated-card-container-color: transparent;
+  --mdc-outlined-card-container-color: transparent;
+  --mat-card-subtitle-text-color: var(--md-sys-color-on-surface-variant);
+
   position: relative;
+  z-index: 1;
 
   overflow: visible;
 
   min-height: 400px;
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 16px;
 
   // Frosted glass effect using MD3 glass surface token
+  // Override mat-card's default background to allow glass effect
   background: var(--md-sys-color-glass-surface);
   backdrop-filter: blur(24px);
-
+  box-shadow: 0 8px 32px var(--md-sys-color-shadow);
 
   @include mixins.mobile() {
     min-height: 300px;
@@ -55,7 +67,8 @@
   z-index: 0;
   inset: 0;
 
-  border-radius: 16px;
+  // Allow orbs to extend beyond the hero section boundaries
+  overflow: visible;
 }
 
 .orb {

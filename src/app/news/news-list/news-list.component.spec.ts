@@ -7,12 +7,27 @@ import { NewsListComponent } from './news-list.component';
 import { provideMockApollo, provideMockOAuthService, provideMockToolbarService } from '../../testing/test-providers';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
+import { Job } from '../../jobs/job.service';
+import { NewsService } from '../news.service';
 
 describe('NewsComponent', () => {
   let component: NewsListComponent;
   let fixture: ComponentFixture<NewsListComponent>;
   let mockPodcastsService: jasmine.SpyObj<PodcastsService>;
   let mockRecentlyUsedPodcastsService: jasmine.SpyObj<RecentlyUsedPodcastsService>;
+  let mockNewsService: jasmine.SpyObj<NewsService>;
+
+  const mockJob: Job = {
+    id: 'test-job-id',
+    uuid: 'test-job-uuid',
+    kind: 'FETCH_NEWS',
+    status: 'PENDING',
+    error: '',
+    result: null,
+    args: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 
   // Partial mock data - only include fields needed for filtering logic
   const mockPodcastsResponse = {
@@ -54,10 +69,21 @@ describe('NewsComponent', () => {
       'loadHistory',
       'sortByRecentlyUsed',
       'getDefaultSelection',
+      'recordSelection',
     ]);
     mockRecentlyUsedPodcastsService.loadHistory.and.returnValue(of([]));
     mockRecentlyUsedPodcastsService.sortByRecentlyUsed.and.callFake((podcasts: PodcastsResult[]) => podcasts);
     mockRecentlyUsedPodcastsService.getDefaultSelection.and.returnValue('podcast-1');
+    mockRecentlyUsedPodcastsService.recordSelection.and.returnValue(undefined);
+
+    mockNewsService = jasmine.createSpyObj('NewsService', ['fetchNews', 'news']);
+    mockNewsService.fetchNews.and.returnValue(of({ job: mockJob }));
+    mockNewsService.news.and.returnValue(
+      of({
+        edges: [],
+        pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
+      }),
+    );
 
     await TestBed.configureTestingModule({
       imports: [NewsListComponent, HttpClientTestingModule, NoopAnimationsModule],
@@ -67,6 +93,7 @@ describe('NewsComponent', () => {
         provideMockToolbarService(),
         { provide: PodcastsService, useValue: mockPodcastsService },
         { provide: RecentlyUsedPodcastsService, useValue: mockRecentlyUsedPodcastsService },
+        { provide: NewsService, useValue: mockNewsService },
       ],
     }).compileComponents();
 
