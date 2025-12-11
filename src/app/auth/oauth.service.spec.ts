@@ -5,14 +5,16 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { OAuthService as AngularOAuthService } from 'angular-oauth2-oidc';
 import { of } from 'rxjs';
 import { OAuthService } from './oauth.service';
+import { TokenStorageService } from './token-storage.service';
 
 describe('OAuthService', () => {
   let service: OAuthService;
   let angularOAuthServiceSpy: jasmine.SpyObj<AngularOAuthService>;
   let routerSpy: jasmine.SpyObj<Router>;
+  let tokenStorageSpy: jasmine.SpyObj<TokenStorageService>;
 
   beforeEach(() => {
-    const oauthSpy = jasmine.createSpyObj('AngularOAuthService', [
+    angularOAuthServiceSpy = jasmine.createSpyObj('AngularOAuthService', [
       'configure',
       'loadDiscoveryDocumentAndTryLogin',
       'hasValidAccessToken',
@@ -22,26 +24,39 @@ describe('OAuthService', () => {
       'refreshToken',
       'loadUserProfile',
     ]);
-    const routerSpyObj = jasmine.createSpyObj('Router', ['navigate']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    tokenStorageSpy = jasmine.createSpyObj('TokenStorageService', [
+      'hasSession',
+      'getAccessToken',
+      'getRefreshToken',
+      'isAccessTokenExpired',
+      'storeTokens',
+      'clearTokens',
+    ]);
 
     // Setup default return values
-    oauthSpy.loadDiscoveryDocumentAndTryLogin.and.returnValue(Promise.resolve(true));
-    oauthSpy.hasValidAccessToken.and.returnValue(false);
+    angularOAuthServiceSpy.loadDiscoveryDocumentAndTryLogin.and.returnValue(Promise.resolve(true));
+    angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    oauthSpy.events = of({ type: 'token_received' }) as any;
+    angularOAuthServiceSpy.events = of({ type: 'token_received' }) as any;
+
+    // TokenStorageService defaults
+    tokenStorageSpy.hasSession.and.returnValue(false);
+    tokenStorageSpy.getAccessToken.and.returnValue(null);
+    tokenStorageSpy.getRefreshToken.and.returnValue(null);
+    tokenStorageSpy.isAccessTokenExpired.and.returnValue(true);
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
         OAuthService,
-        { provide: AngularOAuthService, useValue: oauthSpy },
-        { provide: Router, useValue: routerSpyObj },
+        { provide: AngularOAuthService, useValue: angularOAuthServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: TokenStorageService, useValue: tokenStorageSpy },
       ],
     });
 
     service = TestBed.inject(OAuthService);
-    angularOAuthServiceSpy = TestBed.inject(AngularOAuthService) as jasmine.SpyObj<AngularOAuthService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
   it('should be created', () => {
@@ -85,17 +100,12 @@ describe('OAuthService', () => {
 
   describe('isAuthenticated', () => {
     it('should return true when OAuth service has valid access token', () => {
-      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(true);
+      tokenStorageSpy.hasSession.and.returnValue(true);
       expect(service.isAuthenticated()).toBe(true);
     });
 
     it('should return false when OAuth service does not have valid access token', () => {
-      // Clear localStorage to avoid fallback check
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-
-      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
-      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
+      tokenStorageSpy.hasSession.and.returnValue(false);
       expect(service.isAuthenticated()).toBe(false);
     });
   });
@@ -103,33 +113,28 @@ describe('OAuthService', () => {
   describe('getAccessToken', () => {
     it('should return access token from OAuth service', () => {
       const token = 'test-access-token';
-      angularOAuthServiceSpy.getAccessToken.and.returnValue(token);
+      tokenStorageSpy.getAccessToken.and.returnValue(token);
+      tokenStorageSpy.isAccessTokenExpired.and.returnValue(false);
       expect(service.getAccessToken()).toBe(token);
     });
 
     it('should return null if no token available', () => {
-      // Clear localStorage to avoid fallback mechanism returning a token
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('expires_at');
+      tokenStorageSpy.getAccessToken.and.returnValue(null);
+      expect(service.getAccessToken()).toBe(null);
+    });
 
-      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
+    it('should return null if token is expired', () => {
+      tokenStorageSpy.getAccessToken.and.returnValue('expired-token');
+      tokenStorageSpy.isAccessTokenExpired.and.returnValue(true);
       expect(service.getAccessToken()).toBe(null);
     });
   });
 
   describe('getTokenObservable', () => {
-    beforeEach(() => {
-      // Clear localStorage before each test
-      localStorage.clear();
-    });
-
     it('should return current token if valid', (done) => {
       const token = 'valid-token';
-      localStorage.setItem('access_token', token);
-      localStorage.setItem('expires_at', String(Date.now() + 10000)); // Future expiry
-      angularOAuthServiceSpy.getAccessToken.and.returnValue(token);
-      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(true);
+      tokenStorageSpy.getAccessToken.and.returnValue(token);
+      tokenStorageSpy.isAccessTokenExpired.and.returnValue(false);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBe(token);
@@ -138,8 +143,8 @@ describe('OAuthService', () => {
     });
 
     it('should return null if no token and no refresh token', (done) => {
-      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
-      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
+      tokenStorageSpy.getAccessToken.and.returnValue(null);
+      tokenStorageSpy.getRefreshToken.and.returnValue(null);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBeNull();
@@ -147,11 +152,10 @@ describe('OAuthService', () => {
       });
     });
 
-    it('should logout and return null if refresh token missing', (done) => {
-      localStorage.setItem('access_token', 'expired-token');
-      localStorage.setItem('expires_at', String(Date.now() - 10000)); // Past expiry
-      angularOAuthServiceSpy.getAccessToken.and.returnValue('');
-      angularOAuthServiceSpy.hasValidAccessToken.and.returnValue(false);
+    it('should return null if token expired and no refresh token', (done) => {
+      tokenStorageSpy.getAccessToken.and.returnValue('expired-token');
+      tokenStorageSpy.isAccessTokenExpired.and.returnValue(true);
+      tokenStorageSpy.getRefreshToken.and.returnValue(null);
 
       service.getTokenObservable().subscribe((result) => {
         expect(result).toBeNull();
