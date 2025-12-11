@@ -316,6 +316,11 @@ export const routes: Routes = [
     path: 'finance',
     loadComponent: () => import('./finance/finance.component').then((c) => c.FinanceComponent),
     title: 'Finance',
+    // canActivate: [AuthGuard],
+    data: {
+      showInMenu: true,
+      icon: 'account_balance',
+    },
   },
   {
     path: 'podcasts',

@@ -171,7 +171,18 @@ export class PostLoginLayoutComponent implements OnInit {
       if (!item.data['showInMenu']) {
         return false;
       }
-      // If showInMenu is true, continue with auth checks below
+      // If showInMenu is true, show for logged-in users (or check loggedOutRoutes for logged-out users)
+      if (this.isLoggedIn()) {
+        // For logged-in users, show any route with showInMenu: true
+        // (except those explicitly in loggedOutRoutes like login/register)
+        if (item.path && this.loggedOutRoutes.includes(item.path)) {
+          return false; // Don't show login/register to logged-in users
+        }
+        return true;
+      } else {
+        // For logged-out users, only show loggedOutRoutes
+        return item.path ? this.loggedOutRoutes.includes(item.path) : false;
+      }
     } else {
       // Legacy behavior: if no showInMenu property, check for icon (but this is being phased out)
       // Routes without showInMenu and without icon should be hidden
