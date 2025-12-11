@@ -31,17 +31,6 @@
           }
           }
         </div>
-        <div class="push-down">
-          <mat-list-item class="mat-link log-out-btn" tabindex="0" (click)="logout()" (keydown.enter)="logout()"
-            (keydown.space)="logout()">
-            <div class="route-link">
-              <mat-icon aria-label="Logout">logout</mat-icon>
-              @if (!this.minimized) {
-              <div class="route-title">Logout</div>
-              }
-            </div>
-          </mat-list-item>
-        </div>
       </mat-nav-list>
       <img class="openCollapseSidebar" src="/openSidebaricon.svg" alt="icon" (click)="toggleSecondSidebar()"
         (keydown.enter)="toggleSecondSidebar()" (keydown.space)="toggleSecondSidebar()" tabindex="0"
@@ -251,13 +240,14 @@
             {{ this.userService.userDetails()?.username }}
           </button>
           <mat-menu #profileMenu="matMenu" class="profile-menu">
-            <div class="profile-header">
-              <mat-icon class="profile-icon">account_circle</mat-icon>
-              <div class="profile-name">
-                <p>{{ this.userService.userDetails()?.username }}</p>
-                <span>{{ this.userService.userDetails()?.email }}</span>
+            <div class="profile-header" mat-menu-item disabled>
+              <mat-icon class="profile-avatar-icon">account_circle</mat-icon>
+              <div class="profile-info">
+                <span class="profile-username">{{ this.userService.userDetails()?.username }}</span>
+                <span class="profile-email">{{ this.userService.userDetails()?.email }}</span>
               </div>
             </div>
+            <mat-divider />
             <button mat-menu-item [routerLink]="['/profile']">
               <mat-icon>settings</mat-icon>
               <span>Account Settings</span>
@@ -272,31 +262,17 @@
             </button>
             <button mat-menu-item (click)="openRedeemGiftCodeDialog()">
               <mat-icon>redeem</mat-icon>
-              <span>Gift Code</span>
+              <span>Redeem Gift Code</span>
             </button>
-            <button mat-menu-item class="theme-toggle-card">
-              <div
-                class="left"
-                tabindex="0"
-                role="button"
-                (click)="$event.stopPropagation()"
-                (keyup.enter)="$event.stopPropagation()"
-                (keyup.space)="$event.stopPropagation()"
-              >
-                <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-                <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
-              </div>
-              <mat-slide-toggle
-                [checked]="currentTheme() === 'dark'"
-                (change)="switchTheme($event.checked ? 'dark' : 'light')"
-                aria-label="Theme toggle" />
+            <mat-divider />
+            <button mat-menu-item (click)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')">
+              <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+              <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
             </button>
-            <button class="logout-btn" mat-menu-item (click)="logout()">
-              <div class="left">
-                <mat-icon>logout</mat-icon>
-                <span>Logout</span>
-              </div>
-              <span class="email">{{ this.userService.userDetails()?.email }}</span>
+            <mat-divider />
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Logout</span>
             </button>
           </mat-menu>
         </span>

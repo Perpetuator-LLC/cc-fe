@@ -120,6 +120,9 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   isEditing = false;
   private savedScrollPosition = 0;
   protected selectedTabIndex = 0;
+  // Debounce flags for create episode buttons
+  protected creatingNewsEpisode = false;
+  protected creatingResearchEpisode = false;
   private readonly tabNames = [
     'episodes',
     'settings',
@@ -1126,9 +1129,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   createNewsEpisode() {
+    if (this.creatingNewsEpisode) {
+      return; // Prevent double-click
+    }
+    this.creatingNewsEpisode = true;
+
     this.subscriptions.add(
       this.podcastsService.createLatestNewsEpisodeChain(this.podcastUuid).subscribe({
         next: (data) => {
+          this.creatingNewsEpisode = false;
           if (!data.jobs || data.jobs.length === 0) {
             this.messageService.error('Failed to create latest episode: No jobs returned');
             return;
@@ -1139,6 +1148,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           });
         },
         error: (err: { message: string }) => {
+          this.creatingNewsEpisode = false;
           this.messageService.error(err.message);
         },
       }),
@@ -1146,9 +1156,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   createResearchEpisode() {
+    if (this.creatingResearchEpisode) {
+      return; // Prevent double-click
+    }
+    this.creatingResearchEpisode = true;
+
     this.subscriptions.add(
       this.researchService.createResearchChain(this.podcastUuid).subscribe({
         next: (data) => {
+          this.creatingResearchEpisode = false;
           if (!data.jobs || data.jobs.length === 0) {
             this.messageService.error('Failed to start research: No jobs returned');
             return;
@@ -1159,6 +1175,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           });
         },
         error: (err: { message: string }) => {
+          this.creatingResearchEpisode = false;
           this.messageService.error(`Failed to start research: ${err.message}`);
         },
       }),

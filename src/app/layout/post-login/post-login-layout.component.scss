@@ -11,17 +11,40 @@ mat-sidenav-content mat-toolbar {
   }
 }
 
-//.profile-menu {
-//  .mat-icon {
-//    //font-size: 64px;
-//    //width: 64px;
-//    //height: 64px;
-//    //margin-right: 16px;
-//    //color: var(--md-sys-color-on-surface);
-//    margin: 0;
-//    color: var(--md-sys-color-on-surface);
-//  }
-//}
+// Profile Menu Styling
+.profile-header {
+  cursor: default;
+
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  padding: 16px;
+
+  .profile-avatar-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; // MD3 4px grid
+
+    .profile-username {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .profile-email {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+}
 
 .main-header {
   height: auto;
