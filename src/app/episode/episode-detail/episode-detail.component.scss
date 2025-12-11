@@ -236,9 +236,6 @@
 }
 
 .episode-control {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center; // Vertically center icon and text
   margin-bottom: 1em;
 
   &:disabled {
@@ -248,10 +245,19 @@
     background-color: var(--md-sys-color-surface-container-high);
   }
 
+  // Ensure the button label (which wraps icon + text) uses row layout
+  .mdc-button__label {
+    display: inline-flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
   // Ensure SVG icons are vertically aligned
   app-svg-icon,
   mat-icon {
-    display: flex;
+    display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
   }
