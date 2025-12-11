@@ -49,19 +49,15 @@
     </div>
     <div class="bottom-header">
       <div class="status-summary">
-        <div class="status-item">
+        <a [routerLink]="['/media/podcasts', episodeForm.get('podcast.uuid')?.value]" class="resource-tag podcast-tag">
           <mat-icon>podcasts</mat-icon>
-          <a [routerLink]="['/media/podcasts', episodeForm.get('podcast.uuid')?.value]" class="status-link">
-            {{ episodeForm.get('podcast.name')?.value }}
-          </a>
-        </div>
+          {{ episodeForm.get('podcast.name')?.value }}
+        </a>
         @if (topic) {
-        <div class="status-item">
+        <a [routerLink]="['/media/topics', topic.uuid]" class="resource-tag topic-tag" matTooltip="View the research topic that generated this episode">
           <mat-icon>psychology</mat-icon>
-          <a [routerLink]="['/media/topics', topic.uuid]" class="status-link" matTooltip="View the research topic that generated this episode">
-            {{ topic.title }}
-          </a>
-        </div>
+          {{ topic.title }}
+        </a>
         }
         <div class="status-item">
           <mat-icon>notes</mat-icon>
