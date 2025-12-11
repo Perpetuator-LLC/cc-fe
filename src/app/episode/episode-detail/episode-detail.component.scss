@@ -5,50 +5,20 @@
   display: none;
 }
 
-// Status summary section - matches topic-detail metadata styling
+// Status summary section - uses shared metadata mixins
 .status-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  padding: 16px 0;
+  @include mixins.metadata-section();
 
   .status-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    @include mixins.metadata-item();
 
-    padding: 8px 16px;
-    border-radius: 8px;
-
-    background: var(--md-sys-color-surface-container);
-  }
-
-  .status-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface-variant);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .status-value {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--md-sys-color-primary);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
+    mat-icon {
+      color: var(--md-sys-color-on-surface-variant);
     }
   }
 
-  // Non-link values
-  span.status-value {
-    color: var(--md-sys-color-on-surface);
-
-    &:hover {
-      text-decoration: none;
-    }
+  .status-link {
+    @include mixins.metadata-link();
   }
 }
 

@@ -1065,3 +1065,65 @@ $button-border-radius: 8px;
   background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
 }
 
+// ============================================================================
+// METADATA SECTIONS
+// ============================================================================
+// Provides consistent metadata styling for detail pages (episodes, topics, etc.)
+// Uses inline layout with icons and MD3 design tokens.
+//
+// Usage in SCSS:
+//   .metadata { @include metadata-section; }
+//   .meta-item { @include metadata-item; }
+// ============================================================================
+
+/// Container for metadata items - horizontal flex layout
+@mixin metadata-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+/// Individual metadata item with icon support
+@mixin metadata-item {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+/// Metadata link styling
+@mixin metadata-link {
+  font-weight: 500;
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/// Metadata label (for card-style metadata)
+@mixin metadata-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/// Metadata value
+@mixin metadata-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}

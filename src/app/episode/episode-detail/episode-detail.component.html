@@ -50,36 +50,32 @@
     <div class="bottom-header">
       <div class="status-summary">
         <div class="status-item">
-          <span class="status-label">Podcast</span>
-          <a [routerLink]="['/media/podcasts', episodeForm.get('podcast.uuid')?.value]" class="status-value">
+          <mat-icon>podcasts</mat-icon>
+          <a [routerLink]="['/media/podcasts', episodeForm.get('podcast.uuid')?.value]" class="status-link">
             {{ episodeForm.get('podcast.name')?.value }}
           </a>
         </div>
         @if (topic) {
         <div class="status-item">
-          <span class="status-label">Research Topic</span>
-          <a [routerLink]="['/media/topics', topic.uuid]" class="status-value" matTooltip="View the research topic that generated this episode">
+          <mat-icon>psychology</mat-icon>
+          <a [routerLink]="['/media/topics', topic.uuid]" class="status-link" matTooltip="View the research topic that generated this episode">
             {{ topic.title }}
           </a>
         </div>
         }
         <div class="status-item">
-          <span class="status-label">Word Count</span>
-          <span class="status-value">
-            {{ wordCount }}
-          </span>
+          <mat-icon>notes</mat-icon>
+          <span>{{ wordCount }} words</span>
         </div>
         <div class="status-item">
-          <span class="status-label">Character Count</span>
-          <span class="status-value">
-            {{ charCount }}
-          </span>
+          <mat-icon>text_fields</mat-icon>
+          <span>{{ charCount }} characters</span>
         </div>
-
         <div class="status-item">
-          <span class="status-label">Generated On</span>
-          <span class="status-value" [matTooltip]="episodeForm.get('date')?.value | date: 'z'"
-            matTooltipPosition="above">{{ episodeForm.get('date')?.value | date: 'short' : 'local' }}</span>
+          <mat-icon>calendar_today</mat-icon>
+          <span [matTooltip]="episodeForm.get('date')?.value | date: 'z'" matTooltipPosition="above">
+            {{ episodeForm.get('date')?.value | date: 'short' : 'local' }}
+          </span>
         </div>
       </div>
     </div>
