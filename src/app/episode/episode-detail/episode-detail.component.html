@@ -18,8 +18,19 @@
       <div class="title">
         <h2>{{ episodeForm.get('title')?.value || 'N/A' }}</h2>
       </div>
-      <div class="buttons">
-        @if (episodeForm.get('isLive')?.value && episodeForm.get('podcast.enabled')?.value) {
+      <div class="header-actions">
+        @if (hasAnyVersionWithAudio() || episodeForm.get('isLive')?.value) {
+          <div class="publish-toggle">
+            <mat-checkbox
+              formControlName="isLive"
+              (change)="onIsLiveChange($event.checked)"
+              matTooltip="When checked, this episode is published publicly on all associated platforms (RSS feed, website, etc.). The RSS feed will use the most recent audio that was generated.">
+              Live on Podcast
+            </mat-checkbox>
+          </div>
+        }
+        @if (isSavedAsLive()) {
+          <mat-divider vertical />
           <app-share-buttons
             [shareUrl]="getPublicShareUrl()"
             [title]="episodeForm.get('title')?.value || ''"
@@ -27,24 +38,18 @@
             [compact]="true"
           />
         }
-        @if (hasAnyVersionWithAudio() || episodeForm.get('isLive')?.value) {
-        <mat-checkbox
-          formControlName="isLive"
-          (change)="onIsLiveChange($event.checked)"
-          matTooltip="When checked, this episode is published publicly on all associated platforms (RSS feed, website, etc.). The RSS feed will use the most recent audio that was generated.">
-          Live on Podcast
-        </mat-checkbox>
-        }
-        <span [matTooltip]="getUpdateButtonTooltip()" class="button-wrapper">
-          <button (click)="updateEpisode()" mat-flat-button class="btn-secondary episode-control save-btn"
-            type="button" [disabled]="!hasUnsavedChanges">
-            Update
+        <mat-divider vertical />
+        <div class="action-buttons">
+          <button mat-flat-button color="primary" (click)="updateEpisode()" type="button"
+            [disabled]="!hasUnsavedChanges" [matTooltip]="getUpdateButtonTooltip()">
+            <mat-icon>save</mat-icon>
+            Save
           </button>
-        </span>
-        <button (click)="deleteEpisode()" mat-button class="btn-error-text episode-control delete-btn"
-          type="button">
-          Delete
-        </button>
+          <button mat-stroked-button color="warn" (click)="deleteEpisode()" type="button">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        </div>
       </div>
     </div>
     <div class="bottom-header">

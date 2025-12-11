@@ -13,6 +13,7 @@ import { MatInput } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatDivider } from '@angular/material/divider';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
 import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
@@ -58,6 +59,7 @@ interface EditableFormValues {
     MatInput,
     MatIcon,
     MatCheckbox,
+    MatDivider,
     ReactiveFormsModule,
     RouterLink,
     SvgIconComponent,
@@ -922,6 +924,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     // and we've already warned them - no need to warn again on subsequent edits
     const currentVersionHasAudio = this.audioSrc !== null;
     return isLive && currentVersionHasAudio;
+  }
+
+  /**
+   * Check if the episode is saved as live (not just the form checkbox)
+   * Used for showing share buttons - only show when actually published
+   */
+  public isSavedAsLive(): boolean {
+    // If we have saved form values, use those (most accurate)
+    if (this.initialFormValues) {
+      return this.initialFormValues.isLive;
+    }
+    // Fallback to form value during initial load
+    return this.episodeForm.get('isLive')?.value ?? false;
   }
 
   private showLiveEditWarning(): void {

@@ -731,31 +731,78 @@
   margin-top: -20px;
   padding: 32px 72px;
   background-color: var(--md-sys-color-surface-container);
+}
 
-  .detail-header {
-    margin-bottom: 40px;
+.podcast-detail-page .detail-header {
+  margin-bottom: 40px;
+}
 
-    .top-header {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-      justify-content: space-between;
+.podcast-detail-page .top-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
 
-      margin-bottom: 32px;
+  margin-bottom: 32px;
+}
 
-      .title {
-        h2 {
-          max-width: 700px;
-          margin-top: 0;
-          margin-bottom: 12px;
+.podcast-detail-page .top-header .title h2 {
+  max-width: 700px;
+  margin-top: 0;
+  margin-bottom: 12px;
 
-          font-size: 32px;
-          font-weight: 600;
-          color: var(--md-sys-color-on-surface);
-        }
-      }
-    }
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Header actions bar - contains publish toggle, share buttons, and action buttons
+.header-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  align-items: center;
+
+  padding: 8px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  @include mixins.mobile() {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
   }
+}
+
+.header-actions mat-divider[vertical] {
+  height: 24px;
+
+  @include mixins.mobile() {
+    display: none;
+  }
+}
+
+.header-actions .publish-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions .publish-toggle mat-checkbox {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.header-actions .action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-actions .action-buttons button mat-icon {
+  margin-right: 4px;
+  font-size: 18px;
 }
 
 // Flattened: Empty state selectors
