@@ -710,76 +710,78 @@
 // ELEVATION / SHADOW MIXINS
 // ============================================================================
 // Provides consistent elevation/shadow styling for raised buttons and FABs.
-// Uses MD3 shadow color token which adapts to light/dark mode.
+// Uses a "smoked glass" aesthetic with crisp edges and subtle inner glow.
 //
 // Usage in SCSS:
 //   .my-raised-button { @include elevation-raised; }
 //   .my-fab { @include elevation-fab; }
 // ============================================================================
 
-/// Raised button elevation - subtle shadow for elevated appearance
+/// Raised button elevation - crisp smoked glass edge effect
 @mixin elevation-raised {
+  // Crisp edge shadow (tight, minimal blur) + subtle outer glow
   box-shadow:
-    0 3px 3px -2px var(--md-sys-color-shadow),
-    0 3px 4px 0 var(--md-sys-color-shadow),
-    0 1px 8px 0 var(--md-sys-color-shadow);
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent),
+    0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 60%, transparent),
+    0 2px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 40%, transparent);
 
   &:hover:not(:disabled) {
     box-shadow:
-      0 3px 5px -1px var(--md-sys-color-shadow),
-      0 5px 8px 0 var(--md-sys-color-shadow),
-      0 1px 14px 0 var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent),
+      0 2px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 70%, transparent),
+      0 4px 8px 0 color-mix(in srgb, var(--md-sys-color-shadow) 50%, transparent);
   }
 
   &:active:not(:disabled) {
     box-shadow:
-      0 5px 5px -3px var(--md-sys-color-shadow),
-      0 8px 10px 1px var(--md-sys-color-shadow),
-      0 3px 14px 2px var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 15%, transparent),
+      0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 80%, transparent);
   }
 }
 
-/// FAB elevation - more prominent shadow for floating action buttons
+/// FAB elevation - more prominent smoked glass effect for floating action buttons
 @mixin elevation-fab {
+  // Crisp edge + layered shadow for depth
   box-shadow:
-    0 3px 5px -1px var(--md-sys-color-shadow),
-    0 6px 10px 0 var(--md-sys-color-shadow),
-    0 1px 18px 0 var(--md-sys-color-shadow);
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 10%, transparent),
+    0 2px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 60%, transparent),
+    0 4px 8px 0 color-mix(in srgb, var(--md-sys-color-shadow) 40%, transparent),
+    0 6px 12px 0 color-mix(in srgb, var(--md-sys-color-shadow) 25%, transparent);
 
   &:hover:not(:disabled) {
     box-shadow:
-      0 5px 5px -3px var(--md-sys-color-shadow),
-      0 8px 10px 1px var(--md-sys-color-shadow),
-      0 3px 14px 2px var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 15%, transparent),
+      0 4px 8px 0 color-mix(in srgb, var(--md-sys-color-shadow) 70%, transparent),
+      0 8px 16px 0 color-mix(in srgb, var(--md-sys-color-shadow) 50%, transparent),
+      0 12px 24px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent);
   }
 
   &:active:not(:disabled) {
     box-shadow:
-      0 7px 8px -4px var(--md-sys-color-shadow),
-      0 12px 17px 2px var(--md-sys-color-shadow),
-      0 5px 22px 4px var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 18%, transparent),
+      0 2px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 80%, transparent),
+      0 4px 8px 0 color-mix(in srgb, var(--md-sys-color-shadow) 60%, transparent);
   }
 }
 
 /// Mini FAB elevation - slightly less prominent than regular FAB
 @mixin elevation-mini-fab {
   box-shadow:
-    0 3px 3px -2px var(--md-sys-color-shadow),
-    0 3px 4px 0 var(--md-sys-color-shadow),
-    0 1px 8px 0 var(--md-sys-color-shadow);
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent),
+    0 1px 3px 0 color-mix(in srgb, var(--md-sys-color-shadow) 60%, transparent),
+    0 3px 6px 0 color-mix(in srgb, var(--md-sys-color-shadow) 40%, transparent);
 
   &:hover:not(:disabled) {
     box-shadow:
-      0 3px 5px -1px var(--md-sys-color-shadow),
-      0 6px 10px 0 var(--md-sys-color-shadow),
-      0 1px 18px 0 var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent),
+      0 2px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 70%, transparent),
+      0 4px 8px 0 color-mix(in srgb, var(--md-sys-color-shadow) 50%, transparent);
   }
 
   &:active:not(:disabled) {
     box-shadow:
-      0 5px 5px -3px var(--md-sys-color-shadow),
-      0 8px 10px 1px var(--md-sys-color-shadow),
-      0 3px 14px 2px var(--md-sys-color-shadow);
+      0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 15%, transparent),
+      0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 80%, transparent);
   }
 }
 
