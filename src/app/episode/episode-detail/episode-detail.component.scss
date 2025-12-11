@@ -5,6 +5,53 @@
   display: none;
 }
 
+// Status summary section - matches topic-detail metadata styling
+.status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 16px 0;
+
+  .status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    padding: 8px 16px;
+    border-radius: 8px;
+
+    background: var(--md-sys-color-surface-container);
+  }
+
+  .status-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // Non-link values
+  span.status-value {
+    color: var(--md-sys-color-on-surface);
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
 // Mixins
 @mixin primary-button {
   display: inline-flex;
@@ -189,6 +236,9 @@
 }
 
 .episode-control {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center; // Vertically center icon and text
   margin-bottom: 1em;
 
   &:disabled {
@@ -196,6 +246,14 @@
     color: var(--md-sys-color-on-surface-variant);
     opacity: 0.6;
     background-color: var(--md-sys-color-surface-container-high);
+  }
+
+  // Ensure SVG icons are vertically aligned
+  app-svg-icon,
+  mat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

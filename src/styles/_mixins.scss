@@ -4,6 +4,18 @@
 // All colors use MD3 design tokens from theme files
 
 // ============================================================================
+// Accessibility Utilities
+// ============================================================================
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+// ============================================================================
 // Responsive Breakpoints
 // ============================================================================
 @mixin mobile {
@@ -561,26 +573,26 @@
 @mixin episode-tag {
   @include tag-button-base();
 
-  // Outlined style for dark mode visibility
+  // Outlined style with subtle background for visibility
   border: 1px solid var(--md-sys-color-tertiary);
   color: var(--md-sys-color-tertiary);
-  background: transparent;
+  background: color-mix(in srgb, var(--md-sys-color-tertiary) 5%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-sys-color-tertiary) 10%, transparent);
+    background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent);
   }
 }
 
 @mixin topic-tag {
   @include tag-button-base();
 
-  // Outlined style for dark mode visibility
+  // Outlined style with subtle background for visibility
   border: 1px solid var(--md-extended-color-success-color);
   color: var(--md-extended-color-success-color);
-  background: transparent;
+  background: color-mix(in srgb, var(--md-extended-color-success-color) 5%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-extended-color-success-color) 10%, transparent);
+    background: color-mix(in srgb, var(--md-extended-color-success-color) 15%, transparent);
   }
 }
 
