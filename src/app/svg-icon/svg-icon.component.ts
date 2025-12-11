@@ -1,12 +1,13 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Input, OnInit, ElementRef } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-svg-icon',
   standalone: true,
-  template: `<span [innerHTML]="svgContent"></span>`,
+  templateUrl: './svg-icon.component.html',
+  styleUrl: './svg-icon.component.scss',
 })
 export class SvgIconComponent implements OnInit {
   @Input() icon!: string;
@@ -17,7 +18,6 @@ export class SvgIconComponent implements OnInit {
   constructor(
     private sanitizer: DomSanitizer,
     private http: HttpClient,
-    private elRef: ElementRef,
   ) {}
 
   ngOnInit(): void {
