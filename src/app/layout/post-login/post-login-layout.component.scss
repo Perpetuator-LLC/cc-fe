@@ -354,29 +354,33 @@ mat-nav-list {
   }
 }
 
-.website-logo {
-  display: flex;
-  flex-direction: column;
-  gap: 4px; // MD3 4px grid: 3px → 4px
-  align-items: center;
-  justify-content: center;
-
-  text-decoration: none;
-
-  // Hide the "Home" text - just show the logo icon
-  .route-title {
-    display: none;
-  }
-
-  &.active-link {
-    @include mixins.nav-item-active();
-  }
-}
-
 .mat-link {
   height: auto;
   padding: 12px;
   border-radius: 0;
+
+  // Home logo link gets the same height as nav items
+  &.website-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+
+    height: 64px;
+    padding: 0 12px;
+
+    text-decoration: none;
+
+    // Hide the "Home" text - just show the logo icon
+    .route-title {
+      display: none;
+    }
+
+    &.active-link {
+      @include mixins.nav-item-active();
+    }
+  }
 }
 
 .mat-link.mdc-list-item--activated {
