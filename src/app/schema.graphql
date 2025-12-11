@@ -2552,6 +2552,9 @@ type ApiMutation {
   """
   createStripeCheckoutSession(amount: Int!): CreateStripeCheckoutSession
 
+  """Grant credits to all existing users. Admin only."""
+  grantCreditsToAllUsers(creditAmount: Int!, description: String): GrantCreditsToAllUsers
+
   """Mutation to update user settings."""
   updateUserSetting(key: String!, value: String!): UpdateUserSetting
 
@@ -3250,6 +3253,13 @@ type CreateStripeCheckoutSession {
   success: Boolean
   message: String
   order: OrderType
+}
+
+"""Grant credits to all existing users. Admin only."""
+type GrantCreditsToAllUsers {
+  success: Boolean
+  message: String
+  usersUpdated: Int
 }
 
 """Mutation to update user settings."""

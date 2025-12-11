@@ -1,47 +1,47 @@
 // Copyright (c) 2025 Perpetuator LLC
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, inject } from '@angular/core';
 import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { setContext } from '@apollo/client/link/context';
 import { environment } from '../environments/environment';
-import { OAuthService } from './auth/oauth.service';
-import { Injectable } from '@angular/core';
-import { switchMap } from 'rxjs/operators';
+import { TokenStorageService } from './auth/token-storage.service';
 import { cachePolicyRegistry } from './cache-policies';
 
 const uri = environment.API_URL + '/graphql/';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class ApolloAuthMiddleware {
-  constructor(private authService: OAuthService) {}
+/**
+ * Apollo GraphQL configuration
+ *
+ * Architecture (per AUTH_COOKIE_CROSS_DOMAIN.md):
+ * - Sends Authorization: Bearer <token> header for authentication
+ * - Sends credentials: 'include' for logged_in cookie (cross-subdomain)
+ * - Backend validates the Bearer token, NOT the cookie
+ */
+export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
+  const tokenStorage = inject(TokenStorageService);
 
-  createAuthMiddleware() {
-    // @ts-expect-error: Suppressing TS2345 due to type mismatch in ApolloLink middleware
-    return new ApolloLink((operation, forward) => {
-      return this.authService.getTokenObservable().pipe(
-        switchMap((token) => {
-          operation.setContext({
-            headers: {
-              Authorization: token ? `Bearer ${token}` : '',
-            },
-          });
-          return forward(operation);
-        }),
-      );
-    });
-  }
-}
+  // Auth link adds Authorization header
+  const authLink = setContext((_, { headers }) => {
+    const token = tokenStorage.getAccessToken();
+    const isExpired = tokenStorage.isAccessTokenExpired();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function apolloOptionsFactory(apolloAuthMiddleware: ApolloAuthMiddleware): ApolloClientOptions<any> {
-  const uploadLink = createUploadLink({ uri });
+    return {
+      headers: {
+        ...headers,
+        authorization: token && !isExpired ? `Bearer ${token}` : '',
+      },
+    };
+  });
 
-  const authMiddleware = apolloAuthMiddleware.createAuthMiddleware();
+  // Upload link with credentials for cookies
+  const uploadLink = createUploadLink({
+    uri,
+    credentials: 'include', // For logged_in cookie
+  });
 
   return {
-    link: authMiddleware.concat(uploadLink),
+    link: ApolloLink.from([authLink, uploadLink]),
     cache: new InMemoryCache({
       typePolicies: cachePolicyRegistry.getAll(),
     }),
@@ -50,10 +50,8 @@ export function apolloOptionsFactory(apolloAuthMiddleware: ApolloAuthMiddleware)
 
 export const graphqlProvider: ApplicationConfig['providers'] = [
   Apollo,
-  ApolloAuthMiddleware,
   {
     provide: APOLLO_OPTIONS,
     useFactory: apolloOptionsFactory,
-    deps: [ApolloAuthMiddleware],
   },
 ];
