@@ -7,7 +7,14 @@ cd REPO_DIR && yarn build 2>&1 | tee logs/build.log
 
 Do not use command line tools to edit or read files, use your functions that you have for file operations.
 
+## Documentation Locations
+- **`notes/`** - Internal documentation, guides, and technical notes
+- **`docs/`** - Public-facing documentation only
+- **`logs/ai_edits/`** - AI session logs and change summaries
+
 **📖 Complete Theme Guide:** See `notes/MD3_COMPREHENSIVE_THEME_GUIDE.md` for full documentation.
+
+**🔐 Auth Guide:** See `notes/integrations/AUTH_COOKIE_GUIDE.md` for HTTP-only cookie authentication.
 
 **🚫 NO INLINE TEMPLATES/STYLES:** ESLint enforces external `templateUrl` and `styleUrl` only. See `docs/eslint-no-inline-templates-styles.md`
 * It is too hard to do SCSS linting and MD3 compliance checks with inline styles.
