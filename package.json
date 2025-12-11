@@ -43,7 +43,7 @@
       "yarn check-copyright"
     ],
     "*.scss": [
-      "stylelint --fix",
+      "stylelint --fix --allow-empty-input",
       "yarn check-copyright"
     ]
   },
