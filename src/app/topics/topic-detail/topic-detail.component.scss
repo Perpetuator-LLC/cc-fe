@@ -68,6 +68,38 @@
         @include mixins.metadata-link();
       }
     }
+
+    // Resource tags for podcast and episode links
+    .resource-tag {
+      cursor: pointer;
+
+      display: inline-flex;
+      flex-shrink: 0;
+      gap: 4px;
+      align-items: center;
+
+      height: 28px;
+      padding: 4px 12px;
+      border-radius: 8px;
+
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+      }
+
+      &.podcast-tag {
+        @include mixins.podcast-tag();
+      }
+
+      &.episode-tag {
+        @include mixins.episode-tag();
+      }
+    }
   }
 }
 

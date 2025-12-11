@@ -31,19 +31,15 @@
       <p class="description">{{ topic.description }}</p>
       }
       <div class="metadata">
-        <span class="meta-item">
+        <a [routerLink]="['/media/podcasts', topic.podcast.uuid]" class="resource-tag podcast-tag">
           <mat-icon>podcasts</mat-icon>
-          <a [routerLink]="['/media/podcasts', topic.podcast.uuid]" class="podcast-link">
-            {{ topic.podcast.name }}
-          </a>
-        </span>
+          {{ topic.podcast.name }}
+        </a>
         @if (topic.episode) {
-        <span class="meta-item">
+        <a [routerLink]="['/media/episodes', topic.episode.uuid]" class="resource-tag episode-tag">
           <mat-icon>mic</mat-icon>
-          <a [routerLink]="['/media/episodes', topic.episode.uuid]" class="episode-link">
-            {{ topic.episode.title }}
-          </a>
-        </span>
+          {{ topic.episode.title }}
+        </a>
         }
         <span class="meta-item">
           <mat-icon>calendar_today</mat-icon>
