@@ -1297,6 +1297,9 @@ body .toolbar-container {
 
 // Remove rounded state layer from all list items in navigation
 mat-nav-list {
+  // Override MDC list item height for main navigation menu
+  --mat-list-list-item-one-line-container-height: 64px;
+
   // Override MDC list item activated colors to use primary (blue) not secondary (orange)
   --mdc-list-list-item-selected-container-color: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
   --mdc-list-list-item-hover-state-layer-color: var(--md-sys-color-primary);

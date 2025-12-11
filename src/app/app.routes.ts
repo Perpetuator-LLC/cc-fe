@@ -358,26 +358,26 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./policy/privacy-policy/privacy-policy.component').then((c) => c.PrivacyPolicyComponent),
     title: 'Privacy',
-    data: {
-      icon: 'policy',
-    },
+    // data: {
+    //   icon: 'policy',
+    // },
   },
   {
     path: 'cookie-policy',
     loadComponent: () => import('./policy/cookie-policy/cookie-policy.component').then((c) => c.CookiePolicyComponent),
     title: 'Cookie Policy',
-    data: {
-      icon: 'cookie',
-    },
+    // data: {
+    //   icon: 'cookie',
+    // },
   },
   {
     path: 'terms-and-conditions',
     loadComponent: () =>
       import('./policy/terms-and-conditions/terms-and-conditions.component').then((c) => c.TermsAndConditionsComponent),
     title: 'Terms',
-    data: {
-      icon: 'gavel',
-    },
+    // data: {
+    //   icon: 'gavel',
+    // },
   },
 ];
 
