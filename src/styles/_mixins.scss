@@ -706,6 +706,83 @@
 }
 
 // ============================================================================
+// ELEVATION / SHADOW MIXINS
+// ============================================================================
+// Provides consistent elevation/shadow styling for raised buttons and FABs.
+// Uses MD3 shadow color token which adapts to light/dark mode.
+//
+// Usage in SCSS:
+//   .my-raised-button { @include elevation-raised; }
+//   .my-fab { @include elevation-fab; }
+// ============================================================================
+
+/// Raised button elevation - subtle shadow for elevated appearance
+@mixin elevation-raised {
+  box-shadow:
+    0 3px 3px -2px var(--md-sys-color-shadow),
+    0 3px 4px 0 var(--md-sys-color-shadow),
+    0 1px 8px 0 var(--md-sys-color-shadow);
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 3px 5px -1px var(--md-sys-color-shadow),
+      0 5px 8px 0 var(--md-sys-color-shadow),
+      0 1px 14px 0 var(--md-sys-color-shadow);
+  }
+
+  &:active:not(:disabled) {
+    box-shadow:
+      0 5px 5px -3px var(--md-sys-color-shadow),
+      0 8px 10px 1px var(--md-sys-color-shadow),
+      0 3px 14px 2px var(--md-sys-color-shadow);
+  }
+}
+
+/// FAB elevation - more prominent shadow for floating action buttons
+@mixin elevation-fab {
+  box-shadow:
+    0 3px 5px -1px var(--md-sys-color-shadow),
+    0 6px 10px 0 var(--md-sys-color-shadow),
+    0 1px 18px 0 var(--md-sys-color-shadow);
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 5px 5px -3px var(--md-sys-color-shadow),
+      0 8px 10px 1px var(--md-sys-color-shadow),
+      0 3px 14px 2px var(--md-sys-color-shadow);
+  }
+
+  &:active:not(:disabled) {
+    box-shadow:
+      0 7px 8px -4px var(--md-sys-color-shadow),
+      0 12px 17px 2px var(--md-sys-color-shadow),
+      0 5px 22px 4px var(--md-sys-color-shadow);
+  }
+}
+
+/// Mini FAB elevation - slightly less prominent than regular FAB
+@mixin elevation-mini-fab {
+  box-shadow:
+    0 3px 3px -2px var(--md-sys-color-shadow),
+    0 3px 4px 0 var(--md-sys-color-shadow),
+    0 1px 8px 0 var(--md-sys-color-shadow);
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 3px 5px -1px var(--md-sys-color-shadow),
+      0 6px 10px 0 var(--md-sys-color-shadow),
+      0 1px 18px 0 var(--md-sys-color-shadow);
+  }
+
+  &:active:not(:disabled) {
+    box-shadow:
+      0 5px 5px -3px var(--md-sys-color-shadow),
+      0 8px 10px 1px var(--md-sys-color-shadow),
+      0 3px 14px 2px var(--md-sys-color-shadow);
+  }
+}
+
+// ============================================================================
 // MD3 BUTTON STYLING SYSTEM
 // ============================================================================
 // Provides consistent button styling across the entire application.

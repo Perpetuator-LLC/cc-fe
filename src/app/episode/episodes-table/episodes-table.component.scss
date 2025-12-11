@@ -1,4 +1,5 @@
 /* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
 
 .status-container {
   display: flex;
@@ -7,23 +8,17 @@
 }
 
 .validated-icon {
+  @include mixins.icon-size(16px);
+  @include mixins.validation-icon-success();
+
   cursor: help;
-
-  width: 16px;
-  height: 16px;
-
-  font-size: 16px;
-  color: var(--md-sys-color-success);
 }
 
 .unvalidated-icon {
+  @include mixins.icon-size(16px);
+  @include mixins.validation-icon-warning();
+
   cursor: help;
-
-  width: 16px;
-  height: 16px;
-
-  font-size: 16px;
-  color: var(--md-sys-color-warning);
 }
 
 .no-results-message {
