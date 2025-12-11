@@ -91,9 +91,9 @@ html {
   --md-sys-color-surface-container-rgb: 39, 42, 49;   // matches #272a31
   --md-sys-color-surface-container-high-rgb: 49, 53, 60; // matches #31353c
   // Glass morphism backgrounds with transparency (pre-computed for component use)
-  // "Dirty smoked glass" - darker base color with high opacity for prominent effect
-  --md-sys-color-glass-surface: rgb(15 18 22 / 0.95);
-  --md-sys-color-glass-surface-high: rgb(20 23 28 / 0.95);
+  // "Dirty smoked glass" - dark charcoal with transparency to show blurred orbs through
+  --md-sys-color-glass-surface: rgb(20 23 28 / 0.75);
+  --md-sys-color-glass-surface-high: rgb(25 28 35 / 0.8);
   // stylelint-enable function-disallowed-list
 }
 
