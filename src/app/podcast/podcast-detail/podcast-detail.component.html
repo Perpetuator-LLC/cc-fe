@@ -79,15 +79,23 @@
       <div class="action-buttons">
         <span matTooltip="Creates an AI-generated episode using current news from your RSS feeds" class="button-wrapper">
           <button mat-flat-button color="accent" class="create-episode-button" (click)="createNewsEpisode()"
-            [disabled]="hasUnsavedChanges()">
-            <mat-icon>newspaper</mat-icon>
+            [disabled]="hasUnsavedChanges() || creatingNewsEpisode">
+            @if (creatingNewsEpisode) {
+              <mat-spinner diameter="18" />
+            } @else {
+              <mat-icon>newspaper</mat-icon>
+            }
             <span>News Episode</span>
           </button>
         </span>
         <span matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode" class="button-wrapper">
           <button mat-flat-button color="accent" class="create-episode-button research-button" (click)="createResearchEpisode()"
-            [disabled]="hasUnsavedChanges()">
-            <mat-icon>science</mat-icon>
+            [disabled]="hasUnsavedChanges() || creatingResearchEpisode">
+            @if (creatingResearchEpisode) {
+              <mat-spinner diameter="18" />
+            } @else {
+              <mat-icon>science</mat-icon>
+            }
             <span>Research Episode</span>
           </button>
         </span>

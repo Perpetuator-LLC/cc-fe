@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDivider } from '@angular/material/divider';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -48,6 +49,7 @@ import { LoadingService } from '../loading.service';
     MatSidenavModule,
     MatToolbarModule,
     MatProgressBarModule,
+    MatDivider,
     RouterLink,
     RouterLinkActive,
     MatTooltip,

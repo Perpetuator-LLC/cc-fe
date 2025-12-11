@@ -36,12 +36,12 @@
         </mat-checkbox>
         }
         <span [matTooltip]="getUpdateButtonTooltip()" class="button-wrapper">
-          <button (click)="updateEpisode()" mat-flat-button color="primary" class="episode-control save-btn"
+          <button (click)="updateEpisode()" mat-flat-button class="btn-secondary episode-control save-btn"
             type="button" [disabled]="!hasUnsavedChanges">
             Update
           </button>
         </span>
-        <button (click)="deleteEpisode()" mat-flat-button color="warn" class="episode-control delete-btn"
+        <button (click)="deleteEpisode()" mat-button class="btn-error-text episode-control delete-btn"
           type="button">
           Delete
         </button>

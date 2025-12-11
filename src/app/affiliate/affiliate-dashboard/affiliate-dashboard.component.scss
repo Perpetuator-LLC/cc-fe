@@ -635,7 +635,7 @@
 .brand-image-preview {
   position: relative;
   max-width: 300px;
-  margin-bottom: 16px;
+  margin: 0 auto 16px; // Center the preview horizontally
 
   img {
     display: block;
@@ -702,6 +702,8 @@
 }
 
 .upload-dropzone {
+  position: relative;
+
   margin-bottom: 16px;
   padding: 32px;
   border: 2px dashed var(--md-sys-color-outline-variant);
@@ -712,6 +714,18 @@
   background: var(--md-sys-color-surface-container);
 
   transition: all 0.3s ease;
+
+  // Hide file input (sr-only)
+  input[type='file'] {
+    position: absolute;
+
+    overflow: hidden;
+
+    width: 1px;
+    height: 1px;
+
+    clip-path: inset(50%); // Modern replacement for deprecated clip property
+  }
 
   &.dragging {
     transform: scale(1.02);

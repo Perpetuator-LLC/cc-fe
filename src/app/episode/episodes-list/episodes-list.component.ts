@@ -20,6 +20,7 @@ import { ResearchService, Topic } from '../../topics/research.service';
 import { NewsService } from '../../news/news.service';
 import { JobService, Job } from '../../jobs/job.service';
 import { LoadingService } from '../../layout/loading.service';
+import { PodcastsResult } from '../../podcast/podcasts.service';
 
 @Component({
   selector: 'app-episodes-list',
@@ -31,6 +32,7 @@ import { LoadingService } from '../../layout/loading.service';
 export class EpisodesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   topics: Topic[] = [];
+  podcasts: PodcastsResult[] = [];
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
@@ -49,6 +51,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
 
     this.loadTopics();
+    this.loadPodcasts();
   }
 
   ngOnDestroy() {
@@ -68,11 +71,27 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
     );
   }
 
+  loadPodcasts() {
+    this.subscriptions.add(
+      this.podcastsService.getPodcastsForFilter().subscribe({
+        next: (response) => {
+          // Filter to only podcasts where user has publisher or owner rights
+          this.podcasts = response.podcasts.filter((podcast) =>
+            podcast.team?.members.some((member) => member.role === 'publisher' || member.role === 'owner'),
+          );
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load podcasts: ${err.message}`);
+        },
+      }),
+    );
+  }
+
   openCreateEpisodeDialog() {
     const dialogRef = this.dialog.open(CreateEpisodeDialogComponent, {
       width: '600px',
       data: {
-        topics: this.topics,
+        podcasts: this.podcasts,
       },
     });
 
