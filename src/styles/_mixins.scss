@@ -561,38 +561,39 @@
 @mixin podcast-tag {
   @include tag-button-base();
 
+  // Outlined style with lighter primary (primary-container) for better visibility
   border: 1px solid var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-primary);
-  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 20%, transparent);
 
   &:hover {
-    background: var(--md-sys-color-primary-container);
+    background: color-mix(in srgb, var(--md-sys-color-primary-container) 40%, transparent);
   }
 }
 
 @mixin episode-tag {
   @include tag-button-base();
 
-  // Outlined style with subtle background for visibility
-  border: 1px solid var(--md-sys-color-tertiary);
-  color: var(--md-sys-color-tertiary);
-  background: color-mix(in srgb, var(--md-sys-color-tertiary) 5%, transparent);
+  // Outlined style with lighter purple (tertiary-container) for better visibility
+  border: 1px solid var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 20%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent);
+    background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 40%, transparent);
   }
 }
 
 @mixin topic-tag {
   @include tag-button-base();
 
-  // Outlined style with subtle background for visibility
-  border: 1px solid var(--md-extended-color-success-color);
-  color: var(--md-extended-color-success-color);
-  background: color-mix(in srgb, var(--md-extended-color-success-color) 5%, transparent);
+  // Outlined style with lighter success (success-container) for better visibility
+  border: 1px solid var(--md-extended-color-success-color-container);
+  color: var(--md-extended-color-success-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-success-color-container) 20%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-extended-color-success-color) 15%, transparent);
+    background: color-mix(in srgb, var(--md-extended-color-success-color-container) 40%, transparent);
   }
 }
 

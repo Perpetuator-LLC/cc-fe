@@ -124,10 +124,14 @@ body {
     &.mat-mdc-icon-button,
     &.mat-mdc-fab,
     &.mat-mdc-mini-fab,
+    &.mat-mdc-menu-item,
+    &.mat-mdc-list-item,
     &[mat-button],
     &[mat-raised-button],
     &[mat-flat-button],
-    &[mat-stroked-button] {
+    &[mat-stroked-button],
+    &[mat-menu-item],
+    &[mat-list-item] {
       color: inherit;
 
       &:hover {
