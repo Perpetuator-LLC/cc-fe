@@ -3,6 +3,7 @@ import { Injectable, effect } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
+import { marked } from 'marked';
 import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from '../../base.service';
 import { ErrorHandlerService } from '../../utils/error-handler.service';
@@ -253,31 +254,14 @@ export class PolicyService extends BaseService {
   }
 
   convertMarkdownToHtml(markdown: string): SafeHtml {
-    // Using a simple markdown conversion - in production, consider using 'marked' library
-    // For now, basic conversion:
-    let html = markdown
-      // Headers
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      // Bold
-      .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-      // Italic
-      .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-      // Links
-      .replace(/\[([^\]]+)]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
-      // Line breaks
-      .replace(/\n\n/gim, '</p><p>')
-      // Lists
-      .replace(/^\* (.*$)/gim, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    // Pre-process to preserve blank lines between sections (important for legal documents)
+    // Replace sequences of 2+ newlines with paragraph breaks plus line breaks
+    const processed = markdown.replace(/\n{2,}/g, '\n\n<br>\n\n');
 
-    // Wrap in paragraph tags if not already wrapped
-    if (!html.startsWith('<h') && !html.startsWith('<ul')) {
-      html = `<p>${html}</p>`;
-    }
+    // Parse with marked using breaks option for single newline handling
+    const html = marked.parse(processed, { breaks: true, async: false }) as string;
 
-    return this.sanitizer.sanitize(1, html) as SafeHtml;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   sanitizeHtml(html: string): SafeHtml {
