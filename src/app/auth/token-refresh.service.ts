@@ -1,11 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { TokenStorageService } from './token-storage.service';
+import { TraceService } from '../traces/trace.service';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -28,11 +29,25 @@ interface OAuth2TokenResponse {
   providedIn: 'root',
 })
 export class TokenRefreshService {
+  private traceService?: TraceService;
+
   constructor(
     private http: HttpClient,
     private tokenStorage: TokenStorageService,
     private router: Router,
+    private injector: Injector,
   ) {}
+
+  private getTraceService(): TraceService | null {
+    try {
+      if (!this.traceService) {
+        this.traceService = this.injector.get(TraceService);
+      }
+      return this.traceService;
+    } catch {
+      return null;
+    }
+  }
 
   /**
    * Refresh access token using OAuth2 refresh token grant
@@ -47,8 +62,6 @@ export class TokenRefreshService {
       client_id: environment.OAUTH_CLIENT_ID,
     });
 
-    // Use a minimal HTTP request that doesn't go through the auth interceptor
-    // to avoid infinite loops
     return this.http
       .post<OAuth2TokenResponse>(`${environment.OAUTH_ISSUER}/o/token/`, body.toString(), {
         headers: {
@@ -58,16 +71,15 @@ export class TokenRefreshService {
       })
       .pipe(
         tap((response) => {
-          console.log('[TokenRefresh] Storing new tokens (access + refresh)');
           this.storeTokens(response);
+          this.trackTokenRotation(response.expires_in);
         }),
         map(() => true),
         catchError((error) => {
-          console.error('[TokenRefresh] Refresh failed:', error);
+          this.trackTokenRefreshFailure(error);
 
           // Handle specific OAuth2 errors
           if (error.error?.error === 'invalid_grant') {
-            console.warn('[TokenRefresh] Refresh token is invalid or expired, logging out');
             this.handleLogout();
           }
 
@@ -83,16 +95,69 @@ export class TokenRefreshService {
   private storeTokens(response: OAuth2TokenResponse): void {
     const expiresAt = Date.now() + response.expires_in * 1000;
 
-    // Store both tokens - refresh token rotates with each refresh!
     this.tokenStorage.storeTokens({
       accessToken: response.access_token,
-      refreshToken: response.refresh_token, // NEW refresh token!
+      refreshToken: response.refresh_token,
       expiresAt: expiresAt,
       tokenType: response.token_type,
       scope: response.scope,
     });
+  }
 
-    console.log('[TokenRefresh] Tokens stored. Access expires at:', new Date(expiresAt).toISOString());
+  /**
+   * Track successful token rotation in telemetry
+   */
+  private trackTokenRotation(expiresIn: number): void {
+    const traceService = this.getTraceService();
+    if (traceService) {
+      traceService
+        .recordTrace({
+          kind: 'token_rotation',
+          severity: 'INFO',
+          message: 'Access token refreshed successfully',
+          functionName: 'refreshToken',
+          moduleName: 'TokenRefreshService',
+          inputs: {
+            expiresIn,
+            timestamp: new Date().toISOString(),
+          },
+          tags: {
+            event_type: 'token_refresh_success',
+          },
+        })
+        .subscribe();
+    }
+  }
+
+  /**
+   * Track token refresh failure in telemetry
+   */
+  private trackTokenRefreshFailure(error: unknown): void {
+    const traceService = this.getTraceService();
+    if (traceService) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorCode = (error as any)?.error?.error || 'unknown';
+
+      traceService
+        .recordTrace({
+          kind: 'auth_failure',
+          severity: 'WARNING',
+          message: 'Token refresh failed',
+          functionName: 'refreshToken',
+          moduleName: 'TokenRefreshService',
+          exceptionMessage: errorMessage,
+          inputs: {
+            errorCode,
+            timestamp: new Date().toISOString(),
+          },
+          tags: {
+            event_type: 'token_refresh_failure',
+            error_code: errorCode,
+          },
+        })
+        .subscribe();
+    }
   }
 
   /**
@@ -100,7 +165,6 @@ export class TokenRefreshService {
    */
   private handleLogout(): void {
     this.tokenStorage.clearTokens();
-    // Navigate to home - AuthGuard will redirect to login if needed
     this.router.navigate(['/']);
   }
 }
