@@ -168,39 +168,12 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     if (this.data.panelOpenState === undefined) {
       this.data.panelOpenState = false;
     }
-    this.loadJobs();
+    // Jobs are now loaded via WebSocket (jobs.initial message on connect)
+    // The constructor's toObservable(this.jobService.jobs) subscription handles updates
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-  }
-
-  loadJobs() {
-    const currentJobIds = this.jobs.map((job) => job.id);
-    this.subscriptions.add(
-      this.jobService
-        .getJobs(
-          [JobStatus.PENDING, JobStatus.RUNNING],
-          [
-            // JobKind.SUMMARIZE_NEWS,
-            // JobKind.FETCH_NEWS,
-            // JobKind.EXTRACT_NEWS,
-            // JobKind.CREATE_EPISODE,
-            // JobKind.UPDATE_EPISODE_AUDIO,
-          ],
-          currentJobIds,
-        )
-        .subscribe((result) => {
-          this.enrichJobsWithNames(result.jobs)
-            .then((enrichedJobs) => {
-              this.jobs = enrichedJobs;
-            })
-            .catch((error) => {
-              console.warn('Failed to enrich jobs with names:', error);
-              this.jobs = result.jobs.map((job) => ({ ...job }));
-            });
-        }),
-    );
   }
 
   deleteJob(id: string) {
