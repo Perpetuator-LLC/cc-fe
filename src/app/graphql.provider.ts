@@ -37,34 +37,28 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   async function refreshAndGetToken(): Promise<string | null> {
     const refreshToken = tokenStorage.getRefreshToken();
     if (!refreshToken) {
-      console.warn('[Apollo] No refresh token available');
       return null;
     }
 
     // If already refreshing, wait for the existing promise
     if (isRefreshingGraphQL && refreshPromise) {
-      console.log('[Apollo] Waiting for ongoing token refresh...');
       return refreshPromise;
     }
 
     isRefreshingGraphQL = true;
-    console.log('[Apollo] Starting token refresh...');
 
     refreshPromise = firstValueFrom(tokenRefreshService.refreshToken(refreshToken))
       .then((success) => {
         isRefreshingGraphQL = false;
         refreshPromise = null;
         if (success) {
-          console.log('[Apollo] Token refresh successful');
           return tokenStorage.getAccessToken();
         }
-        console.error('[Apollo] Token refresh failed');
         return null;
       })
-      .catch((error) => {
+      .catch(() => {
         isRefreshingGraphQL = false;
         refreshPromise = null;
-        console.error('[Apollo] Token refresh error:', error);
         return null;
       });
 
@@ -121,12 +115,13 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
         (err) =>
           err.extensions?.['code'] === 'UNAUTHENTICATED' ||
           err.message.toLowerCase().includes('not authenticated') ||
-          err.message.toLowerCase().includes('authentication required'),
+          err.message.toLowerCase().includes('authentication required') ||
+          err.message.toLowerCase().includes('authentication credentials invalid') ||
+          err.message.toLowerCase().includes('token not valid') ||
+          err.message.toLowerCase().includes('token is invalid or expired'),
       );
 
     if (isAuthError) {
-      console.log('[Apollo] Auth error detected, attempting token refresh...');
-
       // Return a new observable that refreshes token and retries
       return new ZenObservable((observer) => {
         refreshAndGetToken()
