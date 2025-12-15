@@ -4,11 +4,19 @@ import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig, inject } from '@angular/core';
 import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
+import { Observable as ZenObservable } from 'zen-observable-ts';
 import { environment } from '../environments/environment';
 import { TokenStorageService } from './auth/token-storage.service';
+import { TokenRefreshService } from './auth/token-refresh.service';
 import { cachePolicyRegistry } from './cache-policies';
+import { firstValueFrom } from 'rxjs';
 
 const uri = environment.API_URL + '/graphql/';
+
+// Shared state for managing concurrent refresh requests in GraphQL
+let isRefreshingGraphQL = false;
+let refreshPromise: Promise<string | null> | null = null;
 
 /**
  * Apollo GraphQL configuration
@@ -17,21 +25,144 @@ const uri = environment.API_URL + '/graphql/';
  * - Sends Authorization: Bearer <token> header for authentication
  * - Sends credentials: 'include' for logged_in cookie (cross-subdomain)
  * - Backend validates the Bearer token, NOT the cookie
+ * - Automatically refreshes token when expired or about to expire
  */
 export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   const tokenStorage = inject(TokenStorageService);
+  const tokenRefreshService = inject(TokenRefreshService);
 
-  // Auth link adds Authorization header
-  const authLink = setContext((_, { headers }) => {
+  /**
+   * Refresh the token and return the new access token
+   */
+  async function refreshAndGetToken(): Promise<string | null> {
+    const refreshToken = tokenStorage.getRefreshToken();
+    if (!refreshToken) {
+      console.warn('[Apollo] No refresh token available');
+      return null;
+    }
+
+    // If already refreshing, wait for the existing promise
+    if (isRefreshingGraphQL && refreshPromise) {
+      console.log('[Apollo] Waiting for ongoing token refresh...');
+      return refreshPromise;
+    }
+
+    isRefreshingGraphQL = true;
+    console.log('[Apollo] Starting token refresh...');
+
+    refreshPromise = firstValueFrom(tokenRefreshService.refreshToken(refreshToken))
+      .then((success) => {
+        isRefreshingGraphQL = false;
+        refreshPromise = null;
+        if (success) {
+          console.log('[Apollo] Token refresh successful');
+          return tokenStorage.getAccessToken();
+        }
+        console.error('[Apollo] Token refresh failed');
+        return null;
+      })
+      .catch((error) => {
+        isRefreshingGraphQL = false;
+        refreshPromise = null;
+        console.error('[Apollo] Token refresh error:', error);
+        return null;
+      });
+
+    return refreshPromise;
+  }
+
+  /**
+   * Check if we should proactively refresh the token
+   * Refresh if token is expired or will expire within 60 seconds
+   */
+  function shouldRefreshToken(): boolean {
     const token = tokenStorage.getAccessToken();
+    if (!token) {
+      return false;
+    }
+
+    const expiresAt = tokenStorage.getExpiresAt();
+    if (!expiresAt) {
+      return false;
+    }
+
+    // Refresh if token expires within 60 seconds
+    const refreshThreshold = 60000;
+    return Date.now() >= expiresAt - refreshThreshold;
+  }
+
+  // Auth link adds Authorization header (with proactive refresh)
+  const authLink = setContext(async (_, { headers }) => {
+    let token = tokenStorage.getAccessToken();
     const isExpired = tokenStorage.isAccessTokenExpired();
+
+    // Proactive refresh: refresh if token is expired or about to expire
+    if (shouldRefreshToken() || isExpired) {
+      const refreshToken = tokenStorage.getRefreshToken();
+      if (refreshToken) {
+        token = await refreshAndGetToken();
+      }
+    }
 
     return {
       headers: {
         ...headers,
-        authorization: token && !isExpired ? `Bearer ${token}` : '',
+        authorization: token ? `Bearer ${token}` : '',
       },
     };
+  });
+
+  // Error link handles 401s and retries with refreshed token
+  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+    // Check for authentication errors
+    const isAuthError =
+      (networkError && 'statusCode' in networkError && networkError.statusCode === 401) ||
+      graphQLErrors?.some(
+        (err) =>
+          err.extensions?.['code'] === 'UNAUTHENTICATED' ||
+          err.message.toLowerCase().includes('not authenticated') ||
+          err.message.toLowerCase().includes('authentication required'),
+      );
+
+    if (isAuthError) {
+      console.log('[Apollo] Auth error detected, attempting token refresh...');
+
+      // Return a new observable that refreshes token and retries
+      return new ZenObservable((observer) => {
+        refreshAndGetToken()
+          .then((newToken) => {
+            if (newToken) {
+              // Update the operation context with new token
+              const oldHeaders = operation.getContext()['headers'] || {};
+              operation.setContext({
+                headers: {
+                  ...oldHeaders,
+                  authorization: `Bearer ${newToken}`,
+                },
+              });
+
+              // Retry the request
+              const subscriber = forward(operation).subscribe({
+                next: observer.next.bind(observer),
+                error: observer.error.bind(observer),
+                complete: observer.complete.bind(observer),
+              });
+
+              return () => subscriber.unsubscribe();
+            } else {
+              // Token refresh failed, let the error propagate
+              observer.error(networkError || graphQLErrors?.[0]);
+              return undefined;
+            }
+          })
+          .catch((error) => {
+            observer.error(error);
+          });
+      });
+    }
+
+    // Not an auth error, don't retry
+    return;
   });
 
   // Upload link with credentials for cookies
@@ -41,7 +172,7 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   });
 
   return {
-    link: ApolloLink.from([authLink, uploadLink]),
+    link: ApolloLink.from([errorLink, authLink, uploadLink]),
     cache: new InMemoryCache({
       typePolicies: cachePolicyRegistry.getAll(),
     }),
