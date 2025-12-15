@@ -81,7 +81,6 @@ function handleTokenRefresh(
 
   // No refresh token available - can't refresh
   if (!refreshToken) {
-    console.warn('[TokenRefresh] No refresh token available, cannot refresh');
     return next(req);
   }
 
@@ -89,19 +88,15 @@ function handleTokenRefresh(
     isRefreshing = true;
     refreshTokenSubject.next(null);
 
-    console.log('[TokenRefresh] Starting token refresh...');
-
     return tokenRefreshService.refreshToken(refreshToken).pipe(
       switchMap((success) => {
         isRefreshing = false;
 
         if (success) {
           const newToken = tokenStorage.getAccessToken();
-          console.log('[TokenRefresh] Token refresh successful');
           refreshTokenSubject.next(newToken);
           return next(addAuthHeader(req, newToken));
         } else {
-          console.error('[TokenRefresh] Token refresh failed');
           refreshTokenSubject.next(null);
           return throwError(() => new Error('Token refresh failed'));
         }
@@ -109,13 +104,11 @@ function handleTokenRefresh(
       catchError((error) => {
         isRefreshing = false;
         refreshTokenSubject.next(null);
-        console.error('[TokenRefresh] Token refresh error:', error);
         return throwError(() => error);
       }),
     );
   } else {
     // Another request is already refreshing, wait for it
-    console.log('[TokenRefresh] Waiting for ongoing refresh...');
     return refreshTokenSubject.pipe(
       filter((token) => token !== null),
       take(1),
