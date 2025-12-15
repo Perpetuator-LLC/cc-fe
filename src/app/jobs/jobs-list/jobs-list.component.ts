@@ -12,6 +12,7 @@ import {
   stringToJobStatus,
   iconForJob,
 } from '../job.service';
+import { JobsWebSocketService } from '../jobs-websocket.service';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../../layout/toolbar.service';
@@ -101,6 +102,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   constructor(
     private jobService: JobService,
+    private jobsWebSocketService: JobsWebSocketService,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
     private podcastsService: PodcastsService,
@@ -108,7 +110,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private jobDisplayService: JobDisplayService,
     private researchService: ResearchService,
     private loadingService: LoadingService,
-  ) {}
+  ) {
+    // Subscribe to real-time job updates via WebSocket
+    this.subscriptions.add(
+      this.jobsWebSocketService.jobUpdates.subscribe({
+        next: ({ type, job }) => {
+          this.handleRealtimeJobUpdate(type, job);
+        },
+      }),
+    );
+  }
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
@@ -118,6 +129,47 @@ export class JobsListComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.loadingService.hide();
+  }
+
+  /**
+   * Handle real-time job updates from WebSocket
+   * Updates the jobs list if the job is on the current page
+   */
+  private handleRealtimeJobUpdate(type: string, job: Job): void {
+    const existingIndex = this.jobs.findIndex((j) => j.uuid === job.uuid);
+
+    if (existingIndex >= 0) {
+      // Job exists in current view - update it
+      this.enrichJobsWithNames([job])
+        .then((enrichedJobs) => {
+          const enrichedJob = enrichedJobs[0];
+          const updatedJobs = [...this.jobs];
+          updatedJobs[existingIndex] = enrichedJob;
+          this.jobs = updatedJobs;
+          this.dataSource.data = this.jobs;
+        })
+        .catch((error) => {
+          console.warn('Failed to enrich updated job:', error);
+          const updatedJobs = [...this.jobs];
+          updatedJobs[existingIndex] = { ...job };
+          this.jobs = updatedJobs;
+          this.dataSource.data = this.jobs;
+        });
+    } else if (type === 'jobs.created' && !this.currentCursor) {
+      // New job created and we're on the first page - add it to the top
+      this.enrichJobsWithNames([job])
+        .then((enrichedJobs) => {
+          this.jobs = [enrichedJobs[0], ...this.jobs];
+          this.dataSource.data = this.jobs;
+          this.totalJobs++;
+        })
+        .catch((error) => {
+          console.warn('Failed to enrich new job:', error);
+          this.jobs = [{ ...job }, ...this.jobs];
+          this.dataSource.data = this.jobs;
+          this.totalJobs++;
+        });
+    }
   }
 
   loadJobs(after: string | null = null, pageIndex = 0, append = false) {
