@@ -290,17 +290,17 @@ export const statusToString = (status: string) => {
 
 export interface JobResult {
   message?: string;
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  topic_uuid?: string;
-  news_uuids?: string[];
+  podcastUuid?: string;
+  episodeUuid?: string;
+  topicUuid?: string;
+  newsUuids?: string[];
   [key: string]: unknown;
 }
 
 export interface JobArgs {
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  topic_uuid?: string;
+  podcastUuid?: string;
+  episodeUuid?: string;
+  topicUuid?: string;
   [key: string]: unknown;
 }
 

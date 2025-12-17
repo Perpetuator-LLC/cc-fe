@@ -57,7 +57,6 @@ describe('JobStatusBarComponent', () => {
       'getPodcastUuid',
       'getEpisodeUuid',
       'getTopicUuid',
-      'getMergedJobData',
     ]);
     mockPodcastsService = jasmine.createSpyObj('PodcastsService', ['getPodcastById']);
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodeById']);
@@ -82,11 +81,13 @@ describe('JobStatusBarComponent', () => {
     );
 
     mockJobService.getJobTransitions.and.returnValue([]);
-    mockJobDisplayService.getMergedJobData.and.returnValue({});
     mockJobDisplayService.getJobMessage.and.returnValue('Job message');
     mockJobDisplayService.hasPodcastUuid.and.returnValue(false);
     mockJobDisplayService.hasEpisodeUuid.and.returnValue(false);
     mockJobDisplayService.hasTopicUuid.and.returnValue(false);
+    mockJobDisplayService.getPodcastUuid.and.returnValue(null);
+    mockJobDisplayService.getEpisodeUuid.and.returnValue(null);
+    mockJobDisplayService.getTopicUuid.and.returnValue(null);
 
     await TestBed.configureTestingModule({
       imports: [JobStatusBarComponent],
@@ -231,7 +232,7 @@ describe('JobStatusBarComponent', () => {
   describe('Job Enrichment', () => {
     it('should enrich jobs with podcast names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ podcast_uuid: 'podcast-1' });
+      mockJobDisplayService.getPodcastUuid.and.returnValue('podcast-1');
       mockPodcastsService.getPodcastById.and.returnValue(
         of({ uuid: 'podcast-1', name: 'Test Podcast' } as unknown) as ReturnType<
           typeof mockPodcastsService.getPodcastById
@@ -247,7 +248,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should enrich jobs with episode names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ episode_uuid: 'episode-1' });
+      mockJobDisplayService.getEpisodeUuid.and.returnValue('episode-1');
       mockEpisodeService.getEpisodeById.and.returnValue(
         of({ uuid: 'episode-1', title: 'Test Episode' } as unknown) as ReturnType<
           typeof mockEpisodeService.getEpisodeById
@@ -263,7 +264,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should enrich jobs with topic names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ topic_uuid: 'topic-1' });
+      mockJobDisplayService.getTopicUuid.and.returnValue('topic-1');
       mockResearchService.getTopicById.and.returnValue(
         of({ uuid: 'topic-1', title: 'Test Topic' } as unknown) as ReturnType<typeof mockResearchService.getTopicById>,
       );
@@ -277,7 +278,9 @@ describe('JobStatusBarComponent', () => {
 
     it('should handle jobs with no UUIDs', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({});
+      mockJobDisplayService.getPodcastUuid.and.returnValue(null);
+      mockJobDisplayService.getEpisodeUuid.and.returnValue(null);
+      mockJobDisplayService.getTopicUuid.and.returnValue(null);
 
       component['enrichJobsWithNames']([job]).then((enriched) => {
         expect(enriched[0].podcastName).toBeUndefined();
@@ -290,7 +293,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should handle enrichment errors gracefully', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ podcast_uuid: 'podcast-1' });
+      mockJobDisplayService.getPodcastUuid.and.returnValue('podcast-1');
       mockPodcastsService.getPodcastById.and.returnValue(throwError(() => new Error('Network error')));
       spyOn(console, 'warn');
 
