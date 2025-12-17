@@ -8,15 +8,6 @@ import { PodcastsService } from './podcast/podcasts.service';
 import { ResearchService } from './topics/research.service';
 import { MessageService } from './message.service';
 
-export interface MergedJobData {
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  topic_uuid?: string;
-  news_uuids?: string[];
-  message?: string;
-  [key: string]: unknown;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -79,15 +70,6 @@ export class JobDisplayService {
     return null;
   }
 
-  // Merge args and results, prioritizing results over args for conflicts
-  getMergedJobData(job: Job): MergedJobData {
-    const args = this.parseJobArgs(job) || {};
-    const result = this.parseJobResult(job) || {};
-
-    // Merge args and results, with results taking precedence
-    return { ...args, ...result };
-  }
-
   // Get formatted message for job display
   getJobMessage(job: Job): string {
     if (job.error) {
@@ -104,38 +86,50 @@ export class JobDisplayService {
 
   // Check if job has podcast UUID (from args or result)
   hasPodcastUuid(job: Job): boolean {
-    const merged = this.getMergedJobData(job);
-    return merged.podcast_uuid != null;
+    return this.getPodcastUuid(job) != null;
   }
 
   // Check if job has episode UUID (from args or result)
   hasEpisodeUuid(job: Job): boolean {
-    const merged = this.getMergedJobData(job);
-    return merged.episode_uuid != null;
+    return this.getEpisodeUuid(job) != null;
   }
 
   // Check if job has topic UUID (from args or result)
   hasTopicUuid(job: Job): boolean {
-    const merged = this.getMergedJobData(job);
-    return merged.topic_uuid != null;
+    return this.getTopicUuid(job) != null;
   }
 
-  // Get podcast UUID from merged data (prioritizing result over args)
+  // Get podcast UUID from result or args (result takes precedence)
   getPodcastUuid(job: Job): string | null {
-    const merged = this.getMergedJobData(job);
-    return merged.podcast_uuid || null;
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return result?.podcastUuid || args?.podcastUuid || null;
   }
 
-  // Get episode UUID from merged data (prioritizing result over args)
+  // Get episode UUID from result or args (result takes precedence)
   getEpisodeUuid(job: Job): string | null {
-    const merged = this.getMergedJobData(job);
-    return merged.episode_uuid || null;
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return result?.episodeUuid || args?.episodeUuid || null;
   }
 
-  // Get topic UUID from merged data (prioritizing result over args)
+  // Get topic UUID from result or args (result takes precedence)
   getTopicUuid(job: Job): string | null {
-    const merged = this.getMergedJobData(job);
-    return merged.topic_uuid || null;
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return result?.topicUuid || args?.topicUuid || null;
+  }
+
+  // Check if job has news UUIDs (only in result)
+  hasNewsUuids(job: Job): boolean {
+    const result = this.parseJobResult(job);
+    return result?.newsUuids != null && Array.isArray(result.newsUuids) && result.newsUuids.length > 0;
+  }
+
+  // Get news UUIDs from result (only in result, not args)
+  getNewsUuids(job: Job): string[] | null {
+    const result = this.parseJobResult(job);
+    return result?.newsUuids && Array.isArray(result.newsUuids) ? result.newsUuids : null;
   }
 
   /**

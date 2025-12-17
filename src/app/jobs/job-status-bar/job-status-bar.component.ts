@@ -208,21 +208,24 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   // Enrich jobs with podcast and episode names using GraphQL queries
   private async enrichJobsWithNames(jobs: Job[]): Promise<EnrichedJob[]> {
-    // Extract unique UUIDs from all jobs using merged data
+    // Extract unique UUIDs from all jobs
     const podcastUuids = new Set<string>();
     const episodeUuids = new Set<string>();
     const topicUuids = new Set<string>();
 
     jobs.forEach((job) => {
-      const merged = this.jobDisplayService.getMergedJobData(job);
-      if (merged.podcast_uuid) {
-        podcastUuids.add(merged.podcast_uuid);
+      const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
+      const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
+      const topicUuid = this.jobDisplayService.getTopicUuid(job);
+
+      if (podcastUuid) {
+        podcastUuids.add(podcastUuid);
       }
-      if (merged.episode_uuid) {
-        episodeUuids.add(merged.episode_uuid);
+      if (episodeUuid) {
+        episodeUuids.add(episodeUuid);
       }
-      if (merged.topic_uuid) {
-        topicUuids.add(merged.topic_uuid);
+      if (topicUuid) {
+        topicUuids.add(topicUuid);
       }
     });
 
@@ -274,21 +277,23 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         });
       }
 
-      // Enrich jobs with the fetched names using merged data
+      // Enrich jobs with the fetched names
       return jobs.map((job) => {
         const enrichedJob: EnrichedJob = { ...job };
-        const merged = this.jobDisplayService.getMergedJobData(job);
+        const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
+        const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
+        const topicUuid = this.jobDisplayService.getTopicUuid(job);
 
-        if (merged.podcast_uuid && podcastNameMap.has(merged.podcast_uuid)) {
-          enrichedJob.podcastName = podcastNameMap.get(merged.podcast_uuid);
+        if (podcastUuid && podcastNameMap.has(podcastUuid)) {
+          enrichedJob.podcastName = podcastNameMap.get(podcastUuid);
         }
 
-        if (merged.episode_uuid && episodeNameMap.has(merged.episode_uuid)) {
-          enrichedJob.episodeName = episodeNameMap.get(merged.episode_uuid);
+        if (episodeUuid && episodeNameMap.has(episodeUuid)) {
+          enrichedJob.episodeName = episodeNameMap.get(episodeUuid);
         }
 
-        if (merged.topic_uuid && topicNameMap.has(merged.topic_uuid)) {
-          enrichedJob.topicName = topicNameMap.get(merged.topic_uuid);
+        if (topicUuid && topicNameMap.has(topicUuid)) {
+          enrichedJob.topicName = topicNameMap.get(topicUuid);
         }
 
         return enrichedJob;
