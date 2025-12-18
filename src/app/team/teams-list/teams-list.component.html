@@ -17,7 +17,7 @@
         <h3>All Teams</h3>
         <span>{{ teams.length }} teams</span>
       </div>
-      <button mat-flat-button color="primary" type="button" (click)="createTeam()">+ Create Team</button>
+      <button mat-button color="primary" type="button" (click)="createTeam()">+ Create Team</button>
     </mat-card-content>
   </mat-card>
 
@@ -74,8 +74,8 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #teamActionsMenu="matMenu" class="actionMenu">
-              <button mat-menu-item (click)="viewTeam(team.uuid)">
-                <app-svg-icon icon="edit" />
+              <button class="mat-mdc-menu-item mat-focus-indicator" mat-menu-item (click)="viewTeam(team.uuid)">
+                <mat-icon>edit</mat-icon>
                 <span>Edit</span>
               </button>
             </mat-menu>

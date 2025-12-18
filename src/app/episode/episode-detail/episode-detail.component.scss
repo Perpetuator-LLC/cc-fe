@@ -1100,7 +1100,11 @@
 .rss-feed-cell {
   display: flex;
   flex-direction: column;
+  align-items: flex-start !important;
   gap: 8px;
+}
+.date-cell {
+  white-space: nowrap;
 }
 
 .rss-feed-cell .rss-feed-row {
