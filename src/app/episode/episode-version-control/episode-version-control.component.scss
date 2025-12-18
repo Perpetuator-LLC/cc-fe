@@ -69,6 +69,12 @@
     .mat-expansion-panel-header {
       background: var(--md-sys-color-surface-container);
       margin-bottom: 10px;
+      @media screen and (width <= 576px) {
+        padding: 0;
+        .mat-content{
+          flex-direction: column;
+        }
+      }
 
       &:hover {
         background: var(--md-sys-color-surface-container-high);

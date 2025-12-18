@@ -1423,3 +1423,15 @@ mat-nav-list {
     height: 1px;
   }
 }
+.version-control-section{
+.mat-expansion-panel-header {
+  @media screen and (width <= 576px) {
+    .mat-content{
+      flex-direction: column;
+    }
+  }
+}
+.mat-expansion-panel-body{
+  padding: 0;
+}
+}
