@@ -63,7 +63,6 @@
 
   .search-filter {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
     align-items: center;
 
@@ -128,6 +127,9 @@
     align-items: center;
 
     button[mat-icon-button] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border: 1px solid transparent;
       border-radius: 8px;
       color: var(--md-sys-color-on-surface);
@@ -293,8 +295,13 @@
 
   // ...existing code...
 
+  .grid-header{
+    width: 100%;
+  }
   .grid-header-name {
+    width: 100%;
     display: flex;
+    justify-content: space-between;
     gap: 28px;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);

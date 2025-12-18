@@ -229,7 +229,7 @@ mat-divider {
       font-weight: 500;
       color: var(--md-sys-color-surface-container);
 
-      background: var(--md-sys-color-surface);
+      background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
     }
   }
 
@@ -460,13 +460,11 @@ mat-divider {
       margin-left: 16px;
       padding: 8px 20px;
       border-radius: 8px;
-
       font-size: 14px;
       font-weight: 600;
       color: white;
       white-space: nowrap;
-
-      background-color: var(--md-sys-color-error);
+      background-color: var(--md-sys-color-error-container);
     }
   }
 
@@ -734,11 +732,11 @@ mat-divider {
 
 .input-search-div {
   display: flex;
-  flex: auto;
+  flex: auto !important;
   gap: 8px;
   align-items: center;
-
   width: 322px;
+  min-width: 615px;
   padding: 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
@@ -749,17 +747,21 @@ mat-divider {
     width: 100%;
     height: 36px;
     border: 0;
-
     color: var(--md-sys-color-on-surface-variant);
-
     background: transparent;
+    &:focus-visible{
+      outline: none;
+    }
   }
 
   @media screen and (width <= 576px) {
     width: auto;
   }
 }
-
+.add-rss-feed-btn{
+  background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
+  color: var(--mat-button-protected-container-color, var(--mat-sys-surface));
+}
 .voice-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

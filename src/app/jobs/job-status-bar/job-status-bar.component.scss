@@ -91,6 +91,7 @@
   .mat-mdc-list {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
 
     //gap: 16px;
     //padding: 16px;
@@ -201,14 +202,14 @@
   }
 
   .mat-mdc-card-title {
-    font-size: 1.2em;
+    font-size: 0.875rem;
 
     //margin-bottom: 8px;
   }
 
   .mat-mdc-card-subtitle {
     margin-left: 8px;
-    font-size: 0.9em;
+    font-size: 0.7rem;
     font-weight: bold;
     text-transform: uppercase;
   }
@@ -280,7 +281,8 @@
   // Error styling
   .error {
     margin: 8px 0;
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.5;
     font-weight: 500;
     color: var(--md-sys-color-error);
   }

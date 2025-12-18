@@ -1,0 +1,108 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+mat-dialog-content {
+  min-width: 600px;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .full-width {
+    flex: 1 1 100%;
+  }
+}
+
+.crontab-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.advanced-cron {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.advanced-toggle {
+  margin-bottom: 8px;
+}
+
+.timezone-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.schedule-preview {
+  margin-top: 16px;
+
+  mat-card {
+    background-color: var(--md-sys-color-surface-container-low);
+  }
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .preview-text {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+  }
+
+  .cron-expression {
+    margin: 0;
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.cancel-btn {
+  width: 96px;
+  height: 40px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container);
+}
+
+.save-btn {
+  min-width: 224px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
+}
+
+mat-form-field {
+  width: 100%;
+}
+

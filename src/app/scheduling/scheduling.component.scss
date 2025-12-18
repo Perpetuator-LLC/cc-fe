@@ -21,7 +21,7 @@
     justify-content: space-between;
 
     height: 40px;
-    padding-top: 0;
+    padding-top: 16px;
     padding-inline: 30px;
 
     .title {
@@ -56,19 +56,6 @@
 
         background: var(--md-sys-color-surface-container-high);
       }
-    }
-
-    button {
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 8px;
-
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 100%;
-      color: var(--md-sys-color-on-secondary);
-      letter-spacing: 0;
-
-      background: var(--md-sys-color-secondary);
     }
 
     @media screen and (width <= 576px) {
@@ -231,8 +218,19 @@
   }
 }
 
+// Top-level loading spinner (matching podcasts component)
 .loading-spinner {
-  margin: 16px 0;
+  position: relative;
+  width: 100%;
+
+  mat-progress-bar {
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 1px;
+  }
 }
 
 // Enhanced crontab styles
