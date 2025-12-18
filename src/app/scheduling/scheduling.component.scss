@@ -59,10 +59,7 @@
     }
 
     @media screen and (width <= 576px) {
-      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
-
       height: auto;
       padding-inline: 16px;
     }
@@ -128,6 +125,11 @@
     width: 100%;
     border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
+    @media screen and (width <= 576px) {
+      overflow: auto;
+    display: block;
+    white-space: nowrap;
+    }
 
     .mat-mdc-header-cell {
       border-bottom: 1px solid var(--md-sys-color-outline-variant);

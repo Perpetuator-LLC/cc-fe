@@ -3,6 +3,9 @@
 
 .button-wrapper {
   display: inline-block;
+  @media screen and (width <= 576px) {
+    width: 100%;
+}
 }
 
 .member-row {
@@ -633,6 +636,9 @@ mat-divider {
     font-size: 14px;
     font-style: italic;
     color: var(--theme-yellow);
+    @media screen and (width <= 576px) {
+      flex-wrap: wrap;
+    }
   }
 }
 
@@ -755,7 +761,9 @@ mat-divider {
   }
 
   @media screen and (width <= 576px) {
-    width: auto;
+    min-width: auto;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 .add-rss-feed-btn{
