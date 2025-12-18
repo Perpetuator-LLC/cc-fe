@@ -4,6 +4,7 @@
 .topic-header-card {
   margin-top: 16px;
   margin-bottom: 16px;
+  padding: 0 20px;
 }
 
 .back-button {
@@ -148,6 +149,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
   background-color: var(--md-sys-color-surface-container-low);
+  margin: 0 20px 20px;
 
   // Target Material tab elements directly
   .mat-mdc-tab-labels {
