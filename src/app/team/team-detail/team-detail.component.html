@@ -138,8 +138,8 @@
           <mat-table [dataSource]="podcasts">
             <!-- Name Column -->
             <ng-container matColumnDef="name">
-              <mat-header-cell *matHeaderCellDef>Podcast Name</mat-header-cell>
-              <mat-cell *matCellDef="let podcast">
+              <mat-header-cell class="podcast-name-header" *matHeaderCellDef>Podcast Name</mat-header-cell>
+              <mat-cell class="podcast-name-cell" *matCellDef="let podcast">
                 <div class="p_name">
                   @if (podcast.imageUrl) {
                     <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />

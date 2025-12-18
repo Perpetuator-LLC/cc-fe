@@ -185,7 +185,13 @@ mat-divider {
 
 .podcast-detail-page {
  padding: 50px 72px;
-//  background-color: var(--md-sys-color-surface);
+ @media screen and (width <= 576px) {
+  padding: 32px 24px;
+ }
+
+ .podcast-name-cell, podcast-name-header{
+  min-width: 200px;
+ }
 
  .detail-header {
    margin-bottom: 20px;

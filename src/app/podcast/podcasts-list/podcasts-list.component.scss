@@ -32,6 +32,9 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    @media screen and (width <= 576px) {
+      flex-wrap: wrap;
+    }
 
     mat-form-field {
       min-width: 150px;
@@ -120,12 +123,13 @@
 
   @media screen and (width <= 576px) {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
 
 .episode-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px; // MD3 4px grid spacing between buttons
   align-items: center;
 }
@@ -221,6 +225,7 @@
     @media screen and (width <= 576px) {
       overflow: auto;
       display: block;
+      white-space: nowrap;
     }
   }
 
@@ -608,10 +613,7 @@
     //}
 
     @media screen and (width <= 576px) {
-      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
-
       height: auto;
       padding-inline: 16px;
     }
