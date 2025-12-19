@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
  * Token Storage Service
@@ -10,6 +11,7 @@ import { Injectable } from '@angular/core';
  * - Tokens (access_token, refresh_token) stored in localStorage
  * - Frontend sends tokens via Authorization: Bearer header
  * - Session detection based on token presence and expiration
+ * - SSR-compatible: returns null/false on server-side
  *
  * Security considerations:
  * - localStorage is vulnerable to XSS, but Angular has built-in XSS protection
@@ -36,11 +38,20 @@ export class TokenStorageService {
   private readonly TOKEN_TYPE_KEY = 'token_type';
   private readonly SCOPE_KEY = 'scope';
 
+  private readonly isBrowser: boolean;
+
+  constructor() {
+    const platformId = inject(PLATFORM_ID);
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
+
   /**
    * Store tokens in localStorage
    * Tokens come from OAuth2/GraphQL response body
    */
   storeTokens(data: Partial<StoredTokenData>): void {
+    if (!this.isBrowser) return;
+
     if (data.accessToken) {
       localStorage.setItem(this.ACCESS_TOKEN_KEY, data.accessToken);
     }
@@ -62,6 +73,7 @@ export class TokenStorageService {
    * Get the access token from localStorage
    */
   getAccessToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
@@ -69,6 +81,7 @@ export class TokenStorageService {
    * Get the refresh token from localStorage
    */
   getRefreshToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
@@ -76,6 +89,7 @@ export class TokenStorageService {
    * Get token expiration time
    */
   getExpiresAt(): number | null {
+    if (!this.isBrowser) return null;
     const expiresAt = localStorage.getItem(this.EXPIRES_AT_KEY);
     return expiresAt ? parseInt(expiresAt, 10) : null;
   }
@@ -105,6 +119,8 @@ export class TokenStorageService {
    * Clear all stored tokens
    */
   clearTokens(): void {
+    if (!this.isBrowser) return;
+
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.EXPIRES_AT_KEY);
@@ -116,6 +132,16 @@ export class TokenStorageService {
    * Get all stored token data
    */
   getStoredTokenData(): StoredTokenData {
+    if (!this.isBrowser) {
+      return {
+        accessToken: null,
+        refreshToken: null,
+        expiresAt: null,
+        tokenType: null,
+        scope: null,
+      };
+    }
+
     return {
       accessToken: this.getAccessToken(),
       refreshToken: this.getRefreshToken(),

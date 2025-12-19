@@ -310,6 +310,10 @@ export const routes: Routes = [
     path: 'a/:code',
     loadComponent: () =>
       import('./affiliate/affiliate-landing/affiliate-landing.component').then((c) => c.AffiliateLandingComponent),
+    resolve: {
+      affiliateData: () =>
+        import('./affiliate/affiliate-landing/affiliate-landing.resolver').then((m) => m.affiliateLandingResolver),
+    },
     title: 'Join My Network',
   },
   {
