@@ -11,6 +11,8 @@ import { AffiliateStorageService } from '../affiliate-storage.service';
 import { AuthService } from '../../auth/auth.service';
 import { MessageService } from '../../message.service';
 import { TraceService } from '../../traces/trace.service';
+import { SeoService } from '../../seo.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-affiliate-landing',
@@ -37,7 +39,19 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private messageService: MessageService,
     private traceService: TraceService,
-  ) {}
+    private seoService: SeoService,
+  ) {
+    // Check for resolved data (from SSR resolver)
+    const resolvedData = this.route.snapshot.data['affiliateData'] as AffiliateLanding | null;
+    if (resolvedData) {
+      this.affiliateData = resolvedData;
+      this.loading = false;
+      const code = this.route.snapshot.paramMap.get('code');
+      if (code) {
+        this.updateSeoTags(code);
+      }
+    }
+  }
 
   ngOnInit(): void {
     this.isAuthenticated = this.authService.isLoggedIn();
@@ -51,12 +65,21 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
 
     this.affiliateStorageService.setAffiliateCode(code);
 
-    // Use GraphQL public query (no auth required)
+    // If we already have data from resolver, just check existing affiliate
+    if (this.affiliateData) {
+      if (this.isAuthenticated) {
+        this.checkExistingAffiliate();
+      }
+      return;
+    }
+
+    // Fallback: fetch data if resolver didn't provide it (client-side navigation)
     this.subscriptions.add(
       this.affiliateService.getAffiliateLanding(code).subscribe({
         next: (data) => {
           this.affiliateData = data;
           this.loading = false;
+          this.updateSeoTags(code);
 
           if (this.isAuthenticated) {
             this.checkExistingAffiliate();
@@ -135,5 +158,24 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   getBrandImageUrl(): string | null {
     if (!this.affiliateData?.brandImageUrl) return null;
     return this.affiliateData.brandImageUrl;
+  }
+
+  private updateSeoTags(code: string): void {
+    if (!this.affiliateData) return;
+
+    const shareUrl = `${environment.SITE_URL}/a/${code}`;
+    const title = `Join ${this.affiliateData.affiliateUsername}'s Network | Capital Copilot`;
+    const description =
+      `Start your journey with Capital Copilot and become part of ` +
+      `${this.affiliateData.affiliateUsername}'s affiliate network.`;
+
+    this.seoService.updateTags({
+      title,
+      description,
+      image: this.affiliateData.brandImageUrl || undefined,
+      url: shareUrl,
+      type: 'website',
+      twitterCard: 'summary_large_image',
+    });
   }
 }

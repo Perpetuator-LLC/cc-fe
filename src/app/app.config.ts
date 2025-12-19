@@ -21,6 +21,7 @@ import { errorTrackingInterceptor } from './core/interceptors/error-tracking.int
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { RouterErrorTracker } from './core/router-error-tracker';
 import { AppTitleStrategy } from './layout/app-title.strategy';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -59,5 +60,6 @@ export const appConfig: ApplicationConfig = {
       provide: TitleStrategy,
       useClass: AppTitleStrategy,
     },
+    provideClientHydration(withEventReplay()),
   ],
 };
