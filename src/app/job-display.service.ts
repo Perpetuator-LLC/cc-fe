@@ -178,12 +178,12 @@ export class JobDisplayService {
 
     return this.episodeService.getEpisodeById(episodeUuid).pipe(
       map((episode) => {
-        const episodeUrl = `/e/${episodeUuid}`;
+        const episodeUrl = `/media/episodes/${episodeUuid}`;
         const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
         this.messageService.success(`New episode: <a href="${episodeUrl}">${episodeTitle}</a>`, null, true);
       }),
       catchError(() => {
-        const episodeUrl = `/e/${episodeUuid}`;
+        const episodeUrl = `/media/episodes/${episodeUuid}`;
         this.messageService.success(`New episode created: <a href="${episodeUrl}">View Episode</a>`, null, true);
         return of(void 0);
       }),
@@ -203,12 +203,12 @@ export class JobDisplayService {
 
     return this.podcastsService.getPodcastById(podcastUuid).pipe(
       map((podcast) => {
-        const podcastUrl = `/p/${podcastUuid}`;
+        const podcastUrl = `/media/podcasts/${podcastUuid}`;
         const podcastName = podcast.name || '(Unnamed Podcast)';
         this.messageService.success(`Podcast generated: <a href="${podcastUrl}">${podcastName}</a>`, null, true);
       }),
       catchError(() => {
-        const podcastUrl = `/p/${podcastUuid}`;
+        const podcastUrl = `/media/podcasts/${podcastUuid}`;
         this.messageService.success(`Podcast generated: <a href="${podcastUrl}">View Podcast</a>`, null, true);
         return of(void 0);
       }),
