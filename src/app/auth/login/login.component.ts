@@ -2,9 +2,9 @@
 import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { environment } from '../../../environments/environment';
@@ -19,6 +19,7 @@ import { AffiliateStorageService } from '../../affiliate/affiliate-storage.servi
 import { AffiliateService } from '../../affiliate/affiliate.service';
 import { PolicyGuardService } from '../../policy/services/policy-guard.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-login',
@@ -26,9 +27,11 @@ import { GraphqlAuthService } from '../graphql-auth.service';
   imports: [
     ReactiveFormsModule,
     MatToolbarModule,
+    MatError,
     MatFormField,
     MatInput,
     MatButton,
+    MatIconButton,
     MatLabel,
     MatCard,
     MatCardTitle,
@@ -37,6 +40,7 @@ import { GraphqlAuthService } from '../graphql-auth.service';
     MatCardActions,
     MatIcon,
     RouterLink,
+    MatProgressSpinner,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -45,13 +49,15 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription | undefined;
   private affiliateCode: string | null = null;
   errorMessage: string | null = null;
+  loading = false;
 
   loginForm = new FormGroup({
     // TODO: Add validation equivalent to back-end
-    password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(5)]),
+    password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]),
     email: new FormControl(environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]),
   });
   returnUrl = '';
+  hidePassword = true;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   constructor(
@@ -95,11 +101,13 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   onSubmit() {
     this.messageService.clearMessages();
     this.errorMessage = null; // Clear previous errors
+    this.loading = true;
 
     this.subscription = this.graphqlAuthService
       .login(this.loginForm.value.email as string, this.loginForm.value.password as string)
       .subscribe({
         next: (success) => {
+          this.loading = false;
           if (success) {
             // Login successful - proceed with post-login flow
             if (this.affiliateCode) {
@@ -111,6 +119,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           // If not successful, error message was already shown by the service
         },
         error: (error: Error) => {
+          this.loading = false;
           // Capture the error message for display
           this.errorMessage = error.message;
         },
@@ -122,6 +131,13 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
    */
   isEmailNotVerified(): boolean {
     return this.errorMessage?.toLowerCase().includes('not verified') || false;
+  }
+
+  /**
+   * Toggle password visibility
+   */
+  togglePasswordVisibility(): void {
+    this.hidePassword = !this.hidePassword;
   }
 
   /**

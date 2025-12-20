@@ -30,9 +30,11 @@
 
   .search-filter {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
     align-items: center;
+    @media screen and (width <= 576px) {
+      flex-wrap: wrap;
+    }
 
     mat-form-field {
       min-width: 150px;
@@ -93,12 +95,24 @@
     button[mat-button] {
       font-weight: 500;
       color: var(--md-sys-color-on-surface);
+      mat-icon{
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+      }
     }
 
     button[mat-icon-button] {
       border: 1px solid transparent;
       border-radius: 8px;
       color: var(--md-sys-color-on-surface);
+      justify-content: center;
+      display: flex;
+      align-items: center;
+
+      .mdc-icon-button__ripple{
+        display: none;
+      }
 
       &.active {
         border-color: var(--md-sys-color-outline-variant);
@@ -109,12 +123,13 @@
 
   @media screen and (width <= 576px) {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
 
 .episode-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px; // MD3 4px grid spacing between buttons
   align-items: center;
 }
@@ -210,6 +225,7 @@
     @media screen and (width <= 576px) {
       overflow: auto;
       display: block;
+      white-space: nowrap;
     }
   }
 
@@ -597,10 +613,7 @@
     //}
 
     @media screen and (width <= 576px) {
-      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
-
       height: auto;
       padding-inline: 16px;
     }

@@ -6,8 +6,9 @@ import { environment } from '../../../environments/environment';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -15,6 +16,7 @@ import { AffiliateService } from '../../affiliate/affiliate.service';
 import { AffiliateStorageService } from '../../affiliate/affiliate-storage.service';
 import { GraphqlAuthService } from '../graphql-auth.service';
 import { Subscription } from 'rxjs';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-register',
@@ -31,9 +33,12 @@ import { Subscription } from 'rxjs';
     MatCardActions,
     MatInput,
     MatButton,
+    MatIconButton,
     MatCheckbox,
+    MatIcon,
     RouterLink,
     MatToolbarModule,
+    MatProgressSpinner,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -42,6 +47,8 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = new Subscription();
   private affiliateCode: string | null = null;
   private returnUrl = '/home';
+  hidePassword = true;
+  loading = false;
 
   registerForm = this.fb.group({
     email: [environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
@@ -95,15 +102,21 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  togglePasswordVisibility(): void {
+    this.hidePassword = !this.hidePassword;
+  }
+
   onSubmit(): void {
     this.messageService.clearMessages();
     if (this.registerForm.valid) {
+      this.loading = true;
       const email = this.registerForm.get('email')!.value!;
       const password = this.registerForm.get('password')!.value!;
       const acceptTerms = this.registerForm.get('acceptTerms')!.value!;
 
       this.graphqlAuthService.register(email, password, acceptTerms).subscribe({
         next: (token: unknown) => {
+          this.loading = false;
           if (token) {
             // Registration successful with tokens (email verification not required)
             console.debug('Registration successful with tokens');
@@ -118,9 +131,8 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
               });
               this.router.navigate([this.returnUrl]);
             }
-          } else {
+          }  else {
             // Registration successful but email verification required
-            console.debug('Registration successful, email verification required');
 
             if (this.messageService.messageCount === 0) {
               this.messageService.addMessage({
@@ -129,11 +141,11 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
                 dismissible: true,
               });
             }
-
-            this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
+            // this.router.navigate(['/login'], { queryParams: { returnUrl: this.returnUrl } });
           }
         },
         error: (error: unknown) => {
+          this.loading = false;
           const errorMessage = error instanceof Error ? error.message : 'Registration failed';
           this.messageService.addMessage({
             type: 'error',

@@ -237,24 +237,8 @@
       }
     }
 
-    button {
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 8px;
-
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 100%;
-      color: var(--md-sys-color-on-secondary);
-      letter-spacing: 0;
-
-      background: var(--md-sys-color-secondary);
-    }
-
     @media screen and (width <= 576px) {
-      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
-
       height: auto;
       padding-inline: 16px;
     }
