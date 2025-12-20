@@ -2,9 +2,10 @@
 @if (showSearchAndFilters) {
 <div class="table-controls">
   <div class="search-filter">
-    <mat-form-field class="search-field" appearance="outline">
+    <mat-form-field class="search-field" appearance="fill">
       <mat-icon matIconPrefix>search</mat-icon>
-      <input matInput placeholder="Search by episode title" [(ngModel)]="searchTerm" (input)="onSearch($event)" />
+      <mat-label>Search by episode title</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (input)="onSearch($event)" />
     </mat-form-field>
 
     @if (!podcastUuid) {
@@ -19,7 +20,7 @@
     </mat-form-field>
     }
 
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="fill">
       <mat-label>Status</mat-label>
       <mat-select [(value)]="selectedLiveStatus" (selectionChange)="onLiveStatusFilterChange()">
         <mat-option [value]="null">All Status</mat-option>
@@ -102,11 +103,12 @@
           </button>
           <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
             <button mat-menu-item [routerLink]="['/media/episodes', episode.uuid]">
-              <app-svg-icon icon="edit" />
+              <mat-icon>edit</mat-icon>
               <span>Edit</span>
             </button>
+            
             <button mat-menu-item (click)="deleteEpisode(episode)">
-              <app-svg-icon icon="delete" />
+              <mat-icon>delete</mat-icon>
               <span>Delete</span>
             </button>
           </mat-menu>
@@ -143,11 +145,11 @@
               </button>
               <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
                 <button mat-menu-item [routerLink]="['/media/episodes', episode.uuid]">
-                  <app-svg-icon icon="edit" />
+                  <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
                 <button mat-menu-item (click)="deleteEpisode(episode)">
-                  <app-svg-icon icon="delete" />
+                  <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
               </mat-menu>

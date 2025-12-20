@@ -68,9 +68,23 @@
     // Target Material expansion panel elements directly
     .mat-expansion-panel-header {
       background: var(--md-sys-color-surface-container);
+      margin-bottom: 10px;
+      @media screen and (width <= 576px) {
+        padding: 0;
+        .mat-content{
+          flex-direction: column;
+        }
+      }
 
       &:hover {
         background: var(--md-sys-color-surface-container-high);
+      }
+    }
+    .mat-expansion-panel-header-description{
+      span{
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
     }
 
