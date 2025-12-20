@@ -1,3 +1,23 @@
+# Changelog from v0.28.0 to v0.28.1
+
+This release focuses on authentication improvements and URL structure modernization. The authentication system now includes automatic token refresh with rotation support and telemetry tracking, while URL paths have been refactored from short paths to semantic `/media` routes for better clarity.
+
+## Enhancements
+
+- Added automatic token refresh with rotation support and telemetry tracking for improved auth reliability
+- Implemented comprehensive frontend trace sanitization system for better security
+- Added schedule creation modal dialog for improved workflow management
+- Integrated `marked` library to replace custom markdown parser for better standards compliance
+- Added affiliate disclosure notice to landing page for transparency
+
+## Cleanups
+
+- Refactored URL structure from short paths to semantic `/media` routes
+- Updated component styling and layout for consistency
+- Fixed Homebrew installation command in setup documentation
+- Increased component style budget from 21kB to 25kB to accommodate UI improvements
+
+
 # Changelog from v0.27.0 to v0.28.0
 
 This release focuses on a comprehensive migration to Material Design 3 (MD3), modernization of the authentication system, and significant architectural improvements including an upgrade to Angular 20.
