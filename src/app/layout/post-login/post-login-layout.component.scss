@@ -160,9 +160,12 @@ mat-sidenav-content mat-toolbar {
   flex: 1 1 0;
   gap: 8px;
   align-items: center;
-
   min-width: 0;
   max-width: 100%;
+
+  @media screen and (width <= 576px) {
+    display: none;
+  }
 
   .breadcrumb-text {
     flex-shrink: 0;
@@ -851,6 +854,10 @@ mat-nav-list {
 
   background: var(--md-sys-color-surface-container-high);
 
+  @media screen and (width <= 576px) {
+    display: none;
+  }
+
   // Override Material button inner layout to keep icon and text inline
   .mdc-button__label {
     display: inline-flex;
@@ -874,7 +881,12 @@ mat-nav-list {
 
   background: transparent;
 }
-
+.transactions-btn{
+  display: none;
+  @media screen and (width <= 576px) {
+    display: flex;
+  }
+}
 
 
 // Flattened selectors to reduce specificity

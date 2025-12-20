@@ -20,13 +20,13 @@
 <div class="middle-card">
   <div class="table-controls">
     <div class="search-filter">
-      <mat-form-field class="search-field" appearance="outline">
+      <mat-form-field class="search-field" appearance="fill">
         <mat-icon matIconPrefix>search</mat-icon>
         <mat-label>Search by podcast name</mat-label>
         <input matInput [(ngModel)]="searchString" (input)="onSearchChange($event)" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline" [hidden]="loadingTeams">
+      <mat-form-field appearance="fill" [hidden]="loadingTeams">
         <mat-label>Team</mat-label>
         <mat-select [(value)]="selectedTeam" (selectionChange)="onTeamFilterChange()">
           <mat-option [value]="null">All Teams</mat-option>
@@ -36,7 +36,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="fill">
         <mat-label>Status</mat-label>
         <mat-select [(value)]="selectedLiveStatus" (selectionChange)="onLiveStatusFilterChange()">
           <mat-option [value]="null">All Status</mat-option>
@@ -62,10 +62,10 @@
           }
         </div>
       </mat-menu>
-      <button mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
+      <button class="view-toggle-btn" mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
         <app-svg-icon icon="grid" />
       </button>
-      <button mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
+      <button class="view-toggle-btn" mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
         <app-svg-icon icon="list" />
       </button>
     </div>
