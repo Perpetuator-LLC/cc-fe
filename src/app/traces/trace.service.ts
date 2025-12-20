@@ -4,6 +4,14 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import {
+  getSafeContext,
+  getSafeUrl,
+  sanitizeMessage,
+  sanitizeSensitiveDataSync,
+  sanitizeStackTrace,
+  sanitizeTags,
+} from './trace-sanitizer';
 
 export type TraceSeverity = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
 
@@ -102,19 +110,29 @@ export class TraceService {
     // Add contextual information
     const enrichedInput = this.enrichTraceInput(input);
 
+    // Sanitize all potentially sensitive data
+    const sanitizedInputs = sanitizeSensitiveDataSync(enrichedInput.inputs) as Record<string, unknown> | undefined;
+    const sanitizedOutputs = sanitizeSensitiveDataSync(enrichedInput.outputs) as Record<string, unknown> | undefined;
+    const sanitizedTags = sanitizeTags(enrichedInput.tags);
+    const sanitizedMessage = enrichedInput.message ? sanitizeMessage(enrichedInput.message) : undefined;
+    const sanitizedExceptionMessage = enrichedInput.exceptionMessage
+      ? sanitizeMessage(enrichedInput.exceptionMessage)
+      : undefined;
+    const sanitizedStackTrace = sanitizeStackTrace(enrichedInput.stackTrace);
+
     // Convert objects to JSON strings
     const variables = {
       kind: enrichedInput.kind,
       severity: enrichedInput.severity || 'INFO',
       functionName: enrichedInput.functionName,
       moduleName: enrichedInput.moduleName,
-      message: enrichedInput.message,
-      inputs: enrichedInput.inputs ? JSON.stringify(enrichedInput.inputs) : undefined,
-      outputs: enrichedInput.outputs ? JSON.stringify(enrichedInput.outputs) : undefined,
+      message: sanitizedMessage,
+      inputs: sanitizedInputs ? JSON.stringify(sanitizedInputs) : undefined,
+      outputs: sanitizedOutputs ? JSON.stringify(sanitizedOutputs) : undefined,
       exceptionType: enrichedInput.exceptionType,
-      exceptionMessage: enrichedInput.exceptionMessage,
-      stackTrace: enrichedInput.stackTrace,
-      tags: enrichedInput.tags ? JSON.stringify(enrichedInput.tags) : undefined,
+      exceptionMessage: sanitizedExceptionMessage,
+      stackTrace: sanitizedStackTrace,
+      tags: sanitizedTags ? JSON.stringify(sanitizedTags) : undefined,
       requestId: enrichedInput.requestId,
     };
 
@@ -160,48 +178,47 @@ export class TraceService {
       ...context,
       inputs: {
         ...context?.inputs,
-        url: window.location.href,
-        userAgent: navigator.userAgent,
+        ...getSafeContext(),
       },
     });
   }
 
   /**
    * Track an authentication failure
+   * Note: username is hashed by the sanitizer as PII
    */
   trackAuthFailure(username: string, error: Error | string): Observable<boolean> {
     const errorMessage = typeof error === 'string' ? error : error.message;
     return this.recordTrace({
       kind: 'auth_failure',
       severity: 'WARNING',
-      message: `Login failed for user: ${username}`,
+      message: 'Login failed',
       exceptionMessage: errorMessage,
       inputs: {
-        username,
+        username, // Will be hashed by sanitizer
         timestamp: new Date().toISOString(),
       },
       tags: {
         event_type: 'login_failure',
-        username,
       },
     });
   }
 
   /**
    * Track a successful authentication
+   * Note: username is hashed by the sanitizer as PII
    */
   trackAuthSuccess(username: string): Observable<boolean> {
     return this.recordTrace({
       kind: 'auth_success',
       severity: 'INFO',
-      message: `User logged in: ${username}`,
+      message: 'User logged in',
       inputs: {
-        username,
+        username, // Will be hashed by sanitizer
         timestamp: new Date().toISOString(),
       },
       tags: {
         event_type: 'login_success',
-        username,
       },
     });
   }
@@ -219,7 +236,7 @@ export class TraceService {
       exceptionMessage: errorMessage,
       inputs: {
         operation: operationName,
-        variables: this.sanitizeVariables(variables),
+        variables, // Will be sanitized by recordTrace
       },
       tags: {
         operation_name: operationName,
@@ -240,10 +257,10 @@ export class TraceService {
       inputs: {
         method,
         endpoint,
-        requestData: this.sanitizeData(requestData),
+        requestData, // Will be sanitized by recordTrace
       },
       outputs: {
-        error: this.sanitizeData(error),
+        error, // Will be sanitized by recordTrace
       },
       tags: {
         api_endpoint: endpoint,
@@ -284,7 +301,7 @@ export class TraceService {
         action,
         ...data,
         timestamp: new Date().toISOString(),
-        url: window.location.href,
+        url: getSafeUrl(),
       },
       tags: {
         action_type: action,
@@ -305,7 +322,7 @@ export class TraceService {
       stackTrace: error.stack,
       inputs: {
         route,
-        currentUrl: window.location.href,
+        currentUrl: getSafeUrl(),
       },
       tags: {
         target_route: route,
@@ -336,8 +353,7 @@ export class TraceService {
       inputs: {
         ...input.inputs,
         timestamp: new Date().toISOString(),
-        url: window.location.href,
-        userAgent: navigator.userAgent,
+        ...getSafeContext(),
       },
     };
   }
@@ -358,48 +374,6 @@ export class TraceService {
       return err.message || err.error || err.statusText || JSON.stringify(error);
     }
     return 'Unknown error';
-  }
-
-  /**
-   * Sanitize variables to remove sensitive data
-   */
-  private sanitizeVariables(variables?: Record<string, unknown>): Record<string, unknown> {
-    if (!variables) {
-      return {};
-    }
-
-    const sanitized = { ...variables };
-    const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'accessToken', 'refreshToken'];
-
-    Object.keys(sanitized).forEach((key) => {
-      if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
-        sanitized[key] = '[REDACTED]';
-      }
-    });
-
-    return sanitized;
-  }
-
-  /**
-   * Sanitize data to prevent sending large payloads
-   */
-  private sanitizeData(data: unknown): unknown {
-    if (!data) {
-      return data;
-    }
-
-    const str = JSON.stringify(data);
-    const maxSize = 5000; // 5KB limit
-
-    if (str.length > maxSize) {
-      return {
-        _truncated: true,
-        _originalSize: str.length,
-        _preview: str.substring(0, maxSize) + '...',
-      };
-    }
-
-    return data;
   }
 
   /**
