@@ -70,38 +70,6 @@ form {
   }
 }
 
-.warning-message {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
-
-  background: var(--md-sys-color-surface-container);
-
-  mat-icon {
-    width: 24px;
-    height: 24px;
-    margin: 0;
-
-    font-size: 24px;
-    color: var(--md-sys-color-secondary);
-  }
-
-  p {
-    flex: 1;
-
-    margin: 0;
-
-    font-size: 14px;
-    line-height: 1.4;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-}
-
 .error-message {
   display: flex;
   gap: 8px;
@@ -179,7 +147,7 @@ mat-dialog-actions {
     white-space: nowrap;
   }
 
-  button[color="primary"] {
+  button[color='primary'] {
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
 
@@ -200,4 +168,3 @@ mat-dialog-actions {
     min-width: unset;
   }
 }
-

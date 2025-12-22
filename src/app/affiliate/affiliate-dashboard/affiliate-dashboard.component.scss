@@ -72,25 +72,6 @@
   }
 }
 
-
-.loading-container-small {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-
-  padding: 16px;
-
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.no-data-small {
-  padding: 16px;
-  font-style: italic;
-  color: var(--md-sys-color-on-surface-variant);
-  text-align: center;
-}
-
-
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -597,33 +578,6 @@
   }
 }
 
-.share-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  button {
-    display: inline-flex;
-    flex-shrink: 0;
-    gap: 8px;
-    align-items: center;
-
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-
-    white-space: nowrap;
-
-    background: var(--md-sys-color-surface-container-low);
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      font-size: 16px;
-    }
-  }
-}
-
 .brand-image-card {
   .help-text {
     margin: 0 0 16px;
@@ -830,30 +784,6 @@
   }
 }
 
-.upload-section {
-  button {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-
-    font-weight: 600;
-    color: var(--md-sys-color-on-secondary);
-    white-space: nowrap;
-
-    background: var(--md-sys-color-secondary);
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      font-size: 16px;
-    }
-  }
-}
-
 .balance-value {
   margin-bottom: 16px;
   font-size: 32px;
@@ -886,7 +816,7 @@
     }
   }
 
-  button[color="primary"] {
+  button[color='primary'] {
     color: var(--md-sys-color-on-secondary);
     background: var(--md-sys-color-secondary);
   }
@@ -945,12 +875,14 @@
     background: var(--md-sys-color-success);
   }
 
-  &.pending, &.under-review {
+  &.pending,
+  &.under-review {
     color: var(--md-sys-color-surface-container-high);
     background: var(--md-sys-color-warning);
   }
 
-  &.failed, &.rejected {
+  &.failed,
+  &.rejected {
     color: var(--md-sys-color-on-primary);
     background: var(--md-sys-color-error);
   }
@@ -978,7 +910,6 @@
     grid-template-columns: repeat(1, 1fr);
   }
 
-  .share-buttons,
   .conversion-actions {
     flex-direction: column;
 
@@ -990,138 +921,6 @@
 
   .link-display {
     flex-direction: column;
-  }
-}
-
-.admin-panel-card {
-  margin-top: 16px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
-  background-color: var(--md-sys-color-surface-container-low);
-
-  mat-card-content {
-    padding: 16px;
-  }
-
-  h2 {
-    margin: 0 0 16px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface);
-  }
-}
-
-.admin-requests-table {
-  overflow-x: auto;
-
-  .user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    strong {
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface);
-    }
-
-    .user-email {
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-  }
-
-  .code-change {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    white-space: nowrap;
-
-    .old-code {
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
-      text-decoration: line-through;
-    }
-
-    .new-code {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--md-sys-color-secondary);
-    }
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-  }
-
-  .reason-text {
-    overflow: hidden;
-    display: block;
-
-    max-width: 200px;
-
-    font-size: 12px;
-    font-style: italic;
-    color: var(--md-sys-color-on-surface-variant);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .action-buttons {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-
-    button {
-      display: inline-flex;
-      flex-shrink: 0;
-      gap: 8px;
-      align-items: center;
-
-      padding: 8px 16px;
-      border-radius: 8px;
-
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-
-      mat-icon {
-        width: 16px;
-        height: 16px;
-        margin: 0;
-        font-size: 16px;
-      }
-    }
-
-    button[color="primary"] {
-      border: 1px solid var(--md-sys-color-outline-variant);
-      color: var(--md-sys-color-on-secondary);
-      background: var(--md-sys-color-secondary);
-    }
-
-    button[color="warn"] {
-      border: 1px solid var(--md-sys-color-error);
-      color: var(--md-sys-color-error);
-      background: var(--md-sys-color-surface-container-high);
-
-      &:hover {
-        background: var(--md-sys-color-error-container);
-      }
-    }
-  }
-}
-
-@media screen and (width <= 768px) {
-  .admin-requests-table {
-    .action-buttons {
-      flex-direction: column;
-
-      button {
-        width: 100%;
-      }
-    }
   }
 }
 
@@ -1264,36 +1063,6 @@
           width: 100%;
         }
       }
-    }
-  }
-}
-
-.payout-requests-section {
-  .affiliate-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    strong {
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface);
-    }
-
-    small {
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-  }
-
-  .amount-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    .usd-amount {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface-variant);
     }
   }
 }

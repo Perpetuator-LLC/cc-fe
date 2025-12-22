@@ -64,6 +64,7 @@
   table {
     width: 100%;
     background-color: var(--md-sys-color-surface-container);
+
     @media screen and (width <= 576px) {
       overflow: auto;
       display: block;
@@ -162,10 +163,6 @@
     color: var(--md-extended-color-warning-color);
     background-color: var(--md-extended-color-warning-color-container);
   }
-}
-
-.loading-spinner {
-  margin-top: 16px;
 }
 
 @media screen and (width <= 576px) {

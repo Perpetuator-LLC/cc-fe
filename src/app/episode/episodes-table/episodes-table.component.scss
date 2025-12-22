@@ -130,8 +130,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
       border: 1px solid transparent;
       border-radius: 8px;
+
       color: var(--md-sys-color-on-surface);
 
       &.active {
@@ -295,14 +297,16 @@
 
   // ...existing code...
 
-  .grid-header{
+  .grid-header {
     width: 100%;
   }
+
   .grid-header-name {
-    width: 100%;
     display: flex;
-    justify-content: space-between;
     gap: 28px;
+    justify-content: space-between;
+
+    width: 100%;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
   }
@@ -378,4 +382,3 @@
 
   background: var(--md-sys-color-success);
 }
-
