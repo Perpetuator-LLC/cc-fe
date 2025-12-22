@@ -3,9 +3,10 @@
 
 .button-wrapper {
   display: inline-block;
+
   @media screen and (width <= 576px) {
     width: 100%;
-}
+  }
 }
 
 .member-row {
@@ -177,7 +178,6 @@ mat-divider {
   margin-bottom: 8px;
 }
 
-
 .voice-select {
   width: 100%;
   margin-top: 8px;
@@ -298,7 +298,6 @@ mat-divider {
     white-space: nowrap;
   }
 }
-
 
 /* Other existing styles... */
 
@@ -425,7 +424,6 @@ mat-divider {
 
       margin-left: auto;
 
-
       @media screen and (width <= 900px) {
         flex-direction: column;
         width: 100%;
@@ -463,10 +461,12 @@ mat-divider {
       margin-left: 16px;
       padding: 8px 20px;
       border-radius: 8px;
+
       font-size: 14px;
       font-weight: 600;
       color: white;
       white-space: nowrap;
+
       background-color: var(--md-sys-color-error-container);
     }
   }
@@ -636,6 +636,7 @@ mat-divider {
     font-size: 14px;
     font-style: italic;
     color: var(--theme-yellow);
+
     @media screen and (width <= 576px) {
       flex-wrap: wrap;
     }
@@ -675,7 +676,9 @@ mat-divider {
 
   object-fit: contain;
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: scale(1.05);
@@ -734,13 +737,12 @@ mat-divider {
   }
 }
 
-
-
 .input-search-div {
   display: flex;
-  flex: auto !important;
+  flex: auto;
   gap: 8px;
   align-items: center;
+
   width: 322px;
   min-width: 615px;
   padding: 0 8px;
@@ -753,23 +755,28 @@ mat-divider {
     width: 100%;
     height: 36px;
     border: 0;
+
     color: var(--md-sys-color-on-surface-variant);
+
     background: transparent;
-    &:focus-visible{
+
+    &:focus-visible {
       outline: none;
     }
   }
 
   @media screen and (width <= 576px) {
-    min-width: auto;
-    width: 100%;
     box-sizing: border-box;
+    width: 100%;
+    min-width: auto;
   }
 }
-.add-rss-feed-btn{
-  background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
+
+.add-rss-feed-btn {
   color: var(--mat-button-protected-container-color, var(--mat-sys-surface));
+  background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
 }
+
 .voice-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1205,4 +1212,3 @@ mat-divider {
     width: 100%;
   }
 }
-

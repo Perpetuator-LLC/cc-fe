@@ -171,36 +171,6 @@
       margin: 16px 0;
     }
 
-    .usage-stats {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-
-      .stat {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: 4px;
-
-        padding: 8px;
-        border: 1px solid var(--md-sys-color-outline-variant);
-        border-radius: 4px;
-
-        background: var(--md-sys-color-surface-container-high);
-
-        .stat-label {
-          font-size: 11px;
-          color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .stat-value {
-          font-size: 16px;
-          font-weight: 600;
-          color: var(--md-sys-color-on-surface);
-        }
-      }
-    }
-
     .rate-limits-compact {
       h4 {
         margin: 0 0 8px;
@@ -242,4 +212,3 @@
     }
   }
 }
-
