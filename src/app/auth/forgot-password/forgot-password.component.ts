@@ -4,17 +4,19 @@ import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } 
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarService } from '../../layout/toolbar.service';
-import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MessageService } from '../../message.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { GraphqlAuthService } from '../graphql-auth.service';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
   imports: [
     MatCard,
+    MatError,
     MatCardHeader,
     MatCardContent,
     MatInput,
@@ -25,6 +27,7 @@ import { GraphqlAuthService } from '../graphql-auth.service';
     MatButton,
     ReactiveFormsModule,
     MatToolbarModule,
+    MatProgressSpinner,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',

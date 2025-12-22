@@ -1,77 +1,54 @@
-# CSS Size Analysis Reports
+# CSS/SCSS Size Tracking
 
-This directory contains reports tracking CSS compilation size over time.
+This directory tracks **compiled CSS output** sizes from Angular builds.
+
+## Quick Commands
+
+```bash
+yarn css:dev          # Build + analyze + compare to baseline
+yarn css:analyze      # Analyze current build (no rebuild)
+yarn css:baseline     # Save current as new baseline
+yarn css:compare      # Compare dev snapshot to baseline
+```
 
 ## Files
 
-- **`baseline.json`** - The baseline snapshot (committed to git)
-  - Represents the "gold standard" to compare against
-  - Update when making significant improvements
-  
-- **`current.dev.json`** - Development snapshot (not committed)
-  - Created with `yarn css:dev`
-  - Used for local comparison before committing
-  - Git-ignored to prevent conflicts
+| File | Purpose | Git Status |
+|------|---------|------------|
+| `history.json` | Historical size data with timestamps | ✅ Committed |
+| `README.md` | This documentation | ✅ Committed |
 
-- **`history.json`** - Historical data (committed to git)
-  - Tracks size changes over time
-  - Useful for trend analysis
+## How It Works
 
-## Usage
-
-### Initial Setup (First Time)
-```bash
-# Build the project and create baseline
-yarn css:baseline
-```
-
-### During Development
-```bash
-# 1. Make your SCSS changes
-# 2. Create a dev snapshot to see the impact
-yarn css:dev
-
-# This automatically:
-# - Builds the project
-# - Analyzes CSS sizes
-# - Compares with baseline
-# - Shows you the diff
-```
-
-### Before Committing
-```bash
-# Compare your changes
-yarn css:compare
-
-# If you've made significant improvements, update the baseline
-yarn css:baseline
-```
-
-### Just Check Current State
-```bash
-# Build and analyze without saving
-yarn build
-yarn css:analyze
-```
+1. **`yarn css:dev`** builds the project and records compiled CSS sizes
+2. Results are appended to `history.json` with timestamps
+3. Each entry includes total size, file count, and git commit hash
 
 ## Interpreting Results
 
-### Good Signs ✅
-- Total size decreased
-- Fewer CSS files (consolidation)
-- Reduced duplication
+### Healthy Metrics
+- Total compiled CSS: **100-150 KB** (gzipped: ~20-30KB)
+- Individual component CSS: **< 24 KB** (warning at 12KB)
+- File count: Should remain stable
 
-### Warning Signs ⚠️
-- Total size increased significantly
-- More CSS files generated
-- Large individual files (>100KB)
+### Warning Signs
+- Sudden size increases > 10%
+- Individual files exceeding 24KB
+- Rapid file count growth
 
-## MD3 Migration Goals
+## Budget Limits (angular.json)
 
-Our MD3 migration should result in:
-- **Smaller total CSS** - Less custom styling
-- **Fewer files** - Better consolidation
-- **Consistent sizing** - Using design tokens reduces duplication
+```json
+{
+  "type": "anyComponentStyle",
+  "maximumWarning": "12kB",   // Triggers warning
+  "maximumError": "24kB"      // Fails build
+}
+```
 
-Track progress by comparing baseline before/after major refactoring phases.
+## Related
+
+- **Source SCSS tracking**: See `logs/scss-sizes/README.md`
+- **Angular budgets**: See `angular.json` → budgets
+- **MD3 Theme Guide**: See `notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md`
 

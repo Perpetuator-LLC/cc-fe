@@ -132,7 +132,11 @@ mat-divider {
 
       &.success {
         border-color: var(--md-extended-color-success-color);
-        background: color-mix(in srgb, var(--md-extended-color-success-color) 10%, var(--md-sys-color-surface-container));
+        background: color-mix(
+          in srgb,
+          var(--md-extended-color-success-color) 10%,
+          var(--md-sys-color-surface-container)
+        );
       }
 
       &.error {
@@ -235,54 +239,3 @@ mat-divider {
     }
   }
 }
-
-// Flattened: Usage meta
-.api-key-detail .usage-list .usage-item .usage-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-
-  font-size: 11px;
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-// Flattened selectors for usage-endpoint and usage-meta
-.api-key-detail {
-  .usage-endpoint {
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-
-      &.success {
-        color: var(--md-extended-color-success-color);
-      }
-
-      &.error {
-        color: var(--md-sys-color-error);
-      }
-    }
-
-    code {
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface);
-    }
-  }
-
-  .usage-meta {
-    .time {
-      font-weight: 500;
-    }
-
-    .ip {
-      font-family: 'Courier New', monospace;
-    }
-
-    .error-msg {
-      flex-basis: 100%;
-      color: var(--md-sys-color-error);
-    }
-  }
-}
-

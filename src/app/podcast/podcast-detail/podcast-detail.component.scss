@@ -3,6 +3,10 @@
 
 .button-wrapper {
   display: inline-block;
+
+  @media screen and (width <= 576px) {
+    width: 100%;
+  }
 }
 
 .member-row {
@@ -174,7 +178,6 @@ mat-divider {
   margin-bottom: 8px;
 }
 
-
 .voice-select {
   width: 100%;
   margin-top: 8px;
@@ -229,7 +232,7 @@ mat-divider {
       font-weight: 500;
       color: var(--md-sys-color-surface-container);
 
-      background: var(--md-sys-color-surface);
+      background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
     }
   }
 
@@ -295,7 +298,6 @@ mat-divider {
     white-space: nowrap;
   }
 }
-
 
 /* Other existing styles... */
 
@@ -422,7 +424,6 @@ mat-divider {
 
       margin-left: auto;
 
-
       @media screen and (width <= 900px) {
         flex-direction: column;
         width: 100%;
@@ -466,7 +467,7 @@ mat-divider {
       color: white;
       white-space: nowrap;
 
-      background-color: var(--md-sys-color-error);
+      background-color: var(--md-sys-color-error-container);
     }
   }
 
@@ -635,6 +636,10 @@ mat-divider {
     font-size: 14px;
     font-style: italic;
     color: var(--theme-yellow);
+
+    @media screen and (width <= 576px) {
+      flex-wrap: wrap;
+    }
   }
 }
 
@@ -671,7 +676,9 @@ mat-divider {
 
   object-fit: contain;
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: scale(1.05);
@@ -730,8 +737,6 @@ mat-divider {
   }
 }
 
-
-
 .input-search-div {
   display: flex;
   flex: auto;
@@ -739,6 +744,7 @@ mat-divider {
   align-items: center;
 
   width: 322px;
+  min-width: 615px;
   padding: 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
@@ -753,11 +759,22 @@ mat-divider {
     color: var(--md-sys-color-on-surface-variant);
 
     background: transparent;
+
+    &:focus-visible {
+      outline: none;
+    }
   }
 
   @media screen and (width <= 576px) {
-    width: auto;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: auto;
   }
+}
+
+.add-rss-feed-btn {
+  color: var(--mat-button-protected-container-color, var(--mat-sys-surface));
+  background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
 }
 
 .voice-list {
@@ -1195,4 +1212,3 @@ mat-divider {
     width: 100%;
   }
 }
-

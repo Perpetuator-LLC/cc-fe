@@ -33,7 +33,6 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { RelayConnection } from '../../utils/relay';
 import { MatTabsModule } from '@angular/material/tabs';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { DeleteTeamDialogComponent } from './delete-team-dialog.component';
 import { AddMemberDialogComponent } from '../add-member-dialog/add-member-dialog.component';
 import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialog/create-podcast-dialog.component';
@@ -54,7 +53,6 @@ import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialo
     MatCell,
     MatMenuTrigger,
     MatMenu,
-    SvgIconComponent,
     MatColumnDef,
     MatHeaderCellDef,
     MatCellDef,

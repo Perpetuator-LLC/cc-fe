@@ -1,322 +1,126 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"><mat-icon>schedule</mat-icon>Scheduling <span>> </span> <span
-      class="page-title-secondary">Automated Tasks</span></span>
+  <span class="page-title"
+    ><mat-icon>schedule</mat-icon>Scheduling <span>> </span>
+    <span class="page-title-secondary">Automated Tasks</span></span
+  >
 </ng-template>
 
-
 @if (loading) {
-<div class="loading-spinner">
-  <mat-progress-bar mode="indeterminate" value="20" />
-</div>
+  <div class="loading-spinner">
+    <mat-progress-bar mode="indeterminate" value="20" />
+  </div>
 } @else {
-<mat-card class="create-schedule-card">
-  <mat-card-content class="content-header">
-    <div class="title">
-      <h3>Scheduled Tasks</h3>
-      <span>{{ schedules.length }} schedules</span>
-    </div>
-    <button mat-flat-button color="primary" type="button" (click)="showCreateSchedule()">
-      + Create Schedule
-    </button>
-  </mat-card-content>
-</mat-card>
-
-@if (showCreateForm) {
-<mat-card class="create-form-card">
-  <mat-card-header>
-    <h3>{{ getFormTitle() }}</h3>
-  </mat-card-header>
-  <mat-card-content>
-    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="schedule-form">
-      <div class="form-row">
-        <mat-form-field class="full-width">
-          <mat-label>Schedule Name</mat-label>
-          <input matInput formControlName="name" placeholder="Enter schedule name" />
-        </mat-form-field>
+  <mat-card class="create-schedule-card">
+    <mat-card-content class="content-header">
+      <div class="title">
+        <h3>Scheduled Tasks</h3>
+        <span>{{ schedules.length }} schedules</span>
       </div>
+      <button mat-button color="primary" type="button" (click)="showCreateSchedule()">+ Create Schedule</button>
+    </mat-card-content>
+  </mat-card>
 
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Job Type</mat-label>
-          <mat-select formControlName="jobKind">
-            @for (jobKind of schedulableJobKinds; track jobKind) {
-            <mat-option [value]="jobKind">{{ formatJobKind(jobKind) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+  <div class="middle-card">
+    <div class="schedules-container">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let schedule">
+            <div class="schedule-name">
+              <strong>{{ schedule.name }}</strong>
+              <div class="schedule-description">{{ getScheduleDescription(schedule) }}</div>
+            </div>
+          </td>
+        </ng-container>
 
-        <mat-form-field>
-          <mat-label>Schedule Type</mat-label>
-          <mat-select formControlName="scheduleType" (selectionChange)="onScheduleTypeChange()">
-            @for (type of scheduleTypes; track type) {
-            <mat-option [value]="type">{{ type }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <!-- Job Kind Column -->
+        <ng-container matColumnDef="jobKind">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Job Type</th>
+          <td mat-cell *matCellDef="let schedule">
+            <span class="job-kind-chip">{{ formatJobKind(schedule.jobKind) }}</span>
+          </td>
+        </ng-container>
 
-        <mat-form-field>
-          <mat-label>Podcast</mat-label>
-          <mat-select formControlName="podcastUuid">
-            <mat-option [value]="">None</mat-option>
-            @for (podcast of podcasts; track podcast.uuid) {
-            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
+        <!-- Schedule Type Column -->
+        <ng-container matColumnDef="scheduleType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <td mat-cell *matCellDef="let schedule">
+            <span class="schedule-type-chip">{{ schedule.scheduleType || 'INTERVAL' }}</span>
+          </td>
+        </ng-container>
 
-      <!-- Interval Schedule Fields -->
-      @if (scheduleForm.get('scheduleType')?.value === 'INTERVAL') {
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Interval (seconds)</mat-label>
-          <input matInput type="number" formControlName="interval" placeholder="3600" />
-        </mat-form-field>
-      </div>
-      }
+        <!-- Interval Column -->
+        <ng-container matColumnDef="interval">
+          <th mat-header-cell *matHeaderCellDef>Schedule</th>
+          <td mat-cell *matCellDef="let schedule">
+            {{ getScheduleDescription(schedule) }}
+          </td>
+        </ng-container>
 
-      <!-- Crontab Schedule Fields -->
-      @if (scheduleForm.get('scheduleType')?.value === 'CRONTAB') {
-      <div class="crontab-section">
-        <!-- Preset Options -->
-        <div class="form-row">
-          <mat-form-field class="full-width">
-            <mat-label>Quick Presets</mat-label>
-            <mat-select [value]="selectedPreset" (selectionChange)="applyPreset($event.value)">
-              <mat-option value="">Custom</mat-option>
-              @for (preset of crontabPresets; track preset.value) {
-              <mat-option [value]="preset.value">{{ preset.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <!-- Podcast Column -->
+        <ng-container matColumnDef="podcast">
+          <th mat-header-cell *matHeaderCellDef>Podcast</th>
+          <td mat-cell *matCellDef="let schedule">
+            {{ getPodcastName(schedule) }}
+          </td>
+        </ng-container>
 
-        <!-- Time Selection -->
-        <div class="form-row">
-          <mat-form-field>
-            <mat-label>Time (Local)</mat-label>
-            <input matInput type="time" formControlName="localTime"
-                   (change)="onLocalTimeChange()"
-                   placeholder="09:00" />
-            <mat-hint>Will run at {{ getUtcTimeDisplay() }} UTC</mat-hint>
-          </mat-form-field>
-          <div class="timezone-info">
-            <mat-icon matTooltip="Your timezone: {{ getUserTimezone() }}">info</mat-icon>
-            <span>{{ getUserTimezone() }}</span>
-          </div>
-        </div>
+        <!-- Enabled Column -->
+        <ng-container matColumnDef="enabled">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let schedule">
+            <mat-slide-toggle
+              [checked]="schedule.enabled"
+              (change)="toggleSchedule(schedule, $event.checked)"
+              color="primary"
+            />
+          </td>
+        </ng-container>
 
-        <!-- Advanced Cron Fields -->
-        <div class="advanced-cron" [class.expanded]="showAdvancedCron">
-          <div class="form-row">
-            <button mat-button type="button"
-                    (click)="toggleAdvancedCron()"
-                    class="advanced-toggle">
-              <mat-icon>{{ showAdvancedCron ? 'expand_less' : 'expand_more' }}</mat-icon>
-              {{ showAdvancedCron ? 'Hide' : 'Show' }} Advanced Options
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let schedule">
+            <button class="action-btn" mat-icon-button [matMenuTriggerFor]="scheduleActionsMenu">
+              <mat-icon>more_vert</mat-icon>
             </button>
-          </div>
+            <mat-menu class="actionMenu" #scheduleActionsMenu="matMenu">
+              <button mat-menu-item (click)="editSchedule(schedule)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteSchedule(schedule)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
 
-          @if (showAdvancedCron) {
-          <div class="form-row">
-            <mat-form-field>
-              <mat-label>Minute (0-59)</mat-label>
-              <input matInput formControlName="cronMinute" placeholder="0" />
-              <mat-hint>* = every minute, */15 = every 15 minutes</mat-hint>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Hour (0-23)</mat-label>
-              <input matInput formControlName="cronHour" placeholder="9" />
-              <mat-hint>* = every hour, */2 = every 2 hours</mat-hint>
-            </mat-form-field>
-          </div>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
 
-          <div class="form-row">
-            <mat-form-field>
-              <mat-label>Day of Month (1-31)</mat-label>
-              <input matInput formControlName="cronDayOfMonth" placeholder="*" />
-              <mat-hint>* = every day, 1,15 = 1st and 15th</mat-hint>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Month (1-12)</mat-label>
-              <input matInput formControlName="cronMonthOfYear" placeholder="*" />
-              <mat-hint>* = every month, 1-6 = Jan-Jun</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <div class="form-row">
-            <mat-form-field class="full-width">
-              <mat-label>Day of Week (0-6, Sun=0)</mat-label>
-              <input matInput formControlName="cronDayOfWeek" placeholder="1-5" />
-              <mat-hint>* = every day, 1-5 = Mon-Fri, 0,6 = weekends</mat-hint>
-            </mat-form-field>
-          </div>
-          }
-        </div>
-
-        <!-- Schedule Preview -->
-        <div class="schedule-preview">
+      @if (schedules.length === 0 && !loading) {
+        <div class="no-schedules">
           <mat-card>
             <mat-card-content>
-              <h4>Schedule Preview</h4>
-              <p class="preview-text">{{ getCronPreview() }}</p>
-              <p class="cron-expression">Cron: {{ getCronExpression() }}</p>
+              <h3>No schedules found</h3>
+              <p>Create your first automated schedule to get started with auto-publishing episodes.</p>
+              <button mat-flat-button color="primary" (click)="showCreateSchedule()">Create Schedule</button>
             </mat-card-content>
           </mat-card>
         </div>
-      </div>
       }
 
-      <!-- Clocked Schedule Fields -->
-      @if (scheduleForm.get('scheduleType')?.value === 'CLOCKED') {
-      <div class="form-row">
-        <mat-form-field class="full-width">
-          <mat-label>Scheduled Time</mat-label>
-          <input matInput type="datetime-local" formControlName="clockedTime" />
-        </mat-form-field>
-      </div>
-      }
-
-      <!-- Solar Schedule Fields -->
-      @if (scheduleForm.get('scheduleType')?.value === 'SOLAR') {
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Solar Event</mat-label>
-          <mat-select formControlName="solarEvent">
-            @for (event of solarEvents; track event) {
-            <mat-option [value]="event">{{ formatSolarEvent(event) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Latitude</mat-label>
-          <input matInput type="number" step="0.0001" formControlName="solarLatitude" placeholder="40.7128" />
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Longitude</mat-label>
-          <input matInput type="number" step="0.0001" formControlName="solarLongitude" placeholder="-74.0060" />
-        </mat-form-field>
-      </div>
-      }
-
-      <div class="form-row">
-        <mat-slide-toggle formControlName="enabled">
-          Enabled
-        </mat-slide-toggle>
-      </div>
-
-      <div class="form-actions">
-        <button mat-button type="button" (click)="cancelCreate()">Cancel</button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="scheduleForm.invalid">
-          {{ getSubmitButtonText() }}
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
-}
-
-<div class="middle-card">
-  <div class="schedules-container">
-    <table mat-table [dataSource]="dataSource" matSort>
-      <!-- Name Column -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-        <td mat-cell *matCellDef="let schedule">
-          <div class="schedule-name">
-            <strong>{{ schedule.name }}</strong>
-            <div class="schedule-description">{{ getScheduleDescription(schedule) }}</div>
-          </div>
-        </td>
-      </ng-container>
-
-      <!-- Job Kind Column -->
-      <ng-container matColumnDef="jobKind">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Job Type</th>
-        <td mat-cell *matCellDef="let schedule">
-          <span class="job-kind-chip">{{ formatJobKind(schedule.jobKind) }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Schedule Type Column -->
-      <ng-container matColumnDef="scheduleType">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-        <td mat-cell *matCellDef="let schedule">
-          <span class="schedule-type-chip">{{ schedule.scheduleType || 'INTERVAL' }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Interval Column -->
-      <ng-container matColumnDef="interval">
-        <th mat-header-cell *matHeaderCellDef>Schedule</th>
-        <td mat-cell *matCellDef="let schedule">
-          {{ getScheduleDescription(schedule) }}
-        </td>
-      </ng-container>
-
-      <!-- Podcast Column -->
-      <ng-container matColumnDef="podcast">
-        <th mat-header-cell *matHeaderCellDef>Podcast</th>
-        <td mat-cell *matCellDef="let schedule">
-          {{ getPodcastName(schedule) }}
-        </td>
-      </ng-container>
-
-      <!-- Enabled Column -->
-      <ng-container matColumnDef="enabled">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let schedule">
-          <mat-slide-toggle
-            [checked]="schedule.enabled"
-            (change)="toggleSchedule(schedule, $event.checked)"
-            color="primary" />
-        </td>
-      </ng-container>
-
-      <!-- Actions Column -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let schedule">
-          <button class="action-btn" mat-icon-button [matMenuTriggerFor]="scheduleActionsMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #scheduleActionsMenu="matMenu">
-            <button mat-menu-item (click)="editSchedule(schedule)">
-              <app-svg-icon icon="edit" />
-              <span>Edit</span>
-            </button>
-            <button mat-menu-item (click)="deleteSchedule(schedule)">
-              <app-svg-icon icon="delete" />
-              <span>Delete</span>
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-
-    @if (schedules.length === 0 && !loading) {
-    <div class="no-schedules">
-      <mat-card>
-        <mat-card-content>
-          <h3>No schedules found</h3>
-          <p>Create your first automated schedule to get started with auto-publishing episodes.</p>
-          <button mat-flat-button color="primary" (click)="showCreateSchedule()">
-            Create Schedule
-          </button>
-        </mat-card-content>
-      </mat-card>
+      <mat-paginator
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons
+        aria-label="Select page of schedules"
+      />
     </div>
-    }
-
-    <mat-paginator
-      [pageSize]="10"
-      [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons
-      aria-label="Select page of schedules" />
   </div>
-</div>
 }

@@ -6,8 +6,6 @@
 // ============================================================================
 .home-container {
   overflow: visible;
-
-  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
@@ -131,35 +129,91 @@
 
 // Animation keyframes - Dynamic wandering motion
 @keyframes float-1 {
-  0% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(100px, 50px) scale(1.1); }
-  50% { transform: translate(150px, 120px) scale(1.05); }
-  75% { transform: translate(80px, 80px) scale(1.15); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(100px, 50px) scale(1.1);
+  }
+
+  50% {
+    transform: translate(150px, 120px) scale(1.05);
+  }
+
+  75% {
+    transform: translate(80px, 80px) scale(1.15);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 @keyframes float-2 {
-  0% { transform: translate(0, 0) scale(1); }
-  20% { transform: translate(-80px, 60px) scale(1.1); }
-  40% { transform: translate(-150px, 100px) scale(1.05); }
-  60% { transform: translate(-120px, 150px) scale(1.12); }
-  80% { transform: translate(-60px, 80px) scale(1.08); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  20% {
+    transform: translate(-80px, 60px) scale(1.1);
+  }
+
+  40% {
+    transform: translate(-150px, 100px) scale(1.05);
+  }
+
+  60% {
+    transform: translate(-120px, 150px) scale(1.12);
+  }
+
+  80% {
+    transform: translate(-60px, 80px) scale(1.08);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 @keyframes float-3 {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(120px, -80px) scale(0.95); }
-  66% { transform: translate(80px, -120px) scale(1.05); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(120px, -80px) scale(0.95);
+  }
+
+  66% {
+    transform: translate(80px, -120px) scale(1.05);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 @keyframes float-4 {
-  0% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-100px, -60px) scale(1.1); }
-  50% { transform: translate(-80px, -140px) scale(1.15); }
-  75% { transform: translate(-140px, -100px) scale(1.08); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(-100px, -60px) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-80px, -140px) scale(1.15);
+  }
+
+  75% {
+    transform: translate(-140px, -100px) scale(1.08);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 // ============================================================================
@@ -602,8 +656,13 @@
 // Skeleton Loading - Reusable Animation
 // ============================================================================
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton-card,
@@ -683,4 +742,3 @@
     height: 16px;
   }
 }
-

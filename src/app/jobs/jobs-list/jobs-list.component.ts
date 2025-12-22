@@ -12,6 +12,7 @@ import {
   stringToJobStatus,
   iconForJob,
 } from '../job.service';
+import { JobsWebSocketService } from '../jobs-websocket.service';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../../layout/toolbar.service';
@@ -101,6 +102,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   constructor(
     private jobService: JobService,
+    private jobsWebSocketService: JobsWebSocketService,
     private toolbarService: ToolbarService,
     private messageService: MessageService,
     private podcastsService: PodcastsService,
@@ -108,7 +110,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private jobDisplayService: JobDisplayService,
     private researchService: ResearchService,
     private loadingService: LoadingService,
-  ) {}
+  ) {
+    // Subscribe to real-time job updates via WebSocket
+    this.subscriptions.add(
+      this.jobsWebSocketService.jobUpdates.subscribe({
+        next: ({ type, job }) => {
+          this.handleRealtimeJobUpdate(type, job);
+        },
+      }),
+    );
+  }
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
@@ -118,6 +129,47 @@ export class JobsListComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.loadingService.hide();
+  }
+
+  /**
+   * Handle real-time job updates from WebSocket
+   * Updates the jobs list if the job is on the current page
+   */
+  private handleRealtimeJobUpdate(type: string, job: Job): void {
+    const existingIndex = this.jobs.findIndex((j) => j.uuid === job.uuid);
+
+    if (existingIndex >= 0) {
+      // Job exists in current view - update it
+      this.enrichJobsWithNames([job])
+        .then((enrichedJobs) => {
+          const enrichedJob = enrichedJobs[0];
+          const updatedJobs = [...this.jobs];
+          updatedJobs[existingIndex] = enrichedJob;
+          this.jobs = updatedJobs;
+          this.dataSource.data = this.jobs;
+        })
+        .catch((error) => {
+          console.warn('Failed to enrich updated job:', error);
+          const updatedJobs = [...this.jobs];
+          updatedJobs[existingIndex] = { ...job };
+          this.jobs = updatedJobs;
+          this.dataSource.data = this.jobs;
+        });
+    } else if (type === 'jobs.created' && !this.currentCursor) {
+      // New job created and we're on the first page - add it to the top
+      this.enrichJobsWithNames([job])
+        .then((enrichedJobs) => {
+          this.jobs = [enrichedJobs[0], ...this.jobs];
+          this.dataSource.data = this.jobs;
+          this.totalJobs++;
+        })
+        .catch((error) => {
+          console.warn('Failed to enrich new job:', error);
+          this.jobs = [{ ...job }, ...this.jobs];
+          this.dataSource.data = this.jobs;
+          this.totalJobs++;
+        });
+    }
   }
 
   loadJobs(after: string | null = null, pageIndex = 0, append = false) {
@@ -189,21 +241,24 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   // Enrich jobs with podcast and episode names using GraphQL queries
   private async enrichJobsWithNames(jobs: Job[]): Promise<EnrichedJob[]> {
-    // Extract unique UUIDs from all jobs using merged data
+    // Extract unique UUIDs from all jobs
     const podcastUuids = new Set<string>();
     const episodeUuids = new Set<string>();
     const topicUuids = new Set<string>();
 
     jobs.forEach((job) => {
-      const merged = this.jobDisplayService.getMergedJobData(job);
-      if (merged.podcast_uuid) {
-        podcastUuids.add(merged.podcast_uuid);
+      const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
+      const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
+      const topicUuid = this.jobDisplayService.getTopicUuid(job);
+
+      if (podcastUuid) {
+        podcastUuids.add(podcastUuid);
       }
-      if (merged.episode_uuid) {
-        episodeUuids.add(merged.episode_uuid);
+      if (episodeUuid) {
+        episodeUuids.add(episodeUuid);
       }
-      if (merged.topic_uuid) {
-        topicUuids.add(merged.topic_uuid);
+      if (topicUuid) {
+        topicUuids.add(topicUuid);
       }
     });
 
@@ -255,21 +310,23 @@ export class JobsListComponent implements OnInit, OnDestroy {
         });
       }
 
-      // Enrich jobs with the fetched names using merged data
+      // Enrich jobs with the fetched names
       return jobs.map((job) => {
         const enrichedJob: EnrichedJob = { ...job };
-        const merged = this.jobDisplayService.getMergedJobData(job);
+        const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
+        const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
+        const topicUuid = this.jobDisplayService.getTopicUuid(job);
 
-        if (merged.podcast_uuid && podcastNameMap.has(merged.podcast_uuid)) {
-          enrichedJob.podcastName = podcastNameMap.get(merged.podcast_uuid);
+        if (podcastUuid && podcastNameMap.has(podcastUuid)) {
+          enrichedJob.podcastName = podcastNameMap.get(podcastUuid);
         }
 
-        if (merged.episode_uuid && episodeNameMap.has(merged.episode_uuid)) {
-          enrichedJob.episodeName = episodeNameMap.get(merged.episode_uuid);
+        if (episodeUuid && episodeNameMap.has(episodeUuid)) {
+          enrichedJob.episodeName = episodeNameMap.get(episodeUuid);
         }
 
-        if (merged.topic_uuid && topicNameMap.has(merged.topic_uuid)) {
-          enrichedJob.topicName = topicNameMap.get(merged.topic_uuid);
+        if (topicUuid && topicNameMap.has(topicUuid)) {
+          enrichedJob.topicName = topicNameMap.get(topicUuid);
         }
 
         return enrichedJob;
@@ -483,10 +540,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
     return this.jobDisplayService.hasTopicUuid(job);
   }
 
-  // Check if job result has news UUIDs (from merged data)
+  // Check if job result has news UUIDs
   hasNewsUuids(job: Job): boolean {
-    const merged = this.jobDisplayService.getMergedJobData(job);
-    return merged.news_uuids != null && Array.isArray(merged.news_uuids);
+    return this.jobDisplayService.hasNewsUuids(job);
   }
 
   // Get podcast UUID from merged data

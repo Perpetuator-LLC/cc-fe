@@ -72,7 +72,7 @@
 }
 
 .disclosure {
-  margin: 0;
+  margin: 24px;
   padding: 8px 16px;
   border-radius: 8px;
 
@@ -102,7 +102,7 @@
     white-space: nowrap;
   }
 
-  button[color="primary"] {
+  button[color='primary'] {
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
     color: var(--md-sys-color-on-primary);
@@ -159,4 +159,3 @@
     }
   }
 }
-
