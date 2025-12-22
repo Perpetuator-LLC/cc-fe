@@ -1,32 +1,32 @@
 /* Copyright (c) 2025 Perpetuator LLC */
 mat-form-field {
-    width: 100%;
-    margin-bottom: 16px;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 mat-dialog-content {
-    min-width: 400px;
+  min-width: 400px;
 }
 
 .cancel-btn {
-    width: 96px; // MD3 4px grid (24 * 4)
-    height: 40px; // MD3 4px grid (10 * 4)
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
+  width: 96px; // MD3 4px grid (24 * 4)
+  height: 40px; // MD3 4px grid (10 * 4)
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
 
-    color: var(--md-sys-color-on-surface);
+  color: var(--md-sys-color-on-surface);
 
-    background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container);
 }
 
 .saveTeamBtn {
-    min-width: 224px; // Changed to min-width for flexibility
-    height: 40px;
-    border-radius: 8px;
+  min-width: 224px; // Changed to min-width for flexibility
+  height: 40px;
+  border-radius: 8px;
 
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-surface-container);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-primary);
 
-    background: var(--md-sys-color-surface);
+  background: var(--md-sys-color-primary);
 }

@@ -203,7 +203,7 @@
           <mat-icon>podcasts</mat-icon>
           <p>{{ isLoggedIn() ? 'No podcasts yet. Create your first podcast!' : 'No podcasts available.' }}</p>
           @if (isLoggedIn()) {
-            <a routerLink="/p" mat-raised-button color="primary">Create Podcast</a>
+            <a routerLink="/media/podcasts/new" mat-raised-button color="primary">Create Podcast</a>
           }
         </div>
       }

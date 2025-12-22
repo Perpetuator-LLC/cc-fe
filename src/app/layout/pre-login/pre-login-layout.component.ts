@@ -29,6 +29,8 @@ import { Subscription } from 'rxjs';
 export class PreLoginLayoutComponent implements OnInit, OnDestroy {
   protected currentTheme = this.themeService.theme;
   isHomePage = false;
+  isLoginPage = false;
+  isRegisterPage = false;
   private subscriptions = new Subscription();
 
   constructor(
@@ -36,13 +38,19 @@ export class PreLoginLayoutComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {
     this.checkHomePage();
+    this.checkLoginPage();
+    this.checkRegisterPage();
   }
 
   ngOnInit() {
     this.currentTheme = this.themeService.theme;
 
     this.subscriptions.add(
-      this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => this.checkHomePage()),
+      this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+        this.checkHomePage();
+        this.checkLoginPage();
+        this.checkRegisterPage();
+      }),
     );
   }
 
@@ -53,6 +61,16 @@ export class PreLoginLayoutComponent implements OnInit, OnDestroy {
   private checkHomePage(): void {
     const url = this.router.url;
     this.isHomePage = url === '/' || url === '/home' || url.startsWith('/home?');
+  }
+
+  private checkLoginPage(): void {
+    const url = this.router.url;
+    this.isLoginPage = url === '/login' || url.startsWith('/login?');
+  }
+
+  private checkRegisterPage(): void {
+    const url = this.router.url;
+    this.isRegisterPage = url === '/register' || url.startsWith('/register?');
   }
 
   switchTheme(theme: Theme): void {

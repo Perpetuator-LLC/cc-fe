@@ -89,15 +89,6 @@
       }
     }
 
-    .graph-toolbar button {
-      display: inline-flex;
-      flex-shrink: 0;
-      gap: 8px;
-      align-items: center;
-
-      white-space: nowrap;
-    }
-
     .zoom-controls {
       .zoom-level {
         min-width: 50px;
@@ -168,21 +159,6 @@
     max-width: 100%;
     height: auto;
     transition: transform 0.2s ease;
-  }
-
-  .message-content {
-    .text-content {
-      pre {
-        overflow-wrap: break-word;
-        white-space: pre-wrap;
-      }
-    }
-
-    &.json-view pre {
-      padding: 16px;
-      border-radius: 8px;
-      background: var(--md-sys-color-surface-container-low);
-    }
   }
 
   .dialog-footer {
