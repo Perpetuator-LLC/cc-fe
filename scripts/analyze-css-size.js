@@ -198,6 +198,28 @@ function compareReports(baseline, current) {
 }
 
 /**
+ * Get current git commit hash
+ */
+function getGitCommit() {
+  try {
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Get current git branch
+ */
+function getGitBranch() {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
  * Update history log
  */
 function updateHistory(data) {
@@ -209,7 +231,10 @@ function updateHistory(data) {
   history.push({
     timestamp: data.timestamp,
     totalSize: data.totalSize,
+    totalSizeFormatted: formatBytes(data.totalSize),
     fileCount: data.fileCount,
+    commit: getGitCommit(),
+    branch: getGitBranch(),
   });
 
   // Keep last 100 entries

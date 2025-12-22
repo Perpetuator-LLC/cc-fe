@@ -4,6 +4,7 @@
 .topic-header-card {
   margin-top: 16px;
   margin-bottom: 16px;
+  padding: 0 20px;
 }
 
 .back-button {
@@ -145,8 +146,11 @@
 
 .topic-tabs {
   overflow: hidden;
+
+  margin: 0 20px 20px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
+
   background-color: var(--md-sys-color-surface-container-low);
 
   // Target Material tab elements directly

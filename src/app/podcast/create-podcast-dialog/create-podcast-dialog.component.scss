@@ -5,6 +5,30 @@
   font-weight: 600;
 }
 
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    width: 100%;
+    margin: 0;
+    font-size: 18px;
+  }
+
+  button {
+    cursor: pointer;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: none;
+  }
+}
+
 .select-new {
   display: flex;
   align-items: center;
@@ -62,4 +86,3 @@ mat-dialog-content {
 .mat-mdc-select {
   color: var(--md-sys-color-on-surface);
 }
-

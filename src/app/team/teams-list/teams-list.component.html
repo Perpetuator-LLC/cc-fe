@@ -17,7 +17,7 @@
         <h3>All Teams</h3>
         <span>{{ teams.length }} teams</span>
       </div>
-      <button mat-flat-button color="primary" type="button" (click)="createTeam()">+ Create Team</button>
+      <button mat-button color="primary" type="button" (click)="createTeam()">+ Create Team</button>
     </mat-card-content>
   </mat-card>
 
@@ -26,7 +26,12 @@
       <div class="search-filter">
         <div class="input-search-div">
           <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Search by team name" (keyup)="applyFilter($event)" (input)="applyFilter($event)" />
+          <input
+            matInput
+            placeholder="Search by team name"
+            (keyup)="applyFilter($event)"
+            (input)="applyFilter($event)"
+          />
         </div>
         <button mat-flat-button class="filter-button">
           <mat-icon>filter_list</mat-icon>
@@ -74,8 +79,8 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #teamActionsMenu="matMenu" class="actionMenu">
-              <button mat-menu-item (click)="viewTeam(team.uuid)">
-                <app-svg-icon icon="edit" />
+              <button class="mat-mdc-menu-item mat-focus-indicator" mat-menu-item (click)="viewTeam(team.uuid)">
+                <mat-icon>edit</mat-icon>
                 <span>Edit</span>
               </button>
             </mat-menu>

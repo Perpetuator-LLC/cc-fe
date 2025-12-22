@@ -29,17 +29,6 @@ mat-form-field {
   filter: brightness(150%);
 }
 
-.error-container {
-  min-width: 300px;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  margin: 8px 0;
-  color: var(--md-sys-color-error);
-}
-
 mat-icon {
   margin-right: 8px;
 }

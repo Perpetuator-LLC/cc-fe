@@ -56,6 +56,8 @@
 
       .description {
         margin: 0;
+        margin-bottom: 6px;
+
         font-size: 16px;
         line-height: 1.6;
         color: var(--md-sys-color-on-surface-variant);
@@ -97,7 +99,11 @@
     width: 100%;
     height: 600px;
 
-    background: linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--md-sys-color-surface-container-high) 0%,
+      var(--md-sys-color-surface-container) 100%
+    );
   }
 
   .concept-image {
@@ -207,7 +213,9 @@
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
 
     &:hover {
       transform: translateY(-4px);
@@ -255,7 +263,11 @@
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 16px;
     text-align: center;
-    background: linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--md-sys-color-surface-container-high) 0%,
+      var(--md-sys-color-surface-container) 100%
+    );
 
     mat-card-content {
       padding: 64px 40px;
@@ -420,4 +432,3 @@
     }
   }
 }
-

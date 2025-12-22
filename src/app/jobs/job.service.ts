@@ -4,12 +4,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
 import { map, Subscription } from 'rxjs';
 import { BaseService } from '../base.service';
-import { Apollo, QueryRef } from 'apollo-angular';
-import { catchError } from 'rxjs/operators';
-import { AuthService } from '../auth/auth.service';
+import { Apollo } from 'apollo-angular';
 import { ErrorHandlerService } from '../utils/error-handler.service';
 import { MessageService } from '../message.service';
 import { RelayConnection } from '../utils/relay';
+import { JobsWebSocketService } from './jobs-websocket.service';
 
 export enum JobKind {
   FETCH_NEWS = 'FETCH_NEWS',
@@ -291,17 +290,17 @@ export const statusToString = (status: string) => {
 
 export interface JobResult {
   message?: string;
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  topic_uuid?: string;
-  news_uuids?: string[];
+  podcastUuid?: string;
+  episodeUuid?: string;
+  topicUuid?: string;
+  newsUuids?: string[];
   [key: string]: unknown;
 }
 
 export interface JobArgs {
-  podcast_uuid?: string;
-  episode_uuid?: string;
-  topic_uuid?: string;
+  podcastUuid?: string;
+  episodeUuid?: string;
+  topicUuid?: string;
   [key: string]: unknown;
 }
 
@@ -318,29 +317,23 @@ export interface Job {
   cost?: number;
 }
 
-interface GetUserJobsResponse {
-  jobs: RelayConnection<Job>;
-}
-
 @Injectable({
   providedIn: 'root',
 })
 export class JobService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
-  private jobStatusSubscription: Subscription | undefined;
   private jobsSignal: WritableSignal<Job[]> = signal([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cleanupInterval: any;
-  private queryRef!: QueryRef<GetUserJobsResponse>;
 
   constructor(
     protected override apollo: Apollo,
     protected override errorHandler: ErrorHandlerService,
-    private authService: AuthService,
+    private jobsWebSocketService: JobsWebSocketService,
     private messageService: MessageService,
   ) {
     super(apollo, errorHandler);
-    this.setupJobStatusPolling();
+    this.setupWebSocketSync();
     this.setupCleanupLoop();
   }
 
@@ -376,125 +369,32 @@ export class JobService extends BaseService implements OnDestroy {
     }
   }
 
-  private setupJobStatusPolling() {
-    // this.initializeJobStatusPolling();
+  /**
+   * Sync jobs signal with WebSocket service
+   * The WebSocket service handles connection/disconnection based on auth state
+   */
+  private setupWebSocketSync() {
+    // Sync jobs from WebSocket service to local signal
     this.subscriptions.add(
-      toObservable(this.authService.isLoggedIn).subscribe({
-        next: (isLoggedIn) => {
-          if (this.jobStatusSubscription) {
-            // NOTE: If logged out, unsubscribe from the job status subscription, if logged in
-            this.jobStatusSubscription.unsubscribe();
-          }
-          if (isLoggedIn) {
-            this.initializeJobStatusPolling();
-            return;
-          }
+      toObservable(this.jobsWebSocketService.jobs).subscribe({
+        next: (jobs) => {
+          this.jobsSignal.set(jobs);
         },
         error: (error) => {
-          this.messageService.error(`Failed to load jobs after login signal: ${error.message}`);
+          this.messageService.error(`Failed to sync jobs: ${error.message}`);
         },
       }),
     );
-
-    this.subscriptions.add(
-      toObservable(this.jobsSignal).subscribe((jobs) => {
-        if (!this.queryRef) {
-          return;
-        }
-        const jobUuids = jobs.map((job) => job.uuid).filter((uuid) => uuid !== null && uuid !== undefined);
-        const newPollInterval = jobs.length === 0 ? 0 : 3000;
-
-        void this.queryRef.refetch({ ...this.queryRef.variables, jobUuids });
-
-        if (newPollInterval === 0) {
-          this.queryRef.stopPolling();
-        } else {
-          this.queryRef.startPolling(newPollInterval);
-        }
-      }),
-    );
-  }
-
-  private initializeJobStatusPolling() {
-    const GET_USER_JOBS = gql`
-      query GetUserJobs(
-        $statuses: [JobStatus!]!
-        $kinds: [JobKind!]
-        $jobUuids: [UUID!]
-        $first: Int
-        $after: String
-        $orderBy: String
-      ) {
-        jobs(statuses: $statuses, kinds: $kinds, jobUuids: $jobUuids, first: $first, after: $after, orderBy: $orderBy) {
-          edges {
-            cursor
-            node {
-              id
-              uuid
-              kind
-              status
-              error
-              result
-              args
-              createdAt
-              updatedAt
-            }
-          }
-          pageInfo {
-            hasNextPage
-            hasPreviousPage
-            startCursor
-            endCursor
-          }
-        }
-      }
-    `;
-
-    this.queryRef = this.watchQuery<GetUserJobsResponse>({
-      query: GET_USER_JOBS,
-      variables: {
-        statuses: [JobStatus.PENDING, JobStatus.RUNNING],
-        // kinds: [
-        //   JobKind.SUMMARIZE_NEWS,
-        //   JobKind.FETCH_NEWS,
-        //   JobKind.EXTRACT_NEWS,
-        //   JobKind.CREATE_EPISODE,
-        //   JobKind.SELECT_UNUSED_NEWS,
-        //   JobKind.UPDATE_EPISODE_AUDIO,
-        //   JobKind.PUBLISH_EPISODE_AUDIO,
-        //   // If you want to track all jobs, comment out the kinds filter
-        //   JobKind.DATA...
-        // ],
-        jobUuids: [],
-        // after: ??,
-        first: 15, // Most windows are 3 wide, so 5 tall
-        orderBy: '-updatedAt',
-      },
-      pollInterval: 3000, // Poll every 3 seconds
-    });
-
-    this.jobStatusSubscription = this.queryRef.valueChanges
-      .pipe(
-        // switchMap(() => this.queryRef.valueChanges), // was this to rebind on error?
-        catchError((error) => this.errorHandler.handleError(error)),
-      )
-      .subscribe({
-        next: (results) => this.jobsSignal.set(results.data.jobs.edges.map((edge) => edge.node)),
-        error: (error) => {
-          this.messageService.error(`Failed to fetch job: ${error.message}`);
-        },
-      });
-    this.subscriptions.add(this.jobStatusSubscription);
-
-    this.queryRef.refetch();
   }
 
   addJobs(jobs: Job[]) {
-    this.jobsSignal.set([...jobs, ...this.jobsSignal()]);
+    // Add to WebSocket service which will sync back to our signal
+    this.jobsWebSocketService.addJobs(jobs);
   }
 
   addJob(job: Job) {
-    this.jobsSignal.set([job, ...this.jobsSignal()]);
+    // Add to WebSocket service which will sync back to our signal
+    this.jobsWebSocketService.addJob(job);
   }
 
   getJobTransitions(newJobs: Job[], previousJobs: Job[], status: string) {

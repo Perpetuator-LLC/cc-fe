@@ -1,9 +1,10 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <div class="route-title">
-        <span class="website-title">Capital<br />
-        <span class="website-title-copilot">&nbsp;&nbsp;Copitol</span>
-        </span>
+    <span class="website-title"
+      >Capital<br />
+      <span class="website-title-copilot">&nbsp;&nbsp;Copitol</span>
+    </span>
   </div>
   <!--  <span class="page-title"-->
   <!--    ><img-->
@@ -14,7 +15,7 @@
   <!--      height="24"-->
   <!--      matTooltip="Capital Copilot"-->
   <!--    />-->
-<!--  Home-->
+  <!--  Home-->
   <!--  </span>-->
 </ng-template>
 
@@ -31,19 +32,25 @@
 
     <mat-card class="hero-banner-card">
       <div class="hero-content">
-<!--        <div #p5Container id="p5Container"></div>-->
+        <!--        <div #p5Container id="p5Container"></div>-->
         <div class="hero-text">
           <h1>Your News, Your Way</h1>
           <p>
-            Get custom-tailored news briefings with only what you actually care about — hours of research condensed into minutes.
+            Get custom-tailored news briefings with only what you actually care about — hours of research condensed into
+            minutes.
             <br />
             <br />
             Simply describe what you care about, and our AI agents will build a podcast for you.
           </p>
-          <button mat-flat-button class="btn-secondary" [routerLink]="['/media/podcasts']" [queryParams]="{ create: 'true' }">Create Your Podcast Now</button>
-          <p>
-            Pick your topics, choose your focus areas, and even request deep dives on specific subjects.
-          </p>
+          <button
+            mat-flat-button
+            class="btn-secondary"
+            [routerLink]="['/media/podcasts']"
+            [queryParams]="{ create: 'true' }"
+          >
+            Create Your Podcast Now
+          </button>
+          <p>Pick your topics, choose your focus areas, and even request deep dives on specific subjects.</p>
         </div>
         <div class="hero-illustration">
           <!-- Placeholder for illustration -->
@@ -63,12 +70,13 @@
             <div>
               <div class="module-title">Create Research Topics</div>
               <div class="module-desc">
-                Create topics and have AI-powered research do a deep dive on a schedule or when you decide with automatic transcripts, seamless audio conversion, and instant
-                publishing.
+                Create topics and have AI-powered research do a deep dive on a schedule or when you decide with
+                automatic transcripts, seamless audio conversion, and instant publishing.
               </div>
             </div>
             <a class="module-link" [routerLink]="['/media/topics']" [queryParams]="{ create: 'true' }"
-              >Create a Topic to Research <app-svg-icon icon="right" /></a>
+              >Create a Topic to Research <app-svg-icon icon="right"
+            /></a>
           </div>
           <span class="image-section">
             <img src="/assets/hero-side.jpg" alt="generate" width="318" height="256" />
@@ -92,17 +100,15 @@
           <div>
             <div class="module-title">AI Financial Intelligence</div>
             <div class="module-desc">
-              Generate comprehensive financial dashboards powered by AI. DCF analysis, dividend metrics, recession monitoring, and more.
+              Generate comprehensive financial dashboards powered by AI. DCF analysis, dividend metrics, recession
+              monitoring, and more.
             </div>
           </div>
-          <a class="module-link" [routerLink]="'/finance'">
-            Explore Finance<app-svg-icon icon="right" />
-          </a>
+          <a class="module-link" [routerLink]="'/finance'"> Explore Finance<app-svg-icon icon="right" /> </a>
         </div>
       </div>
     </div>
   </div>
-
 
   <!-- Recent Podcasts Section -->
   <div class="recent-podcasts-section">
@@ -159,8 +165,15 @@
           </mat-card>
         } @else {
           <mat-card class="podcast-card public-podcast-card" *ngFor="let podcast of publicPodcasts">
-            <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
-              <img [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+            <a
+              [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
+              class="podcast-link"
+            >
+              <img
+                [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'"
+                alt="{{ podcast.name }}"
+                class="podcast-image"
+              />
             </a>
             <mat-card-content>
               <h3>
@@ -203,7 +216,7 @@
           <mat-icon>podcasts</mat-icon>
           <p>{{ isLoggedIn() ? 'No podcasts yet. Create your first podcast!' : 'No podcasts available.' }}</p>
           @if (isLoggedIn()) {
-            <a routerLink="/p" mat-raised-button color="primary">Create Podcast</a>
+            <a routerLink="/media/podcasts/new" mat-raised-button color="primary">Create Podcast</a>
           }
         </div>
       }
@@ -236,8 +249,15 @@
         } @else if (recentPodcasts.length > 0) {
           @for (podcast of recentPodcasts; track podcast.id) {
             <mat-card class="podcast-card public-podcast-card">
-              <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]" class="podcast-link">
-                <img [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+              <a
+                [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
+                class="podcast-link"
+              >
+                <img
+                  [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'"
+                  alt="{{ podcast.name }}"
+                  class="podcast-image"
+                />
               </a>
               <mat-card-content>
                 <h3>
@@ -252,7 +272,9 @@
                   <p class="owner">
                     By
                     @if (podcast.ownerLink) {
-                      <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
+                      <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{
+                        podcast.ownerName
+                      }}</a>
                     } @else {
                       {{ podcast.ownerName }}
                     }
@@ -371,5 +393,4 @@
       </mat-card>
     </div>
   }
-
 </div>

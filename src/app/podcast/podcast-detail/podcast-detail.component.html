@@ -10,13 +10,12 @@
   </span>
 </ng-template>
 
-
 <div class="podcast-detail-page">
   <div class="detail-header">
     <div class="top-header">
       <div class="title">
         <h2>{{ podcastForm.get('name')?.value }}</h2>
-<!--        <p>{{ podcastForm.get('description')?.value }}</p>-->
+        <!--        <p>{{ podcastForm.get('description')?.value }}</p>-->
       </div>
       <div class="buttons">
         @if (podcastForm.get('enabled')?.value) {
@@ -68,18 +67,34 @@
           <span class="status-label">Telegram Connection</span>
           <span
             class="status-badge"
-            [class.enable]="podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')"
-            [class.disable]="!podcastForm.get('tgResponse')?.value || !podcastForm.get('tgResponse')?.value.startsWith('Success.')"
+            [class.enable]="
+              podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')
+            "
+            [class.disable]="
+              !podcastForm.get('tgResponse')?.value || !podcastForm.get('tgResponse')?.value.startsWith('Success.')
+            "
           >
-            {{ (podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')) ? 'Connected' : 'Disconnected' }}
+            {{
+              podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')
+                ? 'Connected'
+                : 'Disconnected'
+            }}
           </span>
         </div>
       </div>
 
       <div class="action-buttons">
-        <span matTooltip="Creates an AI-generated episode using current news from your RSS feeds" class="button-wrapper">
-          <button mat-flat-button color="accent" class="create-episode-button" (click)="createNewsEpisode()"
-            [disabled]="hasUnsavedChanges() || creatingNewsEpisode">
+        <span
+          matTooltip="Creates an AI-generated episode using current news from your RSS feeds"
+          class="button-wrapper"
+        >
+          <button
+            mat-flat-button
+            color="accent"
+            class="create-episode-button"
+            (click)="createNewsEpisode()"
+            [disabled]="hasUnsavedChanges() || creatingNewsEpisode"
+          >
             @if (creatingNewsEpisode) {
               <mat-spinner diameter="18" />
             } @else {
@@ -88,9 +103,17 @@
             <span>News Episode</span>
           </button>
         </span>
-        <span matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode" class="button-wrapper">
-          <button mat-flat-button color="accent" class="create-episode-button research-button" (click)="createResearchEpisode()"
-            [disabled]="hasUnsavedChanges() || creatingResearchEpisode">
+        <span
+          matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode"
+          class="button-wrapper"
+        >
+          <button
+            mat-flat-button
+            color="accent"
+            class="create-episode-button research-button"
+            (click)="createResearchEpisode()"
+            [disabled]="hasUnsavedChanges() || creatingResearchEpisode"
+          >
             @if (creatingResearchEpisode) {
               <mat-spinner diameter="18" />
             } @else {
@@ -100,8 +123,12 @@
           </button>
         </span>
         <span matTooltip="Creates an empty episode that must be manually entered" class="button-wrapper">
-          <button mat-button class="blank-episode-button" (click)="createBlankEpisode()"
-            [disabled]="hasUnsavedChanges()">
+          <button
+            mat-button
+            class="blank-episode-button"
+            (click)="createBlankEpisode()"
+            [disabled]="hasUnsavedChanges()"
+          >
             <mat-icon>add_circle_outline</mat-icon>
             <span>Blank Episode</span>
           </button>
@@ -113,10 +140,7 @@
     <mat-tab-group class="mat-tab-group" [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
       <mat-tab label="Episodes">
         <mat-card-content>
-          <app-episodes-table
-            [podcastUuid]="podcastUuid"
-            [showPodcastColumn]="false"
-            [showSearchAndFilters]="true" />
+          <app-episodes-table [podcastUuid]="podcastUuid" [showPodcastColumn]="false" [showSearchAndFilters]="true" />
         </mat-card-content>
       </mat-tab>
 
@@ -158,7 +182,7 @@
                   <mat-checkbox
                     formControlName="enabled"
                     matTooltip="Podcast RSS feed is only readable when enabled. If not enabled, then podcast clients will think podcast is off-line."
-                  >Podcast Enabled</mat-checkbox
+                    >Podcast Enabled</mat-checkbox
                   >
                 </div>
                 <div class="slug-input">
@@ -275,7 +299,13 @@
                     </div>
                   } @else {
                     <div class="upload-area">
-                      <button class="upload-btn" mat-flat-button color="primary" type="button" (click)="fileInput.click()">
+                      <button
+                        class="upload-btn"
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="fileInput.click()"
+                      >
                         <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <g clip-path="url(#clip0_210_6192)">
                             <path
@@ -559,8 +589,8 @@
           <form [formGroup]="podcastForm">
             <div class="voice-info">
               <p>
-                <mat-icon>info</mat-icon>Select categories that best describe your podcast content. These categories help listeners find your
-                podcast in directories.
+                <mat-icon>info</mat-icon>Select categories that best describe your podcast content. These categories
+                help listeners find your podcast in directories.
               </p>
             </div>
 
@@ -643,12 +673,23 @@
                 </p>
               </div>
               <div class="rss-actions">
-                <button mat-raised-button color="primary" type="button" (click)="openAddRssFeedDialog()">
+                <button
+                  class="add-rss-feed-btn"
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="openAddRssFeedDialog()"
+                >
                   <mat-icon>add</mat-icon>
                   Add RSS Feed
                 </button>
                 @if (podcastForm.get('rssFeeds')?.value?.length) {
-                  <button mat-button type="button" (click)="copyAllRssFeedUrls()" matTooltip="Copy all RSS feed URLs (line-separated)">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="copyAllRssFeedUrls()"
+                    matTooltip="Copy all RSS feed URLs (line-separated)"
+                  >
                     <mat-icon>content_copy</mat-icon>
                     Copy All URLs
                   </button>

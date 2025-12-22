@@ -31,7 +31,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dialog.component';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 
 @Component({
   selector: 'app-teams-list',
@@ -40,7 +39,6 @@ import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
     MatButton,
     MatCard,
     MatCardContent,
-    SvgIconComponent,
     MatIcon,
 
     MatProgressBarModule,

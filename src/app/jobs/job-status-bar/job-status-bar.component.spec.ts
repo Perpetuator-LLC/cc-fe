@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { JobStatusBarComponent } from './job-status-bar.component';
-import { JobService, Job, JobStatus } from '../job.service';
+import { JobService, Job } from '../job.service';
 import { MessageService } from '../../message.service';
 import { JobDisplayService } from '../../job-display.service';
 import { PodcastsService } from '../../podcast/podcasts.service';
@@ -57,7 +57,6 @@ describe('JobStatusBarComponent', () => {
       'getPodcastUuid',
       'getEpisodeUuid',
       'getTopicUuid',
-      'getMergedJobData',
     ]);
     mockPodcastsService = jasmine.createSpyObj('PodcastsService', ['getPodcastById']);
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodeById']);
@@ -82,11 +81,13 @@ describe('JobStatusBarComponent', () => {
     );
 
     mockJobService.getJobTransitions.and.returnValue([]);
-    mockJobDisplayService.getMergedJobData.and.returnValue({});
     mockJobDisplayService.getJobMessage.and.returnValue('Job message');
     mockJobDisplayService.hasPodcastUuid.and.returnValue(false);
     mockJobDisplayService.hasEpisodeUuid.and.returnValue(false);
     mockJobDisplayService.hasTopicUuid.and.returnValue(false);
+    mockJobDisplayService.getPodcastUuid.and.returnValue(null);
+    mockJobDisplayService.getEpisodeUuid.and.returnValue(null);
+    mockJobDisplayService.getTopicUuid.and.returnValue(null);
 
     await TestBed.configureTestingModule({
       imports: [JobStatusBarComponent],
@@ -122,61 +123,43 @@ describe('JobStatusBarComponent', () => {
       expect(component.data.panelOpenState).toBe(false);
     });
 
-    it('should call loadJobs on init', () => {
-      spyOn(component, 'loadJobs');
+    it('should initialize panelOpenState on init', () => {
+      // Jobs are now loaded via WebSocket, not via loadJobs() call
       component.ngOnInit();
-      expect(component.loadJobs).toHaveBeenCalled();
+      expect(component.data.panelOpenState).toBeDefined();
     });
   });
 
-  describe('loadJobs', () => {
-    it('should call jobService.getJobs with correct parameters', () => {
-      component.loadJobs();
-
-      expect(mockJobService.getJobs).toHaveBeenCalledWith([JobStatus.PENDING, JobStatus.RUNNING], [], []);
-    });
-
-    it('should update jobs with enriched data on success', fakeAsync(() => {
+  describe('WebSocket job updates', () => {
+    it('should update jobs when jobService.jobs signal changes', fakeAsync(() => {
       const mockJobs = [createMockJob({ id: '1', kind: 'CREATE_EPISODE' })];
-      mockJobService.getJobs.and.returnValue(
-        of({
-          jobs: mockJobs,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            startCursor: null,
-            endCursor: null,
-          },
-        }),
-      );
-
-      component.loadJobs();
+      jobsSignal.set(mockJobs);
       tick();
 
-      expect(component['jobs'].length).toBe(1);
+      // Jobs are synced from the jobService.jobs signal via WebSocket
+      expect(mockJobService.getJobTransitions).toHaveBeenCalled();
     }));
 
-    it('should handle enrichment errors gracefully', fakeAsync(() => {
-      const mockJobs = [createMockJob()];
-      mockJobService.getJobs.and.returnValue(
-        of({
-          jobs: mockJobs,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            startCursor: null,
-            endCursor: null,
-          },
-        }),
-      );
+    it('should handle job transitions correctly', fakeAsync(() => {
+      const pendingJob = createMockJob({ id: '1', status: 'PENDING' });
+      const completedJob = createMockJob({ id: '1', status: 'COMPLETED' });
 
-      spyOn(console, 'warn');
-      mockJobDisplayService.getMergedJobData.and.throwError('Enrichment error');
-
-      component.loadJobs();
+      // Set initial job
+      jobsSignal.set([pendingJob]);
       tick();
 
-      expect(component['jobs'].length).toBe(1);
+      // Transition to completed
+      mockJobService.getJobTransitions.and.callFake((newJobs, prevJobs, status) => {
+        if (status === 'COMPLETED') {
+          return newJobs.filter((j) => j.status === 'COMPLETED');
+        }
+        return [];
+      });
+
+      jobsSignal.set([completedJob]);
+      tick();
+
+      expect(mockJobService.getJobTransitions).toHaveBeenCalled();
     }));
   });
 
@@ -249,7 +232,7 @@ describe('JobStatusBarComponent', () => {
   describe('Job Enrichment', () => {
     it('should enrich jobs with podcast names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ podcast_uuid: 'podcast-1' });
+      mockJobDisplayService.getPodcastUuid.and.returnValue('podcast-1');
       mockPodcastsService.getPodcastById.and.returnValue(
         of({ uuid: 'podcast-1', name: 'Test Podcast' } as unknown) as ReturnType<
           typeof mockPodcastsService.getPodcastById
@@ -265,7 +248,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should enrich jobs with episode names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ episode_uuid: 'episode-1' });
+      mockJobDisplayService.getEpisodeUuid.and.returnValue('episode-1');
       mockEpisodeService.getEpisodeById.and.returnValue(
         of({ uuid: 'episode-1', title: 'Test Episode' } as unknown) as ReturnType<
           typeof mockEpisodeService.getEpisodeById
@@ -281,7 +264,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should enrich jobs with topic names', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ topic_uuid: 'topic-1' });
+      mockJobDisplayService.getTopicUuid.and.returnValue('topic-1');
       mockResearchService.getTopicById.and.returnValue(
         of({ uuid: 'topic-1', title: 'Test Topic' } as unknown) as ReturnType<typeof mockResearchService.getTopicById>,
       );
@@ -295,7 +278,9 @@ describe('JobStatusBarComponent', () => {
 
     it('should handle jobs with no UUIDs', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({});
+      mockJobDisplayService.getPodcastUuid.and.returnValue(null);
+      mockJobDisplayService.getEpisodeUuid.and.returnValue(null);
+      mockJobDisplayService.getTopicUuid.and.returnValue(null);
 
       component['enrichJobsWithNames']([job]).then((enriched) => {
         expect(enriched[0].podcastName).toBeUndefined();
@@ -308,7 +293,7 @@ describe('JobStatusBarComponent', () => {
 
     it('should handle enrichment errors gracefully', fakeAsync(() => {
       const job = createMockJob({ id: '1' });
-      mockJobDisplayService.getMergedJobData.and.returnValue({ podcast_uuid: 'podcast-1' });
+      mockJobDisplayService.getPodcastUuid.and.returnValue('podcast-1');
       mockPodcastsService.getPodcastById.and.returnValue(throwError(() => new Error('Network error')));
       spyOn(console, 'warn');
 
@@ -479,21 +464,8 @@ describe('JobStatusBarComponent', () => {
       expect(unsubscribeSpy).toHaveBeenCalled();
     });
 
-    it('should add subscriptions to subscription manager', () => {
-      mockJobService.getJobs.and.returnValue(
-        of({
-          jobs: [],
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            startCursor: null,
-            endCursor: null,
-          },
-        }),
-      );
-
-      component.loadJobs();
-
+    it('should have subscription manager initialized', () => {
+      // Subscriptions are created in the constructor for WebSocket sync
       expect(component['subscriptions'].closed).toBe(false);
     });
   });

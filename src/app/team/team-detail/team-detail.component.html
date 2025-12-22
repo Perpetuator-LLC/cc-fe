@@ -22,7 +22,7 @@
     <div class="top-header">
       <div class="title">
         <form class="team-title" [formGroup]="teamForm">
-          <div class="member-row">
+          <div class="member-row team-name-input">
             <mat-form-field appearance="fill">
               <mat-label>Team Name</mat-label>
               <input matInput formControlName="name" />
@@ -52,7 +52,7 @@
   </div>
 
   <div class="team-table-card">
-    <mat-tab-group class="mat-tab-group">
+    <mat-tab-group class="mat-tab-group team-tab-group">
       <mat-tab label="Members">
         <mat-card-header>
           <div class="search-filter">
@@ -98,12 +98,12 @@
                 <mat-menu #teamActionsMenu="matMenu" class="actionMenu">
                   @if (member.role === 'owner') {
                     <button mat-menu-item (click)="openAddMemberDialog(member)">
-                      <app-svg-icon icon="edit" />
+                      <mat-icon>edit</mat-icon>
                       <span>Edit</span>
                     </button>
                   }
                   <button mat-menu-item (click)="removeUserFromTeam(member.user.uuid)">
-                    <app-svg-icon icon="delete" />
+                    <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -138,8 +138,8 @@
           <mat-table [dataSource]="podcasts">
             <!-- Name Column -->
             <ng-container matColumnDef="name">
-              <mat-header-cell *matHeaderCellDef>Podcast Name</mat-header-cell>
-              <mat-cell *matCellDef="let podcast">
+              <mat-header-cell class="podcast-name-header" *matHeaderCellDef>Podcast Name</mat-header-cell>
+              <mat-cell class="podcast-name-cell" *matCellDef="let podcast">
                 <div class="p_name">
                   @if (podcast.imageUrl) {
                     <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
@@ -147,10 +147,12 @@
                     <img src="/image.png" alt="img" />
                   }
                   <div class="name">
-                   <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
+                    <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                       {{ podcast.name }}
                     </a>
-                    <span>{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span>
+                    <span
+                      >{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span
+                    >
                   </div>
                 </div>
               </mat-cell>
@@ -192,8 +194,12 @@
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
-                  <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
-                    <app-svg-icon icon="delete" />
+                  <button
+                    mat-menu-item
+                    [routerLink]="['/media/podcasts', podcast.uuid]"
+                    [queryParams]="{ tab: 'danger-zone' }"
+                  >
+                    <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -219,19 +225,18 @@
         </mat-card-content>
       </mat-tab>
       <mat-tab label="Danger Zone">
-          <mat-card-content>
-            <h3 class="no-margin-top">Danger Zone Settings</h3>
-            <p>Here you can find advanced and potentially destructive actions related to your team.</p>
-          </mat-card-content>
-          <mat-card class="danger-card md3-danger-zone">
-            <div class="danger-card-title">Delete Team</div>
-            <p>Once you delete a team, it will be permanently removed from the data.</p>
-            <button mat-flat-button class="delete-btn md3-danger-action" (click)="deleteTeamDialog()">
-              Delete this Team
-            </button>
-          </mat-card>
+        <mat-card-content>
+          <h3 class="no-margin-top">Danger Zone Settings</h3>
+          <p>Here you can find advanced and potentially destructive actions related to your team.</p>
+        </mat-card-content>
+        <mat-card class="danger-card md3-danger-zone">
+          <div class="danger-card-title">Delete Team</div>
+          <p>Once you delete a team, it will be permanently removed from the data.</p>
+          <button mat-flat-button class="delete-btn md3-danger-action" (click)="deleteTeamDialog()">
+            Delete this Team
+          </button>
+        </mat-card>
       </mat-tab>
     </mat-tab-group>
   </div>
-
 </div>
