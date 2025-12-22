@@ -26,20 +26,20 @@ Disallow: /cancel-change-email
 
 # Disallow private/authenticated routes
 Disallow: /profile
-Disallow: /p
-Disallow: /p/
-Disallow: /e
-Disallow: /e/
+Disallow: /media
+Disallow: /media/podcasts
+Disallow: /media/episodes
+Disallow: /media/topics
+Disallow: /media/news
 Disallow: /teams
 Disallow: /team/
-Disallow: /topics
-Disallow: /topic/
 Disallow: /jobs
 Disallow: /affiliate
 Disallow: /transactions
 Disallow: /orders
 Disallow: /scheduling
 Disallow: /news
+Disallow: /api-keys
 
 # Note: Sitemap not yet implemented
 # Future: Sitemap: https://capitalcopilot.io/sitemap.xml

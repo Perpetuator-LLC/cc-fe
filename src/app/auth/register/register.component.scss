@@ -33,7 +33,23 @@ mat-card.register-card {
     text-align: center;
   }
 
+  .password-container {
+    position: relative;
+
+    .password-icon {
+      position: absolute;
+      top: 40%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+  }
+
   .login-btn {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
     width: 100%;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
@@ -49,13 +65,12 @@ mat-card.register-card {
       opacity: 0.5;
       background: var(--md-sys-color-secondary-container);
     }
-  }
 
-  .forgot {
-    width: 100%;
-    color: var(--md-sys-color-on-surface-variant);
-    text-align: center;
-    background-color: transparent;
+    .inline-spinner {
+      top: 4px;
+      left: -4px;
+      display: inline-block;
+    }
   }
 
   .resend {
@@ -70,45 +85,6 @@ form {
   padding: 0 20px;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  width: 90%;
-  padding: 32px;
-
-  .website-logo {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    text-decoration: none;
-  }
-
-  .route-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface);
-
-    @media screen and (width <= 576px) {
-      display: none;
-    }
-  }
-
-  p {
-    margin: 0;
-    color: var(--md-sys-color-on-surface-variant);
-
-    a {
-      color: var(--md-sys-color-on-surface);
-    }
-  }
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
 mat-error {
   font-size: 0.8em;
   color: var(--md-sys-color-error);
@@ -118,56 +94,6 @@ mat-form-field {
   width: 100%;
 }
 
-//.disclaimers {
-//  //filter: brightness(110%);
-//}
-
-.error-container {
-  min-width: 300px;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  margin: 8px 0;
-  color: var(--md-sys-color-error);
-}
-
 mat-icon {
   margin-right: 8px;
-}
-
-.footer {
-  text-align: center;
-  background-color: transparent;
-
-  .link-button {
-    cursor: pointer;
-
-    border: 0;
-
-    color: var(--md-sys-color-secondary);
-
-    background-color: transparent;
-    box-shadow: none;
-  }
-
-  p {
-    margin-inline: auto;
-
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 16px;
-    color: var(--md-sys-color-on-surface-variant);
-
-    a {
-      font-weight: 500;
-      color: var(--md-sys-color-primary-dark);
-    }
-  }
-
-  @media screen and (width <= 599px) {
-    height: auto;
-    white-space: normal;
-  }
 }

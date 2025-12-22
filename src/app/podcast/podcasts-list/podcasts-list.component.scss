@@ -30,7 +30,6 @@
 
   .search-filter {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
     align-items: center;
 
@@ -83,6 +82,10 @@
         color: var(--md-sys-color-on-surface);
       }
     }
+
+    @media screen and (width <= 576px) {
+      flex-wrap: wrap;
+    }
   }
 
   .view-toggles {
@@ -93,12 +96,27 @@
     button[mat-button] {
       font-weight: 500;
       color: var(--md-sys-color-on-surface);
+
+      mat-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+      }
     }
 
     button[mat-icon-button] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       border: 1px solid transparent;
       border-radius: 8px;
+
       color: var(--md-sys-color-on-surface);
+
+      .mdc-icon-button__ripple {
+        display: none;
+      }
 
       &.active {
         border-color: var(--md-sys-color-outline-variant);
@@ -109,55 +127,16 @@
 
   @media screen and (width <= 576px) {
     flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
   }
 }
 
 .episode-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px; // MD3 4px grid spacing between buttons
   align-items: center;
 }
-
-//.episode-actions-old {
-//  display: flex;
-//  gap: 8px;
-//  align-items: center;
-//
-//  button {
-//    display: inline-flex;
-//    flex-shrink: 0;
-//    gap: 8px;
-//    align-items: center;
-//
-//    min-width: fit-content;
-//    padding: 8px 16px;
-//    border: 1px solid var(--md-sys-color-outline-variant);
-//    border-radius: 8px;
-//
-//    font-weight: 600;
-//    color: #ffffff;
-//    white-space: nowrap;
-//
-//    background: var(--md-sys-color-secondary);
-//
-//    mat-icon {
-//      width: 16px;
-//      height: 16px;
-//      margin: 0;
-//      font-size: 16px;
-//    }
-//
-//    &:hover {
-//      opacity: 0.9;
-//    }
-//  }
-//
-//  .research-button {
-//    color: #ffffff;
-//    background-color: var(--md-sys-color-tertiary);
-//  }
-//}
 
 .action-btn {
   color: var(--md-sys-color-on-surface);
@@ -210,6 +189,7 @@
     @media screen and (width <= 576px) {
       overflow: auto;
       display: block;
+      white-space: nowrap;
     }
   }
 
@@ -597,10 +577,7 @@
     //}
 
     @media screen and (width <= 576px) {
-      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
-
       height: auto;
       padding-inline: 16px;
     }

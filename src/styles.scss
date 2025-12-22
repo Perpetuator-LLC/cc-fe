@@ -88,7 +88,7 @@ html {
 
   // RGB values for glass morphism effects (dark theme)
   // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
-  --md-sys-color-surface-container-rgb: 39, 42, 49;   // matches #272a31
+  --md-sys-color-surface-container-rgb: 39, 42, 49; // matches #272a31
   --md-sys-color-surface-container-high-rgb: 49, 53, 60; // matches #31353c
   // Glass morphism backgrounds with transparency (pre-computed for component use)
   // "Dirty smoked glass" - dark charcoal with transparency to show blurred orbs through
@@ -138,6 +138,66 @@ body {
         text-decoration: none;
       }
     }
+  }
+
+  // Material component global overrides
+  // Using body prefix for higher specificity to avoid !important
+  .mat-mdc-form-field {
+    font-size: 14px;
+  }
+
+  .mat-mdc-notch-piece {
+    border: 0;
+  }
+
+  .mdc-line-ripple::before,
+  .mdc-line-ripple::after {
+    border: 0;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 48px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+  }
+
+  .mat-mdc-text-field-wrapper:has(.mat-mdc-form-field-textarea-control) {
+    height: auto;
+  }
+
+  .team-name-input .mat-mdc-text-field-wrapper {
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+  }
+
+  .status-filter-compact .mat-mdc-form-field-infix {
+    padding-top: 12px;
+  }
+
+  .mat-mdc-paginator-page-size .mat-mdc-form-field-infix {
+    padding-top: 12px;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 20px;
+  }
+
+  .mdc-floating-label {
+    top: 24px;
+  }
+
+  .mat-mdc-select {
+    font-size: 14px;
+  }
+
+  .actionMenu {
+    min-width: 192px;
+  }
+
+  .team-tab-group .mat-mdc-tab.mdc-tab {
+    flex-grow: 0;
   }
 }
 
@@ -260,7 +320,6 @@ body.light {
     background-color: var(--md-extended-color-info-color);
   }
 }
-
 
 // Job card border colors for status bar
 .job-card {
@@ -1371,3 +1430,22 @@ mat-nav-list {
   }
 }
 
+.loading-spinner {
+  mat-progress-bar {
+    height: 1px;
+  }
+}
+
+.version-control-section {
+  .mat-expansion-panel-header {
+    @media screen and (width <= 576px) {
+      .mat-content {
+        flex-direction: column;
+      }
+    }
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0;
+  }
+}

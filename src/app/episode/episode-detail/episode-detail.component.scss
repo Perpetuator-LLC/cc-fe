@@ -210,7 +210,7 @@
     }
 
     .copy-content-btn {
-      @include primary-button ();
+      @include primary-button();
 
       height: 32px;
       min-height: 32px;
@@ -273,7 +273,7 @@
 
 .related-episodes .title,
 .scheduling-section .title {
-  @include section-title-with-badge ();
+  @include section-title-with-badge();
 }
 
 .scheduling-section .title {
@@ -327,7 +327,7 @@
   }
 
   .audio-card {
-    @include card-container ();
+    @include card-container();
 
     margin-top: 8px;
     margin-bottom: 24px;
@@ -472,7 +472,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
 
@@ -501,9 +502,9 @@
 }
 
 .related-table {
-  @include card-container ();
+  @include card-container();
 
-  overflow: hidden;
+  overflow: auto;
   margin-top: 16px;
 
   .news-table {
@@ -608,7 +609,7 @@
 }
 
 .related-card {
-  @include card-container ();
+  @include card-container();
 
   width: 100%;
 
@@ -731,6 +732,10 @@
   margin-top: -20px;
   padding: 32px 72px;
   background-color: var(--md-sys-color-surface-container);
+
+  @media screen and (width <= 576px) {
+    padding: 32px 24px;
+  }
 }
 
 .podcast-detail-page .detail-header {
@@ -744,6 +749,10 @@
   justify-content: space-between;
 
   margin-bottom: 32px;
+
+  @media screen and (width <= 576px) {
+    flex-direction: column;
+  }
 }
 
 .podcast-detail-page .top-header .title h2 {
@@ -754,6 +763,10 @@
   font-size: 32px;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
+
+  @media screen and (width <= 576px) {
+    font-size: 24px;
+  }
 }
 
 // Header actions bar - contains publish toggle, share buttons, and action buttons
@@ -891,7 +904,7 @@
 }
 
 .schedule-card {
-  @include card-container ();
+  @include card-container();
 
   .schedule-header {
     display: flex;
@@ -971,7 +984,7 @@
   text-align: center;
 
   mat-card {
-    @include card-container ();
+    @include card-container();
 
     padding: 40px 20px;
 
@@ -1101,6 +1114,11 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
+}
+
+.date-cell {
+  white-space: nowrap;
 }
 
 .rss-feed-cell .rss-feed-row {
@@ -1159,7 +1177,6 @@
 .rss-feed-cell .status-icon-small.status-error mat-icon {
   color: var(--md-sys-color-error);
 }
-
 
 // Research URLs tab section
 .research-urls-section {
@@ -1286,8 +1303,7 @@
   }
 
   .research-url-item {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
 
     .url-number {
       align-self: flex-start;
