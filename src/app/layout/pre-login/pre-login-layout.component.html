@@ -46,22 +46,27 @@
         height="48"
       />
       <div class="route-title">
-        <span class="website-title">Capital<br />
-        <span class="website-title-copilot">&nbsp;&nbsp;Copilot</span>
+        <span class="website-title"
+          >Capital<br />
+          <span class="website-title-copilot">&nbsp;&nbsp;Copilot</span>
         </span>
       </div>
     </a>
 
     <div class="header-actions">
-      <a mat-button [routerLink]="['/register']" class="auth-link register-link btn-surface">
-        <mat-icon>person_add</mat-icon>
-        <span>Register</span>
-      </a>
+      @if (!isRegisterPage) {
+        <a mat-button [routerLink]="['/register']" class="auth-link register-link btn-surface">
+          <mat-icon>person_add</mat-icon>
+          <span>Register</span>
+        </a>
+      }
 
-      <a mat-stroked-button [routerLink]="['/login']" class="auth-link login-link btn-secondary-outlined">
-        <mat-icon>login</mat-icon>
-        <span>Sign In</span>
-      </a>
+      @if (!isLoginPage) {
+        <a mat-stroked-button [routerLink]="['/login']" class="auth-link login-link btn-secondary-outlined">
+          <mat-icon>login</mat-icon>
+          <span>Sign In</span>
+        </a>
+      }
 
       <button
         mat-icon-button

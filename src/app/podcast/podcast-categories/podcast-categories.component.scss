@@ -172,10 +172,16 @@
   }
 }
 
+.category-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .category-heading {
   margin: 0;
   font-size: 14px;
-  color: var(--md-sys-color-on-surface-variant)
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .heading-div {

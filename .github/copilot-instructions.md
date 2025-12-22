@@ -1,3 +1,5 @@
+Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is enabled in your shell.
+
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
 Redirect STDERR to STDOUT and pipe to tee and capture command output in a logs file e.g.

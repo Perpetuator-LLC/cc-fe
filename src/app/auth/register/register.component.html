@@ -2,20 +2,20 @@
 <ng-template #toolbarTemplate />
 <!--<app-message></app-message>-->
 <div class="register-container">
-<!--  <div class="header">-->
-<!--    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">-->
-<!--      <img-->
-<!--        src="Capital_Copilot_Logo_Slanted.svg"-->
-<!--        aria-label="Side nav toggle icon"-->
-<!--        alt="Capital Copilot"-->
-<!--        width="24"-->
-<!--        height="24"-->
-<!--        matTooltip="Capital Copilot"-->
-<!--      />-->
-<!--      <div class="route-title">Capital Copilot</div>-->
-<!--    </a>-->
-<!--    <p>Already have an account? <a href="/login">Login</a></p>-->
-<!--  </div>-->
+  <!--  <div class="header">-->
+  <!--    <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">-->
+  <!--      <img-->
+  <!--        src="Capital_Copilot_Logo_Slanted.svg"-->
+  <!--        aria-label="Side nav toggle icon"-->
+  <!--        alt="Capital Copilot"-->
+  <!--        width="24"-->
+  <!--        height="24"-->
+  <!--        matTooltip="Capital Copilot"-->
+  <!--      />-->
+  <!--      <div class="route-title">Capital Copilot</div>-->
+  <!--    </a>-->
+  <!--    <p>Already have an account? <a href="/login">Login</a></p>-->
+  <!--  </div>-->
   <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <mat-card class="register-card">
       <mat-card-header>
@@ -34,17 +34,33 @@
             <mat-error>Enter a valid email</mat-error>
           }
         </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="new-password" />
-          @if (registerForm.controls.password.errors?.['minLength']) {
-            <mat-error>Password must be at least 6 characters</mat-error>
-          }
-          @if (registerForm.controls.password.errors?.['required']) {
-            <mat-error>Password is required</mat-error>
-          }
-        </mat-form-field>
+        <div class="password-container">
+          <mat-form-field appearance="fill">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              autocomplete="new-password"
+            />
+            @if (registerForm.controls.password.errors?.['minlength']) {
+              <mat-error>Password must be at least 6 characters</mat-error>
+            }
+            @if (registerForm.controls.password.errors?.['required']) {
+              <mat-error>Password is required</mat-error>
+            }
+          </mat-form-field>
+          <button
+            class="password-icon"
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
 
         <!-- Disclaimers Section -->
         <div class="disclaimers">
@@ -90,12 +106,17 @@
       </mat-card-content>
       <mat-card-actions>
         <button
-          class="login-btn btn-secondary"
+          class="login-btn"
           mat-flat-button
           type="submit"
-          [disabled]="!registerForm.valid || !registerForm.controls['acceptTerms'].value"
+          [disabled]="!registerForm.valid || !registerForm.controls['acceptTerms'].value || loading"
         >
-          Register
+          @if (loading) {
+            <mat-spinner diameter="20" class="inline-spinner" />
+            Registering...
+          } @else {
+            Register
+          }
         </button>
       </mat-card-actions>
       <mat-card-actions>

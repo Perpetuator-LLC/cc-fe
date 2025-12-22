@@ -1,16 +1,16 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
-  <span class="page-title"><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span
-      class="page-title-secondary">Episodes</span></span>
+  <span class="page-title"
+    ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">Episodes</span></span
+  >
 </ng-template>
-
 
 <mat-card class="create-episode-card">
   <mat-card-content class="content-header">
     <div class="title">
       <h3>All Episodes</h3>
     </div>
-    <button mat-flat-button color="primary" type="button" (click)="openCreateEpisodeDialog()">
+    <button mat-button color="primary" type="button" (click)="openCreateEpisodeDialog()">
       <mat-icon>add</mat-icon>
       Create New Episode
     </button>
@@ -18,9 +18,5 @@
 </mat-card>
 
 <div class="middle-card">
-  <app-episodes-table
-    [podcastUuid]="null"
-    [showPodcastColumn]="true"
-    [showSearchAndFilters]="true" />
+  <app-episodes-table [podcastUuid]="null" [showPodcastColumn]="true" [showSearchAndFilters]="true" />
 </div>
-

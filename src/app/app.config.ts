@@ -17,6 +17,7 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { CustomMatPaginatorIntl } from './custom-paginator-intl';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { authInterceptor } from './auth/interceptors/auth.interceptor';
+import { tokenRefreshInterceptor } from './auth/interceptors/token-refresh.interceptor';
 import { errorTrackingInterceptor } from './core/interceptors/error-tracking.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { RouterErrorTracker } from './core/router-error-tracker';
@@ -26,7 +27,10 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor, errorTrackingInterceptor])),
+    provideHttpClient(
+      withInterceptorsFromDi(),
+      withInterceptors([tokenRefreshInterceptor, authInterceptor, errorTrackingInterceptor]),
+    ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimationsAsync(),
     graphqlProvider,
