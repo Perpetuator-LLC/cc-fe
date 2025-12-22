@@ -40,36 +40,6 @@
   }
 }
 
-.podcast-link-header {
-  margin-bottom: 16px;
-
-  .podcast-link {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-
-    padding: 8px 16px;
-    border-radius: 8px;
-
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-secondary);
-    text-decoration: none;
-
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: var(--md-sys-color-surface-container);
-    }
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-    }
-  }
-}
-
 .breadcrumb {
   display: flex;
   flex-wrap: wrap;
@@ -320,4 +290,3 @@
     }
   }
 }
-

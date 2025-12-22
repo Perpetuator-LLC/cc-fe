@@ -440,7 +440,6 @@
     background-color: var(--md-sys-color-surface-container);
     box-shadow: -4px 0 12px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
 
-
     h3 {
       margin-top: 16px;
       margin-bottom: 12px;
@@ -580,13 +579,9 @@
       padding: 8px 16px;
       border: 1px solid var(--md-sys-color-outline-variant);
 
-      color: var(--md-sys-color-tertiary);
+      color: var(--mat-button-protected-container-color, var(--mat-sys-surface));
 
-      background: transparent;
-
-      &:hover {
-        background: var(--md-sys-color-surface-container-high);
-      }
+      background: var(--mat-tab-active-label-text-color, var(--mat-sys-on-surface));
     }
   }
 }
@@ -648,6 +643,10 @@
       color: var(--md-sys-color-on-surface-variant);
 
       background: transparent;
+
+      &:focus-visible {
+        outline: none;
+      }
     }
 
     @media screen and (width <= 576px) {
@@ -837,7 +836,9 @@
 
       background: var(--md-sys-color-surface-container);
 
-      transition: background 0.2s, border 0.2s;
+      transition:
+        background 0.2s,
+        border 0.2s;
     }
 
     input[type='checkbox']:checked + .custom-checkbox {

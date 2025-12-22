@@ -22,7 +22,7 @@
     <div class="top-header">
       <div class="title">
         <form class="team-title" [formGroup]="teamForm">
-          <div class="member-row">
+          <div class="member-row team-name-input">
             <mat-form-field appearance="fill">
               <mat-label>Team Name</mat-label>
               <input matInput formControlName="name" />
@@ -52,7 +52,7 @@
   </div>
 
   <div class="team-table-card">
-    <mat-tab-group class="mat-tab-group">
+    <mat-tab-group class="mat-tab-group team-tab-group">
       <mat-tab label="Members">
         <mat-card-header>
           <div class="search-filter">
@@ -98,12 +98,12 @@
                 <mat-menu #teamActionsMenu="matMenu" class="actionMenu">
                   @if (member.role === 'owner') {
                     <button mat-menu-item (click)="openAddMemberDialog(member)">
-                      <app-svg-icon icon="edit" />
+                      <mat-icon>edit</mat-icon>
                       <span>Edit</span>
                     </button>
                   }
                   <button mat-menu-item (click)="removeUserFromTeam(member.user.uuid)">
-                    <app-svg-icon icon="delete" />
+                    <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -138,8 +138,8 @@
           <mat-table [dataSource]="podcasts">
             <!-- Name Column -->
             <ng-container matColumnDef="name">
-              <mat-header-cell *matHeaderCellDef>Podcast Name</mat-header-cell>
-              <mat-cell *matCellDef="let podcast">
+              <mat-header-cell class="podcast-name-header" *matHeaderCellDef>Podcast Name</mat-header-cell>
+              <mat-cell class="podcast-name-cell" *matCellDef="let podcast">
                 <div class="p_name">
                   @if (podcast.imageUrl) {
                     <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
@@ -193,7 +193,7 @@
                     <span>View Details</span>
                   </button>
                   <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
-                    <app-svg-icon icon="delete" />
+                    <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
                 </mat-menu>

@@ -8,47 +8,13 @@ mat-form-field {
   margin: 1rem 8px;
 }
 
-.codes {
-  mat-form-field {
-    margin-bottom: 0;
-  }
-}
-
-.export,
-.orders,
-.codes,
-.payment {
+.export {
   max-width: 1016px;
   margin: 1rem 8px;
 
   button {
     margin-bottom: 16px;
   }
-}
-
-.danger-zone {
-  max-width: 1016px;
-  margin: 1rem 8px;
-  color: red;
-}
-
-.action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  width: 100%;
-
-  mat-form-field,
-  button {
-    flex: 1 1 100%;
-  }
-}
-
-.button-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 16px;
 }
 
 .user-details {

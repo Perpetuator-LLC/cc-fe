@@ -1,21 +1,5 @@
 [//]: # (Copyright © 2024 Perpetuator LLC)
 
-# TODO
-
-Auto-formatter needs to be run as part of commit/push process.
-
-Replace `src/app/redeem-gift-code-dialog.component.ts` with SCSS
-```
-          style="color: #ff4a4a;font-size: 13px;margin-top: 0;position: relative;top: -12px;"
-```
-
-Replace all `*ngIf`
-
-Find unused imports and remove them.
-
-Find unused styles and remove them.
-
-
 # Concepts
 
 ## CLI First
@@ -83,7 +67,7 @@ grep '"version":' ../../package.json
 Update version in package.json:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.28.0"/' ../../package.json
+sed -i '' 's/"version": ".*"/"version": "0.28.1"/' ../../package.json
 grep '"version":' ../../package.json
 ```
 
@@ -94,7 +78,7 @@ Make sure the changelog script is up to date:
 Update the changelog by running the script in the back-end repository:
 
 ```shell
-(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.28.0' 'v0.27.0')
+(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.28.1' 'v0.28.0')
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -105,15 +89,15 @@ Create the release commit:
 
 ```shell
 git add ../.. && \
-git commit -m "chore: bump version to 0.28.0"
+git commit -m "chore: bump version to 0.28.1"
 ```
 
 Push to main and create the release tag:
 
 ```shell
 git push origin main && \
-git tag -a v0.28.0 -m "This release focuses on a comprehensive migration to Material Design 3 (MD3), modernization of the authentication system, and significant architectural improvements including an upgrade to Angular 20." && \
-git push origin v0.28.0
+git tag -a v0.28.1 -m "This release focuses on authentication improvements and URL structure modernization. The authentication system now includes automatic token refresh with rotation support and telemetry tracking, while URL paths have been refactored from short paths to semantic `/media` routes for better clarity." && \
+git push origin v0.28.1
 ```
 
 #### Step 5: Clean up feature branch (if applicable)

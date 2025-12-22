@@ -86,7 +86,12 @@ mat-sidenav-content mat-toolbar {
       font-size: 16px;
       font-weight: 400;
 
-      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--md-sys-color-tertiary) 0%, var(--md-sys-color-secondary) 50.58%, var(--md-sys-color-tertiary) 100%);
+      background: radial-gradient(
+        115.14% 340.63% at 107.39% 90.62%,
+        var(--md-sys-color-tertiary) 0%,
+        var(--md-sys-color-secondary) 50.58%,
+        var(--md-sys-color-tertiary) 100%
+      );
     }
 
     .nav-list-row {
@@ -190,6 +195,10 @@ mat-sidenav-content mat-toolbar {
     font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  @media screen and (width <= 576px) {
+    display: none;
   }
 }
 
@@ -543,7 +552,11 @@ mat-nav-list {
 
   // Home page: use gradient background to match pre-login layout's glass effect
   &.home-page {
-    background: linear-gradient(120.17deg, color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%, transparent 100%);
+    background: linear-gradient(
+      120.17deg,
+      color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%,
+      transparent 100%
+    );
   }
 }
 
@@ -551,7 +564,11 @@ mat-nav-list {
   display: block;
 
   // MD3: Use design tokens instead of rgb() functions for theme support
-  background: linear-gradient(120.17deg, color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%, transparent 100%);
+  background: linear-gradient(
+    120.17deg,
+    color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%,
+    transparent 100%
+  );
   backdrop-filter: blur(10px);
 
   .main-content {
@@ -648,7 +665,12 @@ mat-nav-list {
       font-size: 16px;
       font-weight: 400;
 
-      background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--md-sys-color-tertiary) 0%, var(--md-sys-color-secondary) 50.58%, var(--md-sys-color-tertiary) 100%);
+      background: radial-gradient(
+        115.14% 340.63% at 107.39% 90.62%,
+        var(--md-sys-color-tertiary) 0%,
+        var(--md-sys-color-secondary) 50.58%,
+        var(--md-sys-color-tertiary) 100%
+      );
     }
   }
 
@@ -863,6 +885,10 @@ mat-nav-list {
     height: 16px;
     font-size: 16px;
   }
+
+  @media screen and (width <= 576px) {
+    display: none;
+  }
 }
 
 .toolbar-container-section .profile-btn {
@@ -875,7 +901,13 @@ mat-nav-list {
   background: transparent;
 }
 
+.transactions-btn {
+  display: none;
 
+  @media screen and (width <= 576px) {
+    display: flex;
+  }
+}
 
 // Flattened selectors to reduce specificity
 .toolbar-container-section .push-right mat-icon.theme-icon {

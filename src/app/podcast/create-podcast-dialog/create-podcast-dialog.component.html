@@ -1,5 +1,10 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<h2 mat-dialog-title>Generate Podcast</h2>
+<div class="dialog-header" mat-dialog-title>
+<h2>Generate Podcast</h2>
+    <button mat-icon-button (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 <mat-dialog-content>
   <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
     <mat-form-field>

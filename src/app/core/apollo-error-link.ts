@@ -30,7 +30,7 @@ export class ApolloErrorLinkFactory {
               exceptionMessage: error.message,
               inputs: {
                 operation: operationName,
-                variables: this.sanitizeVariables(operation.variables),
+                variables: operation.variables, // Will be sanitized by recordTrace
                 path: error.path?.join('.'),
               },
               tags: {
@@ -60,7 +60,7 @@ export class ApolloErrorLinkFactory {
             exceptionMessage: networkError.message,
             inputs: {
               operation: operationName,
-              variables: this.sanitizeVariables(operation.variables),
+              variables: operation.variables, // Will be sanitized by recordTrace
             },
             tags: {
               operation_name: operationName,
@@ -74,22 +74,5 @@ export class ApolloErrorLinkFactory {
 
       return forward(operation);
     });
-  }
-
-  private sanitizeVariables(variables: Record<string, unknown>): Record<string, unknown> {
-    if (!variables) {
-      return {};
-    }
-
-    const sanitized = { ...variables };
-    const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'accessToken', 'refreshToken'];
-
-    Object.keys(sanitized).forEach((key) => {
-      if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
-        sanitized[key] = '[REDACTED]';
-      }
-    });
-
-    return sanitized;
   }
 }

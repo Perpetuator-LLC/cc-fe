@@ -28,6 +28,8 @@
         <h1 class="title">Join {{ affiliateData.affiliateUsername }}'s Network</h1>
         <p class="description">Start your journey with Capital Copilot and become part of an affiliate network.</p>
 
+        <p class="disclosure">This is an affiliate link, and {{ affiliateData.affiliateUsername }} earns commissions from sign-ups through this link. They are an actual customer and user of Capital Copilot.</p>
+
         <div class="actions">
           @if (!isAuthenticated) {
             <button mat-flat-button class="btn-secondary" (click)="onSignUp()">Sign Up</button>

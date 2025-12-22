@@ -101,10 +101,18 @@ else
     compression_ratio=0
 fi
 
+# Get git info
+GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
 # Update JSON with summary
 cat > "$PROD_FILE" << EOF
 {
   "timestamp": "$TIMESTAMP",
+  "git": {
+    "commit": "$GIT_COMMIT",
+    "branch": "$GIT_BRANCH"
+  },
   "summary": {
     "total_source_bytes": $total_source_bytes,
     "total_source_human": "$(format_bytes "$total_source_bytes")",

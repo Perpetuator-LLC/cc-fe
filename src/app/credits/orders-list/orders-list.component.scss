@@ -117,23 +117,6 @@
       }
     }
 
-    .checkbox-container {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 24px;
-
-      p {
-        margin: 0;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--md-sys-color-on-surface);
-
-        span {
-          color: var(--md-sys-color-on-surface-variant);
-        }
-      }
-    }
-
     .pay-btn {
       cursor: pointer;
 

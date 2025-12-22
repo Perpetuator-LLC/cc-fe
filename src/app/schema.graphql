@@ -400,6 +400,21 @@ enum TracesTraceKindChoices {
 
   """Frontend Error"""
   FRONTEND_ERROR
+
+  """Log Entry"""
+  LOG
+
+  """Email Sent"""
+  EMAIL_SENT
+
+  """Email Failed"""
+  EMAIL_FAILED
+
+  """Credits Event"""
+  CREDITS
+
+  """Team Event"""
+  TEAM
 }
 
 """An enumeration."""
@@ -2692,9 +2707,12 @@ type ApiMutation {
 
   """
   Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
-  PENDING, clear the result and error fields, and requeue the jobs for processing. It will also check if any of the
-  jobs are already completed and will not restart them. The mutation returns a message indicating the status of the
-  operation and a list of the jobs that were restarted.
+  PENDING, clear the result and error fields, and requeue the jobs for processing.
+  
+  For jobs that are part of a chain with a completed parent job, the parent's result will be passed to the
+  retried task to maintain chain continuity.
+  
+  The mutation returns a message indicating the status of the operation and a list of the jobs that were restarted.
   """
   retryJobs(jobUuids: [UUID]!): RetryJobs
 
@@ -3506,9 +3524,12 @@ type DeleteJobs {
 
 """
 Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
-PENDING, clear the result and error fields, and requeue the jobs for processing. It will also check if any of the
-jobs are already completed and will not restart them. The mutation returns a message indicating the status of the
-operation and a list of the jobs that were restarted.
+PENDING, clear the result and error fields, and requeue the jobs for processing.
+
+For jobs that are part of a chain with a completed parent job, the parent's result will be passed to the
+retried task to maintain chain continuity.
+
+The mutation returns a message indicating the status of the operation and a list of the jobs that were restarted.
 """
 type RetryJobs {
   success: Boolean

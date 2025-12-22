@@ -64,6 +64,11 @@
   table {
     width: 100%;
     background-color: var(--md-sys-color-surface-container);
+
+    @media screen and (width <= 576px) {
+      overflow: auto;
+      display: block;
+    }
   }
 
   th {
@@ -160,18 +165,8 @@
   }
 }
 
-.loading-spinner {
-  margin-top: 16px;
-}
-
 @media screen and (width <= 576px) {
-  .content-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .create-topic-button {
     justify-content: center;
-    width: 100%;
   }
 }
