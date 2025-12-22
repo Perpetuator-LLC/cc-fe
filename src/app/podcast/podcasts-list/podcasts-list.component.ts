@@ -104,6 +104,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     { id: 'team', label: 'Team', selected: true },
     { id: 'tgChannelId', label: 'Telegram ID', selected: false },
     { id: 'latestInternalEpisodeDate', label: 'Latest Episode', selected: true },
+    { id: 'createdAt', label: 'Created', selected: false },
     { id: 'enabled', label: 'Live', selected: true },
     { id: 'tgResponse', label: 'Telegram Connected', selected: false },
     { id: 'createEpisode', label: 'Create Episode', selected: true },
