@@ -15,9 +15,11 @@
     "lint": "ng lint",
     "lint:scss": "stylelint \"**/*.scss\"",
     "lint:scss:fix": "stylelint \"**/*.scss\" --fix",
-    "lint:md3": "node scripts/check-md3-compliance.js",
+"lint:md3": "node scripts/check-md3-compliance.js",
     "lint:md3:component": "node scripts/check-md3-compliance.js --checklist",
-    "lint:all": "yarn lint && yarn lint:scss && yarn lint:md3",
+    "lint:scss:unused": "node scripts/check-unused-scss.js",
+    "lint:scss:unused:strict": "node scripts/check-unused-scss.js --strict",
+    "lint:all": "yarn lint && yarn lint:scss && yarn lint:md3 && yarn lint:scss:unused:strict && yarn format:check",
     "scss:track": "scripts/track-scss-size.sh",
     "css:analyze": "node scripts/analyze-css-size.js",
     "css:baseline": "yarn build && node scripts/analyze-css-size.js --baseline",
@@ -40,11 +42,14 @@
       "yarn check-copyright"
     ],
     "*.html": [
+      "prettier --write",
       "yarn check-copyright"
     ],
     "*.scss": [
+      "prettier --write",
       "stylelint --fix --allow-empty-input",
-      "yarn check-copyright"
+      "yarn check-copyright",
+      "node scripts/check-unused-scss.js --strict --files"
     ]
   },
   "private": true,

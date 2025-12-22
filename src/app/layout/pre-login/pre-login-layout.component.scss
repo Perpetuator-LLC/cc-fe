@@ -5,7 +5,11 @@
 
   min-height: 100vh;
 
-  background: linear-gradient(120.17deg, color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%, transparent 100%);
+  background: linear-gradient(
+    120.17deg,
+    color-mix(in srgb, var(--md-sys-color-surface) 96%, transparent) -98.63%,
+    transparent 100%
+  );
   backdrop-filter: blur(10px);
 
   .header {
@@ -27,17 +31,12 @@
 
       color: var(--md-sys-color-on-surface);
       text-decoration: none;
-      @media screen and (width <= 576px) {
-        img{
-          width: 40px;
-          height: 40px;
-        }
-      }
 
       .website-title {
         font-size: 1.5rem;
         font-weight: 400;
         white-space: nowrap;
+
         @media screen and (width <= 576px) {
           font-size: 1rem;
         }
@@ -47,8 +46,16 @@
         font-size: 1.5rem;
         font-weight: 200;
         white-space: nowrap;
+
         @media screen and (width <= 576px) {
           font-size: 1rem;
+        }
+      }
+
+      @media screen and (width <= 576px) {
+        img {
+          width: 40px;
+          height: 40px;
         }
       }
     }
@@ -97,7 +104,6 @@
           background: color-mix(in srgb, var(--md-sys-color-secondary-container) 15%, transparent);
         }
       }
-
 
       .theme-toggle {
         width: 40px;
@@ -168,118 +174,108 @@
     // Footer uses margin-top: auto to stick to bottom (defined in shared-footer)
   }
 
-    .main-content {
-      .mat-toolbar {
-        background: transparent;
-      }
+  .main-content {
+    .mat-toolbar {
+      background: transparent;
     }
+  }
 
-    .before-login-sidebar {
-      flex-direction: row;
+  .before-login-sidebar {
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 90%;
+    margin: 0 auto;
+    padding-top: 50px;
+    border: 0;
+
+    background: transparent;
+
+    .navbar {
+      display: flex;
+      align-items: center;
       justify-content: space-between;
 
-      width: 90%;
-      margin: 0 auto;
-      padding-top: 50px;
-      border: 0;
+      width: 100%;
 
-      background: transparent;
+      // MD3 4px grid: 48px = 12 * 4px for navigation pill horizontal padding
+      padding: 16px 48px; // 48px pill shape padding (12 * 4px)
+      /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+      border-radius: 9999px; // Pill shape (effectively infinite radius)
 
-      .navbar {
+      background: radial-gradient(
+        100% 100% at 0% 0%,
+        color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%,
+        color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%
+      );
+      backdrop-filter: blur(8px);
+      box-shadow: -4px -4px 256px 0 var(--md-sys-color-outline-variant) inset; // MD3 4px grid: -4px, 256px = 64 * 4px
+    }
+
+    .website-logo {
+      padding: 0;
+
+      .header-logo {
         display: flex;
+        gap: 4px;
         align-items: center;
-        justify-content: space-between;
-
-        width: 100%;
-
-        // MD3 4px grid: 48px = 12 * 4px for navigation pill horizontal padding
-        padding: 16px 48px; // 48px pill shape padding (12 * 4px)
-        /* stylelint-disable-next-line declaration-property-value-disallowed-list */
-        border-radius: 9999px; // Pill shape (effectively infinite radius)
-
-        background: radial-gradient(100% 100% at 0% 0%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 0.68%, color-mix(in srgb, var(--md-sys-color-surface-container-highest) 7%, transparent) 100%);
-        backdrop-filter: blur(8px);
-        box-shadow: -4px -4px 256px 0 var(--md-sys-color-outline-variant) inset; // MD3 4px grid: -4px, 256px = 64 * 4px
-      }
-
-      .website-logo {
-        padding: 0;
-
-        .header-logo {
-          display: flex;
-          gap: 4px;
-          align-items: center;
-          text-decoration: none;
-        }
-      }
-
-      //.fill-side {
-      //  height: auto;
-      //  flex-direction: row;
-      //  padding: 0;
-      //}
-
-      .keep-up {
-        display: flex;
-        gap: 32px;
-        align-items: center;
-      }
-
-      .route-title {
-        font-size: 16px;
-        font-weight: 400;
-      }
-
-      .push-down {
-        display: flex;
-      }
-
-      .mat-link {
-        overflow: unset;
-        padding: 0;
-
-        &:hover::before {
-          background-color: transparent;
-        }
-
-        &:hover:focus {
-          background-color: transparent;
-        }
-
-        .mat-icon {
-          display: none;
-        }
-      }
-
-      .theme-toggle-card {
-        padding: 0;
-      }
-
-      .loginBtn {
-        width: 142px;
-        min-width: 142px;
-        height: 48px;
-        border-radius: 48px; // MD3 grid: pill shape
-
-        font-family: Sarabun, sans-serif;
-        font-size: 16px;
-        font-weight: 400;
-
-        background: radial-gradient(115.14% 340.63% at 107.39% 90.62%, var(--md-sys-color-tertiary) 0%, var(--md-sys-color-secondary) 50.58%, var(--md-sys-color-tertiary) 100%);
+        text-decoration: none;
       }
     }
 
-    .toolbar-container {
-      justify-content: center;
+    .keep-up {
+      display: flex;
+      gap: 32px;
+      align-items: center;
     }
 
-    .mat-toolbar.footer {
-      justify-content: center;
+    .route-title {
+      font-size: 16px;
+      font-weight: 400;
     }
+
+    .mat-link {
+      overflow: unset;
+      padding: 0;
+
+      &:hover::before {
+        background-color: transparent;
+      }
+
+      &:hover:focus {
+        background-color: transparent;
+      }
+
+      .mat-icon {
+        display: none;
+      }
+    }
+
+    .loginBtn {
+      width: 142px;
+      min-width: 142px;
+      height: 48px;
+      border-radius: 48px; // MD3 grid: pill shape
+
+      font-family: Sarabun, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+
+      background: radial-gradient(
+        115.14% 340.63% at 107.39% 90.62%,
+        var(--md-sys-color-tertiary) 0%,
+        var(--md-sys-color-secondary) 50.58%,
+        var(--md-sys-color-tertiary) 100%
+      );
+    }
+  }
+
+  .mat-toolbar.footer {
+    justify-content: center;
+  }
 }
 
 // Flattened to reduce specificity
 .header-actions .auth-link.login-link:hover {
   background: color-mix(in srgb, var(--md-sys-color-secondary-container) 25%, transparent);
 }
-

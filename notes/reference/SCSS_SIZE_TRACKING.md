@@ -1,113 +1,101 @@
-# SCSS File Size Tracking
+# CSS/SCSS Size Tracking Guide
 
-## Purpose
-Track SCSS source file sizes and compiled CSS output to monitor bundle size optimizations during the MD3 migration and refactoring efforts.
+## Overview
 
-## Usage
+This project tracks both **source SCSS** and **compiled CSS** sizes to monitor bundle optimization.
 
-### Track Current Sizes
+## Quick Reference
+
+| What | Command | Log Directory |
+|------|---------|---------------|
+| Track source SCSS sizes | `yarn scss:track` | `logs/scss-sizes/` |
+| Track compiled CSS sizes | `yarn css:dev` | `logs/css-size-reports/` |
+| Check unused SCSS | `yarn lint:scss:unused` | - |
+| Full lint with size check | `yarn lint:all` | - |
+
+## Budget Limits
+
+Defined in `angular.json`:
+
+| Budget Type | Warning | Error |
+|-------------|---------|-------|
+| Initial bundle | 2 MB | 2.5 MB |
+| Component styles | 12 kB | 24 kB |
+
+### Current Large Components (as of 2025-12-21)
+
+These files exceed the 12kB warning limit:
+
+| Component | Compiled Size |
+|-----------|---------------|
+| episode-detail | 23.5 kB |
+| podcast-detail | 19.3 kB |
+| news-list | 17.7 kB |
+| affiliate-dashboard | 17.2 kB |
+| post-login-layout | 14.5 kB |
+| affiliate-admin | 12.2 kB |
+| jobs-list | 12.1 kB |
+
+## Are These Limits Reasonable?
+
+**Yes.** For a production Angular Material app:
+
+- **12-15kB warning** is appropriate for individual components
+- **24-30kB error** is a reasonable upper bound
+- Components over 20kB should be considered for refactoring
+
+### Why Large Component Styles Aren't Always Bad
+
+Angular's build process bundles all component CSS. Creating more components doesn't reduce total bundle size - it just distributes styles across files.
+
+**What actually reduces bundle size:**
+1. Removing unused classes (we removed 110 in this cleanup)
+2. Using shared mixins instead of duplicating styles  
+3. Leveraging Material's built-in variants
+4. Following the MD3 design token system
+
+## Tracking Logs
+
+### Source SCSS: `logs/scss-sizes/`
+
+Tracks raw SCSS file sizes before compilation.
+
 ```bash
 yarn scss:track
 ```
 
-This will:
-1. Build the project in production mode
-2. Analyze all source SCSS files
-3. Analyze compiled CSS output
-4. Generate timestamped report in `logs/scss-sizes/`
-5. Update `logs/scss-sizes/sizes.dev.json` for comparison
+See: [logs/scss-sizes/README.md](../../logs/scss-sizes/README.md)
 
-### Compare Changes
+### Compiled CSS: `logs/css-size-reports/`
+
+Tracks final compiled CSS bundle sizes.
+
 ```bash
-# Make your SCSS changes, then:
-yarn scss:track
-
-# Compare with previous run:
-diff logs/scss-sizes/sizes.dev.json logs/scss-sizes/sizes.2025-11-30_14-30-00.json
+yarn css:dev
 ```
 
-### Workflow Integration
-The `.dev.json` file is tracked in git to provide a baseline. Before committing significant SCSS changes:
+See: [logs/css-size-reports/README.md](../../logs/css-size-reports/README.md)
 
-1. **Before changes:**
-   ```bash
-   yarn scss:track  # Creates baseline
-   git add logs/scss-sizes/sizes.dev.json
-   git commit -m "Baseline: SCSS sizes before refactoring"
-   ```
+## CI/CD Integration
 
-2. **After changes:**
-   ```bash
-   yarn scss:track  # Compare against baseline
-   # Review the diff to ensure bundle size improvements
-   git add logs/scss-sizes/sizes.dev.json
-   git commit -m "After: SCSS refactoring reduced bundle by XKB"
-   ```
+Bundle sizes are tracked via:
 
-## File Structure
+1. **Angular budgets** - Warns/fails at build time
+2. **GitHub Actions** - Size diffs in PR comments (if configured)
 
-```
-logs/scss-sizes/
-├── sizes.dev.json           # Tracked baseline (committed to git)
-└── sizes.YYYY-MM-DD_HH-MM-SS.json  # Timestamped snapshots (ignored)
-```
+### External Services
 
-## Report Format
+Consider these GitHub-native/external options for historical tracking:
 
-```json
-{
-  "timestamp": "2025-11-30_14-30-00",
-  "summary": {
-    "total_source_bytes": 524288,
-    "total_source_human": "512KB",
-    "total_compiled_bytes": 262144,
-    "total_compiled_human": "256KB",
-    "total_source_files": 145,
-    "total_compiled_files": 3,
-    "compression_ratio_percent": 50,
-    "reduction_bytes": 262144,
-    "reduction_human": "256KB"
-  }
-}
-```
+| Service | Features |
+|---------|----------|
+| **Bundlewatch** | GitHub Action, tracks sizes across commits |
+| **Size Limit** | GitHub Action, performance budgets |
+| **Codecov (Bundle Analysis)** | Historical charts, PR comments |
+| **RelativeCI** | Bundle analysis, GitHub integration |
 
-## Metrics to Monitor
+## Related Documentation
 
-### During MD3 Migration
-- **Source file count**: Should decrease as we consolidate styles into mixins
-- **Total source bytes**: May initially increase (adding MD3 tokens), should decrease overall
-- **Compiled output**: Should decrease significantly as we remove custom styles
-
-### Goals
-- Reduce total SCSS source files by 20-30% through consolidation
-- Reduce compiled CSS bundle by 30-40% by removing duplicate styles
-- Maintain compression ratio >60% (compiled size vs source size)
-
-## Integration with CI/CD
-
-Consider adding to pre-push hooks:
-```bash
-# .husky/pre-push
-yarn scss:track
-git add logs/scss-sizes/sizes.dev.json
-```
-
-Or integrate into build process to track progress over time.
-
-## Troubleshooting
-
-### "Permission denied" error
-```bash
-chmod +x scripts/track-scss-size.sh
-```
-
-### Build fails during tracking
-The script builds the project before analyzing. If build fails:
-1. Fix build errors first
-2. Run `yarn build` manually to verify
-3. Then re-run `yarn scss:track`
-
-## See Also
 - [MD3 Comprehensive Theme Guide](./MD3_COMPREHENSIVE_THEME_GUIDE.md)
-- [CSS Size Analysis](./css-size-analysis.md) (existing tool for runtime analysis)
+- [SCSS Linting Guide](./MD3_LINTING_GUIDE.md)
 

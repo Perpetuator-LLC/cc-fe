@@ -66,56 +66,6 @@
   }
 }
 
-.create-form-card {
-  margin: 16px 30px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  background-color: var(--md-sys-color-surface-container);
-
-  mat-card-header {
-    h3 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface);
-    }
-  }
-
-  @media screen and (width <= 576px) {
-    margin: 16px;
-  }
-}
-
-.schedule-form {
-  .form-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-
-    mat-form-field {
-      flex: 1;
-
-      &.full-width {
-        width: 100%;
-      }
-    }
-
-    @media screen and (width <= 768px) {
-      flex-direction: column;
-      gap: 8px;
-    }
-  }
-
-  .form-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid var(--md-sys-color-outline-variant);
-  }
-}
-
 .schedules-container {
   overflow: hidden;
   margin-top: 16px;
@@ -125,11 +75,6 @@
     width: 100%;
     border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
-    @media screen and (width <= 576px) {
-      overflow: auto;
-    display: block;
-    white-space: nowrap;
-    }
 
     .mat-mdc-header-cell {
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -149,6 +94,12 @@
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
       color: var(--md-sys-color-on-surface);
       background: var(--md-sys-color-surface-container-low);
+    }
+
+    @media screen and (width <= 576px) {
+      overflow: auto;
+      display: block;
+      white-space: nowrap;
     }
   }
 }
@@ -231,113 +182,7 @@
     top: 0;
     right: 0;
     left: 0;
+
     height: 1px;
-  }
-}
-
-// Enhanced crontab styles
-.crontab-section {
-  .timezone-info {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-
-    padding: 8px 12px;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-
-    font-size: 12px;
-    color: var(--md-sys-color-on-surface);
-
-    background: var(--md-sys-color-surface-container-high);
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      color: var(--md-sys-color-secondary);
-    }
-  }
-
-  .advanced-cron {
-    overflow: hidden;
-    margin-top: 16px;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-
-    .advanced-toggle {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-start;
-
-      width: 100%;
-      padding: 12px 16px;
-      border: none;
-
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface);
-
-      background: var(--md-sys-color-surface-container-high);
-
-      transition: background-color 0.2s;
-
-      &:hover {
-        background: var(--md-sys-color-surface-container);
-      }
-
-      mat-icon {
-        transition: transform 0.2s;
-      }
-    }
-
-    &.expanded .advanced-toggle mat-icon {
-      transform: rotate(180deg);
-    }
-
-    .form-row {
-      padding: 0 16px 16px;
-      background: var(--md-sys-color-surface-container-low);
-    }
-  }
-
-  .schedule-preview {
-    margin-top: 16px;
-
-    mat-card {
-      border: 1px solid var(--md-sys-color-outline-variant);
-      background: var(--md-sys-color-surface-container);
-
-      mat-card-content {
-        padding: 16px;
-
-        h4 {
-          margin: 0 0 12px;
-          font-size: 16px;
-          font-weight: 600;
-          color: var(--md-sys-color-on-surface);
-        }
-
-        .preview-text {
-          margin: 0 0 8px;
-          font-size: 14px;
-          color: var(--md-sys-color-on-surface);
-        }
-
-        .cron-expression {
-          display: inline-block;
-
-          margin: 0;
-          padding: 4px 8px;
-          border-radius: 4px;
-
-          font-family: monospace;
-          font-size: 12px;
-          color: var(--md-sys-color-on-surface-variant);
-
-          background: var(--md-sys-color-surface-container-high);
-        }
-      }
-    }
   }
 }

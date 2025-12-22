@@ -31,7 +31,6 @@
     }
   }
 
-
   .mat-mdc-card-header-text {
     width: 100%;
   }
@@ -281,9 +280,10 @@
   // Error styling
   .error {
     margin: 8px 0;
+
     font-size: 12px;
-    line-height: 1.5;
     font-weight: 500;
+    line-height: 1.5;
     color: var(--md-sys-color-error);
   }
 }
@@ -357,4 +357,3 @@
     }
   }
 }
-
