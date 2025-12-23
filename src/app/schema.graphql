@@ -279,7 +279,9 @@ type ApiQuery {
     kind: String
     createdAt: DateTime
     updatedAt: DateTime
+    chainId: UUID
     jobUuid: UUID
+    hasChain: Boolean
     kindContains: String
     createdAfter: DateTime
     createdBefore: DateTime
@@ -289,6 +291,12 @@ type ApiQuery {
     """Ordering"""
     orderBy: String
   ): JobTypeConnection
+
+  """Get all jobs in a specific chain, ordered by chain position"""
+  jobsByChain(
+    """Chain ID to filter jobs"""
+    chainId: UUID!
+  ): [JobType]
   podcasts(
     offset: Int
     before: String
@@ -415,6 +423,21 @@ enum TracesTraceKindChoices {
 
   """Team Event"""
   TEAM
+
+  """Podcast Generation"""
+  PODCAST_GENERATION
+
+  """RSS Feed Discovery"""
+  RSS_DISCOVERY
+
+  """Metadata Generation"""
+  METADATA_GENERATION
+
+  """Voice Recommendation"""
+  VOICE_RECOMMENDATION
+
+  """Episode Creation"""
+  EPISODE_CREATION
 }
 
 """An enumeration."""
@@ -619,6 +642,7 @@ type UserDataExport {
 
 """
 JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
+chain information, and related jobs.
 """
 type JobType implements Node {
   taskId: UUID
@@ -629,11 +653,21 @@ type JobType implements Node {
   result: GenericScalar
   createdAt: DateTime!
   updatedAt: DateTime!
+  chainId: UUID
+  chainPosition: Int
 
   """The ID of the object"""
   id: ID!
   uuid: UUID
   cost: Int
+  parentJobUuid: UUID
+  childJobs: [JobType]
+
+  """All jobs in the same chain, ordered by position"""
+  chainJobs: [JobType]
+
+  """Total number of jobs in this chain"""
+  chainJobCount: Int
 }
 
 """An object with an ID"""
