@@ -49,6 +49,7 @@ export class SharedFooterComponent {
   // Dev-only links (visible only in development environment)
   devLinks: FooterLink[] = [
     { label: 'Button Showcase', route: '/dev/buttons', icon: 'palette', devOnly: true },
+    { label: 'Charts Showcase', route: '/dev/charts', icon: 'analytics', devOnly: true },
     { label: 'Affiliate Admin', route: '/affiliate-admin', icon: 'admin_panel_settings', devOnly: true },
   ];
 
