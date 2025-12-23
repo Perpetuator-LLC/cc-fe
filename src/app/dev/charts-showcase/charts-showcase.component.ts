@@ -42,20 +42,13 @@ export class ChartsShowcaseComponent {
    * Cost breakdown: Taxes 35%, AI 25%, COGS 10% = 70% total costs
    * Remaining 30% = Direct Affiliate 15% + Secondary Affiliate 15%
    *
-   * Direct Revenue: 20 users @ $100 = $2,000
-   *   - Taxes (35%): $700
-   *   - AI Costs (25%): $500
-   *   - COGS (10%): $200
-   *   - You @15%: $300
-   *   - Company (15%): $300
-   *
-   * Indirect Revenue: 400 users @ $100 = $40,000
-   *   - Taxes (35%): $14,000
-   *   - AI Costs (25%): $10,000
-   *   - COGS (10%): $4,000
-   *   - Your Direct Referrals @15%: $6,000 (they get it, not you!)
-   *   - Company (15%): $6,000
-   *   - You: $0 ← MISSED OPPORTUNITY
+   * Total Revenue: $42,000
+   *   - Taxes (35%): $14,700
+   *   - AI Costs (25%): $10,500
+   *   - COGS (10%): $4,200
+   *   - You: $300 (only from direct)
+   *   - Your Referrals: $6,000 (they get indirect)
+   *   - Company (15%): $6,300
    */
   scenario1Options: EChartsOption = {
     title: {
@@ -97,77 +90,86 @@ export class ChartsShowcaseComponent {
           fontSize: 12,
         },
         data: [
-          // Direct Referrals flow (you earn here)
+          // Level 1: Revenue sources
           { name: '20 Direct Referrals', itemStyle: { color: '#4285F4' } },
+          { name: '400 Indirect Referrals', itemStyle: { color: '#9E9E9E' } },
+
+          // Level 2: Revenue totals
           { name: 'Direct Revenue ($2K)', itemStyle: { color: '#34A853' } },
+          { name: 'Indirect Revenue ($40K)', itemStyle: { color: '#BDBDBD' } },
+
+          // Level 3: Unified cost/payout categories
           { name: 'Taxes (35%)', itemStyle: { color: '#EA4335' } },
           { name: 'AI Costs (25%)', itemStyle: { color: '#FBBC04' } },
           { name: 'COGS (10%)', itemStyle: { color: '#FF6D00' } },
           { name: 'You @15%', itemStyle: { color: '#00BCD4' } },
+          { name: 'Your Referrals @15%', itemStyle: { color: '#757575' } },
           { name: 'Company (15%)', itemStyle: { color: '#2E7D32' } },
 
-          // Indirect Referrals flow (grayed - you earn NOTHING)
-          { name: '400 Indirect Referrals', itemStyle: { color: '#9E9E9E' } },
-          { name: 'Indirect Revenue ($40K)', itemStyle: { color: '#BDBDBD' } },
-          { name: 'Indirect Taxes (35%)', itemStyle: { color: '#757575' } },
-          { name: 'Indirect AI (25%)', itemStyle: { color: '#757575' } },
-          { name: 'Indirect COGS (10%)', itemStyle: { color: '#757575' } },
-          { name: 'Your Referrals @15%', itemStyle: { color: '#757575' } },
-          { name: 'Indirect Company (15%)', itemStyle: { color: '#9E9E9E' } },
-          { name: 'You: $0', itemStyle: { color: '#616161' } },
+          // Level 4: Final totals
+          { name: 'Total Taxes: $14,700', itemStyle: { color: '#EA4335' } },
+          { name: 'Total AI: $10,500', itemStyle: { color: '#FBBC04' } },
+          { name: 'Total COGS: $4,200', itemStyle: { color: '#FF6D00' } },
+          { name: 'Your Earnings: $300', itemStyle: { color: '#00BCD4' } },
+          { name: 'Referrals Earnings: $6,000', itemStyle: { color: '#757575' } },
+          { name: 'Company Net: $6,300', itemStyle: { color: '#2E7D32' } },
         ],
         links: [
-          // Direct flow (you earn)
+          // Level 1 → Level 2
           { source: '20 Direct Referrals', target: 'Direct Revenue ($2K)', value: 2000 },
+          {
+            source: '400 Indirect Referrals',
+            target: 'Indirect Revenue ($40K)',
+            value: 40000,
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
+          },
+
+          // Level 2 → Level 3 (Direct flows)
           { source: 'Direct Revenue ($2K)', target: 'Taxes (35%)', value: 700 },
           { source: 'Direct Revenue ($2K)', target: 'AI Costs (25%)', value: 500 },
           { source: 'Direct Revenue ($2K)', target: 'COGS (10%)', value: 200 },
           { source: 'Direct Revenue ($2K)', target: 'You @15%', value: 300 },
           { source: 'Direct Revenue ($2K)', target: 'Company (15%)', value: 300 },
 
-          // Indirect flow (grayed - you miss out!)
-          {
-            source: '400 Indirect Referrals',
-            target: 'Indirect Revenue ($40K)',
-            value: 40000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
-          },
+          // Level 2 → Level 3 (Indirect flows - grayed)
           {
             source: 'Indirect Revenue ($40K)',
-            target: 'Indirect Taxes (35%)',
+            target: 'Taxes (35%)',
             value: 14000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
           },
           {
             source: 'Indirect Revenue ($40K)',
-            target: 'Indirect AI (25%)',
+            target: 'AI Costs (25%)',
             value: 10000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
           },
           {
             source: 'Indirect Revenue ($40K)',
-            target: 'Indirect COGS (10%)',
+            target: 'COGS (10%)',
             value: 4000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
           },
           {
             source: 'Indirect Revenue ($40K)',
             target: 'Your Referrals @15%',
             value: 6000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
           },
           {
             source: 'Indirect Revenue ($40K)',
-            target: 'Indirect Company (15%)',
+            target: 'Company (15%)',
             value: 6000,
-            lineStyle: { color: '#BDBDBD', opacity: 0.4 },
+            lineStyle: { color: '#BDBDBD', opacity: 0.5 },
           },
-          {
-            source: 'Indirect Revenue ($40K)',
-            target: 'You: $0',
-            value: 1,
-            lineStyle: { color: '#BDBDBD', opacity: 0.2 },
-          },
+
+          // Level 3 → Level 4 (Totals)
+          { source: 'Taxes (35%)', target: 'Total Taxes: $14,700', value: 14700 },
+          { source: 'AI Costs (25%)', target: 'Total AI: $10,500', value: 10500 },
+          { source: 'COGS (10%)', target: 'Total COGS: $4,200', value: 4200 },
+          { source: 'You @15%', target: 'Your Earnings: $300', value: 300 },
+          { source: 'Your Referrals @15%', target: 'Referrals Earnings: $6,000', value: 6000 },
+          { source: 'Company (15%)', target: 'Company Net: $6,300', value: 6300 },
         ],
       },
     ],
@@ -186,23 +188,14 @@ export class ChartsShowcaseComponent {
    * Cost breakdown: Taxes 35%, AI 25%, COGS 10% = 70% total costs
    * Remaining 30% = Direct Affiliate 10% + Secondary Affiliate 5% + Company 15%
    *
-   * Direct Revenue: 20 users @ $100 = $2,000
-   *   - Taxes (35%): $700
-   *   - AI Costs (25%): $500
-   *   - COGS (10%): $200
-   *   - You @10% (Direct): $200
-   *   - Your Upline @5%: $100 (if you have one, otherwise company)
-   *   - Company (15%): $300
-   *
-   * Indirect Revenue: 400 users @ $100 = $40,000
-   *   - Taxes (35%): $14,000
-   *   - AI Costs (25%): $10,000
-   *   - COGS (10%): $4,000
-   *   - Your Referrals @10%: $4,000 (they earn as direct affiliates)
-   *   - You @5% (Secondary): $2,000 ← YOUR BONUS!
-   *   - Company (15%): $6,000
-   *
-   * Your total: $200 + $2,000 = $2,200 (vs $300 in 1-tier!)
+   * Total Revenue: $42,000
+   *   - Taxes (35%): $14,700
+   *   - AI Costs (25%): $10,500
+   *   - COGS (10%): $4,200
+   *   - You: $200 (direct @10%) + $2,000 (secondary @5%) = $2,200
+   *   - Your Referrals: $4,000 (@10% of indirect)
+   *   - Your Upline: $100 (@5% of direct)
+   *   - Company (15%): $6,300
    */
   scenario2Options: EChartsOption = {
     title: {
@@ -244,29 +237,39 @@ export class ChartsShowcaseComponent {
           fontSize: 12,
         },
         data: [
-          // Direct Referrals flow
+          // Level 1: Revenue sources
           { name: '20 Direct Referrals', itemStyle: { color: '#4285F4' } },
+          { name: '400 Indirect Referrals', itemStyle: { color: '#4285F4' } },
+
+          // Level 2: Revenue totals
           { name: 'Direct Revenue ($2K)', itemStyle: { color: '#34A853' } },
+          { name: 'Indirect Revenue ($40K)', itemStyle: { color: '#34A853' } },
+
+          // Level 3: Unified cost/payout categories
           { name: 'Taxes (35%)', itemStyle: { color: '#EA4335' } },
           { name: 'AI Costs (25%)', itemStyle: { color: '#FBBC04' } },
           { name: 'COGS (10%)', itemStyle: { color: '#FF6D00' } },
           { name: 'You @10% (Direct)', itemStyle: { color: '#00BCD4' } },
+          { name: 'You @5% (Secondary)', itemStyle: { color: '#F39C12' } },
+          { name: 'Your Referrals @10%', itemStyle: { color: '#00BCD4' } },
           { name: 'Your Upline @5%', itemStyle: { color: '#9C27B0' } },
           { name: 'Company (15%)', itemStyle: { color: '#2E7D32' } },
 
-          // Indirect Referrals flow (NOW YOU EARN!)
-          { name: '400 Indirect Referrals', itemStyle: { color: '#4285F4' } },
-          { name: 'Indirect Revenue ($40K)', itemStyle: { color: '#34A853' } },
-          { name: 'Indirect Taxes (35%)', itemStyle: { color: '#EA4335' } },
-          { name: 'Indirect AI (25%)', itemStyle: { color: '#FBBC04' } },
-          { name: 'Indirect COGS (10%)', itemStyle: { color: '#FF6D00' } },
-          { name: 'Your Referrals @10%', itemStyle: { color: '#00BCD4' } },
-          { name: 'You @5% (Secondary) $2K!', itemStyle: { color: '#F39C12' } },
-          { name: 'Indirect Company (15%)', itemStyle: { color: '#2E7D32' } },
+          // Level 4: Final totals
+          { name: 'Total Taxes: $14,700', itemStyle: { color: '#EA4335' } },
+          { name: 'Total AI: $10,500', itemStyle: { color: '#FBBC04' } },
+          { name: 'Total COGS: $4,200', itemStyle: { color: '#FF6D00' } },
+          { name: 'Your Earnings: $2,200', itemStyle: { color: '#F39C12' } },
+          { name: 'Referrals Earnings: $4,000', itemStyle: { color: '#00BCD4' } },
+          { name: 'Upline Earnings: $100', itemStyle: { color: '#9C27B0' } },
+          { name: 'Company Net: $6,300', itemStyle: { color: '#2E7D32' } },
         ],
         links: [
-          // Direct flow
+          // Level 1 → Level 2
           { source: '20 Direct Referrals', target: 'Direct Revenue ($2K)', value: 2000 },
+          { source: '400 Indirect Referrals', target: 'Indirect Revenue ($40K)', value: 40000 },
+
+          // Level 2 → Level 3 (Direct flows)
           { source: 'Direct Revenue ($2K)', target: 'Taxes (35%)', value: 700 },
           { source: 'Direct Revenue ($2K)', target: 'AI Costs (25%)', value: 500 },
           { source: 'Direct Revenue ($2K)', target: 'COGS (10%)', value: 200 },
@@ -274,14 +277,23 @@ export class ChartsShowcaseComponent {
           { source: 'Direct Revenue ($2K)', target: 'Your Upline @5%', value: 100 },
           { source: 'Direct Revenue ($2K)', target: 'Company (15%)', value: 300 },
 
-          // Indirect flow (you earn the secondary 5%!)
-          { source: '400 Indirect Referrals', target: 'Indirect Revenue ($40K)', value: 40000 },
-          { source: 'Indirect Revenue ($40K)', target: 'Indirect Taxes (35%)', value: 14000 },
-          { source: 'Indirect Revenue ($40K)', target: 'Indirect AI (25%)', value: 10000 },
-          { source: 'Indirect Revenue ($40K)', target: 'Indirect COGS (10%)', value: 4000 },
+          // Level 2 → Level 3 (Indirect flows)
+          { source: 'Indirect Revenue ($40K)', target: 'Taxes (35%)', value: 14000 },
+          { source: 'Indirect Revenue ($40K)', target: 'AI Costs (25%)', value: 10000 },
+          { source: 'Indirect Revenue ($40K)', target: 'COGS (10%)', value: 4000 },
           { source: 'Indirect Revenue ($40K)', target: 'Your Referrals @10%', value: 4000 },
-          { source: 'Indirect Revenue ($40K)', target: 'You @5% (Secondary) $2K!', value: 2000 },
-          { source: 'Indirect Revenue ($40K)', target: 'Indirect Company (15%)', value: 6000 },
+          { source: 'Indirect Revenue ($40K)', target: 'You @5% (Secondary)', value: 2000 },
+          { source: 'Indirect Revenue ($40K)', target: 'Company (15%)', value: 6000 },
+
+          // Level 3 → Level 4 (Totals)
+          { source: 'Taxes (35%)', target: 'Total Taxes: $14,700', value: 14700 },
+          { source: 'AI Costs (25%)', target: 'Total AI: $10,500', value: 10500 },
+          { source: 'COGS (10%)', target: 'Total COGS: $4,200', value: 4200 },
+          { source: 'You @10% (Direct)', target: 'Your Earnings: $2,200', value: 200 },
+          { source: 'You @5% (Secondary)', target: 'Your Earnings: $2,200', value: 2000 },
+          { source: 'Your Referrals @10%', target: 'Referrals Earnings: $4,000', value: 4000 },
+          { source: 'Your Upline @5%', target: 'Upline Earnings: $100', value: 100 },
+          { source: 'Company (15%)', target: 'Company Net: $6,300', value: 6300 },
         ],
       },
     ],
