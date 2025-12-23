@@ -16,6 +16,12 @@ export const routes: Routes = [
     title: 'Button Showcase',
   },
   {
+    path: 'dev/charts',
+    loadComponent: () =>
+      import('./dev/charts-showcase/charts-showcase.component').then((c) => c.ChartsShowcaseComponent),
+    title: 'Charts Showcase',
+  },
+  {
     path: 'home',
     loadComponent: () => import('./home/home.component').then((c) => c.HomeComponent),
     title: 'Home',

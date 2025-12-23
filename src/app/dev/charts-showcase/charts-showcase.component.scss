@@ -1,0 +1,177 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.charts-showcase {
+  @include mixins.flex-column();
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.showcase-header {
+  margin-bottom: 24px;
+  text-align: center;
+
+  h1 {
+    @include mixins.flex-row();
+
+    justify-content: center;
+
+    margin: 0 0 8px;
+
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+
+    mat-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+      color: var(--md-sys-color-primary);
+    }
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.tab-content {
+  @include mixins.flex-column();
+
+  padding: 16px 0;
+}
+
+.scenario-description {
+  margin: 0 0 16px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+// Chart containers with fixed heights for proper ECharts rendering
+.chart-container {
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
+}
+
+.chart-container-small {
+  width: 100%;
+  height: 300px;
+  min-height: 300px;
+}
+
+// Metrics card styling
+.metrics-card {
+  margin-top: 16px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+
+  @include mixins.mobile() {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
+.metric {
+  @include mixins.flex-column();
+
+  gap: 4px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-low);
+
+  .label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+
+    &.expense {
+      color: var(--md-sys-color-error);
+    }
+
+    &.payout {
+      color: var(--md-extended-color-warning-color);
+    }
+
+    &.success {
+      color: var(--md-extended-color-success-color);
+    }
+  }
+
+  &.highlight {
+    background: var(--md-sys-color-primary-container);
+
+    .label {
+      color: var(--md-sys-color-on-primary-container);
+    }
+
+    .value {
+      color: var(--md-sys-color-on-primary-container);
+    }
+  }
+}
+
+// Comparison view
+.comparison-view {
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @include mixins.tablet() {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-card {
+    min-width: 0; // Prevent grid blowout
+  }
+}
+
+.comparison-summary {
+  margin-top: 16px;
+}
+
+.comparison-table {
+  border-collapse: collapse;
+  width: 100%;
+
+  th,
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    text-align: left;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  td {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .highlight-row {
+    td {
+      font-weight: 600;
+      background: var(--md-sys-color-surface-container);
+    }
+
+    .success {
+      color: var(--md-extended-color-success-color);
+    }
+  }
+}

@@ -1,6 +1,5 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Injectable, OnDestroy, PLATFORM_ID, inject, signal, WritableSignal } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, timer } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -40,7 +39,6 @@ export class JobsWebSocketService implements OnDestroy {
   private maxReconnectAttempts = 10;
   private reconnectTimer: Subscription | null = null;
   private pingInterval: Subscription | null = null;
-  private readonly isBrowser: boolean;
 
   // Signals for reactive state
   private connectionStateSignal: WritableSignal<WebSocketConnectionState> = signal('disconnected');
@@ -50,12 +48,6 @@ export class JobsWebSocketService implements OnDestroy {
   private jobUpdate$ = new Subject<{ type: JobWebSocketMessageType; job: Job }>();
 
   constructor(private authService: AuthService) {
-    const platformId = inject(PLATFORM_ID);
-    this.isBrowser = isPlatformBrowser(platformId);
-
-    // Skip WebSocket setup during SSR
-    if (!this.isBrowser) return;
-
     // Auto-connect/disconnect based on auth state
     this.subscriptions.add(
       toObservable(this.authService.isLoggedIn).subscribe({
@@ -90,9 +82,6 @@ export class JobsWebSocketService implements OnDestroy {
   }
 
   connect(): void {
-    // Skip WebSocket on server-side
-    if (!this.isBrowser) return;
-
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
