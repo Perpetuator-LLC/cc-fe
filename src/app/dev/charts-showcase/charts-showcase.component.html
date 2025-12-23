@@ -15,13 +15,13 @@
           <mat-card-header>
             <mat-card-title>
               <mat-icon>account_tree</mat-icon>
-              Scenario 1: Single-Tier Affiliate (15%)
+              1-Tier: You Miss Indirect Revenue
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <p class="scenario-description">
-              20 active T1 affiliates earning 15% commission. 400 T2 users shown grayed out (no payout in single-tier
-              model).
+              You directly referred 20 users and earn 15% on them. Those users referred 400 more — but you get
+              <strong>nothing</strong> from that indirect revenue. It goes to your direct referrals instead.
             </p>
             <div class="chart-container" echarts [options]="scenario1Options" [initOpts]="chartInitOptions"></div>
           </mat-card-content>
@@ -29,37 +29,41 @@
 
         <mat-card class="metrics-card">
           <mat-card-header>
-            <mat-card-title>Revenue Breakdown</mat-card-title>
+            <mat-card-title>Your Earnings</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="metrics-grid">
               <div class="metric">
-                <span class="label">Gross Revenue (T1)</span>
+                <span class="label">Direct Revenue</span>
                 <span class="value">$2,000</span>
               </div>
               <div class="metric">
-                <span class="label">Taxes (12%)</span>
-                <span class="value expense">$240</span>
+                <span class="label">Indirect Revenue</span>
+                <span class="value">$40,000</span>
               </div>
               <div class="metric">
-                <span class="label">AI Costs (9%)</span>
-                <span class="value expense">$180</span>
+                <span class="label">Taxes (35%)</span>
+                <span class="value expense">$14,700</span>
               </div>
               <div class="metric">
-                <span class="label">Server Costs (6%)</span>
-                <span class="value expense">$120</span>
+                <span class="label">AI Costs (25%)</span>
+                <span class="value expense">$10,500</span>
               </div>
               <div class="metric">
-                <span class="label">Overhead (3%)</span>
-                <span class="value expense">$60</span>
+                <span class="label">COGS (10%)</span>
+                <span class="value expense">$4,200</span>
               </div>
               <div class="metric">
-                <span class="label">T1 Payouts (15%)</span>
+                <span class="label">You @15% (Direct)</span>
                 <span class="value payout">$300</span>
               </div>
+              <div class="metric">
+                <span class="label">You @5% (Indirect)</span>
+                <span class="value expense">$0 ❌</span>
+              </div>
               <div class="metric highlight">
-                <span class="label">Company Net</span>
-                <span class="value success">$1,100</span>
+                <span class="label">Your Total Earnings</span>
+                <span class="value">$300</span>
               </div>
             </div>
           </mat-card-content>
@@ -73,52 +77,55 @@
           <mat-card-header>
             <mat-card-title>
               <mat-icon>account_tree</mat-icon>
-              Scenario 2: Two-Tier Affiliate (10% T1 + 5% T2)
+              2-Tier: You Earn from Indirect Referrals!
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <p class="scenario-description">400 T2 users with 10% going to 20 T1 affiliates and 5% to upline.</p>
+            <p class="scenario-description">
+              Same network — but now you earn 10% on your 20 direct referrals
+              <strong>plus 5% on the 400 indirect referrals</strong> they bring in. Company still gets 15%.
+            </p>
             <div class="chart-container" echarts [options]="scenario2Options" [initOpts]="chartInitOptions"></div>
           </mat-card-content>
         </mat-card>
 
         <mat-card class="metrics-card">
           <mat-card-header>
-            <mat-card-title>Revenue Breakdown</mat-card-title>
+            <mat-card-title>Your Earnings</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="metrics-grid">
               <div class="metric">
-                <span class="label">Gross Revenue (T2)</span>
+                <span class="label">Direct Revenue</span>
+                <span class="value">$2,000</span>
+              </div>
+              <div class="metric">
+                <span class="label">Indirect Revenue</span>
                 <span class="value">$40,000</span>
               </div>
               <div class="metric">
-                <span class="label">Taxes (12%)</span>
-                <span class="value expense">$4,800</span>
+                <span class="label">Taxes (35%)</span>
+                <span class="value expense">$14,700</span>
               </div>
               <div class="metric">
-                <span class="label">AI Costs (9%)</span>
-                <span class="value expense">$3,600</span>
+                <span class="label">AI Costs (25%)</span>
+                <span class="value expense">$10,500</span>
               </div>
               <div class="metric">
-                <span class="label">Server Costs (6%)</span>
-                <span class="value expense">$2,400</span>
+                <span class="label">COGS (10%)</span>
+                <span class="value expense">$4,200</span>
               </div>
               <div class="metric">
-                <span class="label">Overhead (3%)</span>
-                <span class="value expense">$1,200</span>
+                <span class="label">You @10% (Direct)</span>
+                <span class="value payout">$200</span>
               </div>
               <div class="metric">
-                <span class="label">T1 Payouts (10%)</span>
-                <span class="value payout">$4,000</span>
-              </div>
-              <div class="metric">
-                <span class="label">T2 Payouts (5%)</span>
-                <span class="value payout">$2,000</span>
+                <span class="label">You @5% (Secondary)</span>
+                <span class="value success">$2,000 ✓</span>
               </div>
               <div class="metric highlight">
-                <span class="label">Company Net</span>
-                <span class="value success">$22,000</span>
+                <span class="label">Your Total Earnings</span>
+                <span class="value success">$2,200 (7.3x more!)</span>
               </div>
             </div>
           </mat-card-content>
@@ -162,7 +169,7 @@
           <mat-card-header>
             <mat-card-title>
               <mat-icon>compare_arrows</mat-icon>
-              Scenario Comparison
+              Why 2-Tier is Better for You
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
@@ -176,29 +183,39 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Total Users</td>
-                  <td>20 T1 + 400 T2</td>
-                  <td>400 T2</td>
+                  <td>Your Network</td>
+                  <td>20 Direct + 400 Indirect</td>
+                  <td>20 Direct + 400 Indirect</td>
                 </tr>
                 <tr>
-                  <td>Gross Revenue</td>
-                  <td>$2,000 (T1 only)</td>
-                  <td>$40,000</td>
+                  <td>Total Revenue</td>
+                  <td>$42,000</td>
+                  <td>$42,000</td>
                 </tr>
                 <tr>
-                  <td>Total Payouts</td>
+                  <td>Costs (70%)</td>
+                  <td>$29,400</td>
+                  <td>$29,400</td>
+                </tr>
+                <tr>
+                  <td>You @Direct</td>
                   <td>$300 (15%)</td>
-                  <td>$6,000 (15%)</td>
+                  <td>$200 (10%)</td>
                 </tr>
                 <tr>
-                  <td>Total Costs</td>
-                  <td>$600 (30%)</td>
-                  <td>$12,000 (30%)</td>
+                  <td>You @Secondary</td>
+                  <td class="expense">$0</td>
+                  <td class="success">$2,000 (5%)</td>
                 </tr>
                 <tr class="highlight-row">
-                  <td>Company Net</td>
-                  <td class="success">$1,100 (55%)</td>
-                  <td class="success">$22,000 (55%)</td>
+                  <td>Your Total Earnings</td>
+                  <td>$300</td>
+                  <td class="success">$2,200 (7.3x more!)</td>
+                </tr>
+                <tr>
+                  <td>Company Net (15%)</td>
+                  <td>$6,300</td>
+                  <td>$6,300</td>
                 </tr>
               </tbody>
             </table>
