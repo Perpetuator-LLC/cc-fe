@@ -3,25 +3,25 @@
   <header class="showcase-header">
     <h1>
       <mat-icon>analytics</mat-icon>
-      ECharts Integration Showcase
+      Affiliate Commission Flow
     </h1>
-    <p class="subtitle">Testing Sankey charts for affiliate revenue flow visualization</p>
+    <p class="subtitle">Understand how revenue flows through our affiliate program</p>
   </header>
 
   <mat-tab-group animationDuration="300ms">
-    <mat-tab label="1-Tier Scenario">
+    <mat-tab label="Single-Tier">
       <div class="tab-content">
         <mat-card>
           <mat-card-header>
             <mat-card-title>
               <mat-icon>account_tree</mat-icon>
-              1-Tier: You Miss Indirect Revenue
+              Single-Tier Commission Structure
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <p class="scenario-description">
-              You directly referred 20 users and earn 15% on them. Those users referred 400 more — but you get
-              <strong>nothing</strong> from that indirect revenue. It goes to your direct referrals instead.
+              With a single-tier structure, you earn 15% commission on users you directly refer. Revenue from indirect
+              referrals (users referred by your referrals) is paid to those direct affiliates instead.
             </p>
             <div class="chart-container" echarts [options]="scenario1Options" [initOpts]="chartInitOptions"></div>
           </mat-card-content>
@@ -54,11 +54,11 @@
                 <span class="value expense">$4,200</span>
               </div>
               <div class="metric">
-                <span class="label">You @15% (Direct)</span>
+                <span class="label">Direct Commission (15%)</span>
                 <span class="value payout">$300</span>
               </div>
               <div class="metric">
-                <span class="label">You @5% (Indirect)</span>
+                <span class="label">Secondary Commission (5%)</span>
                 <span class="value expense">$0 ❌</span>
               </div>
               <div class="metric highlight">
@@ -71,19 +71,19 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="2-Tier Scenario">
+    <mat-tab label="Two-Tier">
       <div class="tab-content">
         <mat-card>
           <mat-card-header>
             <mat-card-title>
               <mat-icon>account_tree</mat-icon>
-              2-Tier: You Earn from Indirect Referrals!
+              Two-Tier Commission Structure
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <p class="scenario-description">
-              Same network — but now you earn 10% on your 20 direct referrals
-              <strong>plus 5% on the 400 indirect referrals</strong> they bring in. Company still gets 15%.
+              With a two-tier structure, you earn 10% on direct referrals plus an additional 5% on indirect referrals
+              brought in by your network. This rewards you for building and supporting your affiliate team.
             </p>
             <div class="chart-container" echarts [options]="scenario2Options" [initOpts]="chartInitOptions"></div>
           </mat-card-content>
@@ -116,11 +116,11 @@
                 <span class="value expense">$4,200</span>
               </div>
               <div class="metric">
-                <span class="label">You @10% (Direct)</span>
+                <span class="label">Direct Commission (10%)</span>
                 <span class="value payout">$200</span>
               </div>
               <div class="metric">
-                <span class="label">You @5% (Secondary)</span>
+                <span class="label">Secondary Commission (5%)</span>
                 <span class="value success">$2,000 ✓</span>
               </div>
               <div class="metric highlight">
@@ -138,7 +138,7 @@
         <div class="charts-row">
           <mat-card class="chart-card">
             <mat-card-header>
-              <mat-card-title>1-Tier (15%)</mat-card-title>
+              <mat-card-title>Single-Tier (15%)</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div
@@ -152,7 +152,7 @@
 
           <mat-card class="chart-card">
             <mat-card-header>
-              <mat-card-title>2-Tier (10% + 5%)</mat-card-title>
+              <mat-card-title>Two-Tier (10% + 5%)</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div
@@ -169,7 +169,7 @@
           <mat-card-header>
             <mat-card-title>
               <mat-icon>compare_arrows</mat-icon>
-              Why 2-Tier is Better for You
+              Commission Structure Comparison
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
@@ -177,8 +177,8 @@
               <thead>
                 <tr>
                   <th>Metric</th>
-                  <th>1-Tier (15%)</th>
-                  <th>2-Tier (10% + 5%)</th>
+                  <th>Single-Tier (15%)</th>
+                  <th>Two-Tier (10% + 5%)</th>
                 </tr>
               </thead>
               <tbody>
@@ -198,12 +198,12 @@
                   <td>$29,400</td>
                 </tr>
                 <tr>
-                  <td>You @Direct</td>
+                  <td>Direct Commission</td>
                   <td>$300 (15%)</td>
                   <td>$200 (10%)</td>
                 </tr>
                 <tr>
-                  <td>You @Secondary</td>
+                  <td>Secondary Commission</td>
                   <td class="expense">$0</td>
                   <td class="success">$2,000 (5%)</td>
                 </tr>
@@ -211,6 +211,11 @@
                   <td>Your Total Earnings</td>
                   <td>$300</td>
                   <td class="success">$2,200 (7.3x more!)</td>
+                </tr>
+                <tr>
+                  <td>Total Affiliate Payouts</td>
+                  <td>$6,300 (50% of net)</td>
+                  <td>$6,300 (50% of net)</td>
                 </tr>
                 <tr>
                   <td>Company Net (15%)</td>
@@ -224,4 +229,14 @@
       </div>
     </mat-tab>
   </mat-tab-group>
+
+  <footer class="disclaimer">
+    <p>
+      This chart is a simplified, illustrative example of how commissions and revenue flows might work under the current
+      affiliate program. It is not part of the Affiliate Marketing Agreement, does not amend any contract, and does not
+      guarantee any specific payout or result. All commission rates, calculations, definitions of "Revenue," and program
+      rules are subject to change at any time in accordance with the Affiliate Marketing Agreement and any updated
+      program terms provided by the Company.
+    </p>
+  </footer>
 </div>

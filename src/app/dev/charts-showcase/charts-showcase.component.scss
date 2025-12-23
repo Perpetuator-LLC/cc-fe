@@ -175,3 +175,18 @@
     }
   }
 }
+
+.disclaimer {
+  margin-top: 32px;
+  padding: 16px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  p {
+    margin: 0;
+
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
+  }
+}
