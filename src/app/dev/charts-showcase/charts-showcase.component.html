@@ -1,0 +1,210 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="charts-showcase">
+  <header class="showcase-header">
+    <h1>
+      <mat-icon>analytics</mat-icon>
+      ECharts Integration Showcase
+    </h1>
+    <p class="subtitle">Testing Sankey charts for affiliate revenue flow visualization</p>
+  </header>
+
+  <mat-tab-group animationDuration="300ms">
+    <mat-tab label="1-Tier Scenario">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>account_tree</mat-icon>
+              Scenario 1: Single-Tier Affiliate (15%)
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="scenario-description">
+              20 active T1 affiliates earning 15% commission. 400 T2 users shown grayed out (no payout in single-tier
+              model).
+            </p>
+            <div class="chart-container" echarts [options]="scenario1Options" [initOpts]="chartInitOptions"></div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metrics-card">
+          <mat-card-header>
+            <mat-card-title>Revenue Breakdown</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metrics-grid">
+              <div class="metric">
+                <span class="label">Gross Revenue (T1)</span>
+                <span class="value">$2,000</span>
+              </div>
+              <div class="metric">
+                <span class="label">Taxes (12%)</span>
+                <span class="value expense">$240</span>
+              </div>
+              <div class="metric">
+                <span class="label">AI Costs (9%)</span>
+                <span class="value expense">$180</span>
+              </div>
+              <div class="metric">
+                <span class="label">Server Costs (6%)</span>
+                <span class="value expense">$120</span>
+              </div>
+              <div class="metric">
+                <span class="label">Overhead (3%)</span>
+                <span class="value expense">$60</span>
+              </div>
+              <div class="metric">
+                <span class="label">T1 Payouts (15%)</span>
+                <span class="value payout">$300</span>
+              </div>
+              <div class="metric highlight">
+                <span class="label">Company Net</span>
+                <span class="value success">$1,100</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="2-Tier Scenario">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>account_tree</mat-icon>
+              Scenario 2: Two-Tier Affiliate (10% T1 + 5% T2)
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="scenario-description">400 T2 users with 10% going to 20 T1 affiliates and 5% to upline.</p>
+            <div class="chart-container" echarts [options]="scenario2Options" [initOpts]="chartInitOptions"></div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metrics-card">
+          <mat-card-header>
+            <mat-card-title>Revenue Breakdown</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metrics-grid">
+              <div class="metric">
+                <span class="label">Gross Revenue (T2)</span>
+                <span class="value">$40,000</span>
+              </div>
+              <div class="metric">
+                <span class="label">Taxes (12%)</span>
+                <span class="value expense">$4,800</span>
+              </div>
+              <div class="metric">
+                <span class="label">AI Costs (9%)</span>
+                <span class="value expense">$3,600</span>
+              </div>
+              <div class="metric">
+                <span class="label">Server Costs (6%)</span>
+                <span class="value expense">$2,400</span>
+              </div>
+              <div class="metric">
+                <span class="label">Overhead (3%)</span>
+                <span class="value expense">$1,200</span>
+              </div>
+              <div class="metric">
+                <span class="label">T1 Payouts (10%)</span>
+                <span class="value payout">$4,000</span>
+              </div>
+              <div class="metric">
+                <span class="label">T2 Payouts (5%)</span>
+                <span class="value payout">$2,000</span>
+              </div>
+              <div class="metric highlight">
+                <span class="label">Company Net</span>
+                <span class="value success">$22,000</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Comparison">
+      <div class="tab-content comparison-view">
+        <div class="charts-row">
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>1-Tier (15%)</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div
+                class="chart-container-small"
+                echarts
+                [options]="scenario1Options"
+                [initOpts]="chartInitOptions"
+              ></div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>2-Tier (10% + 5%)</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div
+                class="chart-container-small"
+                echarts
+                [options]="scenario2Options"
+                [initOpts]="chartInitOptions"
+              ></div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-card class="comparison-summary">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>compare_arrows</mat-icon>
+              Scenario Comparison
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>1-Tier (15%)</th>
+                  <th>2-Tier (10% + 5%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total Users</td>
+                  <td>20 T1 + 400 T2</td>
+                  <td>400 T2</td>
+                </tr>
+                <tr>
+                  <td>Gross Revenue</td>
+                  <td>$2,000 (T1 only)</td>
+                  <td>$40,000</td>
+                </tr>
+                <tr>
+                  <td>Total Payouts</td>
+                  <td>$300 (15%)</td>
+                  <td>$6,000 (15%)</td>
+                </tr>
+                <tr>
+                  <td>Total Costs</td>
+                  <td>$600 (30%)</td>
+                  <td>$12,000 (30%)</td>
+                </tr>
+                <tr class="highlight-row">
+                  <td>Company Net</td>
+                  <td class="success">$1,100 (55%)</td>
+                  <td class="success">$22,000 (55%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
