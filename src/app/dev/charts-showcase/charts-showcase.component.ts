@@ -52,7 +52,7 @@ export class ChartsShowcaseComponent {
    */
   scenario1Options: EChartsOption = {
     title: {
-      text: '1-Tier: You Miss Indirect Revenue',
+      text: 'Single-Tier Commission Structure',
       textStyle: {
         color: 'var(--md-sys-color-on-surface)',
         fontSize: 16,
@@ -199,7 +199,7 @@ export class ChartsShowcaseComponent {
    */
   scenario2Options: EChartsOption = {
     title: {
-      text: '2-Tier: You Earn from Indirect Referrals!',
+      text: 'Two-Tier Commission Structure',
       textStyle: {
         color: 'var(--md-sys-color-on-surface)',
         fontSize: 16,
