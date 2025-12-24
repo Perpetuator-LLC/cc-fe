@@ -108,6 +108,7 @@ describe('PodcastDetailComponentComponent', () => {
         latestInternalEpisodeDate: null,
         viewCount: 0,
         lastNewsFetchedAt: null,
+        createdAt: null,
       }),
     );
 
