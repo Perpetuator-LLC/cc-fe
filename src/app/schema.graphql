@@ -343,13 +343,6 @@ type TraceType {
   exceptionType: String!
   exceptionMessage: String!
   aiModel: String!
-
-  """First 500 chars of prompt for quick reference"""
-  aiPromptPreview: String!
-
-  """First 500 chars of response for quick reference"""
-  aiResponsePreview: String!
-  aiTokenCount: Int
   aiCost: Decimal
 
   """

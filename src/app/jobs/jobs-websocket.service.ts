@@ -89,6 +89,7 @@ export class JobsWebSocketService implements OnDestroy {
     this.connectionStateSignal.set('connecting');
 
     const wsUrl = this.buildWebSocketUrl();
+    console.debug('Attempting WebSocket connection to:', wsUrl.replace(/token=.*$/, 'token=***'));
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
@@ -101,6 +102,7 @@ export class JobsWebSocketService implements OnDestroy {
     this.ws.onmessage = (event) => {
       try {
         const data: JobWebSocketMessage = JSON.parse(event.data);
+        console.debug('[WS] Received message:', data.type, data);
         this.handleMessage(data);
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
@@ -108,7 +110,35 @@ export class JobsWebSocketService implements OnDestroy {
     };
 
     this.ws.onclose = (event) => {
-      console.debug('WebSocket closed:', event.code, event.reason);
+      // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+      // 1000 = Normal closure
+      // 1001 = Going away
+      // 1002 = Protocol error
+      // 1003 = Unsupported data
+      // 1006 = Abnormal closure (no close frame received - server not responding)
+      // 1015 = TLS handshake failure
+      const codeDescriptions: Record<number, string> = {
+        1000: 'Normal closure',
+        1001: 'Going away',
+        1002: 'Protocol error',
+        1003: 'Unsupported data',
+        1006: 'Abnormal closure (server not responding or not running)',
+        1015: 'TLS handshake failure',
+      };
+      const codeDesc = codeDescriptions[event.code] || 'Unknown';
+      console.warn(`WebSocket closed: code=${event.code} (${codeDesc}), reason="${event.reason || 'none'}"`);
+
+      if (event.code === 1006) {
+        console.error(
+          'WebSocket abnormal closure - possible causes:\n' +
+            '  1. Backend server is not running\n' +
+            '  2. Backend is not running with ASGI (WebSocket support)\n' +
+            '  3. Django Channels not configured\n' +
+            '  4. Route /ws/jobs/ not defined in backend\n' +
+            '  5. Token authentication failed on backend',
+        );
+      }
+
       this.stopPingInterval();
       this.connectionStateSignal.set('disconnected');
 
@@ -120,6 +150,7 @@ export class JobsWebSocketService implements OnDestroy {
 
     this.ws.onerror = (error) => {
       console.error('WebSocket error:', error);
+      console.error('WebSocket URL was:', wsUrl);
     };
   }
 
@@ -195,13 +226,22 @@ export class JobsWebSocketService implements OnDestroy {
       case 'jobs.initial':
         // Initial job list on connect - filter to relevant jobs only
         if (data.jobs) {
+          console.debug('[WS] Initial jobs received:', data.jobs.length, 'jobs');
+          // Log first job structure for debugging
+          if (data.jobs.length > 0) {
+            console.debug('[WS] Sample job structure:', JSON.stringify(data.jobs[0], null, 2));
+          }
           const filteredJobs = this.filterInitialJobs(data.jobs);
+          console.debug('[WS] Filtered to:', filteredJobs.length, 'jobs');
           this.jobsSignal.set(filteredJobs);
         }
         break;
 
       case 'jobs.created':
         if (data.job) {
+          console.debug('[WS] Job created:', data.job.uuid, data.job.kind, data.job.status);
+          console.debug('[WS] Job created args:', data.job.args);
+          console.debug('[WS] Job created result:', data.job.result);
           this.handleJobCreated(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
@@ -209,6 +249,9 @@ export class JobsWebSocketService implements OnDestroy {
 
       case 'jobs.update':
         if (data.job) {
+          console.debug('[WS] Job update:', data.job.uuid, data.job.kind, data.job.status);
+          console.debug('[WS] Job args:', data.job.args);
+          console.debug('[WS] Job result:', data.job.result);
           this.handleJobUpdate(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
@@ -216,6 +259,9 @@ export class JobsWebSocketService implements OnDestroy {
 
       case 'jobs.completed':
         if (data.job) {
+          console.debug('[WS] Job completed:', data.job.uuid, data.job.kind);
+          console.debug('[WS] Job completed args:', data.job.args);
+          console.debug('[WS] Job completed result:', data.job.result);
           this.handleJobUpdate(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
@@ -223,6 +269,7 @@ export class JobsWebSocketService implements OnDestroy {
 
       case 'jobs.failed':
         if (data.job) {
+          console.debug('[WS] Job failed:', data.job.uuid, data.job.kind, data.job.error);
           this.handleJobUpdate(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }

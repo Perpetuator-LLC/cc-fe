@@ -22,8 +22,11 @@ export class JobDisplayService {
   // Parse job result JSON safely - handles both string and object types
   parseJobResult(job: Job): JobResult | null {
     if (!job.result) {
+      console.debug('[JobDisplay] parseJobResult: job.result is null/undefined for job', job.uuid);
       return null;
     }
+
+    console.debug('[JobDisplay] parseJobResult: job.result type is', typeof job.result, 'value:', job.result);
 
     // If result is already an object, return it directly
     if (typeof job.result === 'object') {
@@ -34,6 +37,7 @@ export class JobDisplayService {
     if (typeof job.result === 'string') {
       try {
         const parsed = JSON.parse(job.result);
+        console.debug('[JobDisplay] parseJobResult: parsed string to:', parsed);
         return typeof parsed === 'object' ? parsed : null;
       } catch (error) {
         console.warn(`Failed to parse job result as JSON for job ${job.uuid}:`, error);
@@ -48,8 +52,11 @@ export class JobDisplayService {
   // Parse job args JSON safely - handles both string and object types
   parseJobArgs(job: Job): JobArgs | null {
     if (!job.args) {
+      console.debug('[JobDisplay] parseJobArgs: job.args is null/undefined for job', job.uuid);
       return null;
     }
+
+    console.debug('[JobDisplay] parseJobArgs: job.args type is', typeof job.args, 'value:', job.args);
 
     // If args is already an object, return it directly
     if (typeof job.args === 'object') {
@@ -60,6 +67,7 @@ export class JobDisplayService {
     if (typeof job.args === 'string') {
       try {
         const parsed = JSON.parse(job.args);
+        console.debug('[JobDisplay] parseJobArgs: parsed string to:', parsed);
         return typeof parsed === 'object' ? parsed : null;
       } catch (error) {
         console.warn(`Failed to parse job args as JSON for job ${job.uuid}:`, error);
@@ -103,21 +111,58 @@ export class JobDisplayService {
   getPodcastUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    return result?.podcastUuid || args?.podcastUuid || null;
+    const uuid = result?.podcastUuid || args?.podcastUuid || null;
+
+    // Also check for snake_case variants that backend might send
+    const snakeCaseUuid =
+      (result as Record<string, unknown>)?.['podcast_uuid'] ||
+      (args as Record<string, unknown>)?.['podcast_uuid'] ||
+      null;
+
+    if (snakeCaseUuid && !uuid) {
+      console.warn('[JobDisplay] Found podcast_uuid (snake_case) but not podcastUuid:', snakeCaseUuid);
+    }
+
+    console.debug('[JobDisplay] getPodcastUuid:', uuid, 'snake:', snakeCaseUuid);
+    return uuid || (snakeCaseUuid as string) || null;
   }
 
   // Get episode UUID from result or args (result takes precedence)
   getEpisodeUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    return result?.episodeUuid || args?.episodeUuid || null;
+    const uuid = result?.episodeUuid || args?.episodeUuid || null;
+
+    // Also check for snake_case variants that backend might send
+    const snakeCaseUuid =
+      (result as Record<string, unknown>)?.['episode_uuid'] ||
+      (args as Record<string, unknown>)?.['episode_uuid'] ||
+      null;
+
+    if (snakeCaseUuid && !uuid) {
+      console.warn('[JobDisplay] Found episode_uuid (snake_case) but not episodeUuid:', snakeCaseUuid);
+    }
+
+    console.debug('[JobDisplay] getEpisodeUuid:', uuid, 'snake:', snakeCaseUuid);
+    return uuid || (snakeCaseUuid as string) || null;
   }
 
   // Get topic UUID from result or args (result takes precedence)
   getTopicUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    return result?.topicUuid || args?.topicUuid || null;
+    const uuid = result?.topicUuid || args?.topicUuid || null;
+
+    // Also check for snake_case variants that backend might send
+    const snakeCaseUuid =
+      (result as Record<string, unknown>)?.['topic_uuid'] || (args as Record<string, unknown>)?.['topic_uuid'] || null;
+
+    if (snakeCaseUuid && !uuid) {
+      console.warn('[JobDisplay] Found topic_uuid (snake_case) but not topicUuid:', snakeCaseUuid);
+    }
+
+    console.debug('[JobDisplay] getTopicUuid:', uuid, 'snake:', snakeCaseUuid);
+    return uuid || (snakeCaseUuid as string) || null;
   }
 
   // Check if job has news UUIDs (only in result)
