@@ -22,23 +22,19 @@ export class JobDisplayService {
   // Parse job result JSON safely - handles both string and object types
   parseJobResult(job: Job): JobResult | null {
     if (!job.result) {
-      console.debug('[JobDisplay] parseJobResult: job.result is null/undefined for job', job.uuid);
       return null;
     }
 
-    console.debug('[JobDisplay] parseJobResult: job.result type is', typeof job.result, 'value:', job.result);
-
     // If result is already an object, return it directly
     if (typeof job.result === 'object') {
-      return job.result;
+      return this.convertSnakeToCamel(job.result) as JobResult;
     }
 
     // If result is a string, try to parse it as JSON
     if (typeof job.result === 'string') {
       try {
         const parsed = JSON.parse(job.result);
-        console.debug('[JobDisplay] parseJobResult: parsed string to:', parsed);
-        return typeof parsed === 'object' ? parsed : null;
+        return typeof parsed === 'object' ? (this.convertSnakeToCamel(parsed) as JobResult) : null;
       } catch (error) {
         console.warn(`Failed to parse job result as JSON for job ${job.uuid}:`, error);
         // Return a minimal result object with the string as a message
@@ -52,23 +48,19 @@ export class JobDisplayService {
   // Parse job args JSON safely - handles both string and object types
   parseJobArgs(job: Job): JobArgs | null {
     if (!job.args) {
-      console.debug('[JobDisplay] parseJobArgs: job.args is null/undefined for job', job.uuid);
       return null;
     }
 
-    console.debug('[JobDisplay] parseJobArgs: job.args type is', typeof job.args, 'value:', job.args);
-
     // If args is already an object, return it directly
     if (typeof job.args === 'object') {
-      return job.args;
+      return this.convertSnakeToCamel(job.args) as JobArgs;
     }
 
     // If args is a string, try to parse it as JSON
     if (typeof job.args === 'string') {
       try {
         const parsed = JSON.parse(job.args);
-        console.debug('[JobDisplay] parseJobArgs: parsed string to:', parsed);
-        return typeof parsed === 'object' ? parsed : null;
+        return typeof parsed === 'object' ? (this.convertSnakeToCamel(parsed) as JobArgs) : null;
       } catch (error) {
         console.warn(`Failed to parse job args as JSON for job ${job.uuid}:`, error);
         return null;
@@ -76,6 +68,23 @@ export class JobDisplayService {
     }
 
     return null;
+  }
+
+  // Convert snake_case keys to camelCase (handles backend inconsistency)
+  private convertSnakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+      return obj;
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] =
+        value && typeof value === 'object' && !Array.isArray(value)
+          ? this.convertSnakeToCamel(value as Record<string, unknown>)
+          : value;
+    }
+    return result;
   }
 
   // Get formatted message for job display
@@ -111,58 +120,21 @@ export class JobDisplayService {
   getPodcastUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    const uuid = result?.podcastUuid || args?.podcastUuid || null;
-
-    // Also check for snake_case variants that backend might send
-    const snakeCaseUuid =
-      (result as Record<string, unknown>)?.['podcast_uuid'] ||
-      (args as Record<string, unknown>)?.['podcast_uuid'] ||
-      null;
-
-    if (snakeCaseUuid && !uuid) {
-      console.warn('[JobDisplay] Found podcast_uuid (snake_case) but not podcastUuid:', snakeCaseUuid);
-    }
-
-    console.debug('[JobDisplay] getPodcastUuid:', uuid, 'snake:', snakeCaseUuid);
-    return uuid || (snakeCaseUuid as string) || null;
+    return result?.podcastUuid || args?.podcastUuid || null;
   }
 
   // Get episode UUID from result or args (result takes precedence)
   getEpisodeUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    const uuid = result?.episodeUuid || args?.episodeUuid || null;
-
-    // Also check for snake_case variants that backend might send
-    const snakeCaseUuid =
-      (result as Record<string, unknown>)?.['episode_uuid'] ||
-      (args as Record<string, unknown>)?.['episode_uuid'] ||
-      null;
-
-    if (snakeCaseUuid && !uuid) {
-      console.warn('[JobDisplay] Found episode_uuid (snake_case) but not episodeUuid:', snakeCaseUuid);
-    }
-
-    console.debug('[JobDisplay] getEpisodeUuid:', uuid, 'snake:', snakeCaseUuid);
-    return uuid || (snakeCaseUuid as string) || null;
+    return result?.episodeUuid || args?.episodeUuid || null;
   }
 
   // Get topic UUID from result or args (result takes precedence)
   getTopicUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
-    const uuid = result?.topicUuid || args?.topicUuid || null;
-
-    // Also check for snake_case variants that backend might send
-    const snakeCaseUuid =
-      (result as Record<string, unknown>)?.['topic_uuid'] || (args as Record<string, unknown>)?.['topic_uuid'] || null;
-
-    if (snakeCaseUuid && !uuid) {
-      console.warn('[JobDisplay] Found topic_uuid (snake_case) but not topicUuid:', snakeCaseUuid);
-    }
-
-    console.debug('[JobDisplay] getTopicUuid:', uuid, 'snake:', snakeCaseUuid);
-    return uuid || (snakeCaseUuid as string) || null;
+    return result?.topicUuid || args?.topicUuid || null;
   }
 
   // Check if job has news UUIDs (only in result)

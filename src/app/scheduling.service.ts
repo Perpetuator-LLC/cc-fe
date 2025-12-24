@@ -340,7 +340,7 @@ export class SchedulingService extends BaseService {
         schedules.filter((schedule) => {
           // Filter schedules that could apply to this episode's podcast
           const parsedArgs = parseScheduleArgs(schedule.args);
-          return parsedArgs['podcast_uuid'];
+          return parsedArgs['podcastUuid'];
         }),
       ),
     );

@@ -399,41 +399,20 @@ export class JobService extends BaseService implements OnDestroy {
 
   getJobTransitions(newJobs: Job[], previousJobs: Job[], status: string) {
     const transitionedJobs: Job[] = [];
-    console.debug(
-      '[JobService] getJobTransitions: checking',
-      newJobs.length,
-      'new vs',
-      previousJobs.length,
-      'previous for status:',
-      status,
-    );
 
     newJobs.forEach((job: Job) => {
       const existingJob = previousJobs.find((j) => j.uuid === job.uuid);
 
       if (!existingJob) {
-        console.debug('[JobService] Job not in previous jobs:', job.uuid, job.status);
         return;
       }
 
       const jobStatusChanged = stringToJobStatus(existingJob.status) !== stringToJobStatus(job.status);
 
-      console.debug(
-        '[JobService] Job',
-        job.uuid,
-        'status:',
-        existingJob.status,
-        '->',
-        job.status,
-        'changed:',
-        jobStatusChanged,
-      );
-
       if (!jobStatusChanged) {
         return;
       }
       if (stringToJobStatus(job.status) === stringToJobStatus(status)) {
-        console.debug('[JobService] Detected transition to', status, 'for job:', job.uuid);
         transitionedJobs.push(job);
       }
     });
