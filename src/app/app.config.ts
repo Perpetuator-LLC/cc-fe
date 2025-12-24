@@ -9,7 +9,7 @@ import {
 import { provideRouter, TitleStrategy } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { graphqlProvider } from './graphql.provider';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
@@ -28,6 +28,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(
+      withFetch(),
       withInterceptorsFromDi(),
       withInterceptors([tokenRefreshInterceptor, authInterceptor, errorTrackingInterceptor]),
     ),

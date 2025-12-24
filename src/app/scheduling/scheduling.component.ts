@@ -202,7 +202,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 
   getPodcastName(schedule: Schedule): string {
     const parsedArgs = parseScheduleArgs(schedule.args);
-    const podcastUuid = parsedArgs['podcast_uuid'];
+    const podcastUuid = parsedArgs['podcastUuid'];
 
     if (!podcastUuid) return 'N/A';
 

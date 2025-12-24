@@ -102,7 +102,6 @@ export class JobsWebSocketService implements OnDestroy {
     this.ws.onmessage = (event) => {
       try {
         const data: JobWebSocketMessage = JSON.parse(event.data);
-        console.debug('[WS] Received message:', data.type, data);
         this.handleMessage(data);
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
@@ -226,22 +225,15 @@ export class JobsWebSocketService implements OnDestroy {
       case 'jobs.initial':
         // Initial job list on connect - filter to relevant jobs only
         if (data.jobs) {
-          console.debug('[WS] Initial jobs received:', data.jobs.length, 'jobs');
-          // Log first job structure for debugging
-          if (data.jobs.length > 0) {
-            console.debug('[WS] Sample job structure:', JSON.stringify(data.jobs[0], null, 2));
-          }
           const filteredJobs = this.filterInitialJobs(data.jobs);
-          console.debug('[WS] Filtered to:', filteredJobs.length, 'jobs');
+          console.debug('[WS] Initial jobs:', data.jobs.length, '-> filtered:', filteredJobs.length);
           this.jobsSignal.set(filteredJobs);
         }
         break;
 
       case 'jobs.created':
         if (data.job) {
-          console.debug('[WS] Job created:', data.job.uuid, data.job.kind, data.job.status);
-          console.debug('[WS] Job created args:', data.job.args);
-          console.debug('[WS] Job created result:', data.job.result);
+          console.debug('[WS] Job created:', data.job.uuid, data.job.kind);
           this.handleJobCreated(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
@@ -249,9 +241,7 @@ export class JobsWebSocketService implements OnDestroy {
 
       case 'jobs.update':
         if (data.job) {
-          console.debug('[WS] Job update:', data.job.uuid, data.job.kind, data.job.status);
-          console.debug('[WS] Job args:', data.job.args);
-          console.debug('[WS] Job result:', data.job.result);
+          console.debug('[WS] Job update:', data.job.uuid, data.job.status);
           this.handleJobUpdate(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
@@ -260,8 +250,6 @@ export class JobsWebSocketService implements OnDestroy {
       case 'jobs.completed':
         if (data.job) {
           console.debug('[WS] Job completed:', data.job.uuid, data.job.kind);
-          console.debug('[WS] Job completed args:', data.job.args);
-          console.debug('[WS] Job completed result:', data.job.result);
           this.handleJobUpdate(data.job);
           this.jobUpdate$.next({ type: data.type, job: data.job });
         }
