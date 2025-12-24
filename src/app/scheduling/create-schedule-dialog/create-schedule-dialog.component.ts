@@ -114,7 +114,7 @@ export class CreateScheduleDialogComponent implements OnDestroy {
 
   private loadScheduleData(schedule: Schedule) {
     const parsedArgs = parseScheduleArgs(schedule.args);
-    const podcastUuid = parsedArgs['podcast_uuid'] || '';
+    const podcastUuid = parsedArgs['podcastUuid'] || '';
 
     this.scheduleForm.patchValue({
       name: schedule.name,

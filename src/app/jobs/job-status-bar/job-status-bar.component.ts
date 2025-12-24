@@ -84,15 +84,9 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
   ) {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
-        console.debug('[JobStatusBar] Received jobs update:', jobs.length, 'jobs');
-        console.debug('[JobStatusBar] Current this.jobs:', this.jobs.length, 'jobs');
-
         // Get transitions before updating this.jobs
         const completedTransitions = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.COMPLETED);
         const failedTransitions = this.jobService.getJobTransitions(jobs, this.jobs, JobStatus.FAILED);
-
-        console.debug('[JobStatusBar] Completed transitions:', completedTransitions.length);
-        console.debug('[JobStatusBar] Failed transitions:', failedTransitions.length);
 
         // Update this.jobs SYNCHRONOUSLY FIRST to prevent duplicate messages
         // This prevents race condition where signal emits again before async enrichment completes
@@ -110,11 +104,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
         // Now handle transitions - these will only be shown once
         completedTransitions.forEach((job) => {
-          console.debug('[JobStatusBar] Processing completed job:', job.uuid, job.kind);
-
           // Skip if we've already processed this job completion
           if (this.processedJobCompletions.has(job.uuid)) {
-            console.debug('[JobStatusBar] Skipping already processed job:', job.uuid);
             return;
           }
           this.processedJobCompletions.add(job.uuid);
@@ -129,7 +120,6 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
           ];
 
           if (!skipMessageForKinds.includes(jobKind)) {
-            console.debug('[JobStatusBar] Showing message for job:', job.uuid, job.kind);
             // Use centralized job display service for complex job types
             const handledByDisplayService = [
               JobKind.CREATE_EPISODE,
@@ -154,16 +144,12 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
         });
 
         failedTransitions.forEach((job) => {
-          console.debug('[JobStatusBar] Processing failed job:', job.uuid, job.kind, job.error);
-
           // Skip if we've already processed this job failure
           if (this.processedJobCompletions.has(job.uuid)) {
-            console.debug('[JobStatusBar] Skipping already processed failed job:', job.uuid);
             return;
           }
           this.processedJobCompletions.add(job.uuid);
 
-          console.debug('[JobStatusBar] Showing error message for job:', job.uuid);
           this.messageService.error(`${kindToString(job.kind)} failed: ${job.error}`);
         });
       },
