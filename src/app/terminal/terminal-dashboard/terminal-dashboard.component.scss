@@ -1,0 +1,141 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.terminal-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--md-sys-color-surface);
+}
+
+.dashboard-header {
+  @include mixins.flex-between();
+
+  flex-shrink: 0;
+  padding: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .header-left {
+    @include mixins.flex-row();
+
+    gap: 8px;
+
+    mat-icon {
+      color: var(--md-sys-color-primary);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+
+  .header-right {
+    @include mixins.flex-row();
+
+    gap: 4px;
+  }
+}
+
+.dashboard-grid {
+  flex: 1;
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.panel-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.panel-header {
+  @include mixins.flex-between();
+
+  cursor: grab;
+
+  flex-shrink: 0;
+
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px 8px 0 0;
+
+  background: var(--md-sys-color-surface-container-high);
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .panel-menu-button {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .panel-menu-button {
+    opacity: 1;
+  }
+}
+
+.panel-content {
+  overflow: hidden;
+  flex: 1;
+
+  app-chart-panel {
+    height: 100%;
+  }
+}
+
+.empty-dashboard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+    opacity: 0.5;
+  }
+
+  h3 {
+    margin: 16px 0 8px;
+    font-size: 20px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 14px;
+
+    code {
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--md-sys-color-surface-container-high);
+    }
+  }
+}

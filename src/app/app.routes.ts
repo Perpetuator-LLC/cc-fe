@@ -31,6 +31,17 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'terminal',
+    loadComponent: () =>
+      import('./terminal/terminal-page/terminal-page.component').then((c) => c.TerminalPageComponent),
+    title: 'Terminal',
+    canActivate: [AuthGuard],
+    data: {
+      icon: 'terminal',
+      showInMenu: true,
+    },
+  },
+  {
     path: 'media',
     pathMatch: 'full',
     redirectTo: 'media/podcasts',
