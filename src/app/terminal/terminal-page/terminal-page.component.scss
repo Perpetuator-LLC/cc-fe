@@ -1,0 +1,134 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.terminal-page {
+  height: calc(100vh - 64px); // Account for toolbar
+  background: var(--md-sys-color-surface);
+}
+
+.sidenav-container {
+  height: 100%;
+}
+
+.terminal-sidenav {
+  width: 480px;
+  border-right: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
+
+  app-terminal-input {
+    display: block;
+    height: 100%;
+  }
+
+  @include mixins.tablet() {
+    width: 360px;
+  }
+
+  @include mixins.mobile() {
+    width: 100%;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--md-sys-color-surface);
+}
+
+.content-header {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-tabs {
+  flex: 1;
+
+  // Note: Tab body wrapper height should be handled via global Material theme overrides
+  // in styles.scss if needed. Use global theme overrides, not deprecated deep selectors.
+}
+
+// History tab
+.history-tab {
+  padding: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+// Help tab
+.help-tab {
+  padding: 24px;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 20px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .command-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .category {
+    padding: 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-container);
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 12px;
+
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: var(--md-sys-color-on-surface-variant);
+
+        code {
+          padding: 2px 6px;
+          border-radius: 4px;
+
+          font-weight: 600;
+          color: var(--md-sys-color-primary);
+
+          background: var(--md-sys-color-surface-container-high);
+        }
+      }
+    }
+  }
+
+  .ai-note {
+    @include mixins.flex-row();
+
+    gap: 12px;
+
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: 8px;
+
+    background: var(--md-extended-color-info-color-container);
+
+    mat-icon {
+      flex-shrink: 0;
+      color: var(--md-extended-color-info-color);
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--md-extended-color-info-on-color-container);
+    }
+  }
+}

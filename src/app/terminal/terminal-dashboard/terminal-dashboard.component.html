@@ -1,0 +1,55 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="terminal-dashboard">
+  <div class="dashboard-header">
+    <div class="header-left">
+      <mat-icon>dashboard</mat-icon>
+      <h2>Dashboard</h2>
+    </div>
+    <div class="header-right">
+      <button mat-icon-button matTooltip="Save dashboard" (click)="saveDashboard()">
+        <mat-icon>save</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Clear all panels" (click)="clearDashboard()">
+        <mat-icon>clear_all</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <gridster [options]="options" class="dashboard-grid">
+    @for (panel of panels; track panel.id) {
+      <gridster-item [item]="panel">
+        <div class="panel-wrapper">
+          <div class="panel-header drag-handle">
+            <span class="panel-title">{{ panel.title }}</span>
+            <button mat-icon-button [matMenuTriggerFor]="panelMenu" class="panel-menu-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #panelMenu="matMenu">
+              <button mat-menu-item (click)="removePanel(panel)">
+                <mat-icon>delete</mat-icon>
+                <span>Remove</span>
+              </button>
+            </mat-menu>
+          </div>
+          <div class="panel-content">
+            <app-chart-panel
+              [chartOptions]="panel.chartOptions"
+              [title]="panel.title"
+              [showHeader]="false"
+              [showToolbar]="false"
+            />
+          </div>
+        </div>
+      </gridster-item>
+    }
+  </gridster>
+
+  @if (panels.length === 0) {
+    <div class="empty-dashboard">
+      <mat-icon>dashboard_customize</mat-icon>
+      <h3>No panels yet</h3>
+      <p>Use terminal commands to generate charts that will appear here.</p>
+      <p class="hint">Try: <code>AAPL GP</code> to create a price chart</p>
+    </div>
+  }
+</div>

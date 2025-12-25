@@ -1,0 +1,273 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.terminal-container {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.terminal-header {
+  @include mixins.flex-between();
+
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
+
+  .header-left {
+    @include mixins.flex-row();
+
+    gap: 8px;
+
+    mat-icon {
+      color: var(--md-sys-color-primary);
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+
+  .header-right {
+    @include mixins.flex-row();
+
+    gap: 4px;
+
+    .connected mat-icon {
+      color: var(--md-extended-color-success-color);
+    }
+
+    .disconnected mat-icon {
+      color: var(--md-sys-color-error);
+    }
+  }
+}
+
+.terminal-history {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  padding: 32px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--md-sys-color-outline);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .hint {
+    font-size: 14px;
+
+    code {
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--md-sys-color-surface-container);
+    }
+  }
+}
+
+.history-entry {
+  margin-bottom: 16px;
+}
+
+// Copy button - hidden by default, shown on hover
+.copy-button {
+  flex-shrink: 0;
+
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  opacity: 0;
+
+  transition: opacity 0.15s ease-in-out;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.entry-input {
+  @include mixins.flex-row();
+
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .prompt {
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
+  }
+
+  .command {
+    flex: 1;
+    color: var(--md-extended-color-warning-color);
+    word-break: break-all;
+  }
+
+  &:hover .copy-button {
+    opacity: 1;
+  }
+}
+
+.entry-output {
+  position: relative;
+  padding-left: 24px;
+  border-left: 2px solid var(--md-sys-color-outline-variant);
+
+  .result-copy {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+  }
+
+  &:hover .result-copy {
+    opacity: 1;
+  }
+
+  &.success {
+    border-left-color: var(--md-extended-color-success-color);
+  }
+
+  &.error {
+    border-left-color: var(--md-sys-color-error);
+  }
+}
+
+.entry-loading {
+  @include mixins.flex-row();
+
+  gap: 8px;
+  padding-left: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  .progress-text {
+    font-size: 14px;
+  }
+}
+
+.message-output {
+  margin: 0;
+  padding: 8px;
+  border-radius: 4px;
+
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.ai-reasoning {
+  @include mixins.flex-row();
+
+  gap: 8px;
+
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 4px;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    flex-shrink: 0;
+
+    width: 16px;
+    height: 16px;
+
+    font-size: 16px;
+    color: var(--md-extended-color-info-color);
+  }
+}
+
+.terminal-input-row {
+  @include mixins.flex-row();
+
+  flex-shrink: 0;
+  gap: 8px;
+
+  padding: 8px 16px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  .prompt {
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
+  }
+
+  .command-input {
+    flex: 1;
+
+    padding: 8px;
+    border: none;
+
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+
+    background: transparent;
+    outline: none;
+
+    &::placeholder {
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+// Responsive adjustments
+@include mixins.mobile() {
+  .terminal-header {
+    padding: 8px;
+
+    .title {
+      font-size: 14px;
+    }
+  }
+
+  .terminal-history {
+    padding: 8px;
+  }
+
+  .terminal-input-row {
+    padding: 8px;
+  }
+}

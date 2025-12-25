@@ -1,0 +1,124 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="terminal-container">
+  <div class="terminal-header">
+    <div class="header-left">
+      <mat-icon>terminal</mat-icon>
+      <span class="title">Terminal</span>
+    </div>
+    <div class="header-right">
+      <button
+        mat-icon-button
+        [matTooltip]="getConnectionTooltip()"
+        [class.connected]="isConnected"
+        [class.disconnected]="!isConnected"
+      >
+        <mat-icon>{{ getConnectionIcon() }}</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Clear history" (click)="clearHistory()">
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="terminal-history" #historyContainer (click)="focusInput()">
+    @if (history.length === 0) {
+      <div class="empty-state">
+        <mat-icon>terminal</mat-icon>
+        <p>Enter a command or question to get started.</p>
+        <p class="hint">Try: <code>AAPL HP</code>, <code>HELP</code>, or ask a question.</p>
+      </div>
+    }
+
+    @for (entry of history; track entry.timestamp) {
+      <div class="history-entry">
+        <div class="entry-input">
+          <span class="prompt">&gt;</span>
+          <span class="command">{{ entry.input }}</span>
+          <button
+            mat-icon-button
+            class="copy-button"
+            matTooltip="Copy command"
+            (click)="copyCommand(entry.input, $event)"
+          >
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+
+        @if (entry.isLoading) {
+          <div class="entry-loading">
+            <mat-spinner diameter="16"></mat-spinner>
+            @if (entry.progress) {
+              <span class="progress-text"> {{ entry.progress.step }} ({{ entry.progress.progress }}%) </span>
+            } @else {
+              <span class="progress-text">Processing...</span>
+            }
+          </div>
+        }
+
+        @if (entry.result) {
+          <div class="entry-output" [class.success]="entry.result.success" [class.error]="!entry.result.success">
+            <button
+              mat-icon-button
+              class="copy-button result-copy"
+              matTooltip="Copy result"
+              (click)="copyResult(entry, $event)"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            @switch (entry.result.outputType) {
+              @case ('chart') {
+                <app-chart-panel
+                  [chartOptions]="entry.result.chartOptions"
+                  [title]="entry.result.metadata?.symbol || 'Chart'"
+                  [height]="400"
+                />
+              }
+              @case ('data') {
+                <app-data-table [data]="entry.result.data" />
+              }
+              @default {
+                <pre class="message-output">{{ entry.result.message }}</pre>
+              }
+            }
+
+            @if (entry.result.aiReasoning) {
+              <div class="ai-reasoning">
+                <mat-icon>psychology</mat-icon>
+                <span>{{ entry.result.aiReasoning }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="terminal-input-row">
+    <span class="prompt">&gt;</span>
+    <input
+      type="text"
+      #inputElement
+      [(ngModel)]="currentInput"
+      (keydown)="onKeyDown($event)"
+      (input)="onInputChange()"
+      [disabled]="!isConnected"
+      placeholder="Enter command or question..."
+      class="command-input"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="executeCommand()"
+      [disabled]="!currentInput.trim() || isLoading || !isConnected"
+      matTooltip="Execute command"
+    >
+      @if (isLoading) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>send</mat-icon>
+      }
+    </button>
+  </div>
+</div>

@@ -1,0 +1,79 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.data-table-container {
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.table-title {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+  }
+
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  td.mat-mdc-cell {
+    font-family: 'Fira Code', Consolas, monospace;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  tr.mat-mdc-row:hover {
+    background: var(--md-sys-color-surface-container-high);
+  }
+}
+
+.empty-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px;
+
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    opacity: 0.5;
+  }
+}
+
+.table-footer {
+  padding: 8px 16px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  .row-count {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+mat-paginator {
+  background: transparent;
+}
