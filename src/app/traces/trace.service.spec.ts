@@ -121,8 +121,8 @@ describe('TraceService', () => {
     const inputs = JSON.parse(op.operation.variables['inputs'] as string);
     expect(inputs.variables.password).toBe('[REDACTED]');
     expect(inputs.variables.token).toBe('[REDACTED]');
-    // Username is PII, so it should be hashed (not exposed as plaintext)
-    expect((inputs.variables.username as string).startsWith('[HASHED:')).toBeTrue();
+    // Username is allowed through for trace correlation/debugging (not hashed)
+    expect(inputs.variables.username).toBe('testuser');
 
     op.flush({
       data: {

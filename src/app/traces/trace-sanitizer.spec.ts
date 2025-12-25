@@ -17,7 +17,8 @@ describe('TraceSanitizer', () => {
       const data = { username: 'testuser', password: 'secret123' };
       const result = sanitizeSensitiveDataSync(data) as Record<string, unknown>;
 
-      expect((result['username'] as string).startsWith('[HASHED:')).toBeTrue();
+      // Username is allowed through for trace correlation (not hashed)
+      expect(result['username']).toBe('testuser');
       expect(result['password']).toBe('[REDACTED]');
     });
 
@@ -39,7 +40,8 @@ describe('TraceSanitizer', () => {
       const result = sanitizeSensitiveDataSync(data) as Record<string, string>;
 
       expect((result['email'] as string).startsWith('[HASHED:')).toBeTrue();
-      expect((result['username'] as string).startsWith('[HASHED:')).toBeTrue();
+      // Username is allowed through for trace correlation (not hashed)
+      expect(result['username']).toBe('testuser');
     });
 
     it('should handle nested objects', () => {
@@ -275,7 +277,8 @@ describe('TraceSanitizer', () => {
       const tags = { username: 'testuser', action: 'update' };
       const result = sanitizeTags(tags) as Record<string, string>;
 
-      expect((result['username'] as string).startsWith('[HASHED:')).toBeTrue();
+      // Username is allowed through for trace correlation (not hashed)
+      expect(result['username']).toBe('testuser');
       expect(result['action']).toBe('update');
     });
 
