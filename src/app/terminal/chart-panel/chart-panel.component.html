@@ -1,0 +1,42 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="chart-panel" [class.fullscreen]="isFullscreen">
+  @if (showHeader) {
+    <div class="chart-header">
+      <h3 class="chart-title">{{ title }}</h3>
+      @if (showToolbar) {
+        <div class="chart-actions">
+          <button mat-icon-button matTooltip="Refresh" (click)="onRefresh()">
+            <mat-icon>refresh</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Download" (click)="downloadChart()">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+            (click)="onToggleFullscreen()"
+          >
+            <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="chart-container" [class.fixed-height]="!isFullscreen" [style.--chart-height.px]="height">
+    @if (chartOptions) {
+      <div
+        echarts
+        [options]="chartOptions"
+        [initOpts]="chartInitOptions"
+        (chartInit)="onChartInit($any($event))"
+        class="chart"
+      ></div>
+    } @else {
+      <div class="chart-placeholder">
+        <mat-icon>insert_chart</mat-icon>
+        <span>No chart data</span>
+      </div>
+    }
+  </div>
+</div>

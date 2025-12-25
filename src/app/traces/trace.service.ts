@@ -158,7 +158,10 @@ export class TraceService {
         }),
         catchError((error) => {
           // Never let trace recording break the app
-          console.error('[TraceService] Failed to record trace:', error);
+          // Only log errors in development/testing environments
+          if (this.debugMode) {
+            console.error('[TraceService] Failed to record trace:', error);
+          }
           return of(false);
         }),
       );
@@ -185,7 +188,7 @@ export class TraceService {
 
   /**
    * Track an authentication failure
-   * Note: username is hashed by the sanitizer as PII
+   * Note: username is allowed through for trace debugging
    */
   trackAuthFailure(username: string, error: Error | string): Observable<boolean> {
     const errorMessage = typeof error === 'string' ? error : error.message;
@@ -195,7 +198,7 @@ export class TraceService {
       message: 'Login failed',
       exceptionMessage: errorMessage,
       inputs: {
-        username, // Will be hashed by sanitizer
+        username, // Allowed through for debugging
         timestamp: new Date().toISOString(),
       },
       tags: {
@@ -206,7 +209,7 @@ export class TraceService {
 
   /**
    * Track a successful authentication
-   * Note: username is hashed by the sanitizer as PII
+   * Note: username is allowed through for trace debugging
    */
   trackAuthSuccess(username: string): Observable<boolean> {
     return this.recordTrace({
@@ -214,7 +217,7 @@ export class TraceService {
       severity: 'INFO',
       message: 'User logged in',
       inputs: {
-        username, // Will be hashed by sanitizer
+        username, // Allowed through for debugging
         timestamp: new Date().toISOString(),
       },
       tags: {

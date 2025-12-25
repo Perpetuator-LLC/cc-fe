@@ -76,7 +76,20 @@ const SENSITIVE_KEYS = new Set([
 const SENSITIVE_SUFFIXES = ['password', 'token', 'secret', 'auth', 'credential'];
 
 /** Keys that should be hashed for correlation purposes (PII) */
-const PII_KEYS = new Set(['email', 'username', 'phone', 'phone_number', 'phonenumber']);
+const PII_KEYS = new Set([
+  'email',
+  // 'username', // Allowed through - useful for trace debugging
+  'phone',
+  'phone_number',
+  'phonenumber',
+]);
+
+/**
+ * Keys that are explicitly ALLOWED through without hashing.
+ * User identifiers (uuid, username) are useful for trace correlation.
+ * To re-enable hashing, move them back to PII_KEYS above.
+ */
+// const ALLOWED_USER_KEYS = ['username', 'userUuid', 'user_uuid', 'userId', 'user_id'];
 
 /** Patterns that should be redacted from string values */
 const SENSITIVE_PATTERNS: RegExp[] = [
