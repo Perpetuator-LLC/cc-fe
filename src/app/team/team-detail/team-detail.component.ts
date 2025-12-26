@@ -216,9 +216,10 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (role === 'owner') {
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: {
+          title:'Are you sure you want to proceed?',
           message:
             '<h3>Removing this owner will remove their management permissions and access to this team.</h3>' +
-            'Consider changing their role to another role first.<br/><br/><h2>Are you sure you want to proceed?</h2>',
+            '<p>Consider changing their role to another role first.</p>'
         },
       });
       dialogRef.afterClosed().subscribe((confirmed) => {

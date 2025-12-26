@@ -542,8 +542,10 @@
   font-weight: 600;
   text-transform: none;
   white-space: nowrap;
-
   transition: all 0.2s ease;
+  @media screen and (width <= 576px) {
+    white-space: normal;
+  }
 
   mat-icon {
     width: 14px;

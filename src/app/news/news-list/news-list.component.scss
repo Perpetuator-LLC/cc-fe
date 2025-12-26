@@ -68,6 +68,9 @@
       gap: 8px;
       row-gap: 8px;
       align-items: center;
+      @media screen and (width <= 576px) {
+        align-items: flex-start;
+      }
 
       mat-form-field {
         &.podcast-select-field {

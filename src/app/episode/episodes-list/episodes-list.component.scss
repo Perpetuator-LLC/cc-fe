@@ -60,6 +60,7 @@
 .middle-card {
   padding-inline: 30px;
   background-color: var(--md-sys-color-surface-container);
+  padding-bottom: 20px;
 
   @media screen and (width <= 576px) {
     padding-inline: 16px;
