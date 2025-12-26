@@ -2,122 +2,128 @@
 
 ## Current State Analysis
 
-Based on the error message:
+**STATUS: FIXED** ✅
+
+The error was:
 ```
 > AAPL HP Cannot resolve keyword 'symbol' into field. Choices are: close_price, company, company_id, created_at, date, high_price, id, interval, low_price, open_price, updated_at, volume
 ```
 
-The backend has a `StockPrice` or similar model but the command parser is trying to filter by `symbol` which doesn't exist directly on the model. The symbol is likely accessed via the `company` foreign key.
+**Root Cause**: The `StockPrice` model uses a FK to `Company`, and Company uses `ticker` (not `symbol`) as the stock symbol field.
+
+**Fix Applied**: All queries now use `company__ticker__iexact=symbol`:
+```python
+# ✅ CORRECT (implemented)
+StockPrice.objects.filter(company__ticker__iexact=symbol)
+Company.objects.get(ticker__iexact=symbol)
+```
 
 ---
 
-## 1. Database Models Required
+## Auto-Fetch Behavior (NEW) ✅
 
-### 1.1 Stock Data Models (stock_data app)
+Commands now automatically trigger data fetching when data is not cached:
+
+| Command | Trigger Task | JobKind |
+|---------|-------------|---------|
+| `HP` | `fetch_stock_prices_task` | `FETCH_STOCK_PRICES` |
+| `DES` | `fetch_company_info_task` | `FETCH_COMPANY_INFO` |
+| `GP` | `fetch_stock_prices_task` | `FETCH_STOCK_PRICES` |
+
+**Flow:**
+1. User runs `AAPL HP`
+2. Command checks for cached data
+3. If no data: creates Job, triggers Celery task, returns `{ status: "fetching", jobId: "..." }`
+4. Frontend subscribes to job updates
+5. Once job completes, user re-runs command to see data
+
+---
+
+## 1. Database Models (Already Exist)
+
+### 1.1 Stock Data Models (data app) ✅
+
+Located in `data/models.py`:
 
 ```python
-# models.py
 class Company(models.Model):
     """Company/Stock information"""
-    symbol = models.CharField(max_length=10, unique=True, db_index=True)
+    ticker = models.CharField(max_length=10, unique=True)  # NOTE: Uses 'ticker' not 'symbol'
     name = models.CharField(max_length=255)
-    exchange = models.CharField(max_length=20, null=True)
-    sector = models.CharField(max_length=100, null=True)
-    industry = models.CharField(max_length=100, null=True)
-    market_cap = models.BigIntegerField(null=True)
-    description = models.TextField(null=True)
-    website = models.URLField(null=True)
-    logo_url = models.URLField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    exchange = models.ForeignKey(Exchange, ...)
+    sector = models.CharField(max_length=100, blank=True)
+    industry = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    # ... other fields
 
 class StockPrice(models.Model):
     """Historical stock prices - OHLCV data"""
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='prices')
-    date = models.DateField(db_index=True)
-    interval = models.CharField(max_length=10, default='1d')  # 1d, 1h, 5m, etc.
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='stock_prices')
+    date = models.DateTimeField(db_index=True)
+    interval = models.CharField(max_length=20, choices=STOCK_PRICE_INTERVAL_CHOICES)
     open_price = models.DecimalField(max_digits=12, decimal_places=4)
     high_price = models.DecimalField(max_digits=12, decimal_places=4)
     low_price = models.DecimalField(max_digits=12, decimal_places=4)
     close_price = models.DecimalField(max_digits=12, decimal_places=4)
     volume = models.BigIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ['company', 'date', 'interval']
-        indexes = [
-            models.Index(fields=['company', 'date']),
-        ]
 ```
 
-### 1.2 Command System Models (ai_commands app)
+### 1.2 Command System Models (terminal app) ✅
+
+Located in `terminal/models.py`:
 
 ```python
-class CommandRegistry(models.Model):
+class Command(models.Model):
     """Registry of available commands"""
     name = models.CharField(max_length=50, unique=True)
-    aliases = models.JSONField(default=list)  # ["HP", "PRICE", "HIST"]
-    category = models.CharField(max_length=20)  # EQUITY, CHART, SYSTEM
     description = models.TextField()
+    category = models.CharField(max_length=20)
     requires_symbol = models.BooleanField(default=False)
-    parameters_schema = models.JSONField(null=True)  # JSON Schema for params
-    example_usage = models.CharField(max_length=255)
-    credits_cost = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    parameters_schema = models.JSONField(default=dict)
+    # ... other fields
 
 class CommandExecution(models.Model):
     """Log of all command executions"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     raw_input = models.TextField()
-    parsed_command = models.CharField(max_length=50, null=True)
+    parsed_command = models.CharField(max_length=50)
     parsed_symbols = models.JSONField(default=list)
-    parsed_parameters = models.JSONField(default=dict)
     is_ai_interpreted = models.BooleanField(default=False)
-    ai_reasoning = models.TextField(null=True)
-    status = models.CharField(max_length=20)  # pending, running, completed, failed
+    status = models.CharField(max_length=20)
     result = models.JSONField(null=True)
-    error_message = models.TextField(null=True)
-    execution_time_ms = models.IntegerField(null=True)
-    credits_used = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True)
+    # ... other fields
+
+class CommandAlias(models.Model):
+    """User-defined command aliases"""
+    command = models.ForeignKey(Command, on_delete=models.CASCADE)
+    alias = models.CharField(max_length=50)
+    user = models.ForeignKey(User, null=True, ...)  # null = system alias
 ```
 
-### 1.3 Chart/Dashboard Models (charts app)
+### 1.3 Chart/Dashboard Models (visualizations app) ✅
+
+Located in `visualizations/models.py`:
 
 ```python
-class Chart(models.Model):
-    """Saved chart configurations"""
+class ChartDefinition(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    chart_type = models.CharField(max_length=50)  # candlestick, line, bar, etc.
+    chart_type = models.CharField(max_length=50)
     options = models.JSONField()  # ECharts options
-    symbol = models.CharField(max_length=10, null=True)
-    period = models.CharField(max_length=20, null=True)  # 1D, 1W, 1M, 1Y, etc.
-    is_template = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # ... other fields
 
 class Dashboard(models.Model):
-    """User dashboards with chart panels"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    description = models.TextField(null=True)
     is_default = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 class DashboardPanel(models.Model):
-    """Panel position and chart reference"""
-    dashboard = models.ForeignKey(Dashboard, on_delete=models.CASCADE, related_name='panels')
-    chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
+    dashboard = models.ForeignKey(Dashboard, on_delete=models.CASCADE)
+    chart = models.ForeignKey(ChartDefinition, on_delete=models.CASCADE)
     grid_x = models.IntegerField()
     grid_y = models.IntegerField()
     grid_w = models.IntegerField(default=6)
     grid_h = models.IntegerField(default=4)
-    created_at = models.DateTimeField(auto_now_add=True)
 ```
 
 ---

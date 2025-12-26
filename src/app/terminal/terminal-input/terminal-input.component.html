@@ -47,7 +47,12 @@
         @if (entry.isLoading) {
           <div class="entry-loading">
             <mat-spinner diameter="16"></mat-spinner>
-            @if (entry.progress) {
+            @if (isFetching(entry)) {
+              <span class="progress-text fetching">
+                <mat-icon>cloud_download</mat-icon>
+                {{ getFetchingMessage(entry) }}
+              </span>
+            } @else if (entry.progress) {
               <span class="progress-text"> {{ entry.progress.step }} ({{ entry.progress.progress }}%) </span>
             } @else {
               <span class="progress-text">Processing...</span>

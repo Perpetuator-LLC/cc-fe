@@ -14,12 +14,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { TerminalService } from '../terminal.service';
 import { HistoryEntry, TerminalConnectionState } from '../terminal.types';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
 import { DataTableComponent } from '../data-table/data-table.component';
+import { MessageService } from '../../message.service';
 
 @Component({
   selector: 'app-terminal-input',
@@ -31,7 +31,6 @@ import { DataTableComponent } from '../data-table/data-table.component';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatSnackBarModule,
     ChartPanelComponent,
     DataTableComponent,
   ],
@@ -49,14 +48,14 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
 
   constructor(
     protected terminalService: TerminalService,
-    private snackBar: MatSnackBar,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
-    // Listen for errors and display them
+    // Listen for errors and display them via MessageService
     this.subscriptions.add(
       this.terminalService.onError.subscribe((error) => {
-        console.error('Terminal error:', error);
+        this.messageService.error(`Terminal: ${error}`);
       }),
     );
   }
@@ -87,6 +86,24 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
   get isLoading(): boolean {
     const history = this.history;
     return history.length > 0 && (history[history.length - 1].isLoading ?? false);
+  }
+
+  /**
+   * Check if a history entry is in "fetching" state (waiting for data from backend job)
+   */
+  isFetching(entry: HistoryEntry): boolean {
+    if (entry.result?.data && typeof entry.result.data === 'object') {
+      const data = entry.result.data as { status?: string };
+      return data.status === 'fetching';
+    }
+    return false;
+  }
+
+  /**
+   * Get the fetching message for a history entry
+   */
+  getFetchingMessage(entry: HistoryEntry): string {
+    return entry.result?.message || 'Fetching data from external source...';
   }
 
   executeCommand(): void {
@@ -166,31 +183,105 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     event.stopPropagation();
     let text = '';
 
-    if (entry.result?.message) {
+    if (entry.result?.data) {
+      // Format data as markdown table if it's tabular
+      text = this.formatDataForCopy(entry.result.data);
+    } else if (entry.result?.message) {
       text = entry.result.message;
-    } else if (entry.result?.data) {
-      text = JSON.stringify(entry.result.data, null, 2);
     }
 
     if (text) {
       this.copyToClipboard(text, 'Result copied');
+    } else {
+      this.messageService.info('No data to copy', 2000);
     }
+  }
+
+  /**
+   * Format data for clipboard - converts to markdown table if possible
+   */
+  private formatDataForCopy(data: unknown): string {
+    if (!data) return '';
+
+    // If it's an array of objects, format as markdown table
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+      return this.formatAsMarkdownTable(data as Record<string, unknown>[]);
+    }
+
+    // If it's a TableData structure with type: 'table'
+    if (typeof data === 'object' && data !== null) {
+      const tableData = data as {
+        type?: string;
+        title?: string;
+        headers?: string[];
+        rows?: unknown[][];
+        columns?: { key: string; label: string }[];
+      };
+
+      // Handle TableData format: {type: 'table', headers: [...], rows: [...]}
+      if (tableData.type === 'table' && tableData.headers && tableData.rows) {
+        const title = tableData.title ? `# ${tableData.title}\n\n` : '';
+        const header = '| ' + tableData.headers.join(' | ') + ' |';
+        const separator = '| ' + tableData.headers.map(() => '---').join(' | ') + ' |';
+        const rows = tableData.rows
+          .map((row) => '| ' + (row as unknown[]).map((v) => String(v ?? '')).join(' | ') + ' |')
+          .join('\n');
+        return `${title}${header}\n${separator}\n${rows}`;
+      }
+
+      // Handle plain object as key-value table: {symbol: "AAPL", name: "Apple", ...}
+      if (!tableData.type && !tableData.headers && !tableData.rows) {
+        const entries = Object.entries(data as Record<string, unknown>);
+        if (entries.length > 0) {
+          const header = '| key | value |';
+          const separator = '| --- | --- |';
+          const rows = entries
+            .map(([key, value]) => {
+              const val = value === null || value === undefined ? '' : String(value);
+              return `| ${key} | ${val} |`;
+            })
+            .join('\n');
+          return `${header}\n${separator}\n${rows}`;
+        }
+      }
+    }
+
+    // Fallback to JSON
+    return JSON.stringify(data, null, 2);
+  }
+
+  /**
+   * Format array of objects as markdown table
+   */
+  private formatAsMarkdownTable(data: Record<string, unknown>[], headers?: string[]): string {
+    if (!data || data.length === 0) return '';
+
+    const keys = headers || Object.keys(data[0]);
+    const header = '| ' + keys.join(' | ') + ' |';
+    const separator = '| ' + keys.map(() => '---').join(' | ') + ' |';
+    const rows = data
+      .map((row) => {
+        const values = keys.map((key) => {
+          const val = row[key];
+          if (val === null || val === undefined) return '';
+          if (typeof val === 'object') return JSON.stringify(val);
+          return String(val);
+        });
+        return '| ' + values.join(' | ') + ' |';
+      })
+      .join('\n');
+
+    return `${header}\n${separator}\n${rows}`;
   }
 
   private copyToClipboard(text: string, successMessage: string): void {
     navigator.clipboard.writeText(text).then(
       () => {
-        this.snackBar.open(successMessage, '', {
-          duration: 2000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
+        this.messageService.success(successMessage, 2000);
       },
       (err) => {
         console.error('Failed to copy:', err);
-        this.snackBar.open('Failed to copy', '', {
-          duration: 2000,
-        });
+        this.messageService.error('Failed to copy to clipboard');
       },
     );
   }

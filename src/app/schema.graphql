@@ -640,9 +640,13 @@ chain information, and related jobs.
 type JobType implements Node {
   taskId: UUID
   kind: String
+
+  """Job input parameters (auto-converted to camelCase)"""
   args: GenericScalar
   status: String
   error: String
+
+  """Job output/result (auto-converted to camelCase)"""
   result: GenericScalar
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -670,9 +674,15 @@ interface Node {
 }
 
 """
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
+A JSON scalar that automatically converts keys:
+- Output (to frontend): snake_case → camelCase
+- Input (from frontend): camelCase → snake_case
+
+Use this for GenericScalar fields like Job.args and Job.result
+to ensure consistent camelCase in GraphQL responses.
+
+Note: We use the name "GenericScalar" in GraphQL schema for backwards
+compatibility with existing frontend queries.
 """
 scalar GenericScalar
 
@@ -1753,7 +1763,11 @@ type ScheduleType implements Node {
   solarEvent: String
   solarLatitude: Decimal
   solarLongitude: Decimal
+
+  """Schedule arguments (auto-converted to camelCase)"""
   args: GenericScalar
+
+  """Schedule keyword arguments (auto-converted to camelCase)"""
   kwargs: GenericScalar
   enabled: Boolean!
   createdAt: DateTime!
@@ -2453,7 +2467,7 @@ type ApiMutation {
   Mutation to create a new dynamic schedule supporting multiple schedule types.
   """
   createSchedule(
-    """Arguments to pass to the job"""
+    """Arguments to pass to the job (auto-converted from camelCase)"""
     args: GenericScalar
 
     """One-time execution datetime (required for clocked schedules)"""
@@ -2485,7 +2499,7 @@ type ApiMutation {
     """Type of job to schedule"""
     jobKind: JobKind!
 
-    """Keyword arguments to pass to the job"""
+    """Keyword arguments to pass to the job (auto-converted from camelCase)"""
     kwargs: GenericScalar
 
     """Unique name for the schedule"""
@@ -2506,7 +2520,7 @@ type ApiMutation {
 
   """Mutation to update an existing dynamic schedule."""
   updateSchedule(
-    """Arguments to pass to the job"""
+    """Arguments to pass to the job (auto-converted from camelCase)"""
     args: GenericScalar
 
     """One-time execution datetime"""
@@ -2536,7 +2550,7 @@ type ApiMutation {
     """Job kind of the schedule"""
     jobKind: JobKind
 
-    """Keyword arguments to pass to the job"""
+    """Keyword arguments to pass to the job (auto-converted from camelCase)"""
     kwargs: GenericScalar
 
     """Unique name for the schedule"""
