@@ -15,10 +15,15 @@ mat-form-field {
 mat-dialog-content {
   min-width: 400px;
   max-width: 500px;
+  @media screen and (max-width:576px) {
+    min-width: 100%;
+    max-width: 100%;
+  }
 }
 
 mat-dialog-actions {
-  padding: 16px 0;
+  padding: 16px 24px;
+  flex-wrap: nowrap;
 }
 
 .cancel-btn {
@@ -41,5 +46,5 @@ mat-dialog-actions {
   font-weight: 600;
   color: var(--md-sys-color-on-primary);
 
-  background: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary); 
 }
