@@ -1,47 +1,35 @@
 # Backend GraphQL Schema Discovery
 
-Generated: 2025-12-25
+Generated: 2025-12-26
+
+## ⚠️ Important: Update Frontend Schema
+
+After the backend implements new queries, the frontend's `schema.graphql` needs to be updated:
+
+```bash
+# Regenerate schema from backend
+yarn graphql:schema
+
+# Or manually download from backend introspection endpoint
+curl -X POST http://127.0.0.1:8000/graphql/ \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ __schema { types { name } } }"}' > schema.json
+```
+
+---
 
 ## Known Backend Issues
 
-### ❌ Datetime Serialization Error in GP Command
+### ✅ Datetime Serialization Error in GP Command (FIXED)
 
-**Error:**
+> **Status:** FIXED as of 2025-12-26. Backend now correctly serializes datetime objects.
+
+**Previous Error:**
 ```
 Terminal error: Object of type datetime is not JSON serializable
 ```
 
-**Cause:** The GP (chart) command is returning a `datetime` object in Python that isn't being converted to a string before JSON serialization.
-
-**Fix (backend):** In the chart command handler, ensure all datetime values are converted to ISO strings:
-```python
-# Change from:
-chart_options = {
-    "xAxis": {"data": dates},  # dates may contain datetime objects
-    ...
-}
-
-# To:
-chart_options = {
-    "xAxis": {"data": [d.isoformat() if isinstance(d, datetime) else d for d in dates]},
-    ...
-}
-```
-
-Or use a custom JSON encoder:
-```python
-import json
-from datetime import datetime
-
-class DateTimeEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return super().default(obj)
-
-# When sending via WebSocket:
-await self.send(text_data=json.dumps(response, cls=DateTimeEncoder))
-```
+**Resolution:** Backend now properly converts datetime objects to ISO strings.
 
 ---
 
@@ -130,34 +118,34 @@ The frontend now handles auto-fetch responses:
 
 ## Terminal System Queries
 
-### `commands`
+### ✅ `commands` (NOW IMPLEMENTED)
+
+> **Status:** IMPLEMENTED as of 2025-12-26. Requires server restart to take effect.
+
 Get available terminal commands.
 
 ```graphql
-query GetCommands($category: String, $isActive: Boolean) {
-  commands(category: $category, isActive: $isActive) {
-    uuid
+query GetCommands($isActive: Boolean) {
+  commands(isActive: $isActive) {
     name
     description
     category
     aliases
     requiresSymbol
-    parametersSchema
     exampleUsage
-    outputType
-    chartType
-    creditsCost
   }
 }
 ```
 
 **Parameters:**
-- `category` (String, optional): Filter by category (EQUITY, CHART, SYSTEM)
 - `isActive` (Boolean, optional): Filter by active status (default: true)
 
 ---
 
-### `command`
+### ❌ `command` (NOT YET IMPLEMENTED)
+
+> **Status:** This query is NOT in the backend schema yet.
+
 Get a specific command by name.
 
 ```graphql
@@ -183,25 +171,20 @@ query GetCommand($name: String!) {
 
 ---
 
-### `commandHistory`
+### ✅ `commandHistory` (NOW IMPLEMENTED)
+
+> **Status:** IMPLEMENTED as of 2025-12-26. Requires server restart to take effect.
+
 Get user's command execution history.
 
 ```graphql
 query GetCommandHistory($limit: Int) {
   commandHistory(limit: $limit) {
-    uuid
     rawInput
     parsedCommand
-    parsedSymbols
-    parsedArgs
-    isAiInterpreted
-    aiReasoning
     status
     result
-    error
-    creditsCharged
     createdAt
-    completedAt
   }
 }
 ```

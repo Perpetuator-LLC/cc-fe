@@ -1,9 +1,23 @@
-schema {
-  query: ApiQuery
-  mutation: ApiMutation
-}
+type Query {
+  """Get AI agent execution history"""
+  agentExecutions(agentType: String, limit: Int = 20): [AgentExecutionType]
 
-type ApiQuery {
+  """Get specific agent execution"""
+  agentExecution(executionUuid: UUID!): AgentExecutionType
+  charts(includePublic: Boolean = false, includeTemplates: Boolean = false): [ChartDefinitionType]
+  chart(chartUuid: UUID!): ChartDefinitionType
+  dashboards: [DashboardType]
+  dashboard(dashboardUuid: UUID!): DashboardType
+  defaultDashboard: DashboardType
+
+  """List available commands"""
+  commands(category: String, isActive: Boolean): [CommandType]
+
+  """Get command by name"""
+  command(name: String!): CommandType
+
+  """Get user's command history"""
+  commandHistory(limit: Int = 20): [CommandExecutionType]
   traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
   trace(id: UUID!): TraceType
 
@@ -332,6 +346,300 @@ type ApiQuery {
   ): Node
 }
 
+"""GraphQL type for AgentExecution model."""
+type AgentExecutionType {
+  id: UUID!
+  agentType: OrchestrationAgentExecutionAgentTypeChoices!
+
+  """LLM model used (e.g., gpt-4o, claude-3)"""
+  modelName: String!
+
+  """Original user query"""
+  userInput: String!
+
+  """Sequence of tool calls made by the agent"""
+  toolCalls: JSONString!
+
+  """Agent's reasoning/chain of thought"""
+  reasoning: String!
+  finalResponse: String!
+  isSuccessful: Boolean!
+  error: String!
+  inputTokens: Int!
+  outputTokens: Int!
+  totalCost: Decimal!
+  createdAt: DateTime!
+  completedAt: DateTime
+  uuid: UUID
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""An enumeration."""
+enum OrchestrationAgentExecutionAgentTypeChoices {
+  """Terminal Command Agent"""
+  TERMINAL
+
+  """Research Agent"""
+  RESEARCH
+
+  """Financial Analyst Agent"""
+  ANALYST
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""GraphQL type for ChartDefinition model."""
+type ChartDefinitionType {
+  id: UUID!
+  name: String!
+  description: String!
+  chartType: VisualizationsChartDefinitionChartTypeChoices!
+
+  """Full ECharts option object (title, xAxis, yAxis, series, etc.)"""
+  options: JSONString!
+
+  """How to fetch/update data (symbols, queries, refresh interval)"""
+  dataSource: JSONString!
+
+  """Stock symbols this chart displays"""
+  symbols: JSONString!
+  width: Int!
+  height: Int!
+  theme: String!
+
+  """Can be used as template for new charts"""
+  isTemplate: Boolean!
+
+  """Visible to all users"""
+  isPublic: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum VisualizationsChartDefinitionChartTypeChoices {
+  """Candlestick"""
+  CANDLESTICK
+
+  """Line"""
+  LINE
+
+  """Bar"""
+  BAR
+
+  """Pie"""
+  PIE
+
+  """Scatter"""
+  SCATTER
+
+  """Heatmap"""
+  HEATMAP
+
+  """Treemap"""
+  TREEMAP
+
+  """Radar"""
+  RADAR
+
+  """Gauge"""
+  GAUGE
+
+  """Custom"""
+  CUSTOM
+}
+
+"""GraphQL type for Dashboard model."""
+type DashboardType {
+  id: UUID!
+  name: String!
+  description: String!
+
+  """Number of grid columns"""
+  columns: Int!
+
+  """Height of each grid row in pixels"""
+  rowHeight: Int!
+
+  """Grid layout config for react-grid-layout or similar"""
+  layout: JSONString!
+
+  """Default dashboard shown on login"""
+  isDefault: Boolean!
+
+  """Visible to all users"""
+  isPublic: Boolean!
+
+  """Enable auto-refresh of data"""
+  autoRefresh: Boolean!
+
+  """Refresh interval in seconds"""
+  refreshInterval: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  panels: [DashboardPanelType]
+}
+
+"""GraphQL type for DashboardPanel model."""
+type DashboardPanelType {
+  id: UUID!
+
+  """X position in grid units"""
+  gridX: Int!
+
+  """Y position in grid units"""
+  gridY: Int!
+
+  """Width in grid units"""
+  gridW: Int!
+
+  """Height in grid units"""
+  gridH: Int!
+
+  """Override chart title in this panel"""
+  titleOverride: String!
+
+  """Override specific ECharts options"""
+  optionsOverride: JSONString!
+
+  """Prevent moving/resizing"""
+  isLocked: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  chart: ChartDefinitionType
+}
+
+"""GraphQL type for Command model."""
+type CommandType {
+  id: UUID!
+  name: String!
+  description: String!
+  category: TerminalCommandCategoryChoices!
+
+  """GraphQL mutation name (e.g., 'FetchStockPrices')"""
+  gqlMutation: String!
+
+  """GraphQL query name (e.g., 'stockPrices')"""
+  gqlQuery: String!
+
+  """Whether this command requires a stock symbol"""
+  requiresSymbol: Boolean!
+
+  """JSON Schema defining required/optional parameters"""
+  parametersSchema: JSONString!
+
+  """Example usage for help display"""
+  exampleUsage: String!
+
+  """Type of output: data, chart, dashboard, message"""
+  outputType: String!
+
+  """Default chart type if output_type is chart"""
+  chartType: String!
+  isActive: Boolean!
+
+  """Credit cost per execution"""
+  creditsCost: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  aliases: [String]
+}
+
+"""An enumeration."""
+enum TerminalCommandCategoryChoices {
+  """Equity Analysis"""
+  EQUITY
+
+  """Charts & Visualization"""
+  CHART
+
+  """News & Information"""
+  NEWS
+
+  """Screening & Search"""
+  SCREENING
+
+  """System Commands"""
+  SYSTEM
+
+  """Research & Analysis"""
+  RESEARCH
+
+  """Podcast Management"""
+  PODCAST
+
+  """Team Management"""
+  TEAM
+}
+
+"""GraphQL type for CommandExecution model."""
+type CommandExecutionType {
+  id: UUID!
+
+  """Original user input"""
+  rawInput: String!
+  parsedCommand: String!
+
+  """List of symbols parsed from input"""
+  parsedSymbols: JSONString!
+
+  """Parsed arguments"""
+  parsedArgs: JSONString!
+
+  """Whether this was interpreted by AI"""
+  isAiInterpreted: Boolean!
+
+  """AI explanation of interpretation"""
+  aiReasoning: String!
+  status: TerminalCommandExecutionStatusChoices!
+  result: JSONString
+  error: String!
+  createdAt: DateTime!
+  completedAt: DateTime
+  creditsCharged: Int!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum TerminalCommandExecutionStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Running"""
+  RUNNING
+
+  """Completed"""
+  COMPLETED
+
+  """Failed"""
+  FAILED
+}
+
 type TraceType {
   id: UUID!
   createdAt: DateTime!
@@ -359,19 +667,6 @@ type TraceType {
   """Celery task ID"""
   taskId: String
 }
-
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 """An enumeration."""
 enum TracesTraceKindChoices {
@@ -450,17 +745,6 @@ enum TracesTraceSeverityChoices {
   """Critical"""
   CRITICAL
 }
-
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
-
-"""
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
-"""
-scalar JSONString
 
 """A permission definition"""
 type PermissionDefinitionType {
@@ -2278,7 +2562,71 @@ type UserType {
   isVerified: Boolean!
 }
 
-type ApiMutation {
+type Mutation {
+  """
+  Interpret a natural language query using AI.
+  
+  The AI will analyze the query and execute appropriate
+  terminal commands to fulfill the request.
+  """
+  interpretCommand(
+    """Natural language query to interpret"""
+    query: String!
+  ): InterpretCommand
+
+  """
+  Perform comprehensive AI-powered stock analysis.
+  
+  Combines multiple data sources to provide investment insights.
+  """
+  analyzeStock(
+    """Stock symbol to analyze"""
+    symbol: String!
+  ): AnalyzeStock
+
+  """
+  Execute a sequence of terminal commands.
+  
+  Commands are executed in order, with each result
+  available to subsequent commands.
+  """
+  executeCommandChain(
+    """List of commands to execute in order"""
+    commands: [String]!
+  ): ExecuteCommandChain
+
+  """Create a new chart definition."""
+  createChart(chartType: String!, dataSource: JSONString, description: String, height: Int, isPublic: Boolean, isTemplate: Boolean, name: String!, options: JSONString!, symbols: [String], teamUuid: UUID, theme: String, width: Int): CreateChart
+
+  """Update an existing chart definition."""
+  updateChart(chartUuid: UUID!, dataSource: JSONString, description: String, height: Int, isPublic: Boolean, isTemplate: Boolean, name: String, options: JSONString, symbols: [String], theme: String, width: Int): UpdateChart
+
+  """Delete a chart definition."""
+  deleteChart(chartUuid: UUID!): DeleteChart
+
+  """Create a new dashboard."""
+  createDashboard(autoRefresh: Boolean, columns: Int, description: String, isDefault: Boolean, name: String!, refreshInterval: Int, rowHeight: Int, teamUuid: UUID): CreateDashboard
+
+  """Add a chart panel to a dashboard."""
+  addPanelToDashboard(chartUuid: UUID!, dashboardUuid: UUID!, gridH: Int, gridW: Int, gridX: Int, gridY: Int, titleOverride: String): AddPanelToDashboard
+
+  """
+  Execute a terminal command.
+  
+  Parses the input, identifies the command, and executes it.
+  If the command is not recognized, it can be routed to AI interpretation.
+  """
+  executeCommand(
+    """Command input (e.g., 'AAPL HP -period 1Y')"""
+    input: String!
+
+    """Use AI to interpret unrecognized commands"""
+    useAiFallback: Boolean = true
+  ): ExecuteCommand
+
+  """Sync registered commands to database."""
+  syncCommandRegistry: SyncCommandRegistry
+
   """
   Non-authenticated mutation for recording traces from frontend or backend.
   Use this to capture errors, analytics, and telemetry from any source.
@@ -2869,6 +3217,107 @@ type ApiMutation {
   PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
   """
   refreshToken(refresh: String!): RefreshAccessToken
+}
+
+"""
+Interpret a natural language query using AI.
+
+The AI will analyze the query and execute appropriate
+terminal commands to fulfill the request.
+"""
+type InterpretCommand {
+  success: Boolean
+  message: String
+  job: JobType
+  execution: AgentExecutionType
+}
+
+"""
+Perform comprehensive AI-powered stock analysis.
+
+Combines multiple data sources to provide investment insights.
+"""
+type AnalyzeStock {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Execute a sequence of terminal commands.
+
+Commands are executed in order, with each result
+available to subsequent commands.
+"""
+type ExecuteCommandChain {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Create a new chart definition."""
+type CreateChart {
+  success: Boolean
+  message: String
+  chart: ChartDefinitionType
+}
+
+"""Update an existing chart definition."""
+type UpdateChart {
+  success: Boolean
+  message: String
+  chart: ChartDefinitionType
+}
+
+"""Delete a chart definition."""
+type DeleteChart {
+  success: Boolean
+  message: String
+}
+
+"""Create a new dashboard."""
+type CreateDashboard {
+  success: Boolean
+  message: String
+  dashboard: DashboardType
+}
+
+"""Add a chart panel to a dashboard."""
+type AddPanelToDashboard {
+  success: Boolean
+  message: String
+  panel: DashboardPanelType
+}
+
+"""
+Execute a terminal command.
+
+Parses the input, identifies the command, and executes it.
+If the command is not recognized, it can be routed to AI interpretation.
+"""
+type ExecuteCommand {
+  success: Boolean
+  message: String
+  result: CommandResultType
+  execution: CommandExecutionType
+  job: JobType
+}
+
+"""Result from command execution."""
+type CommandResultType {
+  success: Boolean
+  message: String
+  outputType: String
+  data: JSONString
+  chartOptions: JSONString
+  metadata: JSONString
+}
+
+"""Sync registered commands to database."""
+type SyncCommandRegistry {
+  success: Boolean
+  message: String
+  syncedCount: Int
 }
 
 """

@@ -75,25 +75,27 @@ export interface SymbolUpdate {
 }
 
 // ============================================================================
-// Command Registry Types
+// Command Registry Types (matches CommandType from schema)
 // ============================================================================
 
-export type CommandCategory = 'EQUITY' | 'CHART' | 'SYSTEM' | 'RESEARCH' | 'PORTFOLIO';
+export type CommandCategory = 'EQUITY' | 'CHART' | 'NEWS' | 'SCREENING' | 'SYSTEM' | 'RESEARCH' | 'PODCAST' | 'TEAM';
 
 export interface Command {
   id: string;
   name: string;
   description: string;
   category: CommandCategory;
-  requiresSymbol: boolean;
-  parametersSchema?: object;
-  exampleUsage: string;
-  creditsCost: number;
   aliases?: string[];
+  requiresSymbol: boolean;
+  parametersSchema?: string;
+  exampleUsage: string;
+  outputType?: string;
+  chartType?: string;
+  creditsCost?: number;
 }
 
 // ============================================================================
-// History Types
+// History Types (matches CommandExecutionType from schema)
 // ============================================================================
 
 export interface HistoryEntry {
@@ -105,50 +107,89 @@ export interface HistoryEntry {
   progress?: CommandProgress;
 }
 
+export type CommandExecutionStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+
 export interface CommandHistoryItem {
   id: string;
   rawInput: string;
   parsedCommand: string;
-  parsedSymbols: string[];
+  parsedSymbols?: string[];
+  parsedArgs?: object;
   isAiInterpreted: boolean;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  aiReasoning?: string;
+  status: CommandExecutionStatus;
   result?: object;
+  error?: string;
   createdAt: string;
+  completedAt?: string;
+  creditsCharged?: number;
 }
 
 // ============================================================================
-// Dashboard Types
+// Dashboard Types (matches DashboardType, DashboardPanelType from schema)
 // ============================================================================
 
 export interface DashboardPanel {
   id: string;
-  x: number;
-  y: number;
-  cols: number;
-  rows: number;
-  chartId?: string;
-  chartOptions?: EChartsOption;
-  title: string;
-  symbol?: string;
+  gridX: number;
+  gridY: number;
+  gridW: number;
+  gridH: number;
+  titleOverride?: string;
+  optionsOverride?: string;
+  isLocked?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  chart?: ChartDefinition;
 }
 
 export interface Dashboard {
   id: string;
   name: string;
   description?: string;
-  panels: DashboardPanel[];
+  columns: number;
+  rowHeight: number;
+  layout?: string;
+  isDefault?: boolean;
+  isPublic?: boolean;
+  autoRefresh?: boolean;
+  refreshInterval?: number;
   createdAt: string;
   updatedAt: string;
+  panels?: DashboardPanel[];
 }
+
+// ============================================================================
+// Chart Types (matches ChartDefinitionType from schema)
+// ============================================================================
+
+export type ChartType =
+  | 'CANDLESTICK'
+  | 'LINE'
+  | 'BAR'
+  | 'PIE'
+  | 'SCATTER'
+  | 'HEATMAP'
+  | 'TREEMAP'
+  | 'RADAR'
+  | 'GAUGE'
+  | 'CUSTOM';
 
 export interface ChartDefinition {
   id: string;
   name: string;
-  chartType: string;
-  options: EChartsOption;
-  symbol?: string;
-  period?: string;
-  createdAt: string;
+  description?: string;
+  chartType: ChartType;
+  options: string; // JSONString - ECharts options
+  dataSource?: string;
+  symbols?: string;
+  width?: number;
+  height?: number;
+  theme?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============================================================================

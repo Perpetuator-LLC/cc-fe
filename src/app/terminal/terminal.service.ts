@@ -7,7 +7,6 @@ import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.serv
 import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
 import {
   Command,
-  CommandCategory,
   CommandHistoryItem,
   CommandProgress,
   CommandResult,
@@ -23,15 +22,17 @@ import { EChartsOption } from 'echarts';
 // ============================================================================
 
 const GET_COMMANDS = gql`
-  query GetCommands($category: String) {
-    commands(category: $category) {
+  query GetCommands($category: String, $isActive: Boolean) {
+    commands(category: $category, isActive: $isActive) {
       id
       name
       description
       category
+      aliases
       requiresSymbol
-      parametersSchema
       exampleUsage
+      outputType
+      chartType
       creditsCost
     }
   }
@@ -43,8 +44,14 @@ const GET_COMMAND = gql`
       id
       name
       description
+      category
+      requiresSymbol
       parametersSchema
       exampleUsage
+      outputType
+      chartType
+      creditsCost
+      aliases
     }
   }
 `;
@@ -57,9 +64,13 @@ const GET_COMMAND_HISTORY = gql`
       parsedCommand
       parsedSymbols
       isAiInterpreted
+      aiReasoning
       status
       result
+      error
       createdAt
+      completedAt
+      creditsCharged
     }
   }
 `;
@@ -75,10 +86,13 @@ const EXECUTE_COMMAND = gql`
         outputType
         data
         chartOptions
+        metadata
       }
       execution {
         id
         status
+        rawInput
+        parsedCommand
       }
       job {
         id
@@ -92,19 +106,25 @@ const CREATE_DASHBOARD = gql`
   mutation CreateDashboard($name: String!, $description: String) {
     createDashboard(name: $name, description: $description) {
       success
+      message
       dashboard {
         id
         name
         description
+        columns
+        rowHeight
+        isDefault
         panels {
           id
           gridX
           gridY
           gridW
           gridH
+          titleOverride
           chart {
             id
             name
+            chartType
             options
           }
         }
@@ -119,6 +139,12 @@ const GET_DASHBOARDS = gql`
       id
       name
       description
+      columns
+      rowHeight
+      isDefault
+      isPublic
+      autoRefresh
+      refreshInterval
       createdAt
       updatedAt
     }
@@ -347,17 +373,13 @@ export class TerminalService implements OnDestroy {
   // ============================================================================
 
   /**
-   * Load available commands from registry
-   */
-  /**
    * Load available commands from backend registry
-   * Falls back to empty array if backend doesn't have the commands query yet
    */
-  loadCommands(category?: CommandCategory): Observable<Command[]> {
+  loadCommands(category?: string, isActive = true): Observable<Command[]> {
     return this.apollo
       .query<CommandsResult>({
         query: GET_COMMANDS,
-        variables: { category },
+        variables: { category, isActive },
       })
       .pipe(
         map((result) => {
@@ -366,7 +388,7 @@ export class TerminalService implements OnDestroy {
           return commands;
         }),
         catchError(() => {
-          // Backend doesn't have commands query yet - return empty array
+          // Fallback to empty array if query fails
           return of([]);
         }),
       );
