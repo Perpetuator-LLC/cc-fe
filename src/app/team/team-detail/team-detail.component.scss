@@ -80,6 +80,15 @@ mat-divider {
   text-align: center;
 }
 
+.mat-mdc-table{
+  overflow: auto;
+}
+.mat-mdc-header-cell{
+  white-space: nowrap;
+}
+.mat-mdc-cell, .mat-mdc-header-cell{
+  overflow: unset;
+}
 .podcast-detail-page {
   padding: 50px 72px;
 
@@ -130,9 +139,15 @@ mat-divider {
     gap: 8px;
     align-items: center;
     justify-content: space-between;
-
     width: 100%;
     margin: 24px 0;
+    @media screen and (max-width:576px) {
+      flex-direction: column;
+      .input-search-div , button{
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
   }
 
   .p_name {
@@ -162,11 +177,15 @@ mat-divider {
     }
   }
 
+  .chip{
+    white-space: nowrap;
+  }
   .podcast-name-link {
     cursor: pointer;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover {
       text-decoration: none;
