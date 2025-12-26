@@ -36,14 +36,14 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
   constructor(protected terminalService: TerminalService) {}
 
   ngOnInit(): void {
-    // Load available commands on init (optional - terminal works without this)
+    // Load available commands from backend registry
     this.subscriptions.add(
       this.terminalService.loadCommands().subscribe({
         next: (commands) => {
-          console.debug('Loaded commands:', commands.length);
+          console.debug('Loaded commands from registry:', commands.length);
         },
         error: () => {
-          // Commands query not available yet - this is fine, terminal still works
+          // Commands query failed - terminal still works via WebSocket
           console.debug('Commands registry not available - using WebSocket commands');
         },
       }),
