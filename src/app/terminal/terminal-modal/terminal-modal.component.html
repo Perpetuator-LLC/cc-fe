@@ -1,0 +1,91 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="terminal-modal">
+  <div class="modal-header">
+    <div class="header-left">
+      <mat-icon>terminal</mat-icon>
+      <span class="title">Terminal</span>
+      <span class="hint">Press Escape to close</span>
+    </div>
+    <div class="header-right">
+      <button mat-icon-button matTooltip="Clear history" (click)="clearHistory()">
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Close (Esc)" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-content">
+    <div class="history-container" #historyContainer>
+      @if (history.length === 0) {
+        <div class="empty-state">
+          <mat-icon>psychology</mat-icon>
+          <p>Type a command or ask a question</p>
+          <span class="examples">Try: <code>AAPL GP</code>, <code>HELP</code>, or ask anything</span>
+        </div>
+      } @else {
+        @for (item of history; track item.id ?? $index) {
+          <div class="history-item" [class.error]="item.result && !item.result.success">
+            <div class="command-line">
+              <span class="prompt">&gt;</span>
+              <span class="command">{{ item.input }}</span>
+              <span class="timestamp">{{ item.timestamp | date: 'HH:mm:ss' }}</span>
+              @if (item.result) {
+                <mat-icon
+                  class="status-icon"
+                  [class.success]="item.result.success"
+                  [class.error]="!item.result.success"
+                >
+                  {{ item.result.success ? 'check_circle' : 'error' }}
+                </mat-icon>
+              }
+            </div>
+            @if (item.isLoading || isFetching(item)) {
+              <div class="processing">
+                <mat-spinner diameter="16" />
+                <span>{{ isFetching(item) ? 'Fetching data...' : 'Processing...' }}</span>
+              </div>
+            } @else if (item.result) {
+              <div class="output">
+                @if (item.result.message) {
+                  <div class="message" [class.error]="!item.result.success">{{ item.result.message }}</div>
+                }
+                @if (hasChart(item)) {
+                  <app-chart-panel [chartOptions]="item.result.chartOptions!" [showHeader]="false" />
+                }
+                @if (hasTable(item)) {
+                  <app-data-table [data]="$any(item.result.data)" />
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="input-container">
+      <span class="prompt">&gt;</span>
+      <input
+        #commandInput
+        type="text"
+        [(ngModel)]="currentCommand"
+        (keydown)="onKeyDown($event)"
+        (keydown.enter)="onSubmit()"
+        [disabled]="isProcessing"
+        placeholder="Enter command or ask a question..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      @if (isProcessing) {
+        <mat-spinner diameter="20" />
+      } @else {
+        <button mat-icon-button (click)="onSubmit()" [disabled]="!currentCommand.trim()">
+          <mat-icon>send</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+</div>

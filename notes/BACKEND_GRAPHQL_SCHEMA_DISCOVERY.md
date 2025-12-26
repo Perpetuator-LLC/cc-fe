@@ -1,6 +1,7 @@
 # Backend GraphQL Schema Discovery
 
 Generated: 2025-12-26
+Updated: 2025-12-26 (Terminal Redesign & Issues)
 
 ## ⚠️ Important: Update Frontend Schema
 
@@ -19,6 +20,61 @@ curl -X POST http://127.0.0.1:8000/graphql/ \
 ---
 
 ## Known Backend Issues
+
+### ❌ HG Command Returns Empty Data
+
+**Symptom:**
+Running `AAPL HG` (company profile/description) returns empty data:
+```json
+{
+  "success": true,
+  "message": "Company profile for ",  // <-- Name is empty!
+  "data": {
+    "symbol": "AAPL",
+    "name": "",
+    "description": "",
+    "sector": "",
+    "industry": "",
+    "exchange": "",
+    "address": "",
+    "fiscalYearEnd": ""
+  }
+}
+```
+
+**Expected:** The HG (or DES) command should return actual company data fetched from Alpha Vantage.
+
+**Investigation needed:**
+1. Is company data being stored in the database?
+2. Is `fetch_company_info_task` being triggered?
+3. Is the CompanyInfo model being populated correctly?
+
+---
+
+### ❌ Table Copy Feature Only Shows Message
+
+**Symptom:**
+When clicking "Copy" on a table result (like from `AAPL HG`), it only copies:
+```
+Company profile for 
+```
+
+**Expected:** Should copy the actual table data in a useful format (preferably markdown table format).
+
+**Frontend Request:**
+The backend's table data should include a copyable representation, OR the frontend needs to format the table data into markdown when copying.
+
+Example of desired copy output:
+```markdown
+| Key | Value |
+|-----|-------|
+| symbol | AAPL |
+| name | Apple Inc. |
+| sector | Technology |
+...
+```
+
+---
 
 ### ✅ Datetime Serialization Error in GP Command (FIXED)
 
