@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { TerminalService } from '../terminal.service';
-import { TerminalInputComponent } from '../terminal-input/terminal-input.component';
+import { TerminalBarComponent } from '../terminal-bar/terminal-bar.component';
 import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashboard.component';
 
 @Component({
@@ -19,9 +18,8 @@ import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashb
     MatIconModule,
     MatButtonModule,
     MatTabsModule,
-    MatSidenavModule,
     MatTooltipModule,
-    TerminalInputComponent,
+    TerminalBarComponent,
     TerminalDashboardComponent,
   ],
   templateUrl: './terminal-page.component.html',
@@ -29,7 +27,6 @@ import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashb
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalPageComponent implements OnInit, OnDestroy {
-  isTerminalExpanded = true;
   selectedTabIndex = 0;
   private subscriptions = new Subscription();
 
@@ -40,7 +37,7 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.terminalService.loadCommands().subscribe({
         next: (commands) => {
-          console.debug('Loaded commands from registry:', commands.length);
+          console.debug('Loaded commands:', commands.length);
         },
         error: () => {
           // Commands query failed - terminal still works via WebSocket
@@ -52,10 +49,6 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-  }
-
-  toggleTerminal(): void {
-    this.isTerminalExpanded = !this.isTerminalExpanded;
   }
 
   onTabChange(index: number): void {
