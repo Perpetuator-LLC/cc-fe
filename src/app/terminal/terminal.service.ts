@@ -1,9 +1,10 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
-import { Observable, Subscription, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
+import { map, filter, catchError } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
 import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
+import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
 import {
   Command,
   CommandCategory,
@@ -178,8 +179,12 @@ export class TerminalService implements OnDestroy {
   // Currently active charts (subscribed for real-time updates)
   private activeChartsSignal: WritableSignal<Map<string, EChartsOption>> = signal(new Map());
 
+  // Track pending jobs for auto-retry (jobId -> original command input)
+  private pendingJobCommands = new Map<string, string>();
+
   constructor(
     private wsService: TerminalWebSocketService,
+    private jobsWsService: JobsWebSocketService,
     private apollo: Apollo,
   ) {
     this.setupSubscriptions();
@@ -344,6 +349,10 @@ export class TerminalService implements OnDestroy {
   /**
    * Load available commands from registry
    */
+  /**
+   * Load available commands from backend registry
+   * Falls back to empty array if backend doesn't have the commands query yet
+   */
   loadCommands(category?: CommandCategory): Observable<Command[]> {
     return this.apollo
       .query<CommandsResult>({
@@ -355,6 +364,10 @@ export class TerminalService implements OnDestroy {
           const commands = result.data.commands;
           this.commandsCache$.next(commands);
           return commands;
+        }),
+        catchError(() => {
+          // Backend doesn't have commands query yet - return empty array
+          return of([]);
         }),
       );
   }
@@ -485,17 +498,107 @@ export class TerminalService implements OnDestroy {
         this.activeChartsSignal.set(new Map(charts));
       }),
     );
+
+    // Handle job completions - re-run pending commands
+    this.subscriptions.add(
+      this.jobsWsService.jobUpdates
+        .pipe(filter((update) => update.type === 'jobs.completed' || update.type === 'jobs.failed'))
+        .subscribe((update) => {
+          const jobId = update.job.uuid;
+          const pendingCommand = this.pendingJobCommands.get(jobId);
+
+          if (pendingCommand) {
+            this.pendingJobCommands.delete(jobId);
+
+            if (update.type === 'jobs.completed') {
+              console.debug('[TerminalService] Job completed successfully, re-running command:', pendingCommand);
+              // Re-execute the command now that data should be available
+              this.execute(pendingCommand);
+            } else {
+              console.debug('[TerminalService] Job failed:', jobId, update.job.error);
+              // Job failed - update the last history entry (which is showing the fetching state)
+              this.updateLastHistoryWithError(`Data fetch failed: ${update.job.error || 'Unknown error'}`);
+            }
+          }
+        }),
+    );
   }
 
   private updateLastHistoryEntry(result: CommandResult): void {
+    console.debug('[TerminalService] Updating history with result:', {
+      success: result.success,
+      outputType: result.outputType,
+      message: result.message,
+      hasData: !!result.data,
+      hasChartOptions: !!result.chartOptions,
+      dataPreview: result.data ? JSON.stringify(result.data).slice(0, 200) : null,
+    });
+
+    const history = this.historySignal();
+    if (history.length === 0) return;
+
+    const lastEntry = history[history.length - 1];
+
+    // Check if this is a "fetching" response - track the job for auto-retry
+    if (this.isFetchingResponse(result)) {
+      const jobId = this.extractJobId(result);
+      if (jobId) {
+        console.debug('[TerminalService] Data is being fetched, tracking job:', jobId);
+        this.pendingJobCommands.set(jobId, lastEntry.input);
+      }
+    }
+
+    const updatedEntry: HistoryEntry = {
+      ...lastEntry,
+      result,
+      isLoading: result.requiresAI || this.isFetchingResponse(result),
+    };
+
+    this.historySignal.set([...history.slice(0, -1), updatedEntry]);
+  }
+
+  /**
+   * Check if the result indicates data is being fetched
+   */
+  private isFetchingResponse(result: CommandResult): boolean {
+    if (result.data && typeof result.data === 'object') {
+      const data = result.data as { status?: string };
+      return data.status === 'fetching';
+    }
+    return false;
+  }
+
+  /**
+   * Extract job ID from a fetching response
+   */
+  private extractJobId(result: CommandResult): string | null {
+    if (result.data && typeof result.data === 'object') {
+      const data = result.data as { jobId?: string };
+      if (data.jobId) return data.jobId;
+    }
+    if (result.metadata && typeof result.metadata === 'object') {
+      const metadata = result.metadata as { jobId?: string };
+      if (metadata.jobId) return metadata.jobId;
+    }
+    return null;
+  }
+
+  /**
+   * Update the last history entry with an error (for when a fetch job fails)
+   */
+  private updateLastHistoryWithError(errorMessage: string): void {
     const history = this.historySignal();
     if (history.length === 0) return;
 
     const lastEntry = history[history.length - 1];
     const updatedEntry: HistoryEntry = {
       ...lastEntry,
-      result,
-      isLoading: result.requiresAI || false,
+      isLoading: false,
+      result: {
+        success: false,
+        message: errorMessage,
+        outputType: 'message',
+      },
     };
 
     this.historySignal.set([...history.slice(0, -1), updatedEntry]);
