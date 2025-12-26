@@ -237,7 +237,10 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
 
   deleteEpisode(episode: Episode) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { itemType: 'episode', itemName: episode.title },
+        data: {
+        title: 'Delete Episode',
+        message: `Are you sure you want to delete the schedule "${episode.title}"? This action cannot be undone.`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
