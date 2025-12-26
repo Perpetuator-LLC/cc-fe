@@ -185,17 +185,17 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
     return `panel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
-  // Convert DashboardPanel to GridsterDashboardItem
+  // Convert DashboardPanel (from schema) to GridsterDashboardItem (for gridster)
   loadPanels(panels: DashboardPanel[]): void {
     this.panels = panels.map((panel) => ({
       id: panel.id,
-      x: panel.x,
-      y: panel.y,
-      cols: panel.cols,
-      rows: panel.rows,
-      chartId: panel.chartId,
-      chartOptions: panel.chartOptions,
-      title: panel.title,
+      x: panel.gridX,
+      y: panel.gridY,
+      cols: panel.gridW,
+      rows: panel.gridH,
+      chartId: panel.chart?.id,
+      chartOptions: panel.chart?.options ? JSON.parse(panel.chart.options) : undefined,
+      title: panel.titleOverride || panel.chart?.name || 'Panel',
     }));
   }
 
