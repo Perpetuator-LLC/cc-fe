@@ -1430,8 +1430,57 @@ mat-nav-list {
   }
 }
 
-.loading-spinner {
-  mat-progress-bar {
+// add custom styles for input fields and select, because angular material does not support responsive design for these elements
+.mat-mdc-form-field{
+  font-size: 14px !important;
+}
+.mat-mdc-notch-piece{
+  border: 0;
+}
+.mdc-line-ripple::before, .mdc-line-ripple::after{
+  border:0 !important
+}
+.mat-mdc-text-field-wrapper{
+  border: 1px solid #FFFFFF1A;
+  border-radius: 8px !important;
+  height: 48px !important;
+}
+.mat-mdc-text-field-wrapper:has(.mat-mdc-form-field-textarea-control){
+  height: auto !important;
+}
+.team-name-input{
+  .mat-mdc-text-field-wrapper{
+    border: 0 !important;
+    border-radius: 0 !important;
+    height: auto !important;
+    background-color: transparent !important;
+  }
+}
+.status-filter-compact .mat-mdc-form-field-infix{
+  padding-top: 12px !important;
+}
+.mat-mdc-paginator-page-size .mat-mdc-form-field-infix{
+  padding-top: 12px !important;
+}
+.mat-mdc-form-field-infix{
+  padding-top: 20px !important;
+}
+.mdc-floating-label{
+  top: 24px !important;
+}
+.mat-mdc-select{
+  font-size: 14px !important;
+}
+.actionMenu{
+  min-width: 192px !important;
+}
+.team-tab-group{
+  .mat-mdc-tab.mdc-tab{
+    flex-grow: 0 !important;
+  }
+}
+.loading-spinner{
+  mat-progress-bar{
     height: 1px;
   }
 }
