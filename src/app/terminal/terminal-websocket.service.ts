@@ -246,6 +246,9 @@ export class TerminalWebSocketService implements OnDestroy {
   }
 
   private handleMessage(data: TerminalMessage): void {
+    // Debug log all incoming messages
+    console.debug('[Terminal WS] Received message:', data['type'], data);
+
     switch (data['type']) {
       case 'connected':
         console.debug('Terminal connected:', data['userId']);
@@ -256,6 +259,7 @@ export class TerminalWebSocketService implements OnDestroy {
         break;
 
       case 'command.result':
+        console.debug('[Terminal WS] Command result:', JSON.stringify(data['result'], null, 2));
         this.commandResult$.next(data['result'] as CommandResult);
         break;
 
