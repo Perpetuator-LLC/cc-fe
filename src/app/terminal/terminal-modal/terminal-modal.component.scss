@@ -290,10 +290,12 @@
   }
 
   app-chart-panel {
-    overflow: hidden;
+    overflow: visible;
     display: block;
-    max-height: 400px;
+
+    min-height: 400px;
     margin-top: 8px;
+    margin-bottom: 16px;
   }
 
   app-data-table {

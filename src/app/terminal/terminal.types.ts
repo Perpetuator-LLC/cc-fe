@@ -275,6 +275,38 @@ export interface ChartDefinition {
 }
 
 // ============================================================================
+// Watchlist Types
+// ============================================================================
+
+export type WatchlistType = 'SEARCH_HISTORY' | 'CUSTOM' | 'FAVORITES';
+
+export interface Watchlist {
+  uuid: string;
+  name: string;
+  description: string;
+  watchlistType: WatchlistType;
+  isDefault: boolean;
+  itemCount: number;
+  items: WatchlistItem[];
+}
+
+export interface WatchlistItem {
+  uuid?: string;
+  symbol: string;
+  displayName: string;
+  assetType: string;
+  exchange: string;
+  country?: string;
+  currency?: string;
+  sector?: string;
+  industry?: string;
+  marketCap?: number;
+  notes?: string;
+  accessCount: number;
+  lastAccessedAt: string;
+}
+
+// ============================================================================
 // WebSocket Action Types (Client → Server)
 // ============================================================================
 

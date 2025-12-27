@@ -53,37 +53,34 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
     private authService: AuthService,
   ) {
     // Watch for login state changes and recheck cookie policy acceptance
-    effect(
-      () => {
-        const isLoggedIn = this.authService.isLoggedIn();
+    effect(() => {
+      const isLoggedIn = this.authService.isLoggedIn();
 
-        if (isLoggedIn) {
-          // Only check once per login session
-          if (this.hasCheckedOnLogin) {
-            return;
-          }
-          this.hasCheckedOnLogin = true;
-
-          // User just logged in - be optimistic to prevent banner flash
-          // If localStorage consent exists, assume accepted until backend confirms
-          const localConsent = this.cookieConsentService.cookieConsent();
-          if (localConsent && localConsent.accepted) {
-            this.cookiePolicyAccepted.set(true);
-          }
-
-          // Recheck cookie policy acceptance from backend
-          // Add a small delay to allow PolicyGuardService to run first
-          setTimeout(() => {
-            this.checkCookiePolicyAcceptance();
-          }, 500);
-        } else {
-          // User logged out, reset state
-          this.cookiePolicyAccepted.set(false);
-          this.hasCheckedOnLogin = false; // Reset for next login
+      if (isLoggedIn) {
+        // Only check once per login session
+        if (this.hasCheckedOnLogin) {
+          return;
         }
-      },
-      { allowSignalWrites: true },
-    );
+        this.hasCheckedOnLogin = true;
+
+        // User just logged in - be optimistic to prevent banner flash
+        // If localStorage consent exists, assume accepted until backend confirms
+        const localConsent = this.cookieConsentService.cookieConsent();
+        if (localConsent && localConsent.accepted) {
+          this.cookiePolicyAccepted.set(true);
+        }
+
+        // Recheck cookie policy acceptance from backend
+        // Add a small delay to allow PolicyGuardService to run first
+        setTimeout(() => {
+          this.checkCookiePolicyAcceptance();
+        }, 500);
+      } else {
+        // User logged out, reset state
+        this.cookiePolicyAccepted.set(false);
+        this.hasCheckedOnLogin = false; // Reset for next login
+      }
+    });
   }
 
   ngOnInit(): void {

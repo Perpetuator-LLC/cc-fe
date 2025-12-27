@@ -132,8 +132,8 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
       disableWindowResize: false,
       disableWarnings: false,
       scrollToNewItems: false,
-      itemChangeCallback: (item: GridsterItemConfig) => this.itemChange(item),
-      itemResizeCallback: (item: GridsterItemConfig) => this.itemResize(item),
+      itemChangeCallback: () => this.itemChange(),
+      itemResizeCallback: () => this.itemResize(),
     };
   }
 
@@ -185,13 +185,11 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
     this.panels = this.panels.filter((p) => p.id !== panel.id);
   }
 
-  private itemChange(item: GridsterItemConfig): void {
-    console.debug('Item changed:', item);
+  private itemChange(): void {
     // TODO: Save panel layout to server
   }
 
-  private itemResize(item: GridsterItemConfig): void {
-    console.debug('Item resized:', item);
+  private itemResize(): void {
     // Trigger chart resize
   }
 
