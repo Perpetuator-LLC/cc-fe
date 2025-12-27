@@ -87,6 +87,19 @@ export class ChartPanelComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['chartOptions'] && this.chartOptions) {
+      // Debug: Log chart options to understand the structure
+      console.log('[ChartPanel] Received chartOptions:', JSON.stringify(this.chartOptions, null, 2));
+
+      // Check for xAxis/yAxis splitArea settings
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const opts = this.chartOptions as any;
+      if (opts.xAxis) {
+        console.log('[ChartPanel] xAxis:', JSON.stringify(opts.xAxis, null, 2));
+      }
+      if (opts.yAxis) {
+        console.log('[ChartPanel] yAxis:', JSON.stringify(opts.yAxis, null, 2));
+      }
+
       // Merge with dark theme defaults
       this.updateOptions = {
         ...this.darkThemeDefaults,

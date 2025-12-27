@@ -33,11 +33,11 @@ export class TerminalBarComponent {
     return last?.isLoading ?? false;
   });
 
-  // Global keyboard shortcut: Ctrl+` or Cmd+` to open terminal
+  // Global keyboard shortcut: Ctrl+1 or Cmd+1 to open terminal
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    // Ctrl+` or Cmd+` (backtick)
-    if ((event.ctrlKey || event.metaKey) && event.key === '`') {
+    // Ctrl+1 or Cmd+1
+    if ((event.ctrlKey || event.metaKey) && event.key === '1') {
       event.preventDefault();
       this.openTerminal();
     }

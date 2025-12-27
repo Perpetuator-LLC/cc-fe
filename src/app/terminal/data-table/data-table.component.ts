@@ -5,12 +5,22 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TableData } from '../terminal.types';
 
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatSortModule, MatPaginatorModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+  ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -117,5 +127,34 @@ export class DataTableComponent implements OnChanges {
   getCellValue(row: Record<string, unknown>, column: string): string {
     const value = row[column];
     return this.formatValue(value);
+  }
+
+  /**
+   * Copy table data to clipboard as markdown format
+   */
+  copyTableToClipboard(): void {
+    if (this.displayedColumns.length === 0) return;
+
+    // Build markdown table
+    let markdown = '';
+
+    // Add title if present
+    if (this.title) {
+      markdown += `## ${this.title}\n\n`;
+    }
+
+    // Header row
+    markdown += '| ' + this.displayedColumns.join(' | ') + ' |\n';
+
+    // Separator row
+    markdown += '| ' + this.displayedColumns.map(() => '---').join(' | ') + ' |\n';
+
+    // Data rows
+    this.dataSource.data.forEach((row) => {
+      const values = this.displayedColumns.map((col) => this.getCellValue(row, col));
+      markdown += '| ' + values.join(' | ') + ' |\n';
+    });
+
+    navigator.clipboard.writeText(markdown);
   }
 }

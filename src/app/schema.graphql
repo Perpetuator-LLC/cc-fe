@@ -18,6 +18,18 @@ type Query {
 
   """Get user's command history"""
   commandHistory(limit: Int = 20): [CommandExecutionType]
+
+  """Get terminal syntax help and examples"""
+  terminalSyntaxHelp: TerminalSyntaxHelpType
+
+  """Get autocomplete suggestions for terminal input"""
+  autocomplete(
+    """Current terminal input"""
+    input: String!
+
+    """Maximum number of suggestions"""
+    limit: Int = 10
+  ): [AutocompleteSuggestionType]
   traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
   trace(id: UUID!): TraceType
 
@@ -638,6 +650,54 @@ enum TerminalCommandExecutionStatusChoices {
 
   """Failed"""
   FAILED
+}
+
+"""Terminal syntax help and examples."""
+type TerminalSyntaxHelpType {
+  """Grammar rules"""
+  grammar: [String]
+
+  """Syntax examples"""
+  examples: [String]
+
+  """Natural language query examples"""
+  naturalLanguageExamples: [String]
+}
+
+"""A single autocomplete suggestion."""
+type AutocompleteSuggestionType {
+  """The suggestion text"""
+  text: String
+
+  """Display text for the dropdown"""
+  display: String
+
+  """Type: command, alias, parameter, example, symbol"""
+  type: String
+
+  """Description/help text"""
+  description: String
+
+  """Command category (for commands)"""
+  category: String
+
+  """Text to insert when selected"""
+  insert: String
+
+  """Whether command requires a symbol"""
+  requiresSymbol: Boolean
+
+  """Full syntax for the command"""
+  syntax: String
+
+  """Parameter type (for parameters)"""
+  paramType: String
+
+  """Valid choices (for parameters)"""
+  choices: [String]
+
+  """Default value (for parameters)"""
+  default: String
 }
 
 type TraceType {

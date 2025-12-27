@@ -95,6 +95,26 @@ export interface Command {
 }
 
 // ============================================================================
+// Autocomplete Types
+// ============================================================================
+
+export type AutocompleteSuggestionType = 'command' | 'alias' | 'parameter' | 'example' | 'symbol' | 'history';
+
+export interface AutocompleteSuggestion {
+  text: string;
+  display: string;
+  type: AutocompleteSuggestionType;
+  description?: string;
+  category?: CommandCategory;
+  insert: string;
+  requiresSymbol?: boolean;
+  syntax?: string;
+  paramType?: string;
+  choices?: string[];
+  default?: string;
+}
+
+// ============================================================================
 // History Types (matches CommandExecutionType from schema)
 // ============================================================================
 
