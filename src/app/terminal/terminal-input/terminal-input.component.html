@@ -74,8 +74,11 @@
               @case ('chart') {
                 <app-chart-panel
                   [chartOptions]="entry.result.chartOptions"
-                  [title]="entry.result.metadata?.symbol || 'Chart'"
+                  [chartControls]="getChartControls(entry.result)"
+                  [title]="entry.result.metadata?.['symbol'] || 'Chart'"
                   [height]="400"
+                  [dataPoints]="entry.result.metadata?.['dataPoints'] || 0"
+                  (executeCommand)="onChartCommand($event)"
                 />
               }
               @case ('data') {
