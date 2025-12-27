@@ -5,6 +5,7 @@ import { map, filter, catchError, tap } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
 import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
 import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
+import { WatchlistService } from './watchlist.service';
 import {
   AutocompleteSuggestion,
   Command,
@@ -258,6 +259,7 @@ export class TerminalService implements OnDestroy {
   constructor(
     private wsService: TerminalWebSocketService,
     private jobsWsService: JobsWebSocketService,
+    private watchlistService: WatchlistService,
     private apollo: Apollo,
   ) {
     this.setupSubscriptions();
@@ -825,11 +827,9 @@ export class TerminalService implements OnDestroy {
             this.pendingJobCommands.delete(jobId);
 
             if (update.type === 'jobs.completed') {
-              console.debug('[TerminalService] Job completed successfully, re-running command:', pendingCommand);
               // Re-execute the command now that data should be available
               this.execute(pendingCommand);
             } else {
-              console.debug('[TerminalService] Job failed:', jobId, update.job.error);
               // Job failed - update the last history entry (which is showing the fetching state)
               this.updateLastHistoryWithError(`Data fetch failed: ${update.job.error || 'Unknown error'}`);
             }
@@ -839,15 +839,6 @@ export class TerminalService implements OnDestroy {
   }
 
   private updateLastHistoryEntry(result: CommandResult): void {
-    console.debug('[TerminalService] Updating history with result:', {
-      success: result.success,
-      outputType: result.outputType,
-      message: result.message,
-      hasData: !!result.data,
-      hasChartOptions: !!result.chartOptions,
-      dataPreview: result.data ? JSON.stringify(result.data).slice(0, 200) : null,
-    });
-
     const history = this.historySignal();
     if (history.length === 0) return;
 
@@ -857,9 +848,11 @@ export class TerminalService implements OnDestroy {
     if (this.isFetchingResponse(result)) {
       const jobId = this.extractJobId(result);
       if (jobId) {
-        console.debug('[TerminalService] Data is being fetched, tracking job:', jobId);
         this.pendingJobCommands.set(jobId, lastEntry.input);
       }
+    } else if (result.success) {
+      // Track symbol in search history on successful execution
+      this.trackSymbolFromResult(result, lastEntry.input);
     }
 
     const updatedEntry: HistoryEntry = {
@@ -869,6 +862,40 @@ export class TerminalService implements OnDestroy {
     };
 
     this.historySignal.set([...history.slice(0, -1), updatedEntry]);
+  }
+
+  /**
+   * Track symbol in search history when a command is executed
+   */
+  private trackSymbolFromResult(result: CommandResult, input: string): void {
+    // Try to get symbol from metadata first
+    const metadata = result.metadata as { symbol?: string } | undefined;
+    let symbol = metadata?.symbol;
+
+    // If no symbol in metadata, try to extract from input
+    if (!symbol) {
+      const parts = input.trim().toUpperCase().split(/\s+/);
+      if (parts.length > 0 && this.looksLikeSymbol(parts[0])) {
+        symbol = parts[0];
+      }
+    }
+
+    if (symbol) {
+      // Add to watchlist (fire and forget - don't block on response)
+      this.subscriptions.add(
+        this.watchlistService.addToWatchlist(symbol).subscribe({
+          next: (response) => {
+            if (response.success) {
+              // Refresh recent symbols
+              this.watchlistService.loadRecentSymbols(10).subscribe();
+            }
+          },
+          error: () => {
+            // Silent failure - don't spam console for tracking failures
+          },
+        }),
+      );
+    }
   }
 
   /**
