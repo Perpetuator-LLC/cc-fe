@@ -1,9 +1,55 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="chart-panel" [class.fullscreen]="isFullscreen">
+  <!-- Chart Controls - shown independently of header -->
+  @if (showControls && chartControls) {
+    <div class="chart-controls-bar">
+      <div class="chart-controls">
+        <mat-form-field appearance="outline" class="control-field">
+          <mat-label>Period</mat-label>
+          <mat-select [(ngModel)]="selectedPeriod" (selectionChange)="onPeriodChange()" [disabled]="isLoading">
+            @for (period of chartControls.periodOptions; track period) {
+              <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="control-field">
+          <mat-label>Interval</mat-label>
+          <mat-select [(ngModel)]="selectedInterval" (selectionChange)="onIntervalChange()" [disabled]="isLoading">
+            @for (interval of chartControls.intervalOptions; track interval) {
+              <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (dataPoints > 0) {
+          <span class="data-points">{{ dataPoints }} points</span>
+        }
+      </div>
+
+      <div class="chart-actions">
+        <button mat-icon-button matTooltip="Refresh" (click)="onRefresh()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Download" (click)="downloadChart()">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [matTooltip]="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+          (click)="onToggleFullscreen()"
+        >
+          <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+
   @if (showHeader) {
     <div class="chart-header">
       <h3 class="chart-title">{{ title }}</h3>
-      @if (showToolbar) {
+
+      @if (showToolbar && !chartControls) {
         <div class="chart-actions">
           <button mat-icon-button matTooltip="Refresh" (click)="onRefresh()">
             <mat-icon>refresh</mat-icon>
@@ -20,6 +66,14 @@
           </button>
         </div>
       }
+    </div>
+  }
+
+  <!-- Loading Overlay -->
+  @if (isLoading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Updating chart...</span>
     </div>
   }
 

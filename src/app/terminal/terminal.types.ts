@@ -29,12 +29,23 @@ export interface CommandResult {
   success: boolean;
   message?: string;
   outputType: 'data' | 'chart' | 'message';
-  data?: TableData | object;
+  data?: TableData | ChartResultData | object;
   chartOptions?: EChartsOption;
   metadata?: CommandMetadata;
   executionId?: string;
   aiReasoning?: string;
   requiresAI?: boolean;
+}
+
+/**
+ * Data structure returned with chart results
+ */
+export interface ChartResultData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prices?: any[];
+  chartControls?: ChartControls;
+  status?: 'fetching' | 'ready';
+  jobId?: string;
 }
 
 export interface CommandMetadata {
@@ -231,6 +242,20 @@ export type ChartType =
   | 'RADAR'
   | 'GAUGE'
   | 'CUSTOM';
+
+/**
+ * Chart controls for period/interval selection
+ * Returned from backend in chart responses
+ */
+export interface ChartControls {
+  periodOptions: string[];
+  intervalOptions: string[];
+  currentPeriod: string;
+  currentInterval: string;
+  command: string;
+  symbol: string;
+  commandTemplate: string;
+}
 
 export interface ChartDefinition {
   id: string;

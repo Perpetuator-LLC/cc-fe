@@ -25,7 +25,7 @@ type Query {
   """Get terminal hints for empty states and placeholders"""
   terminalHints: TerminalHintsType
 
-  """Get terminal help with commands grouped by category"""
+  """Get full terminal help content with commands grouped by category"""
   terminalHelp: TerminalHelpType
 
   """Get autocomplete suggestions for terminal input"""
@@ -675,22 +675,22 @@ type TerminalHintsType {
   """Quick example commands to try"""
   quickExamples: [String]
 
-  """Placeholder text for the input field"""
+  """Placeholder text for input field"""
   placeholderText: String
 
-  """Message for empty terminal state"""
+  """Message to show when terminal is empty"""
   emptyStateMessage: String
 
-  """Hint for empty dashboard state"""
+  """Hint for dashboard empty state"""
   dashboardHint: String
 
   """Suggested chart command"""
   chartSuggestion: String
 }
 
-"""Terminal help with commands grouped by category."""
+"""Full terminal help content."""
 type TerminalHelpType {
-  """Overview text (markdown)"""
+  """Markdown formatted overview"""
   overview: String
 
   """Commands grouped by category"""
@@ -700,24 +700,24 @@ type TerminalHelpType {
   aiNote: String
 }
 
-"""Command category with commands."""
+"""Commands grouped by category for help display."""
 type CategoryHelpType {
-  """Display name (e.g., "Equity Commands")"""
+  """Category name (e.g., 'Equity Commands')"""
   name: String
 
-  """Category key (e.g., "EQUITY")"""
+  """Category key (e.g., 'EQUITY')"""
   categoryKey: String
 
   """Commands in this category"""
   commands: [CommandHelpType]
 }
 
-"""Command help information."""
+"""Help information for a single command."""
 type CommandHelpType {
   """Command name"""
   name: String
 
-  """Description of the command"""
+  """Command description"""
   description: String
 
   """Example usage"""
@@ -2688,7 +2688,7 @@ type UserType {
 type Mutation {
   """
   Interpret a natural language query using AI.
-
+  
   The AI will analyze the query and execute appropriate
   terminal commands to fulfill the request.
   """
@@ -2699,7 +2699,7 @@ type Mutation {
 
   """
   Perform comprehensive AI-powered stock analysis.
-
+  
   Combines multiple data sources to provide investment insights.
   """
   analyzeStock(
@@ -2709,7 +2709,7 @@ type Mutation {
 
   """
   Execute a sequence of terminal commands.
-
+  
   Commands are executed in order, with each result
   available to subsequent commands.
   """
@@ -2735,7 +2735,7 @@ type Mutation {
 
   """
   Execute a terminal command.
-
+  
   Parses the input, identifies the command, and executes it.
   If the command is not recognized, it can be routed to AI interpretation.
   """
@@ -2842,7 +2842,7 @@ type Mutation {
   """
   Mutation to create a full research chain that produces a ready-to-publish episode.
   Creates: topic -> research -> validate -> transcript -> episode -> audio
-
+  
   If topic_uuid is provided, uses that topic.
   Otherwise, if user-created topics exist for the podcast, picks one randomly.
   Otherwise, generates a new AI topic.
@@ -2852,7 +2852,7 @@ type Mutation {
   """
   Mutation to create a full research chain that produces and publishes a ready-to-publish episode.
   Creates: topic -> research -> validate -> transcript -> episode -> audio -> publish
-
+  
   If topic_uuid is provided, uses that topic.
   Otherwise, if user-created topics exist for the podcast, picks one randomly.
   Otherwise, generates a new AI topic.
@@ -3054,7 +3054,7 @@ type Mutation {
 
   """
   Refresh voices from OpenAI and ElevenLabs providers and sync the local DB.
-
+  
   Returns lists of added, updated, and removed voices.
   """
   refreshVoices(externalIds: [String], forceMetadata: Boolean = false, forceSampleAudio: Boolean = false, models: [VoiceModel] = []): RefreshVoices
@@ -3093,7 +3093,7 @@ type Mutation {
 
   """
   Mutation to change user password.
-
+  
   This will:
   1. Change the password
   2. Revoke all existing OAuth2 tokens (invalidate all sessions)
@@ -3220,10 +3220,10 @@ type Mutation {
   """
   Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
   PENDING, clear the result and error fields, and requeue the jobs for processing.
-
+  
   For jobs that are part of a chain with a completed parent job, the parent's result will be passed to the
   retried task to maintain chain continuity.
-
+  
   The mutation returns a message indicating the status of the operation and a list of the jobs that were restarted.
   """
   retryJobs(jobUuids: [UUID]!): RetryJobs
@@ -3258,7 +3258,7 @@ type Mutation {
   - Description and categories
   - RSS feeds discovery
   - Voice recommendation
-
+  
   The podcast_uuid will be available in the job result once generation completes.
   """
   generatePodcast(description: String!, teamUuid: UUID!, title: String): GeneratePodcast
@@ -3284,59 +3284,59 @@ type Mutation {
   """
   Register a new user account via GraphQL.
   Replaces the REST /auth/registration/ endpoint.
-
+  
   PUBLIC: Anyone can register (no authentication required).
   """
   register(acceptPrivacyPolicy: Boolean!, acceptTermsOfService: Boolean!, email: String!, password1: String!, password2: String!, ppSignature: String, tosSignature: String, username: String!): RegisterUser
 
   """
   Verify user email with token.
-
+  
   PUBLIC: Anyone can verify email (no authentication required).
   """
   verifyEmail(token: String!): VerifyEmail
 
   """
   Resend email verification link.
-
+  
   PUBLIC: Anyone can request verification email (no authentication required).
   """
   resendVerificationEmail(email: String!): ResendVerificationEmail
 
   """
   Login with username/email and password.
-
+  
   PUBLIC: Anyone can login (no authentication required).
   """
   login(password: String!, username: String!): Login
 
   """
   Logout by revoking refresh token.
-
+  
   This invalidates the refresh token so it cannot be used to get new access tokens.
   The current access token will still work until it expires (1 hour).
-
+  
   PUBLIC: Anyone can logout with their refresh token.
   """
   logout(refresh: String!): Logout
 
   """
   Request a password reset email.
-
+  
   PUBLIC: Anyone can request password reset (no authentication required).
   """
   requestPasswordReset(email: String!): RequestPasswordReset
 
   """
   Reset password with token.
-
+  
   PUBLIC: Anyone can reset password with valid token (no authentication required).
   """
   resetPassword(password1: String!, password2: String!, token: String!): ResetPassword
 
   """
   Refresh access token using refresh token.
-
+  
   PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
   """
   refreshToken(refresh: String!): RefreshAccessToken

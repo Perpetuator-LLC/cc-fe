@@ -21,7 +21,14 @@ import { Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
-import { HistoryEntry, AutocompleteSuggestion, TerminalHints } from '../terminal.types';
+import {
+  HistoryEntry,
+  AutocompleteSuggestion,
+  TerminalHints,
+  ChartControls,
+  CommandResult,
+  ChartResultData,
+} from '../terminal.types';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
 import { DataTableComponent } from '../data-table/data-table.component';
 
@@ -346,5 +353,36 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     if (!entry.result?.data) return false;
     const data = entry.result.data as { type?: string };
     return data.type === 'table';
+  }
+
+  /**
+   * Extract chartControls from a CommandResult.
+   * Chart controls may be in data.chartControls or metadata.chartControls
+   */
+  getChartControls(result: CommandResult | undefined): ChartControls | undefined {
+    if (!result) return undefined;
+
+    // Try data.chartControls first (for chart responses)
+    if (result.data && typeof result.data === 'object') {
+      const data = result.data as ChartResultData;
+      if (data.chartControls) {
+        return data.chartControls;
+      }
+    }
+
+    // Fall back to metadata.chartControls
+    if (result.metadata?.['chartControls']) {
+      return result.metadata['chartControls'] as ChartControls;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Handle chart control changes - execute new command with updated period/interval
+   */
+  onChartCommand(command: string): void {
+    this.currentCommand = command;
+    this.onSubmit();
   }
 }
