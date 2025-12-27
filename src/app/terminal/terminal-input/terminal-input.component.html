@@ -25,7 +25,7 @@
       <div class="empty-state">
         <mat-icon>terminal</mat-icon>
         <p>Enter a command or question to get started.</p>
-        <p class="hint">Try: <code>AAPL HP</code>, <code>HELP</code>, or ask a question.</p>
+        <p class="hint" [innerHTML]="markdownToHtml(hints.emptyStateMessage)"></p>
       </div>
     }
 
@@ -82,7 +82,7 @@
                 <app-data-table [data]="entry.result.data" />
               }
               @default {
-                <pre class="message-output">{{ entry.result.message }}</pre>
+                <div class="message-output" [innerHTML]="markdownToHtml(entry.result.message || '')"></div>
               }
             }
 

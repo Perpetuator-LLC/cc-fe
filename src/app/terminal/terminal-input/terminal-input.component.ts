@@ -7,16 +7,19 @@ import {
   ViewChild,
   AfterViewChecked,
   ChangeDetectionStrategy,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
+import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
-import { HistoryEntry, TerminalConnectionState } from '../terminal.types';
+import { HistoryEntry, TerminalConnectionState, TerminalHints } from '../terminal.types';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { MessageService } from '../../message.service';
@@ -42,7 +45,16 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
   @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
   @ViewChild('historyContainer') historyContainer!: ElementRef<HTMLDivElement>;
 
+  private sanitizer = inject(DomSanitizer);
+
   currentInput = '';
+  hints: TerminalHints = {
+    quickExamples: ['AAPL HP', 'HELP'],
+    placeholderText: 'Enter command...',
+    emptyStateMessage: 'Try: AAPL HP, HELP, or ask a question.',
+    dashboardHint: '',
+    chartSuggestion: 'AAPL GP',
+  };
   private shouldScrollToBottom = false;
   private subscriptions = new Subscription();
 
@@ -51,7 +63,22 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     private messageService: MessageService,
   ) {}
 
+  /**
+   * Convert markdown text to safe HTML for rendering.
+   */
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
   ngOnInit(): void {
+    // Load terminal hints from backend
+    this.subscriptions.add(
+      this.terminalService.loadTerminalHints().subscribe((hints) => {
+        this.hints = hints;
+      }),
+    );
+
     // Listen for errors and display them via MessageService
     this.subscriptions.add(
       this.terminalService.onError.subscribe((error) => {

@@ -15,6 +15,8 @@ import {
   HistoryEntry,
   SymbolUpdate,
   TerminalConnectionState,
+  TerminalHints,
+  TerminalHelp,
 } from './terminal.types';
 import { EChartsOption } from 'echarts';
 
@@ -152,6 +154,37 @@ const GET_DASHBOARDS = gql`
   }
 `;
 
+const GET_TERMINAL_HINTS = gql`
+  query GetTerminalHints {
+    terminalHints {
+      quickExamples
+      placeholderText
+      emptyStateMessage
+      dashboardHint
+      chartSuggestion
+    }
+  }
+`;
+
+const GET_TERMINAL_HELP = gql`
+  query GetTerminalHelp {
+    terminalHelp {
+      overview
+      categories {
+        name
+        categoryKey
+        commands {
+          name
+          description
+          exampleUsage
+          aliases
+        }
+      }
+      aiNote
+    }
+  }
+`;
+
 // ============================================================================
 // Response Interfaces
 // ============================================================================
@@ -187,6 +220,14 @@ interface CreateDashboardResult {
 
 interface DashboardsResult {
   dashboards: Dashboard[];
+}
+
+interface TerminalHintsResult {
+  terminalHints: TerminalHints;
+}
+
+interface TerminalHelpResult {
+  terminalHelp: TerminalHelp;
 }
 
 @Injectable({
@@ -423,6 +464,52 @@ export class TerminalService implements OnDestroy {
         variables: { name },
       })
       .pipe(map((result) => result.data.command));
+  }
+
+  /**
+   * Load terminal hints for empty states and placeholders
+   */
+  loadTerminalHints(): Observable<TerminalHints> {
+    return this.apollo
+      .query<TerminalHintsResult>({
+        query: GET_TERMINAL_HINTS,
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.terminalHints),
+        catchError(() => {
+          // Return defaults if query fails
+          return of({
+            quickExamples: ['AAPL GP', 'HELP', 'MSFT DES'],
+            placeholderText: 'Type a command or ask a question...',
+            emptyStateMessage: 'Try: AAPL GP, HELP, or ask anything',
+            dashboardHint: 'Run chart commands like AAPL GP to populate your dashboard',
+            chartSuggestion: 'AAPL GP',
+          });
+        }),
+      );
+  }
+
+  /**
+   * Load terminal help with commands grouped by category
+   */
+  loadTerminalHelp(): Observable<TerminalHelp> {
+    return this.apollo
+      .query<TerminalHelpResult>({
+        query: GET_TERMINAL_HELP,
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.terminalHelp),
+        catchError(() => {
+          // Return empty structure if query fails
+          return of({
+            overview: '',
+            categories: [],
+            aiNote: 'You can also type natural language questions and our AI will interpret them for you.',
+          });
+        }),
+      );
   }
 
   /**

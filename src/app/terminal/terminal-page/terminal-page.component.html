@@ -84,40 +84,40 @@
     <mat-tab label="Help">
       <ng-template matTabContent>
         <div class="help-tab">
-          <h3>Available Commands</h3>
-          <div class="command-categories">
-            <div class="category">
-              <h4>Equity Commands</h4>
-              <ul>
-                <li><code>HP</code> - Historical prices (e.g., <code>AAPL HP -period 1Y</code>)</li>
-                <li><code>DES</code> - Company description</li>
-                <li><code>FA</code> - Financial analysis</li>
-                <li><code>ERN</code> - Earnings data</li>
-                <li><code>QUOTE</code> - Current quote</li>
-              </ul>
+          @if (helpLoading()) {
+            <div class="loading-state">
+              <mat-spinner diameter="24"></mat-spinner>
             </div>
-            <div class="category">
-              <h4>Chart Commands</h4>
-              <ul>
-                <li><code>GP</code> - Price chart (candlestick)</li>
-                <li><code>GIP</code> - Intraday chart</li>
-                <li><code>COMPARE</code> - Compare stocks</li>
-              </ul>
+          } @else {
+            @if (help.overview) {
+              <div class="help-overview" [innerHTML]="markdownToHtml(help.overview)"></div>
+            }
+            <h3>Available Commands</h3>
+            <div class="command-categories">
+              @for (category of help.categories; track category.categoryKey) {
+                <div class="category">
+                  <h4>{{ category.name }}</h4>
+                  <ul>
+                    @for (cmd of category.commands; track cmd.name) {
+                      <li>
+                        <code>{{ cmd.name }}</code> - {{ cmd.description }}
+                        @if (cmd.exampleUsage) {
+                          <span class="example"
+                            >(e.g., <code>{{ cmd.exampleUsage }}</code
+                            >)</span
+                          >
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
             </div>
-            <div class="category">
-              <h4>System Commands</h4>
-              <ul>
-                <li><code>HELP</code> - Show help</li>
-                <li><code>HIST</code> - Command history</li>
-                <li><code>SEARCH</code> - Search symbols</li>
-                <li><code>CMD</code> - List commands</li>
-              </ul>
+            <div class="ai-note">
+              <mat-icon>psychology</mat-icon>
+              <p>{{ help.aiNote }}</p>
             </div>
-          </div>
-          <div class="ai-note">
-            <mat-icon>psychology</mat-icon>
-            <p>You can also type natural language questions and our AI will interpret them for you.</p>
-          </div>
+          }
         </div>
       </ng-template>
     </mat-tab>
