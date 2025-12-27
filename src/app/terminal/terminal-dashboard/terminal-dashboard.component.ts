@@ -18,7 +18,7 @@ import {
 import { Subscription } from 'rxjs';
 import { TerminalService } from '../terminal.service';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
-import { DashboardPanel } from '../terminal.types';
+import { DashboardPanel, TerminalHints } from '../terminal.types';
 import { EChartsOption } from 'echarts';
 
 interface GridsterDashboardItem extends GridsterItemConfig {
@@ -49,6 +49,13 @@ interface GridsterDashboardItem extends GridsterItemConfig {
 export class TerminalDashboardComponent implements OnInit, OnDestroy {
   options: GridsterConfig = {};
   panels: GridsterDashboardItem[] = [];
+  hints: TerminalHints = {
+    quickExamples: [],
+    placeholderText: '',
+    emptyStateMessage: '',
+    dashboardHint: 'Try: AAPL GP to create a price chart',
+    chartSuggestion: 'AAPL GP',
+  };
   private subscriptions = new Subscription();
 
   constructor(private terminalService: TerminalService) {}
@@ -56,6 +63,13 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initGridsterOptions();
     this.setupSubscriptions();
+
+    // Load terminal hints from backend
+    this.subscriptions.add(
+      this.terminalService.loadTerminalHints().subscribe((hints) => {
+        this.hints = hints;
+      }),
+    );
   }
 
   ngOnDestroy(): void {

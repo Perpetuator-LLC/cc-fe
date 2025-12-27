@@ -86,7 +86,15 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   }
 
   // Auth link adds Authorization header (with proactive refresh)
-  const authLink = setContext(async (_, { headers }) => {
+  // Respects useAnonymous context to skip auth for unauthenticated mutations (e.g., recordTrace)
+  const authLink = setContext(async (_, context) => {
+    const { headers, useAnonymous } = context;
+
+    // Skip authentication for anonymous requests (e.g., trace recording)
+    if (useAnonymous) {
+      return { headers };
+    }
+
     let token = tokenStorage.getAccessToken();
     const isExpired = tokenStorage.isAccessTokenExpired();
 
@@ -107,7 +115,14 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   });
 
   // Error link handles 401s and retries with refreshed token
+  // Skips retry for anonymous requests (they shouldn't need auth)
   const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+    // Don't try to refresh token for anonymous requests
+    const context = operation.getContext();
+    if (context['useAnonymous']) {
+      return;
+    }
+
     // Check for authentication errors
     const isAuthError =
       (networkError && 'statusCode' in networkError && networkError.statusCode === 401) ||
