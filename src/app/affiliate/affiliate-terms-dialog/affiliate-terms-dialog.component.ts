@@ -38,16 +38,13 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
     private authService: AuthService,
   ) {
     // Close dialog if user logs out - use effect to monitor signal
-    effect(
-      () => {
-        const isLoggedIn = this.authService.isLoggedIn();
-        if (!isLoggedIn) {
-          // User logged out, close the dialog
-          this.dialogRef.close(false);
-        }
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const isLoggedIn = this.authService.isLoggedIn();
+      if (!isLoggedIn) {
+        // User logged out, close the dialog
+        this.dialogRef.close(false);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -63,8 +60,8 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
     this.loadingPolicy = true;
     this.subscriptions.add(
       this.policyService.getActivePolicies().subscribe({
-        next: (policies: { affiliateTerms?: PolicyVersion }) => {
-          this.policy = policies.affiliateTerms;
+        next: (policies) => {
+          this.policy = policies.affiliateTerms ?? null;
           if (this.policy) {
             this.policyContent = this.policyService.renderPolicyContent(this.policy);
           }

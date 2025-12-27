@@ -112,11 +112,9 @@ export class TerminalWebSocketService implements OnDestroy {
     this.connectionStateSignal.set('connecting');
 
     const wsUrl = this.buildWebSocketUrl();
-    console.debug('Terminal WebSocket connecting to:', wsUrl.replace(/token=.*$/, 'token=***'));
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
-      console.debug('Terminal WebSocket connected');
       this.connectionStateSignal.set('connected');
       this.reconnectAttempts = 0;
       this.startPingInterval();
@@ -246,12 +244,8 @@ export class TerminalWebSocketService implements OnDestroy {
   }
 
   private handleMessage(data: TerminalMessage): void {
-    // Debug log all incoming messages
-    console.debug('[Terminal WS] Received message:', data['type'], data);
-
     switch (data['type']) {
       case 'connected':
-        console.debug('Terminal connected:', data['userId']);
         this.connected$.next({
           userId: data['userId'],
           timestamp: data['timestamp'],
@@ -259,7 +253,6 @@ export class TerminalWebSocketService implements OnDestroy {
         break;
 
       case 'command.result':
-        console.debug('[Terminal WS] Command result:', JSON.stringify(data['result'], null, 2));
         this.commandResult$.next(data['result'] as CommandResult);
         break;
 
@@ -332,7 +325,6 @@ export class TerminalWebSocketService implements OnDestroy {
 
     // Exponential backoff: 1s, 2s, 4s, 8s, ... up to 30s
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
-    console.debug(`Attempting Terminal WebSocket reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
     this.stopReconnectTimer();
     this.reconnectTimer = timer(delay).subscribe(() => {

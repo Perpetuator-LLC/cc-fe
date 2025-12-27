@@ -1,9 +1,17 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+  ViewChild,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatSortModule, Sort } from '@angular/material/sort';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort, MatSort } from '@angular/material/sort';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -25,7 +33,10 @@ import { TableData } from '../terminal.types';
   styleUrl: './data-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DataTableComponent implements OnChanges {
+export class DataTableComponent implements OnChanges, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   @Input() data?: TableData | object;
   @Input() pageSize = 10;
   @Input() pageSizeOptions = [5, 10, 25, 50];
@@ -38,7 +49,25 @@ export class DataTableComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
       this.processData();
+      // Re-attach paginator and sort after data changes
+      this.connectPaginatorAndSort();
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.connectPaginatorAndSort();
+  }
+
+  private connectPaginatorAndSort(): void {
+    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+      if (this.sort) {
+        this.dataSource.sort = this.sort;
+      }
+    });
   }
 
   private processData(): void {
@@ -101,6 +130,7 @@ export class DataTableComponent implements OnChanges {
   }
 
   onSortChange(sort: Sort): void {
+    // MatSort is connected to dataSource, but we need custom comparator for mixed types
     if (!sort.active || sort.direction === '') {
       return;
     }
@@ -117,11 +147,6 @@ export class DataTableComponent implements OnChanges {
 
       return String(aVal ?? '').localeCompare(String(bVal ?? '')) * (isAsc ? 1 : -1);
     });
-  }
-
-  onPageChange(event: PageEvent): void {
-    // For client-side pagination, MatPaginator handles this automatically
-    console.debug('Page changed:', event);
   }
 
   getCellValue(row: Record<string, unknown>, column: string): string {

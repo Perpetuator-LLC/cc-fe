@@ -40,16 +40,13 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {
     // Close dialog if user logs out - use effect to monitor signal
-    effect(
-      () => {
-        const isLoggedIn = this.authService.isLoggedIn();
-        if (!isLoggedIn) {
-          // User logged out, close the dialog
-          this.dialogRef.close(false);
-        }
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const isLoggedIn = this.authService.isLoggedIn();
+      if (!isLoggedIn) {
+        // User logged out, close the dialog
+        this.dialogRef.close(false);
+      }
+    });
   }
 
   ngOnInit(): void {

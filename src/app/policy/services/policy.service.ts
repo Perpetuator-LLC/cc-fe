@@ -65,20 +65,17 @@ export class PolicyService extends BaseService {
     this.wasLoggedIn = this.authService.isLoggedIn();
 
     // Use effect to watch for logout events
-    effect(
-      () => {
-        const isLoggedIn = this.authService.isLoggedIn();
+    effect(() => {
+      const isLoggedIn = this.authService.isLoggedIn();
 
-        // If user was logged in and now is not, they logged out
-        if (this.wasLoggedIn && !isLoggedIn) {
-          this.clearActivePoliciesCache();
-        }
+      // If user was logged in and now is not, they logged out
+      if (this.wasLoggedIn && !isLoggedIn) {
+        this.clearActivePoliciesCache();
+      }
 
-        // Update state for next check
-        this.wasLoggedIn = isLoggedIn;
-      },
-      { allowSignalWrites: true },
-    );
+      // Update state for next check
+      this.wasLoggedIn = isLoggedIn;
+    });
   }
 
   /**

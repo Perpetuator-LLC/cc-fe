@@ -1,0 +1,259 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<div class="watchlist-tab">
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="32" />
+      <p>Loading watchlists...</p>
+    </div>
+  } @else {
+    <div class="watchlist-layout">
+      <!-- Left Sidebar: Symbol List -->
+      <div class="symbol-sidebar">
+        <!-- Watchlist Selector Dropdown -->
+        <div class="sidebar-header">
+          <mat-form-field appearance="outline" class="watchlist-selector">
+            <mat-label>Watchlist</mat-label>
+            <mat-select [value]="selectedWatchlistId()" (selectionChange)="onWatchlistChange($event.value)">
+              <mat-option value="recent">
+                <mat-icon>schedule</mat-icon>
+                Recent ({{ (watchlistService.recentSymbols() || []).length }})
+              </mat-option>
+              @if (watchlistService.searchHistory(); as history) {
+                <mat-option [value]="history.uuid">
+                  <mat-icon>history</mat-icon>
+                  {{ history.name }} ({{ history.itemCount }})
+                </mat-option>
+              }
+              @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
+                <mat-option [value]="watchlist.uuid">
+                  <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
+                  {{ watchlist.name }} ({{ watchlist.itemCount }})
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button matTooltip="Create Watchlist" (click)="toggleCreateForm()">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <!-- Add Symbol Button (only for non-recent watchlists) -->
+        @if (canAddToWatchlist() && !showAddSymbolForm()) {
+          <div class="add-symbol-btn-container">
+            <button mat-stroked-button class="add-symbol-btn" (click)="toggleAddSymbolForm()">
+              <mat-icon>add</mat-icon>
+              Add Symbol
+            </button>
+          </div>
+        }
+
+        <!-- Add Symbol Form (inline) -->
+        @if (showAddSymbolForm()) {
+          <div class="add-symbol-form">
+            <mat-form-field appearance="outline" class="symbol-input">
+              <mat-label>Symbol</mat-label>
+              <input
+                matInput
+                [(ngModel)]="newSymbolInput"
+                placeholder="AAPL"
+                (keydown.enter)="addSymbol()"
+                style="text-transform: uppercase"
+              />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="toggleAddSymbolForm()">Cancel</button>
+              <button mat-flat-button color="primary" (click)="addSymbol()" [disabled]="!newSymbolInput.trim()">
+                Add
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Symbol List -->
+        <div class="symbol-list-container">
+          @if (currentSymbols().length === 0) {
+            <div class="empty-list">
+              <mat-icon>inbox</mat-icon>
+              <p>No symbols yet</p>
+              <span>Run commands like <code>AAPL GP</code> to add symbols</span>
+            </div>
+          } @else {
+            @for (item of currentSymbols(); track item.symbol) {
+              <div
+                class="symbol-item"
+                [class.selected]="selectedSymbol() === item.symbol"
+                tabindex="0"
+                role="button"
+                (click)="selectSymbol(item)"
+                (keydown.enter)="selectSymbol(item)"
+              >
+                <div class="symbol-main">
+                  <mat-icon class="asset-icon">{{ getAssetIcon(item.assetType) }}</mat-icon>
+                  <div class="symbol-details">
+                    <span class="symbol">{{ item.symbol }}</span>
+                    @if (item.displayName && item.displayName !== item.symbol) {
+                      <span class="name">{{ item.displayName }}</span>
+                    }
+                    <!-- Symbol Chips: Exchange, Sector, Industry -->
+                    <div class="symbol-chips">
+                      @if (item.exchange) {
+                        <span class="chip chip-exchange" [matTooltip]="'Exchange: ' + item.exchange">
+                          {{ item.exchange }}
+                        </span>
+                      }
+                      @if (item.sector) {
+                        <span class="chip chip-sector" [matTooltip]="'Sector: ' + item.sector">
+                          {{ item.sector }}
+                        </span>
+                      }
+                      @if (item.industry) {
+                        <span class="chip chip-industry" [matTooltip]="'Industry: ' + item.industry">
+                          {{ item.industry }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div class="symbol-actions">
+                  @if (item.accessCount && item.accessCount > 1) {
+                    <span class="access-count" matTooltip="Times accessed">
+                      {{ item.accessCount }}
+                    </span>
+                  }
+                  <button
+                    mat-icon-button
+                    class="action-btn"
+                    [matMenuTriggerFor]="symbolMenu"
+                    (click)="$event.stopPropagation()"
+                    matTooltip="Actions"
+                  >
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #symbolMenu="matMenu">
+                    @for (action of getSymbolActions(); track action.command) {
+                      <button mat-menu-item (click)="runCommand(item.symbol, action.command)">
+                        <mat-icon>{{ action.icon }}</mat-icon>
+                        <span>{{ action.label }}</span>
+                      </button>
+                    }
+                    <mat-divider />
+                    <button mat-menu-item (click)="removeSymbol(item)" class="delete-action">
+                      <mat-icon>delete</mat-icon>
+                      <span>Remove</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Create Watchlist Form (inline) -->
+        @if (showCreateForm()) {
+          <div class="create-form">
+            <mat-form-field appearance="outline">
+              <mat-label>New Watchlist Name</mat-label>
+              <input matInput [(ngModel)]="newWatchlistName" placeholder="My Watchlist" />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="toggleCreateForm()">Cancel</button>
+              <button mat-flat-button color="primary" (click)="createWatchlist()" [disabled]="!newWatchlistName.trim()">
+                Create
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Main Content: Chart Display -->
+      <div class="chart-main">
+        @if (!selectedSymbol()) {
+          <div class="no-selection">
+            <mat-icon>show_chart</mat-icon>
+            <h3>Select a Symbol</h3>
+            <p>Click a symbol from the list to view its chart</p>
+          </div>
+        } @else {
+          <!-- Chart Controls -->
+          <div class="chart-header">
+            <div class="chart-title">
+              <span class="symbol-name">{{ selectedSymbol() }}</span>
+              @if (selectedItem()?.displayName) {
+                <span class="company-name">{{ selectedItem()?.displayName }}</span>
+              }
+            </div>
+            <div class="chart-actions">
+              @for (action of getSymbolActions(); track action.command) {
+                <button
+                  mat-stroked-button
+                  [class.active]="currentCommand() === action.command"
+                  (click)="runCommand(selectedSymbol()!, action.command)"
+                  [matTooltip]="action.label"
+                >
+                  <mat-icon>{{ action.icon }}</mat-icon>
+                  {{ action.command }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Period/Interval Controls -->
+          <div class="chart-controls-bar">
+            <mat-form-field appearance="outline" class="control-field">
+              <mat-label>Period</mat-label>
+              <mat-select
+                [value]="selectedPeriod()"
+                (selectionChange)="onPeriodChange($event.value)"
+                [disabled]="chartLoading()"
+              >
+                @for (period of periodOptions; track period) {
+                  <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="control-field">
+              <mat-label>Interval</mat-label>
+              <mat-select
+                [value]="selectedInterval()"
+                (selectionChange)="onIntervalChange($event.value)"
+                [disabled]="chartLoading()"
+              >
+                @for (interval of intervalOptions; track interval) {
+                  <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-icon-button matTooltip="Refresh Chart" (click)="retryChart()" [disabled]="chartLoading()">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+
+          <!-- Chart Container -->
+          <div class="chart-container">
+            @if (chartLoading()) {
+              <div class="chart-loading">
+                <mat-spinner diameter="40" />
+                <p>Loading chart...</p>
+              </div>
+            } @else if (chartOptions()) {
+              <div echarts [options]="chartOptions()!" class="chart"></div>
+            } @else if (chartError()) {
+              <div class="chart-error">
+                <mat-icon>error_outline</mat-icon>
+                <p>{{ chartError() }}</p>
+                <button mat-stroked-button (click)="retryChart()">Retry</button>
+              </div>
+            } @else {
+              <div class="chart-placeholder">
+                <mat-icon>insert_chart</mat-icon>
+                <p>Loading chart for {{ selectedSymbol() }}...</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

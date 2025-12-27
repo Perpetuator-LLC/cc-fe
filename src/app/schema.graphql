@@ -1,4 +1,16 @@
 type Query {
+  """Get user's watchlists"""
+  watchlists(watchlistType: String): [WatchlistObjectType]
+
+  """Get a specific watchlist by ID"""
+  watchlist(id: UUID!): WatchlistObjectType
+
+  """Get user's search history (most recent symbols)"""
+  searchHistory(limit: Int = 20): WatchlistObjectType
+
+  """Get user's recently accessed symbols"""
+  recentSymbols(limit: Int = 10): [WatchlistItemType]
+
   """Get AI agent execution history"""
   agentExecutions(agentType: String, limit: Int = 20): [AgentExecutionType]
 
@@ -364,6 +376,75 @@ type Query {
   ): Node
 }
 
+"""GraphQL type for Watchlist."""
+type WatchlistObjectType {
+  id: UUID!
+  name: String!
+  description: String!
+  watchlistType: WatchlistsWatchlistWatchlistTypeChoices!
+
+  """If true, this is the user's default search history watchlist"""
+  isDefault: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  items: [WatchlistItemType]
+  itemCount: Int
+}
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""An enumeration."""
+enum WatchlistsWatchlistWatchlistTypeChoices {
+  """Search History"""
+  SEARCH_HISTORY
+
+  """Custom"""
+  CUSTOM
+
+  """Favorites"""
+  FAVORITES
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""GraphQL type for WatchlistItem."""
+type WatchlistItemType {
+  id: UUID!
+  symbol: String!
+
+  """Company name or description for display"""
+  displayName: String!
+
+  """Stock, ETF, Crypto, etc."""
+  assetType: String!
+
+  """Exchange where the symbol trades"""
+  exchange: String!
+
+  """Country of the exchange/company"""
+  country: String!
+
+  """Currency for prices"""
+  currency: String!
+  notes: String!
+
+  """Number of times this symbol was accessed"""
+  accessCount: Int!
+  createdAt: DateTime!
+  lastAccessedAt: DateTime!
+  uuid: UUID
+}
+
 """GraphQL type for AgentExecution model."""
 type AgentExecutionType {
   id: UUID!
@@ -391,12 +472,6 @@ type AgentExecutionType {
   uuid: UUID
 }
 
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
 """An enumeration."""
 enum OrchestrationAgentExecutionAgentTypeChoices {
   """Terminal Command Agent"""
@@ -419,13 +494,6 @@ scalar JSONString
 
 """The `Decimal` scalar type represents a python Decimal."""
 scalar Decimal
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 """GraphQL type for ChartDefinition model."""
 type ChartDefinitionType {
@@ -735,7 +803,7 @@ type AutocompleteSuggestionType {
   """Display text for the dropdown"""
   display: String
 
-  """Type: command, alias, parameter, example, symbol"""
+  """Type: command, alias, parameter, example, symbol, recent"""
   type: String
 
   """Description/help text"""
@@ -761,6 +829,18 @@ type AutocompleteSuggestionType {
 
   """Default value (for parameters)"""
   default: String
+
+  """Asset type: Stock, ETF, Crypto, etc."""
+  assetType: String
+
+  """Exchange where the symbol trades"""
+  exchange: String
+
+  """Country of the exchange/company"""
+  country: String
+
+  """Currency for prices"""
+  currency: String
 }
 
 type TraceType {
@@ -774,6 +854,15 @@ type TraceType {
   exceptionType: String!
   exceptionMessage: String!
   aiModel: String!
+
+  """Input/prompt tokens from API response"""
+  aiInputTokens: Int
+
+  """Output/completion tokens from API response"""
+  aiOutputTokens: Int
+
+  """Total tokens (input + output)"""
+  aiTotalTokens: Int
   aiCost: Decimal
 
   """
@@ -1904,9 +1993,20 @@ type CompanyType {
   id: ID!
   ticker: String!
   name: String!
+
+  """SEC CIK number"""
+  cik: String!
+
+  """Stock, ETF, etc."""
+  assetType: String!
   sector: String!
   industry: String!
   exchange: ExchangeType
+
+  """Exchange name as string"""
+  exchangeName: String!
+  country: String!
+  currency: String!
   description: String!
   address: String!
   fiscalYearEnd: String!
@@ -2686,6 +2786,26 @@ type UserType {
 }
 
 type Mutation {
+  """Add a symbol to a watchlist."""
+  addToWatchlist(
+    assetType: String
+    displayName: String
+    exchange: String
+    symbol: String!
+
+    """Watchlist ID (uses search history if not provided)"""
+    watchlistId: UUID
+  ): AddToWatchlist
+
+  """Remove a symbol from a watchlist."""
+  removeFromWatchlist(symbol: String!, watchlistId: UUID!): RemoveFromWatchlist
+
+  """Create a new watchlist."""
+  createWatchlist(description: String, name: String!): CreateWatchlist
+
+  """Delete a watchlist."""
+  deleteWatchlist(watchlistId: UUID!): DeleteWatchlist
+
   """
   Interpret a natural language query using AI.
   
@@ -3340,6 +3460,32 @@ type Mutation {
   PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
   """
   refreshToken(refresh: String!): RefreshAccessToken
+}
+
+"""Add a symbol to a watchlist."""
+type AddToWatchlist {
+  success: Boolean
+  message: String
+  item: WatchlistItemType
+}
+
+"""Remove a symbol from a watchlist."""
+type RemoveFromWatchlist {
+  success: Boolean
+  message: String
+}
+
+"""Create a new watchlist."""
+type CreateWatchlist {
+  success: Boolean
+  message: String
+  watchlist: WatchlistObjectType
+}
+
+"""Delete a watchlist."""
+type DeleteWatchlist {
+  success: Boolean
+  message: String
 }
 
 """

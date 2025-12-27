@@ -71,6 +71,7 @@
                     [chartOptions]="item.result.chartOptions!"
                     [chartControls]="getChartControls(item.result)"
                     [dataPoints]="item.result.metadata?.['dataPoints'] || 0"
+                    [height]="400"
                     [showHeader]="false"
                     (executeCommand)="onChartCommand($event)"
                   />

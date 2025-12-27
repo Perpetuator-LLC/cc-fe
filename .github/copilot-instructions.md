@@ -2,6 +2,30 @@ Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is en
 
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
+# ⚠️ SCSS QUICK CHECKLIST (Check before writing ANY SCSS)
+
+**Before you write SCSS, verify:**
+- [ ] Spacing values are on 4px grid: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64px
+- [ ] Font sizes are on 2px grid: 10, 12, 14, 16, 18, 20, 22, 24px
+- [ ] Border-radius is on 4px grid: 4, 8, 12, 16px (or 999px for pills)
+- [ ] Colors use MD3 tokens: `var(--md-sys-color-primary)` not `#hex` or `rgba()`
+- [ ] No `::ng-deep` - use `styles.scss` or `:host` selectors
+- [ ] No `!important` - use specificity instead
+- [ ] No color functions: `rgba()`, `rgb()`, `hsl()` - use tokens
+
+**Common fixes:**
+| ❌ Wrong | ✅ Correct |
+|----------|-----------|
+| `padding: 18px` | `padding: 16px` or `20px` |
+| `font-size: 13px` | `font-size: 12px` or `14px` |
+| `font-size: 11px` | `font-size: 10px` or `12px` |
+| `border-radius: 10px` | `border-radius: 8px` or `12px` |
+| `color: #fff` | `color: var(--md-sys-color-on-primary)` |
+| `background: rgba(0,0,0,.5)` | `background: var(--md-sys-color-shadow)` |
+| `::ng-deep .mat-*` | Put override in `styles.scss` |
+
+---
+
 Redirect STDERR to STDOUT and pipe to tee and capture command output in a logs file e.g.
 ```bash 
 cd REPO_DIR && yarn build 2>&1 | tee logs/build.log
@@ -25,29 +49,63 @@ Do not use command line tools to edit or read files, use your functions that you
 
 ## TL;DR for AI/Copilot (READ THIS FIRST)
 
-**ALL styling via `@include mat.theme()` on root using MD3 design tokens.**
-- **NO custom SCSS** selectors/overrides except via mixins in `styles.scss`
-- **NO inline styles** or direct component styling - ever
-- **NO inline templates** - enforced by ESLint (templateUrl required)
-- **NO inline styles arrays** - enforced by ESLint (styleUrl required)
-- **NO ::ng-deep** - theme changes go in `styles.scss` via theme overrides
-- **Use Material variants** - `mat-flat-button color="primary"` not custom classes
-- **Design tokens ONLY** - `var(--md-sys-color-primary)` not hex colors
-- **MD3 4px grid** - spacing must be 4, 8, 16, 24, 32, 48, 64 (no 18px, 14px, etc.)
-- **Mixins for layout** - `@include mixins.flex-row` instead of custom flex styles
-- **Component SCSS = layout only** - let Material handle colors/typography
+**⚠️ STYLELINT WILL REJECT YOUR CODE IF YOU VIOLATE THESE RULES:**
 
-**If you're using inline template/styles or setting colors directly, you're doing it wrong.**
+### ABSOLUTE PROHIBITIONS (Linter will fail)
+- **NO `::ng-deep`** - deprecated, use global styles in `styles.scss` instead
+- **NO `!important`** - use specificity or Material component variants
+- **NO hex colors** - use `var(--md-sys-color-*)` tokens (e.g., `var(--md-sys-color-primary)`)
+- **NO `rgba()`/`rgb()`/`hsl()` functions** - use MD3 tokens with opacity variants
+- **NO inline styles** (`style="..."`) - enforced by ESLint
+- **NO inline templates** - enforced by ESLint (templateUrl required)
+
+### MD3 4px SPACING GRID (Linter enforced)
+**Valid spacing values:** 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64px
+```scss
+// ✅ GOOD - On the 4px grid
+padding: 16px;
+gap: 8px;
+margin: 24px;
+border-radius: 8px;   // 4, 8, 12, 16px for radius
+
+// ❌ BAD - Linter will REJECT these
+padding: 18px;        // Use 16px or 20px
+gap: 14px;            // Use 12px or 16px
+border-radius: 10px;  // Use 8px or 12px
+margin: 15px;         // Use 16px
+```
+
+### MD3 TYPOGRAPHY GRID (Font sizes on 2px grid)
+**Valid font sizes:** 10, 12, 14, 16, 18, 20, 22, 24px (even numbers)
+```scss
+// ✅ GOOD
+font-size: 12px;
+font-size: 14px;
+
+// ❌ BAD - Linter will REJECT
+font-size: 11px;      // Use 10px or 12px
+font-size: 13px;      // Use 12px or 14px
+font-size: 9px;       // Use 10px
+```
+
+### WHAT TO USE INSTEAD
+- **Colors:** `var(--md-sys-color-primary)`, `var(--md-sys-color-on-surface)`, etc.
+- **Spacing:** Use mixins `@include mixins.flex-row` (auto gap: 16px) or exact 4px grid values
+- **Material overrides:** Put in `styles.scss` using high specificity selectors, not `::ng-deep`
+- **Opacity:** Use pre-defined opacity tokens or surface-variant colors
+
+**If the linter rejects your SCSS, check: spacing grid, font sizes, colors, ::ng-deep, !important**
 
 # Material Design 3 (MD3) Theming: Root-Controlled Architecture
 
-## Core Principles (ABSOLUTE RULES)
+## Core Principles (LINTER WILL REJECT VIOLATIONS)
 1. **ALL theming via `@include mat.theme()` on root** - Never style components directly
-2. **NO component-level overrides** - No `::ng-deep`, no manual selectors, no Material class targeting
-3. **Use Material variants** - Buttons, forms, dialogs use built-in Material components only
-4. **Design tokens only** - Never hardcode colors/spacing, use `var(--md-sys-color-*)` or mixins
-5. **NO inline styles** - Ever. Component SCSS or global mixins only
-6. **MD3 4px grid** - Spacing must be 4, 8, 12, 16, 24, 32, 48, 64 (use mixins for layout)
+2. **NO `::ng-deep`** - Deprecated. Use `styles.scss` with specific selectors
+3. **NO `!important`** - Ever. Use selector specificity instead
+4. **NO color functions** - No `rgba()`, `rgb()`, `hsl()`. Use MD3 tokens only
+5. **NO hex colors** - Use `var(--md-sys-color-*)` tokens
+6. **4px spacing grid** - All spacing: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64px
+7. **2px typography grid** - Font sizes: 10, 12, 14, 16, 18, 20, 22, 24px
 
 ## MD3 Theming Architecture
 
@@ -80,6 +138,29 @@ html {
 html {
   --md-sys-color-primary: #custom-color; // Never do this
 }
+```
+
+### Material Component Overrides (NO ::ng-deep!)
+```scss
+// ❌ NEVER DO THIS - Linter will reject
+::ng-deep .mat-mdc-form-field {
+  display: none;
+}
+
+// ✅ GOOD - Put in styles.scss with high specificity
+// In styles.scss (global):
+.my-component .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+// ✅ GOOD - Use component encapsulation with :host
+// In component.scss:
+:host .mat-mdc-button {
+  min-width: auto;
+}
+
+// ✅ GOOD - Use appearance/config options instead of CSS
+<mat-form-field appearance="outline" subscriptSizing="dynamic">
 ```
 
 ## Component Usage Patterns
@@ -122,23 +203,25 @@ html {
 - **AI Notes:** Save to `logs/ai_edits/` with date prefix
 - **File Structure:** Each component in own directory with `.ts`/`.html`/`.scss`
 
-## Styling Rules (MUST FOLLOW)
+## Styling Rules (LINTER ENFORCED)
 
 ✅ **DO:**
 - Use Material component variants (`mat-flat-button color="primary"`)
 - Use MD3 design tokens (`var(--md-sys-color-primary)`, `var(--md-sys-color-on-surface)`)
 - Use SCSS mixins for layout/responsive (`@include mixins.flex-row`)
-- Use component SCSS only for layout/spacing (let Material handle colors)
-- Use MD3 4px grid values (4, 8, 16, 24, 32, 48, 64)
+- Use 4px grid spacing: 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64px
+- Use 2px font-size grid: 10, 12, 14, 16, 18, 20, 22, 24px
+- Use border-radius on 4px grid: 4, 8, 12, 16px
 
-❌ **DON'T:**
-- NO inline styles (`style="..."`) - Ever
-- NO `::ng-deep` selectors - Theme changes go in `styles.scss` via mixins
-- NO hardcoded colors - Use `var(--md-sys-color-*)` tokens
-- NO custom --cc-* variables - Being phased out, use MD3 tokens
-- NO arbitrary px values - Must be on 4px grid (padding: 18px ❌ → 16px ✅)
-- NO hardcoded colors (`#fff` → `var(--cc-text-primary)`)
-- NO custom button/form classes when Material provides variants
+❌ **LINTER WILL REJECT:**
+- `::ng-deep` - deprecated, put overrides in `styles.scss`
+- `!important` - use specificity instead
+- Hex colors: `#fff` → `var(--md-sys-color-surface)`
+- Color functions: `rgba(0,0,0,0.5)` → `var(--md-sys-color-shadow)`
+- Off-grid spacing: `padding: 18px` → `padding: 16px` or `20px`
+- Off-grid fonts: `font-size: 13px` → `font-size: 12px` or `14px`
+- Off-grid radius: `border-radius: 10px` → `8px` or `12px`
+- Inline styles: `style="..."` - never
 
 # HTML
 Copyright for HTML use:
@@ -210,12 +293,30 @@ padding: 16px;
 gap: 8px;
 ```
 
-### MD3 4px Grid (When Direct Values Needed)
+### MD3 4px Grid (LINTER ENFORCED)
 ```scss
-// Approved values ONLY: 4, 8, 12, 16, 24, 32, 40, 48, 56, 64
+// ✅ VALID spacing values (4px increments):
+// 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64px
 padding: 16px;  // ✅
 gap: 24px;      // ✅
-margin: 18px;   // ❌ Not on grid
+gap: 4px;       // ✅
+
+// ✅ VALID font-sizes (2px increments, even numbers):
+// 10, 12, 14, 16, 18, 20, 22, 24px
+font-size: 12px;  // ✅
+font-size: 14px;  // ✅
+
+// ✅ VALID border-radius (4px increments):
+// 4, 8, 12, 16px (or 999px for pills)
+border-radius: 8px;   // ✅
+border-radius: 12px;  // ✅
+
+// ❌ LINTER REJECTS (off-grid values):
+margin: 18px;         // ❌ Use 16px or 20px
+padding: 15px;        // ❌ Use 16px
+font-size: 13px;      // ❌ Use 12px or 14px
+font-size: 11px;      // ❌ Use 10px or 12px
+border-radius: 10px;  // ❌ Use 8px or 12px
 ```
 
 ### Spacing (Never Hardcode px)

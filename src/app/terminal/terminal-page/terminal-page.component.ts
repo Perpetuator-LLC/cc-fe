@@ -12,6 +12,7 @@ import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
 import { TerminalBarComponent } from '../terminal-bar/terminal-bar.component';
 import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashboard.component';
+import { WatchlistTabComponent } from '../watchlist-tab/watchlist-tab.component';
 import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
 
 @Component({
@@ -26,6 +27,7 @@ import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
     MatProgressSpinnerModule,
     TerminalBarComponent,
     TerminalDashboardComponent,
+    WatchlistTabComponent,
   ],
   templateUrl: './terminal-page.component.html',
   styleUrl: './terminal-page.component.scss',
@@ -58,12 +60,11 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     // Load available commands from backend registry
     this.subscriptions.add(
       this.terminalService.loadCommands().subscribe({
-        next: (commands) => {
-          console.debug('Loaded commands:', commands.length);
+        next: () => {
+          // Commands loaded successfully
         },
         error: () => {
           // Commands query failed - terminal still works via WebSocket
-          console.debug('Commands registry not available - using WebSocket commands');
         },
       }),
     );
@@ -93,8 +94,8 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
 
   onTabChange(index: number): void {
     this.selectedTabIndex = index;
-    // Load user history when switching to History tab
-    if (index === 1) {
+    // Load user history when switching to History tab (now index 2)
+    if (index === 2) {
       this.loadUserHistory();
     }
   }
