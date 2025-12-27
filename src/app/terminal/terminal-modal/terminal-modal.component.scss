@@ -125,15 +125,42 @@
   }
 
   .command {
+    cursor: pointer;
+
     flex: 1;
+
     font-family: 'Roboto Mono', monospace;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
+
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--md-sys-color-primary);
+      text-decoration: underline;
+    }
   }
 
   .timestamp {
     font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .copy-btn {
+    --mdc-icon-button-state-layer-size: 32px;
+    --mdc-icon-button-icon-size: 18px;
+    // Use Material's small icon button size (40px default, but we scale it)
+    // Using transform to reduce visual size while keeping touch target
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .copy-btn {
+    opacity: 0.7;
+  }
+
+  .copy-btn:hover {
+    opacity: 1;
   }
 
   .status-icon {
@@ -157,6 +184,11 @@
   border-left: 1px solid var(--md-sys-color-outline-variant);
 
   .message {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    justify-content: space-between;
+
     margin-bottom: 8px;
     padding: 8px 12px;
     border-radius: 4px;
@@ -167,6 +199,23 @@
     white-space: pre-wrap;
 
     background: var(--md-sys-color-surface-container-high);
+
+    .copy-btn {
+      --mdc-icon-button-state-layer-size: 32px;
+      --mdc-icon-button-icon-size: 18px;
+
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover .copy-btn {
+      opacity: 0.7;
+    }
+
+    .copy-btn:hover {
+      opacity: 1;
+    }
 
     &.error {
       color: var(--md-sys-color-error);
@@ -201,6 +250,115 @@
   padding: 16px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
   background: var(--md-sys-color-surface-container);
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+
+  overflow-y: auto;
+
+  max-height: 320px;
+  margin-bottom: 4px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: var(--md-sys-color-shadow) 0 -4px 24px;
+}
+
+.suggestion-item {
+  @include mixins.flex-row();
+
+  cursor: pointer;
+  gap: 12px;
+  padding: 10px 16px;
+  transition: background-color 0.1s ease;
+
+  &:hover,
+  &.selected {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  &.selected {
+    padding-left: 13px;
+    border-left: 3px solid var(--md-sys-color-primary);
+  }
+}
+
+.suggestion-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &.type-command mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+
+  &.type-alias mat-icon {
+    color: var(--md-sys-color-secondary);
+  }
+
+  &.type-parameter mat-icon {
+    color: var(--md-extended-color-warning-color);
+  }
+
+  &.type-example mat-icon {
+    color: var(--md-extended-color-info-color);
+  }
+
+  &.type-history mat-icon {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.suggestion-text {
+  flex: 1;
+
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.suggestion-desc {
+  overflow: hidden;
+  flex: 2;
+
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-category {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-secondary-container);
+  text-transform: uppercase;
+
+  background: var(--md-sys-color-secondary-container);
 }
 
 .input-container {

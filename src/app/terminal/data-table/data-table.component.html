@@ -1,8 +1,13 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
 <div class="data-table-container">
-  @if (title) {
-    <h4 class="table-title">{{ title }}</h4>
-  }
+  <div class="table-header">
+    @if (title) {
+      <h4 class="table-title">{{ title }}</h4>
+    }
+    <button mat-icon-button class="copy-btn" matTooltip="Copy table as markdown" (click)="copyTableToClipboard()">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
 
   @if (displayedColumns.length > 0) {
     <div class="table-wrapper">

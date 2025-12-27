@@ -29,8 +29,13 @@
           <div class="history-item" [class.error]="item.result && !item.result.success">
             <div class="command-line">
               <span class="prompt">&gt;</span>
-              <span class="command">{{ item.input }}</span>
+              <span class="command" (click)="rerunCommand(item.input)" matTooltip="Click to rerun">{{
+                item.input
+              }}</span>
               <span class="timestamp">{{ item.timestamp | date: 'HH:mm:ss' }}</span>
+              <button mat-icon-button class="copy-btn" matTooltip="Copy command" (click)="copyToClipboard(item.input)">
+                <mat-icon>content_copy</mat-icon>
+              </button>
               @if (item.result) {
                 <mat-icon
                   class="status-icon"
@@ -49,7 +54,17 @@
             } @else if (item.result) {
               <div class="output">
                 @if (item.result.message) {
-                  <div class="message" [class.error]="!item.result.success">{{ item.result.message }}</div>
+                  <div class="message" [class.error]="!item.result.success">
+                    {{ item.result.message }}
+                    <button
+                      mat-icon-button
+                      class="copy-btn"
+                      matTooltip="Copy result"
+                      (click)="copyResultToClipboard(item)"
+                    >
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                  </div>
                 }
                 @if (hasChart(item)) {
                   <app-chart-panel [chartOptions]="item.result.chartOptions!" [showHeader]="false" />
@@ -66,26 +81,72 @@
   </div>
 
   <div class="modal-footer">
-    <div class="input-container">
-      <span class="prompt">&gt;</span>
-      <input
-        #commandInput
-        type="text"
-        [(ngModel)]="currentCommand"
-        (keydown)="onKeyDown($event)"
-        (keydown.enter)="onSubmit()"
-        [disabled]="isProcessing"
-        placeholder="Enter command or ask a question..."
-        autocomplete="off"
-        spellcheck="false"
-      />
-      @if (isProcessing) {
-        <mat-spinner diameter="20" />
-      } @else {
-        <button mat-icon-button (click)="onSubmit()" [disabled]="!currentCommand.trim()">
-          <mat-icon>send</mat-icon>
-        </button>
+    <div class="input-wrapper">
+      @if (suggestions.length > 0 && showSuggestions) {
+        <div class="autocomplete-dropdown">
+          @for (suggestion of suggestions; track suggestion.text; let i = $index) {
+            <div
+              class="suggestion-item"
+              [class.selected]="i === selectedSuggestionIndex"
+              (click)="selectSuggestion(suggestion)"
+              (mouseenter)="selectedSuggestionIndex = i"
+            >
+              <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+                @switch (suggestion.type) {
+                  @case ('command') {
+                    <mat-icon>terminal</mat-icon>
+                  }
+                  @case ('alias') {
+                    <mat-icon>label</mat-icon>
+                  }
+                  @case ('parameter') {
+                    <mat-icon>settings</mat-icon>
+                  }
+                  @case ('example') {
+                    <mat-icon>lightbulb</mat-icon>
+                  }
+                  @case ('history') {
+                    <mat-icon>history</mat-icon>
+                  }
+                  @default {
+                    <mat-icon>chevron_right</mat-icon>
+                  }
+                }
+              </span>
+              <span class="suggestion-text">{{ suggestion.display }}</span>
+              @if (suggestion.description) {
+                <span class="suggestion-desc">{{ suggestion.description }}</span>
+              }
+              @if (suggestion.category) {
+                <span class="suggestion-category">{{ suggestion.category }}</span>
+              }
+            </div>
+          }
+        </div>
       }
+      <div class="input-container">
+        <span class="prompt">&gt;</span>
+        <input
+          #commandInput
+          type="text"
+          [(ngModel)]="currentCommand"
+          (input)="onInputChange()"
+          (keydown)="onKeyDown($event)"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+          [disabled]="isProcessing"
+          placeholder="Enter command or ask a question..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        @if (isProcessing) {
+          <mat-spinner diameter="20" />
+        } @else {
+          <button mat-icon-button (click)="onSubmit()" [disabled]="!currentCommand.trim()">
+            <mat-icon>send</mat-icon>
+          </button>
+        }
+      </div>
     </div>
   </div>
 </div>
