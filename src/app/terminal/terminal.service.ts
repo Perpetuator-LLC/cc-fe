@@ -1,11 +1,12 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
-import { map, filter, catchError } from 'rxjs/operators';
+import { map, filter, catchError, tap } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
 import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
 import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
 import {
+  AutocompleteSuggestion,
   Command,
   CommandHistoryItem,
   CommandProgress,
@@ -194,10 +195,15 @@ interface DashboardsResult {
 export class TerminalService implements OnDestroy {
   private subscriptions = new Subscription();
 
-  // Local command history (in-memory for current session)
+  // Session history (in-memory for current session, shows in terminal modal)
   private historySignal: WritableSignal<HistoryEntry[]> = signal([]);
+
+  // Full command history (strings only, for up/down arrow navigation)
   private commandHistorySignal: WritableSignal<string[]> = signal([]);
   private historyIndex = -1;
+
+  // User history from server (persists across sessions, shows in History tab)
+  private userHistorySignal: WritableSignal<CommandHistoryItem[]> = signal([]);
 
   // Commands registry cache
   private commandsCache$ = new BehaviorSubject<Command[]>([]);
@@ -228,12 +234,25 @@ export class TerminalService implements OnDestroy {
     return this.wsService.connectionState;
   }
 
+  /**
+   * Session history - in-memory for current session, shows in terminal modal
+   */
   get history(): WritableSignal<HistoryEntry[]> {
     return this.historySignal;
   }
 
+  /**
+   * Command strings only - for up/down arrow navigation
+   */
   get commandHistory(): WritableSignal<string[]> {
     return this.commandHistorySignal;
+  }
+
+  /**
+   * User history from server - persists across sessions, shows in History tab
+   */
+  get userHistory(): WritableSignal<CommandHistoryItem[]> {
+    return this.userHistorySignal;
   }
 
   get activeCharts(): WritableSignal<Map<string, EChartsOption>> {
@@ -407,16 +426,30 @@ export class TerminalService implements OnDestroy {
   }
 
   /**
-   * Load command history from server
+   * Load command history from server (user's full command history)
+   * Updates both userHistorySignal (for History tab) and commandHistorySignal (for up/down navigation)
    */
-  loadCommandHistory(limit = 50): Observable<CommandHistoryItem[]> {
+  loadCommandHistory(limit = 100): Observable<CommandHistoryItem[]> {
     return this.apollo
       .query<CommandHistoryResult>({
         query: GET_COMMAND_HISTORY,
         variables: { limit },
         fetchPolicy: 'network-only',
       })
-      .pipe(map((result) => result.data.commandHistory));
+      .pipe(
+        map((result) => result.data.commandHistory),
+        tap((history) => {
+          // Update user history signal
+          this.userHistorySignal.set(history);
+          // Extract just the command strings for up/down navigation (oldest first)
+          const commands = history.map((h) => h.rawInput).reverse();
+          // Merge with any new session commands not yet on server
+          const currentCommands = this.commandHistorySignal();
+          const serverCommandSet = new Set(commands);
+          const newSessionCommands = currentCommands.filter((c) => !serverCommandSet.has(c));
+          this.commandHistorySignal.set([...commands, ...newSessionCommands]);
+        }),
+      );
   }
 
   /**
@@ -481,6 +514,7 @@ export class TerminalService implements OnDestroy {
 
   /**
    * Get suggestions for autocomplete based on partial input
+   * @deprecated Use getAutocompleteSuggestions instead
    */
   getSuggestions(partial: string): Command[] {
     const commands = this.commandsCache$.getValue();
@@ -491,6 +525,177 @@ export class TerminalService implements OnDestroy {
         cmd.name.toUpperCase().startsWith(upperPartial) ||
         cmd.aliases?.some((alias) => alias.toUpperCase().startsWith(upperPartial)),
     );
+  }
+
+  /**
+   * Get autocomplete suggestions based on current input
+   * Handles commands, parameters, and command history
+   */
+  getAutocompleteSuggestions(input: string, limit = 10): AutocompleteSuggestion[] {
+    const trimmedInput = input.trim();
+    const tokens = trimmedInput.split(/\s+/);
+    const commands = this.commandsCache$.getValue();
+    const suggestions: AutocompleteSuggestion[] = [];
+
+    // Empty input - show examples and recent history
+    if (!trimmedInput) {
+      // Add recent history first
+      const history = this.commandHistorySignal();
+      for (let i = 0; i < Math.min(3, history.length); i++) {
+        suggestions.push({
+          text: history[i],
+          display: history[i],
+          type: 'history',
+          description: 'Recent command',
+          insert: history[i],
+        });
+      }
+
+      // Add example commands
+      const examples: AutocompleteSuggestion[] = [
+        {
+          text: 'AAPL HP',
+          display: 'AAPL HP',
+          type: 'example',
+          description: 'Historical prices for Apple',
+          insert: 'AAPL HP',
+        },
+        {
+          text: 'HELP',
+          display: 'HELP',
+          type: 'example',
+          description: 'Show available commands',
+          insert: 'HELP',
+        },
+        {
+          text: 'AAPL GP',
+          display: 'AAPL GP',
+          type: 'example',
+          description: 'Price chart for Apple',
+          insert: 'AAPL GP',
+        },
+      ];
+      suggestions.push(...examples);
+      return suggestions.slice(0, limit);
+    }
+
+    const lastToken = tokens[tokens.length - 1].toUpperCase();
+    const hasSymbol = tokens.length > 0 && this.looksLikeSymbol(tokens[0]);
+
+    // Check if last token starts with '-' (parameter)
+    if (lastToken.startsWith('-')) {
+      // Find the command to get its parameters
+      const commandToken = hasSymbol && tokens.length > 1 ? tokens[1].toUpperCase() : tokens[0].toUpperCase();
+      const command = commands.find((c) => c.name === commandToken);
+
+      if (command?.parametersSchema) {
+        try {
+          const schema = JSON.parse(command.parametersSchema);
+          const properties = schema.properties || {};
+          const paramPartial = lastToken.slice(1); // Remove the '-'
+
+          for (const [paramName, paramDef] of Object.entries(properties)) {
+            const def = paramDef as { type?: string; default?: string; enum?: string[]; description?: string };
+            if (paramName.toUpperCase().startsWith(paramPartial.toUpperCase())) {
+              suggestions.push({
+                text: `-${paramName}`,
+                display: `-${paramName}${def.default ? ` (default: ${def.default})` : ''}`,
+                type: 'parameter',
+                description: def.description || `Parameter for ${command.name}`,
+                insert: `-${paramName} `,
+                paramType: def.type,
+                choices: def.enum,
+                default: def.default,
+              });
+            }
+          }
+        } catch {
+          // Invalid JSON schema, skip parameter suggestions
+        }
+      }
+      return suggestions.slice(0, limit);
+    }
+
+    // If we have a symbol, filter to commands that require symbols
+    if (hasSymbol && tokens.length === 1) {
+      // User typed just a symbol, suggest commands
+      for (const cmd of commands.filter((c) => c.requiresSymbol)) {
+        suggestions.push({
+          text: cmd.name,
+          display: cmd.name,
+          type: 'command',
+          description: cmd.description,
+          category: cmd.category,
+          insert: `${tokens[0]} ${cmd.name}`,
+          requiresSymbol: true,
+          syntax: `SYMBOL ${cmd.name}`,
+        });
+        if (suggestions.length >= limit) break;
+      }
+      return suggestions;
+    }
+
+    // Match commands and aliases
+    for (const cmd of commands) {
+      if (cmd.name.toUpperCase().startsWith(lastToken)) {
+        const insertText = hasSymbol ? `${tokens.slice(0, -1).join(' ')} ${cmd.name}` : cmd.name;
+        suggestions.push({
+          text: cmd.name,
+          display: cmd.name,
+          type: 'command',
+          description: cmd.description,
+          category: cmd.category,
+          insert: insertText,
+          requiresSymbol: cmd.requiresSymbol,
+          syntax: cmd.requiresSymbol ? `SYMBOL ${cmd.name}` : cmd.name,
+        });
+      }
+
+      // Check aliases
+      if (cmd.aliases) {
+        for (const alias of cmd.aliases) {
+          if (alias.toUpperCase().startsWith(lastToken)) {
+            const insertText = hasSymbol ? `${tokens.slice(0, -1).join(' ')} ${alias}` : alias;
+            suggestions.push({
+              text: alias,
+              display: `${alias} → ${cmd.name}`,
+              type: 'alias',
+              description: cmd.description,
+              category: cmd.category,
+              insert: insertText,
+              requiresSymbol: cmd.requiresSymbol,
+            });
+          }
+        }
+      }
+
+      if (suggestions.length >= limit) break;
+    }
+
+    // Add matching history entries
+    const history = this.commandHistorySignal();
+    for (const cmd of history) {
+      if (cmd.toUpperCase().startsWith(trimmedInput.toUpperCase()) && !suggestions.find((s) => s.insert === cmd)) {
+        suggestions.push({
+          text: cmd,
+          display: cmd,
+          type: 'history',
+          description: 'Recent command',
+          insert: cmd,
+        });
+        if (suggestions.length >= limit) break;
+      }
+    }
+
+    return suggestions.slice(0, limit);
+  }
+
+  /**
+   * Check if a token looks like a stock symbol
+   */
+  private looksLikeSymbol(token: string): boolean {
+    // Stock symbols are 1-5 uppercase letters, optionally with a suffix like .A or .B
+    return /^[A-Za-z]{1,5}(\.[A-Za-z])?$/.test(token);
   }
 
   // ============================================================================

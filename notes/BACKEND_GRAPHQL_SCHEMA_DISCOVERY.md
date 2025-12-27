@@ -227,6 +227,87 @@ query GetCommand($name: String!) {
 
 ---
 
+### ❌ `autocomplete` (NOT YET IMPLEMENTED - REQUESTED)
+
+> **Status:** This query is NOT in the backend schema yet. Frontend has client-side fallback.
+
+Get intelligent autocomplete suggestions based on partial input.
+
+```graphql
+query Autocomplete($input: String!, $limit: Int) {
+  autocomplete(input: $input, limit: $limit) {
+    text
+    display
+    type
+    description
+    category
+    insert
+    requiresSymbol
+    syntax
+    paramType
+    choices
+    default
+  }
+}
+```
+
+**Parameters:**
+- `input` (String, required): Current terminal input text
+- `limit` (Int, optional): Max suggestions (default: 10)
+
+**Response Types:**
+- `type`: `command`, `alias`, `parameter`, `example`, `symbol`, `history`
+- When input ends with `-`, return parameter suggestions for the command
+- When input is empty, return examples and recent history
+- When input contains a symbol, filter to symbol-requiring commands
+
+**Frontend Currently Uses:**
+Client-side suggestion generator in `terminal.service.ts:getAutocompleteSuggestions()` that provides:
+- Recent command history
+- Command name/alias matching
+- Parameter suggestions (parsed from `parametersSchema`)
+
+---
+
+### ❌ `terminalSyntaxHelp` (NOT YET IMPLEMENTED - REQUESTED)
+
+> **Status:** This query is NOT in the backend schema yet.
+
+Get terminal syntax grammar and examples for help display.
+
+```graphql
+query GetTerminalSyntaxHelp {
+  terminalSyntaxHelp {
+    grammar
+    examples
+    naturalLanguageExamples
+  }
+}
+```
+
+**Expected Response:**
+```json
+{
+  "terminalSyntaxHelp": {
+    "grammar": [
+      "COMMAND                    → System command (HELP, CMD, HIST)",
+      "SYMBOL COMMAND             → Symbol command (AAPL HP, MSFT DES)",
+      "SYMBOL SYMBOL... COMMAND   → Multi-symbol command (AAPL MSFT COMPARE)"
+    ],
+    "examples": [
+      "AAPL HP              → Historical prices for AAPL",
+      "AAPL DES             → Company description for AAPL"
+    ],
+    "naturalLanguageExamples": [
+      "show me a chart of apple stock",
+      "compare revenue of google and microsoft"
+    ]
+  }
+}
+```
+
+---
+
 ### ✅ `commandHistory` (NOW IMPLEMENTED)
 
 > **Status:** IMPLEMENTED as of 2025-12-26. Requires server restart to take effect.
