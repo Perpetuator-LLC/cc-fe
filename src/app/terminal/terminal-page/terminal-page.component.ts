@@ -1,16 +1,18 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
+import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
 import { TerminalBarComponent } from '../terminal-bar/terminal-bar.component';
 import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashboard.component';
-import { CommandHistoryItem } from '../terminal.types';
+import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
 
 @Component({
   selector: 'app-terminal-page',
@@ -30,11 +32,27 @@ import { CommandHistoryItem } from '../terminal.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalPageComponent implements OnInit, OnDestroy {
+  private sanitizer = inject(DomSanitizer);
+
   selectedTabIndex = 0;
   historyLoading = signal(false);
+  helpLoading = signal(false);
+  help: TerminalHelp = {
+    overview: '',
+    categories: [],
+    aiNote: 'You can also type natural language questions and our AI will interpret them for you.',
+  };
   private subscriptions = new Subscription();
 
   constructor(protected terminalService: TerminalService) {}
+
+  /**
+   * Convert markdown text to safe HTML for rendering.
+   */
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
 
   ngOnInit(): void {
     // Load available commands from backend registry
@@ -46,6 +64,24 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
         error: () => {
           // Commands query failed - terminal still works via WebSocket
           console.debug('Commands registry not available - using WebSocket commands');
+        },
+      }),
+    );
+
+    // Load terminal help content
+    this.loadTerminalHelp();
+  }
+
+  private loadTerminalHelp(): void {
+    this.helpLoading.set(true);
+    this.subscriptions.add(
+      this.terminalService.loadTerminalHelp().subscribe({
+        next: (help) => {
+          this.help = help;
+          this.helpLoading.set(false);
+        },
+        error: () => {
+          this.helpLoading.set(false);
         },
       }),
     );

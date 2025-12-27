@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,8 +19,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
-import { HistoryEntry, AutocompleteSuggestion } from '../terminal.types';
+import { HistoryEntry, AutocompleteSuggestion, TerminalHints } from '../terminal.types';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
 import { DataTableComponent } from '../data-table/data-table.component';
 
@@ -46,12 +48,20 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild('historyContainer') historyContainer!: ElementRef<HTMLDivElement>;
 
   private dialogRef = inject(MatDialogRef<TerminalModalComponent>);
+  private sanitizer = inject(DomSanitizer);
   protected terminalService = inject(TerminalService);
 
   currentCommand = '';
   suggestions: AutocompleteSuggestion[] = [];
   selectedSuggestionIndex = -1;
   showSuggestions = false;
+  hints: TerminalHints = {
+    quickExamples: ['AAPL GP', 'HELP', 'MSFT DES'],
+    placeholderText: 'Type a command or ask a question...',
+    emptyStateMessage: 'Try: AAPL GP, HELP, or ask anything',
+    dashboardHint: '',
+    chartSuggestion: 'AAPL GP',
+  };
   private subscriptions = new Subscription();
   private historyIndex = -1;
   private inputSubject = new Subject<string>();
@@ -66,7 +76,22 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     return hist.length > 0 && (hist[hist.length - 1].isLoading ?? false);
   }
 
+  /**
+   * Convert markdown text to safe HTML for rendering.
+   */
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
   ngOnInit(): void {
+    // Load terminal hints from backend
+    this.subscriptions.add(
+      this.terminalService.loadTerminalHints().subscribe((hints) => {
+        this.hints = hints;
+      }),
+    );
+
     // Load user command history for up/down arrow navigation
     this.subscriptions.add(this.terminalService.loadCommandHistory(100).subscribe());
 

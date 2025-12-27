@@ -22,7 +22,7 @@
         <div class="empty-state">
           <mat-icon>psychology</mat-icon>
           <p>Type a command or ask a question</p>
-          <span class="examples">Try: <code>AAPL GP</code>, <code>HELP</code>, or ask anything</span>
+          <span class="examples" [innerHTML]="markdownToHtml(hints.emptyStateMessage)"></span>
         </div>
       } @else {
         @for (item of history; track item.id ?? $index) {
@@ -55,7 +55,7 @@
               <div class="output">
                 @if (item.result.message) {
                   <div class="message" [class.error]="!item.result.success">
-                    {{ item.result.message }}
+                    <span class="message-content" [innerHTML]="markdownToHtml(item.result.message)"></span>
                     <button
                       mat-icon-button
                       class="copy-btn"
@@ -135,7 +135,7 @@
           (focus)="onInputFocus()"
           (blur)="onInputBlur()"
           [disabled]="isProcessing"
-          placeholder="Enter command or ask a question..."
+          [placeholder]="hints.placeholderText"
           autocomplete="off"
           spellcheck="false"
         />

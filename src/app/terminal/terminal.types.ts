@@ -115,6 +115,43 @@ export interface AutocompleteSuggestion {
 }
 
 // ============================================================================
+// Terminal Hints & Help Types (from backend)
+// ============================================================================
+
+export interface TerminalHints {
+  quickExamples: string[];
+  placeholderText: string;
+  emptyStateMessage: string;
+  dashboardHint: string;
+  chartSuggestion: string;
+}
+
+export interface TerminalHelp {
+  overview: string;
+  categories: CategoryHelp[];
+  aiNote: string;
+}
+
+export interface CategoryHelp {
+  name: string;
+  categoryKey: string;
+  commands: CommandHelp[];
+}
+
+export interface CommandHelp {
+  name: string;
+  description: string;
+  exampleUsage: string;
+  aliases: string[];
+}
+
+export interface TerminalSyntaxHelp {
+  grammar: string[];
+  examples: string[];
+  naturalLanguageExamples: string[];
+}
+
+// ============================================================================
 // History Types (matches CommandExecutionType from schema)
 // ============================================================================
 
