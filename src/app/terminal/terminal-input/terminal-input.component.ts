@@ -19,7 +19,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
-import { HistoryEntry, TerminalConnectionState, TerminalHints } from '../terminal.types';
+import {
+  HistoryEntry,
+  TerminalConnectionState,
+  TerminalHints,
+  ChartControls,
+  CommandResult,
+  ChartResultData,
+} from '../terminal.types';
 import { ChartPanelComponent } from '../chart-panel/chart-panel.component';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { MessageService } from '../../message.service';
@@ -318,5 +325,36 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
       const el = this.historyContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     }
+  }
+
+  /**
+   * Extract chartControls from a CommandResult.
+   * Chart controls may be in data.chartControls or metadata.chartControls
+   */
+  getChartControls(result: CommandResult | undefined): ChartControls | undefined {
+    if (!result) return undefined;
+
+    // Try data.chartControls first (for chart responses)
+    if (result.data && typeof result.data === 'object') {
+      const data = result.data as ChartResultData;
+      if (data.chartControls) {
+        return data.chartControls;
+      }
+    }
+
+    // Fall back to metadata.chartControls
+    if (result.metadata?.['chartControls']) {
+      return result.metadata['chartControls'] as ChartControls;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Handle chart control changes - execute new command with updated period/interval
+   */
+  onChartCommand(command: string): void {
+    this.currentInput = command;
+    this.executeCommand();
   }
 }
