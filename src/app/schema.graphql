@@ -180,6 +180,21 @@ type Query {
     """Ordering"""
     orderBy: String
   ): DiscountedCashFlowAnalysisTypeConnection
+
+  """Get list of all GICS industry names"""
+  gicsIndustries: [String]
+
+  """Get list of all exchange names"""
+  exchanges: [String]
+
+  """Get all symbols in a sector from system catalog (sorted by market cap)"""
+  allSectorSymbols(sector: String!, limit: Int = 100, orderBy: String = "marketCap"): [CatalogSymbolType]
+
+  """Get all symbols in an industry from system catalog"""
+  allIndustrySymbols(industry: String!, limit: Int = 100, orderBy: String = "marketCap"): [CatalogSymbolType]
+
+  """Get all symbols on an exchange from system catalog"""
+  exchangeSymbols(exchange: String!, limit: Int = 100, orderBy: String = "marketCap"): [CatalogSymbolType]
   schedule(
     """The ID of the object"""
     id: ID!
@@ -2264,6 +2279,19 @@ type ListingStatusType {
   lastUpdated: DateTime!
   isUpdating: Boolean!
   updateCount: Int!
+}
+
+"""Symbol from the system catalog with sector/industry info from Company."""
+type CatalogSymbolType {
+  symbol: String!
+  displayName: String
+  assetType: String
+  exchange: String
+  sector: String
+  industry: String
+  marketCap: Float
+  country: String
+  currency: String
 }
 
 """GraphQL type for DynamicSchedule model."""

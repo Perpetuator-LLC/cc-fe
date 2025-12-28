@@ -2,6 +2,26 @@ Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is en
 
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
+# 🎯 AGENT WORKFLOW ESSENTIALS
+
+## Log File Reading - NON-NEGOTIABLE
+**Terminal output is ALWAYS truncated.** After running any terminal command:
+1. **ALWAYS** use `2>&1 | tee logs/<name>.log` 
+2. **IMMEDIATELY** call `read_file` on the log file to see actual output
+3. **NEVER** assume success from truncated output
+
+## Write Compliant Code FIRST
+Don't iterate - get it right the first time by checking:
+- **SCSS**: 4px grid for spacing (4, 8, 12, 16, 20, 24...), 2px grid for fonts (10, 12, 14, 16...), MD3 tokens for colors
+- **TypeScript**: Match interface types exactly, don't add missing type values to unions without checking the interface
+- **Backend Data**: If backend provides data (sectors, industries, exchanges, periods, intervals), LOAD IT - never hardcode
+
+## Union Types Must Match Interface Definitions
+When you create computed properties with union type assertions like `'sector' as const`, ensure the interface actually includes that type. Check the interface FIRST before writing code.
+
+## Icon Visibility in Dark Mode
+Always set explicit color on icons: `color: var(--md-sys-color-on-surface-variant)` - don't assume inheritance works.
+
 # ⚠️ CRITICAL: Before Writing ANY Code
 
 ## Terminal Commands - READ THE OUTPUT!
