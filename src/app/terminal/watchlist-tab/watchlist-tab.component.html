@@ -9,39 +9,90 @@
     <div class="watchlist-layout">
       <!-- Left Sidebar: Symbol List -->
       <div class="symbol-sidebar">
-        <!-- Watchlist Selector Dropdown -->
+        <!-- Watchlist Selector with Hierarchical Menu -->
         <div class="sidebar-header">
-          <mat-form-field appearance="outline" class="watchlist-selector">
-            <mat-label>Watchlist</mat-label>
-            <mat-select [value]="selectedWatchlistId()" (selectionChange)="onWatchlistChange($event.value)">
-              <mat-option value="recent">
-                <mat-icon>schedule</mat-icon>
-                Recent ({{ (watchlistService.recentSymbols() || []).length }})
-              </mat-option>
-              @if (watchlistService.searchHistory(); as history) {
-                <mat-option [value]="history.uuid">
-                  <mat-icon>history</mat-icon>
-                  {{ history.name }} ({{ history.itemCount }})
-                </mat-option>
+          <button mat-button [matMenuTriggerFor]="watchlistMenu" class="watchlist-selector-btn">
+            <mat-icon>{{ getSelectedWatchlistIcon() }}</mat-icon>
+            <span class="watchlist-name">{{ getSelectedWatchlistName() }}</span>
+            <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+          </button>
+          <mat-menu #watchlistMenu="matMenu" class="watchlist-menu">
+            <!-- User Lists -->
+            <div
+              mat-menu-item
+              (click)="onWatchlistChange('recent')"
+              [class.active]="selectedWatchlistId() === 'recent'"
+            >
+              <mat-icon>schedule</mat-icon>
+              <span>Recent ({{ (watchlistService.recentSymbols() || []).length }})</span>
+            </div>
+            @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
+              <div
+                mat-menu-item
+                (click)="onWatchlistChange(watchlist.uuid)"
+                [class.active]="selectedWatchlistId() === watchlist.uuid"
+              >
+                <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
+                <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
+              </div>
+            }
+
+            <!-- Categories Section -->
+            <mat-divider />
+            <div class="menu-section-label">Categories</div>
+
+            <!-- Sectors Submenu -->
+            <button mat-menu-item [matMenuTriggerFor]="sectorsMenu">
+              <mat-icon>category</mat-icon>
+              <span>Sectors</span>
+            </button>
+
+            <!-- Industries Submenu (when backend supports) -->
+            <button mat-menu-item [matMenuTriggerFor]="industriesMenu" [disabled]="!hasIndustries()">
+              <mat-icon>business</mat-icon>
+              <span>Industries</span>
+            </button>
+
+            <!-- Exchanges Submenu (when backend supports) -->
+            <button mat-menu-item [matMenuTriggerFor]="exchangesMenu" [disabled]="!hasExchanges()">
+              <mat-icon>account_balance</mat-icon>
+              <span>Exchanges</span>
+            </button>
+          </mat-menu>
+
+          <!-- Nested Sectors Menu -->
+          <mat-menu #sectorsMenu="matMenu" class="category-submenu">
+            @if (sectorLists().length === 0) {
+              <button mat-menu-item disabled>
+                <span>Loading sectors...</span>
+              </button>
+            } @else {
+              @for (sector of sectorLists(); track sector.id) {
+                <button
+                  mat-menu-item
+                  (click)="onWatchlistChange(sector.id)"
+                  [class.active]="selectedWatchlistId() === sector.id"
+                >
+                  <span>{{ sector.name }}</span>
+                </button>
               }
-              @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
-                <mat-option [value]="watchlist.uuid">
-                  <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
-                  {{ watchlist.name }} ({{ watchlist.itemCount }})
-                </mat-option>
-              }
-              <!-- Sector System Lists -->
-              <mat-divider />
-              <mat-optgroup label="Sectors">
-                @for (sector of sectorLists(); track sector.id) {
-                  <mat-option [value]="sector.id">
-                    <mat-icon>category</mat-icon>
-                    {{ sector.name }}
-                  </mat-option>
-                }
-              </mat-optgroup>
-            </mat-select>
-          </mat-form-field>
+            }
+          </mat-menu>
+
+          <!-- Nested Industries Menu (placeholder - needs backend) -->
+          <mat-menu #industriesMenu="matMenu" class="category-submenu">
+            <button mat-menu-item disabled>
+              <span>Coming soon...</span>
+            </button>
+          </mat-menu>
+
+          <!-- Nested Exchanges Menu (placeholder - needs backend) -->
+          <mat-menu #exchangesMenu="matMenu" class="category-submenu">
+            <button mat-menu-item disabled>
+              <span>Coming soon...</span>
+            </button>
+          </mat-menu>
+
           <button mat-icon-button matTooltip="Create Watchlist" (click)="toggleCreateForm()">
             <mat-icon>add</mat-icon>
           </button>
@@ -151,44 +202,40 @@
                 (keydown.enter)="selectSymbol(item)"
               >
                 <div class="symbol-main">
-                  <mat-icon class="asset-icon">{{ getAssetIcon(item.assetType) }}</mat-icon>
                   <div class="symbol-details">
-                    <div class="symbol-name-row">
+                    <!-- Row 1: Symbol, Exchange, Market Cap -->
+                    <div class="symbol-row-1">
                       <span class="symbol">{{ item.symbol }}</span>
+                      @if (item.exchange) {
+                        <span class="exchange-tag" [matTooltip]="'Exchange: ' + item.exchange">{{
+                          item.exchange
+                        }}</span>
+                      }
                       @if (item.marketCap) {
-                        <span class="market-cap" matTooltip="Market Cap">
-                          {{ formatMarketCap(item.marketCap) }}
-                        </span>
+                        <span class="market-cap" matTooltip="Market Cap">{{ formatMarketCap(item.marketCap) }}</span>
                       }
                     </div>
-                    @if (item.displayName && item.displayName !== item.symbol) {
-                      <span class="name">{{ item.displayName }}</span>
-                    }
-                    <!-- Symbol Chips: Exchange, Sector, Industry -->
-                    <div class="symbol-chips">
-                      @if (item.exchange) {
-                        <span class="chip chip-exchange" [matTooltip]="'Exchange: ' + item.exchange">
-                          {{ item.exchange }}
-                        </span>
+                    <!-- Row 2: Company Name + Sector/Industry chips -->
+                    <div class="symbol-row-2">
+                      @if (item.displayName && item.displayName !== item.symbol) {
+                        <span class="name">{{ item.displayName }}</span>
                       }
                       @if (item.sector) {
-                        <span class="chip chip-sector" [matTooltip]="'Sector: ' + item.sector">
-                          {{ item.sector }}
-                        </span>
+                        <span class="chip-inline chip-sector" [matTooltip]="'Sector: ' + item.sector">{{
+                          item.sector
+                        }}</span>
                       }
                       @if (item.industry) {
-                        <span class="chip chip-industry" [matTooltip]="'Industry: ' + item.industry">
-                          {{ item.industry }}
-                        </span>
+                        <span class="chip-inline chip-industry" [matTooltip]="'Industry: ' + item.industry">{{
+                          item.industry
+                        }}</span>
                       }
                     </div>
                   </div>
                 </div>
                 <div class="symbol-actions">
                   @if (item.accessCount && item.accessCount > 1) {
-                    <span class="access-count" matTooltip="Times accessed">
-                      {{ item.accessCount }}
-                    </span>
+                    <span class="access-count" matTooltip="Times accessed">{{ item.accessCount }}</span>
                   }
                   <button
                     mat-icon-button
@@ -206,11 +253,13 @@
                         <span>{{ action.label }}</span>
                       </button>
                     }
-                    <mat-divider />
-                    <button mat-menu-item (click)="removeSymbol(item)" class="delete-action">
-                      <mat-icon>delete</mat-icon>
-                      <span>Remove</span>
-                    </button>
+                    @if (canRemoveFromWatchlist()) {
+                      <mat-divider />
+                      <button mat-menu-item (click)="removeSymbol(item)" class="delete-action">
+                        <mat-icon>delete</mat-icon>
+                        <span>Remove</span>
+                      </button>
+                    }
                   </mat-menu>
                 </div>
               </div>
@@ -267,58 +316,66 @@
             </div>
           </div>
 
-          <!-- Period/Interval Controls -->
-          <div class="chart-controls-bar">
-            <mat-form-field appearance="outline" class="control-field">
-              <mat-label>Period</mat-label>
-              <mat-select
-                [value]="selectedPeriod()"
-                (selectionChange)="onPeriodChange($event.value)"
-                [disabled]="chartLoading()"
-              >
-                @for (period of periodOptions(); track period) {
-                  <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+          <!-- Period/Interval Controls - only for GP command -->
+          @if (currentCommand() === 'GP') {
+            <div class="chart-controls-bar">
+              <mat-form-field appearance="outline" class="control-field">
+                <mat-label>Period</mat-label>
+                <mat-select
+                  [value]="selectedPeriod()"
+                  (selectionChange)="onPeriodChange($event.value)"
+                  [disabled]="chartLoading()"
+                >
+                  @for (period of periodOptions(); track period) {
+                    <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" class="control-field">
-              <mat-label>Interval</mat-label>
-              <mat-select
-                [value]="selectedInterval()"
-                (selectionChange)="onIntervalChange($event.value)"
-                [disabled]="chartLoading()"
-              >
-                @for (interval of intervalOptions(); track interval) {
-                  <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+              <mat-form-field appearance="outline" class="control-field">
+                <mat-label>Interval</mat-label>
+                <mat-select
+                  [value]="selectedInterval()"
+                  (selectionChange)="onIntervalChange($event.value)"
+                  [disabled]="chartLoading()"
+                >
+                  @for (interval of intervalOptions(); track interval) {
+                    <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-            <button mat-icon-button matTooltip="Refresh Chart" (click)="retryChart()" [disabled]="chartLoading()">
-              <mat-icon>refresh</mat-icon>
-            </button>
-          </div>
+              <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            </div>
+          }
 
-          <!-- Chart Container -->
-          <div class="chart-container">
+          <!-- Content Container -->
+          <div class="content-container">
             @if (chartLoading()) {
-              <div class="chart-loading">
+              <div class="content-loading">
                 <mat-spinner diameter="40" />
-                <p>Loading chart...</p>
+                <p>Loading {{ currentCommand() === 'GP' ? 'chart' : 'data' }}...</p>
               </div>
-            } @else if (chartOptions()) {
+            } @else if (chartOptions() && currentCommand() === 'GP') {
+              <!-- Chart display -->
               <div echarts [options]="chartOptions()!" class="chart"></div>
+            } @else if (dataContent()) {
+              <!-- Data display for HP, DES, QUOTE -->
+              <div class="data-content">
+                <div class="data-message" [innerHTML]="dataContent()"></div>
+              </div>
             } @else if (chartError()) {
-              <div class="chart-error">
+              <div class="content-error">
                 <mat-icon>error_outline</mat-icon>
                 <p>{{ chartError() }}</p>
                 <button mat-stroked-button (click)="retryChart()">Retry</button>
               </div>
             } @else {
-              <div class="chart-placeholder">
-                <mat-icon>insert_chart</mat-icon>
-                <p>Loading chart for {{ selectedSymbol() }}...</p>
+              <div class="content-placeholder">
+                <mat-icon>{{ currentCommand() === 'GP' ? 'insert_chart' : 'info' }}</mat-icon>
+                <p>Loading {{ currentCommand() }} for {{ selectedSymbol() }}...</p>
               </div>
             }
           </div>

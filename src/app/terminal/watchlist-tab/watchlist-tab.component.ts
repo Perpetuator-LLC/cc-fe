@@ -100,6 +100,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartLoading = signal(false);
   chartOptions = signal<EChartsOption | null>(null);
   chartError = signal<string | null>(null);
+  // Data content for non-chart commands (HP, DES, QUOTE)
+  dataContent = signal<string | null>(null);
 
   // Chart controls - extended options from backend documentation
   selectedPeriod = signal('1Y');
@@ -253,12 +255,117 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   /**
    * Check if current watchlist allows adding symbols
+   * System categories (sectors, industries, exchanges) are read-only
    */
   canAddToWatchlist = computed<boolean>(() => {
     const id = this.selectedWatchlistId();
-    // Can't add to recent (auto-populated) but can add to search history and custom
-    return id !== 'recent';
+    // Can't add to recent (auto-populated) or system categories
+    return id !== 'recent' && !this.isSystemCategory(id);
   });
+
+  /**
+   * Check if current watchlist allows removing symbols
+   * System categories are read-only
+   */
+  canRemoveFromWatchlist(): boolean {
+    const id = this.selectedWatchlistId();
+    // Can't remove from system categories (sectors, industries, exchanges)
+    return !this.isSystemCategory(id);
+  }
+
+  /**
+   * Check if a watchlist ID represents a system category
+   */
+  isSystemCategory(id: string): boolean {
+    return id.startsWith('sector:') || id.startsWith('industry:') || id.startsWith('exchange:');
+  }
+
+  /**
+   * Get the display name for the currently selected watchlist
+   */
+  getSelectedWatchlistName(): string {
+    const id = this.selectedWatchlistId();
+
+    if (id === 'recent') {
+      return `Recent (${(this.watchlistService.recentSymbols() || []).length})`;
+    }
+
+    // Check system categories
+    if (id.startsWith('sector:')) {
+      return id.replace('sector:', '');
+    }
+    if (id.startsWith('industry:')) {
+      return id.replace('industry:', '');
+    }
+    if (id.startsWith('exchange:')) {
+      return id.replace('exchange:', '');
+    }
+
+    // Check search history
+    const searchHistory = this.watchlistService.searchHistory();
+    if (searchHistory && searchHistory.uuid === id) {
+      return `${searchHistory.name} (${searchHistory.itemCount})`;
+    }
+
+    // Check custom watchlists
+    const customWatchlists = this.watchlistService.customWatchlists() || [];
+    const customList = customWatchlists.find((wl) => wl.uuid === id);
+    if (customList) {
+      return `${customList.name} (${customList.itemCount})`;
+    }
+
+    return 'Select Watchlist';
+  }
+
+  /**
+   * Get the icon for the currently selected watchlist
+   */
+  getSelectedWatchlistIcon(): string {
+    const id = this.selectedWatchlistId();
+
+    if (id === 'recent') {
+      return 'schedule';
+    }
+
+    if (id.startsWith('sector:')) {
+      return 'category';
+    }
+    if (id.startsWith('industry:')) {
+      return 'business';
+    }
+    if (id.startsWith('exchange:')) {
+      return 'account_balance';
+    }
+
+    const searchHistory = this.watchlistService.searchHistory();
+    if (searchHistory && searchHistory.uuid === id) {
+      return 'history';
+    }
+
+    const customWatchlists = this.watchlistService.customWatchlists() || [];
+    const customList = customWatchlists.find((wl) => wl.uuid === id);
+    if (customList) {
+      return this.getWatchlistIcon(customList.watchlistType);
+    }
+
+    return 'list';
+  }
+
+  /**
+   * Check if industries list is available (backend support)
+   * TODO: Enable when backend implements industryList query
+   */
+  hasIndustries(): boolean {
+    return false; // Disabled until backend implements
+  }
+
+  /**
+   * Check if exchanges list is available (backend support)
+   * TODO: Enable when backend implements exchangeList query
+   */
+  hasExchanges(): boolean {
+    return false; // Disabled until backend implements
+  }
 
   constructor(
     protected watchlistService: WatchlistService,
@@ -343,7 +450,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Subscribe to command results from terminal to update chart
+   * Subscribe to command results from terminal to update chart or data display
    */
   private subscribeToCommandResults(): void {
     this.subscriptions.add(
@@ -358,28 +465,113 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         this.extractChartControls(result);
 
         // Check if this result is for our selected symbol
-        if (resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase()) {
+        const isForSelectedSymbol =
+          resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase();
+
+        if (isForSelectedSymbol || this.chartLoading()) {
           this.chartLoading.set(false);
 
-          if (result.success && result.chartOptions) {
-            this.chartOptions.set(result.chartOptions as EChartsOption);
-            this.chartError.set(null);
-          } else if (result.success && result.outputType === 'chart' && !result.chartOptions) {
-            // Chart result but no options - might be fetching
-            this.chartError.set('Chart data is loading...');
-          } else if (!result.success) {
-            this.chartError.set(result.message || 'Failed to load chart');
+          if (result.success) {
+            if (result.outputType === 'chart' && result.chartOptions) {
+              // Chart result
+              this.chartOptions.set(result.chartOptions as EChartsOption);
+              this.dataContent.set(null);
+              this.chartError.set(null);
+            } else if (result.outputType === 'data' || result.outputType === 'message') {
+              // Data result (HP, DES, QUOTE, etc.)
+              this.chartOptions.set(null);
+              this.chartError.set(null);
+              // Format the data content for display
+              const content = this.formatDataResult(result);
+              this.dataContent.set(content);
+            } else if (result.outputType === 'chart' && !result.chartOptions) {
+              // Chart result but no options - might be fetching
+              this.chartError.set('Chart data is loading...');
+              this.chartOptions.set(null);
+              this.dataContent.set(null);
+            } else if (result.message) {
+              // Generic message result
+              this.dataContent.set(`<p>${result.message}</p>`);
+              this.chartOptions.set(null);
+              this.chartError.set(null);
+            }
+          } else {
+            this.chartError.set(result.message || 'Command failed');
             this.chartOptions.set(null);
+            this.dataContent.set(null);
           }
-        } else if (this.chartLoading() && result.outputType === 'chart' && result.chartOptions) {
-          // Fallback: if we're loading a chart and this result has chart options, use it
-          // This handles cases where symbol matching might fail due to case or format differences
-          this.chartLoading.set(false);
-          this.chartOptions.set(result.chartOptions as EChartsOption);
-          this.chartError.set(null);
         }
       }),
     );
+  }
+
+  /**
+   * Format data result for display
+   */
+  private formatDataResult(result: CommandResult): string {
+    const parts: string[] = [];
+
+    // Add message if present
+    if (result.message) {
+      parts.push(`<p class="result-message">${result.message}</p>`);
+    }
+
+    // Format data based on type
+    if (result.data) {
+      // Check if it's a simple object we can display as key-value pairs
+      if (typeof result.data === 'object' && !Array.isArray(result.data)) {
+        const dataObj = result.data as Record<string, unknown>;
+        // Filter out internal fields and format nicely
+        const displayFields = Object.entries(dataObj).filter(
+          ([key]) => !key.startsWith('_') && key !== 'chartControls',
+        );
+
+        if (displayFields.length > 0) {
+          parts.push('<div class="data-table">');
+          for (const [key, value] of displayFields) {
+            const label = this.formatFieldLabel(key);
+            const displayValue = this.formatFieldValue(value);
+            parts.push(`<div class="data-row"><span class="data-label">${label}</span><span class="data-value">
+            ${displayValue}</span></div>`);
+          }
+          parts.push('</div>');
+        }
+      } else if (Array.isArray(result.data)) {
+        // Array data - could be table data
+        parts.push(`<p><em>Array data with ${result.data.length} items</em></p>`);
+      }
+    }
+
+    return parts.join('') || '<p>No data available</p>';
+  }
+
+  /**
+   * Format a field label for display
+   */
+  private formatFieldLabel(key: string): string {
+    // Convert camelCase to Title Case
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  }
+
+  /**
+   * Format a field value for display
+   */
+  private formatFieldValue(value: unknown): string {
+    if (value === null || value === undefined) return '—';
+    if (typeof value === 'number') {
+      // Format large numbers with commas
+      if (value > 1000000000) return (value / 1000000000).toFixed(2) + 'B';
+      if (value > 1000000) return (value / 1000000).toFixed(2) + 'M';
+      if (value > 1000) return value.toLocaleString();
+      return value.toString();
+    }
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
   }
 
   /**
@@ -483,13 +675,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load chart for symbol
+   * Load chart or data for symbol
    */
   private loadChart(symbol: string, command: string): void {
-    console.debug('[WatchlistTab] Loading chart:', { symbol, command });
     this.chartLoading.set(true);
     this.chartOptions.set(null);
     this.chartError.set(null);
+    this.dataContent.set(null);
     this.currentCommand.set(command);
 
     // For GP command, include period and interval
@@ -500,7 +692,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       fullCommand = `${symbol} GP -period ${period} -interval ${interval}`;
     }
 
-    console.debug('[WatchlistTab] Executing command:', fullCommand);
     this.terminalService.execute(fullCommand);
   }
 
