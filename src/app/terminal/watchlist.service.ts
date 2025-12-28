@@ -361,7 +361,7 @@ export class WatchlistService {
    * @param limit - Max number of symbols
    * @param orderBy - Sort order: 'marketCap', 'accessCount', 'lastAccessedAt', or 'symbol'
    */
-  loadRecentSymbols(limit = 10, orderBy = 'marketCap'): Observable<WatchlistItem[]> {
+  loadRecentSymbols(limit = 10, orderBy = 'lastAccessedAt'): Observable<WatchlistItem[]> {
     return this.apollo
       .query<RecentSymbolsResponse>({
         query: GET_RECENT_SYMBOLS,
@@ -373,7 +373,10 @@ export class WatchlistService {
         tap((symbols) => {
           this._recentSymbols.set(symbols);
         }),
-        catchError(() => of([])),
+        catchError((error) => {
+          console.error('[WatchlistService] Recent symbols error:', error);
+          return of([]);
+        }),
       );
   }
 
