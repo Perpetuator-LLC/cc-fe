@@ -20,11 +20,19 @@ After EVERY terminal command:
 3. Do NOT assume the command succeeded based on truncated terminal output
 4. If `read_file` shows errors, fix them before continuing
 
-Example workflow:
+**MANDATORY WORKFLOW - NO EXCEPTIONS:**
 ```bash
+# Step 1: Run command with log capture
  cd /Users/nik/projects/capital-copilot-fe && yarn stylelint "src/app/**/*.scss" 2>&1 | tee logs/stylelint.log
+
+# Step 2: IMMEDIATELY read the log file to see actual output
+read_file("logs/stylelint.log")
+
+# Step 3: Fix any errors shown in the log
+# Step 4: Repeat until no errors
 ```
-Then IMMEDIATELY: `read_file("logs/stylelint.log")` to see errors!
+
+**WHY THIS MATTERS:** The terminal tool truncates output. You will miss errors if you don't read the log file. This has caused multiple failed fixes that had to be redone.
 
 The space at the start is intentional - it prevents commands from being saved to shell history.
 
