@@ -113,6 +113,67 @@ const GET_GICS_SECTORS = gql`
   }
 `;
 
+// New catalog queries for system-defined categories
+const GET_GICS_INDUSTRIES = gql`
+  query GetGicsIndustries {
+    gicsIndustries
+  }
+`;
+
+const GET_EXCHANGES = gql`
+  query GetExchanges {
+    exchanges
+  }
+`;
+
+const GET_ALL_SECTOR_SYMBOLS = gql`
+  query GetAllSectorSymbols($sector: String!, $limit: Int, $orderBy: String) {
+    allSectorSymbols(sector: $sector, limit: $limit, orderBy: $orderBy) {
+      symbol
+      displayName
+      assetType
+      exchange
+      sector
+      industry
+      marketCap
+      country
+      currency
+    }
+  }
+`;
+
+const GET_ALL_INDUSTRY_SYMBOLS = gql`
+  query GetAllIndustrySymbols($industry: String!, $limit: Int, $orderBy: String) {
+    allIndustrySymbols(industry: $industry, limit: $limit, orderBy: $orderBy) {
+      symbol
+      displayName
+      assetType
+      exchange
+      sector
+      industry
+      marketCap
+      country
+      currency
+    }
+  }
+`;
+
+const GET_EXCHANGE_SYMBOLS = gql`
+  query GetExchangeSymbols($exchange: String!, $limit: Int, $orderBy: String) {
+    exchangeSymbols(exchange: $exchange, limit: $limit, orderBy: $orderBy) {
+      symbol
+      displayName
+      assetType
+      exchange
+      sector
+      industry
+      marketCap
+      country
+      currency
+    }
+  }
+`;
+
 const SEARCH_STOCK_LISTINGS = gql`
   query SearchStockListings($symbol: String, $limit: Int) {
     stockListings(symbol: $symbol, limit: $limit) {
@@ -192,6 +253,42 @@ const DELETE_WATCHLIST = gql`
   }
 `;
 
+const RENAME_WATCHLIST = gql`
+  mutation RenameWatchlist($watchlistId: UUID!, $name: String!, $description: String) {
+    renameWatchlist(watchlistId: $watchlistId, name: $name, description: $description) {
+      success
+      message
+      watchlist {
+        uuid
+        name
+        description
+      }
+    }
+  }
+`;
+
+const DUPLICATE_WATCHLIST = gql`
+  mutation DuplicateWatchlist($watchlistId: UUID!, $name: String!) {
+    duplicateWatchlist(watchlistId: $watchlistId, name: $name) {
+      success
+      message
+      watchlist {
+        uuid
+        name
+        description
+        watchlistType
+        isDefault
+        itemCount
+        items {
+          uuid
+          symbol
+          displayName
+        }
+      }
+    }
+  }
+`;
+
 // ============================================================================
 // Response Interfaces
 // ============================================================================
@@ -218,6 +315,39 @@ interface IndustrySymbolsResponse {
 
 interface GicsSectorsResponse {
   gicsSectors: string[];
+}
+
+interface GicsIndustriesResponse {
+  gicsIndustries: string[];
+}
+
+interface ExchangesResponse {
+  exchanges: string[];
+}
+
+// Catalog symbol type from system catalog
+export interface CatalogSymbol {
+  symbol: string;
+  displayName?: string;
+  assetType?: string;
+  exchange?: string;
+  sector?: string;
+  industry?: string;
+  marketCap?: number;
+  country?: string;
+  currency?: string;
+}
+
+interface AllSectorSymbolsResponse {
+  allSectorSymbols: CatalogSymbol[];
+}
+
+interface AllIndustrySymbolsResponse {
+  allIndustrySymbols: CatalogSymbol[];
+}
+
+interface ExchangeSymbolsResponse {
+  exchangeSymbols: CatalogSymbol[];
 }
 
 export interface StockListing {
@@ -262,6 +392,22 @@ interface DeleteWatchlistResponse {
   };
 }
 
+interface RenameWatchlistResponse {
+  renameWatchlist: {
+    success: boolean;
+    message: string;
+    watchlist: Watchlist;
+  };
+}
+
+interface DuplicateWatchlistResponse {
+  duplicateWatchlist: {
+    success: boolean;
+    message: string;
+    watchlist: Watchlist;
+  };
+}
+
 // ============================================================================
 // Service
 // ============================================================================
@@ -275,6 +421,8 @@ export class WatchlistService {
   private _searchHistory = signal<Watchlist | null>(null);
   private _recentSymbols = signal<WatchlistItem[]>([]);
   private _gicsSectors = signal<string[]>([]);
+  private _gicsIndustries = signal<string[]>([]);
+  private _exchanges = signal<string[]>([]);
   private _loading = signal<boolean>(false);
   private _error = signal<string | null>(null);
 
@@ -283,6 +431,8 @@ export class WatchlistService {
   readonly searchHistory = this._searchHistory.asReadonly();
   readonly recentSymbols = this._recentSymbols.asReadonly();
   readonly gicsSectors = this._gicsSectors.asReadonly();
+  readonly gicsIndustries = this._gicsIndustries.asReadonly();
+  readonly exchanges = this._exchanges.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
@@ -381,7 +531,7 @@ export class WatchlistService {
   }
 
   /**
-   * Load symbols filtered by sector
+   * Load symbols filtered by sector (from user's watchlists)
    */
   loadSectorSymbols(sector: string, limit = 50): Observable<WatchlistItem[]> {
     return this.apollo
@@ -397,7 +547,7 @@ export class WatchlistService {
   }
 
   /**
-   * Load symbols filtered by industry
+   * Load symbols filtered by industry (from user's watchlists)
    */
   loadIndustrySymbols(industry: string, limit = 50): Observable<WatchlistItem[]> {
     return this.apollo
@@ -426,6 +576,90 @@ export class WatchlistService {
         tap((sectors) => {
           this._gicsSectors.set(sectors);
         }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load GICS industry names from backend
+   */
+  loadGicsIndustries(): Observable<string[]> {
+    return this.apollo
+      .query<GicsIndustriesResponse>({
+        query: GET_GICS_INDUSTRIES,
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.gicsIndustries || []),
+        tap((industries) => {
+          this._gicsIndustries.set(industries);
+        }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load exchange names from backend
+   */
+  loadExchanges(): Observable<string[]> {
+    return this.apollo
+      .query<ExchangesResponse>({
+        query: GET_EXCHANGES,
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.exchanges || []),
+        tap((exchanges) => {
+          this._exchanges.set(exchanges);
+        }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load ALL symbols in a sector from system catalog (not user watchlists)
+   */
+  loadAllSectorSymbols(sector: string, limit = 100, orderBy = 'marketCap'): Observable<CatalogSymbol[]> {
+    return this.apollo
+      .query<AllSectorSymbolsResponse>({
+        query: GET_ALL_SECTOR_SYMBOLS,
+        variables: { sector, limit, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.allSectorSymbols || []),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load ALL symbols in an industry from system catalog
+   */
+  loadAllIndustrySymbols(industry: string, limit = 100, orderBy = 'marketCap'): Observable<CatalogSymbol[]> {
+    return this.apollo
+      .query<AllIndustrySymbolsResponse>({
+        query: GET_ALL_INDUSTRY_SYMBOLS,
+        variables: { industry, limit, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.allIndustrySymbols || []),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load ALL symbols on an exchange from system catalog
+   */
+  loadExchangeSymbols(exchange: string, limit = 100, orderBy = 'marketCap'): Observable<CatalogSymbol[]> {
+    return this.apollo
+      .query<ExchangeSymbolsResponse>({
+        query: GET_EXCHANGE_SYMBOLS,
+        variables: { exchange, limit, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.exchangeSymbols || []),
         catchError(() => of([])),
       );
   }
@@ -565,6 +799,57 @@ export class WatchlistService {
   }
 
   /**
+   * Rename a watchlist
+   */
+  renameWatchlist(
+    watchlistId: string,
+    name: string,
+    description?: string,
+  ): Observable<{ success: boolean; message: string; watchlist?: Watchlist }> {
+    return this.apollo
+      .mutate<RenameWatchlistResponse>({
+        mutation: RENAME_WATCHLIST,
+        variables: { watchlistId, name, description },
+      })
+      .pipe(
+        map((result) => result.data!.renameWatchlist),
+        tap((response) => {
+          if (response.success && response.watchlist) {
+            this._watchlists.update((lists) =>
+              lists.map((l) =>
+                l.uuid === watchlistId ? { ...l, name, description: description || l.description } : l,
+              ),
+            );
+          }
+        }),
+        catchError((error) => of({ success: false, message: error.message })),
+      );
+  }
+
+  /**
+   * Duplicate a watchlist
+   */
+  duplicateWatchlist(
+    watchlistId: string,
+    name: string,
+  ): Observable<{ success: boolean; message: string; watchlist?: Watchlist }> {
+    return this.apollo
+      .mutate<DuplicateWatchlistResponse>({
+        mutation: DUPLICATE_WATCHLIST,
+        variables: { watchlistId, name },
+      })
+      .pipe(
+        map((result) => result.data!.duplicateWatchlist),
+        tap((response) => {
+          if (response.success && response.watchlist) {
+            this._watchlists.update((lists) => [...lists, response.watchlist]);
+          }
+        }),
+        catchError((error) => of({ success: false, message: error.message })),
+      );
+  }
+
+  /**
    * Clear all state
    */
   clear(): void {
@@ -572,6 +857,8 @@ export class WatchlistService {
     this._searchHistory.set(null);
     this._recentSymbols.set([]);
     this._gicsSectors.set([]);
+    this._gicsIndustries.set([]);
+    this._exchanges.set([]);
     this._error.set(null);
   }
 }

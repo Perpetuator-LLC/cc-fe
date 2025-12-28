@@ -61,7 +61,7 @@ interface SystemList {
   id: string;
   name: string;
   icon: string;
-  type: 'sector' | 'exchange';
+  type: 'sector' | 'industry' | 'exchange';
   value: string;
 }
 
@@ -124,8 +124,38 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }));
   });
 
+  // System industry lists - dynamically loaded from backend
+  industryLists = computed<SystemList[]>(() => {
+    const industries = this.watchlistService.gicsIndustries();
+    return industries.map((i) => ({
+      id: `industry:${i}`,
+      name: i,
+      icon: 'business',
+      type: 'industry' as const,
+      value: i,
+    }));
+  });
+
+  // System exchange lists - dynamically loaded from backend
+  exchangeLists = computed<SystemList[]>(() => {
+    const exchanges = this.watchlistService.exchanges();
+    return exchanges.map((e) => ({
+      id: `exchange:${e}`,
+      name: e,
+      icon: 'account_balance',
+      type: 'exchange' as const,
+      value: e,
+    }));
+  });
+
   // Dynamically loaded sector symbols
   sectorSymbols = signal<SymbolListItem[]>([]);
+
+  // Dynamically loaded industry symbols
+  industrySymbols = signal<SymbolListItem[]>([]);
+
+  // Dynamically loaded exchange symbols
+  exchangeSymbols = signal<SymbolListItem[]>([]);
 
   // Create watchlist form
   newWatchlistName = '';
@@ -201,6 +231,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Handle sector system lists
     if (watchlistId.startsWith('sector:')) {
       items = this.sectorSymbols();
+    } else if (watchlistId.startsWith('industry:')) {
+      items = this.industrySymbols();
+    } else if (watchlistId.startsWith('exchange:')) {
+      items = this.exchangeSymbols();
     } else if (watchlistId === 'recent') {
       const recentSymbols = this.watchlistService.recentSymbols() || [];
       items = recentSymbols.map((item) => ({
@@ -352,19 +386,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if industries list is available (backend support)
-   * TODO: Enable when backend implements industryList query
+   * Check if industries list is available from backend
    */
   hasIndustries(): boolean {
-    return false; // Disabled until backend implements
+    return (this.watchlistService.gicsIndustries()?.length ?? 0) > 0;
   }
 
   /**
-   * Check if exchanges list is available (backend support)
-   * TODO: Enable when backend implements exchangeList query
+   * Check if exchanges list is available from backend
    */
   hasExchanges(): boolean {
-    return false; // Disabled until backend implements
+    return (this.watchlistService.exchanges()?.length ?? 0) > 0;
   }
 
   constructor(
@@ -447,6 +479,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Load GICS sectors from backend
     this.subscriptions.add(this.watchlistService.loadGicsSectors().subscribe());
+
+    // Load GICS industries from backend
+    this.subscriptions.add(this.watchlistService.loadGicsIndustries().subscribe());
+
+    // Load exchanges from backend
+    this.subscriptions.add(this.watchlistService.loadExchanges().subscribe());
   }
 
   /**
@@ -624,7 +662,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       // Sector lists: sort by market cap by default
       this.sortBy.set('marketCap');
       const sectorName = newValue.replace('sector:', '');
-      this.loadSectorSymbols(sectorName);
+      this.loadCategorySectorSymbols(sectorName);
+    } else if (newValue.startsWith('industry:')) {
+      // Industry lists: sort by market cap by default
+      this.sortBy.set('marketCap');
+      const industryName = newValue.replace('industry:', '');
+      this.loadCategoryIndustrySymbols(industryName);
+    } else if (newValue.startsWith('exchange:')) {
+      // Exchange lists: sort by market cap by default
+      this.sortBy.set('marketCap');
+      const exchangeName = newValue.replace('exchange:', '');
+      this.loadCategoryExchangeSymbols(exchangeName);
     } else {
       // Custom watchlists: keep current sort or default to lastAccessedAt
       // (user may have set a preference)
@@ -632,12 +680,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load symbols for a specific sector
+   * Load symbols for a specific sector from system catalog
    */
-  private loadSectorSymbols(sector: string): void {
+  private loadCategorySectorSymbols(sector: string): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadSectorSymbols(sector, 50).subscribe({
+      this.watchlistService.loadAllSectorSymbols(sector, 100, 'marketCap').subscribe({
         next: (symbols) => {
           this.sectorSymbols.set(
             symbols.map((item) => ({
@@ -648,14 +696,70 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               sector: item.sector,
               industry: item.industry,
               marketCap: item.marketCap,
-              accessCount: item.accessCount,
-              lastAccessedAt: item.lastAccessedAt,
             })),
           );
           this.loading.set(false);
         },
         error: () => {
           this.sectorSymbols.set([]);
+          this.loading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Load symbols for a specific industry from system catalog
+   */
+  private loadCategoryIndustrySymbols(industry: string): void {
+    this.loading.set(true);
+    this.subscriptions.add(
+      this.watchlistService.loadAllIndustrySymbols(industry, 100, 'marketCap').subscribe({
+        next: (symbols) => {
+          this.industrySymbols.set(
+            symbols.map((item) => ({
+              symbol: item.symbol,
+              displayName: item.displayName,
+              assetType: item.assetType,
+              exchange: item.exchange,
+              sector: item.sector,
+              industry: item.industry,
+              marketCap: item.marketCap,
+            })),
+          );
+          this.loading.set(false);
+        },
+        error: () => {
+          this.industrySymbols.set([]);
+          this.loading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Load symbols for a specific exchange from system catalog
+   */
+  private loadCategoryExchangeSymbols(exchange: string): void {
+    this.loading.set(true);
+    this.subscriptions.add(
+      this.watchlistService.loadExchangeSymbols(exchange, 100, 'marketCap').subscribe({
+        next: (symbols) => {
+          this.exchangeSymbols.set(
+            symbols.map((item) => ({
+              symbol: item.symbol,
+              displayName: item.displayName,
+              assetType: item.assetType,
+              exchange: item.exchange,
+              sector: item.sector,
+              industry: item.industry,
+              marketCap: item.marketCap,
+            })),
+          );
+          this.loading.set(false);
+        },
+        error: () => {
+          this.exchangeSymbols.set([]);
           this.loading.set(false);
         },
       }),
@@ -793,6 +897,63 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           },
         }),
     );
+  }
+
+  /**
+   * Open rename dialog for a watchlist
+   */
+  openRenameDialog(watchlist: { uuid: string; name: string; description?: string }): void {
+    const newName = prompt('Enter new name:', watchlist.name);
+    if (newName && newName.trim() && newName.trim() !== watchlist.name) {
+      this.subscriptions.add(
+        this.watchlistService.renameWatchlist(watchlist.uuid, newName.trim(), watchlist.description).subscribe({
+          next: (response) => {
+            if (!response.success) {
+              console.error('Failed to rename watchlist:', response.message);
+            }
+          },
+        }),
+      );
+    }
+  }
+
+  /**
+   * Open duplicate dialog for a watchlist
+   */
+  openDuplicateDialog(watchlist: { uuid: string; name: string }): void {
+    const newName = prompt('Enter name for the copy:', `${watchlist.name} (Copy)`);
+    if (newName && newName.trim()) {
+      this.subscriptions.add(
+        this.watchlistService.duplicateWatchlist(watchlist.uuid, newName.trim()).subscribe({
+          next: (response) => {
+            if (response.success && response.watchlist) {
+              // Optionally switch to the new watchlist
+              this.onWatchlistChange(response.watchlist.uuid);
+            }
+          },
+        }),
+      );
+    }
+  }
+
+  /**
+   * Delete a watchlist with confirmation
+   */
+  deleteWatchlist(watchlist: { uuid: string; name: string }): void {
+    if (confirm(`Are you sure you want to delete "${watchlist.name}"? This cannot be undone.`)) {
+      this.subscriptions.add(
+        this.watchlistService.deleteWatchlist(watchlist.uuid).subscribe({
+          next: (response) => {
+            if (response.success) {
+              // Switch to recent if the deleted watchlist was selected
+              if (this.selectedWatchlistId() === watchlist.uuid) {
+                this.onWatchlistChange('recent');
+              }
+            }
+          },
+        }),
+      );
+    }
   }
 
   /**
