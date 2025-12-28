@@ -11,8 +11,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -25,10 +26,10 @@ import {
   ToolboxComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { WatchlistService } from '../watchlist.service';
+import { WatchlistService, StockListing } from '../watchlist.service';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
-import { CommandResult } from '../terminal.types';
+import { CommandResult, ChartResultData, ChartControls } from '../terminal.types';
 
 // Register required ECharts components
 echarts.use([
@@ -56,6 +57,14 @@ interface SymbolListItem {
   lastAccessedAt?: string;
 }
 
+interface SystemList {
+  id: string;
+  name: string;
+  icon: string;
+  type: 'sector' | 'exchange';
+  value: string;
+}
+
 @Component({
   selector: 'app-watchlist-tab',
   standalone: true,
@@ -71,6 +80,7 @@ interface SymbolListItem {
     MatInputModule,
     MatSelectModule,
     MatDividerModule,
+    MatAutocompleteModule,
     NgxEchartsDirective,
   ],
   providers: [provideEchartsCore({ echarts })],
@@ -91,30 +101,107 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartOptions = signal<EChartsOption | null>(null);
   chartError = signal<string | null>(null);
 
-  // Chart controls
+  // Chart controls - extended options from backend documentation
   selectedPeriod = signal('1Y');
   selectedInterval = signal('daily');
-  periodOptions = ['1D', '5D', '1M', '3M', '6M', '1Y', '2Y', '5Y'];
-  intervalOptions = ['1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly'];
+  // Default options - will be updated from backend chartControls when available
+  periodOptions = signal(['1D', '5D', '1W', '2W', '1M', '3M', '6M', '1Y', '2Y', '5Y', '10Y', '20Y', 'MAX']);
+  intervalOptions = signal(['1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly']);
+  // Command template for regenerating charts
+  commandTemplate = signal<string | null>(null);
+
+  // System sector lists - dynamically loaded from backend
+  sectorLists = computed<SystemList[]>(() => {
+    const sectors = this.watchlistService.gicsSectors();
+    return sectors.map((s) => ({
+      id: `sector:${s}`,
+      name: s,
+      icon: 'category',
+      type: 'sector' as const,
+      value: s,
+    }));
+  });
+
+  // Dynamically loaded sector symbols
+  sectorSymbols = signal<SymbolListItem[]>([]);
 
   // Create watchlist form
   newWatchlistName = '';
   newWatchlistDescription = '';
   showCreateForm = signal(false);
 
-  // Add symbol form
+  // Add symbol form with autocomplete
   newSymbolInput = '';
   showAddSymbolForm = signal(false);
+  symbolSearchResults = signal<StockListing[]>([]);
+  selectedStockListing = signal<StockListing | null>(null);
+  private symbolSearchSubject = new Subject<string>();
 
   private subscriptions = new Subscription();
+
+  // Sort options for the symbol list
+  sortBy = signal<'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt'>('lastAccessedAt');
+
+  // Helper to sort symbols by market cap (descending, nulls last)
+  private sortByMarketCap(items: SymbolListItem[]): SymbolListItem[] {
+    return [...items].sort((a, b) => {
+      const aVal = a.marketCap ?? 0;
+      const bVal = b.marketCap ?? 0;
+      return bVal - aVal; // Descending order
+    });
+  }
+
+  // Helper to sort by access count (descending)
+  private sortByAccessCount(items: SymbolListItem[]): SymbolListItem[] {
+    return [...items].sort((a, b) => {
+      const aVal = a.accessCount ?? 0;
+      const bVal = b.accessCount ?? 0;
+      return bVal - aVal;
+    });
+  }
+
+  // Helper to sort alphabetically by symbol
+  private sortBySymbol(items: SymbolListItem[]): SymbolListItem[] {
+    return [...items].sort((a, b) => a.symbol.localeCompare(b.symbol));
+  }
+
+  // Helper to sort by last accessed date (most recent first)
+  private sortByLastAccessedAt(items: SymbolListItem[]): SymbolListItem[] {
+    return [...items].sort((a, b) => {
+      const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
+      const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
+      return bDate - aDate; // Most recent first
+    });
+  }
+
+  // Apply current sort to items
+  private applySorting(items: SymbolListItem[]): SymbolListItem[] {
+    const sort = this.sortBy();
+    switch (sort) {
+      case 'marketCap':
+        return this.sortByMarketCap(items);
+      case 'accessCount':
+        return this.sortByAccessCount(items);
+      case 'symbol':
+        return this.sortBySymbol(items);
+      case 'lastAccessedAt':
+        return this.sortByLastAccessedAt(items);
+      default:
+        return items;
+    }
+  }
 
   // Computed: get symbols for current selection
   currentSymbols = computed<SymbolListItem[]>(() => {
     const watchlistId = this.selectedWatchlistId();
+    let items: SymbolListItem[] = [];
 
-    if (watchlistId === 'recent') {
+    // Handle sector system lists
+    if (watchlistId.startsWith('sector:')) {
+      items = this.sectorSymbols();
+    } else if (watchlistId === 'recent') {
       const recentSymbols = this.watchlistService.recentSymbols() || [];
-      return recentSymbols.map((item) => ({
+      items = recentSymbols.map((item) => ({
         symbol: item.symbol,
         displayName: item.displayName,
         assetType: item.assetType,
@@ -125,41 +212,43 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         accessCount: item.accessCount,
         lastAccessedAt: item.lastAccessedAt,
       }));
+    } else {
+      // Find the watchlist by uuid
+      const searchHistory = this.watchlistService.searchHistory();
+      if (searchHistory && searchHistory.uuid === watchlistId) {
+        items = (searchHistory.items || []).map((item) => ({
+          symbol: item.symbol,
+          displayName: item.displayName,
+          assetType: item.assetType,
+          exchange: item.exchange,
+          sector: item.sector,
+          industry: item.industry,
+          marketCap: item.marketCap,
+          accessCount: item.accessCount,
+          lastAccessedAt: item.lastAccessedAt,
+        }));
+      } else {
+        const customWatchlists = this.watchlistService.customWatchlists() || [];
+        const customList = customWatchlists.find((wl) => wl.uuid === watchlistId);
+        if (customList) {
+          items = (customList.items || []).map((item) => ({
+            symbol: item.symbol,
+            displayName: item.displayName,
+            assetType: item.assetType,
+            exchange: item.exchange,
+            sector: item.sector,
+            industry: item.industry,
+            marketCap: item.marketCap,
+            accessCount: item.accessCount,
+            lastAccessedAt: item.lastAccessedAt,
+          }));
+        }
+      }
     }
 
-    // Find the watchlist by uuid
-    const searchHistory = this.watchlistService.searchHistory();
-    if (searchHistory && searchHistory.uuid === watchlistId) {
-      return (searchHistory.items || []).map((item) => ({
-        symbol: item.symbol,
-        displayName: item.displayName,
-        assetType: item.assetType,
-        exchange: item.exchange,
-        sector: item.sector,
-        industry: item.industry,
-        marketCap: item.marketCap,
-        accessCount: item.accessCount,
-        lastAccessedAt: item.lastAccessedAt,
-      }));
-    }
-
-    const customWatchlists = this.watchlistService.customWatchlists() || [];
-    const customList = customWatchlists.find((wl) => wl.uuid === watchlistId);
-    if (customList) {
-      return (customList.items || []).map((item) => ({
-        symbol: item.symbol,
-        displayName: item.displayName,
-        assetType: item.assetType,
-        exchange: item.exchange,
-        sector: item.sector,
-        industry: item.industry,
-        marketCap: item.marketCap,
-        accessCount: item.accessCount,
-        lastAccessedAt: item.lastAccessedAt,
-      }));
-    }
-
-    return [];
+    // Apply sorting - read sortBy signal to trigger recomputation when it changes
+    this.sortBy();
+    return this.applySorting(items);
   });
 
   /**
@@ -171,14 +260,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     return id !== 'recent';
   });
 
-  /**
-   * Check if current watchlist allows removing symbols
-   */
-  canRemoveFromWatchlist = computed<boolean>(() => {
-    // Can remove from any watchlist
-    return true;
-  });
-
   constructor(
     protected watchlistService: WatchlistService,
     protected terminalService: TerminalService,
@@ -188,10 +269,53 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadData();
     this.subscribeToCommandResults();
+    this.setupSymbolSearch();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.symbolSearchSubject.complete();
+  }
+
+  /**
+   * Setup symbol search with debounce
+   */
+  private setupSymbolSearch(): void {
+    this.subscriptions.add(
+      this.symbolSearchSubject
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((query) => this.watchlistService.searchStockListings(query, 10)),
+        )
+        .subscribe((results) => {
+          this.symbolSearchResults.set(results);
+        }),
+    );
+  }
+
+  /**
+   * Handle symbol input change for autocomplete
+   */
+  onSymbolInputChange(value: string): void {
+    this.newSymbolInput = value;
+    this.selectedStockListing.set(null);
+    this.symbolSearchSubject.next(value);
+  }
+
+  /**
+   * Select a stock listing from autocomplete
+   */
+  selectStockListing(listing: StockListing): void {
+    this.selectedStockListing.set(listing);
+    this.newSymbolInput = listing.symbol;
+  }
+
+  /**
+   * Display function for autocomplete
+   */
+  displayStockListing(listing: StockListing | null): string {
+    return listing ? listing.symbol : '';
   }
 
   /**
@@ -213,6 +337,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Load recent symbols
     this.subscriptions.add(this.watchlistService.loadRecentSymbols(20).subscribe());
+
+    // Load GICS sectors from backend
+    this.subscriptions.add(this.watchlistService.loadGicsSectors().subscribe());
   }
 
   /**
@@ -226,6 +353,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         // Get symbol from metadata - try multiple access patterns
         const resultSymbol = result.metadata?.symbol as string | undefined;
         const selectedSym = this.selectedSymbol();
+
+        // Extract chartControls from result data if available
+        this.extractChartControls(result);
 
         // Check if this result is for our selected symbol
         if (resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase()) {
@@ -253,6 +383,37 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Extract chartControls from result and update available options
+   */
+  private extractChartControls(result: CommandResult): void {
+    if (result.outputType !== 'chart') return;
+
+    // Try to get chartControls from data.chartControls or metadata.chartControls
+    const chartData = result.data as ChartResultData | undefined;
+    const controls = chartData?.chartControls ?? (result.metadata as { chartControls?: ChartControls })?.chartControls;
+
+    if (controls) {
+      // Update available options from backend
+      if (controls.periodOptions?.length) {
+        this.periodOptions.set(controls.periodOptions);
+      }
+      if (controls.intervalOptions?.length) {
+        this.intervalOptions.set(controls.intervalOptions);
+      }
+      if (controls.commandTemplate) {
+        this.commandTemplate.set(controls.commandTemplate);
+      }
+      // Sync current selections with what backend returned
+      if (controls.currentPeriod) {
+        this.selectedPeriod.set(controls.currentPeriod);
+      }
+      if (controls.currentInterval) {
+        this.selectedInterval.set(controls.currentInterval);
+      }
+    }
+  }
+
+  /**
    * Handle watchlist dropdown change
    */
   onWatchlistChange(newValue: string): void {
@@ -262,6 +423,51 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.selectedItem.set(null);
     this.chartOptions.set(null);
     this.chartError.set(null);
+
+    // Set default sort based on watchlist type
+    if (newValue === 'recent') {
+      // Recent watchlist: sort by most recently accessed by default
+      this.sortBy.set('lastAccessedAt');
+    } else if (newValue.startsWith('sector:')) {
+      // Sector lists: sort by market cap by default
+      this.sortBy.set('marketCap');
+      const sectorName = newValue.replace('sector:', '');
+      this.loadSectorSymbols(sectorName);
+    } else {
+      // Custom watchlists: keep current sort or default to lastAccessedAt
+      // (user may have set a preference)
+    }
+  }
+
+  /**
+   * Load symbols for a specific sector
+   */
+  private loadSectorSymbols(sector: string): void {
+    this.loading.set(true);
+    this.subscriptions.add(
+      this.watchlistService.loadSectorSymbols(sector, 50).subscribe({
+        next: (symbols) => {
+          this.sectorSymbols.set(
+            symbols.map((item) => ({
+              symbol: item.symbol,
+              displayName: item.displayName,
+              assetType: item.assetType,
+              exchange: item.exchange,
+              sector: item.sector,
+              industry: item.industry,
+              marketCap: item.marketCap,
+              accessCount: item.accessCount,
+              lastAccessedAt: item.lastAccessedAt,
+            })),
+          );
+          this.loading.set(false);
+        },
+        error: () => {
+          this.sectorSymbols.set([]);
+          this.loading.set(false);
+        },
+      }),
+    );
   }
 
   /**
@@ -405,6 +611,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.showAddSymbolForm.update((v) => !v);
     if (!this.showAddSymbolForm()) {
       this.newSymbolInput = '';
+      this.selectedStockListing.set(null);
+      this.symbolSearchResults.set([]);
     }
   }
 
@@ -412,7 +620,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Add a symbol to the current watchlist
    */
   addSymbol(): void {
-    const symbol = this.newSymbolInput.trim().toUpperCase();
+    const listing = this.selectedStockListing();
+    const symbol = listing?.symbol || this.newSymbolInput.trim().toUpperCase();
     if (!symbol) return;
 
     const watchlistId = this.selectedWatchlistId();
@@ -432,8 +641,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Use info from selected listing if available
+    const displayName = listing?.name;
+    const assetType = listing?.assetType;
+    const exchange = listing?.exchange;
+
     this.subscriptions.add(
-      this.watchlistService.addToWatchlist(symbol, targetId).subscribe({
+      this.watchlistService.addToWatchlist(symbol, targetId, displayName, assetType, exchange).subscribe({
         next: (response) => {
           if (response.success) {
             this.toggleAddSymbolForm();
@@ -521,12 +735,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const periodMap: Record<string, string> = {
       '1D': '1 Day',
       '5D': '5 Days',
+      '1W': '1 Week',
+      '2W': '2 Weeks',
       '1M': '1 Month',
       '3M': '3 Months',
       '6M': '6 Months',
       '1Y': '1 Year',
       '2Y': '2 Years',
       '5Y': '5 Years',
+      '10Y': '10 Years',
+      '20Y': '20 Years',
+      MAX: 'Maximum',
     };
     return periodMap[period] || period;
   }
@@ -549,23 +768,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get chip color class for exchange
+   * Format market cap for display (e.g., $1.2T, $500B, $50M)
    */
-  getExchangeClass(): string {
-    return 'chip-exchange';
-  }
-
-  /**
-   * Get chip color class for sector
-   */
-  getSectorClass(): string {
-    return 'chip-sector';
-  }
-
-  /**
-   * Get chip color class for industry
-   */
-  getIndustryClass(): string {
-    return 'chip-industry';
+  formatMarketCap(marketCap?: number): string {
+    if (!marketCap) return '';
+    if (marketCap >= 1e12) {
+      return `$${(marketCap / 1e12).toFixed(1)}T`;
+    }
+    if (marketCap >= 1e9) {
+      return `$${(marketCap / 1e9).toFixed(1)}B`;
+    }
+    if (marketCap >= 1e6) {
+      return `$${(marketCap / 1e6).toFixed(0)}M`;
+    }
+    return `$${(marketCap / 1e3).toFixed(0)}K`;
   }
 }

@@ -21,6 +21,7 @@ import { HistoryEntry } from '../terminal.types';
 export class TerminalBarComponent {
   private dialog = inject(MatDialog);
   private terminalService = inject(TerminalService);
+  private dialogRef: ReturnType<typeof this.dialog.open> | null = null;
 
   // Get the last command from history
   lastEntry = computed<HistoryEntry | null>(() => {
@@ -49,11 +50,29 @@ export class TerminalBarComponent {
   }
 
   openTerminal(): void {
-    this.dialog.open(TerminalModalComponent, {
+    // Prevent opening multiple terminal modals - check both dialogRef and openDialogs
+    if (this.dialogRef) {
+      // Focus the existing dialog instead of opening a new one
+      return;
+    }
+
+    // Also check if a terminal modal is already open (handles edge cases)
+    const existingModal = this.dialog.openDialogs.find((d) => d.componentInstance instanceof TerminalModalComponent);
+    if (existingModal) {
+      this.dialogRef = existingModal;
+      return;
+    }
+
+    this.dialogRef = this.dialog.open(TerminalModalComponent, {
       panelClass: 'terminal-modal-panel',
       backdropClass: 'terminal-modal-backdrop',
       autoFocus: false,
       disableClose: false,
+    });
+
+    // Clear the reference when dialog closes
+    this.dialogRef.afterClosed().subscribe(() => {
+      this.dialogRef = null;
     });
   }
 }

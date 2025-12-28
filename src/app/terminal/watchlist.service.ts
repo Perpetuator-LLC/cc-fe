@@ -23,7 +23,9 @@ const GET_WATCHLISTS = gql`
         displayName
         assetType
         exchange
-        currency
+        sector
+        industry
+        marketCap
         notes
         accessCount
         lastAccessedAt
@@ -47,7 +49,9 @@ const GET_SEARCH_HISTORY = gql`
         displayName
         assetType
         exchange
-        currency
+        sector
+        industry
+        marketCap
         accessCount
         lastAccessedAt
       }
@@ -56,14 +60,67 @@ const GET_SEARCH_HISTORY = gql`
 `;
 
 const GET_RECENT_SYMBOLS = gql`
-  query GetRecentSymbols($limit: Int) {
-    recentSymbols(limit: $limit) {
+  query GetRecentSymbols($limit: Int, $orderBy: String) {
+    recentSymbols(limit: $limit, orderBy: $orderBy) {
       symbol
       displayName
       assetType
       exchange
-      currency
+      sector
+      industry
+      marketCap
+      accessCount
       lastAccessedAt
+    }
+  }
+`;
+
+const GET_SECTOR_SYMBOLS = gql`
+  query GetSectorSymbols($sector: String!, $limit: Int) {
+    sectorSymbols(sector: $sector, limit: $limit) {
+      symbol
+      displayName
+      assetType
+      exchange
+      sector
+      industry
+      marketCap
+      accessCount
+      lastAccessedAt
+    }
+  }
+`;
+
+const GET_INDUSTRY_SYMBOLS = gql`
+  query GetIndustrySymbols($industry: String!, $limit: Int) {
+    industrySymbols(industry: $industry, limit: $limit) {
+      symbol
+      displayName
+      assetType
+      exchange
+      sector
+      industry
+      marketCap
+      accessCount
+      lastAccessedAt
+    }
+  }
+`;
+
+const GET_GICS_SECTORS = gql`
+  query GetGicsSectors {
+    gicsSectors
+  }
+`;
+
+const SEARCH_STOCK_LISTINGS = gql`
+  query SearchStockListings($symbol: String, $limit: Int) {
+    stockListings(symbol: $symbol, limit: $limit) {
+      symbol
+      name
+      exchange
+      assetType
+      status
     }
   }
 `;
@@ -151,6 +208,30 @@ interface RecentSymbolsResponse {
   recentSymbols: WatchlistItem[];
 }
 
+interface SectorSymbolsResponse {
+  sectorSymbols: WatchlistItem[];
+}
+
+interface IndustrySymbolsResponse {
+  industrySymbols: WatchlistItem[];
+}
+
+interface GicsSectorsResponse {
+  gicsSectors: string[];
+}
+
+export interface StockListing {
+  symbol: string;
+  name: string;
+  exchange: string;
+  assetType: string;
+  status: string;
+}
+
+interface SearchStockListingsResponse {
+  stockListings: StockListing[];
+}
+
 interface AddToWatchlistResponse {
   addToWatchlist: {
     success: boolean;
@@ -193,6 +274,7 @@ export class WatchlistService {
   private _watchlists = signal<Watchlist[]>([]);
   private _searchHistory = signal<Watchlist | null>(null);
   private _recentSymbols = signal<WatchlistItem[]>([]);
+  private _gicsSectors = signal<string[]>([]);
   private _loading = signal<boolean>(false);
   private _error = signal<string | null>(null);
 
@@ -200,6 +282,7 @@ export class WatchlistService {
   readonly watchlists = this._watchlists.asReadonly();
   readonly searchHistory = this._searchHistory.asReadonly();
   readonly recentSymbols = this._recentSymbols.asReadonly();
+  readonly gicsSectors = this._gicsSectors.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
@@ -275,12 +358,14 @@ export class WatchlistService {
 
   /**
    * Load recent symbols for quick access
+   * @param limit - Max number of symbols
+   * @param orderBy - Sort order: 'marketCap', 'accessCount', 'lastAccessedAt', or 'symbol'
    */
-  loadRecentSymbols(limit = 10): Observable<WatchlistItem[]> {
+  loadRecentSymbols(limit = 10, orderBy = 'marketCap'): Observable<WatchlistItem[]> {
     return this.apollo
       .query<RecentSymbolsResponse>({
         query: GET_RECENT_SYMBOLS,
-        variables: { limit },
+        variables: { limit, orderBy },
         fetchPolicy: 'network-only',
       })
       .pipe(
@@ -288,6 +373,79 @@ export class WatchlistService {
         tap((symbols) => {
           this._recentSymbols.set(symbols);
         }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load symbols filtered by sector
+   */
+  loadSectorSymbols(sector: string, limit = 50): Observable<WatchlistItem[]> {
+    return this.apollo
+      .query<SectorSymbolsResponse>({
+        query: GET_SECTOR_SYMBOLS,
+        variables: { sector, limit },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.sectorSymbols || []),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load symbols filtered by industry
+   */
+  loadIndustrySymbols(industry: string, limit = 50): Observable<WatchlistItem[]> {
+    return this.apollo
+      .query<IndustrySymbolsResponse>({
+        query: GET_INDUSTRY_SYMBOLS,
+        variables: { industry, limit },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.industrySymbols || []),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load GICS sector names from backend
+   */
+  loadGicsSectors(): Observable<string[]> {
+    return this.apollo
+      .query<GicsSectorsResponse>({
+        query: GET_GICS_SECTORS,
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.gicsSectors || []),
+        tap((sectors) => {
+          this._gicsSectors.set(sectors);
+        }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Search for stock listings by symbol (for autocomplete)
+   * @param query - Symbol or partial symbol to search
+   * @param limit - Max number of results
+   */
+  searchStockListings(query: string, limit = 10): Observable<StockListing[]> {
+    if (!query || query.length < 1) {
+      return of([]);
+    }
+
+    return this.apollo
+      .query<SearchStockListingsResponse>({
+        query: SEARCH_STOCK_LISTINGS,
+        variables: { symbol: query.toUpperCase(), limit },
+        fetchPolicy: 'cache-first',
+      })
+      .pipe(
+        map((result) => result.data.stockListings || []),
+        map((listings) => listings.filter((l) => l.status === 'Active')),
         catchError(() => of([])),
       );
   }
@@ -410,6 +568,7 @@ export class WatchlistService {
     this._watchlists.set([]);
     this._searchHistory.set(null);
     this._recentSymbols.set([]);
+    this._gicsSectors.set([]);
     this._error.set(null);
   }
 }
