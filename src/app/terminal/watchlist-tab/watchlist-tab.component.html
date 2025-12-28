@@ -30,10 +30,56 @@
                   {{ watchlist.name }} ({{ watchlist.itemCount }})
                 </mat-option>
               }
+              <!-- Sector System Lists -->
+              <mat-divider />
+              <mat-optgroup label="Sectors">
+                @for (sector of sectorLists(); track sector.id) {
+                  <mat-option [value]="sector.id">
+                    <mat-icon>category</mat-icon>
+                    {{ sector.name }}
+                  </mat-option>
+                }
+              </mat-optgroup>
             </mat-select>
           </mat-form-field>
           <button mat-icon-button matTooltip="Create Watchlist" (click)="toggleCreateForm()">
             <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="sort-options">
+          <button
+            mat-icon-button
+            [matTooltip]="'Sort by Most Recent'"
+            [class.active]="sortBy() === 'lastAccessedAt'"
+            (click)="sortBy.set('lastAccessedAt')"
+          >
+            <mat-icon>schedule</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="'Sort by Market Cap'"
+            [class.active]="sortBy() === 'marketCap'"
+            (click)="sortBy.set('marketCap')"
+          >
+            <mat-icon>attach_money</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="'Sort by Symbol'"
+            [class.active]="sortBy() === 'symbol'"
+            (click)="sortBy.set('symbol')"
+          >
+            <mat-icon>sort_by_alpha</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="'Sort by Access Count'"
+            [class.active]="sortBy() === 'accessCount'"
+            (click)="sortBy.set('accessCount')"
+          >
+            <mat-icon>bar_chart</mat-icon>
           </button>
         </div>
 
@@ -54,11 +100,28 @@
               <mat-label>Symbol</mat-label>
               <input
                 matInput
-                [(ngModel)]="newSymbolInput"
-                placeholder="AAPL"
+                [value]="newSymbolInput"
+                (input)="onSymbolInputChange($any($event.target).value)"
+                placeholder="Search AAPL, MSFT..."
                 (keydown.enter)="addSymbol()"
-                style="text-transform: uppercase"
+                class="uppercase-input"
+                [matAutocomplete]="symbolAuto"
               />
+              <mat-autocomplete
+                #symbolAuto="matAutocomplete"
+                (optionSelected)="selectStockListing($event.option.value)"
+                [displayWith]="displayStockListing"
+              >
+                @for (listing of symbolSearchResults(); track listing.symbol) {
+                  <mat-option [value]="listing">
+                    <div class="autocomplete-option">
+                      <span class="symbol">{{ listing.symbol }}</span>
+                      <span class="name">{{ listing.name }}</span>
+                      <span class="exchange">{{ listing.exchange }}</span>
+                    </div>
+                  </mat-option>
+                }
+              </mat-autocomplete>
             </mat-form-field>
             <div class="form-actions">
               <button mat-button (click)="toggleAddSymbolForm()">Cancel</button>
@@ -90,7 +153,14 @@
                 <div class="symbol-main">
                   <mat-icon class="asset-icon">{{ getAssetIcon(item.assetType) }}</mat-icon>
                   <div class="symbol-details">
-                    <span class="symbol">{{ item.symbol }}</span>
+                    <div class="symbol-name-row">
+                      <span class="symbol">{{ item.symbol }}</span>
+                      @if (item.marketCap) {
+                        <span class="market-cap" matTooltip="Market Cap">
+                          {{ formatMarketCap(item.marketCap) }}
+                        </span>
+                      }
+                    </div>
                     @if (item.displayName && item.displayName !== item.symbol) {
                       <span class="name">{{ item.displayName }}</span>
                     }
@@ -206,7 +276,7 @@
                 (selectionChange)="onPeriodChange($event.value)"
                 [disabled]="chartLoading()"
               >
-                @for (period of periodOptions; track period) {
+                @for (period of periodOptions(); track period) {
                   <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
                 }
               </mat-select>
@@ -219,7 +289,7 @@
                 (selectionChange)="onIntervalChange($event.value)"
                 [disabled]="chartLoading()"
               >
-                @for (interval of intervalOptions; track interval) {
+                @for (interval of intervalOptions(); track interval) {
                   <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
                 }
               </mat-select>

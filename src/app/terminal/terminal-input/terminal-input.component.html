@@ -46,7 +46,7 @@
 
         @if (entry.isLoading) {
           <div class="entry-loading">
-            <mat-spinner diameter="16"></mat-spinner>
+            <mat-spinner diameter="16" />
             @if (isFetching(entry)) {
               <span class="progress-text fetching">
                 <mat-icon>cloud_download</mat-icon>
@@ -123,7 +123,7 @@
       matTooltip="Execute command"
     >
       @if (isLoading) {
-        <mat-spinner diameter="20"></mat-spinner>
+        <mat-spinner diameter="20" />
       } @else {
         <mat-icon>send</mat-icon>
       }

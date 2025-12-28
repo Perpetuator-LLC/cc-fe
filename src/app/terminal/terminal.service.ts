@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
-import { map, filter, catchError, tap } from 'rxjs/operators';
+import { map, filter, catchError, tap, take } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
 import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
 import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
@@ -255,6 +255,10 @@ export class TerminalService implements OnDestroy {
 
   // Track pending jobs for auto-retry (jobId -> original command input)
   private pendingJobCommands = new Map<string, string>();
+
+  // Track background refresh jobs (refreshJobId -> { command, historyIndex })
+  // These silently update the chart when complete, don't re-execute
+  private backgroundRefreshJobs = new Map<string, { command: string; historyIndex: number }>();
 
   constructor(
     private wsService: TerminalWebSocketService,
@@ -815,14 +819,15 @@ export class TerminalService implements OnDestroy {
       }),
     );
 
-    // Handle job completions - re-run pending commands
+    // Handle job completions - re-run pending commands or update background refreshes
     this.subscriptions.add(
       this.jobsWsService.jobUpdates
         .pipe(filter((update) => update.type === 'jobs.completed' || update.type === 'jobs.failed'))
         .subscribe((update) => {
           const jobId = update.job.uuid;
-          const pendingCommand = this.pendingJobCommands.get(jobId);
 
+          // Check for pending command (needs re-execution)
+          const pendingCommand = this.pendingJobCommands.get(jobId);
           if (pendingCommand) {
             this.pendingJobCommands.delete(jobId);
 
@@ -833,6 +838,19 @@ export class TerminalService implements OnDestroy {
               // Job failed - update the last history entry (which is showing the fetching state)
               this.updateLastHistoryWithError(`Data fetch failed: ${update.job.error || 'Unknown error'}`);
             }
+            return;
+          }
+
+          // Check for background refresh (silently update chart data)
+          const refreshJob = this.backgroundRefreshJobs.get(jobId);
+          if (refreshJob) {
+            this.backgroundRefreshJobs.delete(jobId);
+
+            if (update.type === 'jobs.completed') {
+              // Re-execute the command to get fresh data and update the chart
+              this.refreshHistoryEntry(refreshJob.command, refreshJob.historyIndex);
+            }
+            // If failed, silently ignore - user still has cached data
           }
         }),
     );
@@ -843,6 +861,7 @@ export class TerminalService implements OnDestroy {
     if (history.length === 0) return;
 
     const lastEntry = history[history.length - 1];
+    const historyIndex = history.length - 1;
 
     // Check if this is a "fetching" response - track the job for auto-retry
     if (this.isFetchingResponse(result)) {
@@ -853,6 +872,16 @@ export class TerminalService implements OnDestroy {
     } else if (result.success) {
       // Track symbol in search history on successful execution
       this.trackSymbolFromResult(result, lastEntry.input);
+
+      // Check if there's a background refresh happening
+      const metadata = result.metadata as { refreshing?: boolean; refreshJobId?: string } | undefined;
+      if (metadata?.refreshing && metadata?.refreshJobId) {
+        // Track background refresh - when it completes, we'll update the chart
+        this.backgroundRefreshJobs.set(metadata.refreshJobId, {
+          command: lastEntry.input,
+          historyIndex,
+        });
+      }
     }
 
     const updatedEntry: HistoryEntry = {
@@ -957,5 +986,39 @@ export class TerminalService implements OnDestroy {
     };
 
     this.historySignal.set([...history.slice(0, -1), updatedEntry]);
+  }
+
+  /**
+   * Refresh a specific history entry with fresh data (for background refresh completion)
+   * This re-executes the command but updates the specific history entry instead of adding a new one
+   */
+  private refreshHistoryEntry(command: string, historyIndex: number): void {
+    // Send the command through WebSocket to get fresh data
+    this.wsService.execute(command);
+
+    // Subscribe to the next result to update the specific history entry
+    const subscription = this.wsService.onCommandResult.pipe(take(1)).subscribe((result) => {
+      const history = this.historySignal();
+      if (historyIndex >= 0 && historyIndex < history.length) {
+        const existingEntry = history[historyIndex];
+
+        // Only update if it's the same command
+        if (existingEntry.input === command) {
+          const updatedEntry: HistoryEntry = {
+            ...existingEntry,
+            result,
+            timestamp: new Date(), // Update timestamp to show refresh time
+          };
+
+          const newHistory = [...history];
+          newHistory[historyIndex] = updatedEntry;
+          this.historySignal.set(newHistory);
+        }
+      }
+      subscription.unsubscribe();
+    });
+
+    // Clean up subscription after timeout
+    setTimeout(() => subscription.unsubscribe(), 30000);
   }
 }

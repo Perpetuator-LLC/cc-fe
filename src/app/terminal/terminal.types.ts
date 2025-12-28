@@ -51,7 +51,12 @@ export interface ChartResultData {
 export interface CommandMetadata {
   symbol?: string;
   period?: string;
+  interval?: string;
   recordCount?: number;
+  /** Indicates data is being refreshed in background (cached data shown) */
+  refreshing?: boolean;
+  /** Job ID for the background refresh task */
+  refreshJobId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
@@ -255,6 +260,10 @@ export interface ChartControls {
   command: string;
   symbol: string;
   commandTemplate: string;
+  /** Recommended intervals for each period (e.g., {"1D": "5min", "1Y": "daily"}) */
+  recommendedIntervals?: Record<string, string>;
+  /** Maximum period allowed for intraday intervals (e.g., {"1min": "1W", "60min": "2M"}) */
+  intradayLimits?: Record<string, string>;
 }
 
 export interface ChartDefinition {
