@@ -8,8 +8,23 @@ type Query {
   """Get user's search history (most recent symbols)"""
   searchHistory(limit: Int = 20): WatchlistObjectType
 
-  """Get user's recently accessed symbols"""
-  recentSymbols(limit: Int = 10): [WatchlistItemType]
+  """
+  Get user's recently accessed symbols. orderBy: marketCap, accessCount, lastAccessedAt, symbol
+  """
+  recentSymbols(limit: Int = 10, orderBy: String = "lastAccessedAt"): [WatchlistItemType]
+
+  """
+  Get all stocks in a sector from user's watchlists, sorted by market cap
+  """
+  sectorSymbols(sector: String!, limit: Int = 50): [WatchlistItemType]
+
+  """
+  Get all stocks in an industry from user's watchlists, sorted by market cap
+  """
+  industrySymbols(industry: String!, limit: Int = 50): [WatchlistItemType]
+
+  """Get list of all GICS sector names"""
+  gicsSectors: [String]
 
   """Get AI agent execution history"""
   agentExecutions(agentType: String, limit: Int = 20): [AgentExecutionType]
@@ -436,6 +451,15 @@ type WatchlistItemType {
 
   """Currency for prices"""
   currency: String!
+
+  """GICS sector classification"""
+  sector: String!
+
+  """GICS industry classification"""
+  industry: String!
+
+  """Market capitalization in USD"""
+  marketCap: Float
   notes: String!
 
   """Number of times this symbol was accessed"""
@@ -905,6 +929,9 @@ enum TracesTraceKindChoices {
 
   """API Error"""
   API_ERROR
+
+  """External API Call"""
+  EXTERNAL_API
 
   """Frontend Error"""
   FRONTEND_ERROR

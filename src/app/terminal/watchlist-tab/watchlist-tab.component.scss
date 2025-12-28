@@ -70,6 +70,36 @@
   }
 }
 
+// Sort Options Bar
+.sort-options {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  button {
+    width: 32px;
+    height: 32px;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      font-size: 18px;
+    }
+
+    &.active {
+      color: var(--md-sys-color-primary);
+      background: var(--md-sys-color-primary-container);
+    }
+  }
+}
+
 // Symbol List
 .symbol-list-container {
   overflow-y: auto;
@@ -126,17 +156,38 @@
       gap: 4px;
       min-width: 0;
 
+      .symbol-name-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       .symbol {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: var(--md-sys-color-primary);
+      }
+
+      .market-cap {
+        flex-shrink: 0;
+
+        padding: 0 4px;
+        border-radius: 4px;
+
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--md-sys-color-on-secondary-container);
+
+        background: var(--md-sys-color-secondary-container);
       }
 
       .name {
         overflow: hidden;
 
-        font-size: 11px;
+        font-size: 10px;
         color: var(--md-sys-color-on-surface-variant);
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -298,10 +349,10 @@
 
   .symbol-input {
     width: 100%;
+  }
 
-    input {
-      text-transform: uppercase;
-    }
+  .uppercase-input {
+    text-transform: uppercase;
   }
 
   .form-actions {

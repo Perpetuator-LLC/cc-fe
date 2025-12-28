@@ -2,6 +2,75 @@ Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is en
 
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
+# ⚠️ CRITICAL: Before Writing ANY Code
+
+## Terminal Commands - READ THE OUTPUT!
+**ALWAYS** redirect stderr to stdout and capture to a log file to see output:
+```bash
+ cd /Users/nik/projects/capital-copilot-fe && yarn build 2>&1 | tee logs/build.log
+ cd /Users/nik/projects/capital-copilot-fe && yarn lint 2>&1 | tee logs/lint.log
+ cd /Users/nik/projects/capital-copilot-fe && yarn stylelint 2>&1 | tee logs/stylelint.log
+```
+
+**⚠️ CRITICAL: Terminal output is TRUNCATED. You MUST use `read_file` on the log file to see full output!**
+
+After EVERY terminal command:
+1. Run the command with `2>&1 | tee logs/<name>.log`
+2. **IMMEDIATELY** call `read_file` on `logs/<name>.log` to see the actual output
+3. Do NOT assume the command succeeded based on truncated terminal output
+4. If `read_file` shows errors, fix them before continuing
+
+Example workflow:
+```bash
+ cd /Users/nik/projects/capital-copilot-fe && yarn stylelint "src/app/**/*.scss" 2>&1 | tee logs/stylelint.log
+```
+Then IMMEDIATELY: `read_file("logs/stylelint.log")` to see errors!
+
+The space at the start is intentional - it prevents commands from being saved to shell history.
+
+## 🚫 NO HARDCODED VALUES - Use Backend APIs
+**NEVER hardcode values that the backend provides.** Always fetch from GraphQL.
+
+| ❌ Don't Hardcode | ✅ Fetch From Backend |
+|-------------------|----------------------|
+| GICS Sector names | `gicsSectors` query |
+| Terminal hints/examples | `terminalHints` query |
+| Help text/categories | `terminalHelp` query |
+| Chart period/interval options | `chartControls` from GP response |
+| Command list | `commands` query |
+| Autocomplete suggestions | `autocomplete` query |
+
+**Example - Loading GICS Sectors:**
+```typescript
+// ❌ BAD - Hardcoded
+const GICS_SECTORS = ['Technology', 'Healthcare', ...];
+
+// ✅ GOOD - Loaded from backend
+loadGicsSectors(): Observable<string[]> {
+  return this.apollo.query<{ gicsSectors: string[] }>({
+    query: gql`query { gicsSectors }`,
+  }).pipe(map(r => r.data.gicsSectors));
+}
+```
+
+**See:** `logs/ai_edits/FRONTEND_INTEGRATION_GUIDE.md` for all available backend queries.
+
+## SCSS Rules - MEMORIZE THESE
+The linter WILL reject non-compliant SCSS. Write it correctly the first time:
+
+| Property | Rule | Valid Values |
+|----------|------|--------------|
+| `padding`, `margin`, `gap` | **4px grid only** | 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64px |
+| `font-size` | **2px grid only** | 10, 12, 14, 16, 18, 20, 22, 24px |
+| `border-radius` | **4px grid only** | 4, 8, 12, 16px (or 999px for pills) |
+| `color`, `background`, `border-color` | **MD3 tokens only** | `var(--md-sys-color-*)` |
+
+**NEVER USE:**
+- ❌ `::ng-deep` → Put overrides in `styles.scss` with high specificity
+- ❌ `!important` → Use CSS specificity instead
+- ❌ `#hex`, `rgba()`, `rgb()`, `hsl()` → Use `var(--md-sys-color-*)` tokens
+- ❌ Off-grid values like 5px, 10px, 13px, 15px, 18px, 22px
+
 # ⚠️ SCSS QUICK CHECKLIST (Check before writing ANY SCSS)
 
 **Before you write SCSS, verify:**
@@ -17,19 +86,27 @@ Aim for efficient design, maintainability, and consistency with Angular Material
 | ❌ Wrong | ✅ Correct |
 |----------|-----------|
 | `padding: 18px` | `padding: 16px` or `20px` |
+| `padding: 6px` | `padding: 4px` or `8px` |
+| `margin: 10px` | `margin: 8px` or `12px` |
+| `gap: 5px` | `gap: 4px` or `8px` |
+| `gap: 6px` | `gap: 4px` or `8px` |
 | `font-size: 13px` | `font-size: 12px` or `14px` |
 | `font-size: 11px` | `font-size: 10px` or `12px` |
+| `font-size: 9px` | `font-size: 10px` |
 | `border-radius: 10px` | `border-radius: 8px` or `12px` |
+| `border-radius: 6px` | `border-radius: 4px` or `8px` |
+| `border-radius: 2px` | `border-radius: 4px` |
 | `color: #fff` | `color: var(--md-sys-color-on-primary)` |
 | `background: rgba(0,0,0,.5)` | `background: var(--md-sys-color-shadow)` |
 | `::ng-deep .mat-*` | Put override in `styles.scss` |
 
----
-
-Redirect STDERR to STDOUT and pipe to tee and capture command output in a logs file e.g.
-```bash 
-cd REPO_DIR && yarn build 2>&1 | tee logs/build.log
+**MANDATORY: After any SCSS edit, run stylelint and READ the log file:**
+```bash
+ cd /Users/nik/projects/capital-copilot-fe && yarn stylelint "src/app/**/*.scss" 2>&1 | tee logs/stylelint.log
 ```
+Then: `read_file logs/stylelint.log` to verify no errors before continuing.
+
+---
 
 Do not use command line tools to edit or read files, use your functions that you have for file operations.
 

@@ -114,12 +114,16 @@ export class ChartPanelComponent implements OnChanges {
     '1D': '1 Day',
     '5D': '5 Days',
     '1W': '1 Week',
+    '2W': '2 Weeks',
     '1M': '1 Month',
     '3M': '3 Months',
     '6M': '6 Months',
     '1Y': '1 Year',
     '2Y': '2 Years',
     '5Y': '5 Years',
+    '10Y': '10 Years',
+    '20Y': '20 Years',
+    MAX: 'Maximum',
   };
 
   // Interval labels for display
@@ -134,18 +138,34 @@ export class ChartPanelComponent implements OnChanges {
     monthly: 'Monthly',
   };
 
-  // Recommended intervals for each period
-  private recommendedIntervals: Record<string, string[]> = {
+  // Recommended intervals for each period (fallback if backend doesn't provide)
+  private defaultRecommendedIntervals: Record<string, string[]> = {
     '1D': ['1min', '5min', '15min'],
     '5D': ['5min', '15min', '30min', '60min'],
     '1W': ['15min', '30min', '60min'],
+    '2W': ['30min', '60min', 'daily'],
     '1M': ['60min', 'daily'],
     '3M': ['60min', 'daily'],
     '6M': ['daily', 'weekly'],
     '1Y': ['daily', 'weekly'],
     '2Y': ['daily', 'weekly'],
     '5Y': ['weekly', 'monthly'],
+    '10Y': ['weekly', 'monthly'],
+    '20Y': ['monthly'],
+    MAX: ['monthly'],
   };
+
+  /**
+   * Get recommended intervals for a period, using backend data when available
+   */
+  private getRecommendedIntervals(period: string): string[] {
+    // If backend provides recommendedIntervals, use the single recommended value
+    if (this.chartControls?.recommendedIntervals?.[period]) {
+      return [this.chartControls.recommendedIntervals[period]];
+    }
+    // Fall back to defaults
+    return this.defaultRecommendedIntervals[period] || ['daily'];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['chartOptions'] && this.chartOptions) {
@@ -163,8 +183,8 @@ export class ChartPanelComponent implements OnChanges {
   }
 
   onPeriodChange(): void {
-    // Get recommended intervals for this period
-    const recommended = this.recommendedIntervals[this.selectedPeriod] || ['daily'];
+    // Get recommended intervals for this period (uses backend data when available)
+    const recommended = this.getRecommendedIntervals(this.selectedPeriod);
 
     // If current interval isn't recommended, switch to first recommended
     if (!recommended.includes(this.selectedInterval)) {
