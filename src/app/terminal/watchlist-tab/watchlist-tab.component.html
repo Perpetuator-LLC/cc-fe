@@ -346,6 +346,13 @@
               @if (selectedItem()?.displayName) {
                 <span class="company-name">{{ selectedItem()?.displayName }}</span>
               }
+              @if (quoteData(); as quote) {
+                <div class="quote-data" [class.positive]="isPositiveChange()" [class.negative]="!isPositiveChange()">
+                  <span class="price">{{ formatPrice(quote.price) }}</span>
+                  <span class="change">{{ formatChange(quote.change) }}</span>
+                  <span class="change-percent">({{ formatChangePercent(quote.changePercent) }})</span>
+                </div>
+              }
             </div>
             <div class="chart-actions">
               @for (action of getSymbolActions(); track action.command) {
