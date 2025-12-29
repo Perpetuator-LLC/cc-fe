@@ -186,6 +186,29 @@ const GET_TERMINAL_HELP = gql`
   }
 `;
 
+const GET_AUTOCOMPLETE = gql`
+  query GetAutocomplete($input: String!, $limit: Int) {
+    autocomplete(input: $input, limit: $limit) {
+      text
+      display
+      type
+      description
+      category
+      insert
+      requiresSymbol
+      syntax
+      paramType
+      choices
+      default
+      assetType
+      exchange
+      country
+      currency
+      isAiInterpreted
+    }
+  }
+`;
+
 // ============================================================================
 // Response Interfaces
 // ============================================================================
@@ -229,6 +252,10 @@ interface TerminalHintsResult {
 
 interface TerminalHelpResult {
   terminalHelp: TerminalHelp;
+}
+
+interface AutocompleteResult {
+  autocomplete: AutocompleteSuggestion[];
 }
 
 @Injectable({
@@ -607,7 +634,7 @@ export class TerminalService implements OnDestroy {
 
   /**
    * Get suggestions for autocomplete based on partial input
-   * @deprecated Use getAutocompleteSuggestions instead
+   * @deprecated Use fetchAutocompleteSuggestions instead
    */
   getSuggestions(partial: string): Command[] {
     const commands = this.commandsCache$.getValue();
@@ -621,10 +648,39 @@ export class TerminalService implements OnDestroy {
   }
 
   /**
-   * Get autocomplete suggestions based on current input
-   * Handles commands, parameters, and command history
+   * Fetch autocomplete suggestions from backend API
+   * Returns an Observable of suggestions
+   */
+  fetchAutocompleteSuggestions(input: string, limit = 10): Observable<AutocompleteSuggestion[]> {
+    return this.apollo
+      .query<AutocompleteResult>({
+        query: GET_AUTOCOMPLETE,
+        variables: { input, limit },
+        fetchPolicy: 'no-cache',
+      })
+      .pipe(
+        map((result) => result.data.autocomplete),
+        catchError((error) => {
+          console.error('[TerminalService] Autocomplete error:', error);
+          // Fallback to local suggestions on error
+          return of(this.getLocalAutocompleteSuggestions(input, limit));
+        }),
+      );
+  }
+
+  /**
+   * Get autocomplete suggestions synchronously (local fallback)
+   * Used as fallback when backend is unavailable
    */
   getAutocompleteSuggestions(input: string, limit = 10): AutocompleteSuggestion[] {
+    return this.getLocalAutocompleteSuggestions(input, limit);
+  }
+
+  /**
+   * Local autocomplete suggestions (fallback when backend unavailable)
+   * @internal
+   */
+  private getLocalAutocompleteSuggestions(input: string, limit = 10): AutocompleteSuggestion[] {
     const trimmedInput = input.trim();
     const tokens = trimmedInput.split(/\s+/);
     const commands = this.commandsCache$.getValue();

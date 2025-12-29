@@ -84,6 +84,34 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   /**
+   * Get the icon name for a suggestion type
+   */
+  getSuggestionIcon(suggestion: AutocompleteSuggestion): string {
+    switch (suggestion.type) {
+      case 'command':
+        return 'terminal';
+      case 'alias':
+        return 'label';
+      case 'symbol':
+        return suggestion.assetType === 'ETF' ? 'analytics' : 'trending_up';
+      case 'recent':
+        return 'schedule';
+      case 'parameter':
+        return 'settings';
+      case 'example':
+        return 'lightbulb';
+      case 'history':
+        return 'history';
+      case 'history_ai':
+        return 'smart_toy';
+      case 'natural_language':
+        return 'chat';
+      default:
+        return 'chevron_right';
+    }
+  }
+
+  /**
    * Convert markdown text to safe HTML for rendering.
    */
   markdownToHtml(markdown: string): SafeHtml {
@@ -230,9 +258,22 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   private updateSuggestions(input: string): void {
-    this.suggestions = this.terminalService.getAutocompleteSuggestions(input, 8);
-    this.selectedSuggestionIndex = -1;
-    this.showSuggestions = this.suggestions.length > 0;
+    // Use async backend API for suggestions
+    this.subscriptions.add(
+      this.terminalService.fetchAutocompleteSuggestions(input, 10).subscribe({
+        next: (suggestions) => {
+          this.suggestions = suggestions;
+          this.selectedSuggestionIndex = -1;
+          this.showSuggestions = suggestions.length > 0;
+        },
+        error: () => {
+          // Fallback to local suggestions on error
+          this.suggestions = this.terminalService.getAutocompleteSuggestions(input, 10);
+          this.selectedSuggestionIndex = -1;
+          this.showSuggestions = this.suggestions.length > 0;
+        },
+      }),
+    );
   }
 
   private clearSuggestions(): void {

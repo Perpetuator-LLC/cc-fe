@@ -842,7 +842,9 @@ type AutocompleteSuggestionType {
   """Display text for the dropdown"""
   display: String
 
-  """Type: command, alias, parameter, example, symbol, recent"""
+  """
+  Type: command, alias, parameter, example, symbol, recent, history, history_ai, natural_language
+  """
   type: String
 
   """Description/help text"""
@@ -880,6 +882,17 @@ type AutocompleteSuggestionType {
 
   """Currency for prices"""
   currency: String
+
+  """Fully Qualified Name: SYMBOL:EXCHANGE (e.g., AAPL:NASDAQ)"""
+  fqn: String
+
+  """True if this symbol exists on multiple exchanges"""
+  isAmbiguous: Boolean
+
+  """
+  True if this suggestion will be processed by AI (NL queries, history_ai)
+  """
+  isAiInterpreted: Boolean
 }
 
 type TraceType {
@@ -2362,6 +2375,7 @@ enum JobKind {
   FETCH_INCOME_STATEMENT
   FETCH_CASH_FLOW
   FETCH_EARNINGS
+  UPDATE_COMPANY_METADATA
   CREATE_RESEARCH_TOPIC
   RESEARCH_TOPIC
   VALIDATE_RESEARCH

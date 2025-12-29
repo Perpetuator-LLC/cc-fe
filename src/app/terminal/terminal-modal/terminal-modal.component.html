@@ -29,9 +29,15 @@
           <div class="history-item" [class.error]="item.result && !item.result.success">
             <div class="command-line">
               <span class="prompt">&gt;</span>
-              <span class="command" (click)="rerunCommand(item.input)" matTooltip="Click to rerun">{{
-                item.input
-              }}</span>
+              <span
+                class="command"
+                tabindex="0"
+                role="button"
+                (click)="rerunCommand(item.input)"
+                (keydown.enter)="rerunCommand(item.input)"
+                matTooltip="Click to rerun"
+                >{{ item.input }}</span
+              >
               <span class="timestamp">{{ item.timestamp | date: 'HH:mm:ss' }}</span>
               <button mat-icon-button class="copy-btn" matTooltip="Copy command" (click)="copyToClipboard(item.input)">
                 <mat-icon>content_copy</mat-icon>
@@ -95,37 +101,28 @@
             <div
               class="suggestion-item"
               [class.selected]="i === selectedSuggestionIndex"
+              [class.ai-suggestion]="suggestion.isAiInterpreted"
+              tabindex="0"
+              role="option"
               (click)="selectSuggestion(suggestion)"
+              (keydown.enter)="selectSuggestion(suggestion)"
               (mouseenter)="selectedSuggestionIndex = i"
             >
               <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-                @switch (suggestion.type) {
-                  @case ('command') {
-                    <mat-icon>terminal</mat-icon>
-                  }
-                  @case ('alias') {
-                    <mat-icon>label</mat-icon>
-                  }
-                  @case ('parameter') {
-                    <mat-icon>settings</mat-icon>
-                  }
-                  @case ('example') {
-                    <mat-icon>lightbulb</mat-icon>
-                  }
-                  @case ('history') {
-                    <mat-icon>history</mat-icon>
-                  }
-                  @default {
-                    <mat-icon>chevron_right</mat-icon>
-                  }
-                }
+                <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
               </span>
               <span class="suggestion-text">{{ suggestion.display }}</span>
               @if (suggestion.description) {
                 <span class="suggestion-desc">{{ suggestion.description }}</span>
               }
+              @if (suggestion.exchange) {
+                <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
+              }
               @if (suggestion.category) {
                 <span class="suggestion-category">{{ suggestion.category }}</span>
+              }
+              @if (suggestion.isAiInterpreted) {
+                <span class="ai-badge">AI</span>
               }
             </div>
           }

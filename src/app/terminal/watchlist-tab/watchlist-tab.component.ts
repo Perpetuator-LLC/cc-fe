@@ -14,7 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -31,7 +31,7 @@ import { marked } from 'marked';
 import { WatchlistService, StockListing } from '../watchlist.service';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
-import { CommandResult, ChartResultData, ChartControls, TableData } from '../terminal.types';
+import { CommandResult, ChartResultData, ChartControls, TableData, SymbolUpdate } from '../terminal.types';
 import { DataTableComponent } from '../data-table/data-table.component';
 
 // Register required ECharts components
@@ -108,6 +108,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   dataContent = signal<SafeHtml | null>(null);
   // Table data for HP command
   tableData = signal<TableData | null>(null);
+
+  // Quote/price data for selected symbol
+  quoteData = signal<SymbolUpdate | null>(null);
 
   // Inject DomSanitizer for markdown rendering
   private sanitizer = inject(DomSanitizer);
@@ -417,6 +420,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadData();
     this.subscribeToCommandResults();
+    this.subscribeToSymbolUpdates();
     this.setupSymbolSearch();
   }
 
@@ -563,6 +567,24 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           }
         }
       }),
+    );
+  }
+
+  /**
+   * Subscribe to real-time symbol price updates
+   */
+  private subscribeToSymbolUpdates(): void {
+    this.subscriptions.add(
+      this.terminalService.onSymbolUpdate
+        .pipe(
+          filter((update) => {
+            const selected = this.selectedSymbol();
+            return !!selected && update.symbol.toUpperCase() === selected.toUpperCase();
+          }),
+        )
+        .subscribe((update: SymbolUpdate) => {
+          this.quoteData.set(update);
+        }),
     );
   }
 
@@ -837,6 +859,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.selectedSymbol.set(item.symbol);
     this.selectedItem.set(item);
     this.chartError.set(null);
+    this.quoteData.set(null); // Clear previous quote data
+
+    // Subscribe to real-time updates for this symbol
+    this.terminalService.subscribeSymbols([item.symbol]);
 
     // Load chart with default command
     this.loadChart(item.symbol, this.currentCommand());
@@ -1199,5 +1225,44 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       return `$${(marketCap / 1e6).toFixed(0)}M`;
     }
     return `$${(marketCap / 1e3).toFixed(0)}K`;
+  }
+
+  /**
+   * Format price for display
+   */
+  formatPrice(price?: number): string {
+    if (price === undefined || price === null) return '';
+    return price.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  /**
+   * Format change for display (e.g., +1.23 or -0.45)
+   */
+  formatChange(change?: number): string {
+    if (change === undefined || change === null) return '';
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${change.toFixed(2)}`;
+  }
+
+  /**
+   * Format change percent for display (e.g., +1.23% or -0.45%)
+   */
+  formatChangePercent(changePercent?: number): string {
+    if (changePercent === undefined || changePercent === null) return '';
+    const sign = changePercent >= 0 ? '+' : '';
+    return `${sign}${changePercent.toFixed(2)}%`;
+  }
+
+  /**
+   * Check if quote change is positive
+   */
+  isPositiveChange(): boolean {
+    const quote = this.quoteData();
+    return (quote?.change ?? 0) >= 0;
   }
 }

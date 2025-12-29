@@ -114,20 +114,36 @@ export interface Command {
 // Autocomplete Types
 // ============================================================================
 
-export type AutocompleteSuggestionType = 'command' | 'alias' | 'parameter' | 'example' | 'symbol' | 'history';
+export type AutocompleteSuggestionType =
+  | 'command'
+  | 'alias'
+  | 'symbol'
+  | 'parameter'
+  | 'recent'
+  | 'history'
+  | 'history_ai'
+  | 'natural_language'
+  | 'example';
 
 export interface AutocompleteSuggestion {
   text: string;
   display: string;
   type: AutocompleteSuggestionType;
   description?: string;
-  category?: CommandCategory;
+  category?: string;
   insert: string;
   requiresSymbol?: boolean;
   syntax?: string;
   paramType?: string;
   choices?: string[];
   default?: string;
+  // Symbol-specific fields
+  assetType?: string;
+  exchange?: string;
+  country?: string;
+  currency?: string;
+  // AI-related fields
+  isAiInterpreted?: boolean;
 }
 
 // ============================================================================

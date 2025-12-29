@@ -510,6 +510,44 @@
       font-size: 14px;
       color: var(--md-sys-color-on-surface-variant);
     }
+
+    .quote-data {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+
+      margin-left: 8px;
+      padding-left: 12px;
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+
+      font-family: 'JetBrains Mono', monospace;
+
+      .price {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      .change,
+      .change-percent {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      &.positive {
+        .change,
+        .change-percent {
+          color: var(--md-extended-color-success-color);
+        }
+      }
+
+      &.negative {
+        .change,
+        .change-percent {
+          color: var(--md-sys-color-error);
+        }
+      }
+    }
   }
 
   .chart-actions {
