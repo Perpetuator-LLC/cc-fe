@@ -150,7 +150,7 @@
             mat-icon-button
             [matTooltip]="'Sort by Most Recent'"
             [class.active]="sortBy() === 'lastAccessedAt'"
-            (click)="sortBy.set('lastAccessedAt')"
+            (click)="onSortChange('lastAccessedAt')"
           >
             <mat-icon>schedule</mat-icon>
           </button>
@@ -158,7 +158,7 @@
             mat-icon-button
             [matTooltip]="'Sort by Market Cap'"
             [class.active]="sortBy() === 'marketCap'"
-            (click)="sortBy.set('marketCap')"
+            (click)="onSortChange('marketCap')"
           >
             <mat-icon>attach_money</mat-icon>
           </button>
@@ -166,7 +166,7 @@
             mat-icon-button
             [matTooltip]="'Sort by Symbol'"
             [class.active]="sortBy() === 'symbol'"
-            (click)="sortBy.set('symbol')"
+            (click)="onSortChange('symbol')"
           >
             <mat-icon>sort_by_alpha</mat-icon>
           </button>
@@ -174,7 +174,7 @@
             mat-icon-button
             [matTooltip]="'Sort by Access Count'"
             [class.active]="sortBy() === 'accessCount'"
-            (click)="sortBy.set('accessCount')"
+            (click)="onSortChange('accessCount')"
           >
             <mat-icon>bar_chart</mat-icon>
           </button>
@@ -407,8 +407,16 @@
             } @else if (chartOptions() && currentCommand() === 'GP') {
               <!-- Chart display -->
               <div echarts [options]="chartOptions()!" class="chart"></div>
+            } @else if (tableData()) {
+              <!-- Table display for HP command -->
+              <div class="data-content">
+                @if (dataContent()) {
+                  <div class="data-message" [innerHTML]="dataContent()"></div>
+                }
+                <app-data-table [data]="tableData()!" [pageSize]="25" />
+              </div>
             } @else if (dataContent()) {
-              <!-- Data display for HP, DES, QUOTE -->
+              <!-- Data display for DES, QUOTE, etc. -->
               <div class="data-content">
                 <div class="data-message" [innerHTML]="dataContent()"></div>
               </div>

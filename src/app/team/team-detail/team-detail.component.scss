@@ -80,17 +80,21 @@ mat-divider {
   text-align: center;
 }
 
-.mat-mdc-table{
+.mat-mdc-table {
   overflow: auto;
 }
-.mat-mdc-header-cell{
+
+.mat-mdc-header-cell {
   white-space: nowrap;
 }
-.mat-mdc-cell, .mat-mdc-header-cell{
+
+.mat-mdc-cell,
+.mat-mdc-header-cell {
   overflow: unset;
 }
+
 .podcast-detail-page {
-  padding: 50px 72px;
+  padding: 48px 72px;
 
   .podcast-name-cell,
   podcast-name-header {
@@ -139,13 +143,17 @@ mat-divider {
     gap: 8px;
     align-items: center;
     justify-content: space-between;
+
     width: 100%;
     margin: 24px 0;
-    @media screen and (max-width:576px) {
+
+    @media screen and (width <= 576px) {
       flex-direction: column;
-      .input-search-div , button{
-        width: 100%;
+
+      .input-search-div,
+      button {
         box-sizing: border-box;
+        width: 100%;
       }
     }
   }
@@ -177,11 +185,13 @@ mat-divider {
     }
   }
 
-  .chip{
+  .chip {
     white-space: nowrap;
   }
+
   .podcast-name-link {
     cursor: pointer;
+
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     text-decoration: none;

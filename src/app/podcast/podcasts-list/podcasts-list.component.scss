@@ -443,8 +443,8 @@
 }
 
 .middle-card {
-  padding-inline: 30px;
   padding-bottom: 20px;
+  padding-inline: 32px;
   background-color: var(--md-sys-color-surface-container);
 
   @media screen and (width <= 576px) {

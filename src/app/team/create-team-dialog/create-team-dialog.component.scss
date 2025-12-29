@@ -6,11 +6,13 @@ mat-form-field {
 
 mat-dialog-content {
   min-width: 400px;
-  @media screen and (max-width:576px) {
+
+  @media screen and (width <= 576px) {
     min-width: 100%;
   }
 }
-.mat-mdc-dialog-actions{
+
+.mat-mdc-dialog-actions {
   flex-wrap: nowrap;
 }
 
