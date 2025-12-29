@@ -3,12 +3,10 @@
 [mat-dialog-content] {
   overflow: auto;
   display: flex;
-  justify-content: center;
   flex-direction: column;
+  justify-content: center;
 
   min-height: 100px;
   max-height: 80vh;
   padding: 16px;
 }
-
-

@@ -75,8 +75,8 @@
       }
 
       @media screen and (width <= 576px) {
-        padding: 0;
         height: auto;
+        padding: 0;
 
         .mat-content {
           flex-direction: column;
@@ -84,18 +84,20 @@
       }
     }
 
-    .mat-expansion-panel-header-title{
+    .mat-expansion-panel-header-title {
       margin-right: 0;
     }
+
     .mat-expansion-panel-header-description {
-      @media screen and (width <= 576px) {
-        flex-direction: column;
-        align-items: flex-start;
-      }
       span {
         display: flex;
         gap: 8px;
         align-items: center;
+      }
+
+      @media screen and (width <= 576px) {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 

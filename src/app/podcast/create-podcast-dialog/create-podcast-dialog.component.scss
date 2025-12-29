@@ -58,13 +58,16 @@ mat-dialog-content {
   overflow-y: auto;
   min-width: 400px;
   max-height: 70vh;
-  @media screen and (max-width:576px) {
+
+  @media screen and (width <= 576px) {
     min-width: 100%;
   }
 }
-mat-dialog-actions{
+
+mat-dialog-actions {
   flex-wrap: nowrap;
 }
+
 .cancel-btn {
   width: 88px;
   height: 40px;
