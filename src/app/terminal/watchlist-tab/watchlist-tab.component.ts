@@ -1,7 +1,8 @@
 // Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,10 +27,12 @@ import {
   ToolboxComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { marked } from 'marked';
 import { WatchlistService, StockListing } from '../watchlist.service';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
-import { CommandResult, ChartResultData, ChartControls } from '../terminal.types';
+import { CommandResult, ChartResultData, ChartControls, TableData } from '../terminal.types';
+import { DataTableComponent } from '../data-table/data-table.component';
 
 // Register required ECharts components
 echarts.use([
@@ -82,6 +85,7 @@ interface SystemList {
     MatDividerModule,
     MatAutocompleteModule,
     NgxEchartsDirective,
+    DataTableComponent,
   ],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './watchlist-tab.component.html',
@@ -101,7 +105,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartOptions = signal<EChartsOption | null>(null);
   chartError = signal<string | null>(null);
   // Data content for non-chart commands (HP, DES, QUOTE)
-  dataContent = signal<string | null>(null);
+  dataContent = signal<SafeHtml | null>(null);
+  // Table data for HP command
+  tableData = signal<TableData | null>(null);
+
+  // Inject DomSanitizer for markdown rendering
+  private sanitizer = inject(DomSanitizer);
 
   // Chart controls - extended options from backend documentation
   selectedPeriod = signal('1Y');
@@ -463,19 +472,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   loadData(): void {
     this.loading.set(true);
 
-    // Load search history
+    // Load custom watchlists
     this.subscriptions.add(
-      this.watchlistService.loadSearchHistory().subscribe({
+      this.watchlistService.loadWatchlists().subscribe({
         next: () => this.loading.set(false),
         error: () => this.loading.set(false),
       }),
     );
 
-    // Load custom watchlists
-    this.subscriptions.add(this.watchlistService.loadWatchlists().subscribe());
-
-    // Load recent symbols
-    this.subscriptions.add(this.watchlistService.loadRecentSymbols(20).subscribe());
+    // Load recent symbols with default sort (lastAccessedAt)
+    this.subscriptions.add(this.watchlistService.loadRecentSymbols(50, 'lastAccessedAt').subscribe());
 
     // Load GICS sectors from backend
     this.subscriptions.add(this.watchlistService.loadGicsSectors().subscribe());
@@ -514,33 +520,67 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               // Chart result
               this.chartOptions.set(result.chartOptions as EChartsOption);
               this.dataContent.set(null);
+              this.tableData.set(null);
               this.chartError.set(null);
             } else if (result.outputType === 'data' || result.outputType === 'message') {
               // Data result (HP, DES, QUOTE, etc.)
               this.chartOptions.set(null);
               this.chartError.set(null);
-              // Format the data content for display
-              const content = this.formatDataResult(result);
-              this.dataContent.set(content);
+
+              // Check if data is a table
+              if (this.isTableData(result.data)) {
+                this.tableData.set(result.data as TableData);
+                // Render message as markdown if present
+                if (result.message) {
+                  this.dataContent.set(this.markdownToHtml(result.message));
+                } else {
+                  this.dataContent.set(null);
+                }
+              } else {
+                this.tableData.set(null);
+                // Format the data content for display with markdown
+                const content = this.formatDataResult(result);
+                this.dataContent.set(this.markdownToHtml(content));
+              }
             } else if (result.outputType === 'chart' && !result.chartOptions) {
               // Chart result but no options - might be fetching
               this.chartError.set('Chart data is loading...');
               this.chartOptions.set(null);
               this.dataContent.set(null);
+              this.tableData.set(null);
             } else if (result.message) {
-              // Generic message result
-              this.dataContent.set(`<p>${result.message}</p>`);
+              // Generic message result - render as markdown
+              this.dataContent.set(this.markdownToHtml(result.message));
               this.chartOptions.set(null);
+              this.tableData.set(null);
               this.chartError.set(null);
             }
           } else {
             this.chartError.set(result.message || 'Command failed');
             this.chartOptions.set(null);
             this.dataContent.set(null);
+            this.tableData.set(null);
           }
         }
       }),
     );
+  }
+
+  /**
+   * Check if data is TableData format
+   */
+  private isTableData(data: unknown): boolean {
+    if (!data || typeof data !== 'object') return false;
+    const d = data as { type?: string };
+    return d.type === 'table';
+  }
+
+  /**
+   * Convert markdown text to safe HTML for rendering.
+   */
+  markdownToHtml(markdown: string): SafeHtml {
+    const html = marked.parse(markdown, { async: false }) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   /**
@@ -644,6 +684,30 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle sort option change - reload from backend when needed
+   */
+  onSortChange(sort: 'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt'): void {
+    this.sortBy.set(sort);
+
+    // For Recent watchlist, reload from backend with new sort order
+    if (this.selectedWatchlistId() === 'recent') {
+      this.subscriptions.add(this.watchlistService.loadRecentSymbols(50, sort).subscribe());
+    }
+    // For system categories, reload with new sort order
+    else if (this.selectedWatchlistId().startsWith('sector:')) {
+      const sectorName = this.selectedWatchlistId().replace('sector:', '');
+      this.loadCategorySectorSymbols(sectorName, sort);
+    } else if (this.selectedWatchlistId().startsWith('industry:')) {
+      const industryName = this.selectedWatchlistId().replace('industry:', '');
+      this.loadCategoryIndustrySymbols(industryName, sort);
+    } else if (this.selectedWatchlistId().startsWith('exchange:')) {
+      const exchangeName = this.selectedWatchlistId().replace('exchange:', '');
+      this.loadCategoryExchangeSymbols(exchangeName, sort);
+    }
+    // For custom watchlists, local sorting is already applied via computed
+  }
+
+  /**
    * Handle watchlist dropdown change
    */
   onWatchlistChange(newValue: string): void {
@@ -682,10 +746,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Load symbols for a specific sector from system catalog
    */
-  private loadCategorySectorSymbols(sector: string): void {
+  private loadCategorySectorSymbols(sector: string, orderBy = 'marketCap'): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadAllSectorSymbols(sector, 100, 'marketCap').subscribe({
+      this.watchlistService.loadAllSectorSymbols(sector, 100, orderBy).subscribe({
         next: (symbols) => {
           this.sectorSymbols.set(
             symbols.map((item) => ({
@@ -711,10 +775,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Load symbols for a specific industry from system catalog
    */
-  private loadCategoryIndustrySymbols(industry: string): void {
+  private loadCategoryIndustrySymbols(industry: string, orderBy = 'marketCap'): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadAllIndustrySymbols(industry, 100, 'marketCap').subscribe({
+      this.watchlistService.loadAllIndustrySymbols(industry, 100, orderBy).subscribe({
         next: (symbols) => {
           this.industrySymbols.set(
             symbols.map((item) => ({
@@ -740,10 +804,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Load symbols for a specific exchange from system catalog
    */
-  private loadCategoryExchangeSymbols(exchange: string): void {
+  private loadCategoryExchangeSymbols(exchange: string, orderBy = 'marketCap'): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadExchangeSymbols(exchange, 100, 'marketCap').subscribe({
+      this.watchlistService.loadExchangeSymbols(exchange, 100, orderBy).subscribe({
         next: (symbols) => {
           this.exchangeSymbols.set(
             symbols.map((item) => ({
@@ -786,6 +850,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartOptions.set(null);
     this.chartError.set(null);
     this.dataContent.set(null);
+    this.tableData.set(null);
     this.currentCommand.set(command);
 
     // For GP command, include period and interval
