@@ -80,6 +80,12 @@
               <mat-icon>account_balance</mat-icon>
               <span>Exchanges</span>
             </button>
+
+            <!-- Asset Types Submenu -->
+            <button mat-menu-item [matMenuTriggerFor]="assetTypesMenu">
+              <mat-icon>pie_chart</mat-icon>
+              <span>Asset Types</span>
+            </button>
           </mat-menu>
 
           <!-- Nested Sectors Menu -->
@@ -136,6 +142,20 @@
                   <span>{{ exchange.name }}</span>
                 </button>
               }
+            }
+          </mat-menu>
+
+          <!-- Nested Asset Types Menu -->
+          <mat-menu #assetTypesMenu="matMenu" class="category-submenu">
+            @for (assetType of assetTypeLists(); track assetType.id) {
+              <button
+                mat-menu-item
+                (click)="onWatchlistChange(assetType.id)"
+                [class.active]="selectedWatchlistId() === assetType.id"
+              >
+                <mat-icon>{{ assetType.icon }}</mat-icon>
+                <span>{{ assetType.name }}</span>
+              </button>
             }
           </mat-menu>
 
@@ -249,9 +269,14 @@
               >
                 <div class="symbol-main">
                   <div class="symbol-details">
-                    <!-- Row 1: Symbol, Exchange, Market Cap -->
+                    <!-- Row 1: Symbol, Asset Type, Exchange, Market Cap -->
                     <div class="symbol-row-1">
                       <span class="symbol">{{ item.symbol }}</span>
+                      @if (item.assetType && item.assetType !== 'Stock') {
+                        <span class="asset-type-tag" [matTooltip]="'Asset Type: ' + item.assetType">{{
+                          item.assetType
+                        }}</span>
+                      }
                       @if (item.exchange) {
                         <span class="exchange-tag" [matTooltip]="'Exchange: ' + item.exchange">{{
                           item.exchange
@@ -343,8 +368,8 @@
           <div class="chart-header">
             <div class="chart-title">
               <span class="symbol-name">{{ selectedSymbol() }}</span>
-              @if (selectedItem()?.displayName) {
-                <span class="company-name">{{ selectedItem()?.displayName }}</span>
+              @if (quoteData()?.name || selectedItem()?.displayName; as companyName) {
+                <span class="company-name">{{ companyName }}</span>
               }
               @if (quoteData(); as quote) {
                 <div class="quote-data" [class.positive]="isPositiveChange()" [class.negative]="!isPositiveChange()">
