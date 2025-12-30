@@ -241,6 +241,18 @@
         color: var(--md-sys-color-primary);
       }
 
+      .asset-type-tag {
+        padding: 0 4px;
+        border-radius: 4px;
+
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--md-sys-color-on-primary-container);
+        text-transform: uppercase;
+
+        background: var(--md-sys-color-primary-container);
+      }
+
       .exchange-tag {
         padding: 0 4px;
         border-radius: 4px;

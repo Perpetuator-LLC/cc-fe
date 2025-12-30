@@ -174,6 +174,17 @@ const GET_EXCHANGE_SYMBOLS = gql`
   }
 `;
 
+const GET_ASSET_TYPE_SYMBOLS = gql`
+  query GetAssetTypeSymbols($assetType: String!, $limit: Int) {
+    stockListings(assetType: $assetType, status: "Active", limit: $limit) {
+      symbol
+      name
+      exchange
+      assetType
+    }
+  }
+`;
+
 const SEARCH_STOCK_LISTINGS = gql`
   query SearchStockListings($symbol: String, $limit: Int) {
     stockListings(symbol: $symbol, limit: $limit) {
@@ -511,7 +522,7 @@ export class WatchlistService {
    * @param limit - Max number of symbols
    * @param orderBy - Sort order: 'marketCap', 'accessCount', 'lastAccessedAt', or 'symbol'
    */
-  loadRecentSymbols(limit = 10, orderBy = 'lastAccessedAt'): Observable<WatchlistItem[]> {
+  loadRecentSymbols(limit = 30, orderBy = 'lastAccessedAt'): Observable<WatchlistItem[]> {
     return this.apollo
       .query<RecentSymbolsResponse>({
         query: GET_RECENT_SYMBOLS,
@@ -660,6 +671,22 @@ export class WatchlistService {
       })
       .pipe(
         map((result) => result.data.exchangeSymbols || []),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
+   * Load symbols by asset type from stock listings
+   */
+  loadAssetTypeSymbols(assetType: string, limit = 100): Observable<StockListing[]> {
+    return this.apollo
+      .query<SearchStockListingsResponse>({
+        query: GET_ASSET_TYPE_SYMBOLS,
+        variables: { assetType, limit },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.stockListings || []),
         catchError(() => of([])),
       );
   }

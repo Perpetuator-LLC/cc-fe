@@ -12,6 +12,8 @@ export type TerminalMessageType =
   | 'chart.created'
   | 'chart.update'
   | 'symbol.update'
+  | 'symbols.subscribed'
+  | 'symbols.unsubscribed'
   | 'error'
   | 'pong';
 
@@ -83,10 +85,14 @@ export interface TableData {
 
 export interface SymbolUpdate {
   symbol: string;
+  name?: string;
   price: number;
   change?: number;
   changePercent?: number;
   volume?: number;
+  open?: number;
+  high?: number;
+  low?: number;
   timestamp: string;
 }
 
@@ -355,6 +361,11 @@ export interface SubscribeSymbolsAction {
   symbols: string[];
 }
 
+export interface UnsubscribeSymbolsAction {
+  action: 'unsubscribe_symbols';
+  symbols: string[];
+}
+
 export interface PingAction {
   action: 'ping';
 }
@@ -364,6 +375,7 @@ export type TerminalAction =
   | SubscribeChartAction
   | UnsubscribeChartAction
   | SubscribeSymbolsAction
+  | UnsubscribeSymbolsAction
   | PingAction;
 
 // ============================================================================
