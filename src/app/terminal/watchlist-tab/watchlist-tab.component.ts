@@ -64,7 +64,7 @@ interface SystemList {
   id: string;
   name: string;
   icon: string;
-  type: 'sector' | 'industry' | 'exchange';
+  type: 'sector' | 'industry' | 'exchange' | 'assetType';
   value: string;
 }
 
@@ -160,6 +160,24 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }));
   });
 
+  // Asset types list - hardcoded until backend provides endpoint
+  assetTypeLists = computed<SystemList[]>(() => {
+    const assetTypes = [
+      { value: 'Stock', name: 'Stocks', icon: 'trending_up' },
+      { value: 'ETF', name: 'ETFs', icon: 'analytics' },
+      { value: 'Mutual Fund', name: 'Mutual Funds', icon: 'account_balance_wallet' },
+      { value: 'Index', name: 'Indexes', icon: 'show_chart' },
+      { value: 'Crypto', name: 'Crypto', icon: 'currency_bitcoin' },
+    ];
+    return assetTypes.map((a) => ({
+      id: `assetType:${a.value}`,
+      name: a.name,
+      icon: a.icon,
+      type: 'assetType' as const,
+      value: a.value,
+    }));
+  });
+
   // Dynamically loaded sector symbols
   sectorSymbols = signal<SymbolListItem[]>([]);
 
@@ -168,6 +186,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   // Dynamically loaded exchange symbols
   exchangeSymbols = signal<SymbolListItem[]>([]);
+
+  // Dynamically loaded asset type symbols
+  assetTypeSymbols = signal<SymbolListItem[]>([]);
 
   // Create watchlist form
   newWatchlistName = '';
@@ -247,6 +268,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       items = this.industrySymbols();
     } else if (watchlistId.startsWith('exchange:')) {
       items = this.exchangeSymbols();
+    } else if (watchlistId.startsWith('assetType:')) {
+      items = this.assetTypeSymbols();
     } else if (watchlistId === 'recent') {
       const recentSymbols = this.watchlistService.recentSymbols() || [];
       items = recentSymbols.map((item) => ({
@@ -425,6 +448,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Unsubscribe from any active symbol quote updates
+    const currentSymbol = this.selectedSymbol();
+    if (currentSymbol) {
+      this.terminalService.unsubscribeSymbols([currentSymbol]);
+    }
+
     this.subscriptions.unsubscribe();
     this.symbolSearchSubject.complete();
   }
@@ -485,7 +514,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     );
 
     // Load recent symbols with default sort (lastAccessedAt)
-    this.subscriptions.add(this.watchlistService.loadRecentSymbols(50, 'lastAccessedAt').subscribe());
+    this.subscriptions.add(this.watchlistService.loadRecentSymbols(30, 'lastAccessedAt').subscribe());
 
     // Load GICS sectors from backend
     this.subscriptions.add(this.watchlistService.loadGicsSectors().subscribe());
@@ -713,7 +742,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // For Recent watchlist, reload from backend with new sort order
     if (this.selectedWatchlistId() === 'recent') {
-      this.subscriptions.add(this.watchlistService.loadRecentSymbols(50, sort).subscribe());
+      this.subscriptions.add(this.watchlistService.loadRecentSymbols(30, sort).subscribe());
     }
     // For system categories, reload with new sort order
     else if (this.selectedWatchlistId().startsWith('sector:')) {
@@ -725,6 +754,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     } else if (this.selectedWatchlistId().startsWith('exchange:')) {
       const exchangeName = this.selectedWatchlistId().replace('exchange:', '');
       this.loadCategoryExchangeSymbols(exchangeName, sort);
+    } else if (this.selectedWatchlistId().startsWith('assetType:')) {
+      const assetTypeName = this.selectedWatchlistId().replace('assetType:', '');
+      this.loadCategoryAssetTypeSymbols(assetTypeName);
     }
     // For custom watchlists, local sorting is already applied via computed
   }
@@ -759,6 +791,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       this.sortBy.set('marketCap');
       const exchangeName = newValue.replace('exchange:', '');
       this.loadCategoryExchangeSymbols(exchangeName);
+    } else if (newValue.startsWith('assetType:')) {
+      // Asset type lists: sort by market cap by default
+      this.sortBy.set('marketCap');
+      const assetTypeName = newValue.replace('assetType:', '');
+      this.loadCategoryAssetTypeSymbols(assetTypeName);
     } else {
       // Custom watchlists: keep current sort or default to lastAccessedAt
       // (user may have set a preference)
@@ -853,9 +890,41 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Load symbols for a specific asset type from stock listings
+   */
+  private loadCategoryAssetTypeSymbols(assetType: string): void {
+    this.loading.set(true);
+    this.subscriptions.add(
+      this.watchlistService.loadAssetTypeSymbols(assetType, 100).subscribe({
+        next: (symbols) => {
+          this.assetTypeSymbols.set(
+            symbols.map((item) => ({
+              symbol: item.symbol,
+              displayName: item.name,
+              assetType: item.assetType,
+              exchange: item.exchange,
+            })),
+          );
+          this.loading.set(false);
+        },
+        error: () => {
+          this.assetTypeSymbols.set([]);
+          this.loading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
    * Select a symbol and load its chart
    */
   selectSymbol(item: SymbolListItem): void {
+    // Unsubscribe from previous symbol if any
+    const previousSymbol = this.selectedSymbol();
+    if (previousSymbol) {
+      this.terminalService.unsubscribeSymbols([previousSymbol]);
+    }
+
     this.selectedSymbol.set(item.symbol);
     this.selectedItem.set(item);
     this.chartError.set(null);
@@ -922,7 +991,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           this.watchlistService.removeFromWatchlist(searchHistory.uuid, item.symbol).subscribe({
             next: () => {
               // Reload recent symbols after removal
-              this.watchlistService.loadRecentSymbols(20).subscribe();
+              this.watchlistService.loadRecentSymbols(30).subscribe();
               this.watchlistService.loadSearchHistory().subscribe();
             },
           }),

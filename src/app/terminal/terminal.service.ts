@@ -287,6 +287,10 @@ export class TerminalService implements OnDestroy {
   // These silently update the chart when complete, don't re-execute
   private backgroundRefreshJobs = new Map<string, { command: string; historyIndex: number }>();
 
+  // Throttle protection: track recent commands to prevent rapid re-execution
+  private recentCommands = new Map<string, number>(); // command -> timestamp
+  private readonly COMMAND_THROTTLE_MS = 1000; // Minimum 1 second between identical commands
+
   constructor(
     private wsService: TerminalWebSocketService,
     private jobsWsService: JobsWebSocketService,
@@ -368,6 +372,24 @@ export class TerminalService implements OnDestroy {
     const trimmedInput = input.trim();
     if (!trimmedInput) {
       throw new Error('Empty command');
+    }
+
+    // Throttle protection: prevent rapid duplicate commands
+    const now = Date.now();
+    const lastExecutionTime = this.recentCommands.get(trimmedInput);
+    if (lastExecutionTime && now - lastExecutionTime < this.COMMAND_THROTTLE_MS) {
+      // Return the last history entry instead of creating a new one
+      const history = this.historySignal();
+      return history[history.length - 1] || { input: trimmedInput, timestamp: new Date(), isLoading: false };
+    }
+    this.recentCommands.set(trimmedInput, now);
+
+    // Clean up old entries from recentCommands (keep last 5 seconds of commands)
+    const cutoff = now - 5000;
+    for (const [cmd, time] of this.recentCommands.entries()) {
+      if (time < cutoff) {
+        this.recentCommands.delete(cmd);
+      }
     }
 
     // Add to command history
@@ -459,6 +481,13 @@ export class TerminalService implements OnDestroy {
    */
   subscribeSymbols(symbols: string[]): void {
     this.wsService.subscribeSymbols(symbols);
+  }
+
+  /**
+   * Unsubscribe from real-time symbol price updates
+   */
+  unsubscribeSymbols(symbols: string[]): void {
+    this.wsService.unsubscribeSymbols(symbols);
   }
 
   // ============================================================================

@@ -222,6 +222,16 @@ export class TerminalWebSocketService implements OnDestroy {
   }
 
   /**
+   * Unsubscribe from real-time symbol price updates
+   */
+  unsubscribeSymbols(symbols: string[]): void {
+    this.send({
+      action: 'unsubscribe_symbols',
+      symbols: symbols.map((s) => s.toUpperCase()),
+    });
+  }
+
+  /**
    * Send a ping to keep the connection alive
    */
   ping(): void {
@@ -284,12 +294,26 @@ export class TerminalWebSocketService implements OnDestroy {
       case 'symbol.update':
         this.symbolUpdate$.next({
           symbol: data['symbol'],
+          name: data['name'],
           price: data['price'],
           change: data['change'],
           changePercent: data['changePercent'],
           volume: data['volume'],
+          open: data['open'],
+          high: data['high'],
+          low: data['low'],
           timestamp: data['timestamp'],
         });
+        break;
+
+      case 'symbols.subscribed':
+        // Confirmation that symbols were subscribed
+        console.log('[TerminalWS] Subscribed to symbols:', data['symbols']);
+        break;
+
+      case 'symbols.unsubscribed':
+        // Confirmation that symbols were unsubscribed
+        console.log('[TerminalWS] Unsubscribed from symbols:', data['symbols']);
         break;
 
       case 'error':
