@@ -123,27 +123,41 @@
 // Watchlist menu item with actions
 .watchlist-menu-item {
   display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
   align-items: center;
+  justify-content: space-between;
+
+  min-width: 200px;
 
   .watchlist-menu-content {
     cursor: pointer;
 
+    overflow: hidden;
     display: flex;
     flex: 1;
+    flex-shrink: 1;
     gap: 8px;
     align-items: center;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .watchlist-actions-btn {
+    flex-shrink: 0;
     width: 24px;
     height: 24px;
-    margin-left: auto;
     opacity: 0.6;
 
     mat-icon {
       width: 16px;
       height: 16px;
       font-size: 16px;
+      color: var(--md-sys-color-on-surface-variant);
     }
 
     &:hover {
@@ -751,7 +765,7 @@
       th {
         font-weight: 600;
         color: var(--md-sys-color-on-surface);
-        background: var(--md-sys-color-surface-container);
+        background: var(--md-sys-color-surface-container-highest);
       }
 
       td {
@@ -760,7 +774,11 @@
       }
 
       tr:nth-child(even) td {
-        background: var(--md-sys-color-surface-container-lowest);
+        background: var(--md-sys-color-surface-container);
+      }
+
+      tr:hover td {
+        background: var(--md-sys-color-surface-container-high);
       }
     }
 
@@ -814,8 +832,15 @@
       padding: 8px 12px;
       border-radius: 4px;
 
-      &:nth-child(odd) {
-        background: var(--md-sys-color-surface-container-lowest);
+      // Alternating row backgrounds - subtle for dark mode
+      background: var(--md-sys-color-surface-container-low);
+
+      &:nth-child(even) {
+        background: var(--md-sys-color-surface-container);
+      }
+
+      &:hover {
+        background: var(--md-sys-color-surface-container-high);
       }
 
       .data-label {

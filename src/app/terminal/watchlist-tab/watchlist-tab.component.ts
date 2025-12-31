@@ -108,6 +108,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   dataContent = signal<SafeHtml | null>(null);
   // Table data for HP command
   tableData = signal<TableData | null>(null);
+  // ECharts instance for zoom handling
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private chartInstance: any = null;
 
   // Quote/price data for selected symbol
   quoteData = signal<SymbolUpdate | null>(null);
@@ -541,17 +544,31 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         // Extract chartControls from result data if available
         this.extractChartControls(result);
 
-        // Check if this result is for our selected symbol
+        // Check if this result is for our selected symbol OR if it's a new command from the terminal bar
         const isForSelectedSymbol =
           resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase();
 
-        if (isForSelectedSymbol || this.chartLoading()) {
+        // Also accept results if we're loading or if this is a symbol command that should update the display
+        const shouldHandleResult = isForSelectedSymbol || this.chartLoading() || (resultSymbol && result.success);
+
+        if (shouldHandleResult) {
+          // Update the selected symbol if the result has one and we didn't have one selected
+          if (resultSymbol && !selectedSym) {
+            this.selectedSymbol.set(resultSymbol.toUpperCase());
+          }
+
           this.chartLoading.set(false);
 
           if (result.success) {
             if (result.outputType === 'chart' && result.chartOptions) {
-              // Chart result
-              this.chartOptions.set(result.chartOptions as EChartsOption);
+              // Debug: log incoming chart options
+              console.log('[WatchlistTab] Incoming chartOptions:', JSON.stringify(result.chartOptions, null, 2));
+
+              // Apply dark theme overrides
+              const themedOptions = this.applyDarkTheme(result.chartOptions as EChartsOption);
+              console.log('[WatchlistTab] Themed chartOptions:', JSON.stringify(themedOptions, null, 2));
+
+              this.chartOptions.set(themedOptions);
               this.dataContent.set(null);
               this.tableData.set(null);
               this.chartError.set(null);
@@ -978,6 +995,41 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle chart initialization - set up right-sticky zoom behavior
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onChartInit(chart: any): void {
+    this.chartInstance = chart;
+
+    // Listen for datazoom events to enforce right-sticky behavior
+    chart.on('datazoom', () => {
+      // Get current zoom state
+      const option = chart.getOption();
+      const dataZoom = option.dataZoom;
+
+      if (!dataZoom || dataZoom.length === 0) return;
+
+      // Find the inside dataZoom
+      const insideZoom = dataZoom.find((dz: { type?: string }) => dz.type === 'inside') || dataZoom[0];
+
+      // If end is not at 100%, force it to 100% (right-sticky)
+      if (insideZoom.end !== undefined && insideZoom.end < 100) {
+        const zoomRange = insideZoom.end - insideZoom.start;
+        const newStart = 100 - zoomRange;
+
+        // Use setTimeout to avoid recursion
+        setTimeout(() => {
+          chart.dispatchAction({
+            type: 'dataZoom',
+            start: Math.max(0, newStart),
+            end: 100,
+          });
+        }, 0);
+      }
+    });
+  }
+
+  /**
    * Remove a symbol from current watchlist
    */
   removeSymbol(item: SymbolListItem): void {
@@ -1333,5 +1385,213 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   isPositiveChange(): boolean {
     const quote = this.quoteData();
     return (quote?.change ?? 0) >= 0;
+  }
+
+  // ============================================================================
+  // Dark Theme for ECharts
+  // ============================================================================
+
+  private darkThemeDefaults = {
+    backgroundColor: 'transparent',
+    animation: true, // Enable animation for initial load
+    animationDuration: 1000,
+    animationDurationUpdate: 0, // Disable animation for updates (zoom, etc.)
+    textStyle: {
+      color: '#c0c0c0',
+    },
+    grid: {
+      backgroundColor: 'transparent',
+    },
+    title: {
+      textStyle: { color: '#e0e0e0' },
+      subtextStyle: { color: '#a0a0a0' },
+    },
+    legend: {
+      textStyle: { color: '#c0c0c0' },
+    },
+    tooltip: {
+      backgroundColor: 'rgba(30, 30, 30, 0.95)',
+      borderColor: '#505050',
+      textStyle: { color: '#e0e0e0' },
+      // Format dates nicely in tooltips
+      formatter: (params: unknown) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p = params as any;
+        if (Array.isArray(p) && p.length > 0) {
+          const first = p[0];
+          let dateStr = '';
+          if (first.axisValue) {
+            const date = new Date(first.axisValue);
+            if (!isNaN(date.getTime())) {
+              dateStr = date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              });
+            } else {
+              dateStr = String(first.axisValue);
+            }
+          }
+          let html = `<div style="font-weight:600;margin-bottom:4px">${dateStr}</div>`;
+          for (const item of p) {
+            const value = typeof item.value === 'number' ? item.value.toFixed(2) : item.value;
+            html += `<div>${item.marker} ${item.seriesName}: <b>${value}</b></div>`;
+          }
+          return html;
+        }
+        return '';
+      },
+    },
+    dataZoom: {
+      textStyle: { color: '#a0a0a0' },
+      borderColor: '#505050',
+      backgroundColor: 'rgba(30, 30, 30, 0.5)',
+      fillerColor: 'rgba(80, 80, 80, 0.3)',
+      handleStyle: { color: '#606060' },
+      dataBackground: {
+        lineStyle: { color: '#505050' },
+        areaStyle: { color: 'rgba(60, 60, 60, 0.3)' },
+      },
+    },
+  };
+
+  private darkAxisDefaults = {
+    axisLine: { lineStyle: { color: '#505050' } },
+    axisLabel: { color: '#a0a0a0' },
+    splitLine: { lineStyle: { color: '#353535' } },
+    splitArea: {
+      show: false,
+      areaStyle: { color: ['rgba(35, 35, 35, 0.5)', 'rgba(40, 40, 40, 0.5)'] },
+    },
+  };
+
+  // Date formatting for x-axis labels
+  private xAxisDateDefaults = {
+    axisLabel: {
+      color: '#a0a0a0',
+      formatter: (value: string | number) => {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return String(value);
+        // Format: "Jan 15" or "Jan 15 '24" for different years
+        const now = new Date();
+        const month = date.toLocaleDateString('en-US', { month: 'short' });
+        const day = date.getDate();
+        if (date.getFullYear() !== now.getFullYear()) {
+          return `${month} ${day} '${String(date.getFullYear()).slice(-2)}`;
+        }
+        return `${month} ${day}`;
+      },
+    },
+  };
+
+  /**
+   * Apply dark theme to chart options
+   */
+  private applyDarkTheme(options: EChartsOption): EChartsOption {
+    let merged = this.deepMergeChart(options, this.darkThemeDefaults);
+    merged = this.applyAxisTheming(merged);
+    merged = this.applyDataZoomConfig(merged);
+    return merged;
+  }
+
+  /**
+   * Configure dataZoom for scroll-to-zoom with right-sticky behavior
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyDataZoomConfig(options: any): any {
+    const result = { ...options };
+
+    // Create inside dataZoom for mouse wheel zoom (right-sticky)
+    const insideZoom = {
+      type: 'inside',
+      xAxisIndex: 0,
+      start: 0,
+      end: 100,
+      zoomOnMouseWheel: true,
+      moveOnMouseMove: true,
+      moveOnMouseWheel: false,
+      // Keep the right side (most recent) sticky when zooming
+      rangeMode: ['value', 'percent'],
+    };
+
+    // If dataZoom already exists, merge our config
+    if (result.dataZoom) {
+      if (Array.isArray(result.dataZoom)) {
+        // Check if inside type already exists
+        const hasInside = result.dataZoom.some((dz: { type?: string }) => dz.type === 'inside');
+        if (!hasInside) {
+          result.dataZoom = [...result.dataZoom, insideZoom];
+        } else {
+          // Merge our config into existing inside zoom
+          result.dataZoom = result.dataZoom.map((dz: { type?: string }) => {
+            if (dz.type === 'inside') {
+              return { ...dz, ...insideZoom, type: 'inside' };
+            }
+            return dz;
+          });
+        }
+      } else {
+        // Single dataZoom object
+        if (result.dataZoom.type === 'inside') {
+          result.dataZoom = { ...result.dataZoom, ...insideZoom };
+        } else {
+          result.dataZoom = [result.dataZoom, insideZoom];
+        }
+      }
+    } else {
+      // No dataZoom, add our inside zoom
+      result.dataZoom = [insideZoom];
+    }
+
+    return result;
+  }
+
+  /**
+   * Apply dark theme to axes (handles arrays)
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyAxisTheming(options: any): any {
+    const result = { ...options };
+
+    if (result.xAxis) {
+      if (Array.isArray(result.xAxis)) {
+        result.xAxis = result.xAxis.map((axis: unknown) => {
+          let themed = this.deepMergeChart(axis, this.darkAxisDefaults);
+          // Apply date formatting if it's a time/category axis
+          themed = this.deepMergeChart(themed, this.xAxisDateDefaults);
+          return themed;
+        });
+      } else {
+        result.xAxis = this.deepMergeChart(result.xAxis, this.darkAxisDefaults);
+        result.xAxis = this.deepMergeChart(result.xAxis, this.xAxisDateDefaults);
+      }
+    }
+
+    if (result.yAxis) {
+      if (Array.isArray(result.yAxis)) {
+        result.yAxis = result.yAxis.map((axis: unknown) => this.deepMergeChart(axis, this.darkAxisDefaults));
+      } else {
+        result.yAxis = this.deepMergeChart(result.yAxis, this.darkAxisDefaults);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Deep merge for chart options (source overrides target)
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private deepMergeChart(target: any, source: any): any {
+    const result = { ...target };
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = this.deepMergeChart(target[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    return result;
   }
 }
