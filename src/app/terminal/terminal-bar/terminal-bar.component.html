@@ -6,11 +6,12 @@
     <!-- Autocomplete dropdown -->
     @if (suggestions().length > 0 && showSuggestions()) {
       <div class="autocomplete-dropdown">
-        @for (suggestion of suggestions(); track suggestion.text; let i = $index) {
+        @for (suggestion of suggestions(); track suggestion.fqn || suggestion.display; let i = $index) {
           <div
             class="suggestion-item"
             [class.selected]="i === selectedSuggestionIndex()"
             [class.ai-suggestion]="suggestion.isAiInterpreted"
+            [class.ambiguous]="suggestion.isAmbiguous"
             tabindex="0"
             role="option"
             [attr.aria-selected]="i === selectedSuggestionIndex()"
@@ -21,15 +22,33 @@
             <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
               <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
             </span>
-            <span class="suggestion-text">{{ suggestion.display }}</span>
-            @if (suggestion.description) {
-              <span class="suggestion-desc">{{ suggestion.description }}</span>
+            <span class="suggestion-text">
+              @if (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent') {
+                {{ suggestion.symbol || suggestion.display }}
+                @if (suggestion.name) {
+                  <span class="suggestion-name">- {{ suggestion.name }}</span>
+                }
+              } @else {
+                {{ suggestion.display }}
+              }
+            </span>
+            @if (suggestion.displaySecondary || suggestion.description) {
+              <span class="suggestion-desc">{{ suggestion.displaySecondary || suggestion.description }}</span>
             }
-            @if (suggestion.exchange) {
+            @if (
+              suggestion.exchange &&
+              (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent')
+            ) {
               <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
+            }
+            @if (suggestion.assetType && (suggestion.type === 'symbol' || suggestion.type === 'stock')) {
+              <span class="suggestion-asset-type">{{ suggestion.assetType }}</span>
             }
             @if (suggestion.category) {
               <span class="suggestion-category">{{ suggestion.category }}</span>
+            }
+            @if (suggestion.aliasFor) {
+              <span class="suggestion-alias">→ {{ suggestion.aliasFor }}</span>
             }
             @if (suggestion.isAiInterpreted) {
               <span class="ai-badge">AI</span>
@@ -42,25 +61,44 @@
     <!-- Command input -->
     <div class="input-container">
       <span class="prompt">&gt;</span>
-      <input
-        #commandInput
-        type="text"
-        [value]="currentCommand()"
-        (input)="onInputChange($event)"
-        (keydown)="onKeyDown($event)"
-        (focus)="onInputFocus()"
-        (blur)="onInputBlur()"
-        [disabled]="isProcessing()"
-        placeholder="Type a command or ask a question..."
-        autocomplete="off"
-        spellcheck="false"
-      />
-      @if (isProcessing()) {
+      @if (isProcessing() && lastEntry(); as last) {
+        <!-- Show the executing command while processing -->
+        <span class="executing-command">{{ last.input }}</span>
         <mat-spinner diameter="18" />
-      } @else if (currentCommand()) {
-        <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
-          <mat-icon>send</mat-icon>
-        </button>
+      } @else {
+        <!-- Chips for completed FQN tokens -->
+        @for (chip of chips(); track chip.fqn; let i = $index) {
+          <span
+            class="fqn-chip"
+            [class.chip-stock]="chip.type === 'stock'"
+            [class.chip-command]="chip.type === 'command'"
+            [class.chip-crypto]="chip.type === 'crypto'"
+            [class.chip-index]="chip.type === 'index'"
+            [class.chip-forex]="chip.type === 'forex'"
+            [class.chip-parameter]="chip.type === 'parameter'"
+            [matTooltip]="chip.fqn"
+            (click)="removeChip(i)"
+          >
+            {{ chip.display }}
+          </span>
+        }
+        <input
+          #commandInput
+          type="text"
+          [value]="currentInput()"
+          (input)="onInputChange($event)"
+          (keydown)="onKeyDown($event)"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+          [placeholder]="chips().length > 0 ? '' : 'Type a command or ask a question...'"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        @if (currentInput() || chips().length > 0) {
+          <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
+            <mat-icon>send</mat-icon>
+          </button>
+        }
       }
     </div>
   </div>

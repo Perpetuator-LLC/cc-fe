@@ -38,7 +38,8 @@
 
 .terminal-bar .input-container {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
   align-items: center;
 }
 
@@ -72,6 +73,17 @@
   }
 }
 
+.terminal-bar .executing-command {
+  overflow: hidden;
+  flex: 1;
+
+  font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .terminal-bar .send-btn {
   flex-shrink: 0;
   width: 28px;
@@ -87,6 +99,73 @@
 
 .terminal-bar .input-container mat-spinner {
   flex-shrink: 0;
+}
+
+// FQN Chips - colored tokens for completed FQN parts
+.terminal-bar .fqn-chip {
+  cursor: pointer;
+
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  height: 24px;
+  margin-right: 4px;
+  padding: 0 8px;
+  border-radius: 4px;
+
+  font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+
+  &:hover {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Stock chip - Green theme
+.terminal-bar .chip-stock {
+  color: var(--md-extended-color-success-on-color-container);
+  background: var(--md-extended-color-success-color-container);
+}
+
+// Command chip - Blue/Primary theme
+.terminal-bar .chip-command {
+  color: var(--md-sys-color-on-primary-container);
+  background: var(--md-sys-color-primary-container);
+}
+
+// Crypto chip - Orange/Tertiary theme
+.terminal-bar .chip-crypto {
+  color: var(--md-sys-color-on-tertiary-container);
+  background: var(--md-sys-color-tertiary-container);
+}
+
+// Index chip - Purple/Secondary theme
+.terminal-bar .chip-index {
+  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-secondary-container);
+}
+
+// Forex chip - Teal
+.terminal-bar .chip-forex {
+  color: var(--md-extended-color-info-on-color-container);
+  background: var(--md-extended-color-info-color-container);
+}
+
+// Parameter chip - Subtle gray
+.terminal-bar .chip-parameter {
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container-highest);
 }
 
 .autocomplete-dropdown {
@@ -143,7 +222,8 @@
   color: var(--md-sys-color-primary);
 }
 
-.suggestion-icon.type-symbol {
+.suggestion-icon.type-symbol,
+.suggestion-icon.type-stock {
   color: var(--md-extended-color-success-color);
 }
 
@@ -161,6 +241,12 @@
   color: var(--md-sys-color-on-surface);
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  .suggestion-name {
+    margin-left: 4px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
 }
 
 .suggestion-desc {
@@ -174,17 +260,37 @@
 }
 
 .suggestion-exchange,
-.suggestion-category {
+.suggestion-category,
+.suggestion-asset-type {
   flex-shrink: 0;
 
   padding: 2px 6px;
   border-radius: 4px;
 
   font-size: 10px;
-  color: var(--md-sys-color-on-tertiary-container);
   text-transform: uppercase;
+}
 
+.suggestion-exchange {
+  color: var(--md-sys-color-on-tertiary-container);
   background: var(--md-sys-color-tertiary-container);
+}
+
+.suggestion-category {
+  color: var(--md-sys-color-on-primary-container);
+  background: var(--md-sys-color-primary-container);
+}
+
+.suggestion-asset-type {
+  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-secondary-container);
+}
+
+.suggestion-alias {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .ai-badge {
@@ -198,6 +304,10 @@
   color: var(--md-sys-color-on-tertiary);
 
   background: var(--md-sys-color-tertiary);
+}
+
+.suggestion-item.ambiguous {
+  border-left: 2px solid var(--md-sys-color-error);
 }
 
 .terminal-bar .status-icon {
