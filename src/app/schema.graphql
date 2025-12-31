@@ -26,6 +26,9 @@ type Query {
   """Get list of all GICS sector names"""
   gicsSectors: [String]
 
+  """Get system watchlists (All Stocks, Sectors, Industries, Exchanges)"""
+  systemWatchlists: [WatchlistObjectType]
+
   """Get AI agent execution history"""
   agentExecutions(agentType: String, limit: Int = 20): [AgentExecutionType]
 
@@ -834,42 +837,49 @@ type CommandHelpType {
   aliases: [String]
 }
 
-"""A single autocomplete suggestion."""
+"""
+A single autocomplete suggestion.
+
+All suggestions include an FQN field that should be used when executing.
+The frontend displays 'display' but inserts/sends 'fqn' to backend.
+"""
 type AutocompleteSuggestionType {
-  """The suggestion text"""
-  text: String
+  """
+  Fully Qualified Name to insert (e.g., 'stock:NYSE:DIS', 'command:PRICE')
+  """
+  fqn: String!
 
-  """Display text for the dropdown"""
-  display: String
+  """User-friendly display text (e.g., 'DIS - Walt Disney Co')"""
+  display: String!
+
+  """Secondary display text (e.g., category, description preview)"""
+  displaySecondary: String
 
   """
-  Type: command, alias, parameter, example, symbol, recent, history, history_ai, natural_language
+  Type: command, alias, stock, stock_name, crypto, index, recent, history, exchange
   """
-  type: String
+  type: String!
 
-  """Description/help text"""
+  """Full description/help text"""
   description: String
 
-  """Command category (for commands)"""
+  """Relevance score (higher = more relevant)"""
+  score: Int
+
+  """Command category (EQUITY, CHART, etc.)"""
   category: String
 
-  """Text to insert when selected"""
-  insert: String
-
-  """Whether command requires a symbol"""
+  """Whether command requires symbol(s)"""
   requiresSymbol: Boolean
 
-  """Full syntax for the command"""
-  syntax: String
+  """If this is an alias, the canonical command name"""
+  aliasFor: String
 
-  """Parameter type (for parameters)"""
-  paramType: String
+  """The ticker symbol (e.g., 'DIS')"""
+  symbol: String
 
-  """Valid choices (for parameters)"""
-  choices: [String]
-
-  """Default value (for parameters)"""
-  default: String
+  """Company/security name"""
+  name: String
 
   """Asset type: Stock, ETF, Crypto, etc."""
   assetType: String
@@ -883,16 +893,14 @@ type AutocompleteSuggestionType {
   """Currency for prices"""
   currency: String
 
-  """Fully Qualified Name: SYMBOL:EXCHANGE (e.g., AAPL:NASDAQ)"""
-  fqn: String
-
-  """True if this symbol exists on multiple exchanges"""
+  """True if symbol exists on multiple exchanges"""
   isAmbiguous: Boolean
 
-  """
-  True if this suggestion will be processed by AI (NL queries, history_ai)
-  """
-  isAiInterpreted: Boolean
+  """DEPRECATED: Use 'fqn' instead"""
+  text: String
+
+  """DEPRECATED: Use 'fqn' instead"""
+  insert: String
 }
 
 type TraceType {
@@ -2925,11 +2933,18 @@ type Mutation {
   """
   Execute a terminal command.
   
-  Parses the input, identifies the command, and executes it.
-  If the command is not recognized, it can be routed to AI interpretation.
+  Accepts FQN (Fully Qualified Name) format:
+  - command:HELP
+  - stock:NYSE:DIS command:PRICE -period 1Y
+  - stock:NASDAQ:AAPL stock:NASDAQ:GOOGL command:COMPARE
+  
+  The frontend should convert user input to FQN format before sending.
+  Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).
   """
   executeCommand(
-    """Command input (e.g., 'AAPL HP -period 1Y')"""
+    """
+    Command input in FQN format (e.g., 'stock:NYSE:DIS command:PRICE -period 1Y')
+    """
     input: String!
 
     """Use AI to interpret unrecognized commands"""
@@ -3630,8 +3645,13 @@ type AddPanelToDashboard {
 """
 Execute a terminal command.
 
-Parses the input, identifies the command, and executes it.
-If the command is not recognized, it can be routed to AI interpretation.
+Accepts FQN (Fully Qualified Name) format:
+- command:HELP
+- stock:NYSE:DIS command:PRICE -period 1Y
+- stock:NASDAQ:AAPL stock:NASDAQ:GOOGL command:COMPARE
+
+The frontend should convert user input to FQN format before sending.
+Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).
 """
 type ExecuteCommand {
   success: Boolean

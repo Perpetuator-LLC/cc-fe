@@ -535,6 +535,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   private subscribeToCommandResults(): void {
     this.subscriptions.add(
       this.terminalWsService.onCommandResult.subscribe((result: CommandResult) => {
+        console.log('[WatchlistTab] onCommandResult received:', result);
+        console.log('[WatchlistTab] result.outputType:', result?.outputType);
+        console.log('[WatchlistTab] result.chartOptions:', result?.chartOptions);
+        console.log('[WatchlistTab] result.success:', result?.success);
+
         if (!result) return;
 
         // Get symbol from metadata - try multiple access patterns
@@ -551,6 +556,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         // Also accept results if we're loading or if this is a symbol command that should update the display
         const shouldHandleResult = isForSelectedSymbol || this.chartLoading() || (resultSymbol && result.success);
 
+        console.log('[WatchlistTab] Decision logic:', {
+          resultSymbol,
+          selectedSym,
+          isForSelectedSymbol,
+          chartLoading: this.chartLoading(),
+          shouldHandleResult,
+        });
+
         if (shouldHandleResult) {
           // Update the selected symbol if the result has one and we didn't have one selected
           if (resultSymbol && !selectedSym) {
@@ -559,10 +572,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
           this.chartLoading.set(false);
 
+          console.log(
+            '[WatchlistTab] Processing result, outputType:',
+            result.outputType,
+            'chartOptions:',
+            !!result.chartOptions,
+          );
+
           if (result.success) {
             if (result.outputType === 'chart' && result.chartOptions) {
               // Debug: log incoming chart options
-              console.log('[WatchlistTab] Incoming chartOptions:', JSON.stringify(result.chartOptions, null, 2));
+              console.log('[WatchlistTab] Setting chartOptions from result');
 
               // Apply dark theme overrides
               const themedOptions = this.applyDarkTheme(result.chartOptions as EChartsOption);
@@ -950,14 +970,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Subscribe to real-time updates for this symbol
     this.terminalService.subscribeSymbols([item.symbol]);
 
-    // Load chart with default command
-    this.loadChart(item.symbol, this.currentCommand());
+    // Load chart with default command (1D chart on first select)
+    this.loadChart(item.symbol, item.exchange, 'CHART');
   }
 
   /**
-   * Load chart or data for symbol
+   * Load chart or data for symbol using FQN format
    */
-  private loadChart(symbol: string, command: string): void {
+  private loadChart(symbol: string, exchange: string | undefined, command: string): void {
     this.chartLoading.set(true);
     this.chartOptions.set(null);
     this.chartError.set(null);
@@ -965,14 +985,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.tableData.set(null);
     this.currentCommand.set(command);
 
-    // For GP command, include period and interval
-    let fullCommand = `${symbol} ${command}`;
-    if (command === 'GP') {
+    // Build FQN format command
+    const symbolFqn = `stock:${exchange || 'UNKNOWN'}:${symbol}`;
+    const commandFqn = `command:${command}`;
+
+    let fullCommand = `${symbolFqn} ${commandFqn}`;
+
+    // For CHART command, include period and interval
+    if (command === 'CHART' || command === 'GP') {
       const period = this.selectedPeriod();
       const interval = this.selectedInterval();
-      fullCommand = `${symbol} GP -period ${period} -interval ${interval}`;
+      fullCommand = `${symbolFqn} ${commandFqn} -period ${period} -interval ${interval}`;
     }
 
+    console.log('[WatchlistTab] Executing FQN command:', fullCommand);
     this.terminalService.execute(fullCommand);
   }
 
@@ -981,7 +1007,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   runCommand(symbol: string, command: string): void {
     this.currentCommand.set(command);
-    this.loadChart(symbol, command);
+    const item = this.selectedItem();
+    this.loadChart(symbol, item?.exchange, command);
   }
 
   /**
@@ -989,8 +1016,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   retryChart(): void {
     const symbol = this.selectedSymbol();
+    const item = this.selectedItem();
     if (symbol) {
-      this.loadChart(symbol, this.currentCommand());
+      this.loadChart(symbol, item?.exchange, this.currentCommand());
     }
   }
 
@@ -1279,13 +1307,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load chart with current period/interval options
+   * Load chart with current period/interval options using FQN format
    */
   private loadChartWithOptions(symbol: string): void {
     const period = this.selectedPeriod();
     const interval = this.selectedInterval();
-    const command = `${symbol} GP -period ${period} -interval ${interval}`;
-    console.debug('[WatchlistTab] Loading chart with options:', { symbol, period, interval });
+    const item = this.selectedItem();
+    const exchange = item?.exchange || 'UNKNOWN';
+
+    // Build FQN format command
+    const symbolFqn = `stock:${exchange}:${symbol}`;
+    const command = `${symbolFqn} command:CHART -period ${period} -interval ${interval}`;
+
+    console.debug('[WatchlistTab] Loading chart with FQN:', { symbol, exchange, period, interval, command });
     this.chartLoading.set(true);
     this.chartOptions.set(null);
     this.chartError.set(null);
