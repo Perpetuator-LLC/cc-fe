@@ -1,24 +1,83 @@
 <!-- Copyright (c) 2025 Perpetuator LLC -->
-<div class="terminal-bar" (click)="openTerminal()" matTooltip="Open terminal (⌘1 or Ctrl+K)">
+<div class="terminal-bar">
   <mat-icon class="terminal-icon">terminal</mat-icon>
 
-  @if (lastEntry(); as last) {
-    <div class="last-command">
+  <div class="input-wrapper">
+    <!-- Autocomplete dropdown -->
+    @if (suggestions().length > 0 && showSuggestions()) {
+      <div class="autocomplete-dropdown">
+        @for (suggestion of suggestions(); track suggestion.text; let i = $index) {
+          <div
+            class="suggestion-item"
+            [class.selected]="i === selectedSuggestionIndex()"
+            [class.ai-suggestion]="suggestion.isAiInterpreted"
+            tabindex="0"
+            role="option"
+            [attr.aria-selected]="i === selectedSuggestionIndex()"
+            (click)="selectSuggestion(suggestion)"
+            (keydown.enter)="selectSuggestion(suggestion)"
+            (mouseenter)="selectedSuggestionIndex.set(i)"
+          >
+            <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+              <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
+            </span>
+            <span class="suggestion-text">{{ suggestion.display }}</span>
+            @if (suggestion.description) {
+              <span class="suggestion-desc">{{ suggestion.description }}</span>
+            }
+            @if (suggestion.exchange) {
+              <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
+            }
+            @if (suggestion.category) {
+              <span class="suggestion-category">{{ suggestion.category }}</span>
+            }
+            @if (suggestion.isAiInterpreted) {
+              <span class="ai-badge">AI</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Command input -->
+    <div class="input-container">
       <span class="prompt">&gt;</span>
-      <span class="command">{{ last.input }}</span>
+      <input
+        #commandInput
+        type="text"
+        [value]="currentCommand()"
+        (input)="onInputChange($event)"
+        (keydown)="onKeyDown($event)"
+        (focus)="onInputFocus()"
+        (blur)="onInputBlur()"
+        [disabled]="isProcessing()"
+        placeholder="Type a command or ask a question..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      @if (isProcessing()) {
+        <mat-spinner diameter="18" />
+      } @else if (currentCommand()) {
+        <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
+          <mat-icon>send</mat-icon>
+        </button>
+      }
     </div>
-    @if (isProcessing()) {
-      <mat-spinner diameter="16" />
-    } @else if (last.result) {
-      <mat-icon class="status-icon" [class.success]="last.result.success" [class.error]="!last.result.success">
+  </div>
+
+  <!-- Status indicator -->
+  @if (lastEntry(); as last) {
+    @if (!isProcessing() && last.result) {
+      <mat-icon
+        class="status-icon"
+        [class.success]="last.result.success"
+        [class.error]="!last.result.success"
+        [matTooltip]="last.result.success ? 'Success' : 'Error'"
+      >
         {{ last.result.success ? 'check_circle' : 'error' }}
       </mat-icon>
     }
-  } @else {
-    <div class="placeholder">
-      <span>Type a command or ask a question...</span>
-    </div>
   }
 
-  <div class="shortcut-hint"><kbd>⌘</kbd><kbd>1</kbd></div>
+  <div class="shortcut-hint"><kbd>⌘</kbd><kbd>K</kbd></div>
 </div>

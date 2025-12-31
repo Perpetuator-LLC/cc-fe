@@ -7,14 +7,14 @@
     (selectedTabChange)="onTabChange($event.index)"
     class="content-tabs"
   >
-    <mat-tab label="Dashboard">
-      <ng-template matTabContent>
-        <app-terminal-dashboard />
-      </ng-template>
-    </mat-tab>
     <mat-tab label="Watchlists">
       <ng-template matTabContent>
         <app-watchlist-tab />
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Dashboard">
+      <ng-template matTabContent>
+        <app-terminal-dashboard />
       </ng-template>
     </mat-tab>
     <mat-tab label="History">
