@@ -124,6 +124,10 @@ export type AutocompleteSuggestionType =
   | 'command'
   | 'alias'
   | 'symbol'
+  | 'stock'
+  | 'crypto'
+  | 'index'
+  | 'forex'
   | 'parameter'
   | 'recent'
   | 'history'
@@ -132,24 +136,38 @@ export type AutocompleteSuggestionType =
   | 'example';
 
 export interface AutocompleteSuggestion {
-  text: string;
-  display: string;
+  // FQN fields (new backend format)
+  fqn: string; // Fully qualified name - what gets inserted/sent to backend
+  display: string; // User-friendly display text
+  displaySecondary?: string; // Additional context (category, description)
   type: AutocompleteSuggestionType;
-  description?: string;
+  description?: string; // Full description
+  score?: number; // Relevance score (higher = better)
+
+  // Command-specific fields
   category?: string;
-  insert: string;
   requiresSymbol?: boolean;
+  aliasFor?: string; // If this was an alias, shows canonical command
+
+  // Symbol-specific fields
+  symbol?: string;
+  name?: string;
+  exchange?: string;
+  assetType?: string;
+  isAmbiguous?: boolean;
+  country?: string;
+  currency?: string;
+
+  // AI-related fields
+  isAiInterpreted?: boolean;
+
+  // Legacy fields (for backward compatibility during migration)
+  text?: string; // @deprecated use fqn
+  insert?: string; // @deprecated use fqn
   syntax?: string;
   paramType?: string;
   choices?: string[];
   default?: string;
-  // Symbol-specific fields
-  assetType?: string;
-  exchange?: string;
-  country?: string;
-  currency?: string;
-  // AI-related fields
-  isAiInterpreted?: boolean;
 }
 
 // ============================================================================

@@ -189,22 +189,16 @@ const GET_TERMINAL_HELP = gql`
 const GET_AUTOCOMPLETE = gql`
   query GetAutocomplete($input: String!, $limit: Int) {
     autocomplete(input: $input, limit: $limit) {
-      text
+      fqn
       display
+      displaySecondary
       type
       description
       category
-      insert
-      requiresSymbol
-      syntax
-      paramType
-      choices
-      default
-      assetType
+      symbol
+      name
       exchange
-      country
-      currency
-      isAiInterpreted
+      assetType
     }
   }
 `;
@@ -678,9 +672,15 @@ export class TerminalService implements OnDestroy {
 
   /**
    * Fetch autocomplete suggestions from backend API
-   * Returns an Observable of suggestions
+   * Returns an Observable of suggestions in FQN format
+   *
+   * NOTE: Temporarily using local suggestions while backend schema is updated.
+   * TODO: Re-enable backend call once backend adds required fields
    */
   fetchAutocompleteSuggestions(input: string, limit = 10): Observable<AutocompleteSuggestion[]> {
+    console.log('[TerminalService] fetchAutocompleteSuggestions called with:', { input, limit });
+
+    // Call backend autocomplete API
     return this.apollo
       .query<AutocompleteResult>({
         query: GET_AUTOCOMPLETE,
@@ -688,13 +688,69 @@ export class TerminalService implements OnDestroy {
         fetchPolicy: 'no-cache',
       })
       .pipe(
-        map((result) => result.data.autocomplete),
+        map((result) => {
+          console.log('[TerminalService] Autocomplete raw response:', result.data.autocomplete);
+          const mapped = result.data.autocomplete.map((s) => this.mapToFqnFormat(s));
+          console.log('[TerminalService] Autocomplete mapped response:', mapped);
+          return mapped;
+        }),
         catchError((error) => {
           console.error('[TerminalService] Autocomplete error:', error);
+          if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+            console.error('[TerminalService] GraphQL errors:', error.graphQLErrors);
+            error.graphQLErrors.forEach((gqlErr: { message: string }) => {
+              console.error('[TerminalService] GraphQL error message:', gqlErr.message);
+            });
+          }
+          if (error.networkError?.result) {
+            console.error('[TerminalService] Network error result:', error.networkError.result);
+            // Try to extract error messages from the result
+            const result = error.networkError.result as { errors?: { message: string }[] };
+            if (result.errors && Array.isArray(result.errors)) {
+              result.errors.forEach((err: { message: string }) => {
+                console.error('[TerminalService] Backend error:', err.message);
+              });
+            }
+          }
           // Fallback to local suggestions on error
           return of(this.getLocalAutocompleteSuggestions(input, limit));
         }),
       );
+  }
+
+  /**
+   * Map backend autocomplete response to FQN format
+   * This provides compatibility until backend fully implements FQN
+   */
+  private mapToFqnFormat(suggestion: AutocompleteSuggestion): AutocompleteSuggestion {
+    // If backend already provides fqn, use it
+    if (suggestion.fqn) {
+      return suggestion;
+    }
+
+    // Generate FQN from legacy fields
+    let fqn = suggestion.insert || suggestion.text || suggestion.display;
+
+    // Convert to proper FQN format based on type
+    if (suggestion.type === 'command' || suggestion.type === 'alias') {
+      const cmdName = suggestion.text || suggestion.display?.split(' ')[0] || '';
+      fqn = `command:${cmdName.toUpperCase()}`;
+    } else if (suggestion.type === 'symbol' || suggestion.type === 'stock') {
+      const symbol = suggestion.text || suggestion.display?.split(' ')[0] || '';
+      const exchange = suggestion.exchange || 'UNKNOWN';
+      fqn = `stock:${exchange}:${symbol.toUpperCase()}`;
+    } else if (suggestion.type === 'crypto') {
+      const symbol = suggestion.text || '';
+      const exchange = suggestion.exchange || 'UNKNOWN';
+      fqn = `crypto:${exchange}:${symbol.toUpperCase()}`;
+    }
+
+    return {
+      ...suggestion,
+      fqn,
+      displaySecondary: suggestion.displaySecondary || suggestion.description,
+      score: suggestion.score ?? 50,
+    };
   }
 
   /**
@@ -707,6 +763,7 @@ export class TerminalService implements OnDestroy {
 
   /**
    * Local autocomplete suggestions (fallback when backend unavailable)
+   * Uses FQN format for consistency with backend
    * @internal
    */
   private getLocalAutocompleteSuggestions(input: string, limit = 10): AutocompleteSuggestion[] {
@@ -721,36 +778,39 @@ export class TerminalService implements OnDestroy {
       const history = this.commandHistorySignal();
       for (let i = 0; i < Math.min(3, history.length); i++) {
         suggestions.push({
-          text: history[i],
+          fqn: history[i],
           display: history[i],
           type: 'history',
           description: 'Recent command',
-          insert: history[i],
+          score: 100 - i,
         });
       }
 
-      // Add example commands
+      // Add example commands using FQN format
       const examples: AutocompleteSuggestion[] = [
         {
-          text: 'AAPL HP',
+          fqn: 'stock:NASDAQ:AAPL command:HP',
           display: 'AAPL HP',
+          displaySecondary: 'Historical prices for Apple',
           type: 'example',
           description: 'Historical prices for Apple',
-          insert: 'AAPL HP',
+          score: 80,
         },
         {
-          text: 'HELP',
+          fqn: 'command:HELP',
           display: 'HELP',
-          type: 'example',
+          displaySecondary: 'Show available commands',
+          type: 'command',
           description: 'Show available commands',
-          insert: 'HELP',
+          score: 75,
         },
         {
-          text: 'AAPL GP',
-          display: 'AAPL GP',
+          fqn: 'stock:NASDAQ:AAPL command:CHART',
+          display: 'AAPL CHART',
+          displaySecondary: 'Price chart for Apple',
           type: 'example',
           description: 'Price chart for Apple',
-          insert: 'AAPL GP',
+          score: 70,
         },
       ];
       suggestions.push(...examples);
@@ -776,11 +836,11 @@ export class TerminalService implements OnDestroy {
             const def = paramDef as { type?: string; default?: string; enum?: string[]; description?: string };
             if (paramName.toUpperCase().startsWith(paramPartial.toUpperCase())) {
               suggestions.push({
-                text: `-${paramName}`,
+                fqn: `-${paramName}`,
                 display: `-${paramName}${def.default ? ` (default: ${def.default})` : ''}`,
                 type: 'parameter',
                 description: def.description || `Parameter for ${command.name}`,
-                insert: `-${paramName} `,
+                score: 90,
                 paramType: def.type,
                 choices: def.enum,
                 default: def.default,
@@ -796,17 +856,28 @@ export class TerminalService implements OnDestroy {
 
     // If we have a symbol, filter to commands that require symbols
     if (hasSymbol && tokens.length === 1) {
-      // User typed just a symbol, suggest commands
+      // User typed what looks like a symbol - suggest the symbol itself first
+      const symbolUpper = tokens[0].toUpperCase();
+      suggestions.push({
+        fqn: `stock:UNKNOWN:${symbolUpper}`,
+        display: symbolUpper,
+        displaySecondary: `Look up ${symbolUpper}`,
+        type: 'symbol',
+        description: `Stock symbol ${symbolUpper}`,
+        score: 95,
+      });
+
+      // Then suggest commands that work with symbols
       for (const cmd of commands.filter((c) => c.requiresSymbol)) {
         suggestions.push({
-          text: cmd.name,
+          fqn: `command:${cmd.name}`,
           display: cmd.name,
+          displaySecondary: cmd.description,
           type: 'command',
           description: cmd.description,
           category: cmd.category,
-          insert: `${tokens[0]} ${cmd.name}`,
           requiresSymbol: true,
-          syntax: `SYMBOL ${cmd.name}`,
+          score: 85,
         });
         if (suggestions.length >= limit) break;
       }
@@ -816,16 +887,15 @@ export class TerminalService implements OnDestroy {
     // Match commands and aliases
     for (const cmd of commands) {
       if (cmd.name.toUpperCase().startsWith(lastToken)) {
-        const insertText = hasSymbol ? `${tokens.slice(0, -1).join(' ')} ${cmd.name}` : cmd.name;
         suggestions.push({
-          text: cmd.name,
+          fqn: `command:${cmd.name}`,
           display: cmd.name,
+          displaySecondary: cmd.description,
           type: 'command',
           description: cmd.description,
           category: cmd.category,
-          insert: insertText,
           requiresSymbol: cmd.requiresSymbol,
-          syntax: cmd.requiresSymbol ? `SYMBOL ${cmd.name}` : cmd.name,
+          score: 90,
         });
       }
 
@@ -833,15 +903,16 @@ export class TerminalService implements OnDestroy {
       if (cmd.aliases) {
         for (const alias of cmd.aliases) {
           if (alias.toUpperCase().startsWith(lastToken)) {
-            const insertText = hasSymbol ? `${tokens.slice(0, -1).join(' ')} ${alias}` : alias;
             suggestions.push({
-              text: alias,
+              fqn: `command:${cmd.name}`,
               display: `${alias} → ${cmd.name}`,
+              displaySecondary: cmd.description,
               type: 'alias',
               description: cmd.description,
               category: cmd.category,
-              insert: insertText,
+              aliasFor: cmd.name,
               requiresSymbol: cmd.requiresSymbol,
+              score: 85,
             });
           }
         }
@@ -853,13 +924,13 @@ export class TerminalService implements OnDestroy {
     // Add matching history entries
     const history = this.commandHistorySignal();
     for (const cmd of history) {
-      if (cmd.toUpperCase().startsWith(trimmedInput.toUpperCase()) && !suggestions.find((s) => s.insert === cmd)) {
+      if (cmd.toUpperCase().startsWith(trimmedInput.toUpperCase()) && !suggestions.find((s) => s.fqn === cmd)) {
         suggestions.push({
-          text: cmd,
+          fqn: cmd,
           display: cmd,
           type: 'history',
           description: 'Recent command',
-          insert: cmd,
+          score: 80,
         });
         if (suggestions.length >= limit) break;
       }
