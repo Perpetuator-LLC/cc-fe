@@ -105,7 +105,72 @@ export class ChartPanelComponent implements OnChanges {
   private darkThemeDefaults: Partial<EChartsOption> = {
     backgroundColor: 'transparent',
     textStyle: {
-      color: 'var(--md-sys-color-on-surface)',
+      color: '#c0c0c0', // Light text for dark background
+    },
+    grid: {
+      backgroundColor: 'transparent',
+    },
+    title: {
+      textStyle: {
+        color: '#e0e0e0',
+      },
+      subtextStyle: {
+        color: '#a0a0a0',
+      },
+    },
+    legend: {
+      textStyle: {
+        color: '#c0c0c0',
+      },
+    },
+    tooltip: {
+      backgroundColor: 'rgba(30, 30, 30, 0.95)',
+      borderColor: '#505050',
+      textStyle: {
+        color: '#e0e0e0',
+      },
+    },
+    dataZoom: {
+      textStyle: {
+        color: '#a0a0a0',
+      },
+      borderColor: '#505050',
+      backgroundColor: 'rgba(30, 30, 30, 0.5)',
+      fillerColor: 'rgba(80, 80, 80, 0.3)',
+      handleStyle: {
+        color: '#606060',
+      },
+      dataBackground: {
+        lineStyle: {
+          color: '#505050',
+        },
+        areaStyle: {
+          color: 'rgba(60, 60, 60, 0.3)',
+        },
+      },
+    },
+  };
+
+  // Dark theme axis defaults - applied separately to handle arrays
+  private darkAxisDefaults = {
+    axisLine: {
+      lineStyle: {
+        color: '#505050',
+      },
+    },
+    axisLabel: {
+      color: '#a0a0a0',
+    },
+    splitLine: {
+      lineStyle: {
+        color: '#353535',
+      },
+    },
+    splitArea: {
+      show: false, // Disable alternating backgrounds
+      areaStyle: {
+        color: ['rgba(35, 35, 35, 0.5)', 'rgba(40, 40, 40, 0.5)'],
+      },
     },
   };
 
@@ -169,17 +234,69 @@ export class ChartPanelComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['chartOptions'] && this.chartOptions) {
-      // Merge with dark theme defaults
-      this.updateOptions = {
-        ...this.darkThemeDefaults,
-        ...this.chartOptions,
-      };
+      // Debug: log incoming chart options from backend
+      console.log('[ChartPanel] Incoming chartOptions from backend:', JSON.stringify(this.chartOptions, null, 2));
+
+      // Start with backend options
+      let merged = this.deepMerge(this.chartOptions, this.darkThemeDefaults);
+
+      // Apply axis theming (handles both single axis and array of axes)
+      merged = this.applyAxisTheming(merged);
+
+      // Debug: log final merged options
+      console.log('[ChartPanel] Final merged options:', JSON.stringify(merged, null, 2));
+
+      this.updateOptions = merged;
     }
 
     if (changes['chartControls'] && this.chartControls) {
       this.selectedPeriod = this.chartControls.currentPeriod;
       this.selectedInterval = this.chartControls.currentInterval;
     }
+  }
+
+  /**
+   * Apply dark theme to axes (handles single axis or array of axes)
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyAxisTheming(options: any): any {
+    const result = { ...options };
+
+    // Apply to xAxis
+    if (result.xAxis) {
+      if (Array.isArray(result.xAxis)) {
+        result.xAxis = result.xAxis.map((axis: unknown) => this.deepMerge(axis, this.darkAxisDefaults));
+      } else {
+        result.xAxis = this.deepMerge(result.xAxis, this.darkAxisDefaults);
+      }
+    }
+
+    // Apply to yAxis
+    if (result.yAxis) {
+      if (Array.isArray(result.yAxis)) {
+        result.yAxis = result.yAxis.map((axis: unknown) => this.deepMerge(axis, this.darkAxisDefaults));
+      } else {
+        result.yAxis = this.deepMerge(result.yAxis, this.darkAxisDefaults);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Deep merge two objects, with source values overriding target
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private deepMerge(target: any, source: any): any {
+    const result = { ...target };
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = this.deepMerge(target[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    return result;
   }
 
   onPeriodChange(): void {

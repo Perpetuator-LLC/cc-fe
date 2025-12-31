@@ -56,17 +56,26 @@
   th.mat-mdc-header-cell {
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
-    background: var(--md-sys-color-surface-container-high);
+    background: var(--md-sys-color-surface-container-highest);
   }
 
   td.mat-mdc-cell {
     font-family: 'Fira Code', Consolas, monospace;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--md-sys-color-on-surface);
   }
 
-  tr.mat-mdc-row:hover {
-    background: var(--md-sys-color-surface-container-high);
+  // Alternating row backgrounds - use surface-dim for darker rows
+  tr.mat-mdc-row {
+    background: var(--md-sys-color-surface-container-low);
+
+    &:nth-child(even) {
+      background: var(--md-sys-color-surface-container);
+    }
+
+    &:hover {
+      background: var(--md-sys-color-surface-container-high);
+    }
   }
 }
 

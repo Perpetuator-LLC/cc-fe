@@ -1578,7 +1578,6 @@ html body {
   max-height: 400px;
 
   .mat-mdc-menu-item.active {
-    color: var(--md-sys-color-primary);
     background: var(--md-sys-color-primary-container);
   }
 
@@ -1590,5 +1589,48 @@ html body {
     color: var(--md-sys-color-on-surface-variant);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+}
+
+// Watchlist dropdown menu item - force single line layout
+.mat-mdc-menu-panel .watchlist-menu-item.mat-mdc-menu-item {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
+  min-width: 220px;
+  padding-right: 8px;
+
+  .watchlist-menu-content {
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+
+    min-width: 0;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .watchlist-actions-btn {
+    flex-shrink: 0;
+
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
   }
 }
