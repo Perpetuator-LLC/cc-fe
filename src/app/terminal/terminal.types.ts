@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { EChartsOption } from 'echarts';
 
 // ============================================================================
@@ -15,6 +15,7 @@ export type TerminalMessageType =
   | 'symbols.subscribed'
   | 'symbols.unsubscribed'
   | 'autocomplete'
+  | 'history.search'
   | 'error'
   | 'pong';
 
@@ -395,6 +396,12 @@ export interface AutocompleteAction {
   limit?: number;
 }
 
+export interface SearchHistoryAction {
+  action: 'search_history';
+  query: string;
+  limit?: number;
+}
+
 export type TerminalAction =
   | ExecuteAction
   | SubscribeChartAction
@@ -402,7 +409,8 @@ export type TerminalAction =
   | SubscribeSymbolsAction
   | UnsubscribeSymbolsAction
   | PingAction
-  | AutocompleteAction;
+  | AutocompleteAction
+  | SearchHistoryAction;
 
 // ============================================================================
 // Connection State

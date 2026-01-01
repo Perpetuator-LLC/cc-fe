@@ -1,16 +1,15 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Subject, Subscription, timer } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { createClient, Client } from 'graphql-ws';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import {
   CommandProgress,
   CommandResult,
   SymbolUpdate,
-  TerminalAction,
   TerminalConnectionState,
-  TerminalMessage,
   AutocompleteSuggestion,
 } from './terminal.types';
 import { EChartsOption } from 'echarts';
@@ -27,16 +26,35 @@ export interface AutocompleteResponse {
   timestamp: string;
 }
 
+export interface HistorySearchResponse {
+  query: string;
+  results: HistorySearchResult[];
+  total: number;
+  timestamp: string;
+}
+
+export interface HistorySearchResult {
+  id: string;
+  rawInput: string;
+  parsedCommand?: string;
+  parsedSymbols?: string[];
+  status: string;
+  isAiInterpreted?: boolean;
+  createdAt: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class TerminalWebSocketService implements OnDestroy {
-  private ws: WebSocket | null = null;
+  private client: Client | null = null;
   private subscriptions = new Subscription();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectTimer: Subscription | null = null;
-  private pingInterval: Subscription | null = null;
+
+  // Active GraphQL subscriptions
+  private activeSubscriptions = new Map<string, () => void>();
 
   // Signals for reactive state
   private connectionStateSignal: WritableSignal<TerminalConnectionState> = signal('disconnected');
@@ -47,6 +65,7 @@ export class TerminalWebSocketService implements OnDestroy {
   private chartUpdate$ = new Subject<ChartUpdate>();
   private symbolUpdate$ = new Subject<SymbolUpdate>();
   private autocomplete$ = new Subject<AutocompleteResponse>();
+  private historySearch$ = new Subject<HistorySearchResponse>();
   private error$ = new Subject<string>();
   private connected$ = new Subject<{ userId: string; timestamp: string }>();
 
@@ -73,6 +92,7 @@ export class TerminalWebSocketService implements OnDestroy {
     this.chartUpdate$.complete();
     this.symbolUpdate$.complete();
     this.autocomplete$.complete();
+    this.historySearch$.complete();
     this.error$.complete();
     this.connected$.complete();
   }
@@ -105,6 +125,10 @@ export class TerminalWebSocketService implements OnDestroy {
     return this.autocomplete$.asObservable();
   }
 
+  get onHistorySearch() {
+    return this.historySearch$.asObservable();
+  }
+
   get onError() {
     return this.error$.asObservable();
   }
@@ -118,148 +142,318 @@ export class TerminalWebSocketService implements OnDestroy {
   // ============================================================================
 
   connect(): void {
-    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
-      return;
+    if (this.client) {
+      return; // Already connected or connecting
     }
 
     this.connectionStateSignal.set('connecting');
 
     const wsUrl = this.buildWebSocketUrl();
-    this.ws = new WebSocket(wsUrl);
 
-    this.ws.onopen = () => {
-      this.connectionStateSignal.set('connected');
-      this.reconnectAttempts = 0;
-      this.startPingInterval();
-    };
-
-    this.ws.onmessage = (event) => {
-      try {
-        const data: TerminalMessage = JSON.parse(event.data);
-        this.handleMessage(data);
-      } catch (error) {
-        console.error('Failed to parse Terminal WebSocket message:', error);
-      }
-    };
-
-    this.ws.onclose = (event) => {
-      const codeDescriptions: Record<number, string> = {
-        1000: 'Normal closure',
-        1001: 'Going away',
-        1002: 'Protocol error',
-        1003: 'Unsupported data',
-        1006: 'Abnormal closure (server not responding or not running)',
-        1015: 'TLS handshake failure',
-      };
-      const codeDesc = codeDescriptions[event.code] || 'Unknown';
-      console.warn(`Terminal WebSocket closed: code=${event.code} (${codeDesc}), reason="${event.reason || 'none'}"`);
-
-      if (event.code === 1006) {
-        console.error(
-          'Terminal WebSocket abnormal closure - possible causes:\n' +
-            '  1. Backend server is not running\n' +
-            '  2. Backend is not running with ASGI (WebSocket support)\n' +
-            '  3. Route /ws/terminal/ not defined in backend\n' +
-            '  4. Token authentication failed on backend',
-        );
-      }
-
-      this.stopPingInterval();
-      this.connectionStateSignal.set('disconnected');
-
-      // Only attempt reconnect if we were authenticated and it wasn't a clean close
-      if (this.authService.isLoggedIn() && event.code !== 1000) {
-        this.attemptReconnect();
-      }
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('Terminal WebSocket error:', error);
-    };
+    this.client = createClient({
+      url: wsUrl,
+      connectionParams: () => {
+        const token = this.authService.getToken();
+        return token ? { authorization: `Bearer ${token}` } : {};
+      },
+      // Reconnection settings
+      retryAttempts: this.maxReconnectAttempts,
+      shouldRetry: () => this.authService.isLoggedIn(),
+      retryWait: async (retries) => {
+        // Exponential backoff: 1s, 2s, 4s, 8s, ... up to 30s
+        const delay = Math.min(1000 * Math.pow(2, retries), 30000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      },
+      keepAlive: 30000, // Send ping every 30 seconds
+      lazy: false, // Connect immediately
+      on: {
+        connected: () => {
+          this.connectionStateSignal.set('connected');
+          this.reconnectAttempts = 0;
+          this.connected$.next({ userId: '', timestamp: new Date().toISOString() });
+          console.debug('[TerminalWS] GraphQL WebSocket connected');
+        },
+        closed: (event) => {
+          this.connectionStateSignal.set('disconnected');
+          console.debug('[TerminalWS] GraphQL WebSocket closed', event);
+        },
+        error: (error) => {
+          console.error('[TerminalWS] GraphQL WebSocket error:', error);
+          this.error$.next(error instanceof Error ? error.message : String(error));
+        },
+        connecting: () => {
+          this.connectionStateSignal.set('connecting');
+          console.debug('[TerminalWS] GraphQL WebSocket connecting...');
+        },
+      },
+    });
   }
 
   disconnect(): void {
     this.stopReconnectTimer();
-    this.stopPingInterval();
 
-    if (this.ws) {
-      this.ws.close(1000, 'Client disconnect');
-      this.ws = null;
+    // Unsubscribe all active subscriptions
+    this.activeSubscriptions.forEach((unsubscribe) => unsubscribe());
+    this.activeSubscriptions.clear();
+
+    if (this.client) {
+      this.client.dispose();
+      this.client = null;
     }
 
     this.connectionStateSignal.set('disconnected');
   }
 
   // ============================================================================
-  // Send Actions
+  // Send Actions - Using GraphQL over WebSocket
   // ============================================================================
 
   /**
    * Execute a terminal command
    */
   execute(input: string): void {
-    this.send({
-      action: 'execute',
-      input: input.trim(),
-    });
+    if (!this.client) {
+      console.warn('[TerminalWS] Not connected, cannot execute command');
+      return;
+    }
+
+    const mutation = `
+      mutation ExecuteCommand($input: String!) {
+        executeCommand(input: $input) {
+          success
+          message
+          result {
+            success
+            message
+            outputType
+            data
+            chartOptions
+            metadata
+          }
+          execution {
+            uuid
+            rawInput
+            parsedCommand
+            status
+          }
+        }
+      }
+    `;
+
+    const subId = `execute_${Date.now()}`;
+    const unsubscribe = this.client.subscribe(
+      { query: mutation, variables: { input: input.trim() } },
+      {
+        next: (result) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const data = result.data as any;
+          if (data?.executeCommand) {
+            const execResult = data.executeCommand;
+            this.commandResult$.next({
+              success: execResult.success,
+              message: execResult.message,
+              outputType: execResult.result?.outputType || 'message',
+              data: this.parseJsonField(execResult.result?.data) as CommandResult['data'],
+              chartOptions: this.parseJsonField(execResult.result?.chartOptions) as CommandResult['chartOptions'],
+              metadata: this.parseJsonField(execResult.result?.metadata) as CommandResult['metadata'],
+              executionId: execResult.execution?.uuid,
+            });
+          }
+          if (result.errors) {
+            this.error$.next(result.errors.map((e) => e.message).join(', '));
+          }
+        },
+        error: (error) => {
+          console.error('[TerminalWS] Execute error:', error);
+          this.error$.next(error instanceof Error ? error.message : String(error));
+        },
+        complete: () => {
+          this.activeSubscriptions.delete(subId);
+        },
+      },
+    );
+    this.activeSubscriptions.set(subId, unsubscribe);
   }
 
   /**
    * Request autocomplete suggestions
    */
   autocomplete(input: string, limit = 10): void {
-    this.send({
-      action: 'autocomplete',
-      input: input.trim(),
-      limit,
-    });
+    if (!this.client) {
+      console.warn('[TerminalWS] Not connected, cannot autocomplete');
+      return;
+    }
+
+    const query = `
+      query Autocomplete($input: String!, $limit: Int) {
+        autocomplete(input: $input, limit: $limit) {
+          fqn
+          display
+          displaySecondary
+          type
+          description
+          score
+          category
+          requiresSymbol
+          aliasFor
+          symbol
+          name
+          assetType
+          exchange
+          country
+          currency
+          isAmbiguous
+        }
+      }
+    `;
+
+    const subId = `autocomplete_${Date.now()}`;
+    const unsubscribe = this.client.subscribe(
+      { query, variables: { input: input.trim(), limit } },
+      {
+        next: (result) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const data = result.data as any;
+          if (data?.autocomplete) {
+            this.autocomplete$.next({
+              input: input.trim(),
+              suggestions: data.autocomplete || [],
+              timestamp: new Date().toISOString(),
+            });
+          }
+          if (result.errors) {
+            console.error('[TerminalWS] Autocomplete errors:', result.errors);
+          }
+        },
+        error: (error) => {
+          console.error('[TerminalWS] Autocomplete error:', error);
+        },
+        complete: () => {
+          this.activeSubscriptions.delete(subId);
+        },
+      },
+    );
+    this.activeSubscriptions.set(subId, unsubscribe);
   }
 
   /**
-   * Subscribe to chart updates
+   * Search command history with optional substring matching
+   */
+  searchHistory(query: string, limit = 5): void {
+    if (!this.client) {
+      console.warn('[TerminalWS] Not connected, cannot search history');
+      return;
+    }
+
+    const gqlQuery = `
+      query CommandHistory($limit: Int, $search: String) {
+        commandHistory(limit: $limit, search: $search) {
+          uuid
+          rawInput
+          parsedCommand
+          parsedSymbols
+          status
+          isAiInterpreted
+          createdAt
+        }
+      }
+    `;
+
+    const subId = `history_${Date.now()}`;
+    const unsubscribe = this.client.subscribe(
+      { query: gqlQuery, variables: { limit, search: query.trim() || null } },
+      {
+        next: (result) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const data = result.data as any;
+          if (data?.commandHistory) {
+            this.historySearch$.next({
+              query: query.trim(),
+              results: data.commandHistory.map(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (item: any) => ({
+                  id: item.uuid,
+                  rawInput: item.rawInput,
+                  parsedCommand: item.parsedCommand,
+                  parsedSymbols: item.parsedSymbols,
+                  status: item.status,
+                  isAiInterpreted: item.isAiInterpreted,
+                  createdAt: item.createdAt,
+                }),
+              ),
+              total: data.commandHistory.length,
+              timestamp: new Date().toISOString(),
+            });
+          }
+          if (result.errors) {
+            console.error('[TerminalWS] History search errors:', result.errors);
+          }
+        },
+        error: (error) => {
+          console.error('[TerminalWS] History search error:', error);
+        },
+        complete: () => {
+          this.activeSubscriptions.delete(subId);
+        },
+      },
+    );
+    this.activeSubscriptions.set(subId, unsubscribe);
+  }
+
+  /**
+   * Subscribe to chart updates via GraphQL subscription
+   * Note: This uses a query to get initial chart data. Real-time updates
+   * will come via subscriptions when the backend supports them.
    */
   subscribeChart(chartId: string): void {
-    this.send({
-      action: 'subscribe_chart',
-      chartId,
-    });
+    // For now, we'll use query to get chart data
+    // Future: Use GraphQL subscription when backend adds support
+    console.debug('[TerminalWS] Chart subscription requested:', chartId);
   }
 
   /**
    * Unsubscribe from chart updates
    */
   unsubscribeChart(chartId: string): void {
-    this.send({
-      action: 'unsubscribe_chart',
-      chartId,
-    });
+    const subId = `chart_${chartId}`;
+    const unsubscribe = this.activeSubscriptions.get(subId);
+    if (unsubscribe) {
+      unsubscribe();
+      this.activeSubscriptions.delete(subId);
+    }
   }
 
   /**
    * Subscribe to real-time symbol price updates
+   * Note: Currently a placeholder - will use GraphQL subscription when backend supports it
    */
   subscribeSymbols(symbols: string[]): void {
-    this.send({
-      action: 'subscribe_symbols',
-      symbols: symbols.map((s) => s.toUpperCase()),
-    });
+    // For now, log the subscription request
+    // Future: Use GraphQL subscription for real-time symbol updates
+    console.debug('[TerminalWS] Symbol subscription requested:', symbols);
   }
 
   /**
    * Unsubscribe from real-time symbol price updates
    */
   unsubscribeSymbols(symbols: string[]): void {
-    this.send({
-      action: 'unsubscribe_symbols',
-      symbols: symbols.map((s) => s.toUpperCase()),
+    symbols.forEach((symbol) => {
+      const subId = `symbol_${symbol.toUpperCase()}`;
+      const unsubscribe = this.activeSubscriptions.get(subId);
+      if (unsubscribe) {
+        unsubscribe();
+        this.activeSubscriptions.delete(subId);
+      }
     });
   }
 
   /**
    * Send a ping to keep the connection alive
+   * Note: graphql-ws handles keep-alive automatically
    */
   ping(): void {
-    this.send({ action: 'ping' });
+    // graphql-ws handles keep-alive automatically via the keepAlive option
+    console.debug('[TerminalWS] Ping (handled automatically by graphql-ws)');
   }
 
   // ============================================================================
@@ -270,122 +464,8 @@ export class TerminalWebSocketService implements OnDestroy {
     const apiUrl = environment.API_URL;
     const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = apiUrl.replace(/^https?:\/\//, '');
-
-    const accessToken = this.authService.getToken();
-    const tokenParam = accessToken ? `?token=${accessToken}` : '';
-
-    return `${wsProtocol}://${wsHost}/ws/terminal/${tokenParam}`;
-  }
-
-  private handleMessage(data: TerminalMessage): void {
-    switch (data['type']) {
-      case 'connected':
-        this.connected$.next({
-          userId: data['userId'],
-          timestamp: data['timestamp'],
-        });
-        break;
-
-      case 'command.result':
-        this.commandResult$.next(data['result'] as CommandResult);
-        break;
-
-      case 'command.progress':
-        this.commandProgress$.next({
-          executionId: data['executionId'],
-          step: data['step'],
-          progress: data['progress'],
-          message: data['message'],
-        });
-        break;
-
-      case 'chart.created':
-        this.chartUpdate$.next({
-          chartId: data['chartId'],
-          options: data['options'],
-          isNew: true,
-        });
-        break;
-
-      case 'chart.update':
-        this.chartUpdate$.next({
-          chartId: data['chartId'],
-          options: data['options'],
-          isNew: false,
-        });
-        break;
-
-      case 'symbol.update':
-        this.symbolUpdate$.next({
-          symbol: data['symbol'],
-          name: data['name'],
-          price: data['price'],
-          change: data['change'],
-          changePercent: data['changePercent'],
-          volume: data['volume'],
-          open: data['open'],
-          high: data['high'],
-          low: data['low'],
-          timestamp: data['timestamp'],
-        });
-        break;
-
-      case 'symbols.subscribed':
-        // Confirmation that symbols were subscribed
-        console.log('[TerminalWS] Subscribed to symbols:', data['symbols']);
-        break;
-
-      case 'symbols.unsubscribed':
-        // Confirmation that symbols were unsubscribed
-        console.log('[TerminalWS] Unsubscribed from symbols:', data['symbols']);
-        break;
-
-      case 'autocomplete':
-        this.autocomplete$.next({
-          input: data['input'],
-          suggestions: data['suggestions'] || [],
-          timestamp: data['timestamp'],
-        });
-        break;
-
-      case 'error':
-        console.error('Terminal error:', data['message']);
-        this.error$.next(data['message']);
-        break;
-
-      case 'pong':
-        // Keep-alive response, nothing to do
-        break;
-
-      default:
-        console.warn('Unknown Terminal WebSocket message type:', data['type']);
-    }
-  }
-
-  private send(action: TerminalAction): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(action));
-    } else {
-      console.warn('Terminal WebSocket not connected, cannot send:', action);
-    }
-  }
-
-  private attemptReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max Terminal WebSocket reconnect attempts reached');
-      return;
-    }
-
-    this.connectionStateSignal.set('reconnecting');
-    this.reconnectAttempts++;
-
-    // Exponential backoff: 1s, 2s, 4s, 8s, ... up to 30s
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
-
-    this.stopReconnectTimer();
-    this.reconnectTimer = timer(delay).subscribe(() => {
-      this.connect();
-    });
+    // Use the unified GraphQL WebSocket endpoint
+    return `${wsProtocol}://${wsHost}/ws/graphql/`;
   }
 
   private stopReconnectTimer(): void {
@@ -395,18 +475,23 @@ export class TerminalWebSocketService implements OnDestroy {
     }
   }
 
-  private startPingInterval(): void {
-    this.stopPingInterval();
-    // Send ping every 30 seconds to keep connection alive
-    this.pingInterval = timer(30000, 30000).subscribe(() => {
-      this.ping();
-    });
-  }
-
-  private stopPingInterval(): void {
-    if (this.pingInterval) {
-      this.pingInterval.unsubscribe();
-      this.pingInterval = null;
+  /**
+   * Parse a JSON string field safely. Returns the parsed object if input is a string,
+   * or the original value if already an object, or undefined if parsing fails.
+   */
+  private parseJsonField(value: unknown): unknown {
+    if (value === null || value === undefined) {
+      return undefined;
     }
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        console.warn('[TerminalWS] Failed to parse JSON field:', e);
+        return value;
+      }
+    }
+    // Already an object
+    return value;
   }
 }

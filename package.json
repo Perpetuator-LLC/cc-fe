@@ -76,6 +76,7 @@
     "echarts": "^6.0.0",
     "express": "^5.1.0",
     "graphql": "^16.9.0",
+    "graphql-ws": "^6.0.6",
     "marked": "^16.4.0",
     "mermaid": "^11.12.2",
     "ngx-echarts": "^21.0.0",

@@ -17,11 +17,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { TerminalService } from '../terminal.service';
-import { TerminalWebSocketService } from '../terminal-websocket.service';
-import { HistoryEntry, AutocompleteSuggestion } from '../terminal.types';
+import { TerminalWebSocketService, HistorySearchResult } from '../terminal-websocket.service';
+import { HistoryEntry, AutocompleteSuggestion, CommandHistoryItem } from '../terminal.types';
 import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
+
+/**
+ * History entry with match highlighting info
+ */
+export interface MatchedHistoryEntry {
+  item: CommandHistoryItem;
+  tokens: FqnToken[];
+  matchedText?: string;
+  matchStart?: number;
+  matchEnd?: number;
+  // Pre-computed parts to avoid substring() calls in template
+  beforeMatch?: string;
+  matchText?: string;
+  afterMatch?: string;
+}
 
 /**
  * Represents a completed FQN token displayed as a chip
@@ -43,6 +58,13 @@ export interface FqnChip {
 })
 export class TerminalBarComponent implements OnInit, OnDestroy {
   @ViewChild('commandInput') commandInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('inputWrapper') inputWrapper!: ElementRef<HTMLDivElement>;
+
+  // Expose FqnUtils to template
+  FqnUtils = FqnUtils;
+
+  // Position for the fixed history dropdown
+  historyDropdownStyle = signal<Record<string, string>>({});
 
   private terminalService = inject(TerminalService);
   private wsService = inject(TerminalWebSocketService);
@@ -60,6 +82,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   showSuggestions = signal(false);
   userNavigatedSuggestions = signal(false); // True if user used arrow keys to navigate
   isFocused = signal(false); // Track if input is focused
+  showHistoryPreview = signal(false); // Show floating history above input
 
   // True if user has typed something or has chips (not just showing last command)
   hasUserContent = computed(() => {
@@ -69,6 +92,94 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   // Show last command when unfocused and no user content
   showLastCommand = computed(() => {
     return !this.isFocused() && !this.hasUserContent() && this.lastCommandTokens().length > 0;
+  });
+
+  // Track the search term for history substring matching
+  historySearchTerm = signal('');
+
+  // Selected history index for up/down navigation within matched history
+  selectedHistoryIndex = signal(-1);
+
+  // History items from WebSocket search
+  private wsHistoryResults = signal<HistorySearchResult[]>([]);
+  private currentHistoryQuery = ''; // Track the current query
+
+  // Get history items - either from WebSocket search or local fallback
+  // Limited to 5 items, reversed so most recent is at bottom (closest to input)
+  recentHistory = computed<MatchedHistoryEntry[]>(() => {
+    const searchTerm = this.historySearchTerm().toLowerCase().trim();
+    const wsResults = this.wsHistoryResults();
+
+    // If we have WebSocket results, use them
+    if (wsResults.length > 0) {
+      return wsResults
+        .slice(0, 5)
+        .reverse()
+        .map((result) => {
+          const tokens = FqnUtils.parseCommand(result.rawInput);
+          const entry: MatchedHistoryEntry = {
+            item: {
+              id: result.id,
+              rawInput: result.rawInput,
+              parsedCommand: result.parsedCommand ?? '',
+              parsedSymbols: result.parsedSymbols,
+              status: (result.status?.toUpperCase() as CommandHistoryItem['status']) || 'COMPLETED',
+              isAiInterpreted: result.isAiInterpreted ?? false,
+              createdAt: result.createdAt,
+            },
+            tokens,
+          };
+
+          // Add match highlighting if there's a search term
+          if (searchTerm) {
+            const lowerInput = result.rawInput.toLowerCase();
+            const matchStart = lowerInput.indexOf(searchTerm);
+            if (matchStart >= 0) {
+              entry.matchedText = searchTerm;
+              entry.matchStart = matchStart;
+              entry.matchEnd = matchStart + searchTerm.length;
+              entry.beforeMatch = result.rawInput.substring(0, matchStart);
+              entry.matchText = result.rawInput.substring(matchStart, matchStart + searchTerm.length);
+              entry.afterMatch = result.rawInput.substring(matchStart + searchTerm.length);
+            }
+          }
+
+          return entry;
+        });
+    }
+
+    // Fallback to local history if WS not available
+    const fullHistory = this.terminalService.userHistory();
+    let filtered: CommandHistoryItem[];
+
+    if (searchTerm) {
+      filtered = fullHistory.filter((item) => item.rawInput.toLowerCase().includes(searchTerm));
+    } else {
+      filtered = fullHistory;
+    }
+
+    // Take most recent 5 entries and reverse
+    const recent = filtered.slice(0, 5).reverse();
+
+    return recent.map((item) => {
+      const tokens = FqnUtils.parseCommand(item.rawInput);
+      const entry: MatchedHistoryEntry = { item, tokens };
+
+      if (searchTerm) {
+        const lowerInput = item.rawInput.toLowerCase();
+        const matchStart = lowerInput.indexOf(searchTerm);
+        if (matchStart >= 0) {
+          entry.matchedText = searchTerm;
+          entry.matchStart = matchStart;
+          entry.matchEnd = matchStart + searchTerm.length;
+          entry.beforeMatch = item.rawInput.substring(0, matchStart);
+          entry.matchText = item.rawInput.substring(matchStart, matchStart + searchTerm.length);
+          entry.afterMatch = item.rawInput.substring(matchStart + searchTerm.length);
+        }
+      }
+
+      return entry;
+    });
   });
 
   // Legacy: currentCommand is now computed from chips + currentInput
@@ -99,10 +210,29 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    // Load full command history from server
+    this.subscriptions.add(
+      this.terminalService
+        .loadCommandHistory(100)
+        .pipe(take(1))
+        .subscribe({
+          next: (history) => {
+            console.log('[TerminalBar] Loaded command history:', history.length, 'entries');
+          },
+          error: (err) => {
+            console.warn('[TerminalBar] Failed to load command history:', err);
+          },
+        }),
+    );
+
     // Debounced autocomplete via WebSocket
     this.subscriptions.add(
       this.inputSubject.pipe(debounceTime(100), distinctUntilChanged()).subscribe((input) => {
         this.requestAutocomplete(input);
+        // Update history search term for substring matching
+        this.historySearchTerm.set(input);
+        // Reset history navigation when input changes
+        this.selectedHistoryIndex.set(-1);
       }),
     );
 
@@ -120,6 +250,16 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
           const hasUserInput = this.currentInput().trim().length > 0;
           this.selectedSuggestionIndex.set(hasUserInput && sorted.length > 0 ? 0 : -1);
           this.showSuggestions.set(sorted.length > 0);
+        }),
+    );
+
+    // Listen for WebSocket history search responses
+    this.subscriptions.add(
+      this.wsService.onHistorySearch
+        .pipe(filter((response) => response.query === this.currentHistoryQuery))
+        .subscribe((response) => {
+          console.log('[TerminalBar] WS History search response:', response);
+          this.wsHistoryResults.set(response.results);
         }),
     );
   }
@@ -209,6 +349,10 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.chips.set([]);
     this.currentInput.set('');
     this.historyIndex = -1;
+    this.historySearchTerm.set('');
+    this.selectedHistoryIndex.set(-1);
+    this.wsHistoryResults.set([]);
+    this.showHistoryPreview.set(false);
     this.clearSuggestions();
   }
 
@@ -285,10 +429,10 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     // History navigation (when no suggestions shown)
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      this.navigateHistory(-1);
+      this.navigateMatchedHistory(-1);
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
-      this.navigateHistory(1);
+      this.navigateMatchedHistory(1);
     } else if (event.key === 'Enter') {
       this.onSubmit();
     } else if (event.key === 'Escape') {
@@ -305,6 +449,11 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     // Reset user navigation flag when input changes
     this.userNavigatedSuggestions.set(false);
 
+    // Hide history preview once user starts typing
+    if (input.trim()) {
+      this.showHistoryPreview.set(false);
+    }
+
     // If input becomes empty, deselect the current suggestion
     if (!input.trim()) {
       this.selectedSuggestionIndex.set(-1);
@@ -318,8 +467,11 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     }
     this.isFocused.set(true);
 
-    // When focused with last command showing, start fresh (don't inherit last command)
-    // User can start typing immediately with a clean slate
+    // Fetch recent history from backend when focused (for up arrow navigation)
+    if (this.wsService.connectionState() === 'connected') {
+      this.currentHistoryQuery = '';
+      this.wsService.searchHistory('', 5);
+    }
 
     // Show suggestions on focus if there's input
     if (this.currentInput().trim()) {
@@ -327,12 +479,49 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Update the position of the history dropdown to be fixed above the input
+   * This ensures it renders above any parent overflow constraints
+   */
+  private updateHistoryDropdownPosition(): void {
+    if (!this.inputWrapper?.nativeElement) return;
+
+    const rect = this.inputWrapper.nativeElement.getBoundingClientRect();
+    this.historyDropdownStyle.set({
+      position: 'fixed',
+      bottom: `${window.innerHeight - rect.top + 8}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+    });
+  }
+
   onInputBlur(): void {
     // Delay hiding suggestions to allow click events to fire
     this.blurTimeout = setTimeout(() => {
       this.showSuggestions.set(false);
+      this.showHistoryPreview.set(false);
       this.isFocused.set(false);
     }, 200);
+  }
+
+  /**
+   * Select a history entry and populate the input
+   */
+  selectHistoryEntry(entry: MatchedHistoryEntry): void {
+    if (!entry.item.rawInput) return;
+
+    // Parse the command into chips using pre-computed tokens
+    const chips: FqnChip[] = entry.tokens.map((t) => ({
+      fqn: t.fqn,
+      display: t.display,
+      type: t.type as FqnChip['type'],
+    }));
+
+    this.chips.set(chips);
+    this.currentInput.set('');
+    this.historySearchTerm.set('');
+    this.showHistoryPreview.set(false);
+    this.focusInput();
   }
 
   /**
@@ -504,8 +693,102 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.selectedSuggestionIndex.set(-1);
     this.showSuggestions.set(false);
     this.userNavigatedSuggestions.set(false);
+    // Also reset history navigation when clearing suggestions
+    this.selectedHistoryIndex.set(-1);
   }
 
+  /**
+   * Navigate through matched history (supports substring matching)
+   * direction: -1 = older (up arrow), 1 = newer (down arrow)
+   */
+  private navigateMatchedHistory(direction: -1 | 1): void {
+    // If user has typed something, trigger a history search via WebSocket
+    const searchTerm = this.currentInput().trim();
+    if (searchTerm && direction === -1 && !this.showHistoryPreview()) {
+      // First time pressing up with text - search for matching history
+      this.historySearchTerm.set(searchTerm);
+      this.currentHistoryQuery = searchTerm;
+      if (this.wsService.connectionState() === 'connected') {
+        this.wsService.searchHistory(searchTerm, 5);
+      }
+    } else if (!searchTerm && direction === -1 && !this.showHistoryPreview()) {
+      // No search term - just load recent history
+      this.historySearchTerm.set('');
+      this.currentHistoryQuery = '';
+      if (this.wsService.connectionState() === 'connected') {
+        this.wsService.searchHistory('', 5);
+      }
+    }
+
+    const matchedHistory = this.recentHistory();
+
+    if (matchedHistory.length === 0) {
+      // Fall back to legacy navigation if no matched history
+      const historyCommand = this.terminalService.navigateHistory(direction);
+      if (historyCommand !== undefined) {
+        this.chips.set([]);
+        this.currentInput.set(historyCommand);
+      }
+      return;
+    }
+
+    // Show history preview if not already showing
+    if (!this.showHistoryPreview()) {
+      this.updateHistoryDropdownPosition();
+      this.showHistoryPreview.set(true);
+    }
+
+    const currentIdx = this.selectedHistoryIndex();
+    let newIdx: number;
+
+    if (direction === -1) {
+      // Up arrow - go to older (lower index since most recent is at bottom/higher index)
+      if (currentIdx < 0) {
+        // Not navigating yet - start from most recent (bottom = highest index)
+        newIdx = matchedHistory.length - 1;
+      } else if (currentIdx > 0) {
+        newIdx = currentIdx - 1;
+      } else {
+        // Already at oldest - stay there
+        return;
+      }
+    } else {
+      // Down arrow - go to newer (higher index)
+      if (currentIdx < 0) {
+        // Not navigating - do nothing
+        return;
+      } else if (currentIdx < matchedHistory.length - 1) {
+        newIdx = currentIdx + 1;
+      } else {
+        // At newest - clear selection and go back to typing
+        this.selectedHistoryIndex.set(-1);
+        this.showHistoryPreview.set(false);
+        // Clear chips and restore the original search term if there was one
+        this.chips.set([]);
+        this.currentInput.set(searchTerm || this.historySearchTerm());
+        return;
+      }
+    }
+
+    this.selectedHistoryIndex.set(newIdx);
+
+    // Load the selected history entry into the input
+    const entry = matchedHistory[newIdx];
+    if (entry) {
+      // Convert tokens to chips
+      const chips: FqnChip[] = entry.tokens.map((t) => ({
+        fqn: t.fqn,
+        display: t.display,
+        type: t.type as FqnChip['type'],
+      }));
+      this.chips.set(chips);
+      this.currentInput.set('');
+    }
+  }
+
+  /**
+   * @deprecated Use navigateMatchedHistory instead
+   */
   private navigateHistory(direction: -1 | 1): void {
     const historyCommand = this.terminalService.navigateHistory(direction);
     if (historyCommand !== undefined) {
