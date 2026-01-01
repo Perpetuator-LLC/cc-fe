@@ -2,10 +2,58 @@
 <div class="terminal-bar">
   <mat-icon class="terminal-icon">terminal</mat-icon>
 
-  <div class="input-wrapper">
+  <div class="input-wrapper" #inputWrapper>
+    <!-- History preview dropdown (above input, uses fixed positioning) -->
+    @if (showHistoryPreview() && recentHistory().length > 0 && !showSuggestions()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/no-inline-styles -- Dynamic positioning required for fixed overlay -->
+      <div
+        class="history-preview-dropdown"
+        [style.position]="historyDropdownStyle()['position']"
+        [style.bottom]="historyDropdownStyle()['bottom']"
+        [style.left]="historyDropdownStyle()['left']"
+        [style.width]="historyDropdownStyle()['width']"
+      >
+        <div class="history-hint">
+          <mat-icon>keyboard_arrow_up</mat-icon>
+          <span>{{ historySearchTerm() ? 'Matching history' : 'Recent commands' }}</span>
+          <span class="hint-keys"> <kbd>↑</kbd><kbd>↓</kbd> navigate </span>
+        </div>
+        @for (entry of recentHistory(); track entry.item.id || $index; let i = $index) {
+          <div
+            class="history-item"
+            [class.selected]="i === selectedHistoryIndex()"
+            (click)="selectHistoryEntry(entry)"
+            (keydown.enter)="selectHistoryEntry(entry)"
+            tabindex="0"
+            role="option"
+            [attr.aria-selected]="i === selectedHistoryIndex()"
+          >
+            @if (historySearchTerm() && entry.matchStart !== undefined) {
+              <!-- Show raw text with match highlighting -->
+              <span class="history-text">
+                <span>{{ entry.beforeMatch }}</span>
+                <mark class="match-highlight">{{ entry.matchText }}</mark>
+                <span>{{ entry.afterMatch }}</span>
+              </span>
+            } @else {
+              <!-- Show as chips when not searching -->
+              @for (token of entry.tokens; track token.fqn) {
+                <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="history-chip" />
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+
     <!-- Autocomplete dropdown -->
     @if (suggestions().length > 0 && showSuggestions()) {
       <div class="autocomplete-dropdown">
+        <div class="autocomplete-hint">
+          <span class="hint-keys">
+            <kbd>↓</kbd><kbd>↑</kbd> navigate <kbd>Tab</kbd> select <kbd>Enter</kbd> execute
+          </span>
+        </div>
         @for (suggestion of suggestions(); track suggestion.fqn || suggestion.display; let i = $index) {
           <div
             class="suggestion-item"
@@ -67,36 +115,25 @@
           <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
         }
         <mat-spinner diameter="18" />
-      } @else if (showLastCommand()) {
-        <!-- Show last executed command when unfocused and no user content -->
-        @for (token of lastCommandTokens(); track token.fqn) {
-          <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="last-command" />
-        }
-        <!-- Hidden input that captures focus clicks -->
-        <input
-          #commandInput
-          type="text"
-          [value]="currentInput()"
-          (input)="onInputChange($event)"
-          (keydown)="onKeyDown($event)"
-          (focus)="onInputFocus()"
-          (blur)="onInputBlur()"
-          placeholder=""
-          autocomplete="off"
-          spellcheck="false"
-          class="transparent-input"
-        />
       } @else {
-        <!-- Active input: chips for completed FQN tokens -->
-        @for (chip of chips(); track chip.fqn; let i = $index) {
-          <app-fqn-chip
-            [fqn]="chip.fqn"
-            [display]="chip.display"
-            [type]="chip.type"
-            [removable]="true"
-            (removed)="removeChip(i)"
-          />
+        <!-- Show last command chips when unfocused and no user content -->
+        @if (showLastCommand()) {
+          @for (token of lastCommandTokens(); track token.fqn) {
+            <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="last-command" />
+          }
+        } @else {
+          <!-- Active input: chips for completed FQN tokens -->
+          @for (chip of chips(); track chip.fqn; let i = $index) {
+            <app-fqn-chip
+              [fqn]="chip.fqn"
+              [display]="chip.display"
+              [type]="chip.type"
+              [removable]="true"
+              (removed)="removeChip(i)"
+            />
+          }
         }
+        <!-- Single input element - always present when not processing -->
         <input
           #commandInput
           type="text"
@@ -105,11 +142,12 @@
           (keydown)="onKeyDown($event)"
           (focus)="onInputFocus()"
           (blur)="onInputBlur()"
-          [placeholder]="chips().length > 0 ? '' : 'Type a command or ask a question...'"
+          [placeholder]="showLastCommand() ? '' : chips().length > 0 ? '' : 'Type a command or ask a question...'"
+          [class.transparent-input]="showLastCommand()"
           autocomplete="off"
           spellcheck="false"
         />
-        @if (currentInput() || chips().length > 0) {
+        @if ((currentInput() || chips().length > 0) && !showLastCommand()) {
           <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
             <mat-icon>send</mat-icon>
           </button>
@@ -132,5 +170,8 @@
     }
   }
 
-  <div class="shortcut-hint"><kbd>⌘</kbd><kbd>K</kbd></div>
+  <div class="shortcut-hints">
+    <span class="hint"><kbd>↑</kbd> history</span>
+    <span class="hint"><kbd>⌘</kbd><kbd>K</kbd> focus</span>
+  </div>
 </div>

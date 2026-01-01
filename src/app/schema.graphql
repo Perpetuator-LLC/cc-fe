@@ -412,6 +412,11 @@ type Query {
 """GraphQL type for Watchlist."""
 type WatchlistObjectType {
   id: UUID!
+
+  """
+  System watchlists are shared read-only lists (sectors, industries, etc.)
+  """
+  isSystem: Boolean!
   name: String!
   description: String!
   watchlistType: WatchlistsWatchlistWatchlistTypeChoices!
@@ -423,6 +428,9 @@ type WatchlistObjectType {
   uuid: UUID
   items: [WatchlistItemType]
   itemCount: Int
+
+  """Whether the current user can edit this watchlist"""
+  canEdit: Boolean
 }
 
 """
@@ -441,6 +449,9 @@ enum WatchlistsWatchlistWatchlistTypeChoices {
 
   """Favorites"""
   FAVORITES
+
+  """System"""
+  SYSTEM
 }
 
 """
