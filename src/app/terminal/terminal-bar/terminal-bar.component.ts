@@ -28,7 +28,7 @@ import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-
  * @deprecated Use FqnToken from shared component instead
  */
 export interface FqnChip {
-  fqn: string; // Full FQN: "stock:NASDAQ:AAPL" or "command:CHART"
+  fqn: string; // Full FQN: "STOCK:NASDAQ:AAPL" or "COMMAND:CHART"
   display: string; // Display text: "AAPL" or "CHART"
   type: 'stock' | 'command' | 'crypto' | 'index' | 'forex' | 'parameter';
 }
@@ -146,17 +146,20 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     const pendingInput = this.currentInput().trim();
     if (pendingInput) {
       const suggestions = this.suggestions();
+      // Case-insensitive FQN check
+      const upperInput = pendingInput.toUpperCase();
       const isFqnFormat =
-        pendingInput.includes('command:') ||
-        pendingInput.includes('stock:') ||
-        pendingInput.includes('crypto:') ||
-        pendingInput.includes('index:');
+        upperInput.includes('COMMAND:') ||
+        upperInput.includes('STOCK:') ||
+        upperInput.includes('CRYPTO:') ||
+        upperInput.includes('INDEX:');
 
       if (!isFqnFormat && suggestions.length > 0) {
         const firstSuggestion = suggestions[0];
         if (firstSuggestion.fqn) {
           // Add as chip (this updates the chips signal synchronously)
-          const fqn = firstSuggestion.fqn;
+          // Normalize the FQN to uppercase
+          const fqn = FqnUtils.normalize(firstSuggestion.fqn);
           const chipType = this.getChipType(firstSuggestion.type);
           let display = firstSuggestion.symbol || firstSuggestion.display;
           if (fqn.includes(':')) {
@@ -182,10 +185,10 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
 
     if (!finalCommand) return;
 
-    // If it's just a symbol without a command, add CHART command
-    const hasCommand = finalCommand.includes('command:');
+    // If it's just a symbol without a command, add CHART command (case-insensitive check)
+    const hasCommand = finalCommand.toUpperCase().includes('COMMAND:');
     if (!hasCommand && this.chips().some((c) => c.type === 'stock' || c.type === 'crypto' || c.type === 'index')) {
-      finalCommand = `${finalCommand} command:CHART`;
+      finalCommand = `${finalCommand} COMMAND:CHART`;
     }
 
     console.log('[TerminalBar] Executing command:', finalCommand);
@@ -319,14 +322,16 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
    * Add a chip from an autocomplete suggestion
    */
   addChipFromSuggestion(suggestion: AutocompleteSuggestion): void {
-    const fqn = suggestion.fqn || suggestion.insert || suggestion.text || suggestion.display;
+    const rawFqn = suggestion.fqn || suggestion.insert || suggestion.text || suggestion.display;
+    // Normalize the FQN to uppercase (STOCK:, COMMAND:, etc.)
+    const fqn = FqnUtils.normalize(rawFqn);
     const chipType = this.getChipType(suggestion.type);
 
     // Extract display name from FQN or use suggestion display
     let display = suggestion.display;
     if (fqn.includes(':')) {
-      // For FQN like "stock:NASDAQ:AAPL", get "AAPL"
-      // For FQN like "command:CHART", get "CHART"
+      // For FQN like "STOCK:NASDAQ:AAPL", get "AAPL"
+      // For FQN like "COMMAND:CHART", get "CHART"
       const parts = fqn.split(':');
       display = parts[parts.length - 1];
     }

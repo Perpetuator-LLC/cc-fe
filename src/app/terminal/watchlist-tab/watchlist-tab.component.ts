@@ -985,9 +985,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.tableData.set(null);
     this.currentCommand.set(command);
 
-    // Build FQN format command
-    const symbolFqn = `stock:${exchange || 'UNKNOWN'}:${symbol}`;
-    const commandFqn = `command:${command}`;
+    // Build FQN format command (uppercase prefixes)
+    const symbolFqn = `STOCK:${(exchange || 'UNKNOWN').toUpperCase()}:${symbol.toUpperCase()}`;
+    const commandFqn = `COMMAND:${command.toUpperCase()}`;
 
     let fullCommand = `${symbolFqn} ${commandFqn}`;
 
@@ -1315,9 +1315,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const item = this.selectedItem();
     const exchange = item?.exchange || 'UNKNOWN';
 
-    // Build FQN format command
-    const symbolFqn = `stock:${exchange}:${symbol}`;
-    const command = `${symbolFqn} command:CHART -period ${period} -interval ${interval}`;
+    // Build FQN format command (uppercase prefixes)
+    const symbolFqn = `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}`;
+    const command = `${symbolFqn} COMMAND:CHART -period ${period} -interval ${interval}`;
 
     console.debug('[WatchlistTab] Loading chart with FQN:', { symbol, exchange, period, interval, command });
     this.chartLoading.set(true);
