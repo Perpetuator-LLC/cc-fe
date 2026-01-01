@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, signal, WritableSignal, Injector } from '@angular/core';
 import { AuthConfig, OAuthService as AngularOAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
@@ -116,8 +116,15 @@ export class OAuthService {
       }
     });
 
-    // Check if we have a valid session
+    // Check if we have a valid session OR can refresh
+    // hasSession() checks if access token is valid
+    // If access token is expired but refresh token exists, we're still "logged in"
+    // and the token will be refreshed on the first API call
     if (this.tokenStorage.hasSession()) {
+      this.loggedInSignal.set(true);
+    } else if (this.tokenStorage.getRefreshToken()) {
+      // Access token expired but we have a refresh token
+      // Consider user logged in - token will refresh on first API call
       this.loggedInSignal.set(true);
     }
   }
@@ -273,11 +280,13 @@ export class OAuthService {
 
   /**
    * Check if user is authenticated
-   * Checks both localStorage token and backend-set cookie
+   * Returns true if we have a valid access token OR a refresh token
+   * (If only refresh token exists, the token will be refreshed on first API call)
    */
   isAuthenticated(): boolean {
     this.ensureInitialized();
-    return this.tokenStorage.hasSession();
+    // User is authenticated if they have a valid session OR can refresh
+    return this.tokenStorage.hasSession() || !!this.tokenStorage.getRefreshToken();
   }
 
   /**
