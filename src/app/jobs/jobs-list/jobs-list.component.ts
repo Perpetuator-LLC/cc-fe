@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -113,10 +113,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
   ) {
     // Subscribe to real-time job updates via WebSocket
     this.subscriptions.add(
-      this.jobsWebSocketService.jobUpdates.subscribe({
-        next: ({ type, job }) => {
-          this.handleRealtimeJobUpdate(type, job);
-        },
+      this.jobsWebSocketService.jobUpdated$.subscribe((job: Job) => {
+        this.handleRealtimeJobUpdate('job.updated', job);
       }),
     );
   }

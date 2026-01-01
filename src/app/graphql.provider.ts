@@ -1,10 +1,13 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig, inject } from '@angular/core';
-import { ApolloClientOptions, ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloClientOptions, ApolloLink, InMemoryCache, split } from '@apollo/client/core';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
+import { createClient, Client } from 'graphql-ws';
 import { Observable as ZenObservable } from 'zen-observable-ts';
 import { environment } from '../environments/environment';
 import { TokenStorageService } from './auth/token-storage.service';
@@ -13,6 +16,60 @@ import { cachePolicyRegistry } from './cache-policies';
 import { firstValueFrom } from 'rxjs';
 
 const uri = environment.API_URL + '/graphql/';
+
+// WebSocket URL for GraphQL subscriptions and real-time operations
+function getWebSocketUrl(): string {
+  const wsProtocol = environment.API_URL.startsWith('https') ? 'wss' : 'ws';
+  const wsHost = environment.API_URL.replace(/^https?:\/\//, '');
+  return `${wsProtocol}://${wsHost}/ws/graphql/`;
+}
+
+// Shared WebSocket client instance for GraphQL operations
+let wsClient: Client | null = null;
+
+/**
+ * Get the shared GraphQL WebSocket client
+ * Creates client on first call, reuses existing instance
+ */
+export function getGraphQLWsClient(tokenStorage: TokenStorageService): Client {
+  if (!wsClient) {
+    wsClient = createClient({
+      url: getWebSocketUrl(),
+      connectionParams: () => {
+        const token = tokenStorage.getAccessToken();
+        return token ? { authorization: `Bearer ${token}` } : {};
+      },
+      // Reconnection settings
+      retryAttempts: 10,
+      shouldRetry: () => true,
+      retryWait: async (retries) => {
+        // Exponential backoff: 1s, 2s, 4s, 8s, ... up to 30s
+        const delay = Math.min(1000 * Math.pow(2, retries), 30000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      },
+      keepAlive: 30000, // Send ping every 30 seconds
+      lazy: false, // Connect immediately when client is created
+      on: {
+        connected: () => console.debug('[GraphQL-WS] Connected'),
+        closed: () => console.debug('[GraphQL-WS] Closed'),
+        error: (error) => console.error('[GraphQL-WS] Error:', error),
+      },
+    });
+  }
+  return wsClient;
+}
+
+/**
+ * Disconnect and dispose the WebSocket client
+ * Call this on logout or when cleaning up
+ */
+export function disconnectGraphQLWs(): void {
+  if (wsClient) {
+    wsClient.dispose();
+    wsClient = null;
+    console.debug('[GraphQL-WS] Disconnected and disposed');
+  }
+}
 
 // Shared state for managing concurrent refresh requests in GraphQL
 let isRefreshingGraphQL = false;
@@ -175,14 +232,32 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
     return;
   });
 
-  // Upload link with credentials for cookies
+  // Upload link with credentials for cookies (HTTP)
   const uploadLink = createUploadLink({
     uri,
     credentials: 'include', // For logged_in cookie
   });
 
+  // HTTP link chain (upload with auth and error handling)
+  const httpLink = ApolloLink.from([errorLink, authLink, uploadLink]);
+
+  // WebSocket link for subscriptions and real-time operations
+  const wsClient = getGraphQLWsClient(tokenStorage);
+  const wsLink = new GraphQLWsLink(wsClient);
+
+  // Split link: use WebSocket for subscriptions, HTTP for queries/mutations
+  // This allows us to gradually migrate to full WebSocket support
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+    },
+    wsLink, // Use WebSocket for subscriptions
+    httpLink, // Use HTTP for queries and mutations
+  );
+
   return {
-    link: ApolloLink.from([errorLink, authLink, uploadLink]),
+    link: splitLink,
     cache: new InMemoryCache({
       typePolicies: cachePolicyRegistry.getAll(),
     }),

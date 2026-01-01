@@ -1,7 +1,7 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
-import { map, filter, catchError, tap, take } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
 import { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
 import { JobsWebSocketService } from '../jobs/jobs-websocket.service';
@@ -1002,38 +1002,47 @@ export class TerminalService implements OnDestroy {
 
     // Handle job completions - re-run pending commands or update background refreshes
     this.subscriptions.add(
-      this.jobsWsService.jobUpdates
-        .pipe(filter((update) => update.type === 'jobs.completed' || update.type === 'jobs.failed'))
-        .subscribe((update) => {
-          const jobId = update.job.uuid;
+      this.jobsWsService.jobCompleted$.subscribe((job) => {
+        const jobId = job.uuid;
 
-          // Check for pending command (needs re-execution)
-          const pendingCommand = this.pendingJobCommands.get(jobId);
-          if (pendingCommand) {
-            this.pendingJobCommands.delete(jobId);
+        // Check for pending command (needs re-execution)
+        const pendingCommand = this.pendingJobCommands.get(jobId);
+        if (pendingCommand) {
+          this.pendingJobCommands.delete(jobId);
+          // Re-execute the command now that data should be available
+          this.execute(pendingCommand);
+          return;
+        }
 
-            if (update.type === 'jobs.completed') {
-              // Re-execute the command now that data should be available
-              this.execute(pendingCommand);
-            } else {
-              // Job failed - update the last history entry (which is showing the fetching state)
-              this.updateLastHistoryWithError(`Data fetch failed: ${update.job.error || 'Unknown error'}`);
-            }
-            return;
-          }
+        // Check for background refresh (silently update chart data)
+        const refreshJob = this.backgroundRefreshJobs.get(jobId);
+        if (refreshJob) {
+          this.backgroundRefreshJobs.delete(jobId);
+          // Re-execute the command to get fresh data and update the chart
+          this.refreshHistoryEntry(refreshJob.command, refreshJob.historyIndex);
+        }
+      }),
+    );
 
-          // Check for background refresh (silently update chart data)
-          const refreshJob = this.backgroundRefreshJobs.get(jobId);
-          if (refreshJob) {
-            this.backgroundRefreshJobs.delete(jobId);
+    // Handle job failures
+    this.subscriptions.add(
+      this.jobsWsService.jobFailed$.subscribe((job) => {
+        const jobId = job.uuid;
 
-            if (update.type === 'jobs.completed') {
-              // Re-execute the command to get fresh data and update the chart
-              this.refreshHistoryEntry(refreshJob.command, refreshJob.historyIndex);
-            }
-            // If failed, silently ignore - user still has cached data
-          }
-        }),
+        // Check for pending command (needs re-execution)
+        const pendingCommand = this.pendingJobCommands.get(jobId);
+        if (pendingCommand) {
+          this.pendingJobCommands.delete(jobId);
+          // Job failed - update the last history entry (which is showing the fetching state)
+          this.updateLastHistoryWithError(`Data fetch failed: ${job.error || 'Unknown error'}`);
+        }
+
+        // Check for background refresh (silently ignore failures - user still has cached data)
+        const refreshJob = this.backgroundRefreshJobs.get(jobId);
+        if (refreshJob) {
+          this.backgroundRefreshJobs.delete(jobId);
+        }
+      }),
     );
   }
 
