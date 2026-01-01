@@ -845,7 +845,7 @@ The frontend displays 'display' but inserts/sends 'fqn' to backend.
 """
 type AutocompleteSuggestionType {
   """
-  Fully Qualified Name to insert (e.g., 'stock:NYSE:DIS', 'command:PRICE')
+  Fully Qualified Name to insert (e.g., 'STOCK:NYSE:DIS', 'COMMAND:PRICE')
   """
   fqn: String!
 
@@ -2934,16 +2934,16 @@ type Mutation {
   Execute a terminal command.
   
   Accepts FQN (Fully Qualified Name) format:
-  - command:HELP
-  - stock:NYSE:DIS command:PRICE -period 1Y
-  - stock:NASDAQ:AAPL stock:NASDAQ:GOOGL command:COMPARE
+  - COMMAND:HELP
+  - STOCK:NYSE:DIS COMMAND:PRICE -period 1Y
+  - STOCK:NASDAQ:AAPL STOCK:NASDAQ:GOOGL COMMAND:COMPARE
   
   The frontend should convert user input to FQN format before sending.
   Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).
   """
   executeCommand(
     """
-    Command input in FQN format (e.g., 'stock:NYSE:DIS command:PRICE -period 1Y')
+    Command input in FQN format (e.g., 'STOCK:NYSE:DIS COMMAND:PRICE -period 1Y')
     """
     input: String!
 
@@ -3646,9 +3646,9 @@ type AddPanelToDashboard {
 Execute a terminal command.
 
 Accepts FQN (Fully Qualified Name) format:
-- command:HELP
-- stock:NYSE:DIS command:PRICE -period 1Y
-- stock:NASDAQ:AAPL stock:NASDAQ:GOOGL command:COMPARE
+- COMMAND:HELP
+- STOCK:NYSE:DIS COMMAND:PRICE -period 1Y
+- STOCK:NASDAQ:AAPL STOCK:NASDAQ:GOOGL COMMAND:COMPARE
 
 The frontend should convert user input to FQN format before sending.
 Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
 import { map, filter, catchError, tap, take } from 'rxjs/operators';
@@ -271,6 +271,9 @@ export class TerminalService implements OnDestroy {
   // Commands registry cache
   private commandsCache$ = new BehaviorSubject<Command[]>([]);
 
+  // Terminal hints cache (loaded from backend)
+  private hintsCache$ = new BehaviorSubject<TerminalHints | null>(null);
+
   // Currently active charts (subscribed for real-time updates)
   private activeChartsSignal: WritableSignal<Map<string, EChartsOption>> = signal(new Map());
 
@@ -292,6 +295,17 @@ export class TerminalService implements OnDestroy {
     private apollo: Apollo,
   ) {
     this.setupSubscriptions();
+    this.initializeFromBackend();
+  }
+
+  /**
+   * Load initial data from backend (commands and hints)
+   */
+  private initializeFromBackend(): void {
+    // Load commands for local autocomplete fallback
+    this.loadCommands().pipe(take(1)).subscribe();
+    // Load hints for example suggestions
+    this.loadTerminalHints().pipe(take(1)).subscribe();
   }
 
   ngOnDestroy(): void {
@@ -526,6 +540,11 @@ export class TerminalService implements OnDestroy {
    * Load terminal hints for empty states and placeholders
    */
   loadTerminalHints(): Observable<TerminalHints> {
+    // Return cached if available
+    if (this.hintsCache$.getValue()) {
+      return of(this.hintsCache$.getValue()!);
+    }
+
     return this.apollo
       .query<TerminalHintsResult>({
         query: GET_TERMINAL_HINTS,
@@ -533,15 +552,18 @@ export class TerminalService implements OnDestroy {
       })
       .pipe(
         map((result) => result.data.terminalHints),
+        tap((hints) => this.hintsCache$.next(hints)),
         catchError(() => {
-          // Return defaults if query fails
-          return of({
-            quickExamples: ['AAPL GP', 'HELP', 'MSFT DES'],
+          // Return empty structure if query fails (no hardcoded defaults)
+          const emptyHints: TerminalHints = {
+            quickExamples: [],
             placeholderText: 'Type a command or ask a question...',
-            emptyStateMessage: 'Try: AAPL GP, HELP, or ask anything',
-            dashboardHint: 'Run chart commands like AAPL GP to populate your dashboard',
-            chartSuggestion: 'AAPL GP',
-          });
+            emptyStateMessage: 'Type a symbol or command to get started',
+            dashboardHint: '',
+            chartSuggestion: '',
+          };
+          this.hintsCache$.next(emptyHints);
+          return of(emptyHints);
         }),
       );
   }
@@ -772,7 +794,7 @@ export class TerminalService implements OnDestroy {
     const commands = this.commandsCache$.getValue();
     const suggestions: AutocompleteSuggestion[] = [];
 
-    // Empty input - show examples and recent history
+    // Empty input - show recent history and commands from backend
     if (!trimmedInput) {
       // Add recent history first
       const history = this.commandHistorySignal();
@@ -786,34 +808,37 @@ export class TerminalService implements OnDestroy {
         });
       }
 
-      // Add example commands using FQN format (uppercase prefixes)
-      const examples: AutocompleteSuggestion[] = [
-        {
-          fqn: 'STOCK:NASDAQ:AAPL COMMAND:HP',
-          display: 'AAPL HP',
-          displaySecondary: 'Historical prices for Apple',
-          type: 'example',
-          description: 'Historical prices for Apple',
-          score: 80,
-        },
-        {
-          fqn: 'COMMAND:HELP',
-          display: 'HELP',
-          displaySecondary: 'Show available commands',
+      // Add examples from backend hints if available
+      const hints = this.hintsCache$.getValue();
+      if (hints?.quickExamples) {
+        for (let i = 0; i < hints.quickExamples.length && suggestions.length < limit; i++) {
+          const example = hints.quickExamples[i];
+          suggestions.push({
+            fqn: example,
+            display: example,
+            displaySecondary: 'Example command',
+            type: 'example',
+            description: 'Example command',
+            score: 80 - i,
+          });
+        }
+      }
+
+      // Add some commands from cache if we have room
+      for (const cmd of commands) {
+        if (suggestions.length >= limit) break;
+        suggestions.push({
+          fqn: `COMMAND:${cmd.name}`,
+          display: cmd.name,
+          displaySecondary: cmd.description,
           type: 'command',
-          description: 'Show available commands',
-          score: 75,
-        },
-        {
-          fqn: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
-          display: 'AAPL CHART',
-          displaySecondary: 'Price chart for Apple',
-          type: 'example',
-          description: 'Price chart for Apple',
-          score: 70,
-        },
-      ];
-      suggestions.push(...examples);
+          description: cmd.description,
+          category: cmd.category,
+          requiresSymbol: cmd.requiresSymbol,
+          score: 60,
+        });
+      }
+
       return suggestions.slice(0, limit);
     }
 

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="terminal-bar">
   <mat-icon class="terminal-icon">terminal</mat-icon>
 
@@ -67,6 +67,25 @@
           <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
         }
         <mat-spinner diameter="18" />
+      } @else if (showLastCommand()) {
+        <!-- Show last executed command when unfocused and no user content -->
+        @for (token of lastCommandTokens(); track token.fqn) {
+          <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="last-command" />
+        }
+        <!-- Hidden input that captures focus clicks -->
+        <input
+          #commandInput
+          type="text"
+          [value]="currentInput()"
+          (input)="onInputChange($event)"
+          (keydown)="onKeyDown($event)"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+          placeholder=""
+          autocomplete="off"
+          spellcheck="false"
+          class="transparent-input"
+        />
       } @else {
         <!-- Active input: chips for completed FQN tokens -->
         @for (chip of chips(); track chip.fqn; let i = $index) {
