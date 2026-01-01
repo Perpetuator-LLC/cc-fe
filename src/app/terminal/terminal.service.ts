@@ -734,15 +734,15 @@ export class TerminalService implements OnDestroy {
     // Convert to proper FQN format based on type
     if (suggestion.type === 'command' || suggestion.type === 'alias') {
       const cmdName = suggestion.text || suggestion.display?.split(' ')[0] || '';
-      fqn = `command:${cmdName.toUpperCase()}`;
+      fqn = `COMMAND:${cmdName.toUpperCase()}`;
     } else if (suggestion.type === 'symbol' || suggestion.type === 'stock') {
       const symbol = suggestion.text || suggestion.display?.split(' ')[0] || '';
       const exchange = suggestion.exchange || 'UNKNOWN';
-      fqn = `stock:${exchange}:${symbol.toUpperCase()}`;
+      fqn = `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}`;
     } else if (suggestion.type === 'crypto') {
       const symbol = suggestion.text || '';
       const exchange = suggestion.exchange || 'UNKNOWN';
-      fqn = `crypto:${exchange}:${symbol.toUpperCase()}`;
+      fqn = `CRYPTO:${exchange.toUpperCase()}:${symbol.toUpperCase()}`;
     }
 
     return {
@@ -786,10 +786,10 @@ export class TerminalService implements OnDestroy {
         });
       }
 
-      // Add example commands using FQN format
+      // Add example commands using FQN format (uppercase prefixes)
       const examples: AutocompleteSuggestion[] = [
         {
-          fqn: 'stock:NASDAQ:AAPL command:HP',
+          fqn: 'STOCK:NASDAQ:AAPL COMMAND:HP',
           display: 'AAPL HP',
           displaySecondary: 'Historical prices for Apple',
           type: 'example',
@@ -797,7 +797,7 @@ export class TerminalService implements OnDestroy {
           score: 80,
         },
         {
-          fqn: 'command:HELP',
+          fqn: 'COMMAND:HELP',
           display: 'HELP',
           displaySecondary: 'Show available commands',
           type: 'command',
@@ -805,7 +805,7 @@ export class TerminalService implements OnDestroy {
           score: 75,
         },
         {
-          fqn: 'stock:NASDAQ:AAPL command:CHART',
+          fqn: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
           display: 'AAPL CHART',
           displaySecondary: 'Price chart for Apple',
           type: 'example',
@@ -859,7 +859,7 @@ export class TerminalService implements OnDestroy {
       // User typed what looks like a symbol - suggest the symbol itself first
       const symbolUpper = tokens[0].toUpperCase();
       suggestions.push({
-        fqn: `stock:UNKNOWN:${symbolUpper}`,
+        fqn: `STOCK:UNKNOWN:${symbolUpper}`,
         display: symbolUpper,
         displaySecondary: `Look up ${symbolUpper}`,
         type: 'symbol',
@@ -870,7 +870,7 @@ export class TerminalService implements OnDestroy {
       // Then suggest commands that work with symbols
       for (const cmd of commands.filter((c) => c.requiresSymbol)) {
         suggestions.push({
-          fqn: `command:${cmd.name}`,
+          fqn: `COMMAND:${cmd.name}`,
           display: cmd.name,
           displaySecondary: cmd.description,
           type: 'command',
@@ -888,7 +888,7 @@ export class TerminalService implements OnDestroy {
     for (const cmd of commands) {
       if (cmd.name.toUpperCase().startsWith(lastToken)) {
         suggestions.push({
-          fqn: `command:${cmd.name}`,
+          fqn: `COMMAND:${cmd.name}`,
           display: cmd.name,
           displaySecondary: cmd.description,
           type: 'command',
@@ -904,7 +904,7 @@ export class TerminalService implements OnDestroy {
         for (const alias of cmd.aliases) {
           if (alias.toUpperCase().startsWith(lastToken)) {
             suggestions.push({
-              fqn: `command:${cmd.name}`,
+              fqn: `COMMAND:${cmd.name}`,
               display: `${alias} → ${cmd.name}`,
               displaySecondary: cmd.description,
               type: 'alias',
