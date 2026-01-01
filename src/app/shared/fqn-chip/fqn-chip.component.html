@@ -1,0 +1,33 @@
+<!-- Copyright (c) 2025 Perpetuator LLC -->
+<span
+  class="fqn-chip"
+  [class.chip-stock]="computedType === 'stock'"
+  [class.chip-command]="computedType === 'command'"
+  [class.chip-crypto]="computedType === 'crypto'"
+  [class.chip-index]="computedType === 'index'"
+  [class.chip-forex]="computedType === 'forex'"
+  [class.chip-parameter]="computedType === 'parameter'"
+  [class.chip-unknown]="computedType === 'unknown'"
+  [class.removable]="removable"
+  [matTooltip]="fqn"
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="'Token: ' + computedDisplay + ' (' + fqn + ')'"
+  (click)="onClick()"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()"
+>
+  {{ computedDisplay }}
+  @if (removable) {
+    <span
+      class="remove-btn"
+      tabindex="0"
+      role="button"
+      aria-label="Remove token"
+      (click)="onRemove($event)"
+      (keydown.enter)="onRemove($event)"
+      (keydown.space)="onRemove($event)"
+      >×</span
+    >
+  }
+</span>

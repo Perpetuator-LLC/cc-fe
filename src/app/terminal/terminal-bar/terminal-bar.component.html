@@ -62,25 +62,21 @@
     <div class="input-container">
       <span class="prompt">&gt;</span>
       @if (isProcessing() && lastEntry(); as last) {
-        <!-- Show the executing command while processing -->
-        <span class="executing-command">{{ last.input }}</span>
+        <!-- Show the executing command as chips while processing -->
+        @for (token of lastCommandTokens(); track token.fqn) {
+          <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
+        }
         <mat-spinner diameter="18" />
       } @else {
-        <!-- Chips for completed FQN tokens -->
+        <!-- Active input: chips for completed FQN tokens -->
         @for (chip of chips(); track chip.fqn; let i = $index) {
-          <span
-            class="fqn-chip"
-            [class.chip-stock]="chip.type === 'stock'"
-            [class.chip-command]="chip.type === 'command'"
-            [class.chip-crypto]="chip.type === 'crypto'"
-            [class.chip-index]="chip.type === 'index'"
-            [class.chip-forex]="chip.type === 'forex'"
-            [class.chip-parameter]="chip.type === 'parameter'"
-            [matTooltip]="chip.fqn"
-            (click)="removeChip(i)"
-          >
-            {{ chip.display }}
-          </span>
+          <app-fqn-chip
+            [fqn]="chip.fqn"
+            [display]="chip.display"
+            [type]="chip.type"
+            [removable]="true"
+            (removed)="removeChip(i)"
+          />
         }
         <input
           #commandInput

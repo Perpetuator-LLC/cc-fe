@@ -14,6 +14,7 @@ export type TerminalMessageType =
   | 'symbol.update'
   | 'symbols.subscribed'
   | 'symbols.unsubscribed'
+  | 'autocomplete'
   | 'error'
   | 'pong';
 
@@ -388,13 +389,20 @@ export interface PingAction {
   action: 'ping';
 }
 
+export interface AutocompleteAction {
+  action: 'autocomplete';
+  input: string;
+  limit?: number;
+}
+
 export type TerminalAction =
   | ExecuteAction
   | SubscribeChartAction
   | UnsubscribeChartAction
   | SubscribeSymbolsAction
   | UnsubscribeSymbolsAction
-  | PingAction;
+  | PingAction
+  | AutocompleteAction;
 
 // ============================================================================
 // Connection State
