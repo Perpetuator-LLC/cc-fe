@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -98,13 +98,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   selectedWatchlistId = signal<string>('recent'); // Changed to signal
   selectedSymbol = signal<string | null>(null);
   selectedItem = signal<SymbolListItem | null>(null);
-  currentCommand = signal<string>('GP');
+  currentCommand = signal<string>('CHART');
 
   // Chart state
   chartLoading = signal(false);
   chartOptions = signal<EChartsOption | null>(null);
   chartError = signal<string | null>(null);
-  // Data content for non-chart commands (HP, DES, QUOTE)
+  // Data content for non-chart commands (HP, DES)
   dataContent = signal<SafeHtml | null>(null);
   // Table data for HP command
   tableData = signal<TableData | null>(null);
@@ -593,7 +593,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               this.tableData.set(null);
               this.chartError.set(null);
             } else if (result.outputType === 'data' || result.outputType === 'message') {
-              // Data result (HP, DES, QUOTE, etc.)
+              // Data result (HP, DES, etc.)
               this.chartOptions.set(null);
               this.chartError.set(null);
 
@@ -992,7 +992,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     let fullCommand = `${symbolFqn} ${commandFqn}`;
 
     // For CHART command, include period and interval
-    if (command === 'CHART' || command === 'GP') {
+    if (command === 'CHART') {
       const period = this.selectedPeriod();
       const interval = this.selectedInterval();
       fullCommand = `${symbolFqn} ${commandFqn} -period ${period} -interval ${interval}`;
@@ -1099,13 +1099,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   /**
    * Quick actions menu for a symbol
+   * Note: QUOTE removed since price info is displayed at the top of the chart area
    */
   getSymbolActions(): { icon: string; label: string; command: string }[] {
     return [
-      { icon: 'show_chart', label: 'Price Chart', command: 'GP' },
-      { icon: 'table_chart', label: 'Historical Prices', command: 'HP' },
-      { icon: 'info', label: 'Company Info', command: 'DES' },
-      { icon: 'trending_up', label: 'Quote', command: 'QUOTE' },
+      { icon: 'show_chart', label: 'Chart', command: 'CHART' },
+      { icon: 'table_chart', label: 'Table', command: 'HP' },
+      { icon: 'info', label: 'Info', command: 'DES' },
     ];
   }
 
@@ -1419,6 +1419,82 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   isPositiveChange(): boolean {
     const quote = this.quoteData();
     return (quote?.change ?? 0) >= 0;
+  }
+
+  /**
+   * Get a formatted tooltip string for quote data
+   */
+  getQuoteTooltip(quote: SymbolUpdate): string {
+    const lines: string[] = [];
+
+    if (quote.open !== undefined) {
+      lines.push(`Open: ${this.formatPrice(quote.open)}`);
+    }
+    if (quote.high !== undefined) {
+      lines.push(`High: ${this.formatPrice(quote.high)}`);
+    }
+    if (quote.low !== undefined) {
+      lines.push(`Low: ${this.formatPrice(quote.low)}`);
+    }
+    if (quote.volume !== undefined) {
+      lines.push(`Volume: ${this.formatVolume(quote.volume)}`);
+    }
+    if (quote.timestamp) {
+      const date = new Date(quote.timestamp);
+      lines.push(`As of: ${date.toLocaleString()}`);
+    }
+
+    return lines.length > 0 ? lines.join('\n') : 'Quote data';
+  }
+
+  /**
+   * Format volume for display (e.g., 1.2M, 500K)
+   */
+  formatVolume(volume?: number): string {
+    if (volume === undefined || volume === null) return '';
+    if (volume >= 1e9) return `${(volume / 1e9).toFixed(2)}B`;
+    if (volume >= 1e6) return `${(volume / 1e6).toFixed(2)}M`;
+    if (volume >= 1e3) return `${(volume / 1e3).toFixed(0)}K`;
+    return volume.toLocaleString();
+  }
+
+  /**
+   * Get a formatted tooltip string for symbol/company info
+   */
+  getSymbolInfoTooltip(): string {
+    const item = this.selectedItem();
+    const quote = this.quoteData();
+    const lines: string[] = [];
+
+    const symbol = this.selectedSymbol();
+    const companyName = quote?.name || item?.displayName;
+
+    if (symbol) {
+      lines.push(symbol);
+    }
+    if (companyName && companyName !== symbol) {
+      lines.push(companyName);
+    }
+    if (item?.exchange) {
+      lines.push(`Exchange: ${item.exchange}`);
+    }
+    if (item?.sector) {
+      lines.push(`Sector: ${item.sector}`);
+    }
+    if (item?.industry) {
+      lines.push(`Industry: ${item.industry}`);
+    }
+    if (item?.assetType) {
+      lines.push(`Type: ${item.assetType}`);
+    }
+    if (item?.marketCap) {
+      lines.push(`Market Cap: ${this.formatMarketCap(item.marketCap)}`);
+    }
+
+    lines.push('');
+    lines.push('Click "Info" button for full company details');
+
+    return lines.join('\n');
   }
 
   // ============================================================================

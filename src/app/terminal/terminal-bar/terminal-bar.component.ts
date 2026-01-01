@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   Component,
   ChangeDetectionStrategy,
@@ -59,6 +59,17 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   selectedSuggestionIndex = signal(-1);
   showSuggestions = signal(false);
   userNavigatedSuggestions = signal(false); // True if user used arrow keys to navigate
+  isFocused = signal(false); // Track if input is focused
+
+  // True if user has typed something or has chips (not just showing last command)
+  hasUserContent = computed(() => {
+    return this.chips().length > 0 || this.currentInput().trim().length > 0;
+  });
+
+  // Show last command when unfocused and no user content
+  showLastCommand = computed(() => {
+    return !this.isFocused() && !this.hasUserContent() && this.lastCommandTokens().length > 0;
+  });
 
   // Legacy: currentCommand is now computed from chips + currentInput
   currentCommand = computed(() => {
@@ -305,6 +316,11 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       clearTimeout(this.blurTimeout);
       this.blurTimeout = null;
     }
+    this.isFocused.set(true);
+
+    // When focused with last command showing, start fresh (don't inherit last command)
+    // User can start typing immediately with a clean slate
+
     // Show suggestions on focus if there's input
     if (this.currentInput().trim()) {
       this.updateSuggestions(this.currentInput());
@@ -315,6 +331,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     // Delay hiding suggestions to allow click events to fire
     this.blurTimeout = setTimeout(() => {
       this.showSuggestions.set(false);
+      this.isFocused.set(false);
     }, 200);
   }
 

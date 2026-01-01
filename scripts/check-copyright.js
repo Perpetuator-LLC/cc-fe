@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 const fs = require('fs');
 const path = require('path');
 
@@ -18,17 +18,22 @@ const COPYRIGHT_NOTICE_CURRENT_YEAR_CSS = `/* Copyright (c) ${currentYear} Perpe
  * Check if HTML/Markdown file has copyright in multi-line comment format
  * Handles both:
  *   <!-- Copyright (c) 2025 Perpetuator LLC -->
+ *   <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
  *   <!--
  *     Copyright (c) 2025 Perpetuator LLC
  *     ...
  *   -->
  */
 function hasHTMLCopyright(content) {
-  // Check for single-line format
-  if (content.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_HTML_MD)) {
+  const firstLine = content.split('\n')[0] || '';
+
+  // Check for single-line format with current year only
+  if (firstLine.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_HTML_MD)) {
     return true;
   }
-  if (COPYRIGHT_NOTICE_REGEX_HTML_MD.test(content)) {
+
+  // Check for single-line format with year range (e.g., 2025-2026)
+  if (COPYRIGHT_NOTICE_REGEX_HTML_MD.test(firstLine)) {
     return true;
   }
 
@@ -42,13 +47,15 @@ function hasHTMLCopyright(content) {
     for (const line of lines) {
       const trimmed = line.trim();
       // Check if this line contains the copyright notice (ignoring extra whitespace)
-      if (trimmed.match(/Copyright\s*\(c\)\s*\d{4}\s+Perpetuator\s+LLC/i)) {
-        // Extract the year from the line
-        const yearMatch = trimmed.match(/Copyright\s*\(c\)\s*(\d{4})/i);
+      // Support both single year and year range formats
+      if (trimmed.match(/Copyright\s*\(c\)\s*(\d{4}(-\d{4})?)\s+Perpetuator\s+LLC/i)) {
+        // Extract the ending year from the line (handles both "2025" and "2025-2026")
+        const yearMatch = trimmed.match(/Copyright\s*\(c\)\s*(\d{4})(-(\d{4}))?/i);
         if (yearMatch) {
-          const copyrightYear = parseInt(yearMatch[1]);
-          // Accept any year from 2020 onwards (to allow older files)
-          if (copyrightYear >= 2020 && copyrightYear <= currentYear) {
+          // Use the end year if it's a range, otherwise use the single year
+          const copyrightYear = parseInt(yearMatch[3] || yearMatch[1]);
+          // Accept if the ending year matches current year
+          if (copyrightYear === currentYear) {
             return true;
           }
         }
@@ -71,7 +78,9 @@ function checkCopyright(filePath) {
       process.exit(1);
     }
   } else if (filePath.endsWith('.css') || filePath.endsWith('.scss')) {
-    if (!content.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_CSS) && !COPYRIGHT_NOTICE_REGEX_CSS.test(content)) {
+    // Check first line for copyright (supports both single year and year range)
+    const firstLine = content.split('\n')[0] || '';
+    if (!firstLine.startsWith(COPYRIGHT_NOTICE_CURRENT_YEAR_CSS) && !COPYRIGHT_NOTICE_REGEX_CSS.test(firstLine)) {
       console.error(`Missing or incorrect copyright notice in ${filePath}`);
       process.exit(1);
     }

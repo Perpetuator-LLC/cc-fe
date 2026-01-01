@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   Component,
   OnInit,
@@ -63,11 +63,11 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   selectedSuggestionIndex = -1;
   showSuggestions = false;
   hints: TerminalHints = {
-    quickExamples: ['AAPL GP', 'HELP', 'MSFT DES'],
+    quickExamples: ['STOCK:NASDAQ:AAPL COMMAND:CHART', 'COMMAND:HELP', 'STOCK:NASDAQ:MSFT COMMAND:DES'],
     placeholderText: 'Type a command or ask a question...',
-    emptyStateMessage: 'Try: AAPL GP, HELP, or ask anything',
+    emptyStateMessage: 'Try: AAPL CHART, HELP, or ask anything',
     dashboardHint: '',
-    chartSuggestion: 'AAPL GP',
+    chartSuggestion: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
   };
   private subscriptions = new Subscription();
   private historyIndex = -1;

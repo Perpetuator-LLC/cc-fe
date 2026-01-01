@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 @use '@angular/material' as mat;
 @use 'styles/mixins' as mixins;
@@ -1633,4 +1633,20 @@ html body {
       font-size: 18px;
     }
   }
+}
+
+// ============================================================================
+// Custom Tooltip Styles
+// ============================================================================
+
+// Quote tooltip - multi-line support for quote data display
+// Uses high specificity to override Material defaults
+.mat-mdc-tooltip.quote-tooltip .mdc-tooltip__surface {
+  max-width: 300px;
+  padding: 8px 12px;
+
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-line;
 }

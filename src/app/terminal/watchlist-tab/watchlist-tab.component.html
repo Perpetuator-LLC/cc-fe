@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="watchlist-tab">
   @if (loading()) {
     <div class="loading-state">
@@ -367,12 +367,22 @@
           <!-- Chart Controls -->
           <div class="chart-header">
             <div class="chart-title">
-              <span class="symbol-name">{{ selectedSymbol() }}</span>
+              <span class="symbol-name" [matTooltip]="getSymbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
+                selectedSymbol()
+              }}</span>
               @if (quoteData()?.name || selectedItem()?.displayName; as companyName) {
-                <span class="company-name">{{ companyName }}</span>
+                <span class="company-name" [matTooltip]="getSymbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
+                  companyName
+                }}</span>
               }
               @if (quoteData(); as quote) {
-                <div class="quote-data" [class.positive]="isPositiveChange()" [class.negative]="!isPositiveChange()">
+                <div
+                  class="quote-data"
+                  [class.positive]="isPositiveChange()"
+                  [class.negative]="!isPositiveChange()"
+                  [matTooltip]="getQuoteTooltip(quote)"
+                  matTooltipClass="quote-tooltip"
+                >
                   <span class="price">{{ formatPrice(quote.price) }}</span>
                   <span class="change">{{ formatChange(quote.change) }}</span>
                   <span class="change-percent">({{ formatChangePercent(quote.changePercent) }})</span>
@@ -388,14 +398,14 @@
                   [matTooltip]="action.label"
                 >
                   <mat-icon>{{ action.icon }}</mat-icon>
-                  {{ action.command }}
+                  {{ action.label }}
                 </button>
               }
             </div>
           </div>
 
-          <!-- Period/Interval Controls - only for GP/CHART command -->
-          @if (currentCommand() === 'GP' || currentCommand() === 'CHART') {
+          <!-- Period/Interval Controls - only for CHART command -->
+          @if (currentCommand() === 'CHART') {
             <div class="chart-controls-bar">
               <mat-form-field appearance="outline" class="control-field">
                 <mat-label>Period</mat-label>
