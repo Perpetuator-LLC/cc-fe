@@ -1,0 +1,83 @@
+/* Copyright (c) 2025 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.fqn-chip {
+  cursor: default;
+  user-select: none;
+
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.chip-stock {
+    color: var(--md-extended-color-success-on-color-container);
+    background: var(--md-extended-color-success-color-container);
+  }
+
+  &.chip-command {
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
+  }
+
+  &.chip-crypto {
+    color: var(--md-extended-color-warning-on-color-container);
+    background: var(--md-extended-color-warning-color-container);
+  }
+
+  &.chip-index {
+    color: var(--md-extended-color-info-on-color-container);
+    background: var(--md-extended-color-info-color-container);
+  }
+
+  &.chip-forex {
+    color: var(--md-sys-color-on-tertiary-container);
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  &.chip-parameter {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &.chip-unknown {
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container);
+  }
+
+  &.removable {
+    cursor: pointer;
+
+    &:hover {
+      filter: brightness(0.95);
+    }
+  }
+
+  &:focus {
+    outline: 2px solid var(--md-sys-color-outline);
+    outline-offset: 2px;
+  }
+
+  .remove-btn {
+    cursor: pointer;
+    margin-left: 2px;
+    font-weight: bold;
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus {
+      border-radius: 4px;
+      outline: 1px solid currentcolor;
+    }
+  }
+}

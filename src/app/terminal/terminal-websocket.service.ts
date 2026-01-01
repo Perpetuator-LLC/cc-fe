@@ -11,6 +11,7 @@ import {
   TerminalAction,
   TerminalConnectionState,
   TerminalMessage,
+  AutocompleteSuggestion,
 } from './terminal.types';
 import { EChartsOption } from 'echarts';
 
@@ -18,6 +19,12 @@ export interface ChartUpdate {
   chartId: string;
   options: EChartsOption;
   isNew: boolean;
+}
+
+export interface AutocompleteResponse {
+  input: string;
+  suggestions: AutocompleteSuggestion[];
+  timestamp: string;
 }
 
 @Injectable({
@@ -39,6 +46,7 @@ export class TerminalWebSocketService implements OnDestroy {
   private commandProgress$ = new Subject<CommandProgress>();
   private chartUpdate$ = new Subject<ChartUpdate>();
   private symbolUpdate$ = new Subject<SymbolUpdate>();
+  private autocomplete$ = new Subject<AutocompleteResponse>();
   private error$ = new Subject<string>();
   private connected$ = new Subject<{ userId: string; timestamp: string }>();
 
@@ -64,6 +72,7 @@ export class TerminalWebSocketService implements OnDestroy {
     this.commandProgress$.complete();
     this.chartUpdate$.complete();
     this.symbolUpdate$.complete();
+    this.autocomplete$.complete();
     this.error$.complete();
     this.connected$.complete();
   }
@@ -90,6 +99,10 @@ export class TerminalWebSocketService implements OnDestroy {
 
   get onSymbolUpdate() {
     return this.symbolUpdate$.asObservable();
+  }
+
+  get onAutocomplete() {
+    return this.autocomplete$.asObservable();
   }
 
   get onError() {
@@ -188,6 +201,17 @@ export class TerminalWebSocketService implements OnDestroy {
     this.send({
       action: 'execute',
       input: input.trim(),
+    });
+  }
+
+  /**
+   * Request autocomplete suggestions
+   */
+  autocomplete(input: string, limit = 10): void {
+    this.send({
+      action: 'autocomplete',
+      input: input.trim(),
+      limit,
     });
   }
 
@@ -314,6 +338,14 @@ export class TerminalWebSocketService implements OnDestroy {
       case 'symbols.unsubscribed':
         // Confirmation that symbols were unsubscribed
         console.log('[TerminalWS] Unsubscribed from symbols:', data['symbols']);
+        break;
+
+      case 'autocomplete':
+        this.autocomplete$.next({
+          input: data['input'],
+          suggestions: data['suggestions'] || [],
+          timestamp: data['timestamp'],
+        });
         break;
 
       case 'error':
