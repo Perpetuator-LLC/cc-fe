@@ -17,12 +17,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { TerminalService } from '../terminal.service';
+import { TerminalWebSocketService } from '../terminal-websocket.service';
 import { HistoryEntry, AutocompleteSuggestion } from '../terminal.types';
+import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
 
 /**
  * Represents a completed FQN token displayed as a chip
+ * @deprecated Use FqnToken from shared component instead
  */
 export interface FqnChip {
   fqn: string; // Full FQN: "stock:NASDAQ:AAPL" or "command:CHART"
@@ -33,7 +36,7 @@ export interface FqnChip {
 @Component({
   selector: 'app-terminal-bar',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressSpinnerModule, FqnChipComponent],
   templateUrl: './terminal-bar.component.html',
   styleUrl: './terminal-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,10 +45,12 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   @ViewChild('commandInput') commandInput!: ElementRef<HTMLInputElement>;
 
   private terminalService = inject(TerminalService);
+  private wsService = inject(TerminalWebSocketService);
   private subscriptions = new Subscription();
   private inputSubject = new Subject<string>();
   private blurTimeout: ReturnType<typeof setTimeout> | null = null;
   private historyIndex = -1;
+  private currentAutocompleteInput = ''; // Track which input the suggestions are for
 
   // Signals for reactive state
   chips = signal<FqnChip[]>([]); // Completed FQN tokens as chips
@@ -70,17 +75,41 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     return history.length > 0 ? history[history.length - 1] : null;
   });
 
+  // Parse last command into tokens for chip display
+  lastCommandTokens = computed<FqnToken[]>(() => {
+    const last = this.lastEntry();
+    if (!last || !last.input) return [];
+    return FqnUtils.parseCommand(last.input);
+  });
+
   isProcessing = computed(() => {
     const last = this.lastEntry();
     return last?.isLoading ?? false;
   });
 
   ngOnInit(): void {
-    // Debounced autocomplete
+    // Debounced autocomplete via WebSocket
     this.subscriptions.add(
       this.inputSubject.pipe(debounceTime(100), distinctUntilChanged()).subscribe((input) => {
-        this.updateSuggestions(input);
+        this.requestAutocomplete(input);
       }),
+    );
+
+    // Listen for WebSocket autocomplete responses
+    this.subscriptions.add(
+      this.wsService.onAutocomplete
+        .pipe(filter((response) => response.input === this.currentAutocompleteInput))
+        .subscribe((response) => {
+          console.log('[TerminalBar] WS Autocomplete response:', response);
+          // Sort by score (higher = better) if available
+          const sorted = [...response.suggestions].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+          this.suggestions.set(sorted);
+          // Only auto-select first suggestion if user has typed something (non-empty input)
+          // Empty input = show suggestions but don't select any
+          const hasUserInput = this.currentInput().trim().length > 0;
+          this.selectedSuggestionIndex.set(hasUserInput && sorted.length > 0 ? 0 : -1);
+          this.showSuggestions.set(sorted.length > 0);
+        }),
     );
   }
 
@@ -208,14 +237,27 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
         }
         return;
       } else if (event.key === 'Enter') {
-        // Only select suggestion if user explicitly navigated with arrow keys
-        // Otherwise, execute the command
-        if (this.userNavigatedSuggestions() && this.selectedSuggestionIndex() >= 0) {
+        // Behavior depends on whether user has typed something:
+        // - If user typed something and has a selected suggestion: select it, add chip, then execute
+        // - If user navigated with arrows: select that suggestion (don't auto-execute)
+        // - If nothing typed (empty input): just close suggestions, don't select anything
+        const hasUserInput = this.currentInput().trim().length > 0;
+        const hasSelection = this.selectedSuggestionIndex() >= 0;
+
+        if (this.userNavigatedSuggestions() && hasSelection) {
+          // User explicitly navigated - just add the chip, don't execute yet
           event.preventDefault();
           this.addChipFromSuggestion(this.suggestions()[this.selectedSuggestionIndex()]);
           return;
+        } else if (hasUserInput && hasSelection) {
+          // User typed something and we have a selection - add chip and execute
+          event.preventDefault();
+          this.addChipFromSuggestion(this.suggestions()[this.selectedSuggestionIndex()]);
+          // Now execute after the chip was added
+          this.onSubmit();
+          return;
         }
-        // Execute the command
+        // No selection or empty input - just execute whatever we have
         this.clearSuggestions();
         this.onSubmit();
         return;
@@ -245,6 +287,14 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.currentInput.set(input);
     this.inputSubject.next(input);
     this.historyIndex = -1;
+
+    // Reset user navigation flag when input changes
+    this.userNavigatedSuggestions.set(false);
+
+    // If input becomes empty, deselect the current suggestion
+    if (!input.trim()) {
+      this.selectedSuggestionIndex.set(-1);
+    }
   }
 
   onInputFocus(): void {
@@ -395,32 +445,36 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateSuggestions(input: string): void {
-    console.log('[TerminalBar] updateSuggestions called with:', input);
+  /**
+   * Request autocomplete suggestions via WebSocket
+   */
+  private requestAutocomplete(input: string): void {
+    console.log('[TerminalBar] Requesting autocomplete for:', input);
     // Reset navigation flag when fetching new suggestions
     this.userNavigatedSuggestions.set(false);
-    this.subscriptions.add(
-      this.terminalService.fetchAutocompleteSuggestions(input, 10).subscribe({
-        next: (suggestions) => {
-          console.log('[TerminalBar] Received suggestions:', suggestions);
-          // Sort by score (higher = better) if available
-          const sorted = [...suggestions].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-          this.suggestions.set(sorted);
-          // Auto-select first suggestion (highest score) for visual indication
-          this.selectedSuggestionIndex.set(sorted.length > 0 ? 0 : -1);
-          this.showSuggestions.set(sorted.length > 0);
-        },
-        error: (error) => {
-          console.error('[TerminalBar] Autocomplete error:', error);
-          // Fallback to local suggestions on error
-          const localSuggestions = this.terminalService.getAutocompleteSuggestions(input, 10);
-          const sorted = [...localSuggestions].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-          this.suggestions.set(sorted);
-          this.selectedSuggestionIndex.set(sorted.length > 0 ? 0 : -1);
-          this.showSuggestions.set(sorted.length > 0);
-        },
-      }),
-    );
+    this.currentAutocompleteInput = input;
+
+    // Use WebSocket if connected
+    if (this.wsService.connectionState() === 'connected') {
+      this.wsService.autocomplete(input, 10);
+    } else {
+      // Fallback to local suggestions if WebSocket not connected
+      console.log('[TerminalBar] WebSocket not connected, using local suggestions');
+      const localSuggestions = this.terminalService.getAutocompleteSuggestions(input, 10);
+      const sorted = [...localSuggestions].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+      this.suggestions.set(sorted);
+      // Only auto-select if user has typed something
+      const hasUserInput = input.trim().length > 0;
+      this.selectedSuggestionIndex.set(hasUserInput && sorted.length > 0 ? 0 : -1);
+      this.showSuggestions.set(sorted.length > 0);
+    }
+  }
+
+  /**
+   * @deprecated Use requestAutocomplete instead
+   */
+  private updateSuggestions(input: string): void {
+    this.requestAutocomplete(input);
   }
 
   private clearSuggestions(): void {
