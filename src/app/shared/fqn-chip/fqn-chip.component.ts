@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
  * Represents a Fully Qualified Name (FQN) token
  */
 export interface FqnToken {
-  fqn: string; // Full FQN: "stock:NASDAQ:AAPL" or "command:CHART"
+  fqn: string; // Full FQN: "STOCK:NASDAQ:AAPL" or "COMMAND:CHART"
   display: string; // Display text: "AAPL" or "CHART"
   type: FqnTokenType;
 }
@@ -16,31 +16,34 @@ export type FqnTokenType = 'stock' | 'command' | 'crypto' | 'index' | 'forex' | 
 
 /**
  * Utility functions for parsing and working with FQN tokens
+ * FQN format uses UPPERCASE type prefixes: STOCK:, COMMAND:, CRYPTO:, INDEX:, FOREX:
+ * Parsing is case-insensitive for flexibility
  */
 export class FqnUtils {
   /**
    * Parse an FQN string into its components
    * Examples:
-   *   "stock:NASDAQ:AAPL" -> { prefix: "stock", exchange: "NASDAQ", symbol: "AAPL" }
-   *   "command:CHART" -> { prefix: "command", name: "CHART" }
+   *   "STOCK:NASDAQ:AAPL" -> { prefix: "STOCK", exchange: "NASDAQ", symbol: "AAPL" }
+   *   "COMMAND:CHART" -> { prefix: "COMMAND", name: "CHART" }
    */
   static parse(fqn: string): { prefix: string; parts: string[] } {
     const parts = fqn.split(':');
     return {
-      prefix: parts[0] || '',
+      prefix: (parts[0] || '').toUpperCase(),
       parts: parts.slice(1),
     };
   }
 
   /**
-   * Get the type from an FQN string
+   * Get the type from an FQN string (case-insensitive)
    */
   static getType(fqn: string): FqnTokenType {
-    if (fqn.startsWith('stock:')) return 'stock';
-    if (fqn.startsWith('command:')) return 'command';
-    if (fqn.startsWith('crypto:')) return 'crypto';
-    if (fqn.startsWith('index:')) return 'index';
-    if (fqn.startsWith('forex:')) return 'forex';
+    const upper = fqn.toUpperCase();
+    if (upper.startsWith('STOCK:')) return 'stock';
+    if (upper.startsWith('COMMAND:')) return 'command';
+    if (upper.startsWith('CRYPTO:')) return 'crypto';
+    if (upper.startsWith('INDEX:')) return 'index';
+    if (upper.startsWith('FOREX:')) return 'forex';
     if (fqn.startsWith('-')) return 'parameter';
     return 'unknown';
   }
@@ -55,19 +58,37 @@ export class FqnUtils {
   }
 
   /**
+   * Normalize an FQN to use uppercase prefixes
+   * e.g., "stock:nasdaq:aapl" -> "STOCK:NASDAQ:AAPL"
+   */
+  static normalize(fqn: string): string {
+    const parts = fqn.split(':');
+    if (parts.length >= 2) {
+      const prefix = parts[0].toUpperCase();
+      if (['STOCK', 'COMMAND', 'CRYPTO', 'INDEX', 'FOREX'].includes(prefix)) {
+        // Uppercase all parts for consistency
+        return parts.map((p) => p.toUpperCase()).join(':');
+      }
+    }
+    // Return as-is if not a known FQN format
+    return fqn;
+  }
+
+  /**
    * Create an FqnToken from an FQN string
    */
   static toToken(fqn: string): FqnToken {
+    const normalized = FqnUtils.normalize(fqn);
     return {
-      fqn,
-      display: FqnUtils.getDisplay(fqn),
-      type: FqnUtils.getType(fqn),
+      fqn: normalized,
+      display: FqnUtils.getDisplay(normalized),
+      type: FqnUtils.getType(normalized),
     };
   }
 
   /**
    * Parse a full command string into tokens
-   * Example: "stock:NASDAQ:AAPL command:CHART -period 1Y" -> [FqnToken, FqnToken, FqnToken]
+   * Example: "STOCK:NASDAQ:AAPL COMMAND:CHART -period 1Y" -> [FqnToken, FqnToken, FqnToken]
    */
   static parseCommand(command: string): FqnToken[] {
     const tokens: FqnToken[] = [];
