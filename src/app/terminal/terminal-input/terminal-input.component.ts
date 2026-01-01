@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   Component,
   ElementRef,
@@ -56,11 +56,11 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
 
   currentInput = '';
   hints: TerminalHints = {
-    quickExamples: ['AAPL HP', 'HELP'],
+    quickExamples: ['STOCK:NASDAQ:AAPL COMMAND:HP', 'COMMAND:HELP'],
     placeholderText: 'Enter command...',
     emptyStateMessage: 'Try: AAPL HP, HELP, or ask a question.',
     dashboardHint: '',
-    chartSuggestion: 'AAPL GP',
+    chartSuggestion: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
   };
   private shouldScrollToBottom = false;
   private subscriptions = new Subscription();

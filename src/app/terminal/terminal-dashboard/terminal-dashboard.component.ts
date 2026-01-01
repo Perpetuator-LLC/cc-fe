@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -53,8 +53,8 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
     quickExamples: [],
     placeholderText: '',
     emptyStateMessage: '',
-    dashboardHint: 'Try: AAPL GP to create a price chart',
-    chartSuggestion: 'AAPL GP',
+    dashboardHint: 'Try: AAPL CHART to create a price chart',
+    chartSuggestion: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
   };
   private subscriptions = new Subscription();
 

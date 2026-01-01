@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { WatchlistTabComponent } from './watchlist-tab.component';
@@ -29,8 +29,8 @@ describe('WatchlistTabComponent', () => {
 
   it('should return symbol actions with proper commands', () => {
     const actions = component.getSymbolActions();
-    expect(actions.length).toBe(4);
-    expect(actions[0].command).toBe('GP');
+    expect(actions.length).toBe(3);
+    expect(actions[0].command).toBe('CHART');
     expect(actions[1].command).toBe('HP');
   });
 
