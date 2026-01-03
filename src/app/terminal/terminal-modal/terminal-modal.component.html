@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="terminal-modal">
   <div class="modal-header">
     <div class="header-left">
@@ -104,6 +104,7 @@
               [class.ai-suggestion]="suggestion.isAiInterpreted"
               tabindex="0"
               role="option"
+              [attr.aria-selected]="i === selectedSuggestionIndex"
               (click)="selectSuggestion(suggestion)"
               (keydown.enter)="selectSuggestion(suggestion)"
               (mouseenter)="selectedSuggestionIndex = i"

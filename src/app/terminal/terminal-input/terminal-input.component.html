@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="terminal-container">
   <div class="terminal-header">
     <div class="header-left">
@@ -20,7 +20,15 @@
     </div>
   </div>
 
-  <div class="terminal-history" #historyContainer (click)="focusInput()">
+  <div
+    class="terminal-history"
+    #historyContainer
+    (click)="focusInput()"
+    (keydown.enter)="focusInput()"
+    tabindex="0"
+    role="log"
+    aria-label="Command history"
+  >
     @if (history.length === 0) {
       <div class="empty-state">
         <mat-icon>terminal</mat-icon>

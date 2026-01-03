@@ -34,7 +34,8 @@ export interface CommandResult {
   message?: string;
   outputType: 'data' | 'chart' | 'message';
   data?: TableData | ChartResultData | object;
-  chartOptions?: EChartsOption;
+  // Can be string (from GraphQL JSON scalar) or parsed EChartsOption
+  chartOptions?: EChartsOption | string;
   metadata?: CommandMetadata;
   executionId?: string;
   aiReasoning?: string;
