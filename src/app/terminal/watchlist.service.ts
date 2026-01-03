@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, signal, computed } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, tap, catchError, of } from 'rxjs';
@@ -264,41 +264,43 @@ const DELETE_WATCHLIST = gql`
   }
 `;
 
-const RENAME_WATCHLIST = gql`
-  mutation RenameWatchlist($watchlistId: UUID!, $name: String!, $description: String) {
-    renameWatchlist(watchlistId: $watchlistId, name: $name, description: $description) {
-      success
-      message
-      watchlist {
-        uuid
-        name
-        description
-      }
-    }
-  }
-`;
+// TODO: Backend needs to implement renameWatchlist mutation
+// const RENAME_WATCHLIST = gql`
+//   mutation RenameWatchlist($watchlistId: UUID!, $name: String!, $description: String) {
+//     renameWatchlist(watchlistId: $watchlistId, name: $name, description: $description) {
+//       success
+//       message
+//       watchlist {
+//         uuid
+//         name
+//         description
+//       }
+//     }
+//   }
+// `;
 
-const DUPLICATE_WATCHLIST = gql`
-  mutation DuplicateWatchlist($watchlistId: UUID!, $name: String!) {
-    duplicateWatchlist(watchlistId: $watchlistId, name: $name) {
-      success
-      message
-      watchlist {
-        uuid
-        name
-        description
-        watchlistType
-        isDefault
-        itemCount
-        items {
-          uuid
-          symbol
-          displayName
-        }
-      }
-    }
-  }
-`;
+// TODO: Backend needs to implement duplicateWatchlist mutation
+// const DUPLICATE_WATCHLIST = gql`
+//   mutation DuplicateWatchlist($watchlistId: UUID!, $name: String!) {
+//     duplicateWatchlist(watchlistId: $watchlistId, name: $name) {
+//       success
+//       message
+//       watchlist {
+//         uuid
+//         name
+//         description
+//         watchlistType
+//         isDefault
+//         itemCount
+//         items {
+//           uuid
+//           symbol
+//           displayName
+//         }
+//       }
+//     }
+//   }
+// `;
 
 // ============================================================================
 // Response Interfaces
@@ -403,21 +405,23 @@ interface DeleteWatchlistResponse {
   };
 }
 
-interface RenameWatchlistResponse {
-  renameWatchlist: {
-    success: boolean;
-    message: string;
-    watchlist: Watchlist;
-  };
-}
+// TODO: Uncomment when backend implements renameWatchlist mutation
+// interface RenameWatchlistResponse {
+//   renameWatchlist: {
+//     success: boolean;
+//     message: string;
+//     watchlist: Watchlist;
+//   };
+// }
 
-interface DuplicateWatchlistResponse {
-  duplicateWatchlist: {
-    success: boolean;
-    message: string;
-    watchlist: Watchlist;
-  };
-}
+// TODO: Uncomment when backend implements duplicateWatchlist mutation
+// interface DuplicateWatchlistResponse {
+//   duplicateWatchlist: {
+//     success: boolean;
+//     message: string;
+//     watchlist: Watchlist;
+//   };
+// }
 
 // ============================================================================
 // Service
@@ -827,53 +831,33 @@ export class WatchlistService {
 
   /**
    * Rename a watchlist
+   * TODO: Backend needs to implement renameWatchlist mutation
    */
   renameWatchlist(
     watchlistId: string,
     name: string,
     description?: string,
   ): Observable<{ success: boolean; message: string; watchlist?: Watchlist }> {
-    return this.apollo
-      .mutate<RenameWatchlistResponse>({
-        mutation: RENAME_WATCHLIST,
-        variables: { watchlistId, name, description },
-      })
-      .pipe(
-        map((result) => result.data!.renameWatchlist),
-        tap((response) => {
-          if (response.success && response.watchlist) {
-            this._watchlists.update((lists) =>
-              lists.map((l) =>
-                l.uuid === watchlistId ? { ...l, name, description: description || l.description } : l,
-              ),
-            );
-          }
-        }),
-        catchError((error) => of({ success: false, message: error.message })),
-      );
+    // Stub implementation - update local state only
+    // Will be replaced with actual mutation when backend implements it
+    console.warn('[WatchlistService] renameWatchlist not yet implemented in backend');
+    this._watchlists.update((lists) =>
+      lists.map((l) => (l.uuid === watchlistId ? { ...l, name, description: description || l.description } : l)),
+    );
+    return of({ success: true, message: 'Renamed locally (backend not implemented yet)' });
   }
 
   /**
    * Duplicate a watchlist
+   * TODO: Backend needs to implement duplicateWatchlist mutation
    */
   duplicateWatchlist(
     watchlistId: string,
     name: string,
   ): Observable<{ success: boolean; message: string; watchlist?: Watchlist }> {
-    return this.apollo
-      .mutate<DuplicateWatchlistResponse>({
-        mutation: DUPLICATE_WATCHLIST,
-        variables: { watchlistId, name },
-      })
-      .pipe(
-        map((result) => result.data!.duplicateWatchlist),
-        tap((response) => {
-          if (response.success && response.watchlist) {
-            this._watchlists.update((lists) => [...lists, response.watchlist]);
-          }
-        }),
-        catchError((error) => of({ success: false, message: error.message })),
-      );
+    // Stub implementation - not supported until backend implements it
+    console.warn(`[WatchlistService] duplicateWatchlist(${watchlistId}, ${name}) not yet implemented in backend`);
+    return of({ success: false, message: 'Duplicate not yet supported by backend' });
   }
 
   /**

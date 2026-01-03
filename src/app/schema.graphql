@@ -29,6 +29,27 @@ type Query {
   """Get system watchlists (All Stocks, Sectors, Industries, Exchanges)"""
   systemWatchlists: [WatchlistObjectType]
 
+  """Get watchlist symbols with pagination, sorting, and filtering"""
+  watchlistSymbols(
+    """Watchlist UUID"""
+    watchlistId: UUID!
+
+    """Number of items to return"""
+    first: Int = 50
+
+    """Cursor for pagination"""
+    after: String
+
+    """Sort field"""
+    orderBy: WatchlistSortField = RECENT
+
+    """Sort direction"""
+    orderDirection: SortDirection = DESC
+
+    """Search term to filter symbols"""
+    search: String
+  ): WatchlistSymbolConnection
+
   """Get AI agent execution history"""
   agentExecutions(agentType: String, limit: Int = 20): [AgentExecutionType]
 
@@ -43,11 +64,23 @@ type Query {
   """List available commands"""
   commands(category: String, isActive: Boolean): [CommandType]
 
+  """Get all available commands with their arguments. Cache on startup."""
+  availableCommands: [CommandType]
+
   """Get command by name"""
   command(name: String!): CommandType
 
-  """Get user's command history"""
-  commandHistory(limit: Int = 20): [CommandExecutionType]
+  """Get user's command history with pagination and search"""
+  commandHistory(
+    """Number of items to return"""
+    first: Int = 20
+
+    """Cursor for pagination"""
+    after: String
+
+    """Search term to filter history"""
+    search: String
+  ): CommandHistoryConnection
 
   """Get terminal syntax help and examples"""
   terminalSyntaxHelp: TerminalSyntaxHelpType
@@ -146,6 +179,52 @@ type Query {
   companies(ticker: String, name: String, sector: String, industry: String, limit: Int = 100): [CompanyType]
   company(ticker: String!): CompanyType
   stockPrices(ticker: String!, interval: String, startDate: String, endDate: String, limit: Int = 100): [StockPriceType]
+  stockPriceConnection(
+    """Stock symbol (e.g., AAPL)"""
+    symbol: String!
+
+    """Price interval (daily, hourly, etc.)"""
+    interval: StockPriceInterval = DAILY
+
+    """Cursor: fetch data BEFORE this date (for older data)"""
+    before: String
+
+    """Cursor: fetch data AFTER this date (for newer data)"""
+    after: String
+
+    """Number of records to fetch"""
+    first: Int = 252
+
+    """FQN for disambiguation (e.g., STOCK:NYSE:DIS)"""
+    fqn: String
+  ): StockPriceConnection
+
+  """
+  Fetch chart data for a specific date range. Returns data in descending order (newest first).
+  """
+  chartDataRange(
+    """Stock symbol (e.g., AAPL)"""
+    symbol: String!
+
+    """Price interval"""
+    interval: StockPriceInterval = DAILY
+
+    """Start date (inclusive)"""
+    startDate: DateTime!
+
+    """End date (inclusive)"""
+    endDate: DateTime!
+
+    """FQN for disambiguation"""
+    fqn: String
+  ): StockPriceConnection
+  quote(
+    symbol: String!
+
+    """FQN for disambiguation"""
+    fqn: String
+  ): QuoteType
+  chartDataAvailability(symbol: String!, interval: StockPriceInterval = DAILY): ChartDataAvailability
   earnings(ticker: String!, isAnnual: Boolean, limit: Int = 100): [EarningsType]
   balanceSheets(ticker: String!, isAnnual: Boolean, limit: Int = 100): [BalanceSheetType]
   incomeStatements(ticker: String!, isAnnual: Boolean, limit: Int = 100): [IncomeStatementType]
@@ -498,6 +577,42 @@ type WatchlistItemType {
   uuid: UUID
 }
 
+"""Relay-style connection for watchlist symbols with pagination."""
+type WatchlistSymbolConnection {
+  edges: [WatchlistSymbolEdge!]!
+  pageInfo: WatchlistSymbolPageInfo!
+  totalCount: Int
+}
+
+"""An edge in the watchlist symbols connection."""
+type WatchlistSymbolEdge {
+  node: WatchlistItemType!
+  cursor: String!
+}
+
+"""Pagination info for watchlist symbols."""
+type WatchlistSymbolPageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endCursor: String
+  startCursor: String
+}
+
+"""Fields to sort watchlist items by."""
+enum WatchlistSortField {
+  RECENT
+  MARKET_CAP
+  SYMBOL
+  ACCESS_COUNT
+  CREATED
+}
+
+"""Sort direction."""
+enum SortDirection {
+  ASC
+  DESC
+}
+
 """GraphQL type for AgentExecution model."""
 type AgentExecutionType {
   id: UUID!
@@ -707,6 +822,7 @@ type CommandType {
   updatedAt: DateTime!
   uuid: UUID
   aliases: [String]
+  arguments: [CommandArgumentType]
 }
 
 """An enumeration."""
@@ -734,6 +850,29 @@ enum TerminalCommandCategoryChoices {
 
   """Team Management"""
   TEAM
+}
+
+"""GraphQL type for command arguments."""
+type CommandArgumentType {
+  name: String!
+  type: String!
+  description: String
+  default: String
+  required: Boolean
+  options: [String]
+}
+
+"""Relay-style connection for command history with pagination."""
+type CommandHistoryConnection {
+  edges: [CommandHistoryEdge!]!
+  pageInfo: CommandHistoryPageInfo!
+  totalCount: Int
+}
+
+"""An edge in the command history connection."""
+type CommandHistoryEdge {
+  node: CommandExecutionType!
+  cursor: String!
 }
 
 """GraphQL type for CommandExecution model."""
@@ -777,6 +916,14 @@ enum TerminalCommandExecutionStatusChoices {
 
   """Failed"""
   FAILED
+}
+
+"""Pagination info for command history."""
+type CommandHistoryPageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endCursor: String
+  startCursor: String
 }
 
 """Terminal syntax help and examples."""
@@ -2307,6 +2454,101 @@ type EarningsType {
   updatedAt: DateTime!
 }
 
+"""
+Relay-style connection for paginated stock price data.
+
+Use `before` cursor to fetch older historical data (for zoom out).
+Use `after` cursor to fetch newer data (for real-time updates).
+"""
+type StockPriceConnection {
+  edges: [StockPriceEdge!]!
+  pageInfo: StockPricePageInfo!
+
+  """Total available records for this symbol/interval"""
+  totalCount: Int
+}
+
+"""An edge in the stock price connection (Relay-style)."""
+type StockPriceEdge {
+  node: StockPriceNode!
+
+  """Cursor for this edge (base64-encoded date)"""
+  cursor: String!
+}
+
+"""A single stock price data point (candle) for chart display."""
+type StockPriceNode {
+  """Unique identifier"""
+  id: ID!
+  symbol: String!
+  date: DateTime!
+  interval: String!
+  open: Float!
+  high: Float!
+  low: Float!
+  close: Float!
+  volume: Float!
+  adjustedClose: Float
+}
+
+"""Pagination info for stock price connection."""
+type StockPricePageInfo {
+  """Whether there is more historical data available"""
+  hasOlderData: Boolean!
+
+  """Whether there is more recent data available"""
+  hasNewerData: Boolean!
+
+  """Oldest date in current result set"""
+  oldestDate: DateTime
+
+  """Newest date in current result set"""
+  newestDate: DateTime
+
+  """Cursor for the newest (first) edge"""
+  startCursor: String
+
+  """Cursor for the oldest (last) edge"""
+  endCursor: String
+}
+
+"""Valid intervals for stock price data - matches model choices exactly"""
+enum StockPriceInterval {
+  MIN_1
+  MIN_5
+  MIN_15
+  MIN_30
+  MIN_60
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+"""Real-time quote data for current price."""
+type QuoteType {
+  symbol: String!
+  price: Float!
+  open: Float!
+  high: Float!
+  low: Float!
+  previousClose: Float
+  volume: Float!
+  timestamp: DateTime!
+  change: Float
+  changePercent: Float
+}
+
+"""Information about available chart data for a symbol."""
+type ChartDataAvailability {
+  symbol: String!
+  interval: String!
+  oldestDate: DateTime
+  newestDate: DateTime
+  totalRecords: Int!
+  lastUpdated: DateTime
+}
+
 type ListingStatusType {
   lastUpdated: DateTime!
   isUpdating: Boolean!
@@ -3568,6 +3810,7 @@ type AddToWatchlist {
 type RemoveFromWatchlist {
   success: Boolean
   message: String
+  watchlist: WatchlistObjectType
 }
 
 """Create a new watchlist."""
@@ -3994,18 +4237,6 @@ type FetchStockPrices {
   success: Boolean
   message: String
   job: JobType
-}
-
-"""Valid intervals for stock price data - matches model choices exactly"""
-enum StockPriceInterval {
-  MIN_1
-  MIN_5
-  MIN_15
-  MIN_30
-  MIN_60
-  DAILY
-  WEEKLY
-  MONTHLY
 }
 
 """Fetch balance sheet data from Alpha Vantage"""

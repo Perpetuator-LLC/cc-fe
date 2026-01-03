@@ -2,6 +2,25 @@ Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is en
 
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
+# 🚨 SCHEMA IS BACKEND-GENERATED - DO NOT EDIT
+
+**The `src/app/schema.graphql` file is auto-generated from the backend.**
+
+- **NEVER** edit the schema file directly
+- **NEVER** add types, mutations, or queries to the schema
+- **NEVER** run `codegen` configuration changes or suggest setting up codegen
+- **NEVER** create or modify any codegen.yml, codegen.ts, or similar configuration files
+- If a GraphQL type/mutation/query doesn't exist, **tell the user what to add to the backend**
+
+When you encounter a missing GraphQL field or mutation:
+1. **DO NOT** comment out frontend code that uses it
+2. **DO NOT** try to add it to the schema
+3. **DO NOT** suggest using GraphQL codegen tools
+4. **DO** document what the backend needs to provide
+5. **DO** let the user know so they can update the backend
+
+**Schema Sync Process:** The user will update the backend and sync the schema. Frontend types should be defined manually in TypeScript to match the schema.
+
 # 🎯 AGENT WORKFLOW ESSENTIALS
 
 ## Log File Reading - NON-NEGOTIABLE
@@ -82,6 +101,27 @@ loadGicsSectors(): Observable<string[]> {
 ```
 
 **See:** `logs/ai_edits/FRONTEND_INTEGRATION_GUIDE.md` for all available backend queries.
+
+## 🧪 Backend API Testing Scripts
+Use these scripts to test backend APIs without running the full frontend:
+
+```bash
+# Test WebSocket GraphQL APIs (quote, chart, progressive loading, etc.)
+node scripts/test-ws-graphql-v2.cjs all
+
+# Test specific functionality
+node scripts/test-ws-graphql-v2.cjs quote       # Real-time quotes
+node scripts/test-ws-graphql-v2.cjs chart       # Stock price connections
+node scripts/test-ws-graphql-v2.cjs progressive # Progressive data loading
+node scripts/test-ws-graphql-v2.cjs intervals   # Test all interval types
+node scripts/test-ws-graphql-v2.cjs history     # Command history
+node scripts/test-ws-graphql-v2.cjs execute     # Execute commands
+
+# Token management (stored in ~/.capital-copilot/cli-tokens.json)
+rm -f ~/.capital-copilot/cli-tokens.json  # Clear cached tokens
+```
+
+**Token handling:** Scripts read credentials from `src/environments/environment.ts` (TEST_EMAIL, TEST_PASSWORD). Tokens are cached in `~/.capital-copilot/cli-tokens.json` with proper file permissions (0600).
 
 ## SCSS Rules - MEMORIZE THESE
 The linter WILL reject non-compliant SCSS. Write it correctly the first time:

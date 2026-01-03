@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   Component,
   Input,
@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   OnChanges,
   SimpleChanges,
+  HostBinding,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -81,6 +82,11 @@ export class ChartPanelComponent implements OnChanges {
   @Input() isLoading = false;
   @Input() dataPoints = 0;
 
+  @HostBinding('style.--chart-height.px')
+  get chartHeight(): number {
+    return this.height;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Output() chartInit = new EventEmitter<any>();
   @Output() refresh = new EventEmitter<void>();
@@ -88,6 +94,14 @@ export class ChartPanelComponent implements OnChanges {
   @Output() executeCommand = new EventEmitter<string>();
 
   updateOptions: EChartsOption = {};
+
+  /**
+   * Check if updateOptions has real chart data (not just empty object)
+   */
+  get hasChartData(): boolean {
+    return this.updateOptions && Object.keys(this.updateOptions).length > 0;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chartInstance?: any;
   isFullscreen = false;
@@ -288,6 +302,14 @@ export class ChartPanelComponent implements OnChanges {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private deepMerge(target: any, source: any): any {
+    // Safety: if target is not an object, start with empty object
+    if (typeof target !== 'object' || target === null) {
+      target = {};
+    }
+    // Safety: if source is not an object, return target unchanged
+    if (typeof source !== 'object' || source === null) {
+      return target;
+    }
     const result = { ...target };
     for (const key of Object.keys(source)) {
       if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {

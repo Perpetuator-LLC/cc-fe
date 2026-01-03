@@ -128,16 +128,16 @@ yarn lint:md3:component src/app/my-component/my-component.component.ts
 
 ```json
 "lint-staged": {
-  "*.ts": ["eslint --fix", "prettier --write", "yarn check-copyright"],
-  "*.html": ["yarn check-copyright"],
-  "*.scss": ["stylelint --fix", "yarn check-copyright"]
+  "*.ts": ["eslint --fix", "prettier --write", "yarn check-copyright --fix"],
+  "*.html": ["prettier --write", "yarn check-copyright --fix"],
+  "*.scss": ["prettier --write", "stylelint --fix", "yarn check-copyright --fix"]
 }
 ```
 
 **Pre-commit checks:**
 1. ESLint fixes TypeScript
 2. Stylelint fixes SCSS
-3. Copyright headers added
+3. Copyright headers added/updated (like `eslint --fix`, exits 1 if changes made - requires re-stage)
 4. Changes staged automatically
 
 ## Common Violations & Fixes

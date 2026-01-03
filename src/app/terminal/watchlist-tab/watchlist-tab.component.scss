@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .watchlist-tab {
@@ -179,6 +179,7 @@
   background: var(--md-sys-color-surface-container);
 
   button {
+    position: relative;
     width: 32px;
     height: 32px;
 
@@ -192,6 +193,23 @@
     &.active {
       color: var(--md-sys-color-primary);
       background: var(--md-sys-color-primary-container);
+
+      // Show descending arrow by default when active
+      &::after {
+        content: '▼';
+
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+
+        font-size: 10px;
+        color: var(--md-sys-color-primary);
+      }
+
+      // Show ascending arrow when asc class is applied
+      &.asc::after {
+        content: '▲';
+      }
     }
   }
 }
@@ -582,7 +600,7 @@
   }
 }
 
-// Chart Controls Bar (Period/Interval)
+// Chart Controls Bar (Interval selector)
 .chart-controls-bar {
   display: flex;
   gap: 12px;
@@ -600,6 +618,13 @@
     .mat-mdc-form-field-subscript-wrapper {
       display: none;
     }
+  }
+
+  .zoom-hint {
+    margin-left: auto;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--md-sys-color-on-surface-variant);
   }
 }
 
@@ -639,6 +664,117 @@
     width: 100%;
     height: 100%;
     min-height: 380px;
+  }
+}
+
+// OHLC Header - shows OHLC values from crosshair position
+.ohlc-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  .ohlc-date {
+    margin-right: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .ohlc-label {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .ohlc-value {
+    margin-right: 8px;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 500;
+
+    &.positive {
+      color: var(--md-extended-color-success-color);
+    }
+
+    &.negative {
+      color: var(--md-sys-color-error);
+    }
+
+    &.volume {
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+
+  .ohlc-hint {
+    font-style: italic;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .chart-toggles {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+
+    button {
+      width: 28px;
+      height: 28px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+      }
+
+      &.active {
+        color: var(--md-sys-color-primary);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+      }
+    }
+  }
+}
+
+// Loading more data progress bar at top of chart
+.loading-more-bar {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  height: 4px;
+
+  background: var(--md-sys-color-surface-container);
+
+  .progress-bar-indeterminate {
+    width: 50%;
+    height: 100%;
+    background: var(--md-sys-color-primary);
+    animation: loading-bar-animation 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes loading-bar-animation {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(300%);
   }
 }
 

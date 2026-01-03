@@ -21,6 +21,8 @@
             <div
               mat-menu-item
               (click)="onWatchlistChange('recent')"
+              (keydown.enter)="onWatchlistChange('recent')"
+              tabindex="0"
               [class.active]="selectedWatchlistId() === 'recent'"
             >
               <mat-icon>schedule</mat-icon>
@@ -28,7 +30,13 @@
             </div>
             @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
               <div mat-menu-item class="watchlist-menu-item" [class.active]="selectedWatchlistId() === watchlist.uuid">
-                <div class="watchlist-menu-content" (click)="onWatchlistChange(watchlist.uuid)">
+                <div
+                  class="watchlist-menu-content"
+                  (click)="onWatchlistChange(watchlist.uuid)"
+                  (keydown.enter)="onWatchlistChange(watchlist.uuid)"
+                  tabindex="0"
+                  role="button"
+                >
                   <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
                   <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
                 </div>
@@ -168,32 +176,36 @@
         <div class="sort-options">
           <button
             mat-icon-button
-            [matTooltip]="'Sort by Most Recent'"
+            [matTooltip]="getSortTooltip('lastAccessedAt', 'Most Recent')"
             [class.active]="sortBy() === 'lastAccessedAt'"
+            [class.asc]="sortBy() === 'lastAccessedAt' && sortDirection() === 'asc'"
             (click)="onSortChange('lastAccessedAt')"
           >
             <mat-icon>schedule</mat-icon>
           </button>
           <button
             mat-icon-button
-            [matTooltip]="'Sort by Market Cap'"
+            [matTooltip]="getSortTooltip('marketCap', 'Market Cap')"
             [class.active]="sortBy() === 'marketCap'"
+            [class.asc]="sortBy() === 'marketCap' && sortDirection() === 'asc'"
             (click)="onSortChange('marketCap')"
           >
             <mat-icon>attach_money</mat-icon>
           </button>
           <button
             mat-icon-button
-            [matTooltip]="'Sort by Symbol'"
+            [matTooltip]="getSortTooltip('symbol', 'Symbol')"
             [class.active]="sortBy() === 'symbol'"
+            [class.asc]="sortBy() === 'symbol' && sortDirection() === 'asc'"
             (click)="onSortChange('symbol')"
           >
             <mat-icon>sort_by_alpha</mat-icon>
           </button>
           <button
             mat-icon-button
-            [matTooltip]="'Sort by Access Count'"
+            [matTooltip]="getSortTooltip('accessCount', 'Access Count')"
             [class.active]="sortBy() === 'accessCount'"
+            [class.asc]="sortBy() === 'accessCount' && sortDirection() === 'asc'"
             (click)="onSortChange('accessCount')"
           >
             <mat-icon>bar_chart</mat-icon>
@@ -404,22 +416,9 @@
             </div>
           </div>
 
-          <!-- Period/Interval Controls - only for CHART command -->
+          <!-- Interval Controls - only for CHART command -->
           @if (currentCommand() === 'CHART') {
             <div class="chart-controls-bar">
-              <mat-form-field appearance="outline" class="control-field">
-                <mat-label>Period</mat-label>
-                <mat-select
-                  [value]="selectedPeriod()"
-                  (selectionChange)="onPeriodChange($event.value)"
-                  [disabled]="chartLoading()"
-                >
-                  @for (period of periodOptions(); track period) {
-                    <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-
               <mat-form-field appearance="outline" class="control-field">
                 <mat-label>Interval</mat-label>
                 <mat-select
@@ -436,6 +435,8 @@
               <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
                 <mat-icon>refresh</mat-icon>
               </button>
+
+              <span class="zoom-hint">Scroll to zoom out for more history</span>
             </div>
           }
 
@@ -447,6 +448,80 @@
                 <p>Loading {{ currentCommand() === 'GP' || currentCommand() === 'CHART' ? 'chart' : 'data' }}...</p>
               </div>
             } @else if (chartOptions() && (currentCommand() === 'GP' || currentCommand() === 'CHART')) {
+              <!-- OHLC Display at top of chart -->
+              <div class="ohlc-header">
+                @if (crosshairData(); as ohlc) {
+                  <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
+                  <span class="ohlc-label">O</span>
+                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+                    formatPrice(ohlc.open)
+                  }}</span>
+                  <span class="ohlc-label">H</span>
+                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+                    formatPrice(ohlc.high)
+                  }}</span>
+                  <span class="ohlc-label">L</span>
+                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+                    formatPrice(ohlc.low)
+                  }}</span>
+                  <span class="ohlc-label">C</span>
+                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+                    formatPrice(ohlc.close)
+                  }}</span>
+                  @if (ohlc.volume) {
+                    <span class="ohlc-label">Vol</span>
+                    <span class="ohlc-value volume">{{ formatVolume(ohlc.volume) }}</span>
+                  }
+                } @else {
+                  <span class="ohlc-hint">Hover on chart to see OHLC values</span>
+                }
+
+                <!-- Chart Toggles -->
+                <div class="chart-toggles">
+                  <button
+                    mat-icon-button
+                    [matTooltip]="lockToRight() ? 'Locked to Right (Most Recent)' : 'Unlocked - Free Scroll'"
+                    (click)="toggleLockToRight()"
+                    [class.active]="lockToRight()"
+                  >
+                    <mat-icon>{{ lockToRight() ? 'push_pin' : 'drag_pan' }}</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    [matTooltip]="showLocalTime() ? 'Showing Local Time' : 'Showing Exchange Time'"
+                    (click)="toggleLocalTime()"
+                    [class.active]="showLocalTime()"
+                  >
+                    <mat-icon>{{ showLocalTime() ? 'schedule' : 'public' }}</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    matTooltip="Extended Hours"
+                    (click)="toggleExtendedHours()"
+                    [class.active]="showExtendedHours()"
+                    [disabled]="true"
+                  >
+                    <mat-icon>nightlight</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    matTooltip="Dividends Reinvested"
+                    (click)="toggleDividendsReinvested()"
+                    [class.active]="showDividendsReinvested()"
+                    [disabled]="true"
+                  >
+                    <mat-icon>paid</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Loading more data progress bar at top -->
+              @if (loadingMoreData()) {
+                <div class="loading-more-bar">
+                  <div class="progress-bar-indeterminate"></div>
+                </div>
+              }
+
               <!-- Chart display -->
               <div echarts [options]="chartOptions()!" (chartInit)="onChartInit($any($event))" class="chart"></div>
             } @else if (tableData()) {
