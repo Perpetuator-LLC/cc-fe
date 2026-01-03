@@ -187,7 +187,7 @@ const GET_TERMINAL_HELP = gql`
 `;
 
 const GET_AUTOCOMPLETE = gql`
-  query GetAutocomplete($input: String!, $limit: Int) {
+  query GetTerminalAutocomplete($input: String!, $limit: Int) {
     autocomplete(input: $input, limit: $limit) {
       fqn
       display
@@ -199,6 +199,23 @@ const GET_AUTOCOMPLETE = gql`
       name
       exchange
       assetType
+    }
+  }
+`;
+
+const GET_QUOTE = gql`
+  query GetQuote($symbol: String!, $fqn: String) {
+    quote(symbol: $symbol, fqn: $fqn) {
+      symbol
+      price
+      open
+      high
+      low
+      previousClose
+      volume
+      timestamp
+      change
+      changePercent
     }
   }
 `;
@@ -250,6 +267,10 @@ interface TerminalHelpResult {
 
 interface AutocompleteResult {
   autocomplete: AutocompleteSuggestion[];
+}
+
+interface QuoteResult {
+  quote: SymbolUpdate | null;
 }
 
 @Injectable({
@@ -496,6 +517,25 @@ export class TerminalService implements OnDestroy {
    */
   unsubscribeSymbols(symbols: string[]): void {
     this.wsService.unsubscribeSymbols(symbols);
+  }
+
+  /**
+   * Fetch current quote for a symbol via GraphQL
+   */
+  fetchQuote(symbol: string, fqn?: string): Observable<SymbolUpdate | null> {
+    return this.apollo
+      .query<QuoteResult>({
+        query: GET_QUOTE,
+        variables: { symbol, fqn },
+        fetchPolicy: 'network-only', // Always get fresh quote data
+      })
+      .pipe(
+        map((result) => result.data.quote),
+        catchError((error) => {
+          console.warn('[TerminalService] Quote fetch failed:', error);
+          return of(null);
+        }),
+      );
   }
 
   // ============================================================================

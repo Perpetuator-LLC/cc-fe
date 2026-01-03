@@ -1,27 +1,26 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, of, take } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
-import { AsyncPipe, NgForOf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { Apollo, gql } from 'apollo-angular';
-import { MatCard, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
+import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AutocompleteResult } from '../types';
 
 const AUTOCOMPLETE_QUERY = gql`
-  query GetAutocomplete($query: String!) {
-    getAutocomplete(query: $query) {
-      success
-      message
-      results {
-        symbol
-        name
-        cik
-      }
+  query GetSymbolAutocomplete($query: String!) {
+    autocomplete(input: $query, limit: 10) {
+      fqn
+      display
+      displaySecondary
+      type
+      symbol
+      name
     }
   }
 `;
@@ -37,13 +36,11 @@ const AUTOCOMPLETE_QUERY = gql`
     MatOption,
     ReactiveFormsModule,
     MatAutocompleteTrigger,
-    NgForOf,
     MatInput,
     MatCard,
     MatCardTitle,
     MatCardSubtitle,
     MatCardHeader,
-    MatCardContent,
     MatTooltip,
   ],
   templateUrl: './autocomplete.component.html',
@@ -72,7 +69,6 @@ export class AutocompleteComponent {
       return of([]);
     }
 
-    // const filterValue = this.input.nativeElement.value.toLowerCase();
     return (
       this.apollo
         .query({
@@ -80,10 +76,26 @@ export class AutocompleteComponent {
           variables: { query: value },
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .pipe(map((result: any) => result.data.getAutocomplete.results))
+        .pipe(
+          map((result: any) => {
+            // Map new API response to AutocompleteResult format
+            interface AutocompleteItem {
+              fqn: string;
+              display: string;
+              symbol?: string;
+              name?: string;
+            }
+            return (result.data.autocomplete || []).map((item: AutocompleteItem) => ({
+              symbol: item.symbol || item.display,
+              name: item.name || item.display,
+              cik: '', // Not available in new API
+            }));
+          }),
+        )
     );
   }
 
+  /** Public API for parent components to focus the input */
   focusInput() {
     if (this.input) {
       this.input.nativeElement.focus();

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
@@ -208,7 +208,7 @@ export class PodcastsService extends BaseService {
 
   refreshTgResponse(podcastUuid: string): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
     const GQL = gql`
-      mutation UpdatePodcast($podcastUuid: UUID!, $refreshTgResponse: Boolean) {
+      mutation RefreshPodcastTgResponse($podcastUuid: UUID!, $refreshTgResponse: Boolean) {
         updatePodcast(podcastUuid: $podcastUuid, refreshTgResponse: $refreshTgResponse) {
           success
           message

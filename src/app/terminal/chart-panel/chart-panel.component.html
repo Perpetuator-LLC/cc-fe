@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="chart-panel" [class.fullscreen]="isFullscreen">
   <!-- Chart Controls - shown independently of header -->
   @if (showControls && chartControls) {
@@ -77,11 +77,11 @@
     </div>
   }
 
-  <div class="chart-container" [class.fixed-height]="!isFullscreen" [style.--chart-height.px]="height">
-    @if (chartOptions) {
+  <div class="chart-container" [class.fixed-height]="!isFullscreen">
+    @if (hasChartData) {
       <div
         echarts
-        [options]="chartOptions"
+        [options]="updateOptions"
         [initOpts]="chartInitOptions"
         (chartInit)="onChartInit($any($event))"
         class="chart"

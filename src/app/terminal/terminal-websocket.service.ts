@@ -476,22 +476,35 @@ export class TerminalWebSocketService implements OnDestroy {
   }
 
   /**
-   * Parse a JSON string field safely. Returns the parsed object if input is a string,
-   * or the original value if already an object, or undefined if parsing fails.
+   * Parse a JSON string field safely. Handles double-encoded JSON from GraphQL.
+   * Returns the parsed object if input is a string, or the original value if already an object.
    */
   private parseJsonField(value: unknown): unknown {
     if (value === null || value === undefined) {
       return undefined;
     }
-    if (typeof value === 'string') {
+
+    // Keep parsing while it's a string (handles double-encoded JSON)
+    let result = value;
+    let parseAttempts = 0;
+    const maxAttempts = 5; // Safety limit
+
+    while (typeof result === 'string' && parseAttempts < maxAttempts) {
       try {
-        return JSON.parse(value);
-      } catch (e) {
-        console.warn('[TerminalWS] Failed to parse JSON field:', e);
-        return value;
+        result = JSON.parse(result);
+        parseAttempts++;
+        console.debug('[TerminalWS] parseJsonField: parse attempt', parseAttempts, 'result type:', typeof result);
+      } catch {
+        // Not valid JSON, return as-is
+        console.debug('[TerminalWS] parseJsonField: not JSON, keeping as string');
+        return result;
       }
     }
-    // Already an object
-    return value;
+
+    if (parseAttempts > 0) {
+      console.debug('[TerminalWS] parseJsonField: parsed', parseAttempts, 'time(s), final type:', typeof result);
+    }
+
+    return result;
   }
 }
