@@ -515,15 +515,19 @@
                 </div>
               </div>
 
-              <!-- Loading more data progress bar at top -->
-              @if (loadingMoreData()) {
-                <div class="loading-more-bar">
-                  <div class="progress-bar-indeterminate"></div>
-                </div>
-              }
-
-              <!-- Chart display -->
-              <div echarts [options]="chartOptions()!" (chartInit)="onChartInit($any($event))" class="chart"></div>
+              <!-- Chart area with loading indicator -->
+              <div class="chart-area">
+                @if (loadingMoreData()) {
+                  <div class="loading-more-bar">
+                    <div class="progress-bar-indeterminate"></div>
+                  </div>
+                } @else if (showNoMoreDataHint()) {
+                  <div class="no-more-data-hint">
+                    <span>← No more historical data available</span>
+                  </div>
+                }
+                <div echarts [options]="chartOptions()!" (chartInit)="onChartInit($any($event))" class="chart"></div>
+              </div>
             } @else if (tableData()) {
               <!-- Table display for HP command -->
               <div class="data-content">
