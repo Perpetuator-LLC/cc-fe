@@ -83,6 +83,7 @@ export class ChartConfigService {
       show: true,
       type: 'line',
       link: [{ xAxisIndex: 'all' }],
+      animation: false, // Disable animation for instant crosshair response
       label: {
         show: true,
         backgroundColor: this.CROSSHAIR_LABEL_BG,
@@ -120,6 +121,7 @@ export class ChartConfigService {
     axisPointer: {
       show: true,
       type: 'line',
+      animation: false, // Disable animation for instant crosshair response
       label: {
         show: true,
         backgroundColor: this.CROSSHAIR_LABEL_BG,
@@ -137,6 +139,7 @@ export class ChartConfigService {
     axisPointer: {
       show: true,
       type: 'line',
+      animation: false, // Disable animation for instant crosshair response
       label: {
         show: true,
         backgroundColor: this.CROSSHAIR_LABEL_BG,
