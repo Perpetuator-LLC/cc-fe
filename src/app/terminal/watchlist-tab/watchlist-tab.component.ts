@@ -1235,6 +1235,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
       console.log('[WatchlistTab] DataZoom event - start:', startPercent, 'end:', endPercent);
 
+      // If locked to right and user scrolled away from 100%, snap back
+      if (this.lockToRight() && endPercent < 99.9) {
+        // Calculate the zoom range (how zoomed in/out)
+        const range = endPercent - startPercent;
+        // Adjust to keep end at 100%
+        const newStart = Math.max(0, 100 - range);
+        chart.dispatchAction({
+          type: 'dataZoom',
+          start: newStart,
+          end: 100,
+        });
+        return; // Don't process further - the new dispatch will trigger another event
+      }
+
       // Track if user is at the left edge (for "no more data" hint)
       // Consider "at edge" when start is at or near 0%
       this.atLeftEdge.set(startPercent <= 1);
@@ -1521,6 +1535,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         shiftPercent: shiftPercent.toFixed(1),
         zoom: `${currentStart.toFixed(1)}-${currentEnd.toFixed(1)} → ${newStart.toFixed(1)}-${newEnd.toFixed(1)}`,
       });
+    }
+
+    // If locked to right, ensure end is at 100%
+    if (this.lockToRight()) {
+      const range = newEnd - newStart;
+      newStart = Math.max(0, 100 - range);
+      newEnd = 100;
     }
 
     // Update ONLY the data and zoom - use setOption directly on the instance
