@@ -102,11 +102,11 @@ class CachePolicyRegistry {
         merge: relayConnectionMerge,
       } as FieldPolicy<unknown, unknown, unknown>,
 
-      // Command history - may use Relay pagination in future
+      // Command history - Relay-style pagination
       commandHistory: {
-        keyArgs: ['limit', 'search'],
-        merge: false, // Don't merge, replace on new query
-      },
+        keyArgs: ['search'], // Cache by search query, pagination handled by merge
+        merge: relayConnectionMerge, // Use Relay merge for edges/pageInfo
+      } as FieldPolicy<unknown, unknown, unknown>,
 
       // Autocomplete - never cache, always fresh
       autocomplete: {

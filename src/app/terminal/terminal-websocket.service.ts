@@ -358,42 +358,53 @@ export class TerminalWebSocketService implements OnDestroy {
     }
 
     const gqlQuery = `
-      query CommandHistory($limit: Int, $search: String) {
-        commandHistory(limit: $limit, search: $search) {
-          uuid
-          rawInput
-          parsedCommand
-          parsedSymbols
-          status
-          isAiInterpreted
-          createdAt
+      query CommandHistory($first: Int, $search: String) {
+        commandHistory(first: $first, search: $search) {
+          edges {
+            node {
+              id
+              rawInput
+              parsedCommand
+              parsedSymbols
+              status
+              isAiInterpreted
+              createdAt
+            }
+            cursor
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          totalCount
         }
       }
     `;
 
     const subId = `history_${Date.now()}`;
     const unsubscribe = this.client.subscribe(
-      { query: gqlQuery, variables: { limit, search: query.trim() || null } },
+      { query: gqlQuery, variables: { first: limit, search: query.trim() || null } },
       {
         next: (result) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const data = result.data as any;
           if (data?.commandHistory) {
+            const edges = data.commandHistory.edges || [];
             this.historySearch$.next({
               query: query.trim(),
-              results: data.commandHistory.map(
+              results: edges.map(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (item: any) => ({
-                  id: item.uuid,
-                  rawInput: item.rawInput,
-                  parsedCommand: item.parsedCommand,
-                  parsedSymbols: item.parsedSymbols,
-                  status: item.status,
-                  isAiInterpreted: item.isAiInterpreted,
-                  createdAt: item.createdAt,
+                (edge: any) => ({
+                  id: edge.node.id,
+                  rawInput: edge.node.rawInput,
+                  parsedCommand: edge.node.parsedCommand,
+                  parsedSymbols: edge.node.parsedSymbols,
+                  status: edge.node.status,
+                  isAiInterpreted: edge.node.isAiInterpreted,
+                  createdAt: edge.node.createdAt,
                 }),
               ),
-              total: data.commandHistory.length,
+              total: data.commandHistory.totalCount || edges.length,
               timestamp: new Date().toISOString(),
             });
           }
