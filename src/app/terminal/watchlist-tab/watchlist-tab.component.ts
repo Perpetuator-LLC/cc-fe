@@ -34,8 +34,11 @@ import { WatchlistService, StockListing } from '../watchlist.service';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
 import { ChartDataService, ChartCandle, PageInfo, ChartInterval } from '../chart-data.service';
+import { ChartConfigService } from '../chart-config.service';
 import { CommandResult, ChartResultData, ChartControls, TableData, SymbolUpdate } from '../terminal.types';
 import { DataTableComponent } from '../data-table/data-table.component';
+import { TerminalRoutingService } from '../terminal-routing.service';
+import { RouteInfo } from '../terminal-routing.types';
 
 // Register required ECharts components
 echarts.use([
@@ -71,13 +74,6 @@ interface SystemList {
   icon: string;
   type: 'sector' | 'industry' | 'exchange' | 'assetType';
   value: string;
-}
-
-interface EChartsTooltipParam {
-  name: string;
-  data: number[] | unknown;
-  seriesName?: string;
-  color?: string;
 }
 
 @Component({
@@ -520,6 +516,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     protected terminalService: TerminalService,
     private terminalWsService: TerminalWebSocketService,
     private chartDataService: ChartDataService,
+    private chartConfigService: ChartConfigService,
+    private routingService: TerminalRoutingService,
   ) {}
 
   ngOnInit(): void {
@@ -615,14 +613,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.terminalWsService.onCommandResult.subscribe((result: CommandResult) => {
         console.log('[WatchlistTab] onCommandResult received:', result);
+        console.log('[WatchlistTab] result.route:', result?.route);
         console.log('[WatchlistTab] result.outputType:', result?.outputType);
-        console.log('[WatchlistTab] result.chartOptions type:', typeof result?.chartOptions);
         console.log('[WatchlistTab] result.success:', result?.success);
 
         if (!result) return;
 
-        // Get symbol from metadata - try multiple access patterns
-        const resultSymbol = result.metadata?.symbol as string | undefined;
+        // Get symbol from route (preferred) or metadata (fallback)
+        const route = result.route;
+        const resultSymbol = route?.symbol || (result.metadata?.symbol as string | undefined);
         const selectedSym = this.selectedSymbol();
 
         // Extract chartControls from result data if available
@@ -639,14 +638,52 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           resultSymbol,
           selectedSym,
           isForSelectedSymbol,
+          hasRoute: !!route,
           chartLoading: this.chartLoading(),
           shouldHandleResult,
         });
 
         if (shouldHandleResult) {
-          // Update the selected symbol if the result has one and we didn't have one selected
-          if (resultSymbol && !selectedSym) {
-            this.selectedSymbol.set(resultSymbol.toUpperCase());
+          // CRITICAL: Always update the selected symbol if the result has one
+          // This ensures all parent components stay in sync with the command
+          if (resultSymbol) {
+            const newSymbol = resultSymbol.toUpperCase();
+            const isDifferentSymbol = selectedSym && newSymbol !== selectedSym.toUpperCase();
+
+            if (isDifferentSymbol || !selectedSym) {
+              console.log('[WatchlistTab] Switching symbol from', selectedSym, 'to', newSymbol);
+
+              // Unsubscribe from previous symbol's real-time updates
+              if (selectedSym) {
+                this.terminalService.unsubscribeSymbols([selectedSym]);
+              }
+
+              // Update the selected symbol - this is the source of truth
+              this.selectedSymbol.set(newSymbol);
+
+              // Apply route info from backend for URL sync and state management
+              // Use route if available, otherwise build from metadata
+              if (route) {
+                this.routingService.applyRoute(route as RouteInfo);
+              } else {
+                this.routingService.applyRoute({
+                  symbol: newSymbol,
+                  interval: result.metadata?.interval as RouteInfo['interval'],
+                  period: result.metadata?.period as RouteInfo['period'],
+                });
+              }
+
+              // Clear stale data from previous symbol
+              this.rawCandleData.set([]);
+              this.quoteData.set(null);
+              this.chartPageInfo.set(null);
+
+              // Subscribe to real-time updates for new symbol
+              this.terminalService.subscribeSymbols([newSymbol]);
+
+              // Fetch quote data for new symbol
+              this.fetchQuoteForSymbol(newSymbol);
+            }
           }
 
           this.chartLoading.set(false);
@@ -660,8 +697,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
           if (result.success) {
             if (result.outputType === 'chart' && result.chartOptions) {
-              // Parse chartOptions - handle string or object (from GraphQL JSON scalar)
-              const parsedOptions = this.parseChartOptions(result.chartOptions);
+              // Parse chartOptions using ChartConfigService (handles string/object/double-encoded)
+              const parsedOptions = this.chartConfigService.parseChartOptions(result.chartOptions);
               if (!parsedOptions) {
                 this.chartError.set('Failed to parse chart data');
                 return;
@@ -670,8 +707,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               // Extract and store raw candle data for progressive loading
               this.extractAndStoreCandleData(result);
 
-              // Apply dark theme overrides
-              const themedOptions = this.applyDarkTheme(parsedOptions);
+              // Apply dark theme using ChartConfigService (single source of truth for theming)
+              const themedOptions = this.chartConfigService.applyDarkTheme(parsedOptions);
               console.log('[WatchlistTab] Themed chartOptions keys:', Object.keys(themedOptions).slice(0, 8));
 
               this.chartOptions.set(themedOptions);
@@ -1094,6 +1131,25 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Fetch quote data for a symbol (used when switching symbols from command results)
+   */
+  private fetchQuoteForSymbol(symbol: string): void {
+    // Try to get exchange from selectedItem if available
+    const item = this.selectedItem();
+    const exchange = item?.exchange;
+    const fqn = exchange ? `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}` : undefined;
+
+    this.subscriptions.add(
+      this.terminalService.fetchQuote(symbol, fqn).subscribe((quote) => {
+        // Only update if this is still the selected symbol
+        if (quote && this.selectedSymbol() === symbol) {
+          this.quoteData.set(quote);
+        }
+      }),
+    );
+  }
+
+  /**
    * Load chart or data for symbol using FQN format or ChartDataService
    */
   private loadChart(symbol: string, exchange: string | undefined, command: string): void {
@@ -1365,7 +1421,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Build new series data from candles
     const candlestickData = candles.map((c) => [c.open, c.close, c.low, c.high]);
     const volumeData = candles.map((c) => c.volume);
-    const xAxisData = candles.map((c) => this.formatDateForChart(c.date));
+    const xAxisData = candles.map((c) => this.chartConfigService.formatDateForChart(c.date));
 
     // Update chart options - use type assertion for series array
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1411,16 +1467,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     };
 
     this.chartInstance.setOption(newOptions, { notMerge: false });
-  }
-
-  /**
-   * Format date for chart x-axis display
-   */
-  private formatDateForChart(date: Date): string {
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${year}-${month}-${day}`;
   }
 
   /**
@@ -1787,144 +1833,28 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Build ECharts options from candle data
+   * Build ECharts options from candle data using ChartConfigService.
+   * This ensures all charts (from command or progressive loading) look identical.
    */
   private buildChartFromCandles(candles: ChartCandle[], symbol: string): void {
-    const dates = candles.map((c) => this.formatDateForChart(c.date));
-    const ohlcData = candles.map((c) => [c.open, c.close, c.low, c.high]);
-
     const interval = this.selectedInterval();
-    const options: EChartsOption = {
-      title: {
-        text: `${symbol} Price Chart`,
-        subtext: this.formatInterval(interval),
-        left: 'center',
-        textStyle: { color: 'var(--md-sys-color-on-surface)' },
-        subtextStyle: { color: 'var(--md-sys-color-on-surface-variant)' },
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'cross' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter: (params: any) => this.formatCandlestickTooltip(params as EChartsTooltipParam[]),
-      },
-      grid: {
-        left: 60,
-        right: 60,
-        top: 60,
-        bottom: 30,
-        containLabel: false,
-      },
-      xAxis: {
-        type: 'category',
-        data: dates,
-        boundaryGap: true,
-        axisLine: { onZero: false, lineStyle: { color: 'var(--md-sys-color-outline-variant)' } },
-        splitLine: { show: false },
-        axisLabel: { color: 'var(--md-sys-color-on-surface-variant)' },
-      },
-      yAxis: {
-        type: 'value',
-        scale: true,
-        position: 'right',
-        splitArea: { show: true, areaStyle: { color: ['rgba(0,0,0,0.02)', 'rgba(0,0,0,0.05)'] } },
-        axisLabel: { color: 'var(--md-sys-color-on-surface-variant)' },
-        axisLine: { lineStyle: { color: 'var(--md-sys-color-outline-variant)' } },
-      },
-      dataZoom: [
-        {
-          type: 'inside',
-          xAxisIndex: 0,
-          start: 70, // Show last 30% of data initially
-          end: 100,
-          zoomOnMouseWheel: true,
-          moveOnMouseMove: true,
-          moveOnMouseWheel: false,
-          preventDefaultMouseMove: false,
-          minValueSpan: 10,
-        },
-      ],
-      series: [
-        {
-          name: symbol,
-          type: 'candlestick',
-          data: ohlcData,
-          itemStyle: {
-            color: '#26a69a', // Green for up
-            color0: '#ef5350', // Red for down
-            borderColor: '#26a69a',
-            borderColor0: '#ef5350',
-          },
-        },
-      ],
-    };
-
+    // Use ChartConfigService for consistent chart building and theming
+    const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval);
     this.chartOptions.set(options);
   }
 
   /**
-   * Format candlestick tooltip
-   */
-  private formatCandlestickTooltip(params: EChartsTooltipParam[]): string {
-    if (!params || params.length === 0) return '';
-    const p = params[0];
-    const data = p.data as number[];
-    if (!data || data.length < 4) return '';
-
-    const [open, close, low, high] = data;
-    const isUp = close >= open;
-    const color = isUp ? '#26a69a' : '#ef5350';
-
-    return `
-      <div style="font-family: monospace; padding: 8px;">
-        <div style="margin-bottom: 4px; font-weight: bold;">${p.name}</div>
-        <div style="color: ${color};">
-          O: ${open.toFixed(2)}<br/>
-          H: ${high.toFixed(2)}<br/>
-          L: ${low.toFixed(2)}<br/>
-          C: ${close.toFixed(2)}
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Format period for display
+   * Format period for display - delegate to ChartConfigService
    */
   formatPeriod(period: string): string {
-    const periodMap: Record<string, string> = {
-      '1D': '1 Day',
-      '5D': '5 Days',
-      '1W': '1 Week',
-      '2W': '2 Weeks',
-      '1M': '1 Month',
-      '3M': '3 Months',
-      '6M': '6 Months',
-      '1Y': '1 Year',
-      '2Y': '2 Years',
-      '5Y': '5 Years',
-      '10Y': '10 Years',
-      '20Y': '20 Years',
-      MAX: 'Maximum',
-    };
-    return periodMap[period] || period;
+    return this.chartConfigService.formatPeriod(period);
   }
 
   /**
-   * Format interval for display
+   * Format interval for display - delegate to ChartConfigService
    */
   formatInterval(interval: string): string {
-    const intervalMap: Record<string, string> = {
-      '1min': '1 Minute',
-      '5min': '5 Minutes',
-      '15min': '15 Minutes',
-      '30min': '30 Minutes',
-      '60min': '1 Hour',
-      daily: 'Daily',
-      weekly: 'Weekly',
-      monthly: 'Monthly',
-    };
-    return intervalMap[interval] || interval;
+    return this.chartConfigService.formatInterval(interval);
   }
 
   /**
@@ -2109,263 +2039,5 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     lines.push('Click "Info" button for full company details');
 
     return lines.join('\n');
-  }
-
-  // ============================================================================
-  // Dark Theme for ECharts
-  // ============================================================================
-
-  private darkThemeDefaults = {
-    backgroundColor: 'transparent',
-    animation: true, // Enable animation for initial load
-    animationDuration: 500,
-    animationDurationUpdate: 0, // Disable animation for updates (zoom, etc.)
-    textStyle: {
-      color: '#c0c0c0',
-    },
-    // Tight grid margins to maximize chart area; yAxis on right
-    grid: {
-      left: 8,
-      right: 60, // Space for yAxis labels on right
-      top: 16,
-      bottom: 32, // Minimal space (no slider, just legend)
-      containLabel: false,
-      backgroundColor: 'transparent',
-    },
-    title: {
-      show: false, // Hide title - we have our own header
-    },
-    legend: {
-      show: false, // Hide legend - we have our own header with symbol
-    },
-    tooltip: {
-      show: false, // Hide tooltip - we show OHLC at top of chart instead
-      trigger: 'axis' as const,
-      axisPointer: {
-        type: 'cross' as const,
-        crossStyle: { color: '#666' },
-        lineStyle: { color: '#666' },
-      },
-    },
-    // Configure axis pointer - use 'line' type which is valid for cartesian axes
-    axisPointer: {
-      show: true,
-      type: 'line' as const,
-      link: [{ xAxisIndex: 'all' as const }],
-      triggerEmit: true,
-      label: {
-        show: true,
-        backgroundColor: '#333',
-      },
-      lineStyle: {
-        color: 'var(--md-sys-color-outline)',
-        type: 'dashed' as const,
-      },
-    },
-  };
-
-  // Default yAxis config with position on right
-  private darkAxisDefaults = {
-    axisLine: { lineStyle: { color: '#505050' } },
-    axisLabel: { color: '#a0a0a0' },
-    splitLine: { lineStyle: { color: '#353535' } },
-    splitArea: {
-      show: false,
-      areaStyle: { color: ['rgba(35, 35, 35, 0.5)', 'rgba(40, 40, 40, 0.5)'] },
-    },
-  };
-
-  // yAxis defaults with right position
-  private yAxisDefaults = {
-    position: 'right' as const,
-    axisLine: { lineStyle: { color: '#505050' } },
-    axisLabel: { color: '#a0a0a0' },
-    splitLine: { lineStyle: { color: '#353535' } },
-  };
-
-  // Date formatting for x-axis labels
-  private xAxisDateDefaults = {
-    axisLabel: {
-      color: '#a0a0a0',
-      formatter: (value: string | number) => {
-        const date = new Date(value);
-        if (isNaN(date.getTime())) return String(value);
-        // Format: "Jan 15" or "Jan 15 '24" for different years
-        const now = new Date();
-        const month = date.toLocaleDateString('en-US', { month: 'short' });
-        const day = date.getDate();
-        if (date.getFullYear() !== now.getFullYear()) {
-          return `${month} ${day} '${String(date.getFullYear()).slice(-2)}`;
-        }
-        return `${month} ${day}`;
-      },
-    },
-  };
-
-  /**
-   * Apply dark theme to chart options
-   */
-  private applyDarkTheme(options: EChartsOption): EChartsOption {
-    // Safety check: ensure options is an object, not a string
-    if (typeof options !== 'object' || options === null) {
-      console.error('[WatchlistTab] applyDarkTheme received non-object:', typeof options);
-      return this.darkThemeDefaults;
-    }
-    let merged = this.deepMergeChart(options, this.darkThemeDefaults);
-    merged = this.applyAxisTheming(merged);
-    merged = this.applyDataZoomConfig(merged);
-    return merged;
-  }
-
-  /**
-   * Configure dataZoom for scroll-to-zoom with right-sticky behavior
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private applyDataZoomConfig(options: any): any {
-    const result = { ...options };
-
-    // Only use inside dataZoom for mouse wheel zoom - no slider
-    const insideZoom = {
-      type: 'inside',
-      xAxisIndex: 0,
-      start: 0, // Show all data initially
-      end: 100,
-      zoomOnMouseWheel: true,
-      moveOnMouseMove: true,
-      moveOnMouseWheel: false,
-      preventDefaultMouseMove: false,
-      // Don't limit zoom range - allow zooming past data boundary
-      minValueSpan: 10, // Minimum 10 data points when zoomed in
-    };
-
-    // Replace all existing dataZoom with just inside zoom
-    result.dataZoom = [insideZoom];
-
-    return result;
-  }
-
-  /**
-   * Apply dark theme to axes (handles arrays)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private applyAxisTheming(options: any): any {
-    const result = { ...options };
-
-    if (result.xAxis) {
-      if (Array.isArray(result.xAxis)) {
-        result.xAxis = result.xAxis.map((axis: unknown) => {
-          let themed = this.deepMergeChart(axis, this.darkAxisDefaults);
-          // Apply date formatting if it's a time/category axis
-          themed = this.deepMergeChart(themed, this.xAxisDateDefaults);
-          return themed;
-        });
-      } else {
-        result.xAxis = this.deepMergeChart(result.xAxis, this.darkAxisDefaults);
-        result.xAxis = this.deepMergeChart(result.xAxis, this.xAxisDateDefaults);
-      }
-    }
-
-    if (result.yAxis) {
-      if (Array.isArray(result.yAxis)) {
-        // Apply yAxis defaults (including position: right) to all yAxes
-        result.yAxis = result.yAxis.map((axis: unknown) => {
-          let themed = this.deepMergeChart(axis, this.darkAxisDefaults);
-          themed = this.deepMergeChart(themed, this.yAxisDefaults);
-          return themed;
-        });
-      } else {
-        result.yAxis = this.deepMergeChart(result.yAxis, this.darkAxisDefaults);
-        result.yAxis = this.deepMergeChart(result.yAxis, this.yAxisDefaults);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Deep merge for chart options (source overrides target)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private deepMergeChart(target: any, source: any): any {
-    // Safety: if target is not an object, start with empty object
-    if (typeof target !== 'object' || target === null) {
-      target = {};
-    }
-    // Safety: if source is not an object, return target unchanged
-    if (typeof source !== 'object' || source === null) {
-      return target;
-    }
-    const result = { ...target };
-    for (const key of Object.keys(source)) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this.deepMergeChart(target[key] || {}, source[key]);
-      } else {
-        result[key] = source[key];
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Parse chartOptions from the backend - handles string or object, and double-encoded JSON
-   */
-  private parseChartOptions(chartOptions: unknown): EChartsOption | null {
-    console.log('[WatchlistTab] parseChartOptions input type:', typeof chartOptions);
-
-    // If already an object, use it directly
-    if (typeof chartOptions === 'object' && chartOptions !== null) {
-      // Check if it looks like a valid ECharts option (has expected keys)
-      const keys = Object.keys(chartOptions);
-      console.log('[WatchlistTab] chartOptions is object, keys:', keys.slice(0, 5));
-
-      // If keys are numeric strings (0, 1, 2...), this is a spread string - parse it
-      if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) {
-        console.error('[WatchlistTab] chartOptions looks like a spread string, attempting recovery');
-        // This shouldn't happen but if it does, try to recover by joining values
-        const chars = keys
-          .sort((a, b) => Number(a) - Number(b))
-          .map((k) => (chartOptions as Record<string, string>)[k]);
-        const reconstructed = chars.join('');
-        try {
-          const parsed = JSON.parse(reconstructed);
-          console.log('[WatchlistTab] Recovered parsed options keys:', Object.keys(parsed).slice(0, 5));
-          return parsed as EChartsOption;
-        } catch (e) {
-          console.error('[WatchlistTab] Failed to recover chartOptions:', e);
-          return null;
-        }
-      }
-
-      return chartOptions as EChartsOption;
-    }
-
-    // If it's a string, parse it (may need multiple passes for double-encoded)
-    if (typeof chartOptions === 'string') {
-      let parsed: unknown = chartOptions;
-      let attempts = 0;
-      const maxAttempts = 5;
-
-      while (typeof parsed === 'string' && attempts < maxAttempts) {
-        try {
-          parsed = JSON.parse(parsed);
-          attempts++;
-          console.log('[WatchlistTab] Parse attempt', attempts, 'result type:', typeof parsed);
-        } catch (e) {
-          console.error('[WatchlistTab] Failed to parse chartOptions at attempt', attempts, ':', e);
-          return null;
-        }
-      }
-
-      if (typeof parsed === 'object' && parsed !== null) {
-        console.log('[WatchlistTab] Successfully parsed chartOptions, keys:', Object.keys(parsed).slice(0, 5));
-        return parsed as EChartsOption;
-      }
-
-      console.error('[WatchlistTab] chartOptions is not an object after parsing:', typeof parsed);
-      return null;
-    }
-
-    console.error('[WatchlistTab] chartOptions has unexpected type:', typeof chartOptions);
-    return null;
   }
 }

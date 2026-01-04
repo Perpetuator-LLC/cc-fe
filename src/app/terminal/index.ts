@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 // Terminal module exports
 
 // Types
@@ -7,6 +7,7 @@ export * from './terminal.types';
 // Services
 export { TerminalWebSocketService, ChartUpdate } from './terminal-websocket.service';
 export { TerminalService } from './terminal.service';
+export { ChartConfigService } from './chart-config.service';
 
 // Components
 export { TerminalInputComponent } from './terminal-input/terminal-input.component';

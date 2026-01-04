@@ -827,6 +827,9 @@ type CommandType {
 
 """An enumeration."""
 enum TerminalCommandCategoryChoices {
+  """Data & Prices"""
+  DATA
+
   """Equity Analysis"""
   EQUITY
 
@@ -3923,6 +3926,48 @@ type CommandResultType {
   data: JSONString
   chartOptions: JSONString
   metadata: JSONString
+
+  """Navigation routing information"""
+  route: RouteInfoType
+}
+
+"""
+Route information for frontend navigation.
+
+This tells the frontend exactly where to navigate after command execution.
+The backend controls navigation while the frontend handles theming and styling.
+"""
+type RouteInfoType {
+  """Main tab: watchlists, dashboards, history, settings"""
+  tab: String
+
+  """Symbol to select (e.g., 'MSFT')"""
+  symbol: String
+
+  """Exchange for the symbol (e.g., 'NASDAQ')"""
+  exchange: String
+
+  """
+  View to show: chart, info, fundamentals, valuation, history, news, earnings
+  """
+  view: String
+
+  """
+  Chart interval: 1min, 5min, 15min, 30min, 60min, daily, weekly, monthly
+  """
+  interval: String
+
+  """Chart period: 1D, 5D, 1W, 2W, 1M, 3M, 6M, 1Y, 2Y, 5Y, 10Y, 20Y, MAX"""
+  period: String
+
+  """UUID of specific watchlist to select"""
+  watchlistId: String
+
+  """UUID of specific dashboard to select"""
+  dashboardId: String
+
+  """Command execution ID for tracking"""
+  commandId: String
 }
 
 """Sync registered commands to database."""
