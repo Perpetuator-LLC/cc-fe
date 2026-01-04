@@ -120,6 +120,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chartInstance: any = null;
 
+  // Throttle state for mousemove handler (using requestAnimationFrame)
+  private pendingCrosshairUpdate = false;
+  private lastCrosshairDataIndex = -1;
+  // Track last mouse position for updating crosshair on zoom
+  private lastMousePosition: { offsetX: number; offsetY: number } | null = null;
+
   // Quote/price data for selected symbol
   quoteData = signal<SymbolUpdate | null>(null);
 
@@ -1236,16 +1242,55 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       // Trigger progressive data load when zoomed out near the left edge
       // This loads more historical data in the background
       this.checkProgressiveDataLoad(startPercent);
+
+      // Update crosshair position after zoom (data positions have changed)
+      if (this.lastMousePosition) {
+        // Reset the last data index so it will update
+        this.lastCrosshairDataIndex = -1;
+        const pointInGrid = chart.convertFromPixel({ seriesIndex: 0 }, [
+          this.lastMousePosition.offsetX,
+          this.lastMousePosition.offsetY,
+        ]);
+        if (pointInGrid) {
+          const dataIndex = Math.round(pointInGrid[0]);
+          if (dataIndex >= 0) {
+            this.updateCrosshairOHLC(dataIndex);
+            this.lastCrosshairDataIndex = dataIndex;
+
+            // Move the visual crosshair lines to the new data position
+            // Use dispatchAction to update the axisPointer position
+            chart.dispatchAction({
+              type: 'updateAxisPointer',
+              currTrigger: 'mousemove',
+              x: this.lastMousePosition.offsetX,
+              y: this.lastMousePosition.offsetY,
+            });
+          }
+        }
+      }
     });
 
     // Listen for mousemove to update OHLC display based on crosshair position
+    // Throttled using requestAnimationFrame to prevent lag
     chart.getZr().on('mousemove', (params: { offsetX: number; offsetY: number }) => {
+      // Store mouse position for zoom updates
+      this.lastMousePosition = { offsetX: params.offsetX, offsetY: params.offsetY };
+
       // Convert pixel position to data index
       const pointInGrid = chart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY]);
       if (pointInGrid) {
         const dataIndex = Math.round(pointInGrid[0]);
-        if (dataIndex >= 0) {
-          this.updateCrosshairOHLC(dataIndex);
+        // Skip if same index as last update (no change needed)
+        if (dataIndex === this.lastCrosshairDataIndex) return;
+        this.lastCrosshairDataIndex = dataIndex;
+
+        // Throttle updates using requestAnimationFrame
+        if (!this.pendingCrosshairUpdate && dataIndex >= 0) {
+          this.pendingCrosshairUpdate = true;
+          requestAnimationFrame(() => {
+            this.updateCrosshairOHLC(dataIndex);
+            this.pendingCrosshairUpdate = false;
+          });
         }
       }
     });
@@ -1253,6 +1298,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Clear OHLC when mouse leaves chart
     chart.getZr().on('globalout', () => {
       this.crosshairData.set(null);
+      this.lastCrosshairDataIndex = -1;
+      this.lastMousePosition = null;
     });
   }
 
@@ -1486,6 +1533,31 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       },
       { notMerge: false, lazyUpdate: false },
     );
+
+    // Update crosshair position after data load (data indices have changed)
+    if (this.lastMousePosition) {
+      // Reset the last data index so it will update
+      this.lastCrosshairDataIndex = -1;
+      const pointInGrid = this.chartInstance.convertFromPixel({ seriesIndex: 0 }, [
+        this.lastMousePosition.offsetX,
+        this.lastMousePosition.offsetY,
+      ]);
+      if (pointInGrid) {
+        const dataIndex = Math.round(pointInGrid[0]);
+        if (dataIndex >= 0) {
+          this.updateCrosshairOHLC(dataIndex);
+          this.lastCrosshairDataIndex = dataIndex;
+
+          // Move the visual crosshair lines to the new data position
+          this.chartInstance.dispatchAction({
+            type: 'updateAxisPointer',
+            currTrigger: 'mousemove',
+            x: this.lastMousePosition.offsetX,
+            y: this.lastMousePosition.offsetY,
+          });
+        }
+      }
+    }
   }
 
   /**
