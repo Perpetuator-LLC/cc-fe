@@ -29,6 +29,8 @@ export interface TerminalMessage {
 // Command Types
 // ============================================================================
 
+import { RouteInfo } from './terminal-routing.types';
+
 export interface CommandResult {
   success: boolean;
   message?: string;
@@ -40,6 +42,8 @@ export interface CommandResult {
   executionId?: string;
   aiReasoning?: string;
   requiresAI?: boolean;
+  /** Route info for navigation (from backend) */
+  route?: RouteInfo;
 }
 
 /**

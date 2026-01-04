@@ -300,6 +300,17 @@ const EXECUTE_COMMAND_MUTATION = `
         data
         chartOptions
         metadata
+        route {
+          tab
+          symbol
+          exchange
+          view
+          interval
+          period
+          watchlistId
+          dashboardId
+          commandId
+        }
       }
       execution {
         id
@@ -555,6 +566,12 @@ async function testExecuteCommand(ws, command) {
     const data = result?.data?.executeCommand;
 
     if (data) {
+      // Log full result for debugging route info
+      console.log('\nFull result structure:');
+      console.log('  result.route:', JSON.stringify(data.result?.route, null, 2));
+      console.log('  result.metadata:', JSON.stringify(data.result?.metadata, null, 2));
+      console.log('  result.data.chartControls:', JSON.stringify(data.result?.data?.chartControls, null, 2));
+
       printTestResults('Execute Command', data.success, {
         success: data.success,
         message: data.message,
@@ -562,6 +579,8 @@ async function testExecuteCommand(ws, command) {
           outputType: data.result.outputType,
           hasData: !!data.result.data,
           hasChartOptions: !!data.result.chartOptions,
+          route: data.result.route,
+          metadataSymbol: data.result.metadata?.symbol,
         } : null,
         executionId: data.execution?.id,
         executionStatus: data.execution?.status,
@@ -643,6 +662,47 @@ async function testWatchlistSymbols(ws) {
   }
 }
 
+async function testDataOrder(ws, symbol = 'MSFT') {
+  console.log(`\n--- Testing Data Order for ${symbol} ---`);
+  try {
+    const result = await sendQuery(ws, 'do1', STOCK_PRICE_CONNECTION, { symbol, interval: 'DAILY', first: 20 });
+    const data = result?.data?.stockPriceConnection;
+
+    if (data?.edges?.length > 0) {
+      const edges = data.edges;
+      console.log(`\nReceived ${edges.length} candles for ${symbol}:`);
+      console.log(`PageInfo: oldestDate=${data.pageInfo?.oldestDate}, newestDate=${data.pageInfo?.newestDate}`);
+      console.log(`\nFirst 5 candles (should be NEWEST first):`);
+      edges.slice(0, 5).forEach((e, i) => {
+        console.log(`  [${i}] ${e.node.date} - O:${e.node.open} H:${e.node.high} L:${e.node.low} C:${e.node.close}`);
+      });
+      console.log(`\nLast 5 candles (should be OLDEST):`);
+      edges.slice(-5).forEach((e, i) => {
+        console.log(`  [${edges.length - 5 + i}] ${e.node.date} - O:${e.node.open} H:${e.node.high} L:${e.node.low} C:${e.node.close}`);
+      });
+
+      // Check order: first date should be newer than last date for newest-first ordering
+      const firstDate = new Date(edges[0].node.date);
+      const lastDate = new Date(edges[edges.length - 1].node.date);
+      const isNewestFirst = firstDate > lastDate;
+      console.log(`\nData order: ${isNewestFirst ? 'NEWEST FIRST ✅' : 'OLDEST FIRST (needs reversal for chart)'}`);
+
+      printTestResults('Data Order', true, {
+        count: edges.length,
+        orderType: isNewestFirst ? 'newest_first' : 'oldest_first',
+        firstDate: edges[0].node.date,
+        lastDate: edges[edges.length - 1].node.date,
+        hasOlderData: data.pageInfo?.hasOlderData,
+        endCursor: data.pageInfo?.endCursor,
+      });
+    } else {
+      printTestResults('Data Order', false, { error: 'No edges returned' });
+    }
+  } catch (error) {
+    printTestResults('Data Order', false, { error: String(error) });
+  }
+}
+
 async function testIntervals(ws, symbol = 'AAPL') {
   const intervals = ['DAILY', 'WEEKLY', 'MONTHLY', 'HOURLY', 'MIN_5', 'MIN_15'];
   console.log(`\n--- Testing Intervals for ${symbol} ---`);
@@ -710,6 +770,10 @@ async function runTests(testType) {
         break;
       case 'watchlist':
         await testWatchlistSymbols(ws);
+        break;
+      case 'dataorder':
+        await testDataOrder(ws, 'MSFT');
+        await testDataOrder(ws, 'AAPL');
         break;
       case 'all':
       default:

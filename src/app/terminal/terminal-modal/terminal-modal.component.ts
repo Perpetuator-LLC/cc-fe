@@ -219,7 +219,12 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
       this.dialogRef.close();
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      this.navigateHistory(-1);
+      // If no suggestions visible, show suggestions (which include history)
+      if (!this.showSuggestions) {
+        this.updateSuggestions(this.currentCommand);
+      } else {
+        this.navigateHistory(-1);
+      }
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       this.navigateHistory(1);
@@ -238,10 +243,8 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
       clearTimeout(this.blurTimeout);
       this.blurTimeout = null;
     }
-    // Show suggestions on focus if there's input
-    if (this.currentCommand.trim()) {
-      this.updateSuggestions(this.currentCommand);
-    }
+    // Show suggestions on focus - this includes history when input is empty
+    this.updateSuggestions(this.currentCommand);
   }
 
   onInputBlur(): void {
@@ -252,7 +255,7 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   selectSuggestion(suggestion: AutocompleteSuggestion): void {
-    this.currentCommand = suggestion.insert;
+    this.currentCommand = suggestion.insert || suggestion.fqn || suggestion.text || suggestion.display || '';
     this.clearSuggestions();
     this.focusInput();
   }
