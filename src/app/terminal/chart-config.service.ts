@@ -264,6 +264,14 @@ export class ChartConfigService {
         type: 'value',
         scale: true,
       },
+      // Start showing only the last 30% of data to allow zoom-out for older data
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 70,
+          end: 100,
+        },
+      ],
       series: [
         {
           name: symbol,
@@ -422,7 +430,9 @@ export class ChartConfigService {
   }
 
   /**
-   * Configure dataZoom for scroll-to-zoom with right-sticky behavior
+   * Configure dataZoom for free scroll-to-zoom without boundaries.
+   * Users can zoom out as far as they want - empty space shows on left if beyond data.
+   * New data loads progressively and populates automatically.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private applyDataZoomConfig(options: any): any {
@@ -430,10 +440,10 @@ export class ChartConfigService {
 
     // Get existing dataZoom config if any
     const existingZoom = Array.isArray(result.dataZoom) ? result.dataZoom[0] : result.dataZoom;
-    const existingStart = existingZoom?.start ?? 0;
+    const existingStart = existingZoom?.start ?? 70; // Default to showing last 30%
     const existingEnd = existingZoom?.end ?? 100;
 
-    // Only use inside dataZoom for mouse wheel zoom - no slider
+    // Configure for free zooming without hard boundaries
     const insideZoom = {
       type: 'inside',
       xAxisIndex: 0,
@@ -443,8 +453,14 @@ export class ChartConfigService {
       moveOnMouseMove: true,
       moveOnMouseWheel: false,
       preventDefaultMouseMove: false,
-      minValueSpan: 5, // Allow zooming in to show at least 5 candles
-      zoomLock: false, // Allow both zoom in and out
+      minValueSpan: 5, // Minimum 5 data points when zoomed in
+      // Remove zoom boundaries - allow free zoom in/out
+      minSpan: 0, // No minimum zoom range
+      maxSpan: 100, // Can show all data
+      // Don't lock zoom at any boundary
+      zoomLock: false,
+      // Allow scrolling beyond data edges (shows empty space)
+      rangeMode: ['value', 'value'],
     };
 
     // Replace all existing dataZoom with just inside zoom

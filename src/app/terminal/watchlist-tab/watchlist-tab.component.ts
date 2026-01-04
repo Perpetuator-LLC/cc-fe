@@ -148,6 +148,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartPageInfo = signal<PageInfo | null>(null);
   // Whether there's more historical data available
   hasOlderData = signal(true);
+  // Track if user is at the left edge of the chart (for showing "no more data" hint)
+  atLeftEdge = signal(false);
+
+  // Computed: show "no more data" hint when at left edge and no more data available
+  showNoMoreDataHint = computed(() => this.atLeftEdge() && !this.hasOlderData() && !this.loadingMoreData());
 
   // Inject DomSanitizer for markdown rendering
   private sanitizer = inject(DomSanitizer);
@@ -1113,6 +1118,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartError.set(null);
     this.quoteData.set(null); // Clear previous quote data
 
+    // Reset progressive loading state for new symbol
+    this.hasOlderData.set(true);
+    this.atLeftEdge.set(false);
+    this.rawCandleData.set([]);
+    this.chartPageInfo.set(null);
+
     // Subscribe to real-time updates for this symbol
     this.terminalService.subscribeSymbols([item.symbol]);
 
@@ -1196,13 +1207,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle chart initialization - set up zoom behavior and OHLC crosshair
+   * Handle chart initialization - set up zoom behavior and OHLC crosshair.
+   * Allows free zooming without boundaries - data loads progressively.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChartInit(chart: any): void {
     this.chartInstance = chart;
 
-    // Listen for datazoom events to detect when user zooms out
+    // Listen for datazoom events to trigger progressive data loading
     chart.on('datazoom', (params: { start?: number; end?: number; batch?: { start?: number; end?: number }[] }) => {
       // Get current zoom state
       const option = chart.getOption();
@@ -1217,18 +1229,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
       console.log('[WatchlistTab] DataZoom event - start:', startPercent, 'end:', endPercent);
 
-      // If lockToRight is enabled and user tries to scroll left, keep end at 100%
-      if (this.lockToRight() && endPercent < 100) {
-        const zoomRange = endPercent - startPercent;
-        chart.dispatchAction({
-          type: 'dataZoom',
-          start: 100 - zoomRange,
-          end: 100,
-        });
-        return;
-      }
+      // Track if user is at the left edge (for "no more data" hint)
+      // Consider "at edge" when start is at or near 0%
+      this.atLeftEdge.set(startPercent <= 1);
 
-      // Check if we need to load more data when zoomed out near boundary
+      // Trigger progressive data load when zoomed out near the left edge
+      // This loads more historical data in the background
       this.checkProgressiveDataLoad(startPercent);
     });
 
@@ -1297,19 +1303,30 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if we need to load more data when zooming out
+   * Check if we need to load more data when zooming out.
+   * Triggers loading when user approaches the left edge of available data.
+   * No boundary enforcement - user can zoom freely, data loads in background.
    */
   private checkProgressiveDataLoad(startPercent: number): void {
-    // If zoomed out past 20% (meaning we're showing 80%+ of data from left edge), try to load more
-    // This gives buffer to load data before user hits the actual boundary
-    if (startPercent <= 20 && !this.loadingMoreData() && this.hasOlderData()) {
-      console.log('[WatchlistTab] Triggering progressive data load at', startPercent, '%');
+    // Trigger loading when showing data from the left 30% of the chart
+    // This gives ample buffer to load data before user sees empty space
+    const loadThreshold = 30;
+
+    if (startPercent <= loadThreshold && !this.loadingMoreData() && this.hasOlderData()) {
+      console.log(
+        '[WatchlistTab] Triggering progressive data load at',
+        startPercent,
+        '% (threshold:',
+        loadThreshold,
+        '%)',
+      );
       this.loadOlderChartData();
     }
   }
 
   /**
-   * Load older historical data when user zooms out
+   * Load older historical data when user zooms out.
+   * Data is prepended to the chart, maintaining the user's current view position.
    */
   private loadOlderChartData(): void {
     const symbol = this.selectedSymbol();
@@ -1401,15 +1418,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Update the chart with merged candle data
+   * Update the chart with merged candle data.
+   * Maintains the user's current zoom position when new data is prepended.
    */
   private updateChartWithMergedData(candles: ChartCandle[]): void {
-    const currentOptions = this.chartOptions();
-    if (!currentOptions || !this.chartInstance) return;
+    if (!this.chartInstance) return;
 
-    // Get current zoom state to maintain view position
-    const option = this.chartInstance.getOption();
-    const dataZoom = option.dataZoom;
+    // Get current state from the CHART INSTANCE (not the signal)
+    const instanceOption = this.chartInstance.getOption();
+
+    // Get current zoom state
+    const dataZoom = instanceOption.dataZoom;
     let currentStart = 0;
     let currentEnd = 100;
     if (dataZoom && dataZoom.length > 0) {
@@ -1418,55 +1437,55 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       currentEnd = insideZoom.end ?? 100;
     }
 
+    // Get old data count from the chart instance
+    const series = instanceOption.series;
+    let oldDataCount = 0;
+    if (series && Array.isArray(series)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const candlestickSeries = series.find((s: any) => s.type === 'candlestick');
+      oldDataCount = candlestickSeries?.data?.length || 0;
+    }
+
     // Build new series data from candles
     const candlestickData = candles.map((c) => [c.open, c.close, c.low, c.high]);
-    const volumeData = candles.map((c) => c.volume);
     const xAxisData = candles.map((c) => this.chartConfigService.formatDateForChart(c.date));
 
-    // Update chart options - use type assertion for series array
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updatedSeries = (currentOptions.series as any[])?.map((s: any) => {
-      if (s.type === 'candlestick') {
-        return { ...s, data: candlestickData };
-      } else if (s.type === 'bar') {
-        return { ...s, data: volumeData };
-      }
-      return s;
-    });
-
-    // Calculate new zoom position based on lock setting
+    // Calculate new zoom position to maintain the same visible data range
+    const newDataCount = candles.length;
     let newStart = currentStart;
     let newEnd = currentEnd;
 
-    if (this.lockToRight()) {
-      // Keep the same zoom range but anchored to the right
-      const zoomRange = currentEnd - currentStart;
-      newEnd = 100;
-      newStart = 100 - zoomRange;
+    if (newDataCount > oldDataCount && oldDataCount > 0) {
+      // New data was prepended to the left
+      const addedDataCount = newDataCount - oldDataCount;
+      const shiftPercent = (addedDataCount / newDataCount) * 100;
+
+      // Shift the view to the right to keep same visible data
+      newStart = currentStart + shiftPercent;
+      newEnd = currentEnd + shiftPercent;
+
+      // Clamp to valid range
+      newStart = Math.min(100, newStart);
+      newEnd = Math.min(100, newEnd);
+
+      console.log('[WatchlistTab] Adjusted zoom:', {
+        oldDataCount,
+        newDataCount,
+        shiftPercent: shiftPercent.toFixed(1),
+        zoom: `${currentStart.toFixed(1)}-${currentEnd.toFixed(1)} → ${newStart.toFixed(1)}-${newEnd.toFixed(1)}`,
+      });
     }
 
-    const newOptions: EChartsOption = {
-      ...currentOptions,
-      xAxis: Array.isArray(currentOptions.xAxis)
-        ? currentOptions.xAxis.map((axis) => ({ ...axis, data: xAxisData }))
-        : { ...(currentOptions.xAxis as object), data: xAxisData },
-      series: updatedSeries as EChartsOption['series'],
-      dataZoom: [
-        {
-          type: 'inside',
-          xAxisIndex: 0,
-          start: newStart,
-          end: newEnd,
-          zoomOnMouseWheel: true,
-          moveOnMouseMove: true,
-          moveOnMouseWheel: false,
-          preventDefaultMouseMove: false,
-          minValueSpan: 10,
-        },
-      ],
-    };
-
-    this.chartInstance.setOption(newOptions, { notMerge: false });
+    // Update ONLY the data and zoom - use setOption directly on the instance
+    // This avoids any signal-based re-rendering
+    this.chartInstance.setOption(
+      {
+        xAxis: { data: xAxisData },
+        series: [{ data: candlestickData }],
+        dataZoom: [{ start: newStart, end: newEnd }],
+      },
+      { notMerge: false, lazyUpdate: false },
+    );
   }
 
   /**
