@@ -8,6 +8,7 @@ import {
   OnChanges,
   SimpleChanges,
   HostBinding,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -33,6 +34,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { ChartControls } from '../terminal.types';
+import { ChartConfigService } from '../chart-config.service';
 
 // Register required ECharts components
 echarts.use([
@@ -82,6 +84,9 @@ export class ChartPanelComponent implements OnChanges {
   @Input() isLoading = false;
   @Input() dataPoints = 0;
 
+  // Inject shared chart config service
+  private chartConfigService = inject(ChartConfigService);
+
   @HostBinding('style.--chart-height.px')
   get chartHeight(): number {
     return this.height;
@@ -115,107 +120,15 @@ export class ChartPanelComponent implements OnChanges {
     renderer: 'canvas' as const,
   };
 
-  // Default dark theme options to merge with incoming options
-  private darkThemeDefaults: Partial<EChartsOption> = {
-    backgroundColor: 'transparent',
-    textStyle: {
-      color: '#c0c0c0', // Light text for dark background
-    },
-    grid: {
-      backgroundColor: 'transparent',
-    },
-    title: {
-      textStyle: {
-        color: '#e0e0e0',
-      },
-      subtextStyle: {
-        color: '#a0a0a0',
-      },
-    },
-    legend: {
-      textStyle: {
-        color: '#c0c0c0',
-      },
-    },
-    tooltip: {
-      backgroundColor: 'rgba(30, 30, 30, 0.95)',
-      borderColor: '#505050',
-      textStyle: {
-        color: '#e0e0e0',
-      },
-    },
-    dataZoom: {
-      textStyle: {
-        color: '#a0a0a0',
-      },
-      borderColor: '#505050',
-      backgroundColor: 'rgba(30, 30, 30, 0.5)',
-      fillerColor: 'rgba(80, 80, 80, 0.3)',
-      handleStyle: {
-        color: '#606060',
-      },
-      dataBackground: {
-        lineStyle: {
-          color: '#505050',
-        },
-        areaStyle: {
-          color: 'rgba(60, 60, 60, 0.3)',
-        },
-      },
-    },
-  };
+  // Period labels for display (delegated to service for shared use)
+  get periodLabels(): Record<string, string> {
+    return this.chartConfigService.periodLabels;
+  }
 
-  // Dark theme axis defaults - applied separately to handle arrays
-  private darkAxisDefaults = {
-    axisLine: {
-      lineStyle: {
-        color: '#505050',
-      },
-    },
-    axisLabel: {
-      color: '#a0a0a0',
-    },
-    splitLine: {
-      lineStyle: {
-        color: '#353535',
-      },
-    },
-    splitArea: {
-      show: false, // Disable alternating backgrounds
-      areaStyle: {
-        color: ['rgba(35, 35, 35, 0.5)', 'rgba(40, 40, 40, 0.5)'],
-      },
-    },
-  };
-
-  // Period labels for display
-  periodLabels: Record<string, string> = {
-    '1D': '1 Day',
-    '5D': '5 Days',
-    '1W': '1 Week',
-    '2W': '2 Weeks',
-    '1M': '1 Month',
-    '3M': '3 Months',
-    '6M': '6 Months',
-    '1Y': '1 Year',
-    '2Y': '2 Years',
-    '5Y': '5 Years',
-    '10Y': '10 Years',
-    '20Y': '20 Years',
-    MAX: 'Maximum',
-  };
-
-  // Interval labels for display
-  intervalLabels: Record<string, string> = {
-    '1min': '1 Min',
-    '5min': '5 Min',
-    '15min': '15 Min',
-    '30min': '30 Min',
-    '60min': '1 Hour',
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-  };
+  // Interval labels for display (delegated to service for shared use)
+  get intervalLabels(): Record<string, string> {
+    return this.chartConfigService.intervalLabels;
+  }
 
   // Recommended intervals for each period (fallback if backend doesn't provide)
   private defaultRecommendedIntervals: Record<string, string[]> = {
@@ -251,74 +164,19 @@ export class ChartPanelComponent implements OnChanges {
       // Debug: log incoming chart options from backend
       console.log('[ChartPanel] Incoming chartOptions from backend:', JSON.stringify(this.chartOptions, null, 2));
 
-      // Start with backend options
-      let merged = this.deepMerge(this.chartOptions, this.darkThemeDefaults);
+      // Use shared service for consistent theming
+      const themed = this.chartConfigService.applyDarkTheme(this.chartOptions);
 
-      // Apply axis theming (handles both single axis and array of axes)
-      merged = this.applyAxisTheming(merged);
+      // Debug: log final themed options
+      console.log('[ChartPanel] Final themed options:', JSON.stringify(themed, null, 2));
 
-      // Debug: log final merged options
-      console.log('[ChartPanel] Final merged options:', JSON.stringify(merged, null, 2));
-
-      this.updateOptions = merged;
+      this.updateOptions = themed;
     }
 
     if (changes['chartControls'] && this.chartControls) {
       this.selectedPeriod = this.chartControls.currentPeriod;
       this.selectedInterval = this.chartControls.currentInterval;
     }
-  }
-
-  /**
-   * Apply dark theme to axes (handles single axis or array of axes)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private applyAxisTheming(options: any): any {
-    const result = { ...options };
-
-    // Apply to xAxis
-    if (result.xAxis) {
-      if (Array.isArray(result.xAxis)) {
-        result.xAxis = result.xAxis.map((axis: unknown) => this.deepMerge(axis, this.darkAxisDefaults));
-      } else {
-        result.xAxis = this.deepMerge(result.xAxis, this.darkAxisDefaults);
-      }
-    }
-
-    // Apply to yAxis
-    if (result.yAxis) {
-      if (Array.isArray(result.yAxis)) {
-        result.yAxis = result.yAxis.map((axis: unknown) => this.deepMerge(axis, this.darkAxisDefaults));
-      } else {
-        result.yAxis = this.deepMerge(result.yAxis, this.darkAxisDefaults);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Deep merge two objects, with source values overriding target
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private deepMerge(target: any, source: any): any {
-    // Safety: if target is not an object, start with empty object
-    if (typeof target !== 'object' || target === null) {
-      target = {};
-    }
-    // Safety: if source is not an object, return target unchanged
-    if (typeof source !== 'object' || source === null) {
-      return target;
-    }
-    const result = { ...target };
-    for (const key of Object.keys(source)) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this.deepMerge(target[key] || {}, source[key]);
-      } else {
-        result[key] = source[key];
-      }
-    }
-    return result;
   }
 
   onPeriodChange(): void {

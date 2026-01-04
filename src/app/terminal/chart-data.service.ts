@@ -520,18 +520,25 @@ export class ChartDataService implements OnDestroy {
 
   /**
    * Transform GraphQL response to ChartDataResult
+   * Backend returns data newest-first for pagination efficiency,
+   * but charts need oldest-first ordering.
    */
   private transformToChartData(connection: StockPriceConnection): ChartDataResult {
+    const candles = connection.edges.map((edge) => ({
+      date: new Date(edge.node.date),
+      open: edge.node.open,
+      high: edge.node.high,
+      low: edge.node.low,
+      close: edge.node.close,
+      volume: edge.node.volume,
+      adjustedClose: edge.node.adjustedClose ?? undefined,
+    }));
+
+    // Sort candles chronologically (oldest first) for chart rendering
+    candles.sort((a, b) => a.date.getTime() - b.date.getTime());
+
     return {
-      candles: connection.edges.map((edge) => ({
-        date: new Date(edge.node.date),
-        open: edge.node.open,
-        high: edge.node.high,
-        low: edge.node.low,
-        close: edge.node.close,
-        volume: edge.node.volume,
-        adjustedClose: edge.node.adjustedClose ?? undefined,
-      })),
+      candles,
       pageInfo: connection.pageInfo,
       totalCount: connection.totalCount,
     };

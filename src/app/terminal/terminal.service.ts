@@ -91,6 +91,17 @@ const EXECUTE_COMMAND = gql`
         data
         chartOptions
         metadata
+        route {
+          tab
+          symbol
+          exchange
+          view
+          interval
+          period
+          watchlistId
+          dashboardId
+          commandId
+        }
       }
       execution {
         id
@@ -1145,8 +1156,8 @@ export class TerminalService implements OnDestroy {
         this.watchlistService.addToWatchlist(symbol).subscribe({
           next: (response) => {
             if (response.success) {
-              // Refresh recent symbols
-              this.watchlistService.loadRecentSymbols(10).subscribe();
+              // Refresh recent symbols - use 30 to be consistent with initial load
+              this.watchlistService.loadRecentSymbols(30).subscribe();
             }
           },
           error: () => {

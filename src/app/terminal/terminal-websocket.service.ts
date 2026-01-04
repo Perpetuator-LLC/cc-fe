@@ -229,6 +229,17 @@ export class TerminalWebSocketService implements OnDestroy {
             data
             chartOptions
             metadata
+            route {
+              tab
+              symbol
+              exchange
+              view
+              interval
+              period
+              watchlistId
+              dashboardId
+              commandId
+            }
           }
           execution {
             uuid
@@ -257,6 +268,7 @@ export class TerminalWebSocketService implements OnDestroy {
               chartOptions: this.parseJsonField(execResult.result?.chartOptions) as CommandResult['chartOptions'],
               metadata: this.parseJsonField(execResult.result?.metadata) as CommandResult['metadata'],
               executionId: execResult.execution?.uuid,
+              route: execResult.result?.route,
             });
           }
           if (result.errors) {
