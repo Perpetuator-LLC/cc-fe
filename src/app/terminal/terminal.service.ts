@@ -61,20 +61,32 @@ const GET_COMMAND = gql`
 `;
 
 const GET_COMMAND_HISTORY = gql`
-  query GetCommandHistory($limit: Int) {
-    commandHistory(limit: $limit) {
-      id
-      rawInput
-      parsedCommand
-      parsedSymbols
-      isAiInterpreted
-      aiReasoning
-      status
-      result
-      error
-      createdAt
-      completedAt
-      creditsCharged
+  query GetCommandHistory($first: Int, $after: String, $search: String) {
+    commandHistory(first: $first, after: $after, search: $search) {
+      edges {
+        node {
+          id
+          rawInput
+          parsedCommand
+          parsedSymbols
+          isAiInterpreted
+          aiReasoning
+          status
+          result
+          error
+          createdAt
+          completedAt
+          creditsCharged
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
+      totalCount
     }
   }
 `;
@@ -244,7 +256,19 @@ interface CommandQueryResult {
 }
 
 interface CommandHistoryResult {
-  commandHistory: CommandHistoryItem[];
+  commandHistory: {
+    edges: {
+      node: CommandHistoryItem;
+      cursor: string;
+    }[];
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      endCursor: string | null;
+      startCursor: string | null;
+    };
+    totalCount: number;
+  };
 }
 
 interface ExecuteCommandResult {
@@ -649,11 +673,11 @@ export class TerminalService implements OnDestroy {
     return this.apollo
       .query<CommandHistoryResult>({
         query: GET_COMMAND_HISTORY,
-        variables: { limit },
+        variables: { first: limit },
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.commandHistory),
+        map((result) => result.data.commandHistory.edges.map((edge) => edge.node)),
         tap((history) => {
           // Update user history signal
           this.userHistorySignal.set(history);
