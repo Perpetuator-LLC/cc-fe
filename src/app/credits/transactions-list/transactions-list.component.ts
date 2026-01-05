@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UserTransaction, CreditService } from '../credit.service';
@@ -26,6 +26,9 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { kindToString } from '../../jobs/job.service';
 import { LoadingService } from '../../layout/loading.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-transactions-list',
@@ -48,11 +51,13 @@ import { LoadingService } from '../../layout/loading.service';
     MatHeaderRow,
     MatRowDef,
     MatPaginator,
-
     MatCard,
     MatCardContent,
     MatProgressSpinnerModule,
     DecimalPipe,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatTooltipModule,
   ],
   templateUrl: './transactions-list.component.html',
   styleUrl: './transactions-list.component.scss',
@@ -61,7 +66,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   transactions: UserTransaction[] = [];
   dataSource = new MatTableDataSource<UserTransaction>(this.transactions);
-  displayedColumns: string[] = ['createdAt', 'info', 'creditAmount', 'balance'];
+  displayedColumns: string[] = ['createdAt', 'type', 'info', 'creditAmount', 'balance'];
   totalTransactions = 0;
   pageSize = 10;
   cursors: (string | null)[] = [null];
@@ -70,6 +75,18 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   sortDirection = 'DESC';
   sortActive = 'createdAt';
   loading = false;
+  selectedTypeFilter: string | null = null;
+
+  /** Available transaction type filters */
+  typeFilters = [
+    { value: null, label: 'All Types' },
+    { value: 'PURCHASE', label: 'Purchases' },
+    { value: 'JOB', label: 'AI Usage' },
+    { value: 'COMMAND', label: 'Commands' },
+    { value: 'BONUS', label: 'Bonuses' },
+    { value: 'ADJUSTMENT', label: 'Adjustments' },
+    { value: 'REFUND', label: 'Refunds' },
+  ];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -96,36 +113,40 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.loadingService.show();
     this.subscriptions.add(
-      this.creditService.getTransactions(this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
-        next: (response) => {
-          this.transactions = response.transactions;
-          this.dataSource.data = this.transactions;
-          this.hasNextPage = response.pageInfo.hasNextPage;
-          this.hasPreviousPage = response.pageInfo.hasPreviousPage;
-          this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
+      this.creditService
+        .getTransactions(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedTypeFilter)
+        .subscribe({
+          next: (response) => {
+            this.transactions = response.transactions;
+            this.dataSource.data = this.transactions;
+            this.hasNextPage = response.pageInfo.hasNextPage;
+            this.hasPreviousPage = response.pageInfo.hasPreviousPage;
+            this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
 
-          // Set a large enough number to enable the next button if hasNextPage is true
-          this.totalTransactions = response.pageInfo.hasNextPage
-            ? (pageIndex + 2) * this.pageSize
-            : (pageIndex + 1) * this.pageSize;
-        },
-        error: (error) => {
-          console.error(error);
-          this.messageService.error('Failed to load transactions: ' + error.toString());
-          this.loading = false;
-          this.loadingService.hide();
-        },
-        complete: () => {
-          this.loading = false;
-          this.loadingService.hide();
-        },
-      }),
+            // Set a large enough number to enable the next button if hasNextPage is true
+            this.totalTransactions = response.pageInfo.hasNextPage
+              ? (pageIndex + 2) * this.pageSize
+              : (pageIndex + 1) * this.pageSize;
+          },
+          error: (error) => {
+            console.error(error);
+            this.messageService.error('Failed to load transactions: ' + error.toString());
+            this.loading = false;
+            this.loadingService.hide();
+          },
+          complete: () => {
+            this.loading = false;
+            this.loadingService.hide();
+          },
+        }),
     );
   }
 
   sortChange(sortState: Sort) {
     this.sortDirection = sortState.direction.toUpperCase();
     this.sortActive = sortState.active;
+    this.cursors = [null];
+    this.paginator?.firstPage();
     this.loadTransactions();
   }
 
@@ -147,10 +168,51 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.loadTransactions(after, newPageIndex);
   }
 
+  onTypeFilterChange(type: string | null) {
+    this.selectedTypeFilter = type;
+    this.cursors = [null];
+    this.paginator?.firstPage();
+    this.loadTransactions();
+  }
+
   getTransactionInfo(transaction: UserTransaction) {
+    // For command transactions, show the parsed command
+    if (transaction.transactionType === 'COMMAND' && transaction.commandExecution?.parsedCommand) {
+      return transaction.commandExecution.parsedCommand;
+    }
+    // For job transactions, show the job kind
     if (transaction.job?.kind != null) {
       return kindToString(transaction.job.kind);
     }
     return transaction.description;
+  }
+
+  /** Get icon for transaction type */
+  getTransactionIcon(transaction: UserTransaction): string {
+    switch (transaction.transactionType) {
+      case 'PURCHASE':
+        return 'credit_card';
+      case 'BONUS':
+        return 'card_giftcard';
+      case 'COMMAND':
+        return 'terminal';
+      case 'JOB':
+        return 'smart_toy';
+      case 'REFUND':
+        return 'replay';
+      case 'ADJUSTMENT':
+        return 'tune';
+      case 'DEDUCTION':
+      default:
+        return 'remove_circle';
+    }
+  }
+
+  /** Get tooltip for charges breakdown */
+  getChargesBreakdownTooltip(transaction: UserTransaction): string {
+    if (!transaction.chargesBreakdown?.length) {
+      return '';
+    }
+    return transaction.chargesBreakdown.map((c) => `${c.service}: ${c.units.toLocaleString()} units`).join('\n');
   }
 }

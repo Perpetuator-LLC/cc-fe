@@ -113,9 +113,13 @@ node scripts/test-ws-graphql-v2.cjs all
 node scripts/test-ws-graphql-v2.cjs quote       # Real-time quotes
 node scripts/test-ws-graphql-v2.cjs chart       # Stock price connections
 node scripts/test-ws-graphql-v2.cjs progressive # Progressive data loading
-node scripts/test-ws-graphql-v2.cjs intervals   # Test all interval types
+node scripts/test-ws-graphql-v2.cjs intervals   # Test all interval types (daily, weekly, hourly, etc.)
+node scripts/test-ws-graphql-v2.cjs hourly      # Detailed intraday interval investigation
 node scripts/test-ws-graphql-v2.cjs history     # Command history
 node scripts/test-ws-graphql-v2.cjs execute     # Execute commands
+node scripts/test-ws-graphql-v2.cjs commands    # Available commands list
+node scripts/test-ws-graphql-v2.cjs watchlist   # Watchlist symbols
+node scripts/test-ws-graphql-v2.cjs dataorder   # Verify data ordering
 
 # Token management (stored in ~/.capital-copilot/cli-tokens.json)
 rm -f ~/.capital-copilot/cli-tokens.json  # Clear cached tokens
