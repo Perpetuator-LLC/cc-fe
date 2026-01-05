@@ -100,6 +100,7 @@ export interface SymbolUpdate {
   open?: number;
   high?: number;
   low?: number;
+  previousClose?: number;
   timestamp: string;
 }
 
