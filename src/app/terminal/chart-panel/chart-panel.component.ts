@@ -175,8 +175,51 @@ export class ChartPanelComponent implements OnChanges {
 
     if (changes['chartControls'] && this.chartControls) {
       this.selectedPeriod = this.chartControls.currentPeriod;
-      this.selectedInterval = this.chartControls.currentInterval;
+      // Sync interval with available options (case-insensitive matching)
+      this.selectedInterval = this.syncIntervalWithOptions(
+        this.chartControls.currentInterval,
+        this.chartControls.intervalOptions,
+      );
     }
+  }
+
+  /**
+   * Sync interval value with available options (case-insensitive matching)
+   */
+  private syncIntervalWithOptions(interval: string, options: string[]): string {
+    const lowerInterval = interval.toLowerCase();
+
+    // Find matching option (case-insensitive)
+    const matchingOption = options.find((opt) => opt.toLowerCase() === lowerInterval);
+    if (matchingOption) {
+      return matchingOption;
+    }
+
+    // Try normalized name matching
+    const normalizedInterval = this.normalizeIntervalName(interval);
+    const normalizedMatch = options.find((opt) => this.normalizeIntervalName(opt) === normalizedInterval);
+    if (normalizedMatch) {
+      return normalizedMatch;
+    }
+
+    // Fallback to original value
+    return interval;
+  }
+
+  /**
+   * Normalize interval name for comparison
+   */
+  private normalizeIntervalName(interval: string): string {
+    const lower = interval.toLowerCase();
+    const mappings: Record<string, string> = {
+      min_1: '1min',
+      min_5: '5min',
+      min_15: '15min',
+      min_30: '30min',
+      min_60: '60min',
+      hourly: '60min',
+    };
+    return mappings[lower] || lower;
   }
 
   onPeriodChange(): void {
@@ -184,7 +227,9 @@ export class ChartPanelComponent implements OnChanges {
     const recommended = this.getRecommendedIntervals(this.selectedPeriod);
 
     // If current interval isn't recommended, switch to first recommended
-    if (!recommended.includes(this.selectedInterval)) {
+    const normalizedCurrent = this.normalizeIntervalName(this.selectedInterval);
+    const isRecommended = recommended.some((r) => this.normalizeIntervalName(r) === normalizedCurrent);
+    if (!isRecommended && recommended.length > 0) {
       this.selectedInterval = recommended[0];
     }
 

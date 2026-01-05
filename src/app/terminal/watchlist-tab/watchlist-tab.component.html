@@ -406,19 +406,20 @@
           <!-- Content Container -->
           <div class="content-container">
             <!-- OHLC Header - always show for CHART command so user can change interval -->
-            @if (currentCommand() === 'CHART' && !chartLoading()) {
+            @if (currentCommand() === 'CHART') {
               <div class="ohlc-header">
-                <!-- Interval selector -->
-                <select
-                  class="interval-select"
-                  [value]="selectedInterval()"
-                  (change)="onIntervalChange($any($event.target).value)"
-                  [disabled]="chartLoading()"
-                >
-                  @for (interval of intervalOptions(); track interval) {
-                    <option [value]="interval">{{ formatInterval(interval) }}</option>
-                  }
-                </select>
+                <!-- Interval selector using mat-select for proper Angular binding -->
+                <mat-form-field appearance="outline" class="interval-field" subscriptSizing="dynamic">
+                  <mat-select
+                    [value]="selectedInterval()"
+                    (selectionChange)="onIntervalChange($event.value)"
+                    [disabled]="chartLoading()"
+                  >
+                    @for (interval of intervalOptions(); track interval) {
+                      <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
 
                 @if (crosshairData(); as ohlc) {
                   <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
