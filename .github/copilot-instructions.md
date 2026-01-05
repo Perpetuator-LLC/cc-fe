@@ -252,6 +252,67 @@ font-size: 9px;       // Use 10px
 6. **4px spacing grid** - All spacing: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64px
 7. **2px typography grid** - Font sizes: 10, 12, 14, 16, 18, 20, 22, 24px
 
+## 🚫 DON'T FIGHT MATERIAL COMPONENT SIZING
+
+**Material components have intrinsic sizing that follows MD3 specifications. Don't override widths/heights!**
+
+### Icon Buttons (`mat-icon-button`)
+```scss
+// ❌ BAD - Fighting MD3 sizing (causes clipped icons, broken hover states)
+button {
+  width: 24px;
+  height: 24px;
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// ✅ GOOD - Let Material handle sizing, use color binding for active state
+<button mat-icon-button [color]="isActive() ? 'primary' : undefined">
+  <mat-icon>push_pin</mat-icon>
+</button>
+```
+
+### Form Fields (`mat-form-field`)
+```html
+<!-- ❌ BAD - Trying to make form-field compact with CSS overrides -->
+<mat-form-field class="compact-field">...</mat-form-field>
+
+<!-- ✅ GOOD - Use native elements for compact inline controls -->
+<select class="interval-select" [value]="value()" (change)="onChange($event)">
+  <option *ngFor="let opt of options" [value]="opt">{{ opt }}</option>
+</select>
+```
+
+```scss
+// Native select styled to match MD3
+.interval-select {
+  height: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface);
+
+  &:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: none;
+  }
+}
+```
+
+### When to Use Native Elements vs Material Components
+| Need | Use |
+|------|-----|
+| Compact inline dropdown (< 32px height) | Native `<select>` with MD3 styling |
+| Form with validation/hints | `<mat-form-field>` |
+| Standard buttons | `mat-button`, `mat-flat-button`, etc. |
+| Compact icon actions | `mat-icon-button` (don't resize!) |
+| Toggle options | `mat-button-toggle-group` |
+
 ## MD3 Theming Architecture
 
 ### Theme Definition (styles.scss - SINGLE SOURCE OF TRUTH)
