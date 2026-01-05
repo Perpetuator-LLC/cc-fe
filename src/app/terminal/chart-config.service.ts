@@ -248,13 +248,26 @@ export class ChartConfigService {
    * This method creates a complete EChartsOption from raw candle data.
    * Used when loading data via ChartDataService (progressive loading).
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  buildChartFromCandles(candles: ChartCandle[], symbol: string, _interval?: string): EChartsOption {
+
+  buildChartFromCandles(candles: ChartCandle[], symbol: string, interval?: string): EChartsOption {
     // Ensure data is sorted oldest first for proper chart display
     const sortedCandles = [...candles].sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    const dates = sortedCandles.map((c) => this.formatDateForChart(c.date));
+    // Store ISO dates for proper parsing in crosshair and axis labels
+    const dates = sortedCandles.map((c) => c.date.toISOString());
     const ohlcData = sortedCandles.map((c) => [c.open, c.close, c.low, c.high]);
+
+    // Determine if this is intraday data
+    const isIntraday = interval
+      ? interval.toLowerCase().includes('min') ||
+        interval.toLowerCase().includes('hour') ||
+        interval === '60min' ||
+        interval === 'MIN_60' ||
+        interval === 'MIN_30' ||
+        interval === 'MIN_15' ||
+        interval === 'MIN_5' ||
+        interval === 'MIN_1'
+      : false;
 
     // Build minimal options - applyDarkTheme will add all theming
     const options: EChartsOption = {
@@ -262,6 +275,18 @@ export class ChartConfigService {
         type: 'category',
         data: dates,
         boundaryGap: true,
+        axisLine: { onZero: false },
+        axisLabel: {
+          // Dynamic formatter based on zoom level and interval
+          formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
+        },
+        // Axis pointer (crosshair) label formatter for proper date/time display
+        axisPointer: {
+          label: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
+          },
+        },
       },
       yAxis: {
         type: 'value',
@@ -280,6 +305,9 @@ export class ChartConfigService {
           name: symbol,
           type: 'candlestick',
           data: ohlcData,
+          barWidth: '70%', // Use 70% of available space to reduce gaps
+          barMaxWidth: 24, // Limit max width when very zoomed in
+          barMinWidth: 1, // Allow thin candles when zoomed out
           itemStyle: {
             color: this.CANDLE_UP_COLOR,
             color0: this.CANDLE_DOWN_COLOR,
@@ -292,6 +320,84 @@ export class ChartConfigService {
 
     // Apply complete theming
     return this.applyDarkTheme(options);
+  }
+
+  /**
+   * Format axis label dynamically based on interval type
+   * For intraday: shows time, with date when day changes
+   * For daily+: shows date
+   */
+  formatAxisLabel(value: string, isIntraday: boolean): string {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+
+      if (isIntraday) {
+        // For intraday, show time (hour:minute)
+        // The date will be shown in the crosshair tooltip
+        return date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+      } else {
+        // For daily+, show date (Jan 2)
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        });
+      }
+    } catch {
+      return value;
+    }
+  }
+
+  /**
+   * Format axis pointer label (crosshair bubble) for proper date/time display
+   * Shows full date and time for intraday, just date for daily+
+   */
+  formatAxisPointerLabel(value: string, isIntraday: boolean): string {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+
+      if (isIntraday) {
+        // For intraday, show date + time (Jan 2, 9:30 AM)
+        return date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+      } else {
+        // For daily+, show date (Jan 2, 2026)
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      }
+    } catch {
+      return value;
+    }
+  }
+
+  /**
+   * Format axis label for zoomed out view (date only)
+   */
+  formatAxisLabelDateOnly(value: string): string {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return value;
+    }
   }
 
   /**
