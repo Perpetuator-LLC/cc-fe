@@ -3,7 +3,24 @@
  * Test WebSocket GraphQL connection to the backend
  *
  * Usage:
- *   node scripts/test-ws-graphql-v2.cjs [all|quote|chart|progressive|history|execute|intervals|hourly|commands|watchlist|dataorder]
+ *   node scripts/test-ws-graphql-v2.cjs [command] [args...]
+ *
+ * Commands:
+ *   all          - Run all standard tests (default)
+ *   quote        - Test quote queries for AAPL, MSFT
+ *   chart        - Test stock price connection and chart data range
+ *   progressive  - Test progressive loading pagination
+ *   intervals    - Test all intervals for AAPL
+ *   hourly       - Detailed hourly interval investigation
+ *   history      - Test command history
+ *   execute      - Test command execution
+ *   commands     - List available commands
+ *   watchlist    - Test watchlist symbols query
+ *   dataorder    - Verify data ordering (newest first)
+ *   multi        - Multi-symbol intraday test (GOOG, PLTR, SOFI)
+ *   fetchtest    - Test fetch behavior when data doesn't exist
+ *                  Usage: fetchtest [SYMBOL] [INTERVAL]
+ *                  Example: fetchtest COST HOURLY
  *
  * Copyright (c) 2025-2026 Perpetuator LLC
  */
@@ -1003,6 +1020,140 @@ async function testMultiSymbolIntraday(ws) {
   console.log('\n╚══════════════════════════════════════════════════════════════════╝');
 }
 
+/**
+ * Test fetch behavior when data doesn't exist for a symbol/interval
+ * This helps understand what the backend returns and how to handle loading states
+ */
+async function testFetchBehavior(ws, symbol = 'COST', interval = 'HOURLY') {
+  console.log('\n╔══════════════════════════════════════════════════════════════════╗');
+  console.log(`║     FETCH BEHAVIOR TEST - ${symbol} ${interval}                   ║`);
+  console.log('╚══════════════════════════════════════════════════════════════════╝');
+
+  // Step 1: Check current data availability
+  console.log('\n--- Step 1: Check current data availability ---');
+  try {
+    const result = await sendQuery(ws, 'fb1', STOCK_PRICE_CONNECTION, { symbol, interval, first: 5 });
+    const data = result?.data?.stockPriceConnection;
+    console.log('stockPriceConnection result:', {
+      totalCount: data?.totalCount || 0,
+      edgeCount: data?.edges?.length || 0,
+      hasOlderData: data?.pageInfo?.hasOlderData,
+      oldestDate: data?.pageInfo?.oldestDate,
+      newestDate: data?.pageInfo?.newestDate,
+    });
+
+    if (data?.totalCount > 0) {
+      console.log('✅ Data already exists for this symbol/interval');
+      console.log('Sample data:', data.edges?.slice(0, 2).map(e => ({
+        date: e.node.date,
+        close: e.node.close,
+      })));
+    } else {
+      console.log('⚠️ No data currently available');
+    }
+  } catch (error) {
+    console.error('Error checking data:', error.message);
+  }
+
+  // Step 2: Execute CHART command to trigger fetch
+  console.log('\n--- Step 2: Execute CHART command (triggers fetch) ---');
+  const fqn = `STOCK:NASDAQ:${symbol}`;
+  const command = `${fqn} COMMAND:CHART -interval ${interval.toLowerCase()}`;
+  console.log('Executing:', command);
+
+  try {
+    const result = await sendQuery(ws, 'fb2', EXECUTE_COMMAND_MUTATION, { input: command });
+    const exec = result?.data?.executeCommand;
+
+    console.log('executeCommand response:');
+    console.log('  success:', exec?.success);
+    console.log('  message:', exec?.message);
+    console.log('  execution.id:', exec?.execution?.id);
+    console.log('  execution.status:', exec?.execution?.status);
+    console.log('  result.outputType:', exec?.result?.outputType);
+    console.log('  result.success:', exec?.result?.success);
+    console.log('  result.message:', exec?.result?.message);
+
+    // Check if there's chart data
+    if (exec?.result?.chartOptions) {
+      const series = exec.result.chartOptions.series;
+      const candleSeries = series?.find(s => s.type === 'candlestick');
+      console.log('  chartOptions.series count:', series?.length);
+      console.log('  candlestick data points:', candleSeries?.data?.length || 0);
+    } else {
+      console.log('  chartOptions: null (no chart data returned)');
+    }
+
+    // Check metadata for loading indicators
+    if (exec?.result?.metadata) {
+      console.log('  metadata:', JSON.stringify(exec.result.metadata, null, 2));
+    }
+
+    // Analyze the message for loading indicators
+    const msg = exec?.message || '';
+    if (msg.includes('Fetching') || msg.includes('fetching')) {
+      console.log('\n🔄 DETECTED: Backend is fetching data in background');
+      console.log('   The frontend should show a loading indicator');
+    }
+    if (msg.includes('No cached data') || msg.includes('no data')) {
+      console.log('\n⏳ DETECTED: No cached data, fetch initiated');
+    }
+    if (msg.includes('job') || msg.includes('Job')) {
+      console.log('\n📋 DETECTED: Job reference in message');
+    }
+
+  } catch (error) {
+    console.error('Error executing command:', error.message);
+  }
+
+  // Step 3: Wait and check if data appeared
+  console.log('\n--- Step 3: Wait 10 seconds for background fetch ---');
+  await new Promise(resolve => setTimeout(resolve, 10000));
+
+  console.log('--- Step 4: Re-check data availability ---');
+  try {
+    const result = await sendQuery(ws, 'fb3', STOCK_PRICE_CONNECTION, { symbol, interval, first: 5 });
+    const data = result?.data?.stockPriceConnection;
+    console.log('stockPriceConnection result after wait:', {
+      totalCount: data?.totalCount || 0,
+      edgeCount: data?.edges?.length || 0,
+    });
+
+    if (data?.totalCount > 0) {
+      console.log('✅ Data now available!');
+      console.log('Sample data:', data.edges?.slice(0, 2).map(e => ({
+        date: e.node.date,
+        close: e.node.close,
+      })));
+    } else {
+      console.log('⚠️ Still no data - fetch may take longer');
+    }
+  } catch (error) {
+    console.error('Error re-checking data:', error.message);
+  }
+
+  // Summary and recommendations
+  console.log('\n╔══════════════════════════════════════════════════════════════════╗');
+  console.log('║                     ANALYSIS & RECOMMENDATIONS                   ║');
+  console.log('╠══════════════════════════════════════════════════════════════════╣');
+  console.log('║                                                                  ║');
+  console.log('║ Current backend behavior:                                        ║');
+  console.log('║ - Returns empty data immediately                                 ║');
+  console.log('║ - Starts background job to fetch data                           ║');
+  console.log('║ - Message indicates fetch is happening                          ║');
+  console.log('║                                                                  ║');
+  console.log('║ Frontend needs:                                                  ║');
+  console.log('║ 1. Detect "fetching" message from backend                       ║');
+  console.log('║ 2. Show loading indicator instead of "no data"                  ║');
+  console.log('║ 3. Poll/retry after delay OR subscribe to completion            ║');
+  console.log('║                                                                  ║');
+  console.log('║ Backend could provide:                                          ║');
+  console.log('║ - Status field: "fetching" | "ready" | "error"                  ║');
+  console.log('║ - Job ID for subscription                                       ║');
+  console.log('║ - Estimated wait time                                           ║');
+  console.log('╚══════════════════════════════════════════════════════════════════╝');
+}
+
 // Main
 async function runTests(testType) {
   console.log('=== WebSocket GraphQL Test Suite ===\n');
@@ -1059,6 +1210,10 @@ async function runTests(testType) {
       case 'multi':
         // Test multiple symbols for intraday data
         await testMultiSymbolIntraday(ws);
+        break;
+      case 'fetchtest':
+        // Test fetch behavior when data doesn't exist
+        await testFetchBehavior(ws, process.argv[3] || 'COST', process.argv[4] || 'HOURLY');
         break;
       case 'all':
       default:

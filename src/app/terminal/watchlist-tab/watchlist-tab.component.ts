@@ -14,7 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take } from 'rxjs';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -112,6 +112,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartLoading = signal(false);
   chartOptions = signal<EChartsOption | null>(null);
   chartError = signal<string | null>(null);
+  // Technical loading details (shown de-emphasized at bottom of chart area)
+  chartLoadingDetails = signal<string | null>(null);
   // Data content for non-chart commands (HP, DES)
   dataContent = signal<SafeHtml | null>(null);
   // Table data for HP command
@@ -1454,6 +1456,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const interval = this.selectedInterval();
     const backendInterval = this.mapIntervalToBackend(interval);
 
+    console.log('[WatchlistTab] loadOlderChartData interval mapping:', {
+      rawInterval: interval,
+      backendInterval,
+      isIntraday: this.isIntradayInterval(backendInterval),
+    });
+
     // Adjust fetch range based on interval
     if (backendInterval === 'DAILY') {
       startDate.setFullYear(startDate.getFullYear() - 1);
@@ -1552,7 +1560,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Build new series data from candles
     const candlestickData = candles.map((c) => [c.open, c.close, c.low, c.high]);
-    const xAxisData = candles.map((c) => this.chartConfigService.formatDateForChart(c.date));
+    // Use ISO dates for proper parsing in axis labels and crosshair
+    const xAxisData = candles.map((c) => c.date.toISOString());
 
     // Calculate new zoom position to maintain the same visible data range
     const newDataCount = candles.length;
@@ -1969,11 +1978,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             this.chartPageInfo.set(result.pageInfo);
             this.hasOlderData.set(result.pageInfo.hasOlderData);
             this.buildChartFromCandles(result.candles, symbol);
+            this.chartLoading.set(false);
           } else {
-            console.warn('[WatchlistTab] No data returned for interval:', backendInterval);
-            this.chartError.set('No data available for this symbol and interval');
+            // No data returned - trigger fetch via CHART command
+            console.log('[WatchlistTab] No data, triggering fetch via CHART command');
+            this.triggerDataFetchAndPoll(symbol, backendInterval, fqn);
           }
-          this.chartLoading.set(false);
         },
         error: (err) => {
           console.error('[WatchlistTab] Failed to load chart data:', err);
@@ -1982,6 +1992,187 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Trigger data fetch via CHART command and poll for results
+   * Called when stockPriceConnection returns no data (backend needs to fetch)
+   */
+  private triggerDataFetchAndPoll(symbol: string, interval: ChartInterval, fqn: string): void {
+    // Show user-friendly loading message
+    this.chartError.set(`Loading chart data...`);
+    // Store technical details for de-emphasized display
+    this.chartLoadingDetails.set(`Requesting ${this.formatInterval(interval.toLowerCase())} data for ${symbol}`);
+
+    // Execute CHART command to trigger backend fetch
+    const command = `${fqn} COMMAND:CHART -interval ${interval.toLowerCase()}`;
+    console.log('[WatchlistTab] Triggering fetch:', command);
+
+    // Subscribe to command result before executing
+    const resultSubscription = this.terminalWsService.onCommandResult
+      .pipe(
+        // Take only the first result (for this command)
+        take(1),
+      )
+      .subscribe({
+        next: (result: CommandResult) => {
+          console.log('[WatchlistTab] Fetch command result:', result);
+
+          // Check if the result indicates data is being fetched
+          const message = result?.message || '';
+          const metadata = result?.metadata;
+          let jobId: string | undefined;
+
+          // Check for jobId in metadata (using bracket notation for index signature)
+          if (metadata?.['jobId']) {
+            jobId = metadata['jobId'] as string;
+          }
+
+          // Detect if backend returned mismatched interval (daily when we requested intraday)
+          // This happens when the backend doesn't have intraday data and falls back to daily
+          const isMismatchedInterval =
+            message.includes('Changed interval') ||
+            message.includes('interval from') ||
+            (message.includes('daily') && this.isIntradayInterval(interval));
+
+          if (isMismatchedInterval) {
+            console.log(
+              '[WatchlistTab] Backend returned mismatched interval, ignoring chart and polling for ' + 'correct data',
+            );
+            this.chartError.set(`Loading chart data...`);
+            this.chartLoadingDetails.set(`Fetching ${this.formatInterval(interval.toLowerCase())} data from
+            market provider...`);
+            // Start polling for the correct interval data
+            this.pollForChartData(symbol, interval, fqn, 8, 2000); // 8 retries, 2 second intervals
+          } else if (message.includes('Fetching') || message.includes('fetching') || jobId) {
+            console.log('[WatchlistTab] Data fetch initiated, jobId:', jobId);
+            this.chartError.set(`Loading chart data...`);
+            this.chartLoadingDetails.set(`Fetching ${this.formatInterval(interval.toLowerCase())} data from
+            market provider...`);
+
+            // Start polling for data
+            this.pollForChartData(symbol, interval, fqn, 8, 2000); // 8 retries, 2 second intervals
+          } else if (result?.chartOptions) {
+            // Data was returned directly with correct interval (cached)
+            console.log('[WatchlistTab] Data returned from CHART command');
+            this.chartLoadingDetails.set(null);
+            this.handleChartCommandResult(result);
+          } else {
+            this.chartError.set('No data available for this symbol and interval');
+            this.chartLoadingDetails.set(null);
+            this.chartLoading.set(false);
+          }
+        },
+        error: (err: Error) => {
+          console.error('[WatchlistTab] Fetch command failed:', err);
+          this.chartError.set('Failed to fetch chart data');
+          this.chartLoadingDetails.set(null);
+          this.chartLoading.set(false);
+        },
+      });
+
+    this.subscriptions.add(resultSubscription);
+
+    // Execute the command
+    this.terminalWsService.execute(command);
+  }
+
+  /**
+   * Check if an interval is intraday (less than daily)
+   */
+  private isIntradayInterval(interval: ChartInterval): boolean {
+    const lower = interval.toLowerCase();
+    return (
+      lower.includes('min') ||
+      lower.includes('hour') ||
+      lower === '60min' ||
+      lower === 'min_1' ||
+      lower === 'min_5' ||
+      lower === 'min_15' ||
+      lower === 'min_30' ||
+      lower === 'min_60'
+    );
+  }
+
+  /**
+   * Poll for chart data after fetch has been triggered
+   */
+  private pollForChartData(
+    symbol: string,
+    interval: ChartInterval,
+    fqn: string,
+    retriesLeft: number,
+    delayMs: number,
+  ): void {
+    if (retriesLeft <= 0) {
+      this.chartError.set('Data fetch timed out. Please try again later.');
+      this.chartLoadingDetails.set(null);
+      this.chartLoading.set(false);
+      return;
+    }
+
+    console.log('[WatchlistTab] Polling for data, retries left:', retriesLeft);
+    // Update loading details with retry count
+    this.chartLoadingDetails.set(`Waiting for data... (attempt ${9 - retriesLeft}/8)`);
+
+    setTimeout(() => {
+      // Check if component is still expecting this data
+      if (this.selectedSymbol() !== symbol) {
+        console.log('[WatchlistTab] Symbol changed, stopping poll');
+        this.chartLoadingDetails.set(null);
+        return;
+      }
+
+      this.subscriptions.add(
+        this.chartDataService.loadChartData(symbol, interval, undefined, fqn).subscribe({
+          next: (result) => {
+            if (result.candles.length > 0) {
+              console.log('[WatchlistTab] Poll successful, got', result.candles.length, 'candles');
+              this.rawCandleData.set(result.candles);
+              this.chartPageInfo.set(result.pageInfo);
+              this.hasOlderData.set(result.pageInfo.hasOlderData);
+              this.chartError.set(null);
+              this.chartLoadingDetails.set(null);
+              this.buildChartFromCandles(result.candles, symbol);
+              this.chartLoading.set(false);
+            } else {
+              // Still no data, continue polling
+              console.log('[WatchlistTab] Still no data, continuing poll');
+              this.pollForChartData(symbol, interval, fqn, retriesLeft - 1, delayMs);
+            }
+          },
+          error: () => {
+            // Error polling, continue anyway
+            this.pollForChartData(symbol, interval, fqn, retriesLeft - 1, delayMs);
+          },
+        }),
+      );
+    }, delayMs);
+  }
+
+  /**
+   * Handle chart data returned from CHART command result
+   */
+  private handleChartCommandResult(result: CommandResult): void {
+    const chartOptions = result?.chartOptions;
+    // If chartOptions is a string, parse it
+    const options = typeof chartOptions === 'string' ? JSON.parse(chartOptions) : chartOptions;
+
+    if (options?.series) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const candleSeries = options.series.find((s: any) => s.type === 'candlestick');
+      if (candleSeries?.data?.length > 0) {
+        // Extract candle data from chart options
+        // Note: This is a fallback - normally we use stockPriceConnection
+        console.log('[WatchlistTab] Using chart data from command result');
+        this.chartOptions.set(options);
+        this.chartError.set(null);
+        this.chartLoading.set(false);
+        return;
+      }
+    }
+    this.chartError.set('No data available for this symbol and interval');
+    this.chartLoading.set(false);
   }
 
   /**
@@ -2067,7 +2258,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       WEEKLY: 'WEEKLY',
       MONTHLY: 'MONTHLY',
     };
-    return intervalMap[interval] || 'DAILY';
+    const mapped = intervalMap[interval];
+    if (!mapped) {
+      console.warn('[WatchlistTab] ⚠️ Unrecognized interval, defaulting to DAILY:', interval);
+      return 'DAILY';
+    }
+    return mapped;
   }
 
   /**
@@ -2152,20 +2348,67 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format date for OHLC display (human-friendly)
+   * Format date for OHLC display (human-friendly with time)
+   * Respects the showLocalTime setting for timezone display
    */
   formatCrosshairDate(dateStr: string): string {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+
+    // Try to parse as ISO date first, then as formatted date
+    let date: Date;
+    if (dateStr.includes('T') || dateStr.includes('Z')) {
+      // ISO format
+      date = new Date(dateStr);
+    } else {
+      // Already formatted - try to parse
+      date = new Date(dateStr);
+    }
+
     if (isNaN(date.getTime())) return dateStr;
 
-    // Format: "Wed, Jan 15, 2025"
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    const useLocalTime = this.showLocalTime();
+
+    // Check if this is intraday data (has meaningful time component)
+    const interval = this.selectedInterval().toLowerCase();
+    const isIntraday = interval.includes('min') || interval.includes('hour') || interval === '60min';
+
+    if (isIntraday) {
+      // Show date and time for intraday data
+      if (useLocalTime) {
+        // Local time
+        return date.toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+      } else {
+        // EST/ET (Eastern Time)
+        return (
+          date.toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/New_York',
+          }) + ' ET'
+        );
+      }
+    } else {
+      // Daily/Weekly/Monthly - just show date
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
   }
 
   /**
@@ -2280,5 +2523,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     lines.push('Click "Info" button for full company details');
 
     return lines.join('\n');
+  }
+
+  /**
+   * Check if an error message indicates data is being fetched (loading state)
+   * Used in template to show spinner instead of error icon
+   */
+  isDataFetchingMessage(message: string | null): boolean {
+    if (!message) return false;
+    const lowerMessage = message.toLowerCase();
+    return (
+      lowerMessage.includes('fetching') || lowerMessage.includes('loading') || lowerMessage.includes('please wait')
+    );
   }
 }
