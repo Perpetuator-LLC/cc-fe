@@ -261,6 +261,13 @@ export class ChartDataService implements OnDestroy {
     this.currentSymbol$.next(symbol);
     this.isLoading$.next(true);
 
+    console.log('[ChartDataService] loadChartData called:', {
+      symbol,
+      interval,
+      candleCount,
+      fqn,
+    });
+
     return this.apollo
       .query<{ stockPriceConnection: StockPriceConnection }>({
         query: STOCK_PRICE_CONNECTION,
@@ -268,13 +275,27 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'network-only',
       })
       .pipe(
+        tap((result) => {
+          console.log('[ChartDataService] Raw GraphQL result:', {
+            symbol,
+            interval,
+            totalCount: result.data?.stockPriceConnection?.totalCount,
+            edgeCount: result.data?.stockPriceConnection?.edges?.length,
+          });
+        }),
         map((result) => this.transformToChartData(result.data.stockPriceConnection)),
         tap((data) => {
           this.isLoading$.next(false);
           this.cacheChartData(symbol, interval, data);
         }),
         catchError((error) => {
-          console.error('[ChartDataService] Failed to load chart data:', error);
+          console.error('[ChartDataService] Failed to load chart data:', {
+            symbol,
+            interval,
+            error: error.message,
+            networkError: error.networkError,
+            graphQLErrors: error.graphQLErrors,
+          });
           this.isLoading$.next(false);
           return of<ChartDataResult>({ candles: [], pageInfo: this.emptyPageInfo(), totalCount: 0 });
         }),

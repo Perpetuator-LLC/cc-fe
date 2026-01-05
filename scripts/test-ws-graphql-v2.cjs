@@ -838,7 +838,169 @@ async function testHourlyDetailed(ws, symbol = 'AAPL') {
     }
   }
 
+  // Test 6: Test WMT which should have hourly data per backend analysis
+  console.log('\n6. Testing WMT (should have hourly data)...');
+  try {
+    const result = await sendQuery(ws, 'wmt_hourly', STOCK_PRICE_CONNECTION, { symbol: 'WMT', interval: 'HOURLY', first: 5 });
+    const data = result?.data?.stockPriceConnection;
+    if (data?.edges?.length > 0) {
+      console.log(`   ✅ WMT HOURLY: ${data.totalCount} total, got ${data.edges.length}`);
+      console.log(`   Sample data:`);
+      data.edges.slice(0, 3).forEach((edge, i) => {
+        console.log(`     [${i}] ${edge.node.date} - O:${edge.node.open} H:${edge.node.high} L:${edge.node.low} C:${edge.node.close}`);
+      });
+    } else if (data) {
+      console.log(`   ⚠️  WMT HOURLY: totalCount=${data.totalCount}, edges=${data.edges?.length || 0}`);
+    } else {
+      console.log(`   ❌ WMT HOURLY: ${result?.errors?.[0]?.message || 'No data returned'}`);
+    }
+  } catch (error) {
+    console.log(`   ❌ WMT HOURLY: ${error.message}`);
+  }
+
   console.log('\n--- End Detailed Hourly Investigation ---');
+}
+
+async function testMultiSymbolIntraday(ws) {
+  const symbols = ['GOOG', 'PLTR', 'SOFI'];
+  const intervals = ['DAILY', 'WEEKLY', 'MONTHLY', 'HOURLY', 'MIN_60', 'MIN_30', 'MIN_15', 'MIN_5'];
+  const intradayOnly = ['HOURLY', 'MIN_60', 'MIN_30', 'MIN_15', 'MIN_5'];
+
+  console.log('\n╔══════════════════════════════════════════════════════════════════╗');
+  console.log('║     MULTI-SYMBOL INTRADAY TEST - GOOG, PLTR, SOFI               ║');
+  console.log('╚══════════════════════════════════════════════════════════════════╝');
+
+  const results = {};
+
+  // PASS 1: Check all intervals for all symbols
+  console.log('\n=== PASS 1: Initial data availability ===\n');
+
+  for (const symbol of symbols) {
+    console.log(`--- ${symbol} ---`);
+    results[symbol] = {};
+
+    for (const interval of intervals) {
+      try {
+        const result = await sendQuery(ws, `${symbol}_${interval}_1`, STOCK_PRICE_CONNECTION, { symbol, interval, first: 3 });
+        const data = result?.data?.stockPriceConnection;
+        const count = data?.totalCount || 0;
+        results[symbol][interval] = { pass1: count };
+        const status = count > 0 ? '✅' : '⚠️';
+        console.log(`  ${status} ${interval}: ${count} records`);
+      } catch (error) {
+        results[symbol][interval] = { pass1: 0, error: error.message };
+        console.log(`  ❌ ${interval}: ${error.message}`);
+      }
+    }
+  }
+
+  // PASS 2: Execute CHART commands for intraday intervals to trigger fetch
+  console.log('\n=== PASS 2: Execute CHART commands (triggers fetch) ===\n');
+
+  for (const symbol of symbols) {
+    console.log(`--- ${symbol} ---`);
+
+    for (const interval of intradayOnly) {
+      try {
+        // Use FQN format: STOCK:NASDAQ:SYMBOL
+        const intervalArg = interval.toLowerCase().replace('min_', '');
+        const command = `STOCK:NASDAQ:${symbol} COMMAND:CHART -interval ${intervalArg}`;
+        const result = await sendQuery(ws, `${symbol}_${interval}_cmd`, EXECUTE_COMMAND_MUTATION, { input: command });
+        const exec = result?.data?.executeCommand;
+
+        results[symbol][interval].command = {
+          success: exec?.success,
+          message: exec?.message,
+        };
+
+        const status = exec?.success ? '🔄' : '❌';
+        const msg = exec?.message?.substring(0, 50) || 'No message';
+        console.log(`  ${status} ${interval}: ${msg}`);
+      } catch (error) {
+        results[symbol][interval].command = { error: error.message };
+        console.log(`  ❌ ${interval}: ${error.message}`);
+      }
+    }
+  }
+
+  // Wait for background fetch
+  console.log('\n=== Waiting 15 seconds for fetch jobs... ===\n');
+  await new Promise(resolve => setTimeout(resolve, 15000));
+
+  // PASS 3: Retry intraday intervals
+  console.log('=== PASS 3: Retry after waiting ===\n');
+
+  for (const symbol of symbols) {
+    console.log(`--- ${symbol} ---`);
+
+    for (const interval of intradayOnly) {
+      try {
+        const result = await sendQuery(ws, `${symbol}_${interval}_2`, STOCK_PRICE_CONNECTION, { symbol, interval, first: 3 });
+        const data = result?.data?.stockPriceConnection;
+        const count = data?.totalCount || 0;
+        results[symbol][interval].pass3 = count;
+
+        const prevCount = results[symbol][interval].pass1 || 0;
+        const status = count > 0 ? '✅' : '⚠️';
+        const change = count !== prevCount ? ` (was ${prevCount})` : '';
+        console.log(`  ${status} ${interval}: ${count} records${change}`);
+
+        if (data?.edges?.length > 0) {
+          console.log(`     Newest: ${data.edges[0]?.node?.date}`);
+        }
+      } catch (error) {
+        results[symbol][interval].pass3 = 0;
+        console.log(`  ❌ ${interval}: ${error.message}`);
+      }
+    }
+  }
+
+  // Summary Report
+  console.log('\n╔══════════════════════════════════════════════════════════════════╗');
+  console.log('║                        SUMMARY REPORT                            ║');
+  console.log('╠══════════════════════════════════════════════════════════════════╣');
+
+  console.log('\nData availability (Pass 1 → Pass 3):');
+  console.log('Symbol  │ Interval │ Before  │ After   │ Command Result');
+  console.log('────────┼──────────┼─────────┼─────────┼────────────────────────');
+
+  for (const symbol of symbols) {
+    for (const interval of intervals) {
+      const r = results[symbol][interval];
+      const before = r?.pass1 || 0;
+      const after = r?.pass3 !== undefined ? r.pass3 : before;
+      const cmdMsg = r?.command?.message?.substring(0, 25) || '-';
+      const status = before > 0 || after > 0 ? '✅' : '❌';
+      console.log(`${status} ${symbol.padEnd(5)} │ ${interval.padEnd(8)} │ ${String(before).padEnd(7)} │ ${String(after).padEnd(7)} │ ${cmdMsg}`);
+    }
+  }
+
+  // Analysis
+  console.log('\n🔍 ANALYSIS:');
+  const failures = [];
+  for (const symbol of symbols) {
+    for (const interval of intradayOnly) {
+      const r = results[symbol][interval];
+      if ((r?.pass1 || 0) === 0 && (r?.pass3 || 0) === 0) {
+        failures.push({ symbol, interval, command: r?.command });
+      }
+    }
+  }
+
+  if (failures.length > 0) {
+    console.log('\n⚠️ Intraday data NOT available after fetch attempt:');
+    failures.forEach(f => {
+      console.log(`  - ${f.symbol}:${f.interval} → ${f.command?.message || 'No command result'}`);
+    });
+    console.log('\n📋 Backend needs to investigate:');
+    console.log('  1. Are fetch jobs being created and completing?');
+    console.log('  2. Is Alpha Vantage returning intraday data?');
+    console.log('  3. Is the CHART command waiting for fetch to complete?');
+  } else {
+    console.log('\n✅ All symbols have intraday data available!');
+  }
+
+  console.log('\n╚══════════════════════════════════════════════════════════════════╝');
 }
 
 // Main
@@ -893,6 +1055,10 @@ async function runTests(testType) {
       case 'dataorder':
         await testDataOrder(ws, 'MSFT');
         await testDataOrder(ws, 'AAPL');
+        break;
+      case 'multi':
+        // Test multiple symbols for intraday data
+        await testMultiSymbolIntraday(ws);
         break;
       case 'all':
       default:
