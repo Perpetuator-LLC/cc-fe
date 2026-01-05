@@ -319,6 +319,7 @@ type Query {
     createdAt: DateTime
     job: ID
     order: ID
+    transactionType: String
     transactionUuid: UUID
     createdAfter: DateTime
     createdBefore: DateTime
@@ -1837,6 +1838,9 @@ type TransactionType implements Node {
   """User this transaction belongs to"""
   user: UserDataExport
 
+  """Type of transaction"""
+  transactionType: ApiTransactionTransactionTypeChoices!
+
   """
   Transaction description (e.g., 'Credit purchase', 'Episode generation')
   """
@@ -1854,10 +1858,41 @@ type TransactionType implements Node {
   """Order that created this transaction (if any)"""
   order: OrderType
 
+  """Command execution that triggered this transaction (if any)"""
+  commandExecution: CommandExecutionType
+
+  """Detailed breakdown of charges (e.g., tokens in/out, characters, etc.)"""
+  chargesBreakdown: JSONString
+
   """The ID of the object"""
   id: ID!
   uuid: UUID
   balance: Int
+  transactionTypeDisplay: String
+}
+
+"""An enumeration."""
+enum ApiTransactionTransactionTypeChoices {
+  """Credit Purchase"""
+  PURCHASE
+
+  """Credit Deduction"""
+  DEDUCTION
+
+  """Bonus Credits"""
+  BONUS
+
+  """Refund"""
+  REFUND
+
+  """Command Execution"""
+  COMMAND
+
+  """Job Execution"""
+  JOB
+
+  """Manual Adjustment"""
+  ADJUSTMENT
 }
 
 type UserSettingType implements Node {

@@ -2103,6 +2103,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     if (quote.low !== undefined) {
       lines.push(`Low: ${this.formatPrice(quote.low)}`);
     }
+    if (quote.previousClose !== undefined) {
+      lines.push(`Prev Close: ${this.formatPrice(quote.previousClose)}`);
+    }
     if (quote.volume !== undefined) {
       lines.push(`Volume: ${this.formatVolume(quote.volume)}`);
     }

@@ -416,40 +416,23 @@
             </div>
           </div>
 
-          <!-- Interval Controls - only for CHART command -->
-          @if (currentCommand() === 'CHART') {
-            <div class="chart-controls-bar">
-              <mat-form-field appearance="outline" class="control-field">
-                <mat-label>Interval</mat-label>
-                <mat-select
+          <!-- Content Container -->
+          <div class="content-container">
+            <!-- OHLC Header - always show for CHART command so user can change interval -->
+            @if (currentCommand() === 'CHART' && !chartLoading()) {
+              <div class="ohlc-header">
+                <!-- Interval selector -->
+                <select
+                  class="interval-select"
                   [value]="selectedInterval()"
-                  (selectionChange)="onIntervalChange($event.value)"
+                  (change)="onIntervalChange($any($event.target).value)"
                   [disabled]="chartLoading()"
                 >
                   @for (interval of intervalOptions(); track interval) {
-                    <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+                    <option [value]="interval">{{ formatInterval(interval) }}</option>
                   }
-                </mat-select>
-              </mat-form-field>
+                </select>
 
-              <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
-                <mat-icon>refresh</mat-icon>
-              </button>
-
-              <span class="zoom-hint">Scroll to zoom out for more history</span>
-            </div>
-          }
-
-          <!-- Content Container -->
-          <div class="content-container">
-            @if (chartLoading()) {
-              <div class="content-loading">
-                <mat-spinner diameter="40" />
-                <p>Loading {{ currentCommand() === 'GP' || currentCommand() === 'CHART' ? 'chart' : 'data' }}...</p>
-              </div>
-            } @else if (chartOptions() && (currentCommand() === 'GP' || currentCommand() === 'CHART')) {
-              <!-- OHLC Display at top of chart -->
-              <div class="ohlc-header">
                 @if (crosshairData(); as ohlc) {
                   <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
                   <span class="ohlc-label">O</span>
@@ -472,17 +455,20 @@
                     <span class="ohlc-label">Vol</span>
                     <span class="ohlc-value volume">{{ formatVolume(ohlc.volume) }}</span>
                   }
-                } @else {
+                } @else if (!chartError()) {
                   <span class="ohlc-hint">Hover on chart to see OHLC values</span>
                 }
 
-                <!-- Chart Toggles -->
+                <!-- Chart Toggles - using standard mat-icon-button (don't fight MD3 sizing) -->
                 <div class="chart-toggles">
+                  <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
                   <button
                     mat-icon-button
                     [matTooltip]="lockToRight() ? 'Locked to Right (Most Recent)' : 'Unlocked - Free Scroll'"
                     (click)="toggleLockToRight()"
-                    [class.active]="lockToRight()"
+                    [color]="lockToRight() ? 'primary' : undefined"
                   >
                     <mat-icon>{{ lockToRight() ? 'push_pin' : 'drag_pan' }}</mat-icon>
                   </button>
@@ -490,7 +476,7 @@
                     mat-icon-button
                     [matTooltip]="showLocalTime() ? 'Showing Local Time' : 'Showing Exchange Time'"
                     (click)="toggleLocalTime()"
-                    [class.active]="showLocalTime()"
+                    [color]="showLocalTime() ? 'primary' : undefined"
                   >
                     <mat-icon>{{ showLocalTime() ? 'schedule' : 'public' }}</mat-icon>
                   </button>
@@ -498,7 +484,7 @@
                     mat-icon-button
                     matTooltip="Extended Hours"
                     (click)="toggleExtendedHours()"
-                    [class.active]="showExtendedHours()"
+                    [color]="showExtendedHours() ? 'primary' : undefined"
                     [disabled]="true"
                   >
                     <mat-icon>nightlight</mat-icon>
@@ -507,14 +493,21 @@
                     mat-icon-button
                     matTooltip="Dividends Reinvested"
                     (click)="toggleDividendsReinvested()"
-                    [class.active]="showDividendsReinvested()"
+                    [color]="showDividendsReinvested() ? 'primary' : undefined"
                     [disabled]="true"
                   >
                     <mat-icon>paid</mat-icon>
                   </button>
                 </div>
               </div>
+            }
 
+            @if (chartLoading()) {
+              <div class="content-loading">
+                <mat-spinner diameter="40" />
+                <p>Loading {{ currentCommand() === 'GP' || currentCommand() === 'CHART' ? 'chart' : 'data' }}...</p>
+              </div>
+            } @else if (chartOptions() && (currentCommand() === 'GP' || currentCommand() === 'CHART')) {
               <!-- Chart area with loading indicator -->
               <div class="chart-area">
                 @if (loadingMoreData()) {

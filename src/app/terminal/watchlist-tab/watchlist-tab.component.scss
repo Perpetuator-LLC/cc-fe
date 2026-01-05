@@ -597,55 +597,23 @@
   .chart-actions {
     display: flex;
     gap: 8px;
-  }
-}
 
-// Chart Controls Bar (Interval selector)
-.chart-controls-bar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+    button {
+      min-width: auto;
+      padding: 4px 12px;
+      font-size: 12px;
 
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+        font-size: 16px;
+      }
 
-  background: var(--md-sys-color-surface-container);
-
-  .control-field {
-    width: 120px;
-
-    // Form field subscript hidden via global styles or appearance="outline" with no hints
-    .mat-mdc-form-field-subscript-wrapper {
-      display: none;
-    }
-  }
-
-  .zoom-hint {
-    margin-left: auto;
-    font-size: 12px;
-    font-style: italic;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-}
-
-// Chart Action Buttons styling
-.chart-header .chart-actions,
-.chart-controls-bar {
-  button {
-    min-width: auto;
-    padding: 4px 12px;
-    font-size: 12px;
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
-      font-size: 16px;
-    }
-
-    &.active {
-      color: var(--md-sys-color-on-primary-container);
-      background: var(--md-sys-color-primary-container);
+      &.active {
+        color: var(--md-sys-color-on-primary-container);
+        background: var(--md-sys-color-primary-container);
+      }
     }
   }
 }
@@ -673,7 +641,7 @@
   gap: 8px;
   align-items: center;
 
-  padding: 8px 12px;
+  padding: 4px 12px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
   font-size: 12px;
@@ -681,15 +649,36 @@
 
   background: var(--md-sys-color-surface-container);
 
+  // Native select styled to match MD3
+  .interval-select {
+    height: 28px;
+    padding: 4px 8px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 4px;
+
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface);
+
+    &:focus {
+      border-color: var(--md-sys-color-primary);
+      outline: none;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
   .ohlc-date {
-    margin-right: 12px;
+    margin-right: 8px;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
   }
 
   .ohlc-label {
     font-weight: 600;
-    color: var(--md-sys-color-on-surface-variant);
   }
 
   .ohlc-value {
@@ -712,33 +701,12 @@
 
   .ohlc-hint {
     font-style: italic;
-    color: var(--md-sys-color-on-surface-variant);
   }
 
+  // Let mat-icon-button use its default MD3 sizing
   .chart-toggles {
     display: flex;
-    gap: 4px;
     margin-left: auto;
-
-    button {
-      width: 28px;
-      height: 28px;
-      color: var(--md-sys-color-on-surface-variant);
-
-      mat-icon {
-        width: 18px;
-        height: 18px;
-        font-size: 18px;
-      }
-
-      &.active {
-        color: var(--md-sys-color-primary);
-      }
-
-      &:disabled {
-        opacity: 0.4;
-      }
-    }
   }
 }
 
