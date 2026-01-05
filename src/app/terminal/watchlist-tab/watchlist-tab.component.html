@@ -177,38 +177,34 @@
           <button
             mat-icon-button
             [matTooltip]="getSortTooltip('lastAccessedAt', 'Most Recent')"
-            [class.active]="sortBy() === 'lastAccessedAt'"
-            [class.asc]="sortBy() === 'lastAccessedAt' && sortDirection() === 'asc'"
+            [color]="sortBy() === 'lastAccessedAt' ? 'primary' : undefined"
             (click)="onSortChange('lastAccessedAt')"
           >
-            <mat-icon>schedule</mat-icon>
+            <mat-icon>{{ getSortIcon('lastAccessedAt', 'schedule') }}</mat-icon>
           </button>
           <button
             mat-icon-button
             [matTooltip]="getSortTooltip('marketCap', 'Market Cap')"
-            [class.active]="sortBy() === 'marketCap'"
-            [class.asc]="sortBy() === 'marketCap' && sortDirection() === 'asc'"
+            [color]="sortBy() === 'marketCap' ? 'primary' : undefined"
             (click)="onSortChange('marketCap')"
           >
-            <mat-icon>attach_money</mat-icon>
+            <mat-icon>{{ getSortIcon('marketCap', 'attach_money') }}</mat-icon>
           </button>
           <button
             mat-icon-button
             [matTooltip]="getSortTooltip('symbol', 'Symbol')"
-            [class.active]="sortBy() === 'symbol'"
-            [class.asc]="sortBy() === 'symbol' && sortDirection() === 'asc'"
+            [color]="sortBy() === 'symbol' ? 'primary' : undefined"
             (click)="onSortChange('symbol')"
           >
-            <mat-icon>sort_by_alpha</mat-icon>
+            <mat-icon>{{ getSortIcon('symbol', 'sort_by_alpha') }}</mat-icon>
           </button>
           <button
             mat-icon-button
             [matTooltip]="getSortTooltip('accessCount', 'Access Count')"
-            [class.active]="sortBy() === 'accessCount'"
-            [class.asc]="sortBy() === 'accessCount' && sortDirection() === 'asc'"
+            [color]="sortBy() === 'accessCount' ? 'primary' : undefined"
             (click)="onSortChange('accessCount')"
           >
-            <mat-icon>bar_chart</mat-icon>
+            <mat-icon>{{ getSortIcon('accessCount', 'bar_chart') }}</mat-icon>
           </button>
         </div>
 
