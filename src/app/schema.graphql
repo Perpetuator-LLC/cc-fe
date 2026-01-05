@@ -329,7 +329,7 @@ type Query {
 
     """Ordering"""
     orderBy: String
-  ): TransactionTypeConnection
+  ): TransactionNodeConnection
 
   """List of Orders [Relay]"""
   orders(
@@ -353,7 +353,7 @@ type Query {
 
     """Ordering"""
     orderBy: String
-  ): OrderTypeConnection
+  ): OrderNodeConnection
 
   """List of Codes [Relay]"""
   codes(
@@ -384,7 +384,7 @@ type Query {
 
     """Ordering"""
     orderBy: String
-  ): CodeTypeConnection
+  ): CodeNodeConnection
   hasPaidOrder: Boolean
   user: UserDetails
   userSettings(keys: [String]!): UserSettingsType
@@ -1349,8 +1349,8 @@ type UserDataExport {
   teams: [TeamType!]
   podcasts: [PodcastType!]
   episodes: [EpisodeType!]
-  orders: [OrderType!]
-  transactions: [TransactionType!]
+  orders: [OrderNode!]
+  transactions: [TransactionNode!]
   settings: [UserSettingType!]
 }
 
@@ -1787,8 +1787,8 @@ type SourceType implements Node {
   uuid: UUID
 }
 
-"""OrderType is a GraphQL type that represents an order."""
-type OrderType implements Node {
+"""OrderNode is a GraphQL type that represents an order."""
+type OrderNode implements Node {
   """User who placed this order"""
   user: UserDataExport
 
@@ -1833,8 +1833,8 @@ enum ApiOrderStatusChoices {
   CANCELED
 }
 
-"""TransactionType is a GraphQL type that represents a transaction."""
-type TransactionType implements Node {
+"""TransactionNode is a GraphQL type that represents a transaction."""
+type TransactionNode implements Node {
   """User this transaction belongs to"""
   user: UserDataExport
 
@@ -1856,7 +1856,7 @@ type TransactionType implements Node {
   job: JobType
 
   """Order that created this transaction (if any)"""
-  order: OrderType
+  order: OrderNode
 
   """Command execution that triggered this transaction (if any)"""
   commandExecution: CommandExecutionType
@@ -2815,59 +2815,59 @@ type VoiceTypeEdge {
   cursor: String!
 }
 
-type TransactionTypeConnection {
+type TransactionNodeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
 
   """Contains the nodes in this connection."""
-  edges: [TransactionTypeEdge]!
+  edges: [TransactionNodeEdge]!
 }
 
-"""A Relay edge containing a `TransactionType` and its cursor."""
-type TransactionTypeEdge {
+"""A Relay edge containing a `TransactionNode` and its cursor."""
+type TransactionNodeEdge {
   """The item at the end of the edge"""
-  node: TransactionType
+  node: TransactionNode
 
   """A cursor for use in pagination"""
   cursor: String!
 }
 
-type OrderTypeConnection {
+type OrderNodeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
 
   """Contains the nodes in this connection."""
-  edges: [OrderTypeEdge]!
+  edges: [OrderNodeEdge]!
 }
 
-"""A Relay edge containing a `OrderType` and its cursor."""
-type OrderTypeEdge {
+"""A Relay edge containing a `OrderNode` and its cursor."""
+type OrderNodeEdge {
   """The item at the end of the edge"""
-  node: OrderType
+  node: OrderNode
 
   """A cursor for use in pagination"""
   cursor: String!
 }
 
-type CodeTypeConnection {
+type CodeNodeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
 
   """Contains the nodes in this connection."""
-  edges: [CodeTypeEdge]!
+  edges: [CodeNodeEdge]!
 }
 
-"""A Relay edge containing a `CodeType` and its cursor."""
-type CodeTypeEdge {
+"""A Relay edge containing a `CodeNode` and its cursor."""
+type CodeNodeEdge {
   """The item at the end of the edge"""
-  node: CodeType
+  node: CodeNode
 
   """A cursor for use in pagination"""
   cursor: String!
 }
 
-"""CodeType is a GraphQL type that represents a bonus code."""
-type CodeType implements Node {
+"""CodeNode is a GraphQL type that represents a bonus code."""
+type CodeNode implements Node {
   """Redemption code (must be unique)"""
   code: String!
   creator: PublicUserType
@@ -4423,14 +4423,14 @@ Refresh the status of a pending order. This will check the Stripe session status
 type RefreshOrder {
   success: Boolean
   message: String
-  order: OrderType
+  order: OrderNode
 }
 
 """Cancel a pending order. This will cancel the Stripe session."""
 type CancelOrder {
   success: Boolean
   message: String
-  order: OrderType
+  order: OrderNode
 }
 
 """
@@ -4440,7 +4440,7 @@ Input amount of 10000 = $100.00 which will be converted to 100,000 credits.
 type CreateStripeCheckoutSession {
   success: Boolean
   message: String
-  order: OrderType
+  order: OrderNode
 }
 
 """Grant credits to all existing users. Admin only."""

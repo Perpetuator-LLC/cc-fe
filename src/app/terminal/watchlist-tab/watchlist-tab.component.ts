@@ -910,27 +910,38 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle sort option change - implements tri-state cycling: desc → asc → none
+   * Get the icon to display for a sort button, showing direction indicator when active
+   */
+  getSortIcon(sort: string, baseIcon: string): string {
+    if (this.sortBy() === sort) {
+      // Active sort - show direction indicator
+      return this.sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    }
+    return baseIcon;
+  }
+
+  /**
+   * Handle sort option change - implements tri-state cycling: asc → desc → off
    */
   onSortChange(sort: 'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt'): void {
     const currentSort = this.sortBy();
     const currentDirection = this.sortDirection();
 
     if (currentSort === sort) {
-      // Same sort clicked - cycle through desc → asc → none
-      if (currentDirection === 'desc') {
-        this.sortDirection.set('asc');
-      } else if (currentDirection === 'asc') {
+      // Same sort clicked - cycle through asc → desc → off
+      if (currentDirection === 'asc') {
+        this.sortDirection.set('desc');
+      } else if (currentDirection === 'desc') {
         this.sortBy.set(null);
         this.sortDirection.set(null);
       } else {
-        // Was null, start with desc
-        this.sortDirection.set('desc');
+        // Was null, start with asc
+        this.sortDirection.set('asc');
       }
     } else {
-      // Different sort clicked - set to desc
+      // Different sort clicked - start with asc
       this.sortBy.set(sort);
-      this.sortDirection.set('desc');
+      this.sortDirection.set('asc');
     }
 
     // For Recent watchlist, reload from backend with new sort order
