@@ -166,10 +166,9 @@
   }
 }
 
-// Sort Options Bar
+// Sort Options Bar - let mat-icon-button use default MD3 sizing
 .sort-options {
   display: flex;
-  gap: 4px;
   align-items: center;
   justify-content: flex-end;
 
@@ -177,41 +176,6 @@
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
   background: var(--md-sys-color-surface-container);
-
-  button {
-    position: relative;
-    width: 32px;
-    height: 32px;
-
-    mat-icon {
-      width: 18px;
-      height: 18px;
-      margin: 0;
-      font-size: 18px;
-    }
-
-    &.active {
-      color: var(--md-sys-color-primary);
-      background: var(--md-sys-color-primary-container);
-
-      // Show descending arrow by default when active
-      &::after {
-        content: '▼';
-
-        position: absolute;
-        right: 4px;
-        bottom: 4px;
-
-        font-size: 10px;
-        color: var(--md-sys-color-primary);
-      }
-
-      // Show ascending arrow when asc class is applied
-      &.asc::after {
-        content: '▲';
-      }
-    }
-  }
 }
 
 // Symbol List
