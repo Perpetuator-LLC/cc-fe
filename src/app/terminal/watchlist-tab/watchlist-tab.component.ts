@@ -1280,7 +1280,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         ]);
         if (pointInGrid) {
           const dataIndex = Math.round(pointInGrid[0]);
-          if (dataIndex >= 0) {
+          // Get current data length from chart for bounds checking
+          const instanceOption = chart.getOption();
+          const series = instanceOption?.series;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const candleSeries = Array.isArray(series) ? series.find((s: any) => s.type === 'candlestick') : null;
+          const dataLength = candleSeries?.data?.length || 0;
+
+          if (dataIndex >= 0 && dataIndex < dataLength) {
             this.updateCrosshairOHLC(dataIndex);
             this.lastCrosshairDataIndex = dataIndex;
 
@@ -1292,6 +1299,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               x: this.lastMousePosition.offsetX,
               y: this.lastMousePosition.offsetY,
             });
+          } else {
+            // Index out of bounds - clear crosshair
+            this.crosshairData.set(null);
           }
         }
       }
@@ -1332,37 +1342,57 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   /**
    * Update OHLC display from crosshair position
+   * Uses the chart instance directly to ensure data is in sync after progressive loading
    */
   private updateCrosshairOHLC(dataIndex: number): void {
-    const options = this.chartOptions();
-    if (!options) return;
+    // Use chart instance directly to get current data (more reliable than signal after updates)
+    if (!this.chartInstance) return;
 
-    // Get series data - candlestick format is [open, close, low, high]
+    const instanceOption = this.chartInstance.getOption();
+    if (!instanceOption) return;
+
+    // Get series data from the chart instance
+    const series = instanceOption.series;
+    if (!series || !Array.isArray(series) || series.length === 0) return;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const series = options.series as any[];
-    if (!series || series.length === 0) return;
-
-    const candlestickSeries = series.find((s) => s.type === 'candlestick');
+    const candlestickSeries = series.find((s: any) => s.type === 'candlestick');
     if (!candlestickSeries?.data) return;
 
-    const candleData = candlestickSeries.data[dataIndex];
-    if (!candleData || !Array.isArray(candleData)) return;
+    // Validate data index bounds
+    const dataLength = candlestickSeries.data.length;
+    if (dataIndex < 0 || dataIndex >= dataLength) {
+      // Index out of bounds - clear crosshair data
+      this.crosshairData.set(null);
+      return;
+    }
 
-    // Get the date from xAxis data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const xAxis = options.xAxis as any;
+    const candleData = candlestickSeries.data[dataIndex];
+    if (!candleData || !Array.isArray(candleData)) {
+      this.crosshairData.set(null);
+      return;
+    }
+
+    // Get the date from xAxis data (from chart instance)
+    const xAxis = instanceOption.xAxis;
     const xAxisData = Array.isArray(xAxis) ? xAxis[0]?.data : xAxis?.data;
-    const dateStr = xAxisData?.[dataIndex];
+
+    if (!xAxisData || dataIndex >= xAxisData.length) {
+      this.crosshairData.set(null);
+      return;
+    }
+
+    const dateStr = xAxisData[dataIndex];
 
     // ECharts candlestick data format: [open, close, low, high]
     const [open, close, low, high] = candleData;
     const isPositive = close >= open;
 
-    // Get volume if available
+    // Get volume from rawCandleData since we don't have a volume series in the chart
     let volume: number | undefined;
-    const volumeSeries = series.find((s) => s.type === 'bar' && s.name?.toLowerCase().includes('volume'));
-    if (volumeSeries?.data?.[dataIndex]) {
-      volume = volumeSeries.data[dataIndex];
+    const candles = this.rawCandleData();
+    if (candles && dataIndex < candles.length && candles[dataIndex]?.volume) {
+      volume = candles[dataIndex].volume;
     }
 
     this.crosshairData.set({
@@ -1557,8 +1587,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       newEnd = 100;
     }
 
-    // Update ONLY the data and zoom - use setOption directly on the instance
-    // This avoids any signal-based re-rendering
+    // Clear crosshair data before update to prevent stale data display
+    this.crosshairData.set(null);
+    this.lastCrosshairDataIndex = -1;
+
+    // Update the data and zoom - only update the candlestick series (index 0)
+    // Note: The chart only has one series (candlestick) created by buildChartFromCandles
     this.chartInstance.setOption(
       {
         xAxis: { data: xAxisData },
@@ -1568,30 +1602,31 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       { notMerge: false, lazyUpdate: false },
     );
 
-    // Update crosshair position after data load (data indices have changed)
-    if (this.lastMousePosition) {
-      // Reset the last data index so it will update
-      this.lastCrosshairDataIndex = -1;
-      const pointInGrid = this.chartInstance.convertFromPixel({ seriesIndex: 0 }, [
-        this.lastMousePosition.offsetX,
-        this.lastMousePosition.offsetY,
-      ]);
-      if (pointInGrid) {
-        const dataIndex = Math.round(pointInGrid[0]);
-        if (dataIndex >= 0) {
-          this.updateCrosshairOHLC(dataIndex);
-          this.lastCrosshairDataIndex = dataIndex;
+    // Wait for chart to finish rendering before updating crosshair
+    // Use setTimeout to ensure the chart has processed the new data
+    setTimeout(() => {
+      if (this.lastMousePosition && this.chartInstance) {
+        const pointInGrid = this.chartInstance.convertFromPixel({ seriesIndex: 0 }, [
+          this.lastMousePosition.offsetX,
+          this.lastMousePosition.offsetY,
+        ]);
+        if (pointInGrid) {
+          const dataIndex = Math.round(pointInGrid[0]);
+          if (dataIndex >= 0 && dataIndex < candles.length) {
+            this.updateCrosshairOHLC(dataIndex);
+            this.lastCrosshairDataIndex = dataIndex;
 
-          // Move the visual crosshair lines to the new data position
-          this.chartInstance.dispatchAction({
-            type: 'updateAxisPointer',
-            currTrigger: 'mousemove',
-            x: this.lastMousePosition.offsetX,
-            y: this.lastMousePosition.offsetY,
-          });
+            // Move the visual crosshair lines to the new data position
+            this.chartInstance.dispatchAction({
+              type: 'updateAxisPointer',
+              currTrigger: 'mousemove',
+              x: this.lastMousePosition.offsetX,
+              y: this.lastMousePosition.offsetY,
+            });
+          }
         }
       }
-    }
+    }, 50);
   }
 
   /**
