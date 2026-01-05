@@ -51,61 +51,27 @@
   gap: 8px;
   align-items: center;
 
-  padding: 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
+  // Watchlist selector - use mat-button styling with minimal overrides
   .watchlist-selector-btn {
-    overflow: hidden;
-    display: flex;
     flex: 1;
-    gap: 8px;
-    align-items: center;
     justify-content: flex-start;
-
     min-width: 0;
-    padding: 8px 12px;
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: 8px;
-
-    background: var(--md-sys-color-surface);
 
     .watchlist-name {
       overflow: hidden;
       flex: 1;
 
-      font-size: 14px;
       text-align: left;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .dropdown-icon {
-      flex-shrink: 0;
-
-      width: 24px;
-      height: 24px;
-      margin-right: 0;
       margin-left: auto;
-
-      font-size: 24px;
     }
-
-    mat-icon:first-child {
-      flex-shrink: 0;
-
-      width: 18px;
-      height: 18px;
-      margin-right: 0;
-
-      font-size: 18px;
-    }
-  }
-
-  mat-icon {
-    width: 18px;
-    height: 18px;
-    margin-right: 8px;
-    font-size: 18px;
   }
 }
 
@@ -118,52 +84,6 @@
   color: var(--md-sys-color-on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-// Watchlist menu item with actions
-.watchlist-menu-item {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-
-  min-width: 200px;
-
-  .watchlist-menu-content {
-    cursor: pointer;
-
-    overflow: hidden;
-    display: flex;
-    flex: 1;
-    flex-shrink: 1;
-    gap: 8px;
-    align-items: center;
-
-    span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
-  .watchlist-actions-btn {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    opacity: 0.6;
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-
-    &:hover {
-      opacity: 1;
-    }
-  }
 }
 
 // Sort Options Bar - let mat-icon-button use default MD3 sizing
@@ -336,19 +256,12 @@
       background: var(--md-sys-color-surface-container-high);
     }
 
+    // Let mat-icon-button use default sizing
     .action-btn {
-      width: 28px;
-      height: 28px;
+      opacity: 0.7;
 
-      mat-icon {
-        width: 18px;
-        height: 18px;
-        font-size: 18px;
-        color: var(--md-sys-color-on-surface-variant);
-      }
-
-      &:hover mat-icon {
-        color: var(--md-sys-color-on-surface);
+      &:hover {
+        opacity: 1;
       }
     }
   }

@@ -312,6 +312,63 @@ button {
 | Standard buttons | `mat-button`, `mat-flat-button`, etc. |
 | Compact icon actions | `mat-icon-button` (don't resize!) |
 | Toggle options | `mat-button-toggle-group` |
+| Dropdown menus | `mat-menu` with `mat-menu-item` |
+
+### Menus and Menu Items (`mat-menu`, `mat-menu-item`)
+```scss
+// ❌ BAD - Fighting MD3 menu sizing
+.my-menu-item {
+  min-width: 200px;
+  padding: 8px 16px;
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// ✅ GOOD - Let Material handle menu styling
+// Only override for layout (flex), not sizing
+.my-menu-item {
+  display: flex;
+  justify-content: space-between;
+  
+  .menu-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+```
+
+```html
+<!-- ❌ BAD - Embedding buttons inside menu items breaks layout -->
+<div mat-menu-item class="custom-menu-item">
+  <span>Item Name</span>
+  <button mat-icon-button (click)="action()">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+</div>
+
+<!-- ✅ GOOD - Use submenu for actions -->
+<button mat-menu-item [matMenuTriggerFor]="actionsMenu">
+  <mat-icon>folder</mat-icon>
+  <span>Item Name</span>
+</button>
+<mat-menu #actionsMenu="matMenu">
+  <button mat-menu-item (click)="view()">View</button>
+  <button mat-menu-item (click)="edit()">Edit</button>
+  <button mat-menu-item (click)="delete()">Delete</button>
+</mat-menu>
+```
+
+### Active/Selected State in Buttons
+```html
+<!-- ❌ BAD - Custom .active class with manual styling -->
+<button mat-icon-button [class.active]="isActive()">
+
+<!-- ✅ GOOD - Use Material's color binding -->
+<button mat-icon-button [color]="isActive() ? 'primary' : undefined">
+```
 
 ## MD3 Theming Architecture
 

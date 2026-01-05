@@ -29,42 +29,33 @@
               <span>Recent ({{ (watchlistService.recentSymbols() || []).length }})</span>
             </div>
             @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
-              <div mat-menu-item class="watchlist-menu-item" [class.active]="selectedWatchlistId() === watchlist.uuid">
-                <div
-                  class="watchlist-menu-content"
-                  (click)="onWatchlistChange(watchlist.uuid)"
-                  (keydown.enter)="onWatchlistChange(watchlist.uuid)"
-                  tabindex="0"
-                  role="button"
-                >
-                  <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
-                  <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
-                </div>
-                <button
-                  mat-icon-button
-                  class="watchlist-actions-btn"
-                  [matMenuTriggerFor]="watchlistActionsMenu"
-                  (click)="$event.stopPropagation()"
-                  matTooltip="Watchlist Actions"
-                >
-                  <mat-icon>more_vert</mat-icon>
+              <button
+                mat-menu-item
+                [matMenuTriggerFor]="watchlistActionsMenu"
+                [class.active]="selectedWatchlistId() === watchlist.uuid"
+              >
+                <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
+                <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
+              </button>
+              <mat-menu #watchlistActionsMenu="matMenu">
+                <button mat-menu-item (click)="onWatchlistChange(watchlist.uuid)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
                 </button>
-                <mat-menu #watchlistActionsMenu="matMenu">
-                  <button mat-menu-item (click)="openRenameDialog(watchlist)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Rename</span>
-                  </button>
-                  <button mat-menu-item (click)="openDuplicateDialog(watchlist)">
-                    <mat-icon>content_copy</mat-icon>
-                    <span>Duplicate</span>
-                  </button>
-                  <mat-divider />
-                  <button mat-menu-item (click)="deleteWatchlist(watchlist)" class="delete-action">
-                    <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
-                  </button>
-                </mat-menu>
-              </div>
+                <button mat-menu-item (click)="openRenameDialog(watchlist)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Rename</span>
+                </button>
+                <button mat-menu-item (click)="openDuplicateDialog(watchlist)">
+                  <mat-icon>content_copy</mat-icon>
+                  <span>Duplicate</span>
+                </button>
+                <mat-divider />
+                <button mat-menu-item (click)="deleteWatchlist(watchlist)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
             }
 
             <!-- Categories Section -->
