@@ -3,7 +3,7 @@
  * Test WebSocket GraphQL connection to the backend
  *
  * Usage:
- *   node scripts/test-ws-graphql-v2.cjs [all|quote|chart|progressive|history|execute|intervals|commands|watchlist]
+ *   node scripts/test-ws-graphql-v2.cjs [all|quote|chart|progressive|history|execute|intervals|hourly|commands|watchlist|dataorder]
  *
  * Copyright (c) 2025-2026 Perpetuator LLC
  */
@@ -704,7 +704,7 @@ async function testDataOrder(ws, symbol = 'MSFT') {
 }
 
 async function testIntervals(ws, symbol = 'AAPL') {
-  const intervals = ['DAILY', 'WEEKLY', 'MONTHLY', 'HOURLY', 'MIN_5', 'MIN_15'];
+  const intervals = ['DAILY', 'WEEKLY', 'MONTHLY', 'HOURLY', 'MIN_60', 'MIN_30', 'MIN_15', 'MIN_5', 'MIN_1'];
   console.log(`\n--- Testing Intervals for ${symbol} ---`);
 
   for (const interval of intervals) {
@@ -715,7 +715,7 @@ async function testIntervals(ws, symbol = 'AAPL') {
       if (data?.edges?.length > 0) {
         console.log(`  ✅ ${interval}: ${data.totalCount} total, got ${data.edges.length}`);
       } else if (data) {
-        console.log(`  ⚠️  ${interval}: No data available`);
+        console.log(`  ⚠️  ${interval}: No data available (totalCount: ${data.totalCount})`);
       } else {
         console.log(`  ❌ ${interval}: Query failed`, result?.errors?.[0]?.message || 'Unknown error');
       }
@@ -723,6 +723,122 @@ async function testIntervals(ws, symbol = 'AAPL') {
       console.log(`  ❌ ${interval}: ${String(error)}`);
     }
   }
+}
+
+async function testHourlyDetailed(ws, symbol = 'AAPL') {
+  console.log(`\n--- Detailed Hourly Interval Investigation for ${symbol} ---`);
+
+  // Test 1: Check chartDataAvailability
+  console.log('\n1. Checking chartDataAvailability for HOURLY...');
+  const CHART_AVAILABILITY = `
+    query ChartDataAvailability($symbol: String!, $interval: StockPriceInterval) {
+      chartDataAvailability(symbol: $symbol, interval: $interval) {
+        symbol
+        interval
+        oldestDate
+        newestDate
+        totalRecords
+        lastUpdated
+      }
+    }
+  `;
+
+  try {
+    const availResult = await sendQuery(ws, 'avail_hourly', CHART_AVAILABILITY, { symbol, interval: 'HOURLY' });
+    const avail = availResult?.data?.chartDataAvailability;
+    if (avail) {
+      const hasData = avail.totalRecords > 0;
+      console.log(`   hasData: ${hasData}`);
+      console.log(`   totalRecords: ${avail.totalRecords}`);
+      console.log(`   oldestDate: ${avail.oldestDate}`);
+      console.log(`   newestDate: ${avail.newestDate}`);
+      console.log(`   lastUpdated: ${avail.lastUpdated}`);
+    } else {
+      console.log(`   Response: ${JSON.stringify(availResult, null, 2)}`);
+    }
+  } catch (error) {
+    console.log(`   Error: ${error.message}`);
+  }
+
+  // Test 2: Also check MIN_60 (might be an alias)
+  console.log('\n2. Checking chartDataAvailability for MIN_60...');
+  try {
+    const availResult = await sendQuery(ws, 'avail_min60', CHART_AVAILABILITY, { symbol, interval: 'MIN_60' });
+    const avail = availResult?.data?.chartDataAvailability;
+    if (avail) {
+      const hasData = avail.totalRecords > 0;
+      console.log(`   hasData: ${hasData}`);
+      console.log(`   totalRecords: ${avail.totalRecords}`);
+      console.log(`   lastUpdated: ${avail.lastUpdated}`);
+    } else {
+      console.log(`   Response: ${JSON.stringify(availResult, null, 2)}`);
+    }
+  } catch (error) {
+    console.log(`   Error: ${error.message}`);
+  }
+
+  // Test 3: Try DAILY to confirm it works
+  console.log('\n3. Checking chartDataAvailability for DAILY (control)...');
+  try {
+    const availResult = await sendQuery(ws, 'avail_daily', CHART_AVAILABILITY, { symbol, interval: 'DAILY' });
+    const avail = availResult?.data?.chartDataAvailability;
+    if (avail) {
+      const hasData = avail.totalRecords > 0;
+      console.log(`   hasData: ${hasData}`);
+      console.log(`   totalRecords: ${avail.totalRecords}`);
+      console.log(`   oldestDate: ${avail.oldestDate}`);
+      console.log(`   newestDate: ${avail.newestDate}`);
+    } else {
+      console.log(`   Response: ${JSON.stringify(availResult, null, 2)}`);
+    }
+  } catch (error) {
+    console.log(`   Error: ${error.message}`);
+  }
+
+  // Test 4: Try execute command with hourly
+  console.log('\n4. Testing CHART command with hourly interval...');
+  try {
+    const cmdResult = await sendQuery(ws, 'exec_hourly', EXECUTE_COMMAND_MUTATION, {
+      input: `STOCK:NASDAQ:${symbol} COMMAND:CHART -interval hourly`
+    });
+    const exec = cmdResult?.data?.executeCommand;
+    if (exec) {
+      console.log(`   success: ${exec.success}`);
+      console.log(`   message: ${exec.message}`);
+      if (exec.result?.chartOptions?.series) {
+        const candleSeries = exec.result.chartOptions.series.find(s => s.type === 'candlestick');
+        console.log(`   candlestick data points: ${candleSeries?.data?.length || 0}`);
+      }
+      if (exec.result?.metadata) {
+        console.log(`   metadata: ${JSON.stringify(exec.result.metadata)}`);
+      }
+    } else {
+      console.log(`   Response: ${JSON.stringify(cmdResult, null, 2)}`);
+    }
+  } catch (error) {
+    console.log(`   Error: ${error.message}`);
+  }
+
+  // Test 5: Direct stockPriceConnection query for each intraday interval
+  console.log('\n5. Testing stockPriceConnection directly for intraday intervals...');
+  const intradayIntervals = ['HOURLY', 'MIN_60', 'MIN_30', 'MIN_15', 'MIN_5', 'MIN_1'];
+  for (const interval of intradayIntervals) {
+    try {
+      const result = await sendQuery(ws, `spc_${interval}`, STOCK_PRICE_CONNECTION, { symbol, interval, first: 3 });
+      const data = result?.data?.stockPriceConnection;
+      if (data?.edges?.length > 0) {
+        console.log(`   ✅ ${interval}: ${data.totalCount} total, got ${data.edges.length} (newest: ${data.edges[0]?.node?.date})`);
+      } else if (data) {
+        console.log(`   ⚠️  ${interval}: totalCount=${data.totalCount}, edges=${data.edges?.length || 0}`);
+      } else {
+        console.log(`   ❌ ${interval}: ${result?.errors?.[0]?.message || 'No data returned'}`);
+      }
+    } catch (error) {
+      console.log(`   ❌ ${interval}: ${error.message}`);
+    }
+  }
+
+  console.log('\n--- End Detailed Hourly Investigation ---');
 }
 
 // Main
@@ -757,6 +873,9 @@ async function runTests(testType) {
         break;
       case 'intervals':
         await testIntervals(ws, 'AAPL');
+        break;
+      case 'hourly':
+        await testHourlyDetailed(ws, 'AAPL');
         break;
       case 'history':
         await testCommandHistory(ws);

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';
@@ -24,6 +24,22 @@ export interface UserOrder {
   sessionUrl: string;
 }
 
+/** Transaction type values from backend enum */
+export type TransactionTypeValue = 'PURCHASE' | 'DEDUCTION' | 'BONUS' | 'REFUND' | 'COMMAND' | 'JOB' | 'ADJUSTMENT';
+
+/** Breakdown of charges for AI/command transactions */
+export interface ChargeBreakdown {
+  service: string;
+  units: number;
+}
+
+/** Command execution that triggered a transaction */
+export interface CommandExecutionRef {
+  uuid: string;
+  parsedCommand: string;
+  creditsCharged: number;
+}
+
 export interface UserTransaction {
   id: string;
   uuid: string;
@@ -31,10 +47,24 @@ export interface UserTransaction {
   description: string;
   creditAmount: number;
   balance: number;
-  job: {
+  /** Type of transaction: PURCHASE, DEDUCTION, BONUS, REFUND, COMMAND, JOB, ADJUSTMENT */
+  transactionType: TransactionTypeValue;
+  /** Human-readable display name for the transaction type */
+  transactionTypeDisplay: string;
+  /** Detailed breakdown of charges (tokens, characters, etc.) - JSON parsed */
+  chargesBreakdown?: ChargeBreakdown[];
+  job?: {
     id: string;
+    uuid: string;
     kind: string;
   };
+  order?: {
+    uuid: string;
+    amount: number;
+    status: string;
+  };
+  /** Command execution that triggered this transaction (if any) */
+  commandExecution?: CommandExecutionRef;
 }
 
 interface GetUserCreditsResponse {
@@ -68,8 +98,8 @@ const GET_ORDERS = gql`
 `;
 
 const GET_TRANSACTIONS = gql`
-  query GetTransactions($first: Int!, $after: String, $orderBy: String) {
-    transactions(first: $first, after: $after, orderBy: $orderBy) {
+  query GetTransactions($first: Int!, $after: String, $orderBy: String, $transactionType: String) {
+    transactions(first: $first, after: $after, orderBy: $orderBy, transactionType: $transactionType) {
       edges {
         node {
           id
@@ -78,10 +108,23 @@ const GET_TRANSACTIONS = gql`
           description
           creditAmount
           balance
+          transactionType
+          transactionTypeDisplay
+          chargesBreakdown
           job {
             id
             uuid
             kind
+          }
+          order {
+            uuid
+            amount
+            status
+          }
+          commandExecution {
+            uuid
+            parsedCommand
+            creditsCharged
           }
         }
         cursor
@@ -177,21 +220,48 @@ export class CreditService extends BaseService implements OnDestroy {
     this.queryRef.refetch();
   }
 
-  getTransactions(first = 10, after: string | null = null, sort = 'createdAt', direction = 'DESC') {
+  getTransactions(
+    first = 10,
+    after: string | null = null,
+    sort = 'createdAt',
+    direction = 'DESC',
+    transactionType: string | null = null,
+  ) {
     const orderBy = direction === 'DESC' ? `-${sort}` : sort;
 
+    // Raw response from GraphQL - chargesBreakdown is a JSON string
+    interface RawTransaction extends Omit<UserTransaction, 'chargesBreakdown'> {
+      chargesBreakdown?: string | ChargeBreakdown[];
+    }
+
     interface Response {
-      transactions: RelayConnection<UserTransaction>;
+      transactions: RelayConnection<RawTransaction>;
     }
 
     return this.query<Response>({
       query: GET_TRANSACTIONS,
-      variables: { first, after, orderBy },
+      variables: { first, after, orderBy, transactionType },
       fetchPolicy: 'network-only',
     }).pipe(
       map(({ transactions }) => {
         return {
-          transactions: transactions.edges.map((edge) => edge.node),
+          transactions: transactions.edges.map((edge) => {
+            const node = edge.node;
+            // Parse chargesBreakdown JSON if present
+            let chargesBreakdown: ChargeBreakdown[] | undefined;
+            if (node.chargesBreakdown) {
+              try {
+                chargesBreakdown =
+                  typeof node.chargesBreakdown === 'string' ? JSON.parse(node.chargesBreakdown) : node.chargesBreakdown;
+              } catch {
+                chargesBreakdown = undefined;
+              }
+            }
+            return {
+              ...node,
+              chargesBreakdown,
+            } as UserTransaction;
+          }),
           pageInfo: transactions.pageInfo,
         };
       }),
