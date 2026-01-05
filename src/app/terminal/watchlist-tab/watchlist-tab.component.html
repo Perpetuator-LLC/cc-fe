@@ -410,6 +410,7 @@
               <div class="ohlc-header">
                 <!-- Interval selector using mat-select for proper Angular binding -->
                 <mat-form-field appearance="outline" class="interval-field" subscriptSizing="dynamic">
+                  <mat-label>Interval</mat-label>
                   <mat-select
                     [value]="selectedInterval()"
                     (selectionChange)="onIntervalChange($event.value)"
