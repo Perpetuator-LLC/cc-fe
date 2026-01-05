@@ -84,6 +84,9 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   isFocused = signal(false); // Track if input is focused
   showHistoryPreview = signal(false); // Show floating history above input
 
+  // Store the original input before navigating history (to restore on escape/down past end)
+  private originalInputBeforeHistory = '';
+
   // True if user has typed something or has chips (not just showing last command)
   hasUserContent = computed(() => {
     return this.chips().length > 0 || this.currentInput().trim().length > 0;
@@ -94,18 +97,44 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     return !this.isFocused() && !this.hasUserContent() && this.lastCommandTokens().length > 0;
   });
 
+  // Rolodex-style history: show items ABOVE current selection (older items, what's next on up arrow)
+  // Returns empty when at oldest item or not navigating
+  upcomingHistoryItems = computed<MatchedHistoryEntry[]>(() => {
+    const history = this.recentHistory();
+    const selectedIdx = this.selectedHistoryIndex();
+
+    // Not navigating history - don't show upcoming
+    if (selectedIdx < 0 || history.length === 0) {
+      return [];
+    }
+
+    // Return items from index 0 to selectedIdx - 1 (items above current selection)
+    // These are the "older" items that will be selected with more up arrows
+    if (selectedIdx <= 0) {
+      return []; // At oldest item, nothing above
+    }
+
+    // Get items above (older than) current selection, limited to 3 for a clean look
+    const itemsAbove = history.slice(Math.max(0, selectedIdx - 3), selectedIdx);
+    return itemsAbove;
+  });
+
   // Track the search term for history substring matching
   historySearchTerm = signal('');
 
   // Selected history index for up/down navigation within matched history
   selectedHistoryIndex = signal(-1);
 
+  // History loading state
+  historyLoading = signal(false);
+  historyEmpty = signal(false); // True when we've confirmed there's no history
+
   // History items from WebSocket search
   private wsHistoryResults = signal<HistorySearchResult[]>([]);
   private currentHistoryQuery = ''; // Track the current query
 
   // Get history items - either from WebSocket search or local fallback
-  // Limited to 5 items, reversed so most recent is at bottom (closest to input)
+  // Limited to 4 items for rolodex display, reversed so most recent is at bottom (closest to input)
   recentHistory = computed<MatchedHistoryEntry[]>(() => {
     const searchTerm = this.historySearchTerm().toLowerCase().trim();
     const wsResults = this.wsHistoryResults();
@@ -113,7 +142,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     // If we have WebSocket results, use them
     if (wsResults.length > 0) {
       return wsResults
-        .slice(0, 5)
+        .slice(0, 4)
         .reverse()
         .map((result) => {
           const tokens = FqnUtils.parseCommand(result.rawInput);
@@ -158,8 +187,8 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       filtered = fullHistory;
     }
 
-    // Take most recent 5 entries and reverse
-    const recent = filtered.slice(0, 5).reverse();
+    // Take most recent 4 entries and reverse
+    const recent = filtered.slice(0, 4).reverse();
 
     return recent.map((item) => {
       const tokens = FqnUtils.parseCommand(item.rawInput);
@@ -259,7 +288,10 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
         .pipe(filter((response) => response.query === this.currentHistoryQuery))
         .subscribe((response) => {
           console.log('[TerminalBar] WS History search response:', response);
+          this.historyLoading.set(false);
           this.wsHistoryResults.set(response.results);
+          // Mark as empty if no results returned
+          this.historyEmpty.set(response.results.length === 0);
         }),
     );
   }
@@ -699,24 +731,27 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
 
   /**
    * Navigate through matched history (supports substring matching)
+   * Rolodex style: current selection appears in input, upcoming items shown above
    * direction: -1 = older (up arrow), 1 = newer (down arrow)
    */
   private navigateMatchedHistory(direction: -1 | 1): void {
-    // If user has typed something, trigger a history search via WebSocket
     const searchTerm = this.currentInput().trim();
-    if (searchTerm && direction === -1 && !this.showHistoryPreview()) {
-      // First time pressing up with text - search for matching history
+
+    // First up press - initialize history navigation
+    if (direction === -1 && this.selectedHistoryIndex() < 0) {
+      // Store original input to restore on escape or down past end
+      this.originalInputBeforeHistory = searchTerm;
+
+      // Trigger history search with loading state
       this.historySearchTerm.set(searchTerm);
       this.currentHistoryQuery = searchTerm;
+      this.historyLoading.set(true);
+      this.historyEmpty.set(false);
       if (this.wsService.connectionState() === 'connected') {
-        this.wsService.searchHistory(searchTerm, 5);
-      }
-    } else if (!searchTerm && direction === -1 && !this.showHistoryPreview()) {
-      // No search term - just load recent history
-      this.historySearchTerm.set('');
-      this.currentHistoryQuery = '';
-      if (this.wsService.connectionState() === 'connected') {
-        this.wsService.searchHistory('', 5);
+        this.wsService.searchHistory(searchTerm, 4); // Load 4 for rolodex effect
+      } else {
+        // WebSocket not connected - clear loading, rely on local fallback
+        this.historyLoading.set(false);
       }
     }
 
@@ -760,19 +795,18 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       } else if (currentIdx < matchedHistory.length - 1) {
         newIdx = currentIdx + 1;
       } else {
-        // At newest - clear selection and go back to typing
+        // At newest - clear selection and restore original input
         this.selectedHistoryIndex.set(-1);
         this.showHistoryPreview.set(false);
-        // Clear chips and restore the original search term if there was one
         this.chips.set([]);
-        this.currentInput.set(searchTerm || this.historySearchTerm());
+        this.currentInput.set(this.originalInputBeforeHistory);
         return;
       }
     }
 
     this.selectedHistoryIndex.set(newIdx);
 
-    // Load the selected history entry into the input
+    // Load the selected history entry into the input (rolodex effect)
     const entry = matchedHistory[newIdx];
     if (entry) {
       // Convert tokens to chips
