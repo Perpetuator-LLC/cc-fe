@@ -344,10 +344,90 @@
   background: var(--md-sys-color-surface-container-high);
   box-shadow: 0 -4px 16px var(--md-sys-color-shadow);
 
-  /* stylelint-disable function-disallowed-list, alpha-value-notation -- mask-image requires literal rgba values */
-  // Fade effect - items fade out toward the top
-  mask-image: linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 0.5) 15%, black 30%);
-  /* stylelint-enable function-disallowed-list, alpha-value-notation */
+  // Rolodex style - cleaner, more compact
+  &.rolodex {
+    gap: 0;
+
+    padding: 4px 8px;
+    border-bottom: none;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    .history-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      // Fading effect for items further from current selection
+      &.faded {
+        opacity: 0.5;
+      }
+
+      &.upcoming:last-of-type {
+        // Most recent upcoming item - full opacity
+        opacity: 0.8;
+      }
+    }
+
+    .history-hint.compact {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+
+      padding: 2px 0;
+
+      font-size: 10px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 12px;
+        height: 12px;
+        font-size: 12px;
+      }
+    }
+
+    // Status states: loading, empty, end-of-history
+    .history-status {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+
+      padding: 8px;
+
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      &.loading {
+        mat-spinner {
+          margin-right: 4px;
+        }
+      }
+
+      &.empty {
+        font-style: italic;
+      }
+
+      &.end-of-history {
+        padding: 4px 8px;
+        border-top: 1px dashed var(--md-sys-color-outline-variant);
+        font-size: 10px;
+
+        mat-icon {
+          width: 12px;
+          height: 12px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
 }
 
 .history-hint {
