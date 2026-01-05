@@ -927,6 +927,28 @@
   p {
     color: var(--md-sys-color-error);
   }
+
+  // Loading container for chart data fetching
+  .loading-container {
+    @include mixins.flex-column();
+
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+
+    .loading-message {
+      margin: 0;
+      font-size: 16px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .loading-details {
+      margin: 0;
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.7;
+    }
+  }
 }
 
 .chart-loading,

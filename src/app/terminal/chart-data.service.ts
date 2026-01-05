@@ -428,6 +428,12 @@ export class ChartDataService implements OnDestroy {
       '5min': 'MIN_5',
       '15min': 'MIN_15',
       '30min': 'MIN_30',
+      // Backend enum values (pass through)
+      MIN_1: 'MIN_1',
+      MIN_5: 'MIN_5',
+      MIN_15: 'MIN_15',
+      MIN_30: 'MIN_30',
+      MIN_60: 'MIN_60',
       DAILY: 'DAILY',
       daily: 'DAILY',
       WEEKLY: 'WEEKLY',
@@ -435,7 +441,12 @@ export class ChartDataService implements OnDestroy {
       MONTHLY: 'MONTHLY',
       monthly: 'MONTHLY',
     };
-    return intervalMap[interval] || 'DAILY';
+    const mapped = intervalMap[interval];
+    if (!mapped) {
+      console.warn('[ChartDataService] ⚠️ Unrecognized interval, defaulting to DAILY:', interval);
+      return 'DAILY';
+    }
+    return mapped;
   }
 
   /**
