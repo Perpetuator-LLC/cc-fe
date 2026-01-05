@@ -904,7 +904,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         this.selectedPeriod.set(controls.currentPeriod);
       }
       if (controls.currentInterval) {
+        // Set the interval, then sync with available options to ensure it matches
         this.selectedInterval.set(controls.currentInterval);
+        this.syncSelectedIntervalWithOptions(controls.currentInterval);
       }
     }
   }
@@ -1873,7 +1875,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Handle interval change
    */
   onIntervalChange(interval: string): void {
+    console.log('[WatchlistTab] onIntervalChange called with:', interval);
+    console.log('[WatchlistTab] Current intervalOptions:', this.intervalOptions());
+    console.log('[WatchlistTab] Previous selectedInterval:', this.selectedInterval());
+
     this.selectedInterval.set(interval);
+    console.log('[WatchlistTab] New selectedInterval:', this.selectedInterval());
+
     const symbol = this.selectedSymbol();
     if (symbol) {
       this.loadChartWithOptions(symbol);
@@ -1893,13 +1901,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const backendInterval = this.mapIntervalToBackend(interval);
     const fqn = `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}`;
 
-    console.debug('[WatchlistTab] Loading chart via ChartDataService:', {
+    // Ensure selectedInterval matches an available option (case-insensitive)
+    this.syncSelectedIntervalWithOptions(interval);
+
+    console.log('[WatchlistTab] loadChartWithOptions:', {
       symbol,
       exchange,
-      interval,
+      frontendInterval: interval,
       backendInterval,
       fqn,
+      intervalOptions: this.intervalOptions(),
+      selectedIntervalAfterSync: this.selectedInterval(),
     });
+
     this.chartLoading.set(true);
     this.chartOptions.set(null);
     this.chartError.set(null);
@@ -1909,13 +1923,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.chartDataService.loadChartData(symbol, backendInterval, undefined, fqn).subscribe({
         next: (result) => {
-          console.log('[WatchlistTab] Received chart data:', result.candles.length, 'candles');
+          console.log('[WatchlistTab] Received chart data:', {
+            candles: result.candles.length,
+            symbol,
+            interval: backendInterval,
+            hasOlderData: result.pageInfo.hasOlderData,
+          });
           if (result.candles.length > 0) {
             this.rawCandleData.set(result.candles);
             this.chartPageInfo.set(result.pageInfo);
             this.hasOlderData.set(result.pageInfo.hasOlderData);
             this.buildChartFromCandles(result.candles, symbol);
           } else {
+            console.warn('[WatchlistTab] No data returned for interval:', backendInterval);
             this.chartError.set('No data available for this symbol and interval');
           }
           this.chartLoading.set(false);
@@ -1927,6 +1947,66 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Sync selectedInterval with available options (case-insensitive matching)
+   * This ensures the dropdown shows the correct selected value
+   */
+  private syncSelectedIntervalWithOptions(interval: string): void {
+    const options = this.intervalOptions();
+    const lowerInterval = interval.toLowerCase();
+
+    console.log('[WatchlistTab] syncSelectedIntervalWithOptions:', {
+      inputInterval: interval,
+      options,
+      lowerInterval,
+    });
+
+    // Find matching option (case-insensitive)
+    const matchingOption = options.find((opt) => opt.toLowerCase() === lowerInterval);
+
+    if (matchingOption && matchingOption !== interval) {
+      // Update to match the exact case in options
+      console.log('[WatchlistTab] Syncing interval from', interval, 'to', matchingOption);
+      this.selectedInterval.set(matchingOption);
+    } else if (!matchingOption) {
+      // If no match found, try to find by normalized name
+      const normalized = this.normalizeIntervalName(interval);
+      const normalizedMatch = options.find((opt) => this.normalizeIntervalName(opt) === normalized);
+      if (normalizedMatch) {
+        console.log('[WatchlistTab] Syncing interval via normalization from', interval, 'to', normalizedMatch);
+        this.selectedInterval.set(normalizedMatch);
+      } else {
+        console.warn('[WatchlistTab] No matching interval option found for:', interval, 'in options:', options);
+      }
+    }
+  }
+
+  /**
+   * Normalize interval name for comparison (handles various formats)
+   */
+  private normalizeIntervalName(interval: string): string {
+    const lower = interval.toLowerCase();
+    // Map various formats to canonical names
+    const mappings: Record<string, string> = {
+      min_1: '1min',
+      min_5: '5min',
+      min_15: '15min',
+      min_30: '30min',
+      min_60: '60min',
+      hourly: '60min',
+      '1m': '1min',
+      '5m': '5min',
+      '15m': '15min',
+      '30m': '30min',
+      '60m': '60min',
+      '1h': '60min',
+      d: 'daily',
+      w: 'weekly',
+      m: 'monthly',
+    };
+    return mappings[lower] || lower;
   }
 
   /**

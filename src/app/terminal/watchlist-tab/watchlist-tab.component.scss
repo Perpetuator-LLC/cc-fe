@@ -526,7 +526,28 @@
 
   background: var(--md-sys-color-surface-container);
 
-  // Native select styled to match MD3
+  // Compact mat-form-field for interval selector
+  .interval-field {
+    width: auto;
+    min-width: 100px;
+
+    // Override mat-form-field to be compact
+    .mat-mdc-form-field-infix {
+      min-height: 32px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+
+    .mat-mdc-select-trigger {
+      height: 24px;
+    }
+
+    .mat-mdc-select-value-text {
+      font-size: 12px;
+    }
+  }
+
+  // Keep native select styling as fallback
   .interval-select {
     height: 28px;
     padding: 4px 8px;
