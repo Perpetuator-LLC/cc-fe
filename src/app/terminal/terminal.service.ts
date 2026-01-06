@@ -321,6 +321,13 @@ export class TerminalService implements OnDestroy {
   private commandHistorySignal: WritableSignal<string[]> = signal([]);
   private historyIndex = -1;
 
+  // Progressive history loading state
+  private historyEndCursor: string | null = null;
+  private historyHasMore = true;
+  readonly historyLoading: WritableSignal<boolean> = signal(false);
+  private readonly HISTORY_PAGE_SIZE = 10;
+  private readonly HISTORY_LOAD_THRESHOLD = 3; // Load more when within 3 commands of the oldest
+
   // User history from server (persists across sessions, shows in History tab)
   private userHistorySignal: WritableSignal<CommandHistoryItem[]> = signal([]);
 
@@ -496,13 +503,37 @@ export class TerminalService implements OnDestroy {
 
   /**
    * Navigate command history (for arrow up/down)
+   * History is stored oldest-first, so index 0 is the oldest command.
+   * When navigating up (direction -1), we go towards older commands (lower indices).
+   * When approaching the oldest loaded commands, trigger loading more history.
    */
   navigateHistory(direction: -1 | 1): string {
     const commands = this.commandHistorySignal();
     const newIndex = this.historyIndex + direction;
 
+    console.log('[TerminalService] navigateHistory:', {
+      direction,
+      currentIndex: this.historyIndex,
+      newIndex,
+      commandsLength: commands.length,
+      hasMore: this.historyHasMore,
+    });
+
     if (newIndex >= 0 && newIndex < commands.length) {
       this.historyIndex = newIndex;
+
+      // Check if we're approaching the oldest loaded commands (low indices)
+      // and should load more history
+      if (
+        direction === -1 && // Moving towards older commands
+        this.historyIndex <= this.HISTORY_LOAD_THRESHOLD &&
+        this.historyHasMore &&
+        !this.historyLoading()
+      ) {
+        console.log('[TerminalService] Near oldest history, loading more...');
+        this.loadMoreHistory();
+      }
+
       return commands[newIndex];
     } else if (newIndex >= commands.length) {
       this.historyIndex = commands.length;
@@ -669,27 +700,135 @@ export class TerminalService implements OnDestroy {
    * Load command history from server (user's full command history)
    * Updates both userHistorySignal (for History tab) and commandHistorySignal (for up/down navigation)
    */
-  loadCommandHistory(limit = 100): Observable<CommandHistoryItem[]> {
+  loadCommandHistory(limit?: number): Observable<CommandHistoryItem[]> {
+    const pageSize = limit ?? this.HISTORY_PAGE_SIZE;
+    this.historyLoading.set(true);
+
     return this.apollo
       .query<CommandHistoryResult>({
         query: GET_COMMAND_HISTORY,
-        variables: { first: limit },
+        variables: { first: pageSize },
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.commandHistory.edges.map((edge) => edge.node)),
-        tap((history) => {
+        map((result) => ({
+          items: result.data.commandHistory.edges.map((edge) => edge.node),
+          pageInfo: result.data.commandHistory.pageInfo,
+        })),
+        tap(({ items, pageInfo }) => {
           // Update user history signal
-          this.userHistorySignal.set(history);
+          this.userHistorySignal.set(items);
+
+          // Track pagination state
+          this.historyEndCursor = pageInfo.endCursor;
+          this.historyHasMore = pageInfo.hasNextPage;
+
           // Extract just the command strings for up/down navigation (oldest first)
-          const commands = history.map((h) => h.rawInput).reverse();
+          const commands = items.map((h) => h.rawInput).reverse();
           // Merge with any new session commands not yet on server
           const currentCommands = this.commandHistorySignal();
           const serverCommandSet = new Set(commands);
           const newSessionCommands = currentCommands.filter((c) => !serverCommandSet.has(c));
           this.commandHistorySignal.set([...commands, ...newSessionCommands]);
+
+          // Reset history index to point past the newest command
+          this.historyIndex = this.commandHistorySignal().length;
+
+          console.log('[TerminalService] loadCommandHistory complete:', {
+            serverItems: items.length,
+            mergedTotal: this.commandHistorySignal().length,
+            historyIndex: this.historyIndex,
+            hasMore: this.historyHasMore,
+            endCursor: this.historyEndCursor,
+          });
+
+          this.historyLoading.set(false);
+        }),
+        map(({ items }) => items),
+        catchError((error) => {
+          console.error('[TerminalService] Failed to load command history:', error);
+          this.historyLoading.set(false);
+          return of([]);
         }),
       );
+  }
+
+  /**
+   * Load more command history (progressive loading for arrow-up navigation)
+   * Prepends older commands to the beginning of the history array
+   */
+  private loadMoreHistory(): void {
+    if (!this.historyHasMore || this.historyLoading() || !this.historyEndCursor) {
+      return;
+    }
+
+    this.historyLoading.set(true);
+    console.log('[TerminalService] Loading more history, cursor:', this.historyEndCursor);
+
+    this.subscriptions.add(
+      this.apollo
+        .query<CommandHistoryResult>({
+          query: GET_COMMAND_HISTORY,
+          variables: {
+            first: this.HISTORY_PAGE_SIZE,
+            after: this.historyEndCursor,
+          },
+          fetchPolicy: 'network-only',
+        })
+        .pipe(
+          map((result) => ({
+            items: result.data.commandHistory.edges.map((edge) => edge.node),
+            pageInfo: result.data.commandHistory.pageInfo,
+          })),
+        )
+        .subscribe({
+          next: ({ items, pageInfo }) => {
+            // Update pagination state
+            this.historyEndCursor = pageInfo.endCursor;
+            this.historyHasMore = pageInfo.hasNextPage;
+
+            if (items.length > 0) {
+              // Get older commands (newest first from server, we need oldest first)
+              const olderCommands = items.map((h) => h.rawInput).reverse();
+
+              // Prepend to existing history (older commands go at the beginning)
+              const currentCommands = this.commandHistorySignal();
+              const existingSet = new Set(currentCommands);
+              const uniqueOlderCommands = olderCommands.filter((c) => !existingSet.has(c));
+
+              if (uniqueOlderCommands.length > 0) {
+                // Prepend older commands
+                this.commandHistorySignal.set([...uniqueOlderCommands, ...currentCommands]);
+
+                // Adjust history index to account for prepended commands
+                // This keeps the user's current position pointing to the same command
+                this.historyIndex += uniqueOlderCommands.length;
+
+                console.log(
+                  '[TerminalService] Loaded',
+                  uniqueOlderCommands.length,
+                  'older commands, total:',
+                  this.commandHistorySignal().length,
+                );
+              }
+
+              // Also update user history signal for History tab
+              const currentUserHistory = this.userHistorySignal();
+              const existingIds = new Set(currentUserHistory.map((h) => h.id));
+              const newItems = items.filter((item) => !existingIds.has(item.id));
+              if (newItems.length > 0) {
+                this.userHistorySignal.set([...currentUserHistory, ...newItems]);
+              }
+            }
+
+            this.historyLoading.set(false);
+          },
+          error: (error) => {
+            console.error('[TerminalService] Failed to load more history:', error);
+            this.historyLoading.set(false);
+          },
+        }),
+    );
   }
 
   /**

@@ -122,6 +122,10 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     return history.length > 0 && (history[history.length - 1].isLoading ?? false);
   }
 
+  get isHistoryLoading(): boolean {
+    return this.terminalService.historyLoading();
+  }
+
   /**
    * Check if a history entry is in "fetching" state (waiting for data from backend job)
    */
