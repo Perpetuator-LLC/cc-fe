@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .terminal-container {
@@ -283,6 +283,7 @@
 
   flex-shrink: 0;
   gap: 8px;
+  align-items: center;
 
   padding: 8px 16px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
@@ -292,6 +293,10 @@
   .prompt {
     flex-shrink: 0;
     color: var(--md-sys-color-primary);
+  }
+
+  .history-loading-spinner {
+    flex-shrink: 0;
   }
 
   .command-input {

@@ -98,7 +98,8 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   });
 
   // Rolodex-style history: show items ABOVE current selection (older items, what's next on up arrow)
-  // Returns empty when at oldest item or not navigating
+  // With newest-first order: index 0 = most recent, higher index = older
+  // When at selectedIdx, show items at selectedIdx+1, +2, +3 (the next older items)
   upcomingHistoryItems = computed<MatchedHistoryEntry[]>(() => {
     const history = this.recentHistory();
     const selectedIdx = this.selectedHistoryIndex();
@@ -108,14 +109,13 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    // Return items from index 0 to selectedIdx - 1 (items above current selection)
-    // These are the "older" items that will be selected with more up arrows
-    if (selectedIdx <= 0) {
+    // Return items after selectedIdx (older items that will be selected with more up arrows)
+    if (selectedIdx >= history.length - 1) {
       return []; // At oldest item, nothing above
     }
 
     // Get items above (older than) current selection, limited to 3 for a clean look
-    const itemsAbove = history.slice(Math.max(0, selectedIdx - 3), selectedIdx);
+    const itemsAbove = history.slice(selectedIdx + 1, Math.min(selectedIdx + 4, history.length));
     return itemsAbove;
   });
 
@@ -134,50 +134,49 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   private currentHistoryQuery = ''; // Track the current query
 
   // Get history items - either from WebSocket search or local fallback
-  // Limited to 4 items for rolodex display, reversed so most recent is at bottom (closest to input)
+  // Kept in server order: newest first (index 0 = most recent)
+  // Up arrow = go to higher indices (older items)
   recentHistory = computed<MatchedHistoryEntry[]>(() => {
     const searchTerm = this.historySearchTerm().toLowerCase().trim();
     const wsResults = this.wsHistoryResults();
 
-    // If we have WebSocket results, use them
+    // If we have WebSocket results, use them (server returns newest first)
     if (wsResults.length > 0) {
-      return wsResults
-        .slice(0, 4)
-        .reverse()
-        .map((result) => {
-          const tokens = FqnUtils.parseCommand(result.rawInput);
-          const entry: MatchedHistoryEntry = {
-            item: {
-              id: result.id,
-              rawInput: result.rawInput,
-              parsedCommand: result.parsedCommand ?? '',
-              parsedSymbols: result.parsedSymbols,
-              status: (result.status?.toUpperCase() as CommandHistoryItem['status']) || 'COMPLETED',
-              isAiInterpreted: result.isAiInterpreted ?? false,
-              createdAt: result.createdAt,
-            },
-            tokens,
-          };
+      return wsResults.map((result) => {
+        const tokens = FqnUtils.parseCommand(result.rawInput);
+        const entry: MatchedHistoryEntry = {
+          item: {
+            id: result.id,
+            rawInput: result.rawInput,
+            parsedCommand: result.parsedCommand ?? '',
+            parsedSymbols: result.parsedSymbols,
+            status: (result.status?.toUpperCase() as CommandHistoryItem['status']) || 'COMPLETED',
+            isAiInterpreted: result.isAiInterpreted ?? false,
+            createdAt: result.createdAt,
+          },
+          tokens,
+        };
 
-          // Add match highlighting if there's a search term
-          if (searchTerm) {
-            const lowerInput = result.rawInput.toLowerCase();
-            const matchStart = lowerInput.indexOf(searchTerm);
-            if (matchStart >= 0) {
-              entry.matchedText = searchTerm;
-              entry.matchStart = matchStart;
-              entry.matchEnd = matchStart + searchTerm.length;
-              entry.beforeMatch = result.rawInput.substring(0, matchStart);
-              entry.matchText = result.rawInput.substring(matchStart, matchStart + searchTerm.length);
-              entry.afterMatch = result.rawInput.substring(matchStart + searchTerm.length);
-            }
+        // Add match highlighting if there's a search term
+        if (searchTerm) {
+          const lowerInput = result.rawInput.toLowerCase();
+          const matchStart = lowerInput.indexOf(searchTerm);
+          if (matchStart >= 0) {
+            entry.matchedText = searchTerm;
+            entry.matchStart = matchStart;
+            entry.matchEnd = matchStart + searchTerm.length;
+            entry.beforeMatch = result.rawInput.substring(0, matchStart);
+            entry.matchText = result.rawInput.substring(matchStart, matchStart + searchTerm.length);
+            entry.afterMatch = result.rawInput.substring(matchStart + searchTerm.length);
           }
+        }
 
-          return entry;
-        });
+        return entry;
+      });
     }
 
     // Fallback to local history if WS not available
+    // Server returns newest first, so no reverse needed
     const fullHistory = this.terminalService.userHistory();
     let filtered: CommandHistoryItem[];
 
@@ -187,8 +186,8 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       filtered = fullHistory;
     }
 
-    // Take most recent 4 entries and reverse
-    const recent = filtered.slice(0, 4).reverse();
+    // userHistory is already newest first from server
+    const recent = filtered;
 
     return recent.map((item) => {
       const tokens = FqnUtils.parseCommand(item.rawInput);
@@ -732,7 +731,8 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   /**
    * Navigate through matched history (supports substring matching)
    * Rolodex style: current selection appears in input, upcoming items shown above
-   * direction: -1 = older (up arrow), 1 = newer (down arrow)
+   * History is newest-first: index 0 = most recent, higher index = older
+   * direction: -1 = older (up arrow = increase index), 1 = newer (down arrow = decrease index)
    */
   private navigateMatchedHistory(direction: -1 | 1): void {
     const searchTerm = this.currentInput().trim();
@@ -748,7 +748,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
       this.historyLoading.set(true);
       this.historyEmpty.set(false);
       if (this.wsService.connectionState() === 'connected') {
-        this.wsService.searchHistory(searchTerm, 4); // Load 4 for rolodex effect
+        this.wsService.searchHistory(searchTerm, 10); // Load 10 initially for better navigation
       } else {
         // WebSocket not connected - clear loading, rely on local fallback
         this.historyLoading.set(false);
@@ -777,25 +777,37 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     let newIdx: number;
 
     if (direction === -1) {
-      // Up arrow - go to older (lower index since most recent is at bottom/higher index)
+      // Up arrow - go to older (higher index since newest is at index 0)
       if (currentIdx < 0) {
-        // Not navigating yet - start from most recent (bottom = highest index)
-        newIdx = matchedHistory.length - 1;
-      } else if (currentIdx > 0) {
-        newIdx = currentIdx - 1;
+        // Not navigating yet - start from most recent (index 0)
+        newIdx = 0;
+      } else if (currentIdx < matchedHistory.length - 1) {
+        newIdx = currentIdx + 1;
+
+        // Check if we're approaching the oldest loaded item - load more
+        if (
+          newIdx >= matchedHistory.length - 2 &&
+          !this.historyLoading() &&
+          this.wsService.connectionState() === 'connected'
+        ) {
+          // Load more history in the background
+          const currentLimit = this.wsHistoryResults().length;
+          console.log('[TerminalBar] Near oldest loaded history, loading more... current:', currentLimit);
+          this.wsService.searchHistory(this.currentHistoryQuery, currentLimit + 10);
+        }
       } else {
         // Already at oldest - stay there
         return;
       }
     } else {
-      // Down arrow - go to newer (higher index)
+      // Down arrow - go to newer (lower index)
       if (currentIdx < 0) {
         // Not navigating - do nothing
         return;
-      } else if (currentIdx < matchedHistory.length - 1) {
-        newIdx = currentIdx + 1;
+      } else if (currentIdx > 0) {
+        newIdx = currentIdx - 1;
       } else {
-        // At newest - clear selection and restore original input
+        // At newest (index 0) - clear selection and restore original input
         this.selectedHistoryIndex.set(-1);
         this.showHistoryPreview.set(false);
         this.chips.set([]);
