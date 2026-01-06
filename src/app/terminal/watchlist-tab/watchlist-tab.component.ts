@@ -755,11 +755,18 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
                 this.dataContent.set(this.markdownToHtml(content));
               }
             } else if (result.outputType === 'chart' && !result.chartOptions) {
-              // Chart result but no options - might be fetching
-              this.chartError.set('Chart data is loading...');
-              this.chartOptions.set(null);
-              this.dataContent.set(null);
-              this.tableData.set(null);
+              // Chart command succeeded but no chartOptions - load data via ChartDataService
+              // This uses progressive loading and may poll if backend needs to fetch
+              const symbol = this.selectedSymbol();
+              if (symbol) {
+                console.log('[WatchlistTab] Chart result without options, loading via ChartDataService');
+                this.loadChartWithOptions(symbol);
+              } else {
+                this.chartError.set('No symbol selected');
+                this.chartOptions.set(null);
+                this.dataContent.set(null);
+                this.tableData.set(null);
+              }
             } else if (result.message) {
               // Generic message result - render as markdown
               this.dataContent.set(this.markdownToHtml(result.message));
@@ -1184,7 +1191,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load chart or data for symbol using FQN format or ChartDataService
+   * Load chart or data for symbol using FQN format.
+   * ALWAYS executes the command via terminal service to:
+   * 1. Charge credits for the chart/data load
+   * 2. Get routing info from backend
+   * 3. Track command in history
    */
   private loadChart(symbol: string, exchange: string | undefined, command: string): void {
     this.chartLoading.set(true);
@@ -1194,16 +1205,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.tableData.set(null);
     this.currentCommand.set(command);
 
-    // For CHART command, use ChartDataService for progressive loading
-    if (command === 'CHART') {
-      this.loadChartWithOptions(symbol);
-      return;
-    }
-
-    // For other commands (HISTORY, etc.), use terminal execute
+    // Build FQN command
     const symbolFqn = `STOCK:${(exchange || 'UNKNOWN').toUpperCase()}:${symbol.toUpperCase()}`;
     const commandFqn = `COMMAND:${command.toUpperCase()}`;
-    const fullCommand = `${symbolFqn} ${commandFqn}`;
+
+    // For CHART command, include current interval
+    let fullCommand: string;
+    if (command === 'CHART') {
+      const interval = this.selectedInterval();
+      const backendInterval = this.mapIntervalToBackend(interval);
+      fullCommand = `${symbolFqn} ${commandFqn} -interval ${backendInterval.toLowerCase()}`;
+    } else {
+      fullCommand = `${symbolFqn} ${commandFqn}`;
+    }
 
     console.log('[WatchlistTab] Executing FQN command:', fullCommand);
     this.terminalService.execute(fullCommand);
