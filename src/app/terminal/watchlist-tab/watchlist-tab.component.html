@@ -471,21 +471,35 @@
                   </button>
                   <button
                     mat-icon-button
-                    matTooltip="Extended Hours"
+                    [matTooltip]="showExtendedHours() ? 'Extended Hours On' : 'Regular Hours Only'"
                     (click)="toggleExtendedHours()"
                     [color]="showExtendedHours() ? 'primary' : undefined"
-                    [disabled]="true"
                   >
                     <mat-icon>nightlight</mat-icon>
                   </button>
                   <button
                     mat-icon-button
-                    matTooltip="Dividends Reinvested"
+                    [matTooltip]="showDividendsReinvested() ? 'Dividends Reinvested (Total Return)' : 'Price Only'"
                     (click)="toggleDividendsReinvested()"
                     [color]="showDividendsReinvested() ? 'primary' : undefined"
-                    [disabled]="true"
                   >
                     <mat-icon>paid</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    [matTooltip]="showRawData() ? 'Showing Raw Data' : 'Showing Sanitized Data'"
+                    (click)="toggleRawData()"
+                    [color]="showRawData() ? 'primary' : undefined"
+                  >
+                    <mat-icon>{{ showRawData() ? 'data_array' : 'auto_fix_high' }}</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    [matTooltip]="showCorporateActions() ? 'Hiding Corporate Actions' : 'Show Splits & Dividends'"
+                    (click)="toggleCorporateActions()"
+                    [color]="showCorporateActions() ? 'primary' : undefined"
+                  >
+                    <mat-icon>event</mat-icon>
                   </button>
                 </div>
               </div>

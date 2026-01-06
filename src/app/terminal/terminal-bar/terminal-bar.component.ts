@@ -128,6 +128,16 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   // History loading state
   historyLoading = signal(false);
   historyEmpty = signal(false); // True when we've confirmed there's no history
+  historyTotalCount = signal(0); // Total history items available on server
+
+  // Computed: remaining history items after current selection
+  historyRemainingCount = computed(() => {
+    const total = this.historyTotalCount();
+    const selectedIdx = this.selectedHistoryIndex();
+    if (total === 0 || selectedIdx < 0) return 0;
+    // Remaining = total - (selectedIdx + 1) since selectedIdx is 0-based
+    return Math.max(0, total - selectedIdx - 1);
+  });
 
   // History items from WebSocket search
   private wsHistoryResults = signal<HistorySearchResult[]>([]);
@@ -289,6 +299,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
           console.log('[TerminalBar] WS History search response:', response);
           this.historyLoading.set(false);
           this.wsHistoryResults.set(response.results);
+          this.historyTotalCount.set(response.total ?? response.results.length);
           // Mark as empty if no results returned
           this.historyEmpty.set(response.results.length === 0);
         }),

@@ -197,6 +197,21 @@ type Query {
 
     """FQN for disambiguation (e.g., STOCK:NYSE:DIS)"""
     fqn: String
+
+    """
+    Include extended/after-hours trading data. Default: False (regular hours only)
+    """
+    includeExtendedHours: Boolean = false
+
+    """
+    Use dividend-adjusted prices (dividends reinvested). Default: False. Note: Splits are ALWAYS accounted for in chart data.
+    """
+    adjustForDividends: Boolean = false
+
+    """
+    Include all data without anomaly filtering (extreme wicks, gaps). Default: False (clean data)
+    """
+    includeRawData: Boolean = false
   ): StockPriceConnection
 
   """
@@ -217,6 +232,21 @@ type Query {
 
     """FQN for disambiguation"""
     fqn: String
+
+    """
+    Include extended/after-hours trading data. Default: False (regular hours only)
+    """
+    includeExtendedHours: Boolean = false
+
+    """
+    Use dividend-adjusted prices (dividends reinvested). Default: False. Note: Splits are ALWAYS accounted for in chart data.
+    """
+    adjustForDividends: Boolean = false
+
+    """
+    Include all data without anomaly filtering (extreme wicks, gaps). Default: False (clean data)
+    """
+    includeRawData: Boolean = false
   ): StockPriceConnection
   quote(
     symbol: String!
@@ -2448,6 +2478,23 @@ type StockPriceType {
 
   """"""
   volume: BigInt
+
+  """Adjusted close price (accounts for splits and dividends)"""
+  adjustedClose: Decimal
+
+  """Split coefficient (e.g., 4.0 for 4:1 split). 1.0 = no split"""
+  splitCoefficient: Decimal
+
+  """Dividend amount on this date. 0.0 = no dividend"""
+  dividendAmount: Decimal
+
+  """True if this candle includes extended/after-hours trading data"""
+  isExtendedHours: Boolean!
+
+  """
+  Bitfield for data quality flags: 1=extended_hours, 2=extreme_wick, 4=volume_anomaly, 8=price_gap
+  """
+  filterFlags: Int!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -2526,7 +2573,21 @@ type StockPriceNode {
   low: Float!
   close: Float!
   volume: Float!
+
+  """Fully adjusted close (splits + dividends)"""
   adjustedClose: Float
+
+  """Split ratio (e.g., 4.0 for 4:1 split). 1.0 = no split"""
+  splitCoefficient: Float
+
+  """Dividend amount on this date. 0 = no dividend"""
+  dividendAmount: Float
+
+  """True if a stock split occurred on this date"""
+  isSplit: Boolean
+
+  """True if a dividend was paid on this date"""
+  isDividend: Boolean
 }
 
 """Pagination info for stock price connection."""
