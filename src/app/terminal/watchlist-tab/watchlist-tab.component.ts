@@ -145,7 +145,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // Chart display toggles
   showLocalTime = signal(true); // Local time vs EST/Exchange time
   showExtendedHours = signal(false); // Extended trading hours
-  showDividendsReinvested = signal(false); // Total return view
+  showDividendsReinvested = signal(false); // Total return view (dividends reinvested)
+  showRawData = signal(false); // Show raw data without anomaly filtering
+  showCorporateActions = signal(false); // Show splits/dividends markers on chart
   lockToRight = signal(true); // Lock chart to show most recent data on right edge
 
   // Progressive data loading state
@@ -2010,9 +2012,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartError.set(null);
     this.hasOlderData.set(true); // Reset - assume there's more data
 
+    // Build chart options from toggle states
+    const chartDataOptions = {
+      includeExtendedHours: this.showExtendedHours(),
+      adjustForDividends: this.showDividendsReinvested(),
+      includeRawData: this.showRawData(),
+    };
+
     // Use ChartDataService for progressive loading
     this.subscriptions.add(
-      this.chartDataService.loadChartData(symbol, backendInterval, undefined, fqn).subscribe({
+      this.chartDataService.loadChartData(symbol, backendInterval, undefined, fqn, chartDataOptions).subscribe({
         next: (result) => {
           console.log('[WatchlistTab] Received chart data:', {
             candles: result.candles.length,
@@ -2170,8 +2179,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Build chart options from toggle states
+      const chartDataOptions = {
+        includeExtendedHours: this.showExtendedHours(),
+        adjustForDividends: this.showDividendsReinvested(),
+        includeRawData: this.showRawData(),
+      };
+
       this.subscriptions.add(
-        this.chartDataService.loadChartData(symbol, interval, undefined, fqn).subscribe({
+        this.chartDataService.loadChartData(symbol, interval, undefined, fqn, chartDataOptions).subscribe({
           next: (result) => {
             if (result.candles.length > 0) {
               console.log('[WatchlistTab] Poll successful, got', result.candles.length, 'candles');
@@ -2320,7 +2336,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   private buildChartFromCandles(candles: ChartCandle[], symbol: string): void {
     const interval = this.selectedInterval();
     // Use ChartConfigService for consistent chart building and theming
-    const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval);
+    const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval, {
+      showCorporateActions: this.showCorporateActions(),
+    });
     this.chartOptions.set(options);
   }
 
@@ -2508,12 +2526,40 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   toggleExtendedHours(): void {
     this.showExtendedHours.update((v) => !v);
-    // TODO: Re-fetch chart data with extended hours
+    // Re-fetch chart data with new setting
+    this.reloadChartWithCurrentSettings();
   }
 
   toggleDividendsReinvested(): void {
     this.showDividendsReinvested.update((v) => !v);
-    // TODO: Re-fetch chart data with total return view
+    // Re-fetch chart data with total return view
+    this.reloadChartWithCurrentSettings();
+  }
+
+  toggleRawData(): void {
+    this.showRawData.update((v) => !v);
+    // Re-fetch chart data with raw/sanitized toggle
+    this.reloadChartWithCurrentSettings();
+  }
+
+  toggleCorporateActions(): void {
+    this.showCorporateActions.update((v) => !v);
+    // Rebuild chart with/without corporate action markers
+    const candles = this.rawCandleData();
+    const symbol = this.selectedSymbol();
+    if (candles.length && symbol) {
+      this.buildChartFromCandles(candles, symbol);
+    }
+  }
+
+  /**
+   * Reload chart with current toggle settings
+   */
+  private reloadChartWithCurrentSettings(): void {
+    const symbol = this.selectedSymbol();
+    if (symbol) {
+      this.loadChartWithOptions(symbol);
+    }
   }
 
   toggleLockToRight(): void {

@@ -16,6 +16,9 @@ const STOCK_PRICE_CONNECTION = gql`
     $after: String
     $first: Int
     $fqn: String
+    $includeExtendedHours: Boolean
+    $adjustForDividends: Boolean
+    $includeRawData: Boolean
   ) {
     stockPriceConnection(
       symbol: $symbol
@@ -24,6 +27,9 @@ const STOCK_PRICE_CONNECTION = gql`
       after: $after
       first: $first
       fqn: $fqn
+      includeExtendedHours: $includeExtendedHours
+      adjustForDividends: $adjustForDividends
+      includeRawData: $includeRawData
     ) {
       edges {
         node {
@@ -35,6 +41,8 @@ const STOCK_PRICE_CONNECTION = gql`
           close
           volume
           adjustedClose
+          splitCoefficient
+          dividendAmount
         }
         cursor
       }
@@ -88,8 +96,20 @@ const CHART_DATA_RANGE = gql`
     $endDate: DateTime!
     $interval: StockPriceInterval
     $fqn: String
+    $includeExtendedHours: Boolean
+    $adjustForDividends: Boolean
+    $includeRawData: Boolean
   ) {
-    chartDataRange(symbol: $symbol, startDate: $startDate, endDate: $endDate, interval: $interval, fqn: $fqn) {
+    chartDataRange(
+      symbol: $symbol
+      startDate: $startDate
+      endDate: $endDate
+      interval: $interval
+      fqn: $fqn
+      includeExtendedHours: $includeExtendedHours
+      adjustForDividends: $adjustForDividends
+      includeRawData: $includeRawData
+    ) {
       edges {
         node {
           id
@@ -100,6 +120,8 @@ const CHART_DATA_RANGE = gql`
           close
           volume
           adjustedClose
+          splitCoefficient
+          dividendAmount
         }
         cursor
       }
@@ -134,6 +156,10 @@ export interface ChartCandle {
   close: number;
   volume: number;
   adjustedClose?: number;
+  /** Split ratio: 1.0 = no split, 4.0 = 4:1 split, 0.5 = 1:2 reverse split */
+  splitCoefficient?: number;
+  /** Dividend paid per share: 0.0 = no dividend */
+  dividendAmount?: number;
 }
 
 export interface PageInfo {
@@ -172,6 +198,18 @@ export interface ChartDataAvailability {
   lastUpdated: string | null;
 }
 
+/**
+ * Options for chart data fetching - controls adjustments and filtering
+ */
+export interface ChartDataOptions {
+  /** Include pre-market and after-hours trading data */
+  includeExtendedHours?: boolean;
+  /** Adjust prices for dividend reinvestment (total return) */
+  adjustForDividends?: boolean;
+  /** Include raw data without anomaly filtering */
+  includeRawData?: boolean;
+}
+
 interface StockPriceNode {
   id: string;
   date: string;
@@ -181,6 +219,8 @@ interface StockPriceNode {
   close: number;
   volume: number;
   adjustedClose: number | null;
+  splitCoefficient?: number;
+  dividendAmount?: number;
 }
 
 interface StockPriceEdge {
@@ -256,6 +296,7 @@ export class ChartDataService implements OnDestroy {
     interval: ChartInterval = 'DAILY',
     count?: number,
     fqn?: string,
+    options?: ChartDataOptions,
   ): Observable<ChartDataResult> {
     const candleCount = count ?? DEFAULT_CANDLE_COUNT[interval];
     this.currentSymbol$.next(symbol);
@@ -266,12 +307,21 @@ export class ChartDataService implements OnDestroy {
       interval,
       candleCount,
       fqn,
+      options,
     });
 
     return this.apollo
       .query<{ stockPriceConnection: StockPriceConnection }>({
         query: STOCK_PRICE_CONNECTION,
-        variables: { symbol, interval, first: candleCount, fqn },
+        variables: {
+          symbol,
+          interval,
+          first: candleCount,
+          fqn,
+          includeExtendedHours: options?.includeExtendedHours ?? false,
+          adjustForDividends: options?.adjustForDividends ?? false,
+          includeRawData: options?.includeRawData ?? false,
+        },
         fetchPolicy: 'network-only',
       })
       .pipe(
@@ -564,6 +614,8 @@ export class ChartDataService implements OnDestroy {
       close: edge.node.close,
       volume: edge.node.volume,
       adjustedClose: edge.node.adjustedClose ?? undefined,
+      splitCoefficient: edge.node.splitCoefficient ?? undefined,
+      dividendAmount: edge.node.dividendAmount ?? undefined,
     }));
 
     // Sort candles chronologically (oldest first) for chart rendering
