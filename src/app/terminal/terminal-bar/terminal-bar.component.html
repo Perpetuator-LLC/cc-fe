@@ -29,7 +29,7 @@
           <!-- At oldest item -->
           <div class="history-status end-of-history">
             <mat-icon>first_page</mat-icon>
-            <span>End of history</span>
+            <span>End of history ({{ historyTotalCount() }} total)</span>
           </div>
         } @else {
           <!-- Show upcoming items -->
@@ -50,7 +50,11 @@
           }
           <div class="history-hint compact">
             <mat-icon>keyboard_arrow_up</mat-icon>
-            <span>{{ upcomingHistoryItems().length }} more</span>
+            @if (historyRemainingCount() > 0) {
+              <span>{{ historyRemainingCount() }} more</span>
+            } @else {
+              <span>{{ upcomingHistoryItems().length }} more</span>
+            }
           </div>
         }
       </div>

@@ -129,7 +129,7 @@ export class ChartConfigService {
       color: this.AXIS_LABEL_COLOR,
       formatter: (value: string) => this.formatDateLabel(value),
     },
-    // Axis pointer for x-axis
+    // Axis pointer for x-axis - includes formatter for crosshair label
     axisPointer: {
       show: true,
       type: 'line',
@@ -137,6 +137,7 @@ export class ChartConfigService {
       label: {
         show: true,
         backgroundColor: this.CROSSHAIR_LABEL_BG,
+        formatter: (params: { value: string }) => this.formatCrosshairDateLabel(params.value),
       },
       lineStyle: {
         color: this.CROSSHAIR_COLOR,
@@ -261,7 +262,12 @@ export class ChartConfigService {
    * Used when loading data via ChartDataService (progressive loading).
    */
 
-  buildChartFromCandles(candles: ChartCandle[], symbol: string, interval?: string): EChartsOption {
+  buildChartFromCandles(
+    candles: ChartCandle[],
+    symbol: string,
+    interval?: string,
+    options?: { showCorporateActions?: boolean },
+  ): EChartsOption {
     // Ensure data is sorted oldest first for proper chart display
     const sortedCandles = [...candles].sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -281,8 +287,11 @@ export class ChartConfigService {
         interval === 'MIN_1'
       : false;
 
+    // Build mark lines for corporate actions (splits and dividends)
+    const markLineData = options?.showCorporateActions ? this.buildCorporateActionMarkers(sortedCandles) : [];
+
     // Build minimal options - applyDarkTheme will add all theming
-    const options: EChartsOption = {
+    const chartOptions: EChartsOption = {
       xAxis: {
         type: 'category',
         data: dates,
@@ -326,12 +335,65 @@ export class ChartConfigService {
             borderColor: this.CANDLE_UP_COLOR,
             borderColor0: this.CANDLE_DOWN_COLOR,
           },
+          // Add corporate action markers if enabled
+          markLine:
+            markLineData.length > 0
+              ? {
+                  symbol: 'none',
+                  lineStyle: {
+                    type: 'dashed',
+                    width: 1,
+                  },
+                  label: {
+                    show: true,
+                    position: 'start',
+                    fontSize: 10,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: [4, 4],
+                    borderRadius: 4,
+                  },
+                  data: markLineData,
+                }
+              : undefined,
         },
       ],
     };
 
     // Apply complete theming
-    return this.applyDarkTheme(options);
+    return this.applyDarkTheme(chartOptions);
+  }
+
+  /**
+   * Build mark line data for corporate actions (splits and dividends)
+   */
+  private buildCorporateActionMarkers(
+    candles: ChartCandle[],
+  ): { xAxis: string; label: { formatter: string }; lineStyle: { color: string } }[] {
+    const markers: { xAxis: string; label: { formatter: string }; lineStyle: { color: string } }[] = [];
+
+    candles.forEach((candle) => {
+      // Check for splits (coefficient !== 1.0)
+      if (candle.splitCoefficient && candle.splitCoefficient !== 1.0) {
+        const ratio = candle.splitCoefficient;
+        const label = ratio > 1 ? `${ratio}:1 Split` : `1:${Math.round(1 / ratio)} Rev. Split`;
+        markers.push({
+          xAxis: candle.date.toISOString(),
+          label: { formatter: `🔀 ${label}` },
+          lineStyle: { color: '#9c27b0' }, // Purple for splits
+        });
+      }
+
+      // Check for dividends (amount > 0)
+      if (candle.dividendAmount && candle.dividendAmount > 0) {
+        markers.push({
+          xAxis: candle.date.toISOString(),
+          label: { formatter: `💰 $${candle.dividendAmount.toFixed(2)} Div` },
+          lineStyle: { color: '#4caf50' }, // Green for dividends
+        });
+      }
+    });
+
+    return markers;
   }
 
   /**
@@ -521,6 +583,65 @@ export class ChartConfigService {
       });
     } catch {
       return value;
+    }
+  }
+
+  /**
+   * Format date label for crosshair/axisPointer (fuller format than axis label)
+   * Shows date in human-readable format: "Jan 2, 2026" or "Jan 2, 2026 09:30" for intraday
+   */
+  formatCrosshairDateLabel(value: string): string {
+    try {
+      // Handle case where value might already be formatted or empty
+      if (!value || typeof value !== 'string') return String(value);
+
+      // Extract date portion from ISO string to avoid timezone shift
+      const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})(T(\d{2}):(\d{2}))?/);
+      if (dateMatch) {
+        const [, year, month, day, , hour, minute] = dateMatch;
+        const date = new Date(
+          Date.UTC(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+            hour ? parseInt(hour) : 12,
+            minute ? parseInt(minute) : 0,
+            0,
+          ),
+        );
+
+        // If we have time info (intraday), include it
+        if (hour && minute) {
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZone: 'UTC',
+          });
+        }
+
+        // Daily/weekly/monthly - just show date
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          timeZone: 'UTC',
+        });
+      }
+
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+
+      // Fallback format
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return String(value);
     }
   }
 
