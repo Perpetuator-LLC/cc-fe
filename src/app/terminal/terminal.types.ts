@@ -110,6 +110,19 @@ export interface SymbolUpdate {
 
 export type CommandCategory = 'EQUITY' | 'CHART' | 'NEWS' | 'SCREENING' | 'SYSTEM' | 'RESEARCH' | 'PODCAST' | 'TEAM';
 
+/**
+ * Command argument with optional preset values
+ */
+export interface CommandArgument {
+  name: string;
+  type: string;
+  description?: string;
+  default?: string;
+  required?: boolean;
+  /** Preset values for this argument (e.g., ["daily", "weekly", "hourly"]) */
+  options?: string[];
+}
+
 export interface Command {
   id: string;
   name: string;
@@ -122,6 +135,8 @@ export interface Command {
   outputType?: string;
   chartType?: string;
   creditsCost?: number;
+  /** Available arguments/parameters for this command */
+  arguments?: CommandArgument[];
 }
 
 // ============================================================================

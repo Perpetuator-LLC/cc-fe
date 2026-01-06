@@ -43,8 +43,18 @@
               role="option"
               [attr.aria-selected]="false"
             >
-              @for (token of entry.tokens; track token.fqn) {
-                <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="history-chip" />
+              <!-- When searching, show raw text with highlighting -->
+              @if (historySearchTerm() && entry.matchText) {
+                <span class="history-raw-text">
+                  <span class="before-match">{{ entry.beforeMatch }}</span
+                  ><mark class="match-highlight">{{ entry.matchText }}</mark
+                  ><span class="after-match">{{ entry.afterMatch }}</span>
+                </span>
+              } @else {
+                <!-- Normal view: show chips -->
+                @for (token of entry.tokens; track token.fqn) {
+                  <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="history-chip" />
+                }
               }
             </div>
           }
