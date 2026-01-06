@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 import { JobsWebSocketService } from './jobs-websocket.service';
 import { AuthService } from '../auth/auth.service';
@@ -47,7 +47,7 @@ describe('JobsWebSocketService', () => {
 
   describe('Connection State', () => {
     it('should start disconnected', () => {
-      expect(service.connectionState()).toBe('disconnected');
+      expect(service.isConnected()).toBe(false);
     });
 
     it('should have empty jobs initially', () => {
@@ -107,7 +107,7 @@ describe('JobsWebSocketService', () => {
   describe('Auth State Changes', () => {
     it('should start in disconnected state when user is not logged in', () => {
       // Service is created with isLoggedIn = false
-      expect(service.connectionState()).toBe('disconnected');
+      expect(service.isConnected()).toBe(false);
     });
 
     it('should clear jobs when disconnect is called', () => {
@@ -119,7 +119,7 @@ describe('JobsWebSocketService', () => {
       service.disconnect();
 
       // Connection state should be disconnected
-      expect(service.connectionState()).toBe('disconnected');
+      expect(service.isConnected()).toBe(false);
     });
   });
 });
