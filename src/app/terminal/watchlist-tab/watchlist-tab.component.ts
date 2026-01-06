@@ -158,6 +158,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   hasOlderData = signal(true);
   // Track if user is at the left edge of the chart (for showing "no more data" hint)
   atLeftEdge = signal(false);
+  // Flag to prevent re-entrance during zoom correction
+  private isCorrectingZoom = false;
 
   // Computed: show "no more data" hint when at left edge and no more data available
   showNoMoreDataHint = computed(() => this.atLeftEdge() && !this.hasOlderData() && !this.loadingMoreData());
@@ -1236,31 +1238,54 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartInstance = chart;
 
     // Listen for datazoom events to trigger progressive data loading
-    chart.on('datazoom', (params: { start?: number; end?: number; batch?: { start?: number; end?: number }[] }) => {
-      // Get current zoom state
+    chart.on('datazoom', () => {
+      // Skip if we're currently correcting zoom (prevents re-entrance)
+      if (this.isCorrectingZoom) return;
+
+      // Get current zoom state from the chart option (most reliable source after zoom)
       const option = chart.getOption();
       const dataZoom = option.dataZoom;
 
       if (!dataZoom || dataZoom.length === 0) return;
 
-      // Find the inside dataZoom
+      // Find the inside dataZoom - read from the actual option state, not params
+      // The params may not include the final computed values for wheel zoom
       const insideZoom = dataZoom.find((dz: { type?: string }) => dz.type === 'inside') || dataZoom[0];
-      const startPercent = params.start ?? params.batch?.[0]?.start ?? insideZoom.start ?? 0;
-      const endPercent = params.end ?? params.batch?.[0]?.end ?? insideZoom.end ?? 100;
+      // Get values from the option which reflects the current state after the zoom
+      const startPercent = insideZoom.start ?? 0;
+      const endPercent = insideZoom.end ?? 100;
 
-      console.log('[WatchlistTab] DataZoom event - start:', startPercent, 'end:', endPercent);
+      console.log('[WatchlistTab] DataZoom event:', {
+        start: startPercent.toFixed(2),
+        end: endPercent.toFixed(2),
+        locked: this.lockToRight(),
+      });
 
       // If locked to right and user scrolled away from 100%, snap back
-      if (this.lockToRight() && endPercent < 99.9) {
+      // Use a slightly larger threshold (99.5) to catch more edge cases
+      if (this.lockToRight() && endPercent < 99.5) {
         // Calculate the zoom range (how zoomed in/out)
         const range = endPercent - startPercent;
         // Adjust to keep end at 100%
         const newStart = Math.max(0, 100 - range);
-        chart.dispatchAction({
-          type: 'dataZoom',
-          start: newStart,
-          end: 100,
-        });
+
+        // Set flag to prevent re-entrance
+        this.isCorrectingZoom = true;
+
+        // Use setTimeout to ensure the correction happens after the current zoom finishes
+        // This prevents race conditions with ECharts' internal zoom handling
+        setTimeout(() => {
+          chart.dispatchAction({
+            type: 'dataZoom',
+            start: newStart,
+            end: 100,
+          });
+          // Reset flag after a brief delay to allow the corrective zoom to complete
+          setTimeout(() => {
+            this.isCorrectingZoom = false;
+          }, 50);
+        }, 0);
+
         return; // Don't process further - the new dispatch will trigger another event
       }
 
@@ -1600,6 +1625,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.crosshairData.set(null);
     this.lastCrosshairDataIndex = -1;
 
+    // Set flag to prevent datazoom event handler from interfering with our explicit zoom
+    this.isCorrectingZoom = true;
+
     // Update the data and zoom - only update the candlestick series (index 0)
     // Note: The chart only has one series (candlestick) created by buildChartFromCandles
     this.chartInstance.setOption(
@@ -1610,6 +1638,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       },
       { notMerge: false, lazyUpdate: false },
     );
+
+    // Reset flag after a brief delay to allow the zoom to complete
+    setTimeout(() => {
+      this.isCorrectingZoom = false;
+    }, 50);
 
     // Wait for chart to finish rendering before updating crosshair
     // Use setTimeout to ensure the chart has processed the new data
@@ -1635,7 +1668,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           }
         }
       }
-    }, 50);
+    }, 100);
   }
 
   /**
@@ -2354,18 +2387,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   formatCrosshairDate(dateStr: string): string {
     if (!dateStr) return '';
 
-    // Try to parse as ISO date first, then as formatted date
-    let date: Date;
-    if (dateStr.includes('T') || dateStr.includes('Z')) {
-      // ISO format
-      date = new Date(dateStr);
-    } else {
-      // Already formatted - try to parse
-      date = new Date(dateStr);
-    }
-
-    if (isNaN(date.getTime())) return dateStr;
-
     const useLocalTime = this.showLocalTime();
 
     // Check if this is intraday data (has meaningful time component)
@@ -2373,7 +2394,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const isIntraday = interval.includes('min') || interval.includes('hour') || interval === '60min';
 
     if (isIntraday) {
-      // Show date and time for intraday data
+      // For intraday, parse as Date and apply timezone
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+
       if (useLocalTime) {
         // Local time
         return date.toLocaleString('en-US', {
@@ -2401,7 +2425,23 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         );
       }
     } else {
-      // Daily/Weekly/Monthly - just show date
+      // Daily/Weekly/Monthly - extract date portion from ISO string to avoid timezone shift
+      const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        // Create date at noon UTC to avoid any DST issues
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+        return date.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          timeZone: 'UTC', // Use UTC to match the date we extracted
+        });
+      }
+      // Fallback to original parsing if not ISO format
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
       return date.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
@@ -2433,7 +2473,23 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   toggleLocalTime(): void {
     this.showLocalTime.update((v) => !v);
-    // TODO: Re-render chart with new time zone setting
+    // Sync with chartConfigService for axis label formatting
+    this.chartConfigService.useLocalTime.set(this.showLocalTime());
+    // Re-render chart with new time zone setting
+    this.rebuildChartForTimezone();
+  }
+
+  /**
+   * Rebuild the chart to apply new timezone setting.
+   * This updates the axis labels without re-fetching data.
+   */
+  private rebuildChartForTimezone(): void {
+    const candles = this.rawCandleData();
+    const symbol = this.selectedSymbol();
+    if (!candles.length || !symbol) return;
+
+    // Rebuild chart with current data (axis formatters will use new timezone)
+    this.buildChartFromCandles(candles, symbol);
   }
 
   toggleExtendedHours(): void {
@@ -2448,12 +2504,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   toggleLockToRight(): void {
     this.lockToRight.update((v) => !v);
+    // Reset correction flag to prevent stuck state
+    this.isCorrectingZoom = false;
     // When locking, scroll chart to show most recent data on right
     if (this.lockToRight() && this.chartInstance) {
+      // Set flag to prevent datazoom event handler from interfering
+      this.isCorrectingZoom = true;
       this.chartInstance.dispatchAction({
         type: 'dataZoom',
         end: 100, // 100% = most recent data on right
       });
+      // Reset flag after zoom completes
+      setTimeout(() => {
+        this.isCorrectingZoom = false;
+      }, 50);
     }
   }
 

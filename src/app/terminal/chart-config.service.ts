@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { ChartCandle } from './chart-data.service';
 
@@ -17,6 +17,11 @@ export interface EChartsTooltipParam {
 }
 
 /**
+ * Timezone setting for chart display
+ */
+export type ChartTimezone = 'local' | 'exchange';
+
+/**
  * Shared service for chart configuration and theming.
  * This is the SINGLE SOURCE OF TRUTH for all chart styling.
  * Both command results (backend chartOptions) and locally-built charts
@@ -26,6 +31,13 @@ export interface EChartsTooltipParam {
   providedIn: 'root',
 })
 export class ChartConfigService {
+  // ============================================================================
+  // TIMEZONE CONFIGURATION
+  // ============================================================================
+
+  /** Whether to use local time (true) or exchange time/EST (false) */
+  useLocalTime = signal(true);
+
   // ============================================================================
   // CANONICAL CHART COLORS - Use these everywhere for consistency
   // ============================================================================
@@ -324,24 +336,40 @@ export class ChartConfigService {
 
   /**
    * Format axis label dynamically based on interval type
-   * For intraday: shows time, with date when day changes
-   * For daily+: shows date
+   * For intraday: shows time, with date when day changes (respects timezone setting)
+   * For daily+: shows date (uses date portion of ISO string to avoid timezone shift)
    */
   formatAxisLabel(value: string, isIntraday: boolean): string {
     try {
-      const date = new Date(value);
-      if (isNaN(date.getTime())) return value;
-
       if (isIntraday) {
-        // For intraday, show time (hour:minute)
-        // The date will be shown in the crosshair tooltip
+        // For intraday, parse as Date and apply timezone
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return value;
+
+        const timeZone = this.useLocalTime() ? undefined : 'America/New_York';
         return date.toLocaleTimeString('en-US', {
           hour: 'numeric',
           minute: '2-digit',
           hour12: true,
+          timeZone,
         });
       } else {
-        // For daily+, show date (Jan 2)
+        // For daily+, extract date portion from ISO string to avoid timezone shift
+        // ISO format: "2024-01-15T00:00:00.000Z" - we want "Jan 15" not local conversion
+        const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (dateMatch) {
+          const [, year, month, day] = dateMatch;
+          // Create date at noon UTC to avoid any DST issues
+          const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC', // Use UTC to match the date we extracted
+          });
+        }
+        // Fallback to original parsing if not ISO format
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return value;
         return date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -354,24 +382,43 @@ export class ChartConfigService {
 
   /**
    * Format axis pointer label (crosshair bubble) for proper date/time display
-   * Shows full date and time for intraday, just date for daily+
+   * Shows full date and time for intraday (respects timezone setting), just date for daily+
    */
   formatAxisPointerLabel(value: string, isIntraday: boolean): string {
     try {
-      const date = new Date(value);
-      if (isNaN(date.getTime())) return value;
-
       if (isIntraday) {
-        // For intraday, show date + time (Jan 2, 9:30 AM)
-        return date.toLocaleString('en-US', {
+        // For intraday, parse as Date and apply timezone
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return value;
+
+        const timeZone = this.useLocalTime() ? undefined : 'America/New_York';
+        const formatted = date.toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
           hour: 'numeric',
           minute: '2-digit',
           hour12: true,
+          timeZone,
         });
+        // Add timezone indicator when not local time
+        return this.useLocalTime() ? formatted : formatted + ' ET';
       } else {
-        // For daily+, show date (Jan 2, 2026)
+        // For daily+, extract date portion from ISO string to avoid timezone shift
+        const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (dateMatch) {
+          const [, year, month, day] = dateMatch;
+          // Create date at noon UTC to avoid any DST issues
+          const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: 'UTC', // Use UTC to match the date we extracted
+          });
+        }
+        // Fallback to original parsing if not ISO format
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return value;
         return date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -388,6 +435,17 @@ export class ChartConfigService {
    */
   formatAxisLabelDateOnly(value: string): string {
     try {
+      // Extract date portion from ISO string to avoid timezone shift
+      const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC',
+        });
+      }
       const date = new Date(value);
       if (isNaN(date.getTime())) return value;
 
@@ -402,9 +460,25 @@ export class ChartConfigService {
 
   /**
    * Format date for chart display
+   * Extracts date portion from ISO string to avoid timezone shift for daily data
    */
   formatDateForChart(dateInput: Date | string): string {
     try {
+      const value = typeof dateInput === 'string' ? dateInput : dateInput.toISOString();
+
+      // Extract date portion from ISO string to avoid timezone shift
+      const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          timeZone: 'UTC',
+        });
+      }
+
       const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
       if (isNaN(date.getTime())) return String(dateInput);
 
@@ -421,9 +495,22 @@ export class ChartConfigService {
 
   /**
    * Format date label for axis (shorter format)
+   * Extracts date portion from ISO string to avoid timezone shift
    */
   formatDateLabel(value: string): string {
     try {
+      // Extract date portion from ISO string to avoid timezone shift
+      const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (dateMatch) {
+        const [, year, month, day] = dateMatch;
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC',
+        });
+      }
+
       const date = new Date(value);
       if (isNaN(date.getTime())) return value;
 
