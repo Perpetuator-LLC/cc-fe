@@ -111,6 +111,9 @@
 
   <div class="terminal-input-row">
     <span class="prompt">&gt;</span>
+    @if (isHistoryLoading) {
+      <mat-spinner diameter="14" class="history-loading-spinner" />
+    }
     <input
       type="text"
       #inputElement
