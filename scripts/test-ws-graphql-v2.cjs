@@ -669,6 +669,7 @@ async function testWatchlistSymbols(ws) {
           symbol: e.node.symbol,
           name: e.node.displayName,
           exchange: e.node.exchange,
+          marketCap: e.node.marketCap,
         })),
       });
     } else {
