@@ -38,6 +38,14 @@ const GET_COMMANDS = gql`
       outputType
       chartType
       creditsCost
+      arguments {
+        name
+        type
+        description
+        default
+        required
+        options
+      }
     }
   }
 `;
@@ -1065,6 +1073,28 @@ export class TerminalService implements OnDestroy {
       const commandToken = hasSymbol && tokens.length > 1 ? tokens[1].toUpperCase() : tokens[0].toUpperCase();
       const command = commands.find((c) => c.name === commandToken);
 
+      // First try using the new arguments field (preferred)
+      if (command?.arguments && command.arguments.length > 0) {
+        const paramPartial = lastToken.slice(1); // Remove the '-'
+
+        for (const arg of command.arguments) {
+          if (arg.name.toUpperCase().startsWith(paramPartial.toUpperCase())) {
+            suggestions.push({
+              fqn: `-${arg.name}`,
+              display: `-${arg.name}${arg.default ? ` (default: ${arg.default})` : ''}`,
+              type: 'parameter',
+              description: arg.description || `Parameter for ${command.name}`,
+              score: 90,
+              paramType: arg.type,
+              choices: arg.options,
+              default: arg.default,
+            });
+          }
+        }
+        return suggestions.slice(0, limit);
+      }
+
+      // Fallback to parametersSchema if arguments not available
       if (command?.parametersSchema) {
         try {
           const schema = JSON.parse(command.parametersSchema);
@@ -1091,6 +1121,40 @@ export class TerminalService implements OnDestroy {
         }
       }
       return suggestions.slice(0, limit);
+    }
+
+    // Check if last token is a parameter value context (e.g., "-interval ")
+    // Look for pattern: ... -paramName <cursor>
+    if (tokens.length >= 2) {
+      const prevToken = tokens[tokens.length - 2].toUpperCase();
+      if (prevToken.startsWith('-')) {
+        const paramName = prevToken.slice(1);
+        // Find the command
+        const commandToken = hasSymbol && tokens.length > 2 ? tokens[1].toUpperCase() : tokens[0].toUpperCase();
+        const command = commands.find((c) => c.name === commandToken);
+
+        if (command?.arguments) {
+          const arg = command.arguments.find((a) => a.name.toUpperCase() === paramName.toUpperCase());
+          if (arg?.options && arg.options.length > 0) {
+            // Show preset options for this parameter
+            for (const option of arg.options) {
+              if (option.toUpperCase().startsWith(lastToken.toUpperCase()) || lastToken === '') {
+                suggestions.push({
+                  fqn: option,
+                  display: option,
+                  displaySecondary: `Value for -${arg.name}`,
+                  type: 'parameter',
+                  description: `${arg.description || arg.name} option`,
+                  score: 95,
+                });
+              }
+            }
+            if (suggestions.length > 0) {
+              return suggestions.slice(0, limit);
+            }
+          }
+        }
+      }
     }
 
     // If we have a symbol, filter to commands that require symbols
