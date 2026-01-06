@@ -237,9 +237,22 @@ if (fixMode) {
         console.log(`    ~ ${file}`);
       });
     }
-    console.log('\nPlease stage the fixed files and commit again.\n');
-    process.exit(1); // Exit with error so pre-commit fails and requires re-stage
   }
+
+  // Verification pass: ensure all fixed files now pass the check
+  const allFixedFiles = [...fixedFiles.added, ...fixedFiles.updated];
+  const stillFailing = allFixedFiles.filter((file) => !checkCopyright(file));
+
+  if (stillFailing.length > 0) {
+    console.error(`\n❌ ERROR: ${stillFailing.length} file(s) still failing after fix:\n`);
+    stillFailing.forEach((file) => {
+      console.error(`  ${file}`);
+    });
+    console.error(`\nThis indicates a bug in the copyright fixer. Please report this issue.\n`);
+    process.exit(1);
+  }
+
+  // All good - exit 0 so lint-staged auto-stages the fixes
 } else {
   // Check mode - report failures
   if (failingFiles.length > 0) {
