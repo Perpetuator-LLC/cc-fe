@@ -3363,19 +3363,19 @@ type Mutation {
   """Mutation to create a custom user-defined topic without AI generation."""
   createCustomTopic(description: String, podcastUuid: UUID!, title: String!): CreateCustomTopic
 
-  """Force refresh of stock listings from Alpha Vantage"""
+  """Force refresh of stock listings from the data provider"""
   refreshStockListings(
     """Force refresh even if not needed"""
     force: Boolean = false
   ): RefreshStockListings
 
-  """Fetch company information from Alpha Vantage"""
+  """Fetch company information from data provider"""
   fetchCompanyInfo(
     """Stock symbol to fetch company info for"""
     symbol: String!
   ): FetchCompanyInfo
 
-  """Fetch stock price data from Alpha Vantage"""
+  """Fetch stock price data from data provider"""
   fetchStockPrices(
     """End date in YYYY-MM-DD format"""
     endDate: String
@@ -3390,7 +3390,7 @@ type Mutation {
     symbol: String!
   ): FetchStockPrices
 
-  """Fetch balance sheet data from Alpha Vantage"""
+  """Fetch balance sheet data from data provider"""
   fetchBalanceSheet(
     """Fetch annual (True) or quarterly (False) data"""
     isAnnual: Boolean = true
@@ -3399,7 +3399,7 @@ type Mutation {
     symbol: String!
   ): FetchBalanceSheet
 
-  """Fetch income statement data from Alpha Vantage"""
+  """Fetch income statement data from data provider"""
   fetchIncomeStatement(
     """Fetch annual (True) or quarterly (False) data"""
     isAnnual: Boolean = true
@@ -3408,7 +3408,7 @@ type Mutation {
     symbol: String!
   ): FetchIncomeStatement
 
-  """Fetch cash flow data from Alpha Vantage"""
+  """Fetch cash flow data from data provider"""
   fetchCashFlow(
     """Fetch annual (True) or quarterly (False) data"""
     isAnnual: Boolean = true
@@ -3417,7 +3417,7 @@ type Mutation {
     symbol: String!
   ): FetchCashFlow
 
-  """Fetch earnings data from Alpha Vantage"""
+  """Fetch earnings data from data provider"""
   fetchEarnings(
     """Fetch annual (True) or quarterly (False) data"""
     isAnnual: Boolean = true
@@ -4298,49 +4298,49 @@ type CreateCustomTopic {
   topic: TopicType
 }
 
-"""Force refresh of stock listings from Alpha Vantage"""
+"""Force refresh of stock listings from the data provider"""
 type RefreshStockListings {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch company information from Alpha Vantage"""
+"""Fetch company information from data provider"""
 type FetchCompanyInfo {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch stock price data from Alpha Vantage"""
+"""Fetch stock price data from data provider"""
 type FetchStockPrices {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch balance sheet data from Alpha Vantage"""
+"""Fetch balance sheet data from data provider"""
 type FetchBalanceSheet {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch income statement data from Alpha Vantage"""
+"""Fetch income statement data from data provider"""
 type FetchIncomeStatement {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch cash flow data from Alpha Vantage"""
+"""Fetch cash flow data from data provider"""
 type FetchCashFlow {
   success: Boolean
   message: String
   job: JobType
 }
 
-"""Fetch earnings data from Alpha Vantage"""
+"""Fetch earnings data from data provider"""
 type FetchEarnings {
   success: Boolean
   message: String
