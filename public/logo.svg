@@ -1,22 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<svg
+  id="Layer_2"
+  data-name="Layer 2"
+  version="1.1"
+  viewBox="0 0 256 256"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg">
   <defs>
     <style>
       .cls-1 {
-        fill: #f9f9ff;
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 2;
       }
 
       .cls-2 {
-        fill: #ed5525;
+        fill: none;
+        stroke: #888;
+        stroke-width: 2;
       }
     </style>
   </defs>
-  <g id="Layer_2-2" data-name="Layer 2">
-    <g>
-      <path class="cls-1" d="M162.41,68.82h-68.82c-13.68,0-24.77,11.09-24.77,24.77h0c0,13.68,11.09,24.77,24.77,24.77h68.82c24.32,0,44.04,19.72,44.04,44.04h0c0,24.32-19.72,44.04-44.04,44.04h-24.77s0,49.55,0,49.55h24.77c51.69,0,93.59-41.9,93.59-93.59h0c0-51.69-41.9-93.59-93.59-93.59Z"/>
-      <path class="cls-1" d="M118.37,206.45h-24.77c-13.68,0-24.77,11.09-24.77,24.77h0c0,13.68,11.09,24.77,24.77,24.77h24.77s0-49.55,0-49.55Z"/>
-      <path class="cls-2" d="M137.63,49.55h24.77c13.68,0,24.77-11.09,24.77-24.77h0C187.18,11.09,176.09,0,162.41,0h-24.77v49.55Z"/>
-      <path class="cls-2" d="M162.41,137.63h-68.82c-24.32,0-44.04-19.72-44.04-44.04h0c0-24.32,19.72-44.04,44.04-44.04h24.77s0-49.55,0-49.55h-24.77C41.9,0,0,41.9,0,93.59h0c0,51.69,41.9,93.59,93.59,93.59h68.82c13.68,0,24.77-11.09,24.77-24.77h0c0-13.68-11.09-24.77-24.77-24.77Z"/>
-    </g>
+  <g id="Layer_2-2" data-name="Layer 2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+  >
+    <!-- Rect perimeter = 2*(49.52+49.55) = 198.14 -->
+    <rect
+      class="cls-1"
+      x="68.82"
+      y="68.82"
+      width="49.52"
+      height="49.55"
+      rx="12.39"
+      ry="12.39"
+      stroke-dasharray="200"
+      stroke-dashoffset="200">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="200"
+        to="0" />
+    </rect>
+
+    <path
+      class="cls-1"
+      stroke-dasharray="800"
+      stroke-dashoffset="800"
+      d="M231.23,68.82h-81.2c-6.84,0-12.39,5.55-12.39,12.39v24.77c0,6.84,5.55,12.39,12.39,12.39h31.66c13.68,0,24.77,11.09,24.77,24.77v38.54c0,13.68-11.09,24.77-24.77,24.77h-31.66c-6.84,0-12.39,5.55-12.39,12.39v24.77c0,6.84,5.55,12.39,12.39,12.39h81.2c13.68,0,24.77-11.09,24.77-24.77V93.59c0-13.68-11.09-24.77-24.77-24.77Z">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="800"
+        to="0" />
+    </path>
+
+    <!-- Rect perimeter = 2*(49.55+49.55) = 198.2 -->
+    <rect
+      class="cls-1"
+      x="68.82"
+      y="206.45"
+      width="49.55"
+      height="49.55"
+      rx="12.39"
+      ry="12.39"
+      stroke-dasharray="200"
+      stroke-dashoffset="200">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="200"
+        to="0"
+        begin="0.5s" />
+    </rect>
+
+    <rect
+      class="cls-2"
+      x="137.63"
+      y="0"
+      width="49.55"
+      height="49.55"
+      rx="12.39"
+      ry="12.39"
+      stroke-dasharray="200"
+      stroke-dashoffset="200">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="200"
+        to="0"
+        begin="1.0s" />
+    </rect>
+
+    <path
+      class="cls-2"
+      stroke-dasharray="800"
+      stroke-dashoffset="800"
+      d="M105.95,137.63h-31.63c-13.68,0-24.77-11.09-24.77-24.77v-38.54c0-13.68,11.09-24.77,24.77-24.77h31.66c6.84,0,12.39-5.55,12.39-12.39V12.39C118.37,5.55,112.82,0,105.98,0H24.77C11.09,0,0,11.09,0,24.77v137.63c0,13.68,11.09,24.77,24.77,24.77h81.18c6.84,0,12.39-5.55,12.39-12.39v-24.77c0-6.84-5.55-12.39-12.39-12.39Z">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="800"
+        to="0"
+        begin="1.5s" />
+    </path>
+
+    <rect
+      class="cls-2"
+      x="137.63"
+      y="137.63"
+      width="49.55"
+      height="49.55"
+      rx="12.39"
+      ry="12.39"
+      stroke-dasharray="200"
+      stroke-dashoffset="200">
+      <animate
+        fill="freeze"
+        attributeName="stroke-dashoffset"
+        dur="2.0s"
+        from="200"
+        to="0"
+        begin="2.0s" />
+    </rect>
   </g>
 </svg>
