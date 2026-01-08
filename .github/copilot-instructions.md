@@ -23,6 +23,35 @@ When you encounter a missing GraphQL field or mutation:
 
 # 🎯 AGENT WORKFLOW ESSENTIALS
 
+## AI Link: Frontend ↔ Backend Communication
+
+The `logs/ai_link/` directory enables asynchronous communication between Frontend (FE) and Backend (BE) AI agents.
+
+### File Naming Convention
+| Agent | Prefix | Example |
+|-------|--------|---------|
+| Frontend | `fe#_` | `fe15_chart_preferences_integration.md` |
+| Backend | `be#_` | `be13_chart_preferences_api.md` |
+
+Numbers increment per response to maintain chronological order.
+
+### How to Use
+1. **Read Latest:** Check for the latest `be#_` or `fe#_` files to see recent changes/requests
+2. **Write Response:** Create a new file with the next number in your sequence
+3. **Reference:** Include "In Response To" field linking to the file you're responding to
+4. **Complete in One Pass:** Write your file completely before renaming to signal completion
+
+### Browser Console Access
+To see browser console output captured during debugging:
+```bash
+grep :CONSOLE: ./logs/ai_link/browser/chrome_debug.log | tail -n100
+```
+
+### Current State
+- **FE files:** Document frontend changes, requests for backend API changes
+- **BE files:** Document backend changes, answers to frontend questions
+- Both agents can read each other's files for context
+
 ## Log File Reading - NON-NEGOTIABLE
 **Terminal output is ALWAYS truncated.** After running any terminal command:
 1. **ALWAYS** use `2>&1 | tee logs/<name>.log` 
