@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -23,11 +23,10 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MessageService } from '../../message.service';
 import { MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { PaymentService } from '../payment.service';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -70,13 +69,13 @@ import { MatChipsModule } from '@angular/material/chips';
     DecimalPipe,
     MatIcon,
     MatIconButton,
-    SvgIconComponent,
     ReactiveFormsModule,
     MatMenuTrigger,
     MatMenu,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    MatButton,
   ],
   templateUrl: './orders-list.component.html',
   styleUrl: './orders-list.component.scss',

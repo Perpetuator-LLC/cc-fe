@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <span class="page-title">
     <mat-icon>graphic_eq</mat-icon>
@@ -549,7 +549,6 @@
                     tabindex="0"
                     role="button"
                     [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
-                    [class.selected]="isVoiceSelected(voice)"
                   >
                     <button
                       mat-icon-button
@@ -561,12 +560,11 @@
                     >
                       @if (currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid) {
                         <ng-container>
-                          <img src="/assets/music-white.gif" alt="music" width="30" height="30" class="music-white" />
-                          <img src="/assets/music.gif" alt="music" width="30" height="30" class="music-dark" />
+                          <mat-icon>autoplay</mat-icon>
                         </ng-container>
                       } @else {
                         <ng-container #playIcon>
-                          <app-svg-icon icon="play" />
+                          <mat-icon>sound_sampler</mat-icon>
                         </ng-container>
                       }
                     </button>

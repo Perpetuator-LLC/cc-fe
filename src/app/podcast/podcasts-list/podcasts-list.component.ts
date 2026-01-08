@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -31,7 +31,6 @@ import { CreatePodcastDialogComponent } from '../create-podcast-dialog/create-po
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { NewsService } from '../../news/news.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { Job, JobService } from '../../jobs/job.service';
@@ -55,7 +54,6 @@ export interface ColumnOption {
   imports: [
     MatButton,
     MatCard,
-    SvgIconComponent,
     MatCardHeader,
     MatIcon,
 

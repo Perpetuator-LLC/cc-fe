@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
@@ -20,7 +20,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../layout/toolbar.service';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { UserService } from '../../user/user.service';
@@ -62,7 +61,6 @@ export interface SidePanelAccordianData {
     MatDivider,
     MatSelect,
     MatOption,
-    SvgIconComponent,
     MatProgressBarModule,
   ],
   templateUrl: './news-list.component.html',

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 mat-sidenav-content mat-toolbar {
@@ -142,6 +142,13 @@ mat-sidenav-content mat-toolbar {
   // Ensure hamburger icon doesn't flex
   .hamburger-icon {
     flex-shrink: 0;
+  }
+
+  // make hover on hamburger icon more obvious and show cursor pointer
+  .icon-clickable:hover {
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: var(--md-sys-color-surface-container-high);
   }
 
   // Ensure push-right doesn't flex

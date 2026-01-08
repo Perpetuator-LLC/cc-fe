@@ -19,12 +19,11 @@ export interface GraphQLWsMessage<T = unknown> {
  * Provides a single WebSocket connection for all real-time GraphQL operations.
  * Uses the graphql-ws protocol (graphql-transport-ws subprotocol).
  *
- * This replaces:
- * - /ws/terminal/ (terminal commands, autocomplete, chart updates)
- * - /ws/jobs/ (job status updates)
- *
- * With a unified:
+ * Unified endpoint:
  * - /ws/graphql/ (all GraphQL operations over WebSocket)
+ *
+ * Note: Job updates are handled separately by JobsWebSocketService which also
+ * connects to /ws/graphql/ but handles custom job message types.
  */
 @Injectable({
   providedIn: 'root',

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .display-none {
@@ -256,7 +256,6 @@
   }
 
   // Ensure SVG icons are vertically aligned
-  app-svg-icon,
   mat-icon {
     display: inline-flex;
     flex-shrink: 0;

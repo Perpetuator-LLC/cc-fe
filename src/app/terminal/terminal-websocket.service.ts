@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal, inject, Injector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription } from 'rxjs';
 import { createClient, Client } from 'graphql-ws';
@@ -13,6 +13,7 @@ import {
   AutocompleteSuggestion,
 } from './terminal.types';
 import { EChartsOption } from 'echarts';
+import { Job } from '../jobs/job.service';
 
 export interface ChartUpdate {
   chartId: string;
@@ -52,6 +53,7 @@ export class TerminalWebSocketService implements OnDestroy {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectTimer: Subscription | null = null;
+  private injector = inject(Injector);
 
   // Active GraphQL subscriptions
   private activeSubscriptions = new Map<string, () => void>();
@@ -68,6 +70,13 @@ export class TerminalWebSocketService implements OnDestroy {
   private historySearch$ = new Subject<HistorySearchResponse>();
   private error$ = new Subject<string>();
   private connected$ = new Subject<{ userId: string; timestamp: string }>();
+
+  // Job message subjects - forwarded to JobsWebSocketService
+  private jobInitial$ = new Subject<Job[]>();
+  private jobCreated$ = new Subject<Job>();
+  private jobUpdated$ = new Subject<Job>();
+  private jobCompleted$ = new Subject<Job>();
+  private jobFailed$ = new Subject<Job>();
 
   constructor(private authService: AuthService) {
     // Auto-connect/disconnect based on auth state
@@ -137,6 +146,27 @@ export class TerminalWebSocketService implements OnDestroy {
     return this.connected$.asObservable();
   }
 
+  // Job message observables - components can subscribe to these
+  get onJobInitial() {
+    return this.jobInitial$.asObservable();
+  }
+
+  get onJobCreated() {
+    return this.jobCreated$.asObservable();
+  }
+
+  get onJobUpdated() {
+    return this.jobUpdated$.asObservable();
+  }
+
+  get onJobCompleted() {
+    return this.jobCompleted$.asObservable();
+  }
+
+  get onJobFailed() {
+    return this.jobFailed$.asObservable();
+  }
+
   // ============================================================================
   // Connection Management
   // ============================================================================
@@ -167,23 +197,37 @@ export class TerminalWebSocketService implements OnDestroy {
       keepAlive: 30000, // Send ping every 30 seconds
       lazy: false, // Connect immediately
       on: {
-        connected: () => {
+        connected: (socket) => {
           this.connectionStateSignal.set('connected');
           this.reconnectAttempts = 0;
           this.connected$.next({ userId: '', timestamp: new Date().toISOString() });
-          console.debug('[TerminalWS] GraphQL WebSocket connected');
+          const ws = socket as WebSocket;
+          console.log('[TerminalWS] GraphQL WebSocket connected', { readyState: ws?.readyState });
         },
         closed: (event) => {
           this.connectionStateSignal.set('disconnected');
-          console.debug('[TerminalWS] GraphQL WebSocket closed', event);
+          const closeEvent = event as CloseEvent;
+          console.log('[TerminalWS] GraphQL WebSocket CLOSED', {
+            code: closeEvent?.code,
+            reason: closeEvent?.reason,
+            wasClean: closeEvent?.wasClean,
+          });
         },
         error: (error) => {
-          console.error('[TerminalWS] GraphQL WebSocket error:', error);
+          console.error('[TerminalWS] GraphQL WebSocket ERROR:', error);
           this.error$.next(error instanceof Error ? error.message : String(error));
         },
         connecting: () => {
           this.connectionStateSignal.set('connecting');
-          console.debug('[TerminalWS] GraphQL WebSocket connecting...');
+          console.log('[TerminalWS] GraphQL WebSocket connecting...');
+        },
+        message: (message) => {
+          // Log all incoming messages to debug the disconnect issue
+          console.log('[TerminalWS] Received message:', message);
+
+          // Handle job-related custom messages
+          // These are sent by the backend outside of the graphql-transport-ws protocol
+          this.handleJobMessage(message);
         },
       },
     });
@@ -350,16 +394,19 @@ export class TerminalWebSocketService implements OnDestroy {
 
   /**
    * Search command history with optional substring matching
+   * @param query Search string
+   * @param limit Maximum number of results
+   * @param uniqueLatest If true (default), deduplicate results by command
    */
-  searchHistory(query: string, limit = 5): void {
+  searchHistory(query: string, limit = 5, uniqueLatest = true): void {
     if (!this.client) {
       console.warn('[TerminalWS] Not connected, cannot search history');
       return;
     }
 
     const gqlQuery = `
-      query CommandHistory($first: Int, $search: String) {
-        commandHistory(first: $first, search: $search) {
+      query CommandHistory($first: Int, $search: String, $uniqueLatest: Boolean) {
+        commandHistory(first: $first, search: $search, uniqueLatest: $uniqueLatest) {
           edges {
             node {
               id
@@ -371,6 +418,7 @@ export class TerminalWebSocketService implements OnDestroy {
               createdAt
             }
             cursor
+            executionCount
           }
           pageInfo {
             hasNextPage
@@ -383,7 +431,7 @@ export class TerminalWebSocketService implements OnDestroy {
 
     const subId = `history_${Date.now()}`;
     const unsubscribe = this.client.subscribe(
-      { query: gqlQuery, variables: { first: limit, search: query.trim() || null } },
+      { query: gqlQuery, variables: { first: limit, search: query.trim() || null, uniqueLatest } },
       {
         next: (result) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -496,6 +544,151 @@ export class TerminalWebSocketService implements OnDestroy {
       this.reconnectTimer.unsubscribe();
       this.reconnectTimer = null;
     }
+  }
+
+  /**
+   * Handle job-related messages from the backend.
+   *
+   * The backend now wraps job messages in valid graphql-transport-ws format:
+   * { type: "next", id: "_jobs", payload: { data: { __typename: "JobsInitial", jobs: [...] } } }
+   *
+   * This allows them to pass through the graphql-ws library without causing protocol errors.
+   */
+  private handleJobMessage(message: unknown): void {
+    // The message from graphql-ws callback is already parsed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msg = message as any;
+    if (!msg) return;
+
+    // NEW FORMAT: Check for wrapped graphql-transport-ws format (type: "next", id: "_jobs")
+    if (msg.type === 'next' && msg.id === '_jobs') {
+      const data = msg.payload?.data;
+      if (!data) return;
+
+      const typename = data.__typename;
+      console.log(`[TerminalWS] Received job message: ${typename}`);
+
+      switch (typename) {
+        case 'JobsInitial':
+          console.log(`[TerminalWS] Received JobsInitial: ${data.jobs?.length || 0} jobs`);
+          if (data.jobs && Array.isArray(data.jobs)) {
+            this.jobInitial$.next(data.jobs);
+            this.forwardToJobsService('initial', data.jobs);
+          }
+          break;
+
+        case 'JobCreated':
+          console.log(`[TerminalWS] Job created: ${data.job?.uuid}`);
+          if (data.job) {
+            this.jobCreated$.next(data.job);
+            this.forwardToJobsService('created', data.job);
+          }
+          break;
+
+        case 'JobUpdate':
+          console.log(`[TerminalWS] Job updated: ${data.job?.uuid} -> ${data.job?.status}`);
+          if (data.job) {
+            this.jobUpdated$.next(data.job);
+            this.forwardToJobsService('update', data.job);
+          }
+          break;
+
+        case 'JobCompleted':
+          console.log(`[TerminalWS] Job completed: ${data.job?.uuid}`);
+          if (data.job) {
+            this.jobCompleted$.next(data.job);
+            this.forwardToJobsService('completed', data.job);
+          }
+          break;
+
+        case 'JobFailed':
+          console.log(`[TerminalWS] Job failed: ${data.job?.uuid}`);
+          if (data.job) {
+            this.jobFailed$.next(data.job);
+            this.forwardToJobsService('failed', data.job);
+          }
+          break;
+      }
+      return;
+    }
+
+    // LEGACY FORMAT: Handle old-style messages (type: "jobs.initial", etc.) for backwards compatibility
+    if (!msg.type) return;
+
+    switch (msg.type) {
+      case 'jobs.initial':
+        console.log(`[TerminalWS] Received jobs.initial (legacy): ${msg.jobs?.length || 0} jobs`);
+        if (msg.jobs && Array.isArray(msg.jobs)) {
+          this.jobInitial$.next(msg.jobs);
+          this.forwardToJobsService('initial', msg.jobs);
+        }
+        break;
+
+      case 'jobs.created':
+        console.log(`[TerminalWS] Job created (legacy): ${msg.job?.uuid}`);
+        if (msg.job) {
+          this.jobCreated$.next(msg.job);
+          this.forwardToJobsService('created', msg.job);
+        }
+        break;
+
+      case 'jobs.update':
+        console.log(`[TerminalWS] Job updated (legacy): ${msg.job?.uuid} -> ${msg.job?.status}`);
+        if (msg.job) {
+          this.jobUpdated$.next(msg.job);
+          this.forwardToJobsService('update', msg.job);
+        }
+        break;
+
+      case 'jobs.completed':
+        console.log(`[TerminalWS] Job completed (legacy): ${msg.job?.uuid}`);
+        if (msg.job) {
+          this.jobCompleted$.next(msg.job);
+          this.forwardToJobsService('completed', msg.job);
+        }
+        break;
+
+      case 'jobs.failed':
+        console.log(`[TerminalWS] Job failed (legacy): ${msg.job?.uuid}`);
+        if (msg.job) {
+          this.jobFailed$.next(msg.job);
+          this.forwardToJobsService('failed', msg.job);
+        }
+        break;
+    }
+  }
+
+  /**
+   * Forward job messages to JobsWebSocketService
+   * Uses lazy injection to avoid circular dependency
+   */
+  private forwardToJobsService(
+    type: 'initial' | 'created' | 'update' | 'completed' | 'failed',
+    data: Job | Job[],
+  ): void {
+    // Import JobsWebSocketService lazily to avoid circular dependency
+    import('../jobs/jobs-websocket.service')
+      .then(({ JobsWebSocketService }) => {
+        const jobsService = this.injector.get(JobsWebSocketService);
+        switch (type) {
+          case 'initial':
+            jobsService.handleInitialJobs(data as Job[]);
+            break;
+          case 'created':
+          case 'update':
+            jobsService.addJob(data as Job);
+            break;
+          case 'completed':
+            jobsService.handleJobCompleted(data as Job);
+            break;
+          case 'failed':
+            jobsService.handleJobFailed(data as Job);
+            break;
+        }
+      })
+      .catch((err) => {
+        console.error('[TerminalWS] Failed to forward job message:', err);
+      });
   }
 
   /**

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <div class="toolbar-title-wrapper">
     <span class="page-title">
@@ -24,7 +24,8 @@
             <mat-checkbox
               formControlName="isLive"
               (change)="onIsLiveChange($event.checked)"
-              matTooltip="When checked, this episode is published publicly on all associated platforms (RSS feed, website, etc.). The RSS feed will use the most recent audio that was generated.">
+              matTooltip="When checked, this episode is published publicly on all associated platforms (RSS feed, website, etc.). The RSS feed will use the most recent audio that was generated."
+            >
               Live on Podcast
             </mat-checkbox>
           </div>
@@ -40,8 +41,14 @@
         }
         <mat-divider vertical />
         <div class="action-buttons">
-          <button mat-flat-button color="primary" (click)="updateEpisode()" type="button"
-            [disabled]="!hasUnsavedChanges" [matTooltip]="getUpdateButtonTooltip()">
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="updateEpisode()"
+            type="button"
+            [disabled]="!hasUnsavedChanges"
+            [matTooltip]="getUpdateButtonTooltip()"
+          >
             <mat-icon>save</mat-icon>
             Save
           </button>
@@ -59,10 +66,14 @@
           {{ episodeForm.get('podcast.name')?.value }}
         </a>
         @if (topic) {
-        <a [routerLink]="['/media/topics', topic.uuid]" class="resource-tag topic-tag" matTooltip="View the research topic that generated this episode">
-          <mat-icon>psychology</mat-icon>
-          {{ topic.title }}
-        </a>
+          <a
+            [routerLink]="['/media/topics', topic.uuid]"
+            class="resource-tag topic-tag"
+            matTooltip="View the research topic that generated this episode"
+          >
+            <mat-icon>psychology</mat-icon>
+            {{ topic.title }}
+          </a>
         }
         <div class="status-item">
           <mat-icon>notes</mat-icon>
@@ -90,27 +101,67 @@
               <div class="audio-header">
                 <h4>Episode Audio</h4>
                 <div class="buttons">
-                  <button mat-raised-button color="accent" type="button" class="episode-control" [hidden]="!audioSrc"
-                    (click)="downloadAudio()">
+                  <button
+                    mat-raised-button
+                    color="accent"
+                    type="button"
+                    class="episode-control"
+                    [hidden]="!audioSrc"
+                    (click)="downloadAudio()"
+                  >
                     <mat-icon>download</mat-icon>
                     Download MP3
                   </button>
-                  <button mat-raised-button color="accent" type="button" class="episode-control" [hidden]="!audioSrc"
-                    (click)="publishAudio()">
-                    <app-svg-icon icon="telegram" />
+                  <button
+                    mat-raised-button
+                    color="accent"
+                    type="button"
+                    class="episode-control"
+                    [hidden]="!audioSrc"
+                    (click)="publishAudio()"
+                  >
+                    <mat-icon>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                          d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+                        />
+                      </svg>
+                    </mat-icon>
                     Publish to Telegram
                   </button>
-                  <button mat-raised-button color="accent" type="button" class="episode-control"
-                    (click)="audioFileInput.click()" [disabled]="hasUnsavedChanges"
-                    [matTooltip]="hasUnsavedChanges ? 'Please save changes before uploading audio' : 'Upload a custom MP3 file for this episode'">
+                  <button
+                    mat-raised-button
+                    color="accent"
+                    type="button"
+                    class="episode-control"
+                    (click)="audioFileInput.click()"
+                    [disabled]="hasUnsavedChanges"
+                    [matTooltip]="
+                      hasUnsavedChanges
+                        ? 'Please save changes before uploading audio'
+                        : 'Upload a custom MP3 file for this episode'
+                    "
+                  >
                     <mat-icon>upload_file</mat-icon>
                     Upload Custom MP3
                   </button>
-                  <input #audioFileInput type="file" accept="audio/mpeg,audio/mp3" (change)="onAudioFileSelected($event)" class="display-none">
+                  <input
+                    #audioFileInput
+                    type="file"
+                    accept="audio/mpeg,audio/mp3"
+                    (change)="onAudioFileSelected($event)"
+                    class="display-none"
+                  />
                   <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
-                    <button mat-raised-button color="accent" type="button" class="episode-control"
-                      (click)="generateAudio()" [disabled]="isGenerateAudioDisabled()">
-                      <app-svg-icon icon="audio" />
+                    <button
+                      mat-raised-button
+                      color="accent"
+                      type="button"
+                      class="episode-control"
+                      (click)="generateAudio()"
+                      [disabled]="isGenerateAudioDisabled()"
+                    >
+                      <mat-icon>text_to_speech</mat-icon>
                       Generate Audio
                     </button>
                   </span>
@@ -125,7 +176,7 @@
                         <mat-icon
                           class="custom-upload-icon"
                           matTooltip="Custom uploaded audio - will persist even if transcript is edited. Generate Audio to replace with AI-generated version."
-                          >
+                        >
                           upload_file
                         </mat-icon>
                       }
@@ -134,7 +185,7 @@
                   </div>
                 } @else {
                   <div class="empty-audio">
-                    <app-svg-icon width="24" height="24" icon="music" class="icon-clickable" />
+                    <mat-icon>audio_file</mat-icon>
                     No audio for current version
                   </div>
                 }
@@ -147,8 +198,8 @@
                     </div>
                     <audio controls [src]="liveAudioSrc"></audio>
                     <p class="live-audio-note">
-                      This audio is currently published on your podcast RSS feed.
-                      Generate new audio for the current version to update what listeners hear.
+                      This audio is currently published on your podcast RSS feed. Generate new audio for the current
+                      version to update what listeners hear.
                     </p>
                   </div>
                 }
@@ -171,7 +222,8 @@
                     type="button"
                     class="copy-content-btn"
                     (click)="copyCurrentContent()"
-                    matTooltip="Copy current content to clipboard">
+                    matTooltip="Copy current content to clipboard"
+                  >
                     <mat-icon>content_copy</mat-icon>
                     Copy Current Content
                   </button>
@@ -190,31 +242,32 @@
                 [currentVersionChangeType]="currentVersionChangeType"
                 [currentVersionCreator]="currentVersionCreator"
                 [currentVersionCreatedAt]="currentVersionCreatedAt"
-                [currentVersionValidationNotes]="currentVersionValidationNotes ? markdownToHtml(currentVersionValidationNotes) : null"
+                [currentVersionValidationNotes]="
+                  currentVersionValidationNotes ? markdownToHtml(currentVersionValidationNotes) : null
+                "
                 [selectedVersionNumber]="selectedVersionNumber"
                 [selectedVersion]="selectedVersion"
                 (validateEpisode)="validateEpisode()"
                 (regenerateEpisode)="regenerateEpisode()"
                 (versionSelect)="onVersionSelect($event)"
                 (copyVersionContent)="copyVersionContent()"
-                (restoreVersion)="restoreVersion()" />
+                (restoreVersion)="restoreVersion()"
+              />
 
               <div>
                 @if (episodeForm.get('podcastDate')?.value) {
-                Podcast episode went live:
-                <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
-                  {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
-                </span>
+                  Podcast episode went live:
+                  <span [matTooltip]="episodeForm.get('podcastDate')?.value | date: 'z'" matTooltipPosition="above">
+                    {{ episodeForm.get('podcastDate')?.value | date: 'short' : 'local' }}
+                  </span>
                 }
                 @if (episodeForm.get('telegramDate')?.value) {
-                | Published to Telegram on:
-                <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
-                  {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
-                </span>
+                  | Published to Telegram on:
+                  <span [matTooltip]="episodeForm.get('telegramDate')?.value | date: 'z'" matTooltipPosition="above">
+                    {{ episodeForm.get('telegramDate')?.value | date: 'short' : 'local' }}
+                  </span>
                 }
               </div>
-
-
             </div>
           </mat-card-content>
         </mat-tab>
@@ -227,170 +280,169 @@
               </div>
               <div class="view-btn-container">
                 <button type="button" class="view-btn" (click)="toggleView(true)" [class.active]="isGridView">
-                  <app-svg-icon icon="grid" />
+                  <mat-icon>grid_on</mat-icon>
                 </button>
                 <button type="button" class="view-btn" (click)="toggleView(false)" [class.active]="!isGridView">
-                  <app-svg-icon icon="list" />
+                  <mat-icon>list_alt</mat-icon>
                 </button>
               </div>
             </div>
             @if (isGridView) {
-            <div class="related-grid">
-              @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
-              <mat-card class="related-card">
-                <mat-card-header>
-                  <div class="grid-header">
-                    <div class="grid-header-name">
-                      <div class="news-title-wrapper">
-                        <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
-                          {{ referencedNews.title }}
-                        </a>
-                        @if (referencedNews.blocked) {
-                          <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
-                            <mat-icon>block</mat-icon>
-                            Blocked
-                          </span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </mat-card-header>
-
-                <div class="news-meta">
-<!--                  <div class="source">-->
-<!--                    <mat-icon>graphic_eq</mat-icon>-->
-<!--                    <span><strong>Source:</strong> {{ referencedNews.source }}</span>-->
-<!--                  </div>-->
-                  @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
-                    <div class="rss-feeds-list">
-                      <mat-icon>rss_feed</mat-icon>
-                      <div class="rss-feeds-items">
-                        @for (feed of referencedNews.rssFeeds; track feed.id) {
-                          <div class="rss-feed-badge-item">
-                            <span class="rss-feed-name">{{ feed.name || feed.url }}</span>
-                            <div class="rss-feed-status-mini">
-                              <span
-                                class="status-icon status-success"
-                                [class.status-success]="feed.isReachable"
-                                [class.status-error]="!feed.isReachable"
-                                [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
-                              >
-                                <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+              <div class="related-grid">
+                @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
+                  <mat-card class="related-card">
+                    <mat-card-header>
+                      <div class="grid-header">
+                        <div class="grid-header-name">
+                          <div class="news-title-wrapper">
+                            <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                              {{ referencedNews.title }}
+                            </a>
+                            @if (referencedNews.blocked) {
+                              <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                                <mat-icon>block</mat-icon>
+                                Blocked
                               </span>
-                              <span
-                                class="status-icon"
-                                [class.status-success]="feed.isParsable"
-                                [class.status-error]="!feed.isParsable"
-                                [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
-                              >
-                                <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
-                              </span>
-                            </div>
+                            }
                           </div>
-                        }
-                      </div>
-                    </div>
-                  }
-                  <div class="date">
-                    <mat-icon>schedule</mat-icon>
-                    <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
-                  </div>
-                </div>
-              </mat-card>
-              } @empty {
-                <div class="no-related">
-                  <p>No referenced news articles found.</p>
-                </div>
-              }
-            </div>
-
-            }
-
-            @if (!isGridView) {
-            <div class="related-table">
-              <table class="news-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-<!--                    <th>Source</th>-->
-                    <th>RSS Feed</th>
-                    <th>Published</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
-                  <tr>
-                    <td>
-                      <div class="news-title-cell">
-                        <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
-                          {{ referencedNews.title }}
-                        </a>
-                        @if (referencedNews.blocked) {
-                          <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
-                            <mat-icon>block</mat-icon>
-                            Blocked
-                          </span>
-                        }
-                      </div>
-                    </td>
-<!--                    <td>-->
-<!--                      <div class="source-cell">-->
-<!--                        <mat-icon>graphic_eq</mat-icon>-->
-<!--                        <span>{{ referencedNews.source }}</span>-->
-<!--                      </div>-->
-<!--                    </td>-->
-                    <td>
-                      @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
-                        <div class="rss-feed-cell">
-                          @for (feed of referencedNews.rssFeeds; track feed.id) {
-                            <div class="rss-feed-row">
-                              <mat-icon>rss_feed</mat-icon>
-                              <span class="feed-name" [matTooltip]="feed.url">
-                                {{ feed.name || feed.url }}
-                              </span>
-                              <div class="feed-status-icons">
-                                <span
-                                  class="status-icon-small"
-                                  [class.status-success]="feed.isReachable"
-                                  [class.status-error]="!feed.isReachable"
-                                  [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
-                                >
-                                  <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
-                                </span>
-                                <span
-                                  class="status-icon-small"
-                                  [class.status-success]="feed.isParsable"
-                                  [class.status-error]="!feed.isParsable"
-                                  [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
-                                >
-                                  <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
-                                </span>
-                              </div>
-                            </div>
-                          }
                         </div>
-                      } @else {
-                        <span class="no-data">—</span>
+                      </div>
+                    </mat-card-header>
+
+                    <div class="news-meta">
+                      <!--                  <div class="source">-->
+                      <!--                    <mat-icon>graphic_eq</mat-icon>-->
+                      <!--                    <span><strong>Source:</strong> {{ referencedNews.source }}</span>-->
+                      <!--                  </div>-->
+                      @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
+                        <div class="rss-feeds-list">
+                          <mat-icon>rss_feed</mat-icon>
+                          <div class="rss-feeds-items">
+                            @for (feed of referencedNews.rssFeeds; track feed.id) {
+                              <div class="rss-feed-badge-item">
+                                <span class="rss-feed-name">{{ feed.name || feed.url }}</span>
+                                <div class="rss-feed-status-mini">
+                                  <span
+                                    class="status-icon status-success"
+                                    [class.status-success]="feed.isReachable"
+                                    [class.status-error]="!feed.isReachable"
+                                    [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
+                                  >
+                                    <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                                  </span>
+                                  <span
+                                    class="status-icon"
+                                    [class.status-success]="feed.isParsable"
+                                    [class.status-error]="!feed.isParsable"
+                                    [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
+                                  >
+                                    <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                                  </span>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </div>
                       }
-                    </td>
-                    <td>
-                      <div class="date-cell">
+                      <div class="date">
                         <mat-icon>schedule</mat-icon>
                         <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
                       </div>
-                    </td>
-                  </tr>
-                  } @empty {
-                  <tr>
-                    <td colspan="4" class="no-related">
-                      <p>No referenced news articles found.</p>
-                    </td>
-                  </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
+                    </div>
+                  </mat-card>
+                } @empty {
+                  <div class="no-related">
+                    <p>No referenced news articles found.</p>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (!isGridView) {
+              <div class="related-table">
+                <table class="news-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <!--                    <th>Source</th>-->
+                      <th>RSS Feed</th>
+                      <th>Published</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (referencedNews of episodeForm.get('news')?.value; track referencedNews.id) {
+                      <tr>
+                        <td>
+                          <div class="news-title-cell">
+                            <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                              {{ referencedNews.title }}
+                            </a>
+                            @if (referencedNews.blocked) {
+                              <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                                <mat-icon>block</mat-icon>
+                                Blocked
+                              </span>
+                            }
+                          </div>
+                        </td>
+                        <!--                    <td>-->
+                        <!--                      <div class="source-cell">-->
+                        <!--                        <mat-icon>graphic_eq</mat-icon>-->
+                        <!--                        <span>{{ referencedNews.source }}</span>-->
+                        <!--                      </div>-->
+                        <!--                    </td>-->
+                        <td>
+                          @if (referencedNews.rssFeeds && referencedNews.rssFeeds.length > 0) {
+                            <div class="rss-feed-cell">
+                              @for (feed of referencedNews.rssFeeds; track feed.id) {
+                                <div class="rss-feed-row">
+                                  <mat-icon>rss_feed</mat-icon>
+                                  <span class="feed-name" [matTooltip]="feed.url">
+                                    {{ feed.name || feed.url }}
+                                  </span>
+                                  <div class="feed-status-icons">
+                                    <span
+                                      class="status-icon-small"
+                                      [class.status-success]="feed.isReachable"
+                                      [class.status-error]="!feed.isReachable"
+                                      [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
+                                    >
+                                      <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                                    </span>
+                                    <span
+                                      class="status-icon-small"
+                                      [class.status-success]="feed.isParsable"
+                                      [class.status-error]="!feed.isParsable"
+                                      [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
+                                    >
+                                      <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                                    </span>
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          } @else {
+                            <span class="no-data">—</span>
+                          }
+                        </td>
+                        <td>
+                          <div class="date-cell">
+                            <mat-icon>schedule</mat-icon>
+                            <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="no-related">
+                          <p>No referenced news articles found.</p>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
           </mat-card-content>
         </mat-tab>
         <mat-tab label="Research URLs">
@@ -430,76 +482,74 @@
 
             <div class="scheduling-grid">
               @for (schedule of schedules; track schedule.uuid) {
-              <mat-card class="schedule-card">
-                <mat-card-header>
-                  <div class="schedule-header">
-                    <div class="schedule-info">
-                      <h4>{{ schedule.name }}</h4>
-                      <p class="schedule-type">{{ formatJobKind(schedule.jobKind) }}</p>
-                    </div>
-                    <div class="schedule-actions">
-                      <mat-slide-toggle
-                        [checked]="schedule.enabled"
-                        (change)="toggleScheduleEnabled(schedule, $event.checked)"
-                        color="primary" />
-                      <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
-                      <mat-menu #scheduleMenu="matMenu">
-                        <button mat-menu-item (click)="editSchedule(schedule)">
-                          <mat-icon>edit</mat-icon>
-                          <span>Edit</span>
+                <mat-card class="schedule-card">
+                  <mat-card-header>
+                    <div class="schedule-header">
+                      <div class="schedule-info">
+                        <h4>{{ schedule.name }}</h4>
+                        <p class="schedule-type">{{ formatJobKind(schedule.jobKind) }}</p>
+                      </div>
+                      <div class="schedule-actions">
+                        <mat-slide-toggle
+                          [checked]="schedule.enabled"
+                          (change)="toggleScheduleEnabled(schedule, $event.checked)"
+                          color="primary"
+                        />
+                        <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
+                          <mat-icon>more_vert</mat-icon>
                         </button>
-                        <button mat-menu-item (click)="deleteSchedule(schedule)">
-                          <mat-icon>delete</mat-icon>
-                          <span>Delete</span>
-                        </button>
-                      </mat-menu>
+                        <mat-menu #scheduleMenu="matMenu">
+                          <button mat-menu-item (click)="editSchedule(schedule)">
+                            <mat-icon>edit</mat-icon>
+                            <span>Edit</span>
+                          </button>
+                          <button mat-menu-item (click)="deleteSchedule(schedule)">
+                            <mat-icon>delete</mat-icon>
+                            <span>Delete</span>
+                          </button>
+                        </mat-menu>
+                      </div>
                     </div>
-                  </div>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="schedule-details">
-                    <div class="schedule-timing">
-                      <mat-icon>schedule</mat-icon>
-                      <span>{{ getScheduleDescription(schedule) }}</span>
-                    </div>
-                    <div class="schedule-status">
-                      <span class="status-badge" [ngClass]="schedule.enabled ? 'enabled' : 'disabled'">
-                        {{ schedule.enabled ? 'Enabled' : 'Disabled' }}
-                      </span>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-              } @empty {
-              <div class="no-schedules">
-                <mat-card>
+                  </mat-card-header>
                   <mat-card-content>
-                    <mat-icon>schedule</mat-icon>
-                    <h4>No schedules configured</h4>
-                    <p>Set up automated publishing schedules for this podcast to streamline your workflow.</p>
-                    <button mat-flat-button color="primary" (click)="createNewSchedule()">
-                      Create Schedule
-                    </button>
+                    <div class="schedule-details">
+                      <div class="schedule-timing">
+                        <mat-icon>schedule</mat-icon>
+                        <span>{{ getScheduleDescription(schedule) }}</span>
+                      </div>
+                      <div class="schedule-status">
+                        <span class="status-badge" [ngClass]="schedule.enabled ? 'enabled' : 'disabled'">
+                          {{ schedule.enabled ? 'Enabled' : 'Disabled' }}
+                        </span>
+                      </div>
+                    </div>
                   </mat-card-content>
                 </mat-card>
-              </div>
+              } @empty {
+                <div class="no-schedules">
+                  <mat-card>
+                    <mat-card-content>
+                      <mat-icon>schedule</mat-icon>
+                      <h4>No schedules configured</h4>
+                      <p>Set up automated publishing schedules for this podcast to streamline your workflow.</p>
+                      <button mat-flat-button color="primary" (click)="createNewSchedule()">Create Schedule</button>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
               }
             </div>
 
             @if (schedules.length > 0) {
-            <div class="schedule-actions-footer">
-              <button mat-flat-button color="primary" (click)="createNewSchedule()">
-                <mat-icon>add</mat-icon>
-                Add New Schedule
-              </button>
-            </div>
+              <div class="schedule-actions-footer">
+                <button mat-flat-button color="primary" (click)="createNewSchedule()">
+                  <mat-icon>add</mat-icon>
+                  Add New Schedule
+                </button>
+              </div>
             }
           </mat-card-content>
         </mat-tab>
       </mat-tab-group>
-
     </mat-card>
   </div>
 </form>

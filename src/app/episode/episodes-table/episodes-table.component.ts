@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { MatCard, MatCardHeader } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
@@ -23,7 +23,6 @@ import {
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -45,7 +44,6 @@ import { LoadingService } from '../../layout/loading.service';
   imports: [
     FormsModule,
     MatCard,
-    SvgIconComponent,
     MatCardHeader,
     MatIcon,
     MatProgressBarModule,
@@ -237,7 +235,7 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
 
   deleteEpisode(episode: Episode) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-        data: {
+      data: {
         title: 'Delete Episode',
         message: `Are you sure you want to delete the schedule "${episode.title}"? This action cannot be undone.`,
       },

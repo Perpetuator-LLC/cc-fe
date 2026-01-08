@@ -74,9 +74,9 @@
                 automatic transcripts, seamless audio conversion, and instant publishing.
               </div>
             </div>
-            <a class="module-link" [routerLink]="['/media/topics']" [queryParams]="{ create: 'true' }"
-              >Create a Topic to Research <app-svg-icon icon="right"
-            /></a>
+            <a class="module-link" [routerLink]="['/media/topics']" [queryParams]="{ create: 'true' }">
+              Create a Topic to Research <mat-icon>arrow_right</mat-icon>
+            </a>
           </div>
           <span class="image-section">
             <img src="/assets/hero-side.jpg" alt="generate" width="318" height="256" />
@@ -92,7 +92,7 @@
               and audio, ready to publish.
             </div>
           </div>
-          <a class="module-link" routerLink="/news">Create an Episode from News<app-svg-icon icon="right" /></a>
+          <a class="module-link" routerLink="/news">Create an Episode from News<mat-icon>arrow_right</mat-icon></a>
         </div>
       </div>
       <div class="module-card finance-module">
@@ -104,7 +104,7 @@
               monitoring, and more.
             </div>
           </div>
-          <a class="module-link" [routerLink]="'/finance'"> Explore Finance<app-svg-icon icon="right" /> </a>
+          <a class="module-link" [routerLink]="'/finance'"> Explore Finance<mat-icon>arrow_right</mat-icon> </a>
         </div>
       </div>
     </div>
@@ -365,7 +365,7 @@
       <mat-card class="stat-card">
         <mat-card-content>
           <div class="stat-title">
-            <app-svg-icon icon="voice_selection" />
+            <mat-icon>voice_selection</mat-icon>
             <span class="stat-label">Voices</span>
           </div>
           <div class="stat-value">{{ siteStats.totalVoices }}</div>
@@ -375,7 +375,7 @@
       <mat-card class="stat-card">
         <mat-card-content>
           <div class="stat-title">
-            <app-svg-icon icon="newspaper" />
+            <mat-icon>newspaper</mat-icon>
             <span class="stat-label">Summarized News</span>
           </div>
           <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>

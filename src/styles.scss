@@ -1650,3 +1650,46 @@ html body {
   text-align: left;
   white-space: pre-line;
 }
+
+// ============================================================================
+// Chart Settings Menu - Gear menu with slide toggles
+// ============================================================================
+.chart-settings-menu.mat-mdc-menu-panel {
+  min-width: 200px;
+
+  .menu-section-label {
+    padding: 8px 16px 4px;
+
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // Make menu items work well with slide toggles
+  .mat-mdc-menu-item {
+    height: auto;
+    min-height: 40px;
+    padding: 8px 16px;
+
+    // Remove hover background on the item itself since toggle handles it
+    &:hover {
+      background: transparent;
+    }
+
+    mat-slide-toggle {
+      width: 100%;
+
+      .mdc-form-field {
+        width: 100%;
+
+        label {
+          cursor: pointer;
+          flex-grow: 1;
+          padding-left: 0;
+        }
+      }
+    }
+  }
+}

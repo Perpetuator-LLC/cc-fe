@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 // Host component constraints
 :host {
@@ -528,11 +528,6 @@
 
         &:hover {
           background-color: var(--md-sys-color-surface-container-high);
-        }
-
-        app-svg-icon {
-          width: 16px;
-          height: 16px;
         }
       }
     }

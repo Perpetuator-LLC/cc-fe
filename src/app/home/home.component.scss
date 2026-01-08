@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 // ============================================================================
@@ -449,12 +449,6 @@
 
     &:hover {
       text-decoration: underline;
-    }
-
-    app-svg-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
     }
   }
 
