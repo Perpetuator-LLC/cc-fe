@@ -2605,6 +2605,9 @@ type StockPriceNode {
   """Fully adjusted close (splits + dividends)"""
   adjustedClose: Float
 
+  """True if this candle is pre-market or after-hours trading data"""
+  isExtendedHours: Boolean
+
   """Split ratio (e.g., 4.0 for 4:1 split). 1.0 = no split"""
   splitCoefficient: Float
 
