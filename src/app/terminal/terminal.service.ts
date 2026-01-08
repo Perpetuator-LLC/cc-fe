@@ -69,8 +69,8 @@ const GET_COMMAND = gql`
 `;
 
 const GET_COMMAND_HISTORY = gql`
-  query GetCommandHistory($first: Int, $after: String, $search: String) {
-    commandHistory(first: $first, after: $after, search: $search) {
+  query GetCommandHistory($first: Int, $after: String, $search: String, $uniqueLatest: Boolean) {
+    commandHistory(first: $first, after: $after, search: $search, uniqueLatest: $uniqueLatest) {
       edges {
         node {
           id
@@ -87,6 +87,7 @@ const GET_COMMAND_HISTORY = gql`
           creditsCharged
         }
         cursor
+        executionCount
       }
       pageInfo {
         hasNextPage
@@ -268,6 +269,7 @@ interface CommandHistoryResult {
     edges: {
       node: CommandHistoryItem;
       cursor: string;
+      executionCount?: number;
     }[];
     pageInfo: {
       hasNextPage: boolean;
@@ -707,20 +709,25 @@ export class TerminalService implements OnDestroy {
   /**
    * Load command history from server (user's full command history)
    * Updates both userHistorySignal (for History tab) and commandHistorySignal (for up/down navigation)
+   * @param limit Number of history items to load
+   * @param uniqueLatest If true (default), group by command and return only most recent execution
    */
-  loadCommandHistory(limit?: number): Observable<CommandHistoryItem[]> {
+  loadCommandHistory(limit?: number, uniqueLatest = true): Observable<CommandHistoryItem[]> {
     const pageSize = limit ?? this.HISTORY_PAGE_SIZE;
     this.historyLoading.set(true);
 
     return this.apollo
       .query<CommandHistoryResult>({
         query: GET_COMMAND_HISTORY,
-        variables: { first: pageSize },
+        variables: { first: pageSize, uniqueLatest },
         fetchPolicy: 'network-only',
       })
       .pipe(
         map((result) => ({
-          items: result.data.commandHistory.edges.map((edge) => edge.node),
+          items: result.data.commandHistory.edges.map((edge) => ({
+            ...edge.node,
+            executionCount: edge.executionCount,
+          })),
           pageInfo: result.data.commandHistory.pageInfo,
         })),
         tap(({ items, pageInfo }) => {

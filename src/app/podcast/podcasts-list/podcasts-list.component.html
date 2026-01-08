@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>My Podcasts <span>></span>
@@ -65,10 +65,10 @@
         </div>
       </mat-menu>
       <button class="view-toggle-btn" mat-icon-button (click)="toggleView(true)" [class.active]="isGridView">
-        <app-svg-icon icon="grid" />
+        <mat-icon>grid_on</mat-icon>
       </button>
       <button class="view-toggle-btn" mat-icon-button (click)="toggleView(false)" [class.active]="!isGridView">
-        <app-svg-icon icon="list" />
+        <mat-icon>list_alt</mat-icon>
       </button>
     </div>
   </div>

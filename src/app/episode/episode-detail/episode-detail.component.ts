@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
@@ -16,7 +16,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatDivider } from '@angular/material/divider';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FetchPolicy } from '@apollo/client';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog } from '@angular/material/dialog';
@@ -62,7 +61,6 @@ interface EditableFormValues {
     MatDivider,
     ReactiveFormsModule,
     RouterLink,
-    SvgIconComponent,
     MatCardHeader,
     MatTabsModule,
     MatExpansionModule,

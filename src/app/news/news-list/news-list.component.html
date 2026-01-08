@@ -1,10 +1,9 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">News</span></span
   >
 </ng-template>
-
 
 @if (!newsFetched) {
   <div class="before-select-podcast">
@@ -19,11 +18,13 @@
           <div class="podcast-field-wrapper">
             <mat-form-field class="podcast-select-field">
               <mat-label>Select Podcast</mat-label>
-              <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()" [disabled]="loadingPodcasts">
+              <mat-select
+                [(value)]="selectedPodcastUuid"
+                (selectionChange)="onPodcastChange()"
+                [disabled]="loadingPodcasts"
+              >
                 @if (loadingPodcasts) {
-                  <mat-option disabled>
-                    Loading podcasts...
-                  </mat-option>
+                  <mat-option disabled> Loading podcasts... </mat-option>
                 }
                 @for (podcast of podcasts; track podcast.uuid) {
                   <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
@@ -76,11 +77,13 @@
         <div class="select-right-podcasts">
           <mat-form-field>
             <mat-label>Select Podcast</mat-label>
-            <mat-select [(value)]="selectedPodcastUuid" (selectionChange)="onPodcastChange()" [disabled]="loadingPodcasts">
+            <mat-select
+              [(value)]="selectedPodcastUuid"
+              (selectionChange)="onPodcastChange()"
+              [disabled]="loadingPodcasts"
+            >
               @if (loadingPodcasts) {
-                <mat-option disabled>
-                  <mat-icon>autorenew</mat-icon> Loading podcasts...
-                </mat-option>
+                <mat-option disabled> <mat-icon>autorenew</mat-icon> Loading podcasts... </mat-option>
               }
               @for (podcast of podcasts; track podcast.uuid) {
                 <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
@@ -96,7 +99,9 @@
               <mat-select [(value)]="selectedRssFeedUuid" (selectionChange)="onRssFeedChange()">
                 <mat-option [value]="null">All Feeds</mat-option>
                 @for (feed of rssFeeds; track feed.uuid) {
-                  <mat-option [value]="feed.uuid" [matTooltip]="feed.url" matTooltipPosition="after">{{ feed.name }}</mat-option>
+                  <mat-option [value]="feed.uuid" [matTooltip]="feed.url" matTooltipPosition="after">{{
+                    feed.name
+                  }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -130,11 +135,13 @@
                 (change)="toggleSelectAll()"
               />
               <span class="custom-checkbox"></span>
-              <span class="select-label">{{ selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all' }}</span>
+              <span class="select-label">{{
+                selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all'
+              }}</span>
             </label>
           </div>
           <button
-           mat-flat-button
+            mat-flat-button
             class="btn-secondary"
             type="button"
             (click)="createEpisodeAudioChainFromSelected()"
@@ -206,7 +213,10 @@
                                   {{ news.title }}
                                 </a>
                                 @if (news.blocked) {
-                                  <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                                  <span
+                                    class="blocked-badge"
+                                    matTooltip="This article is blocked from our robots/scrapers"
+                                  >
                                     <mat-icon>block</mat-icon>
                                     Blocked
                                   </span>
@@ -222,7 +232,7 @@
                                 {{ news.publishedAt | date: 'short' }}
                               </span>
                               <div class="next-btn">
-                          <span>&gt; </span>
+                                <span>&gt; </span>
                               </div>
                             </div>
                           </div>
@@ -266,15 +276,14 @@
             }
           </div>
         </div>
-        <div class="news-detail-section"
-             [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
-             [style.width.px]="selectedNewsDetail ? detailPanelWidth : 0">
+        <div
+          class="news-detail-section"
+          [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
+          [style.width.px]="selectedNewsDetail ? detailPanelWidth : 0"
+        >
           <!-- Resize Handle -->
           @if (selectedNewsDetail) {
-            <div class="resize-handle"
-                 (mousedown)="onResizeStart($event)"
-                 [class.resizing]="isResizing">
-            </div>
+            <div class="resize-handle" (mousedown)="onResizeStart($event)" [class.resizing]="isResizing"></div>
           }
           <div class="news-details">
             @if (selectedNewsDetail) {
@@ -282,7 +291,7 @@
                 <div class="description-title">
                   <div class="cross-icon">
                     <span tabindex="0" (click)="clearSelectedNewsDetail()" (keydown.enter)="clearSelectedNewsDetail()">
-                      <app-svg-icon icon="cross" />
+                      <mat-icon>close_small</mat-icon>
                     </span>
                   </div>
                   <div class="title">
@@ -291,7 +300,8 @@
                       target="_blank"
                       [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
                       matTooltipPosition="above"
-                      class="external-link">
+                      class="external-link"
+                    >
                       {{ selectedNewsDetail.title }}
                     </a>
                   </div>
@@ -303,9 +313,10 @@
                     [href]="selectedNewsDetail.url"
                     target="_blank"
                     [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
-                    matTooltipPosition="above">
+                    matTooltipPosition="above"
+                  >
                     <button mat-raised-button color="primary" type="button" class="read-btn">
-                      Read More <app-svg-icon icon="right" />
+                      Read More <mat-icon>arrow_right</mat-icon>
                     </button>
                   </a>
                 </div>
@@ -328,8 +339,11 @@
                     <h3>Metadata Tags</h3>
                     <div class="tags-container">
                       @for (tag of selectedNewsDetail.tags; track tag.kind + tag.value) {
-                        <span class="news-tag" [ngClass]="getTagClass(tag.kind, tag.value)"
-                              [matTooltip]="tag.kind + ': ' + tag.value">
+                        <span
+                          class="news-tag"
+                          [ngClass]="getTagClass(tag.kind, tag.value)"
+                          [matTooltip]="tag.kind + ': ' + tag.value"
+                        >
                           {{ getTagLabel(tag.kind, tag.value) }}
                         </span>
                       }
@@ -345,12 +359,7 @@
                 ></p>
                 <mat-divider />
                 <h3>AI Summary</h3>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="processNews(selectedNewsDetail.uuid)"
-                >
+                <button mat-flat-button color="primary" type="button" (click)="processNews(selectedNewsDetail.uuid)">
                   Process News
                 </button>
                 @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
@@ -364,7 +373,14 @@
                     {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary (Force)
                   </button>
                 }
-                <p class="" [innerHTML]="selectedNewsDetail.summary ? markdownToHtml(selectedNewsDetail.summary) : 'No news summary available'"></p>
+                <p
+                  class=""
+                  [innerHTML]="
+                    selectedNewsDetail.summary
+                      ? markdownToHtml(selectedNewsDetail.summary)
+                      : 'No news summary available'
+                  "
+                ></p>
                 <mat-divider />
                 <h3>Validated Summary</h3>
                 @if (selectedNewsDetail.validatedSummary) {

@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take } from 'rxjs';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
@@ -39,6 +40,7 @@ import { CommandResult, ChartResultData, ChartControls, TableData, SymbolUpdate 
 import { DataTableComponent } from '../data-table/data-table.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
 import { RouteInfo } from '../terminal-routing.types';
+import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
 
 // Register required ECharts components
 echarts.use([
@@ -92,6 +94,7 @@ interface SystemList {
     MatSelectModule,
     MatDividerModule,
     MatAutocompleteModule,
+    MatSlideToggleModule,
     NgxEchartsDirective,
     DataTableComponent,
   ],
@@ -535,6 +538,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private chartDataService: ChartDataService,
     private chartConfigService: ChartConfigService,
     private routingService: TerminalRoutingService,
+    private jobsWsService: JobsWebSocketService,
   ) {}
 
   ngOnInit(): void {
@@ -757,17 +761,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
                 this.dataContent.set(this.markdownToHtml(content));
               }
             } else if (result.outputType === 'chart' && !result.chartOptions) {
-              // Chart command succeeded but no chartOptions - load data via ChartDataService
-              // This uses progressive loading and may poll if backend needs to fetch
-              const symbol = this.selectedSymbol();
-              if (symbol) {
-                console.log('[WatchlistTab] Chart result without options, loading via ChartDataService');
-                this.loadChartWithOptions(symbol);
-              } else {
-                this.chartError.set('No symbol selected');
-                this.chartOptions.set(null);
-                this.dataContent.set(null);
-                this.tableData.set(null);
+              // Chart command succeeded but no chartOptions - this means data is being fetched
+              // Do NOT call loadChartWithOptions here - it would create an infinite loop!
+              // The triggerDataFetchAndPoll mechanism handles polling for data.
+              // Just show a loading message to the user.
+              console.log('[WatchlistTab] Chart result without options - data fetch in progress');
+              // Only show message if we're not already loading (to avoid overwriting poll messages)
+              if (!this.chartLoading()) {
+                this.chartError.set('Chart data is being loaded...');
               }
             } else if (result.message) {
               // Generic message result - render as markdown
@@ -2084,35 +2085,34 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             jobId = metadata['jobId'] as string;
           }
 
+          // If we have chartOptions, the data is ready - use it directly
+          if (result?.chartOptions) {
+            console.log('[WatchlistTab] Data returned from CHART command');
+            this.chartLoadingDetails.set(null);
+            this.handleChartCommandResult(result);
+            return;
+          }
+
+          // If we have a jobId, subscribe to job completion instead of polling
+          if (jobId) {
+            console.log('[WatchlistTab] Waiting for job completion:', jobId);
+            this.chartLoadingDetails.set(`Fetching data from market provider...`);
+            this.waitForJobAndLoadData(jobId, symbol, interval, fqn);
+            return;
+          }
+
           // Detect if backend returned mismatched interval (daily when we requested intraday)
-          // This happens when the backend doesn't have intraday data and falls back to daily
           const isMismatchedInterval =
             message.includes('Changed interval') ||
             message.includes('interval from') ||
             (message.includes('daily') && this.isIntradayInterval(interval));
 
-          if (isMismatchedInterval) {
-            console.log(
-              '[WatchlistTab] Backend returned mismatched interval, ignoring chart and polling for ' + 'correct data',
-            );
+          if (isMismatchedInterval || message.includes('Fetching') || message.includes('fetching')) {
+            console.log('[WatchlistTab] Data fetch in progress, starting poll');
             this.chartError.set(`Loading chart data...`);
-            this.chartLoadingDetails.set(`Fetching ${this.formatInterval(interval.toLowerCase())} data from
-            market provider...`);
-            // Start polling for the correct interval data
-            this.pollForChartData(symbol, interval, fqn, 8, 2000); // 8 retries, 2 second intervals
-          } else if (message.includes('Fetching') || message.includes('fetching') || jobId) {
-            console.log('[WatchlistTab] Data fetch initiated, jobId:', jobId);
-            this.chartError.set(`Loading chart data...`);
-            this.chartLoadingDetails.set(`Fetching ${this.formatInterval(interval.toLowerCase())} data from
-            market provider...`);
-
-            // Start polling for data
-            this.pollForChartData(symbol, interval, fqn, 8, 2000); // 8 retries, 2 second intervals
-          } else if (result?.chartOptions) {
-            // Data was returned directly with correct interval (cached)
-            console.log('[WatchlistTab] Data returned from CHART command');
-            this.chartLoadingDetails.set(null);
-            this.handleChartCommandResult(result);
+            this.chartLoadingDetails.set(`Fetching ${this.formatInterval(interval.toLowerCase())} data...`);
+            // Fallback to polling if no jobId (shouldn't happen normally)
+            this.pollForChartData(symbol, interval, fqn, 8, 2000);
           } else {
             this.chartError.set('No data available for this symbol and interval');
             this.chartLoadingDetails.set(null);
@@ -2134,6 +2134,95 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Wait for a specific job to complete, then load chart data
+   * Uses WebSocket job subscription instead of polling
+   */
+  private waitForJobAndLoadData(jobId: string, symbol: string, interval: ChartInterval, fqn: string): void {
+    // Set a timeout in case job never completes
+    const timeout = setTimeout(() => {
+      console.warn('[WatchlistTab] Job timeout, falling back to data query');
+      this.loadChartDataAfterFetch(symbol, interval, fqn);
+    }, 30000); // 30 second timeout
+
+    // Subscribe to job completion
+    const jobSub = this.jobsWsService.jobCompleted$
+      .pipe(
+        filter((job) => job.uuid === jobId),
+        take(1),
+      )
+      .subscribe({
+        next: (job) => {
+          clearTimeout(timeout);
+          console.log('[WatchlistTab] Job completed:', job.uuid);
+          this.loadChartDataAfterFetch(symbol, interval, fqn);
+        },
+      });
+
+    // Also subscribe to job failure
+    const failSub = this.jobsWsService.jobFailed$
+      .pipe(
+        filter((job) => job.uuid === jobId),
+        take(1),
+      )
+      .subscribe({
+        next: (job) => {
+          clearTimeout(timeout);
+          console.error('[WatchlistTab] Job failed:', job.uuid, job.error);
+          this.chartError.set(`Failed to fetch data: ${job.error || 'Unknown error'}`);
+          this.chartLoadingDetails.set(null);
+          this.chartLoading.set(false);
+        },
+      });
+
+    this.subscriptions.add(jobSub);
+    this.subscriptions.add(failSub);
+  }
+
+  /**
+   * Load chart data after a fetch job has completed
+   */
+  private loadChartDataAfterFetch(symbol: string, interval: ChartInterval, fqn: string): void {
+    // Check if symbol is still selected
+    if (this.selectedSymbol() !== symbol) {
+      console.log('[WatchlistTab] Symbol changed, not loading data');
+      return;
+    }
+
+    const chartDataOptions = {
+      includeExtendedHours: this.showExtendedHours(),
+      adjustForDividends: this.showDividendsReinvested(),
+      includeRawData: this.showRawData(),
+    };
+
+    this.subscriptions.add(
+      this.chartDataService.loadChartData(symbol, interval, undefined, fqn, chartDataOptions).subscribe({
+        next: (result) => {
+          if (result.candles.length > 0) {
+            console.log('[WatchlistTab] Data loaded after fetch:', result.candles.length, 'candles');
+            this.rawCandleData.set(result.candles);
+            this.chartPageInfo.set(result.pageInfo);
+            this.hasOlderData.set(result.pageInfo.hasOlderData);
+            this.chartError.set(null);
+            this.chartLoadingDetails.set(null);
+            this.buildChartFromCandles(result.candles, symbol);
+            this.chartLoading.set(false);
+          } else {
+            this.chartError.set('No data available after fetch completed');
+            this.chartLoadingDetails.set(null);
+            this.chartLoading.set(false);
+          }
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Failed to load data after fetch:', err);
+          this.chartError.set('Failed to load chart data');
+          this.chartLoadingDetails.set(null);
+          this.chartLoading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
    * Check if an interval is intraday (less than daily)
    */
   private isIntradayInterval(interval: ChartInterval): boolean {
@@ -2151,7 +2240,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Poll for chart data after fetch has been triggered
+   * Poll for chart data after fetch has been triggered (fallback if no jobId)
    */
   private pollForChartData(
     symbol: string,
@@ -2338,6 +2427,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Use ChartConfigService for consistent chart building and theming
     const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval, {
       showCorporateActions: this.showCorporateActions(),
+      lockToRight: this.lockToRight(),
     });
     this.chartOptions.set(options);
   }
@@ -2564,20 +2654,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   toggleLockToRight(): void {
     this.lockToRight.update((v) => !v);
-    // Reset correction flag to prevent stuck state
-    this.isCorrectingZoom = false;
-    // When locking, scroll chart to show most recent data on right
-    if (this.lockToRight() && this.chartInstance) {
-      // Set flag to prevent datazoom event handler from interfering
-      this.isCorrectingZoom = true;
-      this.chartInstance.dispatchAction({
-        type: 'dataZoom',
-        end: 100, // 100% = most recent data on right
-      });
-      // Reset flag after zoom completes
-      setTimeout(() => {
-        this.isCorrectingZoom = false;
-      }, 50);
+
+    // Rebuild the chart with the new lock setting
+    // This updates the dataZoom config (rangeMode, endValue, moveOnMouseMove)
+    const candles = this.rawCandleData();
+    const symbol = this.selectedSymbol();
+    if (candles.length && symbol) {
+      this.buildChartFromCandles(candles, symbol);
     }
   }
 

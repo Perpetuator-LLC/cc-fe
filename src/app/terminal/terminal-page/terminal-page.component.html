@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="terminal-page">
   <app-terminal-bar />
 
@@ -20,6 +20,15 @@
     <mat-tab label="History">
       <ng-template matTabContent>
         <div class="history-tab">
+          <div class="history-controls">
+            <mat-slide-toggle
+              [checked]="showDuplicates()"
+              (change)="onShowDuplicatesChange($event.checked)"
+              color="primary"
+            >
+              Show all executions
+            </mat-slide-toggle>
+          </div>
           @if (historyLoading()) {
             <div class="loading-state">
               <mat-spinner diameter="32" />
@@ -40,15 +49,23 @@
                 >
                   <div class="entry-header">
                     <span class="command-prompt">&gt;</span>
-                    <span
-                      class="command-text"
+                    <div
+                      class="command-chips"
                       tabindex="0"
                       role="button"
                       (click)="rerunCommand(entry.rawInput)"
                       (keydown.enter)="rerunCommand(entry.rawInput)"
                       matTooltip="Click to rerun"
-                      >{{ entry.rawInput }}</span
                     >
+                      @for (token of getCommandTokens(entry); track token.fqn) {
+                        <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
+                      }
+                    </div>
+                    @if (entry.executionCount && entry.executionCount > 1) {
+                      <span class="execution-count" [matTooltip]="'Executed ' + entry.executionCount + ' times'">
+                        ×{{ entry.executionCount }}
+                      </span>
+                    }
                     <div class="entry-actions">
                       <button
                         mat-icon-button

@@ -259,6 +259,8 @@ export interface CommandHistoryItem {
   createdAt: string;
   completedAt?: string;
   creditsCharged?: number;
+  /** Number of times this command was executed (only populated when uniqueLatest is true) */
+  executionCount?: number;
 }
 
 // ============================================================================
