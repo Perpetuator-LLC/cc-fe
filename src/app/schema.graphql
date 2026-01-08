@@ -432,6 +432,9 @@ type Query {
   users(query: String!): UserList
   emailChangePending: EmailChangeRequestType
 
+  """Get user's chart display preferences"""
+  chartPreferences: ChartPreferenceType
+
   """List all API keys for the current user"""
   apiKeys: [APIKeyType]
 
@@ -2996,6 +2999,30 @@ type EmailChangeRequestType {
   canceled: Boolean
 }
 
+"""User preferences for chart display settings."""
+type ChartPreferenceType {
+  """Include pre-market and after-hours trading data"""
+  showExtendedHours: Boolean
+
+  """Adjust prices for dividends (total return view)"""
+  adjustForDividends: Boolean
+
+  """Show unfiltered data including anomalies/spikes"""
+  showRawData: Boolean
+
+  """Show split and dividend markers on chart"""
+  showCorporateActions: Boolean
+
+  """Default chart interval"""
+  defaultInterval: String
+
+  """Lock chart zoom to right edge (latest data visible)"""
+  lockToRight: Boolean
+
+  """Display times in exchange timezone (ET) instead of local time"""
+  useExchangeTime: Boolean
+}
+
 """
 API Key type for GraphQL responses.
 NOTE: The actual key is NEVER exposed after creation - only the prefix.
@@ -3687,6 +3714,30 @@ type Mutation {
 
   """Mutation to cancel email change request."""
   cancelEmailChange: CancelEmailChange
+
+  """Update user's chart display preferences."""
+  updateChartPreferences(
+    """Adjust prices for dividends (total return view)"""
+    adjustForDividends: Boolean
+
+    """Default chart interval"""
+    defaultInterval: String
+
+    """Lock chart zoom to right edge"""
+    lockToRight: Boolean
+
+    """Show split and dividend markers on chart"""
+    showCorporateActions: Boolean
+
+    """Include pre-market and after-hours trading data"""
+    showExtendedHours: Boolean
+
+    """Show unfiltered data including anomalies/spikes"""
+    showRawData: Boolean
+
+    """Display times in exchange timezone (ET)"""
+    useExchangeTime: Boolean
+  ): UpdateChartPreferences
 
   """
   Create a new API key for the authenticated user.
@@ -4580,6 +4631,13 @@ type ResendEmailChange {
 type CancelEmailChange {
   success: Boolean
   message: String
+}
+
+"""Update user's chart display preferences."""
+type UpdateChartPreferences {
+  success: Boolean
+  message: String
+  preferences: ChartPreferenceType
 }
 
 """

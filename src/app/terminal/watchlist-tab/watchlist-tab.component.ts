@@ -41,6 +41,7 @@ import { DataTableComponent } from '../data-table/data-table.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
 import { RouteInfo } from '../terminal-routing.types';
 import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
+import { ChartPreferencesService } from '../chart-preferences.service';
 
 // Register required ECharts components
 echarts.use([
@@ -145,12 +146,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     isPositive: boolean;
   } | null>(null);
 
-  // Chart display toggles
-  showLocalTime = signal(true); // Local time vs EST/Exchange time
+  // Chart display toggles - defaults match ChartPreferencesService.DEFAULT_CHART_PREFERENCES
+  showLocalTime = signal(false); // Default: Exchange time (useExchangeTime: true → showLocalTime: false)
   showExtendedHours = signal(false); // Extended trading hours
   showDividendsReinvested = signal(false); // Total return view (dividends reinvested)
   showRawData = signal(false); // Show raw data without anomaly filtering
-  showCorporateActions = signal(false); // Show splits/dividends markers on chart
+  showCorporateActions = signal(true); // Show splits/dividends markers on chart (default: true)
   lockToRight = signal(true); // Lock chart to show most recent data on right edge
 
   // Progressive data loading state
@@ -539,9 +540,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private chartConfigService: ChartConfigService,
     private routingService: TerminalRoutingService,
     private jobsWsService: JobsWebSocketService,
+    private chartPreferencesService: ChartPreferencesService,
   ) {}
 
   ngOnInit(): void {
+    this.loadChartPreferences();
     this.loadData();
     this.subscribeToCommandResults();
     this.subscribeToSymbolUpdates();
@@ -557,6 +560,54 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     this.subscriptions.unsubscribe();
     this.symbolSearchSubject.complete();
+  }
+
+  // ============================================================================
+  // Chart Settings Persistence
+  // ============================================================================
+
+  /**
+   * Load chart preferences from backend via ChartPreferencesService.
+   * Falls back to localStorage if backend fails.
+   */
+  private loadChartPreferences(): void {
+    // Apply immediately from service's cached state (loaded from localStorage on service init)
+    const cachedPrefs = this.chartPreferencesService.preferences();
+    this.applyChartPreferences(cachedPrefs);
+    console.log('[WatchlistTab] Applied cached chart preferences:', cachedPrefs);
+
+    // Then load from backend (will update if different)
+    this.subscriptions.add(
+      this.chartPreferencesService.loadPreferences().subscribe((prefs) => {
+        this.applyChartPreferences(prefs);
+        console.log('[WatchlistTab] Loaded chart preferences from backend:', prefs);
+      }),
+    );
+  }
+
+  /**
+   * Apply chart preferences to component signals
+   */
+  private applyChartPreferences(prefs: import('../chart-preferences.service').ChartPreferences): void {
+    // Note: useExchangeTime is inverted from showLocalTime
+    this.showLocalTime.set(!prefs.useExchangeTime);
+    this.chartConfigService.useLocalTime.set(!prefs.useExchangeTime);
+    this.showExtendedHours.set(prefs.showExtendedHours);
+    this.showDividendsReinvested.set(prefs.adjustForDividends);
+    this.showRawData.set(prefs.showRawData);
+    this.showCorporateActions.set(prefs.showCorporateActions);
+    this.lockToRight.set(prefs.lockToRight);
+  }
+
+  /**
+   * Save a chart preference to backend and localStorage.
+   * Used by toggle methods.
+   */
+  private saveChartPreference<K extends keyof import('../chart-preferences.service').ChartPreferences>(
+    key: K,
+    value: import('../chart-preferences.service').ChartPreferences[K],
+  ): void {
+    this.subscriptions.add(this.chartPreferencesService.updatePreference(key, value).subscribe());
   }
 
   /**
@@ -645,12 +696,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         const resultSymbol = route?.symbol || (result.metadata?.symbol as string | undefined);
         const selectedSym = this.selectedSymbol();
 
-        // Extract chartControls from result data if available
-        this.extractChartControls(result);
-
-        // Check if this result is for our selected symbol OR if it's a new command from the terminal bar
+        // Check if this result is for our selected symbol
         const isForSelectedSymbol =
           resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase();
+
+        // Extract chartControls from result data if available
+        // Preserve the user's interval selection if this is a reload for the same symbol
+        // (e.g., after job completion), not a fresh command
+        const preserveInterval = isForSelectedSymbol && !this.chartLoading();
+        this.extractChartControls(result, preserveInterval);
 
         // Also accept results if we're loading or if this is a symbol command that should update the display
         const shouldHandleResult = isForSelectedSymbol || this.chartLoading() || (resultSymbol && result.success);
@@ -740,6 +794,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               // Reset progressive loading state for new chart
               this.hasOlderData.set(true);
               this.chartPageInfo.set(null);
+
+              // Always refresh quote when chart loads - ensures quote data is up-to-date
+              const chartSymbol = resultSymbol || this.selectedSymbol();
+              if (chartSymbol) {
+                console.log('[WatchlistTab] Chart loaded, refreshing quote for:', chartSymbol);
+                this.fetchQuoteForSymbol(chartSymbol);
+              }
             } else if (result.outputType === 'data' || result.outputType === 'message') {
               // Data result (HP, DES, etc.)
               this.chartOptions.set(null);
@@ -893,9 +954,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Extract chartControls from result and update available options
+   * Extract chartControls from result and update available options.
+   * @param result The command result
+   * @param preserveInterval If true, don't overwrite the user's selected interval
    */
-  private extractChartControls(result: CommandResult): void {
+  private extractChartControls(result: CommandResult, preserveInterval = false): void {
     if (result.outputType !== 'chart') return;
 
     // Try to get chartControls from data.chartControls or metadata.chartControls
@@ -917,10 +980,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       if (controls.currentPeriod) {
         this.selectedPeriod.set(controls.currentPeriod);
       }
-      if (controls.currentInterval) {
+      // Only update interval if not preserving user's selection
+      if (controls.currentInterval && !preserveInterval) {
         // Set the interval, then sync with available options to ensure it matches
         this.selectedInterval.set(controls.currentInterval);
         this.syncSelectedIntervalWithOptions(controls.currentInterval);
+      } else if (controls.currentInterval && preserveInterval) {
+        // Still sync with options to ensure it's valid, but keep user's selection
+        this.syncSelectedIntervalWithOptions(this.selectedInterval());
       }
     }
   }
@@ -1162,11 +1229,31 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Fetch initial quote data via GraphQL
     const fqn = item.exchange ? `STOCK:${item.exchange.toUpperCase()}:${item.symbol.toUpperCase()}` : undefined;
+    console.log('[WatchlistTab] selectSymbol - fetching quote:', { symbol: item.symbol, fqn });
     this.subscriptions.add(
-      this.terminalService.fetchQuote(item.symbol, fqn).subscribe((quote) => {
-        if (quote) {
-          this.quoteData.set(quote);
-        }
+      this.terminalService.fetchQuote(item.symbol, fqn).subscribe({
+        next: (quote) => {
+          const currentSymbol = this.selectedSymbol();
+          console.log('[WatchlistTab] selectSymbol - quote received:', {
+            symbol: item.symbol,
+            quote,
+            currentSymbol,
+          });
+          // Only set if this is still the selected symbol (case-insensitive check)
+          if (quote && currentSymbol && currentSymbol.toUpperCase() === item.symbol.toUpperCase()) {
+            this.quoteData.set(quote);
+            console.log('[WatchlistTab] selectSymbol - quoteData SET successfully');
+          } else {
+            console.log('[WatchlistTab] selectSymbol - quoteData NOT set:', {
+              hasQuote: !!quote,
+              currentSymbol,
+              requestedSymbol: item.symbol,
+            });
+          }
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] selectSymbol - quote fetch error:', err);
+        },
       }),
     );
 
@@ -1183,12 +1270,28 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const exchange = item?.exchange;
     const fqn = exchange ? `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}` : undefined;
 
+    console.log('[WatchlistTab] fetchQuoteForSymbol called:', { symbol, fqn, exchange });
+
     this.subscriptions.add(
-      this.terminalService.fetchQuote(symbol, fqn).subscribe((quote) => {
-        // Only update if this is still the selected symbol
-        if (quote && this.selectedSymbol() === symbol) {
-          this.quoteData.set(quote);
-        }
+      this.terminalService.fetchQuote(symbol, fqn).subscribe({
+        next: (quote) => {
+          console.log('[WatchlistTab] fetchQuote returned:', { symbol, quote, currentSymbol: this.selectedSymbol() });
+          // Only update if this is still the selected symbol (case-insensitive)
+          const currentSymbol = this.selectedSymbol();
+          if (quote && currentSymbol && currentSymbol.toUpperCase() === symbol.toUpperCase()) {
+            console.log('[WatchlistTab] Setting quoteData for', symbol);
+            this.quoteData.set(quote);
+          } else {
+            console.log('[WatchlistTab] NOT setting quoteData - symbol mismatch or null quote:', {
+              hasQuote: !!quote,
+              selectedSymbol: this.selectedSymbol(),
+              requestedSymbol: symbol,
+            });
+          }
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] fetchQuote error:', err);
+        },
       }),
     );
   }
@@ -2036,6 +2139,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             this.hasOlderData.set(result.pageInfo.hasOlderData);
             this.buildChartFromCandles(result.candles, symbol);
             this.chartLoading.set(false);
+
+            // Also refresh quote data if not already loaded
+            if (!this.quoteData()) {
+              console.log('[WatchlistTab] Chart loaded but no quote data, fetching quote for:', symbol);
+              this.fetchQuoteForSymbol(symbol);
+            }
           } else {
             // No data returned - trigger fetch via CHART command
             console.log('[WatchlistTab] No data, triggering fetch via CHART command');
@@ -2599,6 +2708,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartConfigService.useLocalTime.set(this.showLocalTime());
     // Re-render chart with new time zone setting
     this.rebuildChartForTimezone();
+    // Persist setting - note: useExchangeTime is the inverse of showLocalTime
+    this.saveChartPreference('useExchangeTime', !this.showLocalTime());
   }
 
   /**
@@ -2616,24 +2727,32 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   toggleExtendedHours(): void {
     this.showExtendedHours.update((v) => !v);
+    // Persist setting
+    this.saveChartPreference('showExtendedHours', this.showExtendedHours());
     // Re-fetch chart data with new setting
     this.reloadChartWithCurrentSettings();
   }
 
   toggleDividendsReinvested(): void {
     this.showDividendsReinvested.update((v) => !v);
+    // Persist setting
+    this.saveChartPreference('adjustForDividends', this.showDividendsReinvested());
     // Re-fetch chart data with total return view
     this.reloadChartWithCurrentSettings();
   }
 
   toggleRawData(): void {
     this.showRawData.update((v) => !v);
+    // Persist setting
+    this.saveChartPreference('showRawData', this.showRawData());
     // Re-fetch chart data with raw/sanitized toggle
     this.reloadChartWithCurrentSettings();
   }
 
   toggleCorporateActions(): void {
     this.showCorporateActions.update((v) => !v);
+    // Persist setting
+    this.saveChartPreference('showCorporateActions', this.showCorporateActions());
     // Rebuild chart with/without corporate action markers
     const candles = this.rawCandleData();
     const symbol = this.selectedSymbol();
@@ -2654,6 +2773,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   toggleLockToRight(): void {
     this.lockToRight.update((v) => !v);
+    // Persist setting
+    this.saveChartPreference('lockToRight', this.lockToRight());
 
     // Rebuild the chart with the new lock setting
     // This updates the dataZoom config (rangeMode, endValue, moveOnMouseMove)
@@ -2686,11 +2807,44 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       lines.push(`Volume: ${this.formatVolume(quote.volume)}`);
     }
     if (quote.timestamp) {
-      const date = new Date(quote.timestamp);
-      lines.push(`As of: ${date.toLocaleString()}`);
+      lines.push(`As of: ${this.formatQuoteTimestamp(quote.timestamp)}`);
     }
 
     return lines.length > 0 ? lines.join('\n') : 'Quote data';
+  }
+
+  /**
+   * Format quote timestamp respecting the showLocalTime setting
+   * When showLocalTime is true: Display in user's local timezone
+   * When showLocalTime is false: Display in Eastern Time (exchange time)
+   */
+  formatQuoteTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const useLocalTime = this.showLocalTime();
+
+    if (useLocalTime) {
+      // Display in user's local time with timezone abbreviation
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short',
+      });
+    } else {
+      // Display in Eastern Time with "ET" suffix
+      return (
+        date.toLocaleString('en-US', {
+          timeZone: 'America/New_York',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }) + ' ET'
+      );
+    }
   }
 
   /**
