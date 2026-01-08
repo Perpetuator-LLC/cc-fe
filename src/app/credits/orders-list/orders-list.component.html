@@ -1,10 +1,9 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>Home <span>></span> <span class="page-title-secondary">My Orders</span></span
   >
 </ng-template>
-
 
 <div class="gift-page-wrapper">
   <div class="gift-container">
@@ -15,7 +14,7 @@
       </div>
       <div class="credits">
         <p>Last update - Today, June 20</p>
-        <h4><app-svg-icon icon="wallet" width="28" height="28" /> {{ this.userCredits }}</h4>
+        <h4><mat-icon>account_balance_wallet</mat-icon> {{ this.userCredits }}</h4>
       </div>
     </div>
     <div class="podcast-card">
@@ -38,17 +37,9 @@
             <button mat-raised-button color="primary" (click)="setAmount(200)">Buy 200k credits $200</button>
           </div>
           @if (submitted && form.invalid) {
-            <span class="error">
-              Please enter a valid amount.
-            </span>
+            <span class="error"> Please enter a valid amount. </span>
           }
-          <button
-            class="pay-btn"
-            mat-raised-button
-            color="primary"
-            type="button"
-            (click)="payFromInput()"
-          >
+          <button class="pay-btn" mat-raised-button color="primary" type="button" (click)="payFromInput()">
             Pay
             <span> ${{ form.get('amount')?.value || 0 | number: '1.2-2' }} </span>
           </button>

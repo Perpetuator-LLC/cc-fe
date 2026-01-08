@@ -266,7 +266,7 @@ export class ChartConfigService {
     candles: ChartCandle[],
     symbol: string,
     interval?: string,
-    options?: { showCorporateActions?: boolean },
+    options?: { showCorporateActions?: boolean; lockToRight?: boolean },
   ): EChartsOption {
     // Ensure data is sorted oldest first for proper chart display
     const sortedCandles = [...candles].sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -274,6 +274,11 @@ export class ChartConfigService {
     // Store ISO dates for proper parsing in crosshair and axis labels
     const dates = sortedCandles.map((c) => c.date.toISOString());
     const ohlcData = sortedCandles.map((c) => [c.open, c.close, c.low, c.high]);
+
+    // Get the latest date for right-anchored zoom
+    const latestDate = dates.length > 0 ? dates[dates.length - 1] : undefined;
+    // Default to locked (lockToRight defaults to true in component)
+    const lockToRight = options?.lockToRight ?? true;
 
     // Determine if this is intraday data
     const isIntraday = interval
@@ -289,6 +294,31 @@ export class ChartConfigService {
 
     // Build mark lines for corporate actions (splits and dividends)
     const markLineData = options?.showCorporateActions ? this.buildCorporateActionMarkers(sortedCandles) : [];
+
+    // Build dataZoom config based on lock state
+    // When locked: use endValue with rangeMode to fix right edge
+    // When unlocked: use start/end percentages for free scrolling
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dataZoomConfig: any = {
+      type: 'inside',
+      zoomOnMouseWheel: true,
+      moveOnMouseMove: !lockToRight, // Disable panning when locked
+      moveOnMouseWheel: false,
+      throttle: 50,
+      minValueSpan: 5,
+    };
+
+    if (lockToRight && latestDate) {
+      // Fixed right edge mode: end is anchored to the latest data point
+      // rangeMode: ['percent', 'value'] means start uses percentage, end uses value
+      dataZoomConfig.rangeMode = ['percent', 'value'];
+      dataZoomConfig.start = 70; // Show last 30% initially
+      dataZoomConfig.endValue = latestDate; // Fix right edge to latest date
+    } else {
+      // Free scroll mode: both sides use percentages
+      dataZoomConfig.start = 70;
+      dataZoomConfig.end = 100;
+    }
 
     // Build minimal options - applyDarkTheme will add all theming
     const chartOptions: EChartsOption = {
@@ -313,14 +343,8 @@ export class ChartConfigService {
         type: 'value',
         scale: true,
       },
-      // Start showing only the last 30% of data to allow zoom-out for older data
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 70,
-          end: 100,
-        },
-      ],
+      // Use the configured dataZoom
+      dataZoom: [dataZoomConfig],
       series: [
         {
           name: symbol,
@@ -346,10 +370,11 @@ export class ChartConfigService {
                   },
                   label: {
                     show: true,
-                    position: 'start',
+                    position: 'insideEndBottom', // Position at top of chart area
                     fontSize: 10,
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    padding: [4, 4],
+                    color: '#ffffff', // White text for visibility on dark background
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: [4, 8],
                     borderRadius: 4,
                   },
                   data: markLineData,
@@ -747,42 +772,52 @@ export class ChartConfigService {
   }
 
   /**
-   * Configure dataZoom for free scroll-to-zoom without boundaries.
-   * Users can zoom out as far as they want - empty space shows on left if beyond data.
-   * New data loads progressively and populates automatically.
+   * Configure dataZoom styling defaults.
+   * IMPORTANT: This preserves the backend's functional configuration (rangeMode, endValue, etc.)
+   * and only adds UI/interaction defaults that the backend doesn't specify.
+   *
+   * For right-anchored zoom behavior (lockToRight), the backend should provide:
+   * - rangeMode: ['percent', 'value']
+   * - endValue: <latest_date>
+   * - moveOnMouseMove: false
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private applyDataZoomConfig(options: any): any {
     const result = { ...options };
 
-    // Get existing dataZoom config if any
+    // Get existing dataZoom config from backend
     const existingZoom = Array.isArray(result.dataZoom) ? result.dataZoom[0] : result.dataZoom;
-    const existingStart = existingZoom?.start ?? 70; // Default to showing last 30%
-    const existingEnd = existingZoom?.end ?? 100;
 
-    // Configure for free zooming without hard boundaries
-    const insideZoom = {
-      type: 'inside',
-      xAxisIndex: 0,
-      start: existingStart,
-      end: existingEnd,
-      zoomOnMouseWheel: true,
-      moveOnMouseMove: true,
-      moveOnMouseWheel: false,
-      preventDefaultMouseMove: false,
-      minValueSpan: 5, // Minimum 5 data points when zoomed in
-      // Remove zoom boundaries - allow free zoom in/out
-      minSpan: 0, // No minimum zoom range
-      maxSpan: 100, // Can show all data
-      // Don't lock zoom at any boundary
-      zoomLock: false,
-      // Allow scrolling beyond data edges (shows empty space)
-      rangeMode: ['value', 'value'],
+    if (!existingZoom) {
+      // No dataZoom from backend - create a basic default
+      result.dataZoom = [
+        {
+          type: 'inside',
+          start: 70,
+          end: 100,
+          zoomOnMouseWheel: true,
+          moveOnMouseWheel: false,
+          throttle: 50,
+          minValueSpan: 5,
+        },
+      ];
+      return result;
+    }
+
+    // Merge with styling defaults, preserving backend's functional config
+    const styledZoom = {
+      ...existingZoom,
+      // Only set defaults if not provided by backend
+      type: existingZoom.type ?? 'inside',
+      zoomOnMouseWheel: existingZoom.zoomOnMouseWheel ?? true,
+      moveOnMouseWheel: existingZoom.moveOnMouseWheel ?? false,
+      throttle: existingZoom.throttle ?? 50,
+      minValueSpan: existingZoom.minValueSpan ?? 5,
+      // Preserve backend's range configuration (don't override!)
+      // rangeMode, start, end, startValue, endValue, moveOnMouseMove
     };
 
-    // Replace all existing dataZoom with just inside zoom
-    result.dataZoom = [insideZoom];
-
+    result.dataZoom = [styledZoom];
     return result;
   }
 

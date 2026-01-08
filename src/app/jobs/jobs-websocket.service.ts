@@ -2,55 +2,31 @@
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, timer } from 'rxjs';
-import { createClient, Client } from 'graphql-ws';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Job } from './job.service';
 
-// GraphQL subscription for job updates
-const JOB_UPDATES_SUBSCRIPTION = `
-  subscription JobUpdates {
-    jobUpdates {
-      type
-      job {
-        uuid
-        kind
-        status
-        error
-        result
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-// GraphQL query for initial jobs
-const GET_JOBS_QUERY = `
-  query GetJobs($limit: Int) {
-    jobs(limit: $limit) {
-      id
-      uuid
-      kind
-      status
-      error
-      result
-      createdAt
-      updatedAt
-    }
-  }
-`;
+/**
+ * JobsWebSocketService
+ *
+ * Connects to /ws/graphql/ and handles custom job message types from the backend:
+ * - jobs.initial: Initial list of active jobs on connection
+ * - jobs.created: New job was created
+ * - jobs.update: Job status changed
+ * - jobs.completed: Job finished successfully
+ * - jobs.failed: Job failed with error
+ */
 
 @Injectable({
   providedIn: 'root',
 })
 export class JobsWebSocketService implements OnDestroy {
-  private client: Client | null = null;
+  private ws: WebSocket | null = null;
   private subscriptions = new Subscription();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectTimer: Subscription | null = null;
-  private activeSubscriptions = new Map<string, () => void>();
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
 
   // Public signals
   readonly jobs: WritableSignal<Job[]> = signal([]);
@@ -73,16 +49,20 @@ export class JobsWebSocketService implements OnDestroy {
   readonly jobFailed$ = this.jobFailedSubject.asObservable();
 
   constructor(private authService: AuthService) {
-    // Auto-connect when user is authenticated
-    this.subscriptions.add(
-      toObservable(this.authService.isLoggedIn).subscribe((isLoggedIn) => {
-        if (isLoggedIn) {
-          this.connect();
-        } else {
-          this.disconnect();
-        }
-      }),
-    );
+    // NOTE: Disabled auto-connect to prevent dual WebSocket connections
+    // The TerminalWebSocketService now handles job messages via the unified connection
+    // Job messages are forwarded from TerminalWebSocketService.onJobMessage()
+    //
+    // To re-enable separate connection, uncomment the subscription below:
+    // this.subscriptions.add(
+    //   toObservable(this.authService.isLoggedIn).subscribe((isLoggedIn) => {
+    //     if (isLoggedIn) {
+    //       this.connect();
+    //     } else {
+    //       this.disconnect();
+    //     }
+    //   }),
+    // );
   }
 
   ngOnDestroy(): void {
@@ -92,9 +72,10 @@ export class JobsWebSocketService implements OnDestroy {
 
   /**
    * Connect to the GraphQL WebSocket for job updates
+   * Uses native WebSocket to handle custom job message types
    */
   connect(): void {
-    if (this.client) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       return;
     }
 
@@ -108,153 +89,203 @@ export class JobsWebSocketService implements OnDestroy {
     const host = environment.API_URL.replace(/^https?:\/\//, '');
     const url = `${wsProtocol}://${host}/ws/graphql/`;
 
-    console.log('[JobsWS] Connecting to GraphQL WebSocket...');
+    console.log('[JobsWS] Connecting to GraphQL WebSocket...', { url });
 
-    this.client = createClient({
-      url,
-      connectionParams: {
-        authToken: token,
-      },
-      retryAttempts: this.maxReconnectAttempts,
-      shouldRetry: () => true,
-      on: {
-        connected: () => {
-          console.log('[JobsWS] GraphQL WebSocket connected');
+    try {
+      // Use graphql-transport-ws subprotocol
+      this.ws = new WebSocket(url, 'graphql-transport-ws');
+
+      this.ws.onopen = () => {
+        console.log('[JobsWS] WebSocket opened, sending connection_init');
+        // Send connection_init with auth token as per graphql-transport-ws protocol
+        this.ws?.send(
+          JSON.stringify({
+            type: 'connection_init',
+            payload: {
+              authorization: `Bearer ${token}`,
+            },
+          }),
+        );
+      };
+
+      this.ws.onmessage = (event) => {
+        this.handleMessage(event.data);
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('[JobsWS] WebSocket error:', error);
+        this.connectionError.set('WebSocket connection error');
+        this.isConnected.set(false);
+      };
+
+      this.ws.onclose = (event) => {
+        console.log('[JobsWS] WebSocket closed:', event.code, event.reason);
+        this.isConnected.set(false);
+        this.stopPing();
+
+        // Auto-reconnect if authenticated and not a clean close
+        if (this.authService.isLoggedIn() && event.code !== 1000) {
+          this.scheduleReconnect();
+        }
+      };
+    } catch (error) {
+      console.error('[JobsWS] Failed to create WebSocket:', error);
+      this.connectionError.set('Failed to connect');
+    }
+  }
+
+  /**
+   * Handle incoming WebSocket messages
+   */
+  private handleMessage(data: string): void {
+    try {
+      const message = JSON.parse(data);
+
+      switch (message.type) {
+        case 'connection_ack':
+          console.log('[JobsWS] Connection acknowledged');
           this.isConnected.set(true);
           this.connectionError.set(null);
           this.reconnectAttempts = 0;
-          this.subscribeToJobUpdates();
-          this.loadInitialJobs();
-        },
-        closed: (event) => {
-          console.log('[JobsWS] GraphQL WebSocket closed', event);
-          this.isConnected.set(false);
-          this.cleanupSubscriptions();
-        },
-        error: (error) => {
-          console.error('[JobsWS] GraphQL WebSocket error:', error);
-          this.connectionError.set(error instanceof Error ? error.message : 'Connection error');
-          this.isConnected.set(false);
-        },
-      },
+          this.startPing();
+          break;
+
+        case 'jobs.initial':
+          console.log(`[JobsWS] Received initial jobs: ${message.jobs?.length || 0}`);
+          if (message.jobs && Array.isArray(message.jobs)) {
+            // Filter to only pending/running jobs (jobs that need monitoring)
+            const activeJobs = message.jobs.filter((job: Job) =>
+              ['PENDING', 'RUNNING', 'QUEUED', 'pending', 'running', 'queued'].includes(job.status),
+            );
+            this.jobs.set(activeJobs);
+          }
+          break;
+
+        case 'jobs.created':
+          console.log(`[JobsWS] Job created: ${message.job?.uuid}`);
+          if (message.job) {
+            this.addOrUpdateJob(message.job);
+            this.jobUpdatedSubject.next(message.job);
+          }
+          break;
+
+        case 'jobs.update':
+          console.log(`[JobsWS] Job updated: ${message.job?.uuid} -> ${message.job?.status}`);
+          if (message.job) {
+            this.addOrUpdateJob(message.job);
+            this.jobUpdatedSubject.next(message.job);
+          }
+          break;
+
+        case 'jobs.completed':
+          console.log(`[JobsWS] Job completed: ${message.job?.uuid}`);
+          if (message.job) {
+            this.addOrUpdateJob(message.job);
+            this.jobCompletedSubject.next(message.job);
+            // Remove from active jobs after a short delay
+            timer(2000).subscribe(() => this.removeJob(message.job.uuid));
+          }
+          break;
+
+        case 'jobs.failed':
+          console.log(`[JobsWS] Job failed: ${message.job?.uuid}`);
+          if (message.job) {
+            this.addOrUpdateJob(message.job);
+            this.jobFailedSubject.next(message.job);
+            // Remove from active jobs after a longer delay
+            timer(5000).subscribe(() => this.removeJob(message.job.uuid));
+          }
+          break;
+
+        case 'ping':
+          // Respond to server ping with pong
+          this.ws?.send(JSON.stringify({ type: 'pong' }));
+          break;
+
+        case 'pong':
+          // Server responded to our ping
+          break;
+
+        case 'next':
+        case 'complete':
+        case 'error':
+          // GraphQL subscription messages - ignore as we're using custom job messages
+          break;
+
+        default:
+          // Log unknown message types for debugging
+          if (message.type && !message.type.startsWith('ka')) {
+            console.debug('[JobsWS] Unknown message type:', message.type);
+          }
+      }
+    } catch (error) {
+      console.error('[JobsWS] Failed to parse message:', error);
+    }
+  }
+
+  /**
+   * Start sending periodic pings to keep connection alive
+   */
+  private startPing(): void {
+    this.stopPing();
+    this.pingInterval = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 30000); // Every 30 seconds
+  }
+
+  /**
+   * Stop ping interval
+   */
+  private stopPing(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+
+  /**
+   * Schedule a reconnection attempt
+   */
+  private scheduleReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('[JobsWS] Max reconnection attempts reached');
+      this.connectionError.set('Failed to reconnect');
+      return;
+    }
+
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    this.reconnectAttempts++;
+
+    console.log(`[JobsWS] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+
+    this.reconnectTimer = timer(delay).subscribe(() => {
+      this.connect();
     });
   }
 
   /**
-   * Disconnect from the GraphQL WebSocket
+   * Disconnect from the WebSocket
    */
   disconnect(): void {
-    this.cleanupSubscriptions();
+    this.stopPing();
 
     if (this.reconnectTimer) {
       this.reconnectTimer.unsubscribe();
       this.reconnectTimer = null;
     }
 
-    if (this.client) {
-      this.client.dispose();
-      this.client = null;
+    if (this.ws) {
+      // Send complete message before closing
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.ws.close(1000, 'Client disconnect');
+      }
+      this.ws = null;
     }
 
     this.isConnected.set(false);
     this.jobs.set([]);
-  }
-
-  /**
-   * Subscribe to real-time job updates
-   */
-  private subscribeToJobUpdates(): void {
-    if (!this.client) return;
-
-    const unsubscribe = this.client.subscribe(
-      { query: JOB_UPDATES_SUBSCRIPTION },
-      {
-        next: (result) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const data = result.data as any;
-          if (data?.jobUpdates) {
-            this.handleJobUpdate(data.jobUpdates);
-          }
-        },
-        error: (error) => {
-          console.error('[JobsWS] Subscription error:', error);
-        },
-        complete: () => {
-          console.log('[JobsWS] Subscription completed');
-        },
-      },
-    );
-
-    this.activeSubscriptions.set('jobUpdates', unsubscribe);
-  }
-
-  /**
-   * Load initial jobs via GraphQL query over WebSocket
-   */
-  private loadInitialJobs(): void {
-    if (!this.client) return;
-
-    this.client.subscribe(
-      { query: GET_JOBS_QUERY, variables: { limit: 50 } },
-      {
-        next: (result) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const data = result.data as any;
-          if (data?.jobs) {
-            const allJobs = data.jobs as Job[];
-            // Filter to only pending/running jobs (jobs that need monitoring)
-            const activeJobs = allJobs.filter((job) => ['PENDING', 'RUNNING', 'QUEUED'].includes(job.status));
-            console.log(`[JobsWS] Initial jobs: ${allJobs.length} -> filtered: ${activeJobs.length}`);
-            this.jobs.set(activeJobs);
-          }
-        },
-        error: (error) => {
-          console.error('[JobsWS] Failed to load initial jobs:', error);
-        },
-        complete: () => {
-          // Query completed
-        },
-      },
-    );
-  }
-
-  /**
-   * Handle incoming job update from subscription
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleJobUpdate(update: { type: string; job: any }): void {
-    const { type, job } = update;
-    console.log(`[JobsWS] Job update: ${type}`, job.uuid, job.status);
-
-    switch (type) {
-      case 'job.created':
-      case 'job.started':
-        this.addOrUpdateJob(job);
-        this.jobUpdatedSubject.next(job);
-        break;
-
-      case 'job.progress':
-        this.updateJobStatus(job);
-        this.jobUpdatedSubject.next(job);
-        break;
-
-      case 'job.completed':
-        this.updateJobStatus(job);
-        this.jobCompletedSubject.next(job);
-        // Remove from active jobs after a short delay
-        timer(2000).subscribe(() => this.removeJob(job.uuid));
-        break;
-
-      case 'job.failed':
-        this.updateJobStatus(job);
-        this.jobFailedSubject.next(job);
-        // Remove from active jobs after a longer delay
-        timer(5000).subscribe(() => this.removeJob(job.uuid));
-        break;
-
-      default:
-        console.warn(`[JobsWS] Unknown job update type: ${type}`);
-    }
   }
 
   /**
@@ -270,21 +301,6 @@ export class JobsWebSocketService implements OnDestroy {
       } else {
         return [job, ...jobs];
       }
-    });
-  }
-
-  /**
-   * Update job status
-   */
-  private updateJobStatus(job: Job): void {
-    this.jobs.update((jobs) => {
-      const index = jobs.findIndex((j) => j.uuid === job.uuid);
-      if (index >= 0) {
-        const updated = [...jobs];
-        updated[index] = job;
-        return updated;
-      }
-      return jobs;
     });
   }
 
@@ -310,7 +326,7 @@ export class JobsWebSocketService implements OnDestroy {
   }
 
   /**
-   * Add a single job to the list
+   * Add a single job to the list (called by other services when creating jobs)
    */
   addJob(job: Job): void {
     this.addOrUpdateJob(job);
@@ -323,17 +339,50 @@ export class JobsWebSocketService implements OnDestroy {
     jobs.forEach((job) => this.addOrUpdateJob(job));
   }
 
+  // ============================================================================
+  // Handlers for forwarded messages from TerminalWebSocketService
+  // These methods are called when TerminalWebSocketService receives job messages
+  // ============================================================================
+
   /**
-   * Clean up active subscriptions
+   * Handle initial jobs list from WebSocket
    */
-  private cleanupSubscriptions(): void {
-    this.activeSubscriptions.forEach((unsubscribe) => {
-      try {
-        unsubscribe();
-      } catch {
-        // Ignore cleanup errors
-      }
-    });
-    this.activeSubscriptions.clear();
+  handleInitialJobs(jobs: Job[]): void {
+    console.log(`[JobsWS] Received initial jobs via forwarding: ${jobs?.length || 0}`);
+    if (jobs && Array.isArray(jobs)) {
+      // Filter to only pending/running jobs (jobs that need monitoring)
+      const activeJobs = jobs.filter((job: Job) =>
+        ['PENDING', 'RUNNING', 'QUEUED', 'pending', 'running', 'queued'].includes(job.status),
+      );
+      this.jobs.set(activeJobs);
+      this.isConnected.set(true);
+      this.connectionError.set(null);
+    }
+  }
+
+  /**
+   * Handle job completed event from WebSocket
+   */
+  handleJobCompleted(job: Job): void {
+    console.log(`[JobsWS] Job completed via forwarding: ${job?.uuid}`);
+    if (job) {
+      this.addOrUpdateJob(job);
+      this.jobCompletedSubject.next(job);
+      // Remove from active jobs after a short delay
+      timer(2000).subscribe(() => this.removeJob(job.uuid));
+    }
+  }
+
+  /**
+   * Handle job failed event from WebSocket
+   */
+  handleJobFailed(job: Job): void {
+    console.log(`[JobsWS] Job failed via forwarding: ${job?.uuid}`);
+    if (job) {
+      this.addOrUpdateJob(job);
+      this.jobFailedSubject.next(job);
+      // Remove from active jobs after a longer delay
+      timer(5000).subscribe(() => this.removeJob(job.uuid));
+    }
   }
 }

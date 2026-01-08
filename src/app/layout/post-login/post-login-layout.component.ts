@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, inject, OnInit, ViewChild, ElementRef, Renderer2, HostListener } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DecimalPipe, NgClass } from '@angular/common';
@@ -26,7 +26,6 @@ import { CreditService } from '../../credits/credit.service';
 import { Job, JobService, JobStatus } from '../../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MessageService } from '../../message.service';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { MatDialog } from '@angular/material/dialog';
 import { RedeemGiftCodeDialogComponent } from '../../credits/redeem-gift-code-dialog/redeem-gift-code-dialog.component';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
@@ -39,7 +38,6 @@ import { LoadingService } from '../loading.service';
   styleUrls: ['./post-login-layout.component.scss'],
   standalone: true,
   imports: [
-    SvgIconComponent,
     FormsModule,
     MatButtonModule,
     MatIconModule,

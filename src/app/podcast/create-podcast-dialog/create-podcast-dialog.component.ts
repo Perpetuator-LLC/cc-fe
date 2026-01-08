@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -14,6 +14,7 @@ import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { JobService } from '../../jobs/job.service';
+import { CreatePodcastDialogStateService } from './create-podcast-dialog-state.service';
 
 @Component({
   selector: 'app-create-podcast-dialog',
@@ -52,6 +53,7 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
     private userService: UserService,
     public dialogRef: MatDialogRef<CreatePodcastDialogComponent>,
     private jobService: JobService,
+    private dialogStateService: CreatePodcastDialogStateService,
   ) {
     this.podcastForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]],
@@ -84,6 +86,28 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messageService.clearMessages();
     this.loadOwnedTeams();
+    this.restoreSavedFormData();
+  }
+
+  /**
+   * Restore any previously saved form data
+   */
+  private restoreSavedFormData(): void {
+    const savedData = this.dialogStateService.getFormData();
+    if (savedData) {
+      this.podcastForm.patchValue(savedData, { emitEvent: false });
+      // Update validation states
+      this.updateDescriptionValidation();
+      this.updateTitleValidation();
+    }
+  }
+
+  /**
+   * Save current form state before dialog closes
+   */
+  private saveCurrentFormData(): void {
+    const formValue = this.podcastForm.getRawValue();
+    this.dialogStateService.saveFormData(formValue);
   }
 
   private updateDescriptionValidation(): void {
@@ -182,6 +206,8 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
         next: (created) => {
           this.messageService.info('Generating podcast...');
           this.jobService.addJob(created.job);
+          // Clear saved form data on successful creation
+          this.dialogStateService.clearFormData();
           this.dialogRef.close(true);
         },
         error: (err) => {
@@ -192,6 +218,10 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Save form data when dialog is closed (unless it was a successful creation which clears it)
+    if (this.dialogStateService.hasSavedData() || this.podcastForm.dirty) {
+      this.saveCurrentFormData();
+    }
     this.subscriptions.unsubscribe();
   }
 }

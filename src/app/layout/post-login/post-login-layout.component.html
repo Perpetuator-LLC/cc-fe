@@ -280,13 +280,9 @@
     <mat-toolbar color="primary" class="toolbar-container-section">
       <div class="toolbar-container">
         <div class="hamburger-icon">
-          <app-svg-icon
-            width="24"
-            height="24"
-            icon="hamburger"
-            (click)="onHamburgerClick($event)"
-            class="icon-clickable"
-          />
+          <button mat-icon-button class="btn-surface" (click)="onHamburgerClick($event)">
+            <mat-icon>menu</mat-icon>
+          </button>
           <img height="36" src="/logo.svg" alt="logo" />
         </div>
         <div class="page-title-container">

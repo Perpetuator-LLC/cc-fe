@@ -1,9 +1,8 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatAnchor } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
@@ -19,7 +18,7 @@ import { SiteStatistics } from '../interface';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatCard, MatCardContent, MatButton, MatAnchor, RouterLink, MatIcon, SvgIconComponent],
+  imports: [CommonModule, MatCard, MatCardContent, MatButton, MatAnchor, RouterLink, MatIcon],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })

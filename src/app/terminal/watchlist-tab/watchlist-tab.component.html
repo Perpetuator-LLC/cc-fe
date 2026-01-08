@@ -448,7 +448,7 @@
                   <span class="ohlc-hint">Hover on chart to see OHLC values</span>
                 }
 
-                <!-- Chart Toggles - using standard mat-icon-button (don't fight MD3 sizing) -->
+                <!-- Chart Toggles - Gear menu with slide toggles -->
                 <div class="chart-toggles">
                   <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
                     <mat-icon>refresh</mat-icon>
@@ -461,46 +461,41 @@
                   >
                     <mat-icon>{{ lockToRight() ? 'push_pin' : 'drag_pan' }}</mat-icon>
                   </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="showLocalTime() ? 'Showing Local Time' : 'Showing Exchange Time'"
-                    (click)="toggleLocalTime()"
-                    [color]="showLocalTime() ? 'primary' : undefined"
-                  >
-                    <mat-icon>{{ showLocalTime() ? 'schedule' : 'public' }}</mat-icon>
+                  <button mat-icon-button [matMenuTriggerFor]="chartSettingsMenu" matTooltip="Chart Settings">
+                    <mat-icon>settings</mat-icon>
                   </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="showExtendedHours() ? 'Extended Hours On' : 'Regular Hours Only'"
-                    (click)="toggleExtendedHours()"
-                    [color]="showExtendedHours() ? 'primary' : undefined"
-                  >
-                    <mat-icon>nightlight</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="showDividendsReinvested() ? 'Dividends Reinvested (Total Return)' : 'Price Only'"
-                    (click)="toggleDividendsReinvested()"
-                    [color]="showDividendsReinvested() ? 'primary' : undefined"
-                  >
-                    <mat-icon>paid</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="showRawData() ? 'Showing Raw Data' : 'Showing Sanitized Data'"
-                    (click)="toggleRawData()"
-                    [color]="showRawData() ? 'primary' : undefined"
-                  >
-                    <mat-icon>{{ showRawData() ? 'data_array' : 'auto_fix_high' }}</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="showCorporateActions() ? 'Hiding Corporate Actions' : 'Show Splits & Dividends'"
-                    (click)="toggleCorporateActions()"
-                    [color]="showCorporateActions() ? 'primary' : undefined"
-                  >
-                    <mat-icon>event</mat-icon>
-                  </button>
+                  <mat-menu #chartSettingsMenu="matMenu" class="chart-settings-menu">
+                    <div class="menu-section-label">Display</div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                      <mat-slide-toggle [checked]="showCorporateActions()" (change)="toggleCorporateActions()">
+                        Splits &amp; Dividends
+                      </mat-slide-toggle>
+                    </div>
+                    <mat-divider />
+                    <div class="menu-section-label">Time &amp; Hours</div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                      <mat-slide-toggle [checked]="showLocalTime()" (change)="toggleLocalTime()">
+                        Local Time
+                      </mat-slide-toggle>
+                    </div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                      <mat-slide-toggle [checked]="showExtendedHours()" (change)="toggleExtendedHours()">
+                        Extended Hours
+                      </mat-slide-toggle>
+                    </div>
+                    <mat-divider />
+                    <div class="menu-section-label">Data</div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                      <mat-slide-toggle [checked]="showDividendsReinvested()" (change)="toggleDividendsReinvested()">
+                        Dividends Reinvested
+                      </mat-slide-toggle>
+                    </div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                      <mat-slide-toggle [checked]="showRawData()" (change)="toggleRawData()">
+                        Show Raw Data
+                      </mat-slide-toggle>
+                    </div>
+                  </mat-menu>
                 </div>
               </div>
             }

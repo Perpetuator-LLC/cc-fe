@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   FormArray,
@@ -39,7 +39,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { SvgIconComponent } from '../../svg-icon/svg-icon.component';
 import { CommonModule } from '@angular/common';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { LoadingService } from '../../layout/loading.service';
@@ -81,7 +80,6 @@ import { RssFeedTableComponent } from '../rss-feed-table/rss-feed-table.componen
     MatOption,
     PodcastCategoriesComponent,
     MatTabsModule,
-    SvgIconComponent,
     CdkTextareaAutosize,
     ShareButtonsComponent,
     EpisodesTableComponent,

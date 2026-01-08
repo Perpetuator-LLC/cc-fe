@@ -80,6 +80,11 @@ type Query {
 
     """Search term to filter history"""
     search: String
+
+    """
+    When true, group by parsed_command and return only the most recent execution of each unique command
+    """
+    uniqueLatest: Boolean = false
   ): CommandHistoryConnection
 
   """Get terminal syntax help and examples"""
@@ -208,10 +213,13 @@ type Query {
     """
     adjustForDividends: Boolean = false
 
-    """
-    Include all data without anomaly filtering (extreme wicks, gaps). Default: False (clean data)
-    """
+    """Skip ALL data cleaning (spikes, gaps, filtering). Default: False"""
     includeRawData: Boolean = false
+
+    """
+    Apply spike adjustments for extreme wicks/gaps (continuous data). Default: True. Set to False to exclude flagged candles instead of adjusting them.
+    """
+    adjustSpikes: Boolean = true
   ): StockPriceConnection
 
   """
@@ -243,10 +251,13 @@ type Query {
     """
     adjustForDividends: Boolean = false
 
-    """
-    Include all data without anomaly filtering (extreme wicks, gaps). Default: False (clean data)
-    """
+    """Skip ALL data cleaning (spikes, gaps, filtering). Default: False"""
     includeRawData: Boolean = false
+
+    """
+    Apply spike adjustments for extreme wicks/gaps (continuous data). Default: True. Set to False to exclude flagged candles instead of adjusting them.
+    """
+    adjustSpikes: Boolean = true
   ): StockPriceConnection
   quote(
     symbol: String!
@@ -907,6 +918,11 @@ type CommandHistoryConnection {
 type CommandHistoryEdge {
   node: CommandExecutionType!
   cursor: String!
+
+  """
+  Number of times this command was executed (only populated when uniqueLatest=true)
+  """
+  executionCount: Int
 }
 
 """GraphQL type for CommandExecution model."""
@@ -2495,6 +2511,15 @@ type StockPriceType {
   Bitfield for data quality flags: 1=extended_hours, 2=extreme_wick, 4=volume_anomaly, 8=price_gap
   """
   filterFlags: Int!
+
+  """Spike-adjusted open price (only set when candle has anomalies)"""
+  adjustedOpen: Decimal
+
+  """Spike-adjusted high price (caps extreme upper wicks)"""
+  adjustedHigh: Decimal
+
+  """Spike-adjusted low price (caps extreme lower wicks)"""
+  adjustedLow: Decimal
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -3291,7 +3316,7 @@ type Mutation {
   - STOCK:NASDAQ:AAPL STOCK:NASDAQ:GOOGL COMMAND:COMPARE
   
   The frontend should convert user input to FQN format before sending.
-  Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).
+  Aliases are resolved to canonical command names (e.g., HP -> PRICE).
   """
   executeCommand(
     """
@@ -4004,7 +4029,7 @@ Accepts FQN (Fully Qualified Name) format:
 - STOCK:NASDAQ:AAPL STOCK:NASDAQ:GOOGL COMMAND:COMPARE
 
 The frontend should convert user input to FQN format before sending.
-Aliases are resolved to canonical command names (e.g., HP -> PRICE, GP -> CHART).
+Aliases are resolved to canonical command names (e.g., HP -> PRICE).
 """
 type ExecuteCommand {
   success: Boolean
