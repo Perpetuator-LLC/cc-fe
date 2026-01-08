@@ -697,13 +697,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         const selectedSym = this.selectedSymbol();
 
         // Check if this result is for our selected symbol
-        const isForSelectedSymbol =
-          resultSymbol && selectedSym && resultSymbol.toUpperCase() === selectedSym.toUpperCase();
+        const isForSelectedSymbol = !!(
+          resultSymbol &&
+          selectedSym &&
+          resultSymbol.toUpperCase() === selectedSym.toUpperCase()
+        );
 
         // Extract chartControls from result data if available
         // Preserve the user's interval selection if this is a reload for the same symbol
         // (e.g., after job completion), not a fresh command
-        const preserveInterval = isForSelectedSymbol && !this.chartLoading();
+        const preserveInterval: boolean = isForSelectedSymbol && !this.chartLoading();
         this.extractChartControls(result, preserveInterval);
 
         // Also accept results if we're loading or if this is a symbol command that should update the display
@@ -782,11 +785,21 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               // Extract and store raw candle data for progressive loading
               this.extractAndStoreCandleData(result);
 
-              // Apply dark theme using ChartConfigService (single source of truth for theming)
-              const themedOptions = this.chartConfigService.applyDarkTheme(parsedOptions);
-              console.log('[WatchlistTab] Themed chartOptions keys:', Object.keys(themedOptions).slice(0, 8));
+              // Build chart using local preferences (showCorporateActions, lockToRight, etc.)
+              // instead of using backend's chartOptions directly
+              const candles = this.rawCandleData();
+              const chartSymbol = resultSymbol || this.selectedSymbol();
 
-              this.chartOptions.set(themedOptions);
+              if (candles.length > 0 && chartSymbol) {
+                // Use buildChartFromCandles to apply user's chart preferences
+                this.buildChartFromCandles(candles, chartSymbol);
+              } else {
+                // Fallback: Use backend's themed options if no candle data extracted
+                const themedOptions = this.chartConfigService.applyDarkTheme(parsedOptions);
+                console.log('[WatchlistTab] Themed chartOptions keys:', Object.keys(themedOptions).slice(0, 8));
+                this.chartOptions.set(themedOptions);
+              }
+
               this.dataContent.set(null);
               this.tableData.set(null);
               this.chartError.set(null);
@@ -796,7 +809,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               this.chartPageInfo.set(null);
 
               // Always refresh quote when chart loads - ensures quote data is up-to-date
-              const chartSymbol = resultSymbol || this.selectedSymbol();
               if (chartSymbol) {
                 console.log('[WatchlistTab] Chart loaded, refreshing quote for:', chartSymbol);
                 this.fetchQuoteForSymbol(chartSymbol);
@@ -2533,10 +2545,21 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   private buildChartFromCandles(candles: ChartCandle[], symbol: string): void {
     const interval = this.selectedInterval();
+    const showCorporateActions = this.showCorporateActions();
+    const lockToRight = this.lockToRight();
+
+    console.log('[WatchlistTab] buildChartFromCandles:', {
+      symbol,
+      interval,
+      candleCount: candles.length,
+      showCorporateActions,
+      lockToRight,
+    });
+
     // Use ChartConfigService for consistent chart building and theming
     const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval, {
-      showCorporateActions: this.showCorporateActions(),
-      lockToRight: this.lockToRight(),
+      showCorporateActions,
+      lockToRight,
     });
     this.chartOptions.set(options);
   }

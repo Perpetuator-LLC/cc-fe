@@ -266,7 +266,12 @@ export class ChartConfigService {
     candles: ChartCandle[],
     symbol: string,
     interval?: string,
-    options?: { showCorporateActions?: boolean; lockToRight?: boolean },
+    options?: {
+      showCorporateActions?: boolean;
+      lockToRight?: boolean;
+      showVolume?: boolean;
+      showExtendedHoursBackground?: boolean;
+    },
   ): EChartsOption {
     // Ensure data is sorted oldest first for proper chart display
     const sortedCandles = [...candles].sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -274,6 +279,18 @@ export class ChartConfigService {
     // Store ISO dates for proper parsing in crosshair and axis labels
     const dates = sortedCandles.map((c) => c.date.toISOString());
     const ohlcData = sortedCandles.map((c) => [c.open, c.close, c.low, c.high]);
+
+    // Volume data with color based on candle direction
+    const volumeData = sortedCandles.map((c) => ({
+      value: c.volume || 0,
+      itemStyle: {
+        color: c.close >= c.open ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)',
+      },
+    }));
+
+    // Check if we have meaningful volume data
+    const hasVolume = sortedCandles.some((c) => c.volume && c.volume > 0);
+    const showVolume = hasVolume && (options?.showVolume ?? true); // Default to showing volume if data exists
 
     // Get the latest date for right-anchored zoom
     const latestDate = dates.length > 0 ? dates[dates.length - 1] : undefined;
@@ -295,12 +312,18 @@ export class ChartConfigService {
     // Build mark lines for corporate actions (splits and dividends)
     const markLineData = options?.showCorporateActions ? this.buildCorporateActionMarkers(sortedCandles) : [];
 
+    // Build markArea for extended hours background shading (only for intraday)
+    // Only show if explicitly enabled (defaults to showing when intraday data has extended hours)
+    const showExtendedHoursBackground = options?.showExtendedHoursBackground ?? isIntraday;
+    const extendedHoursAreas = showExtendedHoursBackground ? this.buildExtendedHoursMarkAreas(sortedCandles) : [];
+
     // Build dataZoom config based on lock state
     // When locked: use endValue with rangeMode to fix right edge
     // When unlocked: use start/end percentages for free scrolling
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dataZoomConfig: any = {
       type: 'inside',
+      xAxisIndex: showVolume ? [0, 1] : [0], // Apply zoom to both x-axes when showing volume
       zoomOnMouseWheel: true,
       moveOnMouseMove: !lockToRight, // Disable panning when locked
       moveOnMouseWheel: false,
@@ -310,7 +333,6 @@ export class ChartConfigService {
 
     if (lockToRight && latestDate) {
       // Fixed right edge mode: end is anchored to the latest data point
-      // rangeMode: ['percent', 'value'] means start uses percentage, end uses value
       dataZoomConfig.rangeMode = ['percent', 'value'];
       dataZoomConfig.start = 70; // Show last 30% initially
       dataZoomConfig.endValue = latestDate; // Fix right edge to latest date
@@ -320,72 +342,157 @@ export class ChartConfigService {
       dataZoomConfig.end = 100;
     }
 
-    // Build minimal options - applyDarkTheme will add all theming
+    // Grid configuration - adjust based on whether volume is shown
+    const grids = showVolume
+      ? [
+          { left: 60, right: 20, top: 20, height: '55%' }, // Price chart (reduced height for volume)
+          { left: 60, right: 20, top: '72%', height: '18%' }, // Volume chart at bottom
+        ]
+      : [{ left: 60, right: 20, top: 20, bottom: 60 }]; // Single grid without volume
+
+    // X-axis configuration
+    const xAxes = showVolume
+      ? [
+          {
+            type: 'category' as const,
+            data: dates,
+            boundaryGap: true,
+            axisLine: { onZero: false },
+            axisLabel: { show: false }, // Hide labels on price chart x-axis
+            axisTick: { show: false },
+            gridIndex: 0,
+          },
+          {
+            type: 'category' as const,
+            data: dates,
+            boundaryGap: true,
+            axisLine: { onZero: false },
+            gridIndex: 1,
+            axisLabel: {
+              formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
+            },
+            axisPointer: {
+              label: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
+              },
+            },
+          },
+        ]
+      : [
+          {
+            type: 'category' as const,
+            data: dates,
+            boundaryGap: true,
+            axisLine: { onZero: false },
+            axisLabel: {
+              formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
+            },
+            axisPointer: {
+              label: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
+              },
+            },
+          },
+        ];
+
+    // Y-axis configuration
+    const yAxes = showVolume
+      ? [
+          { type: 'value' as const, scale: true, gridIndex: 0, splitNumber: 4 },
+          {
+            type: 'value' as const,
+            gridIndex: 1,
+            splitNumber: 2,
+            axisLabel: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter: (value: any) => this.formatVolumeLabel(value),
+            },
+          },
+        ]
+      : [{ type: 'value' as const, scale: true }];
+
+    // Series configuration - use explicit array type to allow push()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const series: any[] = [
+      {
+        name: symbol,
+        type: 'candlestick',
+        data: ohlcData,
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        barWidth: '70%',
+        barMaxWidth: 24,
+        barMinWidth: 1,
+        itemStyle: {
+          color: this.CANDLE_UP_COLOR,
+          color0: this.CANDLE_DOWN_COLOR,
+          borderColor: this.CANDLE_UP_COLOR,
+          borderColor0: this.CANDLE_DOWN_COLOR,
+        },
+        // Extended hours background shading
+        markArea:
+          extendedHoursAreas.length > 0
+            ? {
+                silent: true,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                data: extendedHoursAreas as any,
+              }
+            : undefined,
+        markLine:
+          markLineData.length > 0
+            ? {
+                symbol: 'none',
+                lineStyle: { type: 'dashed', width: 1 },
+                label: {
+                  show: true,
+                  position: 'insideEndBottom',
+                  fontSize: 10,
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  padding: [4, 8],
+                  borderRadius: 4,
+                },
+                data: markLineData,
+              }
+            : undefined,
+      },
+    ];
+
+    // Add volume series if showing
+    if (showVolume) {
+      series.push({
+        name: 'Volume',
+        type: 'bar',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        data: volumeData,
+        barWidth: '60%',
+      });
+    }
+
+    // Build chart options
     const chartOptions: EChartsOption = {
-      xAxis: {
-        type: 'category',
-        data: dates,
-        boundaryGap: true,
-        axisLine: { onZero: false },
-        axisLabel: {
-          // Dynamic formatter based on zoom level and interval
-          formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
-        },
-        // Axis pointer (crosshair) label formatter for proper date/time display
-        axisPointer: {
-          label: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
-          },
-        },
-      },
-      yAxis: {
-        type: 'value',
-        scale: true,
-      },
-      // Use the configured dataZoom
+      grid: grids,
+      xAxis: xAxes,
+      yAxis: yAxes,
       dataZoom: [dataZoomConfig],
-      series: [
-        {
-          name: symbol,
-          type: 'candlestick',
-          data: ohlcData,
-          barWidth: '70%', // Use 70% of available space to reduce gaps
-          barMaxWidth: 24, // Limit max width when very zoomed in
-          barMinWidth: 1, // Allow thin candles when zoomed out
-          itemStyle: {
-            color: this.CANDLE_UP_COLOR,
-            color0: this.CANDLE_DOWN_COLOR,
-            borderColor: this.CANDLE_UP_COLOR,
-            borderColor0: this.CANDLE_DOWN_COLOR,
-          },
-          // Add corporate action markers if enabled
-          markLine:
-            markLineData.length > 0
-              ? {
-                  symbol: 'none',
-                  lineStyle: {
-                    type: 'dashed',
-                    width: 1,
-                  },
-                  label: {
-                    show: true,
-                    position: 'insideEndBottom', // Position at top of chart area
-                    fontSize: 10,
-                    color: '#ffffff', // White text for visibility on dark background
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: [4, 8],
-                    borderRadius: 4,
-                  },
-                  data: markLineData,
-                }
-              : undefined,
-        },
-      ],
+      series,
     };
 
     // Apply complete theming
     return this.applyDarkTheme(chartOptions);
+  }
+
+  /**
+   * Format volume labels (e.g., 1.2M, 500K)
+   */
+  private formatVolumeLabel(value: number): string {
+    if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + 'B';
+    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+    if (value >= 1_000) return (value / 1_000).toFixed(0) + 'K';
+    return value.toString();
   }
 
   /**
@@ -419,6 +526,81 @@ export class ChartConfigService {
     });
 
     return markers;
+  }
+
+  /**
+   * Check if a given candle is during extended hours (pre-market or after-hours).
+   * Uses backend's isExtendedHours field if available, falls back to time-based detection.
+   *
+   * Pre-market: 4:00 AM - 9:30 AM ET
+   * Regular: 9:30 AM - 4:00 PM ET
+   * After-hours: 4:00 PM - 8:00 PM ET
+   */
+  private isExtendedHoursCandle(candle: ChartCandle): boolean {
+    // Prefer backend's isExtendedHours field (handles holidays, half-days correctly)
+    if (typeof candle.isExtendedHours === 'boolean') {
+      return candle.isExtendedHours;
+    }
+
+    // Fallback: time-based detection
+    const date = candle.date;
+    const etTime = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const hours = etTime.getHours();
+    const minutes = etTime.getMinutes();
+    const totalMinutes = hours * 60 + minutes;
+
+    const marketOpen = 9 * 60 + 30; // 9:30 AM = 570 minutes
+    const marketClose = 16 * 60; // 4:00 PM = 960 minutes
+
+    return totalMinutes < marketOpen || totalMinutes >= marketClose;
+  }
+
+  /**
+   * Build markArea data for extended hours background shading.
+   * Creates contiguous shaded regions for pre-market and after-hours periods.
+   */
+  private buildExtendedHoursMarkAreas(candles: ChartCandle[]): { xAxis: string; itemStyle: { color: string } }[][] {
+    const areas: { xAxis: string; itemStyle: { color: string } }[][] = [];
+    let currentAreaStart: string | null = null;
+
+    for (let i = 0; i < candles.length; i++) {
+      const candle = candles[i];
+      const isExtended = this.isExtendedHoursCandle(candle);
+
+      if (isExtended) {
+        if (!currentAreaStart) {
+          // Start a new extended hours area
+          currentAreaStart = candle.date.toISOString();
+        }
+      } else {
+        // Regular hours - close any open extended hours area
+        if (currentAreaStart && i > 0) {
+          const prevCandle = candles[i - 1];
+          areas.push([
+            { xAxis: currentAreaStart, itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
+            { xAxis: prevCandle.date.toISOString(), itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
+          ]);
+          currentAreaStart = null;
+        }
+      }
+    }
+
+    // Close final area if still open
+    if (currentAreaStart && candles.length > 0) {
+      areas.push([
+        { xAxis: currentAreaStart, itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
+        { xAxis: candles[candles.length - 1].date.toISOString(), itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
+      ]);
+    }
+
+    return areas;
+  }
+
+  /**
+   * Format axis label dynamically based on interval type
+    }
+
+    return areas;
   }
 
   /**
@@ -860,6 +1042,8 @@ export class ChartConfigService {
 
   /**
    * Deep merge two objects (source values override target)
+   * IMPORTANT: If target has an array and source has an object for the same key,
+   * keep the target array to preserve multi-grid/multi-axis configurations.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private deepMerge(target: any, source: any): any {
@@ -871,6 +1055,12 @@ export class ChartConfigService {
     }
     const result = { ...target };
     for (const key of Object.keys(source)) {
+      // If target has an array but source has an object, keep target's array
+      // This preserves multi-grid/multi-axis configurations
+      if (Array.isArray(result[key]) && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        // Keep the array from target, don't overwrite with object from source
+        continue;
+      }
       if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
         result[key] = this.deepMerge(target[key] || {}, source[key]);
       } else {
