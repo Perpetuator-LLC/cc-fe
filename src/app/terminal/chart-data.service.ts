@@ -43,6 +43,7 @@ const STOCK_PRICE_CONNECTION = gql`
           adjustedClose
           splitCoefficient
           dividendAmount
+          isExtendedHours
         }
         cursor
       }
@@ -122,6 +123,7 @@ const CHART_DATA_RANGE = gql`
           adjustedClose
           splitCoefficient
           dividendAmount
+          isExtendedHours
         }
         cursor
       }
@@ -160,6 +162,8 @@ export interface ChartCandle {
   splitCoefficient?: number;
   /** Dividend paid per share: 0.0 = no dividend */
   dividendAmount?: number;
+  /** True if this candle is from pre-market or after-hours trading */
+  isExtendedHours?: boolean;
 }
 
 export interface PageInfo {
@@ -221,6 +225,7 @@ interface StockPriceNode {
   adjustedClose: number | null;
   splitCoefficient?: number;
   dividendAmount?: number;
+  isExtendedHours?: boolean;
 }
 
 interface StockPriceEdge {
@@ -616,6 +621,7 @@ export class ChartDataService implements OnDestroy {
       adjustedClose: edge.node.adjustedClose ?? undefined,
       splitCoefficient: edge.node.splitCoefficient ?? undefined,
       dividendAmount: edge.node.dividendAmount ?? undefined,
+      isExtendedHours: edge.node.isExtendedHours ?? undefined,
     }));
 
     // Sort candles chronologically (oldest first) for chart rendering
