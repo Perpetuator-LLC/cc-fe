@@ -294,19 +294,19 @@ export class TerminalRoutingService {
       exchange: this.exchange() || undefined,
       view: this.view(),
       interval: this.interval(),
-      period: this.period(),
+      // Note: period is excluded - chart uses 'first' (record count) instead
       watchlistId: this.watchlistId() || undefined,
       dashboardId: this.dashboardId() || undefined,
     };
 
     const queryParams = routeToQueryParams(route);
 
-    // Update URL without navigation
+    // Update URL - use replaceUrl: false to enable browser back/forward navigation
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
       queryParamsHandling: 'merge',
-      replaceUrl: true,
+      replaceUrl: false, // Push to history for back/forward navigation
     });
   }
 

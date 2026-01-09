@@ -15,7 +15,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -562,6 +563,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private routingService: TerminalRoutingService,
     private jobsWsService: JobsWebSocketService,
     private chartPreferencesService: ChartPreferencesService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -570,6 +572,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.subscribeToCommandResults();
     this.subscribeToSymbolUpdates();
     this.setupSymbolSearch();
+    this.restoreStateFromUrl();
+    this.subscribeToRouteChanges();
   }
 
   ngOnDestroy(): void {
@@ -581,6 +585,66 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     this.subscriptions.unsubscribe();
     this.symbolSearchSubject.complete();
+  }
+
+  // ============================================================================
+  // URL-Based Navigation
+  // ============================================================================
+
+  /**
+   * Restore chart state from URL query parameters on initial load.
+   * This allows deep linking and page refresh to restore the chart.
+   */
+  private restoreStateFromUrl(): void {
+    const state = this.routingService.state();
+    if (state.symbol) {
+      console.log('[WatchlistTab] Restoring state from URL:', state);
+      // Set the interval from URL before loading chart
+      if (state.interval) {
+        this.selectedInterval.set(state.interval);
+      }
+      // Load the chart for the symbol from URL
+      this.loadChart(state.symbol, state.exchange || undefined, 'CHART');
+    }
+  }
+
+  /**
+   * Subscribe to route query parameter changes for browser back/forward navigation.
+   * Skip the first emission (initial state already handled by restoreStateFromUrl).
+   */
+  private subscribeToRouteChanges(): void {
+    this.subscriptions.add(
+      this.route.queryParams
+        .pipe(
+          skip(1), // Skip initial emission - handled by restoreStateFromUrl
+        )
+        .subscribe((params) => {
+          const symbol = params['symbol'];
+          const exchange = params['exchange'];
+          const interval = params['interval'];
+
+          if (symbol) {
+            const currentSymbol = this.selectedSymbol();
+            const currentInterval = this.selectedInterval();
+
+            // Only reload if something changed
+            if (symbol !== currentSymbol || interval !== currentInterval) {
+              console.log('[WatchlistTab] Route changed, reloading chart:', { symbol, exchange, interval });
+              // Update interval if provided
+              if (interval && interval !== currentInterval) {
+                this.selectedInterval.set(interval);
+              }
+              // Update routing service state without updating URL (to avoid loop)
+              this.routingService.applyRoute(
+                { symbol, exchange, interval: interval as RouteInfo['interval'] },
+                { updateUrl: false, silent: true },
+              );
+              // Load the chart
+              this.loadChart(symbol, exchange, 'CHART');
+            }
+          }
+        }),
+    );
   }
 
   // ============================================================================
