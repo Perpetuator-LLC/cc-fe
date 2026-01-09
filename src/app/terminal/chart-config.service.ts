@@ -36,7 +36,10 @@ export class ChartConfigService {
   // ============================================================================
 
   /** Whether to use local time (true) or exchange time/EST (false) */
-  useLocalTime = signal(true);
+  useLocalTime = signal(false); // Default: Exchange Time (showLocalTime: false → show times in ET)
+
+  // Debug counter for axis label logging
+  private _axisLabelLogCount = 0;
 
   // ============================================================================
   // CANONICAL CHART COLORS - Use these everywhere for consistency
@@ -273,11 +276,97 @@ export class ChartConfigService {
       showExtendedHoursBackground?: boolean;
     },
   ): EChartsOption {
+    // Reset debug counter for axis label logging
+    this._axisLabelLogCount = 0;
+
+    // DEBUG: Log all options with JSON.stringify for visibility in Chrome debug log
+    console.log(
+      '[ChartConfig] buildChartFromCandles:',
+      JSON.stringify({
+        symbol,
+        interval,
+        candleCount: candles.length,
+        showCorporateActions: options?.showCorporateActions,
+        lockToRight: options?.lockToRight,
+        showVolume: options?.showVolume,
+        showExtendedHoursBackground: options?.showExtendedHoursBackground,
+        useLocalTime: this.useLocalTime(), // Log current timezone setting
+      }),
+    );
+
     // Ensure data is sorted oldest first for proper chart display
     const sortedCandles = [...candles].sort((a, b) => a.date.getTime() - b.date.getTime());
 
+    // DEBUG: Check for corporate actions and extended hours data
+    const splitsFound = sortedCandles.filter((c) => c.splitCoefficient && c.splitCoefficient !== 1.0).length;
+    const dividendsFound = sortedCandles.filter((c) => c.dividendAmount && c.dividendAmount > 0).length;
+    const extendedHoursFromBackend = sortedCandles.filter((c) => c.isExtendedHours === true).length;
+    console.log(
+      '[ChartConfig] Data analysis:',
+      JSON.stringify({
+        splitsFound,
+        dividendsFound,
+        extendedHoursFromBackend,
+        sampleCandle: sortedCandles[0]
+          ? {
+              date: sortedCandles[0].date.toISOString(),
+              splitCoefficient: sortedCandles[0].splitCoefficient,
+              dividendAmount: sortedCandles[0].dividendAmount,
+              isExtendedHours: sortedCandles[0].isExtendedHours,
+            }
+          : null,
+      }),
+    );
+
+    // Determine if this is intraday data (needed for formatting)
+    const isIntraday = interval
+      ? interval.toLowerCase().includes('min') ||
+        interval.toLowerCase().includes('hour') ||
+        interval === '60min' ||
+        interval === 'MIN_60' ||
+        interval === 'MIN_30' ||
+        interval === 'MIN_15' ||
+        interval === 'MIN_5' ||
+        interval === 'MIN_1'
+      : false;
+
     // Store ISO dates for proper parsing in crosshair and axis labels
     const dates = sortedCandles.map((c) => c.date.toISOString());
+
+    // Pre-format axis labels based on current timezone setting
+    // This ensures labels are correct when chart is built, not relying on formatter callback
+    const useLocal = this.useLocalTime();
+    const timeZone = useLocal ? undefined : 'America/New_York';
+    const formattedAxisLabels = sortedCandles.map((c) => {
+      if (isIntraday) {
+        const timeLabel = c.date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone,
+        });
+        // Add "ET" suffix when using exchange time (not local time)
+        return useLocal ? timeLabel : `${timeLabel} ET`;
+      } else {
+        // For daily+, show date only (no time suffix needed)
+        return c.date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'America/New_York', // Always use ET for daily dates
+        });
+      }
+    });
+
+    console.log(
+      '[ChartConfig] Pre-formatted axis labels:',
+      JSON.stringify({
+        useLocal,
+        timeZone: timeZone || 'local',
+        sampleLabel: formattedAxisLabels[0],
+        sampleDate: dates[0],
+      }),
+    );
+
     const ohlcData = sortedCandles.map((c) => [c.open, c.close, c.low, c.high]);
 
     // Volume data with color based on candle direction
@@ -297,18 +386,6 @@ export class ChartConfigService {
     // Default to locked (lockToRight defaults to true in component)
     const lockToRight = options?.lockToRight ?? true;
 
-    // Determine if this is intraday data
-    const isIntraday = interval
-      ? interval.toLowerCase().includes('min') ||
-        interval.toLowerCase().includes('hour') ||
-        interval === '60min' ||
-        interval === 'MIN_60' ||
-        interval === 'MIN_30' ||
-        interval === 'MIN_15' ||
-        interval === 'MIN_5' ||
-        interval === 'MIN_1'
-      : false;
-
     // Build mark lines for corporate actions (splits and dividends)
     const markLineData = options?.showCorporateActions ? this.buildCorporateActionMarkers(sortedCandles) : [];
 
@@ -316,6 +393,18 @@ export class ChartConfigService {
     // Only show if explicitly enabled (defaults to showing when intraday data has extended hours)
     const showExtendedHoursBackground = options?.showExtendedHoursBackground ?? isIntraday;
     const extendedHoursAreas = showExtendedHoursBackground ? this.buildExtendedHoursMarkAreas(sortedCandles) : [];
+
+    // DEBUG: Log corporate actions and extended hours results
+    console.log(
+      '[ChartConfig] Markers generated:',
+      JSON.stringify({
+        showCorporateActions: options?.showCorporateActions,
+        markLineCount: markLineData.length,
+        showExtendedHoursBackground,
+        extendedHoursAreasCount: extendedHoursAreas.length,
+        isIntraday,
+      }),
+    );
 
     // Build dataZoom config based on lock state
     // When locked: use endValue with rangeMode to fix right edge
@@ -343,38 +432,52 @@ export class ChartConfigService {
     }
 
     // Grid configuration - adjust based on whether volume is shown
+    // Grid configuration for dual chart layout
+    // Price chart: 70% of height, Volume chart: 20% of height, with 40px for axis labels at bottom
     const grids = showVolume
       ? [
-          { left: 60, right: 20, top: 20, height: '55%' }, // Price chart (reduced height for volume)
-          { left: 60, right: 20, top: '72%', height: '18%' }, // Volume chart at bottom
+          { left: 60, right: 20, top: 20, height: '60%' }, // Price chart - 60% of available height
+          { left: 60, right: 20, top: '75%', height: '15%' }, // Volume chart - positioned at 75%, 15% height
         ]
       : [{ left: 60, right: 20, top: 20, bottom: 60 }]; // Single grid without volume
 
-    // X-axis configuration
+    // X-axis configuration - both axes share the same data for synchronized crosshairs
+    // Use formattedAxisLabels for display, but store dates for crosshair tooltip lookup
     const xAxes = showVolume
       ? [
           {
             type: 'category' as const,
-            data: dates,
+            data: formattedAxisLabels, // Use pre-formatted labels
             boundaryGap: true,
             axisLine: { onZero: false },
             axisLabel: { show: false }, // Hide labels on price chart x-axis
             axisTick: { show: false },
             gridIndex: 0,
+            axisPointer: {
+              show: true,
+              label: { show: false }, // Don't show label on price chart x-axis
+            },
           },
           {
             type: 'category' as const,
-            data: dates,
+            data: formattedAxisLabels, // Use pre-formatted labels
             boundaryGap: true,
             axisLine: { onZero: false },
             gridIndex: 1,
             axisLabel: {
-              formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
+              // No formatter needed - data is already formatted
             },
             axisPointer: {
+              show: true,
               label: {
+                // For crosshair tooltip, use the index to look up the original date
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
+                formatter: (params: any) => {
+                  const index =
+                    typeof params.value === 'number' ? params.value : formattedAxisLabels.indexOf(String(params.value));
+                  const originalDate = index >= 0 && index < dates.length ? dates[index] : String(params.value);
+                  return this.formatAxisPointerLabel(originalDate, isIntraday);
+                },
               },
             },
           },
@@ -382,16 +485,22 @@ export class ChartConfigService {
       : [
           {
             type: 'category' as const,
-            data: dates,
+            data: formattedAxisLabels, // Use pre-formatted labels
             boundaryGap: true,
             axisLine: { onZero: false },
             axisLabel: {
-              formatter: (value: string) => this.formatAxisLabel(value, isIntraday),
+              // No formatter needed - data is already formatted
             },
             axisPointer: {
               label: {
+                // For crosshair tooltip, use the index to look up the original date
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter: (params: any) => this.formatAxisPointerLabel(String(params.value), isIntraday),
+                formatter: (params: any) => {
+                  const index =
+                    typeof params.value === 'number' ? params.value : formattedAxisLabels.indexOf(String(params.value));
+                  const originalDate = index >= 0 && index < dates.length ? dates[index] : String(params.value);
+                  return this.formatAxisPointerLabel(originalDate, isIntraday);
+                },
               },
             },
           },
@@ -436,6 +545,9 @@ export class ChartConfigService {
           extendedHoursAreas.length > 0
             ? {
                 silent: true,
+                itemStyle: {
+                  color: 'rgba(100, 100, 100, 0.15)',
+                },
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data: extendedHoursAreas as any,
               }
@@ -497,19 +609,20 @@ export class ChartConfigService {
 
   /**
    * Build mark line data for corporate actions (splits and dividends)
+   * Uses index-based xAxis positioning to match category axis.
    */
   private buildCorporateActionMarkers(
     candles: ChartCandle[],
-  ): { xAxis: string; label: { formatter: string }; lineStyle: { color: string } }[] {
-    const markers: { xAxis: string; label: { formatter: string }; lineStyle: { color: string } }[] = [];
+  ): { xAxis: number; label: { formatter: string }; lineStyle: { color: string } }[] {
+    const markers: { xAxis: number; label: { formatter: string }; lineStyle: { color: string } }[] = [];
 
-    candles.forEach((candle) => {
+    candles.forEach((candle, index) => {
       // Check for splits (coefficient !== 1.0)
       if (candle.splitCoefficient && candle.splitCoefficient !== 1.0) {
         const ratio = candle.splitCoefficient;
         const label = ratio > 1 ? `${ratio}:1 Split` : `1:${Math.round(1 / ratio)} Rev. Split`;
         markers.push({
-          xAxis: candle.date.toISOString(),
+          xAxis: index,
           label: { formatter: `🔀 ${label}` },
           lineStyle: { color: '#9c27b0' }, // Purple for splits
         });
@@ -518,7 +631,7 @@ export class ChartConfigService {
       // Check for dividends (amount > 0)
       if (candle.dividendAmount && candle.dividendAmount > 0) {
         markers.push({
-          xAxis: candle.date.toISOString(),
+          xAxis: index,
           label: { formatter: `💰 $${candle.dividendAmount.toFixed(2)} Div` },
           lineStyle: { color: '#4caf50' }, // Green for dividends
         });
@@ -558,46 +671,66 @@ export class ChartConfigService {
   /**
    * Build markArea data for extended hours background shading.
    * Creates contiguous shaded regions for pre-market and after-hours periods.
+   * Returns array of [startIndex, endIndex] pairs that match xAxis category indices.
    */
-  private buildExtendedHoursMarkAreas(candles: ChartCandle[]): { xAxis: string; itemStyle: { color: string } }[][] {
-    const areas: { xAxis: string; itemStyle: { color: string } }[][] = [];
-    let currentAreaStart: string | null = null;
+  private buildExtendedHoursMarkAreas(candles: ChartCandle[]): { xAxis: number }[][] {
+    const areas: { xAxis: number }[][] = [];
+    let currentAreaStartIndex: number | null = null;
+
+    // Debug: Check if any candles have isExtendedHours field set
+    const candlesWithBackendField = candles.filter((c) => typeof c.isExtendedHours === 'boolean');
+    const extendedHoursCandles = candles.filter((c) => this.isExtendedHoursCandle(c));
+    console.log(
+      '[ChartConfig] Extended hours detection:',
+      JSON.stringify({
+        totalCandles: candles.length,
+        candlesWithBackendField: candlesWithBackendField.length,
+        extendedHoursCandles: extendedHoursCandles.length,
+        sampleCandle: candles[0]
+          ? {
+              date: candles[0].date.toISOString(),
+              isExtendedHours: candles[0].isExtendedHours,
+              detected: this.isExtendedHoursCandle(candles[0]),
+            }
+          : null,
+      }),
+    );
+
+    const EXTENDED_HOURS_COLOR = 'rgba(100, 100, 100, 0.15)';
 
     for (let i = 0; i < candles.length; i++) {
       const candle = candles[i];
       const isExtended = this.isExtendedHoursCandle(candle);
 
       if (isExtended) {
-        if (!currentAreaStart) {
+        if (currentAreaStartIndex === null) {
           // Start a new extended hours area
-          currentAreaStart = candle.date.toISOString();
+          currentAreaStartIndex = i;
         }
       } else {
         // Regular hours - close any open extended hours area
-        if (currentAreaStart && i > 0) {
-          const prevCandle = candles[i - 1];
-          areas.push([
-            { xAxis: currentAreaStart, itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
-            { xAxis: prevCandle.date.toISOString(), itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
-          ]);
-          currentAreaStart = null;
+        if (currentAreaStartIndex !== null && i > 0) {
+          areas.push([{ xAxis: currentAreaStartIndex }, { xAxis: i - 1 }]);
+          currentAreaStartIndex = null;
         }
       }
     }
 
     // Close final area if still open
-    if (currentAreaStart && candles.length > 0) {
-      areas.push([
-        { xAxis: currentAreaStart, itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
-        { xAxis: candles[candles.length - 1].date.toISOString(), itemStyle: { color: 'rgba(128, 128, 128, 0.08)' } },
-      ]);
+    if (currentAreaStartIndex !== null && candles.length > 0) {
+      areas.push([{ xAxis: currentAreaStartIndex }, { xAxis: candles.length - 1 }]);
     }
 
-    return areas;
-  }
-
-  /**
-   * Format axis label dynamically based on interval type
+    // Log the areas for debugging
+    if (areas.length > 0) {
+      console.log(
+        '[ChartConfig] Extended hours markAreas:',
+        JSON.stringify({
+          count: areas.length,
+          sample: areas[0],
+          color: EXTENDED_HOURS_COLOR,
+        }),
+      );
     }
 
     return areas;
@@ -615,13 +748,24 @@ export class ChartConfigService {
         const date = new Date(value);
         if (isNaN(date.getTime())) return value;
 
-        const timeZone = this.useLocalTime() ? undefined : 'America/New_York';
-        return date.toLocaleTimeString('en-US', {
+        const useLocal = this.useLocalTime();
+        const timeZone = useLocal ? undefined : 'America/New_York';
+        const result = date.toLocaleTimeString('en-US', {
           hour: 'numeric',
           minute: '2-digit',
           hour12: true,
           timeZone,
         });
+        // Debug: ALWAYS log first 3 calls to verify timezone is working
+        if (!this._axisLabelLogCount) this._axisLabelLogCount = 0;
+        if (this._axisLabelLogCount < 3) {
+          this._axisLabelLogCount++;
+          console.log(
+            '[ChartConfig] formatAxisLabel:',
+            JSON.stringify({ useLocal, timeZone, input: value, output: result }),
+          );
+        }
+        return result;
       } else {
         // For daily+, extract date portion from ISO string to avoid timezone shift
         // ISO format: "2024-01-15T00:00:00.000Z" - we want "Jan 15" not local conversion
@@ -660,7 +804,8 @@ export class ChartConfigService {
         const date = new Date(value);
         if (isNaN(date.getTime())) return value;
 
-        const timeZone = this.useLocalTime() ? undefined : 'America/New_York';
+        const useLocal = this.useLocalTime();
+        const timeZone = useLocal ? undefined : 'America/New_York';
         const formatted = date.toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -670,7 +815,12 @@ export class ChartConfigService {
           timeZone,
         });
         // Add timezone indicator when not local time
-        return this.useLocalTime() ? formatted : formatted + ' ET';
+        const result = useLocal ? formatted : formatted + ' ET';
+        // DEBUG: Log timezone formatting (only once per 100 calls to avoid spam)
+        if (Math.random() < 0.01) {
+          console.log('[ChartConfig] formatAxisPointerLabel:', { value, useLocal, result });
+        }
+        return result;
       } else {
         // For daily+, extract date portion from ISO string to avoid timezone shift
         const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);

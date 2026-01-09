@@ -150,9 +150,34 @@ node scripts/test-ws-graphql-v2.cjs commands    # Available commands list
 node scripts/test-ws-graphql-v2.cjs watchlist   # Watchlist symbols
 node scripts/test-ws-graphql-v2.cjs dataorder   # Verify data ordering
 
+# Quick GraphQL queries for debugging specific data
+node scripts/test-graphql-query.cjs msft-30min           # MSFT 30min regular hours
+node scripts/test-graphql-query.cjs msft-30min-extended  # MSFT 30min with extended hours
+node scripts/test-graphql-query.cjs msft-daily           # MSFT daily data
+
 # Token management (stored in ~/.capital-copilot/cli-tokens.json)
 rm -f ~/.capital-copilot/cli-tokens.json  # Clear cached tokens
 ```
+
+### Running Scripts with Output Capture
+
+**IMPORTANT:** Terminal output can be truncated. For reliable output, use nohup with redirect:
+
+```bash
+# Pattern for running scripts and capturing full output:
+cd /Users/nik/projects/capital-copilot-fe && \
+  nohup node scripts/test-graphql-query.cjs msft-30min > logs/ai_link/test_output.log 2>&1 & \
+  sleep 8 && \
+  cat logs/ai_link/test_output.log
+
+# Or use read_file() after the script completes to see the log
+```
+
+This pattern:
+1. Runs the script in background with nohup
+2. Redirects all output to a log file
+3. Waits for completion
+4. Displays the captured output
 
 **Token handling:** Scripts read credentials from `src/environments/environment.ts` (TEST_EMAIL, TEST_PASSWORD). Tokens are cached in `~/.capital-copilot/cli-tokens.json` with proper file permissions (0600).
 
