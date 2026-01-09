@@ -824,18 +824,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               // Update the selected symbol - this is the source of truth
               this.selectedSymbol.set(newSymbol);
 
-              // Apply route info from backend for URL sync and state management
-              // Use route if available, otherwise build from metadata
-              if (route) {
-                this.routingService.applyRoute(route as RouteInfo);
-              } else {
-                this.routingService.applyRoute({
-                  symbol: newSymbol,
-                  interval: result.metadata?.interval as RouteInfo['interval'],
-                  period: result.metadata?.period as RouteInfo['period'],
-                });
-              }
-
               // Clear stale data from previous symbol
               this.rawCandleData.set([]);
               this.quoteData.set(null);
@@ -846,6 +834,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
               // Fetch quote data for new symbol
               this.fetchQuoteForSymbol(newSymbol);
+            }
+
+            // ALWAYS update routing on successful command result (for URL sync)
+            // This ensures clicking on watchlist items updates the URL too
+            if (route) {
+              this.routingService.applyRoute(route as RouteInfo);
+            } else {
+              // No route from backend, build from metadata
+              this.routingService.applyRoute({
+                symbol: newSymbol,
+                exchange: result.metadata?.['exchange'] as string | undefined,
+                interval: result.metadata?.['interval'] as RouteInfo['interval'],
+              });
             }
           }
 
