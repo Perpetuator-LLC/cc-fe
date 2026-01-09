@@ -1155,6 +1155,182 @@ async function testFetchBehavior(ws, symbol = 'COST', interval = 'HOURLY') {
   console.log('╚══════════════════════════════════════════════════════════════════╝');
 }
 
+/**
+ * Test Extended Hours and Corporate Actions data
+ * Checks if isExtendedHours, splitCoefficient, and dividendAmount are populated
+ */
+async function testExtendedHoursAndCorporateActions(ws, symbol = 'MSFT') {
+  console.log(`\n=== Testing Extended Hours & Corporate Actions for ${symbol} ===\n`);
+
+  // Query for intraday data with extended hours fields
+  const EXTENDED_HOURS_QUERY = `
+    query ExtendedHoursTest($symbol: String!, $interval: StockPriceInterval!, $first: Int!, $includeExtendedHours: Boolean!) {
+      stockPriceConnection(
+        symbol: $symbol
+        interval: $interval
+        first: $first
+        includeExtendedHours: $includeExtendedHours
+      ) {
+        edges {
+          node {
+            date
+            open
+            close
+            isExtendedHours
+          }
+        }
+        totalCount
+      }
+    }
+  `;
+
+  // Query for daily data with corporate actions
+  const CORPORATE_ACTIONS_QUERY = `
+    query CorporateActionsTest($symbol: String!, $first: Int!) {
+      stockPriceConnection(
+        symbol: $symbol
+        interval: DAILY
+        first: $first
+      ) {
+        edges {
+          node {
+            date
+            close
+            adjustedClose
+            splitCoefficient
+            dividendAmount
+          }
+        }
+        totalCount
+      }
+    }
+  `;
+
+  // Test 1: Extended hours WITH includeExtendedHours: true
+  console.log('--- Test 1: 30min data WITH extended hours ---');
+  try {
+    const result = await sendQuery(ws, 'ext1', EXTENDED_HOURS_QUERY, {
+      symbol,
+      interval: 'MIN_30',
+      first: 100,
+      includeExtendedHours: true,
+    });
+    const data = result?.data?.stockPriceConnection;
+    const edges = data?.edges || [];
+    const extendedCount = edges.filter(e => e.node.isExtendedHours === true).length;
+    const regularCount = edges.filter(e => e.node.isExtendedHours === false).length;
+    const nullCount = edges.filter(e => e.node.isExtendedHours === null || e.node.isExtendedHours === undefined).length;
+
+    console.log('Results:', {
+      totalCount: data?.totalCount || 0,
+      edgeCount: edges.length,
+      extendedHoursCount: extendedCount,
+      regularHoursCount: regularCount,
+      nullIsExtendedHours: nullCount,
+    });
+
+    if (nullCount > 0) {
+      console.log('⚠️  WARNING: isExtendedHours is NULL/undefined for', nullCount, 'candles');
+      console.log('   Backend needs to populate isExtendedHours field');
+    }
+    if (extendedCount > 0) {
+      console.log('✅ isExtendedHours field is populated');
+      console.log('Sample extended hours candle:', edges.find(e => e.node.isExtendedHours === true)?.node);
+    }
+    if (edges.length > 0) {
+      console.log('Sample candle:', edges[0]?.node);
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+
+  // Test 2: Extended hours filtering (includeExtendedHours: false)
+  console.log('\n--- Test 2: 30min data WITHOUT extended hours (filtering test) ---');
+  try {
+    const result = await sendQuery(ws, 'ext2', EXTENDED_HOURS_QUERY, {
+      symbol,
+      interval: 'MIN_30',
+      first: 100,
+      includeExtendedHours: false,
+    });
+    const data = result?.data?.stockPriceConnection;
+    const edges = data?.edges || [];
+    const extendedCount = edges.filter(e => e.node.isExtendedHours === true).length;
+
+    console.log('Results:', {
+      totalCount: data?.totalCount || 0,
+      edgeCount: edges.length,
+      extendedHoursInResponse: extendedCount,
+    });
+
+    if (extendedCount > 0) {
+      console.log('⚠️  WARNING: Extended hours candles still present when includeExtendedHours=false');
+      console.log('   Backend is NOT filtering extended hours data');
+    } else {
+      console.log('✅ No extended hours candles in response (filtering works)');
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+
+  // Test 3: Corporate actions (splits and dividends)
+  console.log('\n--- Test 3: Daily data with corporate actions ---');
+  try {
+    const result = await sendQuery(ws, 'corp1', CORPORATE_ACTIONS_QUERY, {
+      symbol,
+      first: 500, // ~2 years of daily data
+    });
+    const data = result?.data?.stockPriceConnection;
+    const edges = data?.edges || [];
+    const dividends = edges.filter(e => e.node.dividendAmount && e.node.dividendAmount > 0);
+    const splits = edges.filter(e => e.node.splitCoefficient && e.node.splitCoefficient !== 1.0);
+
+    console.log('Results:', {
+      totalCount: data?.totalCount || 0,
+      edgeCount: edges.length,
+      dividendDays: dividends.length,
+      splitDays: splits.length,
+    });
+
+    if (dividends.length > 0) {
+      console.log('✅ Dividend data found');
+      console.log('Recent dividends:', dividends.slice(0, 3).map(e => ({
+        date: e.node.date,
+        amount: e.node.dividendAmount,
+      })));
+    } else {
+      console.log('⚠️  WARNING: No dividends found - dividendAmount field may not be populated');
+    }
+
+    if (splits.length > 0) {
+      console.log('✅ Split data found');
+      console.log('Splits:', splits.map(e => ({
+        date: e.node.date,
+        coefficient: e.node.splitCoefficient,
+      })));
+    } else {
+      console.log('ℹ️  No splits found (may be expected for this symbol/period)');
+    }
+
+    // Check adjusted vs raw close
+    if (edges.length > 0) {
+      const oldest = edges[edges.length - 1]?.node;
+      const newest = edges[0]?.node;
+      console.log('\nPrice comparison (for dividend adjustment validation):');
+      console.log('Newest:', { date: newest?.date, close: newest?.close, adjustedClose: newest?.adjustedClose });
+      console.log('Oldest:', { date: oldest?.date, close: oldest?.close, adjustedClose: oldest?.adjustedClose });
+      if (oldest?.adjustedClose && oldest?.close) {
+        const diff = ((oldest.close - oldest.adjustedClose) / oldest.close * 100).toFixed(2);
+        console.log(`Adjustment difference: ${diff}% (positive = dividends reduce adjusted price)`);
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+
+  console.log('\n=== Extended Hours & Corporate Actions Test Complete ===');
+}
+
 // Main
 async function runTests(testType) {
   console.log('=== WebSocket GraphQL Test Suite ===\n');
@@ -1215,6 +1391,10 @@ async function runTests(testType) {
       case 'fetchtest':
         // Test fetch behavior when data doesn't exist
         await testFetchBehavior(ws, process.argv[3] || 'COST', process.argv[4] || 'HOURLY');
+        break;
+      case 'exthours':
+        // Test extended hours and corporate actions data
+        await testExtendedHoursAndCorporateActions(ws, process.argv[3] || 'MSFT');
         break;
       case 'all':
       default:

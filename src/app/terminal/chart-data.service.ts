@@ -19,6 +19,7 @@ const STOCK_PRICE_CONNECTION = gql`
     $includeExtendedHours: Boolean
     $adjustForDividends: Boolean
     $includeRawData: Boolean
+    $adjustSpikes: Boolean
   ) {
     stockPriceConnection(
       symbol: $symbol
@@ -30,6 +31,7 @@ const STOCK_PRICE_CONNECTION = gql`
       includeExtendedHours: $includeExtendedHours
       adjustForDividends: $adjustForDividends
       includeRawData: $includeRawData
+      adjustSpikes: $adjustSpikes
     ) {
       edges {
         node {
@@ -100,6 +102,7 @@ const CHART_DATA_RANGE = gql`
     $includeExtendedHours: Boolean
     $adjustForDividends: Boolean
     $includeRawData: Boolean
+    $adjustSpikes: Boolean
   ) {
     chartDataRange(
       symbol: $symbol
@@ -110,6 +113,7 @@ const CHART_DATA_RANGE = gql`
       includeExtendedHours: $includeExtendedHours
       adjustForDividends: $adjustForDividends
       includeRawData: $includeRawData
+      adjustSpikes: $adjustSpikes
     ) {
       edges {
         node {
@@ -212,6 +216,8 @@ export interface ChartDataOptions {
   adjustForDividends?: boolean;
   /** Include raw data without anomaly filtering */
   includeRawData?: boolean;
+  /** Adjust spike anomalies to use normalized OHLC values (default: true) */
+  adjustSpikes?: boolean;
 }
 
 interface StockPriceNode {
@@ -326,17 +332,34 @@ export class ChartDataService implements OnDestroy {
           includeExtendedHours: options?.includeExtendedHours ?? false,
           adjustForDividends: options?.adjustForDividends ?? false,
           includeRawData: options?.includeRawData ?? false,
+          adjustSpikes: options?.adjustSpikes ?? true, // Default to true to normalize anomalies
         },
         fetchPolicy: 'network-only',
       })
       .pipe(
         tap((result) => {
-          console.log('[ChartDataService] Raw GraphQL result:', {
-            symbol,
-            interval,
-            totalCount: result.data?.stockPriceConnection?.totalCount,
-            edgeCount: result.data?.stockPriceConnection?.edges?.length,
-          });
+          const edges = result.data?.stockPriceConnection?.edges || [];
+          const extendedHoursCount = edges.filter((e) => e.node.isExtendedHours === true).length;
+          const hasExtendedHoursField = edges.some((e) => typeof e.node.isExtendedHours === 'boolean');
+          console.log(
+            '[ChartDataService] GraphQL result:',
+            JSON.stringify({
+              symbol,
+              interval,
+              totalCount: result.data?.stockPriceConnection?.totalCount,
+              edgeCount: edges.length,
+              extendedHoursCount,
+              hasExtendedHoursField,
+              sampleNode: edges[0]?.node
+                ? {
+                    date: edges[0].node.date,
+                    isExtendedHours: edges[0].node.isExtendedHours,
+                    splitCoefficient: edges[0].node.splitCoefficient,
+                    dividendAmount: edges[0].node.dividendAmount,
+                  }
+                : null,
+            }),
+          );
         }),
         map((result) => this.transformToChartData(result.data.stockPriceConnection)),
         tap((data) => {

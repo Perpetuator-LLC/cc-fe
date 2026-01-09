@@ -466,31 +466,78 @@
                   </button>
                   <mat-menu #chartSettingsMenu="matMenu" class="chart-settings-menu">
                     <div class="menu-section-label">Display</div>
-                    <div mat-menu-item (click)="$event.stopPropagation()">
-                      <mat-slide-toggle [checked]="showCorporateActions()" (change)="toggleCorporateActions()">
+                    <div
+                      mat-menu-item
+                      (click)="$event.stopPropagation()"
+                      [class.disabled-option]="!isCurrentIntervalDailyOrLonger()"
+                      [matTooltip]="
+                        isCurrentIntervalDailyOrLonger()
+                          ? 'Show dividend and stock split markers on the chart'
+                          : 'Only available on Daily, Weekly, and Monthly charts'
+                      "
+                    >
+                      <mat-slide-toggle
+                        [checked]="showCorporateActions()"
+                        [disabled]="!isCurrentIntervalDailyOrLonger()"
+                        (change)="toggleCorporateActions()"
+                      >
                         Splits &amp; Dividends
                       </mat-slide-toggle>
                     </div>
                     <mat-divider />
                     <div class="menu-section-label">Time &amp; Hours</div>
-                    <div mat-menu-item (click)="$event.stopPropagation()">
-                      <mat-slide-toggle [checked]="showLocalTime()" (change)="toggleLocalTime()">
+                    <div
+                      mat-menu-item
+                      (click)="$event.stopPropagation()"
+                      [class.disabled-option]="!isCurrentIntervalIntraday()"
+                      [matTooltip]="
+                        isCurrentIntervalIntraday()
+                          ? 'Show times in your local timezone instead of market time (ET)'
+                          : 'Only affects intraday charts (1min, 5min, 15min, 30min, hourly)'
+                      "
+                    >
+                      <mat-slide-toggle
+                        [checked]="showLocalTime()"
+                        [disabled]="!isCurrentIntervalIntraday()"
+                        (change)="toggleLocalTime()"
+                      >
                         Local Time
                       </mat-slide-toggle>
                     </div>
-                    <div mat-menu-item (click)="$event.stopPropagation()">
-                      <mat-slide-toggle [checked]="showExtendedHours()" (change)="toggleExtendedHours()">
+                    <div
+                      mat-menu-item
+                      (click)="$event.stopPropagation()"
+                      [class.disabled-option]="!isCurrentIntervalIntraday()"
+                      [matTooltip]="
+                        isCurrentIntervalIntraday()
+                          ? 'Include pre-market (4AM-9:30AM ET) and after-hours (4PM-8PM ET) trading data'
+                          : 'Only available on intraday charts (1min, 5min, 15min, 30min, hourly)'
+                      "
+                    >
+                      <mat-slide-toggle
+                        [checked]="showExtendedHours()"
+                        [disabled]="!isCurrentIntervalIntraday()"
+                        (change)="toggleExtendedHours()"
+                      >
                         Extended Hours
                       </mat-slide-toggle>
                     </div>
                     <mat-divider />
                     <div class="menu-section-label">Data</div>
-                    <div mat-menu-item (click)="$event.stopPropagation()">
+                    <div
+                      mat-menu-item
+                      (click)="$event.stopPropagation()"
+                      matTooltip="Show total return by adjusting historical prices as if dividends were reinvested"
+                    >
                       <mat-slide-toggle [checked]="showDividendsReinvested()" (change)="toggleDividendsReinvested()">
                         Dividends Reinvested
                       </mat-slide-toggle>
                     </div>
-                    <div mat-menu-item (click)="$event.stopPropagation()">
+                    <div
+                      mat-menu-item
+                      (click)="$event.stopPropagation()"
+                      matTooltip="Show raw market data including extreme wicks and anomalies (useful for analysis)"
+                    >
                       <mat-slide-toggle [checked]="showRawData()" (change)="toggleRawData()">
                         Show Raw Data
                       </mat-slide-toggle>

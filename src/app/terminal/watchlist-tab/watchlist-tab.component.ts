@@ -154,6 +154,27 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   showCorporateActions = signal(true); // Show splits/dividends markers on chart (default: true)
   lockToRight = signal(true); // Lock chart to show most recent data on right edge
 
+  // Computed: Check if current interval is intraday (for enabling/disabling certain options)
+  isCurrentIntervalIntraday = computed(() => {
+    const interval = this.selectedInterval().toLowerCase();
+    return (
+      interval.includes('min') ||
+      interval.includes('hour') ||
+      interval === '60min' ||
+      interval === 'min_1' ||
+      interval === 'min_5' ||
+      interval === 'min_15' ||
+      interval === 'min_30' ||
+      interval === 'min_60'
+    );
+  });
+
+  // Computed: Check if current interval is daily or longer (for corporate actions)
+  isCurrentIntervalDailyOrLonger = computed(() => {
+    const interval = this.selectedInterval().toLowerCase();
+    return interval === 'daily' || interval === 'weekly' || interval === 'monthly';
+  });
+
   // Progressive data loading state
   loadingMoreData = signal(false);
   // Raw candle data for progressive loading (separate from ECharts options)
@@ -1719,6 +1740,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const candlestickData = candles.map((c) => [c.open, c.close, c.low, c.high]);
     // Use ISO dates for proper parsing in axis labels and crosshair
     const xAxisData = candles.map((c) => c.date.toISOString());
+    // Build volume data with colors based on candle direction
+    const volumeData = candles.map((c) => ({
+      value: c.volume || 0,
+      itemStyle: {
+        color: c.close >= c.open ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)',
+      },
+    }));
 
     // Calculate new zoom position to maintain the same visible data range
     const newDataCount = candles.length;
@@ -1760,16 +1788,28 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Set flag to prevent datazoom event handler from interfering with our explicit zoom
     this.isCorrectingZoom = true;
 
-    // Update the data and zoom - only update the candlestick series (index 0)
-    // Note: The chart only has one series (candlestick) created by buildChartFromCandles
-    this.chartInstance.setOption(
-      {
-        xAxis: { data: xAxisData },
-        series: [{ data: candlestickData }],
-        dataZoom: [{ start: newStart, end: newEnd }],
-      },
-      { notMerge: false, lazyUpdate: false },
-    );
+    // Check if we have volume series (dual-chart mode)
+    const currentSeries = instanceOption.series;
+    const hasVolumeSeries = Array.isArray(currentSeries) && currentSeries.length > 1;
+
+    // Update the data and zoom
+    // When volume is shown, we have 2 x-axes and 2 series that need updating
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateOption: any = {
+      dataZoom: [{ start: newStart, end: newEnd }],
+    };
+
+    if (hasVolumeSeries) {
+      // Dual-chart mode: update both x-axes and both series
+      updateOption.xAxis = [{ data: xAxisData }, { data: xAxisData }];
+      updateOption.series = [{ data: candlestickData }, { data: volumeData }];
+    } else {
+      // Single chart mode: update only candlestick
+      updateOption.xAxis = { data: xAxisData };
+      updateOption.series = [{ data: candlestickData }];
+    }
+
+    this.chartInstance.setOption(updateOption, { notMerge: false, lazyUpdate: false });
 
     // Reset flag after a brief delay to allow the zoom to complete
     setTimeout(() => {
@@ -2547,6 +2587,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const interval = this.selectedInterval();
     const showCorporateActions = this.showCorporateActions();
     const lockToRight = this.lockToRight();
+    const showExtendedHours = this.showExtendedHours();
 
     console.log('[WatchlistTab] buildChartFromCandles:', {
       symbol,
@@ -2554,12 +2595,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       candleCount: candles.length,
       showCorporateActions,
       lockToRight,
+      showExtendedHours,
     });
 
     // Use ChartConfigService for consistent chart building and theming
     const options = this.chartConfigService.buildChartFromCandles(candles, symbol, interval, {
       showCorporateActions,
       lockToRight,
+      showVolume: true, // Always show volume when data is available
+      showExtendedHoursBackground: showExtendedHours, // Show gray background when extended hours enabled
     });
     this.chartOptions.set(options);
   }
@@ -2727,25 +2771,49 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   toggleLocalTime(): void {
     this.showLocalTime.update((v) => !v);
+    const newValue = this.showLocalTime();
+    console.log(
+      '[WatchlistTab] toggleLocalTime:',
+      JSON.stringify({
+        showLocalTime: newValue,
+        chartConfigValueBefore: this.chartConfigService.useLocalTime(),
+      }),
+    );
     // Sync with chartConfigService for axis label formatting
-    this.chartConfigService.useLocalTime.set(this.showLocalTime());
+    this.chartConfigService.useLocalTime.set(newValue);
+    console.log(
+      '[WatchlistTab] After sync:',
+      JSON.stringify({ chartConfigValue: this.chartConfigService.useLocalTime() }),
+    );
     // Re-render chart with new time zone setting
     this.rebuildChartForTimezone();
     // Persist setting - note: useExchangeTime is the inverse of showLocalTime
-    this.saveChartPreference('useExchangeTime', !this.showLocalTime());
+    this.saveChartPreference('useExchangeTime', !newValue);
   }
 
   /**
    * Rebuild the chart to apply new timezone setting.
    * This updates the axis labels without re-fetching data.
+   * Uses notMerge: true to force complete re-render of axis labels.
    */
   private rebuildChartForTimezone(): void {
     const candles = this.rawCandleData();
     const symbol = this.selectedSymbol();
     if (!candles.length || !symbol) return;
 
-    // Rebuild chart with current data (axis formatters will use new timezone)
+    // Force chart re-render: clear instance first, then rebuild
+    // This ensures the axis formatters are completely recreated
+    if (this.chartInstance) {
+      this.chartInstance.clear();
+    }
+
+    // Rebuild chart options with current data (axis formatters will use new timezone)
     this.buildChartFromCandles(candles, symbol);
+
+    // Force complete re-render with notMerge to ensure axis formatters are recreated
+    if (this.chartInstance && this.chartOptions()) {
+      this.chartInstance.setOption(this.chartOptions(), { notMerge: true, replaceMerge: ['xAxis', 'yAxis', 'series'] });
+    }
   }
 
   toggleExtendedHours(): void {
