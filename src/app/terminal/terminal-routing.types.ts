@@ -217,7 +217,7 @@ export function routeToQueryParams(route: RouteInfo): Record<string, string> {
   if (route.exchange) params[ROUTE_QUERY_PARAMS.EXCHANGE] = route.exchange;
   if (route.view) params[ROUTE_QUERY_PARAMS.VIEW] = route.view;
   if (route.interval) params[ROUTE_QUERY_PARAMS.INTERVAL] = route.interval;
-  if (route.period) params[ROUTE_QUERY_PARAMS.PERIOD] = route.period;
+  // Note: period is intentionally excluded - chart data uses 'first' (record count) instead
   if (route.watchlistId) params[ROUTE_QUERY_PARAMS.WATCHLIST] = route.watchlistId;
   if (route.dashboardId) params[ROUTE_QUERY_PARAMS.DASHBOARD] = route.dashboardId;
 
