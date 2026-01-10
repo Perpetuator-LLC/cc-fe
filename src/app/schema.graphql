@@ -2619,6 +2619,11 @@ type StockPriceNode {
 
   """True if a dividend was paid on this date"""
   isDividend: Boolean
+
+  """
+  Quality filter flags bitfield: 1=extended hours, 2=extreme wick, 4=volume anomaly, 8=price gap
+  """
+  filterFlags: Int
 }
 
 """Pagination info for stock price connection."""
@@ -3498,6 +3503,11 @@ type Mutation {
 
     """Price interval"""
     interval: StockPriceInterval = DAILY
+
+    """
+    Extended intraday: Specific month to fetch (format: YYYY-MM). Use this to get historical intraday data beyond the default 30-day window.
+    """
+    month: String
 
     """Start date in YYYY-MM-DD format"""
     startDate: String
