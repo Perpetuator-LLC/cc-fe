@@ -491,6 +491,74 @@ async function testStockPriceConnection(ws, symbol = 'AAPL', interval = 'DAILY')
   }
 }
 
+/**
+ * Test cursor chain pagination for hourly data - verifies endCursor is properly returned
+ * for each page to enable continued pagination.
+ */
+async function testHourlyCursorChain(ws, symbol = 'MSFT') {
+  console.log(`\n--- Testing Hourly Cursor Chain for ${symbol} ---`);
+
+  try {
+    let step = 1;
+    let cursor = null;
+    const results = [];
+
+    // Load up to 4 pages
+    while (step <= 4) {
+      console.log(`\nStep ${step}: Loading ${cursor ? 'older' : 'initial'} hourly data...`);
+
+      const variables = { symbol, interval: 'MIN_60', first: 50 };
+      if (cursor) variables.before = cursor;
+
+      const result = await sendQuery(ws, `hcc${step}`, STOCK_PRICE_CONNECTION, variables);
+      const data = result?.data?.stockPriceConnection;
+
+      if (!data) {
+        console.log(`  ERROR: No data returned`);
+        break;
+      }
+
+      const pi = data.pageInfo || {};
+      const edgeCount = data.edges?.length || 0;
+      const oldestDate = edgeCount > 0 ? data.edges[edgeCount - 1]?.node?.date : null;
+      const newestDate = edgeCount > 0 ? data.edges[0]?.node?.date : null;
+
+      results.push({
+        step,
+        edges: edgeCount,
+        hasOlderData: pi.hasOlderData,
+        endCursor: pi.endCursor ? pi.endCursor.substring(0, 30) + '...' : 'NULL',
+        oldestDate,
+        newestDate
+      });
+
+      console.log(`  Edges: ${edgeCount}`);
+      console.log(`  hasOlderData: ${pi.hasOlderData}`);
+      console.log(`  endCursor: ${pi.endCursor ? pi.endCursor.substring(0, 30) + '...' : 'NULL'}`);
+      console.log(`  Date range: ${oldestDate} to ${newestDate}`);
+
+      if (!pi.endCursor || !pi.hasOlderData) {
+        console.log(`\nStopped: ${!pi.endCursor ? 'No endCursor' : 'No more data'}`);
+        break;
+      }
+
+      cursor = pi.endCursor;
+      step++;
+    }
+
+    console.log('\n=== Cursor Chain Summary ===');
+    results.forEach(r => {
+      console.log(`Step ${r.step}: ${r.edges} edges, hasOlder=${r.hasOlderData}, cursor=${r.endCursor}`);
+    });
+
+    const success = results.length > 1 && results.every(r => r.endCursor !== 'NULL' || !r.hasOlderData);
+    printTestResults(`Hourly Cursor Chain ${symbol}`, success, { steps: results.length, results });
+
+  } catch (error) {
+    printTestResults(`Hourly Cursor Chain ${symbol}`, false, { error: String(error) });
+  }
+}
+
 async function testProgressiveLoading(ws, symbol = 'AAPL') {
   console.log(`\n--- Testing Progressive Loading for ${symbol} ---`);
 
@@ -1395,6 +1463,10 @@ async function runTests(testType) {
       case 'exthours':
         // Test extended hours and corporate actions data
         await testExtendedHoursAndCorporateActions(ws, process.argv[3] || 'MSFT');
+        break;
+      case 'cursorchain':
+        // Test cursor chain for hourly pagination
+        await testHourlyCursorChain(ws, process.argv[3] || 'MSFT');
         break;
       case 'all':
       default:

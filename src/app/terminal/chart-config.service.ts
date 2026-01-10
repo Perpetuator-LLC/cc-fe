@@ -945,57 +945,45 @@ export class ChartConfigService {
 
   /**
    * Format date label for crosshair/axisPointer (fuller format than axis label)
-   * Shows date in human-readable format: "Jan 2, 2026" or "Jan 2, 2026 09:30" for intraday
+   * Shows date in human-readable format: "Jan 2, 2026" or "Jan 2, 2026 09:30 AM ET" for intraday
+   * Respects useLocalTime setting for timezone display
    */
   formatCrosshairDateLabel(value: string): string {
     try {
       // Handle case where value might already be formatted or empty
       if (!value || typeof value !== 'string') return String(value);
 
-      // Extract date portion from ISO string to avoid timezone shift
-      const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})(T(\d{2}):(\d{2}))?/);
-      if (dateMatch) {
-        const [, year, month, day, , hour, minute] = dateMatch;
-        const date = new Date(
-          Date.UTC(
-            parseInt(year),
-            parseInt(month) - 1,
-            parseInt(day),
-            hour ? parseInt(hour) : 12,
-            minute ? parseInt(minute) : 0,
-            0,
-          ),
-        );
+      const useLocal = this.useLocalTime();
+      const timeZone = useLocal ? undefined : 'America/New_York';
 
-        // If we have time info (intraday), include it
-        if (hour && minute) {
-          return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            timeZone: 'UTC',
-          });
-        }
-
-        // Daily/weekly/monthly - just show date
-        return date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          timeZone: 'UTC',
-        });
-      }
-
+      // Parse the ISO date
       const date = new Date(value);
       if (isNaN(date.getTime())) return value;
 
-      // Fallback format
+      // Check if this is intraday data (has meaningful time component)
+      const hasTime = value.includes('T') && !value.endsWith('T00:00:00.000Z');
+
+      if (hasTime) {
+        // Intraday - show full date with time
+        const formatted = date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone,
+        });
+        // Add timezone suffix when using exchange time
+        return useLocal ? formatted : `${formatted} ET`;
+      }
+
+      // Daily/weekly/monthly - just show date in ET (exchange time)
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'America/New_York',
       });
     } catch {
       return String(value);
