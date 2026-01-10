@@ -35,7 +35,7 @@ import { marked } from 'marked';
 import { WatchlistService, StockListing } from '../watchlist.service';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
-import { ChartDataService, ChartCandle, PageInfo, ChartInterval } from '../chart-data.service';
+import { ChartDataService, ChartCandle, PageInfo, ChartInterval, ChartDataResult } from '../chart-data.service';
 import { ChartConfigService } from '../chart-config.service';
 import { CommandResult, ChartResultData, ChartControls, TableData, SymbolUpdate } from '../terminal.types';
 import { DataTableComponent } from '../data-table/data-table.component';
@@ -43,6 +43,8 @@ import { TerminalRoutingService } from '../terminal-routing.service';
 import { RouteInfo } from '../terminal-routing.types';
 import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
 import { ChartPreferencesService } from '../chart-preferences.service';
+import { FundamentalsService, FundamentalsData } from '../fundamentals.service';
+import { FundamentalsChartService } from '../fundamentals-chart.service';
 
 // Register required ECharts components
 echarts.use([
@@ -155,6 +157,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   showCorporateActions = signal(true); // Show splits/dividends markers on chart (default: true)
   lockToRight = signal(true); // Lock chart to show most recent data on right edge
 
+  // Fundamentals view state
+  showFundamentals = signal(false);
+  fundamentalsIsAnnual = signal(true);
+  fundamentalsCharts = signal<{
+    incomeStatement: EChartsOption;
+    balanceSheet: EChartsOption;
+    cashFlow: EChartsOption;
+    margins: EChartsOption;
+  } | null>(null);
+
   // Computed: Check if current interval is intraday (for enabling/disabling certain options)
   isCurrentIntervalIntraday = computed(() => {
     const interval = this.selectedInterval().toLowerCase();
@@ -186,6 +198,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   hasOlderData = signal(true);
   // Track if user is at the left edge of the chart (for showing "no more data" hint)
   atLeftEdge = signal(false);
+  // Track pending progressive load job - when this completes, we should retry loading
+  private pendingProgressiveJobId: string | null = null;
+  // Track last cursor used for progressive loading - to detect if backend returns same cursor
+  private lastProgressiveCursor: string | null = null;
+  // Count retries with same cursor to prevent infinite loops (max 3 retries)
+  private sameCursorRetryCount = 0;
+  private static readonly MAX_SAME_CURSOR_RETRIES = 3;
   // Flag to prevent re-entrance during zoom correction
   private isCorrectingZoom = false;
 
@@ -563,6 +582,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private routingService: TerminalRoutingService,
     private jobsWsService: JobsWebSocketService,
     private chartPreferencesService: ChartPreferencesService,
+    private fundamentalsService: FundamentalsService,
+    private fundamentalsChartService: FundamentalsChartService,
     private route: ActivatedRoute,
   ) {}
 
@@ -571,6 +592,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.loadData();
     this.subscribeToCommandResults();
     this.subscribeToSymbolUpdates();
+    this.subscribeToProgressiveJobEvents();
     this.setupSymbolSearch();
     this.restoreStateFromUrl();
     this.subscribeToRouteChanges();
@@ -603,8 +625,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       if (state.interval) {
         this.selectedInterval.set(state.interval);
       }
-      // Load the chart for the symbol from URL
-      this.loadChart(state.symbol, state.exchange || undefined, 'CHART');
+      // Determine command based on view parameter
+      let command = 'CHART';
+      if (state.view === 'fundamentals') {
+        command = 'FUNDAMENTALS';
+      } else if (state.view === 'info') {
+        command = 'DES';
+      } else if (state.view === 'history') {
+        command = 'HP';
+      }
+      // Load the view for the symbol from URL
+      this.loadChart(state.symbol, state.exchange || undefined, command);
     }
   }
 
@@ -622,25 +653,38 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           const symbol = params['symbol'];
           const exchange = params['exchange'];
           const interval = params['interval'];
+          const view = params['view'];
 
           if (symbol) {
             const currentSymbol = this.selectedSymbol();
             const currentInterval = this.selectedInterval();
+            const currentCommand = this.currentCommand();
+
+            // Determine command from view
+            let command = 'CHART';
+            if (view === 'fundamentals') {
+              command = 'FUNDAMENTALS';
+            } else if (view === 'info') {
+              command = 'DES';
+            } else if (view === 'history') {
+              command = 'HP';
+            }
 
             // Only reload if something changed
-            if (symbol !== currentSymbol || interval !== currentInterval) {
-              console.log('[WatchlistTab] Route changed, reloading chart:', { symbol, exchange, interval });
+            const viewChanged = command !== currentCommand;
+            if (symbol !== currentSymbol || interval !== currentInterval || viewChanged) {
+              console.log('[WatchlistTab] Route changed, reloading:', { symbol, exchange, interval, view, command });
               // Update interval if provided
               if (interval && interval !== currentInterval) {
                 this.selectedInterval.set(interval);
               }
               // Update routing service state without updating URL (to avoid loop)
               this.routingService.applyRoute(
-                { symbol, exchange, interval: interval as RouteInfo['interval'] },
+                { symbol, exchange, interval: interval as RouteInfo['interval'], view: view as RouteInfo['view'] },
                 { updateUrl: false, silent: true },
               );
-              // Load the chart
-              this.loadChart(symbol, exchange, 'CHART');
+              // Load the view
+              this.loadChart(symbol, exchange, command);
             }
           }
         }),
@@ -761,6 +805,49 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Load exchanges from backend
     this.subscriptions.add(this.watchlistService.loadExchanges().subscribe());
+  }
+
+  /**
+   * Subscribe to job events to track background data fetches during progressive loading.
+   * When a job completes, we retry loading older data to get the newly fetched data.
+   */
+  private subscribeToProgressiveJobEvents(): void {
+    // Track job created events - these occur when backend needs to fetch more data
+    this.subscriptions.add(
+      this.terminalWsService.onJobCreated.subscribe((job) => {
+        // Store the job ID so we can detect when it completes
+        if (job?.uuid && job.kind === 'fetch_stock_prices') {
+          console.log('[WatchlistTab] Progressive job created:', job.uuid);
+          this.pendingProgressiveJobId = job.uuid;
+        }
+      }),
+    );
+
+    // When a progressive job completes, retry loading to get new data
+    this.subscriptions.add(
+      this.terminalWsService.onJobCompleted.subscribe((job) => {
+        if (job?.uuid && job.uuid === this.pendingProgressiveJobId) {
+          console.log('[WatchlistTab] Progressive job completed, triggering retry:', job.uuid);
+          this.pendingProgressiveJobId = null;
+          // Retry progressive loading after a short delay to let DB commit
+          setTimeout(() => {
+            if (this.hasOlderData() && !this.loadingMoreData()) {
+              this.loadOlderChartData();
+            }
+          }, 500);
+        }
+      }),
+    );
+
+    // Clear pending job on failure
+    this.subscriptions.add(
+      this.terminalWsService.onJobFailed.subscribe((job) => {
+        if (job?.uuid && job.uuid === this.pendingProgressiveJobId) {
+          console.log('[WatchlistTab] Progressive job failed:', job.uuid);
+          this.pendingProgressiveJobId = null;
+        }
+      }),
+    );
   }
 
   /**
@@ -892,7 +979,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
               // Reset progressive loading state for new chart
               this.hasOlderData.set(true);
-              this.chartPageInfo.set(null);
+              this.sameCursorRetryCount = 0;
+              this.lastProgressiveCursor = null;
+              this.pendingProgressiveJobId = null;
+              // Don't set chartPageInfo to null - fetch it from GraphQL for cursor-based pagination
+              this.fetchChartPageInfo(chartSymbol);
 
               // Always refresh quote when chart loads - ensures quote data is up-to-date
               if (chartSymbol) {
@@ -1321,6 +1412,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.atLeftEdge.set(false);
     this.rawCandleData.set([]);
     this.chartPageInfo.set(null);
+    this.sameCursorRetryCount = 0;
+    this.lastProgressiveCursor = null;
+    this.pendingProgressiveJobId = null;
 
     // Subscribe to real-time updates for this symbol
     this.terminalService.subscribeSymbols([item.symbol]);
@@ -1407,7 +1501,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartError.set(null);
     this.dataContent.set(null);
     this.tableData.set(null);
+    this.showFundamentals.set(false);
+    this.fundamentalsCharts.set(null);
     this.currentCommand.set(command);
+
+    // Handle FUNDAMENTALS command directly (no backend execution needed)
+    if (command === 'FUNDAMENTALS') {
+      this.loadFundamentalsView(symbol);
+      return;
+    }
 
     // Build FQN command
     const symbolFqn = `STOCK:${(exchange || 'UNKNOWN').toUpperCase()}:${symbol.toUpperCase()}`;
@@ -1425,6 +1527,96 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     console.log('[WatchlistTab] Executing FQN command:', fullCommand);
     this.terminalService.execute(fullCommand);
+  }
+
+  /**
+   * Load fundamentals view for a symbol
+   */
+  private loadFundamentalsView(symbol: string): void {
+    console.log('[WatchlistTab] Loading fundamentals for:', symbol);
+    this.showFundamentals.set(true);
+
+    // Update URL to reflect fundamentals view
+    const item = this.selectedItem();
+    this.routingService.applyRoute({
+      symbol,
+      exchange: item?.exchange,
+      view: 'fundamentals',
+    });
+
+    const isAnnual = this.fundamentalsIsAnnual();
+
+    this.subscriptions.add(
+      this.fundamentalsService.loadFundamentals(symbol, isAnnual, 10).subscribe({
+        next: (data: FundamentalsData) => {
+          console.log('[WatchlistTab] Fundamentals loaded:', {
+            balanceSheets: data.balanceSheets.length,
+            incomeStatements: data.incomeStatements.length,
+            cashFlows: data.cashFlows.length,
+          });
+
+          if (data.balanceSheets.length === 0 && data.incomeStatements.length === 0 && data.cashFlows.length === 0) {
+            // No data - trigger fetch from provider
+            console.log('[WatchlistTab] No fundamentals data, fetching from provider...');
+            this.fetchAndLoadFundamentals(symbol);
+          } else {
+            // Build charts from data
+            const charts = this.fundamentalsChartService.buildAllCharts(data);
+            this.fundamentalsCharts.set(charts);
+            this.chartLoading.set(false);
+          }
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Error loading fundamentals:', err);
+          this.chartError.set('Failed to load fundamentals data');
+          this.chartLoading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Fetch fundamentals from provider and reload
+   */
+  private fetchAndLoadFundamentals(symbol: string): void {
+    this.subscriptions.add(
+      this.fundamentalsService.fetchFundamentalsFromProvider(symbol).subscribe({
+        next: (result) => {
+          if (result.success && result.jobIds.length > 0) {
+            // Wait for jobs to complete then reload
+            console.log('[WatchlistTab] Fundamentals fetch jobs started:', result.jobIds);
+            this.chartLoadingDetails.set('Fetching fundamentals data...');
+
+            // Wait 5 seconds then retry loading (jobs typically complete quickly)
+            setTimeout(() => {
+              this.loadFundamentalsView(symbol);
+            }, 5000);
+          } else {
+            this.chartError.set('Failed to fetch fundamentals data');
+            this.chartLoading.set(false);
+          }
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Error fetching fundamentals:', err);
+          this.chartError.set('Failed to fetch fundamentals data');
+          this.chartLoading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Toggle fundamentals period between annual and quarterly
+   */
+  toggleFundamentalsPeriod(): void {
+    const newIsAnnual = !this.fundamentalsIsAnnual();
+    this.fundamentalsIsAnnual.set(newIsAnnual);
+
+    const symbol = this.selectedSymbol();
+    if (symbol) {
+      this.chartLoading.set(true);
+      this.loadFundamentalsView(symbol);
+    }
   }
 
   /**
@@ -1660,8 +1852,21 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Trigger loading when showing data from the left 30% of the chart
     // This gives ample buffer to load data before user sees empty space
     const loadThreshold = 30;
+    const pageInfo = this.chartPageInfo();
+    const hasOlder = this.hasOlderData();
+    const isLoading = this.loadingMoreData();
 
-    if (startPercent <= loadThreshold && !this.loadingMoreData() && this.hasOlderData()) {
+    // Debug logging
+    console.log('[WatchlistTab] checkProgressiveDataLoad:', {
+      startPercent,
+      threshold: loadThreshold,
+      hasOlderData: hasOlder,
+      loadingMoreData: isLoading,
+      hasEndCursor: !!pageInfo?.endCursor,
+      interval: this.selectedInterval(),
+    });
+
+    if (startPercent <= loadThreshold && !isLoading && hasOlder) {
       console.log(
         '[WatchlistTab] Triggering progressive data load at',
         startPercent,
@@ -1675,12 +1880,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   /**
    * Load older historical data when user zooms out.
-   * Data is prepended to the chart, maintaining the user's current view position.
+   * Uses Relay cursor pagination when available, falls back to date range.
+   * Backend should auto-fetch from Alpha Vantage if data is missing.
    */
   private loadOlderChartData(): void {
     const symbol = this.selectedSymbol();
     const candles = this.rawCandleData();
     const item = this.selectedItem();
+    const pageInfo = this.chartPageInfo();
 
     if (!symbol || candles.length === 0) {
       console.log('[WatchlistTab] Cannot load older data: no symbol or candles');
@@ -1689,68 +1896,153 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     this.loadingMoreData.set(true);
 
-    // Get the oldest candle date as the end date for the new fetch
-    // Candles are sorted by date ascending (oldest first), so first element is oldest
-    const oldestCandle = candles[0];
-    const endDate = new Date(oldestCandle.date);
-
-    // Calculate start date based on interval (go back 1 year for daily)
-    const startDate = new Date(endDate);
     const interval = this.selectedInterval();
     const backendInterval = this.mapIntervalToBackend(interval);
-
-    console.log('[WatchlistTab] loadOlderChartData interval mapping:', {
-      rawInterval: interval,
-      backendInterval,
-      isIntraday: this.isIntradayInterval(backendInterval),
-    });
-
-    // Adjust fetch range based on interval
-    if (backendInterval === 'DAILY') {
-      startDate.setFullYear(startDate.getFullYear() - 1);
-    } else if (backendInterval === 'WEEKLY') {
-      startDate.setFullYear(startDate.getFullYear() - 2);
-    } else if (backendInterval === 'MONTHLY') {
-      startDate.setFullYear(startDate.getFullYear() - 5);
-    } else {
-      // Intraday - go back 1 month
-      startDate.setMonth(startDate.getMonth() - 1);
-    }
-
-    // Build FQN if we have exchange info
     const fqn = item?.exchange ? `STOCK:${item.exchange.toUpperCase()}:${symbol.toUpperCase()}` : undefined;
 
-    console.log('[WatchlistTab] Loading older data:', { symbol, startDate, endDate, interval: backendInterval, fqn });
+    // Prefer cursor-based pagination if we have an endCursor
+    if (pageInfo?.endCursor) {
+      console.log('[WatchlistTab] Using cursor-based pagination:', {
+        symbol,
+        interval: backendInterval,
+        cursor: pageInfo.endCursor.substring(0, 30) + '...',
+        currentHasOlderData: pageInfo.hasOlderData,
+      });
 
-    this.subscriptions.add(
-      this.chartDataService.loadDataByRange(symbol, startDate, endDate, backendInterval, fqn).subscribe({
-        next: (result) => {
-          console.log('[WatchlistTab] Received older data:', result.candles.length, 'candles');
+      this.subscriptions.add(
+        this.chartDataService.loadOlderData(symbol, backendInterval, pageInfo.endCursor, undefined, fqn).subscribe({
+          next: (result) => this.handleOlderDataResult(result, candles, backendInterval),
+          error: (err) => {
+            console.error('[WatchlistTab] Failed to load older data:', err);
+            this.loadingMoreData.set(false);
+          },
+        }),
+      );
+    } else {
+      // Fallback to date-range based loading
+      console.log('[WatchlistTab] No endCursor available, falling back to date-range loading. pageInfo:', pageInfo);
+      const oldestCandle = candles[0];
+      const endDate = new Date(oldestCandle.date);
+      const startDate = new Date(endDate);
 
-          if (result.candles.length > 0) {
-            // Merge with existing candles (avoid duplicates)
-            const mergedCandles = this.mergeCandles(candles, result.candles);
-            this.rawCandleData.set(mergedCandles);
+      // Adjust fetch range based on interval
+      if (backendInterval === 'DAILY') {
+        startDate.setFullYear(startDate.getFullYear() - 1);
+      } else if (backendInterval === 'WEEKLY') {
+        startDate.setFullYear(startDate.getFullYear() - 2);
+      } else if (backendInterval === 'MONTHLY') {
+        startDate.setFullYear(startDate.getFullYear() - 5);
+      } else {
+        // Intraday - go back 1 month
+        startDate.setMonth(startDate.getMonth() - 1);
+      }
 
-            // Update page info
-            this.chartPageInfo.set(result.pageInfo);
-            this.hasOlderData.set(result.pageInfo.hasOlderData);
+      console.log('[WatchlistTab] Using date-range loading:', {
+        symbol,
+        startDate,
+        endDate,
+        interval: backendInterval,
+      });
 
-            // Update the chart with merged data
-            this.updateChartWithMergedData(mergedCandles);
-          } else {
-            // No more data available
-            this.hasOlderData.set(false);
-          }
+      this.subscriptions.add(
+        this.chartDataService.loadDataByRange(symbol, startDate, endDate, backendInterval, fqn).subscribe({
+          next: (result) => this.handleOlderDataResult(result, candles, backendInterval),
+          error: (err) => {
+            console.error('[WatchlistTab] Failed to load older data:', err);
+            this.loadingMoreData.set(false);
+          },
+        }),
+      );
+    }
+  }
 
-          this.loadingMoreData.set(false);
-        },
-        error: (err) => {
-          console.error('[WatchlistTab] Failed to load older data:', err);
-          this.loadingMoreData.set(false);
-        },
-      }),
+  /**
+   * Handle result from loading older data.
+   * If no data but hasOlderData is true (backend is fetching), retry after delay.
+   */
+  private handleOlderDataResult(result: ChartDataResult, existingCandles: ChartCandle[], interval: string): void {
+    const cursorPreview = result.pageInfo.endCursor?.substring(0, 20) + '...';
+    console.log(
+      '[WatchlistTab] Received older data:',
+      result.candles.length,
+      'candles, hasOlderData:',
+      result.pageInfo.hasOlderData,
+      'endCursor:',
+      cursorPreview,
     );
+
+    if (result.candles.length > 0) {
+      // Merge with existing candles (avoid duplicates)
+      const mergedCandles = this.mergeCandles(existingCandles, result.candles);
+      this.rawCandleData.set(mergedCandles);
+
+      // Check if backend returned the same cursor (data still being fetched)
+      const newCursor = result.pageInfo.endCursor;
+      const sameCursorReturned = newCursor && newCursor === this.lastProgressiveCursor;
+
+      if (sameCursorReturned && result.pageInfo.hasOlderData) {
+        this.sameCursorRetryCount++;
+        console.log('[WatchlistTab] Same cursor returned, retry count:', this.sameCursorRetryCount);
+
+        if (this.sameCursorRetryCount >= WatchlistTabComponent.MAX_SAME_CURSOR_RETRIES) {
+          // Max retries reached - backend likely has no more data despite hasOlderData=true
+          console.log('[WatchlistTab] Max retries with same cursor reached, stopping progressive loading');
+          this.hasOlderData.set(false);
+          this.pendingProgressiveJobId = null;
+          this.updateChartWithMergedData(mergedCandles);
+          this.loadingMoreData.set(false);
+          return;
+        }
+
+        if (this.pendingProgressiveJobId) {
+          // Backend returned same cursor - wait for job to complete before retrying
+          console.log('[WatchlistTab] Waiting for job completion:', this.pendingProgressiveJobId);
+          this.hasOlderData.set(true);
+          this.updateChartWithMergedData(mergedCandles);
+          this.loadingMoreData.set(false);
+          // Don't update chartPageInfo or lastProgressiveCursor - we'll retry with same cursor after job
+          return;
+        }
+      } else if (newCursor && newCursor !== this.lastProgressiveCursor) {
+        // New cursor returned - reset retry count
+        this.sameCursorRetryCount = 0;
+      }
+
+      // Update tracking for next iteration
+      if (newCursor) {
+        this.lastProgressiveCursor = newCursor;
+        this.chartPageInfo.set(result.pageInfo);
+        this.hasOlderData.set(result.pageInfo.hasOlderData);
+      } else if (result.pageInfo.hasOlderData) {
+        // Backend returned data without cursor but says more exists
+        console.log(
+          '[WatchlistTab] Incomplete pageInfo (no endCursor but hasOlderData=true)',
+          '- keeping existing cursor',
+        );
+        this.hasOlderData.set(true);
+      } else {
+        // No more data available
+        this.chartPageInfo.set(result.pageInfo);
+        this.hasOlderData.set(false);
+      }
+
+      // Update the chart with merged data
+      this.updateChartWithMergedData(mergedCandles);
+      this.loadingMoreData.set(false);
+    } else if (result.pageInfo.hasOlderData && this.isIntradayInterval(interval)) {
+      // No data returned, but backend says more exists - it may be auto-fetching
+      // Retry after a delay to allow backend to fetch from Alpha Vantage
+      console.log('[WatchlistTab] No data yet but hasOlderData=true, backend may be fetching. Retrying in 3s...');
+      setTimeout(() => {
+        this.loadingMoreData.set(false);
+        // Don't auto-retry - let user trigger another zoom action
+        // This prevents infinite loops if backend isn't auto-fetching
+      }, 3000);
+    } else {
+      // No more data available
+      this.hasOlderData.set(false);
+      this.loadingMoreData.set(false);
+    }
   }
 
   /**
@@ -1948,6 +2240,42 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Fetch pageInfo from GraphQL for cursor-based progressive loading.
+   * This is needed when chart data comes from command result (which doesn't include pageInfo).
+   */
+  private fetchChartPageInfo(symbol: string | null): void {
+    if (!symbol) {
+      this.chartPageInfo.set(null);
+      return;
+    }
+
+    const interval = this.selectedInterval();
+    const backendInterval = this.mapIntervalToBackend(interval);
+    const item = this.selectedItem();
+    const fqn = item?.exchange ? `STOCK:${item.exchange.toUpperCase()}:${symbol.toUpperCase()}` : undefined;
+
+    console.log('[WatchlistTab] Fetching pageInfo for:', { symbol, interval: backendInterval });
+
+    // Query a small amount of data just to get the pageInfo
+    this.subscriptions.add(
+      this.chartDataService.loadChartData(symbol, backendInterval, 1, fqn).subscribe({
+        next: (result) => {
+          console.log('[WatchlistTab] Got pageInfo:', {
+            hasOlderData: result.pageInfo.hasOlderData,
+            endCursor: result.pageInfo.endCursor?.substring(0, 20) + '...',
+          });
+          this.chartPageInfo.set(result.pageInfo);
+          this.hasOlderData.set(result.pageInfo.hasOlderData);
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Failed to fetch pageInfo:', err);
+          this.chartPageInfo.set(null);
+        },
+      }),
+    );
+  }
+
+  /**
    * Remove a symbol from current watchlist
    */
   removeSymbol(item: SymbolListItem): void {
@@ -1994,6 +2322,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   getSymbolActions(): { icon: string; label: string; command: string }[] {
     return [
       { icon: 'show_chart', label: 'Chart', command: 'CHART' },
+      { icon: 'account_balance', label: 'Fundamentals', command: 'FUNDAMENTALS' },
       { icon: 'table_chart', label: 'History', command: 'HP' },
       { icon: 'info', label: 'Info', command: 'DES' },
     ];
@@ -2198,6 +2527,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     const symbol = this.selectedSymbol();
     if (symbol) {
+      // Update URL with new interval
+      const item = this.selectedItem();
+      this.routingService.applyRoute({
+        symbol,
+        exchange: item?.exchange,
+        interval: interval as RouteInfo['interval'],
+        view: 'chart',
+      });
+
       this.loadChartWithOptions(symbol);
     }
   }
@@ -2232,6 +2570,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartOptions.set(null);
     this.chartError.set(null);
     this.hasOlderData.set(true); // Reset - assume there's more data
+    this.sameCursorRetryCount = 0;
+    this.lastProgressiveCursor = null;
+    this.pendingProgressiveJobId = null;
 
     // Build chart options from toggle states
     const chartDataOptions = {
@@ -2249,6 +2590,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             symbol,
             interval: backendInterval,
             hasOlderData: result.pageInfo.hasOlderData,
+            endCursor: result.pageInfo.endCursor?.substring(0, 20) + '...',
+            totalCount: result.totalCount,
           });
           if (result.candles.length > 0) {
             this.rawCandleData.set(result.candles);
@@ -2451,7 +2794,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Check if an interval is intraday (less than daily)
    */
-  private isIntradayInterval(interval: ChartInterval): boolean {
+  private isIntradayInterval(interval: ChartInterval | string): boolean {
     const lower = interval.toLowerCase();
     return (
       lower.includes('min') ||

@@ -168,6 +168,18 @@ export interface ChartCandle {
   dividendAmount?: number;
   /** True if this candle is from pre-market or after-hours trading */
   isExtendedHours?: boolean;
+  /** True if a stock split occurred on this date */
+  isSplit?: boolean;
+  /** True if a dividend was paid on this date */
+  isDividend?: boolean;
+  /**
+   * Quality filter flags bitfield:
+   * - Bit 0 (1): Extended hours
+   * - Bit 1 (2): Extreme wick (adjusted if adjustSpikes=true)
+   * - Bit 2 (4): Volume anomaly
+   * - Bit 3 (8): Price gap
+   */
+  filterFlags?: number;
 }
 
 export interface PageInfo {
@@ -232,6 +244,9 @@ interface StockPriceNode {
   splitCoefficient?: number;
   dividendAmount?: number;
   isExtendedHours?: boolean;
+  isSplit?: boolean;
+  isDividend?: boolean;
+  filterFlags?: number;
 }
 
 interface StockPriceEdge {
@@ -363,6 +378,11 @@ export class ChartDataService implements OnDestroy {
         }),
         map((result) => this.transformToChartData(result.data.stockPriceConnection)),
         tap((data) => {
+          console.log('[ChartDataService] loadChartData pageInfo:', {
+            hasOlderData: data.pageInfo.hasOlderData,
+            endCursor: data.pageInfo.endCursor?.substring(0, 30) + '...',
+            totalCount: data.totalCount,
+          });
           this.isLoading$.next(false);
           this.cacheChartData(symbol, interval, data);
         }),
@@ -401,8 +421,26 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'network-only',
       })
       .pipe(
+        tap((rawResult) => {
+          const pi = rawResult.data?.stockPriceConnection?.pageInfo;
+          console.log(
+            '[ChartDataService] loadOlderData RAW pageInfo:',
+            JSON.stringify({
+              hasOlderData: pi?.hasOlderData,
+              hasNewerData: pi?.hasNewerData,
+              endCursor: pi?.endCursor,
+              startCursor: pi?.startCursor,
+            }),
+          );
+        }),
         map((result) => this.transformToChartData(result.data.stockPriceConnection)),
         tap((data) => {
+          console.log('[ChartDataService] loadOlderData result:', {
+            candles: data.candles.length,
+            hasOlderData: data.pageInfo.hasOlderData,
+            endCursor: data.pageInfo.endCursor?.substring(0, 30) + '...',
+            totalCount: data.totalCount,
+          });
           this.isLoading$.next(false);
           // Merge with existing cache
           this.appendOlderData(symbol, interval, data);
@@ -480,7 +518,13 @@ export class ChartDataService implements OnDestroy {
       })
       .pipe(
         map((result) => this.transformToChartData(result.data.chartDataRange)),
-        tap(() => {
+        tap((data) => {
+          console.log('[ChartDataService] loadDataByRange result:', {
+            candles: data.candles.length,
+            hasOlderData: data.pageInfo.hasOlderData,
+            endCursor: data.pageInfo.endCursor?.substring(0, 30) + '...',
+            totalCount: data.totalCount,
+          });
           this.isLoading$.next(false);
         }),
         catchError((error) => {
@@ -489,6 +533,14 @@ export class ChartDataService implements OnDestroy {
           return of<ChartDataResult>({ candles: [], pageInfo: this.emptyPageInfo(), totalCount: 0 });
         }),
       );
+  }
+
+  /**
+   * Check if an interval is intraday (not daily/weekly/monthly)
+   */
+  isIntradayInterval(interval: ChartInterval | string): boolean {
+    const backendInterval = this.mapIntervalToBackend(interval);
+    return ['MIN_1', 'MIN_5', 'MIN_15', 'MIN_30', 'MIN_60'].includes(backendInterval);
   }
 
   /**
@@ -645,6 +697,9 @@ export class ChartDataService implements OnDestroy {
       splitCoefficient: edge.node.splitCoefficient ?? undefined,
       dividendAmount: edge.node.dividendAmount ?? undefined,
       isExtendedHours: edge.node.isExtendedHours ?? undefined,
+      isSplit: edge.node.isSplit ?? undefined,
+      isDividend: edge.node.isDividend ?? undefined,
+      filterFlags: edge.node.filterFlags ?? undefined,
     }));
 
     // Sort candles chronologically (oldest first) for chart rendering

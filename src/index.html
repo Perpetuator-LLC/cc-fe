@@ -7,6 +7,9 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Preload critical loading SVG -->
+    <link rel="preload" href="logo.outline_loading.min.svg" as="image" type="image/svg+xml" fetchpriority="high" />
+
     <!-- Default SEO Meta Tags -->
     <meta
       name="description"
@@ -80,7 +83,7 @@
         }
       </style>
       <div class="app-loading">
-        <img src="logo.outline_loading.svg" alt="Capital Copilot Logo" />
+        <img src="logo.outline_loading.min.svg" alt="Capital Copilot Logo" />
         <div class="app-loading-text">Loading...</div>
       </div>
     </app-root>
