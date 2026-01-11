@@ -63,6 +63,9 @@ export class TerminalRoutingService {
   /** Selected dashboard ID */
   readonly dashboardId = signal<string | null>(null);
 
+  /** Additional parameters (e.g., fundamentals period) */
+  readonly params = signal<Record<string, string>>({});
+
   /** Symbol list panel collapsed state */
   readonly listCollapsed = signal<boolean>(false);
 
@@ -96,6 +99,7 @@ export class TerminalRoutingService {
     dashboardId: this.dashboardId(),
     listCollapsed: this.listCollapsed(),
     detailCollapsed: this.detailCollapsed(),
+    params: this.params(),
   }));
 
   // =========================================================================
@@ -155,6 +159,7 @@ export class TerminalRoutingService {
     if (route.period !== undefined) this.period.set(route.period);
     if (route.watchlistId !== undefined) this.watchlistId.set(route.watchlistId);
     if (route.dashboardId !== undefined) this.dashboardId.set(route.dashboardId);
+    if (route.params !== undefined) this.params.set(route.params);
 
     if (!silent) {
       console.log('[TerminalRouting] New state:', this.state());
@@ -297,6 +302,7 @@ export class TerminalRoutingService {
       // Note: period is excluded - chart uses 'first' (record count) instead
       watchlistId: this.watchlistId() || undefined,
       dashboardId: this.dashboardId() || undefined,
+      params: Object.keys(this.params()).length > 0 ? this.params() : undefined,
     };
 
     const queryParams = routeToQueryParams(route);
@@ -328,6 +334,7 @@ export class TerminalRoutingService {
     this.dashboardId.set(DEFAULT_TERMINAL_STATE.dashboardId);
     this.listCollapsed.set(DEFAULT_TERMINAL_STATE.listCollapsed);
     this.detailCollapsed.set(DEFAULT_TERMINAL_STATE.detailCollapsed);
+    this.params.set({});
     this.symbolChange$.next(null);
     this.updateUrlQueryParams();
   }

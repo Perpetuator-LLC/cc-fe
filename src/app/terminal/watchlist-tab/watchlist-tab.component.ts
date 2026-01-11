@@ -166,6 +166,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     cashFlow: EChartsOption;
     margins: EChartsOption;
   } | null>(null);
+  // Retry counter for fundamentals fetch to prevent infinite loops
+  private fundamentalsFetchRetries = 0;
+  private static readonly MAX_FUNDAMENTALS_RETRIES = 2;
 
   // Computed: Check if current interval is intraday (for enabling/disabling certain options)
   isCurrentIntervalIntraday = computed(() => {
@@ -629,6 +632,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       let command = 'CHART';
       if (state.view === 'fundamentals') {
         command = 'FUNDAMENTALS';
+        // Set fundamentals period from params if specified
+        const period = state.params?.['period'];
+        if (period === 'quarterly') {
+          this.fundamentalsIsAnnual.set(false);
+        } else {
+          this.fundamentalsIsAnnual.set(true); // Default to annual
+        }
       } else if (state.view === 'info') {
         command = 'DES';
       } else if (state.view === 'history') {
@@ -664,6 +674,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             let command = 'CHART';
             if (view === 'fundamentals') {
               command = 'FUNDAMENTALS';
+              // Handle fundamentals period from period query param
+              const period = params['period'];
+              if (period === 'quarterly') {
+                this.fundamentalsIsAnnual.set(false);
+              } else if (period === 'annual') {
+                this.fundamentalsIsAnnual.set(true);
+              }
             } else if (view === 'info') {
               command = 'DES';
             } else if (view === 'history') {
@@ -672,15 +689,29 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
             // Only reload if something changed
             const viewChanged = command !== currentCommand;
-            if (symbol !== currentSymbol || interval !== currentInterval || viewChanged) {
-              console.log('[WatchlistTab] Route changed, reloading:', { symbol, exchange, interval, view, command });
-              // Update interval if provided
-              if (interval && interval !== currentInterval) {
+            const symbolChanged = symbol !== currentSymbol;
+            const intervalChanged = command !== 'FUNDAMENTALS' && interval !== currentInterval;
+
+            if (symbolChanged || intervalChanged || viewChanged) {
+              console.log('[WatchlistTab] Route changed, reloading:', {
+                symbol,
+                exchange,
+                interval,
+                view,
+                command,
+              });
+              // Update interval if provided and not fundamentals view
+              if (command !== 'FUNDAMENTALS' && interval && interval !== currentInterval) {
                 this.selectedInterval.set(interval);
               }
               // Update routing service state without updating URL (to avoid loop)
               this.routingService.applyRoute(
-                { symbol, exchange, interval: interval as RouteInfo['interval'], view: view as RouteInfo['view'] },
+                {
+                  symbol,
+                  exchange,
+                  interval: interval as RouteInfo['interval'],
+                  view: view as RouteInfo['view'],
+                },
                 { updateUrl: false, silent: true },
               );
               // Load the view
@@ -1532,19 +1563,25 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Load fundamentals view for a symbol
    */
-  private loadFundamentalsView(symbol: string): void {
-    console.log('[WatchlistTab] Loading fundamentals for:', symbol);
+  private loadFundamentalsView(symbol: string, isRetry = false): void {
+    console.log('[WatchlistTab] Loading fundamentals for:', symbol, 'isRetry:', isRetry);
     this.showFundamentals.set(true);
 
-    // Update URL to reflect fundamentals view
+    // Reset retry counter on new load (not a retry)
+    if (!isRetry) {
+      this.fundamentalsFetchRetries = 0;
+    }
+
+    // Update URL to reflect fundamentals view with period
     const item = this.selectedItem();
+    const isAnnual = this.fundamentalsIsAnnual();
     this.routingService.applyRoute({
       symbol,
       exchange: item?.exchange,
       view: 'fundamentals',
+      // Use params for fundamentals-specific settings
+      params: { period: isAnnual ? 'annual' : 'quarterly' },
     });
-
-    const isAnnual = this.fundamentalsIsAnnual();
 
     this.subscriptions.add(
       this.fundamentalsService.loadFundamentals(symbol, isAnnual, 10).subscribe({
@@ -1579,6 +1616,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Fetch fundamentals from provider and reload
    */
   private fetchAndLoadFundamentals(symbol: string): void {
+    // Check retry counter to prevent infinite loops
+    this.fundamentalsFetchRetries++;
+    if (this.fundamentalsFetchRetries > WatchlistTabComponent.MAX_FUNDAMENTALS_RETRIES) {
+      console.log('[WatchlistTab] Max fundamentals retries reached, giving up');
+      this.chartError.set('No fundamentals data available for this symbol');
+      this.chartLoading.set(false);
+      return;
+    }
+
     this.subscriptions.add(
       this.fundamentalsService.fetchFundamentalsFromProvider(symbol).subscribe({
         next: (result) => {
@@ -1589,7 +1635,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
             // Wait 5 seconds then retry loading (jobs typically complete quickly)
             setTimeout(() => {
-              this.loadFundamentalsView(symbol);
+              this.loadFundamentalsView(symbol, true); // Pass isRetry=true
             }, 5000);
           } else {
             this.chartError.set('Failed to fetch fundamentals data');
@@ -1611,10 +1657,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   toggleFundamentalsPeriod(): void {
     const newIsAnnual = !this.fundamentalsIsAnnual();
     this.fundamentalsIsAnnual.set(newIsAnnual);
+    this.fundamentalsFetchRetries = 0; // Reset retries for new period
 
     const symbol = this.selectedSymbol();
     if (symbol) {
       this.chartLoading.set(true);
+      this.fundamentalsCharts.set(null); // Clear current charts
       this.loadFundamentalsView(symbol);
     }
   }
@@ -2323,7 +2371,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     return [
       { icon: 'show_chart', label: 'Chart', command: 'CHART' },
       { icon: 'account_balance', label: 'Fundamentals', command: 'FUNDAMENTALS' },
-      { icon: 'table_chart', label: 'History', command: 'HP' },
+      { icon: 'table_chart', label: 'Table', command: 'HP' },
       { icon: 'info', label: 'Info', command: 'DES' },
     ];
   }
