@@ -310,13 +310,21 @@ export class FundamentalsChartService {
 
   /**
    * Build all fundamentals charts
+   * @param data Fundamentals data
+   * @param isAnnual True for annual data (show year only), false for quarterly (show quarter/month)
    */
-  buildAllCharts(data: FundamentalsData): {
+  buildAllCharts(
+    data: FundamentalsData,
+    isAnnual = true,
+  ): {
     incomeStatement: EChartsOption;
     balanceSheet: EChartsOption;
     cashFlow: EChartsOption;
     margins: EChartsOption;
   } {
+    // Store isAnnual for date formatting
+    this.currentIsAnnual = isAnnual;
+
     return {
       incomeStatement: this.buildIncomeStatementChart(data.incomeStatements),
       balanceSheet: this.buildBalanceSheetChart(data.balanceSheets),
@@ -325,12 +333,23 @@ export class FundamentalsChartService {
     };
   }
 
+  // Track if current data is annual (for date formatting)
+  private currentIsAnnual = true;
+
   /**
    * Format fiscal date for display
+   * For annual data: show year only (e.g., "2024")
+   * For quarterly data: show quarter/month and year (e.g., "Q4 2024" or "Dec 2024")
    */
   private formatFiscalDate(date: string): string {
     const d = new Date(date);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    if (this.currentIsAnnual) {
+      // Annual: show just the year
+      return d.getFullYear().toString();
+    } else {
+      // Quarterly: show month and year
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    }
   }
 
   /**

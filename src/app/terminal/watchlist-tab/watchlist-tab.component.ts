@@ -16,7 +16,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -88,6 +88,7 @@ interface SystemList {
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
@@ -121,6 +122,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   chartError = signal<string | null>(null);
   // Technical loading details (shown de-emphasized at bottom of chart area)
   chartLoadingDetails = signal<string | null>(null);
+  // Pending job info for loading state with job link
+  pendingJobInfo = signal<{ jobId: string; interval: string; symbol: string } | null>(null);
   // Data content for non-chart commands (HP, DES)
   dataContent = signal<SafeHtml | null>(null);
   // Table data for HP command
@@ -850,6 +853,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         if (job?.uuid && job.kind === 'fetch_stock_prices') {
           console.log('[WatchlistTab] Progressive job created:', job.uuid);
           this.pendingProgressiveJobId = job.uuid;
+          // Set job info for display
+          this.pendingJobInfo.set({
+            jobId: job.uuid,
+            interval: this.selectedInterval(),
+            symbol: this.selectedSymbol() || '',
+          });
         }
       }),
     );
@@ -860,6 +869,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         if (job?.uuid && job.uuid === this.pendingProgressiveJobId) {
           console.log('[WatchlistTab] Progressive job completed, triggering retry:', job.uuid);
           this.pendingProgressiveJobId = null;
+          this.pendingJobInfo.set(null);
           // Retry progressive loading after a short delay to let DB commit
           setTimeout(() => {
             if (this.hasOlderData() && !this.loadingMoreData()) {
@@ -876,6 +886,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         if (job?.uuid && job.uuid === this.pendingProgressiveJobId) {
           console.log('[WatchlistTab] Progressive job failed:', job.uuid);
           this.pendingProgressiveJobId = null;
+          this.pendingJobInfo.set(null);
         }
       }),
     );
@@ -946,6 +957,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               this.rawCandleData.set([]);
               this.quoteData.set(null);
               this.chartPageInfo.set(null);
+              this.selectedItem.set(null); // Clear selected item to avoid stale company name
 
               // Subscribe to real-time updates for new symbol
               this.terminalService.subscribeSymbols([newSymbol]);
@@ -1597,8 +1609,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             console.log('[WatchlistTab] No fundamentals data, fetching from provider...');
             this.fetchAndLoadFundamentals(symbol);
           } else {
-            // Build charts from data
-            const charts = this.fundamentalsChartService.buildAllCharts(data);
+            // Build charts from data (pass isAnnual for proper date formatting)
+            const charts = this.fundamentalsChartService.buildAllCharts(data, isAnnual);
             this.fundamentalsCharts.set(charts);
             this.chartLoading.set(false);
           }
@@ -1873,15 +1885,23 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const [open, close, low, high] = candleData;
     const isPositive = close >= open;
 
-    // Get volume from rawCandleData since we don't have a volume series in the chart
+    // Get volume and actual date from rawCandleData for proper formatting
     let volume: number | undefined;
+    let actualDate: string = dateStr || '';
     const candles = this.rawCandleData();
-    if (candles && dataIndex < candles.length && candles[dataIndex]?.volume) {
-      volume = candles[dataIndex].volume;
+    if (candles && dataIndex < candles.length) {
+      const candle = candles[dataIndex];
+      if (candle?.volume) {
+        volume = candle.volume;
+      }
+      // Use the actual ISO date string for proper formatting in formatCrosshairDate
+      if (candle?.date) {
+        actualDate = candle.date instanceof Date ? candle.date.toISOString() : String(candle.date);
+      }
     }
 
     this.crosshairData.set({
-      date: dateStr || '',
+      date: actualDate,
       open,
       high,
       low,

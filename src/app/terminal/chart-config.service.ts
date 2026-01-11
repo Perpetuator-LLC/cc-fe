@@ -337,15 +337,35 @@ export class ChartConfigService {
     // This ensures labels are correct when chart is built, not relying on formatter callback
     const useLocal = this.useLocalTime();
     const timeZone = useLocal ? undefined : 'America/New_York';
+
+    // Track the last date to detect day changes
+    let lastDateStr = '';
+
     const formattedAxisLabels = sortedCandles.map((c) => {
       if (isIntraday) {
+        // Get the date in the target timezone
+        const dateOptions: Intl.DateTimeFormatOptions = {
+          month: 'short',
+          day: 'numeric',
+          timeZone: timeZone || undefined,
+        };
+        const currentDateStr = c.date.toLocaleDateString('en-US', dateOptions);
+        const isNewDay = currentDateStr !== lastDateStr;
+        lastDateStr = currentDateStr;
+
         const timeLabel = c.date.toLocaleTimeString('en-US', {
           hour: 'numeric',
           minute: '2-digit',
           hour12: true,
           timeZone,
         });
-        // Add "ET" suffix when using exchange time (not local time)
+
+        // For first candle of each day, show date + time
+        // This helps users understand date context when zoomed out
+        if (isNewDay) {
+          return `${currentDateStr} ${timeLabel}`;
+        }
+        // For other candles, just show time with optional ET suffix
         return useLocal ? timeLabel : `${timeLabel} ET`;
       } else {
         // For daily+, show date only (no time suffix needed)
