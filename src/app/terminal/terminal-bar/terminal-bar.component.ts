@@ -399,6 +399,116 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   }
 
   onKeyDown(event: KeyboardEvent): void {
+    const inputEl = this.commandInput?.nativeElement;
+
+    // ========================================
+    // Terminal-style keyboard shortcuts (Ctrl)
+    // ========================================
+
+    if (event.ctrlKey && !event.metaKey) {
+      switch (event.key.toLowerCase()) {
+        case 'u':
+          // CTRL+U: Clear entire line
+          event.preventDefault();
+          this.clearInput();
+          return;
+
+        case 'a':
+          // CTRL+A: Go to beginning of line
+          event.preventDefault();
+          if (inputEl) {
+            inputEl.setSelectionRange(0, 0);
+          }
+          return;
+
+        case 'e':
+          // CTRL+E: Go to end of line
+          event.preventDefault();
+          if (inputEl) {
+            const len = inputEl.value.length;
+            inputEl.setSelectionRange(len, len);
+          }
+          return;
+
+        case 'k':
+          // CTRL+K: Kill (delete) from cursor to end of line
+          event.preventDefault();
+          if (inputEl) {
+            const pos = inputEl.selectionStart ?? 0;
+            const newValue = inputEl.value.substring(0, pos);
+            this.currentInput.set(newValue);
+            inputEl.value = newValue;
+          }
+          return;
+
+        case 'w':
+          // CTRL+W: Delete word before cursor
+          event.preventDefault();
+          if (inputEl) {
+            const pos = inputEl.selectionStart ?? 0;
+            const text = inputEl.value;
+            // Find start of previous word (skip trailing spaces, then find word boundary)
+            let i = pos - 1;
+            while (i >= 0 && text[i] === ' ') i--;
+            while (i >= 0 && text[i] !== ' ') i--;
+            const newValue = text.substring(0, i + 1) + text.substring(pos);
+            this.currentInput.set(newValue);
+            inputEl.value = newValue;
+            inputEl.setSelectionRange(i + 1, i + 1);
+          }
+          return;
+
+        case 'r':
+          // CTRL+R: Enter history search mode
+          event.preventDefault();
+          this.enterHistorySearchMode();
+          return;
+
+        case 'l':
+          // CTRL+L: Clear/refocus (like clear screen in terminal)
+          event.preventDefault();
+          this.clearSuggestions();
+          this.showHistoryPreview.set(false);
+          inputEl?.focus();
+          return;
+
+        case 'c':
+          // CTRL+C: Cancel current input (clear and defocus)
+          event.preventDefault();
+          this.clearInput();
+          inputEl?.blur();
+          return;
+      }
+    }
+
+    // Alt+Backspace: Delete word before cursor (alternative to CTRL+W)
+    if (event.altKey && event.key === 'Backspace') {
+      event.preventDefault();
+      if (inputEl) {
+        const pos = inputEl.selectionStart ?? 0;
+        const text = inputEl.value;
+        // Find start of previous word
+        let i = pos - 1;
+        while (i >= 0 && text[i] === ' ') i--;
+        while (i >= 0 && text[i] !== ' ') i--;
+        const newValue = text.substring(0, i + 1) + text.substring(pos);
+        this.currentInput.set(newValue);
+        inputEl.value = newValue;
+        inputEl.setSelectionRange(i + 1, i + 1);
+      }
+      return;
+    }
+
+    // Home key: Go to beginning
+    if (event.key === 'Home' && !event.shiftKey) {
+      // Let default behavior work, but if at start with chips, could select chips (future)
+    }
+
+    // End key: Go to end
+    if (event.key === 'End' && !event.shiftKey) {
+      // Default behavior works fine
+    }
+
     // Handle backspace when input is empty - remove last chip and convert to text
     if (event.key === 'Backspace' && this.currentInput() === '' && this.chips().length > 0) {
       event.preventDefault();
@@ -475,6 +585,18 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       this.navigateMatchedHistory(1);
+    } else if (event.key === 'ArrowLeft') {
+      // Left arrow at beginning of input with chips: edit the last chip
+      const inputEl = this.commandInput?.nativeElement;
+      const cursorPos = inputEl?.selectionStart ?? 0;
+      if (cursorPos === 0 && this.chips().length > 0) {
+        event.preventDefault();
+        this.removeLastChipAsText();
+      }
+      // Otherwise, let default left arrow behavior work (move cursor)
+    } else if (event.key === 'ArrowRight') {
+      // Right arrow at end of input: could potentially auto-complete (future feature)
+      // For now, just let default behavior work
     } else if (event.key === 'Enter') {
       this.onSubmit();
     } else if (event.key === 'Escape') {
@@ -737,6 +859,52 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.userNavigatedSuggestions.set(false);
     // Also reset history navigation when clearing suggestions
     this.selectedHistoryIndex.set(-1);
+  }
+
+  /**
+   * Clear all input (chips and text) - CTRL+U
+   */
+  private clearInput(): void {
+    this.chips.set([]);
+    this.currentInput.set('');
+    if (this.commandInput?.nativeElement) {
+      this.commandInput.nativeElement.value = '';
+    }
+    this.historySearchTerm.set('');
+    this.selectedHistoryIndex.set(-1);
+    this.showHistoryPreview.set(false);
+    this.clearSuggestions();
+  }
+
+  /**
+   * Enter history search mode - CTRL+R
+   * This focuses on substring matching within command history
+   */
+  private enterHistorySearchMode(): void {
+    const currentText = this.currentInput().trim();
+
+    // Set the search term to current input (or empty for all history)
+    this.historySearchTerm.set(currentText);
+    this.currentHistoryQuery = currentText;
+
+    // Show loading state
+    this.historyLoading.set(true);
+    this.historyEmpty.set(false);
+    this.showHistoryPreview.set(true);
+
+    // Trigger history search via WebSocket
+    if (this.wsService.connectionState() === 'connected') {
+      // Request more results for search mode
+      this.wsService.searchHistory(currentText, 20);
+    } else {
+      this.historyLoading.set(false);
+    }
+
+    // Set selectedHistoryIndex to -1 so user can navigate with arrow keys
+    this.selectedHistoryIndex.set(-1);
+
+    // Focus input
+    this.focusInput();
   }
 
   /**
