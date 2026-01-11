@@ -616,6 +616,23 @@ export class ChartConfigService {
   ): { xAxis: number; label: { formatter: string }; lineStyle: { color: string } }[] {
     const markers: { xAxis: number; label: { formatter: string }; lineStyle: { color: string } }[] = [];
 
+    // Debug: Check for any candles with split or dividend data
+    const splitsInData = candles.filter((c) => c.splitCoefficient && c.splitCoefficient !== 1.0);
+    const dividendsInData = candles.filter((c) => c.dividendAmount && c.dividendAmount > 0);
+    console.log('[ChartConfig] Corporate actions in data:', {
+      totalCandles: candles.length,
+      splitsFound: splitsInData.length,
+      dividendsFound: dividendsInData.length,
+      sampleSplits: splitsInData.slice(0, 3).map((c) => ({
+        date: c.date.toISOString().split('T')[0],
+        coeff: c.splitCoefficient,
+      })),
+      sampleDividends: dividendsInData.slice(0, 3).map((c) => ({
+        date: c.date.toISOString().split('T')[0],
+        amount: c.dividendAmount,
+      })),
+    });
+
     candles.forEach((candle, index) => {
       // Check for splits (coefficient !== 1.0)
       if (candle.splitCoefficient && candle.splitCoefficient !== 1.0) {

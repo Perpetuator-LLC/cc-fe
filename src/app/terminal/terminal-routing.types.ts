@@ -140,6 +140,9 @@ export interface TerminalState {
 
   /** Whether the detail panel is collapsed */
   detailCollapsed: boolean;
+
+  /** Additional parameters (e.g., fundamentals period) */
+  params?: Record<string, string>;
 }
 
 /**
@@ -221,6 +224,13 @@ export function routeToQueryParams(route: RouteInfo): Record<string, string> {
   if (route.watchlistId) params[ROUTE_QUERY_PARAMS.WATCHLIST] = route.watchlistId;
   if (route.dashboardId) params[ROUTE_QUERY_PARAMS.DASHBOARD] = route.dashboardId;
 
+  // Add any extra params (e.g., fundamentals period)
+  if (route.params) {
+    Object.entries(route.params).forEach(([key, value]) => {
+      params[key] = value;
+    });
+  }
+
   return params;
 }
 
@@ -228,7 +238,7 @@ export function routeToQueryParams(route: RouteInfo): Record<string, string> {
  * Parse URL query parameters to route info
  */
 export function queryParamsToRoute(params: Record<string, string>): RouteInfo {
-  return {
+  const route: RouteInfo = {
     tab: params[ROUTE_QUERY_PARAMS.TAB] as TerminalTab | undefined,
     symbol: params[ROUTE_QUERY_PARAMS.SYMBOL],
     exchange: params[ROUTE_QUERY_PARAMS.EXCHANGE],
@@ -238,6 +248,20 @@ export function queryParamsToRoute(params: Record<string, string>): RouteInfo {
     watchlistId: params[ROUTE_QUERY_PARAMS.WATCHLIST],
     dashboardId: params[ROUTE_QUERY_PARAMS.DASHBOARD],
   };
+
+  // Extract any extra params (e.g., period for fundamentals)
+  const knownParamValues = Object.values(ROUTE_QUERY_PARAMS) as string[];
+  const extraParams: Record<string, string> = {};
+  Object.entries(params).forEach(([key, value]) => {
+    if (!knownParamValues.includes(key) && value) {
+      extraParams[key] = value;
+    }
+  });
+  if (Object.keys(extraParams).length > 0) {
+    route.params = extraParams;
+  }
+
+  return route;
 }
 
 /**
