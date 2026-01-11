@@ -629,6 +629,20 @@
                     @if (chartLoadingDetails()) {
                       <p class="loading-details">{{ chartLoadingDetails() }}</p>
                     }
+                    @if (pendingJobInfo(); as jobInfo) {
+                      <div class="pending-job-info">
+                        <span class="job-status">Waiting for data job to complete</span>
+                        <a
+                          class="job-link"
+                          [routerLink]="['/jobs']"
+                          [queryParams]="{ jobId: jobInfo.jobId }"
+                          matTooltip="View job status"
+                        >
+                          <mat-icon>work</mat-icon>
+                          <span class="job-id">{{ jobInfo.jobId | slice: 0 : 8 }}...</span>
+                        </a>
+                      </div>
+                    }
                   </div>
                 } @else {
                   <!-- Show error state for actual errors -->
