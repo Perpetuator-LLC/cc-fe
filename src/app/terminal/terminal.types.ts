@@ -261,6 +261,10 @@ export interface CommandHistoryItem {
   creditsCharged?: number;
   /** Number of times this command was executed (only populated when uniqueLatest is true) */
   executionCount?: number;
+  /** Whether full details (including result) have been loaded */
+  detailsLoaded?: boolean;
+  /** Whether details are currently loading */
+  detailsLoading?: boolean;
 }
 
 // ============================================================================

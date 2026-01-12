@@ -8,7 +8,7 @@
   } @else {
     <div class="watchlist-layout">
       <!-- Left Sidebar: Symbol List -->
-      <div class="symbol-sidebar">
+      <div class="symbol-sidebar" [style.width.px]="sidebarWidth">
         <!-- Watchlist Selector with Hierarchical Menu -->
         <div class="sidebar-header">
           <button mat-button [matMenuTriggerFor]="watchlistMenu" class="watchlist-selector-btn">
@@ -403,6 +403,9 @@
           </div>
         }
       </div>
+
+      <!-- Resize Handle -->
+      <div class="resize-handle" (mousedown)="onResizeStart($event)" [class.resizing]="isResizing"></div>
 
       <!-- Main Content: Chart Display -->
       <div class="chart-main">
