@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subscription, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angul
 import { MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import {
   Job,
@@ -81,6 +81,7 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     private podcastsService: PodcastsService,
     private episodeService: EpisodeService,
     private researchService: ResearchService,
+    private router: Router,
   ) {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
@@ -352,6 +353,43 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   hasTopicUuid(job: Job): boolean {
     return this.jobDisplayService.hasTopicUuid(job);
+  }
+
+  // Symbol methods for stock-related jobs
+  hasSymbol(job: Job): boolean {
+    return this.jobDisplayService.hasSymbol(job);
+  }
+
+  getSymbol(job: Job): string | null {
+    return this.jobDisplayService.getSymbol(job);
+  }
+
+  getSymbolTooltip(job: Job): string {
+    const fqn = this.jobDisplayService.getFqn(job);
+    const interval = this.jobDisplayService.getInterval(job);
+    const parts: string[] = [];
+    if (fqn) parts.push(`FQN: ${fqn}`);
+    if (interval) parts.push(`Interval: ${interval}`);
+    parts.push('Click to view chart');
+    return parts.join('\n');
+  }
+
+  navigateToSymbol(job: Job): void {
+    const symbol = this.jobDisplayService.getSymbol(job);
+    const exchange = this.jobDisplayService.getExchange(job);
+    const interval = this.jobDisplayService.getInterval(job) || 'daily';
+
+    if (symbol) {
+      this.router.navigate(['/terminal'], {
+        queryParams: {
+          tab: 'watchlists',
+          symbol: symbol,
+          exchange: exchange || undefined,
+          view: 'chart',
+          interval: interval,
+        },
+      });
+    }
   }
 
   // Get podcast name from enriched job

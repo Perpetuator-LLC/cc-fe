@@ -8,6 +8,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { Subscription } from 'rxjs';
 import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
@@ -28,6 +29,7 @@ import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    MatExpansionModule,
     TerminalBarComponent,
     TerminalDashboardComponent,
     WatchlistTabComponent,
@@ -242,5 +244,89 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     }
 
     return tokens;
+  }
+
+  /**
+   * Get the result message from a history entry for display.
+   */
+  getResultMessage(entry: CommandHistoryItem): string | null {
+    if (!entry.result) return null;
+
+    // Result can be a string or object
+    if (typeof entry.result === 'string') {
+      return entry.result;
+    }
+
+    // If result is an object, try to get the message property
+    if (typeof entry.result === 'object') {
+      const result = entry.result as Record<string, unknown>;
+      if (result['message'] && typeof result['message'] === 'string') {
+        return result['message'];
+      }
+      // If no message, return null (don't show large chart data)
+      return null;
+    }
+
+    return null;
+  }
+
+  /**
+   * Handle expansion panel opened - lazy load details if not already loaded
+   */
+  onPanelOpened(entry: CommandHistoryItem): void {
+    // If details already loaded or currently loading, skip
+    if (entry.detailsLoaded || entry.detailsLoading) {
+      return;
+    }
+
+    // Mark as loading
+    const currentHistory = this.terminalService.userHistory();
+    const index = currentHistory.findIndex((h) => h.id === entry.id);
+    if (index !== -1) {
+      const updatedHistory = [...currentHistory];
+      updatedHistory[index] = { ...updatedHistory[index], detailsLoading: true };
+      this.terminalService.userHistory.set(updatedHistory);
+    }
+
+    // Load full details
+    this.subscriptions.add(
+      this.terminalService.loadHistoryItemDetail(entry.id).subscribe({
+        next: () => {
+          // Details are automatically updated in the signal by the service
+        },
+        error: (error) => {
+          console.error('Failed to load history item details:', error);
+          // Clear loading state on error
+          const current = this.terminalService.userHistory();
+          const idx = current.findIndex((h) => h.id === entry.id);
+          if (idx !== -1) {
+            const updated = [...current];
+            updated[idx] = { ...updated[idx], detailsLoading: false };
+            this.terminalService.userHistory.set(updated);
+          }
+        },
+      }),
+    );
+  }
+
+  /**
+   * Load more history items
+   */
+  loadMoreHistory(): void {
+    this.terminalService.loadMoreHistoryForTab(!this.showDuplicates());
+  }
+
+  /**
+   * Check if there are more history items to load
+   */
+  get hasMoreHistory(): boolean {
+    return this.terminalService.hasMoreHistory;
+  }
+
+  /**
+   * Get total count of history items
+   */
+  get historyTotalCount(): number {
+    return this.terminalService.historyTotalCount();
   }
 }
