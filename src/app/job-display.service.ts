@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -135,6 +135,45 @@ export class JobDisplayService {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
     return result?.topicUuid || args?.topicUuid || null;
+  }
+
+  // Check if job has symbol/FQN (for stock-related jobs)
+  hasSymbol(job: Job): boolean {
+    const args = this.parseJobArgs(job);
+    return !!(args?.symbol || args?.fqn);
+  }
+
+  // Get symbol from args
+  getSymbol(job: Job): string | null {
+    const args = this.parseJobArgs(job);
+    // Parse FQN if available (format: STOCK:EXCHANGE:SYMBOL)
+    if (args?.fqn) {
+      const parts = String(args.fqn).split(':');
+      return parts.length >= 3 ? parts[2] : String(args.fqn);
+    }
+    return args?.symbol ? String(args.symbol) : null;
+  }
+
+  // Get FQN from args
+  getFqn(job: Job): string | null {
+    const args = this.parseJobArgs(job);
+    return args?.fqn ? String(args.fqn) : null;
+  }
+
+  // Get exchange from FQN
+  getExchange(job: Job): string | null {
+    const args = this.parseJobArgs(job);
+    if (args?.fqn) {
+      const parts = String(args.fqn).split(':');
+      return parts.length >= 2 ? parts[1] : null;
+    }
+    return null;
+  }
+
+  // Get interval from args (for FETCH_STOCK_PRICES)
+  getInterval(job: Job): string | null {
+    const args = this.parseJobArgs(job);
+    return args?.interval ? String(args.interval) : null;
   }
 
   // Check if job has news UUIDs (only in result)

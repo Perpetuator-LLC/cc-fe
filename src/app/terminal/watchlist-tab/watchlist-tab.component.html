@@ -248,8 +248,28 @@
           </div>
         }
 
-        <!-- Symbol List -->
-        <div class="symbol-list-container">
+        <!-- Column Selection Menu -->
+        <div class="table-controls">
+          <button mat-icon-button [matMenuTriggerFor]="columnMenu" matTooltip="Manage Columns">
+            <mat-icon>view_column</mat-icon>
+          </button>
+          <mat-menu #columnMenu="matMenu">
+            @for (column of watchlistColumns; track column.id) {
+              <div mat-menu-item class="column-menu-item">
+                <mat-checkbox
+                  [(ngModel)]="column.selected"
+                  (change)="updateWatchlistColumns()"
+                  [disabled]="column.id === 'symbol'"
+                >
+                  {{ column.label }}
+                </mat-checkbox>
+              </div>
+            }
+          </mat-menu>
+        </div>
+
+        <!-- Symbol Table -->
+        <div class="symbol-table-container">
           @if (currentSymbols().length === 0) {
             <div class="empty-list">
               <mat-icon>inbox</mat-icon>
@@ -257,59 +277,79 @@
               <span>Run commands like <code>AAPL GP</code> to add symbols</span>
             </div>
           } @else {
-            @for (item of currentSymbols(); track item.symbol) {
-              <div
-                class="symbol-item"
-                [class.selected]="selectedSymbol() === item.symbol"
-                tabindex="0"
-                role="button"
-                (click)="selectSymbol(item)"
-                (keydown.enter)="selectSymbol(item)"
-              >
-                <div class="symbol-main">
-                  <div class="symbol-details">
-                    <!-- Row 1: Symbol, Asset Type, Exchange, Market Cap -->
-                    <div class="symbol-row-1">
-                      <span class="symbol">{{ item.symbol }}</span>
-                      @if (item.assetType && item.assetType !== 'Stock') {
-                        <span class="asset-type-tag" [matTooltip]="'Asset Type: ' + item.assetType">{{
-                          item.assetType
-                        }}</span>
-                      }
-                      @if (item.exchange) {
-                        <span class="exchange-tag" [matTooltip]="'Exchange: ' + item.exchange">{{
-                          item.exchange
-                        }}</span>
-                      }
-                      @if (item.marketCap) {
-                        <span class="market-cap" matTooltip="Market Cap">{{ formatMarketCap(item.marketCap) }}</span>
-                      }
-                    </div>
-                    <!-- Row 2: Company Name + Sector/Industry chips -->
-                    <div class="symbol-row-2">
-                      @if (item.displayName && item.displayName !== item.symbol) {
-                        <span class="name">{{ item.displayName }}</span>
-                      }
-                      @if (item.sector) {
-                        <span class="chip-inline chip-sector" [matTooltip]="'Sector: ' + item.sector">{{
-                          item.sector
-                        }}</span>
-                      }
-                      @if (item.industry) {
-                        <span class="chip-inline chip-industry" [matTooltip]="'Industry: ' + item.industry">{{
-                          item.industry
-                        }}</span>
-                      }
-                    </div>
-                  </div>
-                </div>
-                <div class="symbol-actions">
-                  @if (item.accessCount && item.accessCount > 1) {
-                    <span class="access-count" matTooltip="Times accessed">{{ item.accessCount }}</span>
+            <table mat-table [dataSource]="currentSymbols()" class="symbol-table">
+              <!-- Symbol Column -->
+              <ng-container matColumnDef="symbol">
+                <th mat-header-cell *matHeaderCellDef>Symbol</th>
+                <td mat-cell *matCellDef="let item" class="symbol-cell">
+                  <span class="symbol-text">{{ item.symbol }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let item" class="name-cell">
+                  {{ item.displayName || item.symbol }}
+                </td>
+              </ng-container>
+
+              <!-- Exchange Column -->
+              <ng-container matColumnDef="exchange">
+                <th mat-header-cell *matHeaderCellDef>Exchange</th>
+                <td mat-cell *matCellDef="let item">
+                  @if (item.exchange) {
+                    <span class="exchange-chip">{{ item.exchange }}</span>
                   }
+                </td>
+              </ng-container>
+
+              <!-- Market Cap Column -->
+              <ng-container matColumnDef="marketCap">
+                <th mat-header-cell *matHeaderCellDef>Mkt Cap</th>
+                <td mat-cell *matCellDef="let item" class="market-cap-cell">
+                  {{ item.marketCap ? formatMarketCap(item.marketCap) : '-' }}
+                </td>
+              </ng-container>
+
+              <!-- Sector Column -->
+              <ng-container matColumnDef="sector">
+                <th mat-header-cell *matHeaderCellDef>Sector</th>
+                <td mat-cell *matCellDef="let item" class="sector-cell">
+                  @if (item.sector) {
+                    <button
+                      class="metadata-link"
+                      (click)="navigateToSystemWatchlist('sector', item.sector); $event.stopPropagation()"
+                      [matTooltip]="'View all ' + item.sector + ' stocks'"
+                    >
+                      {{ item.sector }}
+                    </button>
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Industry Column -->
+              <ng-container matColumnDef="industry">
+                <th mat-header-cell *matHeaderCellDef>Industry</th>
+                <td mat-cell *matCellDef="let item" class="industry-cell">
+                  @if (item.industry) {
+                    <button
+                      class="metadata-link"
+                      (click)="navigateToSystemWatchlist('industry', item.industry); $event.stopPropagation()"
+                      [matTooltip]="'View all ' + item.industry + ' stocks'"
+                    >
+                      {{ item.industry }}
+                    </button>
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item" class="actions-cell">
                   <button
                     mat-icon-button
-                    class="action-btn"
                     [matMenuTriggerFor]="symbolMenu"
                     (click)="$event.stopPropagation()"
                     matTooltip="Actions"
@@ -331,9 +371,19 @@
                       </button>
                     }
                   </mat-menu>
-                </div>
-              </div>
-            }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedWatchlistColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: displayedWatchlistColumns"
+                [class.selected]="selectedSymbol() === row.symbol"
+                (click)="selectSymbol(row)"
+                tabindex="0"
+                (keydown.enter)="selectSymbol(row)"
+              ></tr>
+            </table>
           }
         </div>
 
@@ -387,6 +437,41 @@
                   <span class="change-percent">({{ formatChangePercent(quote.changePercent) }})</span>
                 </div>
               }
+              <!-- Symbol metadata chips - clickable to navigate to system watchlists -->
+              <div class="symbol-metadata">
+                @if (selectedItem()?.exchange; as exchange) {
+                  <button
+                    class="metadata-chip exchange"
+                    (click)="navigateToSystemWatchlist('exchange', exchange)"
+                    [matTooltip]="'View all ' + exchange + ' stocks'"
+                  >
+                    {{ exchange }}
+                  </button>
+                }
+                @if (selectedItem()?.sector; as sector) {
+                  <button
+                    class="metadata-chip sector"
+                    (click)="navigateToSystemWatchlist('sector', sector)"
+                    [matTooltip]="'View all ' + sector + ' stocks'"
+                  >
+                    {{ sector }}
+                  </button>
+                }
+                @if (selectedItem()?.industry; as industry) {
+                  <button
+                    class="metadata-chip industry"
+                    (click)="navigateToSystemWatchlist('industry', industry)"
+                    [matTooltip]="'View all ' + industry + ' stocks'"
+                  >
+                    {{ industry }}
+                  </button>
+                }
+                @if (selectedItem()?.marketCap; as marketCap) {
+                  <span class="metadata-chip market-cap" matTooltip="Market Capitalization">
+                    {{ formatMarketCap(marketCap) }}
+                  </span>
+                }
+              </div>
             </div>
             <div class="chart-actions">
               @for (action of getSymbolActions(); track action.command) {

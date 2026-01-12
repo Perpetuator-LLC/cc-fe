@@ -174,6 +174,85 @@ const GET_EXCHANGE_SYMBOLS = gql`
   }
 `;
 
+// New Relay-style catalog queries with totalCount
+const GET_CATALOG_SECTOR_SYMBOLS = gql`
+  query GetCatalogSectorSymbols($sector: String!, $first: Int, $after: String, $orderBy: String) {
+    catalogSectorSymbols(sector: $sector, first: $first, after: $after, orderBy: $orderBy) {
+      totalCount
+      edges {
+        cursor
+        node {
+          symbol
+          displayName
+          assetType
+          exchange
+          sector
+          industry
+          marketCap
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+const GET_CATALOG_INDUSTRY_SYMBOLS = gql`
+  query GetCatalogIndustrySymbols($industry: String!, $first: Int, $after: String, $orderBy: String) {
+    catalogIndustrySymbols(industry: $industry, first: $first, after: $after, orderBy: $orderBy) {
+      totalCount
+      edges {
+        cursor
+        node {
+          symbol
+          displayName
+          assetType
+          exchange
+          sector
+          industry
+          marketCap
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+const GET_CATALOG_EXCHANGE_SYMBOLS = gql`
+  query GetCatalogExchangeSymbols($exchange: String!, $first: Int, $after: String, $orderBy: String) {
+    catalogExchangeSymbols(exchange: $exchange, first: $first, after: $after, orderBy: $orderBy) {
+      totalCount
+      edges {
+        cursor
+        node {
+          symbol
+          displayName
+          assetType
+          exchange
+          sector
+          industry
+          marketCap
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
 const GET_ASSET_TYPE_SYMBOLS = gql`
   query GetAssetTypeSymbols($assetType: String!, $limit: Int) {
     stockListings(assetType: $assetType, status: "Active", limit: $limit) {
@@ -361,6 +440,37 @@ interface AllIndustrySymbolsResponse {
 
 interface ExchangeSymbolsResponse {
   exchangeSymbols: CatalogSymbol[];
+}
+
+// Relay-style catalog connection types
+interface CatalogSymbolPageInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor: string | null;
+  endCursor: string | null;
+}
+
+interface CatalogSymbolEdge {
+  cursor: string;
+  node: CatalogSymbol;
+}
+
+interface CatalogSymbolConnection {
+  totalCount: number;
+  edges: CatalogSymbolEdge[];
+  pageInfo: CatalogSymbolPageInfo;
+}
+
+interface CatalogSectorSymbolsResponse {
+  catalogSectorSymbols: CatalogSymbolConnection;
+}
+
+interface CatalogIndustrySymbolsResponse {
+  catalogIndustrySymbols: CatalogSymbolConnection;
+}
+
+interface CatalogExchangeSymbolsResponse {
+  catalogExchangeSymbols: CatalogSymbolConnection;
 }
 
 export interface StockListing {
@@ -676,6 +786,91 @@ export class WatchlistService {
       .pipe(
         map((result) => result.data.exchangeSymbols || []),
         catchError(() => of([])),
+      );
+  }
+
+  // ============================================================================
+  // RELAY-STYLE CATALOG QUERIES (with totalCount and pagination)
+  // ============================================================================
+
+  /**
+   * Load sector symbols with Relay pagination and totalCount
+   */
+  loadCatalogSectorSymbols(
+    sector: string,
+    first = 50,
+    after: string | null = null,
+    orderBy = 'marketCap',
+  ): Observable<CatalogSymbolConnection> {
+    return this.apollo
+      .query<CatalogSectorSymbolsResponse>({
+        query: GET_CATALOG_SECTOR_SYMBOLS,
+        variables: { sector, first, after, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.catalogSectorSymbols),
+        catchError(() =>
+          of({
+            totalCount: 0,
+            edges: [],
+            pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
+          }),
+        ),
+      );
+  }
+
+  /**
+   * Load industry symbols with Relay pagination and totalCount
+   */
+  loadCatalogIndustrySymbols(
+    industry: string,
+    first = 50,
+    after: string | null = null,
+    orderBy = 'marketCap',
+  ): Observable<CatalogSymbolConnection> {
+    return this.apollo
+      .query<CatalogIndustrySymbolsResponse>({
+        query: GET_CATALOG_INDUSTRY_SYMBOLS,
+        variables: { industry, first, after, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.catalogIndustrySymbols),
+        catchError(() =>
+          of({
+            totalCount: 0,
+            edges: [],
+            pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
+          }),
+        ),
+      );
+  }
+
+  /**
+   * Load exchange symbols with Relay pagination and totalCount
+   */
+  loadCatalogExchangeSymbols(
+    exchange: string,
+    first = 50,
+    after: string | null = null,
+    orderBy = 'marketCap',
+  ): Observable<CatalogSymbolConnection> {
+    return this.apollo
+      .query<CatalogExchangeSymbolsResponse>({
+        query: GET_CATALOG_EXCHANGE_SYMBOLS,
+        variables: { exchange, first, after, orderBy },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.catalogExchangeSymbols),
+        catchError(() =>
+          of({
+            totalCount: 0,
+            edges: [],
+            pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
+          }),
+        ),
       );
   }
 
