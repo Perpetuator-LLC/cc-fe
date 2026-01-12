@@ -13,6 +13,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTableModule } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
@@ -82,6 +84,12 @@ interface SystemList {
   value: string;
 }
 
+interface WatchlistColumnOption {
+  id: string;
+  label: string;
+  selected: boolean;
+}
+
 @Component({
   selector: 'app-watchlist-tab',
   standalone: true,
@@ -100,6 +108,8 @@ interface SystemList {
     MatDividerModule,
     MatAutocompleteModule,
     MatSlideToggleModule,
+    MatTableModule,
+    MatCheckboxModule,
     NgxEchartsDirective,
     DataTableComponent,
   ],
@@ -109,6 +119,18 @@ interface SystemList {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WatchlistTabComponent implements OnInit, OnDestroy {
+  // Watchlist table columns configuration
+  watchlistColumns: WatchlistColumnOption[] = [
+    { id: 'symbol', label: 'Symbol', selected: true },
+    { id: 'name', label: 'Name', selected: true },
+    { id: 'exchange', label: 'Exchange', selected: false },
+    { id: 'marketCap', label: 'Market Cap', selected: true },
+    { id: 'sector', label: 'Sector', selected: false },
+    { id: 'industry', label: 'Industry', selected: false },
+    { id: 'actions', label: 'Actions', selected: true },
+  ];
+  displayedWatchlistColumns: string[] = ['symbol', 'name', 'marketCap', 'actions'];
+
   // State
   loading = signal(false);
   selectedWatchlistId = signal<string>('recent'); // Changed to signal
@@ -3451,6 +3473,51 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     lines.push('Click "Info" button for full company details');
 
     return lines.join('\n');
+  }
+
+  /**
+   * Get a compact tooltip for a watchlist symbol item
+   */
+  getSymbolTooltip(item: SymbolListItem): string {
+    const lines: string[] = [];
+
+    if (item.displayName && item.displayName !== item.symbol) {
+      lines.push(item.displayName);
+    }
+    if (item.exchange) {
+      lines.push(`Exchange: ${item.exchange}`);
+    }
+    if (item.assetType && item.assetType !== 'Stock') {
+      lines.push(`Type: ${item.assetType}`);
+    }
+    if (item.sector) {
+      lines.push(`Sector: ${item.sector}`);
+    }
+    if (item.industry) {
+      lines.push(`Industry: ${item.industry}`);
+    }
+    if (item.marketCap) {
+      lines.push(`Market Cap: ${this.formatMarketCap(item.marketCap)}`);
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Update displayed columns based on user selection
+   */
+  updateWatchlistColumns(): void {
+    this.displayedWatchlistColumns = this.watchlistColumns.filter((col) => col.selected).map((col) => col.id);
+  }
+
+  /**
+   * Navigate to a system watchlist (sector, industry, exchange)
+   */
+  navigateToSystemWatchlist(type: 'sector' | 'industry' | 'exchange', value: string): void {
+    console.log(`[WatchlistTab] Navigating to ${type}: ${value}`);
+    // Update the selected watchlist ID to the system category
+    const newId = `${type}:${value}`;
+    this.onWatchlistChange(newId);
   }
 
   /**

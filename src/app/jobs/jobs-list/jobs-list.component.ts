@@ -22,7 +22,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../../message.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
@@ -110,6 +110,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     private jobDisplayService: JobDisplayService,
     private researchService: ResearchService,
     private loadingService: LoadingService,
+    private router: Router,
   ) {
     // Subscribe to real-time job updates via WebSocket
     this.subscriptions.add(
@@ -556,6 +557,47 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Get topic UUID from merged data
   getTopicUuid(job: Job): string | null {
     return this.jobDisplayService.getTopicUuid(job);
+  }
+
+  // Check if job has symbol/FQN
+  hasSymbol(job: Job): boolean {
+    return this.jobDisplayService.hasSymbol(job);
+  }
+
+  // Get symbol from job args
+  getSymbol(job: Job): string | null {
+    return this.jobDisplayService.getSymbol(job);
+  }
+
+  // Get symbol tooltip with FQN and interval info
+  getSymbolTooltip(job: Job): string {
+    const fqn = this.jobDisplayService.getFqn(job);
+    const interval = this.jobDisplayService.getInterval(job);
+    const parts: string[] = [];
+    if (fqn) parts.push(`FQN: ${fqn}`);
+    if (interval) parts.push(`Interval: ${interval}`);
+    parts.push('Click to view chart');
+    return parts.join('\n');
+  }
+
+  // Navigate to symbol chart
+  navigateToSymbol(job: Job): void {
+    const symbol = this.jobDisplayService.getSymbol(job);
+    const exchange = this.jobDisplayService.getExchange(job);
+    const interval = this.jobDisplayService.getInterval(job) || 'daily';
+
+    if (symbol) {
+      // Navigate to terminal with chart command params
+      this.router.navigate(['/terminal'], {
+        queryParams: {
+          tab: 'watchlists',
+          symbol: symbol,
+          exchange: exchange || undefined,
+          view: 'chart',
+          interval: interval,
+        },
+      });
+    }
   }
 
   // Get podcast name from enriched job
