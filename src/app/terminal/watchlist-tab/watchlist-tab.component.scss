@@ -108,7 +108,130 @@
   background: var(--md-sys-color-surface-container);
 }
 
-// Symbol List
+// Table controls (column selector)
+.table-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.column-menu-item {
+  padding: 0 16px;
+}
+
+// Symbol Table
+.symbol-table-container {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.symbol-table {
+  width: 100%;
+
+  // Compact row height
+  tr.mat-mdc-row {
+    height: 36px;
+  }
+
+  tr.mat-mdc-header-row {
+    height: 32px;
+  }
+
+  // Selected row
+  tr.mat-mdc-row.selected {
+    background: var(--md-sys-color-primary-container);
+  }
+
+  tr.mat-mdc-row:hover:not(.selected) {
+    cursor: pointer;
+    background: var(--md-sys-color-surface-container);
+  }
+
+  // Cell styles
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+  }
+
+  .symbol-cell .symbol-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+  }
+
+  .name-cell {
+    overflow: hidden;
+    max-width: 120px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .market-cap-cell {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+  }
+
+  .exchange-chip {
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-tertiary-container);
+    text-transform: uppercase;
+
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  .sector-cell,
+  .industry-cell {
+    overflow: hidden;
+    max-width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .metadata-link {
+    cursor: pointer;
+
+    padding: 2px 4px;
+    border: none;
+    border-radius: 4px;
+
+    font-size: 10px;
+    color: var(--md-sys-color-primary);
+
+    background: transparent;
+
+    &:hover {
+      background: var(--md-sys-color-primary-container);
+    }
+  }
+
+  .actions-cell {
+    width: 40px;
+    text-align: right;
+
+    button {
+      opacity: 0.6;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Legacy list styles (keep for compatibility)
 .symbol-list-container {
   overflow-y: auto;
   flex: 1;
@@ -140,6 +263,38 @@
     }
   }
 
+  // Compact variant - single line with truncated name
+  &.compact {
+    .symbol-main {
+      overflow: hidden;
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      align-items: center;
+
+      min-width: 0;
+
+      .symbol {
+        flex-shrink: 0;
+
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--md-sys-color-primary);
+      }
+
+      .name-truncated {
+        overflow: hidden;
+
+        font-size: 10px;
+        color: var(--md-sys-color-on-surface-variant);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  // Legacy multi-row layout (keep for compatibility)
   .symbol-main {
     display: flex;
     flex: 1;
@@ -479,29 +634,70 @@
         }
       }
     }
+
+    // Symbol metadata chips - shown next to quote data
+    .symbol-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+
+      margin-left: 8px;
+      padding-left: 12px;
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+    }
+  }
+}
+
+// Metadata chip base - extracted to avoid deep nesting
+.metadata-chip {
+  cursor: pointer;
+
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  transition: all 0.15s ease;
+
+  &.exchange {
+    color: var(--md-sys-color-on-tertiary-container);
+    background: var(--md-sys-color-tertiary-container);
+
+    &:hover {
+      color: var(--md-sys-color-on-tertiary);
+      background: var(--md-sys-color-tertiary);
+    }
   }
 
-  .chart-actions {
-    display: flex;
-    gap: 8px;
+  &.sector {
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
 
-    button {
-      min-width: auto;
-      padding: 4px 12px;
-      font-size: 12px;
-
-      mat-icon {
-        width: 16px;
-        height: 16px;
-        margin-right: 4px;
-        font-size: 16px;
-      }
-
-      &.active {
-        color: var(--md-sys-color-on-primary-container);
-        background: var(--md-sys-color-primary-container);
-      }
+    &:hover {
+      color: var(--md-sys-color-on-primary);
+      background: var(--md-sys-color-primary);
     }
+  }
+
+  &.industry {
+    color: var(--md-sys-color-on-secondary-container);
+    background: var(--md-sys-color-secondary-container);
+
+    &:hover {
+      color: var(--md-sys-color-on-secondary);
+      background: var(--md-sys-color-secondary);
+    }
+  }
+
+  &.market-cap {
+    cursor: default;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container-high);
   }
 }
 

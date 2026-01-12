@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
@@ -301,6 +301,9 @@ export interface JobArgs {
   podcastUuid?: string;
   episodeUuid?: string;
   topicUuid?: string;
+  symbol?: string;
+  fqn?: string;
+  interval?: string;
   [key: string]: unknown;
 }
 
