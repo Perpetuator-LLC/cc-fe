@@ -320,7 +320,7 @@
                     <button
                       class="metadata-link"
                       (click)="navigateToSystemWatchlist('sector', item.sector); $event.stopPropagation()"
-                      [matTooltip]="'View all ' + item.sector + ' stocks'"
+                      [matTooltip]="'Sector: ' + item.sector + ' - Click to view all stocks in this sector'"
                     >
                       {{ item.sector }}
                     </button>
@@ -336,7 +336,7 @@
                     <button
                       class="metadata-link"
                       (click)="navigateToSystemWatchlist('industry', item.industry); $event.stopPropagation()"
-                      [matTooltip]="'View all ' + item.industry + ' stocks'"
+                      [matTooltip]="'Industry: ' + item.industry + ' - Click to view all stocks in this industry'"
                     >
                       {{ item.industry }}
                     </button>
@@ -489,19 +489,18 @@
                 }
               </div>
             </div>
-            <div class="chart-actions">
+            <mat-button-toggle-group [value]="currentCommand()" class="view-toggle-group">
               @for (action of getSymbolActions(); track action.command) {
-                <button
-                  mat-stroked-button
-                  [class.active]="currentCommand() === action.command"
+                <mat-button-toggle
+                  [value]="action.command"
                   (click)="runCommand(selectedSymbol()!, action.command)"
                   [matTooltip]="action.label"
                 >
                   <mat-icon>{{ action.icon }}</mat-icon>
                   {{ action.label }}
-                </button>
+                </mat-button-toggle>
               }
-            </div>
+            </mat-button-toggle-group>
           </div>
 
           <!-- Content Container -->
@@ -670,81 +669,101 @@
                 }
                 <div echarts [options]="chartOptions()!" (chartInit)="onChartInit($any($event))" class="chart"></div>
               </div>
-            } @else if (showFundamentals() && fundamentalsCharts()) {
+            } @else if (showFundamentals()) {
               <!-- Fundamentals view with 4 charts -->
               <div class="fundamentals-view">
                 <div class="fundamentals-header">
                   <span class="fundamentals-title">Financial Statements</span>
-                  <div class="fundamentals-controls">
-                    <button
-                      mat-stroked-button
-                      [class.active]="fundamentalsIsAnnual()"
-                      (click)="fundamentalsIsAnnual() || toggleFundamentalsPeriod()"
-                    >
+                  <mat-button-toggle-group
+                    [value]="fundamentalsIsAnnual() ? 'annual' : 'quarterly'"
+                    class="fundamentals-toggle-group"
+                  >
+                    <mat-button-toggle value="annual" (click)="fundamentalsIsAnnual() || toggleFundamentalsPeriod()">
                       Annual
-                    </button>
-                    <button
-                      mat-stroked-button
-                      [class.active]="!fundamentalsIsAnnual()"
-                      (click)="fundamentalsIsAnnual() && toggleFundamentalsPeriod()"
-                    >
+                    </mat-button-toggle>
+                    <mat-button-toggle value="quarterly" (click)="fundamentalsIsAnnual() && toggleFundamentalsPeriod()">
                       Quarterly
-                    </button>
-                  </div>
+                    </mat-button-toggle>
+                  </mat-button-toggle-group>
                 </div>
-                <div class="fundamentals-grid">
-                  <div class="fundamentals-chart">
-                    <div echarts [options]="fundamentalsCharts()!.incomeStatement" class="fundamentals-echart"></div>
+                @if (fundamentalsCharts()) {
+                  <div class="fundamentals-grid">
+                    <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.incomeStatement" class="fundamentals-echart"></div>
+                    </div>
+                    <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.balanceSheet" class="fundamentals-echart"></div>
+                    </div>
+                    <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.cashFlow" class="fundamentals-echart"></div>
+                    </div>
+                    <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.margins" class="fundamentals-echart"></div>
+                    </div>
                   </div>
-                  <div class="fundamentals-chart">
-                    <div echarts [options]="fundamentalsCharts()!.balanceSheet" class="fundamentals-echart"></div>
+                } @else if (chartLoading()) {
+                  <div class="content-loading">
+                    <mat-spinner diameter="40" />
+                    <p>Loading {{ fundamentalsIsAnnual() ? 'annual' : 'quarterly' }} fundamentals...</p>
                   </div>
-                  <div class="fundamentals-chart">
-                    <div echarts [options]="fundamentalsCharts()!.cashFlow" class="fundamentals-echart"></div>
+                } @else if (chartError()) {
+                  <div class="chart-error">
+                    <mat-icon>error_outline</mat-icon>
+                    <p>{{ chartError() }}</p>
+                    <p class="error-hint">
+                      Try switching to {{ fundamentalsIsAnnual() ? 'Annual' : 'Quarterly' }} data
+                    </p>
                   </div>
-                  <div class="fundamentals-chart">
-                    <div echarts [options]="fundamentalsCharts()!.margins" class="fundamentals-echart"></div>
+                } @else {
+                  <div class="no-data-message">
+                    <mat-icon>info</mat-icon>
+                    <p>No {{ fundamentalsIsAnnual() ? 'annual' : 'quarterly' }} fundamentals data available.</p>
+                    <p class="error-hint">
+                      Try switching to {{ fundamentalsIsAnnual() ? 'Quarterly' : 'Annual' }} data
+                    </p>
                   </div>
-                </div>
+                }
               </div>
-            } @else if (showValuation() && valuationCharts()) {
+            } @else if (showValuation()) {
               <!-- Valuation (DCF Analysis) view -->
               <div class="valuation-view">
                 <div class="valuation-header">
                   <span class="valuation-title">DCF Valuation Analysis</span>
-                  <div class="valuation-tabs">
-                    <button
-                      mat-stroked-button
-                      [class.active]="valuationDrillDown() === 'summary'"
-                      (click)="setValuationDrillDown('summary')"
-                    >
+                  <mat-button-toggle-group [value]="valuationDrillDown()" class="valuation-toggle-group">
+                    <mat-button-toggle value="summary" (click)="setValuationDrillDown('summary')">
                       Summary
-                    </button>
-                    <button
-                      mat-stroked-button
-                      [class.active]="valuationDrillDown() === 'projections'"
-                      (click)="setValuationDrillDown('projections')"
-                    >
+                    </mat-button-toggle>
+                    <mat-button-toggle value="historical" (click)="setValuationDrillDown('historical')">
+                      Historical
+                    </mat-button-toggle>
+                    <mat-button-toggle value="projections" (click)="setValuationDrillDown('projections')">
                       Projections
-                    </button>
-                    <button
-                      mat-stroked-button
-                      [class.active]="valuationDrillDown() === 'sensitivity'"
-                      (click)="setValuationDrillDown('sensitivity')"
-                    >
+                    </mat-button-toggle>
+                    <mat-button-toggle value="sensitivity" (click)="setValuationDrillDown('sensitivity')">
                       Sensitivity
-                    </button>
-                    <button
-                      mat-stroked-button
-                      [class.active]="valuationDrillDown() === 'methodology'"
-                      (click)="setValuationDrillDown('methodology')"
-                    >
+                    </mat-button-toggle>
+                    <mat-button-toggle value="methodology" (click)="setValuationDrillDown('methodology')">
                       Methodology
-                    </button>
-                  </div>
+                    </mat-button-toggle>
+                  </mat-button-toggle-group>
                 </div>
 
-                @if (valuationDrillDown() === 'summary') {
+                @if (chartLoading()) {
+                  <div class="content-loading">
+                    <mat-spinner diameter="40" />
+                    <p>Loading valuation analysis...</p>
+                  </div>
+                } @else if (chartError() && !valuationCharts()) {
+                  <div class="chart-error">
+                    <mat-icon>error_outline</mat-icon>
+                    <p>{{ chartError() }}</p>
+                  </div>
+                } @else if (!valuationCharts()) {
+                  <div class="no-data-message">
+                    <mat-icon>info</mat-icon>
+                    <p>No valuation data available for this symbol.</p>
+                  </div>
+                } @else if (valuationDrillDown() === 'summary') {
                   <!-- Summary View: Key metrics and comparison chart -->
                   <div class="valuation-summary">
                     @if (valuationData(); as data) {
@@ -791,6 +810,63 @@
                         <div echarts [options]="valuationCharts()!.enterpriseValue" class="valuation-echart"></div>
                       </div>
                     </div>
+                  </div>
+                } @else if (valuationDrillDown() === 'historical') {
+                  <!-- Historical Valuation View: P/E, P/B, P/S trends over time -->
+                  <div class="valuation-historical">
+                    @if (valuationCharts()?.historicalValuation) {
+                      <div class="valuation-chart-full">
+                        <div
+                          echarts
+                          [options]="valuationCharts()!.historicalValuation!"
+                          class="valuation-echart-large"
+                        ></div>
+                      </div>
+                    }
+                    @if (valuationCharts()?.peBand) {
+                      <div class="valuation-chart-full">
+                        <div echarts [options]="valuationCharts()!.peBand!" class="valuation-echart-large"></div>
+                      </div>
+                    }
+                    @if (valuationData(); as data) {
+                      @if (data.historicalValuation && data.historicalValuation.length > 0) {
+                        <div class="historical-stats">
+                          <div class="metric-card">
+                            <span class="metric-label">Average P/E</span>
+                            <span class="metric-value">{{
+                              data.historicalValuation[0].avgPeRatio?.toFixed(1) || 'N/A'
+                            }}</span>
+                          </div>
+                          <div class="metric-card">
+                            <span class="metric-label">P/E Range</span>
+                            <span class="metric-value">
+                              {{ data.historicalValuation[0].minPeRatio?.toFixed(1) || 'N/A' }} -
+                              {{ data.historicalValuation[0].maxPeRatio?.toFixed(1) || 'N/A' }}
+                            </span>
+                          </div>
+                          <div class="metric-card">
+                            <span class="metric-label">Current P/E</span>
+                            <span class="metric-value">
+                              {{
+                                data.historicalValuation[data.historicalValuation.length - 1].peRatio?.toFixed(1) ||
+                                  'N/A'
+                              }}
+                            </span>
+                          </div>
+                          <div class="metric-card">
+                            <span class="metric-label">Average P/B</span>
+                            <span class="metric-value">{{
+                              data.historicalValuation[0].avgPbRatio?.toFixed(1) || 'N/A'
+                            }}</span>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="no-data-message">
+                          <mat-icon>info</mat-icon>
+                          <p>Historical valuation data not available for this symbol.</p>
+                        </div>
+                      }
+                    }
                   </div>
                 } @else if (valuationDrillDown() === 'projections') {
                   <!-- Projections View: FCF chart and projection table -->
@@ -924,6 +1000,175 @@
                       </div>
                     }
                   </div>
+                }
+              </div>
+            } @else if (showDividends()) {
+              <!-- Dividend Analysis View -->
+              <div class="dividends-view">
+                <div class="dividends-header">
+                  <span class="dividends-title">Dividend Analysis</span>
+                  <mat-slide-toggle
+                    [checked]="showOperatingCashFlow()"
+                    (change)="toggleOperatingCashFlow()"
+                    matTooltip="Show Operating Cash Flow in comparison chart"
+                  >
+                    Show Op. Cash Flow
+                  </mat-slide-toggle>
+                </div>
+
+                @if (chartLoading()) {
+                  <div class="content-loading">
+                    <mat-spinner diameter="40" />
+                    <p>Loading dividend analysis...</p>
+                  </div>
+                } @else if (chartError() && !dividendCharts()) {
+                  <div class="chart-error">
+                    <mat-icon>error_outline</mat-icon>
+                    <p>{{ chartError() }}</p>
+                  </div>
+                } @else if (!dividendCharts()) {
+                  <div class="no-data-message">
+                    <mat-icon>info</mat-icon>
+                    <p>No dividend data available for this symbol.</p>
+                  </div>
+                } @else {
+                  <!-- Key Metrics Cards -->
+                  @if (dividendData(); as data) {
+                    <div class="dividend-metrics">
+                      <div class="metric-card">
+                        <span class="metric-label">Current Price</span>
+                        <span class="metric-value">${{ data.metrics.currentPrice.toFixed(2) }}</span>
+                      </div>
+                      @if (data.metrics.dividendYield !== null) {
+                        <div class="metric-card highlight">
+                          <span class="metric-label">Dividend Yield</span>
+                          <span class="metric-value">{{ data.metrics.dividendYield.toFixed(2) }}%</span>
+                        </div>
+                      }
+                      @if (data.metrics.ttmPayoutRatio !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">Payout Ratio (TTM)</span>
+                          <span class="metric-value">{{ data.metrics.ttmPayoutRatio.toFixed(1) }}%</span>
+                        </div>
+                      }
+                      @if (data.metrics.ttmFcfPayoutRatio !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">FCF Payout (TTM)</span>
+                          <span class="metric-value">{{ data.metrics.ttmFcfPayoutRatio.toFixed(1) }}%</span>
+                        </div>
+                      }
+                      @if (data.metrics.dividendCagr5Year !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">5Y Div CAGR</span>
+                          <span class="metric-value" [class.positive]="data.metrics.dividendCagr5Year > 0">
+                            {{ data.metrics.dividendCagr5Year > 0 ? '+' : ''
+                            }}{{ data.metrics.dividendCagr5Year.toFixed(1) }}%
+                          </span>
+                        </div>
+                      }
+                      @if (data.metrics.dividendCagr10Year !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">10Y Div CAGR</span>
+                          <span class="metric-value" [class.positive]="data.metrics.dividendCagr10Year > 0">
+                            {{ data.metrics.dividendCagr10Year > 0 ? '+' : ''
+                            }}{{ data.metrics.dividendCagr10Year.toFixed(1) }}%
+                          </span>
+                        </div>
+                      }
+                      @if (data.metrics.fcfCagr5Year !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">5Y FCF CAGR</span>
+                          <span class="metric-value" [class.positive]="data.metrics.fcfCagr5Year > 0">
+                            {{ data.metrics.fcfCagr5Year > 0 ? '+' : '' }}{{ data.metrics.fcfCagr5Year.toFixed(1) }}%
+                          </span>
+                        </div>
+                      }
+                      @if (data.metrics.fcfCagr10Year !== null) {
+                        <div class="metric-card">
+                          <span class="metric-label">10Y FCF CAGR</span>
+                          <span class="metric-value" [class.positive]="data.metrics.fcfCagr10Year > 0">
+                            {{ data.metrics.fcfCagr10Year > 0 ? '+' : '' }}{{ data.metrics.fcfCagr10Year.toFixed(1) }}%
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <!-- Charts Grid -->
+                  <div class="dividend-charts-grid">
+                    <div class="dividend-chart">
+                      <div echarts [options]="dividendCharts()!.yearlyDividends" class="dividend-echart"></div>
+                    </div>
+                    <div class="dividend-chart">
+                      <div echarts [options]="dividendCharts()!.payoutRatio" class="dividend-echart"></div>
+                    </div>
+                    <div class="dividend-chart full-width">
+                      <div echarts [options]="dividendCharts()!.cashFlowComparison" class="dividend-echart"></div>
+                    </div>
+                  </div>
+
+                  <!-- Data Table -->
+                  @if (dividendData(); as data) {
+                    <div class="dividend-table-container">
+                      <h4>Annual Dividend Data</h4>
+                      <div class="dividend-table-scroll">
+                        <table class="dividend-table">
+                          <thead>
+                            <tr>
+                              <th>Metric</th>
+                              @for (year of data.yearlyData; track year.year) {
+                                <th>{{ year.year }}</th>
+                              }
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="metric-name">Free Cash Flow</td>
+                              @for (year of data.yearlyData; track year.year) {
+                                <td>{{ dividendChartService.formatCurrency(year.freeCashFlow) }}</td>
+                              }
+                            </tr>
+                            <tr>
+                              <td class="metric-name">Dividends Paid</td>
+                              @for (year of data.yearlyData; track year.year) {
+                                <td>
+                                  {{
+                                    dividendChartService.formatCurrency(
+                                      year.dividendPayout ? -year.dividendPayout : null
+                                    )
+                                  }}
+                                </td>
+                              }
+                            </tr>
+                            <tr>
+                              <td class="metric-name">FCF Payout Ratio</td>
+                              @for (year of data.yearlyData; track year.year) {
+                                <td [class.warning]="year.fcfPayoutRatio && year.fcfPayoutRatio > 0.8">
+                                  {{
+                                    dividendChartService.formatPercent(
+                                      year.fcfPayoutRatio ? year.fcfPayoutRatio * 100 : null
+                                    )
+                                  }}
+                                </td>
+                              }
+                            </tr>
+                            <tr>
+                              <td class="metric-name">Net Income Payout</td>
+                              @for (year of data.yearlyData; track year.year) {
+                                <td [class.warning]="year.netIncomePayoutRatio && year.netIncomePayoutRatio > 0.8">
+                                  {{
+                                    dividendChartService.formatPercent(
+                                      year.netIncomePayoutRatio ? year.netIncomePayoutRatio * 100 : null
+                                    )
+                                  }}
+                                </td>
+                              }
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  }
                 }
               </div>
             } @else if (tableData()) {

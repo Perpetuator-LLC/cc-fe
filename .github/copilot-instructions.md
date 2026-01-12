@@ -135,6 +135,18 @@ loadGicsSectors(): Observable<string[]> {
 Use these scripts to test backend APIs without running the full frontend:
 
 ```bash
+# Shared authentication library (used by all test scripts)
+# Located at: scripts/lib/test-utils.cjs
+# Provides: getAccessToken, graphqlQuery, loadEnvironment
+
+# Test DCF Valuation API
+node scripts/test-dcf-analysis.cjs MSFT         # DCF for MSFT
+node scripts/test-dcf-analysis.cjs AAPL 7       # DCF with 7 year projections
+
+# Test Fundamentals API
+node scripts/test-fundamentals.cjs MSFT         # Annual fundamentals
+node scripts/test-fundamentals.cjs MSFT q       # Quarterly fundamentals
+
 # Test WebSocket GraphQL APIs (quote, chart, progressive loading, etc.)
 node scripts/test-ws-graphql-v2.cjs all
 
@@ -159,6 +171,18 @@ node scripts/test-graphql-query.cjs msft-daily           # MSFT daily data
 rm -f ~/.capital-copilot/cli-tokens.json  # Clear cached tokens
 ```
 
+### Creating New Test Scripts
+Use the shared auth library for authenticated API calls:
+
+```javascript
+const { graphqlQuery, loadEnvironment } = require('./lib/test-utils.cjs');
+
+// Execute authenticated GraphQL query
+const data = await graphqlQuery(`
+  query { balanceSheets(ticker: "MSFT", isAnnual: true, limit: 5) { fiscalDateEnding totalAssets } }
+`);
+```
+
 ### Running Scripts with Output Capture
 
 **IMPORTANT:** Terminal output can be truncated. For reliable output, use nohup with redirect:
@@ -178,6 +202,35 @@ This pattern:
 2. Redirects all output to a log file
 3. Waits for completion
 4. Displays the captured output
+
+## 🔗 AI Link: Frontend ↔ Backend Communication
+
+The `logs/ai_link/` directory enables asynchronous communication between Frontend (FE) and Backend (BE) AI agents.
+
+### File Naming Convention
+| Agent | Prefix | Example |
+|-------|--------|---------|
+| Frontend | `fe#_` | `fe15_chart_preferences_integration.md` |
+| Backend | `be#_` | `be13_chart_preferences_api.md` |
+
+Numbers increment per response to maintain chronological order.
+
+### How to Use
+1. **Read Latest:** Check for the latest `be#_` or `fe#_` files to see recent changes/requests
+2. **Write Response:** Create a new file with the next number in your sequence
+3. **Reference:** Include "In Response To" field linking to the file you're responding to
+4. **Complete in One Pass:** Write your file completely before renaming to signal completion
+
+### Browser Console Access
+To see browser console output captured during debugging:
+```bash
+grep :CONSOLE: ./logs/ai_link/browser/chrome_debug.log | tail -n100
+```
+
+### Current State
+- **FE files:** Document frontend changes, requests for backend API changes
+- **BE files:** Document backend changes, answers to frontend questions
+- Both agents can read each other's files for context
 
 **Token handling:** Scripts read credentials from `src/environments/environment.ts` (TEST_EMAIL, TEST_PASSWORD). Tokens are cached in `~/.capital-copilot/cli-tokens.json` with proper file permissions (0600).
 

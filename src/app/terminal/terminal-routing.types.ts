@@ -33,7 +33,15 @@ export type TerminalTab = 'watchlists' | 'dashboards' | 'history' | 'settings';
  * - news: News and events
  * - earnings: Earnings reports
  */
-export type TerminalView = 'chart' | 'info' | 'fundamentals' | 'valuation' | 'history' | 'news' | 'earnings';
+export type TerminalView =
+  | 'chart'
+  | 'info'
+  | 'fundamentals'
+  | 'valuation'
+  | 'dividends'
+  | 'history'
+  | 'news'
+  | 'earnings';
 
 /**
  * Chart interval types

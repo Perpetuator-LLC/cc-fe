@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
@@ -49,6 +50,8 @@ import { ChartPreferencesService } from '../chart-preferences.service';
 import { FundamentalsService, FundamentalsData } from '../fundamentals.service';
 import { FundamentalsChartService } from '../fundamentals-chart.service';
 import { ValuationService, DCFAnalysisData } from '../valuation.service';
+import { DividendService, DividendAnalysisData } from '../dividend.service';
+import { DividendChartService } from '../dividend-chart.service';
 import { ValuationChartService } from '../valuation-chart.service';
 
 // Register required ECharts components
@@ -102,6 +105,7 @@ interface WatchlistColumnOption {
     RouterLink,
     MatIconModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatMenuModule,
@@ -214,10 +218,22 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     enterpriseValue: EChartsOption;
     sensitivityHeatmap: EChartsOption;
     historicalFinancials: EChartsOption;
+    historicalValuation: EChartsOption | null;
+    peBand: EChartsOption | null;
   } | null>(null);
-  valuationDrillDown = signal<'summary' | 'projections' | 'sensitivity' | 'methodology'>('summary');
+  valuationDrillDown = signal<'summary' | 'historical' | 'projections' | 'sensitivity' | 'methodology'>('summary');
   private valuationFetchRetries = 0;
   private static readonly MAX_VALUATION_RETRIES = 2;
+
+  // Dividend view state
+  showDividends = signal(false);
+  dividendData = signal<DividendAnalysisData | null>(null);
+  dividendCharts = signal<{
+    payoutRatio: EChartsOption;
+    yearlyDividends: EChartsOption;
+    cashFlowComparison: EChartsOption;
+  } | null>(null);
+  showOperatingCashFlow = signal(false); // Toggle for OCF in comparison chart
 
   // Computed: Check if current interval is intraday (for enabling/disabling certain options)
   isCurrentIntervalIntraday = computed(() => {
@@ -648,6 +664,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private fundamentalsChartService: FundamentalsChartService,
     private valuationService: ValuationService,
     private valuationChartService: ValuationChartService,
+    private dividendService: DividendService,
+    protected dividendChartService: DividendChartService,
     private route: ActivatedRoute,
   ) {}
 
@@ -1710,7 +1728,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.fundamentalsCharts.set(null);
     this.showValuation.set(false);
     this.valuationCharts.set(null);
+    this.showDividends.set(false);
+    this.dividendCharts.set(null);
     this.currentCommand.set(command);
+    // Reset progressive loading state
+    this.loadingMoreData.set(false);
+    this.hasOlderData.set(true);
+    this.chartPageInfo.set(null);
+    this.lastProgressiveCursor = null;
+    this.sameCursorRetryCount = 0;
 
     // Handle FUNDAMENTALS command directly (no backend execution needed)
     if (command === 'FUNDAMENTALS') {
@@ -1721,6 +1747,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Handle DCF/VALUATION command directly
     if (command === 'DCF' || command === 'VALUATION') {
       this.loadValuationView(symbol);
+      return;
+    }
+
+    // Handle DIVIDENDS command directly
+    if (command === 'DIVIDENDS') {
+      this.loadDividendsView(symbol);
       return;
     }
 
@@ -1902,6 +1934,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             enterpriseValue: this.valuationChartService.buildEnterpriseValueWaterfallChart(data.baseCase),
             sensitivityHeatmap: this.valuationChartService.buildSensitivityHeatmap(data.sensitivityGrid),
             historicalFinancials: this.valuationChartService.buildHistoricalFinancialsChart(data),
+            historicalValuation: this.valuationChartService.buildHistoricalValuationChart(data),
+            peBand: this.valuationChartService.buildPeBandChart(data),
           };
           this.valuationCharts.set(charts);
           this.chartLoading.set(false);
@@ -1926,8 +1960,79 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Set valuation drill-down view
    */
-  setValuationDrillDown(view: 'summary' | 'projections' | 'sensitivity' | 'methodology'): void {
+  setValuationDrillDown(view: 'summary' | 'historical' | 'projections' | 'sensitivity' | 'methodology'): void {
     this.valuationDrillDown.set(view);
+  }
+
+  /**
+   * Load dividend analysis view for a symbol
+   */
+  private loadDividendsView(symbol: string): void {
+    console.log('[WatchlistTab] Loading dividends for:', symbol);
+    this.showDividends.set(true);
+
+    // Update URL to reflect dividends view
+    const item = this.selectedItem();
+    this.routingService.applyRoute({
+      symbol,
+      exchange: item?.exchange,
+      view: 'dividends',
+    });
+
+    this.subscriptions.add(
+      this.dividendService.loadDividendAnalysis(symbol, true).subscribe({
+        next: (data: DividendAnalysisData | null) => {
+          if (!data) {
+            const serviceError = this.dividendService.error();
+            console.log('[WatchlistTab] No dividend data, error:', serviceError);
+            this.chartError.set(serviceError || 'No dividend data available. This company may not pay dividends.');
+            this.chartLoading.set(false);
+            return;
+          }
+
+          console.log('[WatchlistTab] Dividends loaded:', {
+            symbol: data.symbol,
+            years: data.yearlyData.length,
+            yield: data.metrics.dividendYield,
+          });
+
+          // Store raw data
+          this.dividendData.set(data);
+
+          // Build dividend charts
+          this.buildDividendCharts(data);
+          this.chartLoading.set(false);
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Error loading dividends:', err);
+          this.chartError.set(err.message || 'Failed to load dividend data');
+          this.chartLoading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Build dividend charts from data
+   */
+  private buildDividendCharts(data: DividendAnalysisData): void {
+    const charts = {
+      payoutRatio: this.dividendChartService.buildFcfPayoutRatioChart(data),
+      yearlyDividends: this.dividendChartService.buildYearlyDividendsChart(data),
+      cashFlowComparison: this.dividendChartService.buildCashFlowComparisonChart(data, this.showOperatingCashFlow()),
+    };
+    this.dividendCharts.set(charts);
+  }
+
+  /**
+   * Toggle operating cash flow visibility in dividend comparison chart
+   */
+  toggleOperatingCashFlow(): void {
+    this.showOperatingCashFlow.update((v) => !v);
+    const data = this.dividendData();
+    if (data) {
+      this.buildDividendCharts(data);
+    }
   }
 
   /**
@@ -2643,6 +2748,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       { icon: 'show_chart', label: 'Chart', command: 'CHART' },
       { icon: 'account_balance', label: 'Fundamentals', command: 'FUNDAMENTALS' },
       { icon: 'analytics', label: 'Valuation', command: 'DCF' },
+      { icon: 'payments', label: 'Dividends', command: 'DIVIDENDS' },
       { icon: 'table_chart', label: 'Table', command: 'HP' },
       { icon: 'info', label: 'Info', command: 'DES' },
     ];

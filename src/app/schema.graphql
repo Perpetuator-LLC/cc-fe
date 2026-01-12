@@ -307,6 +307,15 @@ type Query {
     orderBy: String
   ): DiscountedCashFlowAnalysisTypeConnection
 
+  """Calculate DCF analysis on-demand for a ticker"""
+  dcfAnalysis(
+    """Stock ticker symbol"""
+    ticker: String!
+
+    """Number of years to project (3-10)"""
+    projectionYears: Int = 5
+  ): DCFAnalysisType
+
   """Get list of all GICS industry names"""
   gicsIndustries: [String]
 
@@ -2759,6 +2768,139 @@ type ListingStatusType {
   lastUpdated: DateTime!
   isUpdating: Boolean!
   updateCount: Int!
+}
+
+"""Complete DCF analysis result for on-demand calculation."""
+type DCFAnalysisType {
+  symbol: String!
+  analysisDate: String!
+  companyName: String!
+  historicalFcf: [DCFHistoricalDataType!]!
+  historicalRevenue: [DCFHistoricalDataType!]!
+  historicalNetIncome: [DCFHistoricalDataType!]!
+
+  """
+  Historical P/E, P/B ratios to show if company trades at premium/discount vs history
+  """
+  historicalValuation: [DCFHistoricalValuationType!]!
+  baseCase: DCFResultType!
+  bullCase: DCFResultType!
+  bearCase: DCFResultType!
+  intrinsicValueMin: Float!
+  intrinsicValueMax: Float!
+  intrinsicValueMean: Float!
+  intrinsicValueMedian: Float!
+  sensitivityGrid: [DCFSensitivityPointType!]!
+  projectionChartData: [DCFProjectionChartDataType!]!
+  valuationSummary: DCFValuationSummaryType!
+  assumptions: DCFAssumptionsType!
+}
+
+"""Historical financial data point."""
+type DCFHistoricalDataType {
+  date: String!
+  value: Float!
+  operatingCashFlow: Float
+}
+
+"""Historical valuation metrics for a specific date (P/E, P/B, etc.)."""
+type DCFHistoricalValuationType {
+  date: String!
+  price: Float!
+  eps: Float
+
+  """Price-to-Earnings ratio"""
+  peRatio: Float
+
+  """Price-to-Book ratio"""
+  pbRatio: Float
+
+  """Price-to-Sales ratio"""
+  psRatio: Float
+  bookValuePerShare: Float
+
+  """Average P/E over the historical period"""
+  avgPeRatio: Float
+
+  """Minimum P/E over the historical period"""
+  minPeRatio: Float
+
+  """Maximum P/E over the historical period"""
+  maxPeRatio: Float
+
+  """Average P/B over the historical period"""
+  avgPbRatio: Float
+}
+
+"""DCF calculation result for a single scenario."""
+type DCFResultType {
+  intrinsicValuePerShare: Float!
+  currentPrice: Float!
+  upsidePercentage: Float!
+  marginOfSafety: Float!
+  enterpriseValue: Float!
+  presentValueFcf: Float!
+  terminalValue: Float!
+  presentValueTerminal: Float!
+  netDebt: Float!
+  equityValue: Float!
+  sharesOutstanding: Float!
+  wacc: Float!
+  costOfEquity: Float!
+  costOfDebt: Float!
+  debtWeight: Float!
+  equityWeight: Float!
+  terminalGrowthRate: Float!
+  projectionYears: Int!
+  projections: [DCFProjectionType!]!
+}
+
+"""Projected FCF for a single year."""
+type DCFProjectionType {
+  year: Int!
+  date: String!
+  fcf: Float!
+  discountedFcf: Float!
+  growthRate: Float!
+}
+
+"""Sensitivity analysis point."""
+type DCFSensitivityPointType {
+  discountRate: Float!
+  terminalGrowth: Float!
+  intrinsicValue: Float!
+}
+
+"""Chart data point for FCF projections."""
+type DCFProjectionChartDataType {
+  date: String!
+  type: String!
+  fcf: Float
+  fcfBase: Float
+  fcfBull: Float
+  fcfBear: Float
+}
+
+"""Summary valuation metrics."""
+type DCFValuationSummaryType {
+  currentPrice: Float!
+  intrinsicValueBase: Float!
+  intrinsicValueBull: Float!
+  intrinsicValueBear: Float!
+  upsideBase: Float!
+  marginOfSafety: Float!
+  wacc: Float!
+  terminalGrowth: Float!
+}
+
+"""DCF calculation assumptions."""
+type DCFAssumptionsType {
+  projectionYears: Int!
+  riskFreeRate: Float!
+  marketRiskPremium: Float!
+  beta: Float!
+  taxRate: Float!
+  terminalGrowthRate: Float!
 }
 
 """Relay-style connection for catalog symbols with pagination."""
