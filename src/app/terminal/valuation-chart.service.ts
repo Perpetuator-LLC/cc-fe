@@ -447,6 +447,233 @@ export class ValuationChartService {
     }));
   }
 
+  /**
+   * Build Historical Valuation chart showing P/E, P/B, P/S ratios over time
+   */
+  buildHistoricalValuationChart(data: DCFAnalysisData): EChartsOption | null {
+    const hv = data.historicalValuation;
+    if (!hv || hv.length === 0) {
+      return null;
+    }
+
+    const dates = hv.map((d) => this.formatDate(d.date));
+    const peRatios = hv.map((d) => d.peRatio);
+    const pbRatios = hv.map((d) => d.pbRatio);
+    const psRatios = hv.map((d) => d.psRatio);
+
+    // Get averages for reference lines (same on all entries)
+    const avgPe = hv[0]?.avgPeRatio;
+
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: 'Historical Valuation Multiples',
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'var(--md-sys-color-surface-container-high)',
+        borderColor: 'var(--md-sys-color-outline)',
+        textStyle: { color: THEME.textColor },
+        formatter: (params: unknown) => {
+          const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
+          if (!p || p.length === 0) return '';
+          let html = `<strong>${p[0].axisValue}</strong><br/>`;
+          p.forEach((item) => {
+            if (item.value != null) {
+              html += `<span style="color:${item.color}">●</span> ${item.seriesName}: ${item.value.toFixed(2)}<br/>`;
+            }
+          });
+          if (avgPe != null) {
+            html += `<br/><span style="color:${THEME.textColorSecondary}">Avg P/E: ${avgPe.toFixed(2)}</span>`;
+          }
+          return html;
+        },
+      },
+      legend: {
+        data: ['P/E Ratio', 'P/B Ratio', 'P/S Ratio'],
+        bottom: 0,
+        textStyle: { color: THEME.textColorSecondary },
+      },
+      grid: {
+        left: 60,
+        right: 20,
+        top: 50,
+        bottom: 50,
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Ratio',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+      },
+      series: [
+        {
+          name: 'P/E Ratio',
+          type: 'line',
+          data: peRatios,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: THEME.primary },
+          markLine:
+            avgPe != null
+              ? {
+                  silent: true,
+                  symbol: 'none',
+                  lineStyle: { type: 'dashed', color: THEME.primary, opacity: 0.5 },
+                  data: [
+                    {
+                      yAxis: avgPe,
+                      label: {
+                        formatter: `Avg: ${avgPe.toFixed(1)}`,
+                        color: THEME.textColorSecondary,
+                        position: 'end',
+                      },
+                    },
+                  ],
+                }
+              : undefined,
+        },
+        {
+          name: 'P/B Ratio',
+          type: 'line',
+          data: pbRatios,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: THEME.success },
+        },
+        {
+          name: 'P/S Ratio',
+          type: 'line',
+          data: psRatios,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: THEME.warning },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Build P/E Band Chart showing current P/E relative to historical range
+   */
+  buildPeBandChart(data: DCFAnalysisData): EChartsOption | null {
+    const hv = data.historicalValuation;
+    if (!hv || hv.length === 0) {
+      return null;
+    }
+
+    const dates = hv.map((d) => this.formatDate(d.date));
+    const peRatios = hv.map((d) => d.peRatio ?? 0);
+    const avgPe = hv[0]?.avgPeRatio ?? 0;
+    const minPe = hv[0]?.minPeRatio ?? 0;
+    const maxPe = hv[0]?.maxPeRatio ?? 0;
+
+    // Create band data (min to max range)
+    const bandData = hv.map(() => [minPe, maxPe]);
+
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: 'P/E Ratio Historical Range',
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'var(--md-sys-color-surface-container-high)',
+        borderColor: 'var(--md-sys-color-outline)',
+        textStyle: { color: THEME.textColor },
+        formatter: (params: unknown) => {
+          const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
+          if (!p || p.length === 0) return '';
+          const peItem = p.find((i) => i.seriesName === 'P/E Ratio');
+          let html = `<strong>${p[0].axisValue}</strong><br/>`;
+          if (peItem && peItem.value != null) {
+            html += `P/E Ratio: <strong>${peItem.value.toFixed(2)}</strong><br/>`;
+          }
+          html += `<span style="color:${THEME.textColorSecondary}">`;
+          html += `Range: ${minPe.toFixed(1)} - ${maxPe.toFixed(1)}<br/>`;
+          html += `Average: ${avgPe.toFixed(1)}`;
+          html += `</span>`;
+          return html;
+        },
+      },
+      grid: {
+        left: 60,
+        right: 20,
+        top: 50,
+        bottom: 30,
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'P/E Ratio',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+        min: Math.floor(minPe * 0.8),
+        max: Math.ceil(maxPe * 1.1),
+      },
+      series: [
+        // Band area (min to max range)
+        {
+          name: 'Historical Range',
+          type: 'bar',
+          data: bandData.map((b) => b[1] - b[0]),
+          barWidth: '100%',
+          stack: 'band',
+          itemStyle: { color: 'rgba(144, 202, 249, 0.15)' },
+          silent: true,
+        },
+        // Offset bar for min value
+        {
+          name: 'Offset',
+          type: 'bar',
+          data: bandData.map(() => minPe),
+          barWidth: '100%',
+          stack: 'band',
+          itemStyle: { color: 'transparent' },
+          silent: true,
+        },
+        // Actual P/E line
+        {
+          name: 'P/E Ratio',
+          type: 'line',
+          data: peRatios,
+          smooth: true,
+          lineStyle: { width: 3, color: THEME.primary },
+          itemStyle: { color: THEME.primary },
+          z: 10,
+        },
+        // Average P/E line
+        {
+          name: 'Average',
+          type: 'line',
+          data: hv.map(() => avgPe),
+          lineStyle: { type: 'dashed', width: 2, color: THEME.warning },
+          itemStyle: { color: THEME.warning },
+          symbol: 'none',
+        },
+      ],
+    };
+  }
+
   // Helper methods
   private formatDate(dateStr: string): string {
     if (!dateStr) return '';
