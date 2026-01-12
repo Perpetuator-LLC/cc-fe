@@ -1388,3 +1388,277 @@
     min-height: 180px;
   }
 }
+
+// Valuation (DCF Analysis) View
+.valuation-view {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  height: 100%;
+  padding: 16px;
+}
+
+.valuation-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 8px;
+}
+
+.valuation-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.valuation-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button {
+    min-width: 80px;
+
+    &.active {
+      color: var(--md-sys-color-on-primary-container);
+      background-color: var(--md-sys-color-primary-container);
+    }
+  }
+}
+
+// Valuation Summary
+.valuation-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.valuation-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 12px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  &.base {
+    border-left: 4px solid var(--md-sys-color-primary);
+  }
+
+  &.bull {
+    border-left: 4px solid var(--md-extended-color-success-color);
+  }
+
+  &.bear {
+    border-left: 4px solid var(--md-sys-color-error);
+  }
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.metric-change {
+  font-size: 12px;
+  font-weight: 500;
+
+  &.positive {
+    color: var(--md-extended-color-success-color);
+  }
+
+  &.negative {
+    color: var(--md-sys-color-error);
+  }
+}
+
+.valuation-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.valuation-chart {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 300px;
+  padding: 8px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.valuation-echart {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+}
+
+// Full-width chart container
+.valuation-chart-full {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 350px;
+  padding: 8px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.valuation-echart-full {
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+}
+
+.valuation-echart-large {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+// Projections view
+.valuation-projections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.projections-table-container {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.projections-table {
+  width: 100%;
+}
+
+// Sensitivity view
+.valuation-sensitivity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Methodology view
+.valuation-methodology {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px;
+}
+
+.methodology-section {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.assumptions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.assumption {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.formula {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  code {
+    display: block;
+
+    padding: 8px 12px;
+    border-radius: 4px;
+
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface-container-high);
+  }
+}
+
+// Responsive: valuation view
+@include mixins.mobile() {
+  .valuation-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .valuation-chart {
+    min-height: 250px;
+  }
+
+  .valuation-echart {
+    min-height: 230px;
+  }
+
+  .valuation-tabs {
+    justify-content: center;
+    width: 100%;
+
+    button {
+      flex: 1;
+      min-width: auto;
+    }
+  }
+
+  .valuation-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

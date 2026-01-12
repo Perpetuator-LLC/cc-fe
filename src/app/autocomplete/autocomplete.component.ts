@@ -69,30 +69,33 @@ export class AutocompleteComponent {
       return of([]);
     }
 
-    return (
-      this.apollo
-        .query({
-          query: AUTOCOMPLETE_QUERY,
-          variables: { query: value },
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .pipe(
-          map((result: any) => {
-            // Map new API response to AutocompleteResult format
-            interface AutocompleteItem {
-              fqn: string;
-              display: string;
-              symbol?: string;
-              name?: string;
-            }
-            return (result.data.autocomplete || []).map((item: AutocompleteItem) => ({
-              symbol: item.symbol || item.display,
-              name: item.name || item.display,
-              cik: '', // Not available in new API
-            }));
-          }),
-        )
-    );
+    // Define response type for autocomplete query
+    interface AutocompleteItem {
+      fqn: string;
+      display: string;
+      symbol?: string;
+      name?: string;
+    }
+    interface AutocompleteQueryResult {
+      autocomplete: AutocompleteItem[];
+    }
+
+    return this.apollo
+      .query<AutocompleteQueryResult>({
+        query: AUTOCOMPLETE_QUERY,
+        variables: { query: value },
+      })
+
+      .pipe(
+        map((result) => {
+          // Map new API response to AutocompleteResult format
+          return (result.data.autocomplete || []).map((item: AutocompleteItem) => ({
+            symbol: item.symbol || item.display,
+            name: item.name || item.display,
+            cik: '', // Not available in new API
+          }));
+        }),
+      );
   }
 
   /** Public API for parent components to focus the input */
