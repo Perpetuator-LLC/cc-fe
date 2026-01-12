@@ -15,6 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
@@ -110,6 +111,7 @@ interface WatchlistColumnOption {
     MatSlideToggleModule,
     MatTableModule,
     MatCheckboxModule,
+    MatPaginatorModule,
     NgxEchartsDirective,
     DataTableComponent,
   ],
@@ -322,6 +324,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   // Dynamically loaded asset type symbols
   assetTypeSymbols = signal<SymbolListItem[]>([]);
+
+  // System watchlist pagination state
+  systemWatchlistPageSize = 20;
+  systemWatchlistPageIndex = signal(0);
+  systemWatchlistTotalCount = signal(0);
+  systemWatchlistCursor = signal<string | null>(null);
+  systemWatchlistHasNextPage = signal(false);
+  systemWatchlistHasPrevPage = signal(false);
+  // Store cursors for each page to support going back
+  private systemWatchlistCursors: (string | null)[] = [null];
 
   // Create watchlist form
   newWatchlistName = '';
@@ -1334,6 +1346,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.chartOptions.set(null);
     this.chartError.set(null);
 
+    // Reset pagination state for system watchlists
+    this.systemWatchlistPageIndex.set(0);
+    this.systemWatchlistTotalCount.set(0);
+    this.systemWatchlistCursor.set(null);
+    this.systemWatchlistCursors = [null];
+    this.systemWatchlistHasNextPage.set(false);
+    this.systemWatchlistHasPrevPage.set(false);
+
     // Set default sort based on watchlist type
     if (newValue === 'recent') {
       // Recent watchlist: sort by most recently accessed by default
@@ -1365,28 +1385,33 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load symbols for a specific sector from system catalog
+   * Load symbols for a specific sector from system catalog with pagination
    */
-  private loadCategorySectorSymbols(sector: string, orderBy = 'marketCap'): void {
+  private loadCategorySectorSymbols(sector: string, orderBy = 'marketCap', cursor: string | null = null): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadAllSectorSymbols(sector, 100, orderBy).subscribe({
-        next: (symbols) => {
+      this.watchlistService.loadCatalogSectorSymbols(sector, this.systemWatchlistPageSize, cursor, orderBy).subscribe({
+        next: (connection) => {
           this.sectorSymbols.set(
-            symbols.map((item) => ({
-              symbol: item.symbol,
-              displayName: item.displayName,
-              assetType: item.assetType,
-              exchange: item.exchange,
-              sector: item.sector,
-              industry: item.industry,
-              marketCap: item.marketCap,
+            connection.edges.map((edge) => ({
+              symbol: edge.node.symbol,
+              displayName: edge.node.displayName,
+              assetType: edge.node.assetType,
+              exchange: edge.node.exchange,
+              sector: edge.node.sector,
+              industry: edge.node.industry,
+              marketCap: edge.node.marketCap,
             })),
           );
+          this.systemWatchlistTotalCount.set(connection.totalCount);
+          this.systemWatchlistHasNextPage.set(connection.pageInfo.hasNextPage);
+          this.systemWatchlistHasPrevPage.set(connection.pageInfo.hasPreviousPage);
+          this.systemWatchlistCursor.set(connection.pageInfo.endCursor);
           this.loading.set(false);
         },
         error: () => {
           this.sectorSymbols.set([]);
+          this.systemWatchlistTotalCount.set(0);
           this.loading.set(false);
         },
       }),
@@ -1394,60 +1419,74 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load symbols for a specific industry from system catalog
+   * Load symbols for a specific industry from system catalog with pagination
    */
-  private loadCategoryIndustrySymbols(industry: string, orderBy = 'marketCap'): void {
+  private loadCategoryIndustrySymbols(industry: string, orderBy = 'marketCap', cursor: string | null = null): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadAllIndustrySymbols(industry, 100, orderBy).subscribe({
-        next: (symbols) => {
-          this.industrySymbols.set(
-            symbols.map((item) => ({
-              symbol: item.symbol,
-              displayName: item.displayName,
-              assetType: item.assetType,
-              exchange: item.exchange,
-              sector: item.sector,
-              industry: item.industry,
-              marketCap: item.marketCap,
-            })),
-          );
-          this.loading.set(false);
-        },
-        error: () => {
-          this.industrySymbols.set([]);
-          this.loading.set(false);
-        },
-      }),
+      this.watchlistService
+        .loadCatalogIndustrySymbols(industry, this.systemWatchlistPageSize, cursor, orderBy)
+        .subscribe({
+          next: (connection) => {
+            this.industrySymbols.set(
+              connection.edges.map((edge) => ({
+                symbol: edge.node.symbol,
+                displayName: edge.node.displayName,
+                assetType: edge.node.assetType,
+                exchange: edge.node.exchange,
+                sector: edge.node.sector,
+                industry: edge.node.industry,
+                marketCap: edge.node.marketCap,
+              })),
+            );
+            this.systemWatchlistTotalCount.set(connection.totalCount);
+            this.systemWatchlistHasNextPage.set(connection.pageInfo.hasNextPage);
+            this.systemWatchlistHasPrevPage.set(connection.pageInfo.hasPreviousPage);
+            this.systemWatchlistCursor.set(connection.pageInfo.endCursor);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.industrySymbols.set([]);
+            this.systemWatchlistTotalCount.set(0);
+            this.loading.set(false);
+          },
+        }),
     );
   }
 
   /**
-   * Load symbols for a specific exchange from system catalog
+   * Load symbols for a specific exchange from system catalog with pagination
    */
-  private loadCategoryExchangeSymbols(exchange: string, orderBy = 'marketCap'): void {
+  private loadCategoryExchangeSymbols(exchange: string, orderBy = 'marketCap', cursor: string | null = null): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadExchangeSymbols(exchange, 100, orderBy).subscribe({
-        next: (symbols) => {
-          this.exchangeSymbols.set(
-            symbols.map((item) => ({
-              symbol: item.symbol,
-              displayName: item.displayName,
-              assetType: item.assetType,
-              exchange: item.exchange,
-              sector: item.sector,
-              industry: item.industry,
-              marketCap: item.marketCap,
-            })),
-          );
-          this.loading.set(false);
-        },
-        error: () => {
-          this.exchangeSymbols.set([]);
-          this.loading.set(false);
-        },
-      }),
+      this.watchlistService
+        .loadCatalogExchangeSymbols(exchange, this.systemWatchlistPageSize, cursor, orderBy)
+        .subscribe({
+          next: (connection) => {
+            this.exchangeSymbols.set(
+              connection.edges.map((edge) => ({
+                symbol: edge.node.symbol,
+                displayName: edge.node.displayName,
+                assetType: edge.node.assetType,
+                exchange: edge.node.exchange,
+                sector: edge.node.sector,
+                industry: edge.node.industry,
+                marketCap: edge.node.marketCap,
+              })),
+            );
+            this.systemWatchlistTotalCount.set(connection.totalCount);
+            this.systemWatchlistHasNextPage.set(connection.pageInfo.hasNextPage);
+            this.systemWatchlistHasPrevPage.set(connection.pageInfo.hasPreviousPage);
+            this.systemWatchlistCursor.set(connection.pageInfo.endCursor);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.exchangeSymbols.set([]);
+            this.systemWatchlistTotalCount.set(0);
+            this.loading.set(false);
+          },
+        }),
     );
   }
 
@@ -1475,6 +1514,60 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Handle pagination page change for system watchlists
+   */
+  onSystemWatchlistPageChange(event: PageEvent): void {
+    const newPageIndex = event.pageIndex;
+    const currentPageIndex = this.systemWatchlistPageIndex();
+
+    // Update page size if changed
+    if (event.pageSize !== this.systemWatchlistPageSize) {
+      this.systemWatchlistPageSize = event.pageSize;
+      // Reset to first page when page size changes
+      this.systemWatchlistPageIndex.set(0);
+      this.systemWatchlistCursors = [null];
+      this.reloadCurrentSystemWatchlist(null);
+      return;
+    }
+
+    // Determine the cursor for the target page
+    let cursor: string | null = null;
+
+    if (newPageIndex > currentPageIndex) {
+      // Going forward - use the endCursor from current page
+      cursor = this.systemWatchlistCursor();
+      // Store cursor for this new page index
+      this.systemWatchlistCursors[newPageIndex] = cursor;
+    } else if (newPageIndex < currentPageIndex) {
+      // Going backward - use stored cursor
+      cursor = this.systemWatchlistCursors[newPageIndex] || null;
+    }
+    // If newPageIndex === 0, cursor is null (first page)
+
+    this.systemWatchlistPageIndex.set(newPageIndex);
+    this.reloadCurrentSystemWatchlist(cursor);
+  }
+
+  /**
+   * Reload the current system watchlist with the given cursor
+   */
+  private reloadCurrentSystemWatchlist(cursor: string | null): void {
+    const watchlistId = this.selectedWatchlistId();
+    const effectiveSort = this.effectiveSortField();
+
+    if (watchlistId.startsWith('sector:')) {
+      const sectorName = watchlistId.replace('sector:', '');
+      this.loadCategorySectorSymbols(sectorName, effectiveSort, cursor);
+    } else if (watchlistId.startsWith('industry:')) {
+      const industryName = watchlistId.replace('industry:', '');
+      this.loadCategoryIndustrySymbols(industryName, effectiveSort, cursor);
+    } else if (watchlistId.startsWith('exchange:')) {
+      const exchangeName = watchlistId.replace('exchange:', '');
+      this.loadCategoryExchangeSymbols(exchangeName, effectiveSort, cursor);
+    }
   }
 
   /**

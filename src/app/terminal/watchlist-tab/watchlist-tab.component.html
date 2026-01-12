@@ -384,6 +384,19 @@
                 (keydown.enter)="selectSymbol(row)"
               ></tr>
             </table>
+
+            <!-- Paginator for system watchlists (sectors, industries, exchanges) -->
+            @if (isSystemCategory(selectedWatchlistId()) && systemWatchlistTotalCount() > 0) {
+              <mat-paginator
+                [length]="systemWatchlistTotalCount()"
+                [pageSize]="systemWatchlistPageSize"
+                [pageIndex]="systemWatchlistPageIndex()"
+                [pageSizeOptions]="[10, 20, 50, 100]"
+                [showFirstLastButtons]="true"
+                (page)="onSystemWatchlistPageChange($event)"
+                aria-label="Select page of symbols"
+              />
+            }
           }
         </div>
 
