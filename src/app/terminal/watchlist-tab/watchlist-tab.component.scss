@@ -857,7 +857,7 @@
 
   overflow: hidden;
 
-  height: 4px;
+  height: 1px;
 
   background: var(--md-sys-color-surface-container);
 
@@ -1279,6 +1279,18 @@
   p {
     color: var(--md-sys-color-error);
   }
+
+  .error-hint {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.no-data-message .error-hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 // Delete action in menu
@@ -1332,20 +1344,6 @@
   font-size: 16px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
-}
-
-.fundamentals-controls {
-  display: flex;
-  gap: 8px;
-
-  button {
-    min-width: 80px;
-
-    &.active {
-      color: var(--md-sys-color-on-primary-container);
-      background-color: var(--md-sys-color-primary-container);
-    }
-  }
 }
 
 .fundamentals-grid {
@@ -1416,19 +1414,11 @@
   color: var(--md-sys-color-on-surface);
 }
 
-.valuation-tabs {
-  display: flex;
+// Toggle groups for view selection (using mat-button-toggle-group)
+.view-toggle-group,
+.valuation-toggle-group,
+.fundamentals-toggle-group {
   flex-wrap: wrap;
-  gap: 8px;
-
-  button {
-    min-width: 80px;
-
-    &.active {
-      color: var(--md-sys-color-on-primary-container);
-      background-color: var(--md-sys-color-primary-container);
-    }
-  }
 }
 
 // Valuation Summary
@@ -1569,6 +1559,39 @@
   gap: 16px;
 }
 
+// Historical valuation view
+.valuation-historical {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historical-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    opacity: 0.5;
+  }
+}
+
 // Methodology view
 .valuation-methodology {
   display: flex;
@@ -1648,17 +1671,165 @@
     min-height: 230px;
   }
 
-  .valuation-tabs {
+  .valuation-toggle-group {
     justify-content: center;
     width: 100%;
-
-    button {
-      flex: 1;
-      min-width: auto;
-    }
   }
 
   .valuation-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// Dividend Analysis View
+.dividends-view {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  height: 100%;
+  padding: 16px;
+}
+
+.dividends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.dividends-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.dividend-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+
+  .metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    padding: 12px;
+    border-radius: 8px;
+
+    background: var(--md-sys-color-surface-container);
+
+    &.highlight {
+      border: 1px solid var(--md-sys-color-primary);
+      background: var(--md-sys-color-primary-container);
+
+      .metric-value {
+        color: var(--md-sys-color-on-primary-container);
+      }
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+
+      &.positive {
+        color: var(--md-extended-color-success-color);
+      }
+    }
+  }
+}
+
+.dividend-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  .dividend-chart {
+    min-height: 280px;
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-container);
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .dividend-echart {
+    width: 100%;
+    min-height: 250px;
+  }
+}
+
+.dividend-table-container {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.dividend-table-scroll {
+  overflow-x: auto;
+}
+
+.dividend-table {
+  border-collapse: collapse;
+  width: 100%;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  td {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+
+    &.metric-name {
+      font-weight: 500;
+      text-align: left;
+    }
+
+    &.warning {
+      color: var(--md-sys-color-error);
+    }
+  }
+}
+
+// Responsive: dividend view
+@include mixins.mobile() {
+  .dividend-charts-grid {
+    grid-template-columns: 1fr;
+
+    .dividend-chart.full-width {
+      grid-column: 1;
+    }
+  }
+
+  .dividend-metrics {
     grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -25,6 +25,20 @@ const DCF_ANALYSIS_QUERY = gql`
         value
       }
 
+      historicalValuation {
+        date
+        price
+        eps
+        peRatio
+        pbRatio
+        psRatio
+        bookValuePerShare
+        avgPeRatio
+        minPeRatio
+        maxPeRatio
+        avgPbRatio
+      }
+
       baseCase {
         intrinsicValuePerShare
         currentPrice
@@ -204,6 +218,20 @@ export interface ProjectionChartPoint {
   fcfBear: number | null;
 }
 
+export interface HistoricalValuationPoint {
+  date: string;
+  price: number;
+  eps: number | null;
+  peRatio: number | null;
+  pbRatio: number | null;
+  psRatio: number | null;
+  bookValuePerShare: number | null;
+  avgPeRatio: number | null;
+  minPeRatio: number | null;
+  maxPeRatio: number | null;
+  avgPbRatio: number | null;
+}
+
 export interface ValuationSummary {
   currentPrice: number;
   intrinsicValueBase: number;
@@ -231,6 +259,7 @@ export interface DCFAnalysisData {
   historicalFcf: HistoricalDataPoint[];
   historicalRevenue: HistoricalDataPoint[];
   historicalNetIncome: HistoricalDataPoint[];
+  historicalValuation: HistoricalValuationPoint[];
   baseCase: DCFResult;
   bullCase: DCFResult;
   bearCase: DCFResult;
