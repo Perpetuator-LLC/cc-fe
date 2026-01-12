@@ -131,6 +131,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   ];
   displayedWatchlistColumns: string[] = ['symbol', 'name', 'marketCap', 'actions'];
 
+  // Sidebar resize state
+  sidebarWidth = 280; // Default width in pixels
+  isResizing = false;
+  private resizeStartX = 0;
+  private resizeStartWidth = 0;
+
   // State
   loading = signal(false);
   selectedWatchlistId = signal<string>('recent'); // Changed to signal
@@ -992,6 +998,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             // This ensures clicking on watchlist items updates the URL too
             if (route) {
               this.routingService.applyRoute(route as RouteInfo);
+
+              // Handle view switching based on route
+              if (route.view === 'fundamentals') {
+                console.log('[WatchlistTab] Route specifies fundamentals view, loading fundamentals');
+                this.currentCommand.set('FUNDAMENTALS');
+                this.loadFundamentalsView(newSymbol);
+                return; // Early return - fundamentals view handles its own rendering
+              } else if (route.view === 'info') {
+                this.currentCommand.set('DES');
+              } else if (route.view === 'history') {
+                this.currentCommand.set('HP');
+              } else {
+                this.currentCommand.set('CHART');
+              }
             } else {
               // No route from backend, build from metadata
               this.routingService.applyRoute({
@@ -3531,4 +3551,37 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       lowerMessage.includes('fetching') || lowerMessage.includes('loading') || lowerMessage.includes('please wait')
     );
   }
+
+  // Resize handle methods
+  onResizeStart(event: MouseEvent): void {
+    this.isResizing = true;
+    this.resizeStartX = event.clientX;
+    this.resizeStartWidth = this.sidebarWidth;
+    event.preventDefault();
+
+    // Add event listeners to document for smooth dragging
+    document.addEventListener('mousemove', this.onResizeMove);
+    document.addEventListener('mouseup', this.onResizeEnd);
+  }
+
+  private onResizeMove = (event: MouseEvent): void => {
+    if (!this.isResizing) return;
+
+    // Calculate the new width
+    const deltaX = event.clientX - this.resizeStartX;
+    let newWidth = this.resizeStartWidth + deltaX;
+
+    // Constrain width between min and max
+    const minWidth = 200;
+    const maxWidth = window.innerWidth * 0.5; // Max 50% of viewport
+    newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+
+    this.sidebarWidth = newWidth;
+  };
+
+  private onResizeEnd = (): void => {
+    this.isResizing = false;
+    document.removeEventListener('mousemove', this.onResizeMove);
+    document.removeEventListener('mouseup', this.onResizeEnd);
+  };
 }

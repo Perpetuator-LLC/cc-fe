@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .jobs-container {
@@ -314,6 +314,16 @@
 
   &.topic-tag {
     @include mixins.topic-tag();
+  }
+
+  &.symbol-tag {
+    border: 1px solid var(--md-sys-color-tertiary);
+    color: var(--md-sys-color-tertiary);
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
+
+    &:hover {
+      background-color: var(--md-sys-color-tertiary-container);
+    }
   }
 }
 

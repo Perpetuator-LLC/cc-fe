@@ -21,6 +21,9 @@
       <ng-template matTabContent>
         <div class="history-tab">
           <div class="history-controls">
+            <div class="history-count">
+              {{ terminalService.userHistory().length }} of {{ historyTotalCount }} commands
+            </div>
             <mat-slide-toggle
               [checked]="showDuplicates()"
               (change)="onShowDuplicatesChange($event.checked)"
@@ -29,7 +32,7 @@
               Show all executions
             </mat-slide-toggle>
           </div>
-          @if (historyLoading()) {
+          @if (historyLoading() && terminalService.userHistory().length === 0) {
             <div class="loading-state">
               <mat-spinner diameter="32" />
               <p>Loading history...</p>
@@ -40,71 +43,90 @@
               <p>No command history yet. Execute commands to see them here.</p>
             </div>
           } @else {
-            <div class="history-list">
-              @for (entry of terminalService.userHistory(); track entry.id) {
-                <div
-                  class="history-entry"
+            <mat-accordion class="history-accordion" multi>
+              @for (entry of terminalService.userHistory(); track entry.id; let i = $index) {
+                <mat-expansion-panel
+                  [expanded]="i === 0"
                   [class.error]="entry.status === 'FAILED'"
                   [class.success]="entry.status === 'COMPLETED'"
+                  class="history-panel"
+                  (opened)="onPanelOpened(entry)"
                 >
-                  <div class="entry-header">
-                    <span class="command-prompt">&gt;</span>
-                    <div
-                      class="command-chips"
-                      tabindex="0"
-                      role="button"
-                      (click)="rerunCommand(entry.rawInput)"
-                      (keydown.enter)="rerunCommand(entry.rawInput)"
-                      matTooltip="Click to rerun"
-                    >
-                      @for (token of getCommandTokens(entry); track token.fqn) {
-                        <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <span class="command-prompt">&gt;</span>
+                      <div class="command-chips">
+                        @for (token of getCommandTokens(entry); track token.fqn) {
+                          <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
+                        }
+                      </div>
+                      @if (entry.executionCount && entry.executionCount > 1) {
+                        <span class="execution-count" [matTooltip]="'Executed ' + entry.executionCount + ' times'">
+                          ×{{ entry.executionCount }}
+                        </span>
                       }
-                    </div>
-                    @if (entry.executionCount && entry.executionCount > 1) {
-                      <span class="execution-count" [matTooltip]="'Executed ' + entry.executionCount + ' times'">
-                        ×{{ entry.executionCount }}
-                      </span>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      <span class="timestamp">{{ entry.createdAt | date: 'short' }}</span>
+                      <mat-icon
+                        class="status-icon"
+                        [class.success]="entry.status === 'COMPLETED'"
+                        [class.error]="entry.status === 'FAILED'"
+                        [class.loading]="entry.status === 'RUNNING' || entry.status === 'PENDING'"
+                        >{{ getStatusIcon(entry.status) }}</mat-icon
+                      >
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <!-- Expanded content: command result -->
+                  <div class="entry-content">
+                    @if (entry.detailsLoading) {
+                      <div class="details-loading">
+                        <mat-spinner diameter="24" />
+                        <span>Loading details...</span>
+                      </div>
+                    } @else {
+                      <div class="entry-actions-row">
+                        <button mat-stroked-button matTooltip="Rerun command" (click)="rerunCommand(entry.rawInput)">
+                          <mat-icon>replay</mat-icon>
+                          Rerun
+                        </button>
+                        <button mat-stroked-button matTooltip="Copy command" (click)="copyToClipboard(entry.rawInput)">
+                          <mat-icon>content_copy</mat-icon>
+                          Copy
+                        </button>
+                      </div>
+                      @if (entry.error) {
+                        <div class="entry-message error">{{ entry.error }}</div>
+                      }
+                      @if (entry.isAiInterpreted && entry.aiReasoning) {
+                        <div class="ai-interpretation">
+                          <mat-icon>psychology</mat-icon>
+                          <span>{{ entry.aiReasoning }}</span>
+                        </div>
+                      }
+                      @if (getResultMessage(entry)) {
+                        <div class="result-message">{{ getResultMessage(entry) }}</div>
+                      }
                     }
-                    <div class="entry-actions">
-                      <button
-                        mat-icon-button
-                        class="copy-btn"
-                        matTooltip="Copy command"
-                        (click)="copyToClipboard(entry.rawInput); $event.stopPropagation()"
-                      >
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                      <button
-                        mat-icon-button
-                        class="rerun-btn"
-                        matTooltip="Rerun command"
-                        (click)="rerunCommand(entry.rawInput)"
-                      >
-                        <mat-icon>replay</mat-icon>
-                      </button>
-                    </div>
-                    <span class="timestamp">{{ entry.createdAt | date: 'short' }}</span>
-                    <mat-icon
-                      class="status-icon"
-                      [class.success]="entry.status === 'COMPLETED'"
-                      [class.error]="entry.status === 'FAILED'"
-                      [class.loading]="entry.status === 'RUNNING' || entry.status === 'PENDING'"
-                      >{{ getStatusIcon(entry.status) }}</mat-icon
-                    >
                   </div>
-                  @if (entry.error) {
-                    <div class="entry-message error">{{ entry.error }}</div>
-                  }
-                  @if (entry.isAiInterpreted && entry.aiReasoning) {
-                    <div class="ai-interpretation">
-                      <mat-icon>psychology</mat-icon>
-                      <span>{{ entry.aiReasoning }}</span>
-                    </div>
-                  }
-                </div>
+                </mat-expansion-panel>
               }
-            </div>
+            </mat-accordion>
+
+            <!-- Load More Button -->
+            @if (hasMoreHistory) {
+              <div class="load-more-container">
+                <button mat-stroked-button (click)="loadMoreHistory()" [disabled]="historyLoading()">
+                  @if (historyLoading()) {
+                    <mat-spinner diameter="20" />
+                  } @else {
+                    <mat-icon>expand_more</mat-icon>
+                  }
+                  Load More
+                </button>
+              </div>
+            }
           }
         </div>
       </ng-template>

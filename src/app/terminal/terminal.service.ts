@@ -68,6 +68,7 @@ const GET_COMMAND = gql`
   }
 `;
 
+// Lightweight query for history list - excludes result to avoid loading large chart data
 const GET_COMMAND_HISTORY = gql`
   query GetCommandHistory($first: Int, $after: String, $search: String, $uniqueLatest: Boolean) {
     commandHistory(first: $first, after: $after, search: $search, uniqueLatest: $uniqueLatest) {
@@ -77,10 +78,10 @@ const GET_COMMAND_HISTORY = gql`
           rawInput
           parsedCommand
           parsedSymbols
+          parsedArgs
           isAiInterpreted
           aiReasoning
           status
-          result
           error
           createdAt
           completedAt
@@ -96,6 +97,27 @@ const GET_COMMAND_HISTORY = gql`
         startCursor
       }
       totalCount
+    }
+  }
+`;
+
+// Full query for single history item - includes result for expanded view
+const GET_COMMAND_HISTORY_DETAIL = gql`
+  query GetCommandHistoryDetail($id: ID!) {
+    commandHistoryItem(id: $id) {
+      id
+      rawInput
+      parsedCommand
+      parsedSymbols
+      parsedArgs
+      isAiInterpreted
+      aiReasoning
+      status
+      result
+      error
+      createdAt
+      completedAt
+      creditsCharged
     }
   }
 `;
@@ -335,7 +357,8 @@ export class TerminalService implements OnDestroy {
   private historyEndCursor: string | null = null;
   private historyHasMore = true;
   readonly historyLoading: WritableSignal<boolean> = signal(false);
-  private readonly HISTORY_PAGE_SIZE = 10;
+  readonly historyTotalCount: WritableSignal<number> = signal(0);
+  private readonly HISTORY_PAGE_SIZE = 30; // Initial load for history tab
   private readonly HISTORY_LOAD_THRESHOLD = 3; // Load more when within 3 commands of the oldest
 
   // User history from server (persists across sessions, shows in History tab)
@@ -412,6 +435,13 @@ export class TerminalService implements OnDestroy {
    */
   get userHistory(): WritableSignal<CommandHistoryItem[]> {
     return this.userHistorySignal;
+  }
+
+  /**
+   * Whether there are more history items to load
+   */
+  get hasMoreHistory(): boolean {
+    return this.historyHasMore;
   }
 
   get activeCharts(): WritableSignal<Map<string, EChartsOption>> {
@@ -729,10 +759,14 @@ export class TerminalService implements OnDestroy {
             executionCount: edge.executionCount,
           })),
           pageInfo: result.data.commandHistory.pageInfo,
+          totalCount: result.data.commandHistory.totalCount ?? 0,
         })),
-        tap(({ items, pageInfo }) => {
+        tap(({ items, pageInfo, totalCount }) => {
           // Update user history signal
           this.userHistorySignal.set(items);
+
+          // Update total count
+          this.historyTotalCount.set(totalCount);
 
           // Track pagination state
           this.historyEndCursor = pageInfo.endCursor;
@@ -834,6 +868,85 @@ export class TerminalService implements OnDestroy {
               if (newItems.length > 0) {
                 this.userHistorySignal.set([...currentUserHistory, ...newItems]);
               }
+            }
+
+            this.historyLoading.set(false);
+          },
+          error: (error) => {
+            console.error('[TerminalService] Failed to load more history:', error);
+            this.historyLoading.set(false);
+          },
+        }),
+    );
+  }
+
+  /**
+   * Load full details for a single history item (includes result field)
+   * Used for lazy loading when user expands a history entry
+   */
+  loadHistoryItemDetail(id: string): Observable<CommandHistoryItem | null> {
+    return this.apollo
+      .query<{ commandHistoryItem: CommandHistoryItem | null }>({
+        query: GET_COMMAND_HISTORY_DETAIL,
+        variables: { id },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.commandHistoryItem),
+        tap((item) => {
+          if (item) {
+            // Update the item in userHistorySignal with full details
+            const currentHistory = this.userHistorySignal();
+            const index = currentHistory.findIndex((h) => h.id === id);
+            if (index !== -1) {
+              const updatedHistory = [...currentHistory];
+              updatedHistory[index] = { ...updatedHistory[index], ...item, detailsLoaded: true };
+              this.userHistorySignal.set(updatedHistory);
+            }
+          }
+        }),
+      );
+  }
+
+  /**
+   * Load more history items for the History tab "Load More" button
+   */
+  loadMoreHistoryForTab(uniqueLatest = true): void {
+    if (!this.historyHasMore || this.historyLoading()) {
+      return;
+    }
+
+    this.historyLoading.set(true);
+
+    this.subscriptions.add(
+      this.apollo
+        .query<CommandHistoryResult>({
+          query: GET_COMMAND_HISTORY,
+          variables: {
+            first: this.HISTORY_PAGE_SIZE,
+            after: this.historyEndCursor,
+            uniqueLatest,
+          },
+          fetchPolicy: 'network-only',
+        })
+        .subscribe({
+          next: (result) => {
+            const items = result.data.commandHistory.edges.map((edge) => ({
+              ...edge.node,
+              executionCount: edge.executionCount,
+            }));
+            const pageInfo = result.data.commandHistory.pageInfo;
+
+            // Update pagination state
+            this.historyEndCursor = pageInfo.endCursor;
+            this.historyHasMore = pageInfo.hasNextPage;
+
+            // Append to existing history
+            const currentHistory = this.userHistorySignal();
+            const existingIds = new Set(currentHistory.map((h) => h.id));
+            const newItems = items.filter((item) => !existingIds.has(item.id));
+            if (newItems.length > 0) {
+              this.userHistorySignal.set([...currentHistory, ...newItems]);
             }
 
             this.historyLoading.set(false);
