@@ -104,6 +104,9 @@ type Query {
     """Maximum number of suggestions"""
     limit: Int = 10
   ): [AutocompleteSuggestionType]
+
+  """Get a single command history item by ID for lazy loading details"""
+  commandHistoryItem(id: ID!): CommandExecutionType
   traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
   trace(id: UUID!): TraceType
 

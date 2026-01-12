@@ -48,6 +48,8 @@ import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
 import { ChartPreferencesService } from '../chart-preferences.service';
 import { FundamentalsService, FundamentalsData } from '../fundamentals.service';
 import { FundamentalsChartService } from '../fundamentals-chart.service';
+import { ValuationService, DCFAnalysisData } from '../valuation.service';
+import { ValuationChartService } from '../valuation-chart.service';
 
 // Register required ECharts components
 echarts.use([
@@ -202,6 +204,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // Retry counter for fundamentals fetch to prevent infinite loops
   private fundamentalsFetchRetries = 0;
   private static readonly MAX_FUNDAMENTALS_RETRIES = 2;
+
+  // Valuation (DCF) view state
+  showValuation = signal(false);
+  valuationData = signal<DCFAnalysisData | null>(null);
+  valuationCharts = signal<{
+    fcfProjection: EChartsOption;
+    valuationComparison: EChartsOption;
+    enterpriseValue: EChartsOption;
+    sensitivityHeatmap: EChartsOption;
+    historicalFinancials: EChartsOption;
+  } | null>(null);
+  valuationDrillDown = signal<'summary' | 'projections' | 'sensitivity' | 'methodology'>('summary');
+  private valuationFetchRetries = 0;
+  private static readonly MAX_VALUATION_RETRIES = 2;
 
   // Computed: Check if current interval is intraday (for enabling/disabling certain options)
   isCurrentIntervalIntraday = computed(() => {
@@ -630,6 +646,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     private chartPreferencesService: ChartPreferencesService,
     private fundamentalsService: FundamentalsService,
     private fundamentalsChartService: FundamentalsChartService,
+    private valuationService: ValuationService,
+    private valuationChartService: ValuationChartService,
     private route: ActivatedRoute,
   ) {}
 
@@ -682,6 +700,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         } else {
           this.fundamentalsIsAnnual.set(true); // Default to annual
         }
+      } else if (state.view === 'valuation') {
+        command = 'DCF';
       } else if (state.view === 'info') {
         command = 'DES';
       } else if (state.view === 'history') {
@@ -724,6 +744,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               } else if (period === 'annual') {
                 this.fundamentalsIsAnnual.set(true);
               }
+            } else if (view === 'valuation') {
+              command = 'DCF';
             } else if (view === 'info') {
               command = 'DES';
             } else if (view === 'history') {
@@ -733,7 +755,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             // Only reload if something changed
             const viewChanged = command !== currentCommand;
             const symbolChanged = symbol !== currentSymbol;
-            const intervalChanged = command !== 'FUNDAMENTALS' && interval !== currentInterval;
+            const intervalChanged = command !== 'FUNDAMENTALS' && command !== 'DCF' && interval !== currentInterval;
 
             if (symbolChanged || intervalChanged || viewChanged) {
               console.log('[WatchlistTab] Route changed, reloading:', {
@@ -1017,6 +1039,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
                 this.currentCommand.set('FUNDAMENTALS');
                 this.loadFundamentalsView(newSymbol);
                 return; // Early return - fundamentals view handles its own rendering
+              } else if (route.view === 'valuation') {
+                console.log('[WatchlistTab] Route specifies valuation view, loading DCF');
+                this.currentCommand.set('DCF');
+                this.loadValuationView(newSymbol);
+                return; // Early return - valuation view handles its own rendering
               } else if (route.view === 'info') {
                 this.currentCommand.set('DES');
               } else if (route.view === 'history') {
@@ -1556,7 +1583,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   private reloadCurrentSystemWatchlist(cursor: string | null): void {
     const watchlistId = this.selectedWatchlistId();
-    const effectiveSort = this.effectiveSortField();
+    const effectiveSort: string = this.sortBy() || 'marketCap';
 
     if (watchlistId.startsWith('sector:')) {
       const sectorName = watchlistId.replace('sector:', '');
@@ -1681,11 +1708,19 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.tableData.set(null);
     this.showFundamentals.set(false);
     this.fundamentalsCharts.set(null);
+    this.showValuation.set(false);
+    this.valuationCharts.set(null);
     this.currentCommand.set(command);
 
     // Handle FUNDAMENTALS command directly (no backend execution needed)
     if (command === 'FUNDAMENTALS') {
       this.loadFundamentalsView(symbol);
+      return;
+    }
+
+    // Handle DCF/VALUATION command directly
+    if (command === 'DCF' || command === 'VALUATION') {
+      this.loadValuationView(symbol);
       return;
     }
 
@@ -1812,6 +1847,87 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       this.fundamentalsCharts.set(null); // Clear current charts
       this.loadFundamentalsView(symbol);
     }
+  }
+
+  /**
+   * Load DCF valuation view for a symbol
+   */
+  private loadValuationView(symbol: string, isRetry = false): void {
+    console.log('[WatchlistTab] Loading valuation for:', symbol, 'isRetry:', isRetry);
+    this.showValuation.set(true);
+    this.valuationDrillDown.set('summary');
+
+    // Reset retry counter on new load (not a retry)
+    if (!isRetry) {
+      this.valuationFetchRetries = 0;
+    }
+
+    // Update URL to reflect valuation view
+    const item = this.selectedItem();
+    this.routingService.applyRoute({
+      symbol,
+      exchange: item?.exchange,
+      view: 'valuation',
+    });
+
+    this.subscriptions.add(
+      this.valuationService.loadValuation(symbol).subscribe({
+        next: (data: DCFAnalysisData | null) => {
+          if (!data) {
+            // No valuation data - check for service error message
+            const serviceError = this.valuationService.error();
+            console.log('[WatchlistTab] No valuation data, error:', serviceError);
+            this.chartError.set(
+              serviceError ||
+                'DCF valuation requires fundamental data. Please run Fundamentals first to fetch the data.',
+            );
+            this.chartLoading.set(false);
+            return;
+          }
+
+          console.log('[WatchlistTab] Valuation loaded:', {
+            symbol: data.symbol,
+            companyName: data.companyName,
+            baseCase: data.baseCase.intrinsicValuePerShare,
+            currentPrice: data.valuationSummary.currentPrice,
+          });
+
+          // Store raw data for drill-down
+          this.valuationData.set(data);
+
+          // Build all valuation charts
+          const charts = {
+            fcfProjection: this.valuationChartService.buildFcfProjectionChart(data),
+            valuationComparison: this.valuationChartService.buildValuationComparisonChart(data),
+            enterpriseValue: this.valuationChartService.buildEnterpriseValueWaterfallChart(data.baseCase),
+            sensitivityHeatmap: this.valuationChartService.buildSensitivityHeatmap(data.sensitivityGrid),
+            historicalFinancials: this.valuationChartService.buildHistoricalFinancialsChart(data),
+          };
+          this.valuationCharts.set(charts);
+          this.chartLoading.set(false);
+        },
+        error: (err) => {
+          console.error('[WatchlistTab] Error loading valuation:', err);
+          // Check if this is a schema/API not available error
+          const errorMsg = err.message || '';
+          if (errorMsg.includes('Cannot query field') || errorMsg.includes('400')) {
+            this.chartError.set(
+              'DCF Valuation API is not yet available. The backend needs to implement the dcfAnalysis query.',
+            );
+          } else {
+            this.chartError.set(err.message || 'Failed to load valuation data');
+          }
+          this.chartLoading.set(false);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Set valuation drill-down view
+   */
+  setValuationDrillDown(view: 'summary' | 'projections' | 'sensitivity' | 'methodology'): void {
+    this.valuationDrillDown.set(view);
   }
 
   /**
@@ -2526,6 +2642,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     return [
       { icon: 'show_chart', label: 'Chart', command: 'CHART' },
       { icon: 'account_balance', label: 'Fundamentals', command: 'FUNDAMENTALS' },
+      { icon: 'analytics', label: 'Valuation', command: 'DCF' },
       { icon: 'table_chart', label: 'Table', command: 'HP' },
       { icon: 'info', label: 'Info', command: 'DES' },
     ];
