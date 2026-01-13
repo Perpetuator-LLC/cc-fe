@@ -316,6 +316,23 @@ type Query {
     projectionYears: Int = 5
   ): DCFAnalysisType
 
+  """
+  Calculate DDM (Dividend Discount Model) analysis on-demand for dividend-paying stocks
+  """
+  ddmAnalysis(
+    """Stock ticker symbol"""
+    ticker: String!
+
+    """Number of years to project (5-15)"""
+    projectionYears: Int = 10
+
+    """Optional high growth rate for two-stage DDM (e.g., 0.10)"""
+    highGrowthRate: Float
+
+    """Years of high growth before terminal phase"""
+    highGrowthYears: Int = 5
+  ): DDMAnalysisType
+
   """Get list of all GICS industry names"""
   gicsIndustries: [String]
 
@@ -1495,6 +1512,9 @@ type JobType implements Node {
   result: GenericScalar
   createdAt: DateTime!
   updatedAt: DateTime!
+
+  """Debug metadata for failed job reproduction"""
+  metadata: GenericScalar
   chainId: UUID
   chainPosition: Int
 
@@ -2492,8 +2512,23 @@ type IncomeStatementType {
   totalRevenue: BigInt
 
   """"""
+  costOfRevenue: BigInt
+
+  """"""
+  grossProfit: BigInt
+
+  """"""
+  operatingIncome: BigInt
+
+  """"""
+  ebitda: BigInt
+
+  """"""
   netIncome: BigInt
   epsReported: Decimal
+  grossProfitRatio: Decimal
+  operatingMargin: Decimal
+  netIncomeRatio: Decimal
 }
 
 type CashFlowType {
@@ -2901,6 +2936,79 @@ type DCFAssumptionsType {
   beta: Float!
   taxRate: Float!
   terminalGrowthRate: Float!
+}
+
+"""Complete DDM (Dividend Discount Model) analysis result."""
+type DDMAnalysisType {
+  success: Boolean!
+  isDividendPayer: Boolean!
+  symbol: String!
+  companyName: String
+  analysisDate: String!
+
+  """Fair value per share based on DDM"""
+  intrinsicValue: Float
+  currentPrice: Float
+  upsidePercentage: Float
+  marginOfSafety: Float
+
+  """gordon, two_stage, or h_model"""
+  modelType: String
+  modelDescription: String
+
+  """Required return as percentage"""
+  costOfEquity: Float
+
+  """Long-term growth rate as percentage"""
+  terminalGrowthRate: Float
+
+  """Historical dividend CAGR as percentage"""
+  historicalGrowthRate: Float
+
+  """Current yield as percentage"""
+  currentDividendYield: Float
+
+  """Dividend payout ratio as percentage"""
+  payoutRatio: Float
+
+  """Score 0-100 indicating sustainability"""
+  dividendSustainabilityScore: Float
+  currentDividendPerShare: Float
+  presentValueDividends: Float
+  presentValueTerminal: Float
+  terminalValue: Float
+  historicalDividends: [DDMHistoricalDividendType!]
+  projectedDividends: [DDMProjectionType!]
+
+  """Combined historical + projected"""
+  dividendChartData: [DDMProjectionType!]
+  summaryStats: DDMSummaryStatsType
+}
+
+"""Historical dividend data point."""
+type DDMHistoricalDividendType {
+  date: String!
+  dividendPerShare: Float!
+}
+
+"""Projected dividend for a single year."""
+type DDMProjectionType {
+  date: String!
+  dividendPerShare: Float!
+  discountedDividend: Float!
+
+  """Growth rate as percentage"""
+  growthRate: Float!
+  isProjected: Boolean!
+}
+
+"""DDM summary statistics."""
+type DDMSummaryStatsType {
+  yearsOfDividendData: Int!
+
+  """Compound annual growth rate as percentage"""
+  dividendCagr: Float!
+  earningsPerShare: Float!
 }
 
 """Relay-style connection for catalog symbols with pagination."""

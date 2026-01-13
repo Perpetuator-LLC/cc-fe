@@ -1,0 +1,60 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.financial-table-container {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.table-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.financial-table {
+  border-collapse: collapse;
+  width: 100%;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  .metric-header {
+    text-align: left;
+  }
+
+  td {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+
+    &.metric-name {
+      font-weight: 500;
+      text-align: left;
+    }
+
+    &.warning {
+      color: var(--md-extended-color-warning-color);
+    }
+
+    &.negative {
+      color: var(--md-sys-color-error);
+    }
+  }
+}

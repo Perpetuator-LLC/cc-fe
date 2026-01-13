@@ -81,7 +81,9 @@ export class TerminalRoutingService {
     const sym = this.symbol();
     const exch = this.exchange();
     if (!sym) return null;
-    return `STOCK:${(exch || 'UNKNOWN').toUpperCase()}:${sym.toUpperCase()}`;
+    // Normalize exchange - replace spaces with underscores for proper FQN parsing
+    const normalizedExchange = (exch || 'UNKNOWN').replace(/\s+/g, '_').toUpperCase();
+    return `STOCK:${normalizedExchange}:${sym.toUpperCase()}`;
   });
 
   /** Whether a symbol is currently selected */

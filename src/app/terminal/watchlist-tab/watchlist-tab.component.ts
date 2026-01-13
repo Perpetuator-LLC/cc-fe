@@ -204,6 +204,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     balanceSheet: EChartsOption;
     cashFlow: EChartsOption;
     margins: EChartsOption;
+    eps: EChartsOption;
+    revenue: EChartsOption;
   } | null>(null);
   // Retry counter for fundamentals fetch to prevent infinite loops
   private fundamentalsFetchRetries = 0;
@@ -1642,8 +1644,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Subscribe to real-time updates for this symbol
     this.terminalService.subscribeSymbols([item.symbol]);
 
-    // Fetch initial quote data via GraphQL
-    const fqn = item.exchange ? `STOCK:${item.exchange.toUpperCase()}:${item.symbol.toUpperCase()}` : undefined;
+    // Fetch initial quote data via GraphQL - normalize exchange (replace spaces with underscores)
+    const normalizedExchange = item.exchange?.replace(/\s+/g, '_').toUpperCase();
+    const fqn = normalizedExchange ? `STOCK:${normalizedExchange}:${item.symbol.toUpperCase()}` : undefined;
     console.log('[WatchlistTab] selectSymbol - fetching quote:', { symbol: item.symbol, fqn });
     this.subscriptions.add(
       this.terminalService.fetchQuote(item.symbol, fqn).subscribe({
@@ -1680,12 +1683,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Fetch quote data for a symbol (used when switching symbols from command results)
    */
   private fetchQuoteForSymbol(symbol: string): void {
-    // Try to get exchange from selectedItem if available
+    // Try to get exchange from selectedItem if available - normalize (replace spaces with underscores)
     const item = this.selectedItem();
-    const exchange = item?.exchange;
-    const fqn = exchange ? `STOCK:${exchange.toUpperCase()}:${symbol.toUpperCase()}` : undefined;
+    const normalizedExchange = item?.exchange?.replace(/\s+/g, '_').toUpperCase();
+    const fqn = normalizedExchange ? `STOCK:${normalizedExchange}:${symbol.toUpperCase()}` : undefined;
 
-    console.log('[WatchlistTab] fetchQuoteForSymbol called:', { symbol, fqn, exchange });
+    console.log('[WatchlistTab] fetchQuoteForSymbol called:', { symbol, fqn, exchange: normalizedExchange });
 
     this.subscriptions.add(
       this.terminalService.fetchQuote(symbol, fqn).subscribe({
@@ -1756,8 +1759,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Build FQN command
-    const symbolFqn = `STOCK:${(exchange || 'UNKNOWN').toUpperCase()}:${symbol.toUpperCase()}`;
+    // Build FQN command - normalize exchange name (replace spaces with underscores)
+    const normalizedExchange = (exchange || 'UNKNOWN').replace(/\s+/g, '_').toUpperCase();
+    const symbolFqn = `STOCK:${normalizedExchange}:${symbol.toUpperCase()}`;
     const commandFqn = `COMMAND:${command.toUpperCase()}`;
 
     // For CHART command, include current interval
@@ -1780,6 +1784,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   private loadFundamentalsView(symbol: string, isRetry = false): void {
     console.log('[WatchlistTab] Loading fundamentals for:', symbol, 'isRetry:', isRetry);
     this.showFundamentals.set(true);
+    // Clear chart options so fundamentals view takes precedence
+    this.chartOptions.set(null);
 
     // Reset retry counter on new load (not a retry)
     if (!isRetry) {
@@ -1888,6 +1894,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     console.log('[WatchlistTab] Loading valuation for:', symbol, 'isRetry:', isRetry);
     this.showValuation.set(true);
     this.valuationDrillDown.set('summary');
+    // Clear chart options so valuation view takes precedence
+    this.chartOptions.set(null);
 
     // Reset retry counter on new load (not a retry)
     if (!isRetry) {
@@ -1970,6 +1978,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   private loadDividendsView(symbol: string): void {
     console.log('[WatchlistTab] Loading dividends for:', symbol);
     this.showDividends.set(true);
+    // Clear chart options so dividends view takes precedence
+    this.chartOptions.set(null);
 
     // Update URL to reflect dividends view
     const item = this.selectedItem();
