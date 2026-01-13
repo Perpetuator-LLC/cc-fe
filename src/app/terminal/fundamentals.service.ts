@@ -23,7 +23,15 @@ const INCOME_STATEMENTS_QUERY = gql`
     incomeStatements(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
       fiscalDateEnding
       totalRevenue
+      costOfRevenue
+      grossProfit
+      operatingIncome
+      ebitda
       netIncome
+      epsReported
+      grossProfitRatio
+      operatingMargin
+      netIncomeRatio
     }
   }
 `;
@@ -88,7 +96,15 @@ export interface BalanceSheet {
 export interface IncomeStatement {
   fiscalDateEnding: string;
   totalRevenue: number | null;
+  costOfRevenue: number | null;
+  grossProfit: number | null;
+  operatingIncome: number | null;
+  ebitda: number | null;
   netIncome: number | null;
+  epsReported: number | null;
+  grossProfitRatio: number | null;
+  operatingMargin: number | null;
+  netIncomeRatio: number | null;
 }
 
 export interface CashFlow {

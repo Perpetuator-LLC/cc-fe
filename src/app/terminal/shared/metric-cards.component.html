@@ -1,0 +1,20 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="metric-cards-grid">
+  @for (metric of metrics; track metric.label) {
+    <div class="metric-card" [class.highlight]="metric.highlight" [title]="metric.tooltip || ''">
+      <span class="metric-label">{{ metric.label }}</span>
+      <span
+        class="metric-value"
+        [class.positive]="metric.change && metric.change > 0"
+        [class.negative]="metric.change && metric.change < 0"
+      >
+        {{ formatValue(metric) }}
+      </span>
+      @if (metric.change !== undefined) {
+        <span class="metric-change" [class.positive]="metric.change > 0" [class.negative]="metric.change < 0">
+          {{ metric.change > 0 ? '+' : '' }}{{ metric.change.toFixed(1) }}%
+        </span>
+      }
+    </div>
+  }
+</div>

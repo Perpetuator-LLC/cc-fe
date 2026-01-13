@@ -97,6 +97,203 @@ export class FundamentalsChartService {
   }
 
   /**
+   * Generate EPS (Earnings Per Share) chart
+   */
+  buildEpsChart(data: IncomeStatement[]): EChartsOption {
+    if (!data.length) return this.emptyChart('No EPS Data');
+
+    const sorted = [...data].sort(
+      (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime(),
+    );
+
+    const dates = sorted.map((d) => this.formatFiscalDate(d.fiscalDateEnding));
+    const epsData = sorted.map((d) => d.epsReported);
+
+    // Check if we have any EPS data
+    const hasEps = epsData.some((v) => v !== null && v !== undefined);
+    if (!hasEps) return this.emptyChart('No EPS Data Available');
+
+    return {
+      title: {
+        text: 'Earnings Per Share (EPS)',
+        left: 'center',
+        textStyle: { color: '#E8EAED', fontSize: 16 },
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(32, 33, 36, 0.95)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        textStyle: { color: '#E8EAED' },
+        formatter: (params: unknown) => {
+          const p = params as TooltipParam[];
+          if (!p.length) return '';
+          const item = p[0];
+          return `<strong>${item.name}</strong><br/>EPS: $${item.value?.toFixed(2) ?? 'N/A'}`;
+        },
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '10%',
+        top: '15%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: this.AXIS_LABEL_COLOR },
+        axisLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'EPS ($)',
+        nameTextStyle: { color: this.AXIS_LABEL_COLOR },
+        axisLabel: {
+          color: this.AXIS_LABEL_COLOR,
+          formatter: (value: number) => `$${value.toFixed(2)}`,
+        },
+        splitLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
+      },
+      series: [
+        {
+          name: 'EPS',
+          type: 'bar',
+          data: epsData,
+          itemStyle: { color: this.COLORS.secondary },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '{c}',
+            color: this.AXIS_LABEL_COLOR,
+            fontSize: 10,
+          },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Generate Revenue vs Cost of Revenue chart with Gross Profit Margin line
+   */
+  buildRevenueChart(data: IncomeStatement[]): EChartsOption {
+    if (!data.length) return this.emptyChart('No Revenue Data');
+
+    const sorted = [...data].sort(
+      (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime(),
+    );
+
+    const dates = sorted.map((d) => this.formatFiscalDate(d.fiscalDateEnding));
+    const hasGrossProfit = sorted.some((d) => d.grossProfit !== null);
+
+    return {
+      title: {
+        text: 'Revenue & Profitability',
+        left: 'center',
+        textStyle: { color: '#E8EAED', fontSize: 16 },
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(32, 33, 36, 0.95)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        textStyle: { color: '#E8EAED' },
+        formatter: (params: unknown) => {
+          const p = params as TooltipParam[];
+          if (!p.length) return '';
+          let html = `<strong>${p[0].name}</strong><br/>`;
+          p.forEach((item) => {
+            if (item.value != null) {
+              if (item.seriesName.includes('%')) {
+                html += `<span style="color:${item.color}">●</span> ${item.seriesName}:
+                ${(item.value as number).toFixed(1)}%<br/>`;
+              } else {
+                html += `<span style="color:${item.color}">●</span> ${item.seriesName}:
+                ${this.formatAxisValue(item.value)}<br/>`;
+              }
+            }
+          });
+          return html;
+        },
+      },
+      legend: {
+        data: hasGrossProfit
+          ? ['Revenue', 'Cost of Revenue', 'Gross Profit', 'Gross Margin %']
+          : ['Revenue', 'Cost of Revenue'],
+        bottom: 0,
+        textStyle: { color: this.AXIS_LABEL_COLOR },
+      },
+      grid: {
+        left: '3%',
+        right: '8%',
+        bottom: '15%',
+        top: '15%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: { color: this.AXIS_LABEL_COLOR },
+        axisLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: 'Amount',
+          nameTextStyle: { color: this.AXIS_LABEL_COLOR },
+          axisLabel: {
+            color: this.AXIS_LABEL_COLOR,
+            formatter: (value: number) => this.formatAxisValue(value),
+          },
+          splitLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
+        },
+        {
+          type: 'value',
+          name: 'Margin %',
+          nameTextStyle: { color: this.AXIS_LABEL_COLOR },
+          axisLabel: {
+            color: this.AXIS_LABEL_COLOR,
+            formatter: '{value}%',
+          },
+          splitLine: { show: false },
+          min: 0,
+          max: 100,
+        },
+      ],
+      series: this.buildRevenueSeries(sorted, hasGrossProfit),
+    };
+  }
+
+  /**
+   * Build series array for revenue chart
+   */
+  private buildRevenueSeries(data: IncomeStatement[], hasGrossProfit: boolean): EChartsOption['series'] {
+    const series = [
+      {
+        name: 'Revenue',
+        type: 'bar' as const,
+        data: data.map((d) => d.totalRevenue),
+        itemStyle: { color: this.COLORS.primary },
+      },
+      {
+        name: 'Cost of Revenue',
+        type: 'bar' as const,
+        data: data.map((d) => d.costOfRevenue),
+        itemStyle: { color: this.COLORS.tertiary },
+      },
+    ];
+
+    if (hasGrossProfit) {
+      series.push({
+        name: 'Gross Profit',
+        type: 'bar' as const,
+        data: data.map((d) => d.grossProfit),
+        itemStyle: { color: this.COLORS.secondary },
+      });
+    }
+
+    return series;
+  }
+
+  /**
    * Generate Balance Sheet chart - Assets vs Liabilities vs Equity
    */
   buildBalanceSheetChart(data: BalanceSheet[]): EChartsOption {
@@ -321,6 +518,8 @@ export class FundamentalsChartService {
     balanceSheet: EChartsOption;
     cashFlow: EChartsOption;
     margins: EChartsOption;
+    eps: EChartsOption;
+    revenue: EChartsOption;
   } {
     // Store isAnnual for date formatting
     this.currentIsAnnual = isAnnual;
@@ -330,6 +529,8 @@ export class FundamentalsChartService {
       balanceSheet: this.buildBalanceSheetChart(data.balanceSheets),
       cashFlow: this.buildCashFlowChart(data.cashFlows),
       margins: this.buildDebtChart(data.balanceSheets), // Using debt chart instead of margins
+      eps: this.buildEpsChart(data.incomeStatements),
+      revenue: this.buildRevenueChart(data.incomeStatements),
     };
   }
 

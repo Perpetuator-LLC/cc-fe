@@ -1,0 +1,33 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="financial-table-container">
+  @if (title) {
+    <h4 class="table-title">{{ title }}</h4>
+  }
+  <div class="table-scroll">
+    <table class="financial-table">
+      <thead>
+        <tr>
+          <th class="metric-header">Metric</th>
+          @for (year of data.years; track year) {
+            <th>{{ year }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of data.rows; track row.label) {
+          <tr>
+            <td class="metric-name">{{ row.label }}</td>
+            @for (value of row.values; track $index) {
+              <td
+                [class.warning]="shouldHighlight(row, value)"
+                [class.negative]="row.highlightNegative && value !== null && value < 0"
+              >
+                {{ formatValue(row, value) }}
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

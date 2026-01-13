@@ -1,0 +1,81 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.cagr-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 12px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.cagr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 8px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.cagr-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.cagr-values {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.cagr-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.cagr-period {
+  font-size: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.cagr-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  &.positive {
+    color: var(--md-extended-color-success-color);
+  }
+
+  &.negative {
+    color: var(--md-sys-color-error);
+  }
+
+  &.na {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.trend-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+
+  &.improving {
+    color: var(--md-extended-color-success-color);
+  }
+
+  &.declining {
+    color: var(--md-sys-color-error);
+  }
+}
