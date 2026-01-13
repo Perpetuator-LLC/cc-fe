@@ -689,7 +689,13 @@
                 @if (fundamentalsCharts()) {
                   <div class="fundamentals-grid">
                     <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.revenue" class="fundamentals-echart"></div>
+                    </div>
+                    <div class="fundamentals-chart">
                       <div echarts [options]="fundamentalsCharts()!.incomeStatement" class="fundamentals-echart"></div>
+                    </div>
+                    <div class="fundamentals-chart">
+                      <div echarts [options]="fundamentalsCharts()!.eps" class="fundamentals-echart"></div>
                     </div>
                     <div class="fundamentals-chart">
                       <div echarts [options]="fundamentalsCharts()!.balanceSheet" class="fundamentals-echart"></div>
