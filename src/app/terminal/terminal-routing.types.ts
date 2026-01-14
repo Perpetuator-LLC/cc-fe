@@ -27,7 +27,7 @@ export type TerminalTab = 'watchlists' | 'dashboards' | 'history' | 'settings';
  * Detail view types within a tab
  * - chart: Price chart with candlesticks
  * - info: Company information/description
- * - fundamentals: Financial statements, ratios
+ * - fundamentals/financials: Financial statements, ratios (both work, financials is the command name)
  * - valuation: Valuation metrics, DCF
  * - history: Command history for the symbol
  * - news: News and events
@@ -37,6 +37,7 @@ export type TerminalView =
   | 'chart'
   | 'info'
   | 'fundamentals'
+  | 'financials'
   | 'valuation'
   | 'dividends'
   | 'history'

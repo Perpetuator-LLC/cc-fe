@@ -333,6 +333,38 @@ type Query {
     highGrowthYears: Int = 5
   ): DDMAnalysisType
 
+  """
+  Get hierarchical financial data for drill-down visualization with M&A detection
+  """
+  financialHierarchy(
+    """Stock ticker symbol"""
+    ticker: String!
+
+    """Report type: balance_sheet, income_statement, cash_flow"""
+    reportType: String!
+
+    """Optional specific fiscal year to analyze"""
+    fiscalYear: Int
+
+    """Annual (true) or quarterly (false)"""
+    isAnnual: Boolean = true
+  ): FinancialHierarchyResponseType
+
+  """Get time series for a specific financial hierarchy node"""
+  financialNodeTimeSeries(
+    """Stock ticker symbol"""
+    ticker: String!
+
+    """Node ID (e.g., 'assets.non_current.goodwill')"""
+    nodeId: String!
+
+    """Annual or quarterly data"""
+    isAnnual: Boolean = true
+
+    """Number of periods to return"""
+    periods: Int = 10
+  ): [FinancialTimeSeriesPointType]
+
   """Get list of all GICS industry names"""
   gicsIndustries: [String]
 
@@ -2525,7 +2557,9 @@ type IncomeStatementType {
 
   """"""
   netIncome: BigInt
-  epsReported: Decimal
+
+  """EPS (fetched from Earnings table if not in IncomeStatement)"""
+  epsReported: Float
   grossProfitRatio: Decimal
   operatingMargin: Decimal
   netIncomeRatio: Decimal
@@ -2847,15 +2881,23 @@ type DCFHistoricalValuationType {
   price: Float!
   eps: Float
 
-  """Price-to-Earnings ratio"""
+  """True if EPS was negative - P/E not applicable, use P/S instead"""
+  epsIsNegative: Boolean
+
+  """Price-to-Earnings ratio (null if EPS negative)"""
   peRatio: Float
 
   """Price-to-Book ratio"""
   pbRatio: Float
 
-  """Price-to-Sales ratio"""
+  """Price-to-Sales ratio (always valid, even with negative earnings)"""
   psRatio: Float
   bookValuePerShare: Float
+
+  """
+  Context for unusual situations (e.g., negative earnings, data unavailable)
+  """
+  valuationNote: String
 
   """Average P/E over the historical period"""
   avgPeRatio: Float
@@ -3012,6 +3054,78 @@ type DDMSummaryStatsType {
   """Compound annual growth rate as percentage"""
   dividendCagr: Float!
   earningsPerShare: Float!
+}
+
+"""Response type for financial hierarchy queries."""
+type FinancialHierarchyResponseType {
+  symbol: String!
+
+  """balance_sheet, income_statement, cash_flow"""
+  reportType: String!
+  fiscalDateEnding: Date!
+  previousFiscalDate: Date
+  currency: String!
+  root: FinancialHierarchyNodeType!
+  alerts: [FinancialAlertType]!
+}
+
+"""A node in the financial data hierarchy for drill-down."""
+type FinancialHierarchyNodeType {
+  """Unique path identifier (e.g., 'assets.current.cash')"""
+  id: String!
+
+  """Display name"""
+  name: String!
+
+  """Current period value"""
+  value: Float
+
+  """Previous period value for comparison"""
+  previousValue: Float
+
+  """This node as % of parent"""
+  percentageOfParent: Float
+
+  """Year-over-year change %"""
+  yoyChange: Float
+
+  """Category: assets, liabilities, equity, revenue, expense"""
+  category: String!
+
+  """Depth in hierarchy (0 = root)"""
+  level: Int!
+
+  """Flags: m&a_indicator, significant_change, etc."""
+  flags: [String]!
+
+  """Child nodes"""
+  children: [FinancialHierarchyNodeType]!
+}
+
+"""Alert for significant financial events (M&A, large changes, etc.)."""
+type FinancialAlertType {
+  """Alert type: m&a_detected, significant_change, etc."""
+  type: String!
+
+  """Severity: info, warning, critical"""
+  severity: String!
+
+  """Human-readable alert message"""
+  message: String!
+
+  """Node IDs affected by this alert"""
+  affectedNodes: [String]!
+
+  """Additional details as JSON"""
+  details: JSONString
+}
+
+"""A single point in a financial time series."""
+type FinancialTimeSeriesPointType {
+  fiscalDateEnding: Date!
+  value: Float
+  percentageOfTotal: Float
+  yoyChange: Float
 }
 
 """Relay-style connection for catalog symbols with pagination."""

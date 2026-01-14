@@ -1693,3 +1693,40 @@ html body {
     }
   }
 }
+
+// Formula Display - Math notation styles for innerHTML rendering
+.formula-expression {
+  .fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin: 0 4px;
+
+    vertical-align: middle;
+  }
+
+  .fraction-top {
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--md-sys-color-on-surface);
+  }
+
+  .fraction-bottom {
+    padding-top: 2px;
+  }
+
+  .subscript {
+    font-size: 12px;
+    vertical-align: sub;
+  }
+
+  .superscript {
+    font-size: 12px;
+    vertical-align: super;
+  }
+
+  .sum {
+    margin-right: 4px;
+    font-size: 24px;
+  }
+}

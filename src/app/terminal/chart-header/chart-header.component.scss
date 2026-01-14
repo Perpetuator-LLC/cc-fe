@@ -1,0 +1,81 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  background: var(--md-sys-color-surface-container);
+}
+
+.interval-field {
+  width: 80px;
+}
+
+.ohlc-date {
+  margin-right: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.ohlc-label {
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.ohlc-value {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  &.positive {
+    color: var(--md-extended-color-success-color);
+  }
+
+  &.negative {
+    color: var(--md-sys-color-error);
+  }
+
+  &.volume {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.ohlc-hint {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.chart-toggles {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+// Menu styling
+.menu-section-label {
+  padding: 8px 16px 4px;
+
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.disabled-option {
+  opacity: 0.5;
+}

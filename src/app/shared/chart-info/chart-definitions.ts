@@ -134,6 +134,61 @@ export const CHART_DEFINITIONS = {
       'Tracks P/E, P/B, and P/S ratios over time. ' +
       'Helps identify if current valuation is above or below historical averages.',
   },
+
+  // Fundamentals Charts
+  revenueChart: {
+    title: 'Revenue & Gross Profit',
+    description:
+      'Shows total revenue (sales) and gross profit over time. ' +
+      'Gross profit = Revenue - Cost of Revenue. Indicates business growth and pricing power.',
+  },
+  incomeStatementChart: {
+    title: 'Income Statement',
+    description:
+      'Shows net income (bottom line profit) over time. ' +
+      'Net income is what remains after all expenses, taxes, and interest are deducted.',
+  },
+  epsChart: {
+    title: 'Earnings Per Share (EPS)',
+    description:
+      'Net income divided by shares outstanding. The primary metric investors use to ' +
+      'compare profitability across different-sized companies.',
+  },
+  balanceSheetChart: {
+    title: 'Balance Sheet',
+    description:
+      'Shows total assets, liabilities, and equity. Assets = Liabilities + Equity. ' +
+      'Indicates financial strength and leverage.',
+  },
+  cashFlowChart: {
+    title: 'Cash Flow Statement',
+    description:
+      'Shows operating, investing, and financing cash flows. ' +
+      'Operating cash flow is the key indicator of business health.',
+  },
+  marginsChart: {
+    title: 'Profit Margins',
+    description:
+      'Gross margin and net margin as percentages. ' +
+      'Higher margins indicate better pricing power and operational efficiency.',
+  },
+
+  // Dividend Charts
+  payoutRatioChart: {
+    title: 'Payout Ratio History',
+    description:
+      'FCF and dividend payout ratios over time. ' + 'Lower ratios mean more room for dividend growth or reinvestment.',
+  },
+  yearlyDividendsChart: {
+    title: 'Yearly Dividends',
+    description:
+      'Historical dividend payments per share. ' + 'Look for consistent growth with no cuts for dividend reliability.',
+  },
+  cashFlowComparisonChart: {
+    title: 'Cash Flow vs Dividends',
+    description:
+      'Compares Free Cash Flow to dividend payments. ' + 'FCF should comfortably exceed dividends for sustainability.',
+  },
 };
 
 /**

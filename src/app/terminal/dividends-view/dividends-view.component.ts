@@ -9,6 +9,8 @@ import { EChartsOption } from 'echarts';
 import { DividendAnalysisData } from '../dividend.service';
 import { DividendChartService } from '../dividend-chart.service';
 import { KpiCardComponent } from '../shared/kpi-card/kpi-card.component';
+import { ChartInfoComponent } from '../../shared/chart-info/chart-info.component';
+import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
 
 /**
  * Dividends View Component
@@ -30,12 +32,16 @@ import { KpiCardComponent } from '../shared/kpi-card/kpi-card.component';
     MatSlideToggleModule,
     NgxEchartsDirective,
     KpiCardComponent,
+    ChartInfoComponent,
   ],
   templateUrl: './dividends-view.component.html',
   styleUrl: './dividends-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DividendsViewComponent {
+  /** Chart definitions for educational tooltips */
+  protected readonly CHART_DEFINITIONS = CHART_DEFINITIONS;
+
   /** Dividend analysis data from service */
   @Input() data: DividendAnalysisData | null = null;
 

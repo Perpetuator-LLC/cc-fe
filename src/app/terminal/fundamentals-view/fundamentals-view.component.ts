@@ -6,6 +6,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
+import { ChartInfoComponent } from '../../shared/chart-info/chart-info.component';
+import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
 
 /**
  * Fundamentals charts structure
@@ -33,12 +35,22 @@ export interface FundamentalsCharts {
 @Component({
   selector: 'app-fundamentals-view',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonToggleModule, NgxEchartsDirective],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonToggleModule,
+    NgxEchartsDirective,
+    ChartInfoComponent,
+  ],
   templateUrl: './fundamentals-view.component.html',
   styleUrl: './fundamentals-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FundamentalsViewComponent {
+  /** Chart definitions for educational tooltips */
+  protected readonly CHART_DEFINITIONS = CHART_DEFINITIONS;
+
   /** Pre-built ECharts options for fundamentals charts */
   @Input() charts: FundamentalsCharts | null = null;
 

@@ -100,12 +100,33 @@
     <!-- Charts Grid -->
     <div class="dividend-charts-grid">
       <div class="dividend-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="
+              CHART_DEFINITIONS.yearlyDividendsChart.title + ': ' + CHART_DEFINITIONS.yearlyDividendsChart.description
+            "
+          />
+        </div>
         <div echarts [options]="charts.yearlyDividends" class="dividend-echart"></div>
       </div>
       <div class="dividend-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="CHART_DEFINITIONS.payoutRatioChart.title + ': ' + CHART_DEFINITIONS.payoutRatioChart.description"
+          />
+        </div>
         <div echarts [options]="charts.payoutRatio" class="dividend-echart"></div>
       </div>
       <div class="dividend-chart full-width">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="
+              CHART_DEFINITIONS.cashFlowComparisonChart.title +
+              ': ' +
+              CHART_DEFINITIONS.cashFlowComparisonChart.description
+            "
+          />
+        </div>
         <div echarts [options]="charts.cashFlowComparison" class="dividend-echart"></div>
       </div>
     </div>
