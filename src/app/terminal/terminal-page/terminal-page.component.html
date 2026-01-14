@@ -67,6 +67,22 @@
                       }
                     </mat-panel-title>
                     <mat-panel-description>
+                      <div class="header-actions">
+                        <button
+                          mat-icon-button
+                          matTooltip="Rerun command"
+                          (click)="rerunCommand(entry.rawInput); $event.stopPropagation()"
+                        >
+                          <mat-icon>replay</mat-icon>
+                        </button>
+                        <button
+                          mat-icon-button
+                          matTooltip="Copy command"
+                          (click)="copyToClipboard(entry.rawInput); $event.stopPropagation()"
+                        >
+                          <mat-icon>content_copy</mat-icon>
+                        </button>
+                      </div>
                       <span class="timestamp">{{ entry.createdAt | date: 'short' }}</span>
                       <mat-icon
                         class="status-icon"

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,7 +12,7 @@ export interface FqnToken {
   type: FqnTokenType;
 }
 
-export type FqnTokenType = 'stock' | 'command' | 'crypto' | 'index' | 'forex' | 'parameter' | 'unknown';
+export type FqnTokenType = 'stock' | 'command' | 'crypto' | 'index' | 'forex' | 'parameter' | 'value' | 'unknown';
 
 /**
  * Utility functions for parsing and working with FQN tokens

@@ -1,0 +1,49 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="formula-container">
+  <div class="formula-header">
+    <span class="formula-title">{{ title }}</span>
+    @if (description) {
+      <button type="button" class="info-button" [matTooltip]="description" matTooltipPosition="above">
+        <mat-icon>info_outline</mat-icon>
+      </button>
+    }
+  </div>
+
+  <div class="formula-expression">
+    <span [innerHTML]="formulaHtml"></span>
+  </div>
+
+  @if (variables.length > 0) {
+    <div class="formula-variables">
+      <div class="variables-header">Where:</div>
+      @for (v of variables; track v.symbol) {
+        <div class="variable-row">
+          <span class="variable-symbol">{{ v.symbol }}</span>
+          <span class="equals">=</span>
+          @if (v.editable && editMode()) {
+            <input
+              type="number"
+              class="variable-input"
+              [value]="v.value"
+              [step]="v.step || 0.1"
+              [min]="v.min"
+              [max]="v.max"
+              (input)="onVariableChange(v.symbol, $event)"
+            />
+            <span class="variable-unit">{{ getUnitForVariable(v) }}</span>
+          } @else {
+            <span class="variable-value">{{ formatVariableValue(v) }}</span>
+          }
+          <span class="variable-name">({{ v.name }})</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (hasEditableVars) {
+    <button mat-stroked-button class="edit-button" (click)="toggleEditMode()">
+      <mat-icon>{{ editMode() ? 'check' : 'edit' }}</mat-icon>
+      {{ editMode() ? 'Apply' : 'Edit Variables' }}
+    </button>
+  }
+</div>
