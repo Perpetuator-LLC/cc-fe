@@ -49,10 +49,13 @@ import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
 import { ChartPreferencesService } from '../chart-preferences.service';
 import { FundamentalsService, FundamentalsData } from '../fundamentals.service';
 import { FundamentalsChartService } from '../fundamentals-chart.service';
-import { ValuationService, DCFAnalysisData } from '../valuation.service';
+import { ValuationService, DCFAnalysisData, DDMAnalysisData } from '../valuation.service';
 import { DividendService, DividendAnalysisData } from '../dividend.service';
 import { DividendChartService } from '../dividend-chart.service';
 import { ValuationChartService } from '../valuation-chart.service';
+import { DividendsViewComponent } from '../dividends-view/dividends-view.component';
+import { FundamentalsViewComponent } from '../fundamentals-view/fundamentals-view.component';
+import { ValuationViewComponent } from '../valuation-view/valuation-view.component';
 
 // Register required ECharts components
 echarts.use([
@@ -120,6 +123,9 @@ interface WatchlistColumnOption {
     MatPaginatorModule,
     NgxEchartsDirective,
     DataTableComponent,
+    DividendsViewComponent,
+    FundamentalsViewComponent,
+    ValuationViewComponent,
   ],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './watchlist-tab.component.html',
@@ -224,8 +230,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     peBand: EChartsOption | null;
   } | null>(null);
   valuationDrillDown = signal<'summary' | 'historical' | 'projections' | 'sensitivity' | 'methodology'>('summary');
+  selectedValuationModel = signal<'dcf' | 'ddm'>('dcf');
   private valuationFetchRetries = 0;
   private static readonly MAX_VALUATION_RETRIES = 2;
+
+  // DDM (Dividend Discount Model) state
+  ddmData = signal<DDMAnalysisData | null>(null);
+  ddmCharts = signal<{
+    dividendProjection: EChartsOption | null;
+    valuation: EChartsOption;
+    breakdown: EChartsOption;
+  } | null>(null);
 
   // Dividend view state
   showDividends = signal(false);
@@ -766,6 +781,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               }
             } else if (view === 'valuation') {
               command = 'DCF';
+            } else if (view === 'dividends') {
+              command = 'DIVIDENDS';
             } else if (view === 'info') {
               command = 'DES';
             } else if (view === 'history') {
@@ -1973,6 +1990,56 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle valuation model change (DCF vs DDM)
+   */
+  onValuationModelChange(model: 'dcf' | 'ddm'): void {
+    console.log('[WatchlistTab] Valuation model changed to:', model);
+    this.selectedValuationModel.set(model);
+
+    // Reload valuation with the selected model
+    const symbol = this.selectedSymbol();
+    if (symbol) {
+      if (model === 'ddm') {
+        // Load DDM analysis
+        this.chartLoading.set(true);
+        this.chartError.set(null);
+        this.subscriptions.add(
+          this.valuationService.loadDDM(symbol).subscribe({
+            next: (data) => {
+              console.log('[WatchlistTab] DDM data loaded:', data);
+              if (!data || !data.isDividendPayer) {
+                this.chartError.set('DDM not applicable - company does not pay dividends');
+                this.chartLoading.set(false);
+                return;
+              }
+              // Store DDM data
+              this.ddmData.set(data);
+              // Build DDM charts
+              const charts = {
+                dividendProjection: this.valuationChartService.buildDdmDividendChart(data),
+                valuation: this.valuationChartService.buildDdmValuationChart(data),
+                breakdown: this.valuationChartService.buildDdmBreakdownChart(data),
+              };
+              this.ddmCharts.set(charts);
+              this.chartLoading.set(false);
+            },
+            error: (err) => {
+              console.error('[WatchlistTab] DDM load error:', err);
+              this.chartError.set(err.message || 'Failed to load DDM analysis');
+              this.chartLoading.set(false);
+            },
+          }),
+        );
+      } else {
+        // Clear DDM data and reload DCF analysis
+        this.ddmData.set(null);
+        this.ddmCharts.set(null);
+        this.loadValuationView(symbol);
+      }
+    }
+  }
+
+  /**
    * Load dividend analysis view for a symbol
    */
   private loadDividendsView(symbol: string): void {
@@ -2046,9 +2113,36 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle OCF toggle change from dividends view component
+   */
+  onOcfToggleChange(show: boolean): void {
+    this.showOperatingCashFlow.set(show);
+    const data = this.dividendData();
+    if (data) {
+      this.buildDividendCharts(data);
+    }
+  }
+
+  /**
+   * Handle view toggle change from mat-button-toggle-group
+   */
+  onViewToggleChange(event: { value: string }): void {
+    const command = event.value;
+    const symbol = this.selectedSymbol();
+    if (symbol && command) {
+      console.log('[WatchlistTab] View toggle changed:', { symbol, command });
+      this.runCommand(symbol, command);
+    }
+  }
+
+  /**
    * Run a command for a symbol
    */
   runCommand(symbol: string, command: string): void {
+    console.log('[WatchlistTab] runCommand called:', { symbol, command, currentCommand: this.currentCommand() });
+
+    // Always run the command, even if it's the same as current
+    // This ensures clicking the button always triggers the action
     this.currentCommand.set(command);
     const item = this.selectedItem();
     this.loadChart(symbol, item?.exchange, command);

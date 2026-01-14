@@ -1,14 +1,17 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { EChartsOption } from 'echarts';
-import { DCFAnalysisData, DCFResult, SensitivityPoint } from './valuation.service';
+import { DCFAnalysisData, DCFResult, SensitivityPoint, DDMAnalysisData } from './valuation.service';
 
-// Theme colors from MD3
+// Theme colors - use hex values for ECharts (CSS variables not fully supported)
 const THEME = {
   background: 'transparent',
-  textColor: 'var(--md-sys-color-on-surface)',
-  textColorSecondary: 'var(--md-sys-color-on-surface-variant)',
-  gridLine: 'var(--md-sys-color-outline-variant)',
+  textColor: '#e0e0e0', // Light text for dark mode
+  textColorSecondary: '#a0a0a0', // Secondary text for axes/labels
+  gridLine: '#353535', // Grid lines
+  axisLine: '#505050', // Axis lines
+  tooltipBg: '#404040', // Tooltip background
+  tooltipBorder: '#606060', // Tooltip border
   primary: '#90caf9',
   success: '#81c784',
   error: '#ef5350',
@@ -44,8 +47,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
@@ -130,8 +133,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { name: string; value: number; color: string }[];
@@ -193,8 +196,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { name: string; value: number }[];
@@ -273,8 +276,8 @@ export class ValuationChartService {
       },
       tooltip: {
         position: 'top',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { value: [number, number, number] };
@@ -380,8 +383,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
       },
       legend: {
@@ -473,8 +476,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
@@ -590,8 +593,8 @@ export class ValuationChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
@@ -692,5 +695,210 @@ export class ValuationChartService {
   formatPercentage(value: number): string {
     const sign = value >= 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
+  }
+
+  // ============================================================================
+  // DDM (Dividend Discount Model) Charts
+  // ============================================================================
+
+  /**
+   * Build DDM dividend projection chart showing historical and projected dividends
+   */
+  buildDdmDividendChart(data: DDMAnalysisData): EChartsOption | null {
+    const chartData = data.dividendChartData;
+    if (!chartData || chartData.length === 0) {
+      return null;
+    }
+
+    const dates = chartData.map((d) => this.formatDate(d.date));
+    const discountedDividends = chartData.map((d) => d.discountedDividend || null);
+
+    // Separate historical from projected
+    const historicalDividends = chartData.map((d) => (!d.isProjected ? d.dividendPerShare : null));
+    const projectedDividends = chartData.map((d) => (d.isProjected ? d.dividendPerShare : null));
+
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: 'Dividend Projections',
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
+        textStyle: { color: THEME.textColor },
+        formatter: (params: unknown) => {
+          const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
+          let html = `<strong>${p[0]?.axisValue}</strong><br/>`;
+          p.forEach((item) => {
+            if (item.value !== null && item.value !== undefined) {
+              html += `<span style="color:${item.color}">●</span> ${item.seriesName}: $${item.value.toFixed(2)}<br/>`;
+            }
+          });
+          return html;
+        },
+      },
+      legend: {
+        data: ['Historical', 'Projected', 'Discounted'],
+        textStyle: { color: THEME.textColorSecondary },
+        top: 30,
+      },
+      grid: { left: 60, right: 20, top: 70, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Dividend ($)',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}' },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+      },
+      series: [
+        {
+          name: 'Historical',
+          type: 'bar',
+          data: historicalDividends,
+          itemStyle: { color: THEME.primary },
+        },
+        {
+          name: 'Projected',
+          type: 'bar',
+          data: projectedDividends,
+          itemStyle: { color: THEME.info, opacity: 0.7 },
+        },
+        {
+          name: 'Discounted',
+          type: 'line',
+          data: discountedDividends,
+          lineStyle: { type: 'dashed', width: 2 },
+          itemStyle: { color: THEME.warning },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Build DDM valuation comparison chart (intrinsic value vs current price)
+   */
+  buildDdmValuationChart(data: DDMAnalysisData): EChartsOption {
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: 'DDM Valuation',
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
+        textStyle: { color: THEME.textColor },
+      },
+      grid: { left: 60, right: 20, top: 50, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: ['Intrinsic Value', 'Current Price'],
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Price ($)',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}' },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+      },
+      series: [
+        {
+          type: 'bar',
+          data: [
+            {
+              value: data.intrinsicValue,
+              itemStyle: { color: data.upsidePercentage >= 0 ? THEME.success : THEME.error },
+            },
+            { value: data.currentPrice, itemStyle: { color: THEME.warning } },
+          ],
+          barWidth: '50%',
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '${c}',
+            color: THEME.textColor,
+          },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Build DDM value breakdown waterfall chart
+   */
+  buildDdmBreakdownChart(data: DDMAnalysisData): EChartsOption {
+    const pvDividends = data.presentValueDividends;
+    const pvTerminal = data.presentValueTerminal;
+    const total = pvDividends + pvTerminal;
+
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: 'DDM Value Breakdown',
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
+        textStyle: { color: THEME.textColor },
+        formatter: (params: unknown) => {
+          const p = params as { name: string; value: number }[];
+          const item = p[0];
+          return `${item.name}: $${item.value.toFixed(2)}`;
+        },
+      },
+      grid: { left: 100, right: 20, top: 50, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: ['PV of Dividends', 'PV of Terminal', 'Intrinsic Value'],
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Value per Share ($)',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}' },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+      },
+      series: [
+        {
+          type: 'bar',
+          data: [
+            { value: pvDividends, itemStyle: { color: THEME.primary } },
+            { value: pvTerminal, itemStyle: { color: THEME.info } },
+            { value: total, itemStyle: { color: THEME.success } },
+          ],
+          barWidth: '60%',
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: unknown) => {
+              const p = params as { value: number };
+              return `$${p.value.toFixed(2)}`;
+            },
+            color: THEME.textColor,
+          },
+        },
+      ],
+    };
   }
 }

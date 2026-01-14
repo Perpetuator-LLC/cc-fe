@@ -1,0 +1,20 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="kpi-card" [class]="'accent-' + accent">
+  <div class="kpi-content">
+    <span class="kpi-label">{{ label }}</span>
+    <span class="kpi-value">{{ value }}</span>
+    @if (changePercent !== null && changePercent !== undefined) {
+      <span class="kpi-change" [class.positive]="changePercent > 0" [class.negative]="changePercent < 0">
+        {{ changePercent > 0 ? '+' : '' }}{{ changePercent | number: '1.1-1' }}%
+      </span>
+    }
+    @if (subValue) {
+      <span class="kpi-sub">{{ subValue }}</span>
+    }
+  </div>
+  @if (tooltip) {
+    <button type="button" class="kpi-info" [matTooltip]="tooltip" matTooltipPosition="above">
+      <mat-icon>info_outline</mat-icon>
+    </button>
+  }
+</div>

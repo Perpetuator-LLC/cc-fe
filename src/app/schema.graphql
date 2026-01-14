@@ -2543,6 +2543,9 @@ type CashFlowType {
   operatingCashFlow: BigInt
 
   """"""
+  capitalExpenditures: BigInt
+
+  """"""
   dividendPayout: BigInt
 }
 

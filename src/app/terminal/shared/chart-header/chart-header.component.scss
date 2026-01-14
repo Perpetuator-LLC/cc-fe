@@ -1,0 +1,90 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.symbol-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.symbol-name {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  .company-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.quote-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+
+  .price {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .change {
+    font-size: 14px;
+    font-weight: 500;
+
+    &.positive {
+      color: var(--md-extended-color-success-color);
+    }
+
+    &.negative {
+      color: var(--md-sys-color-error);
+    }
+  }
+
+  .timestamp {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.symbol-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-chip {
+  --mdc-chip-label-text-size: 12px;
+
+  cursor: default;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--md-sys-color-surface-container-high);
+    }
+  }
+}

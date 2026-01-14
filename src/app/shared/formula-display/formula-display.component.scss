@@ -1,0 +1,120 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.formula-container {
+  margin: 8px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.formula-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.formula-title {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.info-button {
+  cursor: help;
+
+  display: inline-flex;
+
+  padding: 4px;
+  border: none;
+
+  opacity: 0.6;
+  background: transparent;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.formula-expression {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 4px;
+
+  font-family: 'Times New Roman', serif;
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface);
+  text-align: center;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.formula-variables {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.variables-header {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.variable-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.variable-symbol {
+  min-width: 40px;
+  font-family: 'Times New Roman', serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.equals {
+  color: var(--md-sys-color-outline);
+}
+
+.variable-value {
+  font-weight: 500;
+  color: var(--md-sys-color-primary);
+}
+
+.variable-input {
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 4px;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface);
+
+  &:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: none;
+  }
+}
+
+.variable-unit {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.variable-name {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.edit-button {
+  margin-top: 12px;
+}
