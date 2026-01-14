@@ -44,37 +44,30 @@
     <!-- DDM View -->
     <div class="valuation-summary">
       <div class="valuation-metrics">
-        <div class="metric-card">
-          <span class="metric-label">Current Price</span>
-          <span class="metric-value">${{ ddmData.currentPrice.toFixed(2) }}</span>
-        </div>
-        <div class="metric-card base">
-          <span class="metric-label">Intrinsic Value</span>
-          <span class="metric-value">${{ ddmData.intrinsicValue.toFixed(2) }}</span>
-          <span
-            class="metric-change"
-            [class.positive]="ddmData.upsidePercentage > 0"
-            [class.negative]="ddmData.upsidePercentage < 0"
-          >
-            {{ ddmData.upsidePercentage > 0 ? '+' : '' }}{{ ddmData.upsidePercentage.toFixed(1) }}%
-          </span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Dividend Yield</span>
-          <span class="metric-value">{{ ddmData.currentDividendYield.toFixed(2) }}%</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Cost of Equity</span>
-          <span class="metric-value">{{ ddmData.costOfEquity.toFixed(1) }}%</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Margin of Safety</span>
-          <span class="metric-value">{{ ddmData.marginOfSafety.toFixed(1) }}%</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Model Type</span>
-          <span class="metric-value">{{ ddmData.modelType }}</span>
-        </div>
+        <app-kpi-card label="Current Price" [value]="'$' + ddmData.currentPrice.toFixed(2)" />
+        <app-kpi-card
+          label="Intrinsic Value"
+          [value]="'$' + ddmData.intrinsicValue.toFixed(2)"
+          [changePercent]="ddmData.upsidePercentage"
+          accent="primary"
+          [tooltip]="CHART_DEFINITIONS.intrinsicValue.description"
+        />
+        <app-kpi-card
+          label="Dividend Yield"
+          [value]="ddmData.currentDividendYield.toFixed(2) + '%'"
+          [tooltip]="CHART_DEFINITIONS.dividendYield.description"
+        />
+        <app-kpi-card label="Cost of Equity" [value]="ddmData.costOfEquity.toFixed(1) + '%'" />
+        <app-kpi-card
+          label="Margin of Safety"
+          [value]="ddmData.marginOfSafety.toFixed(1) + '%'"
+          [tooltip]="CHART_DEFINITIONS.marginOfSafety.description"
+        />
+        <app-kpi-card
+          label="Model Type"
+          [value]="formatModelType(ddmData.modelType)"
+          [tooltip]="ddmData.modelDescription"
+        />
       </div>
       <!-- DDM Charts -->
       <div class="valuation-charts-grid">
@@ -127,38 +120,36 @@
     <div class="valuation-summary">
       @if (dcfData) {
         <div class="valuation-metrics">
-          <div class="metric-card">
-            <span class="metric-label">Current Price</span>
-            <span class="metric-value">${{ dcfData.valuationSummary.currentPrice.toFixed(2) }}</span>
-          </div>
-          <div class="metric-card base">
-            <span class="metric-label">Intrinsic Value (Base)</span>
-            <span class="metric-value">${{ dcfData.valuationSummary.intrinsicValueBase.toFixed(2) }}</span>
-            <span
-              class="metric-change"
-              [class.positive]="dcfData.valuationSummary.upsideBase > 0"
-              [class.negative]="dcfData.valuationSummary.upsideBase < 0"
-            >
-              {{ dcfData.valuationSummary.upsideBase > 0 ? '+' : ''
-              }}{{ dcfData.valuationSummary.upsideBase.toFixed(1) }}%
-            </span>
-          </div>
-          <div class="metric-card bull">
-            <span class="metric-label">Bull Case</span>
-            <span class="metric-value">${{ dcfData.valuationSummary.intrinsicValueBull.toFixed(2) }}</span>
-          </div>
-          <div class="metric-card bear">
-            <span class="metric-label">Bear Case</span>
-            <span class="metric-value">${{ dcfData.valuationSummary.intrinsicValueBear.toFixed(2) }}</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">WACC</span>
-            <span class="metric-value">{{ dcfData.valuationSummary.wacc.toFixed(1) }}%</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">Margin of Safety</span>
-            <span class="metric-value">{{ dcfData.valuationSummary.marginOfSafety.toFixed(1) }}%</span>
-          </div>
+          <app-kpi-card label="Current Price" [value]="'$' + dcfData.valuationSummary.currentPrice.toFixed(2)" />
+          <app-kpi-card
+            label="Intrinsic Value (Base)"
+            [value]="'$' + dcfData.valuationSummary.intrinsicValueBase.toFixed(2)"
+            [changePercent]="dcfData.valuationSummary.upsideBase"
+            accent="primary"
+            [tooltip]="CHART_DEFINITIONS.intrinsicValue.description"
+          />
+          <app-kpi-card
+            label="Bull Case"
+            [value]="'$' + dcfData.valuationSummary.intrinsicValueBull.toFixed(2)"
+            accent="success"
+            tooltip="Optimistic valuation scenario with higher growth assumptions"
+          />
+          <app-kpi-card
+            label="Bear Case"
+            [value]="'$' + dcfData.valuationSummary.intrinsicValueBear.toFixed(2)"
+            accent="error"
+            tooltip="Conservative valuation scenario with lower growth assumptions"
+          />
+          <app-kpi-card
+            label="WACC"
+            [value]="dcfData.valuationSummary.wacc.toFixed(1) + '%'"
+            [tooltip]="CHART_DEFINITIONS.wacc.description"
+          />
+          <app-kpi-card
+            label="Margin of Safety"
+            [value]="dcfData.valuationSummary.marginOfSafety.toFixed(1) + '%'"
+            [tooltip]="CHART_DEFINITIONS.marginOfSafety.description"
+          />
         </div>
       }
       @if (dcfCharts) {
@@ -175,31 +166,39 @@
   } @else if (drillDown() === 'historical') {
     <!-- Historical Valuation View: P/E, P/B, P/S trends over time -->
     <div class="valuation-historical">
+      <!-- Historical header with years selector -->
+      <div class="historical-header">
+        <span class="section-title">Historical Valuation Analysis</span>
+        <mat-form-field appearance="outline" class="years-field" subscriptSizing="dynamic">
+          <mat-label>Period</mat-label>
+          <mat-select [value]="historicalYears" (selectionChange)="onHistoricalYearsChange($event.value)">
+            <mat-option [value]="5">5 Years</mat-option>
+            <mat-option [value]="10">10 Years</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
       <!-- KPI Stats at top -->
       @if (dcfData?.historicalValuation; as histVal) {
         @if (histVal.length > 0) {
           <div class="historical-stats">
-            <div class="metric-card">
-              <span class="metric-label">Average P/E</span>
-              <span class="metric-value">{{ histVal[0].avgPeRatio?.toFixed(1) || 'N/A' }}</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">P/E Range</span>
-              <span class="metric-value">
-                {{ histVal[0].minPeRatio?.toFixed(1) || 'N/A' }} -
-                {{ histVal[0].maxPeRatio?.toFixed(1) || 'N/A' }}
-              </span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Current P/E</span>
-              <span class="metric-value">
-                {{ histVal[histVal.length - 1].peRatio?.toFixed(1) || 'N/A' }}
-              </span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Average P/B</span>
-              <span class="metric-value">{{ histVal[0].avgPbRatio?.toFixed(1) || 'N/A' }}</span>
-            </div>
+            <app-kpi-card
+              label="Current P/E"
+              [value]="histVal[histVal.length - 1].peRatio?.toFixed(1) || 'N/A'"
+              accent="primary"
+              [tooltip]="CHART_DEFINITIONS.peRatio.description"
+            />
+            <app-kpi-card label="Average P/E" [value]="histVal[0].avgPeRatio?.toFixed(1) || 'N/A'" />
+            <app-kpi-card
+              label="P/E Range"
+              [value]="
+                (histVal[0].minPeRatio?.toFixed(1) || 'N/A') + ' - ' + (histVal[0].maxPeRatio?.toFixed(1) || 'N/A')
+              "
+            />
+            <app-kpi-card
+              label="Average P/B"
+              [value]="histVal[0].avgPbRatio?.toFixed(1) || 'N/A'"
+              [tooltip]="CHART_DEFINITIONS.pbRatio.description"
+            />
           </div>
         }
       }
@@ -209,9 +208,9 @@
           <div echarts [options]="dcfCharts!.historicalValuation!" class="valuation-echart-large"></div>
         </div>
       }
-      @if (dcfCharts?.peBand) {
+      @if (dcfCharts?.priceVsValuation) {
         <div class="valuation-chart-full">
-          <div echarts [options]="dcfCharts!.peBand!" class="valuation-echart-large"></div>
+          <div echarts [options]="dcfCharts!.priceVsValuation!" class="valuation-echart-large"></div>
         </div>
       }
       @if (!dcfData?.historicalValuation?.length) {
@@ -300,46 +299,63 @@
             </div>
           </div>
         </div>
+
+        <!-- WACC Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.wacc.title"
+          [description]="CHART_DEFINITIONS.wacc.description"
+          [formulaHtml]="DCF_FORMULAS.wacc.formulaHtml"
+        />
+
+        <!-- Cost of Equity Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.costOfEquity.title"
+          [description]="CHART_DEFINITIONS.wacc.description"
+          [formulaHtml]="DCF_FORMULAS.costOfEquity.formulaHtml"
+        />
+
+        <!-- Terminal Value Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.terminalValue.title"
+          [description]="CHART_DEFINITIONS.terminalValue.description"
+          [formulaHtml]="DCF_FORMULAS.terminalValue.formulaHtml"
+        />
+
+        <!-- Intrinsic Value Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.intrinsicValue.title"
+          [description]="CHART_DEFINITIONS.intrinsicValue.description"
+          [formulaHtml]="DCF_FORMULAS.intrinsicValue.formulaHtml"
+        />
+
+        <!-- Calculated Values Section -->
         <div class="methodology-section">
-          <h4>WACC Calculation</h4>
-          <div class="formula">
-            <code>Cost of Equity = Risk-Free Rate + (Beta × Market Risk Premium)</code>
-            <code
-              >= {{ dcfData.assumptions.riskFreeRate.toFixed(2) }}% + ({{ dcfData.assumptions.beta.toFixed(2) }} ×
-              {{ dcfData.assumptions.marketRiskPremium.toFixed(2) }}%) =
-              {{ dcfData.baseCase.costOfEquity.toFixed(2) }}%</code
-            >
-          </div>
-          <div class="formula">
-            <code>WACC = (E/V × Cost of Equity) + (D/V × Cost of Debt × (1 - Tax Rate))</code>
-            <code>= {{ dcfData.baseCase.wacc.toFixed(2) }}%</code>
-          </div>
-        </div>
-        <div class="methodology-section">
-          <h4>Terminal Value (Gordon Growth Model)</h4>
-          <div class="formula">
-            <code>Terminal Value = FCF(Year N) × (1 + g) / (WACC - g)</code>
-            <code>= ${{ (dcfData.baseCase.terminalValue / 1e9).toFixed(2) }}B</code>
-          </div>
-        </div>
-        <div class="methodology-section">
-          <h4>Intrinsic Value Calculation</h4>
-          <div class="formula">
-            <code
-              >Enterprise Value = Sum(PV of FCF) + PV of Terminal Value = ${{
-                (dcfData.baseCase.enterpriseValue / 1e9).toFixed(2)
-              }}B</code
-            >
-            <code
-              >Equity Value = Enterprise Value - Net Debt = ${{
-                (dcfData.baseCase.equityValue / 1e9).toFixed(2)
-              }}B</code
-            >
-            <code
-              >Intrinsic Value per Share = Equity Value / Shares Outstanding = ${{
-                dcfData.baseCase.intrinsicValuePerShare.toFixed(2)
-              }}</code
-            >
+          <h4>Calculated Values</h4>
+          <div class="assumptions-grid">
+            <div class="assumption">
+              <span class="label">Cost of Equity</span>
+              <span class="value">{{ dcfData.baseCase.costOfEquity.toFixed(2) }}%</span>
+            </div>
+            <div class="assumption">
+              <span class="label">WACC</span>
+              <span class="value">{{ dcfData.baseCase.wacc.toFixed(2) }}%</span>
+            </div>
+            <div class="assumption">
+              <span class="label">Terminal Value</span>
+              <span class="value">${{ (dcfData.baseCase.terminalValue / 1e9).toFixed(2) }}B</span>
+            </div>
+            <div class="assumption">
+              <span class="label">Enterprise Value</span>
+              <span class="value">${{ (dcfData.baseCase.enterpriseValue / 1e9).toFixed(2) }}B</span>
+            </div>
+            <div class="assumption">
+              <span class="label">Equity Value</span>
+              <span class="value">${{ (dcfData.baseCase.equityValue / 1e9).toFixed(2) }}B</span>
+            </div>
+            <div class="assumption">
+              <span class="label">Intrinsic Value/Share</span>
+              <span class="value">${{ dcfData.baseCase.intrinsicValuePerShare.toFixed(2) }}</span>
+            </div>
           </div>
         </div>
       }

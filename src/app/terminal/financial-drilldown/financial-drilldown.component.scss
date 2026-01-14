@@ -1,0 +1,276 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.financial-drilldown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px;
+
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  p {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.error-state mat-icon {
+  color: var(--md-sys-color-error);
+}
+
+// Alerts Section
+.alerts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  padding: 12px;
+  border-radius: 8px;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+
+  &.alert-high {
+    border-left: 4px solid var(--md-sys-color-error);
+    background: var(--md-sys-color-error-container);
+
+    mat-icon {
+      color: var(--md-sys-color-error);
+    }
+  }
+
+  &.alert-medium {
+    border-left: 4px solid var(--md-extended-color-warning-color);
+    background: var(--md-extended-color-warning-color-container);
+
+    mat-icon {
+      color: var(--md-extended-color-warning-color);
+    }
+  }
+
+  &.alert-low {
+    border-left: 4px solid var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+
+    mat-icon {
+      color: var(--md-sys-color-primary);
+    }
+  }
+}
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-type {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+}
+
+.alert-message {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Fiscal Header
+.fiscal-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.fiscal-label {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.fiscal-date {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Tree Container
+.tree-container {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.tree-node {
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.node-row {
+  cursor: pointer;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &:focus {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: -2px;
+  }
+}
+
+.expand-icon {
+  flex-shrink: 0;
+
+  width: 20px;
+  height: 20px;
+
+  font-size: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.expand-placeholder {
+  width: 20px;
+  height: 20px;
+}
+
+.node-name {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  align-items: center;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.indicator {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+
+  &.ma-indicator {
+    color: var(--md-sys-color-tertiary);
+  }
+
+  &.change-indicator {
+    color: var(--md-extended-color-warning-color);
+  }
+}
+
+.node-value {
+  min-width: 100px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  text-align: right;
+}
+
+.node-change {
+  min-width: 60px;
+  font-size: 12px;
+  text-align: right;
+
+  &.positive {
+    color: var(--md-extended-color-success-color);
+  }
+
+  &.negative {
+    color: var(--md-sys-color-error);
+  }
+
+  &.placeholder {
+    color: var(--md-sys-color-outline);
+  }
+}
+
+.node-percent {
+  min-width: 48px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: right;
+
+  &.placeholder {
+    color: var(--md-sys-color-outline);
+  }
+}
+
+.drill-button {
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border: none;
+  border-radius: 4px;
+
+  color: var(--md-sys-color-primary);
+
+  opacity: 0;
+  background: transparent;
+
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: var(--md-sys-color-primary-container);
+  }
+}
+
+.node-row:hover .drill-button {
+  opacity: 1;
+}
+
+.node-children {
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+}

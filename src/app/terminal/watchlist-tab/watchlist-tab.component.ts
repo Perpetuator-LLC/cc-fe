@@ -56,6 +56,7 @@ import { ValuationChartService } from '../valuation-chart.service';
 import { DividendsViewComponent } from '../dividends-view/dividends-view.component';
 import { FundamentalsViewComponent } from '../fundamentals-view/fundamentals-view.component';
 import { ValuationViewComponent } from '../valuation-view/valuation-view.component';
+import { ChartHeaderComponent, ChartSettings } from '../chart-header/chart-header.component';
 
 // Register required ECharts components
 echarts.use([
@@ -126,6 +127,7 @@ interface WatchlistColumnOption {
     DividendsViewComponent,
     FundamentalsViewComponent,
     ValuationViewComponent,
+    ChartHeaderComponent,
   ],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './watchlist-tab.component.html',
@@ -200,6 +202,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   showDividendsReinvested = signal(false); // Total return view (dividends reinvested)
   showRawData = signal(false); // Show raw data without anomaly filtering
   showCorporateActions = signal(true); // Show splits/dividends markers on chart (default: true)
+  showVolume = signal(true); // Show volume chart below price chart (default: true)
   lockToRight = signal(true); // Lock chart to show most recent data on right edge
 
   // Fundamentals view state
@@ -220,6 +223,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // Valuation (DCF) view state
   showValuation = signal(false);
   valuationData = signal<DCFAnalysisData | null>(null);
+  valuationHistoricalYears = signal(10); // 5 or 10 years for historical charts
   valuationCharts = signal<{
     fcfProjection: EChartsOption;
     valuationComparison: EChartsOption;
@@ -227,7 +231,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     sensitivityHeatmap: EChartsOption;
     historicalFinancials: EChartsOption;
     historicalValuation: EChartsOption | null;
-    peBand: EChartsOption | null;
+    priceVsValuation: EChartsOption | null;
   } | null>(null);
   valuationDrillDown = signal<'summary' | 'historical' | 'projections' | 'sensitivity' | 'methodology'>('summary');
   selectedValuationModel = signal<'dcf' | 'ddm'>('dcf');
@@ -272,6 +276,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const interval = this.selectedInterval().toLowerCase();
     return interval === 'daily' || interval === 'weekly' || interval === 'monthly';
   });
+
+  // Computed: Chart settings object for ChartHeaderComponent
+  chartSettings = computed<ChartSettings>(() => ({
+    showCorporateActions: this.showCorporateActions(),
+    showExtendedHours: this.showExtendedHours(),
+    useLocalTime: this.showLocalTime(),
+    adjustForDividends: this.showDividendsReinvested(),
+    showRawData: this.showRawData(),
+    showVolume: this.showVolume(),
+    lockToRight: this.lockToRight(),
+  }));
 
   // Progressive data loading state
   loadingMoreData = signal(false);
@@ -726,9 +741,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       }
       // Determine command based on view parameter
       let command = 'CHART';
-      if (state.view === 'fundamentals') {
-        command = 'FUNDAMENTALS';
-        // Set fundamentals period from params if specified
+      if (state.view === 'fundamentals' || state.view === 'financials') {
+        command = 'FINANCIALS';
+        // Set financials period from params if specified
         const period = state.params?.['period'];
         if (period === 'quarterly') {
           this.fundamentalsIsAnnual.set(false);
@@ -770,9 +785,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
             // Determine command from view
             let command = 'CHART';
-            if (view === 'fundamentals') {
-              command = 'FUNDAMENTALS';
-              // Handle fundamentals period from period query param
+            if (view === 'fundamentals' || view === 'financials') {
+              command = 'FINANCIALS';
+              // Handle financials period from period query param
               const period = params['period'];
               if (period === 'quarterly') {
                 this.fundamentalsIsAnnual.set(false);
@@ -792,7 +807,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             // Only reload if something changed
             const viewChanged = command !== currentCommand;
             const symbolChanged = symbol !== currentSymbol;
-            const intervalChanged = command !== 'FUNDAMENTALS' && command !== 'DCF' && interval !== currentInterval;
+            const intervalChanged =
+              command !== 'FINANCIALS' &&
+              command !== 'FUNDAMENTALS' &&
+              command !== 'DCF' &&
+              interval !== currentInterval;
 
             if (symbolChanged || intervalChanged || viewChanged) {
               console.log('[WatchlistTab] Route changed, reloading:', {
@@ -802,8 +821,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
                 view,
                 command,
               });
-              // Update interval if provided and not fundamentals view
-              if (command !== 'FUNDAMENTALS' && interval && interval !== currentInterval) {
+              // Update interval if provided and not financials view
+              if (command !== 'FINANCIALS' && command !== 'FUNDAMENTALS' && interval && interval !== currentInterval) {
                 this.selectedInterval.set(interval);
               }
               // Update routing service state without updating URL (to avoid loop)
@@ -1071,11 +1090,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               this.routingService.applyRoute(route as RouteInfo);
 
               // Handle view switching based on route
-              if (route.view === 'fundamentals') {
-                console.log('[WatchlistTab] Route specifies fundamentals view, loading fundamentals');
-                this.currentCommand.set('FUNDAMENTALS');
+              if (route.view === 'fundamentals' || route.view === 'financials') {
+                console.log('[WatchlistTab] Route specifies financials view, loading financials');
+                this.currentCommand.set('FINANCIALS');
                 this.loadFundamentalsView(newSymbol);
-                return; // Early return - fundamentals view handles its own rendering
+                return; // Early return - financials view handles its own rendering
               } else if (route.view === 'valuation') {
                 console.log('[WatchlistTab] Route specifies valuation view, loading DCF');
                 this.currentCommand.set('DCF');
@@ -1692,8 +1711,18 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Load chart with default command (1D chart on first select)
-    this.loadChart(item.symbol, item.exchange, 'CHART');
+    // Preserve current view when switching symbols
+    // If user is on valuation/fundamentals/dividends view, load that view for the new symbol
+    if (this.showValuation()) {
+      this.loadValuationView(item.symbol);
+    } else if (this.showFundamentals()) {
+      this.loadFundamentalsView(item.symbol);
+    } else if (this.showDividends()) {
+      this.loadDividendsView(item.symbol);
+    } else {
+      // Default to chart view
+      this.loadChart(item.symbol, item.exchange, 'CHART');
+    }
   }
 
   /**
@@ -1758,8 +1787,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.lastProgressiveCursor = null;
     this.sameCursorRetryCount = 0;
 
-    // Handle FUNDAMENTALS command directly (no backend execution needed)
-    if (command === 'FUNDAMENTALS') {
+    // Handle FINANCIALS command directly (no backend execution needed)
+    // Also handle legacy FUNDAMENTALS command name
+    if (command === 'FINANCIALS' || command === 'FUNDAMENTALS') {
       this.loadFundamentalsView(symbol);
       return;
     }
@@ -1905,10 +1935,40 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Change the number of years shown in historical valuation charts
+   */
+  onValuationYearsChange(years: number): void {
+    this.valuationHistoricalYears.set(years);
+
+    // Rebuild price vs valuation chart with new year filter
+    const data = this.valuationData();
+    if (data) {
+      const currentCharts = this.valuationCharts();
+      if (currentCharts) {
+        this.valuationCharts.set({
+          ...currentCharts,
+          priceVsValuation: this.valuationChartService.buildPriceVsValuationChart(data, years),
+        });
+      }
+    }
+  }
+
+  /**
    * Load DCF valuation view for a symbol
    */
   private loadValuationView(symbol: string, isRetry = false): void {
     console.log('[WatchlistTab] Loading valuation for:', symbol, 'isRetry:', isRetry);
+
+    // Check if this is an ETF - ETFs don't support valuation
+    const item = this.selectedItem();
+    if (item?.assetType?.toUpperCase() === 'ETF') {
+      this.showValuation.set(true);
+      this.chartOptions.set(null);
+      this.chartError.set('Valuation analysis is not available for ETFs. ETFs do not have earnings or cash flow data.');
+      this.chartLoading.set(false);
+      return;
+    }
+
     this.showValuation.set(true);
     this.valuationDrillDown.set('summary');
     // Clear chart options so valuation view takes precedence
@@ -1920,7 +1980,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     // Update URL to reflect valuation view
-    const item = this.selectedItem();
     this.routingService.applyRoute({
       symbol,
       exchange: item?.exchange,
@@ -1960,7 +2019,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             sensitivityHeatmap: this.valuationChartService.buildSensitivityHeatmap(data.sensitivityGrid),
             historicalFinancials: this.valuationChartService.buildHistoricalFinancialsChart(data),
             historicalValuation: this.valuationChartService.buildHistoricalValuationChart(data),
-            peBand: this.valuationChartService.buildPeBandChart(data),
+            priceVsValuation: this.valuationChartService.buildPriceVsValuationChart(
+              data,
+              this.valuationHistoricalYears(),
+            ),
           };
           this.valuationCharts.set(charts);
           this.chartLoading.set(false);
@@ -2152,6 +2214,69 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Retry loading the chart
    */
   retryChart(): void {
+    const symbol = this.selectedSymbol();
+    const item = this.selectedItem();
+    if (symbol) {
+      this.loadChart(symbol, item?.exchange, this.currentCommand());
+    }
+  }
+
+  /**
+   * Handle chart setting toggle from ChartHeaderComponent
+   */
+  onChartSettingChange(event: { setting: keyof ChartSettings; value: boolean }): void {
+    switch (event.setting) {
+      case 'showCorporateActions':
+        this.showCorporateActions.set(event.value);
+        break;
+      case 'showExtendedHours':
+        this.showExtendedHours.set(event.value);
+        break;
+      case 'useLocalTime':
+        this.showLocalTime.set(event.value);
+        break;
+      case 'adjustForDividends':
+        this.showDividendsReinvested.set(event.value);
+        break;
+      case 'showRawData':
+        this.showRawData.set(event.value);
+        break;
+      case 'showVolume':
+        this.showVolume.set(event.value);
+        break;
+      case 'lockToRight':
+        this.lockToRight.set(event.value);
+        break;
+    }
+    // Persist preferences and rebuild chart
+    this.saveChartPreferences();
+    this.rebuildChart();
+  }
+
+  /**
+   * Handle lock to right toggle from ChartHeaderComponent
+   */
+  onLockToRightChange(locked: boolean): void {
+    this.lockToRight.set(locked);
+    this.saveChartPreferences();
+  }
+
+  /**
+   * Save chart preferences to backend
+   */
+  private saveChartPreferences(): void {
+    this.chartPreferencesService.updatePreference('showCorporateActions', this.showCorporateActions()).subscribe();
+    this.chartPreferencesService.updatePreference('showExtendedHours', this.showExtendedHours()).subscribe();
+    this.chartPreferencesService.updatePreference('useExchangeTime', !this.showLocalTime()).subscribe();
+    this.chartPreferencesService.updatePreference('adjustForDividends', this.showDividendsReinvested()).subscribe();
+    this.chartPreferencesService.updatePreference('showRawData', this.showRawData()).subscribe();
+    this.chartPreferencesService.updatePreference('lockToRight', this.lockToRight()).subscribe();
+  }
+
+  /**
+   * Rebuild the chart with current settings
+   */
+  private rebuildChart(): void {
     const symbol = this.selectedSymbol();
     const item = this.selectedItem();
     if (symbol) {
@@ -2850,7 +2975,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   getSymbolActions(): { icon: string; label: string; command: string }[] {
     return [
       { icon: 'show_chart', label: 'Chart', command: 'CHART' },
-      { icon: 'account_balance', label: 'Fundamentals', command: 'FUNDAMENTALS' },
+      { icon: 'account_balance', label: 'Financials', command: 'FINANCIALS' },
       { icon: 'analytics', label: 'Valuation', command: 'DCF' },
       { icon: 'payments', label: 'Dividends', command: 'DIVIDENDS' },
       { icon: 'table_chart', label: 'Table', command: 'HP' },

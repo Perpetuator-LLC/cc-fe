@@ -1,0 +1,117 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="financial-drilldown">
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="32" />
+      <p>Loading financial data...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+    </div>
+  } @else if (!root) {
+    <div class="empty-state">
+      <mat-icon>info</mat-icon>
+      <p>No financial hierarchy data available.</p>
+    </div>
+  } @else {
+    <!-- Alerts Section -->
+    @if (alerts.length > 0) {
+      <div class="alerts-section">
+        @for (alert of alerts; track alert.message) {
+          <div class="alert-card" [class]="getAlertClass(alert)">
+            <mat-icon>{{ alert.severity === 'high' ? 'warning' : 'info' }}</mat-icon>
+            <div class="alert-content">
+              <span class="alert-type">{{ alert.type }}</span>
+              <span class="alert-message">{{ alert.message }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Fiscal Date Header -->
+    @if (fiscalDate) {
+      <div class="fiscal-header">
+        <span class="fiscal-label">As of:</span>
+        <span class="fiscal-date">{{ fiscalDate | date: 'MMM d, yyyy' }}</span>
+      </div>
+    }
+
+    <!-- Tree Structure -->
+    <div class="tree-container">
+      <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: root, level: 0 }" />
+    </div>
+  }
+</div>
+
+<!-- Recursive Node Template -->
+<ng-template #nodeTemplate let-node="node" let-level="level">
+  <div class="tree-node" [class.has-children]="node.children?.length > 0" [class.expanded]="isExpanded(node.id)">
+    <div
+      class="node-row"
+      [style]="getIndentStyle(level)"
+      (click)="node.children?.length > 0 ? toggleNode(node.id) : onNodeClick(node, $event)"
+      (keydown.enter)="node.children?.length > 0 ? toggleNode(node.id) : onNodeClick(node, $event)"
+      tabindex="0"
+    >
+      <!-- Expand/Collapse Icon -->
+      @if (node.children?.length > 0) {
+        <mat-icon class="expand-icon">{{ isExpanded(node.id) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      } @else {
+        <span class="expand-placeholder"></span>
+      }
+
+      <!-- Node Name with Indicators -->
+      <span class="node-name">
+        {{ node.name }}
+        @if (hasMaIndicator(node)) {
+          <mat-icon class="indicator ma-indicator" matTooltip="M&A Activity Detected">merge_type</mat-icon>
+        }
+        @if (hasSignificantChange(node)) {
+          <mat-icon class="indicator change-indicator" matTooltip="Significant YoY Change">trending_up</mat-icon>
+        }
+      </span>
+
+      <!-- Value -->
+      <span class="node-value">{{ formatValue(node.value) }}</span>
+
+      <!-- YoY Change -->
+      @if (node.yoyChange !== null) {
+        <span class="node-change" [class]="getChangeClass(node.yoyChange)">
+          {{ formatChange(node.yoyChange) }}
+        </span>
+      } @else {
+        <span class="node-change placeholder">—</span>
+      }
+
+      <!-- Percentage of Parent -->
+      @if (node.percentageOfParent !== null && level > 0) {
+        <span class="node-percent">{{ node.percentageOfParent.toFixed(1) }}%</span>
+      } @else {
+        <span class="node-percent placeholder">—</span>
+      }
+
+      <!-- Drill-down Button -->
+      <button
+        type="button"
+        class="drill-button"
+        matTooltip="View time series"
+        (click)="onNodeClick(node, $event)"
+        (keydown.enter)="onNodeClick(node, $event)"
+      >
+        <mat-icon>timeline</mat-icon>
+      </button>
+    </div>
+
+    <!-- Children (when expanded) -->
+    @if (isExpanded(node.id) && node.children?.length > 0) {
+      <div class="node-children">
+        @for (child of node.children; track child.id) {
+          <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: child, level: level + 1 }" />
+        }
+      </div>
+    }
+  </div>
+</ng-template>
