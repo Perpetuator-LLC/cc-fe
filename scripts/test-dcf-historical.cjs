@@ -19,10 +19,12 @@ query DcfAnalysis($ticker: String!, $projectionYears: Int) {
       date
       price
       eps
+      epsIsNegative
       peRatio
       pbRatio
       psRatio
       bookValuePerShare
+      valuationNote
       avgPeRatio
       minPeRatio
       maxPeRatio
@@ -78,7 +80,14 @@ query DcfAnalysis($ticker: String!, $projectionYears: Int) {
       console.log('P/E Range:', hv[0]?.minPeRatio?.toFixed(2), '-', hv[0]?.maxPeRatio?.toFixed(2));
       console.log('\nAll data points:');
       hv.forEach(h => {
-        console.log(`  ${h.date}: Price=$${h.price?.toFixed(2)}, EPS=$${h.eps?.toFixed(2)}, P/E=${h.peRatio?.toFixed(2)}, P/B=${h.pbRatio?.toFixed(2)}, P/S=${h.psRatio?.toFixed(2)}`);
+        let line = `  ${h.date}: Price=$${h.price?.toFixed(2)}, EPS=$${h.eps?.toFixed(2)}, P/E=${h.peRatio?.toFixed(2)}, P/B=${h.pbRatio?.toFixed(2)}, P/S=${h.psRatio?.toFixed(2)}`;
+        if (h.epsIsNegative) {
+          line += ' [NEGATIVE EPS]';
+        }
+        if (h.valuationNote) {
+          line += ` Note: ${h.valuationNote}`;
+        }
+        console.log(line);
       });
     } else {
       console.log('No historical valuation data');

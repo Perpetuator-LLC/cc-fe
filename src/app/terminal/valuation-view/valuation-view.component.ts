@@ -6,10 +6,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
 import { DCFAnalysisData, DDMAnalysisData } from '../valuation.service';
 import { KpiCardComponent } from '../shared/kpi-card/kpi-card.component';
+import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
+import { FormulaDisplayComponent } from '../../shared/formula-display/formula-display.component';
+import { DCF_FORMULAS, DDM_FORMULAS } from '../../shared/formula-display/valuation-formulas';
 
 /**
  * DCF valuation charts structure
@@ -21,7 +26,7 @@ export interface ValuationCharts {
   sensitivityHeatmap: EChartsOption;
   historicalFinancials: EChartsOption;
   historicalValuation: EChartsOption | null;
-  peBand: EChartsOption | null;
+  priceVsValuation: EChartsOption | null;
 }
 
 /**
@@ -54,8 +59,11 @@ export type ValuationDrillDown = 'summary' | 'historical' | 'projections' | 'sen
     MatButtonToggleModule,
     MatTableModule,
     MatTooltipModule,
+    MatSelectModule,
+    MatFormFieldModule,
     NgxEchartsDirective,
     KpiCardComponent,
+    FormulaDisplayComponent,
     DatePipe,
   ],
   templateUrl: './valuation-view.component.html',
@@ -63,6 +71,11 @@ export type ValuationDrillDown = 'summary' | 'historical' | 'projections' | 'sen
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValuationViewComponent {
+  /** Chart definitions for tooltips */
+  protected readonly CHART_DEFINITIONS = CHART_DEFINITIONS;
+  protected readonly DCF_FORMULAS = DCF_FORMULAS;
+  protected readonly DDM_FORMULAS = DDM_FORMULAS;
+
   /** DCF analysis data */
   @Input() dcfData: DCFAnalysisData | null = null;
 
@@ -81,6 +94,16 @@ export class ValuationViewComponent {
   /** Error message */
   @Input() error: string | null = null;
 
+  /** Historical chart years (5 or 10) */
+  @Input() historicalYears = 10;
+
+  /** Current model from parent */
+  @Input() set model(value: ValuationModel) {
+    if (value) {
+      this.selectedModel.set(value);
+    }
+  }
+
   /** Currently selected valuation model */
   selectedModel = signal<ValuationModel>('dcf');
 
@@ -90,6 +113,9 @@ export class ValuationViewComponent {
   /** Emitted when model changes */
   @Output() modelChange = new EventEmitter<ValuationModel>();
 
+  /** Emitted when historical years changes */
+  @Output() historicalYearsChange = new EventEmitter<number>();
+
   onModelChange(model: ValuationModel): void {
     this.selectedModel.set(model);
     this.modelChange.emit(model);
@@ -97,6 +123,24 @@ export class ValuationViewComponent {
 
   setDrillDown(view: ValuationDrillDown): void {
     this.drillDown.set(view);
+  }
+
+  onHistoricalYearsChange(years: number): void {
+    this.historicalYearsChange.emit(years);
+  }
+
+  /**
+   * Format DDM model type to friendly display name
+   */
+  formatModelType(modelType: string): string {
+    const names: Record<string, string> = {
+      gordon: 'Gordon Growth',
+      gordon_growth: 'Gordon Growth',
+      two_stage: 'Two-Stage Growth',
+      h_model: 'H-Model (Declining Growth)',
+      three_stage: 'Three-Stage Growth',
+    };
+    return names[modelType.toLowerCase()] || modelType;
   }
 
   // Check if we have any data to display

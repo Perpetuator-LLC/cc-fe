@@ -79,6 +79,19 @@
   gap: 16px;
 }
 
+.historical-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
 .valuation-metrics,
 .historical-stats {
   display: grid;
@@ -92,7 +105,7 @@
   gap: 4px;
 
   padding: 12px;
-  border-left: 4px solid transparent;
+  border-left: 4px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
   background: var(--md-sys-color-surface-container);
@@ -165,6 +178,23 @@
   padding: 16px;
   border-radius: 8px;
   background: var(--md-sys-color-surface-container);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.years-field {
+  width: 120px;
 }
 
 .valuation-echart-large,

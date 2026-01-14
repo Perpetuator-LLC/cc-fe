@@ -12,7 +12,7 @@ export const DCF_FORMULAS = {
   intrinsicValue: {
     title: 'Intrinsic Value Per Share',
     description: 'The fair value of one share, calculated by dividing equity value by shares outstanding.',
-    formulaHtml: `<span class="fraction">
+    formulaHtml: `Intrinsic Value = <span class="fraction">
       <span class="fraction-top">Equity Value</span>
       <span class="fraction-bottom">Shares Outstanding</span>
     </span>`,
@@ -21,13 +21,13 @@ export const DCF_FORMULAS = {
   equityValue: {
     title: 'Equity Value',
     description: 'The portion of enterprise value available to shareholders after accounting for debt.',
-    formulaHtml: `Enterprise Value − Net Debt`,
+    formulaHtml: `Equity Value = Enterprise Value − Net Debt`,
   },
 
   enterpriseValue: {
     title: 'Enterprise Value',
     description: 'The total value of the business operations, including both debt and equity.',
-    formulaHtml: `<span class="sum">Σ</span>
+    formulaHtml: `EV = <span class="sum">Σ</span>
       <span class="fraction">
         <span class="fraction-top">FCF<span class="subscript">t</span></span>
         <span class="fraction-bottom">(1 + WACC)<span class="superscript">t</span></span>
@@ -42,7 +42,7 @@ export const DCF_FORMULAS = {
   terminalValue: {
     title: 'Terminal Value (Gordon Growth)',
     description: 'The value of all cash flows beyond the projection period, assuming perpetual growth.',
-    formulaHtml: `<span class="fraction">
+    formulaHtml: `TV = <span class="fraction">
       <span class="fraction-top">FCF<span class="subscript">n</span> × (1 + g)</span>
       <span class="fraction-bottom">WACC − g</span>
     </span>`,
@@ -51,7 +51,7 @@ export const DCF_FORMULAS = {
   wacc: {
     title: 'Weighted Average Cost of Capital',
     description: 'The blended cost of financing from both debt and equity sources.',
-    formulaHtml: `<span class="fraction">
+    formulaHtml: `WACC = <span class="fraction">
       <span class="fraction-top">E</span>
       <span class="fraction-bottom">E + D</span>
     </span> × R<span class="subscript">e</span>
@@ -67,7 +67,7 @@ export const DCF_FORMULAS = {
     description:
       'The expected return required by equity investors, ' + 'calculated using the Capital Asset Pricing Model.',
     formulaHtml:
-      'R<span class="subscript">f</span> + β × ' +
+      'R<span class="subscript">e</span> = R<span class="subscript">f</span> + β × ' +
       '(R<span class="subscript">m</span> − R<span class="subscript">f</span>)',
   },
 };
@@ -79,7 +79,7 @@ export const DDM_FORMULAS = {
   gordonGrowth: {
     title: 'Gordon Growth Model',
     description: 'Simple DDM assuming constant dividend growth in perpetuity.',
-    formulaHtml: `<span class="fraction">
+    formulaHtml: `P = <span class="fraction">
       <span class="fraction-top">D<span class="subscript">0</span> × (1 + g)</span>
       <span class="fraction-bottom">r − g</span>
     </span>`,
@@ -88,7 +88,7 @@ export const DDM_FORMULAS = {
   twoStage: {
     title: 'Two-Stage DDM',
     description: 'Values dividends with high initial growth transitioning to stable growth.',
-    formulaHtml: `<span class="sum">Σ</span>
+    formulaHtml: `P = <span class="sum">Σ</span>
       <span class="fraction">
         <span class="fraction-top">D<span class="subscript">t</span></span>
         <span class="fraction-bottom">(1 + r)<span class="superscript">t</span></span>
@@ -103,7 +103,7 @@ export const DDM_FORMULAS = {
   hModel: {
     title: 'H-Model',
     description: 'Values declining growth that gradually converges to stable long-term rate.',
-    formulaHtml: `<span class="fraction">
+    formulaHtml: `P = <span class="fraction">
       <span class="fraction-top">D<span class="subscript">0</span> × (1 + g<span class="subscript">L</span>)</span>
       <span class="fraction-bottom">r − g<span class="subscript">L</span></span>
     </span>

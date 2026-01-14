@@ -505,146 +505,22 @@
 
           <!-- Content Container -->
           <div class="content-container">
-            <!-- OHLC Header - always show for CHART command so user can change interval -->
+            <!-- Chart Header - using extracted component -->
             @if (currentCommand() === 'CHART') {
-              <div class="ohlc-header">
-                <!-- Interval selector using mat-select for proper Angular binding -->
-                <mat-form-field appearance="outline" class="interval-field" subscriptSizing="dynamic">
-                  <mat-label>Interval</mat-label>
-                  <mat-select
-                    [value]="selectedInterval()"
-                    (selectionChange)="onIntervalChange($event.value)"
-                    [disabled]="chartLoading()"
-                  >
-                    @for (interval of intervalOptions(); track interval) {
-                      <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-
-                @if (crosshairData(); as ohlc) {
-                  <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
-                  <span class="ohlc-label">O</span>
-                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-                    formatPrice(ohlc.open)
-                  }}</span>
-                  <span class="ohlc-label">H</span>
-                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-                    formatPrice(ohlc.high)
-                  }}</span>
-                  <span class="ohlc-label">L</span>
-                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-                    formatPrice(ohlc.low)
-                  }}</span>
-                  <span class="ohlc-label">C</span>
-                  <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-                    formatPrice(ohlc.close)
-                  }}</span>
-                  @if (ohlc.volume) {
-                    <span class="ohlc-label">Vol</span>
-                    <span class="ohlc-value volume">{{ formatVolume(ohlc.volume) }}</span>
-                  }
-                } @else if (!chartError()) {
-                  <span class="ohlc-hint">Hover on chart to see OHLC values</span>
-                }
-
-                <!-- Chart Toggles - Gear menu with slide toggles -->
-                <div class="chart-toggles">
-                  <button mat-icon-button matTooltip="Refresh" (click)="retryChart()" [disabled]="chartLoading()">
-                    <mat-icon>refresh</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    [matTooltip]="lockToRight() ? 'Locked to Right (Most Recent)' : 'Unlocked - Free Scroll'"
-                    (click)="toggleLockToRight()"
-                    [color]="lockToRight() ? 'primary' : undefined"
-                  >
-                    <mat-icon>{{ lockToRight() ? 'push_pin' : 'drag_pan' }}</mat-icon>
-                  </button>
-                  <button mat-icon-button [matMenuTriggerFor]="chartSettingsMenu" matTooltip="Chart Settings">
-                    <mat-icon>settings</mat-icon>
-                  </button>
-                  <mat-menu #chartSettingsMenu="matMenu" class="chart-settings-menu">
-                    <div class="menu-section-label">Display</div>
-                    <div
-                      mat-menu-item
-                      (click)="$event.stopPropagation()"
-                      [class.disabled-option]="!isCurrentIntervalDailyOrLonger()"
-                      [matTooltip]="
-                        isCurrentIntervalDailyOrLonger()
-                          ? 'Show dividend and stock split markers on the chart'
-                          : 'Only available on Daily, Weekly, and Monthly charts'
-                      "
-                    >
-                      <mat-slide-toggle
-                        [checked]="showCorporateActions()"
-                        [disabled]="!isCurrentIntervalDailyOrLonger()"
-                        (change)="toggleCorporateActions()"
-                      >
-                        Splits &amp; Dividends
-                      </mat-slide-toggle>
-                    </div>
-                    <mat-divider />
-                    <div class="menu-section-label">Time &amp; Hours</div>
-                    <div
-                      mat-menu-item
-                      (click)="$event.stopPropagation()"
-                      [class.disabled-option]="!isCurrentIntervalIntraday()"
-                      [matTooltip]="
-                        isCurrentIntervalIntraday()
-                          ? 'Show times in your local timezone instead of market time (ET)'
-                          : 'Only affects intraday charts (1min, 5min, 15min, 30min, hourly)'
-                      "
-                    >
-                      <mat-slide-toggle
-                        [checked]="showLocalTime()"
-                        [disabled]="!isCurrentIntervalIntraday()"
-                        (change)="toggleLocalTime()"
-                      >
-                        Local Time
-                      </mat-slide-toggle>
-                    </div>
-                    <div
-                      mat-menu-item
-                      (click)="$event.stopPropagation()"
-                      [class.disabled-option]="!isCurrentIntervalIntraday()"
-                      [matTooltip]="
-                        isCurrentIntervalIntraday()
-                          ? 'Include pre-market (4AM-9:30AM ET) and after-hours (4PM-8PM ET) trading data'
-                          : 'Only available on intraday charts (1min, 5min, 15min, 30min, hourly)'
-                      "
-                    >
-                      <mat-slide-toggle
-                        [checked]="showExtendedHours()"
-                        [disabled]="!isCurrentIntervalIntraday()"
-                        (change)="toggleExtendedHours()"
-                      >
-                        Extended Hours
-                      </mat-slide-toggle>
-                    </div>
-                    <mat-divider />
-                    <div class="menu-section-label">Data</div>
-                    <div
-                      mat-menu-item
-                      (click)="$event.stopPropagation()"
-                      matTooltip="Show total return by adjusting historical prices as if dividends were reinvested"
-                    >
-                      <mat-slide-toggle [checked]="showDividendsReinvested()" (change)="toggleDividendsReinvested()">
-                        Dividends Reinvested
-                      </mat-slide-toggle>
-                    </div>
-                    <div
-                      mat-menu-item
-                      (click)="$event.stopPropagation()"
-                      matTooltip="Show raw market data including extreme wicks and anomalies (useful for analysis)"
-                    >
-                      <mat-slide-toggle [checked]="showRawData()" (change)="toggleRawData()">
-                        Show Raw Data
-                      </mat-slide-toggle>
-                    </div>
-                  </mat-menu>
-                </div>
-              </div>
+              <app-chart-header
+                [intervalOptions]="intervalOptions()"
+                [selectedInterval]="selectedInterval()"
+                [crosshairData]="crosshairData()"
+                [chartLoading]="chartLoading()"
+                [chartError]="chartError()"
+                [settings]="chartSettings()"
+                [isCurrentIntervalDailyOrLonger]="isCurrentIntervalDailyOrLonger()"
+                [isIntradayInterval]="isCurrentIntervalIntraday()"
+                (intervalChange)="onIntervalChange($event)"
+                (refresh)="retryChart()"
+                (lockToRightChange)="onLockToRightChange($event)"
+                (settingChange)="onChartSettingChange($event)"
+              />
             }
 
             @if (chartLoading()) {
@@ -687,7 +563,10 @@
                 [ddmCharts]="ddmCharts()"
                 [loading]="chartLoading()"
                 [error]="chartError()"
+                [historicalYears]="valuationHistoricalYears()"
+                [model]="selectedValuationModel()"
                 (modelChange)="onValuationModelChange($event)"
+                (historicalYearsChange)="onValuationYearsChange($event)"
               />
             } @else if (showDividends()) {
               <!-- Dividend Analysis View - using extracted component -->

@@ -91,6 +91,12 @@
   }
 }
 
+.chart-title-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
 .dividend-echart {
   width: 100%;
   height: 300px;

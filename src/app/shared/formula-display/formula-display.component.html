@@ -40,7 +40,7 @@
     </div>
   }
 
-  @if (hasEditableVars) {
+  @if (hasEditableVars()) {
     <button mat-stroked-button class="edit-button" (click)="toggleEditMode()">
       <mat-icon>{{ editMode() ? 'check' : 'edit' }}</mat-icon>
       {{ editMode() ? 'Apply' : 'Edit Variables' }}

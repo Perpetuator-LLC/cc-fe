@@ -11,21 +11,55 @@
   @if (charts) {
     <div class="fundamentals-grid">
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="CHART_DEFINITIONS.revenueChart.title + ': ' + CHART_DEFINITIONS.revenueChart.description"
+          />
+        </div>
         <div echarts [options]="charts.revenue" class="fundamentals-echart"></div>
       </div>
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="
+              CHART_DEFINITIONS.incomeStatementChart.title + ': ' + CHART_DEFINITIONS.incomeStatementChart.description
+            "
+          />
+        </div>
         <div echarts [options]="charts.incomeStatement" class="fundamentals-echart"></div>
       </div>
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="CHART_DEFINITIONS.epsChart.title + ': ' + CHART_DEFINITIONS.epsChart.description"
+          />
+        </div>
         <div echarts [options]="charts.eps" class="fundamentals-echart"></div>
       </div>
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="
+              CHART_DEFINITIONS.balanceSheetChart.title + ': ' + CHART_DEFINITIONS.balanceSheetChart.description
+            "
+          />
+        </div>
         <div echarts [options]="charts.balanceSheet" class="fundamentals-echart"></div>
       </div>
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="CHART_DEFINITIONS.cashFlowChart.title + ': ' + CHART_DEFINITIONS.cashFlowChart.description"
+          />
+        </div>
         <div echarts [options]="charts.cashFlow" class="fundamentals-echart"></div>
       </div>
       <div class="fundamentals-chart">
+        <div class="chart-title-row">
+          <app-chart-info
+            [tooltip]="CHART_DEFINITIONS.marginsChart.title + ': ' + CHART_DEFINITIONS.marginsChart.description"
+          />
+        </div>
         <div echarts [options]="charts.margins" class="fundamentals-echart"></div>
       </div>
     </div>

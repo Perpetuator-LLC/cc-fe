@@ -467,6 +467,14 @@ export class ValuationChartService {
     // Get averages for reference lines (same on all entries)
     const avgPe = hv[0]?.avgPeRatio;
 
+    // Create lookup for valuation notes by date
+    const notesByDate = new Map<string, string>();
+    hv.forEach((d) => {
+      if (d.valuationNote) {
+        notesByDate.set(this.formatDate(d.date), d.valuationNote);
+      }
+    });
+
     return {
       backgroundColor: THEME.background,
       title: {
@@ -488,6 +496,11 @@ export class ValuationChartService {
               html += `<span style="color:${item.color}">●</span> ${item.seriesName}: ${item.value.toFixed(2)}<br/>`;
             }
           });
+          // Show valuation note if available (e.g., for negative EPS years)
+          const note = notesByDate.get(p[0].axisValue);
+          if (note) {
+            html += `<br/><span style="color:${THEME.warning}; font-style: italic">${note}</span>`;
+          }
           if (avgPe != null) {
             html += `<br/><span style="color:${THEME.textColorSecondary}">Avg P/E: ${avgPe.toFixed(2)}</span>`;
           }
@@ -672,6 +685,195 @@ export class ValuationChartService {
           lineStyle: { type: 'dashed', width: 2, color: THEME.warning },
           itemStyle: { color: THEME.warning },
           symbol: 'none',
+        },
+      ],
+    };
+  }
+
+  /**
+   * Build Price vs Valuation chart showing stock price against fair value band
+   *
+   * This chart shows:
+   * - Historical stock price (blue line)
+   * - Fair value based on average P/E (green line)
+   * - Fair value band (min/max P/E * EPS)
+   *
+   * @param data DCF analysis data with historical valuation
+   * @param yearsToShow Number of years to display (5 or 10, defaults to 10)
+   */
+  buildPriceVsValuationChart(data: DCFAnalysisData, yearsToShow = 10): EChartsOption | null {
+    const hv = data.historicalValuation;
+    if (!hv || hv.length === 0) {
+      return null;
+    }
+
+    // Filter data to show only the specified number of years
+    const cutoffDate = new Date();
+    cutoffDate.setFullYear(cutoffDate.getFullYear() - yearsToShow);
+
+    const filteredHv = hv.filter((point) => new Date(point.date) >= cutoffDate);
+    if (filteredHv.length === 0) {
+      return null;
+    }
+
+    // Get average P/E for fair value calculation
+    const avgPe = hv[0]?.avgPeRatio ?? 0;
+    const minPe = hv[0]?.minPeRatio ?? 0;
+    const maxPe = hv[0]?.maxPeRatio ?? 0;
+
+    // Prepare chart data
+    const dates = filteredHv.map((d) => this.formatDate(d.date));
+    const prices = filteredHv.map((d) => d.price);
+
+    // Calculate fair value (avg P/E * EPS) for each point
+    const fairValues = filteredHv.map((d) => {
+      if (d.eps && d.eps > 0 && avgPe > 0) {
+        return avgPe * d.eps;
+      }
+      return null;
+    });
+
+    // Calculate min/max fair value band
+    const minFairValues = filteredHv.map((d) => {
+      if (d.eps && d.eps > 0 && minPe > 0) {
+        return minPe * d.eps;
+      }
+      return null;
+    });
+
+    const maxFairValues = filteredHv.map((d) => {
+      if (d.eps && d.eps > 0 && maxPe > 0) {
+        return maxPe * d.eps;
+      }
+      return null;
+    });
+
+    // Get intrinsic value for reference (currentPrice not used in chart but available via data.valuationSummary)
+    const intrinsicValue = data.valuationSummary.intrinsicValueBase;
+
+    return {
+      backgroundColor: THEME.background,
+      title: {
+        text: `Price vs Fair Value (${yearsToShow}Y)`,
+        textStyle: { color: THEME.textColor, fontSize: 14 },
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
+        textStyle: { color: THEME.textColor },
+        formatter: (params: unknown) => {
+          const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
+          if (!p || p.length === 0) return '';
+          let html = `<strong>${p[0].axisValue}</strong><br/>`;
+          p.forEach((item) => {
+            if (item.value !== null && item.value !== undefined && item.seriesName !== 'Value Band') {
+              html += `<span style="color:${item.color}">●</span> `;
+              html += `${item.seriesName}: <strong>$${item.value.toFixed(2)}</strong><br/>`;
+            }
+          });
+          return html;
+        },
+      },
+      legend: {
+        data: ['Stock Price', 'Fair Value (Avg P/E)', 'Value Band'],
+        textStyle: { color: THEME.textColorSecondary },
+        top: 30,
+      },
+      grid: {
+        left: 70,
+        right: 20,
+        top: 70,
+        bottom: 40,
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Price ($)',
+        nameTextStyle: { color: THEME.textColorSecondary },
+        axisLine: { lineStyle: { color: THEME.gridLine } },
+        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}' },
+        splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
+      },
+      series: [
+        // Value band (area between min and max fair value)
+        {
+          name: 'Value Band',
+          type: 'line',
+          data: maxFairValues,
+          lineStyle: { opacity: 0 },
+          areaStyle: { color: 'rgba(129, 199, 132, 0.15)' },
+          stack: 'valuation-band',
+          symbol: 'none',
+          silent: true,
+        },
+        {
+          name: 'Value Band Lower',
+          type: 'line',
+          data: minFairValues,
+          lineStyle: { opacity: 0 },
+          areaStyle: { color: THEME.background },
+          stack: 'valuation-band',
+          symbol: 'none',
+          silent: true,
+        },
+        // Fair value line (average P/E * EPS)
+        {
+          name: 'Fair Value (Avg P/E)',
+          type: 'line',
+          data: fairValues,
+          smooth: true,
+          lineStyle: { width: 2, type: 'dashed' },
+          itemStyle: { color: THEME.success },
+          symbol: 'none',
+        },
+        // Stock price line
+        {
+          name: 'Stock Price',
+          type: 'line',
+          data: prices,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: THEME.primary },
+          z: 10,
+        },
+        // Current intrinsic value reference line
+        {
+          name: 'Current DCF Value',
+          type: 'line',
+          data: dates.map(() => intrinsicValue),
+          lineStyle: { width: 1, type: 'dotted', color: THEME.warning },
+          itemStyle: { color: THEME.warning },
+          symbol: 'none',
+          markPoint:
+            intrinsicValue > 0
+              ? {
+                  data: [
+                    {
+                      name: 'DCF Value',
+                      coord: [dates[dates.length - 1], intrinsicValue],
+                      value: `DCF: $${intrinsicValue.toFixed(0)}`,
+                      itemStyle: { color: THEME.warning },
+                      label: {
+                        show: true,
+                        formatter: `DCF: $${intrinsicValue.toFixed(0)}`,
+                        color: THEME.textColor,
+                        backgroundColor: THEME.tooltipBg,
+                        borderRadius: 4,
+                        padding: [4, 8],
+                      },
+                    },
+                  ],
+                  symbol: 'pin',
+                  symbolSize: 40,
+                }
+              : undefined,
         },
       ],
     };

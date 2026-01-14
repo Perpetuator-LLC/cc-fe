@@ -46,6 +46,12 @@
   background: var(--md-sys-color-surface-container);
 }
 
+.chart-title-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
 .fundamentals-echart {
   width: 100%;
   min-height: 250px;

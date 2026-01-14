@@ -1,0 +1,166 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="chart-header">
+  <!-- Interval selector -->
+  <mat-form-field appearance="outline" class="interval-field" subscriptSizing="dynamic">
+    <mat-label>Interval</mat-label>
+    <mat-select [value]="selectedInterval" (selectionChange)="onIntervalChange($event.value)" [disabled]="chartLoading">
+      @for (interval of intervalOptions; track interval) {
+        <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <!-- OHLC Data Display -->
+  @if (crosshairData; as ohlc) {
+    <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
+    <span class="ohlc-label">O</span>
+    <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+      formatPrice(ohlc.open)
+    }}</span>
+    <span class="ohlc-label">H</span>
+    <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+      formatPrice(ohlc.high)
+    }}</span>
+    <span class="ohlc-label">L</span>
+    <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+      formatPrice(ohlc.low)
+    }}</span>
+    <span class="ohlc-label">C</span>
+    <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
+      formatPrice(ohlc.close)
+    }}</span>
+    @if (ohlc.volume) {
+      <span class="ohlc-label">Vol</span>
+      <span class="ohlc-value volume">{{ formatVolume(ohlc.volume) }}</span>
+    }
+  } @else if (!chartError) {
+    <span class="ohlc-hint">Hover on chart to see OHLC values</span>
+  }
+
+  <!-- Spacer -->
+  <span class="spacer"></span>
+
+  <!-- Chart Toggle Buttons -->
+  <div class="chart-toggles">
+    <button mat-icon-button matTooltip="Refresh" (click)="onRefresh()" [disabled]="chartLoading">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      [matTooltip]="settings.lockToRight ? 'Locked to Right (Most Recent)' : 'Unlocked - Free Scroll'"
+      (click)="onLockToRightToggle()"
+      [color]="settings.lockToRight ? 'primary' : undefined"
+    >
+      <mat-icon>{{ settings.lockToRight ? 'push_pin' : 'drag_pan' }}</mat-icon>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="chartSettingsMenu" matTooltip="Chart Settings">
+      <mat-icon>settings</mat-icon>
+    </button>
+
+    <!-- Chart Settings Menu -->
+    <mat-menu #chartSettingsMenu="matMenu" class="chart-settings-menu">
+      <div class="menu-section-label">Display</div>
+
+      <!-- Corporate Actions Toggle -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        [class.disabled-option]="!isCurrentIntervalDailyOrLonger"
+        [matTooltip]="
+          isCurrentIntervalDailyOrLonger
+            ? 'Show dividend and stock split markers on the chart'
+            : 'Only available on Daily, Weekly, and Monthly charts'
+        "
+      >
+        <mat-slide-toggle
+          [checked]="settings.showCorporateActions"
+          [disabled]="!isCurrentIntervalDailyOrLonger"
+          (change)="onSettingToggle('showCorporateActions')"
+        >
+          Splits &amp; Dividends
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Extended Hours Toggle -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        [class.disabled-option]="!isIntradayInterval"
+        [matTooltip]="
+          isIntradayInterval
+            ? 'Include pre-market and after-hours trading data'
+            : 'Only available on intraday charts (1min to 60min)'
+        "
+      >
+        <mat-slide-toggle
+          [checked]="settings.showExtendedHours"
+          [disabled]="!isIntradayInterval"
+          (change)="onSettingToggle('showExtendedHours')"
+        >
+          Extended Hours
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Local Time Toggle -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        [class.disabled-option]="!isIntradayInterval"
+        [matTooltip]="
+          isIntradayInterval
+            ? 'Display times in your local timezone instead of exchange time (ET)'
+            : 'Only for intraday'
+        "
+      >
+        <mat-slide-toggle
+          [checked]="settings.useLocalTime"
+          [disabled]="!isIntradayInterval"
+          (change)="onSettingToggle('useLocalTime')"
+        >
+          Local Time
+        </mat-slide-toggle>
+      </div>
+
+      <mat-divider />
+      <div class="menu-section-label">Data</div>
+
+      <!-- Volume Toggle -->
+      <div mat-menu-item (click)="$event.stopPropagation()" matTooltip="Show trading volume below the price chart">
+        <mat-slide-toggle [checked]="settings.showVolume" (change)="onSettingToggle('showVolume')">
+          Volume
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Dividends Reinvested Toggle -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        [class.disabled-option]="!isCurrentIntervalDailyOrLonger"
+        [matTooltip]="
+          isCurrentIntervalDailyOrLonger
+            ? 'Adjust historical prices as if dividends were reinvested (for backtesting)'
+            : 'Only available on Daily, Weekly, and Monthly charts'
+        "
+      >
+        <mat-slide-toggle
+          [checked]="settings.adjustForDividends"
+          [disabled]="!isCurrentIntervalDailyOrLonger"
+          (change)="onSettingToggle('adjustForDividends')"
+        >
+          Dividends Reinvested
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Raw Data Toggle -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        matTooltip="Show raw data including anomalies (large wicks from errant trades)"
+      >
+        <mat-slide-toggle [checked]="settings.showRawData" (change)="onSettingToggle('showRawData')">
+          Show Raw Data
+        </mat-slide-toggle>
+      </div>
+    </mat-menu>
+  </div>
+</div>

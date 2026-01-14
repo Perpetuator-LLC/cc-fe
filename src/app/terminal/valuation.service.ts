@@ -89,10 +89,12 @@ const DCF_ANALYSIS_QUERY = gql`
         date
         price
         eps
+        epsIsNegative
         peRatio
         pbRatio
         psRatio
         bookValuePerShare
+        valuationNote
         avgPeRatio
         minPeRatio
         maxPeRatio
@@ -282,10 +284,12 @@ export interface HistoricalValuationPoint {
   date: string;
   price: number;
   eps: number | null;
+  epsIsNegative: boolean | null;
   peRatio: number | null;
   pbRatio: number | null;
   psRatio: number | null;
   bookValuePerShare: number | null;
+  valuationNote: string | null;
   avgPeRatio: number | null;
   minPeRatio: number | null;
   maxPeRatio: number | null;
