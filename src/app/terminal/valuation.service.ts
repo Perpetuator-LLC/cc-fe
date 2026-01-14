@@ -3,6 +3,66 @@ import { Injectable, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, tap, catchError, of } from 'rxjs';
 
+// Valuation model types
+export type ValuationModel = 'dcf' | 'ddm';
+
+// GraphQL Query for DDM (Dividend Discount Model) Analysis
+const DDM_ANALYSIS_QUERY = gql`
+  query DdmAnalysis($ticker: String!, $projectionYears: Int, $highGrowthRate: Float, $highGrowthYears: Int) {
+    ddmAnalysis(
+      ticker: $ticker
+      projectionYears: $projectionYears
+      highGrowthRate: $highGrowthRate
+      highGrowthYears: $highGrowthYears
+    ) {
+      success
+      isDividendPayer
+      symbol
+      companyName
+      analysisDate
+      intrinsicValue
+      currentPrice
+      upsidePercentage
+      marginOfSafety
+      modelType
+      modelDescription
+      costOfEquity
+      terminalGrowthRate
+      historicalGrowthRate
+      currentDividendYield
+      payoutRatio
+      dividendSustainabilityScore
+      currentDividendPerShare
+      presentValueDividends
+      presentValueTerminal
+      terminalValue
+      historicalDividends {
+        date
+        dividendPerShare
+      }
+      projectedDividends {
+        date
+        dividendPerShare
+        discountedDividend
+        growthRate
+        isProjected
+      }
+      dividendChartData {
+        date
+        dividendPerShare
+        discountedDividend
+        growthRate
+        isProjected
+      }
+      summaryStats {
+        yearsOfDividendData
+        dividendCagr
+        earningsPerShare
+      }
+    }
+  }
+`;
+
 // GraphQL Query for DCF Analysis
 const DCF_ANALYSIS_QUERY = gql`
   query DcfAnalysis($ticker: String!, $projectionYears: Int) {
@@ -252,6 +312,49 @@ export interface DCFAssumptions {
   terminalGrowthRate: number;
 }
 
+// DDM Types
+export interface DDMDividendPoint {
+  date: string;
+  dividendPerShare: number;
+  discountedDividend?: number;
+  growthRate?: number;
+  isProjected?: boolean;
+}
+
+export interface DDMSummaryStats {
+  yearsOfDividendData: number;
+  dividendCagr: number;
+  earningsPerShare: number;
+}
+
+export interface DDMAnalysisData {
+  success: boolean;
+  isDividendPayer: boolean;
+  symbol: string;
+  companyName: string;
+  analysisDate: string;
+  intrinsicValue: number;
+  currentPrice: number;
+  upsidePercentage: number;
+  marginOfSafety: number;
+  modelType: string; // 'gordon', 'two_stage', 'h_model'
+  modelDescription: string;
+  costOfEquity: number;
+  terminalGrowthRate: number;
+  historicalGrowthRate: number;
+  currentDividendYield: number;
+  payoutRatio: number;
+  dividendSustainabilityScore: number;
+  currentDividendPerShare: number;
+  presentValueDividends: number;
+  presentValueTerminal: number;
+  terminalValue: number;
+  historicalDividends: DDMDividendPoint[];
+  projectedDividends: DDMDividendPoint[];
+  dividendChartData: DDMDividendPoint[];
+  summaryStats: DDMSummaryStats;
+}
+
 export interface DCFAnalysisData {
   symbol: string;
   analysisDate: string;
@@ -277,6 +380,10 @@ interface DcfAnalysisResponse {
   dcfAnalysis: DCFAnalysisData | null;
 }
 
+interface DdmAnalysisResponse {
+  ddmAnalysis: DDMAnalysisData | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -286,6 +393,8 @@ export class ValuationService {
   error = signal<string | null>(null);
   currentSymbol = signal<string | null>(null);
   valuationData = signal<DCFAnalysisData | null>(null);
+  ddmData = signal<DDMAnalysisData | null>(null);
+  selectedModel = signal<ValuationModel>('dcf');
 
   constructor(private apollo: Apollo) {}
 
@@ -330,10 +439,58 @@ export class ValuationService {
   }
 
   /**
+   * Load DDM (Dividend Discount Model) valuation analysis for a symbol
+   */
+  loadDDM(symbol: string, projectionYears = 10): Observable<DDMAnalysisData | null> {
+    this.loading.set(true);
+    this.error.set(null);
+    this.currentSymbol.set(symbol);
+    this.selectedModel.set('ddm');
+
+    return this.apollo
+      .query<DdmAnalysisResponse>({
+        query: DDM_ANALYSIS_QUERY,
+        variables: { ticker: symbol, projectionYears },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(
+        map((result) => result.data.ddmAnalysis),
+        tap((data) => {
+          this.ddmData.set(data);
+          this.loading.set(false);
+          if (!data) {
+            this.error.set('No DDM data available. This company may not pay dividends.');
+          } else if (!data.isDividendPayer) {
+            this.error.set('This company does not pay dividends. DDM valuation is not applicable.');
+          }
+        }),
+        catchError((error) => {
+          console.error('[ValuationService] Error loading DDM analysis:', error);
+          const errorMsg = error.message || '';
+          if (errorMsg.includes('Cannot query field') || errorMsg.includes('status code 400')) {
+            this.error.set('DDM Valuation API is not yet available.');
+          } else {
+            this.error.set(error.message || 'Failed to load DDM valuation data');
+          }
+          this.loading.set(false);
+          return of(null);
+        }),
+      );
+  }
+
+  /**
+   * Set the selected valuation model
+   */
+  setModel(model: ValuationModel): void {
+    this.selectedModel.set(model);
+  }
+
+  /**
    * Clear current valuation data
    */
   clear(): void {
     this.valuationData.set(null);
+    this.ddmData.set(null);
     this.currentSymbol.set(null);
     this.error.set(null);
     this.loading.set(false);

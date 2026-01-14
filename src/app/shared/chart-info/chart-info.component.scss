@@ -1,0 +1,28 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.chart-info-button {
+  cursor: help;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px;
+  border: none;
+
+  opacity: 0.6;
+  background: transparent;
+
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}

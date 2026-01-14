@@ -1,0 +1,50 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="fundamentals-view">
+  <div class="fundamentals-header">
+    <span class="fundamentals-title">Financial Statements</span>
+    <mat-button-toggle-group [value]="isAnnual ? 'annual' : 'quarterly'" class="fundamentals-toggle-group">
+      <mat-button-toggle value="annual" (click)="isAnnual || togglePeriod()"> Annual </mat-button-toggle>
+      <mat-button-toggle value="quarterly" (click)="isAnnual && togglePeriod()"> Quarterly </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  @if (charts) {
+    <div class="fundamentals-grid">
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.revenue" class="fundamentals-echart"></div>
+      </div>
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.incomeStatement" class="fundamentals-echart"></div>
+      </div>
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.eps" class="fundamentals-echart"></div>
+      </div>
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.balanceSheet" class="fundamentals-echart"></div>
+      </div>
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.cashFlow" class="fundamentals-echart"></div>
+      </div>
+      <div class="fundamentals-chart">
+        <div echarts [options]="charts.margins" class="fundamentals-echart"></div>
+      </div>
+    </div>
+  } @else if (loading) {
+    <div class="content-loading">
+      <mat-spinner diameter="40" />
+      <p>Loading {{ isAnnual ? 'annual' : 'quarterly' }} fundamentals...</p>
+    </div>
+  } @else if (error) {
+    <div class="chart-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+      <p class="error-hint">Try switching to {{ isAnnual ? 'Quarterly' : 'Annual' }} data</p>
+    </div>
+  } @else {
+    <div class="no-data-message">
+      <mat-icon>info</mat-icon>
+      <p>No {{ isAnnual ? 'annual' : 'quarterly' }} fundamentals data available.</p>
+      <p class="error-hint">Try switching to {{ isAnnual ? 'Quarterly' : 'Annual' }} data</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,35 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-button-toggle-group [value]="activeView" class="view-toggle-group" (change)="onViewChange($event.value)">
+  <mat-button-toggle value="chart" matTooltip="Price Chart">
+    <mat-icon>candlestick_chart</mat-icon>
+    Chart
+  </mat-button-toggle>
+
+  @if (showTable) {
+    <mat-button-toggle value="table" matTooltip="Historical Price Data">
+      <mat-icon>table_chart</mat-icon>
+      Table
+    </mat-button-toggle>
+  }
+
+  @if (showFundamentals) {
+    <mat-button-toggle value="fundamentals" matTooltip="Financial Statements & Fundamentals">
+      <mat-icon>analytics</mat-icon>
+      Fundamentals
+    </mat-button-toggle>
+  }
+
+  @if (showValuation) {
+    <mat-button-toggle value="valuation" matTooltip="DCF & DDM Valuation Analysis">
+      <mat-icon>calculate</mat-icon>
+      Valuation
+    </mat-button-toggle>
+  }
+
+  @if (showDividends) {
+    <mat-button-toggle value="dividends" matTooltip="Dividend Analysis">
+      <mat-icon>payments</mat-icon>
+      Dividends
+    </mat-button-toggle>
+  }
+</mat-button-toggle-group>

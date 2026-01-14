@@ -3,12 +3,14 @@ import { Injectable } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { DividendAnalysisData } from './dividend.service';
 
-// Theme colors from MD3
+// Theme colors - use hex values for ECharts (CSS variables not fully supported)
 const THEME = {
   background: 'transparent',
-  textColor: 'var(--md-sys-color-on-surface)',
-  textColorSecondary: 'var(--md-sys-color-on-surface-variant)',
-  gridLine: 'var(--md-sys-color-outline-variant)',
+  textColor: '#e0e0e0', // Light text for dark mode
+  textColorSecondary: '#a0a0a0', // Secondary text for axes/labels
+  gridLine: '#353535', // Grid lines
+  tooltipBg: '#404040', // Tooltip background
+  tooltipBorder: '#606060', // Tooltip border
   primary: '#90caf9', // Dividends
   success: '#81c784', // FCF
   warning: '#ffb74d', // Operating Cash Flow
@@ -39,8 +41,8 @@ export class DividendChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];
@@ -133,8 +135,8 @@ export class DividendChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; value: number }[];
@@ -237,8 +239,8 @@ export class DividendChartService {
       },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--md-sys-color-surface-container-high)',
-        borderColor: 'var(--md-sys-color-outline)',
+        backgroundColor: THEME.tooltipBg,
+        borderColor: THEME.tooltipBorder,
         textStyle: { color: THEME.textColor },
         formatter: (params: unknown) => {
           const p = params as { axisValue: string; seriesName: string; value: number; color: string }[];

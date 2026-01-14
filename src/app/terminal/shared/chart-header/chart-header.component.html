@@ -1,0 +1,59 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="chart-header">
+  <div class="symbol-info">
+    <h2 class="symbol-name">
+      {{ symbol }}
+      @if (displayName) {
+        <span class="company-name">{{ displayName }}</span>
+      }
+    </h2>
+    @if (quote) {
+      <div class="quote-info">
+        <span class="price">${{ quote.price | number: '1.2-2' }}</span>
+        <span class="change" [class.positive]="quote.change >= 0" [class.negative]="quote.change < 0">
+          {{ quote.change >= 0 ? '+' : '' }}{{ quote.change | number: '1.2-2' }} ({{
+            quote.changePercent >= 0 ? '+' : ''
+          }}{{ quote.changePercent | number: '1.2-2' }}%)
+        </span>
+        @if (quote.timestamp) {
+          <span class="timestamp">{{ quote.timestamp }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="symbol-chips">
+    @if (exchange) {
+      <mat-chip class="info-chip" [matTooltip]="'Exchange: ' + exchange" (click)="onExchangeClick()">
+        <mat-icon matChipAvatar>account_balance</mat-icon>
+        {{ exchange }}
+      </mat-chip>
+    }
+    @if (sector) {
+      <mat-chip
+        class="info-chip clickable"
+        [matTooltip]="'Click to view ' + sector + ' sector'"
+        (click)="onSectorClick()"
+      >
+        <mat-icon matChipAvatar>category</mat-icon>
+        {{ sector }}
+      </mat-chip>
+    }
+    @if (industry) {
+      <mat-chip
+        class="info-chip clickable"
+        [matTooltip]="'Click to view ' + industry + ' industry'"
+        (click)="onIndustryClick()"
+      >
+        <mat-icon matChipAvatar>business</mat-icon>
+        {{ industry }}
+      </mat-chip>
+    }
+    @if (marketCap) {
+      <mat-chip class="info-chip">
+        <mat-icon matChipAvatar>monetization_on</mat-icon>
+        {{ formatMarketCap(marketCap) }}
+      </mat-chip>
+    }
+  </div>
+</div>

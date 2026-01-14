@@ -9,6 +9,7 @@ const CASH_FLOWS_QUERY = gql`
     cashFlows(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
       fiscalDateEnding
       operatingCashFlow
+      capitalExpenditures
       dividendPayout
     }
   }
@@ -34,10 +35,21 @@ const QUOTE_QUERY = gql`
   }
 `;
 
+// Query for shares outstanding (to calculate per-share dividend)
+const BALANCE_SHEET_QUERY = gql`
+  query BalanceSheetForDividends($ticker: String!, $isAnnual: Boolean!, $limit: Int) {
+    balanceSheets(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
+      fiscalDateEnding
+      commonStockSharesOutstanding
+    }
+  }
+`;
+
 // Types
 export interface CashFlowData {
   fiscalDateEnding: string;
   operatingCashFlow: number | null;
+  capitalExpenditures: number | null;
   dividendPayout: number | null;
 }
 
@@ -92,6 +104,15 @@ interface QuoteResponse {
   } | null;
 }
 
+interface BalanceSheetData {
+  fiscalDateEnding: string;
+  commonStockSharesOutstanding: number | null;
+}
+
+interface BalanceSheetResponse {
+  balanceSheets: BalanceSheetData[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -139,8 +160,18 @@ export class DividendService {
           map((result) => result.data.quote),
           catchError(() => of(null)),
         ),
+      balanceSheets: this.apollo
+        .query<BalanceSheetResponse>({
+          query: BALANCE_SHEET_QUERY,
+          variables: { ticker: symbol, isAnnual, limit: 1 },
+          fetchPolicy: 'network-only',
+        })
+        .pipe(
+          map((result) => result.data.balanceSheets),
+          catchError(() => of([] as BalanceSheetData[])),
+        ),
     }).pipe(
-      map(({ cashFlows, incomeStatements, quote }) => {
+      map(({ cashFlows, incomeStatements, quote, balanceSheets }) => {
         this.loading.set(false);
 
         if (!cashFlows.length) {
@@ -148,11 +179,14 @@ export class DividendService {
           return null;
         }
 
+        // Get shares outstanding from most recent balance sheet
+        const sharesOutstanding = balanceSheets[0]?.commonStockSharesOutstanding || null;
+
         // Build yearly data by merging cash flows and income statements
         const yearlyData = this.buildYearlyData(cashFlows, incomeStatements);
 
-        // Calculate metrics
-        const metrics = this.calculateMetrics(yearlyData, quote?.price || 0);
+        // Calculate metrics (pass shares outstanding for per-share calculation)
+        const metrics = this.calculateMetrics(yearlyData, quote?.price || 0, sharesOutstanding);
 
         return {
           symbol,
@@ -184,9 +218,18 @@ export class DividendService {
         const income = incomeMap.get(cf.fiscalDateEnding);
         const year = new Date(cf.fiscalDateEnding).getFullYear().toString();
 
-        // Estimate FCF as Operating Cash Flow (ideally we'd have CapEx too)
-        // For now, use operating cash flow as a proxy
-        const freeCashFlow = cf.operatingCashFlow;
+        // Calculate Free Cash Flow = Operating Cash Flow - Capital Expenditures
+        // Note: CapEx is typically negative in accounting, so we use absolute value
+        let freeCashFlow: number | null = null;
+        if (cf.operatingCashFlow !== null) {
+          if (cf.capitalExpenditures !== null) {
+            // Real FCF calculation using CapEx
+            freeCashFlow = cf.operatingCashFlow - Math.abs(cf.capitalExpenditures);
+          } else {
+            // Fallback: Use OCF as proxy if CapEx not available
+            freeCashFlow = cf.operatingCashFlow;
+          }
+        }
 
         // Calculate payout ratios
         const fcfPayoutRatio =
@@ -212,13 +255,24 @@ export class DividendService {
   /**
    * Calculate dividend metrics from yearly data
    */
-  private calculateMetrics(yearlyData: DividendYearData[], currentPrice: number): DividendMetrics {
-    // Get most recent year's dividend for yield calculation
+  private calculateMetrics(
+    yearlyData: DividendYearData[],
+    currentPrice: number,
+    sharesOutstanding: number | null,
+  ): DividendMetrics {
+    // Get most recent year's total dividend payout
     const recentYear = yearlyData[yearlyData.length - 1];
-    const annualDividend = recentYear?.dividendPayout ? Math.abs(recentYear.dividendPayout) : null;
+    const totalDividendPayout = recentYear?.dividendPayout ? Math.abs(recentYear.dividendPayout) : null;
 
-    // Calculate dividend yield (dividend / price)
-    const dividendYield = annualDividend && currentPrice > 0 ? (annualDividend / currentPrice) * 100 : null;
+    // Calculate per-share dividend (total payout / shares outstanding)
+    let annualDividendPerShare: number | null = null;
+    if (totalDividendPayout && sharesOutstanding && sharesOutstanding > 0) {
+      annualDividendPerShare = totalDividendPayout / sharesOutstanding;
+    }
+
+    // Calculate dividend yield (per-share dividend / price) * 100
+    const dividendYield =
+      annualDividendPerShare && currentPrice > 0 ? (annualDividendPerShare / currentPrice) * 100 : null;
 
     // TTM payout ratios (using most recent year as proxy)
     const ttmPayoutRatio = recentYear?.netIncomePayoutRatio ? recentYear.netIncomePayoutRatio * 100 : null;
@@ -233,7 +287,7 @@ export class DividendService {
     return {
       currentPrice,
       dividendYield,
-      annualDividend,
+      annualDividend: annualDividendPerShare,
       ttmPayoutRatio,
       ttmFcfPayoutRatio,
       dividendCagr5Year,

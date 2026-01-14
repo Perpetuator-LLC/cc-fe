@@ -1,0 +1,20 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+:host {
+  display: block;
+}
+
+.view-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  mat-button-toggle {
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
+      font-size: 18px;
+    }
+  }
+}

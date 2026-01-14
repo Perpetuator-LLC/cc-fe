@@ -230,10 +230,17 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
 
     for (const [key, value] of Object.entries(args)) {
       if (value !== null && value !== undefined) {
+        // Add the switch as its own chip
         tokens.push({
-          fqn: `-${key} ${value}`,
-          display: `-${key} ${value}`,
+          fqn: `-${key}`,
+          display: `-${key}`,
           type: 'parameter',
+        });
+        // Add the value as its own chip
+        tokens.push({
+          fqn: `${value}`,
+          display: `${value}`,
+          type: 'value',
         });
       }
     }

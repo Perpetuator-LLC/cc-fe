@@ -1,0 +1,257 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.valuation-view {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  height: 100%;
+  padding: 16px;
+}
+
+.valuation-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 8px;
+}
+
+.model-toggle-group,
+.valuation-toggle-group {
+  flex-wrap: wrap;
+}
+
+.content-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px;
+
+  p {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.chart-error,
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px;
+
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  p {
+    max-width: 400px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.chart-error mat-icon {
+  color: var(--md-sys-color-error);
+}
+
+.valuation-summary,
+.valuation-historical,
+.valuation-projections,
+.valuation-sensitivity,
+.valuation-methodology {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.valuation-metrics,
+.historical-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 12px;
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  &.base {
+    border-left-color: var(--md-sys-color-primary);
+  }
+
+  &.bull {
+    border-left-color: var(--md-extended-color-success-color);
+  }
+
+  &.bear {
+    border-left-color: var(--md-sys-color-error);
+  }
+
+  .metric-label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .metric-value {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .metric-change {
+    font-size: 12px;
+    font-weight: 500;
+
+    &.positive {
+      color: var(--md-extended-color-success-color);
+    }
+
+    &.negative {
+      color: var(--md-sys-color-error);
+    }
+  }
+}
+
+.valuation-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @include mixins.mobile() {
+    grid-template-columns: 1fr;
+  }
+}
+
+.valuation-chart {
+  min-height: 280px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.valuation-echart {
+  width: 100%;
+  min-height: 250px;
+}
+
+.valuation-chart-full {
+  min-height: 350px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.valuation-echart-large,
+.valuation-echart-full {
+  width: 100%;
+  min-height: 300px;
+}
+
+.projections-table-container {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.projections-table {
+  width: 100%;
+}
+
+.methodology-section {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .model-description {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.assumptions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.assumption {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+
+  padding: 8px 12px;
+  border-radius: 4px;
+
+  background: var(--md-sys-color-surface-container-high);
+
+  .label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .value {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.formula {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 4px;
+
+  background: var(--md-sys-color-surface-container-high);
+
+  code {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+  }
+}
