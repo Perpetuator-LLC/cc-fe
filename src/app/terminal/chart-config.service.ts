@@ -363,7 +363,7 @@ export class ChartConfigService {
         // For first candle of each day, show date + time
         // This helps users understand date context when zoomed out
         if (isNewDay) {
-          return `${currentDateStr} ${timeLabel}`;
+          return useLocal ? `${currentDateStr} ${timeLabel}` : `${currentDateStr} ${timeLabel} ET`;
         }
         // For other candles, just show time with optional ET suffix
         return useLocal ? timeLabel : `${timeLabel} ET`;
