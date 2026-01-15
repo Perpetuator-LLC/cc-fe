@@ -26,6 +26,25 @@
   flex-wrap: wrap;
 }
 
+// ADR currency warning banner
+.currency-warning {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  color: var(--md-extended-color-warning-on-color-container);
+
+  background: var(--md-extended-color-warning-color-container);
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--md-extended-color-warning-color);
+  }
+}
+
 .content-loading {
   display: flex;
   flex-direction: column;

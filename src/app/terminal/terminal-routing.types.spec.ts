@@ -187,7 +187,7 @@ describe('Terminal Routing Types', () => {
         tab: 'dashboards',
         symbol: 'INTC',
         exchange: 'NASDAQ',
-        view: 'fundamentals',
+        view: 'financials',
         interval: 'monthly',
       };
 
@@ -196,7 +196,7 @@ describe('Terminal Routing Types', () => {
       expect(newState.tab).toBe('dashboards');
       expect(newState.symbol).toBe('INTC');
       expect(newState.exchange).toBe('NASDAQ');
-      expect(newState.view).toBe('fundamentals');
+      expect(newState.view).toBe('financials');
       expect(newState.interval).toBe('monthly');
     });
 

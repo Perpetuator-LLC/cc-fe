@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 /**
  * Available view types
  */
-export type ViewType = 'chart' | 'table' | 'fundamentals' | 'valuation' | 'dividends';
+export type ViewType = 'chart' | 'table' | 'financials' | 'valuation' | 'dividends';
 
 /**
  * View Toggle Component

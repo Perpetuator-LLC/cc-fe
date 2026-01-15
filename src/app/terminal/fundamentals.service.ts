@@ -9,6 +9,7 @@ const BALANCE_SHEETS_QUERY = gql`
   query BalanceSheets($ticker: String!, $isAnnual: Boolean!, $limit: Int) {
     balanceSheets(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
       fiscalDateEnding
+      reportedCurrency
       totalAssets
       totalLiabilities
       totalEquity
@@ -22,6 +23,7 @@ const INCOME_STATEMENTS_QUERY = gql`
   query IncomeStatements($ticker: String!, $isAnnual: Boolean!, $limit: Int) {
     incomeStatements(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
       fiscalDateEnding
+      reportedCurrency
       totalRevenue
       costOfRevenue
       grossProfit
@@ -40,6 +42,7 @@ const CASH_FLOWS_QUERY = gql`
   query CashFlows($ticker: String!, $isAnnual: Boolean!, $limit: Int) {
     cashFlows(ticker: $ticker, isAnnual: $isAnnual, limit: $limit) {
       fiscalDateEnding
+      reportedCurrency
       operatingCashFlow
       dividendPayout
     }
@@ -86,6 +89,7 @@ const FETCH_CASH_FLOW = gql`
 // Types - matching actual schema fields
 export interface BalanceSheet {
   fiscalDateEnding: string;
+  reportedCurrency: string;
   totalAssets: number | null;
   totalLiabilities: number | null;
   totalEquity: number | null;
@@ -95,6 +99,7 @@ export interface BalanceSheet {
 
 export interface IncomeStatement {
   fiscalDateEnding: string;
+  reportedCurrency: string;
   totalRevenue: number | null;
   costOfRevenue: number | null;
   grossProfit: number | null;
@@ -109,6 +114,7 @@ export interface IncomeStatement {
 
 export interface CashFlow {
   fiscalDateEnding: string;
+  reportedCurrency: string;
   operatingCashFlow: number | null;
   dividendPayout: number | null;
 }
@@ -119,6 +125,8 @@ export interface FundamentalsData {
   cashFlows: CashFlow[];
   symbol: string;
   isAnnual: boolean;
+  /** Reporting currency (e.g., USD, TWD) - derived from first income statement */
+  reportedCurrency?: string;
 }
 
 @Injectable({
@@ -148,11 +156,16 @@ export class FundamentalsService {
       incomeStatements: this.queryIncomeStatements(symbol, isAnnual, limit),
       cashFlows: this.queryCashFlows(symbol, isAnnual, limit),
     }).pipe(
-      map((result) => ({
-        ...result,
-        symbol,
-        isAnnual,
-      })),
+      map((result) => {
+        // Get reported currency from first income statement (most reliable source)
+        const reportedCurrency = result.incomeStatements[0]?.reportedCurrency || 'USD';
+        return {
+          ...result,
+          symbol,
+          isAnnual,
+          reportedCurrency,
+        };
+      }),
       tap((data) => {
         this.fundamentalsData.set(data);
         this.loading.set(false);
