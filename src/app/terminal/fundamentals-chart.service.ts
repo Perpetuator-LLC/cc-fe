@@ -42,7 +42,7 @@ export class FundamentalsChartService {
 
     return {
       title: {
-        text: 'Income Statement',
+        text: `Income Statement${this.getCurrencyLabel()}`,
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -187,7 +187,7 @@ export class FundamentalsChartService {
 
     return {
       title: {
-        text: 'Revenue & Profitability',
+        text: `Revenue & Profitability${this.getCurrencyLabel()}`,
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -200,14 +200,28 @@ export class FundamentalsChartService {
           const p = params as TooltipParam[];
           if (!p.length) return '';
           let html = `<strong>${p[0].name}</strong><br/>`;
+
+          // Find Revenue value for percentage calculations
+          const revenueItem = p.find((item) => item.seriesName === 'Revenue');
+          const revenueValue = revenueItem?.value ?? 0;
+
           p.forEach((item) => {
             if (item.value != null) {
               if (item.seriesName.includes('%')) {
-                html += `<span style="color:${item.color}">●</span> ${item.seriesName}:
-                ${(item.value as number).toFixed(1)}%<br/>`;
+                // Already a percentage series
+                const pctValue = (item.value as number).toFixed(1);
+                html += `<span style="color:${item.color}">●</span> ${item.seriesName}: ${pctValue}%<br/>`;
               } else {
-                html += `<span style="color:${item.color}">●</span> ${item.seriesName}:
-                ${this.formatAxisValue(item.value)}<br/>`;
+                // Format value with currency
+                const formattedValue = this.formatLargeNumber(item.value);
+                html += `<span style="color:${item.color}">●</span> ${item.seriesName}: ${formattedValue}`;
+
+                // Add percentage of revenue for non-Revenue items
+                if (revenueValue > 0 && item.seriesName !== 'Revenue') {
+                  const pctOfRevenue = ((item.value as number) / revenueValue) * 100;
+                  html += ` <span style="color: rgba(255,255,255,0.6)">(${pctOfRevenue.toFixed(1)}%)</span>`;
+                }
+                html += '<br/>';
               }
             }
           });
@@ -307,7 +321,7 @@ export class FundamentalsChartService {
 
     return {
       title: {
-        text: 'Balance Sheet',
+        text: `Balance Sheet${this.getCurrencyLabel()}`,
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -381,7 +395,7 @@ export class FundamentalsChartService {
 
     return {
       title: {
-        text: 'Cash Flow Statement',
+        text: `Cash Flow Statement${this.getCurrencyLabel()}`,
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -449,7 +463,7 @@ export class FundamentalsChartService {
 
     return {
       title: {
-        text: 'Debt Structure',
+        text: `Debt Structure${this.getCurrencyLabel()}`,
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -523,6 +537,8 @@ export class FundamentalsChartService {
   } {
     // Store isAnnual for date formatting
     this.currentIsAnnual = isAnnual;
+    // Store currency for chart labels
+    this.currentCurrency = data.reportedCurrency || 'USD';
 
     return {
       incomeStatement: this.buildIncomeStatementChart(data.incomeStatements),
@@ -536,6 +552,8 @@ export class FundamentalsChartService {
 
   // Track if current data is annual (for date formatting)
   private currentIsAnnual = true;
+  // Track current reporting currency
+  private currentCurrency = 'USD';
 
   /**
    * Format fiscal date for display
@@ -554,17 +572,18 @@ export class FundamentalsChartService {
   }
 
   /**
-   * Format axis values (billions, millions)
+   * Format axis values (billions, millions) with proper currency
    */
   private formatAxisValue(value: number): string {
+    const currencyPrefix = this.currentCurrency === 'USD' ? '$' : `${this.currentCurrency} `;
     if (Math.abs(value) >= 1e12) {
-      return `$${(value / 1e12).toFixed(1)}T`;
+      return `${currencyPrefix}${(value / 1e12).toFixed(1)}T`;
     } else if (Math.abs(value) >= 1e9) {
-      return `$${(value / 1e9).toFixed(1)}B`;
+      return `${currencyPrefix}${(value / 1e9).toFixed(1)}B`;
     } else if (Math.abs(value) >= 1e6) {
-      return `$${(value / 1e6).toFixed(0)}M`;
+      return `${currencyPrefix}${(value / 1e6).toFixed(0)}M`;
     }
-    return `$${value.toFixed(0)}`;
+    return `${currencyPrefix}${value.toFixed(0)}`;
   }
 
   /**
@@ -581,24 +600,32 @@ export class FundamentalsChartService {
   }
 
   /**
-   * Format large numbers for display
+   * Format large numbers for display with proper currency
    */
   private formatLargeNumber(value: number | null | undefined): string {
     if (value === null || value === undefined) return 'N/A';
 
     const absValue = Math.abs(value);
     const sign = value < 0 ? '-' : '';
+    const currencyPrefix = this.currentCurrency === 'USD' ? '$' : `${this.currentCurrency} `;
 
     if (absValue >= 1e12) {
-      return `${sign}$${(absValue / 1e12).toFixed(2)}T`;
+      return `${sign}${currencyPrefix}${(absValue / 1e12).toFixed(2)}T`;
     } else if (absValue >= 1e9) {
-      return `${sign}$${(absValue / 1e9).toFixed(2)}B`;
+      return `${sign}${currencyPrefix}${(absValue / 1e9).toFixed(2)}B`;
     } else if (absValue >= 1e6) {
-      return `${sign}$${(absValue / 1e6).toFixed(2)}M`;
+      return `${sign}${currencyPrefix}${(absValue / 1e6).toFixed(2)}M`;
     } else if (absValue >= 1e3) {
-      return `${sign}$${(absValue / 1e3).toFixed(2)}K`;
+      return `${sign}${currencyPrefix}${(absValue / 1e3).toFixed(2)}K`;
     }
-    return `${sign}$${absValue.toFixed(0)}`;
+    return `${sign}${currencyPrefix}${absValue.toFixed(0)}`;
+  }
+
+  /**
+   * Get currency label for chart title
+   */
+  private getCurrencyLabel(): string {
+    return this.currentCurrency !== 'USD' ? ` (${this.currentCurrency})` : '';
   }
 
   /**

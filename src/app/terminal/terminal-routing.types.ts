@@ -36,7 +36,6 @@ export type TerminalTab = 'watchlists' | 'dashboards' | 'history' | 'settings';
 export type TerminalView =
   | 'chart'
   | 'info'
-  | 'fundamentals'
   | 'financials'
   | 'valuation'
   | 'dividends'

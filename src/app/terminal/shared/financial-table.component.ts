@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 
 export interface FinancialTableRow {
   label: string;
-  isRatio?: boolean; // If true, format as percentage
+  isRatio?: boolean; // If true, format as percentage (multiplies by 100)
+  isPercent?: boolean; // If true, value is already a percentage (just add % suffix)
   isCurrency?: boolean; // If true, format with $ and appropriate scale
   values: (number | null)[];
   highlightNegative?: boolean; // Highlight negative values in red
@@ -32,6 +33,10 @@ export class FinancialTableComponent {
 
     if (row.isRatio) {
       return `${(value * 100).toFixed(1)}%`;
+    }
+
+    if (row.isPercent) {
+      return `${value.toFixed(1)}%`;
     }
 
     if (row.isCurrency) {

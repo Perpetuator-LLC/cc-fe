@@ -2503,6 +2503,9 @@ type BalanceSheetType {
   company: CompanyType!
   fiscalDateEnding: Date!
   isAnnual: Boolean!
+
+  """Currency in which financial figures are reported (e.g., USD, TWD, EUR)"""
+  reportedCurrency: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -2537,6 +2540,9 @@ type IncomeStatementType {
   company: CompanyType!
   fiscalDateEnding: Date!
   isAnnual: Boolean!
+
+  """Currency in which financial figures are reported (e.g., USD, TWD, EUR)"""
+  reportedCurrency: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -2570,6 +2576,9 @@ type CashFlowType {
   company: CompanyType!
   fiscalDateEnding: Date!
   isAnnual: Boolean!
+
+  """Currency in which financial figures are reported (e.g., USD, TWD, EUR)"""
+  reportedCurrency: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 
@@ -2847,6 +2856,25 @@ type DCFAnalysisType {
   symbol: String!
   analysisDate: String!
   companyName: String!
+
+  """Currency the stock trades in (e.g., USD for US exchanges)"""
+  tradingCurrency: String!
+
+  """
+  Currency used in financial statements (may differ for ADRs like TSM which reports in TWD)
+  """
+  reportingCurrency: String!
+
+  """True if this appears to be an ADR (American Depositary Receipt)"""
+  isAdr: Boolean!
+
+  """User-facing explanation if trading and reporting currencies differ"""
+  currencyNote: String
+
+  """
+  Exchange rate used to convert financials to USD (null if no conversion needed)
+  """
+  exchangeRate: Float
   historicalFcf: [DCFHistoricalDataType!]!
   historicalRevenue: [DCFHistoricalDataType!]!
   historicalNetIncome: [DCFHistoricalDataType!]!
@@ -2990,6 +3018,23 @@ type DDMAnalysisType {
   symbol: String!
   companyName: String
   analysisDate: String!
+
+  """Currency the stock trades in (e.g., USD for US exchanges)"""
+  tradingCurrency: String
+
+  """Currency used in financial statements (may differ for ADRs)"""
+  reportingCurrency: String
+
+  """True if this appears to be an ADR (American Depositary Receipt)"""
+  isAdr: Boolean
+
+  """User-facing explanation if trading and reporting currencies differ"""
+  currencyNote: String
+
+  """
+  Exchange rate used to convert financials to USD (null if no conversion needed)
+  """
+  exchangeRate: Float
 
   """Fair value per share based on DDM"""
   intrinsicValue: Float

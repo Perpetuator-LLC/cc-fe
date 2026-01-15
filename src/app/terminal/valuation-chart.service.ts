@@ -30,18 +30,44 @@ export class ValuationChartService {
     const chartData = data.projectionChartData;
     const dates = chartData.map((d) => this.formatDate(d.date));
 
+    // BE57: Backend now converts all financials to USD for ADRs
+    // Show conversion note in title if exchange rate was applied
+    const wasConverted = data.exchangeRate != null && data.reportingCurrency !== 'USD';
+    const currencySuffix = wasConverted ? ` (converted from ${data.reportingCurrency})` : '';
+    const currencyPrefix = '$';
+
+    // Find the last historical data point to bridge to projections
+    const lastHistoricalIndex = chartData.findIndex((d) => d.type === 'projected') - 1;
+    const lastHistoricalFcf =
+      lastHistoricalIndex >= 0 && chartData[lastHistoricalIndex]?.fcf
+        ? chartData[lastHistoricalIndex].fcf! / 1e9
+        : null;
+
     // Historical FCF (solid line)
     const historicalFcf = chartData.map((d) => (d.type === 'historical' && d.fcf ? d.fcf / 1e9 : null));
 
-    // Scenario projections (dashed lines)
-    const baseFcf = chartData.map((d) => (d.fcfBase ? d.fcfBase / 1e9 : null));
-    const bullFcf = chartData.map((d) => (d.fcfBull ? d.fcfBull / 1e9 : null));
-    const bearFcf = chartData.map((d) => (d.fcfBear ? d.fcfBear / 1e9 : null));
+    // Scenario projections (dashed lines) - include last historical point to bridge the gap
+    const baseFcf = chartData.map((d, i) => {
+      if (d.fcfBase) return d.fcfBase / 1e9;
+      // Bridge: include last historical value at transition point
+      if (i === lastHistoricalIndex && lastHistoricalFcf !== null) return lastHistoricalFcf;
+      return null;
+    });
+    const bullFcf = chartData.map((d, i) => {
+      if (d.fcfBull) return d.fcfBull / 1e9;
+      if (i === lastHistoricalIndex && lastHistoricalFcf !== null) return lastHistoricalFcf;
+      return null;
+    });
+    const bearFcf = chartData.map((d, i) => {
+      if (d.fcfBear) return d.fcfBear / 1e9;
+      if (i === lastHistoricalIndex && lastHistoricalFcf !== null) return lastHistoricalFcf;
+      return null;
+    });
 
     return {
       backgroundColor: THEME.background,
       title: {
-        text: 'Free Cash Flow Projections',
+        text: `Free Cash Flow Projections${currencySuffix}`,
         textStyle: { color: THEME.textColor, fontSize: 14 },
         left: 'center',
       },
@@ -55,7 +81,8 @@ export class ValuationChartService {
           let html = `<strong>${p[0]?.axisValue}</strong><br/>`;
           p.forEach((item) => {
             if (item.value !== null && item.value !== undefined) {
-              html += `<span style="color:${item.color}">●</span> ${item.seriesName}: $${item.value.toFixed(1)}B<br/>`;
+              html += `<span style="color:${item.color}">●</span> ${item.seriesName}:
+              ${currencyPrefix}${item.value.toFixed(1)}B<br/>`;
             }
           });
           return html;
@@ -75,10 +102,13 @@ export class ValuationChartService {
       },
       yAxis: {
         type: 'value',
-        name: 'FCF ($B)',
+        name: 'FCF (USD B)',
         nameTextStyle: { color: THEME.textColorSecondary },
         axisLine: { lineStyle: { color: THEME.gridLine } },
-        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}B' },
+        axisLabel: {
+          color: THEME.textColorSecondary,
+          formatter: (value: number) => `${currencyPrefix}${value}B`,
+        },
         splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
       },
       series: [
@@ -96,7 +126,7 @@ export class ValuationChartService {
           data: baseFcf,
           lineStyle: { type: 'dashed', width: 2 },
           itemStyle: { color: THEME.info },
-          connectNulls: false,
+          connectNulls: true, // Connect through the bridge point
         },
         {
           name: 'Bull Case',
@@ -104,7 +134,7 @@ export class ValuationChartService {
           data: bullFcf,
           lineStyle: { type: 'dashed', width: 2 },
           itemStyle: { color: THEME.success },
-          connectNulls: false,
+          connectNulls: true, // Connect through the bridge point
         },
         {
           name: 'Bear Case',
@@ -112,7 +142,7 @@ export class ValuationChartService {
           data: bearFcf,
           lineStyle: { type: 'dashed', width: 2 },
           itemStyle: { color: THEME.error },
-          connectNulls: false,
+          connectNulls: true, // Connect through the bridge point
         },
       ],
     };
@@ -357,6 +387,12 @@ export class ValuationChartService {
     const revenueData = data.historicalRevenue;
     const netIncomeData = data.historicalNetIncome;
 
+    // BE57: Backend now converts all financials to USD for ADRs
+    // Show conversion note in title if exchange rate was applied
+    const wasConverted = data.exchangeRate != null && data.reportingCurrency !== 'USD';
+    const currencySuffix = wasConverted ? ` (converted from ${data.reportingCurrency})` : '';
+    const currencyPrefix = '$';
+
     // Align dates (use FCF dates as base)
     const dates = fcfData.map((d) => this.formatDate(d.date));
     const fcfValues = fcfData.map((d) => d.value / 1e9);
@@ -377,7 +413,7 @@ export class ValuationChartService {
     return {
       backgroundColor: THEME.background,
       title: {
-        text: 'Historical Financials',
+        text: `Historical Financials${currencySuffix}`,
         textStyle: { color: THEME.textColor, fontSize: 14 },
         left: 'center',
       },
@@ -401,10 +437,13 @@ export class ValuationChartService {
       },
       yAxis: {
         type: 'value',
-        name: 'Amount ($B)',
+        name: 'Amount (USD B)',
         nameTextStyle: { color: THEME.textColorSecondary },
         axisLine: { lineStyle: { color: THEME.gridLine } },
-        axisLabel: { color: THEME.textColorSecondary, formatter: '${value}B' },
+        axisLabel: {
+          color: THEME.textColorSecondary,
+          formatter: (value: number) => `${currencyPrefix}${value}B`,
+        },
         splitLine: { lineStyle: { color: THEME.gridLine, type: 'dashed' } },
       },
       series: [
@@ -452,24 +491,42 @@ export class ValuationChartService {
 
   /**
    * Build Historical Valuation chart showing P/E, P/B, P/S ratios over time
+   *
+   * @param data DCF analysis data with historical valuation
+   * @param yearsToShow Number of years to display (5 or 10, defaults to 10)
    */
-  buildHistoricalValuationChart(data: DCFAnalysisData): EChartsOption | null {
+  buildHistoricalValuationChart(data: DCFAnalysisData, yearsToShow = 10): EChartsOption | null {
     const hv = data.historicalValuation;
     if (!hv || hv.length === 0) {
       return null;
     }
 
-    const dates = hv.map((d) => this.formatDate(d.date));
-    const peRatios = hv.map((d) => d.peRatio);
-    const pbRatios = hv.map((d) => d.pbRatio);
-    const psRatios = hv.map((d) => d.psRatio);
+    // Filter data to show only the specified number of years
+    const cutoffDate = new Date();
+    cutoffDate.setFullYear(cutoffDate.getFullYear() - yearsToShow);
 
-    // Get averages for reference lines (same on all entries)
-    const avgPe = hv[0]?.avgPeRatio;
+    const filteredHv = hv.filter((point) => new Date(point.date) >= cutoffDate);
+    if (filteredHv.length === 0) {
+      return null;
+    }
+
+    const dates = filteredHv.map((d) => this.formatDate(d.date));
+    const peRatios = filteredHv.map((d) => d.peRatio);
+    const pbRatios = filteredHv.map((d) => d.pbRatio);
+    const psRatios = filteredHv.map((d) => d.psRatio);
+
+    // Calculate averages for the filtered period
+    const validPe = filteredHv.filter((d) => d.peRatio != null).map((d) => d.peRatio!);
+    const validPb = filteredHv.filter((d) => d.pbRatio != null).map((d) => d.pbRatio!);
+    const validPs = filteredHv.filter((d) => d.psRatio != null).map((d) => d.psRatio!);
+
+    const avgPe = validPe.length > 0 ? validPe.reduce((a, b) => a + b, 0) / validPe.length : null;
+    const avgPb = validPb.length > 0 ? validPb.reduce((a, b) => a + b, 0) / validPb.length : null;
+    const avgPs = validPs.length > 0 ? validPs.reduce((a, b) => a + b, 0) / validPs.length : null;
 
     // Create lookup for valuation notes by date
     const notesByDate = new Map<string, string>();
-    hv.forEach((d) => {
+    filteredHv.forEach((d) => {
       if (d.valuationNote) {
         notesByDate.set(this.formatDate(d.date), d.valuationNote);
       }
@@ -478,7 +535,7 @@ export class ValuationChartService {
     return {
       backgroundColor: THEME.background,
       title: {
-        text: 'Historical Valuation Multiples',
+        text: `Historical Valuation Multiples (${yearsToShow}Y)`,
         textStyle: { color: THEME.textColor, fontSize: 14 },
         left: 'center',
       },
@@ -501,9 +558,13 @@ export class ValuationChartService {
           if (note) {
             html += `<br/><span style="color:${THEME.warning}; font-style: italic">${note}</span>`;
           }
-          if (avgPe != null) {
-            html += `<br/><span style="color:${THEME.textColorSecondary}">Avg P/E: ${avgPe.toFixed(2)}</span>`;
-          }
+          // Show period averages
+          html += `<br/><span style="color:${THEME.textColorSecondary}; font-size: 11px">`;
+          html += `${yearsToShow}Y Averages: `;
+          if (avgPe != null) html += `P/E ${avgPe.toFixed(1)}`;
+          if (avgPb != null) html += `, P/B ${avgPb.toFixed(1)}`;
+          if (avgPs != null) html += `, P/S ${avgPs.toFixed(1)}`;
+          html += `</span>`;
           return html;
         },
       },
@@ -566,6 +627,24 @@ export class ValuationChartService {
           smooth: true,
           lineStyle: { width: 2 },
           itemStyle: { color: THEME.success },
+          markLine:
+            avgPb != null
+              ? {
+                  silent: true,
+                  symbol: 'none',
+                  lineStyle: { type: 'dashed', color: THEME.success, opacity: 0.5 },
+                  data: [
+                    {
+                      yAxis: avgPb,
+                      label: {
+                        formatter: `Avg: ${avgPb.toFixed(1)}`,
+                        color: THEME.textColorSecondary,
+                        position: 'end',
+                      },
+                    },
+                  ],
+                }
+              : undefined,
         },
         {
           name: 'P/S Ratio',
@@ -574,6 +653,24 @@ export class ValuationChartService {
           smooth: true,
           lineStyle: { width: 2 },
           itemStyle: { color: THEME.warning },
+          markLine:
+            avgPs != null
+              ? {
+                  silent: true,
+                  symbol: 'none',
+                  lineStyle: { type: 'dashed', color: THEME.warning, opacity: 0.5 },
+                  data: [
+                    {
+                      yAxis: avgPs,
+                      label: {
+                        formatter: `Avg: ${avgPs.toFixed(1)}`,
+                        color: THEME.textColorSecondary,
+                        position: 'end',
+                      },
+                    },
+                  ],
+                }
+              : undefined,
         },
       ],
     };
@@ -1101,6 +1198,94 @@ export class ValuationChartService {
           },
         },
       ],
+    };
+  }
+
+  /**
+   * Calculate historical valuation statistics for a given period
+   *
+   * @param data DCF analysis data with historical valuation
+   * @param yearsToShow Number of years to calculate stats for (5 or 10, defaults to 10)
+   * @returns Object with averages, min/max for P/E, P/B, P/S
+   */
+  calculateHistoricalValuationStats(
+    data: DCFAnalysisData,
+    yearsToShow = 10,
+  ): {
+    avgPe: number | null;
+    avgPb: number | null;
+    avgPs: number | null;
+    minPe: number | null;
+    maxPe: number | null;
+    minPb: number | null;
+    maxPb: number | null;
+    minPs: number | null;
+    maxPs: number | null;
+    currentPe: number | null;
+    currentPb: number | null;
+    currentPs: number | null;
+  } {
+    const hv = data.historicalValuation;
+    if (!hv || hv.length === 0) {
+      return {
+        avgPe: null,
+        avgPb: null,
+        avgPs: null,
+        minPe: null,
+        maxPe: null,
+        minPb: null,
+        maxPb: null,
+        minPs: null,
+        maxPs: null,
+        currentPe: null,
+        currentPb: null,
+        currentPs: null,
+      };
+    }
+
+    // Filter data to the specified number of years
+    const cutoffDate = new Date();
+    cutoffDate.setFullYear(cutoffDate.getFullYear() - yearsToShow);
+    const filteredHv = hv.filter((point) => new Date(point.date) >= cutoffDate);
+
+    if (filteredHv.length === 0) {
+      return {
+        avgPe: null,
+        avgPb: null,
+        avgPs: null,
+        minPe: null,
+        maxPe: null,
+        minPb: null,
+        maxPb: null,
+        minPs: null,
+        maxPs: null,
+        currentPe: null,
+        currentPb: null,
+        currentPs: null,
+      };
+    }
+
+    // Extract valid values
+    const validPe = filteredHv.filter((d) => d.peRatio != null).map((d) => d.peRatio!);
+    const validPb = filteredHv.filter((d) => d.pbRatio != null).map((d) => d.pbRatio!);
+    const validPs = filteredHv.filter((d) => d.psRatio != null).map((d) => d.psRatio!);
+
+    // Get current (most recent) values
+    const latest = filteredHv[filteredHv.length - 1];
+
+    return {
+      avgPe: validPe.length > 0 ? validPe.reduce((a, b) => a + b, 0) / validPe.length : null,
+      avgPb: validPb.length > 0 ? validPb.reduce((a, b) => a + b, 0) / validPb.length : null,
+      avgPs: validPs.length > 0 ? validPs.reduce((a, b) => a + b, 0) / validPs.length : null,
+      minPe: validPe.length > 0 ? Math.min(...validPe) : null,
+      maxPe: validPe.length > 0 ? Math.max(...validPe) : null,
+      minPb: validPb.length > 0 ? Math.min(...validPb) : null,
+      maxPb: validPb.length > 0 ? Math.max(...validPb) : null,
+      minPs: validPs.length > 0 ? Math.min(...validPs) : null,
+      maxPs: validPs.length > 0 ? Math.max(...validPs) : null,
+      currentPe: latest?.peRatio ?? null,
+      currentPb: latest?.pbRatio ?? null,
+      currentPs: latest?.psRatio ?? null,
     };
   }
 }

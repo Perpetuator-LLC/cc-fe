@@ -13,6 +13,52 @@
     <span [innerHTML]="formulaHtml"></span>
   </div>
 
+  <!-- Variable Legend with Tooltips and Hover Highlighting -->
+  @if (variableDefinitions.length > 0) {
+    <div class="variable-legend">
+      @for (def of variableDefinitions; track def.symbol) {
+        <span
+          class="legend-item"
+          [class.highlighted]="isHighlighted(def.symbol)"
+          [matTooltip]="def.definition"
+          matTooltipPosition="above"
+          (mouseenter)="onVariableHover(def.symbol)"
+          (mouseleave)="onVariableHover(null)"
+        >
+          <span class="legend-symbol" [innerHTML]="def.symbol"></span>
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Calculation Steps - Show the work -->
+  @if (calculationSteps.length > 0) {
+    <div class="calculation-steps">
+      @for (step of calculationSteps; track step.expressionHtml) {
+        <div class="calculation-step">
+          @if (step.label) {
+            <span class="step-label">{{ step.label }}</span>
+          }
+          <div class="step-expression">
+            <span [innerHTML]="step.expressionHtml"></span>
+            @if (step.result) {
+              <span class="step-result">{{ step.result }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Final Result -->
+  @if (resultLabel && resultValue) {
+    <div class="formula-result">
+      <span class="result-label">{{ resultLabel }}</span>
+      <span class="result-equals">=</span>
+      <span class="result-value">{{ resultValue }}</span>
+    </div>
+  }
+
   @if (variables.length > 0) {
     <div class="formula-variables">
       <div class="variables-header">Where:</div>
