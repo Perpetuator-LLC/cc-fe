@@ -20,6 +20,14 @@ const DDM_ANALYSIS_QUERY = gql`
       symbol
       companyName
       analysisDate
+
+      # Currency fields for ADR handling
+      tradingCurrency
+      reportingCurrency
+      isAdr
+      currencyNote
+      exchangeRate
+
       intrinsicValue
       currentPrice
       upsidePercentage
@@ -70,6 +78,13 @@ const DCF_ANALYSIS_QUERY = gql`
       symbol
       analysisDate
       companyName
+
+      # Currency fields for ADR handling
+      tradingCurrency
+      reportingCurrency
+      isAdr
+      currencyNote
+      exchangeRate
 
       historicalFcf {
         date
@@ -337,6 +352,12 @@ export interface DDMAnalysisData {
   symbol: string;
   companyName: string;
   analysisDate: string;
+  // Currency fields for ADR handling
+  tradingCurrency: string;
+  reportingCurrency: string;
+  isAdr: boolean;
+  currencyNote: string | null;
+  exchangeRate: number | null; // Exchange rate used to convert financials to USD
   intrinsicValue: number;
   currentPrice: number;
   upsidePercentage: number;
@@ -363,6 +384,12 @@ export interface DCFAnalysisData {
   symbol: string;
   analysisDate: string;
   companyName: string;
+  // Currency fields for ADR handling
+  tradingCurrency: string;
+  reportingCurrency: string;
+  isAdr: boolean;
+  currencyNote: string | null;
+  exchangeRate: number | null; // Exchange rate used to convert financials to USD
   historicalFcf: HistoricalDataPoint[];
   historicalRevenue: HistoricalDataPoint[];
   historicalNetIncome: HistoricalDataPoint[];

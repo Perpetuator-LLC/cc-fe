@@ -741,7 +741,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       }
       // Determine command based on view parameter
       let command = 'CHART';
-      if (state.view === 'fundamentals' || state.view === 'financials') {
+      if (state.view === 'financials') {
         command = 'FINANCIALS';
         // Set financials period from params if specified
         const period = state.params?.['period'];
@@ -785,7 +785,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
             // Determine command from view
             let command = 'CHART';
-            if (view === 'fundamentals' || view === 'financials') {
+            if (view === 'financials') {
               command = 'FINANCIALS';
               // Handle financials period from period query param
               const period = params['period'];
@@ -1090,7 +1090,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               this.routingService.applyRoute(route as RouteInfo);
 
               // Handle view switching based on route
-              if (route.view === 'fundamentals' || route.view === 'financials') {
+              if (route.view === 'financials') {
                 console.log('[WatchlistTab] Route specifies financials view, loading financials');
                 this.currentCommand.set('FINANCIALS');
                 this.loadFundamentalsView(newSymbol);
@@ -1839,14 +1839,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       this.fundamentalsFetchRetries = 0;
     }
 
-    // Update URL to reflect fundamentals view with period
+    // Update URL to reflect financials view with period
     const item = this.selectedItem();
     const isAnnual = this.fundamentalsIsAnnual();
     this.routingService.applyRoute({
       symbol,
       exchange: item?.exchange,
-      view: 'fundamentals',
-      // Use params for fundamentals-specific settings
+      view: 'financials',
+      // Use params for financials-specific settings
       params: { period: isAnnual ? 'annual' : 'quarterly' },
     });
 
@@ -1940,13 +1940,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   onValuationYearsChange(years: number): void {
     this.valuationHistoricalYears.set(years);
 
-    // Rebuild price vs valuation chart with new year filter
+    // Rebuild historical valuation charts with new year filter
     const data = this.valuationData();
     if (data) {
       const currentCharts = this.valuationCharts();
       if (currentCharts) {
         this.valuationCharts.set({
           ...currentCharts,
+          historicalValuation: this.valuationChartService.buildHistoricalValuationChart(data, years),
           priceVsValuation: this.valuationChartService.buildPriceVsValuationChart(data, years),
         });
       }

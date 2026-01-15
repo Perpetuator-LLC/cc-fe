@@ -55,6 +55,54 @@
   background: var(--md-sys-color-surface-container-low);
 }
 
+// Variable legend with hover tooltips
+.variable-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  margin: 12px 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+
+  font-size: 12px;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.legend-item {
+  cursor: help;
+
+  padding: 4px 8px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 4px;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover,
+  &.highlighted {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+  }
+}
+
+.legend-symbol {
+  font-family: 'Times New Roman', serif;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface);
+
+  .legend-item:hover &,
+  .legend-item.highlighted & {
+    color: var(--md-sys-color-on-primary-container);
+  }
+}
+
+// Editable variables section
 .formula-variables {
   font-size: 14px;
   color: var(--md-sys-color-on-surface-variant);
@@ -113,6 +161,79 @@
 
 .variable-name {
   color: var(--md-sys-color-on-surface-variant);
+}
+
+// Calculation steps - show the work
+.calculation-steps {
+  margin: 12px 0;
+  padding: 12px;
+  border-left: 4px solid var(--md-sys-color-primary);
+  border-radius: 4px;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.calculation-step {
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.step-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.step-expression {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  font-family: 'Times New Roman', serif;
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.step-result {
+  font-weight: 500;
+  color: var(--md-sys-color-primary);
+}
+
+// Final result display
+.formula-result {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  margin: 12px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  font-family: 'Times New Roman', serif;
+  font-size: 18px;
+
+  background: var(--md-sys-color-primary-container);
+}
+
+.result-label {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.result-equals {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.result-value {
+  font-weight: 700;
+  color: var(--md-sys-color-on-primary-container);
 }
 
 .edit-button {

@@ -25,6 +25,23 @@
     </mat-button-toggle-group>
   </div>
 
+  <!-- ADR Currency Warning Banner -->
+  <!-- ADR Currency Warning Banner for DCF -->
+  @if (selectedModel() === 'dcf' && dcfData?.isAdr && dcfData?.currencyNote) {
+    <div class="currency-warning">
+      <mat-icon>info</mat-icon>
+      <span>{{ dcfData?.currencyNote }}</span>
+    </div>
+  }
+
+  <!-- ADR Currency Warning Banner for DDM -->
+  @if (selectedModel() === 'ddm' && ddmData?.isAdr && ddmData?.currencyNote) {
+    <div class="currency-warning">
+      <mat-icon>info</mat-icon>
+      <span>{{ ddmData?.currencyNote }}</span>
+    </div>
+  }
+
   @if (loading) {
     <div class="content-loading">
       <mat-spinner diameter="40" />
@@ -40,8 +57,8 @@
       <mat-icon>info</mat-icon>
       <p>No valuation data available for this symbol.</p>
     </div>
-  } @else if (selectedModel() === 'ddm' && ddmData) {
-    <!-- DDM View -->
+  } @else if (selectedModel() === 'ddm' && ddmData && drillDown() === 'summary') {
+    <!-- DDM Summary View -->
     <div class="valuation-summary">
       <div class="valuation-metrics">
         <app-kpi-card label="Current Price" [value]="'$' + ddmData.currentPrice.toFixed(2)" />
@@ -81,38 +98,171 @@
             <div echarts [options]="ddmCharts!.breakdown" class="valuation-echart"></div>
           </div>
         }
-        @if (ddmCharts?.dividendProjection) {
-          <div class="valuation-chart full-width">
-            <div echarts [options]="ddmCharts!.dividendProjection!" class="valuation-echart-large"></div>
-          </div>
-        }
       </div>
-      <!-- DDM Methodology -->
+    </div>
+  } @else if (selectedModel() === 'ddm' && ddmData && drillDown() === 'historical') {
+    <!-- DDM Historical View: Dividend history -->
+    <div class="valuation-historical">
+      <div class="historical-header">
+        <span class="section-title">Dividend History</span>
+      </div>
+      <div class="historical-stats">
+        <app-kpi-card
+          label="Current Dividend"
+          [value]="'$' + ddmData.currentDividendPerShare.toFixed(2)"
+          tooltip="Annual dividend per share"
+        />
+        <app-kpi-card
+          label="Dividend CAGR"
+          [value]="ddmData.historicalGrowthRate.toFixed(1) + '%'"
+          tooltip="Compound annual growth rate of dividends"
+        />
+        <app-kpi-card
+          label="Years of Data"
+          [value]="ddmData.summaryStats.yearsOfDividendData.toString()"
+          tooltip="Number of years with dividend data"
+        />
+        <app-kpi-card
+          label="Payout Ratio"
+          [value]="ddmData.payoutRatio.toFixed(1) + '%'"
+          tooltip="Percentage of earnings paid as dividends"
+        />
+        <app-kpi-card
+          label="Sustainability"
+          [value]="ddmData.dividendSustainabilityScore.toFixed(0) + '/100'"
+          tooltip="Score indicating dividend sustainability (higher is better)"
+        />
+      </div>
+      @if (ddmCharts?.dividendProjection) {
+        <div class="valuation-chart-full">
+          <div echarts [options]="ddmCharts!.dividendProjection!" class="valuation-echart-large"></div>
+        </div>
+      }
+    </div>
+  } @else if (selectedModel() === 'ddm' && ddmData && drillDown() === 'projections') {
+    <!-- DDM Projections View: Projected dividends -->
+    <div class="valuation-projections">
+      @if (ddmCharts?.dividendProjection) {
+        <div class="valuation-chart-full">
+          <div echarts [options]="ddmCharts!.dividendProjection!" class="valuation-echart-full"></div>
+        </div>
+      }
+      <!-- Projected Dividends Table -->
+      <app-financial-table [data]="getDdmProjectionTableData()" title="Projected Dividends" />
+    </div>
+  } @else if (selectedModel() === 'ddm' && drillDown() === 'sensitivity') {
+    <!-- DDM Sensitivity View: Not applicable for DDM -->
+    <div class="no-data-message">
+      <mat-icon>info</mat-icon>
+      <p>Sensitivity analysis is not available for the Dividend Discount Model.</p>
+      <p class="hint">
+        DDM valuations are primarily sensitive to cost of equity and dividend growth rate assumptions, which can be
+        adjusted in the Methodology view.
+      </p>
+    </div>
+  } @else if (selectedModel() === 'ddm' && ddmData && drillDown() === 'methodology') {
+    <!-- DDM Methodology View -->
+    <div class="valuation-methodology">
       <div class="methodology-section">
-        <h4>Model Description</h4>
-        <p class="model-description">{{ ddmData.modelDescription }}</p>
+        <h4>Model Parameters</h4>
         <div class="assumptions-grid">
+          <div class="assumption">
+            <span class="label">Model Type</span>
+            <span class="value">{{ formatModelType(ddmData.modelType) }}</span>
+          </div>
           <div class="assumption">
             <span class="label">Current Dividend/Share</span>
             <span class="value">${{ ddmData.currentDividendPerShare.toFixed(2) }}</span>
           </div>
           <div class="assumption">
+            <span class="label">Cost of Equity</span>
+            <span class="value">{{ ddmData.costOfEquity.toFixed(2) }}%</span>
+          </div>
+          <div class="assumption">
             <span class="label">Terminal Growth Rate</span>
-            <span class="value">{{ ddmData.terminalGrowthRate.toFixed(1) }}%</span>
+            <span class="value">{{ ddmData.terminalGrowthRate.toFixed(2) }}%</span>
           </div>
           <div class="assumption">
             <span class="label">Historical Growth Rate</span>
-            <span class="value">{{ ddmData.historicalGrowthRate.toFixed(1) }}%</span>
+            <span class="value">{{ ddmData.historicalGrowthRate.toFixed(2) }}%</span>
           </div>
           <div class="assumption">
             <span class="label">Payout Ratio</span>
             <span class="value">{{ ddmData.payoutRatio.toFixed(1) }}%</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Calculated Values -->
+      <div class="methodology-section">
+        <h4>Calculated Values</h4>
+        <div class="assumptions-grid">
           <div class="assumption">
-            <span class="label">Sustainability Score</span>
-            <span class="value">{{ ddmData.dividendSustainabilityScore.toFixed(0) }}/100</span>
+            <span class="label">PV of Dividends</span>
+            <span class="value">${{ ddmData.presentValueDividends.toFixed(2) }}</span>
+          </div>
+          <div class="assumption">
+            <span class="label">PV of Terminal Value</span>
+            <span class="value">${{ ddmData.presentValueTerminal.toFixed(2) }}</span>
+          </div>
+          <div class="assumption">
+            <span class="label">Terminal Value</span>
+            <span class="value">${{ ddmData.terminalValue.toFixed(2) }}</span>
+          </div>
+          <div class="assumption">
+            <span class="label">Intrinsic Value</span>
+            <span class="value">${{ ddmData.intrinsicValue.toFixed(2) }}</span>
           </div>
         </div>
+      </div>
+
+      <!-- DDM Formula based on model type -->
+      @if (ddmData.modelType === 'gordon') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.gordonGrowth.title"
+          [description]="DDM_FORMULAS.gordonGrowth.description"
+          [formulaHtml]="DDM_FORMULAS.gordonGrowth.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.gordonGrowth.variableDefinitions"
+          [variables]="getDdmVariables()"
+          [calculationSteps]="getGordonGrowthSteps()"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + ddmData.intrinsicValue.toFixed(2)"
+        />
+      } @else if (ddmData.modelType === 'two_stage') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.twoStage.title"
+          [description]="DDM_FORMULAS.twoStage.description"
+          [formulaHtml]="DDM_FORMULAS.twoStage.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.twoStage.variableDefinitions"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + ddmData.intrinsicValue.toFixed(2)"
+        />
+      } @else if (ddmData.modelType === 'h_model') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.hModel.title"
+          [description]="DDM_FORMULAS.hModel.description"
+          [formulaHtml]="DDM_FORMULAS.hModel.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.hModel.variableDefinitions"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + ddmData.intrinsicValue.toFixed(2)"
+        />
+      }
+
+      <!-- Intrinsic Value Formula -->
+      <app-formula-display
+        [title]="DDM_FORMULAS.intrinsicValue.title"
+        [description]="DDM_FORMULAS.intrinsicValue.description"
+        [formulaHtml]="DDM_FORMULAS.intrinsicValue.formulaHtml"
+        [variableDefinitions]="DDM_FORMULAS.intrinsicValue.variableDefinitions"
+        [calculationSteps]="getDdmIntrinsicValueSteps()"
+        resultLabel="Intrinsic Value"
+        [resultValue]="'$' + ddmData.intrinsicValue.toFixed(2)"
+      />
+
+      <!-- Model Description -->
+      <div class="methodology-section">
+        <h4>Model Description</h4>
+        <p class="model-description">{{ ddmData.modelDescription }}</p>
       </div>
     </div>
   } @else if (drillDown() === 'summary') {
@@ -177,27 +327,37 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <!-- KPI Stats at top -->
+      <!-- KPI Stats at top - uses period-specific calculations -->
       @if (dcfData?.historicalValuation; as histVal) {
         @if (histVal.length > 0) {
           <div class="historical-stats">
             <app-kpi-card
               label="Current P/E"
-              [value]="histVal[histVal.length - 1].peRatio?.toFixed(1) || 'N/A'"
+              [value]="getHistoricalStats().currentPe?.toFixed(1) || 'N/A'"
               accent="primary"
               [tooltip]="CHART_DEFINITIONS.peRatio.description"
             />
-            <app-kpi-card label="Average P/E" [value]="histVal[0].avgPeRatio?.toFixed(1) || 'N/A'" />
+            <app-kpi-card
+              [label]="historicalYears + 'Y Avg P/E'"
+              [value]="getHistoricalStats().avgPe?.toFixed(1) || 'N/A'"
+            />
             <app-kpi-card
               label="P/E Range"
               [value]="
-                (histVal[0].minPeRatio?.toFixed(1) || 'N/A') + ' - ' + (histVal[0].maxPeRatio?.toFixed(1) || 'N/A')
+                (getHistoricalStats().minPe?.toFixed(1) || 'N/A') +
+                ' - ' +
+                (getHistoricalStats().maxPe?.toFixed(1) || 'N/A')
               "
             />
             <app-kpi-card
-              label="Average P/B"
-              [value]="histVal[0].avgPbRatio?.toFixed(1) || 'N/A'"
+              [label]="historicalYears + 'Y Avg P/B'"
+              [value]="getHistoricalStats().avgPb?.toFixed(1) || 'N/A'"
               [tooltip]="CHART_DEFINITIONS.pbRatio.description"
+            />
+            <app-kpi-card
+              [label]="historicalYears + 'Y Avg P/S'"
+              [value]="getHistoricalStats().avgPs?.toFixed(1) || 'N/A'"
+              [tooltip]="CHART_DEFINITIONS.psRatio.description"
             />
           </div>
         }
@@ -232,29 +392,7 @@
         </div>
       }
       @if (dcfData) {
-        <div class="projections-table-container">
-          <h4>Base Case FCF Projections</h4>
-          <table mat-table [dataSource]="dcfData.baseCase.projections" class="projections-table">
-            <ng-container matColumnDef="year">
-              <th mat-header-cell *matHeaderCellDef>Year</th>
-              <td mat-cell *matCellDef="let row">{{ row.date | date: 'yyyy' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="fcf">
-              <th mat-header-cell *matHeaderCellDef>FCF</th>
-              <td mat-cell *matCellDef="let row">${{ (row.fcf / 1e9).toFixed(2) }}B</td>
-            </ng-container>
-            <ng-container matColumnDef="discountedFcf">
-              <th mat-header-cell *matHeaderCellDef>Discounted FCF</th>
-              <td mat-cell *matCellDef="let row">${{ (row.discountedFcf / 1e9).toFixed(2) }}B</td>
-            </ng-container>
-            <ng-container matColumnDef="growthRate">
-              <th mat-header-cell *matHeaderCellDef>Growth Rate</th>
-              <td mat-cell *matCellDef="let row">{{ row.growthRate.toFixed(1) }}%</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['year', 'fcf', 'discountedFcf', 'growthRate']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['year', 'fcf', 'discountedFcf', 'growthRate']"></tr>
-          </table>
-        </div>
+        <app-financial-table [data]="getProjectionTableData()" title="Base Case FCF Projections" />
       }
     </div>
   } @else if (drillDown() === 'sensitivity') {
@@ -300,35 +438,7 @@
           </div>
         </div>
 
-        <!-- WACC Formula Display -->
-        <app-formula-display
-          [title]="DCF_FORMULAS.wacc.title"
-          [description]="CHART_DEFINITIONS.wacc.description"
-          [formulaHtml]="DCF_FORMULAS.wacc.formulaHtml"
-        />
-
-        <!-- Cost of Equity Formula Display -->
-        <app-formula-display
-          [title]="DCF_FORMULAS.costOfEquity.title"
-          [description]="CHART_DEFINITIONS.wacc.description"
-          [formulaHtml]="DCF_FORMULAS.costOfEquity.formulaHtml"
-        />
-
-        <!-- Terminal Value Formula Display -->
-        <app-formula-display
-          [title]="DCF_FORMULAS.terminalValue.title"
-          [description]="CHART_DEFINITIONS.terminalValue.description"
-          [formulaHtml]="DCF_FORMULAS.terminalValue.formulaHtml"
-        />
-
-        <!-- Intrinsic Value Formula Display -->
-        <app-formula-display
-          [title]="DCF_FORMULAS.intrinsicValue.title"
-          [description]="CHART_DEFINITIONS.intrinsicValue.description"
-          [formulaHtml]="DCF_FORMULAS.intrinsicValue.formulaHtml"
-        />
-
-        <!-- Calculated Values Section -->
+        <!-- Calculated Values Section - Moved here, right after assumptions -->
         <div class="methodology-section">
           <h4>Calculated Values</h4>
           <div class="assumptions-grid">
@@ -358,6 +468,52 @@
             </div>
           </div>
         </div>
+
+        <!-- Cost of Equity Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.costOfEquity.title"
+          [description]="DCF_FORMULAS.costOfEquity.description"
+          [formulaHtml]="DCF_FORMULAS.costOfEquity.formulaHtml"
+          [variableDefinitions]="DCF_FORMULAS.costOfEquity.variableDefinitions"
+          [variables]="getCostOfEquityVariables()"
+          [calculationSteps]="getCostOfEquitySteps()"
+          resultLabel="Cost of Equity"
+          [resultValue]="dcfData.baseCase.costOfEquity.toFixed(2) + '%'"
+        />
+
+        <!-- WACC Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.wacc.title"
+          [description]="DCF_FORMULAS.wacc.description"
+          [formulaHtml]="DCF_FORMULAS.wacc.formulaHtml"
+          [variableDefinitions]="DCF_FORMULAS.wacc.variableDefinitions"
+          [calculationSteps]="getWaccSteps()"
+          resultLabel="WACC"
+          [resultValue]="dcfData.baseCase.wacc.toFixed(2) + '%'"
+        />
+
+        <!-- Terminal Value Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.terminalValue.title"
+          [description]="DCF_FORMULAS.terminalValue.description"
+          [formulaHtml]="DCF_FORMULAS.terminalValue.formulaHtml"
+          [variableDefinitions]="DCF_FORMULAS.terminalValue.variableDefinitions"
+          [variables]="getTerminalValueVariables()"
+          [calculationSteps]="getTerminalValueSteps()"
+          resultLabel="Terminal Value"
+          [resultValue]="'$' + (dcfData.baseCase.terminalValue / 1e9).toFixed(2) + 'B'"
+        />
+
+        <!-- Intrinsic Value Formula Display -->
+        <app-formula-display
+          [title]="DCF_FORMULAS.intrinsicValue.title"
+          [description]="DCF_FORMULAS.intrinsicValue.description"
+          [formulaHtml]="DCF_FORMULAS.intrinsicValue.formulaHtml"
+          [variableDefinitions]="DCF_FORMULAS.intrinsicValue.variableDefinitions"
+          [calculationSteps]="getIntrinsicValueSteps()"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + dcfData.baseCase.intrinsicValuePerShare.toFixed(2)"
+        />
       }
     </div>
   }

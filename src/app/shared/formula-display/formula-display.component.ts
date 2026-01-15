@@ -23,10 +23,33 @@ export interface FormulaVariable {
 }
 
 /**
+ * Calculation Step interface - shows the work
+ */
+export interface CalculationStep {
+  /** Step label (e.g., "Substituting values:") */
+  label?: string;
+  /** The expression with numbers substituted (e.g., "4.5% + 1.2 × (10.5% - 4.5%)") */
+  expressionHtml: string;
+  /** Optional result (e.g., "= 11.7%") */
+  result?: string;
+}
+
+/**
+ * Variable Definition interface - explains what each symbol means
+ */
+export interface VariableDefinition {
+  /** The symbol (can include HTML like subscripts) */
+  symbol: string;
+  /** Human-readable definition */
+  definition: string;
+}
+
+/**
  * Formula Display Component
  *
  * Displays mathematical formulas in a readable format with variable definitions.
  * Users can optionally edit some variables to see how results change.
+ * Now also supports showing calculation steps with substituted values.
  */
 @Component({
   selector: 'app-formula-display',
@@ -48,12 +71,44 @@ export class FormulaDisplayComponent {
   @Input() description = '';
   @Input() formulaHtml = '';
   @Input() variables: FormulaVariable[] = [];
+  /** Calculation steps showing the work (optional) */
+  @Input() calculationSteps: CalculationStep[] = [];
+  /** Variable definitions explaining what each symbol means */
+  @Input() variableDefinitions: VariableDefinition[] = [];
+  /** Final result variable name and value (e.g., "WACC = 9.2%") */
+  @Input() resultLabel = '';
+  @Input() resultValue = '';
   @Output() variablesChanged = new EventEmitter<Record<string, number>>();
 
   editMode = signal(false);
+  /** Currently hovered variable symbol for highlighting */
+  hoveredVariable = signal<string | null>(null);
 
   // Use computed property instead of method call in template
   hasEditableVars = computed(() => this.variables.some((v) => v.editable));
+
+  /** Get tooltip text for a variable symbol */
+  getDefinitionFor(symbol: string): string {
+    const def = this.variableDefinitions.find(
+      (d) => d.symbol === symbol || d.symbol.replace(/<[^>]*>/g, '') === symbol,
+    );
+    return def?.definition || '';
+  }
+
+  /** Set the hovered variable for highlighting */
+  onVariableHover(symbol: string | null): void {
+    this.hoveredVariable.set(symbol);
+  }
+
+  /** Check if a variable is currently hovered */
+  isHighlighted(symbol: string): boolean {
+    const hovered = this.hoveredVariable();
+    if (!hovered) return false;
+    // Strip HTML tags for comparison
+    const hoveredClean = hovered.replace(/<[^>]*>/g, '');
+    const symbolClean = symbol.replace(/<[^>]*>/g, '');
+    return hoveredClean === symbolClean;
+  }
 
   toggleEditMode(): void {
     if (this.editMode()) {

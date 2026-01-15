@@ -1,0 +1,46 @@
+TSM data: {
+  "symbol": "TSM",
+  "displayName": "Taiwan Semiconductor Manufacturing",
+  "marketCap": null,
+  "sector": "TECHNOLOGY",
+  "exchange": "NYSE"
+}
+
+Symbols with marketCap: 23
+First 5 with marketCap: [
+  {
+    "symbol": "TV",
+    "displayName": "Grupo Televisa SAB",
+    "marketCap": 1579277000,
+    "sector": "COMMUNICATION SERVICES",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "RTX",
+    "displayName": "RTX Corp",
+    "marketCap": 260217029000,
+    "sector": "INDUSTRIALS",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "SAP",
+    "displayName": "Sap SE",
+    "marketCap": 288314884000,
+    "sector": "TECHNOLOGY",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "BABA",
+    "displayName": "Alibaba Group Holding Ltd",
+    "marketCap": 360052851000,
+    "sector": "CONSUMER CYCLICAL",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "MDLZ",
+    "displayName": "Mondelez International Inc - Class A",
+    "marketCap": 72383308000,
+    "sector": "CONSUMER DEFENSIVE",
+    "exchange": "NASDAQ"
+  }
+]
