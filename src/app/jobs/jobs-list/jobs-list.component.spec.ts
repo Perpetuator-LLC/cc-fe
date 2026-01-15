@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { JobsListComponent } from './jobs-list.component';
 import { JobService } from '../job.service';
@@ -29,7 +29,7 @@ describe('JobsListComponent', () => {
   beforeEach(async () => {
     mockJobService = jasmine.createSpyObj('JobService', ['getJobs', 'addJob']);
     mockJobsWebSocketService = jasmine.createSpyObj('JobsWebSocketService', ['addJob', 'addJobs']);
-    Object.defineProperty(mockJobsWebSocketService, 'jobUpdates', {
+    Object.defineProperty(mockJobsWebSocketService, 'jobUpdated$', {
       get: () => EMPTY,
     });
     mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages']);

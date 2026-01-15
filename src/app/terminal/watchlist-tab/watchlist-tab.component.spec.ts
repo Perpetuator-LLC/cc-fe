@@ -39,11 +39,17 @@ describe('WatchlistTabComponent', () => {
   let queryParamsSubject: Subject<Record<string, string>>;
   let commandResultSubject: Subject<CommandResult>;
   let symbolUpdateSubject: Subject<SymbolUpdate>;
+  let jobCreatedSubject: Subject<{ uuid: string; kind: string }>;
+  let jobCompletedSubject: Subject<{ uuid: string }>;
+  let jobFailedSubject: Subject<{ uuid: string }>;
 
   beforeEach(async () => {
     queryParamsSubject = new Subject<Record<string, string>>();
     commandResultSubject = new Subject<CommandResult>();
     symbolUpdateSubject = new Subject<SymbolUpdate>();
+    jobCreatedSubject = new Subject<{ uuid: string; kind: string }>();
+    jobCompletedSubject = new Subject<{ uuid: string }>();
+    jobFailedSubject = new Subject<{ uuid: string }>();
 
     mockRoutingService = jasmine.createSpyObj('TerminalRoutingService', ['applyRoute', 'state', 'setInterval'], {
       symbol: jasmine.createSpy().and.returnValue(null),
@@ -77,6 +83,9 @@ describe('WatchlistTabComponent', () => {
     mockTerminalWsService = jasmine.createSpyObj('TerminalWebSocketService', ['connect', 'disconnect', 'send'], {
       onCommandResult: commandResultSubject.asObservable(),
       onSymbolUpdate: symbolUpdateSubject.asObservable(),
+      onJobCreated: jobCreatedSubject.asObservable(),
+      onJobCompleted: jobCompletedSubject.asObservable(),
+      onJobFailed: jobFailedSubject.asObservable(),
       isConnected: signal(false),
     });
 
@@ -179,6 +188,9 @@ describe('WatchlistTabComponent', () => {
     queryParamsSubject.complete();
     commandResultSubject.complete();
     symbolUpdateSubject.complete();
+    jobCreatedSubject.complete();
+    jobCompletedSubject.complete();
+    jobFailedSubject.complete();
   });
 
   describe('basic functionality', () => {
@@ -192,9 +204,10 @@ describe('WatchlistTabComponent', () => {
 
     it('should return symbol actions with proper commands', () => {
       const actions = component.getSymbolActions();
-      expect(actions.length).toBe(3);
+      expect(actions.length).toBe(6);
       expect(actions[0].command).toBe('CHART');
-      expect(actions[1].command).toBe('HP');
+      expect(actions[1].command).toBe('FINANCIALS');
+      expect(actions[4].command).toBe('HP');
     });
 
     it('should return correct asset icons', () => {
