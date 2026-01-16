@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { RouterLink } from '@angular/router';
 import { MessageService } from '../../message.service';
 import { ButtonShowcaseComponent } from '../button-showcase/button-showcase.component';
 
@@ -26,15 +25,7 @@ import { ButtonShowcaseComponent } from '../button-showcase/button-showcase.comp
 @Component({
   selector: 'app-theme-showcase',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatTabsModule,
-    RouterLink,
-    ButtonShowcaseComponent,
-  ],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatTabsModule, ButtonShowcaseComponent],
   templateUrl: './theme-showcase.component.html',
   styleUrls: ['./theme-showcase.component.scss'],
 })

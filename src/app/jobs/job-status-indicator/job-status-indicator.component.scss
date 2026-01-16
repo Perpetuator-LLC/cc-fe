@@ -36,7 +36,9 @@
 }
 
 .running-indicator {
-  animation: pulse 1.5s ease-in-out infinite;
+  animation:
+    pulse 1.5s ease-in-out infinite,
+    wiggle 0.8s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -46,6 +48,25 @@
   }
 
   50% {
-    opacity: 0.5;
+    opacity: 0.6;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(-8deg) scale(0.95);
+  }
+
+  50% {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  75% {
+    transform: rotate(8deg) scale(0.95);
   }
 }

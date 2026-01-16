@@ -79,7 +79,8 @@
   padding-left: 8px;
   overflow-wrap: break-word;
 
-  a {
+  // Style regular links but not resource-link styled elements
+  a:not([class*='resource-link']) {
     cursor: pointer;
     color: var(--md-sys-color-primary);
     text-decoration: underline;
