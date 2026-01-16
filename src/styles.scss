@@ -103,7 +103,8 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 
   // Default link styling - uses primary color
-  a {
+  // Excludes resource-link styled elements which have their own colors
+  a:not([class*='resource-link']) {
     color: var(--md-sys-color-primary);
     text-decoration: none;
 
@@ -137,6 +138,20 @@ body {
       &:hover {
         text-decoration: none;
       }
+    }
+  }
+
+  // Resource link tags - ensure they don't get default link styling
+  a[class*='resource-link'] {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none;
+    }
+
+    &:visited {
+      // Resource links should not change color when visited
+      color: inherit;
     }
   }
 
@@ -508,16 +523,81 @@ body.light {
   }
 }
 
-// Stock/Symbol tag - Secondary orange (filled style)
+// Stock/Symbol tag - Secondary orange (outlined style - consistent with others)
 .resource-link-stock {
   @extend %resource-link-base;
 
-  border: 1px solid var(--md-sys-color-secondary);
-  color: var(--md-sys-color-on-secondary);
-  background: var(--md-sys-color-secondary);
+  border: 1px solid var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 20%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-sys-color-secondary) 85%, var(--md-sys-color-on-secondary));
+    background: color-mix(in srgb, var(--md-sys-color-secondary-container) 40%, transparent);
+  }
+}
+
+// Watchlist tag - Info blue (outlined style)
+.resource-link-watchlist {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-extended-color-info-color-container);
+  color: var(--md-extended-color-info-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-info-color-container) 20%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-extended-color-info-color-container) 40%, transparent);
+  }
+}
+
+// Dashboard tag - Primary blue tonal (outlined style)
+.resource-link-dashboard {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+  }
+}
+
+// Index tag - Warning amber (outlined style)
+.resource-link-index {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-extended-color-warning-color-container);
+  color: var(--md-extended-color-warning-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-warning-color-container) 20%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-extended-color-warning-color-container) 40%, transparent);
+  }
+}
+
+// Sector tag - Tertiary purple variant (outlined style)
+.resource-link-sector {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-tertiary);
+  background: color-mix(in srgb, var(--md-sys-color-tertiary) 10%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-tertiary) 20%, transparent);
+  }
+}
+
+// Industry tag - Surface/neutral (outlined style)
+.resource-link-industry {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 50%, transparent);
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-high);
   }
 }
 
@@ -1983,11 +2063,12 @@ html body {
   }
 }
 
-// Job Status Menu styles
-.job-status-menu {
+// Job Status Menu styles - must target mat-mdc-menu-panel for width overrides
+.job-status-menu.mat-mdc-menu-panel {
+  min-width: 520px;
+  max-width: 680px;
+
   .mat-mdc-menu-content {
-    min-width: 400px;
-    max-width: 520px;
     padding: 0;
   }
 

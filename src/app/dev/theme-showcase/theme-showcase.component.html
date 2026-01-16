@@ -167,66 +167,126 @@
       <mat-icon>label</mat-icon>
       Resource Link Tags
     </h2>
-    <p class="section-desc">Styled chip/tag links for different resource types. Global classes from styles.scss</p>
+    <p class="section-desc">
+      Styled chip/tag links for different resource types. All use outlined style with translucent backgrounds.
+    </p>
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title>Resource Tag Styles</mat-card-title>
+        <mat-card-title>Resource Link Reference</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="tag-row">
-          <button type="button" class="resource-link-podcast">
-            <mat-icon>mic</mat-icon>
-            Podcast Name
-          </button>
-          <button type="button" class="resource-link-episode">
-            <mat-icon>podcasts</mat-icon>
-            Episode Title
-          </button>
-          <button type="button" class="resource-link-topic">
-            <mat-icon>topic</mat-icon>
-            Research Topic
-          </button>
-          <button type="button" class="resource-link-stock">
-            <mat-icon>show_chart</mat-icon>
-            AAPL
-          </button>
-        </div>
-
-        <div class="code-reference">
-          <h4>CSS Classes</h4>
-          <table class="reference-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Class</th>
-                <th>Color</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Podcast</td>
-                <td><code>.resource-link-podcast</code></td>
-                <td>Primary (Blue)</td>
-              </tr>
-              <tr>
-                <td>Episode</td>
-                <td><code>.resource-link-episode</code></td>
-                <td>Tertiary (Purple)</td>
-              </tr>
-              <tr>
-                <td>Topic</td>
-                <td><code>.resource-link-topic</code></td>
-                <td>Success (Green)</td>
-              </tr>
-              <tr>
-                <td>Stock</td>
-                <td><code>.resource-link-stock</code></td>
-                <td>Secondary (Orange) - Filled</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <table class="reference-table resource-link-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>CSS Class</th>
+              <th>Color</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Podcast</td>
+              <td><code>.resource-link-podcast</code></td>
+              <td>Primary (Blue)</td>
+              <td>
+                <button type="button" class="resource-link-podcast">
+                  <mat-icon>mic</mat-icon>
+                  Morning Brief
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Episode</td>
+              <td><code>.resource-link-episode</code></td>
+              <td>Tertiary (Purple)</td>
+              <td>
+                <button type="button" class="resource-link-episode">
+                  <mat-icon>podcasts</mat-icon>
+                  Ep. 42
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Topic</td>
+              <td><code>.resource-link-topic</code></td>
+              <td>Success (Green)</td>
+              <td>
+                <button type="button" class="resource-link-topic">
+                  <mat-icon>topic</mat-icon>
+                  AI Research
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Stock</td>
+              <td><code>.resource-link-stock</code></td>
+              <td>Secondary (Orange)</td>
+              <td>
+                <button type="button" class="resource-link-stock">
+                  <mat-icon>show_chart</mat-icon>
+                  AAPL
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Index</td>
+              <td><code>.resource-link-index</code></td>
+              <td>Warning (Amber)</td>
+              <td>
+                <button type="button" class="resource-link-index">
+                  <mat-icon>trending_up</mat-icon>
+                  S&P 500
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Sector</td>
+              <td><code>.resource-link-sector</code></td>
+              <td>Tertiary Variant</td>
+              <td>
+                <button type="button" class="resource-link-sector">
+                  <mat-icon>category</mat-icon>
+                  Technology
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Industry</td>
+              <td><code>.resource-link-industry</code></td>
+              <td>Neutral</td>
+              <td>
+                <button type="button" class="resource-link-industry">
+                  <mat-icon>factory</mat-icon>
+                  Software
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Watchlist</td>
+              <td><code>.resource-link-watchlist</code></td>
+              <td>Info (Blue)</td>
+              <td>
+                <button type="button" class="resource-link-watchlist">
+                  <mat-icon>visibility</mat-icon>
+                  My Watchlist
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Dashboard</td>
+              <td><code>.resource-link-dashboard</code></td>
+              <td>Primary Tonal</td>
+              <td>
+                <button type="button" class="resource-link-dashboard">
+                  <mat-icon>dashboard</mat-icon>
+                  Overview
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </mat-card-content>
     </mat-card>
 

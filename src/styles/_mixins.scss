@@ -602,13 +602,13 @@
 @mixin stock-tag {
   @include tag-button-base();
 
-  // Filled style with secondary (orange) for stocks/symbols
-  border: 1px solid var(--md-sys-color-secondary);
-  color: var(--md-sys-color-on-secondary);
-  background: var(--md-sys-color-secondary);
+  // Outlined style with secondary (orange) for stocks/symbols - consistent with other resource links
+  border: 1px solid var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 20%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--md-sys-color-secondary) 85%, var(--md-sys-color-on-secondary));
+    background: color-mix(in srgb, var(--md-sys-color-secondary-container) 40%, transparent);
   }
 }
 

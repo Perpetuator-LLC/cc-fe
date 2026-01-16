@@ -130,6 +130,7 @@ app-button-showcase {
     padding: 8px 12px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
     text-align: left;
+    vertical-align: middle;
   }
 
   th {
@@ -146,6 +147,13 @@ app-button-showcase {
     font-size: 12px;
 
     background: var(--md-sys-color-surface-container-highest);
+  }
+
+  // Resource link table specific styles
+  &.resource-link-table {
+    td:last-child {
+      min-width: 140px;
+    }
   }
 }
 
