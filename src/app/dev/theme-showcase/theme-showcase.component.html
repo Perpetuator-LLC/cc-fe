@@ -1,0 +1,435 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="theme-showcase">
+  <header class="showcase-header">
+    <h1>MD3 Theme Showcase</h1>
+    <p class="subtitle">
+      Comprehensive display of Angular Material Design 3 components, color tokens, and global utility classes.
+    </p>
+  </header>
+
+  <!-- Table of Contents -->
+  <nav class="toc">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Quick Navigation</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="toc-grid">
+          <button mat-button (click)="scrollToSection('buttons')">
+            <mat-icon>smart_button</mat-icon>
+            Buttons
+          </button>
+          <button mat-button (click)="scrollToSection('colors')">
+            <mat-icon>palette</mat-icon>
+            Colors
+          </button>
+          <button mat-button (click)="scrollToSection('resource-tags')">
+            <mat-icon>label</mat-icon>
+            Resource Tags
+          </button>
+          <button mat-button (click)="scrollToSection('badges')">
+            <mat-icon>verified</mat-icon>
+            Badges
+          </button>
+          <button mat-button (click)="scrollToSection('toasts')">
+            <mat-icon>notifications</mat-icon>
+            Toasts
+          </button>
+          <button mat-button (click)="scrollToSection('typography')">
+            <mat-icon>text_fields</mat-icon>
+            Typography
+          </button>
+          <button mat-button (click)="scrollToSection('icons')">
+            <mat-icon>emoji_symbols</mat-icon>
+            Icons
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </nav>
+
+  <!-- Section 1: Buttons (Embedded Full Button Showcase) -->
+  <section id="buttons" class="showcase-section">
+    <h2>
+      <mat-icon>smart_button</mat-icon>
+      Buttons
+    </h2>
+    <p class="section-desc">Full button showcase with all variants, colors, and states</p>
+    <app-button-showcase />
+  </section>
+
+  <!-- Section 2: Color Tokens -->
+  <section id="colors" class="showcase-section">
+    <h2>
+      <mat-icon>palette</mat-icon>
+      Color Tokens
+    </h2>
+    <p class="section-desc">MD3 system colors and extended color palette</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Primary, Secondary, Tertiary</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="color-grid">
+          <div class="color-swatch swatch-primary">
+            <span class="color-label">Primary</span>
+            <code>--md-sys-color-primary</code>
+          </div>
+          <div class="color-swatch swatch-primary-container">
+            <span class="color-label">Primary Container</span>
+            <code>--md-sys-color-primary-container</code>
+          </div>
+          <div class="color-swatch swatch-secondary">
+            <span class="color-label">Secondary</span>
+            <code>--md-sys-color-secondary</code>
+          </div>
+          <div class="color-swatch swatch-secondary-container">
+            <span class="color-label">Secondary Container</span>
+            <code>--md-sys-color-secondary-container</code>
+          </div>
+          <div class="color-swatch swatch-tertiary">
+            <span class="color-label">Tertiary</span>
+            <code>--md-sys-color-tertiary</code>
+          </div>
+          <div class="color-swatch swatch-tertiary-container">
+            <span class="color-label">Tertiary Container</span>
+            <code>--md-sys-color-tertiary-container</code>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Surface Colors</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="color-grid">
+          <div class="color-swatch swatch-surface">
+            <span class="color-label">Surface</span>
+            <code>--md-sys-color-surface</code>
+          </div>
+          <div class="color-swatch swatch-surface-container-lowest">
+            <span class="color-label">Container Lowest</span>
+            <code>--md-sys-color-surface-container-lowest</code>
+          </div>
+          <div class="color-swatch swatch-surface-container-low">
+            <span class="color-label">Container Low</span>
+            <code>--md-sys-color-surface-container-low</code>
+          </div>
+          <div class="color-swatch swatch-surface-container">
+            <span class="color-label">Container</span>
+            <code>--md-sys-color-surface-container</code>
+          </div>
+          <div class="color-swatch swatch-surface-container-high">
+            <span class="color-label">Container High</span>
+            <code>--md-sys-color-surface-container-high</code>
+          </div>
+          <div class="color-swatch swatch-surface-container-highest">
+            <span class="color-label">Container Highest</span>
+            <code>--md-sys-color-surface-container-highest</code>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Semantic Colors (Extended)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="color-grid">
+          <div class="color-swatch swatch-error">
+            <span class="color-label">Error</span>
+            <code>--md-sys-color-error</code>
+          </div>
+          <div class="color-swatch swatch-success">
+            <span class="color-label">Success</span>
+            <code>--md-extended-color-success-color</code>
+          </div>
+          <div class="color-swatch swatch-warning">
+            <span class="color-label">Warning</span>
+            <code>--md-extended-color-warning-color</code>
+          </div>
+          <div class="color-swatch swatch-info">
+            <span class="color-label">Info</span>
+            <code>--md-extended-color-info-color</code>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Section 3: Resource Tags -->
+  <section id="resource-tags" class="showcase-section">
+    <h2>
+      <mat-icon>label</mat-icon>
+      Resource Link Tags
+    </h2>
+    <p class="section-desc">Styled chip/tag links for different resource types. Global classes from styles.scss</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Resource Tag Styles</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="tag-row">
+          <button type="button" class="resource-link-podcast">
+            <mat-icon>mic</mat-icon>
+            Podcast Name
+          </button>
+          <button type="button" class="resource-link-episode">
+            <mat-icon>podcasts</mat-icon>
+            Episode Title
+          </button>
+          <button type="button" class="resource-link-topic">
+            <mat-icon>topic</mat-icon>
+            Research Topic
+          </button>
+          <button type="button" class="resource-link-stock">
+            <mat-icon>show_chart</mat-icon>
+            AAPL
+          </button>
+        </div>
+
+        <div class="code-reference">
+          <h4>CSS Classes</h4>
+          <table class="reference-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Class</th>
+                <th>Color</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Podcast</td>
+                <td><code>.resource-link-podcast</code></td>
+                <td>Primary (Blue)</td>
+              </tr>
+              <tr>
+                <td>Episode</td>
+                <td><code>.resource-link-episode</code></td>
+                <td>Tertiary (Purple)</td>
+              </tr>
+              <tr>
+                <td>Topic</td>
+                <td><code>.resource-link-topic</code></td>
+                <td>Success (Green)</td>
+              </tr>
+              <tr>
+                <td>Stock</td>
+                <td><code>.resource-link-stock</code></td>
+                <td>Secondary (Orange) - Filled</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>In Message Toast Context</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Resource links can be embedded in message toast HTML:</p>
+        <div class="mock-toast">
+          <mat-icon class="md3-icon-success">check_circle</mat-icon>
+          <span>
+            Job completed! View
+            <button type="button" class="resource-link-podcast">
+              <mat-icon>mic</mat-icon>
+              Morning Brief
+            </button>
+          </span>
+        </div>
+        <div class="mock-toast">
+          <mat-icon class="md3-icon-info">info</mat-icon>
+          <span>
+            Price alert triggered for
+            <button type="button" class="resource-link-stock">
+              <mat-icon>show_chart</mat-icon>
+              MSFT
+            </button>
+          </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Section 4: Status Badges -->
+  <section id="badges" class="showcase-section">
+    <h2>
+      <mat-icon>verified</mat-icon>
+      Status Badges
+    </h2>
+    <p class="section-desc">Global badge utility classes from styles.scss</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Job Status Badges</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="badge-row">
+          <span class="status-badge job-pending">Pending</span>
+          <span class="status-badge job-running">Running</span>
+          <span class="status-badge job-completed">Completed</span>
+          <span class="status-badge job-failed">Failed</span>
+        </div>
+        <div class="code-reference">
+          <code>.status-badge.job-pending</code> | <code>.status-badge.job-running</code> |
+          <code>.status-badge.job-completed</code> |
+          <code>.status-badge.job-failed</code>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>MD3 Badge Classes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="badge-row">
+          <span class="md3-badge-success">Success</span>
+          <span class="md3-badge-warning">Warning</span>
+          <span class="md3-badge-error">Error</span>
+          <span class="md3-badge-info">Info</span>
+        </div>
+        <div class="code-reference">
+          <code>.md3-badge-success</code> | <code>.md3-badge-warning</code> | <code>.md3-badge-error</code> |
+          <code>.md3-badge-info</code>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Section 5: Message Toasts -->
+  <section id="toasts" class="showcase-section">
+    <h2>
+      <mat-icon>notifications</mat-icon>
+      Message Toasts
+    </h2>
+    <p class="section-desc">Click buttons to trigger live message toasts</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Basic Toasts</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="button-row">
+          <button mat-flat-button class="btn-success" (click)="showSuccessToast()">
+            <mat-icon>check_circle</mat-icon>
+            Success
+          </button>
+          <button mat-flat-button class="btn-error" (click)="showErrorToast()">
+            <mat-icon>error</mat-icon>
+            Error
+          </button>
+          <button mat-flat-button class="btn-warning" (click)="showWarningToast()">
+            <mat-icon>warning</mat-icon>
+            Warning
+          </button>
+          <button mat-flat-button class="btn-info" (click)="showInfoToast()">
+            <mat-icon>info</mat-icon>
+            Info
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Toasts with Resource Links</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="button-row">
+          <button mat-flat-button class="btn-primary" (click)="showToastWithPodcastLink()">
+            <mat-icon>mic</mat-icon>
+            Toast with Podcast Link
+          </button>
+          <button mat-flat-button class="btn-secondary" (click)="showToastWithStockLink()">
+            <mat-icon>show_chart</mat-icon>
+            Toast with Stock Link
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Section 6: Typography -->
+  <section id="typography" class="showcase-section">
+    <h2>
+      <mat-icon>text_fields</mat-icon>
+      Typography
+    </h2>
+    <p class="section-desc">Text styles using MD3 design tokens</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Headlines & Body Text</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="typography-samples">
+          <div class="type-sample">
+            <h1>Headline 1</h1>
+            <code>&lt;h1&gt;</code>
+          </div>
+          <div class="type-sample">
+            <h2>Headline 2</h2>
+            <code>&lt;h2&gt;</code>
+          </div>
+          <div class="type-sample">
+            <h3>Headline 3</h3>
+            <code>&lt;h3&gt;</code>
+          </div>
+          <div class="type-sample">
+            <p class="text-on-surface">Primary body text</p>
+            <code>color: --md-sys-color-on-surface</code>
+          </div>
+          <div class="type-sample">
+            <p class="text-on-surface-variant">Secondary body text</p>
+            <code>color: --md-sys-color-on-surface-variant</code>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Section 7: Icons -->
+  <section id="icons" class="showcase-section">
+    <h2>
+      <mat-icon>emoji_symbols</mat-icon>
+      Icons
+    </h2>
+    <p class="section-desc">Icon utility classes from styles.scss</p>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Semantic Icon Colors</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="icon-row">
+          <div class="icon-item">
+            <mat-icon class="md3-icon-success">check_circle</mat-icon>
+            <code>.md3-icon-success</code>
+          </div>
+          <div class="icon-item">
+            <mat-icon class="md3-icon-warning">warning</mat-icon>
+            <code>.md3-icon-warning</code>
+          </div>
+          <div class="icon-item">
+            <mat-icon class="md3-icon-error">error</mat-icon>
+            <code>.md3-icon-error</code>
+          </div>
+          <div class="icon-item">
+            <mat-icon class="md3-icon-info">info</mat-icon>
+            <code>.md3-icon-info</code>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>

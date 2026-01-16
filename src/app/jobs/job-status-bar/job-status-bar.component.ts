@@ -2,11 +2,9 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subscription, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from '@angular/material/expansion';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { DatePipe, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -49,18 +47,13 @@ interface Topic {
   selector: 'app-job-status-bar',
   standalone: true,
   imports: [
-    MatList,
-    MatListItem,
     MatTooltip,
-    MatCard,
     MatAccordion,
     MatExpansionPanel,
     MatExpansionPanelHeader,
-    MatCardHeader,
+    MatButton,
     MatIconButton,
-    MatCardSubtitle,
     MatProgressBar,
-    MatCardTitle,
     DatePipe,
     NgClass,
     RouterLink,

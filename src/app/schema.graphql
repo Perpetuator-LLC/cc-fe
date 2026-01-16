@@ -1660,6 +1660,16 @@ type PodcastType implements Node {
   """
   newsTargetWords: Int!
 
+  """
+  How far back (in hours) to look for news articles. Default: 48 (2 days). Use 168 for weekly.
+  """
+  newsLookbackHours: Int!
+
+  """
+  Maximum news articles to include per episode. Default: 100. Set to 0 for no limit.
+  """
+  maxNewsArticles: Int!
+
   """Guidelines for generating research-focused episodes"""
   researchPrompt: String!
 
@@ -4387,7 +4397,7 @@ type Mutation {
   """
   Update a podcast. This will update the podcast's name, intro, prompt, outro, and enabled status.
   """
-  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, name: String, newsPrompt: String, newsTargetWords: Int, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, researchPrompt: String, researchTargetWords: Int, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
+  updatePodcast(categories: GenericScalar, deleteImage: Boolean, description: String, enabled: Boolean, image: Upload, intro: String, maxNewsArticles: Int, name: String, newsLookbackHours: Int, newsPrompt: String, newsTargetWords: Int, outro: String, ownerEmail: String, ownerLink: String, ownerName: String, podcastUuid: UUID!, prompt: String, refreshTgResponse: Boolean, researchPrompt: String, researchTargetWords: Int, slug: String, teamUuid: UUID, tgBotToken: String, tgChannelId: String, voiceUuid: UUID): UpdatePodcast
   deletePodcast(confirm: String!, podcastUuid: UUID!): DeletePodcast
 
   """

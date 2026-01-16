@@ -29,7 +29,7 @@ import { MessageService } from '../../message.service';
 import { MatDialog } from '@angular/material/dialog';
 import { RedeemGiftCodeDialogComponent } from '../../credits/redeem-gift-code-dialog/redeem-gift-code-dialog.component';
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
-import { JobStatusBarComponent } from '../../jobs/job-status-bar/job-status-bar.component';
+import { JobStatusIndicatorComponent } from '../../jobs/job-status-indicator/job-status-indicator.component';
 import { LoadingService } from '../loading.service';
 
 @Component({
@@ -54,7 +54,7 @@ import { LoadingService } from '../loading.service';
     NgClass,
     DecimalPipe,
     SharedFooterComponent,
-    JobStatusBarComponent,
+    JobStatusIndicatorComponent,
   ],
 })
 export class PostLoginLayoutComponent implements OnInit {

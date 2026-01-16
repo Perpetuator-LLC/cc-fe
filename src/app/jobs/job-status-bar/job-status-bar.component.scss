@@ -3,306 +3,165 @@
 
 .jobs-container {
   width: 100%;
-  height: 100%;
-  border-top: 1px solid var(--md-sys-color-outline-variant); // Crisp line at top
-  border-bottom: 1px solid var(--md-sys-color-outline-variant); // Crisp line at bottom
-  border-radius: 8px;
 
-  background-color: var(--md-sys-color-surface-container-low); // Match table background
+  mat-accordion {
+    display: block;
+  }
+}
 
-  transition: all 0.3s ease;
+// Job panel - the main expansion panel for each job
+.job-panel {
+  margin-bottom: 4px;
 
-  //padding-top: 8em;
-  //overflow: hidden;
-  //display: flex;
-
-  .job-header {
-    display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-
-    width: 100%;
-    padding: 0 1rem;
-
-    //padding-right: 1rem; // Add padding to the right to avoid overlap with the accordion button
-
-    .job-status {
-      margin-left: auto;
-    }
+  // Status-based left border
+  &.PENDING,
+  &.pending {
+    border-left: 3px solid var(--md-extended-color-warning-color);
   }
 
-  .mat-mdc-card-header-text {
-    width: 100%;
+  &.RUNNING,
+  &.running {
+    border-left: 3px solid var(--md-extended-color-info-color);
   }
 
-  mat-card-header.job-type {
-    flex: 1;
-    flex-direction: row;
-    align-self: start;
-
-    //display: flex;
-    //align-items: left;
-    width: 100%;
-
-    text-align: left;
-
-    //mat-checkbox {
-    //  margin-right: auto; // Pushes the checkbox to the far left
-    //}
+  &.FAILED,
+  &.failed {
+    border-left: 3px solid var(--md-sys-color-error);
   }
 
-  mat-card-header.job-status {
-    display: flex;
-    flex: 1;
-    flex-direction: row-reverse;
-    align-items: center;
-    align-self: start;
-    justify-content: flex-end;
+  &.COMPLETED,
+  &.completed {
+    border-left: 3px solid var(--md-extended-color-success-color);
+  }
+}
 
-    margin-right: 1rem;
+// Panel title - job kind and status badge
+.job-panel-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
 
-    text-align: right;
+  width: 100%;
+}
 
-    .job-status {
-      margin-left: auto;
-    }
+.job-kind {
+  overflow: hidden;
+  flex: 1;
 
-    //mat-checkbox {
-    //  margin-right: auto; // Pushes the checkbox to the far left
-    //}
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-status-badge {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.PENDING,
+  &.pending {
+    color: var(--md-extended-color-warning-on-color);
+    background: var(--md-extended-color-warning-color);
   }
 
-  mat-expansion-panel {
-    border-radius: 0;
+  &.RUNNING,
+  &.running {
+    color: var(--md-extended-color-info-on-color);
+    background: var(--md-extended-color-info-color);
   }
 
-  mat-expansion-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    min-width: 0; // Allow flex items to shrink if necessary
-    height: auto;
-    padding: 0 0.5rem 0 0;
-    border-radius: 0;
+  &.FAILED,
+  &.failed {
+    color: var(--md-sys-color-on-error);
+    background: var(--md-sys-color-error);
   }
 
-  .mat-mdc-list {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-
-    //gap: 16px;
-    //padding: 16px;
-
-    .mat-mdc-list-item {
-      flex: 1 1 auto;
-
-      //box-sizing: border-box;
-    }
+  &.COMPLETED,
+  &.completed {
+    color: var(--md-extended-color-success-on-color);
+    background: var(--md-extended-color-success-color);
   }
+}
 
-  .mat-mdc-list-item {
-    flex: 1 1 150px;
-    max-width: 350px;
-    height: auto;
-    padding: 0;
+// Progress bar for running jobs
+.job-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
 
-    // Target Material list item content directly
-    .mdc-list-item__content {
-      display: block;
-      height: auto;
-    }
-  }
+  width: 100%;
+  height: 2px;
+}
 
-  //:hover {
-  //  transform: translateY(-5px);
-  //  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  //}
+// Job content - the expanded panel content
+.job-content {
+  padding: 8px 0;
 
-  mat-card {
-    position: relative; // Ensure the card is positioned relative to its container
-    border-radius: 0;
-  }
-
-  mat-progress-bar {
-    position: absolute;
-    z-index: 10; // Ensure it's above card background
-    bottom: 0;
-    left: 0;
-
-    width: 100%;
-    height: 1px; // Ensure visible height
-    // Material automatically uses primary color for progress bar
-  }
-
-  // Job card status colors are now in global styles.scss
-  // Classes: .job-card.PENDING, .job-card.RUNNING, .job-card.FAILED, .job-card.COMPLETED
-  // Add border-left and subtitle colors based on status
-  .job-card {
-    &.PENDING,
-    &.pending {
-      border-left: 4px solid var(--md-extended-color-warning-color);
-
-      .mat-mdc-card-subtitle {
-        color: var(--md-extended-color-warning-color);
-      }
-    }
-
-    &.RUNNING,
-    &.running {
-      border-left: 4px solid var(--md-extended-color-info-color);
-
-      .mat-mdc-card-subtitle {
-        color: var(--md-extended-color-info-color);
-      }
-    }
-
-    &.FAILED,
-    &.failed {
-      border-left: 4px solid var(--md-sys-color-error);
-
-      .mat-mdc-card-subtitle {
-        color: var(--md-sys-color-error);
-      }
-    }
-
-    &.COMPLETED,
-    &.completed {
-      border-left: 4px solid var(--md-extended-color-success-color);
-
-      .mat-mdc-card-subtitle {
-        color: var(--md-extended-color-success-color);
-      }
-    }
-
-    button {
-      margin-right: 1em;
-    }
-
-    p {
-      overflow-wrap: break-word;
-      white-space: normal;
-    }
-  }
-
-  .pending,
-  .running,
-  .failed,
-  .completed {
-    background-color: var(--md-sys-color-surface-container);
-  }
-
-  .mat-mdc-card-header {
-    width: 100%;
-    padding: 0;
-
-    //padding: 16px 16px 0;
-  }
-
-  .mat-mdc-card-title {
-    font-size: 0.875rem;
-
-    //margin-bottom: 8px;
-  }
-
-  .mat-mdc-card-subtitle {
-    margin-left: 8px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    text-transform: uppercase;
-  }
-
-  .mat-mdc-card-content {
-    //padding: 16px;
-    font-size: 0.9em;
-
-    p {
-      margin: 8px 0;
-    }
-
-    .error,
-    .result {
-      margin-top: 8px;
-      padding: 8px;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
-
-    .error {
-      background-color: color-mix(in srgb, var(--md-sys-color-error-container) 27%, transparent);
-    }
-
-    .result {
-      background-color: color-mix(in srgb, var(--md-extended-color-success-color-container) 27%, transparent);
-    }
-  }
-
-  // Job message and links styling
-  .job-message {
-    margin: 8px 0;
-
-    .job-details {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .job-section {
-      .section-title {
-        margin: 0 0 4px;
-
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface-variant);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-    }
-
-    .message-text {
-      font-size: 13px;
-      color: var(--md-sys-color-on-surface);
-
-      &.error-message {
-        font-weight: 500;
-        color: var(--md-sys-color-error);
-      }
-    }
-
-    .job-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-  }
-
-  // Error styling
   .error {
-    margin: 8px 0;
+    margin: 0 0 8px;
 
     font-size: 12px;
     font-weight: 500;
-    line-height: 1.5;
+    line-height: 1.4;
     color: var(--md-sys-color-error);
   }
 }
 
-// Resource tags - extracted to reduce nesting depth
-.jobs-container .job-link-item {
-  display: flex;
-  align-items: center;
+// Job sections
+.job-section {
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
-.jobs-container .resource-tag {
+.message-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--md-sys-color-on-surface);
+
+  &.error-message {
+    font-weight: 500;
+    color: var(--md-sys-color-error);
+  }
+}
+
+// Resources section
+.resources-section {
+  .job-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+// Resource tags
+.resource-tag {
   cursor: pointer;
 
   display: inline-flex;
-  flex-shrink: 0;
   gap: 4px;
   align-items: center;
 
-  min-height: 24px;
+  min-height: 28px;
+  padding: 4px 8px;
+
+  font-size: 12px;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
 
   &.podcast-tag {
     @include mixins.podcast-tag();
@@ -317,48 +176,40 @@
   }
 
   &.symbol-tag {
-    border: 1px solid var(--md-sys-color-tertiary);
-    color: var(--md-sys-color-tertiary);
-    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
-
-    &:hover {
-      background-color: var(--md-sys-color-tertiary-container);
-    }
+    @include mixins.stock-tag();
   }
 }
 
-// Job timestamps and actions - extracted to reduce nesting depth
-.jobs-container .job-timestamps {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-}
-
-.jobs-container .timestamp-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.jobs-container .timestamp-text {
-  margin-bottom: 2px;
-  font-size: 10px;
-  color: var(--md-sys-color-on-surface-variant);
-
-  strong {
-    font-weight: 500;
-  }
-}
-
-.jobs-container .timeline-actions {
+// Job footer - timestamps and actions
+.job-footer {
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: space-between;
+
+  padding-top: 8px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.timestamp-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timestamp-text {
+  font-size: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.job-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 
   button {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    width: 28px;
+    height: 28px;
 
     mat-icon {
       width: 16px;

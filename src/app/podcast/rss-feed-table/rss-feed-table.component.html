@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <mat-table [dataSource]="dataSource">
   <!-- RSS Feed Name Column -->
   <ng-container matColumnDef="name">
@@ -31,11 +31,7 @@
           <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
           {{ feed.isReachable ? 'Reachable' : 'Unreachable' }}
         </span>
-        <span
-          class="rss-status-badge"
-          [class.status-success]="feed.isParsable"
-          [class.status-error]="!feed.isParsable"
-        >
+        <span class="rss-status-badge" [class.status-success]="feed.isParsable" [class.status-error]="!feed.isParsable">
           <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
           {{ feed.isParsable ? 'Parsable' : 'Parse Error' }}
         </span>
@@ -45,10 +41,10 @@
             {{ feed.lastFetchAttempt | date: 'short' }}
           </span>
         }
-        @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined) {
-          <span class="articles-per-day">
+        @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined && feed.articlesPerDay > 0) {
+          <span class="articles-per-day" [matTooltip]="'Average: ' + feed.articlesPerDay.toFixed(1) + ' articles/day'">
             <mat-icon>article</mat-icon>
-            {{ feed.articlesPerDay }} articles/day
+            ~{{ (feed.articlesPerDay * 7).toFixed(0) }}/week
           </span>
         }
       </div>
@@ -60,13 +56,7 @@
     <ng-container matColumnDef="actions">
       <mat-header-cell *matHeaderCellDef class="actions-column">Actions</mat-header-cell>
       <mat-cell *matCellDef="let feed" class="actions-cell">
-        <button
-          mat-icon-button
-          color="warn"
-          type="button"
-          (click)="onDelete(feed.uuid)"
-          matTooltip="Remove RSS feed"
-        >
+        <button mat-icon-button color="warn" type="button" (click)="onDelete(feed.uuid)" matTooltip="Remove RSS feed">
           <mat-icon>delete</mat-icon>
         </button>
       </mat-cell>
@@ -91,4 +81,3 @@
     <p>No RSS feeds found</p>
   </div>
 }
-

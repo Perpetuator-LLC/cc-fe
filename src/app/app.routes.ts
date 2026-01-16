@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/auth.guard';
 import { PodcastsListComponent } from './podcast/podcasts-list/podcasts-list.component';
@@ -8,6 +8,11 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     redirectTo: 'home',
+  },
+  {
+    path: 'dev/theme',
+    loadComponent: () => import('./dev/theme-showcase/theme-showcase.component').then((c) => c.ThemeShowcaseComponent),
+    title: 'Theme Showcase',
   },
   {
     path: 'dev/buttons',
