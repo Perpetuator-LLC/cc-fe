@@ -6,13 +6,45 @@
 
   mat-accordion {
     display: block;
+
+    // Connected panel styling - first, middle, last logic
+    mat-expansion-panel {
+      // Remove default margin/spacing between panels
+      margin: 0;
+
+      // Default: square corners for middle panels
+      border-radius: 0;
+
+      // Remove any internal spacing that creates gaps
+      &::before {
+        display: none;
+      }
+
+      // First panel: rounded top
+      &:first-child {
+        border-radius: 8px 8px 0 0;
+      }
+
+      // Last panel: rounded bottom
+      &:last-child {
+        border-radius: 0 0 8px 8px;
+      }
+
+      // Single panel: all rounded
+      &:only-child {
+        border-radius: 8px;
+      }
+
+      // Divider line between panels
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      }
+    }
   }
 }
 
 // Job panel - the main expansion panel for each job
 .job-panel {
-  margin-bottom: 4px;
-
   // Status-based left border
   &.PENDING,
   &.pending {
@@ -144,7 +176,7 @@
   }
 }
 
-// Resource tags
+// Resource tags - compact styling (override Material button defaults)
 .resource-tag {
   cursor: pointer;
 
@@ -152,10 +184,20 @@
   gap: 4px;
   align-items: center;
 
-  min-height: 28px;
+  min-width: unset;
+  height: auto;
+
+  // Compact sizing - override Material button min-height
+  min-height: unset;
   padding: 4px 8px;
+  border-radius: 8px;
 
   font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+
+  // Reset Material button letter-spacing
+  letter-spacing: normal;
 
   mat-icon {
     width: 14px;

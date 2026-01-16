@@ -100,9 +100,18 @@ export class MessageComponent implements OnDestroy {
   }
 
   /**
-   * Intercept link clicks in message content to use Angular Router for internal links
+   * Check if message contains HTML content (links, etc.)
+   * Used to determine if close button should be shown
    */
-  handleLinkClick(event: Event): void {
+  hasHtmlContent(message: Message): boolean {
+    return message.text.includes('<a ') || message.text.includes('<button');
+  }
+
+  /**
+   * Intercept link clicks in message content to use Angular Router for internal links
+   * Also dismisses the toast after clicking a link
+   */
+  handleLinkClick(event: Event, message: MessageWithProgress): void {
     const target = event.target as HTMLElement;
     const anchor = target.closest('a');
 
@@ -111,7 +120,12 @@ export class MessageComponent implements OnDestroy {
       // Check if it's an internal link (starts with /)
       if (href && href.startsWith('/')) {
         event.preventDefault();
+        // Dismiss the toast first, then navigate
+        this.removeMessage(message.timestamp);
         this.router.navigateByUrl(href);
+      } else if (href) {
+        // External link - still dismiss the toast
+        this.removeMessage(message.timestamp);
       }
     }
   }

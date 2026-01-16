@@ -5,7 +5,7 @@
   <div class="message-container">
     @for (message of messages; track message.timestamp) {
       <mat-card class="message-card">
-        @if (message.dismissible) {
+        @if (message.dismissible || hasHtmlContent(message)) {
           <button class="close-button" mat-icon-button (click)="removeMessage(message.timestamp)" aria-label="Close">
             <mat-icon>close</mat-icon>
           </button>
@@ -29,8 +29,8 @@
             </div>
             <div
               class="message-text"
-              (click)="handleLinkClick($event)"
-              (keydown.enter)="handleLinkClick($event)"
+              (click)="handleLinkClick($event, message)"
+              (keydown.enter)="handleLinkClick($event, message)"
               tabindex="0"
             >
               <div [innerHTML]="message.text"></div>
