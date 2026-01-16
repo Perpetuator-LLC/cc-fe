@@ -297,6 +297,9 @@
         </div>
         @if (this.authService.isLoggedIn()) {
           <span class="push-right">
+            <!-- Job Status Indicator -->
+            <app-job-status-indicator />
+
             <a
               class="credit-btn"
               mat-button
@@ -360,7 +363,8 @@
         <mat-progress-bar mode="indeterminate" value="20" class="loading-indicator" />
       </div>
     }
-    <app-job-status-bar />
+    <!-- Job status bar now moved to toolbar indicator - see app-job-status-indicator -->
+    <!-- <app-job-status-bar /> -->
     <div class="content-area with-footer" [class.is-home-page]="isHomePage">
       <div class="content-wrapper" [class.home-page]="isHomePage">
         <div class="content">

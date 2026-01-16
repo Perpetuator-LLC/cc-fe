@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 // Material Design 3 SCSS Mixins and Utilities
 // All spacing uses direct px values from MD3's 4px grid
 // All colors use MD3 design tokens from theme files
@@ -599,6 +599,19 @@
   }
 }
 
+@mixin stock-tag {
+  @include tag-button-base();
+
+  // Filled style with secondary (orange) for stocks/symbols
+  border: 1px solid var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+  background: var(--md-sys-color-secondary);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-secondary) 85%, var(--md-sys-color-on-secondary));
+  }
+}
+
 // ============================================================================
 // Version Control Patterns (For episode-version-control.component)
 // ============================================================================
@@ -641,7 +654,6 @@
   }
 }
 
-
 // ============================================================================
 // Button with Icon Pattern (Reduce nesting in version controls, actions, etc.)
 // ============================================================================
@@ -654,7 +666,7 @@
     @include icon-size(16px);
   }
 
-  &[color="accent"] {
+  &[color='accent'] {
     color: var(--md-sys-color-on-success);
     background: var(--md-sys-color-success);
   }
@@ -887,8 +899,16 @@ $button-border-radius: 8px;
   background-color: var(--md-sys-color-primary-container);
 
   &:hover:not(:disabled) {
-    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-primary-container) 90%, var(--md-sys-color-primary));
-    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-primary-container) 90%, var(--md-sys-color-primary));
+    --mdc-filled-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-primary-container) 90%,
+      var(--md-sys-color-primary)
+    );
+    --mdc-protected-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-primary-container) 90%,
+      var(--md-sys-color-primary)
+    );
   }
 
   &:disabled {
@@ -970,8 +990,16 @@ $button-border-radius: 8px;
   background-color: var(--md-sys-color-secondary-container);
 
   &:hover:not(:disabled) {
-    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 90%, var(--md-sys-color-secondary));
-    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 90%, var(--md-sys-color-secondary));
+    --mdc-filled-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-secondary-container) 90%,
+      var(--md-sys-color-secondary)
+    );
+    --mdc-protected-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-secondary-container) 90%,
+      var(--md-sys-color-secondary)
+    );
   }
 
   &:disabled {
@@ -1053,8 +1081,16 @@ $button-border-radius: 8px;
   background-color: var(--md-sys-color-tertiary-container);
 
   &:hover:not(:disabled) {
-    --mdc-filled-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 90%, var(--md-sys-color-tertiary));
-    --mdc-protected-button-container-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 90%, var(--md-sys-color-tertiary));
+    --mdc-filled-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-tertiary-container) 90%,
+      var(--md-sys-color-tertiary)
+    );
+    --mdc-protected-button-container-color: color-mix(
+      in srgb,
+      var(--md-sys-color-tertiary-container) 90%,
+      var(--md-sys-color-tertiary)
+    );
   }
 
   &:disabled {

@@ -15,6 +15,7 @@ const BALANCE_SHEETS_QUERY = gql`
       totalEquity
       shortTermDebt
       longTermDebt
+      commonStockSharesOutstanding
     }
   }
 `;
@@ -95,6 +96,7 @@ export interface BalanceSheet {
   totalEquity: number | null;
   shortTermDebt: number | null;
   longTermDebt: number | null;
+  commonStockSharesOutstanding: number | null;
 }
 
 export interface IncomeStatement {
