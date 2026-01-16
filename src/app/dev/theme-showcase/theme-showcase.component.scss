@@ -1,0 +1,218 @@
+/* Copyright (c) 2025-2026 Perpetuator LLC */
+/*
+ * Theme Showcase SCSS
+ *
+ * NOTE: Most styles come from global styles.scss!
+ * Only layout-specific styles for the showcase page are here.
+ */
+@use 'styles/mixins' as mixins;
+
+:host {
+  display: block;
+}
+
+// Embed the button-showcase seamlessly
+app-button-showcase {
+  display: block;
+
+  // Remove duplicate header since we have our own
+  .showcase-header {
+    display: none;
+  }
+}
+
+// Color swatch improvements
+.color-swatch {
+  .color-label {
+    display: block;
+    font-weight: 600;
+  }
+
+  code {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  // Color swatch variants
+  &.swatch-primary {
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-primary);
+  }
+
+  &.swatch-primary-container {
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
+  }
+
+  &.swatch-secondary {
+    color: var(--md-sys-color-on-secondary);
+    background: var(--md-sys-color-secondary);
+  }
+
+  &.swatch-secondary-container {
+    color: var(--md-sys-color-on-secondary-container);
+    background: var(--md-sys-color-secondary-container);
+  }
+
+  &.swatch-tertiary {
+    color: var(--md-sys-color-on-tertiary);
+    background: var(--md-sys-color-tertiary);
+  }
+
+  &.swatch-tertiary-container {
+    color: var(--md-sys-color-on-tertiary-container);
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  &.swatch-surface {
+    border: 1px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface);
+  }
+
+  &.swatch-surface-container-lowest {
+    border: 1px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-lowest);
+  }
+
+  &.swatch-surface-container-low {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  &.swatch-surface-container {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container);
+  }
+
+  &.swatch-surface-container-high {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &.swatch-surface-container-highest {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  &.swatch-error {
+    color: var(--md-sys-color-on-error);
+    background: var(--md-sys-color-error);
+  }
+
+  &.swatch-success {
+    color: var(--md-extended-color-success-on-color);
+    background: var(--md-extended-color-success-color);
+  }
+
+  &.swatch-warning {
+    color: var(--md-extended-color-warning-on-color);
+    background: var(--md-extended-color-warning-color);
+  }
+
+  &.swatch-info {
+    color: var(--md-extended-color-info-on-color);
+    background: var(--md-extended-color-info-color);
+  }
+}
+
+// Reference tables
+.reference-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 16px;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    text-align: left;
+  }
+
+  th {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  code {
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+
+    background: var(--md-sys-color-surface-container-highest);
+  }
+}
+
+.code-reference {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  code {
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+
+    background: var(--md-sys-color-surface-container-highest);
+  }
+}
+
+// Typography samples
+.typography-samples {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .type-sample {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    code {
+      flex-shrink: 0;
+
+      padding: 2px 6px;
+      border-radius: 4px;
+
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+
+      background: var(--md-sys-color-surface-container-highest);
+    }
+  }
+
+  .text-on-surface {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .text-on-surface-variant {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Section headers with icons
+.showcase-section h2 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+}

@@ -97,9 +97,11 @@ export class FundamentalsChartService {
   }
 
   /**
-   * Generate EPS (Earnings Per Share) chart
+   * Generate EPS (Earnings Per Share) chart with Shares Outstanding overlay
+   * Industry-standard dual-axis chart showing EPS as bars and shares outstanding as a line
+   * This helps users understand EPS changes due to stock splits or share issuance
    */
-  buildEpsChart(data: IncomeStatement[]): EChartsOption {
+  buildEpsChart(data: IncomeStatement[], balanceSheets?: BalanceSheet[]): EChartsOption {
     if (!data.length) return this.emptyChart('No EPS Data');
 
     const sorted = [...data].sort(
@@ -113,9 +115,134 @@ export class FundamentalsChartService {
     const hasEps = epsData.some((v) => v !== null && v !== undefined);
     if (!hasEps) return this.emptyChart('No EPS Data Available');
 
+    // Build shares outstanding data by matching fiscal dates
+    const sharesData: (number | null)[] = [];
+    let hasShares = false;
+    if (balanceSheets && balanceSheets.length > 0) {
+      const balanceMap = new Map<string, number>();
+      balanceSheets.forEach((bs) => {
+        if (bs.commonStockSharesOutstanding) {
+          // Use fiscal year end date for matching
+          const key = this.formatFiscalDate(bs.fiscalDateEnding);
+          balanceMap.set(key, bs.commonStockSharesOutstanding);
+        }
+      });
+
+      dates.forEach((dateKey) => {
+        const shares = balanceMap.get(dateKey) ?? null;
+        sharesData.push(shares);
+        if (shares !== null) hasShares = true;
+      });
+    }
+
+    // Detect significant share count changes (>20% YoY) for annotations
+    const markPoints: { name: string; xAxis: number; yAxis: number; value: string }[] = [];
+    if (hasShares) {
+      for (let i = 1; i < sharesData.length; i++) {
+        const prev = sharesData[i - 1];
+        const curr = sharesData[i];
+        if (prev && curr && prev > 0) {
+          const changePercent = ((curr - prev) / prev) * 100;
+          if (Math.abs(changePercent) > 20) {
+            // Significant change - likely a split or major issuance
+            const label = changePercent > 0 ? `+${changePercent.toFixed(0)}%` : `${changePercent.toFixed(0)}%`;
+            markPoints.push({
+              name: changePercent > 0 ? 'Share Issuance' : 'Buyback',
+              xAxis: i,
+              yAxis: curr / 1e9,
+              value: label,
+            });
+          }
+        }
+      }
+    }
+
+    // Build series array
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const series: any[] = [
+      {
+        name: 'EPS',
+        type: 'bar',
+        data: epsData,
+        itemStyle: { color: this.COLORS.secondary },
+        label: {
+          show: true,
+          position: 'top',
+          formatter: '{c}',
+          color: this.AXIS_LABEL_COLOR,
+          fontSize: 10,
+        },
+      },
+    ];
+
+    // Add shares outstanding line if we have data
+    if (hasShares) {
+      series.push({
+        name: 'Shares Outstanding',
+        type: 'line',
+        yAxisIndex: 1,
+        data: sharesData.map((s) => (s !== null ? s / 1e9 : null)), // Convert to billions
+        lineStyle: { color: this.COLORS.quinary, width: 2 },
+        symbol: 'circle',
+        symbolSize: 6,
+        itemStyle: { color: this.COLORS.quinary },
+        markPoint:
+          markPoints.length > 0
+            ? {
+                data: markPoints.map((mp) => ({
+                  name: mp.name,
+                  coord: [mp.xAxis, mp.yAxis],
+                  value: mp.value,
+                  itemStyle: { color: mp.value.startsWith('+') ? this.COLORS.tertiary : this.COLORS.primary },
+                  label: {
+                    show: true,
+                    formatter: '{c}',
+                    color: '#fff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                  },
+                })),
+                symbol: 'pin',
+                symbolSize: 40,
+              }
+            : undefined,
+      });
+    }
+
+    // Build yAxis array
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const yAxis: any[] = [
+      {
+        type: 'value',
+        name: 'EPS ($)',
+        nameTextStyle: { color: this.AXIS_LABEL_COLOR },
+        axisLabel: {
+          color: this.AXIS_LABEL_COLOR,
+          formatter: (value: number) => `$${value.toFixed(2)}`,
+        },
+        splitLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
+      },
+    ];
+
+    // Add secondary axis for shares if we have data
+    if (hasShares) {
+      yAxis.push({
+        type: 'value',
+        name: 'Shares (B)',
+        nameTextStyle: { color: this.COLORS.quinary },
+        position: 'right',
+        axisLabel: {
+          color: this.COLORS.quinary,
+          formatter: (value: number) => `${value.toFixed(1)}B`,
+        },
+        axisLine: { lineStyle: { color: this.COLORS.quinary } },
+        splitLine: { show: false },
+      });
+    }
+
     return {
       title: {
-        text: 'Earnings Per Share (EPS)',
+        text: hasShares ? 'EPS & Shares Outstanding' : 'Earnings Per Share (EPS)',
         left: 'center',
         textStyle: { color: '#E8EAED', fontSize: 16 },
       },
@@ -127,15 +254,29 @@ export class FundamentalsChartService {
         formatter: (params: unknown) => {
           const p = params as TooltipParam[];
           if (!p.length) return '';
-          const item = p[0];
-          return `<strong>${item.name}</strong><br/>EPS: $${item.value?.toFixed(2) ?? 'N/A'}`;
+          let result = `<strong>${p[0].name}</strong>`;
+          p.forEach((item) => {
+            if (item.seriesName === 'EPS') {
+              result += `<br/><span style="color:${item.color}">●</span> EPS: $${item.value?.toFixed(2) ?? 'N/A'}`;
+            } else if (item.seriesName === 'Shares Outstanding') {
+              result += `<br/><span style="color:${item.color}">●</span> Shares: ${item.value?.toFixed(2) ?? 'N/A'}B`;
+            }
+          });
+          return result;
         },
       },
+      legend: hasShares
+        ? {
+            data: ['EPS', 'Shares Outstanding'],
+            top: 30,
+            textStyle: { color: this.AXIS_LABEL_COLOR },
+          }
+        : undefined,
       grid: {
         left: '3%',
-        right: '4%',
+        right: hasShares ? '8%' : '4%',
         bottom: '10%',
-        top: '15%',
+        top: hasShares ? '20%' : '15%',
         containLabel: true,
       },
       xAxis: {
@@ -144,31 +285,8 @@ export class FundamentalsChartService {
         axisLabel: { color: this.AXIS_LABEL_COLOR },
         axisLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
       },
-      yAxis: {
-        type: 'value',
-        name: 'EPS ($)',
-        nameTextStyle: { color: this.AXIS_LABEL_COLOR },
-        axisLabel: {
-          color: this.AXIS_LABEL_COLOR,
-          formatter: (value: number) => `$${value.toFixed(2)}`,
-        },
-        splitLine: { lineStyle: { color: this.GRID_LINE_COLOR } },
-      },
-      series: [
-        {
-          name: 'EPS',
-          type: 'bar',
-          data: epsData,
-          itemStyle: { color: this.COLORS.secondary },
-          label: {
-            show: true,
-            position: 'top',
-            formatter: '{c}',
-            color: this.AXIS_LABEL_COLOR,
-            fontSize: 10,
-          },
-        },
-      ],
+      yAxis,
+      series,
     };
   }
 
@@ -545,7 +663,7 @@ export class FundamentalsChartService {
       balanceSheet: this.buildBalanceSheetChart(data.balanceSheets),
       cashFlow: this.buildCashFlowChart(data.cashFlows),
       margins: this.buildDebtChart(data.balanceSheets), // Using debt chart instead of margins
-      eps: this.buildEpsChart(data.incomeStatements),
+      eps: this.buildEpsChart(data.incomeStatements, data.balanceSheets),
       revenue: this.buildRevenueChart(data.incomeStatements),
     };
   }

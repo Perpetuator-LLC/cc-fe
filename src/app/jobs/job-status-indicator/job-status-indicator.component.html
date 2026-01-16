@@ -1,0 +1,25 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (hasActiveJobs()) {
+  <div class="job-indicator-container">
+    <button
+      mat-icon-button
+      class="job-indicator-button"
+      [matMenuTriggerFor]="jobMenu"
+      matTooltip="Active Jobs"
+      matTooltipPosition="below"
+    >
+      <mat-icon [class.running-indicator]="hasRunningJobs()">
+        {{ hasRunningJobs() ? 'sync' : 'pending_actions' }}
+      </mat-icon>
+      @if (activeJobCount() > 0) {
+        <span class="job-count-badge">{{ activeJobCount() }}</span>
+      }
+    </button>
+
+    <mat-menu #jobMenu="matMenu" class="job-status-menu" xPosition="before">
+      <div class="job-menu-content" (click)="$event.stopPropagation()">
+        <app-job-status-bar [data]="{ title: 'Active Jobs', panelOpenState: false }" />
+      </div>
+    </mat-menu>
+  </div>
+}

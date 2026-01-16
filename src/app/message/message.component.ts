@@ -1,5 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Message, MessageService } from '../message.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -24,7 +25,10 @@ export class MessageComponent implements OnDestroy {
   private timeoutIds = new Map<number, number>();
   private progressIntervalIds = new Map<number, number>();
 
-  constructor(private messageService: MessageService) {
+  constructor(
+    private messageService: MessageService,
+    private router: Router,
+  ) {
     this.messageService.messages$.subscribe({
       next: (messages) => {
         this.messages = messages.map((message) => {
@@ -93,6 +97,23 @@ export class MessageComponent implements OnDestroy {
 
   shouldShowTimeoutProgress(message: MessageWithProgress): boolean {
     return message.type !== 'progress' && message.timeout !== null && message.timeout !== undefined;
+  }
+
+  /**
+   * Intercept link clicks in message content to use Angular Router for internal links
+   */
+  handleLinkClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const anchor = target.closest('a');
+
+    if (anchor) {
+      const href = anchor.getAttribute('href');
+      // Check if it's an internal link (starts with /)
+      if (href && href.startsWith('/')) {
+        event.preventDefault();
+        this.router.navigateByUrl(href);
+      }
+    }
   }
 
   ngOnDestroy(): void {
