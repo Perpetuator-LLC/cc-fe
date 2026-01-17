@@ -1,6 +1,6 @@
 # Capital Copilot Frontend - Documentation
 
-> **Note:** This documentation is for stakeholders and developers. Product-facing documentation will be in the `docs/` directory (coming soon).
+> **Note:** This documentation is for stakeholders and developers. Product-facing documentation is in the `docs/` directory.
 
 ## 📁 Documentation Structure
 
@@ -9,18 +9,23 @@ System design, component architecture, and technical diagrams.
 - [ARCHITECTURE_DIAGRAM.md](./architecture/ARCHITECTURE_DIAGRAM.md) - System flow diagrams
 - [ANGULAR.md](./architecture/ANGULAR.md) - Angular-specific architecture patterns
 - [APOLLO_ANGULAR.md](./architecture/APOLLO_ANGULAR.md) - Apollo GraphQL integration
+- [CHART_DATA_ARCHITECTURE.md](./architecture/CHART_DATA_ARCHITECTURE.md) - Progressive chart data loading
+- [COMMAND_ROUTING.md](./architecture/COMMAND_ROUTING.md) - Terminal command routing logic
 
 ### 🔧 Development
 Day-to-day development workflows, setup, and tooling.
 - [DEVELOPMENT.md](./development/DEVELOPMENT.md) - Development workflows and standards
 - [FRONTEND_QUICK_START.md](./development/FRONTEND_QUICK_START.md) - Getting started guide
 - [INITIAL_CONFIG.md](./development/INITIAL_CONFIG.md) - Initial project configuration
+- [ASSET_OPTIMIZATION.md](./development/ASSET_OPTIMIZATION.md) - Asset optimization guide
+- [FRONTEND_ENHANCEMENT_REQUIREMENTS.md](./development/FRONTEND_ENHANCEMENT_REQUIREMENTS.md) - Enhancement tracking
 
 ### 🎨 Reference
 Technical reference materials, style guides, and standards.
 - [MATERIAL.md](./reference/MATERIAL.md) - Material Design 3 implementation
 - [MD3_COMPREHENSIVE_THEME_GUIDE.md](./reference/MD3_COMPREHENSIVE_THEME_GUIDE.md) - Complete MD3 theming guide
 - [MD3_LINTING_GUIDE.md](./reference/MD3_LINTING_GUIDE.md) - MD3 linting and quality standards
+- [SCSS_LINTING_QUICK_REFERENCE.md](./reference/SCSS_LINTING_QUICK_REFERENCE.md) - SCSS linting quick reference
 - [HTML_DOM.md](./reference/HTML_DOM.md) - HTML/DOM best practices
 - [FONTS.md](./reference/FONTS.md) - Typography and font usage
 - [SVGS.md](./reference/SVGS.md) - SVG asset guidelines
@@ -29,10 +34,14 @@ Technical reference materials, style guides, and standards.
 - [ESLINT_GUIDELINES.md](./reference/ESLINT_GUIDELINES.md) - ESLint configuration and standards
 
 ### 🔌 Integrations
-Third-party integrations and OAuth configurations.
-- [OAUTH_GRAPHQL_DOCS_QUICKREF.md](./integrations/OAUTH_GRAPHQL_DOCS_QUICKREF.md) - OAuth and GraphQL integration
-- [OAUTH_SETUP.md](./integrations/OAUTH_SETUP.md) - OAuth configuration guide
+Backend APIs, third-party integrations, and authentication.
+- [AUTH_COOKIE_GUIDE.md](./integrations/AUTH_COOKIE_GUIDE.md) - Authentication with localStorage + Bearer tokens
+- [BACKEND_API_REFERENCE.md](./integrations/BACKEND_API_REFERENCE.md) - Complete backend API reference
+- [GRAPHQL_WEBSOCKET_GUIDE.md](./integrations/GRAPHQL_WEBSOCKET_GUIDE.md) - GraphQL over WebSocket
+- [ERROR_TRACKING_GUIDE.md](./integrations/ERROR_TRACKING_GUIDE.md) - Frontend error tracking
 - [GRAPHQL_DOCS.md](./integrations/GRAPHQL_DOCS.md) - GraphQL documentation generation
+- [OAUTH_SETUP.md](./integrations/OAUTH_SETUP.md) - OAuth configuration guide
+- [OAUTH_GRAPHQL_DOCS_QUICKREF.md](./integrations/OAUTH_GRAPHQL_DOCS_QUICKREF.md) - OAuth quick reference
 
 ### 🚀 Production
 Production deployment, builds, and configuration.
@@ -94,5 +103,5 @@ When adding new documentation:
 
 ## 📄 License
 
-Copyright © 2025 Perpetuator LLC. All rights reserved.
+Copyright © 2026 Perpetuator LLC. All rights reserved.
 

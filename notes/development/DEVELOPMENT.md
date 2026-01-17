@@ -1,4 +1,4 @@
-[//]: # (Copyright © 2024 Perpetuator LLC)
+[//]: # (Copyright © 2024-2026 Perpetuator LLC)
 
 # Concepts
 
@@ -9,7 +9,7 @@ development, but you must be able to run any code generation or manipulation fro
 
 ## Getting Started
 
-This project uses `npm` to manage the Node.js environment and dependencies. To get started, follow these steps:
+This project uses `yarn` to manage dependencies. To get started, follow these steps:
 
 - See: [INITIAL_CONFIG.md](INITIAL_CONFIG.md)
 
