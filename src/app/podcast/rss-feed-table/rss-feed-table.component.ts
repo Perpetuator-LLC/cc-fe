@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -29,11 +29,11 @@ export class RssFeedTableComponent implements OnInit {
   @Input() loading = false;
   @Output() deleteFeed = new EventEmitter<string>();
 
-  displayedColumns: string[] = ['name', 'url', 'status'];
+  displayedColumns: string[] = ['name', 'url', 'status', 'articlesPerDay'];
 
   ngOnInit() {
     if (this.showActions) {
-      this.displayedColumns = ['name', 'url', 'status', 'actions'];
+      this.displayedColumns = ['name', 'url', 'status', 'articlesPerDay', 'actions'];
     }
   }
 
