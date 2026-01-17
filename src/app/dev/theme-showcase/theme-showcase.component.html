@@ -326,42 +326,95 @@
       <mat-icon>verified</mat-icon>
       Status Badges
     </h2>
-    <p class="section-desc">Global badge utility classes from styles.scss</p>
+    <p class="section-desc">
+      Outlined status badges with translucent backgrounds - consistent with resource link styling.
+    </p>
 
     <mat-card>
       <mat-card-header>
         <mat-card-title>Job Status Badges</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="badge-row">
-          <span class="status-badge job-pending">Pending</span>
-          <span class="status-badge job-running">Running</span>
-          <span class="status-badge job-completed">Completed</span>
-          <span class="status-badge job-failed">Failed</span>
-        </div>
-        <div class="code-reference">
-          <code>.status-badge.job-pending</code> | <code>.status-badge.job-running</code> |
-          <code>.status-badge.job-completed</code> |
-          <code>.status-badge.job-failed</code>
-        </div>
+        <table class="reference-table badge-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>CSS Class</th>
+              <th>Color</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pending</td>
+              <td><code>.status-badge.job-pending</code></td>
+              <td>Warning (Amber)</td>
+              <td><span class="status-badge job-pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td>Running</td>
+              <td><code>.status-badge.job-running</code></td>
+              <td>Info (Blue)</td>
+              <td><span class="status-badge job-running">Running</span></td>
+            </tr>
+            <tr>
+              <td>Completed</td>
+              <td><code>.status-badge.job-completed</code></td>
+              <td>Success (Green)</td>
+              <td><span class="status-badge job-completed">Completed</span></td>
+            </tr>
+            <tr>
+              <td>Failed</td>
+              <td><code>.status-badge.job-failed</code></td>
+              <td>Error (Red)</td>
+              <td><span class="status-badge job-failed">Failed</span></td>
+            </tr>
+          </tbody>
+        </table>
       </mat-card-content>
     </mat-card>
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title>MD3 Badge Classes</mat-card-title>
+        <mat-card-title>MD3 Semantic Badges</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="badge-row">
-          <span class="md3-badge-success">Success</span>
-          <span class="md3-badge-warning">Warning</span>
-          <span class="md3-badge-error">Error</span>
-          <span class="md3-badge-info">Info</span>
-        </div>
-        <div class="code-reference">
-          <code>.md3-badge-success</code> | <code>.md3-badge-warning</code> | <code>.md3-badge-error</code> |
-          <code>.md3-badge-info</code>
-        </div>
+        <table class="reference-table badge-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>CSS Class</th>
+              <th>Color</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Success</td>
+              <td><code>.md3-badge-success</code></td>
+              <td>Success (Green)</td>
+              <td><span class="md3-badge-success">Success</span></td>
+            </tr>
+            <tr>
+              <td>Warning</td>
+              <td><code>.md3-badge-warning</code></td>
+              <td>Warning (Amber)</td>
+              <td><span class="md3-badge-warning">Warning</span></td>
+            </tr>
+            <tr>
+              <td>Error</td>
+              <td><code>.md3-badge-error</code></td>
+              <td>Error (Red)</td>
+              <td><span class="md3-badge-error">Error</span></td>
+            </tr>
+            <tr>
+              <td>Info</td>
+              <td><code>.md3-badge-info</code></td>
+              <td>Info (Blue)</td>
+              <td><span class="md3-badge-info">Info</span></td>
+            </tr>
+          </tbody>
+        </table>
       </mat-card-content>
     </mat-card>
   </section>

@@ -7,6 +7,10 @@
   mat-accordion {
     display: block;
 
+    // Add shadow to the entire accordion group
+    border-radius: 8px;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-shadow) 25%, transparent);
+
     // Connected panel styling - first, middle, last logic
     mat-expansion-panel {
       // Remove default margin/spacing between panels
@@ -18,6 +22,17 @@
       // Remove any internal spacing that creates gaps
       &::before {
         display: none;
+      }
+
+      // Compact panel header height
+      .mat-expansion-panel-header {
+        height: 28px;
+        min-height: 28px;
+        padding: 0 8px;
+      }
+
+      .mat-expansion-panel-body {
+        padding: 4px 8px;
       }
 
       // First panel: rounded top
@@ -75,51 +90,61 @@
   justify-content: space-between;
 
   width: 100%;
+  margin-right: 8px; // Space before accordion arrow
 }
 
 .job-kind {
   overflow: hidden;
   flex: 1;
 
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+// Job status badges - compact outlined style consistent with resource links
 .job-status-badge {
+  display: inline-flex;
   flex-shrink: 0;
+  gap: 4px;
+  align-items: center;
 
-  padding: 2px 8px;
+  padding: 1px 4px;
   border-radius: 4px;
 
   font-size: 10px;
   font-weight: 600;
+  line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
 
   &.PENDING,
   &.pending {
-    color: var(--md-extended-color-warning-on-color);
-    background: var(--md-extended-color-warning-color);
+    border: 1px solid var(--md-extended-color-warning-color-container);
+    color: var(--md-extended-color-warning-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-warning-color-container) 20%, transparent);
   }
 
   &.RUNNING,
   &.running {
-    color: var(--md-extended-color-info-on-color);
-    background: var(--md-extended-color-info-color);
+    border: 1px solid var(--md-extended-color-info-color-container);
+    color: var(--md-extended-color-info-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-info-color-container) 20%, transparent);
   }
 
   &.FAILED,
   &.failed {
-    color: var(--md-sys-color-on-error);
-    background: var(--md-sys-color-error);
+    border: 1px solid var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    background: color-mix(in srgb, var(--md-sys-color-error-container) 20%, transparent);
   }
 
   &.COMPLETED,
   &.completed {
-    color: var(--md-extended-color-success-on-color);
-    background: var(--md-extended-color-success-color);
+    border: 1px solid var(--md-extended-color-success-color-container);
+    color: var(--md-extended-color-success-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-success-color-container) 20%, transparent);
   }
 }
 
@@ -135,21 +160,21 @@
 
 // Job content - the expanded panel content
 .job-content {
-  padding: 8px 0;
+  padding: 4px 0;
 
   .error {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
 
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1.3;
     color: var(--md-sys-color-error);
   }
 }
 
 // Job sections
 .job-section {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 
   &:last-child {
     margin-bottom: 0;
@@ -157,8 +182,8 @@
 }
 
 .message-text {
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 10px;
+  line-height: 1.3;
   color: var(--md-sys-color-on-surface);
 
   &.error-message {
@@ -225,11 +250,11 @@
 // Job footer - timestamps and actions
 .job-footer {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   justify-content: space-between;
 
-  padding-top: 8px;
+  padding-top: 4px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 
