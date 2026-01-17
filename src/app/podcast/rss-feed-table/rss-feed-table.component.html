@@ -41,13 +41,22 @@
             {{ feed.lastFetchAttempt | date: 'short' }}
           </span>
         }
-        @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined && feed.articlesPerDay > 0) {
-          <span class="articles-per-day" [matTooltip]="'Average: ' + feed.articlesPerDay.toFixed(1) + ' articles/day'">
-            <mat-icon>article</mat-icon>
-            ~{{ (feed.articlesPerDay * 7).toFixed(0) }}/week
-          </span>
-        }
       </div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Articles Per Day Column -->
+  <ng-container matColumnDef="articlesPerDay">
+    <mat-header-cell *matHeaderCellDef>Frequency</mat-header-cell>
+    <mat-cell *matCellDef="let feed">
+      @if (feed.articlesPerDay !== null && feed.articlesPerDay !== undefined && feed.articlesPerDay > 0) {
+        <span class="articles-per-day" [matTooltip]="'Average: ' + feed.articlesPerDay.toFixed(1) + ' articles/day'">
+          <mat-icon>article</mat-icon>
+          ~{{ (feed.articlesPerDay * 7).toFixed(0) }}/week
+        </span>
+      } @else {
+        <span class="no-data-cell">—</span>
+      }
     </mat-cell>
   </ng-container>
 
