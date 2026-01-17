@@ -150,9 +150,10 @@ app-button-showcase {
   }
 
   // Resource link table specific styles
-  &.resource-link-table {
+  &.resource-link-table,
+  &.badge-table {
     td:last-child {
-      min-width: 140px;
+      min-width: 120px;
     }
   }
 }

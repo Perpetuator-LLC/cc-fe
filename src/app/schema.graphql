@@ -4382,8 +4382,10 @@ type Mutation {
   Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
   PENDING, clear the result and error fields, and requeue the jobs for processing.
   
-  For jobs that are part of a chain with a completed parent job, the parent's result will be passed to the
-  retried task to maintain chain continuity.
+  For jobs that are part of a chain:
+  - If retrying a parent job, all downstream jobs in the chain are also reset to PENDING
+  - The parent's result will be passed to downstream tasks to maintain chain continuity
+  - The chain will automatically continue after the retried job completes
   
   The mutation returns a message indicating the status of the operation and a list of the jobs that were restarted.
   """
@@ -5369,8 +5371,10 @@ type DeleteJobs {
 Mutation to retry jobs that are in PENDING or FAILED state. This mutation will set the status of the jobs to
 PENDING, clear the result and error fields, and requeue the jobs for processing.
 
-For jobs that are part of a chain with a completed parent job, the parent's result will be passed to the
-retried task to maintain chain continuity.
+For jobs that are part of a chain:
+- If retrying a parent job, all downstream jobs in the chain are also reset to PENDING
+- The parent's result will be passed to downstream tasks to maintain chain continuity
+- The chain will automatically continue after the retried job completes
 
 The mutation returns a message indicating the status of the operation and a list of the jobs that were restarted.
 """
