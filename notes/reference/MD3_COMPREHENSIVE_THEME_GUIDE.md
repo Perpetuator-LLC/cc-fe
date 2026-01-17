@@ -2,6 +2,16 @@
 
 Visit: https://material-foundation.github.io/material-theme-builder/
 
+```css
+.light {
+  primary: #39F;
+  primary: #2073ce;
+}
+.dark {
+  primary: #5ae;
+}
+```
+
 - Primary: #3F97FF
 - Secondary: #8391AC (gen) or #F14A00
 - Tertiary: #A784B3 (gen)

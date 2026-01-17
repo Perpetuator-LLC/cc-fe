@@ -16,7 +16,7 @@ This document covers optimization techniques for frontend assets like images, SV
 
 ```bash
 # Compress a single SVG file
-npx svgo public/logo.outline_loading.svg -o public/logo.outline_loading.min.svg
+npx svgo public/logo.outline_loading.svg -o public/logo.loading.min.svg
 
 # Compress in-place (overwrites original)
 npx svgo public/logo.outline_loading.svg
