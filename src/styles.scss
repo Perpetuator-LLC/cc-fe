@@ -337,37 +337,6 @@ body.light {
   // stylelint-enable function-disallowed-list
 }
 
-// Job status badge colors - consistent across all components
-// Use specific selector to override component styles without !important
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-weight: 500;
-
-  &.job-success,
-  &.job-completed {
-    color: var(--md-extended-color-success-on-color);
-    background-color: var(--md-extended-color-success-color);
-  }
-
-  &.job-failed,
-  &.job-error {
-    color: var(--md-sys-color-on-error);
-    background-color: var(--md-sys-color-error);
-  }
-
-  &.job-pending {
-    color: var(--md-extended-color-warning-on-color);
-    background-color: var(--md-extended-color-warning-color);
-  }
-
-  &.job-running {
-    color: var(--md-extended-color-info-on-color);
-    background-color: var(--md-extended-color-info-color);
-  }
-}
-
 // Job card border colors for status bar
 .job-card {
   &.PENDING,
@@ -414,25 +383,80 @@ body.light {
   color: var(--md-extended-color-info-color);
 }
 
-// MD3 Badge Utility Classes (for status badges)
+// MD3 Badge Utility Classes (outlined style - consistent with resource links)
+%status-badge-base {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  padding: 4px 8px;
+  border-radius: 8px;
+
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .md3-badge-success {
-  color: var(--md-extended-color-success-on-color);
-  background-color: var(--md-extended-color-success-color);
+  @extend %status-badge-base;
+
+  border: 1px solid var(--md-extended-color-success-color-container);
+  color: var(--md-extended-color-success-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-success-color-container) 20%, transparent);
 }
 
 .md3-badge-warning {
-  color: var(--md-extended-color-warning-on-color);
-  background-color: var(--md-extended-color-warning-color);
+  @extend %status-badge-base;
+
+  border: 1px solid var(--md-extended-color-warning-color-container);
+  color: var(--md-extended-color-warning-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-warning-color-container) 20%, transparent);
 }
 
 .md3-badge-error {
-  color: var(--md-sys-color-on-error);
-  background-color: var(--md-sys-color-error);
+  @extend %status-badge-base;
+
+  border: 1px solid var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+  background: color-mix(in srgb, var(--md-sys-color-error-container) 20%, transparent);
 }
 
 .md3-badge-info {
-  color: var(--md-extended-color-info-on-color);
-  background-color: var(--md-extended-color-info-color);
+  @extend %status-badge-base;
+
+  border: 1px solid var(--md-extended-color-info-color-container);
+  color: var(--md-extended-color-info-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-info-color-container) 20%, transparent);
+}
+
+// Job Status Badge Classes (for job status display)
+.status-badge {
+  @extend %status-badge-base;
+
+  &.job-pending {
+    border: 1px solid var(--md-extended-color-warning-color-container);
+    color: var(--md-extended-color-warning-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-warning-color-container) 20%, transparent);
+  }
+
+  &.job-running {
+    border: 1px solid var(--md-extended-color-info-color-container);
+    color: var(--md-extended-color-info-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-info-color-container) 20%, transparent);
+  }
+
+  &.job-completed {
+    border: 1px solid var(--md-extended-color-success-color-container);
+    color: var(--md-extended-color-success-on-color-container);
+    background: color-mix(in srgb, var(--md-extended-color-success-color-container) 20%, transparent);
+  }
+
+  &.job-failed {
+    border: 1px solid var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    background: color-mix(in srgb, var(--md-sys-color-error-container) 20%, transparent);
+  }
 }
 
 // ============================================================================
@@ -2068,13 +2092,21 @@ html body {
   min-width: 520px;
   max-width: 680px;
 
+  // Make the menu panel transparent so only the accordion items show
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  box-shadow: none;
+
   .mat-mdc-menu-content {
     padding: 0;
+    background: transparent;
   }
 
   .job-menu-content {
     overflow-y: auto;
     max-height: 70vh;
-    padding: 8px;
+    padding: 0;
   }
 }
