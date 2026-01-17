@@ -921,6 +921,11 @@ export class PodcastsService extends BaseService {
             id
             uuid
             url
+            name
+            isReachable
+            isParsable
+            lastFetchAttempt
+            articlesPerDay
           }
         }
       }

@@ -908,6 +908,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               isReachable: [data.rssFeed.isReachable],
               isParsable: [data.rssFeed.isParsable],
               lastFetchAttempt: [data.rssFeed.lastFetchAttempt],
+              articlesPerDay: [data.rssFeed.articlesPerDay],
             }),
           );
           resolve({ success: true });
@@ -958,6 +959,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
               isReachable: [data.rssFeed.isReachable],
               isParsable: [data.rssFeed.isParsable],
               lastFetchAttempt: [data.rssFeed.lastFetchAttempt],
+              articlesPerDay: [data.rssFeed.articlesPerDay],
             }),
           );
           this.updateRssFeeds();
@@ -983,6 +985,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           isReachable: [feed.isReachable],
           isParsable: [feed.isParsable],
           lastFetchAttempt: [feed.lastFetchAttempt],
+          articlesPerDay: [feed.articlesPerDay],
         }),
       );
     });
