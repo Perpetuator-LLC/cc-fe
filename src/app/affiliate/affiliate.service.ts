@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, forkJoin } from 'rxjs';
@@ -88,6 +88,7 @@ export interface AffiliateLanding {
   affiliateCode: string;
   affiliateUsername: string;
   brandImageUrl: string | null;
+  customMessage: string | null;
 }
 
 export interface AffiliateProfile {
@@ -95,6 +96,7 @@ export interface AffiliateProfile {
   user: PublicUser;
   code: string;
   brandImageUrl: string | null;
+  customMessage: string | null;
   isActive: boolean;
   eligibilityStatus?: string | null;
   eligibilityMessage?: string | null;
@@ -461,6 +463,7 @@ export class AffiliateService extends BaseService {
           affiliateCode
           affiliateUsername
           brandImageUrl
+          customMessage
         }
       }
     `;
@@ -808,6 +811,7 @@ export class AffiliateService extends BaseService {
           }
           code
           brandImageUrl
+          customMessage
           isActive
           eligibilityStatus
           eligibilityMessage
@@ -825,7 +829,61 @@ export class AffiliateService extends BaseService {
 
     return this.query<AffiliateProfileResponse>({
       query,
+      fetchPolicy: 'network-only',
     }).pipe(map((data) => data.affiliateProfile));
+  }
+
+  /**
+   * Update affiliate profile settings
+   * Allows affiliates to set their custom landing page message
+   */
+  updateAffiliateProfile(customMessage: string | null): Observable<{
+    success: boolean;
+    message: string;
+    affiliateProfile: AffiliateProfile | null;
+  }> {
+    const mutation = gql`
+      mutation UpdateAffiliateProfile($customMessage: String) {
+        updateAffiliateProfile(customMessage: $customMessage) {
+          success
+          message
+          affiliateProfile {
+            uuid
+            user {
+              uuid
+              username
+            }
+            code
+            brandImageUrl
+            customMessage
+            isActive
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      updateAffiliateProfile: {
+        success: boolean;
+        message: string;
+        affiliateProfile: AffiliateProfile | null;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation,
+      variables: { customMessage }, // Pass as-is, empty string clears the message
+      fetchPolicy: 'no-cache',
+    }).pipe(
+      map((data) => {
+        if (!data.updateAffiliateProfile.success) {
+          throw new Error(data.updateAffiliateProfile.message);
+        }
+        return data.updateAffiliateProfile;
+      }),
+    );
   }
 
   getAffiliateStats(): Observable<AffiliateStats | null> {

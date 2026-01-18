@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
@@ -383,6 +383,7 @@ export class TraceService {
    * Check if running in production
    */
   private isProduction(): boolean {
+    if (typeof window === 'undefined') return true; // Assume production on SSR
     return window.location.hostname !== 'localhost' && !window.location.hostname.startsWith('127.');
   }
 }

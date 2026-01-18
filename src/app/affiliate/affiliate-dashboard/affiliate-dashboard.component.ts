@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -78,6 +78,8 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   isDragging = false;
   uploadingImage = false;
   imagePreview: string | null = null;
+  customMessageInput = '';
+  savingCustomMessage = false;
   readonly MAX_FILE_SIZE = 1024 * 1024;
   readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -238,6 +240,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       }).subscribe({
         next: ({ profile, stats, credits, conversions, codeChangeRequests }) => {
           this.profile = profile;
+          this.customMessageInput = profile?.customMessage || '';
           this.stats = stats;
           this.credits = credits;
           this.conversions = conversions;
@@ -273,6 +276,59 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   getAffiliateLink(): string {
     if (!this.profile?.code) return '';
     return `${environment.SITE_URL}/a/${this.profile.code}`;
+  }
+
+  getDefaultMessage(): string {
+    return `Join ${this.profile?.user?.username || 'our'}'s Network`;
+  }
+
+  /**
+   * Handle input event for custom message field
+   */
+  onCustomMessageInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.customMessageInput = input.value;
+  }
+
+  /**
+   * Check if the custom message input has changed from the saved value
+   * Handles null/empty string comparison properly
+   */
+  hasCustomMessageChanged(): boolean {
+    const currentSaved = this.profile?.customMessage || '';
+    const currentInput = this.customMessageInput?.trim() || '';
+    return currentInput !== currentSaved;
+  }
+
+  saveCustomMessage(): void {
+    if (this.savingCustomMessage) return;
+    if (!this.hasCustomMessageChanged()) return;
+
+    this.savingCustomMessage = true;
+    // Send empty string to clear (backend interprets null as "no change")
+    const messageToSave = this.customMessageInput?.trim() ?? '';
+
+    this.subscriptions.add(
+      this.affiliateService.updateAffiliateProfile(messageToSave).subscribe({
+        next: (response) => {
+          if (response.affiliateProfile) {
+            this.profile = { ...this.profile!, ...response.affiliateProfile };
+            this.customMessageInput = response.affiliateProfile.customMessage || '';
+          }
+          this.messageService.success('Landing page message updated!');
+          this.savingCustomMessage = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update message: ${err.message}`);
+          this.savingCustomMessage = false;
+        },
+      }),
+    );
+  }
+
+  clearCustomMessage(): void {
+    this.customMessageInput = '';
+    this.saveCustomMessage();
   }
 
   copyLink(): void {
