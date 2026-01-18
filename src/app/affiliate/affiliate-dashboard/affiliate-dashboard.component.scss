@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 .affiliate-dashboard-container {
   padding: 16px;
@@ -506,6 +506,7 @@
 
 .link-card,
 .brand-image-card,
+.custom-message-card,
 .balance-card {
   margin-bottom: 16px;
   border: 1px solid var(--md-sys-color-outline-variant);
@@ -574,6 +575,71 @@
       height: 16px;
       margin: 0;
       font-size: 16px;
+    }
+  }
+}
+
+.custom-message-card {
+  .help-text {
+    margin: 0 0 16px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .custom-message-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .message-preview {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+
+    padding: 12px 16px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+
+    background: var(--md-sys-color-surface-container);
+
+    .preview-label {
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .preview-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+
+  .message-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    button {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+
+      mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+      }
+
+      mat-spinner {
+        margin-right: 4px;
+      }
     }
   }
 }

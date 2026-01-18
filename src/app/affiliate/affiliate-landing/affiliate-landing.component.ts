@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -40,18 +40,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private traceService: TraceService,
     private seoService: SeoService,
-  ) {
-    // Check for resolved data (from SSR resolver)
-    const resolvedData = this.route.snapshot.data['affiliateData'] as AffiliateLanding | null;
-    if (resolvedData) {
-      this.affiliateData = resolvedData;
-      this.loading = false;
-      const code = this.route.snapshot.paramMap.get('code');
-      if (code) {
-        this.updateSeoTags(code);
-      }
-    }
-  }
+  ) {}
 
   ngOnInit(): void {
     this.isAuthenticated = this.authService.isLoggedIn();
@@ -65,15 +54,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
 
     this.affiliateStorageService.setAffiliateCode(code);
 
-    // If we already have data from resolver, just check existing affiliate
-    if (this.affiliateData) {
-      if (this.isAuthenticated) {
-        this.checkExistingAffiliate();
-      }
-      return;
-    }
-
-    // Fallback: fetch data if resolver didn't provide it (client-side navigation)
+    // Fetch affiliate landing data
     this.subscriptions.add(
       this.affiliateService.getAffiliateLanding(code).subscribe({
         next: (data) => {

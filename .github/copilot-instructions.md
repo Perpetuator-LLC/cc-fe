@@ -72,35 +72,38 @@ Always set explicit color on icons: `color: var(--md-sys-color-on-surface-varian
 
 # ⚠️ CRITICAL: Before Writing ANY Code
 
-## Terminal Commands - READ THE OUTPUT!
-**ALWAYS** redirect stderr to stdout and capture to a log file to see output:
+## Terminal Commands - CRITICAL CONSTRAINTS
+
+### Output Truncation
+**Terminal output is ALWAYS truncated.** After running any terminal command:
+1. **ALWAYS** use `2>&1 | tee logs/<name>.log` 
+2. **IMMEDIATELY** call `read_file` on the log file to see actual output
+3. **NEVER** assume success from truncated output
+
+### Character Limits
+Terminal input has a **hard limit of ~1024 characters** for pasted/programmatic input:
+- **DO NOT** generate large multi-line commands that exceed this limit
+- **DO NOT** use complex inline node -e scripts with multi-line code
+- **PREFER** creating executable script files over inline command chains
+
+### Preferred Approach for Complex Operations
+1. **Create a script file** with proper extension (.sh, .cjs, .js, .py)
+2. Write the complex logic into that file
+3. Execute with a short command: `node scripts/my-test.cjs`
+
+### Standard Command Patterns
 ```bash
+# Build with log capture
  cd /Users/nik/projects/capital-copilot-fe && yarn build 2>&1 | tee logs/build.log
+
+# Lint with log capture
  cd /Users/nik/projects/capital-copilot-fe && yarn lint 2>&1 | tee logs/lint.log
- cd /Users/nik/projects/capital-copilot-fe && yarn stylelint 2>&1 | tee logs/stylelint.log
-```
 
-**⚠️ CRITICAL: Terminal output is TRUNCATED. You MUST use `read_file` on the log file to see full output!**
-
-After EVERY terminal command:
-1. Run the command with `2>&1 | tee logs/<name>.log`
-2. **IMMEDIATELY** call `read_file` on `logs/<name>.log` to see the actual output
-3. Do NOT assume the command succeeded based on truncated terminal output
-4. If `read_file` shows errors, fix them before continuing
-
-**MANDATORY WORKFLOW - NO EXCEPTIONS:**
-```bash
-# Step 1: Run command with log capture
+# Stylelint with log capture  
  cd /Users/nik/projects/capital-copilot-fe && yarn stylelint "src/app/**/*.scss" 2>&1 | tee logs/stylelint.log
-
-# Step 2: IMMEDIATELY read the log file to see actual output
-read_file("logs/stylelint.log")
-
-# Step 3: Fix any errors shown in the log
-# Step 4: Repeat until no errors
 ```
 
-**WHY THIS MATTERS:** The terminal tool truncates output. You will miss errors if you don't read the log file. This has caused multiple failed fixes that had to be redone.
+**After EVERY command:** call `read_file` on the log file to see actual output.
 
 The space at the start is intentional - it prevents commands from being saved to shell history.
 
@@ -185,16 +188,11 @@ const data = await graphqlQuery(`
 
 ### Running Scripts with Output Capture
 
-**IMPORTANT:** Terminal output can be truncated. For reliable output, use nohup with redirect:
-
 ```bash
 # Pattern for running scripts and capturing full output:
-cd /Users/nik/projects/capital-copilot-fe && \
-  nohup node scripts/test-graphql-query.cjs msft-30min > logs/ai_link/test_output.log 2>&1 & \
-  sleep 8 && \
-  cat logs/ai_link/test_output.log
+ cd /Users/nik/projects/capital-copilot-fe && node scripts/test-graphql-query.cjs msft-30min 2>&1 | tee logs/ai_link/test_output.log
 
-# Or use read_file() after the script completes to see the log
+# Then use read_file() on the log to see full output
 ```
 
 This pattern:

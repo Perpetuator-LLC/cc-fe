@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
 /**
  * Frontend Trace Sanitization Utility
@@ -343,6 +343,7 @@ export function sanitizeTags(tags: Record<string, string> | undefined): Record<s
  * Get a safe URL (pathname only, no query params which may contain tokens)
  */
 export function getSafeUrl(): string {
+  if (typeof window === 'undefined') return '/';
   return window.location.pathname;
 }
 
@@ -350,6 +351,9 @@ export function getSafeUrl(): string {
  * Get safe context for traces
  */
 export function getSafeContext(): Record<string, string> {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return { url: '/', userAgent: 'SSR' };
+  }
   return {
     url: getSafeUrl(),
     userAgent: navigator.userAgent,
