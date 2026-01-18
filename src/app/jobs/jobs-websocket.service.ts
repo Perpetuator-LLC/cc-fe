@@ -182,8 +182,8 @@ export class JobsWebSocketService implements OnDestroy {
           if (message.job) {
             this.addOrUpdateJob(message.job);
             this.jobCompletedSubject.next(message.job);
-            // Remove from active jobs after a short delay
-            timer(2000).subscribe(() => this.removeJob(message.job.uuid));
+            // Keep completed jobs visible for 5 seconds before removing
+            timer(5000).subscribe(() => this.removeJob(message.job.uuid));
           }
           break;
 
@@ -192,8 +192,8 @@ export class JobsWebSocketService implements OnDestroy {
           if (message.job) {
             this.addOrUpdateJob(message.job);
             this.jobFailedSubject.next(message.job);
-            // Remove from active jobs after a longer delay
-            timer(5000).subscribe(() => this.removeJob(message.job.uuid));
+            // Keep failed jobs visible for 15 seconds before removing
+            timer(15000).subscribe(() => this.removeJob(message.job.uuid));
           }
           break;
 
@@ -290,15 +290,34 @@ export class JobsWebSocketService implements OnDestroy {
 
   /**
    * Add or update a job in the jobs list
+   * Only updates if the incoming job has a newer updatedAt timestamp to prevent
+   * stale mutation responses from overwriting fresh WebSocket updates.
    */
   private addOrUpdateJob(job: Job): void {
     this.jobs.update((jobs) => {
       const index = jobs.findIndex((j) => j.uuid === job.uuid);
       if (index >= 0) {
+        const existing = jobs[index];
+        // Compare timestamps to prevent stale data from overwriting fresh updates
+        const existingTime = new Date(existing.updatedAt).getTime();
+        const incomingTime = new Date(job.updatedAt).getTime();
+
+        if (incomingTime < existingTime) {
+          // Incoming job is older than what we have - skip update
+          console.log(
+            `[JobsWS] Skipping stale update for job ${job.uuid?.slice(0, 8)}: ` +
+              `incoming ${job.status} is older than existing ${existing.status}`,
+          );
+          return jobs;
+        }
+
+        console.log(`[JobsWS] Updating job ${job.uuid?.slice(0, 8)}: ${existing.status} -> ${job.status}`);
         const updated = [...jobs];
         updated[index] = job;
         return updated;
       } else {
+        const total = jobs.length + 1;
+        console.log(`[JobsWS] Adding new job ${job.uuid?.slice(0, 8)} status=${job.status} (total: ${total})`);
         return [job, ...jobs];
       }
     });
@@ -354,6 +373,12 @@ export class JobsWebSocketService implements OnDestroy {
       const activeJobs = jobs.filter((job: Job) =>
         ['PENDING', 'RUNNING', 'QUEUED', 'pending', 'running', 'queued'].includes(job.status),
       );
+      console.log(`[JobsWS] After filtering to active jobs: ${activeJobs.length} jobs`);
+      if (activeJobs.length > 0) {
+        console.log(
+          `[JobsWS] Active job statuses: ${activeJobs.map((j) => `${j.uuid?.slice(0, 8)}:${j.status}`).join(', ')}`,
+        );
+      }
       this.jobs.set(activeJobs);
       this.isConnected.set(true);
       this.connectionError.set(null);
@@ -368,8 +393,9 @@ export class JobsWebSocketService implements OnDestroy {
     if (job) {
       this.addOrUpdateJob(job);
       this.jobCompletedSubject.next(job);
-      // Remove from active jobs after a short delay
-      timer(2000).subscribe(() => this.removeJob(job.uuid));
+      // Keep completed jobs visible for 5 seconds before removing
+      // This matches JobService.cleanupOldJobs timing
+      timer(5000).subscribe(() => this.removeJob(job.uuid));
     }
   }
 
@@ -381,8 +407,9 @@ export class JobsWebSocketService implements OnDestroy {
     if (job) {
       this.addOrUpdateJob(job);
       this.jobFailedSubject.next(job);
-      // Remove from active jobs after a longer delay
-      timer(5000).subscribe(() => this.removeJob(job.uuid));
+      // Keep failed jobs visible for 15 seconds before removing
+      // This matches JobService.cleanupOldJobs timing
+      timer(15000).subscribe(() => this.removeJob(job.uuid));
     }
   }
 }

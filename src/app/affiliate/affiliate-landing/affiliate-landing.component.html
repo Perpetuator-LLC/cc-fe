@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="affiliate-landing-container">
   @if (loading) {
     <div class="loading-container">
@@ -21,14 +21,24 @@
       <mat-card-content>
         @if (getBrandImageUrl()) {
           <div class="brand-image-container">
-            <img [src]="getBrandImageUrl()" [alt]="affiliateData.affiliateUsername + ' brand image'" class="brand-image">
+            <img
+              [src]="getBrandImageUrl()"
+              [alt]="affiliateData.affiliateUsername + ' brand image'"
+              class="brand-image"
+            />
           </div>
         }
 
-        <h1 class="title">Join {{ affiliateData.affiliateUsername }}'s Network</h1>
+        <h1 class="title">
+          {{ affiliateData.customMessage || 'Join ' + affiliateData.affiliateUsername + "'s Network" }}
+        </h1>
         <p class="description">Start your journey with Capital Copilot and become part of an affiliate network.</p>
 
-        <p class="disclosure">This is an affiliate link, and {{ affiliateData.affiliateUsername }} earns commissions from sign-ups through this link. They are an actual customer and user of Capital Copilot.</p>
+        <p class="disclosure">
+          This is an affiliate link, and the affiliate earns commissions from sign-ups through this link. They are an
+          actual customer and user of Capital Copilot.
+        </p>
+        <!--        <p class="disclosure">This is an affiliate link, and {{ affiliateData.affiliateUsername }} earns commissions from sign-ups through this link. They are an actual customer and user of Capital Copilot.</p>-->
 
         <div class="actions">
           @if (!isAuthenticated) {
@@ -36,7 +46,10 @@
             <button mat-stroked-button class="btn-secondary-outlined" (click)="onSignIn()">Sign In</button>
           } @else if (hasExistingAffiliate) {
             <div class="existing-affiliate-message">
-              <p>You are part of <strong>{{ existingAffiliateUsername }}</strong>'s network and cannot join this one.</p>
+              <p>
+                You are part of <strong>{{ existingAffiliateUsername }}</strong
+                >'s network and cannot join this one.
+              </p>
               <button mat-button class="btn-primary-text" routerLink="/profile">Go to Profile</button>
             </div>
           } @else {
@@ -47,4 +60,3 @@
     </mat-card>
   }
 </div>
-
