@@ -2110,3 +2110,9 @@ html body {
     padding: 0;
   }
 }
+
+// Logo inversion for light theme
+// The logo SVG is white, so we invert it for light theme backgrounds
+body.light .website-logo img {
+  filter: invert(1);
+}
