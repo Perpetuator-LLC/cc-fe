@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <h2 mat-dialog-title>{{ formTitle }}</h2>
 <mat-dialog-content>
   <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="schedule-form">
@@ -151,11 +151,16 @@
 
     <!-- Clocked Schedule Fields -->
     @if (scheduleForm.get('scheduleType')?.value === 'CLOCKED') {
-      <div class="form-row">
+      <!-- <div class="form-row">
         <mat-form-field class="full-width">
           <mat-label>Scheduled Time</mat-label>
           <input matInput type="datetime-local" formControlName="clockedTime" />
+        <input type="datetime-local" formControlName="clockedTime" class="mat-input-element" />
         </mat-form-field>
+      </div>-->
+      <div class="form-row schedule-time-row">
+        <span>Scheduled Time</span>
+        <input type="datetime-local" formControlName="clockedTime" class="native-datetime" />
       </div>
     }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 .gift-page-wrapper {
   position: relative;
@@ -295,6 +295,11 @@
 
   @media screen and (width <= 576px) {
     padding: 8px;
+
+    table {
+      overflow: auto;
+      display: block;
+    }
   }
 }
 

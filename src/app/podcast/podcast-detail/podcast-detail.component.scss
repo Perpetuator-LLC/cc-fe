@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/material-overrides' as md3;
 
 .button-wrapper {
@@ -1173,6 +1173,12 @@ mat-divider {
   &.research-button {
     color: var(--md-sys-color-on-tertiary);
     background-color: var(--md-sys-color-tertiary);
+
+    .research-btn {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
   }
 
   @media screen and (width <= 900px) {

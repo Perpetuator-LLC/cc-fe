@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <div class="toolbar-title-wrapper">
     <span class="page-title">
@@ -23,10 +23,9 @@
       <div class="title">
         <form class="team-title" [formGroup]="teamForm">
           <div class="member-row team-name-input">
-            <mat-form-field appearance="fill">
-              <mat-label>Team Name</mat-label>
-              <input matInput formControlName="name" />
-            </mat-form-field>
+            <div>
+              <input #teamNameInput type="text" formControlName="name" class="team-input" placeholder="Team Name" />
+            </div>
             <button
               class="edit-btn"
               mat-icon-button

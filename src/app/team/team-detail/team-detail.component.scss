@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 // Component styles
 .member-row {
@@ -114,9 +114,15 @@ mat-divider {
 
       .title {
         input {
+          border: 0;
+
           font-size: 32px;
           font-weight: 600;
           color: var(--md-sys-color-on-surface);
+
+          background: transparent;
+          outline: none;
+          box-shadow: none;
         }
 
         p {
