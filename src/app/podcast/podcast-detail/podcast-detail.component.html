@@ -277,7 +277,7 @@
                   <div class="image-preview">
                     @if (thumbnailUrl || imageUrl) {
                       <img
-                        [src]="thumbnailUrl || imageUrl"
+                        [src]="displayImageUrl"
                         alt="Podcast Image"
                         class="podcast-image-thumbnail icon-clickable"
                         loading="lazy"
@@ -321,7 +321,7 @@
                         </svg>
                         Upload Podcast Featured Image
                       </button>
-                      <span class="desc">Drag & drop or click to upload image (PNG/JPG, max 1MB)</span>
+                      <span class="desc">Drag & drop or click to upload image (JPEG, PNG, WEBP, GIF, max 5MB)</span>
                     </div>
                   }
 
@@ -330,7 +330,7 @@
                     type="file"
                     formControlName="image"
                     (change)="onPodcastImageSelected($event)"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     hidden
                   />
                 </div>
