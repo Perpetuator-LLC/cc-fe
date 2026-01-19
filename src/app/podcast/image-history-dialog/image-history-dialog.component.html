@@ -1,0 +1,63 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Image History</h2>
+
+<mat-dialog-content>
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Loading image history...</span>
+    </div>
+  } @else if (imageHistory.length === 0) {
+    <div class="empty-state">
+      <mat-icon>image_not_supported</mat-icon>
+      <p>No image history available</p>
+    </div>
+  } @else {
+    <div class="image-list">
+      @for (image of imageHistory; track image.uuid) {
+        <div class="image-item" [class.current]="image.isCurrent">
+          <div class="image-preview">
+            <img [src]="image.imageUrl" [alt]="image.sourceDisplay" loading="lazy" />
+          </div>
+          <div class="image-info">
+            <div class="source-badge">
+              <mat-icon>{{ getSourceIcon(image.source) }}</mat-icon>
+              <span>{{ image.sourceDisplay }}</span>
+              @if (image.isCurrent) {
+                <span class="current-badge">Current</span>
+              }
+            </div>
+            <div class="date">{{ formatDate(image.createdAt) }}</div>
+            @if (image.prompt) {
+              <div class="prompt" matTooltip="{{ image.prompt }}">
+                <mat-icon>lightbulb</mat-icon>
+                <span>{{ image.prompt | slice: 0 : 50 }}{{ image.prompt.length > 50 ? '...' : '' }}</span>
+              </div>
+            }
+          </div>
+          <div class="image-actions">
+            @if (!image.isCurrent) {
+              <button
+                mat-stroked-button
+                color="primary"
+                (click)="revertToImage(image)"
+                [disabled]="reverting"
+                matTooltip="Use this image as the current cover"
+              >
+                @if (reverting) {
+                  <mat-spinner diameter="16"></mat-spinner>
+                } @else {
+                  Use This Image
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onClose()">Close</button>
+</mat-dialog-actions>
