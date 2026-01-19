@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Source code (not needed in production container)
+src/
+scripts/
+notes/
+docs/
+logs/
+
+# Build artifacts (we only need dist/)
+.angular/
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Config files not needed in container
+*.config.js
+*.config.cjs
+*.config.ts
+tsconfig*.json
+angular.json
+package.json
+yarn.lock
+eslint.config.js
+commitlint.config.js
+spectaql-config.yml
+
+# Test files
+*.spec.ts
+
+# Documentation
+*.md
+LICENSE
+
+# Environment files
+.env*

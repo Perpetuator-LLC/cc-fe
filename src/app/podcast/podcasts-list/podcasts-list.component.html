@@ -107,7 +107,9 @@
                     loading="lazy"
                   />
                 } @else {
-                  <img src="/image.png" alt="img" />
+                  <div class="podcast-placeholder">
+                    <mat-icon>podcasts</mat-icon>
+                  </div>
                 }
                 <div class="name">
                   <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
@@ -295,7 +297,9 @@
                         loading="lazy"
                       />
                     } @else {
-                      <img src="/image.png" alt="img" class="img" />
+                      <div class="podcast-placeholder-grid">
+                        <mat-icon>podcasts</mat-icon>
+                      </div>
                     }
                   </a>
                   <div class="response-div">

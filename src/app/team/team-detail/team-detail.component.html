@@ -143,7 +143,9 @@
                   @if (podcast.imageUrl) {
                     <img [src]="podcast.imageUrl" alt="Podcast Image" class="podcast-image-preview" loading="lazy" />
                   } @else {
-                    <img src="/image.png" alt="img" />
+                    <div class="podcast-placeholder">
+                      <mat-icon>podcasts</mat-icon>
+                    </div>
                   }
                   <div class="name">
                     <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
