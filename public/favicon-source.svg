@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Favicon source - uses #888 gray for universal light/dark background compatibility -->
+<svg
+   version="1.1"
+   viewBox="0 0 30 30"
+   width="512"
+   height="512"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .dot-1, .dot-2 {
+        fill: #888;
+      }
+      .trail-1, .trail-2 {
+        fill: none;
+        stroke: #888;
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <!-- Background circle -->
+  <circle
+     style="fill:#2f2f2f;fill-opacity:1"
+     cx="15"
+     cy="15"
+     r="15" />
+  <!-- Icon elements -->
+  <g transform="translate(2, 2)">
+    <circle class="dot-2" cx="16" cy="4" r="2" />
+    <circle class="dot-1" cx="10" cy="10" r="2" />
+    <circle class="dot-2" cx="16" cy="16" r="2" />
+    <circle class="dot-1" cx="10" cy="22" r="2" />
+    <path class="trail-2" d="m 10,4 a 6,6 0 1 0 0,12" />
+    <path class="trail-1" d="M 16,22 A 6,6 0 1 0 16,10" />
+  </g>
+</svg>
