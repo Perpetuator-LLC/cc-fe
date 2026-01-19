@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -25,7 +25,7 @@ import {
 import { MatPaginator } from '@angular/material/paginator';
 import { MatIcon } from '@angular/material/icon';
 import { TitleCasePipe } from '@angular/common';
-import { MatInput, MatLabel } from '@angular/material/input';
+import { MatInput } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
@@ -62,7 +62,6 @@ import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialo
     MatRowDef,
     MatIcon,
     TitleCasePipe,
-    MatLabel,
     MatInput,
     MatIconButton,
     MatHeaderRowDef,
@@ -76,6 +75,7 @@ import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialo
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
+  @ViewChild('teamNameInput') teamNameInput!: ElementRef<HTMLInputElement>;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   teamForm: FormGroup;
@@ -216,10 +216,10 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     if (role === 'owner') {
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: {
-          title:'Are you sure you want to proceed?',
+          title: 'Are you sure you want to proceed?',
           message:
             '<h3>Removing this owner will remove their management permissions and access to this team.</h3>' +
-            '<p>Consider changing their role to another role first.</p>'
+            '<p>Consider changing their role to another role first.</p>',
         },
       });
       dialogRef.afterClosed().subscribe((confirmed) => {
