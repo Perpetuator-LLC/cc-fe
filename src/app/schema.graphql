@@ -648,6 +648,15 @@ type Query {
     """Podcast name to validate"""
     name: String!
   ): PodcastNameValidation
+
+  """Get the image history for a podcast"""
+  podcastImageHistory(podcastUuid: UUID!): [PodcastImageType]
+
+  """Get the user's generated images (most recent first)"""
+  generatedImages(limit: Int = 20): [GeneratedImageType]
+
+  """Get a specific generated image by UUID"""
+  generatedImage(imageUuid: UUID!): GeneratedImageType
   podcastCategories: PodcastCategoriesType
   teams(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, name: String, teamUuid: UUID): TeamTypeConnection
   me: UserType
@@ -1628,6 +1637,9 @@ type AffiliateProfileType {
   stripePayoutsEnabled: Boolean!
   stripeCountry: String
   stripeDetailsSubmitted: Boolean!
+
+  """Custom headline message for affiliate landing page (max 200 chars)"""
+  customMessage: String
   createdAt: DateTime!
   updatedAt: DateTime!
   uuid: UUID
@@ -1730,6 +1742,7 @@ type PodcastType implements Node {
   thumbnailUrl: String
   url: String
   voice: VoiceType
+  imageHistory: [PodcastImageType]
 }
 
 type RssFeedType implements Node {
@@ -1786,6 +1799,39 @@ enum VoiceModel {
   OPENAI_GPT_4O_MINI_TTS
   ELEVENLABS_MULTILINGUAL_V2
   ELEVENLABS_FLASH_V2_5
+}
+
+"""
+Type for PodcastImage model - represents a historical or current podcast cover image.
+"""
+type PodcastImageType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """How this image was created"""
+  source: ApiPodcastImageSourceChoices!
+
+  """AI prompt used to generate this image (if AI generated)"""
+  prompt: String
+
+  """Whether this is the currently active image for the podcast"""
+  isCurrent: Boolean!
+  createdAt: DateTime!
+  uuid: UUID
+  imageUrl: String
+  sourceDisplay: String
+}
+
+"""An enumeration."""
+enum ApiPodcastImageSourceChoices {
+  """AI Generated"""
+  AI_GENERATED
+
+  """Manual Upload"""
+  MANUAL_UPLOAD
+
+  """Reverted from History"""
+  REVERTED
 }
 
 """GraphQL type for Episode model."""
@@ -2150,6 +2196,7 @@ type AffiliateLandingType {
   affiliateCode: String
   affiliateUsername: String
   brandImageUrl: String
+  customMessage: String
 }
 
 type AffiliateRelationshipType {
@@ -3295,6 +3342,8 @@ enum JobKind {
   CREATE_RESEARCH_EPISODE
   PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN
   GENERATE_PODCAST
+  GENERATE_PODCAST_IMAGE
+  GENERATE_IMAGE
   TEST_RAISE
   TEST_PRINT
 }
@@ -3761,6 +3810,24 @@ type PodcastNameValidation {
   hasSpecialChars: Boolean
 }
 
+"""Type for GeneratedImage model - represents an AI-generated image."""
+type GeneratedImageType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """The prompt used to generate this image"""
+  prompt: String!
+
+  """Size of the generated image (e.g., 1024x1024, 3000x3000)"""
+  size: String!
+
+  """Quality setting used (standard or hd)"""
+  quality: String!
+  createdAt: DateTime!
+  uuid: UUID
+  imageUrl: String
+}
+
 type PodcastCategoriesType {
   categories: GenericScalar
 }
@@ -3931,6 +3998,14 @@ type Mutation {
   refreshStripeAccountStatus: RefreshStripeAccountStatus
   getStripeDashboardLink: GetStripeDashboardLink
   updateAffiliateBrandImage(deleteImage: Boolean, image: Upload): UpdateAffiliateBrandImage
+
+  """Update affiliate profile fields (currently supports custom_message)."""
+  updateAffiliateProfile(
+    """
+    Custom headline for affiliate landing page (max 200 chars, empty to clear)
+    """
+    customMessage: String
+  ): UpdateAffiliateProfile
   joinAffiliateProgram(affiliateCode: String!): JoinAffiliateProgram
   convertAffiliateCredits(amount: Int!, conversionType: String!): ConvertAffiliateCredits
   approvePayoutRequest(adminNotes: String, conversionId: UUID!): ApprovePayoutRequest
@@ -4426,6 +4501,39 @@ type Mutation {
   """
   generatePodcast(description: String!, teamUuid: UUID!, title: String): GeneratePodcast
 
+  """
+  Regenerate a podcast cover image using AI.
+  Creates a new image using DALL-E 3 and sets it as the current image.
+  Previous images are preserved in history.
+  """
+  regeneratePodcastImage(
+    """Optional style hint to influence the AI image generation"""
+    customPromptHint: String
+    podcastUuid: UUID!
+  ): RegeneratePodcastImage
+
+  """
+  Revert to a previous podcast image from history.
+  Sets the specified historical image as the current image.
+  """
+  revertPodcastImage(imageUuid: UUID!, podcastUuid: UUID!): RevertPodcastImage
+
+  """
+  Generate an AI image from a custom prompt.
+  Uses DALL-E 3 to create images. The generated image is stored and returned.
+  Cost: ~320 credits for HD quality, ~160 credits for standard quality.
+  """
+  generateImage(
+    """Text prompt describing the image to generate (max 4000 chars)"""
+    prompt: String!
+
+    """Quality: 'standard' (~160 credits) or 'hd' (~320 credits, default)"""
+    quality: String = "hd"
+
+    """Output size: '1024x1024' or '3000x3000' (default)"""
+    size: String = "3000x3000"
+  ): GenerateImage
+
   """Mutation to create a new team."""
   createTeam(name: String!): CreateTeam
 
@@ -4775,6 +4883,13 @@ Create scalar that ignores normal serialization/deserialization, since
 that will be handled by the multipart request spec
 """
 scalar Upload
+
+"""Update affiliate profile fields (currently supports custom_message)."""
+type UpdateAffiliateProfile {
+  success: Boolean
+  message: String
+  affiliateProfile: AffiliateProfileType
+}
 
 type JoinAffiliateProgram {
   success: Boolean
@@ -5438,6 +5553,38 @@ This creates a job that will generate podcast metadata including:
 The podcast_uuid will be available in the job result once generation completes.
 """
 type GeneratePodcast {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Regenerate a podcast cover image using AI.
+Creates a new image using DALL-E 3 and sets it as the current image.
+Previous images are preserved in history.
+"""
+type RegeneratePodcastImage {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""
+Revert to a previous podcast image from history.
+Sets the specified historical image as the current image.
+"""
+type RevertPodcastImage {
+  success: Boolean
+  message: String
+  podcast: PodcastType
+}
+
+"""
+Generate an AI image from a custom prompt.
+Uses DALL-E 3 to create images. The generated image is stored and returned.
+Cost: ~320 credits for HD quality, ~160 credits for standard quality.
+"""
+type GenerateImage {
   success: Boolean
   message: String
   job: JobType

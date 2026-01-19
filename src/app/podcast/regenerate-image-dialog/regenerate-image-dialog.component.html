@@ -1,0 +1,46 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Regenerate Cover Image</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <p class="description">
+      Generate a new AI-powered cover image for your podcast using DALL-E 3. You can optionally provide style hints to
+      influence the design.
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Style Hint (optional)</mat-label>
+      <textarea
+        matInput
+        formControlName="customPromptHint"
+        placeholder="e.g., minimalist, modern, blue tones"
+        rows="2"
+      ></textarea>
+      <mat-hint>Add style keywords to customize the generated image</mat-hint>
+    </mat-form-field>
+
+    <div class="style-suggestions">
+      <span class="suggestions-label">Suggestions:</span>
+      <mat-chip-set>
+        @for (style of styleSuggestions; track style) {
+          <mat-chip (click)="addStyleSuggestion(style)">
+            {{ style }}
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+
+    <div class="cost-info">
+      <mat-icon>info</mat-icon>
+      <span>Cost: ~320 credits (HD quality)</span>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="onSubmit()">
+    <mat-icon>auto_awesome</mat-icon>
+    Generate
+  </button>
+</mat-dialog-actions>

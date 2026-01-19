@@ -23,6 +23,17 @@ cachePolicyRegistry.register('PodcastType', {
   },
 });
 
+// Podcast Image History type
+export interface PodcastImageResult {
+  uuid: string;
+  imageUrl: string;
+  source: 'AI_GENERATED' | 'MANUAL_UPLOAD' | 'REVERTED';
+  sourceDisplay: string;
+  prompt: string | null;
+  isCurrent: boolean;
+  createdAt: string;
+}
+
 export type GenericScalar = unknown;
 
 export interface UserResult {
@@ -985,5 +996,131 @@ export class PodcastsService extends BaseService {
         return data.createLatestEpisodeChain;
       }),
     );
+  }
+
+  /**
+   * Regenerate podcast cover image using AI (DALL-E 3)
+   * Returns a job that can be monitored via WebSocket
+   */
+  regeneratePodcastImage(
+    podcastUuid: string,
+    customPromptHint?: string,
+  ): Observable<{ success: boolean; message: string; job: Job }> {
+    const GQL = gql`
+      mutation RegeneratePodcastImage($podcastUuid: UUID!, $customPromptHint: String) {
+        regeneratePodcastImage(podcastUuid: $podcastUuid, customPromptHint: $customPromptHint) {
+          success
+          message
+          job {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      regeneratePodcastImage: {
+        success: boolean;
+        message: string;
+        job: Job;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        podcastUuid,
+        customPromptHint: customPromptHint || null,
+      },
+    }).pipe(
+      map((data) => {
+        if (!data.regeneratePodcastImage.success) {
+          throw new Error(data.regeneratePodcastImage.message);
+        }
+        return data.regeneratePodcastImage;
+      }),
+    );
+  }
+
+  /**
+   * Revert podcast image to a previous version from history
+   */
+  revertPodcastImage(
+    podcastUuid: string,
+    imageUuid: string,
+  ): Observable<{ success: boolean; message: string; podcast: PodcastsResult }> {
+    const GQL = gql`
+      mutation RevertPodcastImage($podcastUuid: UUID!, $imageUuid: UUID!) {
+        revertPodcastImage(podcastUuid: $podcastUuid, imageUuid: $imageUuid) {
+          success
+          message
+          podcast {
+            id
+            uuid
+            imageUrl
+            thumbnailUrl
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      revertPodcastImage: {
+        success: boolean;
+        message: string;
+        podcast: PodcastsResult;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: {
+        podcastUuid,
+        imageUuid,
+      },
+    }).pipe(
+      map((data) => {
+        if (!data.revertPodcastImage.success) {
+          throw new Error(data.revertPodcastImage.message);
+        }
+        return data.revertPodcastImage;
+      }),
+    );
+  }
+
+  /**
+   * Get podcast image history for version management
+   */
+  getPodcastImageHistory(podcastUuid: string): Observable<PodcastImageResult[]> {
+    const GQL = gql`
+      query GetPodcastImageHistory($podcastUuid: UUID!) {
+        podcastImageHistory(podcastUuid: $podcastUuid) {
+          uuid
+          imageUrl
+          source
+          sourceDisplay
+          prompt
+          isCurrent
+          createdAt
+        }
+      }
+    `;
+
+    interface Response {
+      podcastImageHistory: PodcastImageResult[];
+    }
+
+    return this.query<Response>({
+      query: GQL,
+      variables: { podcastUuid },
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.podcastImageHistory));
   }
 }

@@ -336,6 +336,23 @@
                 </div>
 
                 <div class="image-actions">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    type="button"
+                    (click)="regenerateImage()"
+                    [disabled]="generatingImage"
+                    matTooltip="Regenerate cover image using AI"
+                  >
+                    @if (generatingImage) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>auto_awesome</mat-icon>
+                    }
+                  </button>
+                  <button mat-icon-button type="button" (click)="openImageHistory()" matTooltip="View image history">
+                    <mat-icon>history</mat-icon>
+                  </button>
                   @if (thumbnailUrl || imageUrl) {
                     <button
                       mat-icon-button

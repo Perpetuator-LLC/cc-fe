@@ -1,0 +1,165 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px 24px;
+
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px 24px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+  }
+}
+
+.image-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.image-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container);
+
+  transition: border-color 0.2s ease;
+
+  &.current {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+  }
+}
+
+.image-preview {
+  overflow: hidden;
+  flex-shrink: 0;
+
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.image-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.source-badge {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  margin-bottom: 4px;
+
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .current-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-primary);
+    text-transform: uppercase;
+
+    background: var(--md-sys-color-primary);
+  }
+}
+
+.date {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.prompt {
+  cursor: help;
+
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  margin-top: 8px;
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.image-actions {
+  flex-shrink: 0;
+
+  button {
+    white-space: nowrap;
+
+    mat-spinner {
+      display: inline-block;
+    }
+  }
+}
+
+@include mixins.mobile() {
+  .image-item {
+    flex-direction: column;
+  }
+
+  .image-preview {
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+  }
+
+  .image-actions {
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}
