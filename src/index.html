@@ -54,6 +54,14 @@
   </head>
 
   <body class="mat-typography mat-app-background">
+    <!-- Immediately set background based on stored theme preference to prevent flash -->
+    <script>
+      (function () {
+        var theme = localStorage.getItem('theme');
+        var isLight = theme === 'light';
+        document.body.style.backgroundColor = isLight ? '#fdfcff' : '#121212';
+      })();
+    </script>
     <app-root>
       <!-- Loading screen shown while Angular app is bootstrapping -->
       <style>
@@ -81,7 +89,23 @@
           color: #888;
           letter-spacing: 0.5px;
         }
+        /* Light theme from localStorage */
+        body.theme-light .app-loading {
+          background: #fdfcff;
+        }
+        body.theme-light .app-loading-text {
+          color: #666;
+        }
       </style>
+      <script>
+        // Apply theme class to body for loading screen styling
+        (function () {
+          var theme = localStorage.getItem('theme');
+          if (theme === 'light') {
+            document.body.classList.add('theme-light');
+          }
+        })();
+      </script>
       <div class="app-loading">
         <img src="logo.loading.min.svg" alt="Capital Copilot Logo" />
         <div class="app-loading-text">Loading...</div>
