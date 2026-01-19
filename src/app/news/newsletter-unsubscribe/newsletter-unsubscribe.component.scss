@@ -68,6 +68,13 @@
     font-size: 64px;
     color: var(--md-sys-color-error);
   }
+
+  &.info .state-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+    color: var(--md-extended-color-info-color);
+  }
 }
 
 mat-card-actions {

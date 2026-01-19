@@ -1,14 +1,14 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <mat-card-footer>
   @if (showBanner()) {
     <div class="cookie-banner mat-elevation-z4">
       <span class="cookie-text">
-        We use cookies to enhance your browsing experience and to analyze our traffic. By clicking "Accept", you consent
-        to our use of cookies. To learn more, view our
+        We use only essential cookies required for our site to function properly, such as keeping you logged in. We do
+        not use tracking, analytics, or advertising cookies. For more details, see our
         <a routerLink="/cookie-policy" class="privacy-link">Cookie Policy</a>.
       </span>
       <div class="cookie-buttons">
-        <button mat-raised-button color="primary" (click)="acceptCookies()">Accept</button>
+        <button mat-raised-button color="primary" (click)="acceptCookies()">Got it</button>
       </div>
     </div>
   }

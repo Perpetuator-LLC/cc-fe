@@ -61,6 +61,24 @@
           </a>
         </mat-card-actions>
       }
+
+      @case ('not-found') {
+        <mat-card-content class="state-content info">
+          <mat-icon class="state-icon">info</mat-icon>
+          <h2>Not Subscribed</h2>
+          <p>{{ errorMessage }}</p>
+          @if (email) {
+            <p class="email-display">{{ email }}</p>
+          }
+          <p class="note">You may have already unsubscribed or this email was never subscribed.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-flat-button color="primary" routerLink="/home">
+            <mat-icon>home</mat-icon>
+            Go to Home
+          </a>
+        </mat-card-actions>
+      }
     }
   </mat-card>
 </div>
