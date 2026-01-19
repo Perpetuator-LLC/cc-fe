@@ -203,6 +203,14 @@ export const routes: Routes = [
     title: 'Reset Password',
   },
   {
+    path: 'newsletter/unsubscribe',
+    loadComponent: () =>
+      import('./news/newsletter-unsubscribe/newsletter-unsubscribe.component').then(
+        (c) => c.NewsletterUnsubscribeComponent,
+      ),
+    title: 'Unsubscribe from Newsletter',
+  },
+  {
     path: 'profile',
     loadComponent: () => import('./user/user-detail/user-detail.component').then((c) => c.UserDetailComponent),
     title: 'Profile',

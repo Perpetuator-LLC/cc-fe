@@ -7,25 +7,19 @@
     <style>
       .dot-1 {
         fill: #fff;
-        /*fill: #f9f9ff;*/
       }
       .dot-2 {
         fill: #fff;
-        /*fill: #ed5525;*/
-        /*fill: #fff;*/
       }
       .trail-1 {
         fill: none;
         stroke: #fff;
-        /*stroke: #f9f9ff;*/
         stroke-width: 4;
         stroke-linecap: round;
       }
       .trail-2 {
         fill: none;
-        /*stroke: #ed5525;*/
         stroke: #fff;
-        /*stroke: #fff;*/
         stroke-width: 4;
         stroke-linecap: round;
       }

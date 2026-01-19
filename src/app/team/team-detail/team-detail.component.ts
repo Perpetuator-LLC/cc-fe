@@ -8,7 +8,7 @@ import { MemberResult, TeamsService } from '../teams.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
-import { MatFormField, MatPrefix } from '@angular/material/form-field';
+import { MatPrefix } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCell,
@@ -46,7 +46,6 @@ import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialo
     MatProgressBarModule,
     MatCard,
     ReactiveFormsModule,
-    MatFormField,
     MatButton,
     MatTable,
     MatHeaderCell,
