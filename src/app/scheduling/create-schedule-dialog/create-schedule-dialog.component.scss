@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 mat-dialog-content {
   overflow-y: auto;
   min-width: 600px;
@@ -22,6 +22,63 @@ mat-dialog-content {
   flex-wrap: wrap;
   gap: 16px;
   align-items: flex-start;
+
+  &.schedule-time-row {
+    position: relative;
+
+    flex-direction: column;
+    gap: 0;
+    justify-content: center;
+
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 8px;
+
+    background-color: var(--mat-form-field-filled-container-color);
+
+    &:focus-within {
+      span {
+        color: var(--md-sys-color-primary);
+      }
+    }
+
+    span {
+      position: absolute;
+      top: 4px;
+
+      display: block;
+
+      font-family: var(--mat-form-field-container-text-font);
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--mat-form-field-filled-label-text-color);
+    }
+
+    input {
+      position: relative;
+      top: 8px;
+
+      width: 100%;
+      border: 0;
+
+      font-family: var(--mat-form-field-container-text-font);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--mat-form-field-filled-input-text-color);
+
+      background: transparent;
+      /* Change calendar icon color */
+      &::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        filter: invert(1); /* white icon */
+      }
+
+      &:focus {
+        outline: 0;
+      }
+    }
+  }
 
   mat-form-field {
     flex: 1;
