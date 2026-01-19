@@ -40,6 +40,8 @@ export enum JobKind {
   CREATE_RESEARCH_EPISODE = 'CREATE_RESEARCH_EPISODE',
   PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN = 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN',
   GENERATE_PODCAST = 'GENERATE_PODCAST',
+  GENERATE_PODCAST_IMAGE = 'GENERATE_PODCAST_IMAGE',
+  GENERATE_IMAGE = 'GENERATE_IMAGE',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -104,6 +106,10 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN;
     case 'GENERATE_PODCAST':
       return JobKind.GENERATE_PODCAST;
+    case 'GENERATE_PODCAST_IMAGE':
+      return JobKind.GENERATE_PODCAST_IMAGE;
+    case 'GENERATE_IMAGE':
+      return JobKind.GENERATE_IMAGE;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -173,6 +179,10 @@ export const kindToString = (kind: string) => {
       return 'Publish Research Topic Episode Chain';
     case JobKind.GENERATE_PODCAST:
       return 'Generate Podcast';
+    case JobKind.GENERATE_PODCAST_IMAGE:
+      return 'Generate Podcast Image';
+    case JobKind.GENERATE_IMAGE:
+      return 'Generate Image';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
@@ -242,6 +252,10 @@ export const iconForJob = (kind: string): string => {
       return 'rocket_launch';
     case JobKind.GENERATE_PODCAST:
       return 'auto_awesome';
+    case JobKind.GENERATE_PODCAST_IMAGE:
+      return 'image';
+    case JobKind.GENERATE_IMAGE:
+      return 'palette';
     case JobKind.TEST_RAISE:
       return 'bug_report';
     case JobKind.TEST_PRINT:

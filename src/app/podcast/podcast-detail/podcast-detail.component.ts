@@ -50,6 +50,15 @@ import { ShareButtonsComponent } from '../../share-buttons/share-buttons.compone
 import { ShareService } from '../../share.service';
 import { EpisodesTableComponent } from '../../episode/episodes-table/episodes-table.component';
 import { RssFeedTableComponent } from '../rss-feed-table/rss-feed-table.component';
+import {
+  RegenerateImageDialogComponent,
+  RegenerateImageDialogResult,
+} from '../regenerate-image-dialog/regenerate-image-dialog.component';
+import {
+  ImageHistoryDialogComponent,
+  ImageHistoryDialogData,
+} from '../image-history-dialog/image-history-dialog.component';
+import { JobStatus, stringToJobStatus } from '../../jobs/job.service';
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -121,6 +130,7 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   // Debounce flags for create episode buttons
   protected creatingNewsEpisode = false;
   protected creatingResearchEpisode = false;
+  protected generatingImage = false;
   private readonly tabNames = [
     'episodes',
     'settings',
@@ -735,6 +745,91 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
             this.messageService.error(`Failed to delete podcast image: ${err.message}`);
           },
         });
+      }
+    });
+  }
+
+  /**
+   * Open dialog to regenerate podcast cover image using AI
+   */
+  regenerateImage(): void {
+    const dialogRef = this.dialog.open(RegenerateImageDialogComponent, {
+      width: '500px',
+    });
+
+    dialogRef.afterClosed().subscribe((result: RegenerateImageDialogResult | undefined) => {
+      if (result) {
+        this.generatingImage = true;
+        this.podcastsService.regeneratePodcastImage(this.podcastUuid, result.customPromptHint).subscribe({
+          next: ({ job }) => {
+            this.jobService.addJob(job);
+            this.messageService.success('Image generation started. This may take a few moments.');
+            // Monitor job completion to refresh podcast data
+            this.monitorImageGenerationJob(job.uuid);
+          },
+          error: (err) => {
+            this.generatingImage = false;
+            this.messageService.error(`Failed to start image generation: ${err.message}`);
+          },
+        });
+      }
+    });
+  }
+
+  /**
+   * Monitor image generation job and refresh podcast data when complete
+   */
+  private monitorImageGenerationJob(jobUuid: string): void {
+    const checkInterval = setInterval(() => {
+      const jobs = this.jobService.jobs();
+      const job = jobs.find((j) => j.uuid === jobUuid);
+
+      if (!job) {
+        // Job was removed (cleanup), check if it completed
+        clearInterval(checkInterval);
+        this.generatingImage = false;
+        this.refreshPodcastData();
+        return;
+      }
+
+      const status = stringToJobStatus(job.status);
+      if (status === JobStatus.COMPLETED) {
+        clearInterval(checkInterval);
+        this.generatingImage = false;
+        this.messageService.success('Podcast cover image generated successfully!');
+        this.refreshPodcastData();
+      } else if (status === JobStatus.FAILED) {
+        clearInterval(checkInterval);
+        this.generatingImage = false;
+        this.messageService.error(`Image generation failed: ${job.error || 'Unknown error'}`);
+      }
+    }, 1000);
+
+    // Clear interval after 5 minutes as a safety measure
+    setTimeout(
+      () => {
+        clearInterval(checkInterval);
+        if (this.generatingImage) {
+          this.generatingImage = false;
+          this.messageService.error('Image generation timed out. Please check job status.');
+        }
+      },
+      5 * 60 * 1000,
+    );
+  }
+
+  /**
+   * Open dialog to view and manage image history
+   */
+  openImageHistory(): void {
+    const dialogRef = this.dialog.open(ImageHistoryDialogComponent, {
+      width: '600px',
+      data: { podcastUuid: this.podcastUuid } as ImageHistoryDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.reverted) {
+        this.refreshPodcastData();
       }
     });
   }
