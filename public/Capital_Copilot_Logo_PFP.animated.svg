@@ -49,32 +49,88 @@
        cx="16"
        cy="4"
        r="2"
-       id="circle1" />
+       opacity="0"
+       id="circle1">
+      <animate
+         fill="freeze"
+         attributeName="opacity"
+         dur="0.3s"
+         from="0"
+         to="1"
+         begin="0.2s" />
+    </circle>
     <circle
        class="dot-1"
        cx="10"
        cy="10"
        r="2"
-       id="circle2" />
+       opacity="0"
+       id="circle2">
+      <animate
+         fill="freeze"
+         attributeName="opacity"
+         dur="0.3s"
+         from="0"
+         to="1"
+         begin="0.4s" />
+    </circle>
     <circle
        class="dot-2"
        cx="16"
        cy="16"
        r="2"
-       id="circle3" />
+       opacity="0"
+       id="circle3">
+      <animate
+         fill="freeze"
+         attributeName="opacity"
+         dur="0.2s"
+         from="0"
+         to="1"
+         begin="0.5s" />
+    </circle>
     <circle
        class="dot-1"
        cx="10"
        cy="22"
        r="2"
-       id="circle4" />
+       opacity="0"
+       id="circle4">
+      <animate
+         fill="freeze"
+         attributeName="opacity"
+         dur="0.3s"
+         from="0"
+         to="1"
+         begin="0.3s" />
+    </circle>
     <path
        class="trail-2"
        d="m 10,4 a 6,6 0 1 0 0,12"
-       id="path4" />
+       stroke-dasharray="18.85"
+       stroke-dashoffset="18.85"
+       id="path4">
+      <animate
+         fill="freeze"
+         attributeName="stroke-dashoffset"
+         dur="2s"
+         from="18.85"
+         to="0"
+         begin="0s" />
+    </path>
     <path
        class="trail-1"
        d="M 16,22 A 6,6 0 1 0 16,10"
-       id="path5" />
+       stroke-dasharray="18.85"
+       stroke-dashoffset="18.85"
+       id="path5">
+      <animate
+         fill="freeze"
+         attributeName="stroke-dashoffset"
+         dur="2s"
+         from="18.85"
+         to="0"
+         begin="0s" />
+    </path>
   </g>
 </svg>

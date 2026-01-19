@@ -176,6 +176,25 @@ mat-divider {
       object-fit: cover;
     }
 
+    .podcast-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+
+      background: var(--md-sys-color-surface-container-high);
+
+      mat-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+
     .name {
       display: flex;
       flex-direction: column;

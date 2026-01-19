@@ -137,7 +137,13 @@
         @if (isLoggedIn()) {
           <mat-card class="podcast-card" *ngFor="let podcast of authPodcasts">
             <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-link">
-              <img [src]="podcast.thumbnailUrl || '/image.png'" alt="{{ podcast.name }}" class="podcast-image" />
+              @if (podcast.thumbnailUrl) {
+                <img [src]="podcast.thumbnailUrl" alt="{{ podcast.name }}" class="podcast-image" />
+              } @else {
+                <div class="podcast-placeholder">
+                  <mat-icon>podcasts</mat-icon>
+                </div>
+              }
             </a>
             <mat-card-content>
               <div class="status-badge" [class.enabled]="podcast.enabled" [class.disabled]="!podcast.enabled">
@@ -169,11 +175,13 @@
               [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
               class="podcast-link"
             >
-              <img
-                [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'"
-                alt="{{ podcast.name }}"
-                class="podcast-image"
-              />
+              @if (podcast.thumbnailUrl || podcast.imageUrl) {
+                <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="{{ podcast.name }}" class="podcast-image" />
+              } @else {
+                <div class="podcast-placeholder">
+                  <mat-icon>podcasts</mat-icon>
+                </div>
+              }
             </a>
             <mat-card-content>
               <h3>
@@ -253,11 +261,17 @@
                 [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
                 class="podcast-link"
               >
-                <img
-                  [src]="podcast.thumbnailUrl || podcast.imageUrl || '/image.png'"
-                  alt="{{ podcast.name }}"
-                  class="podcast-image"
-                />
+                @if (podcast.thumbnailUrl || podcast.imageUrl) {
+                  <img
+                    [src]="podcast.thumbnailUrl || podcast.imageUrl"
+                    alt="{{ podcast.name }}"
+                    class="podcast-image"
+                  />
+                } @else {
+                  <div class="podcast-placeholder">
+                    <mat-icon>podcasts</mat-icon>
+                  </div>
+                }
               </a>
               <mat-card-content>
                 <h3>

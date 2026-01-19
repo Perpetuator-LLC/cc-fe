@@ -36,6 +36,11 @@ ng build --configuration=development
 
 ## Architecture Overview
 
+The frontend is a **single Node.js Express server** that handles:
+1. Static file serving (JS, CSS, images)
+2. Server-side rendering (SSR) for specific routes
+3. Client-side rendering for all other routes
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Internet                                │
@@ -43,25 +48,22 @@ ng build --configuration=development
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      nginx (Port 443/80)                        │
+│                    nginx (reverse proxy)                        │
 │  • SSL termination                                              │
-│  • Static file serving (JS, CSS, images)                        │
-│  • Gzip compression                                             │
-│  • Cache headers                                                │
-│  • Route SSR requests to Express                                │
-└──────────┬─────────────────────────────────┬────────────────────┘
-           │                                 │
-           │ Static files                    │ SSR routes only
-           │ (90%+ of requests)              │ /a/:code
-           ▼                                 │ /podcasts/:id
-┌──────────────────────┐                     │ /episodes/:id
-│  dist/.../browser/   │                     ▼
-│  • *.js              │         ┌────────────────────────┐
-│  • *.css             │         │  Express SSR (PM2)     │
-│  • assets/*          │         │  Port 4000             │
-│  • index.html        │         │  • Server-side render  │
-└──────────────────────┘         │  • OG meta tags        │
-                                 └────────────────────────┘
+│  • Optional: Gzip, caching                                      │
+│  • Routes to frontend (container or PM2 process)                │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Frontend (Node.js Express Server)                 │
+│               server/server.mjs - Port 4000                     │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ • Serves static files from /browser                        │ │
+│  │ • SSR for: /a/:code, /podcasts/:id, /episodes/:id          │ │
+│  │ • Client-side rendering for all other routes               │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## SSR Routes
@@ -73,25 +75,126 @@ SSR is enabled only for social media link previews:
 
 All other routes serve `index.html` and use client-side rendering.
 
+**Configuration:** See `src/app/app.routes.server.ts` for SSR route definitions.
+
 ## Build Output
 
 After `yarn build`:
 ```
 dist/capital-copilot-fe/
-├── browser/        # Static assets (served by nginx)
-│   ├── *.js
-│   ├── *.css
+├── browser/              # Static assets
 │   ├── index.html
-│   └── assets/
-└── server/
-    └── server.mjs  # Express SSR server (PM2)
+│   ├── *.js              # JavaScript bundles (hashed)
+│   ├── *.css             # CSS bundles (hashed)
+│   └── assets/           # Images, fonts, etc.
+├── server/               # SSR server code
+│   ├── server.mjs        # Express server entry point
+│   ├── main.server.mjs   # Angular SSR bootstrap
+│   └── chunk-*.mjs       # Lazy-loaded chunks
+├── 3rdpartylicenses.txt
+└── prerendered-routes.json
 ```
 
 ---
 
-## Deployment
+## Deployment Options
 
-### Quick Reference (for deployment scripts)
+### Option 1: Docker (Recommended for Production)
+
+See `logs/ai_link/fe74_docker_deployment_ssr.md` for complete Docker documentation.
+
+#### Dockerfile
+
+```dockerfile
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Copy pre-built dist folder
+COPY dist/capital-copilot-fe ./
+
+ENV NODE_ENV=production
+ENV PORT=4000
+
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget -q --spider http://localhost:4000/ || exit 1
+
+CMD ["node", "server/server.mjs"]
+```
+
+#### Docker Build & Run
+
+```bash
+# Build the app
+yarn build
+
+# Build Docker image
+docker build -t capital-copilot-fe:latest .
+
+# Run container
+docker run -d -p 4000:4000 capital-copilot-fe:latest
+
+# Verify
+curl -s http://localhost:4000/ | head -20
+```
+
+#### Docker Compose Example
+
+```yaml
+services:
+  frontend:
+    build: ./capital-copilot-fe
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+```
+
+#### nginx Configuration (Docker)
+
+When using Docker, nginx just proxies to the container:
+
+```nginx
+upstream frontend {
+    server frontend:4000;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name capitalcopilot.io;
+
+    ssl_certificate /etc/letsencrypt/live/capitalcopilot.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/capitalcopilot.io/privkey.pem;
+
+    location / {
+        proxy_pass http://frontend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+---
+
+### Option 2: PM2 (Traditional Server)
+
+#### Quick Reference (for deployment scripts)
 
 ```bash
 # ==============================================================================
@@ -134,7 +237,7 @@ EOF
 ssh $REMOTE_USER@$REMOTE_HOST "curl -s http://localhost:4000/a/test | grep -q 'og:title' && echo 'SSR OK' || echo 'SSR FAILED'"
 ```
 
-### Production Directory Structure
+#### Production Directory Structure (PM2)
 
 After deployment, the production server should have:
 ```
@@ -152,11 +255,11 @@ After deployment, the production server should have:
     └── pm2-error.log
 ```
 
-### First-Time Setup (on production server)
+#### First-Time Setup (on production server)
 
 ```bash
-# Install Node.js 20+ and PM2
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+# Install Node.js 22+ and PM2
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 sudo npm install -g pm2
 
@@ -172,31 +275,7 @@ pm2 save
 pm2 startup  # Follow instructions to enable auto-start on reboot
 ```
 
-### Step 1: Build and Deploy Files
-
-```bash
-# Build
-yarn build
-
-# Copy to production server
-rsync -avz dist/capital-copilot-fe/ user@server:/var/www/capital-copilot-fe/
-```
-
-### Step 2: Start Express SSR Server
-
-```bash
-# Install PM2 globally (once)
-npm install -g pm2
-
-# Start with ecosystem file
-pm2 start ecosystem.config.cjs
-
-# Enable auto-restart on reboot
-pm2 startup
-pm2 save
-```
-
-### Step 3: Configure nginx
+#### nginx Configuration (PM2)
 
 ```nginx
 # /etc/nginx/sites-available/capitalcopilot.com
@@ -219,73 +298,14 @@ server {
     gzip_types text/plain text/css text/xml text/javascript 
                application/javascript application/json application/xml;
 
-    # Root for static files
-    root /var/www/capital-copilot-fe/browser;
-
-    # ============================================================
-    # SSR ROUTES - Proxy to Express for server-side rendering
-    # These routes need SSR for social media link previews
-    # ============================================================
-    
-    # Affiliate landing pages
-    location ~ ^/a/[^/]+$ {
-        proxy_pass http://127.0.0.1:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Short cache for SSR responses (crawlers will get fresh data)
-        proxy_cache_valid 200 5m;
-    }
-
-    # Podcast pages
-    location ~ ^/podcasts/[^/]+$ {
-        proxy_pass http://127.0.0.1:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_valid 200 5m;
-    }
-
-    # Episode pages
-    location ~ ^/episodes/[^/]+$ {
-        proxy_pass http://127.0.0.1:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_valid 200 5m;
-    }
-
-    # ============================================================
-    # STATIC FILES - Served directly by nginx (high performance)
-    # ============================================================
-
-    # Hashed assets (JS, CSS) - immutable, cache forever
-    location ~* \.[a-f0-9]{16,}\.(js|css)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-        access_log off;
-    }
-
-    # Other static assets
-    location ~* \.(ico|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot)$ {
-        expires 1M;
-        add_header Cache-Control "public";
-        access_log off;
-    }
-
-    # ============================================================
-    # SPA FALLBACK - All other routes serve index.html
-    # Angular handles client-side routing
-    # ============================================================
+    # Proxy all requests to Express SSR server
     location / {
-        try_files $uri $uri/ /index.html;
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 
@@ -295,16 +315,6 @@ server {
     server_name capitalcopilot.com;
     return 301 https://$server_name$request_uri;
 }
-```
-
-### Step 4: Reload nginx
-
-```bash
-# Test configuration
-sudo nginx -t
-
-# Reload
-sudo systemctl reload nginx
 ```
 
 ---
@@ -344,11 +354,34 @@ pm2 delete capital-copilot-fe  # Remove from PM2
 
 ---
 
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `4000` | Port the Express server listens on |
+| `NODE_ENV` | `production` | Node environment |
+
+**Note:** API URLs are baked into the build. To change endpoints, rebuild the frontend.
+
+---
+
+## Resource Requirements
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| Memory (idle) | ~150MB | Node.js base + loaded chunks |
+| Memory (under load) | ~300-500MB | Depends on concurrent requests |
+| CPU | Low | Mostly I/O bound |
+| Disk | ~100MB | Built assets |
+| Startup time | ~3-5 seconds | Until ready to serve |
+
+---
+
 ## Troubleshooting
 
 ### SSR not working (no meta tags in curl)
-1. Check PM2 is running: `pm2 status`
-2. Check Express logs: `pm2 logs capital-copilot-fe`
+1. Check server is running: `pm2 status` or `docker ps`
+2. Check logs: `pm2 logs capital-copilot-fe` or `docker logs <container>`
 3. Test directly: `curl http://localhost:4000/a/testcode`
 4. Check nginx config: `sudo nginx -t`
 
@@ -357,6 +390,9 @@ pm2 delete capital-copilot-fe  # Remove from PM2
 - Check: `pm2 status` and `netstat -tlnp | grep 4000`
 
 ### Static files 404
-- Check root path in nginx config
+- Check Express is serving from correct path
 - Verify files exist: `ls /var/www/capital-copilot-fe/browser/`
 
+### Memory issues
+- Increase container/PM2 memory limits
+- Check for memory leaks in logs
