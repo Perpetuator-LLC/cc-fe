@@ -58,7 +58,7 @@ import {
   ImageHistoryDialogComponent,
   ImageHistoryDialogData,
 } from '../image-history-dialog/image-history-dialog.component';
-import { JobStatus, stringToJobStatus } from '../../jobs/job.service';
+
 @Component({
   selector: 'app-podcast-detail',
   templateUrl: './podcast-detail.component.html',
@@ -231,6 +231,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   imageUrl: string | null = null;
   thumbnailUrl: string | null = null;
   isDraggingImage = false;
+  // Cache buster to force browser to reload image after regeneration/revert
+  imageCacheBuster = Date.now();
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
@@ -255,11 +257,15 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastForm.get('imageUrl')?.valueChanges.subscribe((value) => {
         this.imageUrl = value;
+        // Update cache buster when image URL changes to force browser reload
+        this.imageCacheBuster = Date.now();
       }),
     );
     this.subscriptions.add(
       this.podcastForm.get('thumbnailUrl')?.valueChanges.subscribe((value) => {
         this.thumbnailUrl = value;
+        // Update cache buster when thumbnail URL changes to force browser reload
+        this.imageCacheBuster = Date.now();
       }),
     );
     this.loadTeams();
@@ -764,8 +770,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
           next: ({ job }) => {
             this.jobService.addJob(job);
             this.messageService.success('Image generation started. This may take a few moments.');
-            // Monitor job completion to refresh podcast data
-            this.monitorImageGenerationJob(job.uuid);
+            // Subscribe to WebSocket events for this job
+            this.subscribeToImageGenerationJob(job.uuid);
           },
           error: (err) => {
             this.generatingImage = false;
@@ -777,41 +783,42 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Monitor image generation job and refresh podcast data when complete
+   * Subscribe to WebSocket job events for image generation
    */
-  private monitorImageGenerationJob(jobUuid: string): void {
-    const checkInterval = setInterval(() => {
-      const jobs = this.jobService.jobs();
-      const job = jobs.find((j) => j.uuid === jobUuid);
-
-      if (!job) {
-        // Job was removed (cleanup), check if it completed
-        clearInterval(checkInterval);
-        this.generatingImage = false;
-        this.refreshPodcastData();
-        return;
-      }
-
-      const status = stringToJobStatus(job.status);
-      if (status === JobStatus.COMPLETED) {
-        clearInterval(checkInterval);
+  private subscribeToImageGenerationJob(jobUuid: string): void {
+    // Subscribe to job completed events
+    const completedSub = this.jobService.jobCompleted$.subscribe((job) => {
+      if (job.uuid === jobUuid) {
         this.generatingImage = false;
         this.messageService.success('Podcast cover image generated successfully!');
         this.refreshPodcastData();
-      } else if (status === JobStatus.FAILED) {
-        clearInterval(checkInterval);
+        completedSub.unsubscribe();
+        failedSub.unsubscribe();
+      }
+    });
+
+    // Subscribe to job failed events
+    const failedSub = this.jobService.jobFailed$.subscribe((job) => {
+      if (job.uuid === jobUuid) {
         this.generatingImage = false;
         this.messageService.error(`Image generation failed: ${job.error || 'Unknown error'}`);
+        completedSub.unsubscribe();
+        failedSub.unsubscribe();
       }
-    }, 1000);
+    });
 
-    // Clear interval after 5 minutes as a safety measure
+    // Add to component subscriptions so they get cleaned up on destroy
+    this.subscriptions.add(completedSub);
+    this.subscriptions.add(failedSub);
+
+    // Safety timeout after 5 minutes
     setTimeout(
       () => {
-        clearInterval(checkInterval);
         if (this.generatingImage) {
           this.generatingImage = false;
           this.messageService.error('Image generation timed out. Please check job status.');
+          completedSub.unsubscribe();
+          failedSub.unsubscribe();
         }
       },
       5 * 60 * 1000,
@@ -832,6 +839,18 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.refreshPodcastData();
       }
     });
+  }
+
+  /**
+   * Get the display image URL with cache-busting parameter
+   * This ensures the browser reloads the image after regeneration/revert
+   */
+  get displayImageUrl(): string | null {
+    const url = this.thumbnailUrl || this.imageUrl;
+    if (!url) return null;
+    // Add cache buster as query parameter
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${this.imageCacheBuster}`;
   }
 
   protected viewFullImage(): void {
@@ -863,16 +882,17 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   }
 
   private handleImageFile(file: File): void {
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      this.messageService.error('Please upload an image file (PNG, JPG, GIF, WEBP)');
+    // Supported MIME types per BE69: JPEG, PNG, WEBP, GIF
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!supportedTypes.includes(file.type)) {
+      this.messageService.error('Please upload an image file (JPEG, PNG, WEBP, or GIF)');
       return;
     }
 
-    // Check file size (1MB = 1048576 bytes)
-    const maxSizeInBytes = 1048576;
+    // Check file size (5MB = 5242880 bytes) per BE69
+    const maxSizeInBytes = 5 * 1024 * 1024;
     if (file.size > maxSizeInBytes) {
-      this.messageService.error('File size exceeds the maximum limit of 1MB. Please upload a smaller image.');
+      this.messageService.error('File size exceeds the maximum limit of 5MB. Please upload a smaller image.');
       return;
     }
 

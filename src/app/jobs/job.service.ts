@@ -414,6 +414,20 @@ export class JobService extends BaseService implements OnDestroy {
     this.jobsWebSocketService.addJob(job);
   }
 
+  /**
+   * Observable for job completed events (pushed via WebSocket)
+   */
+  get jobCompleted$() {
+    return this.jobsWebSocketService.jobCompleted$;
+  }
+
+  /**
+   * Observable for job failed events (pushed via WebSocket)
+   */
+  get jobFailed$() {
+    return this.jobsWebSocketService.jobFailed$;
+  }
+
   getJobTransitions(newJobs: Job[], previousJobs: Job[], status: string) {
     const transitionedJobs: Job[] = [];
 
