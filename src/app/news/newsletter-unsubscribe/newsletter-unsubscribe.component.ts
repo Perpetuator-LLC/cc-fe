@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NewsletterHttpService } from '../newsletter-http.service';
 
-type UnsubscribeState = 'loading' | 'success' | 'error' | 'missing-email';
+type UnsubscribeState = 'loading' | 'success' | 'error' | 'not-found' | 'missing-email';
 
 @Component({
   selector: 'app-newsletter-unsubscribe',
@@ -29,19 +29,18 @@ export class NewsletterUnsubscribeComponent implements OnInit {
 
   ngOnInit(): void {
     this.email = this.route.snapshot.queryParamMap.get('email');
-    const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!this.email) {
       this.state = 'missing-email';
       return;
     }
 
-    this.unsubscribe(this.email, token || undefined);
+    this.unsubscribe(this.email);
   }
 
-  private unsubscribe(email: string, token?: string): void {
+  private unsubscribe(email: string): void {
     this.state = 'loading';
-    this.newsletterHttpService.unsubscribe(email, token).subscribe({
+    this.newsletterHttpService.unsubscribe(email).subscribe({
       next: (response) => {
         if (response.success) {
           this.state = 'success';
@@ -51,16 +50,21 @@ export class NewsletterUnsubscribeComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.state = 'error';
-        this.errorMessage = err.error?.message || 'Failed to unsubscribe. Please try again later.';
+        // Handle 404 - email not found in subscribers
+        if (err.status === 404) {
+          this.state = 'not-found';
+          this.errorMessage = 'This email is not subscribed to our newsletter.';
+        } else {
+          this.state = 'error';
+          this.errorMessage = err.error?.message || 'Failed to unsubscribe. Please try again later.';
+        }
       },
     });
   }
 
   retry(): void {
     if (this.email) {
-      const token = this.route.snapshot.queryParamMap.get('token');
-      this.unsubscribe(this.email, token || undefined);
+      this.unsubscribe(this.email);
     }
   }
 }

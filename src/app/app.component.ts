@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { PostLoginLayoutComponent } from './layout/post-login/post-login-layout.component';
@@ -63,6 +63,7 @@ export class AppComponent {
       /^\/episodes(\/|$)/, // Public episode pages
       /^\/categories(\/|$)/, // Public category pages
       /^\/finance(\/|$)/, // Public finance page
+      /^\/newsletter\/unsubscribe/, // Newsletter unsubscribe page
       /^\/dev\//, // Dev tools (buttons showcase, etc.)
     ];
 
