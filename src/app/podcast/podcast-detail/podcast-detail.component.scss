@@ -1173,6 +1173,12 @@ mat-divider {
   &.research-button {
     color: var(--md-sys-color-on-tertiary);
     background-color: var(--md-sys-color-tertiary);
+    
+    .research-btn{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
   }
 
   @media screen and (width <= 900px) {

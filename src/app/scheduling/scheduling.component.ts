@@ -11,13 +11,12 @@ import { ToolbarService } from '../layout/toolbar.service';
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { CreateScheduleDialogComponent } from './create-schedule-dialog/create-schedule-dialog.component';
-import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { parseScheduleArgs } from '../utils/schedule';
 import { CommonModule } from '@angular/common';
 
@@ -31,7 +30,6 @@ import { CommonModule } from '@angular/common';
     MatPaginatorModule,
     MatCard,
     MatCardContent,
-    MatCardHeader,
     MatButton,
     MatIconButton,
     MatIcon,
@@ -41,7 +39,6 @@ import { CommonModule } from '@angular/common';
     MatMenuItem,
     MatMenuTrigger,
     MatDialogModule,
-    SvgIconComponent,
   ],
   templateUrl: './scheduling.component.html',
   styleUrl: './scheduling.component.scss',
