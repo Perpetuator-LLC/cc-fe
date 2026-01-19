@@ -1,0 +1,66 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="unsubscribe-container">
+  <mat-card class="unsubscribe-card">
+    @switch (state) {
+      @case ('loading') {
+        <mat-card-content class="state-content">
+          <mat-spinner diameter="48" />
+          <h2>Unsubscribing...</h2>
+          <p>Please wait while we process your request.</p>
+        </mat-card-content>
+      }
+
+      @case ('success') {
+        <mat-card-content class="state-content success">
+          <mat-icon class="state-icon">check_circle</mat-icon>
+          <h2>Successfully Unsubscribed</h2>
+          <p>You have been unsubscribed from our newsletter.</p>
+          <p class="email-display">{{ email }}</p>
+          <p class="note">You will no longer receive newsletter emails from us.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-flat-button color="primary" routerLink="/home">
+            <mat-icon>home</mat-icon>
+            Go to Home
+          </a>
+        </mat-card-actions>
+      }
+
+      @case ('error') {
+        <mat-card-content class="state-content error">
+          <mat-icon class="state-icon">error</mat-icon>
+          <h2>Unsubscribe Failed</h2>
+          <p>{{ errorMessage }}</p>
+          @if (email) {
+            <p class="email-display">{{ email }}</p>
+          }
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button (click)="retry()">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+          <a mat-flat-button color="primary" routerLink="/home">
+            <mat-icon>home</mat-icon>
+            Go to Home
+          </a>
+        </mat-card-actions>
+      }
+
+      @case ('missing-email') {
+        <mat-card-content class="state-content error">
+          <mat-icon class="state-icon">warning</mat-icon>
+          <h2>Invalid Unsubscribe Link</h2>
+          <p>The unsubscribe link is missing required information.</p>
+          <p class="note">Please use the link from the email you received.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-flat-button color="primary" routerLink="/home">
+            <mat-icon>home</mat-icon>
+            Go to Home
+          </a>
+        </mat-card-actions>
+      }
+    }
+  </mat-card>
+</div>
