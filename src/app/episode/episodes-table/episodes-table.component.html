@@ -9,7 +9,7 @@
     </mat-form-field>
 
     @if (!podcastUuid) {
-    <mat-form-field appearance="outline" [hidden]="loadingPodcasts">
+    <mat-form-field appearance="fill" [hidden]="loadingPodcasts">
       <mat-label>Podcast</mat-label>
       <mat-select [(value)]="selectedPodcast" (selectionChange)="onPodcastChange()">
         <mat-option [value]="null">All Podcasts</mat-option>

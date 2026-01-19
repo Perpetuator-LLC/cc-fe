@@ -239,7 +239,6 @@
 
     mat-chip-option {
       cursor: pointer;
-
       min-height: 28px;
       padding: 4px 12px;
       border-radius: 16px;
@@ -295,6 +294,10 @@
 
   @media screen and (width <= 576px) {
     padding: 8px;
+    table{
+      overflow: auto;
+      display: block;
+    }
   }
 }
 

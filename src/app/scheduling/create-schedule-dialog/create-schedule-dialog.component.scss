@@ -22,6 +22,50 @@ mat-dialog-content {
   flex-wrap: wrap;
   gap: 16px;
   align-items: flex-start;
+  &.schedule-time-row {
+    background-color: var(--mat-form-field-filled-container-color);
+    height: 48px;
+    border-radius: 8px;
+    padding: 0 16px;
+    flex-direction: column;
+    box-sizing: border-box;
+    gap: 0;
+    justify-content: center;
+    position: relative;
+    &:focus-within{
+      span{
+        color:var(--md-sys-color-primary) !important
+      }
+    }
+    span {
+      display: block;
+      position: absolute;
+      font-size: 12px;
+      font-weight: 400;
+      top: 2px;
+      font-family: var(--mat-form-field-container-text-font);
+      color: var(--mat-form-field-filled-label-text-color);
+    }
+    input {
+      background: transparent;
+      border: 0;
+      position: relative;
+      color: var(--mat-form-field-filled-input-text-color);
+      top: 8px;
+      font-size: 13px;
+      font-weight: 400;
+      font-family: var(--mat-form-field-container-text-font);
+      width: 100%;
+      &:focus{
+        outline: 0;
+      }
+      /* Change calendar icon color */
+      &::-webkit-calendar-picker-indicator {
+        filter: invert(1); /* white icon */
+        cursor: pointer;
+      }
+    }
+  }
 
   mat-form-field {
     flex: 1;
