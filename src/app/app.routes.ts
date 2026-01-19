@@ -43,7 +43,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: {
       icon: 'terminal',
-      showInMenu: true,
+      showInMenu: false, // TODO: Re-enable after publish
     },
   },
   {

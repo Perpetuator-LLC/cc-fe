@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
@@ -24,6 +24,17 @@ const angularApp = new AngularNodeAppEngine();
  * });
  * ```
  */
+
+/**
+ * Health check endpoint for container orchestration and monitoring.
+ * Returns server status and timestamp.
+ */
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 /**
  * Serve static files from /browser
