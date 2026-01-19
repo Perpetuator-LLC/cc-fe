@@ -27,6 +27,7 @@
     "css:compare": "node scripts/analyze-css-size.js --compare",
     "generate": "graphql-codegen",
     "theme:generate": "tsx scripts/generate-palettes.ts",
+    "favicon": "node scripts/generate-favicons.cjs",
     "docs:graphql": "spectaql spectaql-config.yml 2>&1 | grep -v 'Deprecation Warning' | grep -v 'legacy-js-api' | grep -v 'More info' | grep -v '@import' | grep -v '╷' | grep -v '╵' | grep -v 'scss' || true",
     "check-copyright": "node scripts/check-copyright.js"
   },
@@ -108,6 +109,7 @@
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "favicons": "^7.2.0",
     "husky": "^9.1.4",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
