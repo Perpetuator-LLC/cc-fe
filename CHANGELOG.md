@@ -1,3 +1,37 @@
+# Changelog from v0.28.1 to v0.29.0
+
+This release introduces a comprehensive terminal interface with AI-powered autocomplete, real-time WebSocket updates, and interactive charting capabilities. Major improvements include progressive chart data loading, currency handling for international stocks, DCF valuation analysis, and affiliate revenue visualization using ECharts.
+
+## Enhancements
+
+- **Terminal Interface**: Added AI-powered terminal with real-time stock charts, WebSocket-based autocomplete, command history navigation (rolodex-style), keyboard shortcuts, and FQN (Fully Qualified Name) format for symbol identification
+- **Chart Improvements**: Implemented progressive data loading with free zoom navigation, volume bars, extended hours support and shading, timezone handling, crosshair instant response, user preferences with backend sync, and URL persistence for period selection
+- **Stock Data Features**: Added currency handling and formula displays for international stocks, comprehensive fundamentals visualization with new charts and metrics, and DCF valuation analysis with interactive charts
+- **Watchlist Enhancements**: Introduced sector, industry, and exchange watchlists with pagination, hierarchical menu navigation, rename/duplicate/delete actions, market cap sorting, and stock search capabilities
+- **Real-time Updates**: Replaced job polling with WebSocket-based real-time monitoring, added real-time quote subscriptions with symbol filtering, and improved job status displays with stock symbol support
+- **Affiliate Features**: Added ECharts-based revenue flow visualization (sankey charts), custom affiliate messages, commission showcase with professional terminology, and SSR support for landing pages with dynamic meta tags
+- **Authentication**: Implemented automatic token refresh with rotation support, refresh token awareness in state handling, and token refresh telemetry
+- **UI/UX Improvements**: Added theme showcase, redesigned status badges with outlined translucent style, prevented theme flash on page load, comprehensive favicon generation system, improved newsletter unsubscribe flow, and added transaction list filtering with detailed breakdown
+- **Podcast Features**: Added AI-powered cover image generation with history tracking and created date column to podcast lists
+- **Documentation**: Reorganized structure with consolidated guides, added asset optimization guide with SVG compression tooling, shared test library documentation, and GraphQL WebSocket integration guides
+
+## Cleanups
+
+- Removed 110+ unused SCSS classes and updated build tooling
+- Replaced custom markdown parser with marked library
+- Standardized CSS property ordering across components
+- Removed unnecessary Angular effect options
+- Extracted reusable components (chart header, terminal views, FQN chip)
+- Replaced Material form-field with native select for chart interval picker
+- Simplified watchlist menu using Material Design submenu pattern
+- Standardized GraphQL types with Node suffix for consistency
+- Migrated command history to Relay-style pagination
+- Replaced Telegram icon SVGs with Material inline SVG
+- Removed Docker configuration initially, then re-added with improved placeholder handling
+- Enabled Fetch API and normalized backend snake_case to camelCase
+- Simplified job UUID extraction to use direct getter methods
+
+
 # Changelog from v0.28.0 to v0.28.1
 
 This release focuses on authentication improvements and URL structure modernization. The authentication system now includes automatic token refresh with rotation support and telemetry tracking, while URL paths have been refactored from short paths to semantic `/media` routes for better clarity.
