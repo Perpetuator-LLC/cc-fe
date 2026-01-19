@@ -94,9 +94,11 @@
             @if (creatingResearchEpisode) {
               <mat-spinner diameter="18" />
             } @else {
-              <mat-icon>science</mat-icon>
+              <span class="research-btn">
+                <mat-icon>science</mat-icon>
+                <span>Research Episode</span>
+              </span>
             }
-            <span>Research Episode</span>
           </button>
         </span>
         <span matTooltip="Creates an empty episode that must be manually entered" class="button-wrapper">

@@ -1498,3 +1498,7 @@ mat-nav-list {
     padding: 0;
   }
 }
+
+.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before{
+  border: 0 !important;
+}

@@ -113,6 +113,10 @@ mat-divider {
           font-size: 32px;
           font-weight: 600;
           color: var(--md-sys-color-on-surface);
+          background: transparent;
+          border: 0;
+          box-shadow: none;
+          outline: none;
         }
 
         p {

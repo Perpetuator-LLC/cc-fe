@@ -23,10 +23,9 @@
       <div class="title">
         <form class="team-title" [formGroup]="teamForm">
           <div class="member-row team-name-input">
-            <mat-form-field appearance="fill">
-              <mat-label>Team Name</mat-label>
-              <input matInput formControlName="name" />
-            </mat-form-field>
+            <div>
+              <input #teamNameInput type="text" formControlName="name" class="team-input" placeholder="Team Name" />
+            </div>
             <button
               class="edit-btn"
               mat-icon-button
@@ -147,10 +146,12 @@
                     <img src="/image.png" alt="img" />
                   }
                   <div class="name">
-                   <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
+                    <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                       {{ podcast.name }}
                     </a>
-                    <span>{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span>
+                    <span
+                      >{{ formatTimeAgo(podcast.latestEpisodeDate) }} • {{ formatViewCount(podcast.viewCount) }}</span
+                    >
                   </div>
                 </div>
               </mat-cell>
@@ -192,7 +193,11 @@
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
-                  <button mat-menu-item [routerLink]="['/media/podcasts', podcast.uuid]" [queryParams]="{ tab: 'danger-zone' }">
+                  <button
+                    mat-menu-item
+                    [routerLink]="['/media/podcasts', podcast.uuid]"
+                    [queryParams]="{ tab: 'danger-zone' }"
+                  >
                     <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
@@ -219,19 +224,18 @@
         </mat-card-content>
       </mat-tab>
       <mat-tab label="Danger Zone">
-          <mat-card-content>
-            <h3 class="no-margin-top">Danger Zone Settings</h3>
-            <p>Here you can find advanced and potentially destructive actions related to your team.</p>
-          </mat-card-content>
-          <mat-card class="danger-card md3-danger-zone">
-            <div class="danger-card-title">Delete Team</div>
-            <p>Once you delete a team, it will be permanently removed from the data.</p>
-            <button mat-flat-button class="delete-btn md3-danger-action" (click)="deleteTeamDialog()">
-              Delete this Team
-            </button>
-          </mat-card>
+        <mat-card-content>
+          <h3 class="no-margin-top">Danger Zone Settings</h3>
+          <p>Here you can find advanced and potentially destructive actions related to your team.</p>
+        </mat-card-content>
+        <mat-card class="danger-card md3-danger-zone">
+          <div class="danger-card-title">Delete Team</div>
+          <p>Once you delete a team, it will be permanently removed from the data.</p>
+          <button mat-flat-button class="delete-btn md3-danger-action" (click)="deleteTeamDialog()">
+            Delete this Team
+          </button>
+        </mat-card>
       </mat-tab>
     </mat-tab-group>
   </div>
-
 </div>
