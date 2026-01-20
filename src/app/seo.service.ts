@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
@@ -21,12 +21,10 @@ export interface SeoConfig {
 })
 export class SeoService {
   private defaultConfig: SeoConfig = {
-    title: 'Capital Copilot - AI-Powered Podcast Platform',
-    description:
-      'Create, manage, and distribute podcasts with AI-powered tools. ' +
-      'Discover amazing podcasts from our community.',
+    title: 'Capital Copilot - AI-Powered Stock Market Terminal',
+    description: 'Analyze stocks, track portfolios, and make smarter investment decisions ' + 'with AI-powered tools.',
     image: '/Capital_Copilot_Logo_PFP.png',
-    url: 'https://capitalcopilot.com',
+    url: 'https://capitalcopilot.io',
     type: 'website',
     twitterCard: 'summary_large_image',
   };
