@@ -51,6 +51,7 @@ export class SharedFooterComponent {
     { label: 'Theme Showcase', route: '/dev/theme', icon: 'palette', devOnly: true },
     { label: 'Button Showcase', route: '/dev/buttons', icon: 'smart_button', devOnly: true },
     { label: 'Charts Showcase', route: '/dev/charts', icon: 'analytics', devOnly: true },
+    { label: 'Social Preview', route: '/dev/social-preview', icon: 'share', devOnly: true },
     { label: 'Affiliate Admin', route: '/affiliate-admin', icon: 'admin_panel_settings', devOnly: true },
   ];
 
