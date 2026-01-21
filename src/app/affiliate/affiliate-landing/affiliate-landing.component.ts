@@ -145,10 +145,17 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     if (!this.affiliateData) return;
 
     const shareUrl = `${environment.SITE_URL}/a/${code}`;
-    const title = `Join ${this.affiliateData.affiliateUsername}'s Network | Capital Copilot`;
-    const description =
-      `Start your journey with Capital Copilot and become part of ` +
-      `${this.affiliateData.affiliateUsername}'s affiliate network.`;
+
+    // Use customMessage if available, otherwise fall back to default
+    const title = this.affiliateData.customMessage
+      ? this.affiliateData.customMessage
+      : `Join ${this.affiliateData.affiliateUsername}'s Network | Capital Copilot`;
+
+    // Use generic description that works for both custom messages and default
+    const description = this.affiliateData.customMessage
+      ? `Start your journey with Capital Copilot through this affiliate invitation.`
+      : `Start your journey with Capital Copilot and become part of
+      ${this.affiliateData.affiliateUsername}'s affiliate network.`;
 
     this.seoService.updateTags({
       title,

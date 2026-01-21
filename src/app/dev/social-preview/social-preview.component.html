@@ -1,0 +1,284 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="social-preview-container">
+  <header class="page-header">
+    <h1>
+      <mat-icon>share</mat-icon>
+      Social Media Preview Checker
+    </h1>
+    <p class="subtitle">
+      Test how your pages will appear when shared on Facebook, Twitter/X, LinkedIn, and other platforms.
+    </p>
+  </header>
+
+  <!-- URL Input Section -->
+  <mat-card class="input-section">
+    <mat-card-content>
+      <div class="url-input-row">
+        <mat-form-field appearance="outline" class="url-field">
+          <mat-label>Enter URL to check</mat-label>
+          <input
+            matInput
+            [(ngModel)]="urlInput"
+            placeholder="https://capitalcopilot.io/a/HUMN"
+            (keyup.enter)="fetchPreview()"
+          />
+          <mat-icon matSuffix>link</mat-icon>
+        </mat-form-field>
+        <button mat-flat-button color="primary" (click)="fetchPreview()" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            <ng-container>
+              <mat-icon>search</mat-icon>
+              Check Preview
+            </ng-container>
+          }
+        </button>
+      </div>
+
+      <div class="preset-urls">
+        <span class="preset-label">Quick test:</span>
+        @for (preset of presetUrls; track preset.url) {
+          <button mat-stroked-button class="preset-btn" (click)="selectPreset(preset.url)">
+            {{ preset.label }}
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Error Message -->
+  @if (errorMessage(); as errMsg) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon>error</mat-icon>
+        <span>{{ errMsg }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Results Section -->
+  @if (previewResult(); as res) {
+    <div class="results-section">
+      <!-- Validation Status -->
+      <mat-card class="validation-card" [class.has-warnings]="res.warnings.length > 0">
+        <mat-card-content>
+          @if (res.warnings.length === 0) {
+            <div class="validation-status success">
+              <mat-icon>check_circle</mat-icon>
+              <span>All required meta tags are present!</span>
+            </div>
+          } @else {
+            <div class="validation-status warning">
+              <mat-icon>warning</mat-icon>
+              <span>{{ res.warnings.length }} issue(s) found</span>
+            </div>
+            <ul class="warnings-list">
+              @for (warning of res.warnings; track warning) {
+                <li>{{ warning }}</li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Meta Tags Raw Data -->
+      <mat-card class="meta-data-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>code</mat-icon>
+            Meta Tags Data
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="meta-grid">
+            <div class="meta-section">
+              <h4>Page</h4>
+              <div class="meta-item">
+                <span class="meta-label">Title:</span>
+                <span class="meta-value">{{ res.tags.title || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Description:</span>
+                <span class="meta-value">{{ res.tags.description || '(not set)' }}</span>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <h4>Open Graph (Facebook, LinkedIn)</h4>
+              <div class="meta-item">
+                <span class="meta-label">og:title:</span>
+                <span class="meta-value">{{ res.tags.og.title || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">og:description:</span>
+                <span class="meta-value">{{ res.tags.og.description || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">og:image:</span>
+                <span class="meta-value">{{ res.tags.og.image || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">og:url:</span>
+                <span class="meta-value">{{ res.tags.og.url || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">og:type:</span>
+                <span class="meta-value">{{ res.tags.og.type || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">og:site_name:</span>
+                <span class="meta-value">{{ res.tags.og.site_name || '(not set)' }}</span>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <h4>Twitter Card (X)</h4>
+              <div class="meta-item">
+                <span class="meta-label">twitter:card:</span>
+                <span class="meta-value">{{ res.tags.twitter.card || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">twitter:title:</span>
+                <span class="meta-value">{{ res.tags.twitter.title || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">twitter:description:</span>
+                <span class="meta-value">{{ res.tags.twitter.description || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">twitter:image:</span>
+                <span class="meta-value">{{ res.tags.twitter.image || '(not set)' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">twitter:site:</span>
+                <span class="meta-value">{{ res.tags.twitter.site || '(not set)' }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Preview Cards -->
+      <h2 class="previews-heading">
+        <mat-icon>preview</mat-icon>
+        Platform Previews
+      </h2>
+
+      <div class="previews-grid">
+        <!-- Facebook Preview -->
+        <mat-card class="preview-card facebook">
+          <mat-card-header>
+            <mat-icon matCardAvatar class="platform-icon">facebook</mat-icon>
+            <mat-card-title>Facebook</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="facebook-preview">
+              @if (res.tags.og.image) {
+                <div class="fb-image">
+                  <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                </div>
+              }
+              <div class="fb-content">
+                <div class="fb-domain">{{ res.tags.og.site_name || 'capitalcopilot.io' }}</div>
+                <div class="fb-title">{{ res.tags.og.title || res.tags.title || 'No title' }}</div>
+                <div class="fb-description">
+                  {{ truncateText(res.tags.og.description || res.tags.description, 100) || 'No description' }}
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Twitter/X Preview -->
+        <mat-card class="preview-card twitter">
+          <mat-card-header>
+            <mat-icon matCardAvatar class="platform-icon">close</mat-icon>
+            <mat-card-title>Twitter / X</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="twitter-preview" [class.summary-large]="res.tags.twitter.card === 'summary_large_image'">
+              @if (res.tags.twitter.image && res.tags.twitter.card === 'summary_large_image') {
+                <div class="tw-image large">
+                  <img [src]="getImageUrl(res.tags.twitter.image, res.url)" alt="Preview image" class="preview-img" />
+                </div>
+              }
+              <div class="tw-content">
+                @if (res.tags.twitter.image && res.tags.twitter.card !== 'summary_large_image') {
+                  <div class="tw-image small">
+                    <img [src]="getImageUrl(res.tags.twitter.image, res.url)" alt="Preview image" class="preview-img" />
+                  </div>
+                }
+                <div class="tw-text">
+                  <div class="tw-title">
+                    {{ res.tags.twitter.title || res.tags.og.title || res.tags.title || 'No title' }}
+                  </div>
+                  <div class="tw-description">
+                    {{
+                      truncateText(
+                        res.tags.twitter.description || res.tags.og.description || res.tags.description,
+                        100
+                      ) || 'No description'
+                    }}
+                  </div>
+                  <div class="tw-domain">
+                    <mat-icon>link</mat-icon>
+                    {{ res.tags.twitter.site || 'capitalcopilot.io' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- LinkedIn Preview -->
+        <mat-card class="preview-card linkedin">
+          <mat-card-header>
+            <mat-icon matCardAvatar class="platform-icon">work</mat-icon>
+            <mat-card-title>LinkedIn</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="linkedin-preview">
+              @if (res.tags.og.image) {
+                <div class="li-image">
+                  <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                </div>
+              }
+              <div class="li-content">
+                <div class="li-title">{{ res.tags.og.title || res.tags.title || 'No title' }}</div>
+                <div class="li-domain">capitalcopilot.io</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Slack Preview -->
+        <mat-card class="preview-card slack">
+          <mat-card-header>
+            <mat-icon matCardAvatar class="platform-icon">tag</mat-icon>
+            <mat-card-title>Slack</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="slack-preview">
+              <div class="slack-bar"></div>
+              <div class="slack-content">
+                <div class="slack-site">{{ res.tags.og.site_name || 'Capital Copilot' }}</div>
+                <div class="slack-title">{{ res.tags.og.title || res.tags.title || 'No title' }}</div>
+                <div class="slack-description">
+                  {{ truncateText(res.tags.og.description || res.tags.description, 150) || 'No description' }}
+                </div>
+                @if (res.tags.og.image) {
+                  <div class="slack-image">
+                    <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                  </div>
+                }
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <p class="timestamp">Fetched at: {{ res.fetchedAt | date: 'medium' }}</p>
+    </div>
+  }
+</div>

@@ -44,11 +44,12 @@ export class SeoService {
       this.meta.updateTag({ name: 'twitter:title', content: finalConfig.title });
     }
 
-    // Update description
+    // Update description (truncate to recommended max length for social media)
     if (finalConfig.description) {
-      this.meta.updateTag({ name: 'description', content: finalConfig.description });
-      this.meta.updateTag({ property: 'og:description', content: finalConfig.description });
-      this.meta.updateTag({ name: 'twitter:description', content: finalConfig.description });
+      const truncatedDescription = this.truncateDescription(finalConfig.description);
+      this.meta.updateTag({ name: 'description', content: truncatedDescription });
+      this.meta.updateTag({ property: 'og:description', content: truncatedDescription });
+      this.meta.updateTag({ name: 'twitter:description', content: truncatedDescription });
     }
 
     // Update image
@@ -110,5 +111,24 @@ export class SeoService {
     }
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://capitalcopilot.com';
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  /**
+   * Truncates description to recommended max length for social media (200 chars)
+   * Tries to break at word boundary and adds ellipsis if truncated
+   */
+  private truncateDescription(text: string, maxLength = 197): string {
+    if (!text || text.length <= maxLength) {
+      return text;
+    }
+
+    // Find the last space before maxLength to avoid cutting words
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+
+    // If there's a space, cut at the word boundary; otherwise just cut
+    const cutPoint = lastSpace > maxLength * 0.7 ? lastSpace : maxLength;
+
+    return text.substring(0, cutPoint).trim() + '...';
   }
 }
