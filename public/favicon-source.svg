@@ -1,37 +1,122 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Favicon source - uses #888 gray for universal light/dark background compatibility -->
 <svg
    version="1.1"
-   viewBox="0 0 30 30"
-   width="512"
-   height="512"
-   xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      .dot-1, .dot-2 {
-        fill: #888;
+   viewBox="0 0 29.999999 30"
+   id="svg5"
+   width="29.999998"
+   height="30"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .dot-1 {
+        fill: #000;
       }
-      .trail-1, .trail-2 {
+      .dot-2 {
+        fill: #000;
+      }
+      .trail-1 {
         fill: none;
-        stroke: #888;
+        stroke: #000;
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+      .trail-2 {
+        fill: none;
+        stroke: #000;
         stroke-width: 4;
         stroke-linecap: round;
       }
     </style>
   </defs>
-  <!-- Background circle -->
-  <circle
-     style="fill:#2f2f2f;fill-opacity:1"
-     cx="15"
-     cy="15"
-     r="15" />
-  <!-- Icon elements -->
-  <g transform="translate(2, 2)">
-    <circle class="dot-2" cx="16" cy="4" r="2" />
-    <circle class="dot-1" cx="10" cy="10" r="2" />
-    <circle class="dot-2" cx="16" cy="16" r="2" />
-    <circle class="dot-1" cx="10" cy="22" r="2" />
-    <path class="trail-2" d="m 10,4 a 6,6 0 1 0 0,12" />
-    <path class="trail-1" d="M 16,22 A 6,6 0 1 0 16,10" />
+  <g
+     id="layer2"
+     transform="translate(0.03566647)">
+    <circle
+       style="fill:#2f2f2f;fill-opacity:1;stroke-width:1.72959;stroke-dasharray:17.2959;stroke-dashoffset:17.2959"
+       id="path6"
+       cx="14.964334"
+       cy="15"
+       r="15" />
+  </g>
+  <g
+     id="layer1"
+     transform="translate(2.9999984,3)">
+    <circle
+       class="dot-2"
+       cx="16"
+       cy="4"
+       r="2"
+       id="circle1" />
+    <circle
+       class="dot-1"
+       cx="10"
+       cy="10"
+       r="2"
+       id="circle2" />
+    <circle
+       class="dot-2"
+       cx="16"
+       cy="16"
+       r="2"
+       id="circle3" />
+    <circle
+       class="dot-1"
+       cx="10"
+       cy="22"
+       r="2"
+       id="circle4" />
+    <path
+       class="trail-2"
+       d="m 10,4 a 6,6 0 1 0 0,12"
+       id="path4" />
+    <path
+       class="trail-1"
+       d="M 16,22 A 6,6 0 1 0 16,10"
+       id="path5" />
+  </g>
+  <g
+     id="layer1-9"
+     transform="translate(1.9999984,2)">
+    <circle
+       class="dot-2"
+       cx="16"
+       cy="4"
+       r="2"
+       id="circle1-8"
+       style="fill:#ffffff" />
+    <circle
+       class="dot-1"
+       cx="10"
+       cy="10"
+       r="2"
+       id="circle2-6"
+       style="fill:#ffffff" />
+    <circle
+       class="dot-2"
+       cx="16"
+       cy="16"
+       r="2"
+       id="circle3-5"
+       style="fill:#ffffff" />
+    <circle
+       class="dot-1"
+       cx="10"
+       cy="22"
+       r="2"
+       id="circle4-7"
+       style="fill:#ffffff" />
+    <path
+       class="trail-2"
+       d="m 10,4 a 6,6 0 1 0 0,12"
+       id="path4-6"
+       style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" />
+    <path
+       class="trail-1"
+       d="M 16,22 A 6,6 0 1 0 16,10"
+       id="path5-2"
+       style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" />
   </g>
 </svg>
