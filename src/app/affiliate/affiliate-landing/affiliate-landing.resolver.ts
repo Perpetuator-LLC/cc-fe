@@ -30,9 +30,10 @@ export const affiliateLandingResolver: ResolveFn<AffiliateLanding | null> = (rou
           ? data.customMessage
           : `Join ${data.affiliateUsername}'s Network | Capital Copilot`;
 
-        const description =
-          `Start your journey with Capital Copilot and become part of ` +
-          `${data.affiliateUsername}'s affiliate network.`;
+        // Use generic description that works for both custom messages and default
+        const description = data.customMessage
+          ? `Start your journey with Capital Copilot through this affiliate invitation.`
+          : `Start your journey with Capital Copilot and become part of ${data.affiliateUsername}'s affiliate network.`;
 
         seoService.updateTags({
           title,

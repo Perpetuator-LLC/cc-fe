@@ -27,6 +27,11 @@ export const routes: Routes = [
     title: 'Charts Showcase',
   },
   {
+    path: 'dev/social-preview',
+    loadComponent: () => import('./dev/social-preview/social-preview.component').then((c) => c.SocialPreviewComponent),
+    title: 'Social Media Preview Checker',
+  },
+  {
     path: 'home',
     loadComponent: () => import('./home/home.component').then((c) => c.HomeComponent),
     title: 'Home',
