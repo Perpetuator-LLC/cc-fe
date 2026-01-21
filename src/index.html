@@ -76,6 +76,48 @@
         document.body.style.backgroundColor = isLight ? '#fdfcff' : '#121212';
       })();
     </script>
+
+    <!-- Detect stale chunk 404 errors and auto-refresh -->
+    <script>
+      (function () {
+        var chunkErrorCount = 0;
+        var hasRefreshed = false;
+
+        // Listen for script/css load errors (404s)
+        window.addEventListener(
+          'error',
+          function (e) {
+            // Check if it's a script or link element that failed to load
+            var target = e.target;
+            if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+              var src = target.src || target.href || '';
+              // Check if it's one of our chunks or main files
+              if (src.includes('chunk-') || src.includes('main-') || src.includes('styles-')) {
+                chunkErrorCount++;
+                console.warn('[ChunkLoader] Failed to load:', src);
+
+                // If we've seen multiple chunk errors, it's likely a stale cache issue
+                if (chunkErrorCount >= 2 && !hasRefreshed) {
+                  var lastRefresh = sessionStorage.getItem('chunk-refresh-time');
+                  var now = Date.now();
+
+                  // Only refresh if we haven't tried in the last 10 seconds
+                  if (!lastRefresh || now - parseInt(lastRefresh, 10) > 10000) {
+                    hasRefreshed = true;
+                    sessionStorage.setItem('chunk-refresh-time', now.toString());
+                    console.warn('[ChunkLoader] Stale chunks detected, refreshing...');
+                    // Use location.reload(true) to bypass cache
+                    window.location.reload(true);
+                  }
+                }
+              }
+            }
+          },
+          true,
+        ); // Use capture phase to catch errors early
+      })();
+    </script>
+
     <app-root>
       <!-- Loading screen shown while Angular app is bootstrapping -->
       <style>
@@ -121,12 +163,23 @@
           if (theme === 'light') {
             document.body.classList.add('theme-light');
           }
+
+          // If app hasn't loaded in 15 seconds, show a more helpful message
+          setTimeout(function () {
+            var loadingText = document.querySelector('.app-loading-text');
+            if (loadingText && document.querySelector('.app-loading')) {
+              loadingText.innerHTML =
+                'Taking longer than expected...<br>Try pressing Ctrl+Shift+R (Cmd+Shift+R on Mac) to hard refresh.';
+            }
+          }, 15000);
         })();
       </script>
       <div class="app-loading">
         <img src="logo.loading.min.svg" alt="Capital Copilot Logo" />
         <div class="app-loading-text">Loading...</div>
-        <div class="app-loading-text">If you are stuck here, try SHIFT + Click on Refresh</div>
+        <div class="app-loading-text app-loading-hint" style="font-size: 12px; margin-top: 8px; opacity: 0.7">
+          If stuck, press Ctrl+Shift+R (Cmd+Shift+R on Mac)
+        </div>
       </div>
     </app-root>
   </body>
