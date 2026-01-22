@@ -89,6 +89,58 @@ describe('ChartConfigService', () => {
     });
   });
 
+  describe('daily chart timezone handling', () => {
+    // This test captures a regression where daily candles with UTC midnight dates
+    // were being displayed as the previous day when formatted in local time.
+    // Example: "2026-01-20T00:00:00.000Z" should show "Jan 20", not "Jan 19"
+
+    it('should display correct date for UTC midnight daily candles (timezone regression test)', () => {
+      // Simulate MA daily data from backend - dates are midnight UTC
+      // These represent trading days Jan 17, 20, 21 2026
+      const candles: ChartCandle[] = [
+        createMockCandle('2026-01-17T00:00:00.000Z'), // Friday Jan 17
+        createMockCandle('2026-01-20T00:00:00.000Z'), // Monday Jan 20 (MLK Day - market closed, but simulating)
+        createMockCandle('2026-01-21T00:00:00.000Z'), // Tuesday Jan 21
+      ];
+
+      const options = service.buildChartFromCandles(candles, 'MA', 'daily', {});
+      const xAxisData = getXAxisData(options);
+
+      // The axis labels should match the date portion of the ISO string,
+      // NOT be shifted by timezone conversion
+      expect(xAxisData.length).toBe(3);
+
+      // Jan 17 (2026-01-17T00:00:00.000Z) should display as "Jan 17", NOT "Jan 16"
+      expect(xAxisData[0]).toContain('17');
+      expect(xAxisData[0]).toContain('Jan');
+
+      // Jan 20 (2026-01-20T00:00:00.000Z) should display as "Jan 20", NOT "Jan 19"
+      expect(xAxisData[1]).toContain('20');
+      expect(xAxisData[1]).toContain('Jan');
+
+      // Jan 21 (2026-01-21T00:00:00.000Z) should display as "Jan 21", NOT "Jan 20"
+      expect(xAxisData[2]).toContain('21');
+      expect(xAxisData[2]).toContain('Jan');
+    });
+
+    it('should handle daily data regardless of local timezone', () => {
+      // This test verifies that daily chart dates are stable across timezones
+      // The backend sends dates as midnight UTC representing the trading day
+      const candles: ChartCandle[] = [
+        createMockCandle('2026-01-15T00:00:00.000Z'), // Jan 15
+        createMockCandle('2026-01-16T00:00:00.000Z'), // Jan 16
+      ];
+
+      const options = service.buildChartFromCandles(candles, 'AAPL', 'daily', {});
+      const xAxisData = getXAxisData(options);
+
+      // Dates should be extracted from the ISO string, not converted through Date object
+      // which would shift them based on local timezone
+      expect(xAxisData[0]).toMatch(/Jan\s+15/);
+      expect(xAxisData[1]).toMatch(/Jan\s+16/);
+    });
+  });
+
   describe('extended hours markArea', () => {
     it('should generate markAreas for extended hours candles', () => {
       const candles: ChartCandle[] = [
