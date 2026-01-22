@@ -225,6 +225,31 @@ const QUERIES = {
         }
       }
     `
+  },
+  'ma-daily': {
+    description: 'MA (Mastercard) daily data for timezone testing',
+    query: `
+      query {
+        stockPriceConnection(
+          symbol: "MA"
+          interval: DAILY
+          first: 10
+        ) {
+          edges {
+            node {
+              date
+              open
+              high
+              low
+              close
+              splitCoefficient
+              dividendAmount
+            }
+          }
+          totalCount
+        }
+      }
+    `
   }
 };
 
