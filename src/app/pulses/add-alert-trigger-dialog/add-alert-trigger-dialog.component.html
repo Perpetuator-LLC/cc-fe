@@ -1,0 +1,74 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="add-alert-trigger-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>notifications</mat-icon>
+    Add Alert Trigger
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="alertForm">
+      <!-- Alert Type -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Alert Type</mat-label>
+        <mat-select formControlName="alertType">
+          @for (type of alertTypes; track type.value) {
+            <mat-option [value]="type.value" [disabled]="!type.available">
+              <mat-icon>{{ type.icon }}</mat-icon>
+              {{ type.label }}
+              @if (!type.available) {
+                <span class="coming-soon">(Coming Soon)</span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Breaking News Keywords -->
+      @if (selectedType === 'breaking_news') {
+        <div class="keywords-section">
+          <label>Keywords</label>
+          <p class="hint">Add keywords that will trigger an alert when found in news headlines</p>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Add keywords</mat-label>
+            <mat-chip-grid #chipGrid>
+              @for (keyword of keywords; track keyword) {
+                <mat-chip-row (removed)="removeKeyword(keyword)">
+                  {{ keyword }}
+                  <button matChipRemove>
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+              <input
+                placeholder="Type and press Enter..."
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+                (matChipInputTokenEnd)="addKeyword($event)"
+              />
+            </mat-chip-grid>
+            <mat-hint>Examples: crash, breaking, urgent, lawsuit</mat-hint>
+          </mat-form-field>
+        </div>
+      }
+
+      <!-- Cooldown -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Cooldown (minutes)</mat-label>
+        <input matInput type="number" formControlName="cooldownMinutes" />
+        <mat-hint>Minimum time between alerts (5-1440 minutes)</mat-hint>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="alertForm.invalid || isSubmitting">
+      @if (isSubmitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Add Trigger
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

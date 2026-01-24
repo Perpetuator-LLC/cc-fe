@@ -48,7 +48,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: {
       icon: 'terminal',
-      showInMenu: false, // TODO: Re-enable after publish
+      showInMenu: true,
     },
   },
   {
@@ -138,6 +138,19 @@ export const routes: Routes = [
         path: 'topics/:uuid',
         loadComponent: () => import('./topics/topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
         title: 'Topic Detail',
+      },
+      {
+        path: 'pulses',
+        loadComponent: () => import('./pulses/pulses-list/pulses-list.component').then((c) => c.PulsesListComponent),
+        title: 'Pulses',
+        data: {
+          icon: 'vital_signs',
+        },
+      },
+      {
+        path: 'pulses/:uuid',
+        loadComponent: () => import('./pulses/pulse-detail/pulse-detail.component').then((c) => c.PulseDetailComponent),
+        title: 'Pulse Configuration',
       },
     ],
   },
