@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, OnDestroy, PLATFORM_ID, signal, WritableSignal, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -49,6 +49,20 @@ export class CookieConsentService implements OnDestroy {
       console.error('[CookieConsent] Invalid JSON in localStorage:', e);
       localStorage.removeItem('cookie_consent');
       return null;
+    }
+  }
+
+  /**
+   * Reload consent from localStorage.
+   * Call this after hydration if the signal wasn't properly initialized during SSR.
+   */
+  reloadFromLocalStorage(): void {
+    if (!this.isBrowser) return;
+
+    const localConsent = this.loadConsentFromLocalStorage();
+    if (localConsent && !this.cookieConsentSignal()) {
+      // Only set if not already set (to avoid overwriting a more recent value)
+      this.cookieConsentSignal.set(localConsent);
     }
   }
 

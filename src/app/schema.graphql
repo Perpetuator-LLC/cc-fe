@@ -1,4 +1,9 @@
 type Query {
+  pulseConfigs(first: Int = 20, after: String, search: String, isActive: Boolean, orderBy: String = "-updated_at"): PulseConfigConnection
+  pulseConfig(uuid: UUID!): PulseConfigType
+  pulses(configUuid: UUID, status: String, first: Int = 20, after: String): PulseConnection
+  pulse(uuid: UUID!): PulseType
+
   """Get user's watchlists"""
   watchlists(watchlistType: String): [WatchlistObjectType]
 
@@ -481,6 +486,12 @@ type Query {
     orderBy: String
   ): TransactionNodeConnection
 
+  """Total count of transactions matching filter"""
+  transactionsCount(
+    """Filter by transaction type (lowercase)"""
+    transactionType: String
+  ): Int
+
   """List of Orders [Relay]"""
   orders(
     offset: Int
@@ -536,6 +547,9 @@ type Query {
     orderBy: String
   ): CodeNodeConnection
   hasPaidOrder: Boolean
+
+  """Available transaction types for filtering"""
+  transactionTypes: [TransactionTypeChoice]
   user: UserDetails
   userSettings(keys: [String]!): UserSettingsType
   users(query: String!): UserList
@@ -587,6 +601,16 @@ type Query {
   Total count of news items matching the filter (use with news query for pagination)
   """
   newsCount(hours: Int = 24, podcastUuid: UUID!): Int
+
+  """
+  List all RSS feeds as a simple array (no pagination). Set onlyValid=false to include unreachable/unparsable feeds.
+  """
+  rssFeedsList(onlyValid: Boolean = true): [RssFeedType]
+
+  """
+  Search RSS feeds by name or URL. Multi-word queries match ALL words (AND logic).
+  """
+  searchRssFeeds(query: String!, limit: Int = 20, onlyValid: Boolean = true): [RssFeedType]
   jobs(
     jobUuids: [UUID]
     statuses: [JobStatus]
@@ -666,6 +690,364 @@ type Query {
   ): Node
 }
 
+"""Connection type for PulseConfig pagination."""
+type PulseConfigConnection {
+  edges: [PulseConfigEdge]
+  pageInfo: PulsePageInfo
+  totalCount: Int
+}
+
+"""Edge type for PulseConfig pagination."""
+type PulseConfigEdge {
+  node: PulseConfigType
+  cursor: String
+}
+
+"""GraphQL type for PulseConfig."""
+type PulseConfigType implements Node {
+  """Name for this pulse config (e.g., 'Morning Brief')"""
+  name: String!
+
+  """User's description of what they want in this pulse"""
+  description: String!
+
+  """Whether this pulse config is active"""
+  isActive: Boolean!
+
+  """Target duration in minutes (converted to ~150 words/min)"""
+  targetDurationMinutes: Float!
+
+  """Maximum duration in minutes (strict limit)"""
+  maxDurationMinutes: Float
+
+  """
+  User's additional instructions for content generation (e.g., 'Focus on earnings news')
+  """
+  customInstructions: String
+
+  """Tone for the pulse (professional, casual, formal, conversational)"""
+  tone: String!
+
+  """Include a greeting/intro"""
+  includeIntro: Boolean!
+
+  """Include a closing statement"""
+  includeOutro: Boolean!
+
+  """TTS voice for generating pulse audio"""
+  voice: VoiceType
+
+  """How to deliver pulse notifications"""
+  deliveryMethod: PulsesPulseConfigDeliveryMethodChoices!
+
+  """How often to generate this pulse"""
+  scheduleFrequency: PulsesPulseConfigScheduleFrequencyChoices!
+
+  """Time of day to generate pulse (user's local time)"""
+  scheduleTime: Time
+
+  """Days of week for custom schedule (0=Monday, 6=Sunday)"""
+  scheduleDays: JSONString!
+
+  """User's timezone for scheduling"""
+  scheduleTimezone: String!
+
+  """How far back to look for news (hours)"""
+  newsLookbackHours: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastGeneratedAt: DateTime
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  contentSources: [ContentSourceType_]
+  alertTriggers: [AlertTriggerType]
+  targetWords: Int
+  maxWords: Int
+  voiceUuid: UUID
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+type VoiceType implements Node {
+  """The ID of the object"""
+  id: ID!
+  model: VoiceModel
+
+  """Provider's voice identifier (OpenAI voice name or ElevenLabs voice ID)"""
+  externalId: String!
+
+  """Human-friendly name for this voice"""
+  displayName: String
+
+  """Whether this voice is available for selection"""
+  enabled: Boolean!
+
+  """When this voice was added to the system"""
+  createdAt: DateTime!
+
+  """When this voice was last updated"""
+  updatedAt: DateTime!
+  metadata: GenericScalar
+  uuid: UUID
+  sampleUrl: String
+  creditsPerMillionChar: Int
+}
+
+"""An enumeration."""
+enum VoiceModel {
+  OPENAI_TTS_1
+  OPENAI_TTS_1_HD
+  OPENAI_GPT_4O_MINI_TTS
+  ELEVENLABS_MULTILINGUAL_V2
+  ELEVENLABS_FLASH_V2_5
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+"""
+Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""An enumeration."""
+enum PulsesPulseConfigDeliveryMethodChoices {
+  """SMS with Link"""
+  SMS_LINK
+
+  """Email with Link"""
+  EMAIL_LINK
+
+  """Push Notification"""
+  PUSH_NOTIFICATION
+
+  """In-App Only"""
+  IN_APP
+}
+
+"""An enumeration."""
+enum PulsesPulseConfigScheduleFrequencyChoices {
+  """One-time"""
+  ONCE
+
+  """Daily"""
+  DAILY
+
+  """Weekdays Only"""
+  WEEKDAYS
+
+  """Weekly"""
+  WEEKLY
+
+  """Custom Schedule"""
+  CUSTOM
+}
+
+"""
+The `Time` scalar type represents a Time value as
+specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar Time
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+"""GraphQL type for ContentSource."""
+type ContentSourceType_ implements Node {
+  sourceType: String
+
+  """RSS feed URL (if not using existing feed)"""
+  rssUrl: String
+
+  """Search term to find news about"""
+  searchTerm: String
+
+  """Stock symbol (for COMPANY type)"""
+  symbol: String
+
+  """Higher priority sources appear first (0-100)"""
+  priority: Int!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  sourceDetail: String
+  rssFeedUuid: UUID
+  watchlistUuid: UUID
+}
+
+"""GraphQL type for AlertTrigger."""
+type AlertTriggerType implements Node {
+  alertType: String
+
+  """Keywords that trigger breaking news alerts"""
+  keywords: JSONString!
+
+  """Stock symbol for price/indicator alerts"""
+  symbol: String
+
+  """Price threshold for price alerts"""
+  priceThreshold: Decimal
+
+  """Direction of price movement"""
+  priceDirection: PulsesAlertTriggerPriceDirectionChoices!
+
+  """Percentage change threshold"""
+  percentChange: Decimal
+
+  """Days before event to trigger alert"""
+  daysBefore: Int
+  isActive: Boolean!
+
+  """Minimum minutes between alerts of this type"""
+  cooldownMinutes: Int!
+  lastTriggeredAt: DateTime
+  createdAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+"""An enumeration."""
+enum PulsesAlertTriggerPriceDirectionChoices {
+  """Above"""
+  ABOVE
+
+  """Below"""
+  BELOW
+
+  """Any"""
+  ANY
+}
+
+"""Page info for pagination."""
+type PulsePageInfo {
+  hasNextPage: Boolean
+  hasPreviousPage: Boolean
+  startCursor: String
+  endCursor: String
+}
+
+"""Connection type for Pulse pagination."""
+type PulseConnection {
+  edges: [PulseEdge]
+  pageInfo: PulsePageInfo
+  totalCount: Int
+}
+
+"""Edge type for Pulse pagination."""
+type PulseEdge {
+  node: PulseType
+  cursor: String
+}
+
+"""GraphQL type for Pulse."""
+type PulseType implements Node {
+  """Generated title for this pulse"""
+  title: String!
+
+  """Full transcript of the pulse"""
+  transcript: String!
+
+  """Brief summary of pulse contents"""
+  summary: String!
+
+  """Duration of audio in seconds"""
+  audioDurationSeconds: Int
+
+  """Word count of transcript"""
+  wordCount: Int
+
+  """Current status of pulse generation"""
+  status: PulsesPulseStatusChoices!
+  errorMessage: String
+
+  """Whether this was a scheduled pulse or triggered by alert"""
+  isScheduled: Boolean!
+  versionNumber: Int!
+  validatedCompliance: Boolean!
+  validatedFacts: Boolean!
+  validatedLength: Boolean!
+  validationNotes: String
+  deliveredAt: DateTime
+  deliveryMethod: PulsesPulseDeliveryMethodChoices
+  playCount: Int!
+  listenDurationSeconds: Int!
+  createdAt: DateTime!
+  generatedAt: DateTime
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  audioUrl: String
+  isValidated: Boolean
+  configName: String
+}
+
+"""An enumeration."""
+enum PulsesPulseStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Generating"""
+  GENERATING
+
+  """Ready"""
+  READY
+
+  """Delivered"""
+  DELIVERED
+
+  """Failed"""
+  FAILED
+}
+
+"""An enumeration."""
+enum PulsesPulseDeliveryMethodChoices {
+  """SMS with Link"""
+  SMS_LINK
+
+  """Email with Link"""
+  EMAIL_LINK
+
+  """Push Notification"""
+  PUSH_NOTIFICATION
+
+  """In-App Only"""
+  IN_APP
+}
+
 """GraphQL type for Watchlist."""
 type WatchlistObjectType {
   id: UUID!
@@ -690,12 +1072,6 @@ type WatchlistObjectType {
   canEdit: Boolean
 }
 
-"""
-Leverages the internal Python implementation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
-
 """An enumeration."""
 enum WatchlistsWatchlistWatchlistTypeChoices {
   """Search History"""
@@ -710,13 +1086,6 @@ enum WatchlistsWatchlistWatchlistTypeChoices {
   """System"""
   SYSTEM
 }
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 """GraphQL type for WatchlistItem."""
 type WatchlistItemType {
@@ -829,17 +1198,6 @@ enum OrchestrationAgentExecutionAgentTypeChoices {
   """Financial Analyst Agent"""
   ANALYST
 }
-
-"""
-Allows use of a JSON String for input / output from the GraphQL schema.
-
-Use of this type is *not recommended* as you lose the benefits of having a defined, static
-schema (one of the key benefits of GraphQL).
-"""
-scalar JSONString
-
-"""The `Decimal` scalar type represents a python Decimal."""
-scalar Decimal
 
 """GraphQL type for ChartDefinition model."""
 type ChartDefinitionType {
@@ -1573,25 +1931,6 @@ type JobType implements Node {
   chainJobCount: Int
 }
 
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
-"""
-A JSON scalar that automatically converts keys:
-- Output (to frontend): snake_case → camelCase
-- Input (from frontend): camelCase → snake_case
-
-Use this for GenericScalar fields like Job.args and Job.result
-to ensure consistent camelCase in GraphQL responses.
-
-Note: We use the name "GenericScalar" in GraphQL schema for backwards
-compatibility with existing frontend queries.
-"""
-scalar GenericScalar
-
 type TeamType implements Node {
   """The ID of the object"""
   id: ID!
@@ -1765,40 +2104,6 @@ type RssFeedType implements Node {
   """Cached average articles per day (updated when feed is fetched)"""
   articlesPerDay: Float!
   uuid: UUID
-}
-
-type VoiceType implements Node {
-  """The ID of the object"""
-  id: ID!
-  model: VoiceModel
-
-  """Provider's voice identifier (OpenAI voice name or ElevenLabs voice ID)"""
-  externalId: String!
-
-  """Human-friendly name for this voice"""
-  displayName: String
-
-  """Whether this voice is available for selection"""
-  enabled: Boolean!
-
-  """When this voice was added to the system"""
-  createdAt: DateTime!
-
-  """When this voice was last updated"""
-  updatedAt: DateTime!
-  metadata: GenericScalar
-  uuid: UUID
-  sampleUrl: String
-  creditsPerMillionChar: Int
-}
-
-"""An enumeration."""
-enum VoiceModel {
-  OPENAI_TTS_1
-  OPENAI_TTS_1_HD
-  OPENAI_GPT_4O_MINI_TTS
-  ELEVENLABS_MULTILINGUAL_V2
-  ELEVENLABS_FLASH_V2_5
 }
 
 """
@@ -3344,6 +3649,9 @@ enum JobKind {
   GENERATE_PODCAST
   GENERATE_PODCAST_IMAGE
   GENERATE_IMAGE
+  GENERATE_PULSE
+  VALIDATE_PULSE
+  DELIVER_PULSE
   TEST_RAISE
   TEST_PRINT
 }
@@ -3547,6 +3855,15 @@ type CodeNode implements Node {
   """The ID of the object"""
   id: ID!
   uuid: UUID
+}
+
+"""Represents a transaction type choice for filtering."""
+type TransactionTypeChoice {
+  """The database value (lowercase)"""
+  value: String
+
+  """Human-readable display label"""
+  label: String
 }
 
 type UserDetails {
@@ -3858,6 +4175,33 @@ type UserType {
 }
 
 type Mutation {
+  """Create a new pulse configuration."""
+  createPulseConfig(alertTriggers: [AlertTriggerInput], contentSources: [ContentSourceInput], deliveryMethod: String = "sms_link", description: String, maxDurationMinutes: Float, name: String!, newsLookbackHours: Int = 24, scheduleFrequency: String = "daily", scheduleTime: String, scheduleTimezone: String = "America/New_York", targetDurationMinutes: Float = 3, tone: String = "professional", voiceUuid: UUID): CreatePulseConfig
+
+  """Update an existing pulse configuration."""
+  updatePulseConfig(customInstructions: String, deliveryMethod: String, description: String, includeIntro: Boolean, includeOutro: Boolean, isActive: Boolean, maxDurationMinutes: Float, name: String, newsLookbackHours: Int, pulseConfigUuid: UUID!, scheduleFrequency: String, scheduleTime: String, scheduleTimezone: String, targetDurationMinutes: Float, tone: String, voiceUuid: UUID): UpdatePulseConfig
+
+  """Delete a pulse configuration."""
+  deletePulseConfig(pulseConfigUuid: UUID!): DeletePulseConfig
+
+  """Add a content source to a pulse configuration."""
+  addContentSource(pulseConfigUuid: UUID!, source: ContentSourceInput!): AddContentSource
+
+  """Remove a content source from a pulse configuration."""
+  removeContentSource(contentSourceUuid: UUID!): RemoveContentSource
+
+  """Add an alert trigger to a pulse configuration."""
+  addAlertTrigger(pulseConfigUuid: UUID!, trigger: AlertTriggerInput!): AddAlertTrigger
+
+  """Remove an alert trigger from a pulse configuration."""
+  removeAlertTrigger(alertTriggerUuid: UUID!): RemoveAlertTrigger
+
+  """Generate a pulse immediately for a configuration."""
+  generatePulse(pulseConfigUuid: UUID!): GeneratePulse
+
+  """Deliver a generated pulse to the user."""
+  deliverPulse(deliveryMethod: String, pulseUuid: UUID!): DeliverPulse
+
   """Add a symbol to a watchlist."""
   addToWatchlist(
     assetType: String
@@ -4142,6 +4486,27 @@ type Mutation {
     """Stock symbol to fetch earnings for"""
     symbol: String!
   ): FetchEarnings
+
+  """
+  Refresh stock metadata (sector, industry) for top stocks.
+  Admin only. Equivalent to the weekly-stock-metadata-refresh scheduled task.
+  """
+  refreshStockMetadata(
+    """Max companies to process (default: 500)"""
+    limit: Int = 500
+  ): RefreshStockMetadata
+
+  """
+  Refresh fundamentals data (income statements, cash flows, earnings).
+  Admin only. Equivalent to the weekly-fundamentals-refresh scheduled task.
+  """
+  refreshFundamentalsData(
+    """Seconds between API calls (default: 0.25)"""
+    delay: Float = 0.25
+
+    """Max companies to process (default: 100)"""
+    limit: Int = 100
+  ): RefreshFundamentalsData
 
   """Generate a DCF analysis report for a stock symbol"""
   createDiscountedCashFlowAnalysis(symbol: String!): CreateDiscountedCashFlowAnalysis
@@ -4611,6 +4976,120 @@ type Mutation {
   PUBLIC: Anyone can refresh token (no authentication required, token itself is the auth).
   """
   refreshToken(refresh: String!): RefreshAccessToken
+}
+
+"""Create a new pulse configuration."""
+type CreatePulseConfig {
+  success: Boolean
+  message: String
+  pulseConfig: PulseConfigType
+}
+
+"""Input for creating/updating alert triggers."""
+input AlertTriggerInput {
+  alertType: String!
+  keywords: [String]
+  symbol: String
+  priceThreshold: Float
+  priceDirection: String
+  percentChange: Float
+  daysBefore: Int
+  cooldownMinutes: Int = 30
+}
+
+"""Input for creating/updating content sources."""
+input ContentSourceInput {
+  sourceType: String!
+  rssUrl: String
+  rssFeedUuid: UUID
+  searchTerm: String
+  watchlistUuid: UUID
+  symbol: String
+  priority: Int = 0
+}
+
+"""Update an existing pulse configuration."""
+type UpdatePulseConfig {
+  success: Boolean
+  message: String
+  pulseConfig: PulseConfigType
+}
+
+"""Delete a pulse configuration."""
+type DeletePulseConfig {
+  success: Boolean
+  message: String
+}
+
+"""Add a content source to a pulse configuration."""
+type AddContentSource {
+  success: Boolean
+  message: String
+  contentSource: ContentSourceType_
+}
+
+"""Remove a content source from a pulse configuration."""
+type RemoveContentSource {
+  success: Boolean
+  message: String
+}
+
+"""Add an alert trigger to a pulse configuration."""
+type AddAlertTrigger {
+  success: Boolean
+  message: String
+  alertTrigger: AlertTriggerType
+}
+
+"""Remove an alert trigger from a pulse configuration."""
+type RemoveAlertTrigger {
+  success: Boolean
+  message: String
+}
+
+"""Generate a pulse immediately for a configuration."""
+type GeneratePulse {
+  success: Boolean
+  message: String
+  pulse: PulseType
+  jobUuid: UUID
+}
+
+"""Deliver a generated pulse to the user."""
+type DeliverPulse {
+  success: Boolean
+  message: String
+  delivery: PulseDeliveryType
+}
+
+"""GraphQL type for PulseDelivery."""
+type PulseDeliveryType implements Node {
+  deliveryMethod: PulsesPulseDeliveryDeliveryMethodChoices!
+  sentAt: DateTime!
+  wasSuccessful: Boolean!
+  errorMessage: String
+  linkClickedAt: DateTime
+  playbackStartedAt: DateTime
+  playbackCompletedAt: DateTime
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum PulsesPulseDeliveryDeliveryMethodChoices {
+  """SMS with Link"""
+  SMS_LINK
+
+  """Email with Link"""
+  EMAIL_LINK
+
+  """Push Notification"""
+  PUSH_NOTIFICATION
+
+  """In-App Only"""
+  IN_APP
 }
 
 """Add a symbol to a watchlist."""
@@ -5128,6 +5607,26 @@ type FetchEarnings {
   success: Boolean
   message: String
   job: JobType
+}
+
+"""
+Refresh stock metadata (sector, industry) for top stocks.
+Admin only. Equivalent to the weekly-stock-metadata-refresh scheduled task.
+"""
+type RefreshStockMetadata {
+  success: Boolean
+  message: String
+  taskId: String
+}
+
+"""
+Refresh fundamentals data (income statements, cash flows, earnings).
+Admin only. Equivalent to the weekly-fundamentals-refresh scheduled task.
+"""
+type RefreshFundamentalsData {
+  success: Boolean
+  message: String
+  taskId: String
 }
 
 """Generate a DCF analysis report for a stock symbol"""

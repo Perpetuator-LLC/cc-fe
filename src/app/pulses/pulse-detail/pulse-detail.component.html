@@ -1,0 +1,397 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span class="page-title">
+    <mat-icon>vital_signs</mat-icon>My Pulses <span>></span>
+    <span class="page-title-secondary">{{ pulseConfig?.name || 'Loading...' }}</span>
+  </span>
+</ng-template>
+
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (pulseConfig) {
+  <div class="pulse-detail">
+    <!-- Header -->
+    <mat-card class="pulse-header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="header-info">
+            <div class="pulse-icon">
+              <mat-icon>vital_signs</mat-icon>
+            </div>
+            <div class="header-text">
+              <h1>{{ pulseConfig.name }}</h1>
+              <p>{{ pulseConfig.description || 'No description' }}</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button mat-flat-button color="primary" (click)="generatePulse()" [disabled]="generatingPulse">
+              @if (generatingPulse) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>play_arrow</mat-icon>
+              }
+              Generate Now
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" matTooltip="More actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="deletePulseConfig()">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete Configuration</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" dynamicHeight>
+      <!-- Settings Tab -->
+      <mat-tab label="Settings">
+        <div class="tab-content">
+          <form [formGroup]="pulseForm">
+            <mat-card>
+              <mat-card-content>
+                <h3>Basic Settings</h3>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Pulse Name</mat-label>
+                  <input matInput formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" cdkTextareaAutosize></textarea>
+                </mat-form-field>
+
+                <div class="checkbox-row">
+                  <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+                </div>
+
+                <div class="duration-field">
+                  <label>Target Duration: {{ pulseForm.get('targetDurationMinutes')?.value }} minutes</label>
+                  <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
+                    <input matSliderThumb formControlName="targetDurationMinutes" />
+                  </mat-slider>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tone</mat-label>
+                  <mat-select formControlName="tone">
+                    @for (option of toneOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <div class="checkbox-row">
+                  <mat-checkbox formControlName="includeIntro">Include Introduction</mat-checkbox>
+                  <mat-checkbox formControlName="includeOutro">Include Closing</mat-checkbox>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+              <mat-card-content>
+                <h3>Custom Instructions (Optional)</h3>
+                <p class="section-description">
+                  Add preferences for your pulse content. Examples: "Focus on tech stocks", "Skip politics", "Include
+                  market sentiment analysis".
+                </p>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Custom Instructions</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="customInstructions"
+                    cdkTextareaAutosize
+                    placeholder="e.g., Focus on earnings news, Skip cryptocurrency..."
+                  ></textarea>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Content Sources Tab -->
+      <mat-tab label="Content Sources">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="section-header">
+                <h3>Content Sources</h3>
+                <button mat-button color="primary" (click)="addContentSource()">
+                  <mat-icon>add</mat-icon>
+                  Add Source
+                </button>
+              </div>
+
+              <p class="section-description">
+                Define what content to include in your pulse: RSS feeds, search terms, watchlists, or companies.
+              </p>
+
+              @if (contentSources.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>source</mat-icon>
+                  <p>No content sources configured. Add sources to get news content in your pulse.</p>
+                  <div class="source-type-hints">
+                    <span><mat-icon>rss_feed</mat-icon> RSS Feeds - Add news feeds by URL</span>
+                    <span><mat-icon>search</mat-icon> Search Terms - Keywords to search for</span>
+                    <span><mat-icon>list</mat-icon> Watchlists - Monitor your watchlists for news</span>
+                    <span><mat-icon>business</mat-icon> Companies - Track specific stock symbols</span>
+                  </div>
+                </div>
+              } @else {
+                <table mat-table [dataSource]="contentSources" class="sources-table">
+                  <ng-container matColumnDef="sourceType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let source">
+                      <span class="source-type">
+                        <mat-icon>{{ getSourceTypeIcon(source.sourceType) }}</mat-icon>
+                        {{ getSourceTypeLabel(source.sourceType) }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="sourceDetail">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let source">
+                      <div class="source-detail">
+                        @if (source.sourceType === 'rss_feed') {
+                          <a [href]="source.rssUrl" target="_blank" rel="noopener noreferrer" class="rss-url">
+                            {{ source.sourceDetail || source.rssUrl }}
+                          </a>
+                        } @else if (source.sourceType === 'company') {
+                          <span class="symbol-badge">{{ source.symbol }}</span>
+                          {{ source.sourceDetail }}
+                        } @else {
+                          {{ source.sourceDetail || source.searchTerm || 'N/A' }}
+                        }
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="priority">
+                    <th mat-header-cell *matHeaderCellDef>Priority</th>
+                    <td mat-cell *matCellDef="let source">{{ source.priority }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="isActive">
+                    <th mat-header-cell *matHeaderCellDef>Active</th>
+                    <td mat-cell *matCellDef="let source">
+                      <mat-icon [class.active]="source.isActive" [class.inactive]="!source.isActive">
+                        {{ source.isActive ? 'check_circle' : 'cancel' }}
+                      </mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let source">
+                      <button mat-icon-button (click)="removeContentSource(source.uuid)" matTooltip="Remove">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="contentSourceColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: contentSourceColumns"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Alert Triggers Tab -->
+      <mat-tab label="Alerts">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="section-header">
+                <h3>Alert Triggers</h3>
+                <button mat-button color="primary" (click)="addAlertTrigger()">
+                  <mat-icon>add</mat-icon>
+                  Add Alert
+                </button>
+              </div>
+
+              <p class="section-description">
+                Configure alerts to trigger immediate pulse generation for breaking news or other events.
+              </p>
+
+              @if (alertTriggers.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>notifications_off</mat-icon>
+                  <p>No alert triggers configured. Alerts will generate pulses when specific conditions are met.</p>
+                </div>
+              } @else {
+                <table mat-table [dataSource]="alertTriggers" class="alerts-table">
+                  <ng-container matColumnDef="alertType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <span class="alert-type">
+                        <mat-icon>{{ getAlertTypeIcon(trigger.alertType) }}</mat-icon>
+                        {{ trigger.alertType | titlecase }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      @if (trigger.keywords?.length) {
+                        <mat-chip-set>
+                          @for (keyword of trigger.keywords; track keyword) {
+                            <mat-chip>{{ keyword }}</mat-chip>
+                          }
+                        </mat-chip-set>
+                      } @else if (trigger.symbol) {
+                        {{ trigger.symbol }} - {{ trigger.priceDirection }} {{ trigger.priceThreshold }}
+                      }
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="isActive">
+                    <th mat-header-cell *matHeaderCellDef>Active</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <mat-icon [class.active]="trigger.isActive">
+                        {{ trigger.isActive ? 'check_circle' : 'cancel' }}
+                      </mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <button mat-icon-button (click)="removeAlertTrigger(trigger.uuid)" matTooltip="Remove">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="alertTriggerColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: alertTriggerColumns"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Schedule Tab -->
+      <mat-tab label="Schedule">
+        <div class="tab-content">
+          <form [formGroup]="pulseForm">
+            <mat-card>
+              <mat-card-content>
+                <h3>Schedule & Delivery</h3>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Frequency</mat-label>
+                  <mat-select formControlName="scheduleFrequency">
+                    @for (option of scheduleOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Time</mat-label>
+                  <input matInput type="time" formControlName="scheduleTime" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Timezone</mat-label>
+                  <input matInput formControlName="scheduleTimezone" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>News Lookback (hours)</mat-label>
+                  <input matInput type="number" formControlName="newsLookbackHours" />
+                  <mat-hint>How far back to search for news (1-168 hours)</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Delivery Method</mat-label>
+                  <mat-select formControlName="deliveryMethod">
+                    @for (option of deliveryOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- History Tab -->
+      <mat-tab label="History">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <h3>Generated Pulses</h3>
+
+              @if (pulses.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>history</mat-icon>
+                  <p>No pulses generated yet. Click "Generate Now" to create your first pulse.</p>
+                </div>
+              } @else {
+                <table mat-table [dataSource]="pulses" class="pulses-table">
+                  <ng-container matColumnDef="title">
+                    <th mat-header-cell *matHeaderCellDef>Title</th>
+                    <td mat-cell *matCellDef="let pulse">{{ pulse.title }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let pulse">
+                      <span class="status-badge" [class]="getStatusClass(pulse.status)">
+                        {{ pulse.status | titlecase }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="duration">
+                    <th mat-header-cell *matHeaderCellDef>Duration</th>
+                    <td mat-cell *matCellDef="let pulse">
+                      {{ formatSeconds(pulse.audioDurationSeconds) }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="createdAt">
+                    <th mat-header-cell *matHeaderCellDef>Created</th>
+                    <td mat-cell *matCellDef="let pulse">
+                      {{ formatTimeAgo(pulse.createdAt) }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let pulse">
+                      @if (pulse.audioUrl) {
+                        <button mat-icon-button (click)="playPulse(pulse)" matTooltip="Play">
+                          <mat-icon>play_arrow</mat-icon>
+                        </button>
+                      }
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="pulseHistoryColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: pulseHistoryColumns"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

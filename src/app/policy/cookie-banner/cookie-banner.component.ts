@@ -1,5 +1,16 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, computed, OnInit, OnDestroy, signal, WritableSignal, effect } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  signal,
+  WritableSignal,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatCardFooter } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
@@ -20,8 +31,14 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   private serverCookiePolicyVersion: WritableSignal<string | null> = signal(null);
   private hasCheckedOnLogin = false; // Prevent repeated checks on login
+  private readonly isBrowser: boolean;
 
   showBanner = computed(() => {
+    // Never show banner during SSR - prevents hydration mismatch
+    if (!this.isBrowser) {
+      return false;
+    }
+
     const serverVersion = this.serverCookiePolicyVersion();
     const isLoggedIn = this.authService.isLoggedIn();
     const consent = this.cookieConsentService.cookieConsent();
@@ -52,6 +69,9 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
     private policyService: PolicyService,
     private authService: AuthService,
   ) {
+    const platformId = inject(PLATFORM_ID);
+    this.isBrowser = isPlatformBrowser(platformId);
+
     // Watch for login state changes and recheck cookie policy acceptance
     effect(() => {
       const isLoggedIn = this.authService.isLoggedIn();
@@ -84,6 +104,10 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Ensure consent is loaded from localStorage after hydration
+    // (During SSR, localStorage is not available, so we need to reload on client)
+    this.cookieConsentService.reloadFromLocalStorage();
+
     // Only fetch public policy version if NOT logged in
     // Logged-in users get policies through PolicyGuardService and the effect()
     if (!this.authService.isLoggedIn()) {
@@ -106,10 +130,15 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
           next: (policies) => {
             if (policies.cookiePolicy) {
               this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
+            } else {
+              // No cookie policy in response, use fallback
+              this.serverCookiePolicyVersion.set('1.0');
             }
           },
           error: (err) => {
             console.error('[CookieBanner] Failed to fetch cookie policy version:', err);
+            // Use fallback version to ensure banner can still be dismissed
+            this.serverCookiePolicyVersion.set('1.0');
           },
         }),
     );
@@ -214,24 +243,38 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
                 localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
                 // Update server version signal to prevent banner from reappearing
                 this.serverCookiePolicyVersion.set(policies.cookiePolicy.version);
+              } else {
+                // No cookie policy returned, use fallback
+                this.acceptCookiesWithFallbackVersion();
               }
             },
             error: (err: Error) => {
               console.error('[CookieBanner] Failed to load cookie policy for acceptance:', err);
-              // Fallback: use server version if already fetched
-              const version = this.serverCookiePolicyVersion();
-              if (version) {
-                const updatedConsent = {
-                  version,
-                  accepted: true,
-                  date: new Date().toISOString(),
-                };
-                this.cookieConsentService.cookieConsent.set(updatedConsent);
-                localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
-              }
+              // Fallback: accept with current server version or a default
+              this.acceptCookiesWithFallbackVersion();
             },
           }),
       );
+    }
+  }
+
+  /**
+   * Accept cookies with a fallback version when the policy fetch fails.
+   * This ensures the banner is dismissed even if there are network issues.
+   */
+  private acceptCookiesWithFallbackVersion(): void {
+    // Use cached server version if available, otherwise use a default version
+    const version = this.serverCookiePolicyVersion() || '1.0';
+    const updatedConsent = {
+      version,
+      accepted: true,
+      date: new Date().toISOString(),
+    };
+    this.cookieConsentService.cookieConsent.set(updatedConsent);
+    localStorage.setItem('cookie_consent', JSON.stringify(updatedConsent));
+    // Also update server version to ensure showBanner computes false
+    if (!this.serverCookiePolicyVersion()) {
+      this.serverCookiePolicyVersion.set(version);
     }
   }
 }

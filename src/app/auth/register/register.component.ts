@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -173,6 +173,11 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to join affiliate program:', err);
+          // Show affiliate error message
+          const errorMessage = err?.message || 'Failed to join affiliate program';
+          this.messageService.error(errorMessage);
+          this.affiliateStorageService.clearAffiliateCode();
+          // Still show registration success
           this.messageService.addMessage({
             type: 'success',
             text: 'Registration successful! Check your email for a verification link.',

@@ -1,0 +1,140 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="add-content-source-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>source</mat-icon>
+    Add Content Source
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="sourceForm">
+      <!-- Source Type -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Source Type</mat-label>
+        <mat-select formControlName="sourceType">
+          @for (type of sourceTypes; track type.value) {
+            <mat-option [value]="type.value">
+              <mat-icon>{{ type.icon }}</mat-icon>
+              {{ type.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- RSS Feed URL with Autocomplete -->
+      @if (selectedType === 'rss_feed') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>RSS Feed URL or Name</mat-label>
+          <input
+            matInput
+            formControlName="rssUrl"
+            placeholder="Search existing feeds or enter a URL..."
+            [matAutocomplete]="rssAutocomplete"
+            (input)="onRssInputChange($event)"
+          />
+          @if (isSearchingRssFeeds) {
+            <mat-spinner matSuffix diameter="20"></mat-spinner>
+          }
+          <mat-autocomplete
+            #rssAutocomplete="matAutocomplete"
+            [displayWith]="displayRssFeed"
+            (optionSelected)="selectRssFeed($event.option.value)"
+            [autoSelectActiveOption]="false"
+          >
+            @for (feed of rssFeedSuggestions; track feed.uuid) {
+              <mat-option [value]="feed" [matTooltip]="feed.url" matTooltipPosition="after">
+                <div class="rss-option">
+                  <span class="rss-name">{{ feed.name || 'Unnamed Feed' }}</span>
+                  <span class="rss-meta">
+                    @if (feed.articlesPerDay > 0) {
+                      <span class="articles-per-day">~{{ feed.articlesPerDay | number: '1.0-1' }}/day</span>
+                    }
+                    @if (!feed.isReachable || !feed.isParsable) {
+                      <mat-icon class="warning-icon" matTooltip="Feed may have issues">warning</mat-icon>
+                    }
+                  </span>
+                </div>
+              </mat-option>
+            }
+            @if (rssFeedSuggestions.length === 0 && !isSearchingRssFeeds) {
+              <mat-option disabled>
+                <span class="no-results">No matching feeds. Enter a URL to add a new one.</span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+          <mat-hint>
+            Search existing feeds by name/URL, or enter a new feed URL.
+            @if (selectedRssFeed) {
+              <span class="selected-hint">Selected: {{ selectedRssFeed.name || selectedRssFeed.url }}</span>
+            }
+          </mat-hint>
+          @if (sourceForm.get('rssUrl')?.hasError('required')) {
+            <mat-error>RSS URL is required</mat-error>
+          }
+          @if (sourceForm.get('rssUrl')?.hasError('pattern')) {
+            <mat-error>Please enter a valid URL</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Search Term -->
+      @if (selectedType === 'search_term') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Search Term</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="e.g., artificial intelligence" />
+          <mat-hint>Keywords to search for in news</mat-hint>
+          @if (sourceForm.get('searchTerm')?.hasError('required')) {
+            <mat-error>Search term is required</mat-error>
+          }
+          @if (sourceForm.get('searchTerm')?.hasError('minlength')) {
+            <mat-error>Search term must be at least 2 characters</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Watchlist UUID (TODO: Replace with picker) -->
+      @if (selectedType === 'watchlist') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Watchlist UUID</mat-label>
+          <input matInput formControlName="watchlistUuid" placeholder="Enter watchlist UUID" />
+          <mat-hint>Select a watchlist to monitor for news</mat-hint>
+          @if (sourceForm.get('watchlistUuid')?.hasError('required')) {
+            <mat-error>Watchlist is required</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Company Symbol -->
+      @if (selectedType === 'company') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Symbol</mat-label>
+          <input matInput formControlName="symbol" placeholder="e.g., AAPL" [style.text-transform]="'uppercase'" />
+          <mat-hint>Stock ticker symbol (1-5 characters)</mat-hint>
+          @if (sourceForm.get('symbol')?.hasError('required')) {
+            <mat-error>Symbol is required</mat-error>
+          }
+          @if (sourceForm.get('symbol')?.hasError('pattern')) {
+            <mat-error>Enter a valid ticker symbol (1-5 uppercase letters)</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Priority -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Priority (0-100)</mat-label>
+        <input matInput type="number" formControlName="priority" />
+        <mat-hint>Higher priority sources are weighted more heavily</mat-hint>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="sourceForm.invalid || isSubmitting">
+      @if (isSubmitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Add Source
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

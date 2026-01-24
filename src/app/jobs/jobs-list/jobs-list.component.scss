@@ -577,13 +577,7 @@
   }
 
   &.symbol-tag {
-    border: 1px solid var(--md-sys-color-tertiary);
-    color: var(--md-sys-color-tertiary);
-    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
-
-    &:hover {
-      background-color: var(--md-sys-color-tertiary-container);
-    }
+    @include mixins.stock-tag();
   }
 }
 

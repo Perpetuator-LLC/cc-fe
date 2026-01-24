@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -24,6 +24,7 @@ import { ExportPersonalDialogComponent } from '../export-personal-dialog/export-
 import { LoadingService } from '../../layout/loading.service';
 import { AffiliateService, AffiliateRelationship } from '../../affiliate/affiliate.service';
 import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-user-detail',
@@ -46,6 +47,7 @@ import { MatIcon } from '@angular/material/icon';
     FormsModule,
     MatIcon,
     RouterLink,
+    MatTooltip,
   ],
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.scss'],
@@ -56,6 +58,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   userDetailForm: FormGroup;
   changePasswordForm: FormGroup;
   notificationPreferencesForm: FormGroup;
+  phoneVerificationForm: FormGroup;
   deleteConfirmation = '';
   exportConfirmation = '';
   private subscriptions = new Subscription();
@@ -64,6 +67,14 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   protected loadingOrders = true;
   loading = false;
   affiliateRelationship: AffiliateRelationship | null = null;
+
+  // Phone verification state
+  phoneNumber: string | null = null;
+  phoneVerified = false;
+  showVerificationInput = false;
+  savingPhone = false;
+  sendingCode = false;
+  verifyingPhone = false;
 
   constructor(
     private fb: FormBuilder,
@@ -83,7 +94,11 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
       email: [{ value: '' }],
+    });
+
+    this.phoneVerificationForm = this.fb.group({
       phoneNumber: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
+      verificationCode: ['', [Validators.minLength(6), Validators.maxLength(6)]],
     });
 
     this.changePasswordForm = this.fb.group(
@@ -168,7 +183,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.userService.getUserPreferences().subscribe({
         next: (preferences: UserPreferences) => {
-          const phoneNumber = preferences.sms.phoneNumber || '';
+          // Store phone verification state
+          this.phoneNumber = preferences.sms.phoneNumber || null;
+          this.phoneVerified = preferences.sms.isVerified || false;
 
           // Update notification preferences form
           this.notificationPreferencesForm.patchValue({
@@ -178,9 +195,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             marketingEmails: preferences.email.marketingEmails,
           });
 
-          // Update phone number in user details form
-          this.userDetailForm.patchValue({
-            phoneNumber: phoneNumber,
+          // Update phone verification form
+          this.phoneVerificationForm.patchValue({
+            phoneNumber: this.phoneNumber || '',
           });
 
           // Update SMS checkbox state based on phone validity
@@ -226,6 +243,89 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Save phone number to SMS preferences
+   */
+  onSubmitPhoneNumber(): void {
+    if (this.phoneVerificationForm.invalid || this.savingPhone) {
+      return;
+    }
+
+    const newPhoneNumber = this.phoneVerificationForm.get('phoneNumber')?.value?.trim() || '';
+    this.savingPhone = true;
+
+    this.subscriptions.add(
+      this.userService.updateSmsPreferences(newPhoneNumber).subscribe({
+        next: () => {
+          this.savingPhone = false;
+          this.phoneNumber = newPhoneNumber || null;
+          this.phoneVerified = false; // Reset verification when phone changes
+          this.showVerificationInput = false;
+          this.messageService.success('Phone number saved. Click "Send Verification Code" to verify.');
+        },
+        error: (err) => {
+          this.savingPhone = false;
+          this.messageService.error(`Failed to save phone number: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Send SMS verification code to user's phone
+   */
+  sendVerificationCode(): void {
+    if (this.sendingCode) {
+      return;
+    }
+
+    this.sendingCode = true;
+
+    this.subscriptions.add(
+      this.userService.sendSmsVerification().subscribe({
+        next: () => {
+          this.sendingCode = false;
+          this.showVerificationInput = true;
+          this.messageService.success('Verification code sent to your phone.');
+        },
+        error: (err) => {
+          this.sendingCode = false;
+          this.messageService.error(`Failed to send verification code: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Verify phone number with code
+   */
+  verifyPhone(): void {
+    const code = this.phoneVerificationForm.get('verificationCode')?.value?.trim();
+    if (!code || this.verifyingPhone) {
+      return;
+    }
+
+    this.verifyingPhone = true;
+
+    this.subscriptions.add(
+      this.userService.verifyPhoneNumber(code).subscribe({
+        next: () => {
+          this.verifyingPhone = false;
+          this.phoneVerified = true;
+          this.showVerificationInput = false;
+          this.phoneVerificationForm.get('verificationCode')?.reset();
+          this.messageService.success('Phone number verified successfully!');
+          // Reload preferences to update state
+          this.loadNotificationPreferences();
+        },
+        error: (err) => {
+          this.verifyingPhone = false;
+          this.messageService.error(`Verification failed: ${err.message}`);
+        },
+      }),
+    );
+  }
+
   passwordMatchValidator(formGroup: FormGroup) {
     const newPassword = formGroup.get('newPassword');
     const confirmPassword = formGroup.get('confirmPassword');
@@ -266,26 +366,12 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
   onSubmitUserDetails(): void {
     if (this.userDetailForm.valid) {
-      const { username, email, phoneNumber } = this.userDetailForm.value;
+      const { username, email } = this.userDetailForm.value;
       this.subscriptions.add(
         this.userService.updateUser(username, email).subscribe({
           next: (response) => {
             if (response.success) {
-              // After updating user details, also update phone number in SMS preferences
-              const currentSmsEnabled = this.notificationPreferencesForm.get('lowBalanceSms')?.value || false;
-              const phoneValue = phoneNumber?.trim() || '';
-
-              this.subscriptions.add(
-                this.userService.updateSmsPreferences(phoneValue, currentSmsEnabled).subscribe({
-                  next: () => {
-                    this.messageService.success('User details and phone number updated successfully.');
-                  },
-                  error: (err) => {
-                    const msg = `User details updated, but failed to update phone number: ${err.message}`;
-                    this.messageService.warning(msg);
-                  },
-                }),
-              );
+              this.messageService.success('User details updated successfully.');
 
               this.userService.loadUserDetails().subscribe({
                 next: (userDetails: UserDetails) => {
