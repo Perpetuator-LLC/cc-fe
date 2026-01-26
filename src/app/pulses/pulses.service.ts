@@ -29,6 +29,7 @@ const PULSE_CONFIG_FRAGMENT = gql`
     maxDurationMinutes
     targetWords
     maxWords
+    wordsPerMinute
     tone
     customInstructions
     includeIntro
@@ -49,6 +50,7 @@ const PULSE_CONFIG_FRAGMENT = gql`
       displayName
       model
       sampleUrl
+      wordsPerMinute
     }
     contentSources {
       uuid

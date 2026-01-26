@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, debounceTime, filter, switchMap } from 'rxjs';
 import { MessageService } from '../../message.service';
@@ -33,7 +33,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AddContentSourceDialogComponent } from '../add-content-source-dialog/add-content-source-dialog.component';
 import { AddAlertTriggerDialogComponent } from '../add-alert-trigger-dialog/add-alert-trigger-dialog.component';
 import { Job } from '../../jobs/job.service';
-import { Voice, VoicesService, tierToString, voiceToTier } from '../../podcast/voices.service';
+import { Voice } from '../../podcast/voices.service';
+import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
+import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 
 @Component({
   selector: 'app-pulse-detail',
@@ -64,6 +66,7 @@ import { Voice, VoicesService, tierToString, voiceToTier } from '../../podcast/v
     MatSliderModule,
     MatTableModule,
     MatChipsModule,
+    VoiceSelectorComponent,
   ],
 })
 export class PulseDetailComponent implements OnInit, OnDestroy {
@@ -80,6 +83,13 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   contentSources: ContentSource[] = [];
   alertTriggers: AlertTrigger[] = [];
   pulses: Pulse[] = [];
+
+  // Latest pulse for header display
+  get latestPulse(): Pulse | null {
+    if (this.pulses.length === 0) return null;
+    return this.pulses[0]; // Already sorted by createdAt desc
+  }
+  showTranscript = false;
 
   // Options
   toneOptions = [
@@ -113,14 +123,6 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   // Pulse history columns
   pulseHistoryColumns = ['title', 'status', 'duration', 'createdAt', 'actions'];
 
-  // Voice selection
-  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
-  voices: Voice[] = [];
-  filteredVoices: Voice[] = [];
-  voiceSearchControl = new FormControl('');
-  currentPlayingVoice: Voice | null = null;
-  loadingVoices = false;
-
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -132,7 +134,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     protected shareService: ShareService,
     private dialog: MatDialog,
     private jobService: JobService,
-    private voicesService: VoicesService,
+    private audioPlayerService: AudioPlayerService,
   ) {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
@@ -178,9 +180,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
     this.loadPulseConfig();
     this.loadPulseHistory();
-    this.loadVoices();
     this.setupAutoSave();
-    this.setupVoiceSearch();
   }
 
   ngOnDestroy(): void {
@@ -411,11 +411,19 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   // Helpers
   /**
    * Calculate target words based on duration.
-   * Conversion: 120 words per minute
+   * Uses voice-specific WPM from API, or defaults to 150.
    */
   getTargetWords(): number {
     const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
-    return minutes * 120;
+    const wpm = this.pulseConfig?.wordsPerMinute || 150;
+    return minutes * wpm;
+  }
+
+  /**
+   * Get the WPM being used (for display purposes)
+   */
+  getWordsPerMinute(): number {
+    return this.pulseConfig?.wordsPerMinute || 150;
   }
 
   formatDuration(value: number): string {
@@ -502,51 +510,33 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   }
 
   playPulse(pulse: Pulse): void {
-    if (pulse.audioUrl) {
-      window.open(pulse.audioUrl, '_blank');
+    if (!pulse.audioUrl) {
+      this.messageService.error('Audio not yet available');
+      return;
     }
+
+    const track: AudioTrack = {
+      id: pulse.uuid,
+      title: pulse.title,
+      subtitle: this.pulseConfig?.name || 'Pulse',
+      audioUrl: pulse.audioUrl,
+      duration: pulse.audioDurationSeconds,
+      type: 'pulse',
+      sourceRoute: `/media/pulses/${this.pulseConfigUuid}`,
+    };
+    this.audioPlayerService.play(track);
+  }
+
+  toggleTranscript(): void {
+    this.showTranscript = !this.showTranscript;
   }
 
   // ==================== VOICE METHODS ====================
 
-  private loadVoices(): void {
-    this.loadingVoices = true;
-    this.subscriptions.add(
-      this.voicesService.getVoices(undefined, true).subscribe({
-        next: (response) => {
-          this.voices = response.voices;
-          this.applyVoiceFilters();
-          this.loadingVoices = false;
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to load voices: ${err.message}`);
-          this.loadingVoices = false;
-        },
-      }),
-    );
-  }
-
-  private setupVoiceSearch(): void {
-    this.subscriptions.add(
-      this.voiceSearchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
-        this.applyVoiceFilters();
-      }),
-    );
-  }
-
-  applyVoiceFilters(): void {
-    const searchTerm = (this.voiceSearchControl.value || '').toLowerCase();
-    this.filteredVoices = this.voices.filter((voice) => {
-      const name = (voice.displayName || voice.externalId || '').toLowerCase();
-      return name.includes(searchTerm);
-    });
-  }
-
-  isVoiceSelected(voice: Voice): boolean {
-    return this.pulseConfig?.voice?.uuid === voice.uuid;
-  }
-
-  selectVoice(voice: Voice): void {
+  /**
+   * Handle voice selection from shared voice selector component
+   */
+  onVoiceSelected(voice: Voice): void {
     if (!this.pulseConfig) return;
 
     this.subscriptions.add(
@@ -560,30 +550,5 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
-  }
-
-  getVoiceDisplayName(voice: Voice): string {
-    return voice.displayName || voice.externalId || 'Unknown Voice';
-  }
-
-  getVoiceTier(voice: Voice): string {
-    return tierToString(voiceToTier(voice).toString());
-  }
-
-  playVoiceSample(voice: Voice): void {
-    if (!voice.sampleUrl || !this.audioPlayer) return;
-    this.currentPlayingVoice = voice;
-    this.audioPlayer.nativeElement.src = voice.sampleUrl;
-    this.audioPlayer.nativeElement.play().catch(() => {
-      this.currentPlayingVoice = null;
-    });
-  }
-
-  stopVoiceSample(): void {
-    if (this.audioPlayer) {
-      this.audioPlayer.nativeElement.pause();
-      this.audioPlayer.nativeElement.currentTime = 0;
-    }
-    this.currentPlayingVoice = null;
   }
 }

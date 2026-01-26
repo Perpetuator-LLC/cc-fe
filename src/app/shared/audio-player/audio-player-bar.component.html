@@ -1,0 +1,81 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (audioService.hasTrack()) {
+  <div class="audio-player-bar">
+    <!-- Progress bar (clickable) -->
+    <div
+      class="progress-container"
+      (click)="onProgressClick($event)"
+      role="slider"
+      tabindex="0"
+      [attr.aria-valuenow]="audioService.progress()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-label="Audio progress"
+    >
+      <div class="progress-bar" [style.width.%]="audioService.progress()"></div>
+      @if (audioService.isLoading()) {
+        <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+      }
+    </div>
+
+    <div class="player-content">
+      <!-- Track info -->
+      <div class="track-info" (click)="navigateToSource()" [class.clickable]="audioService.track()?.sourceRoute">
+        <mat-icon class="type-icon">{{ getTypeIcon() }}</mat-icon>
+        <div class="track-text">
+          <span class="track-title">{{ audioService.track()?.title }}</span>
+          @if (audioService.track()?.subtitle) {
+            <span class="track-subtitle">{{ audioService.track()?.subtitle }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="player-controls">
+        <button mat-icon-button (click)="audioService.skipBackward(15)" matTooltip="Back 15s">
+          <mat-icon>replay_10</mat-icon>
+        </button>
+
+        <button mat-icon-button class="play-button" (click)="audioService.togglePlay()">
+          @if (audioService.isPlaying()) {
+            <mat-icon>pause_circle</mat-icon>
+          } @else {
+            <mat-icon>play_circle</mat-icon>
+          }
+        </button>
+
+        <button mat-icon-button (click)="audioService.skipForward(15)" matTooltip="Forward 15s">
+          <mat-icon>forward_10</mat-icon>
+        </button>
+      </div>
+
+      <!-- Time display -->
+      <div class="time-display">
+        <span class="current-time">{{ audioService.formatTime(audioService.currentTime()) }}</span>
+        <span class="separator">/</span>
+        <span class="duration">{{ audioService.formatTime(audioService.duration()) }}</span>
+      </div>
+
+      <!-- Volume & close -->
+      <div class="secondary-controls">
+        <button
+          mat-icon-button
+          (click)="audioService.toggleMute()"
+          [matTooltip]="audioService.isMuted() ? 'Unmute' : 'Mute'"
+        >
+          @if (audioService.isMuted() || audioService.volume() === 0) {
+            <mat-icon>volume_off</mat-icon>
+          } @else if (audioService.volume() < 0.5) {
+            <mat-icon>volume_down</mat-icon>
+          } @else {
+            <mat-icon>volume_up</mat-icon>
+          }
+        </button>
+
+        <button mat-icon-button (click)="audioService.stop()" matTooltip="Close player">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+}

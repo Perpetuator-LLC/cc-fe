@@ -776,6 +776,11 @@ type PulseConfigType implements Node {
   targetWords: Int
   maxWords: Int
   voiceUuid: UUID
+
+  """
+  Words per minute for this config's voice. Uses voice-specific WPM if set, otherwise defaults to 150.
+  """
+  wordsPerMinute: Int
 }
 
 """An object with an ID"""
@@ -803,9 +808,16 @@ type VoiceType implements Node {
 
   """When this voice was last updated"""
   updatedAt: DateTime!
+  sampleSeconds: Int
+  sampleWords: Int
   metadata: GenericScalar
   uuid: UUID
   sampleUrl: String
+
+  """
+  Speaking rate in words per minute. Returns voice-specific WPM or default 150.
+  """
+  wordsPerMinute: Int
   creditsPerMillionChar: Int
 }
 

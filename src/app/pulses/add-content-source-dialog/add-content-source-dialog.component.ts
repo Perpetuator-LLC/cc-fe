@@ -146,10 +146,17 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
   /** Load user's watchlists for picker */
   private loadWatchlists(): void {
     this.isLoadingWatchlists = true;
+    // Load ALL watchlists (not filtered by type) to include user's custom watchlists
     this.subscriptions.add(
-      this.watchlistService.loadWatchlists('personal').subscribe({
+      this.watchlistService.loadWatchlists().subscribe({
         next: (watchlists) => {
-          this.watchlists = watchlists;
+          // Include all user-created watchlists (custom, favorites)
+          // The watchlistType from BE is lowercase
+          this.watchlists = watchlists.filter((w) => {
+            const type = w.watchlistType?.toLowerCase();
+            // Include custom and favorites, exclude search_history and system sectors/industries
+            return type === 'custom' || type === 'favorites' || type === 'personal';
+          });
           this.isLoadingWatchlists = false;
         },
         error: (err) => {

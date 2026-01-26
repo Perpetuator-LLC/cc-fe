@@ -131,10 +131,11 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
 
   /**
    * Calculate target words based on duration.
-   * Conversion: 120 words per minute
+   * Uses default 150 WPM since voice isn't selected during creation.
+   * Actual WPM will be recalculated when voice is set.
    */
   getTargetWords(): number {
     const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
-    return minutes * 120;
+    return minutes * 150; // Default WPM
   }
 }

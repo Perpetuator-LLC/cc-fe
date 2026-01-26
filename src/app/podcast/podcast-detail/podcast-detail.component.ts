@@ -58,6 +58,7 @@ import {
   ImageHistoryDialogComponent,
   ImageHistoryDialogData,
 } from '../image-history-dialog/image-history-dialog.component';
+import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -93,6 +94,7 @@ import {
     ShareButtonsComponent,
     EpisodesTableComponent,
     RssFeedTableComponent,
+    VoiceSelectorComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -1209,6 +1211,11 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   isVoiceSelected(voice: Voice): boolean {
     const selected = this.podcastForm.get('voice')?.value;
     return selected && selected.uuid === voice.uuid;
+  }
+
+  // Handle voice selection from shared voice selector
+  onVoiceSelected(voice: Voice): void {
+    this.finfo(voice);
   }
 
   // Update finfo to select the voice
