@@ -241,13 +241,16 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
 
   /**
    * Get cost per word for a voice.
-   * Uses creditsPerMillionChar and assumes ~5 chars per word average.
-   * TODO: Backend should provide creditsPerWord directly for accuracy.
+   * Uses backend-provided creditsPerWord field (preferred) or calculates from creditsPerMillionChar.
    */
   getCreditsPerWord(voice: Voice): number | null {
+    // Prefer backend-calculated value
+    if (voice.creditsPerWord != null) {
+      return voice.creditsPerWord;
+    }
+    // Fallback calculation (deprecated - backend should provide this)
     if (!voice.creditsPerMillionChar) return null;
-    // Approximate: 5 characters per word average
-    const charsPerWord = 5;
+    const charsPerWord = 5; // Must match backend AVERAGE_CHARS_PER_WORD
     return (voice.creditsPerMillionChar * charsPerWord) / 1_000_000;
   }
 

@@ -1,7 +1,8 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { MessageService } from '../../message.service';
 import { PulsesService } from '../pulses.service';
 import { ContentSourceType, RssFeed } from '../pulses.types';
@@ -17,6 +18,14 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { WatchlistService } from '../../terminal/watchlist.service';
 import { Watchlist } from '../../terminal/terminal.types';
+import { Apollo, gql } from 'apollo-angular';
+
+// Stock autocomplete result type
+interface StockAutocompleteResult {
+  symbol: string;
+  name: string;
+  display: string;
+}
 
 export interface AddContentSourceDialogData {
   pulseConfigUuid: string;
@@ -57,6 +66,12 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
   watchlists: Watchlist[] = [];
   isLoadingWatchlists = false;
 
+  // Stock/Company autocomplete
+  stockSearchQuery$ = new Subject<string>();
+  stockSuggestions: StockAutocompleteResult[] = [];
+  isSearchingStocks = false;
+  selectedStock: StockAutocompleteResult | null = null;
+
   sourceTypes: { value: ContentSourceType; label: string; icon: string }[] = [
     { value: 'rss_feed', label: 'RSS Feed', icon: 'rss_feed' },
     { value: 'search_term', label: 'Search Term', icon: 'search' },
@@ -69,6 +84,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private pulsesService: PulsesService,
     private watchlistService: WatchlistService,
+    private apollo: Apollo,
     public dialogRef: MatDialogRef<AddContentSourceDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddContentSourceDialogData,
   ) {
@@ -120,6 +136,33 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
             console.error('[AddContentSource] RSS feed search error:', err);
             this.rssFeedSuggestions = [];
             this.isSearchingRssFeeds = false;
+          },
+        }),
+    );
+
+    // Setup stock/company autocomplete search
+    this.subscriptions.add(
+      this.stockSearchQuery$
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((query) => {
+            if (!query || query.length < 1) {
+              return of([]);
+            }
+            this.isSearchingStocks = true;
+            return this.searchStocks(query);
+          }),
+        )
+        .subscribe({
+          next: (stocks) => {
+            this.stockSuggestions = stocks;
+            this.isSearchingStocks = false;
+          },
+          error: (err) => {
+            console.error('[AddContentSource] Stock search error:', err);
+            this.stockSuggestions = [];
+            this.isSearchingStocks = false;
           },
         }),
     );
@@ -282,5 +325,60 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  // ==================== Stock Autocomplete ====================
+
+  /** Search stocks using autocomplete query */
+  private searchStocks(query: string) {
+    const AUTOCOMPLETE_QUERY = gql`
+      query GetSymbolAutocomplete($query: String!) {
+        autocomplete(input: $query, limit: 10) {
+          display
+          symbol
+          name
+        }
+      }
+    `;
+
+    interface AutocompleteResponse {
+      autocomplete: { display: string; symbol: string; name: string }[];
+    }
+
+    return this.apollo
+      .query<AutocompleteResponse>({
+        query: AUTOCOMPLETE_QUERY,
+        variables: { query },
+      })
+      .pipe(
+        map((result) =>
+          (result.data.autocomplete || []).map((item) => ({
+            symbol: item.symbol || item.display,
+            name: item.name || '',
+            display: item.display,
+          })),
+        ),
+      );
+  }
+
+  /** Handle stock input change for autocomplete */
+  onStockInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.stockSearchQuery$.next(input.value);
+    // Clear selected stock when user types
+    this.selectedStock = null;
+  }
+
+  /** Handle stock selection from autocomplete */
+  selectStock(stock: StockAutocompleteResult): void {
+    this.selectedStock = stock;
+    this.sourceForm.get('symbol')?.setValue(stock.symbol);
+  }
+
+  /** Display function for stock autocomplete */
+  displayStock(stock: StockAutocompleteResult | string): string {
+    if (!stock) return '';
+    if (typeof stock === 'string') return stock;
+    return stock.symbol;
   }
 }

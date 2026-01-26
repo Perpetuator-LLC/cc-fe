@@ -213,7 +213,7 @@ export const kindToString = (kind: string) => {
     case JobKind.FETCH_PULSE_NEWS:
       return 'Fetching News';
     case JobKind.RESEARCH_PULSE_CONTENT:
-      return 'Researching Content';
+      return 'Researching Pulse Content';
     case JobKind.CREATE_PULSE_TRANSCRIPT:
       return 'Creating Transcript';
     case JobKind.VALIDATE_PULSE:
