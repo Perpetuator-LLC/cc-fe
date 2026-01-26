@@ -734,6 +734,16 @@ type PulseConfigType implements Node {
   """Include a closing statement"""
   includeOutro: Boolean!
 
+  """
+  Custom introduction text (e.g., 'Good morning! Here's your market pulse...')
+  """
+  introText: String
+
+  """
+  Custom closing text (e.g., 'That's your market pulse. Have a great trading day!')
+  """
+  outroText: String
+
   """TTS voice for generating pulse audio"""
   voice: VoiceType
 
@@ -888,6 +898,7 @@ type ContentSourceType_ implements Node {
 
   """Stock symbol (for COMPANY type)"""
   symbol: String
+  customInstructions: String
 
   """Higher priority sources appear first (0-100)"""
   priority: Int!
@@ -1070,6 +1081,12 @@ type WatchlistObjectType {
 
   """Whether the current user can edit this watchlist"""
   canEdit: Boolean
+
+  """UUIDs of pulse configs that use this watchlist as a content source"""
+  pulseConfigUuids: [UUID]
+
+  """Number of pulse configs that use this watchlist"""
+  pulseConfigCount: Int
 }
 
 """An enumeration."""
@@ -3650,8 +3667,13 @@ enum JobKind {
   GENERATE_PODCAST_IMAGE
   GENERATE_IMAGE
   GENERATE_PULSE
+  FETCH_PULSE_NEWS
+  RESEARCH_PULSE_CONTENT
+  CREATE_PULSE_TRANSCRIPT
   VALIDATE_PULSE
+  GENERATE_PULSE_AUDIO
   DELIVER_PULSE
+  PUBLISH_PULSE_CHAIN
   TEST_RAISE
   TEST_PRINT
 }
@@ -4176,10 +4198,10 @@ type UserType {
 
 type Mutation {
   """Create a new pulse configuration."""
-  createPulseConfig(alertTriggers: [AlertTriggerInput], contentSources: [ContentSourceInput], deliveryMethod: String = "sms_link", description: String, maxDurationMinutes: Float, name: String!, newsLookbackHours: Int = 24, scheduleFrequency: String = "daily", scheduleTime: String, scheduleTimezone: String = "America/New_York", targetDurationMinutes: Float = 3, tone: String = "professional", voiceUuid: UUID): CreatePulseConfig
+  createPulseConfig(alertTriggers: [AlertTriggerInput], contentSources: [ContentSourceInput], deliveryMethod: String = "sms_link", description: String, includeIntro: Boolean = true, includeOutro: Boolean = true, introText: String, maxDurationMinutes: Float, name: String!, newsLookbackHours: Int = 24, outroText: String, scheduleFrequency: String = "daily", scheduleTime: String, scheduleTimezone: String = "America/New_York", targetDurationMinutes: Float = 3, tone: String = "professional", voiceUuid: UUID): CreatePulseConfig
 
   """Update an existing pulse configuration."""
-  updatePulseConfig(customInstructions: String, deliveryMethod: String, description: String, includeIntro: Boolean, includeOutro: Boolean, isActive: Boolean, maxDurationMinutes: Float, name: String, newsLookbackHours: Int, pulseConfigUuid: UUID!, scheduleFrequency: String, scheduleTime: String, scheduleTimezone: String, targetDurationMinutes: Float, tone: String, voiceUuid: UUID): UpdatePulseConfig
+  updatePulseConfig(customInstructions: String, deliveryMethod: String, description: String, includeIntro: Boolean, includeOutro: Boolean, introText: String, isActive: Boolean, maxDurationMinutes: Float, name: String, newsLookbackHours: Int, outroText: String, pulseConfigUuid: UUID!, scheduleFrequency: String, scheduleTime: String, scheduleTimezone: String, targetDurationMinutes: Float, tone: String, voiceUuid: UUID): UpdatePulseConfig
 
   """Delete a pulse configuration."""
   deletePulseConfig(pulseConfigUuid: UUID!): DeletePulseConfig
@@ -4197,7 +4219,12 @@ type Mutation {
   removeAlertTrigger(alertTriggerUuid: UUID!): RemoveAlertTrigger
 
   """Generate a pulse immediately for a configuration."""
-  generatePulse(pulseConfigUuid: UUID!): GeneratePulse
+  generatePulse(
+    pulseConfigUuid: UUID!
+
+    """Use chain-based generation (recommended for better job tracking)"""
+    useChain: Boolean = true
+  ): GeneratePulse
 
   """Deliver a generated pulse to the user."""
   deliverPulse(deliveryMethod: String, pulseUuid: UUID!): DeliverPulse
@@ -5006,6 +5033,7 @@ input ContentSourceInput {
   watchlistUuid: UUID
   symbol: String
   priority: Int = 0
+  customInstructions: String
 }
 
 """Update an existing pulse configuration."""
@@ -5053,6 +5081,9 @@ type GeneratePulse {
   message: String
   pulse: PulseType
   jobUuid: UUID
+
+  """All jobs in the generation chain"""
+  jobUuids: [UUID]
 }
 
 """Deliver a generated pulse to the user."""

@@ -61,6 +61,7 @@ export interface ContentSource {
 
   priority: number; // Higher = more important (0-100)
   isActive: boolean;
+  customInstructions?: string | null; // Source-specific instructions for AI
 }
 
 /**
@@ -107,6 +108,8 @@ export interface PulseConfig {
   customInstructions?: string | null; // User preferences like "Focus on tech stocks"
   includeIntro: boolean;
   includeOutro: boolean;
+  introText?: string | null; // Custom intro text when includeIntro is true
+  outroText?: string | null; // Custom outro text when includeOutro is true
 
   // Voice (same Voice model as podcasts)
   voice?: Voice | null;
@@ -184,6 +187,7 @@ export interface ContentSourceInput {
   watchlistUuid?: string | null;
   symbol?: string | null;
   priority?: number;
+  customInstructions?: string | null;
 }
 
 /**

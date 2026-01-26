@@ -128,4 +128,13 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
   formatDuration(value: number): string {
     return `${value} min`;
   }
+
+  /**
+   * Calculate target words based on duration.
+   * Conversion: 120 words per minute
+   */
+  getTargetWords(): number {
+    const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
+    return minutes * 120;
+  }
 }

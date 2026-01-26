@@ -15,6 +15,8 @@ import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { WatchlistService } from '../../terminal/watchlist.service';
+import { Watchlist } from '../../terminal/terminal.types';
 
 export interface AddContentSourceDialogData {
   pulseConfigUuid: string;
@@ -51,6 +53,10 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
   isSearchingRssFeeds = false;
   selectedRssFeed: RssFeed | null = null;
 
+  // Watchlist picker
+  watchlists: Watchlist[] = [];
+  isLoadingWatchlists = false;
+
   sourceTypes: { value: ContentSourceType; label: string; icon: string }[] = [
     { value: 'rss_feed', label: 'RSS Feed', icon: 'rss_feed' },
     { value: 'search_term', label: 'Search Term', icon: 'search' },
@@ -62,6 +68,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private messageService: MessageService,
     private pulsesService: PulsesService,
+    private watchlistService: WatchlistService,
     public dialogRef: MatDialogRef<AddContentSourceDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddContentSourceDialogData,
   ) {
@@ -72,6 +79,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
       watchlistUuid: [''],
       symbol: [''],
       priority: [50, [Validators.min(0), Validators.max(100)]],
+      customInstructions: [''],
     });
 
     // Update validators based on source type
@@ -83,6 +91,9 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Load initial list of all RSS feeds (cached)
     this.loadInitialFeeds();
+
+    // Load user's watchlists
+    this.loadWatchlists();
 
     // Setup RSS feed autocomplete search
     this.subscriptions.add(
@@ -127,6 +138,24 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
           console.error('[AddContentSource] Failed to load RSS feeds:', err);
           this.rssFeedSuggestions = [];
           this.isSearchingRssFeeds = false;
+        },
+      }),
+    );
+  }
+
+  /** Load user's watchlists for picker */
+  private loadWatchlists(): void {
+    this.isLoadingWatchlists = true;
+    this.subscriptions.add(
+      this.watchlistService.loadWatchlists('personal').subscribe({
+        next: (watchlists) => {
+          this.watchlists = watchlists;
+          this.isLoadingWatchlists = false;
+        },
+        error: (err) => {
+          console.error('[AddContentSource] Failed to load watchlists:', err);
+          this.watchlists = [];
+          this.isLoadingWatchlists = false;
         },
       }),
     );
@@ -206,9 +235,11 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
       watchlistUuid?: string;
       symbol?: string;
       priority: number;
+      customInstructions?: string;
     } = {
       sourceType: formValue.sourceType,
       priority: formValue.priority,
+      customInstructions: formValue.customInstructions || undefined,
     };
 
     // Only include relevant field based on type

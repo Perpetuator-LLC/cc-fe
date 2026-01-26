@@ -406,14 +406,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>Brand and Style Prompt</mat-label>
+                <mat-label>Brand Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="prompt"
                   class="textarea-prompt"
-                  placeholder="Enter transcript prompt"
+                  placeholder="Enter brand voice and style guidelines"
                   rows="20"
                 ></textarea>
+                <mat-hint>Brand voice and style guidelines applied to all episode types</mat-hint>
               </mat-form-field>
             </div>
             <div class="member-row">
@@ -434,14 +435,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>News Prompt</mat-label>
+                <mat-label>News Episode Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="newsPrompt"
                   class="textarea-prompt"
-                  placeholder="Enter news prompt"
+                  placeholder="Enter instructions for news episodes"
                   rows="20"
                 ></textarea>
+                <mat-hint>Guidelines for generating news-focused episodes</mat-hint>
               </mat-form-field>
             </div>
             <div class="member-row">
@@ -462,14 +464,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>Research Prompt</mat-label>
+                <mat-label>Research Topic Episode Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="researchPrompt"
                   class="textarea-prompt"
-                  placeholder="Enter research prompt"
+                  placeholder="Enter instructions for research topic episodes"
                   rows="20"
                 ></textarea>
+                <mat-hint>Guidelines for generating research-focused episodes</mat-hint>
               </mat-form-field>
             </div>
           </form>
