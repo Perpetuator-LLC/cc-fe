@@ -1,0 +1,176 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.audio-player-bar {
+  position: fixed;
+  z-index: 1000;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 -2px 8px var(--md-sys-color-shadow);
+}
+
+.progress-container {
+  cursor: pointer;
+
+  position: relative;
+
+  width: 100%;
+  height: 4px;
+
+  background: var(--md-sys-color-surface-container-highest);
+
+  transition: height 0.2s;
+
+  &:hover {
+    height: 8px;
+
+    .progress-bar {
+      background: var(--md-sys-color-primary);
+    }
+  }
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--md-sys-color-primary);
+  transition: width 0.1s linear;
+}
+
+.loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+}
+
+.player-content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.track-info {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  align-items: center;
+
+  min-width: 0;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover .track-title {
+      color: var(--md-sys-color-primary);
+    }
+  }
+
+  .type-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .track-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .track-title {
+    overflow: hidden;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    transition: color 0.2s;
+  }
+
+  .track-subtitle {
+    overflow: hidden;
+
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.player-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  .play-button {
+    mat-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 40px;
+      color: var(--md-sys-color-primary);
+    }
+  }
+}
+
+.time-display {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  min-width: 80px;
+
+  font-family: monospace;
+  font-size: 12px;
+
+  .current-time {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .separator {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .duration {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.secondary-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+// Responsive: hide time display on small screens
+@media (width <= 576px) {
+  .player-content {
+    padding: 8px;
+  }
+
+  .track-info {
+    .type-icon {
+      display: none;
+    }
+  }
+
+  .time-display {
+    display: none;
+  }
+
+  .secondary-controls {
+    button:first-child {
+      display: none; // Hide volume on mobile
+    }
+  }
+}

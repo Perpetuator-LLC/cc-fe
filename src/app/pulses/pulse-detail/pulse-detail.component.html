@@ -48,6 +48,94 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Latest Pulse Section -->
+    @if (latestPulse) {
+      <mat-card class="latest-pulse-card">
+        <mat-card-content>
+          <div class="latest-pulse-header">
+            <div class="latest-pulse-info">
+              <h3>
+                <mat-icon>schedule</mat-icon>
+                Latest Pulse
+              </h3>
+              <span class="pulse-title">{{ latestPulse.title }}</span>
+              <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
+            </div>
+            <div class="latest-pulse-actions">
+              @if (latestPulse.audioUrl && latestPulse.status === 'ready') {
+                <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
+                  <mat-icon>play_arrow</mat-icon>
+                  Play
+                </button>
+              }
+              <button mat-button (click)="toggleTranscript()">
+                <mat-icon>{{ showTranscript ? 'expand_less' : 'expand_more' }}</mat-icon>
+                {{ showTranscript ? 'Hide Transcript' : 'Show Transcript' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="pulse-stats">
+            <div class="stat-item">
+              <mat-icon>timer</mat-icon>
+              <span class="stat-value">{{ formatSeconds(latestPulse.audioDurationSeconds) }}</span>
+              <span class="stat-label">Duration</span>
+            </div>
+            <div class="stat-item">
+              <mat-icon>notes</mat-icon>
+              <span class="stat-value">{{ latestPulse.wordCount || 0 }}</span>
+              <span class="stat-label">Words</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedCompliance"
+              [class.not-validated]="!latestPulse.validatedCompliance"
+            >
+              <mat-icon>gavel</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedCompliance ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Compliance</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedFacts"
+              [class.not-validated]="!latestPulse.validatedFacts"
+            >
+              <mat-icon>fact_check</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedFacts ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Facts</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedLength"
+              [class.not-validated]="!latestPulse.validatedLength"
+            >
+              <mat-icon>straighten</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedLength ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Length</span>
+            </div>
+            @if (latestPulse.status === 'failed') {
+              <div class="stat-item status-error">
+                <mat-icon>error</mat-icon>
+                <span class="stat-value">Failed</span>
+                <span class="stat-label" [matTooltip]="latestPulse.errorMessage || ''">{{
+                  latestPulse.errorMessage || 'Unknown error'
+                }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Transcript -->
+          @if (showTranscript && latestPulse.transcript) {
+            <div class="transcript-section">
+              <h4>Transcript</h4>
+              <div class="transcript-content">{{ latestPulse.transcript }}</div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
     <!-- Tabs -->
     <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" dynamicHeight>
       <!-- Settings Tab -->
@@ -327,67 +415,10 @@
                 Choose the voice for your pulse audio. Hover over a voice card to preview.
               </p>
 
-              <audio #audioPlayer></audio>
-
-              <div class="voice-search">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Search voices</mat-label>
-                  <mat-icon matPrefix>search</mat-icon>
-                  <input matInput [formControl]="voiceSearchControl" placeholder="Search by voice name..." />
-                </mat-form-field>
-              </div>
-
-              @if (loadingVoices) {
-                <div class="loading-container">
-                  <mat-spinner diameter="32" />
-                  <p>Loading voices...</p>
-                </div>
-              } @else if (filteredVoices.length === 0) {
-                <div class="empty-state">
-                  <mat-icon>record_voice_over</mat-icon>
-                  <p>No voices found matching your search.</p>
-                </div>
-              } @else {
-                <div class="voice-grid">
-                  @for (voice of filteredVoices; track voice.uuid) {
-                    <div
-                      class="voice-card"
-                      [class.selected]="isVoiceSelected(voice)"
-                      (click)="selectVoice(voice)"
-                      (keydown.enter)="selectVoice(voice)"
-                      (keydown.space)="selectVoice(voice)"
-                      tabindex="0"
-                      role="button"
-                      [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
-                    >
-                      <div class="voice-header">
-                        <span class="voice-name">{{ getVoiceDisplayName(voice) }}</span>
-                        <span class="voice-tier">{{ getVoiceTier(voice) }}</span>
-                      </div>
-                      <div class="voice-actions">
-                        <button
-                          mat-icon-button
-                          type="button"
-                          [disabled]="!voice.sampleUrl"
-                          (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
-                          (mouseleave)="stopVoiceSample()"
-                          (click)="$event.stopPropagation()"
-                          matTooltip="Preview voice"
-                        >
-                          @if (currentPlayingVoice?.uuid === voice.uuid) {
-                            <mat-icon>volume_up</mat-icon>
-                          } @else {
-                            <mat-icon>play_circle</mat-icon>
-                          }
-                        </button>
-                        @if (isVoiceSelected(voice)) {
-                          <mat-icon class="selected-icon">check_circle</mat-icon>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
+              <app-voice-selector
+                [selectedVoiceUuid]="pulseConfig.voice?.uuid ?? null"
+                (voiceSelected)="onVoiceSelected($event)"
+              />
             </mat-card-content>
           </mat-card>
         </div>

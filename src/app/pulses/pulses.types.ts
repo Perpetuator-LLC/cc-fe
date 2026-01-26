@@ -100,8 +100,9 @@ export interface PulseConfig {
   // Duration
   targetDurationMinutes: number;
   maxDurationMinutes?: number | null;
-  targetWords: number; // Computed: targetDurationMinutes * 150
+  targetWords: number; // Computed by BE: targetDurationMinutes * wordsPerMinute
   maxWords?: number | null;
+  wordsPerMinute: number; // Voice-specific WPM or default 150
 
   // Customization
   tone: string; // "professional", "casual", "formal", "conversational"

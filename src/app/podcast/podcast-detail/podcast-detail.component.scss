@@ -643,6 +643,15 @@ mat-divider {
   }
 }
 
+.voice-admin-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+
+  margin-bottom: 16px;
+}
+
 .settings-section {
   margin-bottom: 40px;
   padding-bottom: 32px;

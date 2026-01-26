@@ -32,6 +32,7 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
 import { JobStatusIndicatorComponent } from '../../jobs/job-status-indicator/job-status-indicator.component';
 import { LoadingService } from '../loading.service';
 import { MediaTabPreferenceService } from '../media-tab-preference.service';
+import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-bar.component';
 
 @Component({
   selector: 'app-post-login-layout',
@@ -56,6 +57,7 @@ import { MediaTabPreferenceService } from '../media-tab-preference.service';
     DecimalPipe,
     SharedFooterComponent,
     JobStatusIndicatorComponent,
+    AudioPlayerBarComponent,
   ],
 })
 export class PostLoginLayoutComponent implements OnInit {
