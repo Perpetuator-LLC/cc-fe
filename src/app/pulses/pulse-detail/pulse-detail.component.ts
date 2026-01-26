@@ -527,6 +527,47 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     this.audioPlayerService.play(track);
   }
 
+  /**
+   * Create an AudioTrack from a Pulse
+   */
+  private createTrackFromPulse(pulse: Pulse): AudioTrack {
+    return {
+      id: pulse.uuid,
+      title: pulse.title,
+      subtitle: this.pulseConfig?.name || 'Pulse',
+      audioUrl: pulse.audioUrl!,
+      duration: pulse.audioDurationSeconds,
+      type: 'pulse',
+      sourceRoute: `/media/pulses/${this.pulseConfigUuid}`,
+    };
+  }
+
+  /**
+   * Add pulse to play next in queue
+   */
+  addToQueueNext(pulse: Pulse): void {
+    if (!pulse.audioUrl) {
+      this.messageService.warning('No audio available for this pulse');
+      return;
+    }
+    const track = this.createTrackFromPulse(pulse);
+    this.audioPlayerService.playNext(track);
+    this.messageService.success('Added to play next');
+  }
+
+  /**
+   * Add pulse to end of queue
+   */
+  addToQueue(pulse: Pulse): void {
+    if (!pulse.audioUrl) {
+      this.messageService.warning('No audio available for this pulse');
+      return;
+    }
+    const track = this.createTrackFromPulse(pulse);
+    this.audioPlayerService.addToQueue(track);
+    this.messageService.success('Added to queue');
+  }
+
   toggleTranscript(): void {
     this.showTranscript = !this.showTranscript;
   }

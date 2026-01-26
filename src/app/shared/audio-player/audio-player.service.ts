@@ -22,9 +22,13 @@ export interface AudioPlayerState {
   error: string | null;
 }
 
+const QUEUE_STORAGE_KEY = 'audio-player-queue';
+const VOLUME_STORAGE_KEY = 'audio-player-volume';
+
 /**
  * Persistent audio player service that maintains audio playback state
  * across page navigation. Uses signals for reactive state management.
+ * Supports queue with localStorage persistence.
  */
 @Injectable({
   providedIn: 'root',
@@ -42,6 +46,10 @@ export class AudioPlayerService {
   private readonly _isLoading = signal(false);
   private readonly _error = signal<string | null>(null);
 
+  // Queue signals
+  private readonly _queue = signal<AudioTrack[]>([]);
+  private readonly _autoQueueEnabled = signal(false);
+
   // Public readonly signals
   readonly track = this._track.asReadonly();
   readonly isPlaying = this._isPlaying.asReadonly();
@@ -51,9 +59,13 @@ export class AudioPlayerService {
   readonly isMuted = this._isMuted.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly error = this._error.asReadonly();
+  readonly queue = this._queue.asReadonly();
+  readonly autoQueueEnabled = this._autoQueueEnabled.asReadonly();
 
   // Computed signals
   readonly hasTrack = computed(() => this._track() !== null);
+  readonly hasQueue = computed(() => this._queue().length > 0);
+  readonly queueLength = computed(() => this._queue().length);
   readonly progress = computed(() => {
     const duration = this._duration();
     const currentTime = this._currentTime();
@@ -64,7 +76,52 @@ export class AudioPlayerService {
   });
 
   constructor() {
+    this.loadQueueFromStorage();
+    this.loadVolumeFromStorage();
     this.initAudio();
+  }
+
+  private loadQueueFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem(QUEUE_STORAGE_KEY);
+      if (stored) {
+        const queue = JSON.parse(stored) as AudioTrack[];
+        this._queue.set(queue);
+      }
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to load queue from storage:', e);
+    }
+  }
+
+  private saveQueueToStorage(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(this._queue()));
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to save queue to storage:', e);
+    }
+  }
+
+  private loadVolumeFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem(VOLUME_STORAGE_KEY);
+      if (stored) {
+        this._volume.set(parseFloat(stored));
+      }
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to load volume from storage:', e);
+    }
+  }
+
+  private saveVolumeToStorage(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(VOLUME_STORAGE_KEY, this._volume().toString());
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to save volume to storage:', e);
+    }
   }
 
   private initAudio(): void {
@@ -102,6 +159,8 @@ export class AudioPlayerService {
     this.audio.addEventListener('ended', () => {
       this._isPlaying.set(false);
       this._currentTime.set(0);
+      // Auto-play next track in queue
+      this.playNext();
     });
 
     this.audio.addEventListener('error', () => {
@@ -229,6 +288,7 @@ export class AudioPlayerService {
   setVolume(volume: number): void {
     if (!this.audio) return;
     this.audio.volume = Math.max(0, Math.min(1, volume));
+    this.saveVolumeToStorage();
   }
 
   /**
@@ -253,5 +313,98 @@ export class AudioPlayerService {
       return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // ==================== QUEUE MANAGEMENT ====================
+
+  /**
+   * Add track to end of queue
+   */
+  addToQueue(track: AudioTrack): void {
+    // Don't add duplicates
+    if (this._queue().some((t) => t.id === track.id)) {
+      return;
+    }
+    this._queue.update((q) => [...q, track]);
+    this.saveQueueToStorage();
+  }
+
+  /**
+   * Add track to play next (after current track)
+   */
+  playNext(track?: AudioTrack): void {
+    if (track) {
+      // Remove if already in queue to avoid duplicates
+      this._queue.update((q) => q.filter((t) => t.id !== track.id));
+      // Add to front of queue
+      this._queue.update((q) => [track, ...q]);
+      this.saveQueueToStorage();
+    } else {
+      // No track provided - play next from queue
+      const queue = this._queue();
+      if (queue.length > 0) {
+        const nextTrack = queue[0];
+        this._queue.update((q) => q.slice(1));
+        this.saveQueueToStorage();
+        this.play(nextTrack);
+      }
+      // TODO: If auto-queue enabled and queue empty, fetch from backend
+    }
+  }
+
+  /**
+   * Remove track from queue by id
+   */
+  removeFromQueue(trackId: string): void {
+    this._queue.update((q) => q.filter((t) => t.id !== trackId));
+    this.saveQueueToStorage();
+  }
+
+  /**
+   * Clear the entire queue
+   */
+  clearQueue(): void {
+    this._queue.set([]);
+    this.saveQueueToStorage();
+  }
+
+  /**
+   * Move track in queue (reorder)
+   */
+  reorderQueue(fromIndex: number, toIndex: number): void {
+    const queue = [...this._queue()];
+    const [moved] = queue.splice(fromIndex, 1);
+    queue.splice(toIndex, 0, moved);
+    this._queue.set(queue);
+    this.saveQueueToStorage();
+  }
+
+  /**
+   * Skip to a specific track in queue (plays it and removes from queue)
+   */
+  skipToTrack(trackId: string): void {
+    const queue = this._queue();
+    const index = queue.findIndex((t) => t.id === trackId);
+    if (index >= 0) {
+      const track = queue[index];
+      // Remove this track and all before it from queue
+      this._queue.update((q) => q.slice(index + 1));
+      this.saveQueueToStorage();
+      this.play(track);
+    }
+  }
+
+  /**
+   * Toggle auto-queue feature
+   */
+  toggleAutoQueue(): void {
+    this._autoQueueEnabled.update((v) => !v);
+  }
+
+  /**
+   * Set auto-queue enabled state
+   */
+  setAutoQueue(enabled: boolean): void {
+    this._autoQueueEnabled.set(enabled);
   }
 }

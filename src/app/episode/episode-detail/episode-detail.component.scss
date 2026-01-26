@@ -436,6 +436,16 @@
   }
 }
 
+.audio-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  audio {
+    flex: 1;
+  }
+}
+
 .live-audio-section {
   display: flex;
   flex-direction: column;

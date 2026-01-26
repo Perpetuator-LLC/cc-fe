@@ -118,12 +118,46 @@
         </mat-form-field>
       }
 
-      <!-- Company Symbol -->
+      <!-- Company Symbol with Autocomplete -->
       @if (selectedType === 'company') {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Company Symbol</mat-label>
-          <input matInput formControlName="symbol" placeholder="e.g., AAPL" [style.text-transform]="'uppercase'" />
-          <mat-hint>Stock ticker symbol (1-5 characters)</mat-hint>
+          <input
+            matInput
+            formControlName="symbol"
+            placeholder="Search by symbol or company name..."
+            [matAutocomplete]="stockAutocomplete"
+            (input)="onStockInputChange($event)"
+            [style.text-transform]="'uppercase'"
+          />
+          @if (isSearchingStocks) {
+            <mat-spinner matSuffix diameter="20"></mat-spinner>
+          }
+          <mat-autocomplete
+            #stockAutocomplete="matAutocomplete"
+            [displayWith]="displayStock"
+            (optionSelected)="selectStock($event.option.value)"
+          >
+            @for (stock of stockSuggestions; track stock.symbol) {
+              <mat-option [value]="stock">
+                <div class="stock-option">
+                  <span class="stock-symbol">{{ stock.symbol }}</span>
+                  <span class="stock-name">{{ stock.name }}</span>
+                </div>
+              </mat-option>
+            }
+            @if (stockSuggestions.length === 0 && !isSearchingStocks) {
+              <mat-option disabled>
+                <span class="no-results">Type to search for a company</span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+          <mat-hint>
+            Search by ticker symbol or company name
+            @if (selectedStock) {
+              <span class="selected-hint">Selected: {{ selectedStock.name }}</span>
+            }
+          </mat-hint>
           @if (sourceForm.get('symbol')?.hasError('required')) {
             <mat-error>Symbol is required</mat-error>
           }

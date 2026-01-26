@@ -71,6 +71,7 @@ export interface Voice {
   model: string;
   externalId: string;
   creditsPerMillionChar: number;
+  creditsPerWord?: number | null;
   displayName: string | null;
   sampleUrl: string | null;
   sampleSeconds?: number | null;
@@ -90,6 +91,7 @@ const GET_VOICES = gql`
           enabled
           model
           creditsPerMillionChar
+          creditsPerWord
           externalId
           displayName
           sampleUrl
