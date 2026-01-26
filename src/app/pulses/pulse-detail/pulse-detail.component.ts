@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, debounceTime, filter, switchMap } from 'rxjs';
 import { MessageService } from '../../message.service';
@@ -33,6 +33,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AddContentSourceDialogComponent } from '../add-content-source-dialog/add-content-source-dialog.component';
 import { AddAlertTriggerDialogComponent } from '../add-alert-trigger-dialog/add-alert-trigger-dialog.component';
 import { Job } from '../../jobs/job.service';
+import { Voice, VoicesService, tierToString, voiceToTier } from '../../podcast/voices.service';
 
 @Component({
   selector: 'app-pulse-detail',
@@ -101,7 +102,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     { value: 'once', label: 'One-time' },
   ];
 
-  private readonly tabNames = ['settings', 'content', 'alerts', 'schedule', 'history'];
+  private readonly tabNames = ['settings', 'content', 'alerts', 'voice', 'schedule', 'history'];
 
   // Content source columns
   contentSourceColumns = ['sourceType', 'sourceDetail', 'priority', 'isActive', 'actions'];
@@ -111,6 +112,14 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
   // Pulse history columns
   pulseHistoryColumns = ['title', 'status', 'duration', 'createdAt', 'actions'];
+
+  // Voice selection
+  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+  voices: Voice[] = [];
+  filteredVoices: Voice[] = [];
+  voiceSearchControl = new FormControl('');
+  currentPlayingVoice: Voice | null = null;
+  loadingVoices = false;
 
   constructor(
     private fb: FormBuilder,
@@ -123,6 +132,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     protected shareService: ShareService,
     private dialog: MatDialog,
     private jobService: JobService,
+    private voicesService: VoicesService,
   ) {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
@@ -139,6 +149,8 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
       customInstructions: [''],
       includeIntro: [true],
       includeOutro: [true],
+      introText: [''],
+      outroText: [''],
       deliveryMethod: ['in_app'],
       scheduleFrequency: ['daily'],
       scheduleTime: ['07:00'],
@@ -166,7 +178,9 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
     this.loadPulseConfig();
     this.loadPulseHistory();
+    this.loadVoices();
     this.setupAutoSave();
+    this.setupVoiceSearch();
   }
 
   ngOnDestroy(): void {
@@ -193,6 +207,8 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
             customInstructions: config.customInstructions || '',
             includeIntro: config.includeIntro,
             includeOutro: config.includeOutro,
+            introText: config.introText || '',
+            outroText: config.outroText || '',
             deliveryMethod: config.deliveryMethod,
             scheduleFrequency: config.scheduleFrequency,
             scheduleTime: config.scheduleTime || '07:00',
@@ -393,6 +409,15 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   }
 
   // Helpers
+  /**
+   * Calculate target words based on duration.
+   * Conversion: 120 words per minute
+   */
+  getTargetWords(): number {
+    const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
+    return minutes * 120;
+  }
+
   formatDuration(value: number): string {
     return `${value} min`;
   }
@@ -480,5 +505,85 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     if (pulse.audioUrl) {
       window.open(pulse.audioUrl, '_blank');
     }
+  }
+
+  // ==================== VOICE METHODS ====================
+
+  private loadVoices(): void {
+    this.loadingVoices = true;
+    this.subscriptions.add(
+      this.voicesService.getVoices(undefined, true).subscribe({
+        next: (response) => {
+          this.voices = response.voices;
+          this.applyVoiceFilters();
+          this.loadingVoices = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load voices: ${err.message}`);
+          this.loadingVoices = false;
+        },
+      }),
+    );
+  }
+
+  private setupVoiceSearch(): void {
+    this.subscriptions.add(
+      this.voiceSearchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
+        this.applyVoiceFilters();
+      }),
+    );
+  }
+
+  applyVoiceFilters(): void {
+    const searchTerm = (this.voiceSearchControl.value || '').toLowerCase();
+    this.filteredVoices = this.voices.filter((voice) => {
+      const name = (voice.displayName || voice.externalId || '').toLowerCase();
+      return name.includes(searchTerm);
+    });
+  }
+
+  isVoiceSelected(voice: Voice): boolean {
+    return this.pulseConfig?.voice?.uuid === voice.uuid;
+  }
+
+  selectVoice(voice: Voice): void {
+    if (!this.pulseConfig) return;
+
+    this.subscriptions.add(
+      this.pulsesService.updatePulseConfig(this.pulseConfigUuid, { voiceUuid: voice.uuid }).subscribe({
+        next: (result) => {
+          this.pulseConfig = result.pulseConfig;
+          this.messageService.success(`Voice changed to ${voice.displayName || voice.externalId}`);
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to update voice: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  getVoiceDisplayName(voice: Voice): string {
+    return voice.displayName || voice.externalId || 'Unknown Voice';
+  }
+
+  getVoiceTier(voice: Voice): string {
+    return tierToString(voiceToTier(voice).toString());
+  }
+
+  playVoiceSample(voice: Voice): void {
+    if (!voice.sampleUrl || !this.audioPlayer) return;
+    this.currentPlayingVoice = voice;
+    this.audioPlayer.nativeElement.src = voice.sampleUrl;
+    this.audioPlayer.nativeElement.play().catch(() => {
+      this.currentPlayingVoice = null;
+    });
+  }
+
+  stopVoiceSample(): void {
+    if (this.audioPlayer) {
+      this.audioPlayer.nativeElement.pause();
+      this.audioPlayer.nativeElement.currentTime = 0;
+    }
+    this.currentPlayingVoice = null;
   }
 }

@@ -44,8 +44,13 @@ export enum JobKind {
   GENERATE_IMAGE = 'GENERATE_IMAGE',
   // Pulse job types
   GENERATE_PULSE = 'GENERATE_PULSE',
+  FETCH_PULSE_NEWS = 'FETCH_PULSE_NEWS',
+  RESEARCH_PULSE_CONTENT = 'RESEARCH_PULSE_CONTENT',
+  CREATE_PULSE_TRANSCRIPT = 'CREATE_PULSE_TRANSCRIPT',
   VALIDATE_PULSE = 'VALIDATE_PULSE',
+  GENERATE_PULSE_AUDIO = 'GENERATE_PULSE_AUDIO',
   DELIVER_PULSE = 'DELIVER_PULSE',
+  PUBLISH_PULSE_CHAIN = 'PUBLISH_PULSE_CHAIN',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -116,10 +121,20 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.GENERATE_IMAGE;
     case 'GENERATE_PULSE':
       return JobKind.GENERATE_PULSE;
+    case 'FETCH_PULSE_NEWS':
+      return JobKind.FETCH_PULSE_NEWS;
+    case 'RESEARCH_PULSE_CONTENT':
+      return JobKind.RESEARCH_PULSE_CONTENT;
+    case 'CREATE_PULSE_TRANSCRIPT':
+      return JobKind.CREATE_PULSE_TRANSCRIPT;
     case 'VALIDATE_PULSE':
       return JobKind.VALIDATE_PULSE;
+    case 'GENERATE_PULSE_AUDIO':
+      return JobKind.GENERATE_PULSE_AUDIO;
     case 'DELIVER_PULSE':
       return JobKind.DELIVER_PULSE;
+    case 'PUBLISH_PULSE_CHAIN':
+      return JobKind.PUBLISH_PULSE_CHAIN;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -195,10 +210,20 @@ export const kindToString = (kind: string) => {
       return 'Generate Image';
     case JobKind.GENERATE_PULSE:
       return 'Generate Pulse';
+    case JobKind.FETCH_PULSE_NEWS:
+      return 'Fetching News';
+    case JobKind.RESEARCH_PULSE_CONTENT:
+      return 'Researching Content';
+    case JobKind.CREATE_PULSE_TRANSCRIPT:
+      return 'Creating Transcript';
     case JobKind.VALIDATE_PULSE:
-      return 'Validate Pulse';
+      return 'Validating Content';
+    case JobKind.GENERATE_PULSE_AUDIO:
+      return 'Generating Audio';
     case JobKind.DELIVER_PULSE:
-      return 'Deliver Pulse';
+      return 'Delivering Pulse';
+    case JobKind.PUBLISH_PULSE_CHAIN:
+      return 'Publishing Pulse';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
@@ -274,10 +299,20 @@ export const iconForJob = (kind: string): string => {
       return 'palette';
     case JobKind.GENERATE_PULSE:
       return 'vital_signs';
+    case JobKind.FETCH_PULSE_NEWS:
+      return 'rss_feed';
+    case JobKind.RESEARCH_PULSE_CONTENT:
+      return 'search';
+    case JobKind.CREATE_PULSE_TRANSCRIPT:
+      return 'description';
     case JobKind.VALIDATE_PULSE:
       return 'verified';
+    case JobKind.GENERATE_PULSE_AUDIO:
+      return 'volume_up';
     case JobKind.DELIVER_PULSE:
       return 'send';
+    case JobKind.PUBLISH_PULSE_CHAIN:
+      return 'rocket_launch';
     case JobKind.TEST_RAISE:
       return 'bug_report';
     case JobKind.TEST_PRINT:

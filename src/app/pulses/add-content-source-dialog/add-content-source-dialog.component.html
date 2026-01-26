@@ -91,11 +91,26 @@
         </mat-form-field>
       }
 
-      <!-- Watchlist UUID (TODO: Replace with picker) -->
+      <!-- Watchlist Picker -->
       @if (selectedType === 'watchlist') {
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Watchlist UUID</mat-label>
-          <input matInput formControlName="watchlistUuid" placeholder="Enter watchlist UUID" />
+          <mat-label>Watchlist</mat-label>
+          <mat-select formControlName="watchlistUuid" [disabled]="isLoadingWatchlists">
+            @if (isLoadingWatchlists) {
+              <mat-option disabled> <mat-icon>autorenew</mat-icon> Loading watchlists... </mat-option>
+            }
+            @for (watchlist of watchlists; track watchlist.uuid) {
+              <mat-option [value]="watchlist.uuid">
+                {{ watchlist.name }}
+                @if (watchlist.itemCount) {
+                  <span class="watchlist-count">({{ watchlist.itemCount }} symbols)</span>
+                }
+              </mat-option>
+            }
+            @if (!isLoadingWatchlists && watchlists.length === 0) {
+              <mat-option disabled>No watchlists found</mat-option>
+            }
+          </mat-select>
           <mat-hint>Select a watchlist to monitor for news</mat-hint>
           @if (sourceForm.get('watchlistUuid')?.hasError('required')) {
             <mat-error>Watchlist is required</mat-error>
@@ -117,6 +132,18 @@
           }
         </mat-form-field>
       }
+
+      <!-- Custom Instructions -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Custom Instructions (Optional)</mat-label>
+        <textarea
+          matInput
+          formControlName="customInstructions"
+          placeholder="e.g., 'Focus on earnings revisions' or 'Watch for SMA crossovers'"
+          rows="3"
+        ></textarea>
+        <mat-hint>Tell the AI what to focus on for this source</mat-hint>
+      </mat-form-field>
 
       <!-- Priority -->
       <mat-form-field appearance="outline" class="full-width">

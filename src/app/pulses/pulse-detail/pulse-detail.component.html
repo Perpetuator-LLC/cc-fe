@@ -73,7 +73,12 @@
                 </div>
 
                 <div class="duration-field">
-                  <label>Target Duration: {{ pulseForm.get('targetDurationMinutes')?.value }} minutes</label>
+                  <label
+                    >Target Duration: {{ pulseForm.get('targetDurationMinutes')?.value }} minutes (~{{
+                      getTargetWords()
+                    }}
+                    words)</label
+                  >
                   <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
                     <input matSliderThumb formControlName="targetDurationMinutes" />
                   </mat-slider>
@@ -92,6 +97,32 @@
                   <mat-checkbox formControlName="includeIntro">Include Introduction</mat-checkbox>
                   <mat-checkbox formControlName="includeOutro">Include Closing</mat-checkbox>
                 </div>
+
+                @if (pulseForm.get('includeIntro')?.value) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Introduction Text</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="introText"
+                      cdkTextareaAutosize
+                      placeholder="e.g., Good morning! Here's your market pulse for today..."
+                    ></textarea>
+                    <mat-hint>Custom greeting spoken at the start of each pulse</mat-hint>
+                  </mat-form-field>
+                }
+
+                @if (pulseForm.get('includeOutro')?.value) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Closing Text</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="outroText"
+                      cdkTextareaAutosize
+                      placeholder="e.g., That's your market pulse. Have a great trading day!"
+                    ></textarea>
+                    <mat-hint>Custom closing spoken at the end of each pulse</mat-hint>
+                  </mat-form-field>
+                }
               </mat-card-content>
             </mat-card>
 
@@ -109,6 +140,8 @@
                     matInput
                     formControlName="customInstructions"
                     cdkTextareaAutosize
+                    cdkAutosizeMinRows="5"
+                    cdkAutosizeMaxRows="20"
                     placeholder="e.g., Focus on earnings news, Skip cryptocurrency..."
                   ></textarea>
                 </mat-form-field>
@@ -278,6 +311,82 @@
                   <tr mat-header-row *matHeaderRowDef="alertTriggerColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: alertTriggerColumns"></tr>
                 </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Voice Tab -->
+      <mat-tab label="Voice">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <h3>Voice Selection</h3>
+              <p class="section-description">
+                Choose the voice for your pulse audio. Hover over a voice card to preview.
+              </p>
+
+              <audio #audioPlayer></audio>
+
+              <div class="voice-search">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Search voices</mat-label>
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input matInput [formControl]="voiceSearchControl" placeholder="Search by voice name..." />
+                </mat-form-field>
+              </div>
+
+              @if (loadingVoices) {
+                <div class="loading-container">
+                  <mat-spinner diameter="32" />
+                  <p>Loading voices...</p>
+                </div>
+              } @else if (filteredVoices.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>record_voice_over</mat-icon>
+                  <p>No voices found matching your search.</p>
+                </div>
+              } @else {
+                <div class="voice-grid">
+                  @for (voice of filteredVoices; track voice.uuid) {
+                    <div
+                      class="voice-card"
+                      [class.selected]="isVoiceSelected(voice)"
+                      (click)="selectVoice(voice)"
+                      (keydown.enter)="selectVoice(voice)"
+                      (keydown.space)="selectVoice(voice)"
+                      tabindex="0"
+                      role="button"
+                      [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
+                    >
+                      <div class="voice-header">
+                        <span class="voice-name">{{ getVoiceDisplayName(voice) }}</span>
+                        <span class="voice-tier">{{ getVoiceTier(voice) }}</span>
+                      </div>
+                      <div class="voice-actions">
+                        <button
+                          mat-icon-button
+                          type="button"
+                          [disabled]="!voice.sampleUrl"
+                          (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
+                          (mouseleave)="stopVoiceSample()"
+                          (click)="$event.stopPropagation()"
+                          matTooltip="Preview voice"
+                        >
+                          @if (currentPlayingVoice?.uuid === voice.uuid) {
+                            <mat-icon>volume_up</mat-icon>
+                          } @else {
+                            <mat-icon>play_circle</mat-icon>
+                          }
+                        </button>
+                        @if (isVoiceSelected(voice)) {
+                          <mat-icon class="selected-icon">check_circle</mat-icon>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
               }
             </mat-card-content>
           </mat-card>

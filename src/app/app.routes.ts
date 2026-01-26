@@ -54,7 +54,8 @@ export const routes: Routes = [
   {
     path: 'media',
     pathMatch: 'full',
-    redirectTo: 'media/podcasts',
+    loadComponent: () => import('./media-redirect/media-redirect.component').then((c) => c.MediaRedirectComponent),
+    canActivate: [AuthGuard],
   },
   {
     path: 'media',

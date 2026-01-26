@@ -33,6 +33,8 @@ const PULSE_CONFIG_FRAGMENT = gql`
     customInstructions
     includeIntro
     includeOutro
+    introText
+    outroText
     deliveryMethod
     scheduleFrequency
     scheduleTime
@@ -59,6 +61,7 @@ const PULSE_CONFIG_FRAGMENT = gql`
       symbol
       priority
       isActive
+      customInstructions
     }
     alertTriggers {
       uuid
@@ -370,11 +373,12 @@ export class PulsesService extends BaseService {
       customInstructions: string;
       includeIntro: boolean;
       includeOutro: boolean;
+      introText: string;
+      outroText: string;
       deliveryMethod: DeliveryMethod;
       scheduleFrequency: ScheduleFrequency;
       scheduleTime: string;
       scheduleTimezone: string;
-      scheduleDays: number[];
       newsLookbackHours: number;
       voiceUuid: string;
     }>,
@@ -392,11 +396,12 @@ export class PulsesService extends BaseService {
         $customInstructions: String
         $includeIntro: Boolean
         $includeOutro: Boolean
+        $introText: String
+        $outroText: String
         $deliveryMethod: String
         $scheduleFrequency: String
         $scheduleTime: String
         $scheduleTimezone: String
-        $scheduleDays: [Int!]
         $newsLookbackHours: Int
         $voiceUuid: UUID
       ) {
@@ -411,11 +416,12 @@ export class PulsesService extends BaseService {
           customInstructions: $customInstructions
           includeIntro: $includeIntro
           includeOutro: $includeOutro
+          introText: $introText
+          outroText: $outroText
           deliveryMethod: $deliveryMethod
           scheduleFrequency: $scheduleFrequency
           scheduleTime: $scheduleTime
           scheduleTimezone: $scheduleTimezone
-          scheduleDays: $scheduleDays
           newsLookbackHours: $newsLookbackHours
           voiceUuid: $voiceUuid
         ) {
@@ -507,6 +513,7 @@ export class PulsesService extends BaseService {
             symbol
             priority
             isActive
+            customInstructions
           }
         }
       }
@@ -655,14 +662,18 @@ export class PulsesService extends BaseService {
 
   /**
    * Generate a pulse immediately (async job)
+   * Returns jobUuid (first job) and jobUuids (all jobs in chain)
    */
-  generatePulse(pulseConfigUuid: string): Observable<{ success: boolean; message: string; jobUuid: string }> {
+  generatePulse(
+    pulseConfigUuid: string,
+  ): Observable<{ success: boolean; message: string; jobUuid: string; jobUuids: string[] }> {
     const GQL = gql`
       mutation GeneratePulse($pulseConfigUuid: UUID!) {
         generatePulse(pulseConfigUuid: $pulseConfigUuid) {
           success
           message
           jobUuid
+          jobUuids
         }
       }
     `;
@@ -672,6 +683,7 @@ export class PulsesService extends BaseService {
         success: boolean;
         message: string;
         jobUuid: string;
+        jobUuids: string[];
       };
     }
 
