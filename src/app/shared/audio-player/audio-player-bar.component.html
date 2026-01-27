@@ -32,6 +32,10 @@
 
       <!-- Controls -->
       <div class="player-controls">
+        <button mat-icon-button (click)="previousTrack()" matTooltip="Previous track" [disabled]="!hasPreviousTrack()">
+          <mat-icon>skip_previous</mat-icon>
+        </button>
+
         <button mat-icon-button (click)="audioService.skipBackward(15)" matTooltip="Back 15s">
           <mat-icon>replay_10</mat-icon>
         </button>
@@ -47,6 +51,10 @@
         <button mat-icon-button (click)="audioService.skipForward(15)" matTooltip="Forward 15s">
           <mat-icon>forward_10</mat-icon>
         </button>
+
+        <button mat-icon-button (click)="nextTrack()" matTooltip="Next track" [disabled]="!audioService.hasQueue()">
+          <mat-icon>skip_next</mat-icon>
+        </button>
       </div>
 
       <!-- Time display -->
@@ -58,6 +66,18 @@
 
       <!-- Volume & close -->
       <div class="secondary-controls">
+        <button
+          mat-icon-button
+          (click)="toggleQueue()"
+          [matTooltip]="showQueue ? 'Hide queue' : 'Show queue (' + audioService.queueLength() + ')'"
+          [class.active]="showQueue"
+        >
+          <mat-icon>queue_music</mat-icon>
+          @if (audioService.queueLength() > 0) {
+            <span class="queue-badge">{{ audioService.queueLength() }}</span>
+          }
+        </button>
+
         <button
           mat-icon-button
           (click)="audioService.toggleMute()"
@@ -77,5 +97,112 @@
         </button>
       </div>
     </div>
+
+    <!-- Playlist Panel (History + Current + Queue) -->
+    @if (showQueue) {
+      <div class="queue-panel">
+        <div class="queue-header">
+          <h4>Playlist</h4>
+          <button mat-button (click)="clearAll()" matTooltip="Clear history and queue">Clear All</button>
+        </div>
+
+        <div class="playlist-container">
+          <!-- History Section (oldest at top) -->
+          @if (history.length > 0) {
+            <div class="playlist-section history-section">
+              @for (track of getHistoryReversed(); track track.id) {
+                <div class="playlist-item history-item">
+                  <div class="playlist-item-content" (click)="playTrack(track)">
+                    <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
+                    <div class="playlist-item-text">
+                      <span class="playlist-item-title">{{ track.title }}</span>
+                      @if (track.subtitle) {
+                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
+                      }
+                    </div>
+                  </div>
+                  <button mat-icon-button [matMenuTriggerFor]="historyMenu" (click)="$event.stopPropagation()">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #historyMenu="matMenu">
+                    <button mat-menu-item (click)="navigateToTrack(track)">
+                      <mat-icon>open_in_new</mat-icon>
+                      <span>Go to page</span>
+                    </button>
+                    <button mat-menu-item (click)="removeFromHistory(track.id)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Remove</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Currently Playing -->
+          @if (audioService.track(); as currentTrack) {
+            <div class="playlist-section now-playing-section">
+              <div class="playlist-item now-playing">
+                <div class="now-playing-indicator">
+                  <mat-icon class="playing-icon">{{ audioService.isPlaying() ? 'equalizer' : 'play_arrow' }}</mat-icon>
+                </div>
+                <div class="playlist-item-content" (click)="navigateToTrack(currentTrack)">
+                  <mat-icon class="type-icon">{{
+                    currentTrack.type === 'episode' ? 'podcasts' : 'vital_signs'
+                  }}</mat-icon>
+                  <div class="playlist-item-text">
+                    <span class="playlist-item-title">{{ currentTrack.title }}</span>
+                    @if (currentTrack.subtitle) {
+                      <span class="playlist-item-subtitle">{{ currentTrack.subtitle }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Queue Section (up next) -->
+          @if (audioService.queueLength() > 0) {
+            <div class="playlist-section queue-section">
+              @for (track of audioService.queue(); track track.id; let i = $index) {
+                <div class="playlist-item queue-item">
+                  <div class="playlist-item-content" (click)="playFromQueue(track.id)">
+                    <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
+                    <div class="playlist-item-text">
+                      <span class="playlist-item-title">{{ track.title }}</span>
+                      @if (track.subtitle) {
+                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
+                      }
+                    </div>
+                  </div>
+                  <button mat-icon-button [matMenuTriggerFor]="queueMenu" (click)="$event.stopPropagation()">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #queueMenu="matMenu">
+                    <button mat-menu-item (click)="navigateToTrack(track)">
+                      <mat-icon>open_in_new</mat-icon>
+                      <span>Go to page</span>
+                    </button>
+                    <button mat-menu-item (click)="removeFromQueue($event, track.id)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Remove</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Empty state -->
+          @if (history.length === 0 && audioService.queueLength() === 0) {
+            <div class="playlist-empty">
+              <mat-icon>queue_music</mat-icon>
+              <span>No tracks in playlist</span>
+              <span class="hint">Add tracks using the menu on episodes or pulses</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
   </div>
 }

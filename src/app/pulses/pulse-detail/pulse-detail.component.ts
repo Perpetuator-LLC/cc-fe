@@ -363,7 +363,19 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         next: (result) => {
           this.generatingPulse = false;
           this.messageService.info('Pulse generation started...');
-          if (result.jobUuid) {
+
+          // Track all jobs in the chain
+          if (result.jobUuids && result.jobUuids.length > 0) {
+            result.jobUuids.forEach((jobUuid, index) => {
+              this.jobService.addJob({
+                uuid: jobUuid,
+                kind: this.getJobKindForChainIndex(index),
+                status: index === 0 ? 'pending' : 'pending',
+                createdAt: new Date().toISOString(),
+              } as Job);
+            });
+          } else if (result.jobUuid) {
+            // Fallback for single job (legacy)
             this.jobService.addJob({
               uuid: result.jobUuid,
               kind: 'generate_pulse',
@@ -378,6 +390,22 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Get job kind for pulse chain index
+   * Order: fetch_news -> research -> transcript -> validate -> audio -> deliver
+   */
+  private getJobKindForChainIndex(index: number): string {
+    const kinds = [
+      'fetch_pulse_news',
+      'research_pulse_content',
+      'create_pulse_transcript',
+      'validate_pulse',
+      'generate_pulse_audio',
+      'deliver_pulse',
+    ];
+    return kinds[index] || 'generate_pulse';
   }
 
   // Delete pulse config
