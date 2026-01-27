@@ -134,8 +134,8 @@
 // Voice Grid
 .voice-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
 }
 
 // Voice Card
@@ -144,9 +144,9 @@
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 
-  padding: 12px;
+  padding: 8px 12px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -204,17 +204,17 @@
 .voice-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
 
   .voice-wpm,
   .voice-cost {
-    font-size: 12px;
+    font-size: 10px;
     color: var(--md-sys-color-on-surface-variant);
   }
 
   .voice-cost {
-    padding: 2px 6px;
+    padding: 0 4px;
     border-radius: 4px;
     background: var(--md-sys-color-surface-container);
   }
