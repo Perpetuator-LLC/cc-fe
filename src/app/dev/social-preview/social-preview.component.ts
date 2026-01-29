@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { environment } from '../../../environments/environment';
 
 interface SocialMetaTags {
   title: string | null;
@@ -69,12 +70,13 @@ export class SocialPreviewComponent implements OnInit {
   errorMessage = computed(() => this.error());
   previewResult = computed(() => this.result());
 
-  // Preset URLs for quick testing
+  // Preset URLs for quick testing (uses environment SITE_URL)
+  readonly siteUrl = environment.SITE_URL;
   readonly presetUrls = [
-    { label: 'Home', url: 'https://capitalcopilot.io/' },
-    { label: 'Affiliate (HUMN)', url: 'https://capitalcopilot.io/a/HUMN' },
-    { label: 'Login', url: 'https://capitalcopilot.io/login' },
-    { label: 'Register', url: 'https://capitalcopilot.io/register' },
+    { label: 'Home', url: `${environment.SITE_URL}/` },
+    { label: 'Affiliate (HUMN)', url: `${environment.SITE_URL}/a/HUMN` },
+    { label: 'Login', url: `${environment.SITE_URL}/login` },
+    { label: 'Register', url: `${environment.SITE_URL}/register` },
   ];
 
   ngOnInit(): void {

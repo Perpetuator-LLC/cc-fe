@@ -636,6 +636,20 @@ type Query {
     orderBy: String
   ): JobTypeConnection
 
+  """
+  Get jobs grouped by chain. Returns all jobs from N distinct chains/standalone jobs, ordered by most recent activity. Use this for UI that groups chains together.
+  """
+  jobsGrouped(
+    """Number of top-level items (chains + standalone jobs) to return"""
+    firstTopLevel: Int!
+
+    """Filter by job status"""
+    statuses: [JobStatus]
+
+    """Filter by job kind"""
+    kinds: [JobKind]
+  ): [JobType]
+
   """Get all jobs in a specific chain, ordered by chain position"""
   jobsByChain(
     """Chain ID to filter jobs"""
@@ -819,6 +833,9 @@ type VoiceType implements Node {
   """
   wordsPerMinute: Int
   creditsPerMillionChar: Int
+
+  """Cost in credits per word, calculated from credits_per_million_char."""
+  creditsPerWord: Float
 }
 
 """An enumeration."""
@@ -1940,6 +1957,9 @@ type JobType implements Node {
   result: GenericScalar
   createdAt: DateTime!
   updatedAt: DateTime!
+
+  """How the job was triggered: manual, schedule, chain, retry, downstream"""
+  triggerSource: String
 
   """Debug metadata for failed job reproduction"""
   metadata: GenericScalar
@@ -5898,6 +5918,8 @@ type PublishLatestEpisodeChain {
   success: Boolean
   message: String
   jobs: [JobType]
+  chainId: String
+  podcastUuid: UUID
 }
 
 """

@@ -553,6 +553,8 @@
   align-items: center;
 }
 
+// Resource tag styles for job links (podcasts, episodes, topics, symbols, pulses)
+.job-links .resource-tag,
 .job-details .resource-tag {
   cursor: pointer;
 
@@ -578,6 +580,10 @@
 
   &.symbol-tag {
     @include mixins.stock-tag();
+  }
+
+  &.pulse-tag {
+    @include mixins.pulse-tag();
   }
 }
 

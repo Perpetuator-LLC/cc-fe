@@ -116,6 +116,16 @@ export class JobDisplayService {
     return this.getTopicUuid(job) != null;
   }
 
+  // Check if job has pulse UUID (from args or result)
+  hasPulseUuid(job: Job): boolean {
+    return this.getPulseUuid(job) != null;
+  }
+
+  // Check if job has pulse config UUID (from args or result)
+  hasPulseConfigUuid(job: Job): boolean {
+    return this.getPulseConfigUuid(job) != null;
+  }
+
   // Get podcast UUID from result or args (result takes precedence)
   getPodcastUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
@@ -135,6 +145,20 @@ export class JobDisplayService {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
     return result?.topicUuid || args?.topicUuid || null;
+  }
+
+  // Get pulse UUID from result or args (result takes precedence)
+  getPulseUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['pulseUuid'] as string) || (args?.['pulseUuid'] as string) || null;
+  }
+
+  // Get pulse config UUID from result or args (result takes precedence)
+  getPulseConfigUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['pulseConfigUuid'] as string) || (args?.['pulseConfigUuid'] as string) || null;
   }
 
   // Check if job has symbol/FQN (for stock-related jobs)

@@ -201,6 +201,53 @@ This pattern:
 3. Waits for completion
 4. Displays the captured output
 
+## 🏥 Health Check Verification
+
+Before running tests or debugging API issues, verify both frontend and backend are healthy:
+
+### Backend Health Check
+```bash
+# Check if backend is running (should return JSON with status and timestamp)
+curl -s http://localhost:8000/health/ | jq
+
+# Expected response:
+# { "status": "ok", "timestamp": "2026-01-27T12:00:00Z" }
+
+# If empty or error, backend is not running
+```
+
+### Frontend Health Check
+```bash
+# Check if frontend dev server is running
+curl -s http://localhost:4200 | head -5
+
+# Or check if build works
+ cd /Users/nik/projects/capital-copilot-fe && ng build 2>&1 | tail -5
+```
+
+### Quick Full Stack Check
+```bash
+# Backend
+curl -s http://localhost:8000/health/ && echo " ✅ Backend OK" || echo " ❌ Backend DOWN"
+
+# Frontend (dev server)
+curl -s http://localhost:4200 > /dev/null && echo " ✅ Frontend OK" || echo " ❌ Frontend DOWN"
+```
+
+### GraphQL API Check
+```bash
+# Test authenticated GraphQL query (requires backend running)
+node scripts/test-jobs-chain.cjs 2>&1 | head -20
+```
+
+### Common Issues
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| `curl: (7) Failed to connect` | Server not running | Start backend/frontend |
+| Empty response from scripts | Auth token expired | `rm -f ~/.capital-copilot/cli-tokens.json` |
+| GraphQL errors | Schema mismatch | Sync schema from backend |
+| `ECONNREFUSED` | Wrong port/URL | Check `environment.ts` API_URL |
+
 ## 🔗 AI Link: Frontend ↔ Backend Communication
 
 The `logs/ai_link/` directory enables asynchronous communication between Frontend (FE) and Backend (BE) AI agents.

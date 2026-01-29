@@ -378,6 +378,9 @@ export interface JobArgs {
   [key: string]: unknown;
 }
 
+// Trigger source enum values
+export type TriggerSource = 'manual' | 'schedule' | 'chain' | 'retry' | 'downstream' | 'unknown';
+
 export interface Job {
   id: string;
   uuid: string;
@@ -389,6 +392,13 @@ export interface Job {
   createdAt: string;
   updatedAt: string;
   cost?: number;
+  // Chain fields
+  chainId?: string | null;
+  chainPosition?: number | null;
+  chainJobCount?: number | null;
+  chainJobs?: Job[] | null; // All jobs in the same chain
+  // Trigger source - how this job was initiated
+  triggerSource?: TriggerSource | null;
 }
 
 @Injectable({
@@ -539,6 +549,25 @@ export class JobService extends BaseService implements OnDestroy {
               createdAt
               updatedAt
               cost
+              triggerSource
+              chainId
+              chainPosition
+              chainJobCount
+              chainJobs {
+                id
+                uuid
+                kind
+                status
+                error
+                result
+                args
+                createdAt
+                updatedAt
+                cost
+                triggerSource
+                chainId
+                chainPosition
+              }
             }
           }
           pageInfo {
@@ -567,6 +596,54 @@ export class JobService extends BaseService implements OnDestroy {
         pageInfo: jobs.pageInfo,
       })),
     );
+  }
+
+  /**
+   * Get jobs grouped by chain. Returns all jobs from N distinct top-level items
+   * (chains + standalone jobs), ordered by most recent activity.
+   *
+   * This is better for the jobs list UI because it ensures we always get N
+   * top-level items regardless of how many jobs are in each chain.
+   *
+   * @param firstTopLevel Number of top-level items (chains + standalone) to return
+   * @param statuses Filter by job status
+   * @param kinds Filter by job kind
+   */
+  getJobsGrouped(firstTopLevel = 10, statuses: string[] = [], kinds: string[] = []) {
+    const FETCH_JOBS_GROUPED = gql`
+      query GetJobsGrouped($firstTopLevel: Int!, $statuses: [JobStatus!], $kinds: [JobKind!]) {
+        jobsGrouped(firstTopLevel: $firstTopLevel, statuses: $statuses, kinds: $kinds) {
+          id
+          uuid
+          kind
+          status
+          error
+          result
+          args
+          createdAt
+          updatedAt
+          cost
+          triggerSource
+          chainId
+          chainPosition
+          chainJobCount
+        }
+      }
+    `;
+
+    interface Response {
+      jobsGrouped: Job[];
+    }
+
+    return this.query<Response>({
+      query: FETCH_JOBS_GROUPED,
+      variables: {
+        firstTopLevel,
+        statuses: statuses.length > 0 ? statuses : null,
+        kinds: kinds.length > 0 ? kinds : null,
+      },
+      fetchPolicy: 'network-only',
+    }).pipe(map(({ jobsGrouped }) => jobsGrouped));
   }
 
   retryJobs(jobUuids: string[]) {
