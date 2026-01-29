@@ -255,14 +255,26 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format credits per word for display (e.g., "0.0025 credits/word")
+   * Format credits per word for display (e.g., "~4k credits/1k words")
+   * Rounds to nearest thousand for cleaner display.
    */
   formatCreditsPerWord(voice: Voice): string | null {
     const cpw = this.getCreditsPerWord(voice);
     if (cpw === null) return null;
     // Format as credits per 1000 words for readability
     const per1k = cpw * 1000;
-    return `${per1k.toFixed(2)} credits/1k words`;
+
+    // Round to nearest thousand and display as ~Xk
+    if (per1k >= 1000) {
+      const rounded = Math.round(per1k / 1000);
+      return `~${rounded}k credits/1k words`;
+    }
+    // For smaller values, show rounded whole number
+    if (per1k >= 100) {
+      return `~${Math.round(per1k)} credits/1k words`;
+    }
+    // For very small values, show with one decimal
+    return `~${per1k.toFixed(1)} credits/1k words`;
   }
 
   // Preview methods

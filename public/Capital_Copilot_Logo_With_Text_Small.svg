@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   viewBox="0 0 60.19639 25.724735"
+   id="svg5"
+   width="60.196388"
+   height="25.724735"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .dot-1 {
+        fill: #000;
+      }
+      .dot-2 {
+        fill: #000;
+      }
+      .trail-1 {
+        fill: none;
+        stroke: #000;
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+      .trail-2 {
+        fill: none;
+        stroke: #000;
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <g
+     id="layer2"
+     transform="matrix(0.60731144,0,0,0.40573728,20.794864,4.1404936)"
+     style="fill:#2f2f2f;fill-opacity:1">
+    <rect
+       style="fill:#2f2f2f;fill-opacity:1;stroke-width:1.5;stroke-dasharray:15;stroke-dashoffset:15"
+       id="rect1"
+       width="140.80811"
+       height="90.068863"
+       x="-48.591545"
+       y="-14.496925"
+       transform="matrix(0.70393297,0,0,0.70393297,-0.03566647,0)" />
+  </g>
+  <g
+     id="g4"
+     transform="matrix(0.83853464,0,0,0.83853464,5.3386691,-8.1126114)">
+    <g
+       id="layer3"
+       transform="translate(-5.6630178,8.9213935)">
+      <g
+         id="layer1"
+         transform="translate(-0.52723537,3.5396637)">
+        <circle
+           class="dot-2"
+           cx="16"
+           cy="4"
+           r="2"
+           id="circle1" />
+        <circle
+           class="dot-1"
+           cx="10"
+           cy="10"
+           r="2"
+           id="circle2" />
+        <circle
+           class="dot-2"
+           cx="16"
+           cy="16"
+           r="2"
+           id="circle3" />
+        <circle
+           class="dot-1"
+           cx="10"
+           cy="22"
+           r="2"
+           id="circle4" />
+        <path
+           class="trail-2"
+           d="m 10,4 a 6,6 0 1 0 0,12"
+           id="path4" />
+        <path
+           class="trail-1"
+           d="M 16,22 A 6,6 0 1 0 16,10"
+           id="path5" />
+      </g>
+      <g
+         id="layer1-9"
+         transform="translate(-1.4216528,2.6452463)">
+        <circle
+           class="dot-2"
+           cx="16"
+           cy="4"
+           r="2"
+           id="circle1-8"
+           style="fill:#ffffff" />
+        <circle
+           class="dot-1"
+           cx="10"
+           cy="10"
+           r="2"
+           id="circle2-6"
+           style="fill:#ffffff" />
+        <circle
+           class="dot-2"
+           cx="16"
+           cy="16"
+           r="2"
+           id="circle3-5"
+           style="fill:#ffffff" />
+        <circle
+           class="dot-1"
+           cx="10"
+           cy="22"
+           r="2"
+           id="circle4-7"
+           style="fill:#ffffff" />
+        <path
+           class="trail-2"
+           d="m 10,4 a 6,6 0 1 0 0,12"
+           id="path4-6"
+           style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" />
+        <path
+           class="trail-1"
+           d="M 16,22 A 6,6 0 1 0 16,10"
+           id="path5-2"
+           style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" />
+      </g>
+    </g>
+    <g
+       id="layer4"
+       transform="translate(0,5.1956607)">
+      <text
+         xml:space="preserve"
+         style="writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke-width:1.5;stroke-dasharray:15;stroke-dashoffset:15"
+         x="18.310863"
+         y="15.995382"
+         id="text1"><tspan
+           id="tspan1"
+           x="18.310863"
+           y="15.995382"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Lexend;-inkscape-font-specification:Lexend;fill:#000000">Capital</tspan><tspan
+           x="18.310863"
+           y="31.147419"
+           style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-family:Lexend;-inkscape-font-specification:'Lexend Ultra-Light';fill:#000000"
+           id="tspan2">  Copilot</tspan></text>
+      <text
+         xml:space="preserve"
+         style="writing-mode:lr-tb;direction:ltr;fill:#2f2f2f;fill-opacity:1;stroke-width:1.5;stroke-dasharray:15;stroke-dashoffset:15"
+         x="17.416445"
+         y="15.100965"
+         id="text4"><tspan
+           id="tspan3"
+           x="17.416445"
+           y="15.100965"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Lexend;-inkscape-font-specification:Lexend;fill:#ffffff">Capital</tspan><tspan
+           x="17.416445"
+           y="30.253"
+           style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-family:Lexend;-inkscape-font-specification:'Lexend Ultra-Light';fill:#ffffff"
+           id="tspan4">  Copilot</tspan></text>
+    </g>
+  </g>
+</svg>

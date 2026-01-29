@@ -1,6 +1,6 @@
 # SSR (Server-Side Rendering) Configuration
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-28
 
 ---
 
@@ -12,11 +12,43 @@ This project uses Angular SSR for production builds to improve SEO and initial p
 
 ## Configuration Summary
 
-| Environment | SSR Enabled | Output Mode | Command |
-|-------------|-------------|-------------|---------|
-| Development | ❌ No | `static` | `yarn start` |
-| Production | ✅ Yes | `server` | `yarn build` |
-| SSR Testing | ✅ Yes | `server` | `yarn start:ssr` |
+| Environment | SSR Enabled | Output Mode | WebSocket | Command |
+|-------------|-------------|-------------|-----------|---------|
+| Development | ❌ No | `static` | ✅ Browser | `yarn start` |
+| Production | ✅ Yes | `server` | ✅ Browser only | `yarn build` |
+| SSR Testing | ✅ Yes | `server` | ✅ Browser only | `yarn start:ssr` |
+
+---
+
+## GraphQL Transport by Environment
+
+The app uses different GraphQL transports based on the execution context:
+
+| Context | Transport | Subscriptions | Notes |
+|---------|-----------|---------------|-------|
+| Browser (any mode) | HTTP + WebSocket | ✅ Supported | Full real-time support |
+| Server (SSR render) | HTTP only | ❌ Not supported | No WebSocket on Node.js SSR |
+| Social Media Crawlers | HTTP only | N/A | Server-rendered HTML only |
+
+### Why WebSocket is Disabled on Server
+
+Node.js's internal WebSocket implementation conflicts with Zone.js (Angular's change detection). The `graphql.provider.ts` checks `isPlatformBrowser()` and only creates WebSocket connections in the browser:
+
+```typescript
+if (isBrowser) {
+  // Browser: Use WebSocket for subscriptions
+  const wsLink = new GraphQLWsLink(wsClient);
+  finalLink = split(...);
+} else {
+  // Server (SSR): HTTP only - no WebSocket
+  finalLink = httpLink;
+}
+```
+
+This means:
+- **Initial SSR render:** Uses HTTP for data fetching
+- **After hydration:** Browser takes over with full WebSocket support
+- **Social cards/SEO:** Work perfectly (server-rendered HTML)
 
 ---
 
@@ -110,6 +142,67 @@ If you need SSR with development settings (source maps, no optimization):
 | `src/main.server.ts` | Server-side Angular bootstrap |
 | `src/server.ts` | Express.js server entry point |
 | `src/app/app.config.server.ts` | Server-specific Angular providers |
+| `src/app/graphql.provider.ts` | GraphQL transport (HTTP/WS based on platform) |
+
+---
+
+## Verifying Each Flow
+
+### 1. Development Hot Reload
+
+```bash
+yarn start
+# Make a change to any .ts or .html file
+# Browser should auto-refresh within 1-2 seconds
+```
+
+✅ Expected: Fast rebuilds, automatic browser refresh
+
+### 2. Social Media Cards (SEO/Open Graph)
+
+```bash
+# Build with SSR
+yarn build
+
+# Serve locally
+yarn serve:ssr:capital-copilot-fe
+
+# Test with curl to see server-rendered HTML
+curl -s http://localhost:4000/ | grep -E "<title>|og:title"
+```
+
+✅ Expected: HTML contains meta tags for social sharing
+
+### 3. Production SSR Flow
+
+```bash
+# Build
+yarn build
+
+# Serve
+yarn serve:ssr:capital-copilot-fe
+
+# Visit http://localhost:4000 in browser
+# View page source - should see rendered HTML
+# Check DevTools Network tab - subsequent navigation uses client-side routing
+```
+
+✅ Expected:
+- Initial page load has server-rendered HTML (view source shows content)
+- After hydration, navigation is client-side (fast, no full page reload)
+- WebSocket connects after hydration for real-time features
+
+### 4. GraphQL Subscriptions (Real-time)
+
+```bash
+# In development mode
+yarn start
+
+# Open DevTools > Network > WS tab
+# Navigate to a page with real-time data (e.g., jobs list)
+```
+
+✅ Expected: WebSocket connection to `/ws/graphql/` appears and stays connected
 
 ---
 
@@ -120,6 +213,19 @@ If you need SSR with development settings (source maps, no optimization):
 **Symptom:** Changes to files don't trigger browser refresh or updates.
 
 **Solution:** Make sure you're using `yarn start` (development mode) which has SSR disabled.
+
+### WebSocket TypeError During SSR
+
+**Symptom:**
+```
+TypeError [ERR_INVALID_ARG_TYPE]: The "event" argument must be an instance of Event.
+Received an instance of Event
+    at WebSocket.dispatchEvent (node:internal/event_target:773:13)
+```
+
+**Cause:** WebSocket was being initialized on the server. Node.js's WebSocket has a different `Event` class than browsers, and Zone.js intercepts cause type mismatches.
+
+**Solution:** Already fixed in `graphql.provider.ts` - WebSocket is only created when `isPlatformBrowser()` is true.
 
 ### "The 'prerender' option is not considered when 'outputMode' is specified"
 
