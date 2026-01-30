@@ -368,11 +368,25 @@ export class ChartConfigService {
         // For other candles, just show time with optional ET suffix
         return useLocal ? timeLabel : `${timeLabel} ET`;
       } else {
-        // For daily+, show date only (no time suffix needed)
+        // For daily+, extract date from ISO string to avoid timezone shift
+        // Backend sends dates as midnight UTC (e.g., "2026-01-20T00:00:00.000Z")
+        // which should display as "Jan 20", not be shifted by timezone
+        const isoString = c.date.toISOString();
+        const dateMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (dateMatch) {
+          const [, year, month, day] = dateMatch;
+          // Create date at noon UTC to avoid any DST issues, then format in UTC
+          const utcDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+          return utcDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC',
+          });
+        }
+        // Fallback if ISO parsing fails
         return c.date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          timeZone: 'America/New_York', // Always use ET for daily dates
         });
       }
     });

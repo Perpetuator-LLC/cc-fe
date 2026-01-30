@@ -96,11 +96,17 @@
             [disabled]="hasUnsavedChanges() || creatingNewsEpisode"
           >
             @if (creatingNewsEpisode) {
-              <mat-spinner diameter="18" />
+              <span class="news-episode-btn">
+                <mat-spinner diameter="18" />
+                <span>News Episode</span>
+              </span>
+              
             } @else {
+              <span class="news-episode-btn">
               <mat-icon>newspaper</mat-icon>
+              <span>News Episode</span>
+            </span>
             }
-            <span>News Episode</span>
           </button>
         </span>
         <span
@@ -115,7 +121,10 @@
             [disabled]="hasUnsavedChanges() || creatingResearchEpisode"
           >
             @if (creatingResearchEpisode) {
+              <span class="research-btn">
               <mat-spinner diameter="18" />
+              <span>Research Episode</span>
+            </span>
             } @else {
               <span class="research-btn">
                 <mat-icon>science</mat-icon>

@@ -274,7 +274,6 @@ mat-divider {
 .voice-buttons {
   /* Adjust based on button content + gaps */
   display: flex;
-  flex-wrap: wrap;
   /* Allow buttons inside to wrap */
   gap: 8px;
   justify-content: flex-end;
@@ -742,7 +741,7 @@ mat-divider {
   flex: auto;
   gap: 8px;
   align-items: center;
-
+  flex: auto !important;
   width: 322px;
   min-width: 615px;
   padding: 0 8px;
@@ -1168,6 +1167,12 @@ mat-divider {
 
   &:hover:not(:disabled) {
     opacity: 0.9;
+  }
+
+  .news-episode-btn{
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   &.research-button {
