@@ -1,0 +1,129 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (showHeader) {
+  <div class="news-header">
+    <div class="title-section">
+      <h4>
+        <mat-icon>newspaper</mat-icon>
+        Referenced News
+      </h4>
+      <span class="count">{{ news.length }} articles</span>
+    </div>
+    <div class="view-toggles">
+      <button type="button" class="view-btn" (click)="toggleView(true)" [class.active]="viewMode === 'grid'">
+        <mat-icon>grid_on</mat-icon>
+      </button>
+      <button type="button" class="view-btn" (click)="toggleView(false)" [class.active]="viewMode === 'list'">
+        <mat-icon>list_alt</mat-icon>
+      </button>
+    </div>
+  </div>
+}
+
+@if (news.length === 0) {
+  <div class="no-data">
+    <mat-icon>article</mat-icon>
+    <p>No news articles referenced</p>
+  </div>
+} @else if (viewMode === 'grid') {
+  <div class="news-grid">
+    @for (item of news; track item.id) {
+      <mat-card class="news-card">
+        <mat-card-content>
+          <div class="news-title-wrapper">
+            <a [href]="item.url" target="_blank" rel="noopener noreferrer" class="news-title">
+              {{ item.title }}
+            </a>
+            @if (item.blocked) {
+              <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                <mat-icon>block</mat-icon>
+                Blocked
+              </span>
+            }
+          </div>
+          <div class="news-meta">
+            @if (item.rssFeeds && item.rssFeeds.length > 0) {
+              <div class="rss-feeds">
+                <mat-icon>rss_feed</mat-icon>
+                <div class="feed-items">
+                  @for (feed of item.rssFeeds; track feed.id) {
+                    <div class="feed-badge">
+                      <span class="feed-name">{{ feed.name || feed.url }}</span>
+                      <div class="feed-status">
+                        <span
+                          class="status-icon"
+                          [class.success]="feed.isReachable"
+                          [class.error]="!feed.isReachable"
+                          [matTooltip]="feed.isReachable ? 'Reachable' : 'Unreachable'"
+                        >
+                          <mat-icon>{{ feed.isReachable ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+                        </span>
+                        <span
+                          class="status-icon"
+                          [class.success]="feed.isParsable"
+                          [class.error]="!feed.isParsable"
+                          [matTooltip]="feed.isParsable ? 'Parsable' : 'Parse Error'"
+                        >
+                          <mat-icon>{{ feed.isParsable ? 'check_circle' : 'error' }}</mat-icon>
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            <div class="date">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ item.publishedAt | date: 'short' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+} @else {
+  <div class="news-list">
+    <table class="news-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>RSS Feed</th>
+          <th>Published</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of news; track item.id) {
+          <tr>
+            <td>
+              <div class="title-cell">
+                <a [href]="item.url" target="_blank" rel="noopener noreferrer">
+                  {{ item.title }}
+                </a>
+                @if (item.blocked) {
+                  <span class="blocked-badge" matTooltip="Blocked">
+                    <mat-icon>block</mat-icon>
+                  </span>
+                }
+              </div>
+            </td>
+            <td>
+              @if (item.rssFeeds && item.rssFeeds.length > 0) {
+                <div class="feeds-cell">
+                  @for (feed of item.rssFeeds; track feed.id) {
+                    <span class="feed-name" [matTooltip]="feed.url">
+                      {{ feed.name || 'RSS Feed' }}
+                    </span>
+                  }
+                </div>
+              } @else {
+                <span class="no-feed">—</span>
+              }
+            </td>
+            <td>
+              <span class="date-cell">{{ item.publishedAt | date: 'short' }}</span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

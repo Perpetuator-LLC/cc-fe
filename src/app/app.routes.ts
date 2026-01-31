@@ -153,6 +153,27 @@ export const routes: Routes = [
         loadComponent: () => import('./pulses/pulse-detail/pulse-detail.component').then((c) => c.PulseDetailComponent),
         title: 'Pulse Configuration',
       },
+      {
+        path: 'pulses/:uuid/recordings/:recordingUuid',
+        loadComponent: () =>
+          import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
+        title: 'Recording Detail',
+      },
+      {
+        path: 'recordings',
+        loadComponent: () =>
+          import('./pulses/recordings-list/recordings-list.component').then((c) => c.RecordingsListComponent),
+        title: 'Recordings',
+        data: {
+          icon: 'mic',
+        },
+      },
+      {
+        path: 'recordings/:recordingUuid',
+        loadComponent: () =>
+          import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
+        title: 'Recording Detail',
+      },
     ],
   },
   {

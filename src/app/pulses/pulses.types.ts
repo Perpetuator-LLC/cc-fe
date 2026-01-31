@@ -32,7 +32,7 @@ export type AlertType =
 /**
  * Pulse status during generation and delivery
  */
-export type PulseStatus = 'pending' | 'generating' | 'ready' | 'delivered' | 'failed';
+export type PulseStatus = 'PENDING' | 'GENERATING' | 'READY' | 'DELIVERED' | 'FAILED';
 
 /**
  * Delivery method for pulses
@@ -144,6 +144,10 @@ export interface Pulse {
   transcript: string;
   summary: string;
 
+  // Original text (for user-created recordings)
+  originalText?: string | null;
+  wasConverted?: boolean;
+
   // Audio
   audioUrl: string;
   audioDurationSeconds: number;
@@ -160,6 +164,15 @@ export interface Pulse {
   isValidated: boolean; // Computed: all three true
   validationNotes?: string | null;
 
+  // Agent actions (research steps taken during pulse generation)
+  agentActions?: string | null; // JSON string of AgentAction[]
+
+  // News articles used in this pulse
+  news?: PulseNewsItem[] | null;
+
+  // Research URLs accessed during validation/fact-checking
+  researchUrls?: string[] | null;
+
   // Triggering
   isScheduled: boolean; // true = scheduled, false = alert triggered
   configName: string;
@@ -175,6 +188,47 @@ export interface Pulse {
   // Timestamps
   createdAt: string;
   generatedAt?: string | null;
+}
+
+/**
+ * Agent action record from pulse generation
+ */
+export interface AgentAction {
+  tool: string;
+  args: Record<string, unknown>;
+  status: 'success' | 'no_results' | 'error';
+  result_count?: number;
+  result_summary?: string;
+  items?: AgentActionItem[];
+  error?: string;
+}
+
+export interface AgentActionItem {
+  title?: string;
+  url?: string;
+  source?: string;
+  publishedAt?: string;
+}
+
+/**
+ * News item referenced in a pulse
+ */
+export interface PulseNewsItem {
+  id: string;
+  title: string;
+  url: string;
+  source?: string;
+  publishedAt: string;
+  blocked?: boolean;
+  rssFeeds?: PulseRssFeed[];
+}
+
+export interface PulseRssFeed {
+  id: string;
+  name?: string;
+  url: string;
+  isReachable: boolean;
+  isParsable: boolean;
 }
 
 /**

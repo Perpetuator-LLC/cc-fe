@@ -120,11 +120,25 @@
           <div class="links">
             @if (router.url.startsWith('/media/')) {
               <!-- Media section links -->
-              <a [routerLink]="['/media/pulses']" class="header-logo s-link" routerLinkActive="active">
+              <a
+                [routerLink]="['/media/pulses']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
                 <mat-icon>vital_signs</mat-icon>
                 <span class="website-title">Pulses</span>
               </a>
-              <a [routerLink]="['/media/podcasts']" class="header-logo s-link" routerLinkActive="active">
+              <a [routerLink]="['/media/recordings']" class="header-logo s-link sub-link" routerLinkActive="active">
+                <mat-icon>mic</mat-icon>
+                <span class="website-title">Recordings</span>
+              </a>
+              <a
+                [routerLink]="['/media/podcasts']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M10.5 2.25H7.5C4.67175 2.25 3.25725 2.25 2.379 3.129C1.50075 4.008 1.5 5.42175 1.5 8.25C1.5 11.0782 1.5 12.4927 2.379 13.371C3.258 14.2492 4.67175 14.25 7.5 14.25H10.5C13.3282 14.25 14.7427 14.25 15.621 13.371C16.4992 12.492 16.5 11.0782 16.5 8.25C16.5 5.42175 16.5 4.00725 15.621 3.129C14.742 2.25075 13.3282 2.25 10.5 2.25Z"

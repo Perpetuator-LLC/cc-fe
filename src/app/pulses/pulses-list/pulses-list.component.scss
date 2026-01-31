@@ -298,6 +298,12 @@
         color: var(--md-sys-color-on-surface-variant);
       }
     }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
   }
 }
 

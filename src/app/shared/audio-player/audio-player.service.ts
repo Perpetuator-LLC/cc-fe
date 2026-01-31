@@ -24,6 +24,15 @@ export interface AudioPlayerState {
 
 const QUEUE_STORAGE_KEY = 'audio-player-queue';
 const VOLUME_STORAGE_KEY = 'audio-player-volume';
+const PLAYBACK_STATE_KEY = 'audio-player-state';
+const STATE_SAVE_INTERVAL = 3000; // Save state every 3 seconds during playback
+
+interface StoredPlaybackState {
+  track: AudioTrack | null;
+  position: number; // Current time in seconds
+  wasPlaying: boolean;
+  timestamp: number; // When this was saved (to detect stale states)
+}
 
 /**
  * Persistent audio player service that maintains audio playback state
@@ -35,6 +44,8 @@ const VOLUME_STORAGE_KEY = 'audio-player-volume';
 })
 export class AudioPlayerService {
   private audio: HTMLAudioElement | null = null;
+  private stateSaveInterval: ReturnType<typeof setInterval> | null = null;
+  private hasRestoredState = false;
 
   // State signals
   private readonly _track = signal<AudioTrack | null>(null);
@@ -79,6 +90,8 @@ export class AudioPlayerService {
     this.loadQueueFromStorage();
     this.loadVolumeFromStorage();
     this.initAudio();
+    this.restorePlaybackState();
+    this.setupBeforeUnloadHandler();
   }
 
   private loadQueueFromStorage(): void {
@@ -124,6 +137,110 @@ export class AudioPlayerService {
     }
   }
 
+  private savePlaybackState(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const state: StoredPlaybackState = {
+        track: this._track(),
+        position: this._currentTime(),
+        wasPlaying: this._isPlaying(),
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(PLAYBACK_STATE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to save playback state:', e);
+    }
+  }
+
+  private loadPlaybackState(): StoredPlaybackState | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem(PLAYBACK_STATE_KEY);
+      if (stored) {
+        return JSON.parse(stored) as StoredPlaybackState;
+      }
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to load playback state:', e);
+    }
+    return null;
+  }
+
+  private restorePlaybackState(): void {
+    if (this.hasRestoredState || !this.audio) return;
+    this.hasRestoredState = true;
+
+    const state = this.loadPlaybackState();
+    if (!state?.track) return;
+
+    // Check if state is stale (older than 24 hours)
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+    if (Date.now() - state.timestamp > maxAge) {
+      this.clearPlaybackState();
+      return;
+    }
+
+    // Restore the track
+    this._track.set(state.track);
+    this._duration.set(state.track.duration || 0);
+    this._isLoading.set(true);
+
+    this.audio.src = state.track.audioUrl;
+    this.audio.load();
+
+    // Wait for metadata to load before seeking
+    const onCanPlay = () => {
+      if (!this.audio) return;
+      this.audio.removeEventListener('canplay', onCanPlay);
+
+      // Seek to saved position
+      this.audio.currentTime = state.position;
+      this._currentTime.set(state.position);
+
+      // Resume playback if it was playing
+      if (state.wasPlaying) {
+        this.audio.play().catch((err) => {
+          // Autoplay might be blocked by browser - that's okay
+          console.warn('[AudioPlayer] Autoplay blocked after restore:', err);
+        });
+      }
+    };
+
+    this.audio.addEventListener('canplay', onCanPlay);
+  }
+
+  private clearPlaybackState(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(PLAYBACK_STATE_KEY);
+    } catch (e) {
+      console.warn('[AudioPlayer] Failed to clear playback state:', e);
+    }
+  }
+
+  private startStateSaveInterval(): void {
+    if (this.stateSaveInterval) return;
+    this.stateSaveInterval = setInterval(() => {
+      if (this._isPlaying()) {
+        this.savePlaybackState();
+      }
+    }, STATE_SAVE_INTERVAL);
+  }
+
+  private stopStateSaveInterval(): void {
+    if (this.stateSaveInterval) {
+      clearInterval(this.stateSaveInterval);
+      this.stateSaveInterval = null;
+    }
+  }
+
+  private setupBeforeUnloadHandler(): void {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('beforeunload', () => {
+      // Save state immediately before page unloads
+      this.savePlaybackState();
+    });
+  }
+
   private initAudio(): void {
     if (typeof window === 'undefined') return; // SSR check
 
@@ -150,15 +267,20 @@ export class AudioPlayerService {
 
     this.audio.addEventListener('play', () => {
       this._isPlaying.set(true);
+      this.startStateSaveInterval();
+      this.savePlaybackState(); // Save immediately when play starts
     });
 
     this.audio.addEventListener('pause', () => {
       this._isPlaying.set(false);
+      this.stopStateSaveInterval();
+      this.savePlaybackState(); // Save state when paused
     });
 
     this.audio.addEventListener('ended', () => {
       this._isPlaying.set(false);
       this._currentTime.set(0);
+      this.stopStateSaveInterval();
       // Auto-play next track in queue
       this.playNext();
     });
@@ -250,6 +372,8 @@ export class AudioPlayerService {
     this._currentTime.set(0);
     this._duration.set(0);
     this._isPlaying.set(false);
+    this.stopStateSaveInterval();
+    this.clearPlaybackState();
   }
 
   /**

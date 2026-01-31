@@ -88,6 +88,8 @@ const PULSE_FRAGMENT = gql`
     title
     transcript
     summary
+    originalText
+    wasConverted
     audioUrl
     audioDurationSeconds
     wordCount
@@ -98,6 +100,25 @@ const PULSE_FRAGMENT = gql`
     validatedLength
     isValidated
     validationNotes
+    agentActions
+    news {
+      id
+      uuid
+      title
+      summary
+      url
+      source
+      publishedAt
+      blocked
+      rssFeeds {
+        id
+        name
+        url
+        isReachable
+        isParsable
+      }
+    }
+    researchUrls
     isScheduled
     configName
     deliveredAt
@@ -210,13 +231,20 @@ export class PulsesService extends BaseService {
   }
 
   /**
-   * Get generated pulses for a configuration
+   * Get generated pulses (recordings) with optional filters
+   * NOTE: search parameter requires backend support - see fe106_request_pulses_search.md
    */
-  getPulses(configUuid?: string, status?: string, first = 20, after?: string | null): Observable<PulsesResponse> {
+  getPulses(
+    configUuid?: string,
+    status?: string,
+    search?: string,
+    first = 20,
+    after?: string | null,
+  ): Observable<PulsesResponse> {
     const GQL = gql`
       ${PULSE_FRAGMENT}
-      query GetPulses($configUuid: UUID, $status: String, $first: Int, $after: String) {
-        pulses(configUuid: $configUuid, status: $status, first: $first, after: $after) {
+      query GetPulses($configUuid: UUID, $status: String, $search: String, $first: Int, $after: String) {
+        pulses(configUuid: $configUuid, status: $status, search: $search, first: $first, after: $after) {
           edges {
             node {
               ...PulseFields
@@ -243,7 +271,7 @@ export class PulsesService extends BaseService {
 
     return this.query<Response>({
       query: GQL,
-      variables: { configUuid, status, first, after },
+      variables: { configUuid, status, search, first, after },
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => ({
@@ -698,6 +726,127 @@ export class PulsesService extends BaseService {
           throw new Error(data.generatePulse.message);
         }
         return data.generatePulse;
+      }),
+    );
+  }
+
+  /**
+   * Generate audio from custom text (Text-to-Speech)
+   * Creates a "blank" pulse with just the provided text
+   *
+   * @param text The text to convert to speech (max 50,000 characters)
+   * @param title Optional title for the generated audio
+   * @param voiceUuid Optional voice UUID (uses default if not provided)
+   */
+  generateTextToSpeech(
+    text: string,
+    title?: string,
+    voiceUuid?: string,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    pulse: Pulse;
+    jobUuid: string;
+  }> {
+    const GQL = gql`
+      ${PULSE_FRAGMENT}
+      mutation GenerateTextToSpeech($text: String!, $title: String, $voiceUuid: UUID) {
+        generateTextToSpeech(text: $text, title: $title, voiceUuid: $voiceUuid) {
+          success
+          message
+          pulse {
+            ...PulseFields
+          }
+          jobUuid
+        }
+      }
+    `;
+
+    interface Response {
+      generateTextToSpeech: {
+        success: boolean;
+        message: string;
+        pulse: Pulse;
+        jobUuid: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { text, title, voiceUuid },
+    }).pipe(
+      map((data) => {
+        if (!data.generateTextToSpeech.success) {
+          throw new Error(data.generateTextToSpeech.message);
+        }
+        return data.generateTextToSpeech;
+      }),
+    );
+  }
+
+  /**
+   * Create a recording from custom text within a specific Pulse.
+   * This uses the Pulse's configured voice and can optionally convert
+   * the text to an audio-friendly transcript.
+   *
+   * @param pulseConfigUuid The Pulse to create the recording under
+   * @param title Title for the recording
+   * @param text The text content to convert to speech
+   * @param convertToTranscript If true (default), AI converts text to clean transcript
+   */
+  createRecording(
+    pulseConfigUuid: string,
+    title: string,
+    text: string,
+    convertToTranscript = true,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    pulse: Pulse;
+    jobUuid: string;
+  }> {
+    const GQL = gql`
+      ${PULSE_FRAGMENT}
+      mutation CreateRecording(
+        $pulseConfigUuid: UUID!
+        $title: String!
+        $text: String!
+        $convertToTranscript: Boolean
+      ) {
+        createRecording(
+          pulseConfigUuid: $pulseConfigUuid
+          title: $title
+          text: $text
+          convertToTranscript: $convertToTranscript
+        ) {
+          success
+          message
+          pulse {
+            ...PulseFields
+          }
+          jobUuid
+        }
+      }
+    `;
+
+    interface Response {
+      createRecording: {
+        success: boolean;
+        message: string;
+        pulse: Pulse;
+        jobUuid: string;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { pulseConfigUuid, title, text, convertToTranscript },
+    }).pipe(
+      map((data) => {
+        if (!data.createRecording.success) {
+          throw new Error(data.createRecording.message);
+        }
+        return data.createRecording;
       }),
     );
   }

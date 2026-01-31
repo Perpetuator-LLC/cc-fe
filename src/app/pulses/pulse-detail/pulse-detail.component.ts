@@ -32,6 +32,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { AddContentSourceDialogComponent } from '../add-content-source-dialog/add-content-source-dialog.component';
 import { AddAlertTriggerDialogComponent } from '../add-alert-trigger-dialog/add-alert-trigger-dialog.component';
+import {
+  CreateRecordingDialogComponent,
+  CreateRecordingDialogData,
+} from '../create-recording-dialog/create-recording-dialog.component';
 import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
@@ -77,6 +81,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   protected pulseConfigUuid: string;
   protected selectedTabIndex = 0;
   protected generatingPulse = false;
+  protected selectedPulseUuid: string | null = null;
 
   // Data
   pulseConfig: PulseConfig | null = null;
@@ -112,7 +117,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     { value: 'once', label: 'One-time' },
   ];
 
-  private readonly tabNames = ['settings', 'content', 'alerts', 'voice', 'schedule', 'history'];
+  private readonly tabNames = ['settings', 'content', 'alerts', 'voice', 'schedule', 'recordings'];
 
   // Content source columns
   contentSourceColumns = ['sourceType', 'sourceDetail', 'priority', 'isActive', 'actions'];
@@ -231,7 +236,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
   private loadPulseHistory(): void {
     this.subscriptions.add(
-      this.pulsesService.getPulses(this.pulseConfigUuid, undefined, 20).subscribe({
+      this.pulsesService.getPulses(this.pulseConfigUuid, undefined, undefined, 20).subscribe({
         next: (response) => {
           this.pulses = response.pulses;
         },
@@ -523,7 +528,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'ready':
       case 'delivered':
         return 'status-success';
@@ -598,6 +603,52 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
   toggleTranscript(): void {
     this.showTranscript = !this.showTranscript;
+  }
+
+  // ==================== UPDATES (PULSE HISTORY) METHODS ====================
+
+  /**
+   * Navigate to recording detail page
+   * Uses /media/recordings/:uuid route so sidebar highlights "Recordings"
+   */
+  viewRecording(pulse: Pulse): void {
+    this.router.navigate(['/media/recordings', pulse.uuid], {
+      queryParams: { pulse: this.pulseConfigUuid },
+    });
+  }
+
+  /**
+   * Copy pulse transcript to clipboard
+   */
+  copyTranscript(pulse: Pulse): void {
+    if (!pulse.transcript) {
+      this.messageService.error('No transcript available');
+      return;
+    }
+
+    navigator.clipboard.writeText(pulse.transcript).then(
+      () => this.messageService.success('Transcript copied to clipboard'),
+      () => this.messageService.error('Failed to copy transcript'),
+    );
+  }
+
+  /**
+   * Create a new recording from custom text
+   */
+  createRecording(): void {
+    const dialogRef = this.dialog.open(CreateRecordingDialogComponent, {
+      width: '600px',
+      data: {
+        pulseConfigUuid: this.pulseConfigUuid,
+      } as CreateRecordingDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Reload pulse history to show the new recording
+        this.loadPulseHistory();
+      }
+    });
   }
 
   // ==================== VOICE METHODS ====================
