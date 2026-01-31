@@ -62,7 +62,7 @@
               <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
             </div>
             <div class="latest-pulse-actions">
-              @if (latestPulse.audioUrl && latestPulse.status === 'ready') {
+              @if (latestPulse.audioUrl && latestPulse.status === 'READY') {
                 <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
                   <mat-icon>play_arrow</mat-icon>
                   Play
@@ -127,7 +127,7 @@
               <span class="stat-value">{{ latestPulse.validatedLength ? 'Pass' : 'N/A' }}</span>
               <span class="stat-label">Length</span>
             </div>
-            @if (latestPulse.status === 'failed') {
+            @if (latestPulse.status === 'FAILED') {
               <div class="stat-item status-error">
                 <mat-icon>error</mat-icon>
                 <span class="stat-value">Failed</span>
@@ -484,62 +484,117 @@
         </div>
       </mat-tab>
 
-      <!-- History Tab -->
-      <mat-tab label="History">
+      <!-- Recordings Tab (formerly Updates/History) -->
+      <mat-tab label="Recordings">
         <div class="tab-content">
           <mat-card>
             <mat-card-content>
-              <h3>Generated Pulses</h3>
+              <div class="recordings-header">
+                <div>
+                  <h3>Recordings</h3>
+                  <p class="recordings-description">
+                    Each recording is a generated audio file. Auto-generated from your content sources, or create your
+                    own.
+                  </p>
+                </div>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="createRecording()"
+                  matTooltip="Create a recording from your own text"
+                >
+                  <mat-icon>add</mat-icon>
+                  Create Recording
+                </button>
+              </div>
 
               @if (pulses.length === 0) {
                 <div class="empty-state">
-                  <mat-icon>history</mat-icon>
-                  <p>No pulses generated yet. Click "Generate Now" to create your first pulse.</p>
+                  <mat-icon>mic</mat-icon>
+                  <p>
+                    No recordings yet. Click "Generate Now" to create from your content sources, or "Create Recording"
+                    to add your own text.
+                  </p>
                 </div>
               } @else {
-                <table mat-table [dataSource]="pulses" class="pulses-table">
-                  <ng-container matColumnDef="title">
-                    <th mat-header-cell *matHeaderCellDef>Title</th>
-                    <td mat-cell *matCellDef="let pulse">{{ pulse.title }}</td>
-                  </ng-container>
+                <div class="recordings-list">
+                  @for (pulse of pulses; track pulse.uuid; let i = $index) {
+                    <div class="recording-card" (click)="viewRecording(pulse)">
+                      <div class="recording-header">
+                        <div class="recording-title-section">
+                          <span class="recording-number">#{{ pulses.length - i }}</span>
+                          <span class="recording-title">{{ pulse.title }}</span>
+                          <span class="recording-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
+                        </div>
+                        <div class="recording-status">
+                          <span class="status-badge" [class]="getStatusClass(pulse.status)">
+                            {{ pulse.status | titlecase }}
+                          </span>
+                        </div>
+                      </div>
 
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let pulse">
-                      <span class="status-badge" [class]="getStatusClass(pulse.status)">
-                        {{ pulse.status | titlecase }}
-                      </span>
-                    </td>
-                  </ng-container>
+                      <div class="recording-stats">
+                        <span class="stat">
+                          <mat-icon>timer</mat-icon>
+                          {{ formatSeconds(pulse.audioDurationSeconds) }}
+                        </span>
+                        <span class="stat">
+                          <mat-icon>notes</mat-icon>
+                          {{ pulse.wordCount || 0 }} words
+                        </span>
+                        @if (pulse.isValidated) {
+                          <span class="stat validated">
+                            <mat-icon>verified</mat-icon>
+                            Validated
+                          </span>
+                        }
+                        @if (pulse.news && pulse.news.length > 0) {
+                          <span class="stat">
+                            <mat-icon>newspaper</mat-icon>
+                            {{ pulse.news.length }} news
+                          </span>
+                        }
+                        @if (pulse.researchUrls && pulse.researchUrls.length > 0) {
+                          <span class="stat">
+                            <mat-icon>link</mat-icon>
+                            {{ pulse.researchUrls.length }} URLs
+                          </span>
+                        }
+                      </div>
 
-                  <ng-container matColumnDef="duration">
-                    <th mat-header-cell *matHeaderCellDef>Duration</th>
-                    <td mat-cell *matCellDef="let pulse">
-                      {{ formatSeconds(pulse.audioDurationSeconds) }}
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="createdAt">
-                    <th mat-header-cell *matHeaderCellDef>Created</th>
-                    <td mat-cell *matCellDef="let pulse">
-                      {{ formatTimeAgo(pulse.createdAt) }}
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let pulse">
-                      @if (pulse.audioUrl) {
-                        <button mat-icon-button (click)="playPulse(pulse)" matTooltip="Play">
-                          <mat-icon>play_arrow</mat-icon>
-                        </button>
-                      }
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="pulseHistoryColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: pulseHistoryColumns"></tr>
-                </table>
+                      <div class="recording-actions" (click)="$event.stopPropagation()">
+                        @if (pulse.audioUrl && pulse.status === 'READY') {
+                          <button mat-flat-button color="primary" (click)="playPulse(pulse)">
+                            <mat-icon>play_arrow</mat-icon>
+                            Play
+                          </button>
+                          <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
+                            <mat-icon>more_vert</mat-icon>
+                          </button>
+                          <mat-menu #recordingMenu="matMenu">
+                            <button mat-menu-item (click)="addToQueueNext(pulse)">
+                              <mat-icon>queue_play_next</mat-icon>
+                              <span>Play Next</span>
+                            </button>
+                            <button mat-menu-item (click)="addToQueue(pulse)">
+                              <mat-icon>playlist_add</mat-icon>
+                              <span>Add to Queue</span>
+                            </button>
+                            <button mat-menu-item (click)="viewRecording(pulse)">
+                              <mat-icon>info</mat-icon>
+                              <span>View Details</span>
+                            </button>
+                          </mat-menu>
+                        } @else {
+                          <button mat-stroked-button (click)="viewRecording(pulse)">
+                            <mat-icon>info</mat-icon>
+                            Details
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
               }
             </mat-card-content>
           </mat-card>

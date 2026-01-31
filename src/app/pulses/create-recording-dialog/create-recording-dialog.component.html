@@ -1,0 +1,76 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>
+  <mat-icon>mic</mat-icon>
+  Create Recording
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="recording-form">
+    <p class="description">Create a recording from your own text. This will use the voice configured for this Pulse.</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Recording title" />
+      <mat-hint>A name for this recording</mat-hint>
+      @if (form.get('title')?.hasError('required')) {
+        <mat-error>Title is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Text content</mat-label>
+      <textarea
+        matInput
+        formControlName="text"
+        rows="10"
+        placeholder="Enter or paste your text here. This can include markdown, HTML, links, etc."
+        [maxlength]="50000"
+      ></textarea>
+      <mat-hint> {{ wordCount }} words · ~{{ estimatedDuration }} </mat-hint>
+      @if (form.get('text')?.hasError('required')) {
+        <mat-error>Text is required</mat-error>
+      }
+      @if (form.get('text')?.hasError('maxlength')) {
+        <mat-error>Maximum 50,000 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="convert-toggle">
+      <mat-checkbox formControlName="convertToTranscript" color="primary"> Convert to transcript </mat-checkbox>
+      <mat-icon
+        class="help-icon"
+        matTooltip="When ON, AI will clean up your text for audio (removes links, converts markdown, formats numbers for speech). Turn OFF if your text is already written to be read aloud."
+        matTooltipPosition="above"
+      >
+        help_outline
+      </mat-icon>
+    </div>
+    <p class="toggle-hint">
+      @if (form.get('convertToTranscript')?.value) {
+        AI will convert your text to audio-friendly format (removes URLs, formatting, etc.)
+      } @else {
+        Text will be read exactly as written (use for pre-written scripts)
+      }
+    </p>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="generating">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="generate()"
+    [disabled]="form.invalid || generating || wordCount === 0"
+  >
+    @if (generating) {
+      <mat-spinner diameter="18"></mat-spinner>
+      Creating...
+    } @else {
+      <ng-container>
+        <mat-icon>mic</mat-icon>
+        Create Recording
+      </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

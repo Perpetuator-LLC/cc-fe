@@ -359,8 +359,7 @@
 
 // Tables
 .sources-table,
-.alerts-table,
-.pulses-table {
+.alerts-table {
   width: 100%;
 
   .mat-mdc-header-cell {
@@ -459,4 +458,28 @@
     color: var(--md-sys-color-error);
     background-color: var(--md-sys-color-error-container);
   }
+}
+
+// Recordings Tab Styles
+.recordings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 4px;
+  }
+
+  .recordings-description {
+    margin: 0;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.recordings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

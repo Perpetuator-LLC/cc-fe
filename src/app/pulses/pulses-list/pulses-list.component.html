@@ -12,10 +12,12 @@
       <h3>My Pulse Configs</h3>
       <span>{{ pulseConfigs.length }} configurations</span>
     </div>
-    <button mat-button color="secondary" type="button" (click)="createPulseConfig()">
-      <mat-icon>add</mat-icon>
-      Create Pulse
-    </button>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" type="button" (click)="createPulseConfig()">
+        <mat-icon>add</mat-icon>
+        Create Pulse
+      </button>
+    </div>
   </mat-card-content>
 </mat-card>
 

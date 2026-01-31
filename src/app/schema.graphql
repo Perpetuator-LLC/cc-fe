@@ -4,6 +4,9 @@ type Query {
   pulses(configUuid: UUID, status: String, first: Int = 20, after: String): PulseConnection
   pulse(uuid: UUID!): PulseType
 
+  """Validate a pulse config before generating (pre-flight check)"""
+  validatePulseConfig(uuid: UUID!): PulseConfigValidationType
+
   """Get user's watchlists"""
   watchlists(watchlistType: String): [WatchlistObjectType]
 
@@ -1023,6 +1026,12 @@ type PulseType implements Node {
   """Brief summary of pulse contents"""
   summary: String!
 
+  """Original text provided by user (for user-created recordings)"""
+  originalText: String
+
+  """Whether AI converted original_text to transcript"""
+  wasConverted: Boolean!
+
   """Duration of audio in seconds"""
   audioDurationSeconds: Int
 
@@ -1053,6 +1062,9 @@ type PulseType implements Node {
   audioUrl: String
   isValidated: Boolean
   configName: String
+
+  """List of agent tool calls and their results during research"""
+  agentActions: JSONString
 }
 
 """An enumeration."""
@@ -1086,6 +1098,29 @@ enum PulsesPulseDeliveryMethodChoices {
 
   """In-App Only"""
   IN_APP
+}
+
+"""Result of validating a pulse config before generation."""
+type PulseConfigValidationType {
+  """Whether the config is valid for generation"""
+  valid: Boolean
+
+  """Blocking errors that prevent generation"""
+  errors: [String]
+
+  """Non-blocking warnings"""
+  warnings: [String]
+
+  """Summary of each content source"""
+  sourceSummary: [SourceSummaryType]
+}
+
+"""Summary of a content source for validation."""
+type SourceSummaryType {
+  type: String
+  name: String
+  status: String
+  details: String
 }
 
 """GraphQL type for Watchlist."""
@@ -4261,6 +4296,26 @@ type Mutation {
   """Deliver a generated pulse to the user."""
   deliverPulse(deliveryMethod: String, pulseUuid: UUID!): DeliverPulse
 
+  """
+  Create a recording (audio) from custom text within a specific Pulse (config).
+  
+  The recording uses the Pulse's configured voice. Optionally, the text can be
+  AI-converted to a clean, audio-friendly transcript.
+  """
+  createRecording(
+    """If True, AI converts text to audio-friendly transcript"""
+    convertToTranscript: Boolean = true
+
+    """The Pulse (config) to create the recording under"""
+    pulseConfigUuid: UUID!
+
+    """The text content to convert to speech"""
+    text: String!
+
+    """Title for the recording"""
+    title: String!
+  ): CreateRecording
+
   """Add a symbol to a watchlist."""
   addToWatchlist(
     assetType: String
@@ -5153,6 +5208,19 @@ enum PulsesPulseDeliveryDeliveryMethodChoices {
 
   """In-App Only"""
   IN_APP
+}
+
+"""
+Create a recording (audio) from custom text within a specific Pulse (config).
+
+The recording uses the Pulse's configured voice. Optionally, the text can be
+AI-converted to a clean, audio-friendly transcript.
+"""
+type CreateRecording {
+  success: Boolean
+  message: String
+  pulse: PulseType
+  jobUuid: UUID
 }
 
 """Add a symbol to a watchlist."""
