@@ -1,5 +1,3 @@
-Start every command you run with a space incase `setopt HIST_IGNORE_SPACE` is enabled in your shell.
-
 Aim for efficient design, maintainability, and consistency with Angular Material 3.
 
 # 🚨 SCHEMA IS BACKEND-GENERATED - DO NOT EDIT
@@ -23,35 +21,6 @@ When you encounter a missing GraphQL field or mutation:
 
 # 🎯 AGENT WORKFLOW ESSENTIALS
 
-## AI Link: Frontend ↔ Backend Communication
-
-The `logs/ai_link/` directory enables asynchronous communication between Frontend (FE) and Backend (BE) AI agents.
-
-### File Naming Convention
-| Agent | Prefix | Example |
-|-------|--------|---------|
-| Frontend | `fe#_` | `fe15_chart_preferences_integration.md` |
-| Backend | `be#_` | `be13_chart_preferences_api.md` |
-
-Numbers increment per response to maintain chronological order.
-
-### How to Use
-1. **Read Latest:** Check for the latest `be#_` or `fe#_` files to see recent changes/requests
-2. **Write Response:** Create a new file with the next number in your sequence
-3. **Reference:** Include "In Response To" field linking to the file you're responding to
-4. **Complete in One Pass:** Write your file completely before renaming to signal completion
-
-### Browser Console Access
-To see browser console output captured during debugging:
-```bash
-grep :CONSOLE: ./logs/ai_link/browser/chrome_debug.log | tail -n100
-```
-
-### Current State
-- **FE files:** Document frontend changes, requests for backend API changes
-- **BE files:** Document backend changes, answers to frontend questions
-- Both agents can read each other's files for context
-
 ## Log File Reading - NON-NEGOTIABLE
 **Terminal output is ALWAYS truncated.** After running any terminal command:
 1. **ALWAYS** use `2>&1 | tee logs/<name>.log` 
@@ -72,26 +41,7 @@ Always set explicit color on icons: `color: var(--md-sys-color-on-surface-varian
 
 # ⚠️ CRITICAL: Before Writing ANY Code
 
-## Terminal Commands - CRITICAL CONSTRAINTS
-
-### Output Truncation
-**Terminal output is ALWAYS truncated.** After running any terminal command:
-1. **ALWAYS** use `2>&1 | tee logs/<name>.log` 
-2. **IMMEDIATELY** call `read_file` on the log file to see actual output
-3. **NEVER** assume success from truncated output
-
-### Character Limits
-Terminal input has a **hard limit of ~1024 characters** for pasted/programmatic input:
-- **DO NOT** generate large multi-line commands that exceed this limit
-- **DO NOT** use complex inline node -e scripts with multi-line code
-- **PREFER** creating executable script files over inline command chains
-
-### Preferred Approach for Complex Operations
-1. **Create a script file** with proper extension (.sh, .cjs, .js, .py)
-2. Write the complex logic into that file
-3. Execute with a short command: `node scripts/my-test.cjs`
-
-### Standard Command Patterns
+## Project-Specific Command Patterns
 ```bash
 # Build with log capture
  cd /Users/nik/projects/capital-copilot-fe && yarn build 2>&1 | tee logs/build.log
@@ -105,7 +55,6 @@ Terminal input has a **hard limit of ~1024 characters** for pasted/programmatic 
 
 **After EVERY command:** call `read_file` on the log file to see actual output.
 
-The space at the start is intentional - it prevents commands from being saved to shell history.
 
 ## 🚫 NO HARDCODED VALUES - Use Backend APIs
 **NEVER hardcode values that the backend provides.** Always fetch from GraphQL.
@@ -248,34 +197,6 @@ node scripts/test-jobs-chain.cjs 2>&1 | head -20
 | GraphQL errors | Schema mismatch | Sync schema from backend |
 | `ECONNREFUSED` | Wrong port/URL | Check `environment.ts` API_URL |
 
-## 🔗 AI Link: Frontend ↔ Backend Communication
-
-The `logs/ai_link/` directory enables asynchronous communication between Frontend (FE) and Backend (BE) AI agents.
-
-### File Naming Convention
-| Agent | Prefix | Example |
-|-------|--------|---------|
-| Frontend | `fe#_` | `fe15_chart_preferences_integration.md` |
-| Backend | `be#_` | `be13_chart_preferences_api.md` |
-
-Numbers increment per response to maintain chronological order.
-
-### How to Use
-1. **Read Latest:** Check for the latest `be#_` or `fe#_` files to see recent changes/requests
-2. **Write Response:** Create a new file with the next number in your sequence
-3. **Reference:** Include "In Response To" field linking to the file you're responding to
-4. **Complete in One Pass:** Write your file completely before renaming to signal completion
-
-### Browser Console Access
-To see browser console output captured during debugging:
-```bash
-grep :CONSOLE: ./logs/ai_link/browser/chrome_debug.log | tail -n100
-```
-
-### Current State
-- **FE files:** Document frontend changes, requests for backend API changes
-- **BE files:** Document backend changes, answers to frontend questions
-- Both agents can read each other's files for context
 
 **Token handling:** Scripts read credentials from `src/environments/environment.ts` (TEST_EMAIL, TEST_PASSWORD). Tokens are cached in `~/.capital-copilot/cli-tokens.json` with proper file permissions (0600).
 
@@ -332,7 +253,6 @@ Then: `read_file logs/stylelint.log` to verify no errors before continuing.
 
 ---
 
-Do not use command line tools to edit or read files, use your functions that you have for file operations.
 
 ## Documentation Locations
 - **`notes/`** - Internal documentation, guides, and technical notes
