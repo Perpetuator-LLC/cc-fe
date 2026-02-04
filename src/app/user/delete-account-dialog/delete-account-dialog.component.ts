@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -35,7 +35,7 @@ export class DeleteAccountDialogComponent {
 
   onDelete(): void {
     if (this.deleteConfirmation === this.email) {
-      this.dialogRef.close(true);
+      this.dialogRef.close(this.deleteConfirmation);
     }
   }
 }
