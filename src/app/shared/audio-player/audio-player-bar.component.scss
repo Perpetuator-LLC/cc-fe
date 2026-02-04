@@ -1,5 +1,10 @@
 /* Copyright (c) 2026 Perpetuator LLC */
 
+// Ensure host element doesn't interfere with fixed positioning
+:host {
+  display: contents;
+}
+
 .audio-player-bar {
   position: fixed;
   z-index: 1000;

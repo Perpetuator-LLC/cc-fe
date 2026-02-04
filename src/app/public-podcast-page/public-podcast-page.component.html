@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="public-podcast-page">
   @if (loading) {
     <div class="loading-container">
@@ -36,7 +36,9 @@
             <p class="owner">
               By
               @if (podcastData.ownerLink) {
-                <a [href]="podcastData.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcastData.ownerName }}</a>
+                <a [href]="podcastData.ownerLink" target="_blank" rel="noopener noreferrer">{{
+                  podcastData.ownerName
+                }}</a>
               } @else {
                 {{ podcastData.ownerName }}
               }
@@ -120,9 +122,10 @@
                   <p class="episode-description">{{ episode.description }}</p>
                 }
                 <div class="episode-player">
-                  <audio controls [src]="episode.audioUrl">
-                    Your browser does not support the audio element.
-                  </audio>
+                  <button mat-flat-button color="primary" (click)="playEpisode(episode)" class="play-button">
+                    <mat-icon>play_arrow</mat-icon>
+                    Play
+                  </button>
                   @if (episode.duration) {
                     <span class="duration">{{ formatDuration(episode.duration) }}</span>
                   }
@@ -157,4 +160,3 @@
     </div>
   }
 </div>
-

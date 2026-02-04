@@ -5,9 +5,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface AgentAction {
-  tool: string;
-  args: Record<string, unknown>;
-  status: 'success' | 'no_results' | 'error';
+  tool?: string;
+  args?: Record<string, unknown>;
+  status?: 'success' | 'no_results' | 'error';
   result_count?: number;
   result_summary?: string;
   items?: {
@@ -33,13 +33,25 @@ export class AgentActionsListComponent {
   get agentActions(): AgentAction[] {
     if (!this.agentActionsJson) return [];
     try {
-      return JSON.parse(this.agentActionsJson);
-    } catch {
+      let parsed = JSON.parse(this.agentActionsJson);
+      // Handle double-encoded JSON from backend (JSONString field)
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      // Ensure we have an array
+      if (!Array.isArray(parsed)) {
+        console.warn('[AgentActions] Expected array, got:', typeof parsed);
+        return [];
+      }
+      return parsed;
+    } catch (e) {
+      console.error('[AgentActions] Failed to parse:', e);
       return [];
     }
   }
 
   getActionIcon(action: AgentAction): string {
+    if (!action) return 'build';
     if (action.status === 'error') return 'error';
     if (action.status === 'no_results') return 'search_off';
 
@@ -66,11 +78,13 @@ export class AgentActionsListComponent {
     }
   }
 
-  formatToolName(tool: string): string {
+  formatToolName(tool: string | undefined): string {
+    if (!tool) return 'Unknown Action';
     return tool.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: string | undefined): string {
+    if (!status) return '';
     switch (status) {
       case 'success':
         return 'status-success';
@@ -83,7 +97,8 @@ export class AgentActionsListComponent {
     }
   }
 
-  getArgsDisplay(args: Record<string, unknown>): string {
+  getArgsDisplay(args: Record<string, unknown> | undefined): string {
+    if (!args) return '';
     const entries = Object.entries(args);
     if (entries.length === 0) return '';
 

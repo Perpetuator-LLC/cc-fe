@@ -44,10 +44,10 @@ export const routes: Routes = [
     path: 'terminal',
     loadComponent: () =>
       import('./terminal/terminal-page/terminal-page.component').then((c) => c.TerminalPageComponent),
-    title: 'Terminal',
+    title: 'Finance',
     canActivate: [AuthGuard],
     data: {
-      icon: 'terminal',
+      icon: 'account_balance',
       showInMenu: true,
     },
   },
@@ -385,10 +385,10 @@ export const routes: Routes = [
   {
     path: 'finance',
     loadComponent: () => import('./finance/finance.component').then((c) => c.FinanceComponent),
-    title: 'Finance',
+    title: 'Finance (Legacy)',
     // canActivate: [AuthGuard],
     data: {
-      showInMenu: true,
+      showInMenu: false,
       icon: 'account_balance',
     },
   },

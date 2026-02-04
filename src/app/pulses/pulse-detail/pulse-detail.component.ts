@@ -36,6 +36,11 @@ import {
   CreateRecordingDialogComponent,
   CreateRecordingDialogData,
 } from '../create-recording-dialog/create-recording-dialog.component';
+import {
+  EditContentSourceDialogComponent,
+  EditContentSourceDialogData,
+} from '../edit-content-source-dialog/edit-content-source-dialog.component';
+import { AddRssFeedDialogComponent } from '../../podcast/add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
@@ -95,6 +100,21 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     return this.pulses[0]; // Already sorted by createdAt desc
   }
   showTranscript = false;
+
+  // Combined symbols from all content sources (company sources + resolved watchlists)
+  // For now, only includes directly added company symbols
+  // TODO: Request BE computed field for full list including watchlist symbols
+  get allSymbols(): string[] {
+    const symbols = new Set<string>();
+    for (const source of this.contentSources) {
+      if (source.sourceType === 'company' && source.symbol) {
+        symbols.add(source.symbol);
+      }
+      // Watchlist symbols would need to be resolved from the backend
+      // For now we can show a placeholder
+    }
+    return Array.from(symbols).sort();
+  }
 
   // Options
   toneOptions = [
@@ -291,6 +311,61 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         this.contentSources = [...this.contentSources, result];
       }
     });
+  }
+
+  editContentSource(source: ContentSource): void {
+    const dialogRef = this.dialog.open(EditContentSourceDialogComponent, {
+      width: '500px',
+      data: {
+        pulseConfigUuid: this.pulseConfigUuid,
+        source,
+      } as EditContentSourceDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Replace the old source with the new one
+        this.contentSources = this.contentSources.map((s) => (s.uuid === source.uuid ? result : s));
+      }
+    });
+  }
+
+  addBulkRssFeeds(): void {
+    const dialogRef = this.dialog.open(AddRssFeedDialogComponent, {
+      width: '500px',
+    });
+
+    dialogRef.afterClosed().subscribe((result: { urls: string[] } | undefined) => {
+      if (result?.urls?.length) {
+        this.addRssFeedsSequentially(result.urls);
+      }
+    });
+  }
+
+  private addRssFeedsSequentially(urls: string[], index = 0): void {
+    if (index >= urls.length) {
+      this.messageService.success(`Added ${urls.length} RSS feed(s)`);
+      return;
+    }
+
+    const url = urls[index];
+    this.pulsesService
+      .addContentSource(this.pulseConfigUuid, {
+        sourceType: 'rss_feed',
+        rssUrl: url,
+        priority: 50,
+      })
+      .subscribe({
+        next: (result) => {
+          this.contentSources = [...this.contentSources, result.contentSource];
+          this.addRssFeedsSequentially(urls, index + 1);
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to add ${url}: ${err.message}`);
+          // Continue with next URL
+          this.addRssFeedsSequentially(urls, index + 1);
+        },
+      });
   }
 
   removeContentSource(uuid: string): void {

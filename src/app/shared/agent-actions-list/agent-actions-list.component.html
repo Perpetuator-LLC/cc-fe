@@ -25,7 +25,7 @@
           <div class="action-header">
             <span class="tool-name">{{ formatToolName(action.tool) }}</span>
             <span class="status-badge" [class]="getStatusClass(action.status)">
-              {{ action.status === 'no_results' ? 'No Results' : (action.status | titlecase) }}
+              {{ action.status === 'no_results' ? 'No Results' : (action.status || 'unknown' | titlecase) }}
             </span>
           </div>
           @if (getArgsDisplay(action.args)) {

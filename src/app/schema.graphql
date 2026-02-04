@@ -1,7 +1,15 @@
 type Query {
   pulseConfigs(first: Int = 20, after: String, search: String, isActive: Boolean, orderBy: String = "-updated_at"): PulseConfigConnection
   pulseConfig(uuid: UUID!): PulseConfigType
-  pulses(configUuid: UUID, status: String, first: Int = 20, after: String): PulseConnection
+  pulses(
+    configUuid: UUID
+    status: String
+
+    """Filter by title containing search term (case-insensitive)"""
+    search: String
+    first: Int = 20
+    after: String
+  ): PulseConnection
   pulse(uuid: UUID!): PulseType
 
   """Validate a pulse config before generating (pre-flight check)"""
@@ -927,6 +935,12 @@ type ContentSourceType_ implements Node {
 
   """Search term to find news about"""
   searchTerm: String
+  searchTermOriginal: String
+  searchUserIntent: String
+  searchExtractionFocus: [String]
+  searchIsProduct: Boolean
+  searchIsNews: Boolean
+  searchIsResearch: Boolean
 
   """Stock symbol (for COMPANY type)"""
   symbol: String
@@ -1065,6 +1079,12 @@ type PulseType implements Node {
 
   """List of agent tool calls and their results during research"""
   agentActions: JSONString
+
+  """News items used in this pulse"""
+  news: [NewsItemType!]
+
+  """URLs researched during pulse generation"""
+  researchUrls: [String]
 }
 
 """An enumeration."""
@@ -1098,6 +1118,28 @@ enum PulsesPulseDeliveryMethodChoices {
 
   """In-App Only"""
   IN_APP
+}
+
+"""Simple news item type for pulse news references."""
+type NewsItemType {
+  id: ID
+  uuid: UUID
+  title: String
+  summary: String
+  url: String
+  source: String
+  publishedAt: DateTime
+  blocked: Boolean
+  rssFeeds: [RssFeedInfoType]
+}
+
+"""RSS feed info for news articles."""
+type RssFeedInfoType {
+  id: ID
+  name: String
+  url: String
+  isReachable: Boolean
+  isParsable: Boolean
 }
 
 """Result of validating a pulse config before generation."""
@@ -4274,7 +4316,37 @@ type Mutation {
   deletePulseConfig(pulseConfigUuid: UUID!): DeletePulseConfig
 
   """Add a content source to a pulse configuration."""
-  addContentSource(pulseConfigUuid: UUID!, source: ContentSourceInput!): AddContentSource
+  addContentSource(
+    """
+    For search_term sources, automatically optimize the query and generate instructions
+    """
+    autoOptimize: Boolean = true
+    pulseConfigUuid: UUID!
+    source: ContentSourceInput!
+  ): AddContentSource
+
+  """
+  Update a content source, with optional re-optimization for search terms.
+  
+  When editing a search_term source:
+  - Set `search_term_original` to the new raw search term
+  - If `re_optimize=True`, regenerate the optimized query and instructions
+  - If `re_optimize=False`, use the raw term as-is (for user overrides)
+  """
+  updateContentSource(
+    contentSourceUuid: UUID!
+
+    """Custom instructions (overrides auto-generated)"""
+    customInstructions: String
+    isActive: Boolean
+    priority: Int
+
+    """If True, re-run AI optimization on the search term"""
+    reOptimize: Boolean = true
+
+    """The raw search term (before optimization)"""
+    searchTermOriginal: String
+  ): UpdateContentSource
 
   """Remove a content source from a pulse configuration."""
   removeContentSource(contentSourceUuid: UUID!): RemoveContentSource
@@ -4284,6 +4356,20 @@ type Mutation {
 
   """Remove an alert trigger from a pulse configuration."""
   removeAlertTrigger(alertTriggerUuid: UUID!): RemoveAlertTrigger
+
+  """
+  Optimize a search term for better results.
+  
+  Call this when creating a new search term source to get AI-powered
+  suggestions for improving the search query and extracting relevant info.
+  """
+  optimizeSearchTerm(
+    """Optional context about the pulse"""
+    context: String
+
+    """The user's raw search term"""
+    searchTerm: String!
+  ): OptimizeSearchTerm
 
   """Generate a pulse immediately for a configuration."""
   generatePulse(
@@ -5141,6 +5227,35 @@ type AddContentSource {
   success: Boolean
   message: String
   contentSource: ContentSourceType_
+  searchOptimization: SearchOptimizationType
+}
+
+"""Result of search term optimization."""
+type SearchOptimizationType {
+  originalQuery: String
+  optimizedQuery: String
+  userIntent: String
+  extractionFocus: [String]
+  isProductSearch: Boolean
+  isNewsSearch: Boolean
+  isResearchSearch: Boolean
+  suggestedVariations: [String]
+  customInstructions: String
+}
+
+"""
+Update a content source, with optional re-optimization for search terms.
+
+When editing a search_term source:
+- Set `search_term_original` to the new raw search term
+- If `re_optimize=True`, regenerate the optimized query and instructions
+- If `re_optimize=False`, use the raw term as-is (for user overrides)
+"""
+type UpdateContentSource {
+  success: Boolean
+  message: String
+  contentSource: ContentSourceType_
+  searchOptimization: SearchOptimizationType
 }
 
 """Remove a content source from a pulse configuration."""
@@ -5160,6 +5275,18 @@ type AddAlertTrigger {
 type RemoveAlertTrigger {
   success: Boolean
   message: String
+}
+
+"""
+Optimize a search term for better results.
+
+Call this when creating a new search term source to get AI-powered
+suggestions for improving the search query and extracting relevant info.
+"""
+type OptimizeSearchTerm {
+  success: Boolean
+  message: String
+  optimization: SearchOptimizationType
 }
 
 """Generate a pulse immediately for a configuration."""

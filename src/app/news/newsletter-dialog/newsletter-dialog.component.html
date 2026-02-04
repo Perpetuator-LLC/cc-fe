@@ -1,26 +1,33 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
-<h2 mat-dialog-title>Subscribe to Newsletter</h2>
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Subscribe to Updates</h2>
 
 <mat-dialog-content>
   @if (loading) {
-  <div class="loading-container">
-    <mat-spinner diameter="50" />
-    <p>Subscribing...</p>
-  </div>
+    <div class="loading-container">
+      <mat-spinner diameter="50" />
+      <p>Subscribing...</p>
+    </div>
   } @else {
-  <p>Get notified when we launch the Finance feature and receive updates about new features and improvements.</p>
+    <p>Stay informed with product updates, new features, and market insights delivered to your inbox.</p>
 
-  <form [formGroup]="newsletterForm">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Email Address</mat-label>
-      <input matInput type="email" formControlName="email" placeholder="your@email.com" [readonly]="isAuthenticated" />
-      @if (newsletterForm.get('email')?.hasError('required')) {
-      <mat-error>Email is required</mat-error>
-      } @if (newsletterForm.get('email')?.hasError('email')) {
-      <mat-error>Please enter a valid email address</mat-error>
-      }
-    </mat-form-field>
-  </form>
+    <form [formGroup]="newsletterForm">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Email Address</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="your@email.com"
+          [readonly]="isAuthenticated"
+        />
+        @if (newsletterForm.get('email')?.hasError('required')) {
+          <mat-error>Email is required</mat-error>
+        }
+        @if (newsletterForm.get('email')?.hasError('email')) {
+          <mat-error>Please enter a valid email address</mat-error>
+        }
+      </mat-form-field>
+    </form>
   }
 </mat-dialog-content>
 
@@ -30,4 +37,3 @@
     Subscribe
   </button>
 </mat-dialog-actions>
-

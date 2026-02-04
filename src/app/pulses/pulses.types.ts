@@ -55,13 +55,36 @@ export interface ContentSource {
   // Type-specific fields
   rssUrl?: string | null;
   rssFeedUuid?: string | null;
-  searchTerm?: string | null;
+  searchTerm?: string | null; // Optimized search query
   watchlistUuid?: string | null;
   symbol?: string | null;
+
+  // Search optimization fields (for search_term sources)
+  searchTermOriginal?: string | null; // Original raw term user entered
+  searchUserIntent?: string | null; // AI-inferred intent
+  searchExtractionFocus?: string[] | null; // Things to extract from results
+  searchIsProduct?: boolean | null; // Product/purchase search
+  searchIsNews?: boolean | null; // News/current events search
+  searchIsResearch?: boolean | null; // Deep research search
 
   priority: number; // Higher = more important (0-100)
   isActive: boolean;
   customInstructions?: string | null; // Source-specific instructions for AI
+}
+
+/**
+ * Search optimization result from AI
+ */
+export interface SearchOptimization {
+  originalQuery: string;
+  optimizedQuery: string;
+  userIntent: string;
+  extractionFocus: string[];
+  isProductSearch: boolean;
+  isNewsSearch: boolean;
+  isResearchSearch: boolean;
+  suggestedVariations: string[];
+  customInstructions: string;
 }
 
 /**

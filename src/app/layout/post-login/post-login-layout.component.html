@@ -129,7 +129,12 @@
                 <mat-icon>vital_signs</mat-icon>
                 <span class="website-title">Pulses</span>
               </a>
-              <a [routerLink]="['/media/recordings']" class="header-logo s-link sub-link" routerLinkActive="active">
+              <a
+                [routerLink]="['/media/recordings']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
                 <mat-icon>mic</mat-icon>
                 <span class="website-title">Recordings</span>
               </a>

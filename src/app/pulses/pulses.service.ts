@@ -16,6 +16,7 @@ import {
   DeliveryMethod,
   ScheduleFrequency,
   RssFeed,
+  SearchOptimization,
 } from './pulses.types';
 
 // Fragment for pulse config fields
@@ -526,10 +527,16 @@ export class PulsesService extends BaseService {
   addContentSource(
     pulseConfigUuid: string,
     source: ContentSourceInput,
-  ): Observable<{ success: boolean; message: string; contentSource: ContentSource }> {
+    autoOptimize = true,
+  ): Observable<{
+    success: boolean;
+    message: string;
+    contentSource: ContentSource;
+    searchOptimization?: SearchOptimization;
+  }> {
     const GQL = gql`
-      mutation AddContentSource($pulseConfigUuid: UUID!, $source: ContentSourceInput!) {
-        addContentSource(pulseConfigUuid: $pulseConfigUuid, source: $source) {
+      mutation AddContentSource($pulseConfigUuid: UUID!, $source: ContentSourceInput!, $autoOptimize: Boolean) {
+        addContentSource(pulseConfigUuid: $pulseConfigUuid, source: $source, autoOptimize: $autoOptimize) {
           success
           message
           contentSource {
@@ -539,10 +546,27 @@ export class PulsesService extends BaseService {
             rssUrl
             rssFeedUuid
             searchTerm
+            searchTermOriginal
+            searchUserIntent
+            searchExtractionFocus
+            searchIsProduct
+            searchIsNews
+            searchIsResearch
             watchlistUuid
             symbol
             priority
             isActive
+            customInstructions
+          }
+          searchOptimization {
+            originalQuery
+            optimizedQuery
+            userIntent
+            extractionFocus
+            isProductSearch
+            isNewsSearch
+            isResearchSearch
+            suggestedVariations
             customInstructions
           }
         }
@@ -554,18 +578,112 @@ export class PulsesService extends BaseService {
         success: boolean;
         message: string;
         contentSource: ContentSource;
+        searchOptimization?: SearchOptimization;
       };
     }
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { pulseConfigUuid, source },
+      variables: { pulseConfigUuid, source, autoOptimize },
     }).pipe(
       map((data) => {
         if (!data.addContentSource.success) {
           throw new Error(data.addContentSource.message);
         }
         return data.addContentSource;
+      }),
+    );
+  }
+
+  /**
+   * Update a content source
+   */
+  updateContentSource(
+    contentSourceUuid: string,
+    updates: {
+      searchTermOriginal?: string;
+      reOptimize?: boolean;
+      priority?: number;
+      isActive?: boolean;
+      customInstructions?: string;
+    },
+  ): Observable<{
+    success: boolean;
+    message: string;
+    contentSource: ContentSource;
+    searchOptimization?: SearchOptimization;
+  }> {
+    const GQL = gql`
+      mutation UpdateContentSource(
+        $contentSourceUuid: UUID!
+        $searchTermOriginal: String
+        $reOptimize: Boolean
+        $priority: Int
+        $isActive: Boolean
+        $customInstructions: String
+      ) {
+        updateContentSource(
+          contentSourceUuid: $contentSourceUuid
+          searchTermOriginal: $searchTermOriginal
+          reOptimize: $reOptimize
+          priority: $priority
+          isActive: $isActive
+          customInstructions: $customInstructions
+        ) {
+          success
+          message
+          contentSource {
+            uuid
+            sourceType
+            sourceDetail
+            rssUrl
+            rssFeedUuid
+            searchTerm
+            searchTermOriginal
+            searchUserIntent
+            searchExtractionFocus
+            searchIsProduct
+            searchIsNews
+            searchIsResearch
+            watchlistUuid
+            symbol
+            priority
+            isActive
+            customInstructions
+          }
+          searchOptimization {
+            originalQuery
+            optimizedQuery
+            userIntent
+            extractionFocus
+            isProductSearch
+            isNewsSearch
+            isResearchSearch
+            suggestedVariations
+            customInstructions
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      updateContentSource: {
+        success: boolean;
+        message: string;
+        contentSource: ContentSource;
+        searchOptimization?: SearchOptimization;
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: { contentSourceUuid, ...updates },
+    }).pipe(
+      map((data) => {
+        if (!data.updateContentSource.success) {
+          throw new Error(data.updateContentSource.message);
+        }
+        return data.updateContentSource;
       }),
     );
   }
