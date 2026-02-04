@@ -255,14 +255,39 @@
       <!-- Content Sources Tab -->
       <mat-tab label="Content Sources">
         <div class="tab-content">
+          <!-- Combined Tickers Summary -->
+          @if (allSymbols.length > 0) {
+            <mat-card class="tickers-summary-card">
+              <mat-card-content>
+                <div class="tickers-summary">
+                  <div class="tickers-header">
+                    <mat-icon>trending_up</mat-icon>
+                    <span>All Tracked Symbols ({{ allSymbols.length }})</span>
+                  </div>
+                  <div class="tickers-chips">
+                    @for (symbol of allSymbols; track symbol) {
+                      <span class="symbol-chip">{{ symbol }}</span>
+                    }
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
           <mat-card>
             <mat-card-content>
               <div class="section-header">
                 <h3>Content Sources</h3>
-                <button mat-button color="primary" (click)="addContentSource()">
-                  <mat-icon>add</mat-icon>
-                  Add Source
-                </button>
+                <div class="section-actions">
+                  <button mat-button (click)="addBulkRssFeeds()" matTooltip="Add multiple RSS feeds at once">
+                    <mat-icon>playlist_add</mat-icon>
+                    Bulk Add RSS
+                  </button>
+                  <button mat-button color="primary" (click)="addContentSource()">
+                    <mat-icon>add</mat-icon>
+                    Add Source
+                  </button>
+                </div>
               </div>
 
               <p class="section-description">
@@ -303,8 +328,32 @@
                         } @else if (source.sourceType === 'company') {
                           <span class="symbol-badge">{{ source.symbol }}</span>
                           {{ source.sourceDetail }}
+                        } @else if (source.sourceType === 'search_term') {
+                          <div class="search-source-detail">
+                            <span class="search-term-original">{{
+                              source.searchTermOriginal || source.searchTerm
+                            }}</span>
+                            @if (source.searchUserIntent) {
+                              <span class="search-intent" matTooltip="{{ source.searchUserIntent }}">
+                                <mat-icon>auto_awesome</mat-icon>
+                                {{ source.searchUserIntent | slice: 0 : 50
+                                }}{{ source.searchUserIntent.length > 50 ? '...' : '' }}
+                              </span>
+                            }
+                            <div class="search-type-indicators">
+                              @if (source.searchIsProduct) {
+                                <span class="type-indicator product">Product</span>
+                              }
+                              @if (source.searchIsNews) {
+                                <span class="type-indicator news">News</span>
+                              }
+                              @if (source.searchIsResearch) {
+                                <span class="type-indicator research">Research</span>
+                              }
+                            </div>
+                          </div>
                         } @else {
-                          {{ source.sourceDetail || source.searchTerm || 'N/A' }}
+                          {{ source.sourceDetail || 'N/A' }}
                         }
                       </div>
                     </td>
@@ -327,6 +376,11 @@
                   <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef></th>
                     <td mat-cell *matCellDef="let source">
+                      @if (source.sourceType === 'search_term' || source.sourceType === 'company') {
+                        <button mat-icon-button (click)="editContentSource(source)" matTooltip="Edit">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      }
                       <button mat-icon-button (click)="removeContentSource(source.uuid)" matTooltip="Remove">
                         <mat-icon>delete</mat-icon>
                       </button>

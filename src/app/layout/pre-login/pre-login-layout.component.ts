@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, RouterOutlet, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,6 +9,7 @@ import { SharedFooterComponent } from '../shared-footer/shared-footer.component'
 import { ThemeService, Theme } from '../theme.service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-bar.component';
 
 @Component({
   selector: 'app-pre-login-layout',
@@ -22,6 +23,7 @@ import { Subscription } from 'rxjs';
     MatIconModule,
     MatButtonModule,
     SharedFooterComponent,
+    AudioPlayerBarComponent,
   ],
   templateUrl: './pre-login-layout.component.html',
   styleUrls: ['./pre-login-layout.component.scss'],

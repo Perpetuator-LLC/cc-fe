@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,6 +13,7 @@ import { ShareButtonsComponent } from '../share-buttons/share-buttons.component'
 import { MessageService } from '../message.service';
 import { AuthService } from '../auth/auth.service';
 import { SeoService } from '../seo.service';
+import { AudioPlayerService, AudioTrack } from '../shared/audio-player/audio-player.service';
 
 @Component({
   selector: 'app-public-episode-page',
@@ -44,8 +45,25 @@ export class PublicEpisodePageComponent implements OnInit {
     private messageService: MessageService,
     private authService: AuthService,
     private seoService: SeoService,
+    private audioPlayerService: AudioPlayerService,
   ) {
     this.isAuthenticated = this.authService.isLoggedIn();
+  }
+
+  playEpisode(): void {
+    if (!this.episodeData?.audioUrl) return;
+
+    const track: AudioTrack = {
+      id: this.episodeData.id.toString(),
+      title: this.episodeData.title,
+      subtitle: this.episodeData.podcastName,
+      audioUrl: this.episodeData.audioUrl,
+      duration: this.episodeData.duration || this.episodeData.audioSeconds,
+      type: 'episode',
+      sourceRoute: this.getShareUrl(),
+    };
+
+    this.audioPlayerService.play(track);
   }
 
   ngOnInit(): void {
