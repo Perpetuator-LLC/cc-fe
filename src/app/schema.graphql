@@ -5123,7 +5123,7 @@ type Mutation {
   
   PUBLIC: Anyone can register (no authentication required).
   """
-  register(acceptPrivacyPolicy: Boolean!, acceptTermsOfService: Boolean!, email: String!, password1: String!, password2: String!, ppSignature: String, tosSignature: String, username: String!): RegisterUser
+  register(acceptPrivacyPolicy: Boolean!, acceptTermsOfService: Boolean!, email: String!, password1: String!, password2: String!, ppSignature: String, tosSignature: String, username: String): RegisterUser
 
   """
   Verify user email with token.

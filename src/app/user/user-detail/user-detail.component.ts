@@ -588,8 +588,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
       width: '500px',
       data: { email: this.userDetailForm.get('email')?.value },
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === true) {
+    dialogRef.afterClosed().subscribe((result: string | false) => {
+      if (typeof result === 'string' && result) {
+        this.deleteConfirmation = result;
         this.deleteAccount();
       }
     });
