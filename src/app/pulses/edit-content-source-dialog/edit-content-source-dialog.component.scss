@@ -1,0 +1,130 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.info-text {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+
+.stock-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .stock-name {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.exact-search-toggle {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.optimization-panel {
+  margin-bottom: 16px;
+
+  mat-panel-title {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    mat-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+      color: var(--md-sys-color-primary);
+    }
+  }
+}
+
+.optimization-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optimization-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .value {
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .optimized-query {
+    padding: 8px;
+    border-radius: 4px;
+
+    font-family: monospace;
+    font-size: 12px;
+
+    background: var(--md-sys-color-surface-container-high);
+  }
+}
+
+.extraction-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.extraction-chip {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 8px;
+  border-radius: 12px;
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-secondary-container);
+
+  background: var(--md-sys-color-secondary-container);
+}
+
+.search-type-badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 12px;
+  border-radius: 16px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  &.product {
+    color: var(--md-sys-color-on-tertiary-container);
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  &.news {
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
+  }
+
+  &.research {
+    color: var(--md-sys-color-on-secondary-container);
+    background: var(--md-sys-color-secondary-container);
+  }
+}

@@ -181,7 +181,30 @@
                         </mat-icon>
                       }
                     </div>
-                    <audio controls [src]="audioSrc"></audio>
+                    <div class="audio-controls">
+                      <button mat-flat-button color="primary" (click)="playInPlayer(audioSrc, 'Current Version')">
+                        <mat-icon>play_arrow</mat-icon>
+                        Play
+                      </button>
+                      <button mat-icon-button [matMenuTriggerFor]="currentAudioMenu" matTooltip="More options">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #currentAudioMenu="matMenu">
+                        <button mat-menu-item (click)="addToQueueNext(audioSrc, 'Current Version')">
+                          <mat-icon>queue_play_next</mat-icon>
+                          <span>Play Next</span>
+                        </button>
+                        <button mat-menu-item (click)="addToQueue(audioSrc, 'Current Version')">
+                          <mat-icon>playlist_add</mat-icon>
+                          <span>Add to Queue</span>
+                        </button>
+                        <mat-divider></mat-divider>
+                        <button mat-menu-item (click)="downloadAudio()">
+                          <mat-icon>download</mat-icon>
+                          <span>Download</span>
+                        </button>
+                      </mat-menu>
+                    </div>
                   </div>
                 } @else {
                   <div class="empty-audio">
@@ -196,7 +219,29 @@
                       <mat-icon class="live-icon">radio_button_checked</mat-icon>
                       <span>Live on RSS Feed ({{ getLiveAudioVersionText() }}):</span>
                     </div>
-                    <audio controls [src]="liveAudioSrc"></audio>
+                    <div class="audio-controls">
+                      <button
+                        mat-flat-button
+                        color="accent"
+                        (click)="playInPlayer(liveAudioSrc, getLiveAudioVersionText())"
+                      >
+                        <mat-icon>play_arrow</mat-icon>
+                        Play Live Version
+                      </button>
+                      <button mat-icon-button [matMenuTriggerFor]="liveAudioMenu" matTooltip="More options">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #liveAudioMenu="matMenu">
+                        <button mat-menu-item (click)="addToQueueNext(liveAudioSrc, getLiveAudioVersionText())">
+                          <mat-icon>queue_play_next</mat-icon>
+                          <span>Play Next</span>
+                        </button>
+                        <button mat-menu-item (click)="addToQueue(liveAudioSrc, getLiveAudioVersionText())">
+                          <mat-icon>playlist_add</mat-icon>
+                          <span>Add to Queue</span>
+                        </button>
+                      </mat-menu>
+                    </div>
                     <p class="live-audio-note">
                       This audio is currently published on your podcast RSS feed. Generate new audio for the current
                       version to update what listeners hear.

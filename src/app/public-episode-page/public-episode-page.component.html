@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="public-episode-page">
   @if (loading) {
     <div class="loading-container">
@@ -74,12 +74,15 @@
 
         <div class="audio-player">
           <h2>Listen to Episode</h2>
-          <audio controls [src]="episodeData.audioUrl">
-            Your browser does not support the audio element.
-          </audio>
-          @if (episodeData.duration) {
-            <p class="duration">Duration: {{ formatDuration(episodeData.duration) }}</p>
-          }
+          <div class="player-controls">
+            <button mat-flat-button color="primary" (click)="playEpisode()" class="play-button">
+              <mat-icon>play_arrow</mat-icon>
+              Play Episode
+            </button>
+            @if (episodeData.duration) {
+              <span class="duration">Duration: {{ formatDuration(episodeData.duration) }}</span>
+            }
+          </div>
         </div>
 
         @if (episodeData.content) {
@@ -115,4 +118,3 @@
     </div>
   }
 </div>
-

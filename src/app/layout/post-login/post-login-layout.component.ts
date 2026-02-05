@@ -31,6 +31,8 @@ import { RedeemGiftCodeDialogComponent } from '../../credits/redeem-gift-code-di
 import { SharedFooterComponent } from '../shared-footer/shared-footer.component';
 import { JobStatusIndicatorComponent } from '../../jobs/job-status-indicator/job-status-indicator.component';
 import { LoadingService } from '../loading.service';
+import { MediaTabPreferenceService } from '../media-tab-preference.service';
+import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-bar.component';
 
 @Component({
   selector: 'app-post-login-layout',
@@ -55,6 +57,7 @@ import { LoadingService } from '../loading.service';
     DecimalPipe,
     SharedFooterComponent,
     JobStatusIndicatorComponent,
+    AudioPlayerBarComponent,
   ],
 })
 export class PostLoginLayoutComponent implements OnInit {
@@ -97,6 +100,7 @@ export class PostLoginLayoutComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private loadingService: LoadingService,
+    private mediaTabPreferenceService: MediaTabPreferenceService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -129,6 +133,10 @@ export class PostLoginLayoutComponent implements OnInit {
       const url = this.router.url;
       this.isHomePage = url === '/' || url === '/home';
       this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/jobs');
+      // Track media tab preference when user navigates
+      if (url.startsWith('/media/')) {
+        this.mediaTabPreferenceService.recordTabVisit(url);
+      }
     });
   }
 

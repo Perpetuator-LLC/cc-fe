@@ -3,6 +3,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatAnchor } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
 import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.service';
@@ -14,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { DashboardService } from '../dashboard.service';
 import { SiteStatistics } from '../interface';
+import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-dialog.component';
 
 @Component({
   selector: 'app-home',
@@ -40,7 +42,15 @@ export class HomeComponent implements AfterViewInit, OnInit {
     private publicPodcastService: PublicPodcastHttpService,
     private dashboardService: DashboardService,
     protected shareService: ShareService,
+    private dialog: MatDialog,
   ) {}
+
+  openNewsletterDialog(): void {
+    this.dialog.open(NewsletterDialogComponent, {
+      width: '500px',
+      disableClose: false,
+    });
+  }
 
   ngOnInit(): void {
     if (this.isLoggedIn()) {

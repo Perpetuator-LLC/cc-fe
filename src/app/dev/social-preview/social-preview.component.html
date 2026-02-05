@@ -16,12 +16,7 @@
       <div class="url-input-row">
         <mat-form-field appearance="outline" class="url-field">
           <mat-label>Enter URL to check</mat-label>
-          <input
-            matInput
-            [(ngModel)]="urlInput"
-            placeholder="https://capitalcopilot.io/a/HUMN"
-            (keyup.enter)="fetchPreview()"
-          />
+          <input matInput [(ngModel)]="urlInput" [placeholder]="siteUrl + '/a/CCA2'" (keyup.enter)="fetchPreview()" />
           <mat-icon matSuffix>link</mat-icon>
         </mat-form-field>
         <button mat-flat-button color="primary" (click)="fetchPreview()" [disabled]="isLoading()">

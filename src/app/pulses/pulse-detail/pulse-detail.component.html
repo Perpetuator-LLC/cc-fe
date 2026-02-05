@@ -1,0 +1,659 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<ng-template #toolbarTemplate>
+  <span class="page-title">
+    <mat-icon>vital_signs</mat-icon>My Pulses <span>></span>
+    <span class="page-title-secondary">{{ pulseConfig?.name || 'Loading...' }}</span>
+  </span>
+</ng-template>
+
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (pulseConfig) {
+  <div class="pulse-detail">
+    <!-- Header -->
+    <mat-card class="pulse-header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="header-info">
+            <div class="pulse-icon">
+              <mat-icon>vital_signs</mat-icon>
+            </div>
+            <div class="header-text">
+              <h1>{{ pulseConfig.name }}</h1>
+              <p>{{ pulseConfig.description || 'No description' }}</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button mat-flat-button color="primary" (click)="generatePulse()" [disabled]="generatingPulse">
+              @if (generatingPulse) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>play_arrow</mat-icon>
+              }
+              Generate Now
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" matTooltip="More actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="deletePulseConfig()">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete Configuration</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Latest Pulse Section -->
+    @if (latestPulse) {
+      <mat-card class="latest-pulse-card">
+        <mat-card-content>
+          <div class="latest-pulse-header">
+            <div class="latest-pulse-info">
+              <h3>
+                <mat-icon>schedule</mat-icon>
+                Latest Pulse
+              </h3>
+              <span class="pulse-title">{{ latestPulse.title }}</span>
+              <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
+            </div>
+            <div class="latest-pulse-actions">
+              @if (latestPulse.audioUrl && latestPulse.status === 'READY') {
+                <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
+                  <mat-icon>play_arrow</mat-icon>
+                  Play
+                </button>
+                <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #pulseMenu="matMenu">
+                  <button mat-menu-item (click)="addToQueueNext(latestPulse)">
+                    <mat-icon>queue_play_next</mat-icon>
+                    <span>Play Next</span>
+                  </button>
+                  <button mat-menu-item (click)="addToQueue(latestPulse)">
+                    <mat-icon>playlist_add</mat-icon>
+                    <span>Add to Queue</span>
+                  </button>
+                </mat-menu>
+              }
+              <button mat-button (click)="toggleTranscript()">
+                <mat-icon>{{ showTranscript ? 'expand_less' : 'expand_more' }}</mat-icon>
+                {{ showTranscript ? 'Hide Transcript' : 'Show Transcript' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="pulse-stats">
+            <div class="stat-item">
+              <mat-icon>timer</mat-icon>
+              <span class="stat-value">{{ formatSeconds(latestPulse.audioDurationSeconds) }}</span>
+              <span class="stat-label">Duration</span>
+            </div>
+            <div class="stat-item">
+              <mat-icon>notes</mat-icon>
+              <span class="stat-value">{{ latestPulse.wordCount || 0 }}</span>
+              <span class="stat-label">Words</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedCompliance"
+              [class.not-validated]="!latestPulse.validatedCompliance"
+            >
+              <mat-icon>gavel</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedCompliance ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Compliance</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedFacts"
+              [class.not-validated]="!latestPulse.validatedFacts"
+            >
+              <mat-icon>fact_check</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedFacts ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Facts</span>
+            </div>
+            <div
+              class="stat-item"
+              [class.validated]="latestPulse.validatedLength"
+              [class.not-validated]="!latestPulse.validatedLength"
+            >
+              <mat-icon>straighten</mat-icon>
+              <span class="stat-value">{{ latestPulse.validatedLength ? 'Pass' : 'N/A' }}</span>
+              <span class="stat-label">Length</span>
+            </div>
+            @if (latestPulse.status === 'FAILED') {
+              <div class="stat-item status-error">
+                <mat-icon>error</mat-icon>
+                <span class="stat-value">Failed</span>
+                <span class="stat-label" [matTooltip]="latestPulse.errorMessage || ''">{{
+                  latestPulse.errorMessage || 'Unknown error'
+                }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Transcript -->
+          @if (showTranscript && latestPulse.transcript) {
+            <div class="transcript-section">
+              <h4>Transcript</h4>
+              <div class="transcript-content">{{ latestPulse.transcript }}</div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" dynamicHeight>
+      <!-- Settings Tab -->
+      <mat-tab label="Settings">
+        <div class="tab-content">
+          <form [formGroup]="pulseForm">
+            <mat-card>
+              <mat-card-content>
+                <h3>Basic Settings</h3>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Pulse Name</mat-label>
+                  <input matInput formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" cdkTextareaAutosize></textarea>
+                </mat-form-field>
+
+                <div class="checkbox-row">
+                  <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+                </div>
+
+                <div class="duration-field">
+                  <label
+                    >Target Duration: {{ pulseForm.get('targetDurationMinutes')?.value }} minutes (~{{
+                      getTargetWords()
+                    }}
+                    words)</label
+                  >
+                  <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
+                    <input matSliderThumb formControlName="targetDurationMinutes" />
+                  </mat-slider>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tone</mat-label>
+                  <mat-select formControlName="tone">
+                    @for (option of toneOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <div class="checkbox-row">
+                  <mat-checkbox formControlName="includeIntro">Include Introduction</mat-checkbox>
+                  <mat-checkbox formControlName="includeOutro">Include Closing</mat-checkbox>
+                </div>
+
+                @if (pulseForm.get('includeIntro')?.value) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Introduction Text</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="introText"
+                      cdkTextareaAutosize
+                      placeholder="e.g., Good morning! Here's your market pulse for today..."
+                    ></textarea>
+                    <mat-hint>Custom greeting spoken at the start of each pulse</mat-hint>
+                  </mat-form-field>
+                }
+
+                @if (pulseForm.get('includeOutro')?.value) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Closing Text</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="outroText"
+                      cdkTextareaAutosize
+                      placeholder="e.g., That's your market pulse. Have a great trading day!"
+                    ></textarea>
+                    <mat-hint>Custom closing spoken at the end of each pulse</mat-hint>
+                  </mat-form-field>
+                }
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+              <mat-card-content>
+                <h3>Custom Instructions (Optional)</h3>
+                <p class="section-description">
+                  Add preferences for your pulse content. Examples: "Focus on tech stocks", "Skip politics", "Include
+                  market sentiment analysis".
+                </p>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Custom Instructions</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="customInstructions"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="5"
+                    cdkAutosizeMaxRows="20"
+                    placeholder="e.g., Focus on earnings news, Skip cryptocurrency..."
+                  ></textarea>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Content Sources Tab -->
+      <mat-tab label="Content Sources">
+        <div class="tab-content">
+          <!-- Combined Tickers Summary -->
+          @if (allSymbols.length > 0) {
+            <mat-card class="tickers-summary-card">
+              <mat-card-content>
+                <div class="tickers-summary">
+                  <div class="tickers-header">
+                    <mat-icon>trending_up</mat-icon>
+                    <span>All Tracked Symbols ({{ allSymbols.length }})</span>
+                  </div>
+                  <div class="tickers-chips">
+                    @for (symbol of allSymbols; track symbol) {
+                      <span class="symbol-chip">{{ symbol }}</span>
+                    }
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <mat-card>
+            <mat-card-content>
+              <div class="section-header">
+                <h3>Content Sources</h3>
+                <div class="section-actions">
+                  <button mat-button (click)="addBulkRssFeeds()" matTooltip="Add multiple RSS feeds at once">
+                    <mat-icon>playlist_add</mat-icon>
+                    Bulk Add RSS
+                  </button>
+                  <button mat-button color="primary" (click)="addContentSource()">
+                    <mat-icon>add</mat-icon>
+                    Add Source
+                  </button>
+                </div>
+              </div>
+
+              <p class="section-description">
+                Define what content to include in your pulse: RSS feeds, search terms, watchlists, or companies.
+              </p>
+
+              @if (contentSources.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>source</mat-icon>
+                  <p>No content sources configured. Add sources to get news content in your pulse.</p>
+                  <div class="source-type-hints">
+                    <span><mat-icon>rss_feed</mat-icon> RSS Feeds - Add news feeds by URL</span>
+                    <span><mat-icon>search</mat-icon> Search Terms - Keywords to search for</span>
+                    <span><mat-icon>list</mat-icon> Watchlists - Monitor your watchlists for news</span>
+                    <span><mat-icon>business</mat-icon> Companies - Track specific stock symbols</span>
+                  </div>
+                </div>
+              } @else {
+                <table mat-table [dataSource]="contentSources" class="sources-table">
+                  <ng-container matColumnDef="sourceType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let source">
+                      <span class="source-type">
+                        <mat-icon>{{ getSourceTypeIcon(source.sourceType) }}</mat-icon>
+                        {{ getSourceTypeLabel(source.sourceType) }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="sourceDetail">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let source">
+                      <div class="source-detail">
+                        @if (source.sourceType === 'rss_feed') {
+                          <a [href]="source.rssUrl" target="_blank" rel="noopener noreferrer" class="rss-url">
+                            {{ source.sourceDetail || source.rssUrl }}
+                          </a>
+                        } @else if (source.sourceType === 'company') {
+                          <span class="symbol-badge">{{ source.symbol }}</span>
+                          {{ source.sourceDetail }}
+                        } @else if (source.sourceType === 'search_term') {
+                          <div class="search-source-detail">
+                            <span class="search-term-original">{{
+                              source.searchTermOriginal || source.searchTerm
+                            }}</span>
+                            @if (source.searchUserIntent) {
+                              <span class="search-intent" matTooltip="{{ source.searchUserIntent }}">
+                                <mat-icon>auto_awesome</mat-icon>
+                                {{ source.searchUserIntent | slice: 0 : 50
+                                }}{{ source.searchUserIntent.length > 50 ? '...' : '' }}
+                              </span>
+                            }
+                            <div class="search-type-indicators">
+                              @if (source.searchIsProduct) {
+                                <span class="type-indicator product">Product</span>
+                              }
+                              @if (source.searchIsNews) {
+                                <span class="type-indicator news">News</span>
+                              }
+                              @if (source.searchIsResearch) {
+                                <span class="type-indicator research">Research</span>
+                              }
+                            </div>
+                          </div>
+                        } @else {
+                          {{ source.sourceDetail || 'N/A' }}
+                        }
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="priority">
+                    <th mat-header-cell *matHeaderCellDef>Priority</th>
+                    <td mat-cell *matCellDef="let source">{{ source.priority }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="isActive">
+                    <th mat-header-cell *matHeaderCellDef>Active</th>
+                    <td mat-cell *matCellDef="let source">
+                      <mat-icon [class.active]="source.isActive" [class.inactive]="!source.isActive">
+                        {{ source.isActive ? 'check_circle' : 'cancel' }}
+                      </mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let source">
+                      @if (source.sourceType === 'search_term' || source.sourceType === 'company') {
+                        <button mat-icon-button (click)="editContentSource(source)" matTooltip="Edit">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      }
+                      <button mat-icon-button (click)="removeContentSource(source.uuid)" matTooltip="Remove">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="contentSourceColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: contentSourceColumns"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Alert Triggers Tab -->
+      <mat-tab label="Alerts">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="section-header">
+                <h3>Alert Triggers</h3>
+                <button mat-button color="primary" (click)="addAlertTrigger()">
+                  <mat-icon>add</mat-icon>
+                  Add Alert
+                </button>
+              </div>
+
+              <p class="section-description">
+                Configure alerts to trigger immediate pulse generation for breaking news or other events.
+              </p>
+
+              @if (alertTriggers.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>notifications_off</mat-icon>
+                  <p>No alert triggers configured. Alerts will generate pulses when specific conditions are met.</p>
+                </div>
+              } @else {
+                <table mat-table [dataSource]="alertTriggers" class="alerts-table">
+                  <ng-container matColumnDef="alertType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <span class="alert-type">
+                        <mat-icon>{{ getAlertTypeIcon(trigger.alertType) }}</mat-icon>
+                        {{ trigger.alertType | titlecase }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      @if (trigger.keywords?.length) {
+                        <mat-chip-set>
+                          @for (keyword of trigger.keywords; track keyword) {
+                            <mat-chip>{{ keyword }}</mat-chip>
+                          }
+                        </mat-chip-set>
+                      } @else if (trigger.symbol) {
+                        {{ trigger.symbol }} - {{ trigger.priceDirection }} {{ trigger.priceThreshold }}
+                      }
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="isActive">
+                    <th mat-header-cell *matHeaderCellDef>Active</th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <mat-icon [class.active]="trigger.isActive">
+                        {{ trigger.isActive ? 'check_circle' : 'cancel' }}
+                      </mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let trigger">
+                      <button mat-icon-button (click)="removeAlertTrigger(trigger.uuid)" matTooltip="Remove">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="alertTriggerColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: alertTriggerColumns"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Voice Tab -->
+      <mat-tab label="Voice">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <h3>Voice Selection</h3>
+              <p class="section-description">
+                Choose the voice for your pulse audio. Hover over a voice card to preview.
+              </p>
+
+              <app-voice-selector
+                [selectedVoiceUuid]="pulseConfig.voice?.uuid ?? null"
+                (voiceSelected)="onVoiceSelected($event)"
+              />
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Schedule Tab -->
+      <mat-tab label="Schedule">
+        <div class="tab-content">
+          <form [formGroup]="pulseForm">
+            <mat-card>
+              <mat-card-content>
+                <h3>Schedule & Delivery</h3>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Frequency</mat-label>
+                  <mat-select formControlName="scheduleFrequency">
+                    @for (option of scheduleOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Time</mat-label>
+                  <input matInput type="time" formControlName="scheduleTime" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Timezone</mat-label>
+                  <input matInput formControlName="scheduleTimezone" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>News Lookback (hours)</mat-label>
+                  <input matInput type="number" formControlName="newsLookbackHours" />
+                  <mat-hint>How far back to search for news (1-168 hours)</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Delivery Method</mat-label>
+                  <mat-select formControlName="deliveryMethod">
+                    @for (option of deliveryOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Recordings Tab (formerly Updates/History) -->
+      <mat-tab label="Recordings">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="recordings-header">
+                <div>
+                  <h3>Recordings</h3>
+                  <p class="recordings-description">
+                    Each recording is a generated audio file. Auto-generated from your content sources, or create your
+                    own.
+                  </p>
+                </div>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="createRecording()"
+                  matTooltip="Create a recording from your own text"
+                >
+                  <mat-icon>add</mat-icon>
+                  Create Recording
+                </button>
+              </div>
+
+              @if (pulses.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>mic</mat-icon>
+                  <p>
+                    No recordings yet. Click "Generate Now" to create from your content sources, or "Create Recording"
+                    to add your own text.
+                  </p>
+                </div>
+              } @else {
+                <div class="recordings-list">
+                  @for (pulse of pulses; track pulse.uuid; let i = $index) {
+                    <div class="recording-card" (click)="viewRecording(pulse)">
+                      <div class="recording-header">
+                        <div class="recording-title-section">
+                          <span class="recording-number">#{{ pulses.length - i }}</span>
+                          <span class="recording-title">{{ pulse.title }}</span>
+                          <span class="recording-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
+                        </div>
+                        <div class="recording-status">
+                          <span class="status-badge" [class]="getStatusClass(pulse.status)">
+                            {{ pulse.status | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="recording-stats">
+                        <span class="stat">
+                          <mat-icon>timer</mat-icon>
+                          {{ formatSeconds(pulse.audioDurationSeconds) }}
+                        </span>
+                        <span class="stat">
+                          <mat-icon>notes</mat-icon>
+                          {{ pulse.wordCount || 0 }} words
+                        </span>
+                        @if (pulse.isValidated) {
+                          <span class="stat validated">
+                            <mat-icon>verified</mat-icon>
+                            Validated
+                          </span>
+                        }
+                        @if (pulse.news && pulse.news.length > 0) {
+                          <span class="stat">
+                            <mat-icon>newspaper</mat-icon>
+                            {{ pulse.news.length }} news
+                          </span>
+                        }
+                        @if (pulse.researchUrls && pulse.researchUrls.length > 0) {
+                          <span class="stat">
+                            <mat-icon>link</mat-icon>
+                            {{ pulse.researchUrls.length }} URLs
+                          </span>
+                        }
+                      </div>
+
+                      <div class="recording-actions" (click)="$event.stopPropagation()">
+                        @if (pulse.audioUrl && pulse.status === 'READY') {
+                          <button mat-flat-button color="primary" (click)="playPulse(pulse)">
+                            <mat-icon>play_arrow</mat-icon>
+                            Play
+                          </button>
+                          <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
+                            <mat-icon>more_vert</mat-icon>
+                          </button>
+                          <mat-menu #recordingMenu="matMenu">
+                            <button mat-menu-item (click)="addToQueueNext(pulse)">
+                              <mat-icon>queue_play_next</mat-icon>
+                              <span>Play Next</span>
+                            </button>
+                            <button mat-menu-item (click)="addToQueue(pulse)">
+                              <mat-icon>playlist_add</mat-icon>
+                              <span>Add to Queue</span>
+                            </button>
+                            <button mat-menu-item (click)="viewRecording(pulse)">
+                              <mat-icon>info</mat-icon>
+                              <span>View Details</span>
+                            </button>
+                          </mat-menu>
+                        } @else {
+                          <button mat-stroked-button (click)="viewRecording(pulse)">
+                            <mat-icon>info</mat-icon>
+                            Details
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

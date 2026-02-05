@@ -27,7 +27,7 @@ describe('JobsListComponent', () => {
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
 
   beforeEach(async () => {
-    mockJobService = jasmine.createSpyObj('JobService', ['getJobs', 'addJob']);
+    mockJobService = jasmine.createSpyObj('JobService', ['getJobs', 'getJobsGrouped', 'addJob']);
     mockJobsWebSocketService = jasmine.createSpyObj('JobsWebSocketService', ['addJob', 'addJobs']);
     Object.defineProperty(mockJobsWebSocketService, 'jobUpdated$', {
       get: () => EMPTY,
@@ -54,6 +54,8 @@ describe('JobsListComponent', () => {
         },
       }),
     );
+
+    mockJobService.getJobsGrouped.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [JobsListComponent],

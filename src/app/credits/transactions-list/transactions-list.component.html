@@ -10,7 +10,7 @@
     <mat-card-content class="content-header">
       <div class="title">
         <h3>All Transactions</h3>
-        <span>{{ transactions.length }} transactions</span>
+        <span>{{ totalCount | number }} transactions</span>
       </div>
       <div class="filters">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -34,7 +34,7 @@
       } @else if (transactions.length > 0) {
         <table
           mat-table
-          [dataSource]="dataSource"
+          [dataSource]="transactions"
           (matSortChange)="sortChange($event)"
           matSort
           matSortActive="createdAt"
@@ -87,9 +87,10 @@
         </table>
 
         <mat-paginator
-          [length]="totalTransactions"
+          [length]="totalCount"
           [pageSize]="pageSize"
-          [pageSizeOptions]="[5, 10, 20]"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[10, 25, 50]"
           (page)="onPageChange($event)"
         />
       } @else {

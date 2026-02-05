@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
@@ -71,8 +71,12 @@ export interface Voice {
   model: string;
   externalId: string;
   creditsPerMillionChar: number;
+  creditsPerWord?: number | null;
   displayName: string | null;
   sampleUrl: string | null;
+  sampleSeconds?: number | null;
+  sampleWords?: number | null;
+  wordsPerMinute?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -87,9 +91,13 @@ const GET_VOICES = gql`
           enabled
           model
           creditsPerMillionChar
+          creditsPerWord
           externalId
           displayName
           sampleUrl
+          sampleSeconds
+          sampleWords
+          wordsPerMinute
           createdAt
           updatedAt
         }

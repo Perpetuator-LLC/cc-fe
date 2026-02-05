@@ -1,0 +1,123 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Edit Content Source</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    @switch (data.source.sourceType) {
+      @case ('search_term') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Search Term</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="e.g., Trek Domane SL 7, AI stocks" />
+          <mat-hint>Enter what you want to search for - we'll optimize it automatically</mat-hint>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="useExactSearch" class="exact-search-toggle">
+          Use exact search (skip AI optimization)
+        </mat-checkbox>
+
+        <!-- Show existing optimization info if available -->
+        @if (data.source.searchUserIntent || data.source.searchTerm !== data.source.searchTermOriginal) {
+          <mat-expansion-panel class="optimization-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>auto_awesome</mat-icon>
+                Search Optimization
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="optimization-content">
+              @if (data.source.searchTerm && data.source.searchTerm !== data.source.searchTermOriginal) {
+                <div class="optimization-row">
+                  <span class="label">Optimized query:</span>
+                  <span class="value optimized-query">{{ data.source.searchTerm }}</span>
+                </div>
+              }
+
+              @if (data.source.searchUserIntent) {
+                <div class="optimization-row">
+                  <span class="label">Intent:</span>
+                  <span class="value">{{ data.source.searchUserIntent }}</span>
+                </div>
+              }
+
+              @if (data.source.searchExtractionFocus && data.source.searchExtractionFocus.length > 0) {
+                <div class="optimization-row">
+                  <span class="label">Looking for:</span>
+                  <div class="extraction-chips">
+                    @for (focus of data.source.searchExtractionFocus; track focus) {
+                      <span class="extraction-chip">{{ focus }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <div class="search-type-badges">
+                @if (data.source.searchIsProduct) {
+                  <span class="type-badge product">Product Search</span>
+                }
+                @if (data.source.searchIsNews) {
+                  <span class="type-badge news">News Search</span>
+                }
+                @if (data.source.searchIsResearch) {
+                  <span class="type-badge research">Research</span>
+                }
+              </div>
+            </div>
+          </mat-expansion-panel>
+        }
+      }
+      @case ('company') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Stock Symbol</mat-label>
+          <input
+            matInput
+            formControlName="symbol"
+            placeholder="e.g., AAPL"
+            style="text-transform: uppercase"
+            [matAutocomplete]="stockAuto"
+            (input)="onStockInputChange($event)"
+          />
+          <mat-hint>Stock symbol to track</mat-hint>
+          <mat-autocomplete #stockAuto="matAutocomplete" (optionSelected)="selectStock($event.option.value)">
+            @for (stock of stockSuggestions; track stock.symbol) {
+              <mat-option [value]="stock">
+                <span class="stock-option">
+                  <strong>{{ stock.symbol }}</strong>
+                  <span class="stock-name">{{ stock.name }}</span>
+                </span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      }
+      @default {
+        <p class="info-text">This content source type cannot be edited. Remove and re-add if needed.</p>
+      }
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Priority (0-100)</mat-label>
+      <input matInput type="number" formControlName="priority" min="0" max="100" />
+      <mat-hint>Higher priority sources are emphasized more</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Custom Instructions (Optional)</mat-label>
+      <textarea
+        matInput
+        formControlName="customInstructions"
+        rows="3"
+        placeholder="e.g., Focus on earnings and guidance"
+      ></textarea>
+      <mat-hint>Special instructions for how to use this source</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="!form.valid || saving">
+    @if (saving) {
+      <mat-spinner diameter="18"></mat-spinner>
+    }
+    Save
+  </button>
+</mat-dialog-actions>

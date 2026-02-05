@@ -16,7 +16,6 @@ import {
   MatRow,
   MatRowDef,
   MatTable,
-  MatTableDataSource,
   MatTableModule,
 } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -50,7 +49,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatRow,
     MatHeaderRow,
     MatRowDef,
-    MatPaginator,
     MatCard,
     MatCardContent,
     MatProgressSpinnerModule,
@@ -64,29 +62,25 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class TransactionsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
+
+  // Table data
   transactions: UserTransaction[] = [];
-  dataSource = new MatTableDataSource<UserTransaction>(this.transactions);
   displayedColumns: string[] = ['createdAt', 'type', 'info', 'creditAmount', 'balance'];
-  totalTransactions = 0;
-  pageSize = 10;
-  cursors: (string | null)[] = [null];
-  hasNextPage = false;
-  hasPreviousPage = false;
+
+  // Sorting
   sortDirection = 'DESC';
   sortActive = 'createdAt';
+
+  // Pagination - simple cursor-based with total count
+  pageSize = 10;
+  pageIndex = 0;
+  totalCount = 0;
+  cursors: (string | null)[] = [null]; // Store cursor for each page
+
+  // UI state
   loading = false;
   selectedTypeFilter: string | null = null;
-
-  /** Available transaction type filters */
-  typeFilters = [
-    { value: null, label: 'All Types' },
-    { value: 'PURCHASE', label: 'Purchases' },
-    { value: 'JOB', label: 'AI Usage' },
-    { value: 'COMMAND', label: 'Commands' },
-    { value: 'BONUS', label: 'Bonuses' },
-    { value: 'ADJUSTMENT', label: 'Adjustments' },
-    { value: 'REFUND', label: 'Refunds' },
-  ];
+  typeFilters: { value: string | null; label: string }[] = [{ value: null, label: 'All Types' }];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -101,6 +95,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
+    this.loadTransactionTypes();
     this.loadTransactions();
   }
 
@@ -109,32 +104,70 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.loadingService.hide();
   }
 
-  loadTransactions(after: string | null = null, pageIndex = 0) {
+  /** Load available transaction types from backend */
+  private loadTransactionTypes(): void {
+    this.subscriptions.add(
+      this.creditService.getTransactionTypes().subscribe({
+        next: (types) => {
+          console.log('[Transactions] Loaded types:', types);
+          this.typeFilters = [{ value: null, label: 'All Types' }, ...types];
+        },
+        error: (error: Error) => {
+          console.error('[Transactions] Failed to load types:', error);
+        },
+      }),
+    );
+  }
+
+  /** Load total count for current filter */
+  private loadTotalCount(): void {
+    this.subscriptions.add(
+      this.creditService.getTransactionsCount(this.selectedTypeFilter).subscribe({
+        next: (count: number) => {
+          console.log('[Transactions] Total count:', count);
+          this.totalCount = count;
+        },
+        error: (error: Error) => {
+          console.error('[Transactions] Failed to load count:', error);
+        },
+      }),
+    );
+  }
+
+  /** Load transactions for current page */
+  private loadTransactions(): void {
     this.loading = true;
     this.loadingService.show();
+
+    // Load count on first page
+    if (this.pageIndex === 0) {
+      this.loadTotalCount();
+    }
+
+    const cursor = this.cursors[this.pageIndex] ?? null;
+    console.log('[Transactions] Loading page', this.pageIndex, 'with cursor:', cursor);
+
     this.subscriptions.add(
       this.creditService
-        .getTransactions(this.pageSize, after, this.sortActive, this.sortDirection, this.selectedTypeFilter)
+        .getTransactions(this.pageSize, cursor, this.sortActive, this.sortDirection, this.selectedTypeFilter)
         .subscribe({
           next: (response) => {
-            this.transactions = response.transactions;
-            this.dataSource.data = this.transactions;
-            this.hasNextPage = response.pageInfo.hasNextPage;
-            this.hasPreviousPage = response.pageInfo.hasPreviousPage;
-            this.cursors[pageIndex + 1] = response.pageInfo.endCursor ?? null;
+            console.log('[Transactions] Received', response.transactions.length, 'items');
+            console.log('[Transactions] pageInfo:', response.pageInfo);
 
-            // Set a large enough number to enable the next button if hasNextPage is true
-            this.totalTransactions = response.pageInfo.hasNextPage
-              ? (pageIndex + 2) * this.pageSize
-              : (pageIndex + 1) * this.pageSize;
-          },
-          error: (error) => {
-            console.error(error);
-            this.messageService.error('Failed to load transactions: ' + error.toString());
+            this.transactions = response.transactions;
+
+            // Store cursor for next page
+            if (response.pageInfo.endCursor) {
+              this.cursors[this.pageIndex + 1] = response.pageInfo.endCursor;
+            }
+
             this.loading = false;
             this.loadingService.hide();
           },
-          complete: () => {
+          error: (error: Error) => {
+            console.error('[Transactions] Load error:', error);
+            this.messageService.error('Failed to load transactions: ' + error.message);
             this.loading = false;
             this.loadingService.hide();
           },
@@ -142,52 +175,61 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     );
   }
 
-  sortChange(sortState: Sort) {
-    this.sortDirection = sortState.direction.toUpperCase();
-    this.sortActive = sortState.active;
-    this.cursors = [null];
-    this.paginator?.firstPage();
-    this.loadTransactions();
-  }
+  /** Handle page change from paginator */
+  onPageChange(event: PageEvent): void {
+    console.log('[Transactions] Page change:', event);
 
-  onPageChange(event: PageEvent) {
-    const newPageIndex = event.pageIndex;
-    const newPageSize = event.pageSize;
-
-    // If pageSize changed, reset pagination entirely
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      this.cursors = [null]; // reset all known cursors
-      this.paginator.firstPage(); // back to pageIndex = 0
-      this.loadTransactions(); // load first page
+    // Handle page size change - reset to first page
+    if (event.pageSize !== this.pageSize) {
+      this.pageSize = event.pageSize;
+      this.pageIndex = 0;
+      this.cursors = [null];
+      this.loadTransactions();
       return;
     }
 
-    // Otherwise, grab the cursor for the page they jumped to
-    const after = this.cursors[newPageIndex] ?? null;
-    this.loadTransactions(after, newPageIndex);
-  }
-
-  onTypeFilterChange(type: string | null) {
-    this.selectedTypeFilter = type;
-    this.cursors = [null];
-    this.paginator?.firstPage();
+    // Normal forward/backward navigation
+    this.pageIndex = event.pageIndex;
     this.loadTransactions();
   }
 
-  getTransactionInfo(transaction: UserTransaction) {
-    // For command transactions, show the parsed command
+  /** Handle sort change */
+  sortChange(sortState: Sort): void {
+    console.log('[Transactions] Sort change:', sortState);
+    this.sortDirection = sortState.direction.toUpperCase() || 'DESC';
+    this.sortActive = sortState.active;
+    this.resetPagination();
+    this.loadTransactions();
+  }
+
+  /** Handle filter change */
+  onTypeFilterChange(type: string | null): void {
+    console.log('[Transactions] Filter change:', type);
+    this.selectedTypeFilter = type;
+    this.resetPagination();
+    this.loadTransactions();
+  }
+
+  /** Reset pagination state */
+  private resetPagination(): void {
+    this.pageIndex = 0;
+    this.cursors = [null];
+    this.totalCount = 0;
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+  }
+
+  getTransactionInfo(transaction: UserTransaction): string {
     if (transaction.transactionType === 'COMMAND' && transaction.commandExecution?.parsedCommand) {
       return transaction.commandExecution.parsedCommand;
     }
-    // For job transactions, show the job kind
     if (transaction.job?.kind != null) {
       return kindToString(transaction.job.kind);
     }
     return transaction.description;
   }
 
-  /** Get icon for transaction type */
   getTransactionIcon(transaction: UserTransaction): string {
     switch (transaction.transactionType) {
       case 'PURCHASE':
@@ -208,7 +250,6 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Get tooltip for charges breakdown */
   getChargesBreakdownTooltip(transaction: UserTransaction): string {
     if (!transaction.chargesBreakdown?.length) {
       return '';

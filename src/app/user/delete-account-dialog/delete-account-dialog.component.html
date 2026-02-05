@@ -1,11 +1,14 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="delete-dialog">
   <h2 mat-dialog-title>Permanently remove your account</h2>
   <mat-dialog-content>
     <div class="danger-zone">
       <p>
-        Username is publicly visible, do not use personally identifying information in it. Username is publicly
-        visible, do not use personally identifying information in it.
+        This action <strong>cannot be undone</strong>. This will permanently delete your account, all your data, and
+        remove you from any teams or podcasts you are a member of.
+      </p>
+      <p>
+        Please type your email address <strong>{{ email }}</strong> to confirm.
       </p>
       <div class="action-row">
         <mat-form-field appearance="fill">
@@ -28,4 +31,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-

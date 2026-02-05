@@ -104,11 +104,36 @@
               monitoring, and more.
             </div>
           </div>
-          <a class="module-link" [routerLink]="'/finance'"> Explore Finance<mat-icon>arrow_right</mat-icon> </a>
+          <a class="module-link" [routerLink]="'/terminal'"> Explore Finance<mat-icon>arrow_right</mat-icon> </a>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Newsletter Signup Section (logged-out users only) -->
+  @if (!isLoggedIn()) {
+    <div class="newsletter-section">
+      <mat-card class="newsletter-card">
+        <mat-card-content>
+          <div class="newsletter-content">
+            <div class="newsletter-text">
+              <mat-icon>mail</mat-icon>
+              <div>
+                <h3>Stay in the Loop</h3>
+                <p>
+                  Get updates on new features, product announcements, and tips to get the most out of Capital Copilot.
+                </p>
+              </div>
+            </div>
+            <button mat-flat-button color="primary" (click)="openNewsletterDialog()">
+              <mat-icon>notifications</mat-icon>
+              Subscribe to Updates
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 
   <!-- Recent Podcasts Section -->
   <div class="recent-podcasts-section">

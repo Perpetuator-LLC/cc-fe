@@ -39,6 +39,23 @@ interface EnrichedJob extends Job {
   topicName?: string;
 }
 
+/** Represents a group of jobs in a chain, or a single standalone job */
+interface JobChainGroup {
+  chainId: string | null;
+  jobs: EnrichedJob[];
+  expanded: boolean;
+  // Aggregated stats
+  totalCost: number;
+  totalJobs: number;
+  completedJobs: number;
+  failedJobs: number;
+  status: string; // Overall status: completed, running, pending, failed
+  firstJobKind: string;
+  lastJobKind: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Episode {
   uuid: string;
   title?: string;
@@ -53,11 +70,10 @@ interface Episode {
     MatTableModule,
     MatSortModule,
     DatePipe,
+    DecimalPipe,
     MatIcon,
     MatIconButton,
     MatButton,
-
-    DecimalPipe,
     NgClass,
     RouterLink,
     MatSelectModule,
@@ -86,6 +102,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   // New status filter property
   statusFilter: string | null = null;
+
+  // Track which job chains are expanded
+  expandedChains = new Set<string>();
 
   // Available status options for the dropdown
   statusOptions = [
@@ -171,7 +190,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadJobs(after: string | null = null, pageIndex = 0, append = false) {
+  loadJobs(append = false) {
     if (append) {
       this.isLoadingMore = true;
     } else {
@@ -182,21 +201,24 @@ export class JobsListComponent implements OnInit, OnDestroy {
     // Build statuses array based on filter
     const statuses = this.statusFilter ? [this.statusFilter] : [];
 
+    // Use jobsGrouped API for proper chain grouping (returns N top-level items)
+    // Note: jobsGrouped doesn't support cursor pagination yet, so append mode uses existing jobs
     this.subscriptions.add(
-      this.jobService.getJobs(statuses, [], [], this.pageSize, after, this.sortActive, this.sortDirection).subscribe({
-        next: ({ jobs, pageInfo }) => {
+      this.jobService.getJobsGrouped(this.pageSize, statuses, []).subscribe({
+        next: (jobs) => {
           this.enrichJobsWithNames(jobs)
             .then((enrichedJobs) => {
               if (append) {
-                this.jobs = [...this.jobs, ...enrichedJobs];
+                // For append, we'd need cursor support - for now just refresh
+                this.jobs = enrichedJobs;
               } else {
                 this.jobs = enrichedJobs;
               }
               this.dataSource.data = this.jobs;
-              this.hasNextPage = pageInfo.hasNextPage || false;
-              this.currentCursor = pageInfo.endCursor ?? null;
-              this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-              this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+              // jobsGrouped doesn't return pageInfo, so estimate based on results
+              this.hasNextPage = jobs.length >= this.pageSize;
+              this.currentCursor = null; // No cursor support yet
+              this.totalJobs = jobs.length;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
               this.loading = false;
@@ -208,15 +230,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
               const jobsToAdd = jobs.map((job) => ({ ...job }));
               if (append) {
-                this.jobs = [...this.jobs, ...jobsToAdd];
+                this.jobs = jobsToAdd;
               } else {
                 this.jobs = jobsToAdd;
               }
               this.dataSource.data = this.jobs;
-              this.hasNextPage = pageInfo.hasNextPage || false;
-              this.currentCursor = pageInfo.endCursor ?? null;
-              this.cursors[pageIndex + 1] = pageInfo.endCursor ?? null;
-              this.totalJobs = pageInfo.hasNextPage ? (pageIndex + 2) * this.pageSize : (pageIndex + 1) * this.pageSize;
+              this.hasNextPage = jobs.length >= this.pageSize;
+              this.currentCursor = null;
+              this.totalJobs = jobs.length;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
               this.loading = false;
@@ -433,8 +454,66 @@ export class JobsListComponent implements OnInit, OnDestroy {
     return option ? option.label : 'Unknown';
   }
 
-  // Group jobs by date for timeline view - apply client-side filtering if needed
-  get groupedJobs() {
+  // Toggle chain expansion
+  toggleChainExpanded(chainId: string): void {
+    if (this.expandedChains.has(chainId)) {
+      this.expandedChains.delete(chainId);
+    } else {
+      this.expandedChains.add(chainId);
+    }
+  }
+
+  // Check if a chain is expanded
+  isChainExpanded(chainId: string): boolean {
+    return this.expandedChains.has(chainId);
+  }
+
+  // Create a JobChainGroup from a list of jobs with the same chainId
+  private createChainGroup(chainId: string | null, jobs: EnrichedJob[]): JobChainGroup {
+    // Sort jobs by chainPosition if available, otherwise by createdAt
+    const sortedJobs = [...jobs].sort((a, b) => {
+      if (a.chainPosition != null && b.chainPosition != null) {
+        return a.chainPosition - b.chainPosition;
+      }
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+
+    const totalCost = sortedJobs.reduce((sum, job) => sum + (job.cost || 0), 0);
+    const completedJobs = sortedJobs.filter((j) => stringToJobStatus(j.status) === JobStatus.COMPLETED).length;
+    const failedJobs = sortedJobs.filter((j) => stringToJobStatus(j.status) === JobStatus.FAILED).length;
+    const runningJobs = sortedJobs.filter((j) => stringToJobStatus(j.status) === JobStatus.RUNNING).length;
+
+    // Determine overall status
+    let status = 'pending';
+    if (failedJobs > 0) {
+      status = 'failed';
+    } else if (completedJobs === sortedJobs.length) {
+      status = 'completed';
+    } else if (runningJobs > 0) {
+      status = 'running';
+    }
+
+    return {
+      chainId,
+      jobs: sortedJobs,
+      expanded: chainId ? this.expandedChains.has(chainId) : true,
+      totalCost,
+      totalJobs: sortedJobs.length,
+      completedJobs,
+      failedJobs,
+      status,
+      firstJobKind: sortedJobs[0]?.kind || '',
+      lastJobKind: sortedJobs[sortedJobs.length - 1]?.kind || '',
+      createdAt: sortedJobs[0]?.createdAt || '',
+      updatedAt: sortedJobs.reduce(
+        (latest, job) => (new Date(job.updatedAt) > new Date(latest) ? job.updatedAt : latest),
+        sortedJobs[0]?.updatedAt || '',
+      ),
+    };
+  }
+
+  // Group jobs by date, then by chain for timeline view
+  get groupedJobs(): { label: string; items: (JobChainGroup | EnrichedJob)[] }[] {
     if (!this.jobs) return [];
 
     let filteredJobs = this.jobs;
@@ -444,7 +523,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       filteredJobs = this.jobs.filter((job) => stringToJobStatus(job.status) === stringToJobStatus(this.statusFilter!));
     }
 
-    const groups: { label: string; jobs: Job[] }[] = [];
+    const groups: { label: string; items: (JobChainGroup | EnrichedJob)[] }[] = [];
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
@@ -474,7 +553,24 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     };
 
-    const jobsByDate = filteredJobs.reduce((acc: Record<string, Job[]>, job) => {
+    // Group jobs by date first
+    // First, build complete chains using chainJobs field
+    const processedChainIds = new Set<string>();
+    const allChainJobs = new Map<string, EnrichedJob[]>();
+
+    // Process jobs and collect complete chains from chainJobs field
+    filteredJobs.forEach((job) => {
+      if (job.chainId && !processedChainIds.has(job.chainId)) {
+        processedChainIds.add(job.chainId);
+        // Use chainJobs if available (complete chain from backend)
+        if (job.chainJobs && job.chainJobs.length > 0) {
+          allChainJobs.set(job.chainId, job.chainJobs as EnrichedJob[]);
+        }
+      }
+    });
+
+    // Group by date, using complete chains
+    const jobsByDate = filteredJobs.reduce((acc: Record<string, EnrichedJob[]>, job) => {
       const updatedDate = new Date(job.updatedAt);
       const localDateStr = updatedDate.toLocaleDateString();
       if (!acc[localDateStr]) {
@@ -484,16 +580,108 @@ export class JobsListComponent implements OnInit, OnDestroy {
       return acc;
     }, {});
 
+    // Process each date group
     Object.keys(jobsByDate)
       .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
       .forEach((dateKey) => {
+        const dateJobs = jobsByDate[dateKey];
+
+        // Group jobs by chainId within this date
+        const chainGroups = new Map<string, EnrichedJob[]>();
+        const standaloneJobs: EnrichedJob[] = [];
+        const seenChainIds = new Set<string>();
+
+        dateJobs.forEach((job) => {
+          if (job.chainId) {
+            // Only process each chain once per date
+            if (!seenChainIds.has(job.chainId)) {
+              seenChainIds.add(job.chainId);
+              // Use complete chain from chainJobs if available
+              const completeChain = allChainJobs.get(job.chainId);
+              if (completeChain && completeChain.length > 0) {
+                chainGroups.set(job.chainId, completeChain);
+              } else {
+                // Fallback: collect jobs with this chainId from the current date
+                const chainJobsInDate = dateJobs.filter((j) => j.chainId === job.chainId);
+                chainGroups.set(job.chainId, chainJobsInDate);
+              }
+            }
+          } else {
+            standaloneJobs.push(job);
+          }
+        });
+
+        // Create items array with chain groups and standalone jobs
+        const items: (JobChainGroup | EnrichedJob)[] = [];
+
+        // Add chain groups
+        chainGroups.forEach((jobs, chainId) => {
+          items.push(this.createChainGroup(chainId, jobs));
+        });
+
+        // Add standalone jobs
+        standaloneJobs.forEach((job) => {
+          items.push(job);
+        });
+
+        // Sort items by updatedAt (most recent first)
+        items.sort((a, b) => {
+          const aDate = 'updatedAt' in a ? a.updatedAt : (a as JobChainGroup).updatedAt;
+          const bDate = 'updatedAt' in b ? b.updatedAt : (b as JobChainGroup).updatedAt;
+          return new Date(bDate).getTime() - new Date(aDate).getTime();
+        });
+
         groups.push({
           label: dateLabel(dateKey),
-          jobs: jobsByDate[dateKey].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+          items,
         });
       });
 
     return groups;
+  }
+
+  // Type guard to check if an item is a JobChainGroup
+  isChainGroup(item: JobChainGroup | EnrichedJob): item is JobChainGroup {
+    return 'chainId' in item && 'totalJobs' in item && 'jobs' in item;
+  }
+
+  // Get chain status class
+  chainStatusClass(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'job-success';
+      case 'running':
+        return 'job-running';
+      case 'failed':
+        return 'job-failed';
+      default:
+        return 'job-pending';
+    }
+  }
+
+  // Get chain progress percentage
+  getChainProgress(chain: JobChainGroup): number {
+    if (chain.totalJobs === 0) return 0;
+    return (chain.completedJobs / chain.totalJobs) * 100;
+  }
+
+  // Get chain display title
+  getChainTitle(chain: JobChainGroup): string {
+    if (chain.totalJobs === 1) {
+      return kindToString(chain.firstJobKind);
+    }
+    // Show first and last job kind for multi-job chains
+    const firstKind = kindToString(chain.firstJobKind);
+    const lastKind = kindToString(chain.lastJobKind);
+    if (firstKind === lastKind) {
+      return `${firstKind} (${chain.totalJobs} jobs)`;
+    }
+    return `${firstKind} → ${lastKind}`;
+  }
+
+  // Get chain icon (use the first job's icon)
+  getChainIcon(chain: JobChainGroup): string {
+    return iconForJob(chain.firstJobKind);
   }
 
   statusClass(status: string): string {
@@ -539,6 +727,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
     return this.jobDisplayService.hasTopicUuid(job);
   }
 
+  // Check if job has pulse UUID (from args or result)
+  hasPulseUuid(job: Job): boolean {
+    return this.jobDisplayService.hasPulseUuid(job);
+  }
+
+  // Check if job has pulse config UUID (from args or result)
+  hasPulseConfigUuid(job: Job): boolean {
+    return this.jobDisplayService.hasPulseConfigUuid(job);
+  }
+
   // Check if job result has news UUIDs
   hasNewsUuids(job: Job): boolean {
     return this.jobDisplayService.hasNewsUuids(job);
@@ -557,6 +755,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Get topic UUID from merged data
   getTopicUuid(job: Job): string | null {
     return this.jobDisplayService.getTopicUuid(job);
+  }
+
+  // Get pulse UUID from merged data
+  getPulseUuid(job: Job): string | null {
+    return this.jobDisplayService.getPulseUuid(job);
+  }
+
+  // Get pulse config UUID from merged data
+  getPulseConfigUuid(job: Job): string | null {
+    return this.jobDisplayService.getPulseConfigUuid(job);
   }
 
   // Check if job has symbol/FQN
@@ -644,8 +852,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
   }
 
   loadMoreJobs(): void {
-    if (this.hasNextPage && this.currentCursor && !this.isLoadingMore) {
-      this.loadJobs(this.currentCursor, 0, true);
+    if (this.hasNextPage && !this.isLoadingMore) {
+      this.loadJobs(true);
     }
   }
 

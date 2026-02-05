@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -184,13 +184,13 @@ export class GraphqlAuthService {
    */
   register(email: string, password: string, acceptTerms = true): Observable<boolean> {
     this.messageService.clearMessages();
-    const username = 'User' + Math.floor(Math.random() * 1000000);
+    // Don't send username - backend will auto-generate fun usernames like "AlphaWolf", "SmoothRain"
 
     return this.apollo
       .mutate<{ register: RegisterResponse }>({
         mutation: REGISTER_USER,
         variables: {
-          username,
+          // username omitted - backend generates fun names
           email,
           password1: password,
           password2: password,

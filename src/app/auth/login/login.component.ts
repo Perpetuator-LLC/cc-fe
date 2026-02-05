@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -161,6 +161,10 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to join affiliate program:', err);
+        // Show error message to user
+        const errorMessage = err?.message || 'Failed to join affiliate program';
+        this.messageService.error(errorMessage);
+        this.affiliateStorageService.clearAffiliateCode();
         this.completeLogin();
       },
     });

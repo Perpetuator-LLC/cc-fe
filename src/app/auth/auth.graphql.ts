@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { gql } from 'apollo-angular';
 
 export interface AuthTokens {
@@ -65,7 +65,7 @@ export interface MeResponse {
 
 export const REGISTER_USER = gql`
   mutation RegisterUser(
-    $username: String!
+    $username: String
     $email: String!
     $password1: String!
     $password2: String!
