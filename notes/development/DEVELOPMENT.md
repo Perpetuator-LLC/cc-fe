@@ -67,7 +67,7 @@ grep '"version":' ../../package.json
 Update version in package.json:
 
 ```shell
-sed -i '' 's/"version": ".*"/"version": "0.29.0"/' ../../package.json
+sed -i '' 's/"version": ".*"/"version": "0.30.0"/' ../../package.json
 grep '"version":' ../../package.json
 ```
 
@@ -78,7 +78,7 @@ Make sure the changelog script is up to date:
 Update the changelog by running the script in the back-end repository:
 
 ```shell
-(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.29.0' 'v0.28.1')
+(cd ~/projects/capital-copilot-be && poetry run python -m scripts.update_changelog --repo-dir ~/projects/capital-copilot-fe 'v0.30.0' 'v0.29.0')
 ```
 
 Review and update the new changelog entry to make sure it is correct.
@@ -89,15 +89,15 @@ Create the release commit:
 
 ```shell
 git add ../.. && \
-git commit -m "chore: bump version to 0.29.0"
+git commit -m "chore: bump version to 0.30.0"
 ```
 
 Push to main and create the release tag:
 
 ```shell
 git push origin main && \
-git tag -a v0.29.0 -m "This release introduces a comprehensive terminal interface with AI-powered autocomplete, real-time WebSocket updates, and interactive charting capabilities. Major improvements include progressive chart data loading, currency handling for international stocks, DCF valuation analysis, and affiliate revenue visualization using ECharts." && \
-git push origin v0.29.0
+git tag -a v0.30.0 -m "This release introduces a comprehensive audio content management system with text-to-speech capabilities and queue management, alongside improvements to pulse content handling, social media integration, and several critical bug fixes for date display and account security." && \
+git push origin v0.30.0
 ```
 
 #### Step 5: Clean up feature branch (if applicable)

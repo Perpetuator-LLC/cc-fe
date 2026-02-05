@@ -1,3 +1,34 @@
+# Changelog from v0.29.0 to v0.30.0
+
+This release introduces a comprehensive audio content management system with text-to-speech capabilities and queue management, alongside improvements to pulse content handling, social media integration, and several critical bug fixes for date display and account security.
+
+## Enhancements
+
+- Added audio player integration with queue management functionality for managing playback across the application
+- Implemented recordings management system with custom text-to-speech creation capabilities
+- Added job chain grouping UI with health checks and GraphQL transport support
+- Introduced voice selector component for managing TTS voice preferences with persistent audio player
+- Added smart media tab redirect functionality to improve navigation within pulse content
+- Implemented automatic stale chunk detection and recovery for improved reliability
+- Added social media preview tools with SEO metadata for affiliate landing pages to enhance social sharing capabilities
+- Updated brand logo with enhanced contrast and white overlay layer
+- Improved stock search user experience with audio player queue integration
+- Added SSR development configuration to support server-side rendering workflows
+- Enhanced pulse content management with better organization and media handling
+
+## Bug Fixes
+
+- Fixed daily chart date display to prevent timezone-based date shifting issues
+- Fixed account security by requiring email confirmation for account deletion and implementing auto-generated usernames
+
+## Cleanups
+
+- Consolidated development tools into shared footer navigation for better organization
+- Extracted voice selector into shared component for code reusability
+- Moved user-specific copilot instructions out of project directory
+- Added gitignore rules to prevent browser profile data leaks
+
+
 # Changelog from v0.28.1 to v0.29.0
 
 This release introduces a comprehensive terminal interface with AI-powered autocomplete, real-time WebSocket updates, and interactive charting capabilities. Major improvements include progressive chart data loading, currency handling for international stocks, DCF valuation analysis, and affiliate revenue visualization using ECharts.
