@@ -44,17 +44,18 @@ export const routes: Routes = [
     path: 'terminal',
     loadComponent: () =>
       import('./terminal/terminal-page/terminal-page.component').then((c) => c.TerminalPageComponent),
-    title: 'Terminal',
+    title: 'Finance',
     canActivate: [AuthGuard],
     data: {
-      icon: 'terminal',
-      showInMenu: false, // TODO: Re-enable after publish
+      icon: 'account_balance',
+      showInMenu: true,
     },
   },
   {
     path: 'media',
     pathMatch: 'full',
-    redirectTo: 'media/podcasts',
+    loadComponent: () => import('./media-redirect/media-redirect.component').then((c) => c.MediaRedirectComponent),
+    canActivate: [AuthGuard],
   },
   {
     path: 'media',
@@ -138,6 +139,40 @@ export const routes: Routes = [
         path: 'topics/:uuid',
         loadComponent: () => import('./topics/topic-detail/topic-detail.component').then((c) => c.TopicDetailComponent),
         title: 'Topic Detail',
+      },
+      {
+        path: 'pulses',
+        loadComponent: () => import('./pulses/pulses-list/pulses-list.component').then((c) => c.PulsesListComponent),
+        title: 'Pulses',
+        data: {
+          icon: 'vital_signs',
+        },
+      },
+      {
+        path: 'pulses/:uuid',
+        loadComponent: () => import('./pulses/pulse-detail/pulse-detail.component').then((c) => c.PulseDetailComponent),
+        title: 'Pulse Configuration',
+      },
+      {
+        path: 'pulses/:uuid/recordings/:recordingUuid',
+        loadComponent: () =>
+          import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
+        title: 'Recording Detail',
+      },
+      {
+        path: 'recordings',
+        loadComponent: () =>
+          import('./pulses/recordings-list/recordings-list.component').then((c) => c.RecordingsListComponent),
+        title: 'Recordings',
+        data: {
+          icon: 'mic',
+        },
+      },
+      {
+        path: 'recordings/:recordingUuid',
+        loadComponent: () =>
+          import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
+        title: 'Recording Detail',
       },
     ],
   },
@@ -350,10 +385,10 @@ export const routes: Routes = [
   {
     path: 'finance',
     loadComponent: () => import('./finance/finance.component').then((c) => c.FinanceComponent),
-    title: 'Finance',
+    title: 'Finance (Legacy)',
     // canActivate: [AuthGuard],
     data: {
-      showInMenu: true,
+      showInMenu: false,
       icon: 'account_balance',
     },
   },

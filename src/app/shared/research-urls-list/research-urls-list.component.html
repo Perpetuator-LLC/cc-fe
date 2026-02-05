@@ -1,0 +1,30 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (showHeader) {
+  <div class="urls-header">
+    <h4>
+      <mat-icon>link</mat-icon>
+      Research URLs
+    </h4>
+    <span class="count">{{ urls.length }} URLs</span>
+  </div>
+  <p class="description">{{ description }}</p>
+}
+
+@if (urls.length === 0) {
+  <div class="no-data">
+    <mat-icon>search</mat-icon>
+    <p>No research URLs recorded</p>
+  </div>
+} @else {
+  <div class="urls-list">
+    @for (url of urls; track url; let i = $index) {
+      <div class="url-item">
+        <span class="url-number">{{ i + 1 }}</span>
+        <a [href]="url" target="_blank" rel="noopener noreferrer" class="url-link">
+          {{ url }}
+        </a>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </div>
+    }
+  </div>
+}

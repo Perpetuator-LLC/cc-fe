@@ -24,8 +24,17 @@ export interface UserOrder {
   sessionUrl: string;
 }
 
-/** Transaction type values from backend enum */
+/** Transaction type values from backend enum (UPPERCASE as returned by GraphQL) */
 export type TransactionTypeValue = 'PURCHASE' | 'DEDUCTION' | 'BONUS' | 'REFUND' | 'COMMAND' | 'JOB' | 'ADJUSTMENT';
+
+/**
+ * Transaction type choice for filter dropdown
+ * Note: filter values are lowercase (as per BE77), but returned data uses uppercase
+ */
+export interface TransactionTypeChoice {
+  value: string;
+  label: string;
+}
 
 /** Breakdown of charges for AI/command transactions */
 export interface ChargeBreakdown {
@@ -135,6 +144,64 @@ const GET_TRANSACTIONS = gql`
         startCursor
         endCursor
       }
+    }
+  }
+`;
+
+/** Query for reverse pagination (last page) using 'last' parameter */
+const GET_TRANSACTIONS_LAST = gql`
+  query GetTransactionsLast($last: Int!, $before: String, $orderBy: String, $transactionType: String) {
+    transactions(last: $last, before: $before, orderBy: $orderBy, transactionType: $transactionType) {
+      edges {
+        node {
+          id
+          uuid
+          createdAt
+          description
+          creditAmount
+          balance
+          transactionType
+          transactionTypeDisplay
+          chargesBreakdown
+          job {
+            id
+            uuid
+            kind
+          }
+          order {
+            uuid
+            amount
+            status
+          }
+          commandExecution {
+            uuid
+            parsedCommand
+            creditsCharged
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+const GET_TRANSACTIONS_COUNT = gql`
+  query GetTransactionsCount($transactionType: String) {
+    transactionsCount(transactionType: $transactionType)
+  }
+`;
+
+const GET_TRANSACTION_TYPES = gql`
+  query GetTransactionTypes {
+    transactionTypes {
+      value
+      label
     }
   }
 `;
@@ -266,6 +333,89 @@ export class CreditService extends BaseService implements OnDestroy {
         };
       }),
     );
+  }
+
+  /**
+   * Get last page of transactions (for "go to last" button)
+   * Uses the 'last' parameter to get items from the end of the list
+   */
+  getTransactionsLast(
+    last = 10,
+    before: string | null = null,
+    sort = 'createdAt',
+    direction = 'DESC',
+    transactionType: string | null = null,
+  ) {
+    const orderBy = direction === 'DESC' ? `-${sort}` : sort;
+
+    interface RawTransaction extends Omit<UserTransaction, 'chargesBreakdown'> {
+      chargesBreakdown?: string | ChargeBreakdown[];
+    }
+
+    interface Response {
+      transactions: RelayConnection<RawTransaction>;
+    }
+
+    return this.query<Response>({
+      query: GET_TRANSACTIONS_LAST,
+      variables: { last, before, orderBy, transactionType },
+      fetchPolicy: 'network-only',
+    }).pipe(
+      map(({ transactions }) => {
+        // Reverse the edges since 'last' returns in reverse order
+        const reversedEdges = [...transactions.edges].reverse();
+        return {
+          transactions: reversedEdges.map((edge) => {
+            const node = edge.node;
+            let chargesBreakdown: ChargeBreakdown[] | undefined;
+            if (node.chargesBreakdown) {
+              try {
+                chargesBreakdown =
+                  typeof node.chargesBreakdown === 'string' ? JSON.parse(node.chargesBreakdown) : node.chargesBreakdown;
+              } catch {
+                chargesBreakdown = undefined;
+              }
+            }
+            return {
+              ...node,
+              chargesBreakdown,
+            } as UserTransaction;
+          }),
+          pageInfo: transactions.pageInfo,
+        };
+      }),
+    );
+  }
+
+  /**
+   * Get total count of transactions (for pagination UI)
+   * @param transactionType - Optional filter by transaction type (lowercase: 'command', 'job', etc.)
+   */
+  getTransactionsCount(transactionType: string | null = null) {
+    interface Response {
+      transactionsCount: number;
+    }
+
+    return this.query<Response>({
+      query: GET_TRANSACTIONS_COUNT,
+      variables: { transactionType },
+      fetchPolicy: 'network-only',
+    }).pipe(map((data) => data.transactionsCount));
+  }
+
+  /**
+   * Get available transaction types for filter dropdown
+   * Returns array of { value, label } where value is lowercase for filtering
+   */
+  getTransactionTypes() {
+    interface Response {
+      transactionTypes: TransactionTypeChoice[];
+    }
+
+    return this.query<Response>({
+      query: GET_TRANSACTION_TYPES,
+      fetchPolicy: 'cache-first', // Rarely changes
+    }).pipe(map((data) => data.transactionTypes));
   }
 
   getOrders(first = 10, after: string | null = null, sort = 'createdAt', direction = 'DESC') {

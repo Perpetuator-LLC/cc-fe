@@ -1,7 +1,8 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
-import { ApplicationConfig, inject } from '@angular/core';
+import { ApplicationConfig, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ApolloClientOptions, ApolloLink, InMemoryCache, split } from '@apollo/client/core';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
@@ -87,6 +88,8 @@ let refreshPromise: Promise<string | null> | null = null;
 export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   const tokenStorage = inject(TokenStorageService);
   const tokenRefreshService = inject(TokenRefreshService);
+  const platformId = inject(PLATFORM_ID);
+  const isBrowser = isPlatformBrowser(platformId);
 
   /**
    * Refresh the token and return the new access token
@@ -241,23 +244,31 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   // HTTP link chain (upload with auth and error handling)
   const httpLink = ApolloLink.from([errorLink, authLink, uploadLink]);
 
-  // WebSocket link for subscriptions and real-time operations
-  const wsClient = getGraphQLWsClient(tokenStorage);
-  const wsLink = new GraphQLWsLink(wsClient);
+  // Only use WebSocket in browser environment (SSR doesn't support WebSocket properly)
+  let finalLink: ApolloLink;
 
-  // Split link: use WebSocket for subscriptions, HTTP for queries/mutations
-  // This allows us to gradually migrate to full WebSocket support
-  const splitLink = split(
-    ({ query }) => {
-      const definition = getMainDefinition(query);
-      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
-    },
-    wsLink, // Use WebSocket for subscriptions
-    httpLink, // Use HTTP for queries and mutations
-  );
+  if (isBrowser) {
+    // WebSocket link for subscriptions and real-time operations
+    const wsClient = getGraphQLWsClient(tokenStorage);
+    const wsLink = new GraphQLWsLink(wsClient);
+
+    // Split link: use WebSocket for subscriptions, HTTP for queries/mutations
+    finalLink = split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+      },
+      wsLink, // Use WebSocket for subscriptions
+      httpLink, // Use HTTP for queries and mutations
+    );
+  } else {
+    // On server (SSR), only use HTTP - no WebSocket support
+    console.debug('[GraphQL] SSR mode - WebSocket disabled');
+    finalLink = httpLink;
+  }
 
   return {
-    link: splitLink,
+    link: finalLink,
     cache: new InMemoryCache({
       typePolicies: cachePolicyRegistry.getAll(),
     }),

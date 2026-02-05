@@ -553,6 +553,8 @@
   align-items: center;
 }
 
+// Resource tag styles for job links (podcasts, episodes, topics, symbols, pulses)
+.job-links .resource-tag,
 .job-details .resource-tag {
   cursor: pointer;
 
@@ -577,13 +579,11 @@
   }
 
   &.symbol-tag {
-    border: 1px solid var(--md-sys-color-tertiary);
-    color: var(--md-sys-color-tertiary);
-    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
+    @include mixins.stock-tag();
+  }
 
-    &:hover {
-      background-color: var(--md-sys-color-tertiary-container);
-    }
+  &.pulse-tag {
+    @include mixins.pulse-tag();
   }
 }
 

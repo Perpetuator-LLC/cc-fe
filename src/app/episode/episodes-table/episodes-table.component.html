@@ -8,8 +8,8 @@
         <input matInput [(ngModel)]="searchTerm" (input)="onSearch($event)" />
       </mat-form-field>
 
-      @if (!podcastUuid) {
-        <mat-form-field appearance="fill" [hidden]="loadingPodcasts">
+      @if (!podcastUuid && !loadingPodcasts) {
+        <mat-form-field appearance="fill">
           <mat-label>Podcast</mat-label>
           <mat-select [(value)]="selectedPodcast" (selectionChange)="onPodcastChange()">
             <mat-option [value]="null">All Podcasts</mat-option>

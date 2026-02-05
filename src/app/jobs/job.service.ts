@@ -42,6 +42,15 @@ export enum JobKind {
   GENERATE_PODCAST = 'GENERATE_PODCAST',
   GENERATE_PODCAST_IMAGE = 'GENERATE_PODCAST_IMAGE',
   GENERATE_IMAGE = 'GENERATE_IMAGE',
+  // Pulse job types
+  GENERATE_PULSE = 'GENERATE_PULSE',
+  FETCH_PULSE_NEWS = 'FETCH_PULSE_NEWS',
+  RESEARCH_PULSE_CONTENT = 'RESEARCH_PULSE_CONTENT',
+  CREATE_PULSE_TRANSCRIPT = 'CREATE_PULSE_TRANSCRIPT',
+  VALIDATE_PULSE = 'VALIDATE_PULSE',
+  GENERATE_PULSE_AUDIO = 'GENERATE_PULSE_AUDIO',
+  DELIVER_PULSE = 'DELIVER_PULSE',
+  PUBLISH_PULSE_CHAIN = 'PUBLISH_PULSE_CHAIN',
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
 }
@@ -110,6 +119,22 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.GENERATE_PODCAST_IMAGE;
     case 'GENERATE_IMAGE':
       return JobKind.GENERATE_IMAGE;
+    case 'GENERATE_PULSE':
+      return JobKind.GENERATE_PULSE;
+    case 'FETCH_PULSE_NEWS':
+      return JobKind.FETCH_PULSE_NEWS;
+    case 'RESEARCH_PULSE_CONTENT':
+      return JobKind.RESEARCH_PULSE_CONTENT;
+    case 'CREATE_PULSE_TRANSCRIPT':
+      return JobKind.CREATE_PULSE_TRANSCRIPT;
+    case 'VALIDATE_PULSE':
+      return JobKind.VALIDATE_PULSE;
+    case 'GENERATE_PULSE_AUDIO':
+      return JobKind.GENERATE_PULSE_AUDIO;
+    case 'DELIVER_PULSE':
+      return JobKind.DELIVER_PULSE;
+    case 'PUBLISH_PULSE_CHAIN':
+      return JobKind.PUBLISH_PULSE_CHAIN;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -183,6 +208,22 @@ export const kindToString = (kind: string) => {
       return 'Generate Podcast Image';
     case JobKind.GENERATE_IMAGE:
       return 'Generate Image';
+    case JobKind.GENERATE_PULSE:
+      return 'Generate Pulse';
+    case JobKind.FETCH_PULSE_NEWS:
+      return 'Fetching News';
+    case JobKind.RESEARCH_PULSE_CONTENT:
+      return 'Researching Pulse Content';
+    case JobKind.CREATE_PULSE_TRANSCRIPT:
+      return 'Creating Transcript';
+    case JobKind.VALIDATE_PULSE:
+      return 'Validating Content';
+    case JobKind.GENERATE_PULSE_AUDIO:
+      return 'Generating Audio';
+    case JobKind.DELIVER_PULSE:
+      return 'Delivering Pulse';
+    case JobKind.PUBLISH_PULSE_CHAIN:
+      return 'Publishing Pulse';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
@@ -256,6 +297,22 @@ export const iconForJob = (kind: string): string => {
       return 'image';
     case JobKind.GENERATE_IMAGE:
       return 'palette';
+    case JobKind.GENERATE_PULSE:
+      return 'vital_signs';
+    case JobKind.FETCH_PULSE_NEWS:
+      return 'rss_feed';
+    case JobKind.RESEARCH_PULSE_CONTENT:
+      return 'search';
+    case JobKind.CREATE_PULSE_TRANSCRIPT:
+      return 'description';
+    case JobKind.VALIDATE_PULSE:
+      return 'verified';
+    case JobKind.GENERATE_PULSE_AUDIO:
+      return 'volume_up';
+    case JobKind.DELIVER_PULSE:
+      return 'send';
+    case JobKind.PUBLISH_PULSE_CHAIN:
+      return 'rocket_launch';
     case JobKind.TEST_RAISE:
       return 'bug_report';
     case JobKind.TEST_PRINT:
@@ -321,6 +378,9 @@ export interface JobArgs {
   [key: string]: unknown;
 }
 
+// Trigger source enum values
+export type TriggerSource = 'manual' | 'schedule' | 'chain' | 'retry' | 'downstream' | 'unknown';
+
 export interface Job {
   id: string;
   uuid: string;
@@ -332,6 +392,13 @@ export interface Job {
   createdAt: string;
   updatedAt: string;
   cost?: number;
+  // Chain fields
+  chainId?: string | null;
+  chainPosition?: number | null;
+  chainJobCount?: number | null;
+  chainJobs?: Job[] | null; // All jobs in the same chain
+  // Trigger source - how this job was initiated
+  triggerSource?: TriggerSource | null;
 }
 
 @Injectable({
@@ -482,6 +549,25 @@ export class JobService extends BaseService implements OnDestroy {
               createdAt
               updatedAt
               cost
+              triggerSource
+              chainId
+              chainPosition
+              chainJobCount
+              chainJobs {
+                id
+                uuid
+                kind
+                status
+                error
+                result
+                args
+                createdAt
+                updatedAt
+                cost
+                triggerSource
+                chainId
+                chainPosition
+              }
             }
           }
           pageInfo {
@@ -510,6 +596,54 @@ export class JobService extends BaseService implements OnDestroy {
         pageInfo: jobs.pageInfo,
       })),
     );
+  }
+
+  /**
+   * Get jobs grouped by chain. Returns all jobs from N distinct top-level items
+   * (chains + standalone jobs), ordered by most recent activity.
+   *
+   * This is better for the jobs list UI because it ensures we always get N
+   * top-level items regardless of how many jobs are in each chain.
+   *
+   * @param firstTopLevel Number of top-level items (chains + standalone) to return
+   * @param statuses Filter by job status
+   * @param kinds Filter by job kind
+   */
+  getJobsGrouped(firstTopLevel = 10, statuses: string[] = [], kinds: string[] = []) {
+    const FETCH_JOBS_GROUPED = gql`
+      query GetJobsGrouped($firstTopLevel: Int!, $statuses: [JobStatus!], $kinds: [JobKind!]) {
+        jobsGrouped(firstTopLevel: $firstTopLevel, statuses: $statuses, kinds: $kinds) {
+          id
+          uuid
+          kind
+          status
+          error
+          result
+          args
+          createdAt
+          updatedAt
+          cost
+          triggerSource
+          chainId
+          chainPosition
+          chainJobCount
+        }
+      }
+    `;
+
+    interface Response {
+      jobsGrouped: Job[];
+    }
+
+    return this.query<Response>({
+      query: FETCH_JOBS_GROUPED,
+      variables: {
+        firstTopLevel,
+        statuses: statuses.length > 0 ? statuses : null,
+        kinds: kinds.length > 0 ? kinds : null,
+      },
+      fetchPolicy: 'network-only',
+    }).pipe(map(({ jobsGrouped }) => jobsGrouped));
   }
 
   retryJobs(jobUuids: string[]) {

@@ -23,10 +23,10 @@ describe('AffiliateLandingComponent', () => {
   let mockMessageService: jasmine.SpyObj<MessageService>;
 
   const mockAffiliateLandingWithCustomMessage: AffiliateLanding = {
-    affiliateCode: 'HUMN',
-    affiliateUsername: 'KBallard',
+    affiliateCode: 'GOOSE',
+    affiliateUsername: 'Goose',
     brandImageUrl: 'https://example.com/brand.jpg',
-    customMessage: 'Join the HUMN Network',
+    customMessage: "Join Goose's Network!",
   };
 
   const mockAffiliateLandingWithoutCustomMessage: AffiliateLanding = {
@@ -69,7 +69,7 @@ describe('AffiliateLandingComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: convertToParamMap({ code: 'HUMN' }),
+              paramMap: convertToParamMap({ code: 'GOOSE' }),
             },
           },
         },
@@ -90,7 +90,7 @@ describe('AffiliateLandingComponent', () => {
 
       expect(mockSeoService.updateTags).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          title: 'Join the HUMN Network',
+          title: "Join Goose's Network!",
         }),
       );
     }));
@@ -101,7 +101,7 @@ describe('AffiliateLandingComponent', () => {
 
       expect(mockSeoService.updateTags).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          url: jasmine.stringMatching(/\/a\/HUMN$/),
+          url: jasmine.stringMatching(/\/a\/GOOSE$/),
         }),
       );
     }));

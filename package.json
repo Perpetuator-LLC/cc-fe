@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+   "start:ssr": "ng serve --configuration production",
     "prestart": "yarn docs:graphql",
     "build": "ng build",
     "prebuild": "yarn docs:graphql",

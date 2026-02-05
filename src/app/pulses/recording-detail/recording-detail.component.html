@@ -1,0 +1,261 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (recording) {
+  <div class="recording-detail">
+    <!-- Header Card -->
+    <mat-card class="header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <button mat-icon-button (click)="goBack()" class="back-button" matTooltip="Back to Pulse">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+
+          <div class="header-info">
+            <div class="recording-icon">
+              <mat-icon>mic</mat-icon>
+            </div>
+            <div class="header-text">
+              <h1>{{ recording.title }}</h1>
+              <div class="header-meta">
+                <span class="status-badge" [class]="getStatusClass(recording.status)">
+                  {{ recording.status | titlecase }}
+                </span>
+                <span class="meta-item">
+                  <mat-icon>timer</mat-icon>
+                  {{ formatSeconds(recording.audioDurationSeconds) }}
+                </span>
+                <span class="meta-item">
+                  <mat-icon>notes</mat-icon>
+                  {{ recording.wordCount || 0 }} words
+                </span>
+                <span class="meta-item">
+                  <mat-icon>schedule</mat-icon>
+                  {{ recording.createdAt | date: 'medium' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            @if (recording.audioUrl && recording.status === 'READY') {
+              <button mat-flat-button color="primary" (click)="playRecording()">
+                <mat-icon>play_arrow</mat-icon>
+                Play
+              </button>
+              <button mat-icon-button [matMenuTriggerFor]="playMenu" matTooltip="More options">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #playMenu="matMenu">
+                <button mat-menu-item (click)="addToQueueNext()">
+                  <mat-icon>queue_play_next</mat-icon>
+                  <span>Play Next</span>
+                </button>
+                <button mat-menu-item (click)="addToQueue()">
+                  <mat-icon>playlist_add</mat-icon>
+                  <span>Add to Queue</span>
+                </button>
+              </mat-menu>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" dynamicHeight>
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <!-- Validation Status -->
+              <div class="section">
+                <h3>Validation Status</h3>
+                <div class="validation-badges">
+                  <div
+                    class="validation-badge"
+                    [class.passed]="recording.validatedCompliance"
+                    [class.failed]="!recording.validatedCompliance"
+                  >
+                    <mat-icon>{{ recording.validatedCompliance ? 'check_circle' : 'cancel' }}</mat-icon>
+                    <span>Compliance</span>
+                  </div>
+                  <div
+                    class="validation-badge"
+                    [class.passed]="recording.validatedFacts"
+                    [class.failed]="!recording.validatedFacts"
+                  >
+                    <mat-icon>{{ recording.validatedFacts ? 'check_circle' : 'cancel' }}</mat-icon>
+                    <span>Facts</span>
+                  </div>
+                  <div
+                    class="validation-badge"
+                    [class.passed]="recording.validatedLength"
+                    [class.failed]="!recording.validatedLength"
+                  >
+                    <mat-icon>{{ recording.validatedLength ? 'check_circle' : 'cancel' }}</mat-icon>
+                    <span>Length</span>
+                  </div>
+                </div>
+                @if (recording.validationNotes) {
+                  <div class="validation-notes"><strong>Notes:</strong> {{ recording.validationNotes }}</div>
+                }
+              </div>
+
+              <!-- Summary -->
+              @if (recording.summary) {
+                <div class="section">
+                  <h3>Summary</h3>
+                  <p class="summary-text">{{ recording.summary }}</p>
+                </div>
+              }
+
+              <!-- Error Message -->
+              @if (recording.status === 'FAILED' && recording.errorMessage) {
+                <div class="section error-section">
+                  <h3>Error</h3>
+                  <p class="error-message">{{ recording.errorMessage }}</p>
+                </div>
+              }
+
+              <!-- Metadata -->
+              <div class="section">
+                <h3>Details</h3>
+                <div class="metadata-grid">
+                  <div class="metadata-item">
+                    <span class="label">Generated</span>
+                    <span class="value">{{ recording.generatedAt | date: 'medium' }}</span>
+                  </div>
+                  <div class="metadata-item">
+                    <span class="label">Duration</span>
+                    <span class="value">{{ formatSeconds(recording.audioDurationSeconds) }}</span>
+                  </div>
+                  <div class="metadata-item">
+                    <span class="label">Word Count</span>
+                    <span class="value">{{ recording.wordCount }}</span>
+                  </div>
+                  <div class="metadata-item">
+                    <span class="label">Trigger</span>
+                    <span class="value">{{ recording.isScheduled ? 'Scheduled' : 'Manual' }}</span>
+                  </div>
+                  @if (recording.wasConverted !== undefined) {
+                    <div class="metadata-item">
+                      <span class="label">Text Converted</span>
+                      <span class="value">{{ recording.wasConverted ? 'Yes (AI cleaned)' : 'No (verbatim)' }}</span>
+                    </div>
+                  }
+                  @if (recording.deliveredAt) {
+                    <div class="metadata-item">
+                      <span class="label">Delivered</span>
+                      <span class="value"
+                        >{{ recording.deliveredAt | date: 'medium' }} via {{ recording.deliveryMethod }}</span
+                      >
+                    </div>
+                  }
+                  <div class="metadata-item">
+                    <span class="label">Play Count</span>
+                    <span class="value">{{ recording.playCount }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Transcript Tab -->
+      <mat-tab label="Transcript">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="section-header">
+                <h3>Transcript</h3>
+                <button mat-icon-button (click)="copyTranscript()" matTooltip="Copy transcript">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </div>
+
+              @if (recording.transcript) {
+                <div class="transcript-content">{{ recording.transcript }}</div>
+              } @else {
+                <div class="no-data">
+                  <mat-icon>description</mat-icon>
+                  <p>No transcript available</p>
+                </div>
+              }
+
+              <!-- Show original text if it was converted -->
+              @if (recording.wasConverted && recording.originalText) {
+                <div class="section" style="margin-top: 24px">
+                  <h3>Original Text</h3>
+                  <p class="hint">This is the original text before AI conversion</p>
+                  <div class="original-text-content">{{ recording.originalText }}</div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Research Steps Tab -->
+      <mat-tab label="Research Steps">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              @if (recording.agentActions) {
+                <app-agent-actions-list [agentActionsJson]="recording.agentActions" />
+              } @else {
+                <div class="no-data">
+                  <mat-icon>psychology</mat-icon>
+                  <p>No research steps recorded for this recording</p>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- News Tab -->
+      <mat-tab label="News">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              @if (recording.news && recording.news.length > 0) {
+                <app-research-news-list [news]="recording.news" />
+              } @else {
+                <div class="no-data">
+                  <mat-icon>newspaper</mat-icon>
+                  <p>No news articles referenced in this recording</p>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Research URLs Tab -->
+      <mat-tab label="URLs">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              @if (recording.researchUrls && recording.researchUrls.length > 0) {
+                <app-research-urls-list
+                  [urls]="recording.researchUrls"
+                  description="URLs accessed during recording validation and fact-checking."
+                />
+              } @else {
+                <div class="no-data">
+                  <mat-icon>link</mat-icon>
+                  <p>No research URLs recorded for this recording</p>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

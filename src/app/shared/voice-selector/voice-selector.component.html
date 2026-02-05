@@ -1,0 +1,113 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="voice-selector">
+  <audio #audioPlayer></audio>
+
+  <!-- Controls Row: Search + Tier Toggles -->
+  <div class="controls-row">
+    <!-- Search -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search voices</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchControl" placeholder="Search by voice name..." />
+    </mat-form-field>
+
+    <!-- Tier Toggle Buttons -->
+    <div class="tier-toggles">
+      <span class="tier-label">Tiers:</span>
+      @for (tier of allTiers; track tier) {
+        <button
+          mat-button
+          [class.selected]="isTierSelected(tier)"
+          (click)="toggleTier(tier)"
+          [matTooltip]="getTierLabel(tier)"
+          class="tier-toggle"
+        >
+          <mat-icon>{{ getTierIcon(tier) }}</mat-icon>
+          {{ getTierLabel(tier) }}
+        </button>
+      }
+      <button mat-button class="select-all-btn" (click)="selectAllTiers()" matTooltip="Select all tiers">All</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loadingVoices || loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Loading voices...</p>
+    </div>
+  } @else if (filteredVoices.length === 0) {
+    <!-- Empty State -->
+    <div class="empty-state">
+      <mat-icon>record_voice_over</mat-icon>
+      <p>No voices found matching your filters.</p>
+      <button mat-button color="primary" (click)="selectAllTiers()">Show all tiers</button>
+    </div>
+  } @else {
+    <!-- Voices Grouped by Tier -->
+    @for (group of getVoicesGroupedByTier(); track group.tier) {
+      <div class="tier-section">
+        <div class="tier-header">
+          <mat-icon>{{ getTierIcon(group.tier) }}</mat-icon>
+          <span class="tier-name">{{ group.label }}</span>
+          <span class="tier-count">({{ group.voices.length }})</span>
+        </div>
+
+        <div class="voice-grid">
+          @for (voice of group.voices; track voice.uuid) {
+            <div
+              class="voice-card"
+              [class.selected]="isVoiceSelected(voice)"
+              (click)="selectVoice(voice)"
+              (keydown.enter)="selectVoice(voice)"
+              (keydown.space)="selectVoice(voice)"
+              tabindex="0"
+              role="button"
+              [attr.aria-pressed]="isVoiceSelected(voice)"
+              [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
+            >
+              <div class="voice-header">
+                <span class="voice-name">{{ getVoiceDisplayName(voice) }}</span>
+                @if (isVoiceSelected(voice)) {
+                  <mat-icon class="selected-icon">check_circle</mat-icon>
+                }
+              </div>
+
+              <div class="voice-meta">
+                @if (getVoiceWpm(voice)) {
+                  <span class="voice-wpm" matTooltip="Words per minute speaking rate">
+                    {{ getVoiceWpm(voice) }} wpm
+                  </span>
+                }
+                @if (formatCreditsPerWord(voice)) {
+                  <span class="voice-cost" matTooltip="Cost per 1000 words">
+                    {{ formatCreditsPerWord(voice) }}
+                  </span>
+                }
+              </div>
+
+              <div class="voice-actions">
+                <button
+                  mat-icon-button
+                  type="button"
+                  [disabled]="!voice.sampleUrl"
+                  (mouseenter)="voice.sampleUrl && playPreview(voice, $event)"
+                  (mouseleave)="stopPreview()"
+                  (click)="$event.stopPropagation()"
+                  matTooltip="Preview voice"
+                  class="preview-btn"
+                >
+                  @if (currentPlayingVoice?.uuid === voice.uuid) {
+                    <mat-icon>volume_up</mat-icon>
+                  } @else {
+                    <mat-icon>play_circle</mat-icon>
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

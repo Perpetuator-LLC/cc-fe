@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 .public-episode-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -189,15 +189,21 @@
     color: var(--md-sys-color-on-surface);
   }
 
-  audio {
-    width: 100%;
-    margin-bottom: 12px;
-  }
+  .player-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
 
-  .duration {
-    margin: 0;
-    font-size: 14px;
-    color: var(--md-sys-color-on-surface-variant);
+    .play-button {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .duration {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
   }
 }
 

@@ -1,0 +1,48 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+
+@if (appearance === 'icon') {
+  <!-- Icon-only button with menu -->
+  <button
+    mat-icon-button
+    [color]="isPlaying ? 'primary' : undefined"
+    (click)="togglePlay()"
+    [matTooltip]="isPlaying ? 'Pause' : 'Play'"
+  >
+    <mat-icon>{{ isPlaying ? 'pause' : 'play_arrow' }}</mat-icon>
+  </button>
+  <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="More options">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+} @else {
+  <!-- Button with optional label -->
+  @if (appearance === 'flat') {
+    <button mat-flat-button [color]="color" (click)="togglePlay()">
+      <mat-icon>{{ isPlaying ? 'pause' : 'play_arrow' }}</mat-icon>
+      @if (showLabel) {
+        {{ isPlaying ? 'Pause' : 'Play' }}
+      }
+    </button>
+  } @else {
+    <button mat-stroked-button [color]="color" (click)="togglePlay()">
+      <mat-icon>{{ isPlaying ? 'pause' : 'play_arrow' }}</mat-icon>
+      @if (showLabel) {
+        {{ isPlaying ? 'Pause' : 'Play' }}
+      }
+    </button>
+  }
+  <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="More options">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+}
+
+<!-- Context menu for queue actions -->
+<mat-menu #actionsMenu="matMenu">
+  <button mat-menu-item (click)="playNext()">
+    <mat-icon>queue_play_next</mat-icon>
+    <span>Play Next</span>
+  </button>
+  <button mat-menu-item (click)="addToQueue()">
+    <mat-icon>playlist_add</mat-icon>
+    <span>Add to Queue</span>
+  </button>
+</mat-menu>

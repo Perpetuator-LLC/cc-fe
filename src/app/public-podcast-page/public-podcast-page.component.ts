@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,12 +7,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PublicPodcastHttpService, PodcastResponse } from '../public-podcast-http.service';
+import { PublicPodcastHttpService, PodcastResponse, PublicEpisode } from '../public-podcast-http.service';
 import { ShareService } from '../share.service';
 import { ShareButtonsComponent } from '../share-buttons/share-buttons.component';
 import { MessageService } from '../message.service';
 import { AuthService } from '../auth/auth.service';
 import { SeoService } from '../seo.service';
+import { AudioPlayerService, AudioTrack } from '../shared/audio-player/audio-player.service';
 
 @Component({
   selector: 'app-public-podcast-page',
@@ -47,8 +48,25 @@ export class PublicPodcastPageComponent implements OnInit {
     private messageService: MessageService,
     private authService: AuthService,
     private seoService: SeoService,
+    private audioPlayerService: AudioPlayerService,
   ) {
     this.isAuthenticated = this.authService.isLoggedIn();
+  }
+
+  playEpisode(episode: PublicEpisode): void {
+    if (!episode.audioUrl) return;
+
+    const track: AudioTrack = {
+      id: episode.id.toString(),
+      title: episode.title,
+      subtitle: this.podcastData?.name,
+      audioUrl: episode.audioUrl,
+      duration: episode.duration,
+      type: 'episode',
+      sourceRoute: this.getEpisodeUrl(episode.id, episode.title),
+    };
+
+    this.audioPlayerService.play(track);
   }
 
   ngOnInit(): void {

@@ -28,15 +28,17 @@
         <input matInput [(ngModel)]="searchString" (input)="onSearchChange($event)" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" [hidden]="loadingTeams">
-        <mat-label>Team</mat-label>
-        <mat-select [(value)]="selectedTeam" (selectionChange)="onTeamFilterChange()">
-          <mat-option [value]="null">All Teams</mat-option>
-          @for (team of teams; track team.uuid) {
-            <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      @if (!loadingTeams) {
+        <mat-form-field appearance="fill">
+          <mat-label>Team</mat-label>
+          <mat-select [(value)]="selectedTeam" (selectionChange)="onTeamFilterChange()">
+            <mat-option [value]="null">All Teams</mat-option>
+            @for (team of teams; track team.uuid) {
+              <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
 
       <mat-form-field appearance="fill">
         <mat-label>Status</mat-label>

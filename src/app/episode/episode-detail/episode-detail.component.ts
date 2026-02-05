@@ -32,6 +32,7 @@ import { MessageService } from '../../message.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { LoadingService } from '../../layout/loading.service';
 import { ShareService } from '../../share.service';
+import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 
 interface EditableFormValues {
   title: string;
@@ -124,6 +125,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private sanitizer: DomSanitizer,
     protected shareService: ShareService,
+    private audioPlayerService: AudioPlayerService,
   ) {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
@@ -1061,5 +1063,64 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   getEpisodeDescription(): string {
     const episode = this.episodeForm.getRawValue();
     return episode.description || '';
+  }
+
+  /**
+   * Play episode audio in the persistent audio player bar.
+   * This allows the audio to continue playing while navigating to other pages.
+   */
+  playInPlayer(audioUrl: string | null, versionLabel?: string): void {
+    if (!audioUrl) {
+      this.messageService.error('No audio available to play');
+      return;
+    }
+
+    const track = this.createTrack(audioUrl, versionLabel);
+    this.audioPlayerService.play(track);
+  }
+
+  /**
+   * Create an AudioTrack from episode data
+   */
+  private createTrack(audioUrl: string, versionLabel?: string): AudioTrack {
+    const episode = this.episodeForm.getRawValue();
+    const podcastName = episode.podcast?.name || 'Podcast';
+    const title = episode.title || 'Episode';
+    const subtitle = versionLabel ? `${podcastName} - ${versionLabel}` : podcastName;
+
+    return {
+      id: `${this.episodeUuid}-${versionLabel || 'default'}`,
+      title: title,
+      subtitle: subtitle,
+      audioUrl: audioUrl,
+      type: 'episode',
+      sourceRoute: `/media/episodes/${this.episodeUuid}-${this.shareService.generateSlug(title)}`,
+    };
+  }
+
+  /**
+   * Add episode audio to play next in queue
+   */
+  addToQueueNext(audioUrl: string | null, versionLabel?: string): void {
+    if (!audioUrl) {
+      this.messageService.warning('No audio available');
+      return;
+    }
+    const track = this.createTrack(audioUrl, versionLabel);
+    this.audioPlayerService.playNext(track);
+    this.messageService.success('Added to play next');
+  }
+
+  /**
+   * Add episode audio to end of queue
+   */
+  addToQueue(audioUrl: string | null, versionLabel?: string): void {
+    if (!audioUrl) {
+      this.messageService.warning('No audio available');
+      return;
+    }
+    const track = this.createTrack(audioUrl, versionLabel);
+    this.audioPlayerService.addToQueue(track);
+    this.messageService.success('Added to queue');
   }
 }

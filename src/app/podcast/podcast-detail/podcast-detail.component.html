@@ -406,14 +406,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>Brand and Style Prompt</mat-label>
+                <mat-label>Brand Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="prompt"
                   class="textarea-prompt"
-                  placeholder="Enter transcript prompt"
+                  placeholder="Enter brand voice and style guidelines"
                   rows="20"
                 ></textarea>
+                <mat-hint>Brand voice and style guidelines applied to all episode types</mat-hint>
               </mat-form-field>
             </div>
             <div class="member-row">
@@ -434,14 +435,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>News Prompt</mat-label>
+                <mat-label>News Episode Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="newsPrompt"
                   class="textarea-prompt"
-                  placeholder="Enter news prompt"
+                  placeholder="Enter instructions for news episodes"
                   rows="20"
                 ></textarea>
+                <mat-hint>Guidelines for generating news-focused episodes</mat-hint>
               </mat-form-field>
             </div>
             <div class="member-row">
@@ -462,14 +464,15 @@
             </div>
             <div class="member-row">
               <mat-form-field appearance="fill">
-                <mat-label>Research Prompt</mat-label>
+                <mat-label>Research Topic Episode Instructions</mat-label>
                 <textarea
                   matInput
                   formControlName="researchPrompt"
                   class="textarea-prompt"
-                  placeholder="Enter research prompt"
+                  placeholder="Enter instructions for research topic episodes"
                   rows="20"
                 ></textarea>
+                <mat-hint>Guidelines for generating research-focused episodes</mat-hint>
               </mat-form-field>
             </div>
           </form>
@@ -478,126 +481,27 @@
 
       <mat-tab label="Voice">
         <mat-card-content>
-          <form [formGroup]="podcastForm">
-            <div class="voice-info">
-              <p>
-                <mat-icon>info</mat-icon>CPM is an approximation to Credits Per Minute of audio or Credits Per
-                One-Thousand Characters
-              </p>
-            </div>
-            <div class="member-row voice-controls-container">
-              <div class="input-search-div">
-                <mat-icon matPrefix>search</mat-icon>
-                <input matInput [formControl]="voiceSearchControl" placeholder="Search by voice name" />
-              </div>
+          <div class="voice-info">
+            <p>
+              <mat-icon>info</mat-icon>CPM is an approximation to Credits Per Minute of audio or Credits Per
+              One-Thousand Characters
+            </p>
+          </div>
 
-              <!-- <mat-form-field appearance="fill" class="voice-filter-item tier-filter">
-                <mat-label>Filter by Tier</mat-label>
-                <mat-select [formControl]="voiceFilter" multiple>
-                  @for (tier of voiceTiers; track tier) {
-                    <mat-option [value]="tier" (click)="applyVoiceFilters()">
-                      {{ tierToString(tier) }}
-                    </mat-option>
-                  }
-                </mat-select>
-              </mat-form-field> -->
+          <!-- Admin actions -->
+          <div class="voice-admin-actions">
+            <button mat-raised-button class="add-voice-btn" color="accent" (click)="openAddVoiceDialog()" type="button">
+              <mat-icon>add</mat-icon> Add Voice
+            </button>
+            @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
+              <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
+            }
+          </div>
 
-              <div class="voice-filter-item voice-buttons">
-                <!-- Filter Button -->
-                <button class="filter-btn" mat-button [matMenuTriggerFor]="filterMenu">
-                  <mat-icon>filter_list</mat-icon>
-                  Filter by Tier
-                </button>
-
-                <mat-menu #filterMenu="matMenu" class="filter-menu">
-                  <div
-                    class="filter-container"
-                    role="button"
-                    tabindex="0"
-                    (click)="$event.stopPropagation()"
-                    (keydown.space)="$event.stopPropagation()"
-                    (keydown.enter)="$event.stopPropagation()"
-                  >
-                    @for (tier of voiceTiers; track tier) {
-                      <mat-checkbox
-                        [value]="tier"
-                        [checked]="voiceFilter.value?.includes(tier)"
-                        (change)="onCheckboxChange($event, tier)"
-                        class="checkbox-block"
-                      >
-                        {{ tierToString(tier) }}
-                      </mat-checkbox>
-                    }
-
-                    <button mat-button color="warn" (click)="clearVoiceFilters()">Clear All</button>
-                  </div>
-                </mat-menu>
-                <!-- <button mat-button class="apply-btn" color="primary" (click)="applyVoiceFilters()" type="button">
-                  Apply Filters
-                </button> -->
-                <!-- <button mat-button class="clear-btn" (click)="clearVoiceFilters()" type="button">Clear Filters</button> -->
-                <button
-                  mat-raised-button
-                  class="add-voice-btn"
-                  color="accent"
-                  (click)="openAddVoiceDialog()"
-                  type="button"
-                >
-                  <mat-icon>add</mat-icon> Add Voice
-                </button>
-                @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
-                  <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
-                }
-              </div>
-            </div>
-            <div class="voice-header">
-              <h3>Select Voices</h3>
-              <p>CPM is an approximation to Credits Per Minute of audio or Credits Per One-Thousand Characters</p>
-            </div>
-
-            <div class="member-row">
-              <audio #audioPlayer></audio>
-              <div class="voice-list">
-                @for (voice of filteredVoices; track voice.uuid) {
-                  <div
-                    class="voice-card"
-                    [class.selected]="isVoiceSelected(voice)"
-                    (click)="finfo(voice)"
-                    (keydown.enter)="finfo(voice)"
-                    (keydown.space)="finfo(voice)"
-                    tabindex="0"
-                    role="button"
-                    [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
-                  >
-                    <button
-                      mat-icon-button
-                      type="button"
-                      [disabled]="!voice.sampleUrl"
-                      (mouseenter)="voice.sampleUrl && playVoiceSample(voice)"
-                      (mouseleave)="stopVoiceSample()"
-                      (click)="$event.stopPropagation()"
-                    >
-                      @if (currentPlayingVoice && currentPlayingVoice.uuid === voice.uuid) {
-                        <ng-container>
-                          <mat-icon>autoplay</mat-icon>
-                        </ng-container>
-                      } @else {
-                        <ng-container #playIcon>
-                          <mat-icon>sound_sampler</mat-icon>
-                        </ng-container>
-                      }
-                    </button>
-                    <div class="voice-name">
-                      {{ getVoiceDisplayName(voice) }}
-                    </div>
-                    <span class="radio-round">
-                      <span></span>
-                    </span>
-                  </div>
-                }
-              </div>
-            </div>
-          </form>
+          <app-voice-selector
+            [selectedVoiceUuid]="podcastForm.get('voice')?.value?.uuid ?? null"
+            (voiceSelected)="onVoiceSelected($event)"
+          />
         </mat-card-content>
       </mat-tab>
 

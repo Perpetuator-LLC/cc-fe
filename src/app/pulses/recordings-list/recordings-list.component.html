@@ -1,0 +1,158 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="recordings-list-container">
+  <!-- Header Card -->
+  <mat-card class="header-card">
+    <mat-card-content>
+      <div class="header-content">
+        <div class="title-section">
+          <h1>Recordings</h1>
+          <span class="count">{{ totalCount }} total</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search recordings</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Search by title..." />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Pulse Config Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Pulse</mat-label>
+          <mat-select [formControl]="pulseConfigControl">
+            <mat-option [value]="null">All Pulses</mat-option>
+            @for (config of pulseConfigs; track config.uuid) {
+              <mat-option [value]="config.uuid">{{ config.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusControl">
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Clear Filters -->
+        @if (hasActiveFilters()) {
+          <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
+            <mat-icon>clear</mat-icon>
+            Clear
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recordings List -->
+  <mat-card class="recordings-card">
+    <mat-card-content>
+      @if (loading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (recordings.length === 0) {
+        <div class="empty-state">
+          <mat-icon>mic_off</mat-icon>
+          <h3>No recordings found</h3>
+          <p>
+            @if (hasActiveFilters()) {
+              Try adjusting your filters to find recordings.
+            } @else {
+              Generate some recordings from your Pulses to see them here.
+            }
+          </p>
+        </div>
+      } @else {
+        <div class="recordings-grid">
+          @for (recording of recordings; track recording.uuid) {
+            <div class="recording-card" (click)="viewRecording(recording)">
+              <div class="recording-header">
+                <div class="recording-title-section">
+                  <span class="recording-title">{{ recording.title }}</span>
+                  <span class="recording-config">{{ recording.configName }}</span>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(recording.status)">
+                  {{ recording.status | titlecase }}
+                </span>
+              </div>
+
+              <div class="recording-meta">
+                <span class="meta-item">
+                  <mat-icon>timer</mat-icon>
+                  {{ formatSeconds(recording.audioDurationSeconds) }}
+                </span>
+                <span class="meta-item">
+                  <mat-icon>notes</mat-icon>
+                  {{ recording.wordCount || 0 }} words
+                </span>
+                <span class="meta-item">
+                  <mat-icon>schedule</mat-icon>
+                  {{ formatTimeAgo(recording.createdAt) }}
+                </span>
+                @if (recording.isValidated) {
+                  <span class="meta-item validated">
+                    <mat-icon>verified</mat-icon>
+                    Validated
+                  </span>
+                }
+              </div>
+
+              <div class="recording-actions" (click)="$event.stopPropagation()">
+                @if (recording.audioUrl && recording.status === 'READY') {
+                  <button mat-flat-button color="primary" (click)="playRecording(recording)">
+                    <mat-icon>play_arrow</mat-icon>
+                    Play
+                  </button>
+                  <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #recordingMenu="matMenu">
+                    <button mat-menu-item (click)="addToQueueNext(recording)">
+                      <mat-icon>queue_play_next</mat-icon>
+                      <span>Play Next</span>
+                    </button>
+                    <button mat-menu-item (click)="addToQueue(recording)">
+                      <mat-icon>playlist_add</mat-icon>
+                      <span>Add to Queue</span>
+                    </button>
+                    <button mat-menu-item (click)="viewRecording(recording)">
+                      <mat-icon>info</mat-icon>
+                      <span>View Details</span>
+                    </button>
+                  </mat-menu>
+                } @else {
+                  <button mat-stroked-button (click)="viewRecording(recording)">
+                    <mat-icon>info</mat-icon>
+                    Details
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator
+          [length]="totalCount"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[10, 20, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+        />
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

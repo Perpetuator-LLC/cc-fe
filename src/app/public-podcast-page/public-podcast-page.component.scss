@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .public-podcast-page {
@@ -229,11 +229,6 @@
     }
   }
 
-  .episode-player audio {
-    flex: 1;
-    height: 40px;
-  }
-
   // Flattened episode header styles
   .episode-header {
     h3 {
@@ -266,6 +261,13 @@
     font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
     white-space: nowrap;
+  }
+
+  // Flattened play button style
+  .play-button {
+    display: flex;
+    gap: 4px;
+    align-items: center;
   }
 
   mat-paginator {
@@ -315,4 +317,3 @@
     gap: 8px;
   }
 }
-

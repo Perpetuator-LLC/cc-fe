@@ -612,6 +612,19 @@
   }
 }
 
+@mixin pulse-tag {
+  @include tag-button-base();
+
+  // Outlined style with info (blue) for pulses - distinct from other tags
+  border: 1px solid var(--md-extended-color-info-color-container);
+  color: var(--md-extended-color-info-on-color-container);
+  background: color-mix(in srgb, var(--md-extended-color-info-color-container) 20%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-extended-color-info-color-container) 40%, transparent);
+  }
+}
+
 // ============================================================================
 // Version Control Patterns (For episode-version-control.component)
 // ============================================================================

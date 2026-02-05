@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, signal, WritableSignal, OnDestroy } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { map, Observable, Subscription } from 'rxjs';
@@ -508,6 +508,66 @@ export class UserService extends BaseService implements OnDestroy {
           throw new Error(data.unsubscribeFromNewsletter.message);
         }
         return data.unsubscribeFromNewsletter;
+      }),
+    );
+  }
+
+  /**
+   * Send SMS verification code to user's phone number.
+   * User must have a phone number set via updateSmsPreferences first.
+   */
+  sendSmsVerification(): Observable<BaseResponse> {
+    const SEND_SMS_VERIFICATION = gql`
+      mutation SendSmsVerification {
+        sendSmsVerification {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      sendSmsVerification: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: SEND_SMS_VERIFICATION,
+    }).pipe(
+      map((data) => {
+        if (!data.sendSmsVerification.success) {
+          throw new Error(data.sendSmsVerification.message);
+        }
+        return data.sendSmsVerification;
+      }),
+    );
+  }
+
+  /**
+   * Verify phone number with the code sent via SMS.
+   */
+  verifyPhoneNumber(code: string): Observable<BaseResponse> {
+    const VERIFY_PHONE_NUMBER = gql`
+      mutation VerifyPhoneNumber($code: String!) {
+        verifyPhoneNumber(code: $code) {
+          success
+          message
+        }
+      }
+    `;
+
+    interface Response {
+      verifyPhoneNumber: BaseResponse;
+    }
+
+    return this.mutate<Response>({
+      mutation: VERIFY_PHONE_NUMBER,
+      variables: { code },
+    }).pipe(
+      map((data) => {
+        if (!data.verifyPhoneNumber.success) {
+          throw new Error(data.verifyPhoneNumber.message);
+        }
+        return data.verifyPhoneNumber;
       }),
     );
   }
