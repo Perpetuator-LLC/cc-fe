@@ -1603,6 +1603,9 @@ html body [mat-mini-fab] {
   }
 }
 
+.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before{
+  border: 0 !important;
+}
 // Error Button Classes
 .btn-error {
   &.mat-mdc-button,
