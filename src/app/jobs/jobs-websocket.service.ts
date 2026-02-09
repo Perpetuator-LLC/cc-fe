@@ -346,9 +346,11 @@ export class JobsWebSocketService implements OnDestroy {
 
   /**
    * Add a single job to the list (called by other services when creating jobs)
+   * Also emits to jobUpdated$ so components like JobsListComponent can react
    */
   addJob(job: Job): void {
     this.addOrUpdateJob(job);
+    this.jobUpdatedSubject.next(job);
   }
 
   /**

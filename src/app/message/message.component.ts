@@ -24,6 +24,9 @@ export class MessageComponent implements OnDestroy {
   messages: MessageWithProgress[] = [];
   private timeoutIds = new Map<number, number>();
   private progressIntervalIds = new Map<number, number>();
+  // Store timeout progress and start times separately so they persist through array updates
+  private timeoutProgressMap = new Map<number, number>();
+  private timeoutStartTimeMap = new Map<number, number>();
 
   constructor(
     private messageService: MessageService,
@@ -32,20 +35,26 @@ export class MessageComponent implements OnDestroy {
     this.messageService.messages$.subscribe({
       next: (messages) => {
         this.messages = messages.map((message) => {
-          const existingMessage = this.messages.find((m) => m.timestamp === message.timestamp);
-          if (existingMessage) {
-            // Merge updated message data with existing timeout tracking data
+          const existingProgress = this.timeoutProgressMap.get(message.timestamp);
+          const existingStartTime = this.timeoutStartTimeMap.get(message.timestamp);
+
+          if (existingProgress !== undefined) {
+            // Message already has a timer running - use stored values
             return {
-              ...message, // Use updated message data (text, progress, etc.)
-              timeoutProgress: existingMessage.timeoutProgress,
-              timeoutStartTime: existingMessage.timeoutStartTime,
+              ...message,
+              timeoutProgress: existingProgress,
+              timeoutStartTime: existingStartTime,
             };
           }
+
+          // New message - initialize and start timer
           const newMessage: MessageWithProgress = {
             ...message,
             timeoutProgress: 100,
             timeoutStartTime: Date.now(),
           };
+          this.timeoutProgressMap.set(message.timestamp, 100);
+          this.timeoutStartTimeMap.set(message.timestamp, newMessage.timeoutStartTime!);
           this.setAutoDismiss(newMessage);
           return newMessage;
         });
@@ -63,13 +72,26 @@ export class MessageComponent implements OnDestroy {
       }, message.timeout);
       this.timeoutIds.set(message.timestamp, timeoutId);
 
-      const intervalId = window.setInterval(() => {
-        const elapsed = Date.now() - (message.timeoutStartTime || Date.now());
-        const remaining = Math.max(0, (message.timeout || 0) - elapsed);
-        message.timeoutProgress = (remaining / (message.timeout || 1)) * 100;
+      const startTime = this.timeoutStartTimeMap.get(message.timestamp) || Date.now();
+      const timeout = message.timeout;
+      const timestamp = message.timestamp;
 
-        if (message.timeoutProgress <= 0) {
-          this.clearMessageTimers(message.timestamp);
+      const intervalId = window.setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, timeout - elapsed);
+        const progress = (remaining / timeout) * 100;
+
+        // Update the Map so the value persists
+        this.timeoutProgressMap.set(timestamp, progress);
+
+        // Also update the message in the array for reactivity
+        const msg = this.messages.find((m) => m.timestamp === timestamp);
+        if (msg) {
+          msg.timeoutProgress = progress;
+        }
+
+        if (progress <= 0) {
+          this.clearMessageTimers(timestamp);
         }
       }, 50);
       this.progressIntervalIds.set(message.timestamp, intervalId);
@@ -93,6 +115,10 @@ export class MessageComponent implements OnDestroy {
       clearInterval(intervalId);
       this.progressIntervalIds.delete(timestamp);
     }
+
+    // Clean up progress tracking maps
+    this.timeoutProgressMap.delete(timestamp);
+    this.timeoutStartTimeMap.delete(timestamp);
   }
 
   shouldShowTimeoutProgress(message: MessageWithProgress): boolean {
@@ -135,5 +161,7 @@ export class MessageComponent implements OnDestroy {
     this.progressIntervalIds.forEach((id) => clearInterval(id));
     this.timeoutIds.clear();
     this.progressIntervalIds.clear();
+    this.timeoutProgressMap.clear();
+    this.timeoutStartTimeMap.clear();
   }
 }
