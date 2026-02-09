@@ -137,6 +137,20 @@ export class JobsListComponent implements OnInit, OnDestroy {
         this.handleRealtimeJobUpdate('job.updated', job);
       }),
     );
+
+    // Subscribe to job completed events
+    this.subscriptions.add(
+      this.jobsWebSocketService.jobCompleted$.subscribe((job: Job) => {
+        this.handleRealtimeJobUpdate('job.completed', job);
+      }),
+    );
+
+    // Subscribe to job failed events
+    this.subscriptions.add(
+      this.jobsWebSocketService.jobFailed$.subscribe((job: Job) => {
+        this.handleRealtimeJobUpdate('job.failed', job);
+      }),
+    );
   }
 
   ngOnInit(): void {
