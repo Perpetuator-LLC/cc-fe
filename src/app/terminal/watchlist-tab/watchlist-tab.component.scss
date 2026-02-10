@@ -627,6 +627,12 @@
     display: flex;
     gap: 12px;
     align-items: baseline;
+    div{
+      text-align: center;
+      span{
+        display: block;
+      }
+    }
 
     .symbol-name {
       font-family: 'JetBrains Mono', monospace;
@@ -689,6 +695,9 @@
       padding-left: 12px;
       border-left: 1px solid var(--md-sys-color-outline-variant);
     }
+  }
+  .view-toggle-group{
+    overflow: auto;
   }
 }
 

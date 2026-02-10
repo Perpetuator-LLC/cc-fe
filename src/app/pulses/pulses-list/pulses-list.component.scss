@@ -99,6 +99,9 @@
     width: 100%;
     border: 1px solid var(--md-sys-color-outline-variant);
     background: transparent;
+    .mdc-data-table__row:last-child .mat-mdc-cell {
+      border-bottom: 0;
+    }
 
     @media screen and (width <= 576px) {
       overflow: auto;
@@ -274,7 +277,11 @@
 }
 
 .create-pulse-card {
-  margin-bottom: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 0;
+  background-color: var(--md-sys-color-surface-container-low);
+  box-shadow: none;
+  padding-inline: 30px;
 
   .content-header {
     display: flex;
@@ -308,10 +315,8 @@
 }
 
 .middle-card {
-  padding: 16px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 12px;
-  background: var(--md-sys-color-surface-container-lowest);
+  padding-inline: 32px;
+  background-color: var(--md-sys-color-surface-container);
 }
 
 .no-results-message {

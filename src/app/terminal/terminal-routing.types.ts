@@ -21,7 +21,7 @@
 /**
  * Main terminal tabs
  */
-export type TerminalTab = 'watchlists' | 'dashboards' | 'history' | 'settings';
+export type TerminalTab = 'watchlists' | 'dashboards' | 'history' | 'help' | 'settings';
 
 /**
  * Detail view types within a tab

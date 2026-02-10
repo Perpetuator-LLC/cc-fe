@@ -447,10 +447,13 @@ export class ChartConfigService {
     const dataZoomConfig: any = {
       type: 'inside',
       xAxisIndex: showVolume ? [0, 1] : [0], // Apply zoom to both x-axes when showing volume
+      // Smoother zooming configuration
       zoomOnMouseWheel: true,
       moveOnMouseMove: !lockToRight, // Disable panning when locked
-      moveOnMouseWheel: false,
-      throttle: 50,
+      moveOnMouseWheel: true, // Enable move on mouse wheel
+      preventDefaultMouseMove: false,
+      zoomLock: false, // Prevent zoom lock for better feel
+      throttle: 100, // Thromb to prevent jerkiness
       minValueSpan: 5,
     };
 

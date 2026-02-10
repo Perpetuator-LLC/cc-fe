@@ -33,6 +33,7 @@ import { JobStatusIndicatorComponent } from '../../jobs/job-status-indicator/job
 import { LoadingService } from '../loading.service';
 import { MediaTabPreferenceService } from '../media-tab-preference.service';
 import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-bar.component';
+import { TerminalRoutingService } from '../../terminal/terminal-routing.service';
 
 @Component({
   selector: 'app-post-login-layout',
@@ -101,6 +102,7 @@ export class PostLoginLayoutComponent implements OnInit {
     private fb: FormBuilder,
     private loadingService: LoadingService,
     private mediaTabPreferenceService: MediaTabPreferenceService,
+    protected terminalRoutingService: TerminalRoutingService,
   ) {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
@@ -132,7 +134,7 @@ export class PostLoginLayoutComponent implements OnInit {
     this.router.events.subscribe(() => {
       const url = this.router.url;
       this.isHomePage = url === '/' || url === '/home';
-      this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/jobs');
+      this.showSecondSidebar = url.startsWith('/media/') || url.startsWith('/terminal') || url.startsWith('/jobs');
       // Track media tab preference when user navigates
       if (url.startsWith('/media/')) {
         this.mediaTabPreferenceService.recordTabVisit(url);
