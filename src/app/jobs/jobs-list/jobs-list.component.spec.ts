@@ -17,7 +17,7 @@ describe('JobsListComponent', () => {
   let component: JobsListComponent;
   let fixture: ComponentFixture<JobsListComponent>;
   let mockJobService: jasmine.SpyObj<JobService>;
-  let mockJobsWebSocketService: jasmine.SpyObj<JobsWebSocketService>;
+  let mockJobsWebSocketService: Partial<JobsWebSocketService>;
   let mockMessageService: jasmine.SpyObj<MessageService>;
   let mockToolbarService: jasmine.SpyObj<ToolbarService>;
   let mockPodcastsService: jasmine.SpyObj<PodcastsService>;
@@ -28,10 +28,13 @@ describe('JobsListComponent', () => {
 
   beforeEach(async () => {
     mockJobService = jasmine.createSpyObj('JobService', ['getJobs', 'getJobsGrouped', 'addJob']);
-    mockJobsWebSocketService = jasmine.createSpyObj('JobsWebSocketService', ['addJob', 'addJobs']);
-    Object.defineProperty(mockJobsWebSocketService, 'jobUpdated$', {
-      get: () => EMPTY,
-    });
+    mockJobsWebSocketService = {
+      jobUpdated$: EMPTY,
+      jobCompleted$: EMPTY,
+      jobFailed$: EMPTY,
+      addJob: jasmine.createSpy('addJob'),
+      addJobs: jasmine.createSpy('addJobs'),
+    } as unknown as Partial<JobsWebSocketService>;
     mockMessageService = jasmine.createSpyObj('MessageService', ['success', 'error', 'clearMessages']);
     Object.defineProperty(mockMessageService, 'messages$', {
       get: () => new BehaviorSubject([]).asObservable(),
@@ -61,8 +64,8 @@ describe('JobsListComponent', () => {
       imports: [JobsListComponent],
       providers: [
         provideAnimations(),
-        { provide: JobService, useValue: mockJobService },
         { provide: JobsWebSocketService, useValue: mockJobsWebSocketService },
+        { provide: JobService, useValue: mockJobService },
         { provide: MessageService, useValue: mockMessageService },
         { provide: ToolbarService, useValue: mockToolbarService },
         { provide: PodcastsService, useValue: mockPodcastsService },
@@ -72,13 +75,23 @@ describe('JobsListComponent', () => {
         { provide: LoadingService, useValue: mockLoadingService },
       ],
     }).compileComponents();
+  });
 
-    fixture = TestBed.createComponent(JobsListComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  it('should have mock JobsWebSocketService with all properties', () => {
+    const svc = TestBed.inject(JobsWebSocketService);
+    console.log('Injected service:', svc);
+    console.log('jobUpdated$:', svc.jobUpdated$);
+    console.log('jobCompleted$:', svc.jobCompleted$);
+    console.log('jobFailed$:', svc.jobFailed$);
+    expect(svc.jobUpdated$).toBeDefined();
+    expect(svc.jobCompleted$).toBeDefined();
+    expect(svc.jobFailed$).toBeDefined();
   });
 
   it('should create', () => {
+    fixture = TestBed.createComponent(JobsListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 });
