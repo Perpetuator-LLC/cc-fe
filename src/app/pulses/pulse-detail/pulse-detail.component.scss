@@ -89,6 +89,9 @@
 // Latest Pulse Card
 .latest-pulse-card {
   margin-top: 16px;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 14px;
 
   .latest-pulse-header {
     display: flex;
@@ -117,7 +120,8 @@
 
     .pulse-title {
       display: block;
-      margin-top: 4px;
+      margin-top: 6px;
+      margin-bottom: 4px;
       font-size: 14px;
       color: var(--md-sys-color-on-surface);
     }
