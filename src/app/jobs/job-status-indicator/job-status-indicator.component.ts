@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -33,6 +33,18 @@ export class JobStatusIndicatorComponent {
 
   // JobService.jobs is already a WritableSignal
   private jobs = this.jobService.jobs;
+
+  // Expose connection state so we can show WebSocket status if needed
+  // This also ensures the terminalWsService isn't tree-shaken in production
+  isWebSocketConnected = computed(() => this.terminalWsService.connectionState() === 'connected');
+
+  // Debug effect to trace job updates
+  private debugEffect = effect(() => {
+    const wsState = this.terminalWsService.connectionState();
+    const jobCount = this.jobs().length;
+    const activeCount = this.activeJobCount();
+    console.log(`[JobIndicator] WS: ${wsState}, Total jobs: ${jobCount}, Active: ${activeCount}`);
+  });
 
   activeJobCount = computed(() => {
     return this.jobs().filter((job) => {

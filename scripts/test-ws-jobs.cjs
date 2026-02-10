@@ -199,34 +199,75 @@ async function testWebSocketJobs() {
         receivedMessages.push(message);
         log(`[MSG] Received: ${JSON.stringify(message).substring(0, 100)}...`, 'dim');
 
+        // Check for NEW FORMAT: { type: "next", id: "_jobs", payload: { data: { __typename: "JobsInitial", ... } } }
+        if (message.type === 'next' && message.id === '_jobs') {
+          const typename = message.payload?.data?.__typename;
+          const jobs = message.payload?.data?.jobs;
+          const job = message.payload?.data?.job;
+
+          switch (typename) {
+            case 'JobsInitial':
+              initialJobsReceived = true;
+              log(`✓ Received JobsInitial (new format) with ${jobs?.length || 0} jobs`, 'green');
+              if (jobs && jobs.length > 0) {
+                logJson('Initial jobs (new format)', jobs.slice(0, 3));
+              }
+              break;
+
+            case 'JobCreated':
+              log(`✓ Job created (new format): ${job?.uuid} (${job?.kind})`, 'blue');
+              break;
+
+            case 'JobUpdate':
+              log(`✓ Job update (new format): ${job?.uuid} -> ${job?.status}`, 'blue');
+              break;
+
+            case 'JobCompleted':
+              log(`✓ Job completed (new format): ${job?.uuid}`, 'green');
+              break;
+
+            case 'JobFailed':
+              log(`✓ Job failed (new format): ${job?.uuid} - ${job?.error}`, 'red');
+              break;
+
+            default:
+              log(`Received job message (new format): ${typename}`, 'dim');
+          }
+          return; // Don't fall through to legacy handling
+        }
+
+        // LEGACY FORMAT handling
         switch (message.type) {
           case 'connection_ack':
             connectionAcked = true;
             log('✓ Received connection_ack', 'green');
+            // After connection_ack, the backend should automatically send jobs.initial
+            // But let's also log when we expect it
+            log('Waiting for jobs.initial or JobsInitial message...', 'dim');
             break;
 
           case 'jobs.initial':
             initialJobsReceived = true;
-            log(`✓ Received jobs.initial with ${message.jobs?.length || 0} jobs`, 'green');
+            log(`✓ Received jobs.initial (legacy) with ${message.jobs?.length || 0} jobs`, 'green');
             if (message.jobs && message.jobs.length > 0) {
-              logJson('Initial jobs', message.jobs.slice(0, 3));
+              logJson('Initial jobs (legacy)', message.jobs.slice(0, 3));
             }
             break;
 
           case 'jobs.created':
-            log(`✓ Job created: ${message.job?.uuid} (${message.job?.kind})`, 'blue');
+            log(`✓ Job created (legacy): ${message.job?.uuid} (${message.job?.kind})`, 'blue');
             break;
 
           case 'jobs.update':
-            log(`✓ Job update: ${message.job?.uuid} -> ${message.job?.status}`, 'blue');
+            log(`✓ Job update (legacy): ${message.job?.uuid} -> ${message.job?.status}`, 'blue');
             break;
 
           case 'jobs.completed':
-            log(`✓ Job completed: ${message.job?.uuid}`, 'green');
+            log(`✓ Job completed (legacy): ${message.job?.uuid}`, 'green');
             break;
 
           case 'jobs.failed':
-            log(`✓ Job failed: ${message.job?.uuid} - ${message.job?.error}`, 'red');
+            log(`✓ Job failed (legacy): ${message.job?.uuid} - ${message.job?.error}`, 'red');
             break;
 
           case 'ka':
