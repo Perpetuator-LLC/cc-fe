@@ -125,7 +125,6 @@ export class TerminalRoutingService {
     // Initial check
     this.checkUrl();
 
-    // Stay in sync with future navigation
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
@@ -135,8 +134,6 @@ export class TerminalRoutingService {
 
   private checkUrl(): void {
     try {
-      // Use parseUrl to reliably get query params from the current URL tree
-      // This avoids issues with ActivatedRoute in root-provided services
       const urlTree = this.router.parseUrl(this.router.url);
       const params = urlTree.queryParams;
 
@@ -144,12 +141,6 @@ export class TerminalRoutingService {
         const route = queryParamsToRoute(params);
         this.applyRoute(route, { updateUrl: false, silent: true });
       } else {
-        // Only reset if we are actually on a terminal route but have no params
-        // Check if the URL starts with /terminal or is the terminal route
-        // We don't want to reset if we are on a completely different page (though service is singleton)
-        // However, if we preserve specific terminal state while away, we shouldn't reset.
-        // But the requirement is to sync with URL.
-        // Let's check if the current URL is relevant to terminal.
         if (this.router.url.startsWith('/terminal')) {
              this.resetInternal();
         }
@@ -159,9 +150,7 @@ export class TerminalRoutingService {
     }
   }
 
-  /**
-   * Internal reset that doesn't trigger URL update
-   */
+ 
   private resetInternal(): void {
     const d = DEFAULT_TERMINAL_STATE;
     this.tab.set(d.tab);
