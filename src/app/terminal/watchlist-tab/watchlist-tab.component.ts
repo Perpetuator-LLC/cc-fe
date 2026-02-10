@@ -2290,6 +2290,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Allows free zooming without boundaries - data loads progressively.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+private zoomCorrectionTimer: any = null;
+
   onChartInit(chart: any): void {
     this.chartInstance = chart;
 
@@ -2321,26 +2323,29 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       // Use a slightly larger threshold (99.5) to catch more edge cases
       if (this.lockToRight() && endPercent < 99.5) {
         // Calculate the zoom range (how zoomed in/out)
-        const range = endPercent - startPercent;
+        const MIN_RANGE = 3;
+        const range = Math.max(endPercent - startPercent, MIN_RANGE);
         // Adjust to keep end at 100%
         const newStart = Math.max(0, 100 - range);
+        
+        clearTimeout(this.zoomCorrectionTimer);
 
-        // Set flag to prevent re-entrance
+         this.zoomCorrectionTimer = setTimeout(() => {
         this.isCorrectingZoom = true;
 
-        // Use setTimeout to ensure the correction happens after the current zoom finishes
-        // This prevents race conditions with ECharts' internal zoom handling
+        chart.dispatchAction({
+          type: 'dataZoom',
+          start: newStart,
+          end: 100,
+          animation: true,
+          animationDuration: 180,
+          animationEasing: 'linear'
+        });
+
         setTimeout(() => {
-          chart.dispatchAction({
-            type: 'dataZoom',
-            start: newStart,
-            end: 100,
-          });
-          // Reset flag after a brief delay to allow the corrective zoom to complete
-          setTimeout(() => {
-            this.isCorrectingZoom = false;
-          }, 50);
-        }, 0);
+          this.isCorrectingZoom = false;
+        }, 200);
+      }, 120);
 
         return; // Don't process further - the new dispatch will trigger another event
       }
@@ -2354,6 +2359,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       this.checkProgressiveDataLoad(startPercent);
 
       // Update crosshair position after zoom (data positions have changed)
+
       if (this.lastMousePosition) {
         // Reset the last data index so it will update
         this.lastCrosshairDataIndex = -1;

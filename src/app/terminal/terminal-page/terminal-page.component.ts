@@ -17,6 +17,9 @@ import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashb
 import { WatchlistTabComponent } from '../watchlist-tab/watchlist-tab.component';
 import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
 import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
+import { TerminalRoutingService } from '../terminal-routing.service';
+import { TerminalTab } from '../terminal-routing.types';
+import { effect } from '@angular/core';
 
 @Component({
   selector: 'app-terminal-page',
@@ -25,7 +28,6 @@ import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-
     CommonModule,
     MatIconModule,
     MatButtonModule,
-    MatTabsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
@@ -42,7 +44,6 @@ import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-
 export class TerminalPageComponent implements OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
 
-  selectedTabIndex = 0;
   historyLoading = signal(false);
   helpLoading = signal(false);
   /** When true, show all command executions. When false (default), deduplicate by command. */
@@ -53,8 +54,18 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     aiNote: 'You can also type natural language questions and our AI will interpret them for you.',
   };
   private subscriptions = new Subscription();
+  protected routingService = inject(TerminalRoutingService);
 
-  constructor(protected terminalService: TerminalService) {}
+  constructor(protected terminalService: TerminalService) {
+    // Sync tab selection from routing service
+    effect(() => {
+      const tab = this.routingService.tab();
+      // If switching to history, load it
+      if (tab === 'history') {
+        this.loadUserHistory();
+      }
+    });
+  }
 
   /**
    * Convert markdown text to safe HTML for rendering.
@@ -100,13 +111,6 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  onTabChange(index: number): void {
-    this.selectedTabIndex = index;
-    // Load user history when switching to History tab (now index 2)
-    if (index === 2) {
-      this.loadUserHistory();
-    }
-  }
 
   loadUserHistory(): void {
     this.historyLoading.set(true);
@@ -138,7 +142,7 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
   rerunCommand(command: string): void {
     this.terminalService.execute(command);
     // Switch to Dashboard tab to see result
-    this.selectedTabIndex = 0;
+    this.routingService.setTab('dashboards');
   }
 
   /**

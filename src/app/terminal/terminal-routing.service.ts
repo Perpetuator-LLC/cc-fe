@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Perpetuator LLC
 
 import { Injectable, signal, computed } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, filter } from 'rxjs';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import {
   RouteInfo,
   TerminalState,
@@ -121,10 +121,58 @@ export class TerminalRoutingService {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
   ) {
-    // Initialize from URL query parameters on service creation
-    this.initFromQueryParams();
+    // Initial check
+    this.checkUrl();
+
+    // Stay in sync with future navigation
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.checkUrl();
+    });
+  }
+
+  private checkUrl(): void {
+    try {
+      // Use parseUrl to reliably get query params from the current URL tree
+      // This avoids issues with ActivatedRoute in root-provided services
+      const urlTree = this.router.parseUrl(this.router.url);
+      const params = urlTree.queryParams;
+
+      if (Object.keys(params).length > 0) {
+        const route = queryParamsToRoute(params);
+        this.applyRoute(route, { updateUrl: false, silent: true });
+      } else {
+        // Only reset if we are actually on a terminal route but have no params
+        // Check if the URL starts with /terminal or is the terminal route
+        // We don't want to reset if we are on a completely different page (though service is singleton)
+        // However, if we preserve specific terminal state while away, we shouldn't reset.
+        // But the requirement is to sync with URL.
+        // Let's check if the current URL is relevant to terminal.
+        if (this.router.url.startsWith('/terminal')) {
+             this.resetInternal();
+        }
+      }
+    } catch (e) {
+      console.error('[TerminalRouting] Error parsing URL:', e);
+    }
+  }
+
+  /**
+   * Internal reset that doesn't trigger URL update
+   */
+  private resetInternal(): void {
+    const d = DEFAULT_TERMINAL_STATE;
+    this.tab.set(d.tab);
+    this.symbol.set(d.symbol);
+    this.exchange.set(d.exchange);
+    this.view.set(d.view);
+    this.interval.set(d.interval);
+    this.period.set(d.period);
+    this.watchlistId.set(d.watchlistId);
+    this.dashboardId.set(d.dashboardId);
+    this.params.set({});
   }
 
   // =========================================================================
@@ -281,17 +329,6 @@ export class TerminalRoutingService {
   // =========================================================================
 
   /**
-   * Initialize state from URL query parameters
-   */
-  private initFromQueryParams(): void {
-    const params = this.route.snapshot.queryParams;
-    if (Object.keys(params).length > 0) {
-      const route = queryParamsToRoute(params);
-      this.applyRoute(route, { updateUrl: false, silent: true });
-    }
-  }
-
-  /**
    * Update URL query parameters to reflect current state
    */
   private updateUrlQueryParams(): void {
@@ -309,9 +346,8 @@ export class TerminalRoutingService {
 
     const queryParams = routeToQueryParams(route);
 
-    // Update URL - use replaceUrl: false to enable browser back/forward navigation
+    // Update URL - stay on /terminal or whatever the current base path is
     this.router.navigate([], {
-      relativeTo: this.route,
       queryParams,
       queryParamsHandling: 'merge',
       replaceUrl: false, // Push to history for back/forward navigation

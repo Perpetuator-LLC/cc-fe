@@ -14,6 +14,12 @@
 }
 
 .pulse-header-card {
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 0;
+  background-color: var(--md-sys-color-surface-container-low);
+  box-shadow: none;
+  padding-inline: 14px;
+
   .header-content {
     display: flex;
     align-items: center;
@@ -225,6 +231,11 @@
 
   mat-card {
     margin-bottom: 16px;
+    padding-inline: 70px;
+    box-shadow: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 
     &:last-child {
       margin-bottom: 0;

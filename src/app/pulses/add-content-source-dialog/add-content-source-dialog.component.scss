@@ -31,10 +31,11 @@
   mat-dialog-content {
     overflow-y: auto;
     min-height: 200px;
+    padding: 20px 24px;
   }
 
   mat-dialog-actions {
-    padding: 16px 0 0;
+    padding: 16px;
     border-top: 1px solid var(--md-sys-color-outline-variant);
 
     button {
