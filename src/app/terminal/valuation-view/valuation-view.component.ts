@@ -98,6 +98,9 @@ export class ValuationViewComponent {
   /** Historical chart years (5 or 10) */
   @Input() historicalYears = 10;
 
+  /** Live price from real-time quote - overrides analysis currentPrice when provided */
+  @Input() livePrice: number | null = null;
+
   /** Current model from parent */
   @Input() set model(value: ValuationModel) {
     if (value) {
@@ -128,6 +131,47 @@ export class ValuationViewComponent {
 
   onHistoricalYearsChange(years: number): void {
     this.historicalYearsChange.emit(years);
+  }
+
+  /**
+   * Get the current price to display - uses live price if available, otherwise analysis price
+   */
+  getDisplayPrice(model: 'dcf' | 'ddm'): number {
+    if (this.livePrice !== null && this.livePrice > 0) {
+      return this.livePrice;
+    }
+    if (model === 'dcf' && this.dcfData) {
+      return this.dcfData.valuationSummary.currentPrice;
+    }
+    if (model === 'ddm' && this.ddmData) {
+      return this.ddmData.currentPrice;
+    }
+    return 0;
+  }
+
+  /**
+   * Get whether we're using live price (for UI indicator)
+   */
+  isUsingLivePrice(): boolean {
+    return this.livePrice !== null && this.livePrice > 0;
+  }
+
+  /**
+   * Calculate upside percentage based on display price (live or analysis)
+   */
+  getDisplayUpside(model: 'dcf' | 'ddm'): number {
+    const currentPrice = this.getDisplayPrice(model);
+    if (currentPrice <= 0) return 0;
+
+    let intrinsicValue = 0;
+    if (model === 'dcf' && this.dcfData) {
+      intrinsicValue = this.dcfData.valuationSummary.intrinsicValue.base;
+    } else if (model === 'ddm' && this.ddmData) {
+      intrinsicValue = this.ddmData.intrinsicValue;
+    }
+
+    if (intrinsicValue <= 0) return 0;
+    return ((intrinsicValue - currentPrice) / currentPrice) * 100;
   }
 
   /**

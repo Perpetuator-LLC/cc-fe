@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -17,6 +17,9 @@ import { JobService } from '../../jobs/job.service';
 import { LoadingService } from '../../layout/loading.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-topic-detail',
@@ -34,6 +37,9 @@ import { marked } from 'marked';
     MatTabsModule,
     MatChipsModule,
     RouterLink,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './topic-detail.component.html',
   styleUrls: ['./topic-detail.component.scss'],
@@ -45,6 +51,12 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   topic: Topic | null = null;
   topicUuid: string | null = null;
   isGeneratingResearch = false;
+
+  // Editing state
+  isEditing = false;
+  isSaving = false;
+  editTitle = '';
+  editDescription = '';
 
   constructor(
     private router: Router,
@@ -151,5 +163,66 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   markdownToHtml(markdown: string): SafeHtml {
     const html = marked.parse(markdown, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  startEditing(): void {
+    if (!this.topic) return;
+    this.isEditing = true;
+    this.editTitle = this.topic.title;
+    this.editDescription = this.topic.description || '';
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.editTitle = '';
+    this.editDescription = '';
+  }
+
+  saveChanges(): void {
+    if (!this.topic || !this.topicUuid || this.isSaving) return;
+
+    const trimmedTitle = this.editTitle.trim();
+    if (!trimmedTitle) {
+      this.messageService.error('Title is required');
+      return;
+    }
+
+    this.isSaving = true;
+    this.messageService.clearMessages();
+
+    const updates: { title?: string; description?: string } = {};
+
+    if (trimmedTitle !== this.topic.title) {
+      updates.title = trimmedTitle;
+    }
+
+    const trimmedDescription = this.editDescription.trim();
+    if (trimmedDescription !== (this.topic.description || '')) {
+      updates.description = trimmedDescription || undefined;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      this.messageService.info('No changes to save');
+      this.isEditing = false;
+      this.isSaving = false;
+      return;
+    }
+
+    this.subscriptions.add(
+      this.researchService.updateTopic(this.topicUuid, updates).subscribe({
+        next: (response) => {
+          this.messageService.success('Topic updated successfully');
+          if (response.topic) {
+            this.topic = { ...this.topic!, ...response.topic };
+          }
+          this.isEditing = false;
+          this.isSaving = false;
+        },
+        error: (err: { message: string }) => {
+          this.messageService.error(`Failed to update topic: ${err.message}`);
+          this.isSaving = false;
+        },
+      }),
+    );
   }
 }

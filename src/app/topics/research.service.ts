@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
@@ -69,6 +69,14 @@ interface PublishResearchTopicEpisodeChainResponse {
 
 interface CreateCustomTopicResponse {
   createCustomTopic: {
+    success: boolean;
+    message: string;
+    topic: Topic;
+  };
+}
+
+interface UpdateTopicResponse {
+  updateTopic: {
     success: boolean;
     message: string;
     topic: Topic;
@@ -335,6 +343,63 @@ export class ResearchService extends BaseService {
           throw new Error(data.createCustomTopic.message);
         }
         return data.createCustomTopic;
+      }),
+    );
+  }
+
+  updateTopic(
+    topicUuid: string,
+    updates: {
+      title?: string;
+      description?: string;
+      researchContent?: string;
+      validatedContent?: string;
+      transcript?: string;
+    },
+  ): Observable<UpdateTopicResponse['updateTopic']> {
+    const UPDATE_TOPIC = gql`
+      mutation UpdateTopic(
+        $topicUuid: UUID!
+        $title: String
+        $description: String
+        $researchContent: String
+        $validatedContent: String
+        $transcript: String
+      ) {
+        updateTopic(
+          topicUuid: $topicUuid
+          title: $title
+          description: $description
+          researchContent: $researchContent
+          validatedContent: $validatedContent
+          transcript: $transcript
+        ) {
+          success
+          message
+          topic {
+            uuid
+            title
+            description
+            researchContent
+            validatedContent
+            transcript
+            isUserCreated
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    `;
+
+    return this.mutate<UpdateTopicResponse>({
+      mutation: UPDATE_TOPIC,
+      variables: { topicUuid, ...updates },
+    }).pipe(
+      map((data) => {
+        if (!data.updateTopic.success) {
+          throw new Error(data.updateTopic.message);
+        }
+        return data.updateTopic;
       }),
     );
   }
