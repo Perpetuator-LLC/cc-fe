@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .topic-header-card {
@@ -58,6 +58,22 @@
     color: var(--md-sys-color-on-surface-variant);
   }
 
+  // Edit mode form fields
+  .edit-title-field,
+  .edit-description-field {
+    display: block;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .edit-title-field {
+    max-width: 600px;
+  }
+
+  .edit-description-field {
+    max-width: 800px;
+  }
+
   .metadata {
     @include mixins.metadata-section();
 
@@ -105,7 +121,22 @@
 }
 
 .header-actions {
+  display: flex;
   flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+
+  .edit-button {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
 
   .generate-button {
     display: inline-flex;

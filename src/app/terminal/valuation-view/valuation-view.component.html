@@ -61,11 +61,15 @@
     <!-- DDM Summary View -->
     <div class="valuation-summary">
       <div class="valuation-metrics">
-        <app-kpi-card label="Current Price" [value]="'$' + ddmData.currentPrice.toFixed(2)" />
+        <app-kpi-card
+          [label]="isUsingLivePrice() ? 'Current Price (Live)' : 'Current Price'"
+          [value]="'$' + getDisplayPrice('ddm').toFixed(2)"
+          [accent]="isUsingLivePrice() ? 'success' : undefined"
+        />
         <app-kpi-card
           label="Intrinsic Value"
           [value]="'$' + ddmData.intrinsicValue.toFixed(2)"
-          [changePercent]="ddmData.upsidePercentage"
+          [changePercent]="getDisplayUpside('ddm')"
           accent="primary"
           [tooltip]="CHART_DEFINITIONS.intrinsicValue.description"
         />
@@ -270,11 +274,15 @@
     <div class="valuation-summary">
       @if (dcfData) {
         <div class="valuation-metrics">
-          <app-kpi-card label="Current Price" [value]="'$' + dcfData.valuationSummary.currentPrice.toFixed(2)" />
+          <app-kpi-card
+            [label]="isUsingLivePrice() ? 'Current Price (Live)' : 'Current Price'"
+            [value]="'$' + getDisplayPrice('dcf').toFixed(2)"
+            [accent]="isUsingLivePrice() ? 'success' : undefined"
+          />
           <app-kpi-card
             label="Intrinsic Value (Base)"
             [value]="'$' + dcfData.valuationSummary.intrinsicValueBase.toFixed(2)"
-            [changePercent]="dcfData.valuationSummary.upsideBase"
+            [changePercent]="getDisplayUpside('dcf')"
             accent="primary"
             [tooltip]="CHART_DEFINITIONS.intrinsicValue.description"
           />

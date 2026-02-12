@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <div class="toolbar-title-wrapper">
     <span class="page-title">
@@ -10,154 +10,184 @@
   </div>
 </ng-template>
 @if (!topic && !loading) {
-<div class="middle-card">
-  <h2>Topic not found.</h2>
-  <button mat-flat-button color="primary" (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
-    Back to Topics
-  </button>
-</div>
+  <div class="middle-card">
+    <h2>Topic not found.</h2>
+    <button mat-flat-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Topics
+    </button>
+  </div>
 } @else if (topic) {
-<div class="topic-header-card">
-  <button mat-flat-button (click)="goBack()" class="back-button">
-    <mat-icon>arrow_back</mat-icon>
-    Back to Topics
-  </button>
+  <div class="topic-header-card">
+    <button mat-flat-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Topics
+    </button>
 
-  <div class="topic-header">
-    <div class="header-content">
-      <h1>{{ topic.title }}</h1>
-      @if (topic.description) {
-      <p class="description">{{ topic.description }}</p>
-      }
-      <div class="metadata">
-        <a [routerLink]="['/media/podcasts', topic.podcast.uuid]" class="resource-tag podcast-tag">
-          <mat-icon>podcasts</mat-icon>
-          {{ topic.podcast.name }}
-        </a>
-        @if (topic.episode) {
-        <a [routerLink]="['/media/episodes', topic.episode.uuid]" class="resource-tag episode-tag">
-          <mat-icon>mic</mat-icon>
-          {{ topic.episode.title }}
-        </a>
+    <div class="topic-header">
+      <div class="header-content">
+        @if (isEditing) {
+          <mat-form-field class="edit-title-field">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="editTitle" placeholder="Topic title" />
+          </mat-form-field>
+          <mat-form-field class="edit-description-field">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="editDescription" placeholder="Topic description" rows="3"></textarea>
+          </mat-form-field>
+        } @else {
+          <h1>{{ topic.title }}</h1>
+          @if (topic.description) {
+            <p class="description">{{ topic.description }}</p>
+          }
         }
-        <span class="meta-item">
-          <mat-icon>calendar_today</mat-icon>
-          {{ formatDate(topic.createdAt) }}
-        </span>
-        <span class="meta-item">
-          <mat-icon>link</mat-icon>
-          {{ topic.sources.length }} sources
-        </span>
+        <div class="metadata">
+          <a [routerLink]="['/media/podcasts', topic.podcast.uuid]" class="resource-tag podcast-tag">
+            <mat-icon>podcasts</mat-icon>
+            {{ topic.podcast.name }}
+          </a>
+          @if (topic.episode) {
+            <a [routerLink]="['/media/episodes', topic.episode.uuid]" class="resource-tag episode-tag">
+              <mat-icon>mic</mat-icon>
+              {{ topic.episode.title }}
+            </a>
+          }
+          <span class="meta-item">
+            <mat-icon>calendar_today</mat-icon>
+            {{ formatDate(topic.createdAt) }}
+          </span>
+          <span class="meta-item">
+            <mat-icon>link</mat-icon>
+            {{ topic.sources.length }} sources
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        @if (topic.isUserCreated && !isEditing) {
+          <button mat-stroked-button (click)="startEditing()" class="edit-button">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+        }
+        @if (isEditing) {
+          <button mat-button (click)="cancelEditing()" [disabled]="isSaving">Cancel</button>
+          <button mat-flat-button color="primary" (click)="saveChanges()" [disabled]="isSaving">
+            @if (isSaving) {
+              <mat-progress-spinner diameter="20" mode="indeterminate" />
+            } @else {
+              <mat-icon>save</mat-icon>
+            }
+            Save
+          </button>
+        } @else {
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="generateResearch()"
+            [disabled]="isGeneratingResearch"
+            class="generate-button"
+          >
+            @if (isGeneratingResearch) {
+              <mat-progress-spinner diameter="20" mode="indeterminate" />
+            } @else {
+              <mat-icon>auto_awesome</mat-icon>
+            }
+            Generate Research
+          </button>
+        }
       </div>
     </div>
-    <div class="header-actions">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="generateResearch()"
-        [disabled]="isGeneratingResearch"
-        class="generate-button">
-        @if (isGeneratingResearch) {
-          <mat-progress-spinner diameter="20" mode="indeterminate" />
-        } @else {
-          <mat-icon>auto_awesome</mat-icon>
-        }
-        Generate Research
-      </button>
-    </div>
   </div>
-</div>
 
-<mat-tab-group class="topic-tabs">
-  @if (topic.transcript) {
-  <mat-tab label="Transcript">
-    <div class="tab-content">
-      <mat-card>
-        <mat-card-header>
-          <mat-icon>description</mat-icon>
-          <h3>Final Transcript</h3>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="content-section">
-            <pre class="transcript-content">{{ topic.transcript }}</pre>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </mat-tab>
-  }
+  <mat-tab-group class="topic-tabs">
+    @if (topic.transcript) {
+      <mat-tab label="Transcript">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-icon>description</mat-icon>
+              <h3>Final Transcript</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="content-section">
+                <pre class="transcript-content">{{ topic.transcript }}</pre>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    }
 
-  @if (topic.validatedContent) {
-  <mat-tab label="Validated Research">
-    <div class="tab-content">
-      <mat-card>
-        <mat-card-header>
-          <mat-icon>fact_check</mat-icon>
-          <h3>Fact-Checked Content</h3>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="content-section">
-            <div class="content-text" [innerHTML]="markdownToHtml(topic.validatedContent)"></div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </mat-tab>
-  }
+    @if (topic.validatedContent) {
+      <mat-tab label="Validated Research">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-icon>fact_check</mat-icon>
+              <h3>Fact-Checked Content</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="content-section">
+                <div class="content-text" [innerHTML]="markdownToHtml(topic.validatedContent)"></div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    }
 
-  @if (topic.researchContent) {
-  <mat-tab label="Raw Research">
-    <div class="tab-content">
-      <mat-card>
-        <mat-card-header>
-          <mat-icon>search</mat-icon>
-          <h3>Research Content</h3>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="content-section">
-            <div class="content-text" [innerHTML]="markdownToHtml(topic.researchContent)"></div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </mat-tab>
-  }
+    @if (topic.researchContent) {
+      <mat-tab label="Raw Research">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-icon>search</mat-icon>
+              <h3>Research Content</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="content-section">
+                <div class="content-text" [innerHTML]="markdownToHtml(topic.researchContent)"></div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    }
 
-  @if (topic.sources.length > 0) {
-  <mat-tab label="Sources">
-    <div class="tab-content">
-      <mat-card>
-        <mat-card-header>
-          <mat-icon>link</mat-icon>
-          <h3>Research Sources ({{ topic.sources.length }})</h3>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="sources-list">
-            @for (source of topic.sources; track source.uuid) {
-            <div class="source-item">
-              <div class="source-header">
-                @if (source.title) {
-                <h4>{{ source.title }}</h4>
+    @if (topic.sources.length > 0) {
+      <mat-tab label="Sources">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-icon>link</mat-icon>
+              <h3>Research Sources ({{ topic.sources.length }})</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="sources-list">
+                @for (source of topic.sources; track source.uuid) {
+                  <div class="source-item">
+                    <div class="source-header">
+                      @if (source.title) {
+                        <h4>{{ source.title }}</h4>
+                      }
+                      <a [href]="source.url" target="_blank" rel="noopener noreferrer" class="source-link">
+                        {{ source.url }}
+                        <mat-icon>open_in_new</mat-icon>
+                      </a>
+                      <span class="source-date">{{ formatDate(source.createdAt) }}</span>
+                    </div>
+                    @if (source.content) {
+                      <div class="source-content">
+                        <p>{{ source.content }}</p>
+                      </div>
+                    }
+                  </div>
                 }
-                <a [href]="source.url" target="_blank" rel="noopener noreferrer" class="source-link">
-                  {{ source.url }}
-                  <mat-icon>open_in_new</mat-icon>
-                </a>
-                <span class="source-date">{{ formatDate(source.createdAt) }}</span>
               </div>
-              @if (source.content) {
-              <div class="source-content">
-                <p>{{ source.content }}</p>
-              </div>
-              }
-            </div>
-            }
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </mat-tab>
-  }
-</mat-tab-group>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    }
+  </mat-tab-group>
 }
