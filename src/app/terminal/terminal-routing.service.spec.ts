@@ -1,17 +1,24 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, UrlTree } from '@angular/router';
 import { TerminalRoutingService } from './terminal-routing.service';
 import { RouteInfo } from './terminal-routing.types';
+import { Subject } from 'rxjs';
 
 describe('TerminalRoutingService', () => {
   let service: TerminalRoutingService;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: { snapshot: { queryParams: Record<string, string> } };
+  let routerEventsSubject: Subject<unknown>;
 
   beforeEach(() => {
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    routerEventsSubject = new Subject();
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'parseUrl'], {
+      events: routerEventsSubject.asObservable(),
+      url: '/terminal',
+    });
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
+    mockRouter.parseUrl.and.returnValue({ queryParams: {} } as unknown as UrlTree);
 
     mockActivatedRoute = {
       snapshot: {
@@ -193,7 +200,21 @@ describe('TerminalRoutingService', () => {
 
   describe('init from query params', () => {
     it('should initialize from URL query params on creation', () => {
-      // Create a new service with query params
+      // Create a new mock router with query params in parseUrl
+      const routerEventsSubject2 = new Subject();
+      const mockRouter2 = jasmine.createSpyObj('Router', ['navigate', 'parseUrl'], {
+        events: routerEventsSubject2.asObservable(),
+        url: '/terminal?symbol=INTC&exchange=NASDAQ&interval=weekly',
+      });
+      mockRouter2.navigate.and.returnValue(Promise.resolve(true));
+      mockRouter2.parseUrl.and.returnValue({
+        queryParams: {
+          symbol: 'INTC',
+          exchange: 'NASDAQ',
+          interval: 'weekly',
+        },
+      } as unknown as UrlTree);
+
       const routeWithParams = {
         snapshot: {
           queryParams: {
@@ -208,7 +229,7 @@ describe('TerminalRoutingService', () => {
       TestBed.configureTestingModule({
         providers: [
           TerminalRoutingService,
-          { provide: Router, useValue: mockRouter },
+          { provide: Router, useValue: mockRouter2 },
           { provide: ActivatedRoute, useValue: routeWithParams },
         ],
       });

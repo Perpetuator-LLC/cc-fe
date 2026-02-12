@@ -2,7 +2,7 @@
 @if (jobs.length > 0) {
   <div class="jobs-container">
     <mat-accordion [multi]="false">
-      @for (job of jobs; track job.id) {
+      @for (job of jobs; track job.uuid) {
         <mat-expansion-panel class="job-panel {{ job.status }}" [expanded]="data.panelOpenState">
           <mat-expansion-panel-header>
             <span mat-panel-title class="job-panel-title">
