@@ -1,3 +1,22 @@
+# Changelog from v0.30.0 to v0.31.0
+
+This release focuses on significant improvements to the stock terminal interface, real-time job tracking capabilities, and valuation modeling features.
+
+## Enhancements
+
+- Added DDM (Dividend Discount Model) projection table data to valuation tools
+- Implemented live price display functionality with topic editing capabilities
+- Introduced GraphQL subscription support for real-time updates
+- Enhanced job status tracking by switching from ID-based to UUID-based tracking in the status bar
+- Improved stock terminal page interface, including chart visualizations and layout refinements
+- Updated Pulse page user interface with various visual improvements
+
+## Cleanups
+
+- Removed unused comments from codebase
+- Fixed JobsWebSocketService mock to properly include all observable properties in tests
+
+
 # Changelog from v0.29.0 to v0.30.0
 
 This release introduces a comprehensive audio content management system with text-to-speech capabilities and queue management, alongside improvements to pulse content handling, social media integration, and several critical bug fixes for date display and account security.
