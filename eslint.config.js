@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 // @ts-check
 const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
@@ -68,4 +68,3 @@ module.exports = tseslint.config(
     },
   },
 );
-

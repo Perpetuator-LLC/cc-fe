@@ -165,7 +165,7 @@ export class ValuationViewComponent {
 
     let intrinsicValue = 0;
     if (model === 'dcf' && this.dcfData) {
-      intrinsicValue = this.dcfData.valuationSummary.intrinsicValue.base;
+      intrinsicValue = this.dcfData.valuationSummary.intrinsicValueBase;
     } else if (model === 'ddm' && this.ddmData) {
       intrinsicValue = this.ddmData.intrinsicValue;
     }

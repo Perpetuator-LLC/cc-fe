@@ -25,17 +25,17 @@
     </mat-button-toggle-group>
   </div>
 
-  <!-- ADR Currency Warning Banner -->
-  <!-- ADR Currency Warning Banner for DCF -->
-  @if (selectedModel() === 'dcf' && dcfData?.isAdr && dcfData?.currencyNote) {
+  <!-- Currency Warning Banner -->
+  <!-- Currency Warning Banner for DCF - show when trading and reporting currencies differ -->
+  @if (selectedModel() === 'dcf' && dcfData?.currencyNote && dcfData?.tradingCurrency !== dcfData?.reportingCurrency) {
     <div class="currency-warning">
       <mat-icon>info</mat-icon>
       <span>{{ dcfData?.currencyNote }}</span>
     </div>
   }
 
-  <!-- ADR Currency Warning Banner for DDM -->
-  @if (selectedModel() === 'ddm' && ddmData?.isAdr && ddmData?.currencyNote) {
+  <!-- Currency Warning Banner for DDM - show when trading and reporting currencies differ -->
+  @if (selectedModel() === 'ddm' && ddmData?.currencyNote && ddmData?.tradingCurrency !== ddmData?.reportingCurrency) {
     <div class="currency-warning">
       <mat-icon>info</mat-icon>
       <span>{{ ddmData?.currencyNote }}</span>
@@ -64,7 +64,7 @@
         <app-kpi-card
           [label]="isUsingLivePrice() ? 'Current Price (Live)' : 'Current Price'"
           [value]="'$' + getDisplayPrice('ddm').toFixed(2)"
-          [accent]="isUsingLivePrice() ? 'success' : undefined"
+          [accent]="isUsingLivePrice() ? 'success' : 'none'"
         />
         <app-kpi-card
           label="Intrinsic Value"
@@ -277,7 +277,7 @@
           <app-kpi-card
             [label]="isUsingLivePrice() ? 'Current Price (Live)' : 'Current Price'"
             [value]="'$' + getDisplayPrice('dcf').toFixed(2)"
-            [accent]="isUsingLivePrice() ? 'success' : undefined"
+            [accent]="isUsingLivePrice() ? 'success' : 'none'"
           />
           <app-kpi-card
             label="Intrinsic Value (Base)"
