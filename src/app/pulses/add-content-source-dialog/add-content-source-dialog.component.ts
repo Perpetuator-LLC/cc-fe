@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -79,15 +79,15 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
     { value: 'company', label: 'Company Symbol', icon: 'business' },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private pulsesService: PulsesService,
-    private watchlistService: WatchlistService,
-    private apollo: Apollo,
-    public dialogRef: MatDialogRef<AddContentSourceDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AddContentSourceDialogData,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly watchlistService = inject(WatchlistService);
+  private readonly apollo = inject(Apollo);
+  readonly dialogRef = inject(MatDialogRef<AddContentSourceDialogComponent>);
+  readonly data: AddContentSourceDialogData = inject(MAT_DIALOG_DATA);
+
+  constructor() {
     this.sourceForm = this.fb.group({
       sourceType: ['rss_feed', Validators.required],
       rssUrl: [''],
@@ -352,7 +352,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
       })
       .pipe(
         map((result) =>
-          (result.data.autocomplete || []).map((item) => ({
+          (result.data!.autocomplete || []).map((item) => ({
             symbol: item.symbol || item.display,
             name: item.name || '',
             display: item.display,

@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, of, catchError, map, tap } from 'rxjs';
 
@@ -109,7 +109,9 @@ export class ChartPreferencesService {
   // Whether preferences have been loaded from backend
   private loaded = false;
 
-  constructor(private apollo: Apollo) {
+  private readonly apollo = inject(Apollo);
+
+  constructor() {
     // Log initial preferences
     console.log('[ChartPreferencesService] Initialized with:', this.preferences());
   }
@@ -150,7 +152,7 @@ export class ChartPreferencesService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.chartPreferences),
+        map((result) => result.data!.chartPreferences),
         tap((prefs) => {
           console.log('[ChartPreferencesService] Loaded from backend:', prefs);
           this.preferences.set(prefs);
@@ -191,7 +193,7 @@ export class ChartPreferencesService {
       .pipe(
         map((result) => {
           if (result.data?.updateChartPreferences.success) {
-            const prefs = result.data.updateChartPreferences.preferences;
+            const prefs = result.data!.updateChartPreferences.preferences;
             this.preferences.set(prefs);
             console.log('[ChartPreferencesService] Updated preference:', key, '=', value);
             return prefs;
@@ -225,7 +227,7 @@ export class ChartPreferencesService {
       .pipe(
         map((result) => {
           if (result.data?.updateChartPreferences.success) {
-            const prefs = result.data.updateChartPreferences.preferences;
+            const prefs = result.data!.updateChartPreferences.preferences;
             this.preferences.set(prefs);
             console.log('[ChartPreferencesService] Updated preferences:', updates);
             return prefs;

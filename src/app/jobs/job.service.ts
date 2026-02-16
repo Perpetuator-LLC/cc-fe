@@ -1,11 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import gql from 'graphql-tag';
 import { map, Subscription } from 'rxjs';
 import { BaseService } from '../base.service';
-import { Apollo } from 'apollo-angular';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { MessageService } from '../message.service';
 import { RelayConnection } from '../utils/relay';
 import { JobsWebSocketService } from './jobs-websocket.service';
@@ -410,13 +408,11 @@ export class JobService extends BaseService implements OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cleanupInterval: any;
 
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-    private jobsWebSocketService: JobsWebSocketService,
-    private messageService: MessageService,
-  ) {
-    super(apollo, errorHandler);
+  private readonly jobsWebSocketService = inject(JobsWebSocketService);
+  private readonly messageService = inject(MessageService);
+
+  constructor() {
+    super();
     this.setupWebSocketSync();
     this.setupCleanupLoop();
   }

@@ -1,10 +1,9 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { map } from 'rxjs/operators';
 import { Job } from '../jobs/job.service';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo, RelayEdge } from '../utils/relay';
 
 export interface NewsTag {
@@ -46,13 +45,6 @@ export interface NewsConnection {
   providedIn: 'root',
 })
 export class NewsService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   fetchNews(podcastUuid: string) {
     const FETCH_NEWS_DATA = gql`
       mutation FetchNews($podcastUuid: UUID!) {

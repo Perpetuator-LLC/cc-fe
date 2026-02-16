@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, catchError, of, forkJoin } from 'rxjs';
 
@@ -120,7 +120,7 @@ export class DividendService {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Load dividend analysis data for a symbol
@@ -137,7 +137,7 @@ export class DividendService {
           fetchPolicy: 'network-only',
         })
         .pipe(
-          map((result) => result.data.cashFlows),
+          map((result) => result.data!.cashFlows),
           catchError(() => of([] as CashFlowData[])),
         ),
       incomeStatements: this.apollo
@@ -147,7 +147,7 @@ export class DividendService {
           fetchPolicy: 'network-only',
         })
         .pipe(
-          map((result) => result.data.incomeStatements),
+          map((result) => result.data!.incomeStatements),
           catchError(() => of([] as IncomeData[])),
         ),
       quote: this.apollo
@@ -157,7 +157,7 @@ export class DividendService {
           fetchPolicy: 'network-only',
         })
         .pipe(
-          map((result) => result.data.quote),
+          map((result) => result.data!.quote),
           catchError(() => of(null)),
         ),
       balanceSheets: this.apollo
@@ -167,7 +167,7 @@ export class DividendService {
           fetchPolicy: 'network-only',
         })
         .pipe(
-          map((result) => result.data.balanceSheets),
+          map((result) => result.data!.balanceSheets),
           catchError(() => of([] as BalanceSheetData[])),
         ),
     }).pipe(

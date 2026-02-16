@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { inject, Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { SiteStatistics } from './interface';
   providedIn: 'root',
 })
 export class DashboardService {
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Get site statistics using GraphQL public query (no auth required)
@@ -51,6 +51,6 @@ export class DashboardService {
         query,
         fetchPolicy: 'network-only',
       })
-      .pipe(map((result) => result.data.siteStatistics));
+      .pipe(map((result) => result.data!.siteStatistics));
   }
 }

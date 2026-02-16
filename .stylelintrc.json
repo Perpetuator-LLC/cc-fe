@@ -35,7 +35,6 @@
         "message": "ID selectors are prohibited - use classes instead"
       }
     ],
-    "scss/at-import-partial-extension": null,
     "import-notation": null,
     "at-rule-no-unknown": null,
     "scss/at-rule-no-unknown": true,

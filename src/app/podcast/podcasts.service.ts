@@ -1,10 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo, RelayConnection, RelayEdge } from '../utils/relay';
 import { TeamsResult } from '../team/teams.service';
 import { Voice } from './voices.service';
@@ -102,13 +101,6 @@ interface PodcastCategoriesResponse {
   providedIn: 'root',
 })
 export class PodcastsService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   createPodcast(
     name: string,
     teamUuid: string,

@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, BehaviorSubject, Subscription, interval, of, Subject } from 'rxjs';
 import { map, tap, catchError, switchMap, filter, takeUntil } from 'rxjs/operators';
@@ -294,7 +294,7 @@ export class ChartDataService implements OnDestroy {
   // Current quote data
   readonly currentQuote: WritableSignal<QuoteUpdate | null> = signal(null);
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -376,7 +376,7 @@ export class ChartDataService implements OnDestroy {
             }),
           );
         }),
-        map((result) => this.transformToChartData(result.data.stockPriceConnection)),
+        map((result) => this.transformToChartData(result.data!.stockPriceConnection)),
         tap((data) => {
           console.log('[ChartDataService] loadChartData pageInfo:', {
             hasOlderData: data.pageInfo.hasOlderData,
@@ -433,7 +433,7 @@ export class ChartDataService implements OnDestroy {
             }),
           );
         }),
-        map((result) => this.transformToChartData(result.data.stockPriceConnection)),
+        map((result) => this.transformToChartData(result.data!.stockPriceConnection)),
         tap((data) => {
           console.log('[ChartDataService] loadOlderData result:', {
             candles: data.candles.length,
@@ -474,7 +474,7 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => this.transformToChartData(result.data.stockPriceConnection)),
+        map((result) => this.transformToChartData(result.data!.stockPriceConnection)),
         tap((data) => {
           this.isLoading$.next(false);
           // Merge with existing cache
@@ -517,7 +517,7 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => this.transformToChartData(result.data.chartDataRange)),
+        map((result) => this.transformToChartData(result.data!.chartDataRange)),
         tap((data) => {
           console.log('[ChartDataService] loadDataByRange result:', {
             candles: data.candles.length,
@@ -590,7 +590,7 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'network-only', // Always fresh
       })
       .pipe(
-        map((result) => result.data.quote),
+        map((result) => result.data!.quote),
         tap((quote) => this.currentQuote.set(quote)),
         catchError((error) => {
           console.error('[ChartDataService] Failed to get quote:', error);
@@ -630,7 +630,7 @@ export class ChartDataService implements OnDestroy {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.chartDataAvailability),
+        map((result) => result.data!.chartDataAvailability),
         catchError((error) => {
           console.error('[ChartDataService] Failed to check data availability:', error);
           return of(null);

@@ -1,6 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { ApolloQueryResult } from '@apollo/client/core';
-import { MutationResult } from 'apollo-angular';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import type { Apollo } from 'apollo-angular';
 
 interface ApolloErrorParams {
   message: string;
@@ -23,21 +22,49 @@ interface ApolloErrorParams {
   };
 }
 
-export function mapQueryResult<T>(result: ApolloQueryResult<T>): T {
-  if (result.errors) {
-    throw new Error(result.errors.map((e) => e.message).join(', '));
+export function mapQueryResult<T>(result: Apollo.QueryResult<T>): T {
+  // Apollo v4 uses 'error' (singular) instead of 'errors' (array)
+  if (result.error) {
+    throw new Error(result.error.message);
   }
-  return result.data;
+  if (result.data === undefined) {
+    throw new Error('No data field was returned');
+  }
+  return result.data as T;
 }
 
-export function mapMutationResult<T>(result: MutationResult<T>): T {
-  if (result.errors) {
-    throw new Error(result.errors.map((e) => e.message).join(', '));
+export function mapMutationResult<T>(result: Apollo.MutateResult<T>): T {
+  // Apollo v4 uses 'error' (singular) for mutations too
+  if (result.error) {
+    throw new Error(result.error.message);
   }
   if (result.data === null || result.data === undefined) {
     throw new Error('No data field was returned');
   }
-  return result.data;
+  return result.data as T;
+}
+
+/**
+ * Safely extract a field from Apollo query result data.
+ * In Apollo v4, result.data can be undefined during loading states.
+ * This utility provides a type-safe way to access data fields.
+ */
+export function extractData<T, K extends keyof T>(result: Apollo.QueryResult<T>, key: K): T[K] | undefined {
+  return result.data?.[key];
+}
+
+/**
+ * Extract data field, throwing if not present.
+ * Use this when you expect data to always be present (e.g., after filtering loading states).
+ */
+export function requireData<T>(result: Apollo.QueryResult<T>): T {
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  if (result.data === undefined) {
+    throw new Error('No data in query result');
+  }
+  return result.data as T;
 }
 
 export function handleApolloError(data: ApolloErrorParams) {
