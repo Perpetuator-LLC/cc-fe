@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, signal, computed } from '@angular/core';
+import { inject, Injectable, signal, computed } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, tap, catchError, of } from 'rxjs';
 import { Watchlist, WatchlistItem } from './terminal.types';
@@ -573,7 +573,7 @@ export class WatchlistService {
     return (watchlists || []).find((w) => w.watchlistType === 'FAVORITES');
   });
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Load all watchlists for the user
@@ -589,7 +589,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.watchlists),
+        map((result) => result.data!.watchlists),
         tap((watchlists) => {
           this._watchlists.set(watchlists);
           this._loading.set(false);
@@ -617,7 +617,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.searchHistory),
+        map((result) => result.data!.searchHistory),
         tap((history) => {
           this._searchHistory.set(history);
           this._loading.set(false);
@@ -644,7 +644,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.recentSymbols),
+        map((result) => result.data!.recentSymbols),
         tap((symbols) => {
           this._recentSymbols.set(symbols);
         }),
@@ -666,7 +666,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.sectorSymbols || []),
+        map((result) => result.data!.sectorSymbols || []),
         catchError(() => of([])),
       );
   }
@@ -682,7 +682,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.industrySymbols || []),
+        map((result) => result.data!.industrySymbols || []),
         catchError(() => of([])),
       );
   }
@@ -697,7 +697,7 @@ export class WatchlistService {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.gicsSectors || []),
+        map((result) => result.data!.gicsSectors || []),
         tap((sectors) => {
           this._gicsSectors.set(sectors);
         }),
@@ -715,7 +715,7 @@ export class WatchlistService {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.gicsIndustries || []),
+        map((result) => result.data!.gicsIndustries || []),
         tap((industries) => {
           this._gicsIndustries.set(industries);
         }),
@@ -733,7 +733,7 @@ export class WatchlistService {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.exchanges || []),
+        map((result) => result.data!.exchanges || []),
         tap((exchanges) => {
           this._exchanges.set(exchanges);
         }),
@@ -752,7 +752,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.allSectorSymbols || []),
+        map((result) => result.data!.allSectorSymbols || []),
         catchError(() => of([])),
       );
   }
@@ -768,7 +768,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.allIndustrySymbols || []),
+        map((result) => result.data!.allIndustrySymbols || []),
         catchError(() => of([])),
       );
   }
@@ -784,7 +784,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.exchangeSymbols || []),
+        map((result) => result.data!.exchangeSymbols || []),
         catchError(() => of([])),
       );
   }
@@ -809,7 +809,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.catalogSectorSymbols),
+        map((result) => result.data!.catalogSectorSymbols),
         catchError(() =>
           of({
             totalCount: 0,
@@ -836,7 +836,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.catalogIndustrySymbols),
+        map((result) => result.data!.catalogIndustrySymbols),
         catchError(() =>
           of({
             totalCount: 0,
@@ -863,7 +863,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.catalogExchangeSymbols),
+        map((result) => result.data!.catalogExchangeSymbols),
         catchError(() =>
           of({
             totalCount: 0,
@@ -885,7 +885,7 @@ export class WatchlistService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.stockListings || []),
+        map((result) => result.data!.stockListings || []),
         catchError(() => of([])),
       );
   }
@@ -907,7 +907,7 @@ export class WatchlistService {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.stockListings || []),
+        map((result) => result.data!.stockListings || []),
         map((listings) => listings.filter((l) => l.status === 'Active')),
         catchError(() => of([])),
       );

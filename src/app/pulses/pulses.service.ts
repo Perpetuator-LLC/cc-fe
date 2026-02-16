@@ -1,10 +1,9 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo } from '../utils/relay';
 import {
   PulseConfig,
@@ -147,13 +146,6 @@ export interface PulsesResponse {
   providedIn: 'root',
 })
 export class PulsesService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   // ==================== QUERIES ====================
 
   /**

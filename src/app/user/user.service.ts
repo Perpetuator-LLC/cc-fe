@@ -1,10 +1,8 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable, signal, WritableSignal, OnDestroy } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import { map, Observable, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseResponse, BaseService, CommonResponse } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 
 export interface UserDetails {
   id: string;
@@ -55,13 +53,6 @@ export class UserService extends BaseService implements OnDestroy {
   private subscriptions = new Subscription();
   private userDetailsSignal: WritableSignal<UserDetails | null> = signal(null);
   private emailChangePending: { newEmail: string } | null = null;
-
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
 
   userSettings(keys: string[]): Observable<UserSetting[]> {
     const GET_USER_SETTINGS = gql`

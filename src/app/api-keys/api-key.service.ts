@@ -1,11 +1,9 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 
 export interface ApiKey {
   uuid: string;
@@ -61,13 +59,6 @@ export interface UpdateApiKeyInput {
   providedIn: 'root',
 })
 export class ApiKeyService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   /**
    * Get all API keys for the current user
    */

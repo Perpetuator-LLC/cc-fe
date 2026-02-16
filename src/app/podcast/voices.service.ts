@@ -1,10 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PageInfo, RelayEdge } from '../utils/relay';
 
 export enum VoiceTier {
@@ -153,13 +152,6 @@ const REFRESH_VOICES = gql`
   providedIn: 'root',
 })
 export class VoicesService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   getVoices(tiers?: VoiceTier[], enabled?: boolean) {
     interface Response {
       voices: {

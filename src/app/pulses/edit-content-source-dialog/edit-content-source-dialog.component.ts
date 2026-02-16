@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -63,29 +63,29 @@ export class EditContentSourceDialogComponent implements OnInit, OnDestroy {
   stockSuggestions: StockAutocompleteResult[] = [];
   isSearchingStocks = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private apollo: Apollo,
-    private pulsesService: PulsesService,
-    private messageService: MessageService,
-    public dialogRef: MatDialogRef<EditContentSourceDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditContentSourceDialogData,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly apollo = inject(Apollo);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly messageService = inject(MessageService);
+  readonly dialogRef = inject(MatDialogRef<EditContentSourceDialogComponent>);
+  readonly data: EditContentSourceDialogData = inject(MAT_DIALOG_DATA);
+
+  constructor() {
     // For search terms, use the original search term for editing
-    const searchTermValue = data.source.searchTermOriginal || data.source.searchTerm || '';
+    const searchTermValue = this.data.source.searchTermOriginal || this.data.source.searchTerm || '';
 
     this.form = this.fb.group({
       searchTerm: [searchTermValue],
-      symbol: [data.source.symbol || ''],
-      priority: [data.source.priority || 50, [Validators.min(0), Validators.max(100)]],
-      customInstructions: [data.source.customInstructions || ''],
+      symbol: [this.data.source.symbol || ''],
+      priority: [this.data.source.priority || 50, [Validators.min(0), Validators.max(100)]],
+      customInstructions: [this.data.source.customInstructions || ''],
       useExactSearch: [false], // Don't optimize, use exact term
     });
 
     // Set validators based on source type
-    if (data.source.sourceType === 'search_term') {
+    if (this.data.source.sourceType === 'search_term') {
       this.form.get('searchTerm')?.setValidators([Validators.required, Validators.minLength(2)]);
-    } else if (data.source.sourceType === 'company') {
+    } else if (this.data.source.sourceType === 'company') {
       this.form.get('symbol')?.setValidators([Validators.required, Validators.pattern(/^[A-Z]{1,5}$/)]);
     }
   }
@@ -144,7 +144,7 @@ export class EditContentSourceDialogComponent implements OnInit, OnDestroy {
       })
       .pipe(
         map((result) =>
-          (result.data.autocomplete || []).map((item) => ({
+          (result.data!.autocomplete || []).map((item) => ({
             symbol: item.symbol || item.display,
             name: item.name || '',
             display: item.display,

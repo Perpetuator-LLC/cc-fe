@@ -1,9 +1,8 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { map } from 'rxjs/operators';
 import { BaseService } from './base.service';
-import { ErrorHandlerService } from './utils/error-handler.service';
 import { RelayConnection } from './utils/relay';
 import { parseScheduleArgs } from './utils/schedule';
 
@@ -210,13 +209,6 @@ const DELETE_SCHEDULE = gql`
   providedIn: 'root',
 })
 export class SchedulingService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   getSchedules() {
     interface Response {
       schedules: RelayConnection<Schedule>;

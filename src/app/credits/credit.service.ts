@@ -1,14 +1,12 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/core';
-import { Apollo, QueryRef } from 'apollo-angular';
+import { inject, Injectable, OnDestroy, signal, WritableSignal, Signal } from '@angular/core';
+import { QueryRef, onlyCompleteData } from 'apollo-angular';
 import { map, Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 import { BaseService } from '../base.service';
-import { mapQueryResult } from '../utils/error-handler';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { MessageService } from '../message.service';
 import { RelayConnection } from '../utils/relay';
 
@@ -215,14 +213,11 @@ export class CreditService extends BaseService implements OnDestroy {
   private userCreditsSignal: WritableSignal<number> = signal(0);
   private userOrdersSignal: WritableSignal<UserOrder[]> = signal([]);
   private queryRef!: QueryRef<GetUserCreditsResponse>;
+  private readonly authService = inject(AuthService);
+  private readonly messageService = inject(MessageService);
 
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-    private authService: AuthService,
-    private messageService: MessageService,
-  ) {
-    super(apollo, errorHandler);
+  constructor() {
+    super();
     this.initializeUserCreditsQuery();
     // When the user logs in, fetch the user credits
     this.subscriptions.add(
@@ -256,8 +251,8 @@ export class CreditService extends BaseService implements OnDestroy {
 
     this.userCreditSubscription = this.queryRef.valueChanges
       .pipe(
-        map(mapQueryResult),
-        map((data) => data.credits),
+        onlyCompleteData(),
+        map((result) => result.data.credits ?? 0),
         catchError((error) => this.errorHandler.handleError(error)),
       )
       .subscribe({

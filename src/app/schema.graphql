@@ -3105,6 +3105,10 @@ type DiscountedCashFlowAnalysisType implements Node {
   company: CompanyType!
   user: UserDataExport!
   createdAt: DateTime!
+
+  """
+  Price at analysis time (snapshot). Use liveCurrentPrice in GraphQL for current market price.
+  """
   currentPrice: Decimal
   bookValuePerShare: Decimal
   earningsPerShare: Decimal
@@ -3132,6 +3136,20 @@ type DiscountedCashFlowAnalysisType implements Node {
   """"""
   predictedBookValue: BigInt
   predictedEps: Decimal
+
+  """
+  Current live price (latest available), may differ from analysis snapshot price
+  """
+  liveCurrentPrice: Decimal
+
+  """Price at the time of analysis (snapshot)"""
+  analysisPrice: Decimal
+
+  """Price change since analysis was created"""
+  priceChangeSinceAnalysis: Decimal
+
+  """Percentage price change since analysis"""
+  priceChangePercent: Decimal
 }
 
 type StockPriceType {

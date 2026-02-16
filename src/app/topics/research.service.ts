@@ -1,11 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { Job } from '../jobs/job.service';
 import { RelayConnection, PageInfo } from '../utils/relay';
 
@@ -91,13 +89,6 @@ interface GetTopicsResponse {
   providedIn: 'root',
 })
 export class ResearchService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   getTopics(podcastUuid?: string, first = 10, after: string | null = null): Observable<GetTopicsResult> {
     const GET_TOPICS = gql`
       query GetTopics($podcastUuid: UUID, $first: Int, $after: String) {

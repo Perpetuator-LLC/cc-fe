@@ -278,6 +278,12 @@
     object-fit: cover;
   }
 
+  iframe {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border-radius: 12px;
+  }
+
   @include mixins.mobile() {
     max-width: 100%;
   }

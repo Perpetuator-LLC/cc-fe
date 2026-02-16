@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, tap, catchError, of } from 'rxjs';
 
@@ -427,7 +427,7 @@ export class ValuationService {
   ddmData = signal<DDMAnalysisData | null>(null);
   selectedModel = signal<ValuationModel>('dcf');
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Load DCF valuation analysis for a symbol
@@ -444,7 +444,7 @@ export class ValuationService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.dcfAnalysis),
+        map((result) => result.data!.dcfAnalysis),
         tap((data) => {
           this.valuationData.set(data);
           this.loading.set(false);
@@ -485,7 +485,7 @@ export class ValuationService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.ddmAnalysis),
+        map((result) => result.data!.ddmAnalysis),
         tap((data) => {
           this.ddmData.set(data);
           this.loading.set(false);

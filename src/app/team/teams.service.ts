@@ -1,13 +1,12 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
 import { User } from '../types';
 import { Episode } from '../episode/episode.service';
 import { Job } from '../jobs/job.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { PodcastsResult } from '../podcast/podcasts.service';
 import { RelayConnection } from '../utils/relay';
 
@@ -73,13 +72,6 @@ const GET_TEAMS = gql`
   providedIn: 'root',
 })
 export class TeamsService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   createTeam(name: string): Observable<{ success: boolean; message: string; team: TeamsResult }> {
     const GQL = gql`
       mutation CreateTeam($name: String!) {

@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, of } from 'rxjs';
 import { map, catchError, tap, take } from 'rxjs/operators';
 import { Apollo, gql } from 'apollo-angular';
@@ -384,12 +384,12 @@ export class TerminalService implements OnDestroy {
   private recentCommands = new Map<string, number>(); // command -> timestamp
   private readonly COMMAND_THROTTLE_MS = 1000; // Minimum 1 second between identical commands
 
-  constructor(
-    private wsService: TerminalWebSocketService,
-    private jobsWsService: JobsWebSocketService,
-    private watchlistService: WatchlistService,
-    private apollo: Apollo,
-  ) {
+  private readonly wsService = inject(TerminalWebSocketService);
+  private readonly jobsWsService = inject(JobsWebSocketService);
+  private readonly watchlistService = inject(WatchlistService);
+  private readonly apollo = inject(Apollo);
+
+  constructor() {
     this.setupSubscriptions();
     this.initializeFromBackend();
   }
@@ -636,7 +636,7 @@ export class TerminalService implements OnDestroy {
         fetchPolicy: 'network-only', // Always get fresh quote data
       })
       .pipe(
-        map((result) => result.data.quote),
+        map((result) => result.data!.quote),
         catchError((error) => {
           console.warn('[TerminalService] Quote fetch failed:', error);
           return of(null);
@@ -659,7 +659,7 @@ export class TerminalService implements OnDestroy {
       })
       .pipe(
         map((result) => {
-          const commands = result.data.commands;
+          const commands = result.data!.commands;
           this.commandsCache$.next(commands);
           return commands;
         }),
@@ -679,7 +679,7 @@ export class TerminalService implements OnDestroy {
         query: GET_COMMAND,
         variables: { name },
       })
-      .pipe(map((result) => result.data.command));
+      .pipe(map((result) => result.data!.command));
   }
 
   /**
@@ -697,7 +697,7 @@ export class TerminalService implements OnDestroy {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.terminalHints),
+        map((result) => result.data!.terminalHints),
         tap((hints) => this.hintsCache$.next(hints)),
         catchError(() => {
           // Return empty structure if query fails (no hardcoded defaults)
@@ -724,7 +724,7 @@ export class TerminalService implements OnDestroy {
         fetchPolicy: 'cache-first',
       })
       .pipe(
-        map((result) => result.data.terminalHelp),
+        map((result) => result.data!.terminalHelp),
         catchError(() => {
           // Return empty structure if query fails
           return of({
@@ -754,12 +754,12 @@ export class TerminalService implements OnDestroy {
       })
       .pipe(
         map((result) => ({
-          items: result.data.commandHistory.edges.map((edge) => ({
+          items: result.data!.commandHistory.edges.map((edge) => ({
             ...edge.node,
             executionCount: edge.executionCount,
           })),
-          pageInfo: result.data.commandHistory.pageInfo,
-          totalCount: result.data.commandHistory.totalCount ?? 0,
+          pageInfo: result.data!.commandHistory.pageInfo,
+          totalCount: result.data!.commandHistory.totalCount ?? 0,
         })),
         tap(({ items, pageInfo, totalCount }) => {
           // Update user history signal
@@ -826,8 +826,8 @@ export class TerminalService implements OnDestroy {
         })
         .pipe(
           map((result) => ({
-            items: result.data.commandHistory.edges.map((edge) => edge.node),
-            pageInfo: result.data.commandHistory.pageInfo,
+            items: result.data!.commandHistory.edges.map((edge) => edge.node),
+            pageInfo: result.data!.commandHistory.pageInfo,
           })),
         )
         .subscribe({
@@ -892,7 +892,7 @@ export class TerminalService implements OnDestroy {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.commandHistoryItem),
+        map((result) => result.data!.commandHistoryItem),
         tap((item) => {
           if (item) {
             // Update the item in userHistorySignal with full details
@@ -931,11 +931,11 @@ export class TerminalService implements OnDestroy {
         })
         .subscribe({
           next: (result) => {
-            const items = result.data.commandHistory.edges.map((edge) => ({
+            const items = result.data!.commandHistory.edges.map((edge) => ({
               ...edge.node,
               executionCount: edge.executionCount,
             }));
-            const pageInfo = result.data.commandHistory.pageInfo;
+            const pageInfo = result.data!.commandHistory.pageInfo;
 
             // Update pagination state
             this.historyEndCursor = pageInfo.endCursor;
@@ -968,7 +968,7 @@ export class TerminalService implements OnDestroy {
         query: GET_DASHBOARDS,
         fetchPolicy: 'network-only',
       })
-      .pipe(map((result) => result.data.dashboards));
+      .pipe(map((result) => result.data!.dashboards));
   }
 
   /**
@@ -1053,8 +1053,8 @@ export class TerminalService implements OnDestroy {
       })
       .pipe(
         map((result) => {
-          console.log('[TerminalService] Autocomplete raw response:', result.data.autocomplete);
-          const mapped = result.data.autocomplete.map((s) => this.mapToFqnFormat(s));
+          console.log('[TerminalService] Autocomplete raw response:', result.data!.autocomplete);
+          const mapped = result.data!.autocomplete.map((s) => this.mapToFqnFormat(s));
           console.log('[TerminalService] Autocomplete mapped response:', mapped);
           return mapped;
         }),

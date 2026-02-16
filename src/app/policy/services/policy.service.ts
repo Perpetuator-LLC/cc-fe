@@ -1,12 +1,10 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable, effect } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { inject, Injectable, effect } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { marked } from 'marked';
 import { map, Observable, of, switchMap, take } from 'rxjs';
 import { BaseService } from '../../base.service';
-import { ErrorHandlerService } from '../../utils/error-handler.service';
 import { AuthService } from '../../auth/auth.service';
 
 export enum PolicyType {
@@ -52,14 +50,11 @@ export interface ActivePoliciesResult {
 })
 export class PolicyService extends BaseService {
   private wasLoggedIn = false;
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly authService = inject(AuthService);
 
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-    private sanitizer: DomSanitizer,
-    private authService: AuthService,
-  ) {
-    super(apollo, errorHandler);
+  constructor() {
+    super();
 
     // Monitor auth state to clear cache on logout
     this.wasLoggedIn = this.authService.isLoggedIn();

@@ -1,12 +1,11 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { gql } from 'apollo-angular';
 import { throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '../base.service';
 import { Job } from '../jobs/job.service';
 import { FetchPolicy } from '@apollo/client';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 import { NewsResult } from '../news/news.service';
 import { RelayConnection } from '../utils/relay';
 import { TeamsResult } from '../team/teams.service';
@@ -215,13 +214,6 @@ const GET_EPISODE = gql`
   providedIn: 'root',
 })
 export class EpisodeService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   getEpisodes(
     first = 10,
     after: string | null = null,

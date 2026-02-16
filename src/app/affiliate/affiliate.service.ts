@@ -1,11 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import gql from 'graphql-tag';
 import { BaseService } from '../base.service';
-import { ErrorHandlerService } from '../utils/error-handler.service';
 
 /**
  * Affiliate Service (GraphQL)
@@ -444,13 +442,6 @@ export interface ExportAffiliateGraphResponse {
   providedIn: 'root',
 })
 export class AffiliateService extends BaseService {
-  constructor(
-    protected override apollo: Apollo,
-    protected override errorHandler: ErrorHandlerService,
-  ) {
-    super(apollo, errorHandler);
-  }
-
   /**
    * Get public affiliate landing page data
    * PUBLIC QUERY - Does not require authentication

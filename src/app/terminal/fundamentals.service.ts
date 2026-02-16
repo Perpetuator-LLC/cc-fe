@@ -1,6 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-/* Copyright (c) 2026 Perpetuator LLC */
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, map, tap, catchError, of, forkJoin } from 'rxjs';
 
@@ -142,7 +141,7 @@ export class FundamentalsService {
   isAnnual = signal(true);
   fundamentalsData = signal<FundamentalsData | null>(null);
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Load all fundamentals data for a symbol
@@ -198,7 +197,7 @@ export class FundamentalsService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.balanceSheets || []),
+        map((result) => result.data!.balanceSheets || []),
         catchError(() => of([])),
       );
   }
@@ -214,7 +213,7 @@ export class FundamentalsService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.incomeStatements || []),
+        map((result) => result.data!.incomeStatements || []),
         catchError(() => of([])),
       );
   }
@@ -230,7 +229,7 @@ export class FundamentalsService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data.cashFlows || []),
+        map((result) => result.data!.cashFlows || []),
         catchError(() => of([])),
       );
   }

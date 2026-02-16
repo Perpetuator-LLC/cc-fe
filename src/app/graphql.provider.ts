@@ -1,15 +1,16 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
+import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { ApplicationConfig, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { ApolloClientOptions, ApolloLink, InMemoryCache, split } from '@apollo/client/core';
+import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client/core';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
+import { ErrorLink } from '@apollo/client/link/error';
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { createClient, Client } from 'graphql-ws';
-import { Observable as ZenObservable } from 'zen-observable-ts';
+import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { TokenStorageService } from './auth/token-storage.service';
 import { TokenRefreshService } from './auth/token-refresh.service';
@@ -85,7 +86,7 @@ let refreshPromise: Promise<string | null> | null = null;
  * - Backend validates the Bearer token, NOT the cookie
  * - Automatically refreshes token when expired or about to expire
  */
-export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
+export function apolloOptionsFactory(): ApolloClient.Options {
   const tokenStorage = inject(TokenStorageService);
   const tokenRefreshService = inject(TokenRefreshService);
   const platformId = inject(PLATFORM_ID);
@@ -176,7 +177,7 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
 
   // Error link handles 401s and retries with refreshed token
   // Skips retry for anonymous requests (they shouldn't need auth)
-  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  const errorLink = new ErrorLink(({ error, operation, forward }) => {
     // Don't try to refresh token for anonymous requests
     const context = operation.getContext();
     if (context['useAnonymous']) {
@@ -184,9 +185,11 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
     }
 
     // Check for authentication errors
-    const isAuthError =
-      (networkError && 'statusCode' in networkError && networkError.statusCode === 401) ||
-      graphQLErrors?.some(
+    let isAuthError = false;
+
+    if (CombinedGraphQLErrors.is(error)) {
+      // GraphQL errors - check for auth-related error codes/messages
+      isAuthError = error.errors.some(
         (err) =>
           err.extensions?.['code'] === 'UNAUTHENTICATED' ||
           err.message.toLowerCase().includes('not authenticated') ||
@@ -195,10 +198,14 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
           err.message.toLowerCase().includes('token not valid') ||
           err.message.toLowerCase().includes('token is invalid or expired'),
       );
+    } else if (error && 'statusCode' in error && (error as { statusCode?: number }).statusCode === 401) {
+      // Network error with 401 status
+      isAuthError = true;
+    }
 
     if (isAuthError) {
       // Return a new observable that refreshes token and retries
-      return new ZenObservable((observer) => {
+      return new Observable((observer) => {
         refreshAndGetToken()
           .then((newToken) => {
             if (newToken) {
@@ -213,20 +220,20 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
 
               // Retry the request
               const subscriber = forward(operation).subscribe({
-                next: observer.next.bind(observer),
-                error: observer.error.bind(observer),
-                complete: observer.complete.bind(observer),
+                next: (value) => observer.next(value),
+                error: (err) => observer.error(err),
+                complete: () => observer.complete(),
               });
 
               return () => subscriber.unsubscribe();
             } else {
               // Token refresh failed, let the error propagate
-              observer.error(networkError || graphQLErrors?.[0]);
+              observer.error(error);
               return undefined;
             }
           })
-          .catch((error) => {
-            observer.error(error);
+          .catch((err) => {
+            observer.error(err);
           });
       });
     }
@@ -236,7 +243,7 @@ export function apolloOptionsFactory(): ApolloClientOptions<unknown> {
   });
 
   // Upload link with credentials for cookies (HTTP)
-  const uploadLink = createUploadLink({
+  const uploadLink = new UploadHttpLink({
     uri,
     credentials: 'include', // For logged_in cookie
   });
