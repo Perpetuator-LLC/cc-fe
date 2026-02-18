@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -39,6 +39,15 @@ interface EnrichedJob extends Job {
   topicName?: string;
 }
 
+/** Aggregated resources from all jobs in a chain */
+interface ChainResources {
+  podcasts: { uuid: string; name: string }[];
+  episodes: { uuid: string; name: string }[];
+  topics: { uuid: string; name: string }[];
+  pulseConfigs: { uuid: string }[];
+  symbols: { symbol: string; job: EnrichedJob }[];
+}
+
 /** Represents a group of jobs in a chain, or a single standalone job */
 interface JobChainGroup {
   chainId: string | null;
@@ -54,6 +63,8 @@ interface JobChainGroup {
   lastJobKind: string;
   createdAt: string;
   updatedAt: string;
+  // Pre-computed resources
+  resources: ChainResources;
 }
 
 interface Episode {
@@ -85,7 +96,19 @@ interface Episode {
   styleUrl: './jobs-list.component.scss',
 })
 export class JobsListComponent implements OnInit, OnDestroy {
+  private readonly jobService = inject(JobService);
+  private readonly jobsWebSocketService = inject(JobsWebSocketService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly messageService = inject(MessageService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly jobDisplayService = inject(JobDisplayService);
+  private readonly researchService = inject(ResearchService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly router = inject(Router);
+
   private subscriptions: Subscription = new Subscription();
+  private intersectionObserver: IntersectionObserver | null = null;
   jobs: EnrichedJob[] = [];
   dataSource = new MatTableDataSource<EnrichedJob>(this.jobs);
   displayedColumns: string[] = ['kind', 'message', 'cost', 'createdAt', 'updatedAt', 'status'];
@@ -118,19 +141,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
+  @ViewChild('scrollSentinel') scrollSentinel!: ElementRef<HTMLDivElement>;
 
-  constructor(
-    private jobService: JobService,
-    private jobsWebSocketService: JobsWebSocketService,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-    private podcastsService: PodcastsService,
-    private episodeService: EpisodeService,
-    private jobDisplayService: JobDisplayService,
-    private researchService: ResearchService,
-    private loadingService: LoadingService,
-    private router: Router,
-  ) {
+  constructor() {
     // Subscribe to real-time job updates via WebSocket
     this.subscriptions.add(
       this.jobsWebSocketService.jobUpdated$.subscribe((job: Job) => {
@@ -161,6 +174,46 @@ export class JobsListComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.loadingService.hide();
+    this.cleanupInfiniteScroll();
+  }
+
+  /**
+   * Set up IntersectionObserver for infinite scrolling
+   * Called after data loads to ensure sentinel element exists
+   */
+  private setupInfiniteScroll(): void {
+    // Clean up existing observer first
+    this.cleanupInfiniteScroll();
+
+    // Delay to ensure DOM is updated after data load
+    setTimeout(() => {
+      if (this.scrollSentinel?.nativeElement) {
+        this.intersectionObserver = new IntersectionObserver(
+          (entries) => {
+            const [entry] = entries;
+            if (entry.isIntersecting && this.hasNextPage && !this.isLoadingMore && !this.loading) {
+              this.loadMoreJobs();
+            }
+          },
+          {
+            root: null, // Use viewport as root
+            rootMargin: '200px', // Start loading 200px before reaching the sentinel
+            threshold: 0,
+          },
+        );
+        this.intersectionObserver.observe(this.scrollSentinel.nativeElement);
+      }
+    }, 200);
+  }
+
+  /**
+   * Clean up IntersectionObserver
+   */
+  private cleanupInfiniteScroll(): void {
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
+    }
   }
 
   /**
@@ -215,23 +268,19 @@ export class JobsListComponent implements OnInit, OnDestroy {
     // Build statuses array based on filter
     const statuses = this.statusFilter ? [this.statusFilter] : [];
 
-    // Use jobsGrouped API for proper chain grouping (returns N top-level items)
-    // Note: jobsGrouped doesn't support cursor pagination yet, so append mode uses existing jobs
+    // For "load more", request additional items by increasing the total count
+    // jobsGrouped doesn't support cursor pagination, so we increase firstTopLevel
+    const requestCount = append ? this.totalJobs + this.pageSize : this.pageSize;
+
     this.subscriptions.add(
-      this.jobService.getJobsGrouped(this.pageSize, statuses, []).subscribe({
+      this.jobService.getJobsGrouped(requestCount, statuses, []).subscribe({
         next: (jobs) => {
           this.enrichJobsWithNames(jobs)
             .then((enrichedJobs) => {
-              if (append) {
-                // For append, we'd need cursor support - for now just refresh
-                this.jobs = enrichedJobs;
-              } else {
-                this.jobs = enrichedJobs;
-              }
+              this.jobs = enrichedJobs;
               this.dataSource.data = this.jobs;
-              // jobsGrouped doesn't return pageInfo, so estimate based on results
-              this.hasNextPage = jobs.length >= this.pageSize;
-              this.currentCursor = null; // No cursor support yet
+              // Check if there might be more jobs (backend returned exactly what we asked for)
+              this.hasNextPage = jobs.length >= requestCount;
               this.totalJobs = jobs.length;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
@@ -239,18 +288,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
               if (!append) {
                 this.loadingService.hide();
               }
+              // Set up infinite scroll observer after data loads
+              this.setupInfiniteScroll();
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
-              const jobsToAdd = jobs.map((job) => ({ ...job }));
-              if (append) {
-                this.jobs = jobsToAdd;
-              } else {
-                this.jobs = jobsToAdd;
-              }
+              this.jobs = jobs.map((job) => ({ ...job }));
               this.dataSource.data = this.jobs;
-              this.hasNextPage = jobs.length >= this.pageSize;
-              this.currentCursor = null;
+              this.hasNextPage = jobs.length >= requestCount;
               this.totalJobs = jobs.length;
               this.isLoadingMore = false;
               this.isInitialLoading = false;
@@ -258,6 +303,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
               if (!append) {
                 this.loadingService.hide();
               }
+              // Set up infinite scroll observer after data loads
+              this.setupInfiniteScroll();
             });
         },
         error: (error) => {
@@ -507,6 +554,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
       status = 'running';
     }
 
+    // Pre-compute resources from all jobs
+    const resources = this.computeChainResources(sortedJobs);
+
     return {
       chainId,
       jobs: sortedJobs,
@@ -523,6 +573,51 @@ export class JobsListComponent implements OnInit, OnDestroy {
         (latest, job) => (new Date(job.updatedAt) > new Date(latest) ? job.updatedAt : latest),
         sortedJobs[0]?.updatedAt || '',
       ),
+      resources,
+    };
+  }
+
+  // Compute aggregated resources from chain jobs
+  private computeChainResources(jobs: EnrichedJob[]): ChainResources {
+    const podcasts = new Map<string, string>();
+    const episodes = new Map<string, string>();
+    const topics = new Map<string, string>();
+    const pulseConfigs = new Set<string>();
+    const symbols = new Map<string, EnrichedJob>();
+
+    for (const job of jobs) {
+      const podcastUuid = this.getPodcastUuid(job);
+      if (podcastUuid && !podcasts.has(podcastUuid)) {
+        podcasts.set(podcastUuid, this.getPodcastName(job));
+      }
+
+      const episodeUuid = this.getEpisodeUuid(job);
+      if (episodeUuid && !episodes.has(episodeUuid)) {
+        episodes.set(episodeUuid, this.getEpisodeName(job));
+      }
+
+      const topicUuid = this.getTopicUuid(job);
+      if (topicUuid && !topics.has(topicUuid)) {
+        topics.set(topicUuid, this.getTopicName(job));
+      }
+
+      const pulseConfigUuid = this.getPulseConfigUuid(job);
+      if (pulseConfigUuid) {
+        pulseConfigs.add(pulseConfigUuid);
+      }
+
+      const symbol = this.getSymbol(job);
+      if (symbol && !symbols.has(symbol)) {
+        symbols.set(symbol, job);
+      }
+    }
+
+    return {
+      podcasts: Array.from(podcasts.entries()).map(([uuid, name]) => ({ uuid, name })),
+      episodes: Array.from(episodes.entries()).map(([uuid, name]) => ({ uuid, name })),
+      topics: Array.from(topics.entries()).map(([uuid, name]) => ({ uuid, name })),
+      pulseConfigs: Array.from(pulseConfigs).map((uuid) => ({ uuid })),
+      symbols: Array.from(symbols.entries()).map(([symbol, job]) => ({ symbol, job })),
     };
   }
 

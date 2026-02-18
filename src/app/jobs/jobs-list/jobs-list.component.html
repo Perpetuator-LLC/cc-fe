@@ -88,6 +88,72 @@
                             Updated {{ item.updatedAt | date: 'EEE dd MMM, h:mm a' : 'local' }}
                           </span>
                         </div>
+                        <!-- Chain Resources (aggregated from all jobs) -->
+                        @if (
+                          item.resources.podcasts.length > 0 ||
+                          item.resources.episodes.length > 0 ||
+                          item.resources.topics.length > 0 ||
+                          item.resources.pulseConfigs.length > 0 ||
+                          item.resources.symbols.length > 0
+                        ) {
+                          <div class="chain-resources" (click)="$event.stopPropagation()">
+                            @for (podcast of item.resources.podcasts; track podcast.uuid) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag podcast-tag"
+                                [routerLink]="['/media/podcasts', podcast.uuid]"
+                                matTooltip="Podcast"
+                              >
+                                <mat-icon>mic</mat-icon>
+                                {{ podcast.name }}
+                              </button>
+                            }
+                            @for (episode of item.resources.episodes; track episode.uuid) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag episode-tag"
+                                [routerLink]="['/media/episodes', episode.uuid]"
+                                matTooltip="Episode"
+                              >
+                                <mat-icon>podcasts</mat-icon>
+                                {{ episode.name }}
+                              </button>
+                            }
+                            @for (topic of item.resources.topics; track topic.uuid) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag topic-tag"
+                                [routerLink]="['/media/topics', topic.uuid]"
+                                matTooltip="Topic"
+                              >
+                                <mat-icon>topic</mat-icon>
+                                {{ topic.name }}
+                              </button>
+                            }
+                            @for (pulse of item.resources.pulseConfigs; track pulse.uuid) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag pulse-tag"
+                                [routerLink]="['/media/pulses', pulse.uuid]"
+                                matTooltip="Pulse"
+                              >
+                                <mat-icon>vital_signs</mat-icon>
+                                Pulse
+                              </button>
+                            }
+                            @for (symbolInfo of item.resources.symbols; track symbolInfo.symbol) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag symbol-tag"
+                                (click)="navigateToSymbol(symbolInfo.job)"
+                                [matTooltip]="getSymbolTooltip(symbolInfo.job)"
+                              >
+                                <mat-icon>show_chart</mat-icon>
+                                {{ symbolInfo.symbol }}
+                              </button>
+                            }
+                          </div>
+                        }
                       </div>
                       <span class="timeline-status" [ngClass]="chainStatusClass(item.status)">
                         {{ item.status.toUpperCase() }}
@@ -306,21 +372,30 @@
         }
       </div>
 
-      <!-- Load More Jobs button -->
-      @if (hasNextPage && !loading && !isLoadingMore && groupedJobs.length > 0) {
-        <div class="load-more-container">
-          <button
-            mat-flat-button
-            color="primary"
-            class="load-more-btn"
-            (click)="loadMoreJobs()"
-            [disabled]="isLoadingMore"
-          >
-            @if (isLoadingMore) {
-              <mat-icon>refresh</mat-icon>
-            }
-            {{ isLoadingMore ? 'Loading...' : 'Load More Jobs' }}
-          </button>
+      <!-- Infinite scroll sentinel and loading indicator -->
+      @if (groupedJobs.length > 0) {
+        <div class="infinite-scroll-container">
+          <!-- Sentinel element for IntersectionObserver - always rendered when hasNextPage -->
+          @if (hasNextPage) {
+            <div #scrollSentinel class="scroll-sentinel"></div>
+          }
+          <!-- Loading indicator when fetching more jobs -->
+          @if (isLoadingMore) {
+            <div class="loading-more-indicator">
+              <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+              <span>Loading more jobs...</span>
+            </div>
+          }
+          <!-- Load More button as fallback -->
+          @if (hasNextPage && !isLoadingMore) {
+            <button mat-stroked-button class="load-more-btn" (click)="loadMoreJobs()">Load More Jobs</button>
+          }
+          <!-- End of list indicator -->
+          @if (!hasNextPage && !isLoadingMore) {
+            <div class="end-of-list">
+              <span>All jobs loaded</span>
+            </div>
+          }
         </div>
       }
     </div>

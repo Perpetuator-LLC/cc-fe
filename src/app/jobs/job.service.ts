@@ -623,6 +623,21 @@ export class JobService extends BaseService implements OnDestroy {
           chainId
           chainPosition
           chainJobCount
+          chainJobs {
+            id
+            uuid
+            kind
+            status
+            error
+            result
+            args
+            createdAt
+            updatedAt
+            cost
+            triggerSource
+            chainId
+            chainPosition
+          }
         }
       }
     `;
