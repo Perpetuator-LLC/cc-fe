@@ -1,19 +1,19 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { PulsesService } from '../pulses.service';
+import { UserService, UserPreferences } from '../../user/user.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatError, MatFormField } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
-import { MatSelect, MatOption } from '@angular/material/select';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
-import { MatSliderModule } from '@angular/material/slider';
-import { DeliveryMethod, ScheduleFrequency } from '../pulses.types';
-import { Router } from '@angular/router';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-create-pulse-dialog',
@@ -24,66 +24,110 @@ import { Router } from '@angular/router';
     MatFormField,
     MatInput,
     MatButton,
+    MatIconButton,
     MatLabel,
     MatError,
-    MatSelect,
-    MatOption,
     MatDialogModule,
     MatIcon,
-    MatSliderModule,
+    MatCheckbox,
+    MatTooltip,
+    RouterLink,
   ],
   templateUrl: './create-pulse-dialog.component.html',
   styleUrl: './create-pulse-dialog.component.scss',
 })
 export class CreatePulseDialogComponent implements OnInit, OnDestroy {
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly userService = inject(UserService);
+  readonly dialogRef = inject(MatDialogRef<CreatePulseDialogComponent>);
+  private readonly router = inject(Router);
+
   pulseForm: FormGroup;
   private subscriptions = new Subscription();
   isSubmitting = false;
+  descriptionError: string | null = null;
+  titleError: string | null = null;
 
-  // Options for dropdowns
-  toneOptions = [
-    { value: 'professional', label: 'Professional' },
-    { value: 'casual', label: 'Casual' },
-    { value: 'formal', label: 'Formal' },
-  ];
+  // Phone verification status for SMS toggle
+  phoneVerified = false;
+  phoneNumber: string | null = null;
+  loadingPreferences = true;
 
-  deliveryOptions: { value: DeliveryMethod; label: string }[] = [
-    { value: 'in_app', label: 'In-App Only' },
-    { value: 'email_link', label: 'Email' },
-    { value: 'sms_link', label: 'SMS (requires verified phone)' },
-  ];
-
-  scheduleOptions: { value: ScheduleFrequency; label: string }[] = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekdays', label: 'Weekdays (Mon-Fri)' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'once', label: 'One-time' },
-  ];
-
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private pulsesService: PulsesService,
-    public dialogRef: MatDialogRef<CreatePulseDialogComponent>,
-    private router: Router,
-  ) {
+  constructor() {
     this.pulseForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      description: [''],
-      targetDurationMinutes: [3, [Validators.required, Validators.min(1), Validators.max(10)]],
-      tone: ['professional', Validators.required],
-      deliveryMethod: ['in_app', Validators.required],
-      scheduleFrequency: ['daily', Validators.required],
-      scheduleTime: ['07:00'],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      title: [''],
+      smsNotificationEnabled: [false],
+    });
+
+    this.pulseForm.get('description')?.valueChanges.subscribe(() => {
+      this.updateDescriptionValidation();
+    });
+
+    this.pulseForm.get('title')?.valueChanges.subscribe(() => {
+      this.updateTitleValidation();
     });
   }
 
   ngOnInit(): void {
     this.messageService.clearMessages();
+    this.loadUserPreferences();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Load user preferences to check phone verification status
+   */
+  private loadUserPreferences(): void {
+    this.loadingPreferences = true;
+    this.subscriptions.add(
+      this.userService.getUserPreferences().subscribe({
+        next: (preferences: UserPreferences) => {
+          this.phoneNumber = preferences.sms.phoneNumber || null;
+          this.phoneVerified = preferences.sms.isVerified || false;
+          this.loadingPreferences = false;
+
+          // Disable SMS toggle if phone not verified
+          if (!this.phoneVerified) {
+            this.pulseForm.get('smsNotificationEnabled')?.disable();
+          }
+        },
+        error: () => {
+          this.loadingPreferences = false;
+          // Disable SMS toggle on error
+          this.pulseForm.get('smsNotificationEnabled')?.disable();
+        },
+      }),
+    );
+  }
+
+  private updateDescriptionValidation(): void {
+    const errors = this.pulseForm.get('description')?.errors;
+    if (errors) {
+      if (errors['required']) {
+        this.descriptionError = 'Description is required';
+      } else if (errors['minlength']) {
+        this.descriptionError = 'Description must be at least 10 characters';
+      } else {
+        this.descriptionError = 'Enter a valid description';
+      }
+    } else {
+      this.descriptionError = null;
+    }
+  }
+
+  private updateTitleValidation(): void {
+    const errors = this.pulseForm.get('title')?.errors;
+    if (errors) {
+      this.titleError = 'Enter a valid title';
+    } else {
+      this.titleError = null;
+    }
   }
 
   onSubmit(): void {
@@ -92,26 +136,22 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
     }
 
     this.isSubmitting = true;
-    const formValue = this.pulseForm.value;
+    const formValue = this.pulseForm.getRawValue();
 
     this.subscriptions.add(
       this.pulsesService
-        .createPulseConfig({
-          name: formValue.name,
-          description: formValue.description || undefined,
-          targetDurationMinutes: formValue.targetDurationMinutes,
-          tone: formValue.tone,
-          deliveryMethod: formValue.deliveryMethod,
-          scheduleFrequency: formValue.scheduleFrequency,
-          scheduleTime: formValue.scheduleTime,
+        .generatePulseFromDescription({
+          description: formValue.description,
+          title: formValue.title || undefined,
+          smsNotificationEnabled: formValue.smsNotificationEnabled || false,
         })
         .subscribe({
           next: (result) => {
             this.isSubmitting = false;
-            this.messageService.success('Pulse configuration created successfully!');
-            this.dialogRef.close(result.pulseConfig);
-            // Navigate to the new pulse config for editing
-            this.router.navigate(['/media/pulses', result.pulseConfig.uuid]);
+            this.messageService.success('Pulse generation started! You can track progress in the jobs panel.');
+            this.dialogRef.close({ jobUuid: result.job.uuid });
+            // Navigate to jobs to track progress
+            this.router.navigate(['/jobs']);
           },
           error: (err: Error) => {
             this.isSubmitting = false;
@@ -123,19 +163,5 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.dialogRef.close();
-  }
-
-  formatDuration(value: number): string {
-    return `${value} min`;
-  }
-
-  /**
-   * Calculate target words based on duration.
-   * Uses default 150 WPM since voice isn't selected during creation.
-   * Actual WPM will be recalculated when voice is set.
-   */
-  getTargetWords(): number {
-    const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
-    return minutes * 150; // Default WPM
   }
 }

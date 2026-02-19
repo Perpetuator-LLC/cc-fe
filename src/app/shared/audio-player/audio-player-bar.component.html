@@ -106,13 +106,13 @@
           <button mat-button (click)="clearAll()" matTooltip="Clear history and queue">Clear All</button>
         </div>
 
-        <div class="playlist-container">
+        <div class="playlist-container" #playlistContainer>
           <!-- History Section (oldest at top) -->
           @if (history.length > 0) {
             <div class="playlist-section history-section">
               @for (track of getHistoryReversed(); track track.id) {
                 <div class="playlist-item history-item">
-                  <div class="playlist-item-content" (click)="playTrack(track)">
+                  <div class="playlist-item-content" (click)="playFromHistory(track)">
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>

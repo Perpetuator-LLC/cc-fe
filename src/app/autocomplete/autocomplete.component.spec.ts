@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { AutocompleteComponent } from './autocomplete.component';
 import { Apollo } from 'apollo-angular';
@@ -9,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ApolloQueryResult } from '@apollo/client/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AutocompleteResult } from '../types';
 import { startWith, switchMap } from 'rxjs/operators';
@@ -22,11 +21,12 @@ describe('AutocompleteComponent', () => {
   beforeEach(async () => {
     const apolloMock = jasmine.createSpyObj('Apollo', ['query']);
 
-    const mockQueryResult: ApolloQueryResult<{ getAutocomplete: { results: AutocompleteResult[] } }> = {
-      data: { getAutocomplete: { results: [] } },
+    const mockQueryResult = {
+      data: { getAutocomplete: { results: [] as AutocompleteResult[] } },
       loading: false,
       networkStatus: 7,
-    };
+      partial: false,
+    } as unknown;
 
     apolloMock.query.and.returnValue(of(mockQueryResult));
 

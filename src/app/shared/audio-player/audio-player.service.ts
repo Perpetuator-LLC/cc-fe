@@ -493,6 +493,14 @@ export class AudioPlayerService {
   }
 
   /**
+   * Set the entire queue (replaces existing queue)
+   */
+  setQueue(tracks: AudioTrack[]): void {
+    this._queue.set(tracks);
+    this.saveQueueToStorage();
+  }
+
+  /**
    * Move track in queue (reorder)
    */
   reorderQueue(fromIndex: number, toIndex: number): void {

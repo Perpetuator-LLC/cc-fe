@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Output, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, of, take } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
@@ -47,6 +47,8 @@ const AUTOCOMPLETE_QUERY = gql`
   styleUrls: ['./autocomplete.component.scss'],
 })
 export class AutocompleteComponent {
+  private readonly apollo = inject(Apollo);
+
   results: AutocompleteResult[] = [];
   tickerControl = new FormControl();
   filteredOptions: Observable<{ symbol: string; name: string; cik: string }[]>;
@@ -56,7 +58,7 @@ export class AutocompleteComponent {
   @Output() enterPressed = new EventEmitter<void>();
   @Output() valueSubmitted = new EventEmitter<string>();
 
-  constructor(private readonly apollo: Apollo) {
+  constructor() {
     this.filteredOptions = this.tickerControl.valueChanges.pipe(
       startWith(''),
       debounceTime(200), // Wait (ms) after the last keystroke before sending, avoid unnecessary requests
@@ -89,7 +91,7 @@ export class AutocompleteComponent {
       .pipe(
         map((result) => {
           // Map new API response to AutocompleteResult format
-          return (result.data.autocomplete || []).map((item: AutocompleteItem) => ({
+          return (result.data?.autocomplete || []).map((item: AutocompleteItem) => ({
             symbol: item.symbol || item.display,
             name: item.name || item.display,
             cik: '', // Not available in new API

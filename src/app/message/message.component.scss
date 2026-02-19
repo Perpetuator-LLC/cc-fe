@@ -2,8 +2,8 @@
 .message-container {
   position: fixed;
   z-index: 3000; /* Above cookie banner (z-index: 2000) */
-  right: 24px;
   bottom: 24px;
+  left: 24px;
 
   width: 360px; // Slightly wider for better readability
   border-radius: 12px; // MD3 medium radius

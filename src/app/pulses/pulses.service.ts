@@ -37,6 +37,7 @@ const PULSE_CONFIG_FRAGMENT = gql`
     introText
     outroText
     deliveryMethod
+    smsNotificationEnabled
     scheduleFrequency
     scheduleTime
     scheduleTimezone
@@ -382,6 +383,54 @@ export class PulsesService extends BaseService {
   }
 
   /**
+   * Generate a pulse config from a natural language description.
+   * AI will generate name, RSS feeds, search terms, watchlist symbols,
+   * tone, schedule suggestion, and duration target.
+   */
+  generatePulseFromDescription(input: {
+    description: string;
+    title?: string;
+    smsNotificationEnabled?: boolean;
+  }): Observable<{ success: boolean; message: string; job: { uuid: string; status: string } }> {
+    const GQL = gql`
+      mutation GeneratePulseFromDescription($description: String!, $title: String, $smsNotificationEnabled: Boolean) {
+        generatePulseFromDescription(
+          description: $description
+          title: $title
+          smsNotificationEnabled: $smsNotificationEnabled
+        ) {
+          success
+          message
+          job {
+            uuid
+            status
+          }
+        }
+      }
+    `;
+
+    interface Response {
+      generatePulseFromDescription: {
+        success: boolean;
+        message: string;
+        job: { uuid: string; status: string };
+      };
+    }
+
+    return this.mutate<Response>({
+      mutation: GQL,
+      variables: input,
+    }).pipe(
+      map((data) => {
+        if (!data.generatePulseFromDescription.success) {
+          throw new Error(data.generatePulseFromDescription.message);
+        }
+        return data.generatePulseFromDescription;
+      }),
+    );
+  }
+
+  /**
    * Update an existing pulse configuration
    */
   updatePulseConfig(
@@ -399,6 +448,7 @@ export class PulsesService extends BaseService {
       introText: string;
       outroText: string;
       deliveryMethod: DeliveryMethod;
+      smsNotificationEnabled: boolean;
       scheduleFrequency: ScheduleFrequency;
       scheduleTime: string;
       scheduleTimezone: string;
@@ -422,6 +472,7 @@ export class PulsesService extends BaseService {
         $introText: String
         $outroText: String
         $deliveryMethod: String
+        $smsNotificationEnabled: Boolean
         $scheduleFrequency: String
         $scheduleTime: String
         $scheduleTimezone: String
@@ -442,6 +493,7 @@ export class PulsesService extends BaseService {
           introText: $introText
           outroText: $outroText
           deliveryMethod: $deliveryMethod
+          smsNotificationEnabled: $smsNotificationEnabled
           scheduleFrequency: $scheduleFrequency
           scheduleTime: $scheduleTime
           scheduleTimezone: $scheduleTimezone

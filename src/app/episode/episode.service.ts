@@ -82,6 +82,7 @@ const GET_EPISODES = gql`
           title
           content
           isLive
+          audioUrl
           currentVersionNumber
           versions {
             uuid

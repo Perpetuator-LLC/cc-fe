@@ -1,78 +1,121 @@
 /* Copyright (c) 2026 Perpetuator LLC */
 
-.create-pulse-dialog {
-  min-width: 400px;
+.mat-mdc-dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+}
 
-  h2[mat-dialog-title] {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    margin: 0 0 16px;
-
-    font-size: 20px;
-    color: var(--md-sys-color-on-surface);
-
-    mat-icon {
-      color: var(--md-sys-color-primary);
-    }
-  }
-
-  .dialog-description {
-    margin: 0 0 16px;
-    font-size: 14px;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .full-width {
+  h2 {
     width: 100%;
+    margin: 0;
+    font-size: 18px;
   }
 
-  .duration-field {
+  button {
+    cursor: pointer;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: none;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-dialog-content {
+  overflow-y: auto;
+  min-width: 400px;
+  max-height: 70vh;
+
+  @media screen and (width <= 576px) {
+    min-width: 100%;
+  }
+}
+
+mat-dialog-actions {
+  flex-wrap: nowrap;
+}
+
+.notification-section {
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .notification-option {
     display: flex;
     flex-direction: column;
     gap: 8px;
 
-    margin-bottom: 16px;
-    padding: 12px;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-
-    background: var(--md-sys-color-surface-container-low);
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
+    mat-checkbox {
       color: var(--md-sys-color-on-surface);
     }
 
-    mat-slider {
-      width: 100%;
-    }
-  }
+    .verify-link {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
 
-  mat-dialog-content {
-    overflow-y: auto;
-    min-height: 300px;
-    max-height: 60vh;
-  }
+      font-size: 12px;
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
 
-  mat-dialog-actions {
-    padding: 16px;
-    border-top: 1px solid var(--md-sys-color-outline-variant);
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+      }
 
-    button {
-      min-width: 100px;
+      &:hover {
+        text-decoration: underline;
+      }
     }
 
     mat-spinner {
       display: inline-block;
     }
   }
+}
+
+.cancel-btn {
+  width: 88px;
+  height: 40px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.generate-btn {
+  width: 180px;
+  height: 40px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mat-mdc-select {
+  color: var(--md-sys-color-on-surface);
 }
