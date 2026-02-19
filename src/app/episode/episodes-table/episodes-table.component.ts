@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, Input, inject } from '@angular/core';
 import { MatCard, MatCardHeader } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatOption } from '@angular/material/core';
@@ -24,6 +24,7 @@ import { MatSort, Sort } from '@angular/material/sort';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -37,6 +38,7 @@ import { RelayPaginatorBase } from '../../utils/relay-paginator';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { MessageService } from '../../message.service';
 import { LoadingService } from '../../layout/loading.service';
+import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 
 @Component({
   selector: 'app-episodes-table',
@@ -68,6 +70,7 @@ import { LoadingService } from '../../layout/loading.service';
     MatPaginator,
     MatCheckboxModule,
     MatMenuItem,
+    MatDivider,
     MatPrefix,
     MatIconButton,
     MatInput,
@@ -84,6 +87,15 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
   @Input() showCreateButton = false;
 
   private subscriptions = new Subscription();
+  // Dependencies
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly dialog = inject(MatDialog);
+  private readonly loadingService = inject(LoadingService);
+  private readonly audioPlayerService = inject(AudioPlayerService);
+
   episodes: Episode[] = [];
   displayedColumns: string[] = ['title', 'podcast', 'status', 'actions'];
   totalEpisodes = 0;
@@ -99,14 +111,7 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
   selectedLiveStatus: string | null = null;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(
-    private router: Router,
-    private messageService: MessageService,
-    private episodeService: EpisodeService,
-    private podcastsService: PodcastsService,
-    private dialog: MatDialog,
-    private loadingService: LoadingService,
-  ) {
+  constructor() {
     super();
   }
 
@@ -277,5 +282,66 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
 
     const status = this.isEpisodeFullyValidated(episode) ? 'Validated' : 'Not Validated';
     return `${status}\n - ${parts.join('\n - ')}`;
+  }
+
+  // ==================== AUDIO PLAYER METHODS ====================
+
+  /**
+   * Create an AudioTrack from an episode
+   */
+  private createTrack(episode: Episode): AudioTrack {
+    return {
+      id: episode.uuid,
+      title: episode.title || 'Untitled Episode',
+      subtitle: episode.podcast?.name || 'Unknown Podcast',
+      audioUrl: episode.audioUrl,
+      type: 'episode',
+      sourceRoute: `/media/episodes/${episode.uuid}`,
+    };
+  }
+
+  /**
+   * Check if episode has audio available
+   */
+  hasAudio(episode: Episode): boolean {
+    return !!episode.audioUrl;
+  }
+
+  /**
+   * Play episode immediately
+   */
+  playEpisode(episode: Episode): void {
+    if (!episode.audioUrl) {
+      this.messageService.warning('No audio available for this episode');
+      return;
+    }
+    const track = this.createTrack(episode);
+    this.audioPlayerService.play(track);
+  }
+
+  /**
+   * Add episode to play next (after current track)
+   */
+  playEpisodeNext(episode: Episode): void {
+    if (!episode.audioUrl) {
+      this.messageService.warning('No audio available for this episode');
+      return;
+    }
+    const track = this.createTrack(episode);
+    this.audioPlayerService.playNext(track);
+    this.messageService.success('Added to play next');
+  }
+
+  /**
+   * Add episode to end of queue
+   */
+  addEpisodeToQueue(episode: Episode): void {
+    if (!episode.audioUrl) {
+      this.messageService.warning('No audio available for this episode');
+      return;
+    }
+    const track = this.createTrack(episode);
+    this.audioPlayerService.addToQueue(track);
+    this.messageService.success('Added to queue');
   }
 }

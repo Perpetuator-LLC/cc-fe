@@ -1,93 +1,73 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
-<div class="create-pulse-dialog">
-  <h2 mat-dialog-title>
-    <mat-icon>vital_signs</mat-icon>
-    Create New Pulse
-  </h2>
-
-  <mat-dialog-content>
-    <p class="dialog-description">
-      Create a personalized audio news feed. You can configure content sources and alert triggers after creation.
-    </p>
-
-    <form [formGroup]="pulseForm" (ngSubmit)="onSubmit()">
-      <!-- Name -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Pulse Name</mat-label>
-        <input matInput formControlName="name" placeholder="e.g., Morning Tech Brief" />
-        @if (pulseForm.get('name')?.hasError('required') && pulseForm.get('name')?.touched) {
-          <mat-error>Name is required</mat-error>
-        }
-        @if (pulseForm.get('name')?.hasError('minlength')) {
-          <mat-error>Name must be at least 3 characters</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Description -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description (optional)</mat-label>
-        <input matInput formControlName="description" placeholder="Brief description of this pulse" />
-      </mat-form-field>
-
-      <!-- Target Duration -->
-      <div class="duration-field">
-        <label
-          >Target Duration: {{ getTargetWords() }} words (~{{
-            pulseForm.get('targetDurationMinutes')?.value
-          }}
-          minutes)</label
-        >
-        <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
-          <input matSliderThumb formControlName="targetDurationMinutes" />
-        </mat-slider>
-      </div>
-
-      <!-- Tone -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Tone</mat-label>
-        <mat-select formControlName="tone">
-          @for (option of toneOptions; track option.value) {
-            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Schedule Frequency -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Schedule</mat-label>
-        <mat-select formControlName="scheduleFrequency">
-          @for (option of scheduleOptions; track option.value) {
-            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Schedule Time -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Time</mat-label>
-        <input matInput type="time" formControlName="scheduleTime" />
-      </mat-form-field>
-
-      <!-- Delivery Method -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Delivery Method</mat-label>
-        <mat-select formControlName="deliveryMethod">
-          @for (option of deliveryOptions; track option.value) {
-            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </form>
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="pulseForm.invalid || isSubmitting">
-      @if (isSubmitting) {
-        <mat-spinner diameter="20"></mat-spinner>
-      } @else {
-        Create Pulse
-      }
-    </button>
-  </mat-dialog-actions>
+<div class="dialog-header" mat-dialog-title>
+  <h2>Generate Pulse</h2>
+  <button mat-icon-button (click)="dialogRef.close()">
+    <mat-icon>close</mat-icon>
+  </button>
 </div>
+<mat-dialog-content>
+  <form [formGroup]="pulseForm" (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <mat-label>Description (Required)</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        required
+        rows="4"
+        placeholder="Describe your ideal audio news feed... (e.g., 'A morning market brief covering AI and tech news, focusing on NVIDIA and semiconductor stocks.')"
+      ></textarea>
+      @if (descriptionError) {
+        <mat-error>{{ descriptionError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Title (Optional)</mat-label>
+      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
+      @if (titleError) {
+        <mat-error>{{ titleError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="notification-section">
+      <h3>Notifications</h3>
+      <div class="notification-option">
+        <mat-checkbox
+          formControlName="smsNotificationEnabled"
+          [matTooltip]="
+            !phoneVerified
+              ? 'Verify your phone number in Settings to enable SMS notifications'
+              : 'Receive an SMS when your pulse is ready'
+          "
+        >
+          Notify me via SMS when ready
+        </mat-checkbox>
+        @if (!loadingPreferences && !phoneVerified) {
+          <a routerLink="/user" class="verify-link" (click)="dialogRef.close()">
+            <mat-icon>phone</mat-icon>
+            Verify phone number
+          </a>
+        }
+        @if (loadingPreferences) {
+          <mat-spinner diameter="16" />
+        }
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
+  <button
+    class="generate-btn"
+    mat-flat-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="!pulseForm.valid || isSubmitting"
+  >
+    @if (isSubmitting) {
+      <mat-spinner diameter="20" />
+    } @else {
+      Generate Pulse
+    }
+  </button>
+</mat-dialog-actions>

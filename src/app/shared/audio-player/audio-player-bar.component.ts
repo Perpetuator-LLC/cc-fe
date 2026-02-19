@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { AudioPlayerService, AudioTrack } from './audio-player.service';
 
 const HISTORY_STORAGE_KEY = 'audio-player-history';
-const MAX_HISTORY_SIZE = 20;
+const MAX_HISTORY_SIZE = 10;
 
 /**
  * Persistent audio player bar that displays at the bottom of the screen.
@@ -32,13 +32,17 @@ const MAX_HISTORY_SIZE = 20;
   templateUrl: './audio-player-bar.component.html',
   styleUrl: './audio-player-bar.component.scss',
 })
-export class AudioPlayerBarComponent {
+export class AudioPlayerBarComponent implements AfterViewChecked {
   protected readonly audioService = inject(AudioPlayerService);
   private readonly router = inject(Router);
+
+  @ViewChild('playlistContainer') playlistContainer?: ElementRef<HTMLDivElement>;
 
   showQueue = false;
   history: AudioTrack[] = [];
   private previousTrackForHistory: AudioTrack | null = null;
+  private shouldScrollToBottom = false;
+  private skipNextHistoryUpdate = false; // Flag to prevent effect from re-adding track when playing from history
 
   constructor() {
     this.loadHistory();
@@ -46,6 +50,12 @@ export class AudioPlayerBarComponent {
     // Track history when track changes
     effect(() => {
       const currentTrack = this.audioService.track();
+      if (this.skipNextHistoryUpdate) {
+        // Reset flag and update previous track without adding to history
+        this.skipNextHistoryUpdate = false;
+        this.previousTrackForHistory = currentTrack;
+        return;
+      }
       if (this.previousTrackForHistory && currentTrack?.id !== this.previousTrackForHistory.id) {
         this.addToHistory(this.previousTrackForHistory);
       }
@@ -75,6 +85,23 @@ export class AudioPlayerBarComponent {
   // Queue Panel Controls
   toggleQueue(): void {
     this.showQueue = !this.showQueue;
+    if (this.showQueue) {
+      this.shouldScrollToBottom = true;
+    }
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.shouldScrollToBottom && this.playlistContainer) {
+      this.scrollPlaylistToBottom();
+      this.shouldScrollToBottom = false;
+    }
+  }
+
+  private scrollPlaylistToBottom(): void {
+    if (this.playlistContainer) {
+      const container = this.playlistContainer.nativeElement;
+      container.scrollTop = container.scrollHeight;
+    }
   }
 
   nextTrack(): void {
@@ -95,7 +122,39 @@ export class AudioPlayerBarComponent {
     return this.history.length > 0;
   }
 
+  /**
+   * Play a track from the queue, adding skipped tracks to history.
+   * When user clicks a queue item that's not the next one:
+   * 1. The current track goes to history
+   * 2. Any skipped tracks (between current and clicked) go to history
+   * 3. The clicked track starts playing
+   */
   playFromQueue(trackId: string): void {
+    const queue = this.audioService.queue();
+    const clickedIndex = queue.findIndex((t) => t.id === trackId);
+    if (clickedIndex === -1) return;
+
+    // Get the current track to add to history
+    const currentTrack = this.audioService.track();
+
+    // Get tracks that will be skipped (tracks before the clicked one in queue)
+    const skippedTracks = queue.slice(0, clickedIndex);
+
+    // Add current track to history first (it's the most recently played)
+    if (currentTrack) {
+      this.addToHistory(currentTrack);
+    }
+
+    // Add skipped tracks to history in order (oldest skipped first = lowest index)
+    // We add them one by one so they're in the right order in history
+    for (const track of skippedTracks) {
+      this.addToHistory(track);
+    }
+
+    // Skip the history update from the effect since we've handled it
+    this.skipNextHistoryUpdate = true;
+
+    // Now skip to the track
     this.audioService.skipToTrack(trackId);
   }
 
@@ -104,7 +163,65 @@ export class AudioPlayerBarComponent {
     this.audioService.removeFromQueue(trackId);
   }
 
-  playTrack(track: AudioTrack): void {
+  /**
+   * Play a track from history, properly restoring the play order.
+   * When user clicks a history item:
+   * 1. All tracks after it (more recently played) go to the front of the queue
+   * 2. The current track also goes to the front of the queue
+   * 3. The clicked track becomes the current track
+   * This way, if user plays through, they'll hear everything they missed in order.
+   */
+  playFromHistory(track: AudioTrack): void {
+    // Find the index of the clicked track in history
+    // History is stored with most recent at index 0
+    const clickedIndex = this.history.findIndex((t) => t.id === track.id);
+    if (clickedIndex === -1) return;
+
+    // Get all tracks that were played AFTER the clicked track (more recent = lower index)
+    // These need to go back into the queue so user hears them again
+    const tracksToRequeue = this.history.slice(0, clickedIndex);
+
+    // Get the currently playing track (if any) - it also goes to the queue
+    const currentTrack = this.audioService.track();
+
+    // Build the new queue: [more recent history items] + [current track] + [existing queue]
+    const existingQueue = this.audioService.queue();
+    const newQueueItems: AudioTrack[] = [];
+
+    // Add history items that were played after clicked track (in reverse order so oldest plays first)
+    // tracksToRequeue is [most recent, ..., least recent], we want [least recent, ..., most recent]
+    for (let i = tracksToRequeue.length - 1; i >= 0; i--) {
+      const historyTrack = tracksToRequeue[i];
+      // Don't add duplicates
+      if (!newQueueItems.some((t) => t.id === historyTrack.id)) {
+        newQueueItems.push(historyTrack);
+      }
+    }
+
+    // Add current track if it exists and isn't already queued
+    if (currentTrack && !newQueueItems.some((t) => t.id === currentTrack.id)) {
+      newQueueItems.push(currentTrack);
+    }
+
+    // Add existing queue items that aren't duplicates
+    for (const queueTrack of existingQueue) {
+      if (!newQueueItems.some((t) => t.id === queueTrack.id)) {
+        newQueueItems.push(queueTrack);
+      }
+    }
+
+    // Update the queue with the new order
+    this.audioService.setQueue(newQueueItems);
+
+    // Remove the clicked track and all tracks before it (more recent) from history
+    // Keep only the tracks that were played before the clicked track (older)
+    this.history = this.history.slice(clickedIndex + 1);
+    this.saveHistory();
+
+    // Skip the next history update from the effect - we've already handled the history
+    this.skipNextHistoryUpdate = true;
+
+    // Play the clicked track
     this.audioService.play(track);
   }
 

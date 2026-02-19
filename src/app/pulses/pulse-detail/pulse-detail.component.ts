@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, debounceTime, filter, switchMap } from 'rxjs';
@@ -45,6 +45,8 @@ import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
+import { UserService, UserPreferences } from '../../user/user.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-pulse-detail',
@@ -76,6 +78,7 @@ import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-select
     MatTableModule,
     MatChipsModule,
     VoiceSelectorComponent,
+    RouterLink,
   ],
 })
 export class PulseDetailComponent implements OnInit, OnDestroy {
@@ -87,6 +90,11 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   protected selectedTabIndex = 0;
   protected generatingPulse = false;
   protected selectedPulseUuid: string | null = null;
+
+  // Phone verification status for SMS toggle
+  phoneVerified = false;
+  phoneNumber: string | null = null;
+  loadingPreferences = true;
 
   // Data
   pulseConfig: PulseConfig | null = null;
@@ -148,19 +156,21 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   // Pulse history columns
   pulseHistoryColumns = ['title', 'status', 'duration', 'createdAt', 'actions'];
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private pulsesService: PulsesService,
-    private loadingService: LoadingService,
-    protected shareService: ShareService,
-    private dialog: MatDialog,
-    private jobService: JobService,
-    private audioPlayerService: AudioPlayerService,
-  ) {
+  // Dependencies
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly loadingService = inject(LoadingService);
+  protected readonly shareService = inject(ShareService);
+  private readonly dialog = inject(MatDialog);
+  private readonly jobService = inject(JobService);
+  private readonly audioPlayerService = inject(AudioPlayerService);
+  private readonly userService = inject(UserService);
+
+  constructor() {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
       throw new Error('Failed to get Pulse Config ID from route.');
@@ -179,6 +189,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
       introText: [''],
       outroText: [''],
       deliveryMethod: ['in_app'],
+      smsNotificationEnabled: [false],
       scheduleFrequency: ['daily'],
       scheduleTime: ['07:00'],
       scheduleTimezone: ['America/New_York'],
@@ -205,6 +216,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
     this.loadPulseConfig();
     this.loadPulseHistory();
+    this.loadUserPreferences();
     this.setupAutoSave();
   }
 
@@ -235,6 +247,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
             introText: config.introText || '',
             outroText: config.outroText || '',
             deliveryMethod: config.deliveryMethod,
+            smsNotificationEnabled: config.smsNotificationEnabled || false,
             scheduleFrequency: config.scheduleFrequency,
             scheduleTime: config.scheduleTime || '07:00',
             scheduleTimezone: config.scheduleTimezone,
@@ -262,6 +275,34 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.messageService.error(`Failed to load pulse history: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Load user preferences to check phone verification status
+   */
+  private loadUserPreferences(): void {
+    this.loadingPreferences = true;
+    this.subscriptions.add(
+      this.userService.getUserPreferences().subscribe({
+        next: (preferences: UserPreferences) => {
+          this.phoneNumber = preferences.sms.phoneNumber || null;
+          this.phoneVerified = preferences.sms.isVerified || false;
+          this.loadingPreferences = false;
+
+          // Disable SMS toggle if phone not verified
+          if (!this.phoneVerified) {
+            this.pulseForm.get('smsNotificationEnabled')?.disable();
+          } else {
+            this.pulseForm.get('smsNotificationEnabled')?.enable();
+          }
+        },
+        error: () => {
+          this.loadingPreferences = false;
+          // Disable SMS toggle on error
+          this.pulseForm.get('smsNotificationEnabled')?.disable();
         },
       }),
     );

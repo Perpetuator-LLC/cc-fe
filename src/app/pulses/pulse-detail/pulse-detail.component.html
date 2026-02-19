@@ -532,6 +532,29 @@
                     }
                   </mat-select>
                 </mat-form-field>
+
+                <!-- SMS Notification Toggle -->
+                <div class="notification-setting">
+                  <mat-checkbox
+                    formControlName="smsNotificationEnabled"
+                    [matTooltip]="
+                      !phoneVerified
+                        ? 'Verify your phone number in Settings to enable SMS notifications'
+                        : 'Receive an SMS when your pulse is ready'
+                    "
+                  >
+                    Notify me via SMS when ready
+                  </mat-checkbox>
+                  @if (!loadingPreferences && !phoneVerified) {
+                    <a routerLink="/user" class="verify-link">
+                      <mat-icon>phone</mat-icon>
+                      Verify phone number
+                    </a>
+                  }
+                  @if (loadingPreferences) {
+                    <mat-spinner diameter="16" />
+                  }
+                </div>
               </mat-card-content>
             </mat-card>
           </form>

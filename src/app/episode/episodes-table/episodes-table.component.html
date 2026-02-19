@@ -122,6 +122,21 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+                @if (hasAudio(episode)) {
+                  <button mat-menu-item (click)="playEpisode(episode)">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Play</span>
+                  </button>
+                  <button mat-menu-item (click)="playEpisodeNext(episode)">
+                    <mat-icon>queue_play_next</mat-icon>
+                    <span>Play Next</span>
+                  </button>
+                  <button mat-menu-item (click)="addEpisodeToQueue(episode)">
+                    <mat-icon>playlist_add</mat-icon>
+                    <span>Add to Queue</span>
+                  </button>
+                  <mat-divider />
+                }
                 <button mat-menu-item [routerLink]="['/media/episodes', episode.uuid]">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
@@ -173,6 +188,21 @@
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
+                      @if (hasAudio(episode)) {
+                        <button mat-menu-item (click)="playEpisode(episode)">
+                          <mat-icon>play_arrow</mat-icon>
+                          <span>Play</span>
+                        </button>
+                        <button mat-menu-item (click)="playEpisodeNext(episode)">
+                          <mat-icon>queue_play_next</mat-icon>
+                          <span>Play Next</span>
+                        </button>
+                        <button mat-menu-item (click)="addEpisodeToQueue(episode)">
+                          <mat-icon>playlist_add</mat-icon>
+                          <span>Add to Queue</span>
+                        </button>
+                        <mat-divider />
+                      }
                       <button mat-menu-item [routerLink]="['/media/episodes', episode.uuid]">
                         <mat-icon>edit</mat-icon>
                         <span>Edit</span>
