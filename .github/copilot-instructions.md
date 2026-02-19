@@ -19,6 +19,40 @@ When you encounter a missing GraphQL field or mutation:
 
 **Schema Sync Process:** The user will update the backend and sync the schema. Frontend types should be defined manually in TypeScript to match the schema.
 
+# 🚀 ANGULAR 21 & APOLLO 4.x - CRITICAL PATTERNS
+
+## Dependency Injection: MUST use inject()
+**ESLint rule `@angular-eslint/prefer-inject` will REJECT constructor injection.**
+
+```typescript
+// ❌ REJECTED BY LINTER
+constructor(private service: MyService) {}
+
+// ✅ CORRECT - Use inject()
+private readonly service = inject(MyService);
+```
+
+## Apollo Client 4.x: Handle undefined data
+**Query results may have `data: undefined` - always handle this.**
+
+```typescript
+// ❌ WILL CAUSE TS18048 ERROR
+.pipe(map((result) => result.data.myQuery))
+
+// ✅ CORRECT - Check for undefined
+.pipe(map((result) => result.data?.myQuery ?? []))
+```
+
+## Apollo Imports Changed
+```typescript
+// ❌ OLD - These imports no longer exist in apollo-angular 13.x
+import { MutationResult, QueryRef } from 'apollo-angular';
+
+// ✅ NEW - Import from @apollo/client
+import { ApolloQueryResult } from '@apollo/client/core';
+import type { QueryRef } from 'apollo-angular';
+```
+
 # 🎯 AGENT WORKFLOW ESSENTIALS
 
 ## Log File Reading - NON-NEGOTIABLE
@@ -29,6 +63,8 @@ When you encounter a missing GraphQL field or mutation:
 
 ## Write Compliant Code FIRST
 Don't iterate - get it right the first time by checking:
+- **Dependency Injection**: Use `inject()` not constructor injection - ESLint will reject constructor params
+- **Apollo Queries**: Handle `result.data` being undefined with optional chaining or null checks
 - **SCSS**: 4px grid for spacing (4, 8, 12, 16, 20, 24...), 2px grid for fonts (10, 12, 14, 16...), MD3 tokens for colors
 - **TypeScript**: Match interface types exactly, don't add missing type values to unions without checking the interface
 - **Backend Data**: If backend provides data (sectors, industries, exchanges, periods, intervals), LOAD IT - never hardcode
@@ -820,12 +856,99 @@ form {
 ```
 
 # TypeScript
-```
-export class Service extends BaseService {
-constructor(protected override apollo: Apollo,
-protected override errorHandler: ErrorHandlerService) {
-super(apollo, errorHandler);
+
+## Project Setup
+- **Package Manager:** yarn (not npm)
+- **Angular Version:** 21.x (with standalone components)
+- **Apollo Client:** 4.x with apollo-angular 13.x
+- **TypeScript:** 5.9.x
+- **ESLint:** 9.x with flat config
+
+## Dependency Injection - MUST USE inject()
+
+**ESLint enforces `@angular-eslint/prefer-inject` - constructor injection will fail linting.**
+
+```typescript
+// ❌ BAD - Constructor injection (LINTER WILL REJECT)
+export class MyService {
+  constructor(
+    private apollo: Apollo,
+    private messageService: MessageService,
+  ) {}
 }
+
+// ✅ GOOD - Use inject() function
+export class MyService {
+  private readonly apollo = inject(Apollo);
+  private readonly messageService = inject(MessageService);
+}
+```
+
+### Service Pattern with inject()
+```typescript
+@Injectable({ providedIn: 'root' })
+export class MyService extends BaseService {
+  // Inject dependencies as readonly class fields
+  private readonly someService = inject(SomeService);
+  
+  constructor() {
+    // Call super() with injected dependencies if extending BaseService
+    super();
+  }
+}
+```
+
+### Component Pattern with inject()
+```typescript
+@Component({ standalone: true, imports: [...] })
+export class MyComponent implements OnInit, OnDestroy {
+  // Services via inject()
+  private readonly myService = inject(MyService);
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
+  
+  // ViewChild, Input, Output remain as decorators
+  @ViewChild(MatSort) sort!: MatSort;
+  @Input() data: Type[] = [];
+  
+  private subscriptions = new Subscription();
+
+  ngOnDestroy() { this.subscriptions.unsubscribe(); }
+}
+```
+
+## Apollo Client 4.x - Query Result Handling
+
+**Apollo Client 4.x changed result types - `result.data` may be undefined.**
+
+```typescript
+// ❌ BAD - Will cause TS2345/TS18048 errors
+.pipe(map((result) => result.data.myQuery))
+
+// ✅ GOOD - Handle potentially undefined data
+.pipe(
+  map((result) => {
+    if (!result.data) {
+      throw new Error('No data returned');
+    }
+    return result.data.myQuery;
+  })
+)
+
+// ✅ ALSO GOOD - Use optional chaining with fallback
+.pipe(map((result) => result.data?.myQuery ?? []))
+```
+
+### BaseService Pattern
+Services extending BaseService use `query()` and `mutate()` methods that handle error extraction:
+```typescript
+export class MyService extends BaseService {
+  getData(): Observable<MyType[]> {
+    return this.query<{ myQuery: MyType[] }>({
+      query: MY_QUERY,
+      fetchPolicy: 'network-only',
+    }).pipe(map(({ myQuery }) => myQuery));
+  }
 }
 ```
 - GraphQL: inline definitions, define response interfaces, use observables
@@ -845,16 +968,12 @@ super(apollo, errorHandler);
 - Enums for constants with converters | Avoid `any`, use `unknown`
 
 ## Components
-```
-@Component({ standalone: true, imports: [...] })
-export class Component implements OnInit, OnDestroy {
-@ViewChild(MatSort) sort!: MatSort;
-@Input() data: Type[] = [];
-private subscriptions = new Subscription();
+See "Component Pattern with inject()" above for the standard component structure.
 
-ngOnDestroy() { this.subscriptions.unsubscribe(); }
-}
-```
+Key points:
+- Use `inject()` for all service dependencies
+- `@ViewChild`, `@Input`, `@Output` remain as decorators
+- Always implement `OnDestroy` and unsubscribe
 - Subscriptions: always unsubscribe, use operators (`debounceTime`, `switchMap`, `tap`)
 - State: signals for reactive, `BehaviorSubject` for complex observables
 - Errors: `MessageService` for user-facing, check success flags in mutations
@@ -900,28 +1019,29 @@ HTML: `[showFirstLastButtons]="false"` `(page)="onPageChange($event)"`
 ```
 
 ## Component Pattern
-```
+```typescript
 export class PublicComponent implements OnInit {
-isAuthenticated = false;
+  private readonly authService = inject(AuthService);
+  private readonly httpService = inject(HttpService);
+  private readonly router = inject(Router);
+  
+  isAuthenticated = false;
 
-constructor(private authService: AuthService,
-private httpService: HttpService) {}
-
-ngOnInit() {
-this.isAuthenticated = this.authService.isLoggedIn();
+  ngOnInit() {
+    this.isAuthenticated = this.authService.isLoggedIn();
 
     // HTTP for public data (not GraphQL)
     this.httpService.getData(code).subscribe({
       next: (data) => { /* handle */ },
       error: () => { /* fail silently on public pages */ }
     });
-}
+  }
 
-onSignUp() {
-this.router.navigate(['/register'], {
-queryParams: { ref: this.code }
-});
-}
+  onSignUp() {
+    this.router.navigate(['/register'], {
+      queryParams: { ref: this.code }
+    });
+  }
 }
 ```
 
