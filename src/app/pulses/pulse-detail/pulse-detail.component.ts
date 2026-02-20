@@ -43,6 +43,12 @@ import {
 import { AddRssFeedDialogComponent } from '../../podcast/add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
+import {
+  getStatusClass as pulseStatusClass,
+  getDisplayStatusText as pulseDisplayText,
+  formatSeconds as pulseFormatSeconds,
+  formatTimeAgo as pulseFormatTimeAgo,
+} from '../pulse-status.utils';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { UserService, UserPreferences } from '../../user/user.service';
@@ -580,22 +586,11 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   }
 
   formatSeconds(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return pulseFormatSeconds(seconds);
   }
 
   formatTimeAgo(dateString: string | null | undefined): string {
-    if (!dateString) return 'Never';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-
-    if (diffDays > 0) return `${diffDays}d ago`;
-    if (diffHours > 0) return `${diffHours}h ago`;
-    return 'Just now';
+    return pulseFormatTimeAgo(dateString);
   }
 
   getSourceTypeIcon(type: string): string {
@@ -643,19 +638,12 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'ready':
-      case 'delivered':
-        return 'status-success';
-      case 'generating':
-      case 'pending':
-        return 'status-warning';
-      case 'failed':
-        return 'status-error';
-      default:
-        return '';
-    }
+  getStatusClass(status: string, pulse?: Pulse): string {
+    return pulseStatusClass(status, pulse);
+  }
+
+  getDisplayStatusText(pulse: Pulse): string {
+    return pulseDisplayText(pulse);
   }
 
   playPulse(pulse: Pulse): void {

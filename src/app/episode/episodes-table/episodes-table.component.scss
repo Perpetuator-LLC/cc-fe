@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .status-container {
@@ -381,4 +381,11 @@
   color: var(--md-extended-color-success-on-color);
 
   background: var(--md-sys-color-success);
+}
+
+.duration-hint {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
 }

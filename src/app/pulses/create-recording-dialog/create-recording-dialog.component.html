@@ -6,7 +6,13 @@
 
 <mat-dialog-content>
   <form [formGroup]="form" class="recording-form">
-    <p class="description">Create a recording from your own text. This will use the voice configured for this Pulse.</p>
+    <p class="description">
+      @if (isStandalone) {
+        Create a recording from your own text. Paste or type content and it will be converted to audio.
+      } @else {
+        Create a recording from your own text. This will use the voice configured for this Pulse.
+      }
+    </p>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Title</mat-label>
@@ -34,6 +40,24 @@
         <mat-error>Maximum 50,000 characters</mat-error>
       }
     </mat-form-field>
+
+    @if (isStandalone) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Voice</mat-label>
+        @if (loadingVoices) {
+          <mat-select disabled>
+            <mat-option>Loading voices...</mat-option>
+          </mat-select>
+        } @else {
+          <mat-select [value]="selectedVoiceUuid" (selectionChange)="onVoiceChange($event.value)">
+            @for (voice of voices; track voice.uuid) {
+              <mat-option [value]="voice.uuid"> {{ voice.displayName }} ({{ getVoiceTierLabel(voice) }}) </mat-option>
+            }
+          </mat-select>
+        }
+        <mat-hint>Select a voice for text-to-speech conversion</mat-hint>
+      </mat-form-field>
+    }
 
     <div class="convert-toggle">
       <mat-checkbox formControlName="convertToTranscript" color="primary"> Convert to transcript </mat-checkbox>

@@ -48,7 +48,7 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Latest Pulse Section -->
+    <!-- Latest Recording Section -->
     @if (latestPulse) {
       <mat-card class="latest-pulse-card">
         <mat-card-content>
@@ -56,7 +56,7 @@
             <div class="latest-pulse-info">
               <h3>
                 <mat-icon>schedule</mat-icon>
-                Latest Pulse
+                Latest Recording
               </h3>
               <span class="pulse-title">{{ latestPulse.title }}</span>
               <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
@@ -66,6 +66,9 @@
                 <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
                   <mat-icon>play_arrow</mat-icon>
                   Play
+                  @if (latestPulse.audioDurationSeconds) {
+                    <span class="duration-hint">{{ formatSeconds(latestPulse.audioDurationSeconds) }}</span>
+                  }
                 </button>
                 <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
                   <mat-icon>more_vert</mat-icon>
@@ -604,8 +607,8 @@
                           <span class="recording-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
                         </div>
                         <div class="recording-status">
-                          <span class="status-badge" [class]="getStatusClass(pulse.status)">
-                            {{ pulse.status | titlecase }}
+                          <span class="status-badge" [class]="getStatusClass(pulse.status, pulse)">
+                            {{ getDisplayStatusText(pulse) }}
                           </span>
                         </div>
                       </div>
@@ -644,6 +647,9 @@
                           <button mat-flat-button color="primary" (click)="playPulse(pulse)">
                             <mat-icon>play_arrow</mat-icon>
                             Play
+                            @if (pulse.audioDurationSeconds) {
+                              <span class="duration-hint">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+                            }
                           </button>
                           <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
                             <mat-icon>more_vert</mat-icon>

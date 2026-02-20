@@ -39,6 +39,7 @@ export interface Episode {
   currentVersionNumber: number;
   versions: EpisodeVersion[];
   audioUrl: string;
+  audioSeconds?: number | null;
   audioIsCustomUpload: boolean;
   isLive: boolean;
   podcastDate: string;
@@ -83,6 +84,7 @@ const GET_EPISODES = gql`
           content
           isLive
           audioUrl
+          audioSeconds
           currentVersionNumber
           versions {
             uuid
@@ -154,6 +156,7 @@ const GET_EPISODE = gql`
             }
           }
           audioUrl
+          audioSeconds
           audioIsCustomUpload
           isLive
           podcastDate

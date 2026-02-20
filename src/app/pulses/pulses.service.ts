@@ -122,12 +122,14 @@ const PULSE_FRAGMENT = gql`
     researchUrls
     isScheduled
     configName
+    configUuid
     deliveredAt
     deliveryMethod
     playCount
     listenDurationSeconds
     createdAt
     generatedAt
+    generatingStartedAt
   }
 `;
 
@@ -899,11 +901,13 @@ export class PulsesService extends BaseService {
    * @param text The text to convert to speech (max 50,000 characters)
    * @param title Optional title for the generated audio
    * @param voiceUuid Optional voice UUID (uses default if not provided)
+   * @param convertToTranscript If true (default), AI converts text to clean transcript
    */
   generateTextToSpeech(
     text: string,
     title?: string,
     voiceUuid?: string,
+    convertToTranscript = true,
   ): Observable<{
     success: boolean;
     message: string;
@@ -912,8 +916,13 @@ export class PulsesService extends BaseService {
   }> {
     const GQL = gql`
       ${PULSE_FRAGMENT}
-      mutation GenerateTextToSpeech($text: String!, $title: String, $voiceUuid: UUID) {
-        generateTextToSpeech(text: $text, title: $title, voiceUuid: $voiceUuid) {
+      mutation GenerateTextToSpeech($text: String!, $title: String, $voiceUuid: UUID, $convertToTranscript: Boolean) {
+        generateTextToSpeech(
+          text: $text
+          title: $title
+          voiceUuid: $voiceUuid
+          convertToTranscript: $convertToTranscript
+        ) {
           success
           message
           pulse {
@@ -935,7 +944,7 @@ export class PulsesService extends BaseService {
 
     return this.mutate<Response>({
       mutation: GQL,
-      variables: { text, title, voiceUuid },
+      variables: { text, title, voiceUuid, convertToTranscript },
     }).pipe(
       map((data) => {
         if (!data.generateTextToSpeech.success) {

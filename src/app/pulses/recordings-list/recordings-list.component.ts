@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -14,11 +14,23 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../../message.service';
 import { PulsesService } from '../pulses.service';
 import { PulseConfig, Pulse, PulseStatus } from '../pulses.types';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { PageTitleService } from '../../layout/page-title.service';
+import {
+  getStatusClass as pulseStatusClass,
+  getDisplayStatusText as pulseDisplayText,
+  formatSeconds as pulseFormatSeconds,
+  formatTimeAgo as pulseFormatTimeAgo,
+} from '../pulse-status.utils';
+import {
+  CreateRecordingDialogComponent,
+  CreateRecordingDialogData,
+  CreateRecordingDialogResult,
+} from '../create-recording-dialog/create-recording-dialog.component';
 
 @Component({
   selector: 'app-recordings-list',
@@ -41,6 +53,15 @@ import { PageTitleService } from '../../layout/page-title.service';
   styleUrl: './recordings-list.component.scss',
 })
 export class RecordingsListComponent implements OnInit, OnDestroy {
+  // Dependencies
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly audioPlayerService = inject(AudioPlayerService);
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly dialog = inject(MatDialog);
+
   private subscriptions = new Subscription();
 
   // Data
@@ -69,15 +90,6 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     { value: 'FAILED', label: 'Failed' },
     { value: 'DELIVERED', label: 'Delivered' },
   ];
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private pulsesService: PulsesService,
-    private audioPlayerService: AudioPlayerService,
-    private pageTitleService: PageTitleService,
-  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Recordings');
@@ -234,6 +246,7 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     const track: AudioTrack = {
       id: recording.uuid,
       title: recording.title,
+      subtitle: recording.configName || 'Recording',
       audioUrl: recording.audioUrl,
       duration: recording.audioDurationSeconds,
       type: 'pulse',
@@ -261,6 +274,7 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     return {
       id: recording.uuid,
       title: recording.title,
+      subtitle: recording.configName || 'Recording',
       audioUrl: recording.audioUrl,
       duration: recording.audioDurationSeconds,
       type: 'pulse',
@@ -268,40 +282,37 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     };
   }
 
+  createRecording(): void {
+    const dialogRef = this.dialog.open(CreateRecordingDialogComponent, {
+      width: '600px',
+      data: {} as CreateRecordingDialogData,
+    });
+
+    this.subscriptions.add(
+      dialogRef.afterClosed().subscribe((result: CreateRecordingDialogResult | undefined) => {
+        if (result) {
+          // Refresh the recordings list
+          this.resetPagination();
+          this.loadRecordings();
+        }
+      }),
+    );
+  }
+
   formatSeconds(seconds: number | null | undefined): string {
-    if (!seconds) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return pulseFormatSeconds(seconds);
   }
 
   formatTimeAgo(dateStr: string): string {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    return pulseFormatTimeAgo(dateStr);
   }
 
-  getStatusClass(status: PulseStatus): string {
-    switch (status) {
-      case 'READY':
-      case 'DELIVERED':
-        return 'status-success';
-      case 'GENERATING':
-      case 'PENDING':
-        return 'status-warning';
-      case 'FAILED':
-        return 'status-error';
-      default:
-        return '';
-    }
+  getStatusClass(status: PulseStatus, recording?: Pulse): string {
+    return pulseStatusClass(status, recording);
+  }
+
+  getDisplayStatusText(recording: Pulse): string {
+    return pulseDisplayText(recording);
   }
 
   clearFilters(): void {
