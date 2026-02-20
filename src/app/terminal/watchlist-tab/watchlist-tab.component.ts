@@ -143,7 +143,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     { id: 'marketCap', label: 'Market Cap', selected: true },
     { id: 'sector', label: 'Sector', selected: false },
     { id: 'industry', label: 'Industry', selected: false },
-    { id: 'actions', label: 'Actions', selected: true },
   ];
   displayedWatchlistColumns: string[] = ['symbol', 'name', 'marketCap', 'actions'];
 
@@ -2321,7 +2320,7 @@ private zoomCorrectionTimer: any = null;
 
       // If locked to right and user scrolled away from 100%, snap back
       // Use a slightly larger threshold (99.5) to catch more edge cases
-      if (this.lockToRight() && endPercent < 99.5) {
+      if (this.lockToRight() && endPercent < 99.9) {
         // Calculate the zoom range (how zoomed in/out)
         const MIN_RANGE = 3;
         const range = Math.max(endPercent - startPercent, MIN_RANGE);
@@ -2330,22 +2329,22 @@ private zoomCorrectionTimer: any = null;
         
         clearTimeout(this.zoomCorrectionTimer);
 
-         this.zoomCorrectionTimer = setTimeout(() => {
-        this.isCorrectingZoom = true;
+        // Use a very short timeout to batch corrections but keep them frame-instant
+        this.zoomCorrectionTimer = setTimeout(() => {
+          this.isCorrectingZoom = true;
 
-        chart.dispatchAction({
-          type: 'dataZoom',
-          start: newStart,
-          end: 100,
-          animation: true,
-          animationDuration: 180,
-          animationEasing: 'linear'
-        });
+          chart.dispatchAction({
+            type: 'dataZoom',
+            start: newStart,
+            end: 100,
+            animation: false, // Disable animation for strict locking to right edge
+          });
 
-        setTimeout(() => {
-          this.isCorrectingZoom = false;
-        }, 200);
-      }, 120);
+          // Allow the next zoom event after 100ms
+          setTimeout(() => {
+            this.isCorrectingZoom = false;
+          }, 100);
+        }, 16); // 16ms = ~1 frame delay for instant feel
 
         return; // Don't process further - the new dispatch will trigger another event
       }
