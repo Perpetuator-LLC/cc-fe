@@ -200,6 +200,7 @@ export interface Pulse {
   // Triggering
   isScheduled: boolean; // true = scheduled, false = alert triggered
   configName: string;
+  configUuid?: string | null; // UUID of parent PulseConfig (null for standalone)
 
   // Delivery
   deliveredAt?: string | null;
@@ -212,6 +213,7 @@ export interface Pulse {
   // Timestamps
   createdAt: string;
   generatedAt?: string | null;
+  generatingStartedAt?: string | null; // When generation started (for stale detection)
 }
 
 /**

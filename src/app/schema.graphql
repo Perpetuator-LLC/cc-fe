@@ -775,6 +775,11 @@ type PulseConfigType implements Node {
   """How to deliver pulse notifications"""
   deliveryMethod: PulsesPulseConfigDeliveryMethodChoices!
 
+  """
+  Send SMS notification when a new recording is generated (requires verified phone number)
+  """
+  smsNotificationEnabled: Boolean!
+
   """How often to generate this pulse"""
   scheduleFrequency: PulsesPulseConfigScheduleFrequencyChoices!
 
@@ -1070,12 +1075,18 @@ type PulseType implements Node {
   createdAt: DateTime!
   generatedAt: DateTime
 
+  """When generation started (for detecting stale GENERATING status)"""
+  generatingStartedAt: DateTime
+
   """The ID of the object"""
   id: ID!
   uuid: UUID
   audioUrl: String
   isValidated: Boolean
   configName: String
+
+  """UUID of the parent PulseConfig (null for standalone recordings)"""
+  configUuid: UUID
 
   """List of agent tool calls and their results during research"""
   agentActions: JSONString
@@ -3793,6 +3804,7 @@ enum JobKind {
   GENERATE_PODCAST
   GENERATE_PODCAST_IMAGE
   GENERATE_IMAGE
+  GENERATE_PULSE_CONFIG
   GENERATE_PULSE
   FETCH_PULSE_NEWS
   RESEARCH_PULSE_CONTENT
@@ -4328,7 +4340,31 @@ type Mutation {
   createPulseConfig(alertTriggers: [AlertTriggerInput], contentSources: [ContentSourceInput], deliveryMethod: String = "sms_link", description: String, includeIntro: Boolean = true, includeOutro: Boolean = true, introText: String, maxDurationMinutes: Float, name: String!, newsLookbackHours: Int = 24, outroText: String, scheduleFrequency: String = "daily", scheduleTime: String, scheduleTimezone: String = "America/New_York", targetDurationMinutes: Float = 3, tone: String = "professional", voiceUuid: UUID): CreatePulseConfig
 
   """Update an existing pulse configuration."""
-  updatePulseConfig(customInstructions: String, deliveryMethod: String, description: String, includeIntro: Boolean, includeOutro: Boolean, introText: String, isActive: Boolean, maxDurationMinutes: Float, name: String, newsLookbackHours: Int, outroText: String, pulseConfigUuid: UUID!, scheduleFrequency: String, scheduleTime: String, scheduleTimezone: String, targetDurationMinutes: Float, tone: String, voiceUuid: UUID): UpdatePulseConfig
+  updatePulseConfig(
+    customInstructions: String
+    deliveryMethod: String
+    description: String
+    includeIntro: Boolean
+    includeOutro: Boolean
+    introText: String
+    isActive: Boolean
+    maxDurationMinutes: Float
+    name: String
+    newsLookbackHours: Int
+    outroText: String
+    pulseConfigUuid: UUID!
+    scheduleFrequency: String
+    scheduleTime: String
+    scheduleTimezone: String
+
+    """
+    Enable SMS notifications when new recordings are generated (requires verified phone)
+    """
+    smsNotificationEnabled: Boolean
+    targetDurationMinutes: Float
+    tone: String
+    voiceUuid: UUID
+  ): UpdatePulseConfig
 
   """Delete a pulse configuration."""
   deletePulseConfig(pulseConfigUuid: UUID!): DeletePulseConfig
@@ -4389,6 +4425,32 @@ type Mutation {
     searchTerm: String!
   ): OptimizeSearchTerm
 
+  """
+  Generate a complete pulse configuration from a text description using AI.
+  
+  This creates a job that will generate pulse metadata including:
+  - Name (if not provided)
+  - Description and custom instructions
+  - Intro and outro text
+  - RSS feeds discovery
+  - Search terms and watchlist symbols
+  - Schedule suggestions
+  
+  The pulse_config_uuid will be available in the job result once generation completes.
+  """
+  generatePulseFromDescription(
+    """Description of what you want in your pulse"""
+    description: String!
+
+    """
+    Enable SMS notifications when new recordings are generated (requires verified phone)
+    """
+    smsNotificationEnabled: Boolean = false
+
+    """Optional title for the pulse (will be generated if not provided)"""
+    title: String
+  ): GeneratePulseFromDescription
+
   """Generate a pulse immediately for a configuration."""
   generatePulse(
     pulseConfigUuid: UUID!
@@ -4401,24 +4463,53 @@ type Mutation {
   deliverPulse(deliveryMethod: String, pulseUuid: UUID!): DeliverPulse
 
   """
-  Create a recording (audio) from custom text within a specific Pulse (config).
+  Create a recording (audio) from custom text.
   
-  The recording uses the Pulse's configured voice. Optionally, the text can be
-  AI-converted to a clean, audio-friendly transcript.
+  Can be either:
+  1. Associated with a PulseConfig (uses its configured voice)
+  2. Standalone/orphan recording (uses specified voice or default)
+  
+  Optionally, the text can be AI-converted to a clean, audio-friendly transcript.
   """
   createRecording(
     """If True, AI converts text to audio-friendly transcript"""
     convertToTranscript: Boolean = true
 
-    """The Pulse (config) to create the recording under"""
-    pulseConfigUuid: UUID!
+    """
+    Optional: Pulse config to associate with (null for standalone recording)
+    """
+    pulseConfigUuid: UUID
 
     """The text content to convert to speech"""
     text: String!
 
     """Title for the recording"""
     title: String!
+
+    """Voice to use (required for standalone recordings if no pulse_config)"""
+    voiceUuid: UUID
   ): CreateRecording
+
+  """
+  Generate a standalone audio recording from text — no PulseConfig required.
+  
+  This is the preferred mutation for creating recordings that aren't
+  associated with a recurring pulse. The text can optionally be AI-converted
+  to an audio-friendly transcript before TTS generation.
+  """
+  generateTextToSpeech(
+    """If True, AI converts text to audio-friendly transcript"""
+    convertToTranscript: Boolean = true
+
+    """The text content to convert to speech (max 50,000 chars)"""
+    text: String!
+
+    """Title for the recording (auto-generated if not provided)"""
+    title: String
+
+    """Voice to use (defaults to cheapest available)"""
+    voiceUuid: UUID
+  ): GenerateTextToSpeech
 
   """Add a symbol to a watchlist."""
   addToWatchlist(
@@ -5307,6 +5398,25 @@ type OptimizeSearchTerm {
   optimization: SearchOptimizationType
 }
 
+"""
+Generate a complete pulse configuration from a text description using AI.
+
+This creates a job that will generate pulse metadata including:
+- Name (if not provided)
+- Description and custom instructions
+- Intro and outro text
+- RSS feeds discovery
+- Search terms and watchlist symbols
+- Schedule suggestions
+
+The pulse_config_uuid will be available in the job result once generation completes.
+"""
+type GeneratePulseFromDescription {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
 """Generate a pulse immediately for a configuration."""
 type GeneratePulse {
   success: Boolean
@@ -5356,12 +5466,29 @@ enum PulsesPulseDeliveryDeliveryMethodChoices {
 }
 
 """
-Create a recording (audio) from custom text within a specific Pulse (config).
+Create a recording (audio) from custom text.
 
-The recording uses the Pulse's configured voice. Optionally, the text can be
-AI-converted to a clean, audio-friendly transcript.
+Can be either:
+1. Associated with a PulseConfig (uses its configured voice)
+2. Standalone/orphan recording (uses specified voice or default)
+
+Optionally, the text can be AI-converted to a clean, audio-friendly transcript.
 """
 type CreateRecording {
+  success: Boolean
+  message: String
+  pulse: PulseType
+  jobUuid: UUID
+}
+
+"""
+Generate a standalone audio recording from text — no PulseConfig required.
+
+This is the preferred mutation for creating recordings that aren't
+associated with a recurring pulse. The text can optionally be AI-converted
+to an audio-friendly transcript before TTS generation.
+"""
+type GenerateTextToSpeech {
   success: Boolean
   message: String
   pulse: PulseType
