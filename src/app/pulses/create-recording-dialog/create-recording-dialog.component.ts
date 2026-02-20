@@ -10,13 +10,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
 import { PulsesService } from '../pulses.service';
 import { MessageService } from '../../message.service';
 import { JobService } from '../../jobs/job.service';
 import { UserService } from '../../user/user.service';
-import { Voice, VoicesService, VoiceTier, voiceToTier, tierToString } from '../../podcast/voices.service';
-import { forkJoin } from 'rxjs';
+import { Voice } from '../../podcast/voices.service';
+import { VoiceDropdownComponent } from '../../shared/voice-dropdown/voice-dropdown.component';
 
 export interface CreateRecordingDialogData {
   pulseConfigUuid?: string; // Optional — if absent, creates standalone recording
@@ -43,7 +42,7 @@ export interface CreateRecordingDialogResult {
     MatProgressSpinnerModule,
     MatCheckboxModule,
     MatTooltipModule,
-    MatSelectModule,
+    VoiceDropdownComponent,
   ],
   templateUrl: './create-recording-dialog.component.html',
   styleUrl: './create-recording-dialog.component.scss',
@@ -57,14 +56,11 @@ export class CreateRecordingDialogComponent implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly jobService = inject(JobService);
   private readonly userService = inject(UserService);
-  private readonly voicesService = inject(VoicesService);
 
   form: FormGroup;
   generating = false;
 
   // Voice selection for standalone recordings
-  voices: Voice[] = [];
-  loadingVoices = false;
   selectedVoiceUuid: string | null = null;
 
   /** Whether this dialog creates a standalone recording (no pulse config) */
@@ -89,7 +85,7 @@ export class CreateRecordingDialogComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      title: [this.data?.initialTitle || '', [Validators.required, Validators.maxLength(200)]],
+      title: [this.data?.initialTitle || '', [Validators.maxLength(200)]],
       text: [this.data?.initialText || '', [Validators.required, Validators.maxLength(50000)]],
       convertToTranscript: [true],
     });
@@ -97,54 +93,27 @@ export class CreateRecordingDialogComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isStandalone) {
-      this.loadVoicesAndUserDefault();
+      this.loadUserDefaultVoice();
     }
   }
 
-  private loadVoicesAndUserDefault(): void {
-    this.loadingVoices = true;
-
-    // Load voices and user's default voice setting in parallel
-    forkJoin({
-      voicesResult: this.voicesService.getVoices(),
-      settings: this.userService.userSettings(['defaultVoice']),
-    }).subscribe({
-      next: ({ voicesResult, settings }) => {
-        this.voices = voicesResult.voices;
-        this.loadingVoices = false;
-
-        // Check if user has a saved default voice
+  private loadUserDefaultVoice(): void {
+    this.userService.userSettings(['defaultVoice']).subscribe({
+      next: (settings) => {
         const defaultVoiceSetting = settings.find((s) => s.key === 'defaultVoice');
         if (defaultVoiceSetting?.value) {
-          // Verify the saved voice still exists
-          const savedVoice = this.voices.find((v) => v.uuid === defaultVoiceSetting.value);
-          if (savedVoice) {
-            this.selectedVoiceUuid = savedVoice.uuid;
-            return;
-          }
-        }
-
-        // No saved default or it doesn't exist — pick first Regular HD voice
-        const regularHdVoice = this.voices.find((v) => voiceToTier(v) === VoiceTier.REGULAR_HD);
-        if (regularHdVoice) {
-          this.selectedVoiceUuid = regularHdVoice.uuid;
-          // Save as user's default
-          this.saveDefaultVoice(regularHdVoice.uuid);
-        } else if (this.voices.length > 0) {
-          // Fallback to first available voice
-          this.selectedVoiceUuid = this.voices[0].uuid;
+          this.selectedVoiceUuid = defaultVoiceSetting.value;
         }
       },
       error: () => {
-        this.loadingVoices = false;
-        // Continue without voice selection — backend will use its default
+        // Ignore - use component default
       },
     });
   }
 
-  onVoiceChange(voiceUuid: string): void {
-    this.selectedVoiceUuid = voiceUuid;
-    this.saveDefaultVoice(voiceUuid);
+  onVoiceSelected(voice: Voice): void {
+    this.selectedVoiceUuid = voice.uuid;
+    this.saveDefaultVoice(voice.uuid);
   }
 
   private saveDefaultVoice(voiceUuid: string): void {
@@ -154,10 +123,6 @@ export class CreateRecordingDialogComponent implements OnInit {
         // Ignore errors, voice selection still works locally
       },
     });
-  }
-
-  getVoiceTierLabel(voice: Voice): string {
-    return tierToString(voiceToTier(voice));
   }
 
   generate(): void {
