@@ -453,7 +453,7 @@ export class ChartConfigService {
       moveOnMouseWheel: true, // Enable move on mouse wheel
       preventDefaultMouseMove: false,
       zoomLock: false, // Prevent zoom lock for better feel
-      throttle: 100, // Thromb to prevent jerkiness
+      throttle: 50, // Reduced throttle for more responsive zoom events during continuous scroll
       minValueSpan: 5,
     };
 

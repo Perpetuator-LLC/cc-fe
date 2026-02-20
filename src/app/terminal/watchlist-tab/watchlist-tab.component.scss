@@ -203,6 +203,7 @@
     font-weight: 600;
     color: var(--md-sys-color-on-surface-variant);
     text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .symbol-cell .symbol-text {
@@ -701,6 +702,17 @@
   }
 }
 
+.manage-btn{
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    width: auto;
+
+}
 // Metadata chip base - extracted to avoid deep nesting
 .metadata-chip {
   cursor: pointer;
