@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
@@ -83,6 +83,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   liveAudioSrc: string | null = null;
   liveAudioVersionNumber: number | null = null;
   audioIsCustomUpload = false;
+  audioSeconds: number | null = null;
   topic: { uuid: string; title: string } | null = null;
   wordCount = 0;
   charCount = 0;
@@ -104,6 +105,21 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private episodeUuid: string;
 
+  // Dependency injection using inject()
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly jobService = inject(JobService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  private readonly schedulingService = inject(SchedulingService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly sanitizer = inject(DomSanitizer);
+  protected readonly shareService = inject(ShareService);
+  private readonly audioPlayerService = inject(AudioPlayerService);
+
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges) {
@@ -112,21 +128,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private episodeService: EpisodeService,
-    private jobService: JobService,
-    private router: Router,
-    private dialog: MatDialog,
-    private schedulingService: SchedulingService,
-    private loadingService: LoadingService,
-    private sanitizer: DomSanitizer,
-    protected shareService: ShareService,
-    private audioPlayerService: AudioPlayerService,
-  ) {
+  constructor() {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
       throw new Error('Failed to get Episode ID from route.');
@@ -259,6 +261,9 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
           } else {
             this.audioSrc = null;
           }
+
+          // Store audio duration
+          this.audioSeconds = episode.audioSeconds || null;
 
           // Track the live/published audio (from episode.audioUrl)
           // If episode.audioUrl is set, use that (it's the officially published audio)
@@ -1122,5 +1127,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     const track = this.createTrack(audioUrl, versionLabel);
     this.audioPlayerService.addToQueue(track);
     this.messageService.success('Added to queue');
+  }
+
+  /**
+   * Format seconds into human readable duration (e.g., "3:45" or "1:23:45")
+   */
+  formatDuration(seconds: number | null | undefined): string {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   }
 }

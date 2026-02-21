@@ -2402,6 +2402,9 @@ type EpisodeVersionType {
 
   """When this version was created"""
   createdAt: DateTime!
+
+  """When this version was last updated (for autosave)"""
+  updatedAt: DateTime!
   uuid: UUID
   createdBy: PublicUserType
   audioUrl: String
@@ -2414,6 +2417,9 @@ enum ApiEpisodeVersionChangeTypeChoices {
 
   """Manually Edited"""
   EDITED
+
+  """Autosaved"""
+  AUTOSAVED
 
   """Regenerated"""
   REGENERATED
@@ -4483,8 +4489,8 @@ type Mutation {
     """The text content to convert to speech"""
     text: String!
 
-    """Title for the recording"""
-    title: String!
+    """Title for the recording (auto-generated from text if not provided)"""
+    title: String
 
     """Voice to use (required for standalone recordings if no pulse_config)"""
     voiceUuid: UUID
@@ -5095,6 +5101,20 @@ type Mutation {
   The edited version is marked as unvalidated.
   """
   editEpisode(content: String, description: String, episodeUuid: UUID!, title: String): EditEpisode
+
+  """
+  Mutation for autosaving episode content as the user types.
+  
+  This mutation is designed to be called frequently (e.g., every 60 seconds) and will:
+  1. Update the current version in-place if safe (no audio generated, not published, within time window)
+  2. Create a new version if:
+     - The current version has audio generated
+     - The episode has been published since the last version
+     - More than VERSION_INTERVAL_MINUTES have passed since the version was created
+  
+  This prevents data loss while minimizing version clutter.
+  """
+  autosaveEpisode(content: String, description: String, episodeUuid: UUID!, title: String): AutosaveEpisode
 
   """
   Mutation to manually trigger validation on an episode's current content.
@@ -6312,6 +6332,27 @@ type EditEpisode {
   success: Boolean
   message: String
   episode: EpisodeType
+}
+
+"""
+Mutation for autosaving episode content as the user types.
+
+This mutation is designed to be called frequently (e.g., every 60 seconds) and will:
+1. Update the current version in-place if safe (no audio generated, not published, within time window)
+2. Create a new version if:
+   - The current version has audio generated
+   - The episode has been published since the last version
+   - More than VERSION_INTERVAL_MINUTES have passed since the version was created
+
+This prevents data loss while minimizing version clutter.
+"""
+type AutosaveEpisode {
+  success: Boolean
+  message: String
+  episode: EpisodeType
+
+  """True if a new version was created, False if current was updated"""
+  versionCreated: Boolean
 }
 
 """

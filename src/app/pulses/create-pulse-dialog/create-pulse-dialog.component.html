@@ -8,24 +8,26 @@
 <mat-dialog-content>
   <form [formGroup]="pulseForm" (ngSubmit)="onSubmit()">
     <mat-form-field>
-      <mat-label>Description (Required)</mat-label>
+      <mat-label>Title (optional)</mat-label>
+      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
+      <mat-hint>Auto-generated if left blank</mat-hint>
+      @if (titleError) {
+        <mat-error>{{ titleError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
       <textarea
         matInput
         formControlName="description"
         required
         rows="4"
+        cdkFocusInitial
         placeholder="Describe your ideal audio news feed... (e.g., 'A morning market brief covering AI and tech news, focusing on NVIDIA and semiconductor stocks.')"
       ></textarea>
       @if (descriptionError) {
         <mat-error>{{ descriptionError }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Title (Optional)</mat-label>
-      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
-      @if (titleError) {
-        <mat-error>{{ titleError }}</mat-error>
       }
     </mat-form-field>
 

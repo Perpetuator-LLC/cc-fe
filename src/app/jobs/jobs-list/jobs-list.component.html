@@ -132,13 +132,13 @@
                             }
                             @for (pulse of item.resources.pulseConfigs; track pulse.uuid) {
                               <button
-                                mat-flat-button
-                                class="resource-tag pulse-tag"
+                                type="button"
+                                class="resource-link-pulse"
                                 [routerLink]="['/media/pulses', pulse.uuid]"
                                 matTooltip="Pulse"
                               >
                                 <mat-icon>vital_signs</mat-icon>
-                                Pulse
+                                {{ pulse.name }}
                               </button>
                             }
                             @for (symbolInfo of item.resources.symbols; track symbolInfo.symbol) {
@@ -308,13 +308,13 @@
                             }
                             @if (hasPulseConfigUuid(item)) {
                               <button
-                                mat-flat-button
-                                class="resource-tag pulse-tag"
+                                type="button"
+                                class="resource-link-pulse"
                                 [routerLink]="['/media/pulses', getPulseConfigUuid(item)]"
                                 matTooltip="Pulse"
                               >
                                 <mat-icon>vital_signs</mat-icon>
-                                Pulse
+                                {{ getPulseConfigName(item) }}
                               </button>
                             }
                             @if (hasSymbol(item)) {
@@ -382,7 +382,7 @@
           <!-- Loading indicator when fetching more jobs -->
           @if (isLoadingMore) {
             <div class="loading-more-indicator">
-              <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+              <mat-progress-spinner diameter="32" mode="indeterminate" />
               <span>Loading more jobs...</span>
             </div>
           }

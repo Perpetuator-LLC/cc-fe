@@ -8,7 +8,7 @@
 
 @if (loading) {
   <div class="loading-container">
-    <mat-spinner diameter="48"></mat-spinner>
+    <mat-spinner diameter="48" />
   </div>
 } @else if (pulseConfig) {
   <div class="pulse-detail">
@@ -28,7 +28,7 @@
           <div class="header-actions">
             <button mat-flat-button color="primary" (click)="generatePulse()" [disabled]="generatingPulse">
               @if (generatingPulse) {
-                <mat-spinner diameter="18"></mat-spinner>
+                <mat-spinner diameter="18" />
               } @else {
                 <mat-icon>play_arrow</mat-icon>
               }
@@ -325,8 +325,13 @@
                     <td mat-cell *matCellDef="let source">
                       <div class="source-detail">
                         @if (source.sourceType === 'rss_feed') {
-                          <a [href]="source.rssUrl" target="_blank" rel="noopener noreferrer" class="rss-url">
-                            {{ source.sourceDetail || source.rssUrl }}
+                          <a
+                            [href]="source.rssFeedUrl || source.rssUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="rss-url"
+                          >
+                            {{ source.rssFeedName || source.sourceDetail || source.rssFeedUrl || source.rssUrl }}
                           </a>
                         } @else if (source.sourceType === 'company') {
                           <span class="symbol-badge">{{ source.symbol }}</span>

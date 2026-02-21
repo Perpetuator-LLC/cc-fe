@@ -625,6 +625,32 @@ body.light {
   }
 }
 
+// Pulse tag - Tertiary/Magenta (distinct from podcast blue)
+.resource-link-pulse {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-tertiary);
+  background: color-mix(in srgb, var(--md-sys-color-tertiary) 15%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-tertiary) 25%, transparent);
+  }
+}
+
+// Recording tag - Info/Cyan (audio-related but distinct)
+.resource-link-recording {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-extended-color-info-color);
+  color: var(--md-extended-color-info-color);
+  background: color-mix(in srgb, var(--md-extended-color-info-color) 15%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-extended-color-info-color) 25%, transparent);
+  }
+}
+
 // ============================================================================
 // Showcase/Demo Page Layout Utilities
 // ============================================================================
@@ -1603,9 +1629,10 @@ html body [mat-mini-fab] {
   }
 }
 
-.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before{
+.mat-mdc-standard-chip .mdc-evolution-chip__action--primary::before {
   border: 0 !important;
 }
+
 // Error Button Classes
 .btn-error {
   &.mat-mdc-button,

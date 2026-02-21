@@ -627,9 +627,11 @@
     display: flex;
     gap: 12px;
     align-items: baseline;
-    div{
+
+    div {
       text-align: center;
-      span{
+
+      span {
         display: block;
       }
     }
@@ -696,7 +698,8 @@
       border-left: 1px solid var(--md-sys-color-outline-variant);
     }
   }
-  .view-toggle-group{
+
+  .view-toggle-group {
     overflow: auto;
   }
 }

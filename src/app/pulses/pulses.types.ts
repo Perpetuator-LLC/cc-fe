@@ -55,6 +55,8 @@ export interface ContentSource {
   // Type-specific fields
   rssUrl?: string | null;
   rssFeedUuid?: string | null;
+  rssFeedUrl?: string | null; // Actual URL of the RSS feed
+  rssFeedName?: string | null; // Name of the RSS feed
   searchTerm?: string | null; // Optimized search query
   watchlistUuid?: string | null;
   symbol?: string | null;

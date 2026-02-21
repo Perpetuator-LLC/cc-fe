@@ -116,7 +116,7 @@
   <button mat-button (click)="onCancel()">Cancel</button>
   <button mat-flat-button color="primary" (click)="onSave()" [disabled]="!form.valid || saving">
     @if (saving) {
-      <mat-spinner diameter="18"></mat-spinner>
+      <mat-spinner diameter="18" />
     }
     Save
   </button>
