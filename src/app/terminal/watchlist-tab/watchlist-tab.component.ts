@@ -144,7 +144,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     { id: 'sector', label: 'Sector', selected: false },
     { id: 'industry', label: 'Industry', selected: false },
   ];
-  displayedWatchlistColumns: string[] = ['symbol', 'name', 'marketCap', 'actions'];
+  displayedWatchlistColumns: string[] = ['actions', 'symbol', 'name', 'marketCap'];
 
   // Sidebar resize state
   sidebarWidth = 280; // Default width in pixels
@@ -172,8 +172,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // Table data for HP command
   tableData = signal<TableData | null>(null);
   // ECharts instance for zoom handling
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private chartInstance: any = null;
+  private chartInstance: echarts.ECharts | null = null;
 
   // Throttle state for mousemove handler (using requestAnimationFrame)
   private pendingCrosshairUpdate = false;
@@ -682,23 +681,22 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     return (this.watchlistService.exchanges()?.length ?? 0) > 0;
   }
 
-  constructor(
-    protected watchlistService: WatchlistService,
-    protected terminalService: TerminalService,
-    private terminalWsService: TerminalWebSocketService,
-    private chartDataService: ChartDataService,
-    private chartConfigService: ChartConfigService,
-    private routingService: TerminalRoutingService,
-    private jobsWsService: JobsWebSocketService,
-    private chartPreferencesService: ChartPreferencesService,
-    private fundamentalsService: FundamentalsService,
-    private fundamentalsChartService: FundamentalsChartService,
-    private valuationService: ValuationService,
-    private valuationChartService: ValuationChartService,
-    private dividendService: DividendService,
-    protected dividendChartService: DividendChartService,
-    private route: ActivatedRoute,
-  ) {}
+  // Dependency injection via inject()
+  protected readonly watchlistService = inject(WatchlistService);
+  protected readonly terminalService = inject(TerminalService);
+  private readonly terminalWsService = inject(TerminalWebSocketService);
+  private readonly chartDataService = inject(ChartDataService);
+  private readonly chartConfigService = inject(ChartConfigService);
+  private readonly routingService = inject(TerminalRoutingService);
+  private readonly jobsWsService = inject(JobsWebSocketService);
+  private readonly chartPreferencesService = inject(ChartPreferencesService);
+  private readonly fundamentalsService = inject(FundamentalsService);
+  private readonly fundamentalsChartService = inject(FundamentalsChartService);
+  private readonly valuationService = inject(ValuationService);
+  private readonly valuationChartService = inject(ValuationChartService);
+  private readonly dividendService = inject(DividendService);
+  protected readonly dividendChartService = inject(DividendChartService);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.loadChartPreferences();
@@ -2288,10 +2286,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Handle chart initialization - set up zoom behavior and OHLC crosshair.
    * Allows free zooming without boundaries - data loads progressively.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-private zoomCorrectionTimer: any = null;
+  private zoomCorrectionTimer: ReturnType<typeof setTimeout> | null = null;
 
-  onChartInit(chart: any): void {
+  onChartInit(chart: echarts.ECharts): void {
     this.chartInstance = chart;
 
     // Listen for datazoom events to trigger progressive data loading
@@ -2326,7 +2323,7 @@ private zoomCorrectionTimer: any = null;
         const range = Math.max(endPercent - startPercent, MIN_RANGE);
         // Adjust to keep end at 100%
         const newStart = Math.max(0, 100 - range);
-        
+
         clearTimeout(this.zoomCorrectionTimer);
 
         // Use a very short timeout to batch corrections but keep them frame-instant
@@ -4078,7 +4075,8 @@ private zoomCorrectionTimer: any = null;
    * Update displayed columns based on user selection
    */
   updateWatchlistColumns(): void {
-    this.displayedWatchlistColumns = this.watchlistColumns.filter((col) => col.selected).map((col) => col.id);
+    const selectedColumns = this.watchlistColumns.filter((col) => col.selected).map((col) => col.id);
+    this.displayedWatchlistColumns = ['actions', ...selectedColumns];
   }
 
   /**
