@@ -6,15 +6,18 @@
 
 <mat-dialog-content>
   <form [formGroup]="form" class="recording-form">
-    <p class="description">Create a recording from your own text. This will use the voice configured for this Pulse.</p>
+    <p class="description">
+      @if (isStandalone) {
+        Create a recording from your own text. Paste or type content and it will be converted to audio.
+      } @else {
+        Create a recording from your own text. This will use the voice configured for this Pulse.
+      }
+    </p>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Title</mat-label>
-      <input matInput formControlName="title" placeholder="Recording title" />
-      <mat-hint>A name for this recording</mat-hint>
-      @if (form.get('title')?.hasError('required')) {
-        <mat-error>Title is required</mat-error>
-      }
+      <mat-label>Title (optional)</mat-label>
+      <input matInput formControlName="title" placeholder="Auto-generated from content if left empty" />
+      <mat-hint>Leave blank to auto-generate from your text</mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
@@ -23,6 +26,7 @@
         matInput
         formControlName="text"
         rows="10"
+        cdkFocusInitial
         placeholder="Enter or paste your text here. This can include markdown, HTML, links, etc."
         [maxlength]="50000"
       ></textarea>
@@ -34,6 +38,14 @@
         <mat-error>Maximum 50,000 characters</mat-error>
       }
     </mat-form-field>
+
+    @if (isStandalone) {
+      <app-voice-dropdown
+        [selectedVoiceUuid]="selectedVoiceUuid"
+        (voiceSelected)="onVoiceSelected($event)"
+        hint="Select a voice · Click play to preview"
+      />
+    }
 
     <div class="convert-toggle">
       <mat-checkbox formControlName="convertToTranscript" color="primary"> Convert to transcript </mat-checkbox>
@@ -56,21 +68,22 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="generating">Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="generate()"
-    [disabled]="form.invalid || generating || wordCount === 0"
-  >
-    @if (generating) {
-      <mat-spinner diameter="18"></mat-spinner>
-      Creating...
-    } @else {
-      <ng-container>
-        <mat-icon>mic</mat-icon>
-        Create Recording
-      </ng-container>
-    }
-  </button>
+  <button mat-button type="button" (click)="cancel()" [disabled]="generating">Cancel</button>
+  @if (generating) {
+    <button mat-flat-button color="primary" type="button" disabled>
+      <mat-spinner diameter="18" />
+      <span>Creating...</span>
+    </button>
+  } @else {
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="generate()"
+      [disabled]="form.invalid || wordCount === 0"
+    >
+      <mat-icon>mic</mat-icon>
+      <span>Create Recording</span>
+    </button>
+  }
 </mat-dialog-actions>

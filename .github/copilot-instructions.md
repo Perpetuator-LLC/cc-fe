@@ -426,6 +426,109 @@ button {
 | Toggle options | `mat-button-toggle-group` |
 | Dropdown menus | `mat-menu` with `mat-menu-item` |
 
+### Icon Buttons (`mat-icon-button`) — NEVER OVERRIDE SIZING
+
+**Material icon buttons have intrinsic 48px touch targets with centered 24px icons. DO NOT resize them.**
+
+```html
+<!-- ✅ CORRECT - Just use mat-icon-button, no custom classes needed -->
+<button mat-icon-button matTooltip="Preview">
+  <mat-icon>play_circle</mat-icon>
+</button>
+
+<!-- ❌ WRONG - Custom sizing breaks icon centering -->
+<button mat-icon-button class="small-btn">
+  <mat-icon>play_circle</mat-icon>
+</button>
+```
+
+```scss
+// ❌ BAD - NEVER DO THIS - Icons will be off-center
+.small-btn {
+  width: 32px;
+  height: 32px;
+  
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// ✅ GOOD - No custom sizing needed, Material handles it
+// Just use mat-icon-button directly with no SCSS overrides
+```
+
+**If you need a smaller touch target:**
+- Use `mat-mini-fab` for 40px circular buttons
+- Or accept the 48px standard touch target (better for accessibility)
+
+**Icon naming conventions:**
+- `play_circle` / `pause_circle` — for media playback controls
+- `volume_up` — for audio currently playing
+- `play_arrow` / `pause` — for simpler play/pause icons
+
+### Buttons with Icons and Text — PROPER PATTERNS
+
+**Material buttons with icons MUST follow this pattern:**
+
+```html
+<!-- ✅ CORRECT - Icon and text as siblings inside button -->
+<button mat-flat-button color="primary">
+  <mat-icon>mic</mat-icon>
+  <span>Create Recording</span>
+</button>
+
+<!-- ✅ CORRECT - Conditional loading state using SEPARATE BUTTONS -->
+<!-- Use @if/@else to swap entire buttons, not content inside a button -->
+@if (loading) {
+  <button mat-flat-button color="primary" disabled>
+    <mat-spinner diameter="18" />
+    <span>Creating...</span>
+  </button>
+} @else {
+  <button mat-flat-button color="primary" (click)="create()" [disabled]="!valid">
+    <mat-icon>mic</mat-icon>
+    <span>Create Recording</span>
+  </button>
+}
+
+<!-- ❌ WRONG - Conditional content INSIDE button causes content projection issues -->
+<button mat-flat-button color="primary" [disabled]="loading">
+  @if (loading) {
+    <mat-spinner diameter="18" />
+    <span>Creating...</span>
+  } @else {
+    <mat-icon>mic</mat-icon>
+    <span>Create Recording</span>
+  }
+</button>
+
+<!-- ❌ WRONG - Text not wrapped in span -->
+<button mat-flat-button>
+  <mat-icon>mic</mat-icon>
+  Create Recording
+</button>
+
+<!-- ❌ WRONG - ng-container doesn't help with content projection -->
+<button mat-flat-button>
+  <ng-container>
+    <mat-icon>mic</mat-icon>
+    <span>Create Recording</span>
+  </ng-container>
+</button>
+
+<!-- ❌ WRONG - Self-closing button -->
+<button mat-flat-button />
+```
+
+**Key rules:**
+1. Always wrap button text in `<span>` when next to icon
+2. For loading/conditional states: use separate `@if/@else` buttons, NOT conditional content inside
+3. Use `mat-spinner` with `diameter="18"` for loading state
+4. Add `type="button"` to prevent form submission in dialogs
+5. Never override button sizing with CSS
+
 ### Menus and Menu Items (`mat-menu`, `mat-menu-item`)
 ```scss
 // ❌ BAD - Fighting MD3 menu sizing

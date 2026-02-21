@@ -55,6 +55,8 @@ export interface ContentSource {
   // Type-specific fields
   rssUrl?: string | null;
   rssFeedUuid?: string | null;
+  rssFeedUrl?: string | null; // Actual URL of the RSS feed
+  rssFeedName?: string | null; // Name of the RSS feed
   searchTerm?: string | null; // Optimized search query
   watchlistUuid?: string | null;
   symbol?: string | null;
@@ -200,6 +202,7 @@ export interface Pulse {
   // Triggering
   isScheduled: boolean; // true = scheduled, false = alert triggered
   configName: string;
+  configUuid?: string | null; // UUID of parent PulseConfig (null for standalone)
 
   // Delivery
   deliveredAt?: string | null;
@@ -212,6 +215,7 @@ export interface Pulse {
   // Timestamps
   createdAt: string;
   generatedAt?: string | null;
+  generatingStartedAt?: string | null; // When generation started (for stale detection)
 }
 
 /**

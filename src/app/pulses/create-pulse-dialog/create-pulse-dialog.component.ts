@@ -1,12 +1,12 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { PulsesService } from '../pulses.service';
 import { UserService, UserPreferences } from '../../user/user.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatError, MatFormField } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -14,6 +14,14 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
+import { A11yModule } from '@angular/cdk/a11y';
+import { DialogDraftService } from '../../shared/services/dialog-draft.service';
+
+interface PulseDraft {
+  description: string;
+  title: string;
+  smsNotificationEnabled: boolean;
+}
 
 @Component({
   selector: 'app-create-pulse-dialog',
@@ -27,11 +35,13 @@ import { Router, RouterLink } from '@angular/router';
     MatIconButton,
     MatLabel,
     MatError,
+    MatHint,
     MatDialogModule,
     MatIcon,
     MatCheckbox,
     MatTooltip,
     RouterLink,
+    A11yModule,
   ],
   templateUrl: './create-pulse-dialog.component.html',
   styleUrl: './create-pulse-dialog.component.scss',
@@ -43,6 +53,7 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
   readonly dialogRef = inject(MatDialogRef<CreatePulseDialogComponent>);
   private readonly router = inject(Router);
+  private readonly draftService = inject(DialogDraftService);
 
   pulseForm: FormGroup;
   private subscriptions = new Subscription();
@@ -56,6 +67,9 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
   loadingPreferences = true;
 
   constructor() {
+    // Prevent accidental close on backdrop click
+    this.dialogRef.disableClose = true;
+
     this.pulseForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]],
       title: [''],
@@ -69,15 +83,43 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
     this.pulseForm.get('title')?.valueChanges.subscribe(() => {
       this.updateTitleValidation();
     });
+
+    // Auto-save draft on changes (debounced)
+    this.subscriptions.add(
+      this.pulseForm.valueChanges.pipe(debounceTime(500)).subscribe(() => {
+        this.saveDraft();
+      }),
+    );
   }
 
   ngOnInit(): void {
     this.messageService.clearMessages();
     this.loadUserPreferences();
+    this.restoreDraft();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Restore any previously saved draft
+   */
+  private restoreDraft(): void {
+    const savedData = this.draftService.loadDraft<PulseDraft>('pulse');
+    if (savedData) {
+      this.pulseForm.patchValue(savedData, { emitEvent: false });
+      this.updateDescriptionValidation();
+      this.updateTitleValidation();
+    }
+  }
+
+  /**
+   * Save current form state to localStorage
+   */
+  private saveDraft(): void {
+    const formValue = this.pulseForm.getRawValue();
+    this.draftService.saveDraft('pulse', formValue);
   }
 
   /**
@@ -149,6 +191,8 @@ export class CreatePulseDialogComponent implements OnInit, OnDestroy {
           next: (result) => {
             this.isSubmitting = false;
             this.messageService.success('Pulse generation started! You can track progress in the jobs panel.');
+            // Clear draft on successful creation
+            this.draftService.clearDraft('pulse');
             this.dialogRef.close({ jobUuid: result.job.uuid });
             // Navigate to jobs to track progress
             this.router.navigate(['/jobs']);
