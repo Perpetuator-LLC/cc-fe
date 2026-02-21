@@ -1,6 +1,6 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, ElementRef, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { forkJoin, Subscription } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   Job,
@@ -27,6 +27,8 @@ import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service'
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
 import { ResearchService, Topic } from '../../topics/research.service';
+import { PulsesService } from '../../pulses/pulses.service';
+import { PulseConfig } from '../../pulses/pulses.types';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -37,6 +39,7 @@ interface EnrichedJob extends Job {
   podcastName?: string;
   episodeName?: string;
   topicName?: string;
+  pulseConfigName?: string;
 }
 
 /** Aggregated resources from all jobs in a chain */
@@ -44,7 +47,7 @@ interface ChainResources {
   podcasts: { uuid: string; name: string }[];
   episodes: { uuid: string; name: string }[];
   topics: { uuid: string; name: string }[];
-  pulseConfigs: { uuid: string }[];
+  pulseConfigs: { uuid: string; name: string }[];
   symbols: { symbol: string; job: EnrichedJob }[];
 }
 
@@ -104,6 +107,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private readonly episodeService = inject(EpisodeService);
   private readonly jobDisplayService = inject(JobDisplayService);
   private readonly researchService = inject(ResearchService);
+  private readonly pulsesService = inject(PulsesService);
   private readonly loadingService = inject(LoadingService);
   private readonly router = inject(Router);
 
@@ -326,11 +330,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
     const podcastUuids = new Set<string>();
     const episodeUuids = new Set<string>();
     const topicUuids = new Set<string>();
+    const pulseConfigUuids = new Set<string>();
 
     jobs.forEach((job) => {
       const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
       const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
       const topicUuid = this.jobDisplayService.getTopicUuid(job);
+      const pulseConfigUuid = this.getPulseConfigUuid(job);
 
       if (podcastUuid) {
         podcastUuids.add(podcastUuid);
@@ -341,10 +347,19 @@ export class JobsListComponent implements OnInit, OnDestroy {
       if (topicUuid) {
         topicUuids.add(topicUuid);
       }
+      if (pulseConfigUuid) {
+        pulseConfigUuids.add(pulseConfigUuid);
+      }
     });
 
     // Create observables for fetching data
-    const queries = [];
+    interface FetchResult {
+      podcasts?: PodcastsResult[];
+      episodes?: Episode[];
+      topics?: Topic[];
+      pulseConfigs?: PulseConfig[];
+    }
+    const queries: Observable<FetchResult>[] = [];
 
     if (podcastUuids.size > 0) {
       queries.push(this.fetchPodcastNames(Array.from(podcastUuids)));
@@ -356,6 +371,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
     if (topicUuids.size > 0) {
       queries.push(this.fetchTopicNames(Array.from(topicUuids)));
+    }
+
+    if (pulseConfigUuids.size > 0) {
+      queries.push(this.fetchPulseConfigNames(Array.from(pulseConfigUuids)));
     }
 
     // If no UUIDs to fetch, return jobs as-is
@@ -370,25 +389,38 @@ export class JobsListComponent implements OnInit, OnDestroy {
       const podcastNameMap = new Map<string, string>();
       const episodeNameMap = new Map<string, string>();
       const topicNameMap = new Map<string, string>();
+      const pulseConfigNameMap = new Map<string, string>();
 
       if (results) {
-        results.forEach((result: { podcasts?: PodcastsResult[]; episodes?: Episode[]; topics?: Topic[] }) => {
-          if (result.podcasts) {
-            result.podcasts.forEach((podcast: PodcastsResult) => {
-              podcastNameMap.set(podcast.uuid, podcast.name || 'Unnamed Podcast');
-            });
-          }
-          if (result.episodes) {
-            result.episodes.forEach((episode: Episode) => {
-              episodeNameMap.set(episode.uuid, episode.title || 'Untitled Episode');
-            });
-          }
-          if (result.topics) {
-            result.topics.forEach((topic: Topic) => {
-              topicNameMap.set(topic.uuid, topic.title || 'Untitled Topic');
-            });
-          }
-        });
+        results.forEach(
+          (result: {
+            podcasts?: PodcastsResult[];
+            episodes?: Episode[];
+            topics?: Topic[];
+            pulseConfigs?: PulseConfig[];
+          }) => {
+            if (result.podcasts) {
+              result.podcasts.forEach((podcast: PodcastsResult) => {
+                podcastNameMap.set(podcast.uuid, podcast.name || 'Unnamed Podcast');
+              });
+            }
+            if (result.episodes) {
+              result.episodes.forEach((episode: Episode) => {
+                episodeNameMap.set(episode.uuid, episode.title || 'Untitled Episode');
+              });
+            }
+            if (result.topics) {
+              result.topics.forEach((topic: Topic) => {
+                topicNameMap.set(topic.uuid, topic.title || 'Untitled Topic');
+              });
+            }
+            if (result.pulseConfigs) {
+              result.pulseConfigs.forEach((pulseConfig: PulseConfig) => {
+                pulseConfigNameMap.set(pulseConfig.uuid, pulseConfig.name || 'Unnamed Pulse');
+              });
+            }
+          },
+        );
       }
 
       // Enrich jobs with the fetched names
@@ -397,6 +429,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
         const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
         const topicUuid = this.jobDisplayService.getTopicUuid(job);
+        const pulseConfigUuid = this.getPulseConfigUuid(job);
 
         if (podcastUuid && podcastNameMap.has(podcastUuid)) {
           enrichedJob.podcastName = podcastNameMap.get(podcastUuid);
@@ -410,10 +443,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
           enrichedJob.topicName = topicNameMap.get(topicUuid);
         }
 
+        if (pulseConfigUuid && pulseConfigNameMap.has(pulseConfigUuid)) {
+          enrichedJob.pulseConfigName = pulseConfigNameMap.get(pulseConfigUuid);
+        }
+
         return enrichedJob;
       });
     } catch (error) {
-      console.warn('Failed to fetch podcast/episode/topic names:', error);
+      console.warn('Failed to fetch podcast/episode/topic/pulse names:', error);
       return jobs.map((job) => ({ ...job }));
     }
   }
@@ -467,6 +504,21 @@ export class JobsListComponent implements OnInit, OnDestroy {
     return forkJoin(queries).pipe(
       // Transform to the expected format
       map((topics) => ({ topics })),
+    );
+  }
+
+  // Fetch multiple pulse config names efficiently
+  private fetchPulseConfigNames(uuids: string[]) {
+    const queries = uuids.map((uuid) =>
+      this.pulsesService.getPulseConfig(uuid).pipe(
+        // Handle individual errors gracefully
+        map((config) => config),
+      ),
+    );
+
+    return forkJoin(queries).pipe(
+      // Transform to the expected format
+      map((pulseConfigs) => ({ pulseConfigs })),
     );
   }
 
@@ -582,7 +634,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
     const podcasts = new Map<string, string>();
     const episodes = new Map<string, string>();
     const topics = new Map<string, string>();
-    const pulseConfigs = new Set<string>();
+    const pulseConfigs = new Map<string, string>();
     const symbols = new Map<string, EnrichedJob>();
 
     for (const job of jobs) {
@@ -602,8 +654,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
       }
 
       const pulseConfigUuid = this.getPulseConfigUuid(job);
-      if (pulseConfigUuid) {
-        pulseConfigs.add(pulseConfigUuid);
+      if (pulseConfigUuid && !pulseConfigs.has(pulseConfigUuid)) {
+        pulseConfigs.set(pulseConfigUuid, this.getPulseConfigName(job));
       }
 
       const symbol = this.getSymbol(job);
@@ -616,7 +668,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       podcasts: Array.from(podcasts.entries()).map(([uuid, name]) => ({ uuid, name })),
       episodes: Array.from(episodes.entries()).map(([uuid, name]) => ({ uuid, name })),
       topics: Array.from(topics.entries()).map(([uuid, name]) => ({ uuid, name })),
-      pulseConfigs: Array.from(pulseConfigs).map((uuid) => ({ uuid })),
+      pulseConfigs: Array.from(pulseConfigs.entries()).map(([uuid, name]) => ({ uuid, name })),
       symbols: Array.from(symbols.entries()).map(([symbol, job]) => ({ symbol, job })),
     };
   }
@@ -930,6 +982,11 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Get topic name from enriched job
   getTopicName(job: EnrichedJob): string {
     return job.topicName || 'Topic';
+  }
+
+  // Get pulse config name from enriched job
+  getPulseConfigName(job: EnrichedJob): string {
+    return job.pulseConfigName || 'Pulse';
   }
 
   // Check if a message is an error message

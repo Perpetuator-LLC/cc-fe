@@ -33,7 +33,7 @@
   <!-- Loading State -->
   @if (loadingVoices || loading) {
     <div class="loading-container">
-      <mat-spinner diameter="32"></mat-spinner>
+      <mat-spinner diameter="32" />
       <p>Loading voices...</p>
     </div>
   } @else if (filteredVoices.length === 0) {

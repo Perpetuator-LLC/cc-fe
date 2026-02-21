@@ -14,7 +14,7 @@
     >
       <div class="progress-bar" [style.width.%]="audioService.progress()"></div>
       @if (audioService.isLoading()) {
-        <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+        <mat-progress-bar mode="indeterminate" class="loading-bar" />
       }
     </div>
 

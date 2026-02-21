@@ -13,9 +13,9 @@
       <span>{{ pulseConfigs.length }} configurations</span>
     </div>
     <div class="header-actions">
-      <button mat-flat-button color="primary" type="button" (click)="createPulseConfig()">
+      <button mat-button color="secondary" type="button" (click)="createPulseConfig()">
         <mat-icon>add</mat-icon>
-        Create Pulse
+        <span>Create Pulse</span>
       </button>
     </div>
   </mat-card-content>
@@ -210,5 +210,5 @@
     [pageSizeOptions]="pageSizeOptions"
     [showFirstLastButtons]="false"
     (page)="onPageChange($event)"
-  ></mat-paginator>
+  />
 </div>

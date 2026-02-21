@@ -26,6 +26,7 @@
         matInput
         formControlName="text"
         rows="10"
+        cdkFocusInitial
         placeholder="Enter or paste your text here. This can include markdown, HTML, links, etc."
         [maxlength]="50000"
       ></textarea>
@@ -67,21 +68,22 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="generating">Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="generate()"
-    [disabled]="form.invalid || generating || wordCount === 0"
-  >
-    @if (generating) {
-      <mat-spinner diameter="18"></mat-spinner>
-      Creating...
-    } @else {
-      <ng-container>
-        <mat-icon>mic</mat-icon>
-        Create Recording
-      </ng-container>
-    }
-  </button>
+  <button mat-button type="button" (click)="cancel()" [disabled]="generating">Cancel</button>
+  @if (generating) {
+    <button mat-flat-button color="primary" type="button" disabled>
+      <mat-spinner diameter="18" />
+      <span>Creating...</span>
+    </button>
+  } @else {
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="generate()"
+      [disabled]="form.invalid || wordCount === 0"
+    >
+      <mat-icon>mic</mat-icon>
+      <span>Create Recording</span>
+    </button>
+  }
 </mat-dialog-actions>

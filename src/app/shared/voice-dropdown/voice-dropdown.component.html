@@ -8,19 +8,29 @@
       </mat-select>
     } @else {
       <mat-select [value]="selectedVoiceUuid" (selectionChange)="onSelectionChange($event.value)">
+        <!-- Custom trigger shows only voice name -->
+        <mat-select-trigger>
+          {{ getSelectedVoiceName() }}
+        </mat-select-trigger>
         @for (voice of voices; track voice.uuid) {
           <mat-option [value]="voice.uuid">
             <div class="voice-option">
               <span class="voice-name">{{ getDisplayName(voice) }}</span>
-              <span class="voice-tier">{{ getTierLabel(voice) }}</span>
+              <span class="voice-tier-chip">{{ getTierLabel(voice) }}</span>
               @if (voice.sampleUrl) {
                 <button
                   mat-icon-button
-                  class="preview-btn"
-                  (click)="playPreview(voice, $event)"
-                  [matTooltip]="isPlaying(voice) ? 'Stop preview' : 'Preview voice'"
+                  type="button"
+                  (mouseenter)="playPreviewOnHover(voice)"
+                  (mouseleave)="stopPreview()"
+                  (click)="$event.stopPropagation()"
+                  [matTooltip]="isPlaying(voice) ? 'Playing...' : 'Preview voice'"
                 >
-                  <mat-icon>{{ isPlaying(voice) ? 'stop' : 'play_arrow' }}</mat-icon>
+                  @if (isPlaying(voice)) {
+                    <mat-icon>volume_up</mat-icon>
+                  } @else {
+                    <mat-icon>play_circle</mat-icon>
+                  }
                 </button>
               }
             </div>

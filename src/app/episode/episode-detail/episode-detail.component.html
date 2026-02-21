@@ -184,7 +184,10 @@
                     <div class="audio-controls">
                       <button mat-flat-button color="primary" (click)="playInPlayer(audioSrc, 'Current Version')">
                         <mat-icon>play_arrow</mat-icon>
-                        Play
+                        <span>Play</span>
+                        @if (audioSeconds) {
+                          <span class="duration-hint">{{ formatDuration(audioSeconds) }}</span>
+                        }
                       </button>
                       <button mat-icon-button [matMenuTriggerFor]="currentAudioMenu" matTooltip="More options">
                         <mat-icon>more_vert</mat-icon>
@@ -198,7 +201,7 @@
                           <mat-icon>playlist_add</mat-icon>
                           <span>Add to Queue</span>
                         </button>
-                        <mat-divider></mat-divider>
+                        <mat-divider />
                         <button mat-menu-item (click)="downloadAudio()">
                           <mat-icon>download</mat-icon>
                           <span>Download</span>
@@ -226,7 +229,10 @@
                         (click)="playInPlayer(liveAudioSrc, getLiveAudioVersionText())"
                       >
                         <mat-icon>play_arrow</mat-icon>
-                        Play Live Version
+                        <span>Play Live Version</span>
+                        @if (audioSeconds) {
+                          <span class="duration-hint">{{ formatDuration(audioSeconds) }}</span>
+                        }
                       </button>
                       <button mat-icon-button [matMenuTriggerFor]="liveAudioMenu" matTooltip="More options">
                         <mat-icon>more_vert</mat-icon>

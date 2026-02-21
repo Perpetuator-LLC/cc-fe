@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -10,12 +10,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { A11yModule } from '@angular/cdk/a11y';
+import { Subscription, debounceTime } from 'rxjs';
 import { PulsesService } from '../pulses.service';
 import { MessageService } from '../../message.service';
 import { JobService } from '../../jobs/job.service';
 import { UserService } from '../../user/user.service';
 import { Voice } from '../../podcast/voices.service';
 import { VoiceDropdownComponent } from '../../shared/voice-dropdown/voice-dropdown.component';
+import { DialogDraftService } from '../../shared/services/dialog-draft.service';
 
 export interface CreateRecordingDialogData {
   pulseConfigUuid?: string; // Optional — if absent, creates standalone recording
@@ -26,6 +29,12 @@ export interface CreateRecordingDialogData {
 export interface CreateRecordingDialogResult {
   pulseUuid: string;
   jobUuid: string;
+}
+
+interface RecordingDraft {
+  title: string;
+  text: string;
+  convertToTranscript: boolean;
 }
 
 @Component({
@@ -42,12 +51,13 @@ export interface CreateRecordingDialogResult {
     MatProgressSpinnerModule,
     MatCheckboxModule,
     MatTooltipModule,
+    A11yModule,
     VoiceDropdownComponent,
   ],
   templateUrl: './create-recording-dialog.component.html',
   styleUrl: './create-recording-dialog.component.scss',
 })
-export class CreateRecordingDialogComponent implements OnInit {
+export class CreateRecordingDialogComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef =
     inject<MatDialogRef<CreateRecordingDialogComponent, CreateRecordingDialogResult>>(MatDialogRef);
@@ -56,9 +66,11 @@ export class CreateRecordingDialogComponent implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly jobService = inject(JobService);
   private readonly userService = inject(UserService);
+  private readonly draftService = inject(DialogDraftService);
 
   form: FormGroup;
   generating = false;
+  private subscriptions = new Subscription();
 
   // Voice selection for standalone recordings
   selectedVoiceUuid: string | null = null;
@@ -84,17 +96,52 @@ export class CreateRecordingDialogComponent implements OnInit {
   }
 
   constructor() {
+    // Prevent accidental close on backdrop click
+    this.dialogRef.disableClose = true;
+
     this.form = this.fb.group({
       title: [this.data?.initialTitle || '', [Validators.maxLength(200)]],
       text: [this.data?.initialText || '', [Validators.required, Validators.maxLength(50000)]],
       convertToTranscript: [true],
     });
+
+    // Auto-save draft on changes (debounced) - only for standalone recordings
+    this.subscriptions.add(
+      this.form.valueChanges.pipe(debounceTime(500)).subscribe(() => {
+        if (this.isStandalone) {
+          this.saveDraft();
+        }
+      }),
+    );
   }
 
   ngOnInit(): void {
     if (this.isStandalone) {
       this.loadUserDefaultVoice();
+      this.restoreDraft();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Restore any previously saved draft (only for standalone recordings)
+   */
+  private restoreDraft(): void {
+    const savedData = this.draftService.loadDraft<RecordingDraft>('recording');
+    if (savedData) {
+      this.form.patchValue(savedData, { emitEvent: false });
+    }
+  }
+
+  /**
+   * Save current form state to localStorage
+   */
+  private saveDraft(): void {
+    const formValue = this.form.getRawValue();
+    this.draftService.saveDraft('recording', formValue);
   }
 
   private loadUserDefaultVoice(): void {
@@ -140,6 +187,10 @@ export class CreateRecordingDialogComponent implements OnInit {
         this.generating = false;
         this.messageService.success('Recording created! Audio will be ready shortly.');
         this.trackJob(response.jobUuid);
+        // Clear draft on successful creation
+        if (this.isStandalone) {
+          this.draftService.clearDraft('recording');
+        }
         this.dialogRef.close({
           pulseUuid: response.pulse.uuid,
           jobUuid: response.jobUuid,

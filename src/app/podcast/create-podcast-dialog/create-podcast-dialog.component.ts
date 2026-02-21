@@ -1,20 +1,28 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { PodcastsService } from '../podcasts.service';
 import { TeamsResult, TeamsService } from '../../team/teams.service';
 import { UserService } from '../../user/user.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatError, MatFormField } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput, MatLabel } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
+import { A11yModule } from '@angular/cdk/a11y';
 import { JobService } from '../../jobs/job.service';
-import { CreatePodcastDialogStateService } from './create-podcast-dialog-state.service';
+import { DialogDraftService } from '../../shared/services/dialog-draft.service';
+
+interface PodcastDraft {
+  description: string;
+  teamSelection: string;
+  newTeamName: string;
+  title: string;
+}
 
 @Component({
   selector: 'app-create-podcast-dialog',
@@ -25,13 +33,16 @@ import { CreatePodcastDialogStateService } from './create-podcast-dialog-state.s
     MatFormField,
     MatInput,
     MatButton,
+    MatIconButton,
     MatLabel,
     MatError,
+    MatHint,
     MatSelect,
     MatOption,
     MatOptgroup,
     MatDialogModule,
     MatIcon,
+    A11yModule,
   ],
   templateUrl: './create-podcast-dialog.component.html',
   styleUrl: './create-podcast-dialog.component.scss',
@@ -45,16 +56,20 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   isLoadingTeams = true;
   private teamNameManuallyEdited = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private podcastsService: PodcastsService,
-    private teamsService: TeamsService,
-    private userService: UserService,
-    public dialogRef: MatDialogRef<CreatePodcastDialogComponent>,
-    private jobService: JobService,
-    private dialogStateService: CreatePodcastDialogStateService,
-  ) {
+  // Dependency injection using inject()
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly teamsService = inject(TeamsService);
+  private readonly userService = inject(UserService);
+  readonly dialogRef = inject(MatDialogRef<CreatePodcastDialogComponent>);
+  private readonly jobService = inject(JobService);
+  private readonly draftService = inject(DialogDraftService);
+
+  constructor() {
+    // Prevent accidental close on backdrop click
+    this.dialogRef.disableClose = true;
+
     this.podcastForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]],
       teamSelection: ['', Validators.required],
@@ -81,6 +96,13 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
     this.podcastForm.get('newTeamName')?.valueChanges.subscribe(() => {
       this.teamNameManuallyEdited = true;
     });
+
+    // Auto-save draft on changes (debounced)
+    this.subscriptions.add(
+      this.podcastForm.valueChanges.pipe(debounceTime(500)).subscribe(() => {
+        this.saveDraft();
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -90,10 +112,10 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Restore any previously saved form data
+   * Restore any previously saved draft
    */
   private restoreSavedFormData(): void {
-    const savedData = this.dialogStateService.getFormData();
+    const savedData = this.draftService.loadDraft<PodcastDraft>('podcast');
     if (savedData) {
       this.podcastForm.patchValue(savedData, { emitEvent: false });
       // Update validation states
@@ -103,11 +125,11 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Save current form state before dialog closes
+   * Save current form state to localStorage
    */
-  private saveCurrentFormData(): void {
+  private saveDraft(): void {
     const formValue = this.podcastForm.getRawValue();
-    this.dialogStateService.saveFormData(formValue);
+    this.draftService.saveDraft('podcast', formValue);
   }
 
   private updateDescriptionValidation(): void {
@@ -206,8 +228,8 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
         next: (created) => {
           this.messageService.info('Generating podcast...');
           this.jobService.addJob(created.job);
-          // Clear saved form data on successful creation
-          this.dialogStateService.clearFormData();
+          // Clear saved draft on successful creation
+          this.draftService.clearDraft('podcast');
           this.dialogRef.close(true);
         },
         error: (err) => {
@@ -218,10 +240,6 @@ export class CreatePodcastDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Save form data when dialog is closed (unless it was a successful creation which clears it)
-    if (this.dialogStateService.hasSavedData() || this.podcastForm.dirty) {
-      this.saveCurrentFormData();
-    }
     this.subscriptions.unsubscribe();
   }
 }

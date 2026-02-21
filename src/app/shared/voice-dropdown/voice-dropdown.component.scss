@@ -22,7 +22,7 @@
   white-space: nowrap;
 }
 
-.voice-tier {
+.voice-tier-chip {
   flex-shrink: 0;
 
   padding: 2px 8px;
@@ -34,18 +34,6 @@
   text-transform: uppercase;
 
   background: var(--md-sys-color-surface-container-high);
-}
-
-.preview-btn {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-
-  mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
-  }
 }
 
 audio {

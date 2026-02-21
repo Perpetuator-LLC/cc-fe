@@ -59,6 +59,8 @@ const PULSE_CONFIG_FRAGMENT = gql`
       sourceDetail
       rssUrl
       rssFeedUuid
+      rssFeedUrl
+      rssFeedName
       searchTerm
       watchlistUuid
       symbol
@@ -591,6 +593,8 @@ export class PulsesService extends BaseService {
             sourceDetail
             rssUrl
             rssFeedUuid
+            rssFeedUrl
+            rssFeedName
             searchTerm
             searchTermOriginal
             searchUserIntent
@@ -684,6 +688,8 @@ export class PulsesService extends BaseService {
             sourceDetail
             rssUrl
             rssFeedUuid
+            rssFeedUrl
+            rssFeedName
             searchTerm
             searchTermOriginal
             searchUserIntent

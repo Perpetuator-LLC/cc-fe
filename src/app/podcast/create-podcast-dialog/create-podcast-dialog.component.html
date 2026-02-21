@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="dialog-header" mat-dialog-title>
   <h2>Generate Podcast</h2>
   <button mat-icon-button (click)="dialogRef.close()">
@@ -8,12 +8,22 @@
 <mat-dialog-content>
   <form [formGroup]="podcastForm" (ngSubmit)="createPodcast()">
     <mat-form-field>
-      <mat-label>Description (Required)</mat-label>
+      <mat-label>Title (optional)</mat-label>
+      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
+      <mat-hint>Auto-generated if left blank</mat-hint>
+      @if (titleError) {
+        <mat-error>{{ titleError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
       <textarea
         matInput
         formControlName="description"
         required
         rows="4"
+        cdkFocusInitial
         placeholder="Describe your podcast... (e.g., 'A daily tech news podcast with episodes covering entrepreneurship, startups, and innovation.')"
       ></textarea>
       @if (descriptionError) {
@@ -50,14 +60,6 @@
         <input matInput formControlName="newTeamName" />
       </mat-form-field>
     }
-
-    <mat-form-field>
-      <mat-label>Title (Optional)</mat-label>
-      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
-      @if (titleError) {
-        <mat-error>{{ titleError }}</mat-error>
-      }
-    </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

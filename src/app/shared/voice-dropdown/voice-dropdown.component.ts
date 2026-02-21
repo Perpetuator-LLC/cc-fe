@@ -76,13 +76,19 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
       this.voicesService.getVoices(undefined, true).subscribe({
         next: (response) => {
           this.voices = response.voices;
-          // Sort by tier then name
+          // Sort by tier then name (Regular HD first)
           this.voices.sort((a, b) => {
             const tierOrder = this.getTierOrder(voiceToTier(a)) - this.getTierOrder(voiceToTier(b));
             if (tierOrder !== 0) return tierOrder;
             return this.getDisplayName(a).localeCompare(this.getDisplayName(b));
           });
           this.loadingVoices = false;
+
+          // Auto-select first voice if none is selected
+          if (!this.selectedVoiceUuid && this.voices.length > 0) {
+            this.selectedVoiceUuid = this.voices[0].uuid;
+            this.voiceSelected.emit(this.voices[0]);
+          }
         },
         error: () => {
           this.loadingVoices = false;
@@ -113,19 +119,18 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
     return voice.displayName || voice.externalId || 'Unknown';
   }
 
+  getSelectedVoiceName(): string {
+    if (!this.selectedVoiceUuid) return '';
+    const voice = this.voices.find((v) => v.uuid === this.selectedVoiceUuid);
+    return voice ? this.getDisplayName(voice) : '';
+  }
+
   getTierLabel(voice: Voice): string {
     return tierToString(voiceToTier(voice));
   }
 
-  playPreview(voice: Voice, event: MouseEvent): void {
-    event.stopPropagation();
+  playPreviewOnHover(voice: Voice): void {
     if (!voice.sampleUrl) return;
-
-    // If already playing this voice, stop it
-    if (this.playingVoiceUuid === voice.uuid) {
-      this.stopPreview();
-      return;
-    }
 
     this.playingVoiceUuid = voice.uuid;
     if (this.audioPlayer?.nativeElement) {
