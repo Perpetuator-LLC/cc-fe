@@ -34,6 +34,11 @@
 
 // Left Sidebar
 .symbol-sidebar {
+
+  // Optimize for resize performance
+  will-change: width;
+
+  contain: layout style;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -573,6 +578,9 @@
 
 // Main Chart Area
 .chart-main {
+
+  // Isolate layout recalculations during resize
+  contain: layout style;
   overflow: hidden;
   display: flex;
   flex: 1;
