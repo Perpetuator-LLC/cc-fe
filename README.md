@@ -1,24 +1,24 @@
 # Capital Copilot Frontend
 
-> **Angular 18 | Material Design 3 | Apollo GraphQL**
+> **Angular 21 | Material Design 3 | Apollo GraphQL**
 
-[![Angular](https://img.shields.io/badge/Angular-18.0.6-red)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-21.1-red)](https://angular.io/)
 [![Material Design](https://img.shields.io/badge/Material-MD3-blue)](https://m3.material.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and yarn
+- Node.js 22+ and yarn
 - Access to Capital Copilot backend API
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/capital-copilot-fe.git
-   cd capital-copilot-fe
+   git clone https://github.com/Perpetuator-LLC/cc-fe.git
+   cd cc-fe
    ```
 
 2. **Install dependencies:**
@@ -81,12 +81,13 @@ See [notes/README.md](./notes/README.md) for complete documentation index.
 
 ## 🛠️ Key Technologies
 
-- **Framework:** Angular 18.0.6 (Standalone Components)
+- **Framework:** Angular 21.1 (Standalone Components)
 - **UI Library:** Angular Material 3 (MD3)
-- **State Management:** Apollo Client + RxJS
-- **GraphQL:** Apollo Angular
+- **State Management:** Apollo Client 4.x + RxJS
+- **GraphQL:** Apollo Angular 13.x
+- **TypeScript:** 5.9+
 - **Package Manager:** yarn
-- **Linting:** ESLint + Stylelint
+- **Linting:** ESLint 9.x + Stylelint
 
 ## 📋 Available Commands
 
@@ -115,9 +116,12 @@ This project follows **Material Design 3** guidelines:
 
 - ✅ Use MD3 design tokens: `var(--md-sys-color-*)`
 - ✅ Use Material components: `<mat-button>`, `<mat-card>`
-- ✅ 4px grid spacing: 4, 8, 16, 24, 32, 48, 64
+- ✅ 4px grid spacing: 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64
+- ✅ 2px font-size grid: 10, 12, 14, 16, 18, 20, 22, 24
+- ✅ Use `inject()` for dependency injection (not constructor injection)
 - ❌ No inline templates/styles (enforced by ESLint)
-- ❌ No hardcoded colors or spacing
+- ❌ No hardcoded colors (hex/rgba) - use MD3 tokens
+- ❌ No `::ng-deep` or `!important`
 
 See [MD3_COMPREHENSIVE_THEME_GUIDE.md](./notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md) for details.
 
@@ -183,7 +187,7 @@ See [PRODUCTION.md](./notes/production/PRODUCTION.md) for deployment instruction
 
 ## 📄 License
 
-Copyright © 2025 Perpetuator LLC. All rights reserved.
+Copyright © 2025-2026 Perpetuator LLC. All rights reserved.
 
 ## 🆘 Support
 
