@@ -147,10 +147,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   displayedWatchlistColumns: string[] = ['actions', 'symbol', 'name', 'marketCap'];
 
   // Sidebar resize state
-  sidebarWidth = 280; // Default width in pixels
+  sidebarWidth = signal(280); // Default width in pixels
   isResizing = false;
   private resizeStartX = 0;
   private resizeStartWidth = 0;
+  private pendingResizeFrame: number | null = null;
 
   // State
   loading = signal(false);
@@ -2298,13 +2299,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
       // Get current zoom state from the chart option (most reliable source after zoom)
       const option = chart.getOption();
-      const dataZoom = option.dataZoom;
+      const dataZoom = option['dataZoom'] as { type?: string; start?: number; end?: number }[] | undefined;
 
       if (!dataZoom || dataZoom.length === 0) return;
 
       // Find the inside dataZoom - read from the actual option state, not params
       // The params may not include the final computed values for wheel zoom
-      const insideZoom = dataZoom.find((dz: { type?: string }) => dz.type === 'inside') || dataZoom[0];
+      const insideZoom = dataZoom.find((dz) => dz.type === 'inside') || dataZoom[0];
       // Get values from the option which reflects the current state after the zoom
       const startPercent = insideZoom.start ?? 0;
       const endPercent = insideZoom.end ?? 100;
@@ -2324,7 +2325,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         // Adjust to keep end at 100%
         const newStart = Math.max(0, 100 - range);
 
-        clearTimeout(this.zoomCorrectionTimer);
+        if (this.zoomCorrectionTimer) {
+          clearTimeout(this.zoomCorrectionTimer);
+        }
 
         // Use a very short timeout to batch corrections but keep them frame-instant
         this.zoomCorrectionTimer = setTimeout(() => {
@@ -2334,7 +2337,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
             type: 'dataZoom',
             start: newStart,
             end: 100,
-            animation: false, // Disable animation for strict locking to right edge
           });
 
           // Allow the next zoom event after 100ms
@@ -2367,7 +2369,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           const dataIndex = Math.round(pointInGrid[0]);
           // Get current data length from chart for bounds checking
           const instanceOption = chart.getOption();
-          const series = instanceOption?.series;
+          const series = instanceOption?.['series'] as { type?: string; data?: unknown[] }[] | undefined;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const candleSeries = Array.isArray(series) ? series.find((s: any) => s.type === 'candlestick') : null;
           const dataLength = candleSeries?.data?.length || 0;
@@ -2437,7 +2439,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     if (!instanceOption) return;
 
     // Get series data from the chart instance
-    const series = instanceOption.series;
+    const series = instanceOption['series'] as { type?: string; data?: unknown[] }[] | undefined;
     if (!series || !Array.isArray(series) || series.length === 0) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2459,8 +2461,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     // Get the date from xAxis data (from chart instance)
-    const xAxis = instanceOption.xAxis;
-    const xAxisData = Array.isArray(xAxis) ? xAxis[0]?.data : xAxis?.data;
+    const xAxis = instanceOption['xAxis'] as { data?: string[] }[] | { data?: string[] } | undefined;
+    const xAxisData = Array.isArray(xAxis) ? xAxis[0]?.data : (xAxis as { data?: string[] })?.data;
 
     if (!xAxisData || dataIndex >= xAxisData.length) {
       this.crosshairData.set(null);
@@ -2731,17 +2733,17 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     const instanceOption = this.chartInstance.getOption();
 
     // Get current zoom state
-    const dataZoom = instanceOption.dataZoom;
+    const dataZoom = instanceOption['dataZoom'] as { type?: string; start?: number; end?: number }[] | undefined;
     let currentStart = 0;
     let currentEnd = 100;
     if (dataZoom && dataZoom.length > 0) {
-      const insideZoom = dataZoom.find((dz: { type?: string }) => dz.type === 'inside') || dataZoom[0];
+      const insideZoom = dataZoom.find((dz) => dz.type === 'inside') || dataZoom[0];
       currentStart = insideZoom.start ?? 0;
       currentEnd = insideZoom.end ?? 100;
     }
 
     // Get old data count from the chart instance
-    const series = instanceOption.series;
+    const series = instanceOption['series'] as { type?: string; data?: unknown[] }[] | undefined;
     let oldDataCount = 0;
     if (series && Array.isArray(series)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2802,7 +2804,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.isCorrectingZoom = true;
 
     // Check if we have volume series (dual-chart mode)
-    const currentSeries = instanceOption.series;
+    const currentSeries = instanceOption['series'] as unknown[] | undefined;
     const hasVolumeSeries = Array.isArray(currentSeries) && currentSeries.length > 1;
 
     // Update the data and zoom
@@ -3877,8 +3879,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.buildChartFromCandles(candles, symbol);
 
     // Force complete re-render with notMerge to ensure axis formatters are recreated
-    if (this.chartInstance && this.chartOptions()) {
-      this.chartInstance.setOption(this.chartOptions(), { notMerge: true, replaceMerge: ['xAxis', 'yAxis', 'series'] });
+    const options = this.chartOptions();
+    if (this.chartInstance && options) {
+      this.chartInstance.setOption(options, { notMerge: true, replaceMerge: ['xAxis', 'yAxis', 'series'] });
     }
   }
 
@@ -4103,9 +4106,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   // Resize handle methods
   onResizeStart(event: MouseEvent): void {
+    console.time('[Resize] Total drag session');
+    console.log('[Resize] START - clientX:', event.clientX);
     this.isResizing = true;
     this.resizeStartX = event.clientX;
-    this.resizeStartWidth = this.sidebarWidth;
+    this.resizeStartWidth = this.sidebarWidth();
     event.preventDefault();
 
     // Add event listeners to document for smooth dragging
@@ -4113,23 +4118,44 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     document.addEventListener('mouseup', this.onResizeEnd);
   }
 
+  private resizeMoveCount = 0;
+
   private onResizeMove = (event: MouseEvent): void => {
     if (!this.isResizing) return;
 
-    // Calculate the new width
-    const deltaX = event.clientX - this.resizeStartX;
-    let newWidth = this.resizeStartWidth + deltaX;
+    this.resizeMoveCount++;
 
-    // Constrain width between min and max
-    const minWidth = 200;
-    const maxWidth = window.innerWidth * 0.5; // Max 50% of viewport
-    newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+    // Throttle updates using requestAnimationFrame
+    if (this.pendingResizeFrame !== null) {
+      return;
+    }
 
-    this.sidebarWidth = newWidth;
+    this.pendingResizeFrame = requestAnimationFrame(() => {
+      this.pendingResizeFrame = null;
+
+      // Calculate the new width
+      const deltaX = event.clientX - this.resizeStartX;
+      let newWidth = this.resizeStartWidth + deltaX;
+
+      // Constrain width between min and max
+      const minWidth = 200;
+      const maxWidth = window.innerWidth * 0.5; // Max 50% of viewport
+      newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+
+      // Using signal.set() triggers change detection in OnPush components
+      this.sidebarWidth.set(newWidth);
+    });
   };
 
   private onResizeEnd = (): void => {
+    console.log('[Resize] END - total moves:', this.resizeMoveCount);
+    console.timeEnd('[Resize] Total drag session');
+    this.resizeMoveCount = 0;
     this.isResizing = false;
+    if (this.pendingResizeFrame !== null) {
+      cancelAnimationFrame(this.pendingResizeFrame);
+      this.pendingResizeFrame = null;
+    }
     document.removeEventListener('mousemove', this.onResizeMove);
     document.removeEventListener('mouseup', this.onResizeEnd);
   };
