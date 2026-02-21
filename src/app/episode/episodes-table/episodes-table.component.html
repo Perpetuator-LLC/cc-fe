@@ -126,6 +126,9 @@
                   <button mat-menu-item (click)="playEpisode(episode)">
                     <mat-icon>play_arrow</mat-icon>
                     <span>Play</span>
+                    @if (episode.audioSeconds) {
+                      <span class="duration-hint">{{ formatDuration(episode.audioSeconds) }}</span>
+                    }
                   </button>
                   <button mat-menu-item (click)="playEpisodeNext(episode)">
                     <mat-icon>queue_play_next</mat-icon>
@@ -192,6 +195,9 @@
                         <button mat-menu-item (click)="playEpisode(episode)">
                           <mat-icon>play_arrow</mat-icon>
                           <span>Play</span>
+                          @if (episode.audioSeconds) {
+                            <span class="duration-hint">{{ formatDuration(episode.audioSeconds) }}</span>
+                          }
                         </button>
                         <button mat-menu-item (click)="playEpisodeNext(episode)">
                           <mat-icon>queue_play_next</mat-icon>

@@ -308,6 +308,21 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
   }
 
   /**
+   * Format seconds as M:SS or H:MM:SS
+   */
+  formatDuration(seconds: number | null | undefined): string {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    if (mins >= 60) {
+      const hours = Math.floor(mins / 60);
+      const remainingMins = mins % 60;
+      return `${hours}:${remainingMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  /**
    * Play episode immediately
    */
   playEpisode(episode: Episode): void {

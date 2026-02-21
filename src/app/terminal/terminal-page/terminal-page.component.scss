@@ -9,11 +9,12 @@
 }
 
 .content-container {
+  overflow: hidden;
   display: flex;
   flex: 1;
   flex-direction: column;
+
   min-height: 0;
-  overflow: hidden;
 }
 
 // History tab
@@ -557,8 +558,8 @@
 
 // Help tab
 .help-tab {
-  padding: 24px;
   overflow: auto;
+  padding: 24px;
 
   h3 {
     margin-top: 0;

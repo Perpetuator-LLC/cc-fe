@@ -9,13 +9,13 @@
 <mat-card class="create-pulse-card">
   <mat-card-content class="content-header">
     <div class="title">
-      <h3>My Pulse Configs</h3>
+      <h3 matTooltip="Auto-generated news audio" matTooltipPosition="right">My Pulse Configs</h3>
       <span>{{ pulseConfigs.length }} configurations</span>
     </div>
     <div class="header-actions">
-      <button mat-flat-button color="primary" type="button" (click)="createPulseConfig()">
+      <button mat-button color="secondary" type="button" (click)="createPulseConfig()">
         <mat-icon>add</mat-icon>
-        Create Pulse
+        <span>Create Pulse</span>
       </button>
     </div>
   </mat-card-content>
@@ -210,5 +210,5 @@
     [pageSizeOptions]="pageSizeOptions"
     [showFirstLastButtons]="false"
     (page)="onPageChange($event)"
-  ></mat-paginator>
+  />
 </div>

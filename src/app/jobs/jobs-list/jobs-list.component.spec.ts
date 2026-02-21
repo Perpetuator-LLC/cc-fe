@@ -10,6 +10,8 @@ import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
 import { ResearchService } from '../../topics/research.service';
 import { LoadingService } from '../../layout/loading.service';
+import { PulsesService } from '../../pulses/pulses.service';
+import { Apollo } from 'apollo-angular';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, EMPTY } from 'rxjs';
 
@@ -25,6 +27,7 @@ describe('JobsListComponent', () => {
   let mockJobDisplayService: jasmine.SpyObj<JobDisplayService>;
   let mockResearchService: jasmine.SpyObj<ResearchService>;
   let mockLoadingService: jasmine.SpyObj<LoadingService>;
+  let mockPulsesService: jasmine.SpyObj<PulsesService>;
 
   beforeEach(async () => {
     mockJobService = jasmine.createSpyObj('JobService', ['getJobs', 'getJobsGrouped', 'addJob']);
@@ -45,6 +48,9 @@ describe('JobsListComponent', () => {
     mockJobDisplayService = jasmine.createSpyObj('JobDisplayService', ['openJobStatusDialog']);
     mockResearchService = jasmine.createSpyObj('ResearchService', ['getTopic']);
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['show', 'hide']);
+    mockPulsesService = jasmine.createSpyObj('PulsesService', ['getPulseConfig']);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockPulsesService.getPulseConfig.and.returnValue(EMPTY as any);
 
     mockJobService.getJobs.and.returnValue(
       of({
@@ -73,6 +79,11 @@ describe('JobsListComponent', () => {
         { provide: JobDisplayService, useValue: mockJobDisplayService },
         { provide: ResearchService, useValue: mockResearchService },
         { provide: LoadingService, useValue: mockLoadingService },
+        { provide: PulsesService, useValue: mockPulsesService },
+        {
+          provide: Apollo,
+          useValue: { query: () => EMPTY, mutate: () => EMPTY, watchQuery: () => ({ valueChanges: EMPTY }) },
+        },
       ],
     }).compileComponents();
   });

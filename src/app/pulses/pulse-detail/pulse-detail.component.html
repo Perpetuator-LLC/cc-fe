@@ -8,7 +8,7 @@
 
 @if (loading) {
   <div class="loading-container">
-    <mat-spinner diameter="48"></mat-spinner>
+    <mat-spinner diameter="48" />
   </div>
 } @else if (pulseConfig) {
   <div class="pulse-detail">
@@ -28,7 +28,7 @@
           <div class="header-actions">
             <button mat-flat-button color="primary" (click)="generatePulse()" [disabled]="generatingPulse">
               @if (generatingPulse) {
-                <mat-spinner diameter="18"></mat-spinner>
+                <mat-spinner diameter="18" />
               } @else {
                 <mat-icon>play_arrow</mat-icon>
               }
@@ -48,7 +48,7 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Latest Pulse Section -->
+    <!-- Latest Recording Section -->
     @if (latestPulse) {
       <mat-card class="latest-pulse-card">
         <mat-card-content>
@@ -56,7 +56,7 @@
             <div class="latest-pulse-info">
               <h3>
                 <mat-icon>schedule</mat-icon>
-                Latest Pulse
+                Latest Recording
               </h3>
               <span class="pulse-title">{{ latestPulse.title }}</span>
               <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
@@ -66,6 +66,9 @@
                 <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
                   <mat-icon>play_arrow</mat-icon>
                   Play
+                  @if (latestPulse.audioDurationSeconds) {
+                    <span class="duration-hint">{{ formatSeconds(latestPulse.audioDurationSeconds) }}</span>
+                  }
                 </button>
                 <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
                   <mat-icon>more_vert</mat-icon>
@@ -322,8 +325,13 @@
                     <td mat-cell *matCellDef="let source">
                       <div class="source-detail">
                         @if (source.sourceType === 'rss_feed') {
-                          <a [href]="source.rssUrl" target="_blank" rel="noopener noreferrer" class="rss-url">
-                            {{ source.sourceDetail || source.rssUrl }}
+                          <a
+                            [href]="source.rssFeedUrl || source.rssUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="rss-url"
+                          >
+                            {{ source.rssFeedName || source.sourceDetail || source.rssFeedUrl || source.rssUrl }}
                           </a>
                         } @else if (source.sourceType === 'company') {
                           <span class="symbol-badge">{{ source.symbol }}</span>
@@ -604,8 +612,8 @@
                           <span class="recording-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
                         </div>
                         <div class="recording-status">
-                          <span class="status-badge" [class]="getStatusClass(pulse.status)">
-                            {{ pulse.status | titlecase }}
+                          <span class="status-badge" [class]="getStatusClass(pulse.status, pulse)">
+                            {{ getDisplayStatusText(pulse) }}
                           </span>
                         </div>
                       </div>
@@ -644,6 +652,9 @@
                           <button mat-flat-button color="primary" (click)="playPulse(pulse)">
                             <mat-icon>play_arrow</mat-icon>
                             Play
+                            @if (pulse.audioDurationSeconds) {
+                              <span class="duration-hint">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+                            }
                           </button>
                           <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
                             <mat-icon>more_vert</mat-icon>

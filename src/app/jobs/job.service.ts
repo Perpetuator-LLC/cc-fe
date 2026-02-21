@@ -31,6 +31,7 @@ export enum JobKind {
   FETCH_INCOME_STATEMENT = 'FETCH_INCOME_STATEMENT',
   FETCH_CASH_FLOW = 'FETCH_CASH_FLOW',
   FETCH_EARNINGS = 'FETCH_EARNINGS',
+  UPDATE_COMPANY_METADATA = 'UPDATE_COMPANY_METADATA',
   CREATE_RESEARCH_TOPIC = 'CREATE_RESEARCH_TOPIC',
   RESEARCH_TOPIC = 'RESEARCH_TOPIC',
   VALIDATE_RESEARCH = 'VALIDATE_RESEARCH',
@@ -41,6 +42,7 @@ export enum JobKind {
   GENERATE_PODCAST_IMAGE = 'GENERATE_PODCAST_IMAGE',
   GENERATE_IMAGE = 'GENERATE_IMAGE',
   // Pulse job types
+  GENERATE_PULSE_CONFIG = 'GENERATE_PULSE_CONFIG',
   GENERATE_PULSE = 'GENERATE_PULSE',
   FETCH_PULSE_NEWS = 'FETCH_PULSE_NEWS',
   RESEARCH_PULSE_CONTENT = 'RESEARCH_PULSE_CONTENT',
@@ -49,8 +51,14 @@ export enum JobKind {
   GENERATE_PULSE_AUDIO = 'GENERATE_PULSE_AUDIO',
   DELIVER_PULSE = 'DELIVER_PULSE',
   PUBLISH_PULSE_CHAIN = 'PUBLISH_PULSE_CHAIN',
+  // Recording job types
+  CREATE_RECORDING = 'CREATE_RECORDING',
+  GENERATE_TEXT_TO_SPEECH = 'GENERATE_TEXT_TO_SPEECH',
+  // Test job types
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
+  // Fallback for unknown types from backend
+  UNKNOWN = 'UNKNOWN',
 }
 
 export const stringToJobKind = (kind: string) => {
@@ -99,6 +107,8 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.FETCH_CASH_FLOW;
     case 'FETCH_EARNINGS':
       return JobKind.FETCH_EARNINGS;
+    case 'UPDATE_COMPANY_METADATA':
+      return JobKind.UPDATE_COMPANY_METADATA;
     case 'CREATE_RESEARCH_TOPIC':
       return JobKind.CREATE_RESEARCH_TOPIC;
     case 'RESEARCH_TOPIC':
@@ -117,6 +127,8 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.GENERATE_PODCAST_IMAGE;
     case 'GENERATE_IMAGE':
       return JobKind.GENERATE_IMAGE;
+    case 'GENERATE_PULSE_CONFIG':
+      return JobKind.GENERATE_PULSE_CONFIG;
     case 'GENERATE_PULSE':
       return JobKind.GENERATE_PULSE;
     case 'FETCH_PULSE_NEWS':
@@ -133,12 +145,18 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.DELIVER_PULSE;
     case 'PUBLISH_PULSE_CHAIN':
       return JobKind.PUBLISH_PULSE_CHAIN;
+    case 'CREATE_RECORDING':
+      return JobKind.CREATE_RECORDING;
+    case 'GENERATE_TEXT_TO_SPEECH':
+      return JobKind.GENERATE_TEXT_TO_SPEECH;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
       return JobKind.TEST_RAISE;
     default:
-      throw new Error('Invalid job type');
+      // Log unknown job types for debugging but don't crash
+      console.warn(`[JobService] Unknown job type: ${kind}`);
+      return JobKind.UNKNOWN;
   }
 };
 
@@ -188,6 +206,8 @@ export const kindToString = (kind: string) => {
       return 'Fetch Cash Flow';
     case JobKind.FETCH_EARNINGS:
       return 'Fetch Earnings';
+    case JobKind.UPDATE_COMPANY_METADATA:
+      return 'Update Company Metadata';
     case JobKind.CREATE_RESEARCH_TOPIC:
       return 'Create Research Topic';
     case JobKind.RESEARCH_TOPIC:
@@ -206,6 +226,8 @@ export const kindToString = (kind: string) => {
       return 'Generate Podcast Image';
     case JobKind.GENERATE_IMAGE:
       return 'Generate Image';
+    case JobKind.GENERATE_PULSE_CONFIG:
+      return 'Generate Pulse Config';
     case JobKind.GENERATE_PULSE:
       return 'Generate Pulse';
     case JobKind.FETCH_PULSE_NEWS:
@@ -222,10 +244,16 @@ export const kindToString = (kind: string) => {
       return 'Delivering Pulse';
     case JobKind.PUBLISH_PULSE_CHAIN:
       return 'Publishing Pulse';
+    case JobKind.CREATE_RECORDING:
+      return 'Create Recording';
+    case JobKind.GENERATE_TEXT_TO_SPEECH:
+      return 'Generate Audio';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
       return 'Test Raise';
+    case JobKind.UNKNOWN:
+      return 'Processing';
     default:
       return 'N/A';
   }
@@ -277,6 +305,8 @@ export const iconForJob = (kind: string): string => {
       return 'account_balance_wallet';
     case JobKind.FETCH_EARNINGS:
       return 'monetization_on';
+    case JobKind.UPDATE_COMPANY_METADATA:
+      return 'edit_note';
     case JobKind.CREATE_RESEARCH_TOPIC:
       return 'topic';
     case JobKind.RESEARCH_TOPIC:
@@ -295,6 +325,8 @@ export const iconForJob = (kind: string): string => {
       return 'image';
     case JobKind.GENERATE_IMAGE:
       return 'palette';
+    case JobKind.GENERATE_PULSE_CONFIG:
+      return 'settings';
     case JobKind.GENERATE_PULSE:
       return 'vital_signs';
     case JobKind.FETCH_PULSE_NEWS:
@@ -311,10 +343,16 @@ export const iconForJob = (kind: string): string => {
       return 'send';
     case JobKind.PUBLISH_PULSE_CHAIN:
       return 'rocket_launch';
+    case JobKind.CREATE_RECORDING:
+      return 'mic';
+    case JobKind.GENERATE_TEXT_TO_SPEECH:
+      return 'volume_up';
     case JobKind.TEST_RAISE:
       return 'bug_report';
     case JobKind.TEST_PRINT:
       return 'print';
+    case JobKind.UNKNOWN:
+      return 'help_outline';
     default:
       return 'work';
   }

@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
 @if (loading) {
   <div class="loading-container">
-    <mat-spinner diameter="48"></mat-spinner>
+    <mat-spinner diameter="48" />
   </div>
 } @else if (recording) {
   <div class="recording-detail">
@@ -19,9 +19,20 @@
             </div>
             <div class="header-text">
               <h1>{{ recording.title }}</h1>
+              @if (recording.configName && pulseConfigUuid) {
+                <a class="pulse-link" [routerLink]="['/media/pulses', pulseConfigUuid]">
+                  <mat-icon>vital_signs</mat-icon>
+                  {{ recording.configName }}
+                </a>
+              } @else if (recording.configName) {
+                <span class="pulse-name">
+                  <mat-icon>vital_signs</mat-icon>
+                  {{ recording.configName }}
+                </span>
+              }
               <div class="header-meta">
                 <span class="status-badge" [class]="getStatusClass(recording.status)">
-                  {{ recording.status | titlecase }}
+                  {{ getDisplayStatusText() }}
                 </span>
                 <span class="meta-item">
                   <mat-icon>timer</mat-icon>

@@ -65,7 +65,7 @@
     <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
     <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="alertForm.invalid || isSubmitting">
       @if (isSubmitting) {
-        <mat-spinner diameter="20"></mat-spinner>
+        <mat-spinner diameter="20" />
       } @else {
         Add Trigger
       }

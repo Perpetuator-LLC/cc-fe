@@ -1,0 +1,41 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.voice-dropdown-container {
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.voice-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.voice-name {
+  overflow: hidden;
+  flex: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-tier-chip {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+
+  background: var(--md-sys-color-surface-container-high);
+}
+
+audio {
+  display: none;
+}

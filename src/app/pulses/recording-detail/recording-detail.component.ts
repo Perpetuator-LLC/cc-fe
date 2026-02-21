@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +18,11 @@ import { AgentActionsListComponent } from '../../shared/agent-actions-list/agent
 import { ResearchNewsListComponent } from '../../shared/research-news-list/research-news-list.component';
 import { ResearchUrlsListComponent } from '../../shared/research-urls-list/research-urls-list.component';
 import { PageTitleService } from '../../layout/page-title.service';
+import {
+  getStatusClass as pulseStatusClass,
+  getDisplayStatusText as pulseDisplayText,
+  formatSeconds as pulseFormatSeconds,
+} from '../pulse-status.utils';
 
 @Component({
   selector: 'app-recording-detail',
@@ -25,6 +30,7 @@ import { PageTitleService } from '../../layout/page-title.service';
   imports: [
     CommonModule,
     DatePipe,
+    RouterLink,
     MatCardModule,
     MatIconModule,
     MatButtonModule,
@@ -40,6 +46,14 @@ import { PageTitleService } from '../../layout/page-title.service';
   styleUrl: './recording-detail.component.scss',
 })
 export class RecordingDetailComponent implements OnInit, OnDestroy {
+  // Dependencies
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly messageService = inject(MessageService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly audioPlayerService = inject(AudioPlayerService);
+
   private subscriptions = new Subscription();
   protected loading = true;
   protected recordingUuid: string;
@@ -50,14 +64,7 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
 
   private readonly tabNames = ['overview', 'transcript', 'research', 'news', 'urls'];
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private pageTitleService: PageTitleService,
-    private messageService: MessageService,
-    private pulsesService: PulsesService,
-    private audioPlayerService: AudioPlayerService,
-  ) {
+  constructor() {
     this.recordingUuid = this.route.snapshot.params['recordingUuid'];
     // Support both route param and query param for pulse context
     this.pulseConfigUuid = this.route.snapshot.params['uuid'] || this.route.snapshot.queryParams['pulse'] || null;
@@ -94,6 +101,10 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
         next: (pulse) => {
           this.recording = pulse;
           this.pageTitleService.setTitle(pulse.title || 'Recording');
+          // Use configUuid from the recording if not already set from route
+          if (!this.pulseConfigUuid && pulse.configUuid) {
+            this.pulseConfigUuid = pulse.configUuid;
+          }
           this.loading = false;
         },
         error: (err) => {
@@ -122,6 +133,7 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
     const track: AudioTrack = {
       id: this.recording.uuid,
       title: this.recording.title,
+      subtitle: this.recording.configName || 'Recording',
       audioUrl: this.recording.audioUrl,
       duration: this.recording.audioDurationSeconds,
       type: 'pulse',
@@ -149,6 +161,7 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
     return {
       id: this.recording!.uuid,
       title: this.recording!.title,
+      subtitle: this.recording!.configName || 'Recording',
       audioUrl: this.recording!.audioUrl,
       duration: this.recording!.audioDurationSeconds,
       type: 'pulse',
@@ -169,25 +182,16 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
   }
 
   formatSeconds(seconds: number | null | undefined): string {
-    if (!seconds) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return pulseFormatSeconds(seconds);
   }
 
   getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'ready':
-      case 'delivered':
-        return 'status-success';
-      case 'generating':
-      case 'pending':
-        return 'status-warning';
-      case 'failed':
-        return 'status-error';
-      default:
-        return '';
-    }
+    return pulseStatusClass(status, this.recording ?? undefined);
+  }
+
+  getDisplayStatusText(): string {
+    if (!this.recording) return '';
+    return pulseDisplayText(this.recording);
   }
 
   goBack(): void {

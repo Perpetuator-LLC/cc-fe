@@ -5,8 +5,14 @@
     <mat-card-content>
       <div class="header-content">
         <div class="title-section">
-          <h1>Recordings</h1>
+          <h1 matTooltip="Audio files from text" matTooltipPosition="right">Recordings</h1>
           <span class="count">{{ totalCount }} total</span>
+        </div>
+        <div class="header-actions">
+          <button mat-flat-button color="primary" (click)="createRecording()">
+            <mat-icon>mic</mat-icon>
+            Create Recording
+          </button>
         </div>
       </div>
     </mat-card-content>
@@ -60,7 +66,7 @@
     <mat-card-content>
       @if (loading) {
         <div class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
+          <mat-spinner diameter="40" />
         </div>
       } @else if (recordings.length === 0) {
         <div class="empty-state">
@@ -83,8 +89,8 @@
                   <span class="recording-title">{{ recording.title }}</span>
                   <span class="recording-config">{{ recording.configName }}</span>
                 </div>
-                <span class="status-badge" [class]="getStatusClass(recording.status)">
-                  {{ recording.status | titlecase }}
+                <span class="status-badge" [class]="getStatusClass(recording.status, recording)">
+                  {{ getDisplayStatusText(recording) }}
                 </span>
               </div>
 
@@ -114,6 +120,9 @@
                   <button mat-flat-button color="primary" (click)="playRecording(recording)">
                     <mat-icon>play_arrow</mat-icon>
                     Play
+                    @if (recording.audioDurationSeconds) {
+                      <span class="duration-hint">{{ formatSeconds(recording.audioDurationSeconds) }}</span>
+                    }
                   </button>
                   <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
                     <mat-icon>more_vert</mat-icon>
