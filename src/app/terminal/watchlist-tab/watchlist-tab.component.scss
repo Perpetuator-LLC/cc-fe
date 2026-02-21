@@ -263,14 +263,15 @@
 
   .actions-cell {
     width: 40px;
-    text-align: right;
+    padding: 0 4px;
+  }
 
-    button {
-      opacity: 0.6;
+  // Row action buttons - slightly faded until hover
+  td.actions-cell button {
+    opacity: 0.6;
 
-      &:hover {
-        opacity: 1;
-      }
+    &:hover {
+      opacity: 1;
     }
   }
 }
@@ -705,17 +706,19 @@
   }
 }
 
-.manage-btn{
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface-variant);
-    text-transform: uppercase;
-    width: auto;
+.manage-btn {
+  display: flex;
+  align-items: center;
 
+  width: auto;
+
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
+
 // Metadata chip base - extracted to avoid deep nesting
 .metadata-chip {
   cursor: pointer;
