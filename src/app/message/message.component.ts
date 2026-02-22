@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, NgZone, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Message, MessageService } from '../message.service';
 import { MatIcon } from '@angular/material/icon';
@@ -21,6 +21,11 @@ interface MessageWithProgress extends Message {
   styleUrl: './message.component.scss',
 })
 export class MessageComponent implements OnDestroy {
+  private readonly messageService = inject(MessageService);
+  private readonly router = inject(Router);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
   messages: MessageWithProgress[] = [];
   private timeoutIds = new Map<number, number>();
   private progressIntervalIds = new Map<number, number>();
@@ -28,10 +33,7 @@ export class MessageComponent implements OnDestroy {
   private timeoutProgressMap = new Map<number, number>();
   private timeoutStartTimeMap = new Map<number, number>();
 
-  constructor(
-    private messageService: MessageService,
-    private router: Router,
-  ) {
+  constructor() {
     this.messageService.messages$.subscribe({
       next: (messages) => {
         this.messages = messages.map((message) => {
@@ -76,25 +78,33 @@ export class MessageComponent implements OnDestroy {
       const timeout = message.timeout;
       const timestamp = message.timestamp;
 
-      const intervalId = window.setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, timeout - elapsed);
-        const progress = (remaining / timeout) * 100;
+      // Run interval outside Angular zone to avoid triggering change detection every 50ms
+      this.ngZone.runOutsideAngular(() => {
+        const intervalId = window.setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, timeout - elapsed);
+          const progress = (remaining / timeout) * 100;
 
-        // Update the Map so the value persists
-        this.timeoutProgressMap.set(timestamp, progress);
+          // Update the Map so the value persists
+          this.timeoutProgressMap.set(timestamp, progress);
 
-        // Also update the message in the array for reactivity
-        const msg = this.messages.find((m) => m.timestamp === timestamp);
-        if (msg) {
-          msg.timeoutProgress = progress;
-        }
+          // Also update the message in the array for reactivity
+          const msg = this.messages.find((m) => m.timestamp === timestamp);
+          if (msg) {
+            msg.timeoutProgress = progress;
+          }
 
-        if (progress <= 0) {
-          this.clearMessageTimers(timestamp);
-        }
-      }, 50);
-      this.progressIntervalIds.set(message.timestamp, intervalId);
+          // Trigger change detection to update the UI
+          this.ngZone.run(() => {
+            this.cdr.detectChanges();
+          });
+
+          if (progress <= 0) {
+            this.clearMessageTimers(timestamp);
+          }
+        }, 50);
+        this.progressIntervalIds.set(timestamp, intervalId);
+      });
     }
   }
 
