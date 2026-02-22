@@ -6,9 +6,8 @@
     "ng": "ng",
     "start": "ng serve",
     "start:ssr": "ng serve --configuration production",
-    "prestart": "yarn docs:graphql",
     "build": "ng build",
-    "prebuild": "yarn docs:graphql",
+    "build:prod": "yarn docs:graphql && ng build",
     "watch": "ng build --watch --configuration development",
     "prepare": "husky install",
     "test": "ng test --watch=false",
@@ -29,7 +28,7 @@
     "generate": "graphql-codegen",
     "theme:generate": "tsx scripts/generate-palettes.ts",
     "favicon": "node scripts/generate-favicons.cjs",
-    "docs:graphql": "spectaql spectaql-config.yml 2>&1 | grep -v 'Deprecation Warning' | grep -v 'legacy-js-api' | grep -v 'More info' | grep -v '@import' | grep -v '╷' | grep -v '╵' | grep -v 'scss' || true",
+    "docs:graphql": "spectaql spectaql-config.yml",
     "check-copyright": "node scripts/check-copyright.js"
   },
   "lint-staged": {
