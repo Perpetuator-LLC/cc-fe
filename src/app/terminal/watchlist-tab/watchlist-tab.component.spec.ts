@@ -99,6 +99,7 @@ describe('WatchlistTabComponent', () => {
         'loadGicsSectors',
         'loadGicsIndustries',
         'loadExchanges',
+        'addToWatchlist',
       ],
       {
         searchHistory: signal(null),
@@ -116,6 +117,7 @@ describe('WatchlistTabComponent', () => {
     mockWatchlistService.loadGicsSectors.and.returnValue(of([]));
     mockWatchlistService.loadGicsIndustries.and.returnValue(of([]));
     mockWatchlistService.loadExchanges.and.returnValue(of([]));
+    mockWatchlistService.addToWatchlist.and.returnValue(of({ success: true, message: 'Added' }));
 
     mockChartPreferencesService = jasmine.createSpyObj(
       'ChartPreferencesService',
