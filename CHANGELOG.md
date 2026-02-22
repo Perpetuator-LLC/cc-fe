@@ -1,3 +1,24 @@
+# Changelog from v0.31.0 to v0.32.0
+
+This release focuses on watchlist table improvements, audio management features, and build system modernization. Key changes include reorganized table controls, enhanced audio recording capabilities, and migration to npm with Angular 21 standards.
+
+## Enhancements
+- Consolidated table sorting and column controls into a unified menu interface in the watchlist
+- Relocated actions column to the leftmost position in watchlist table for improved accessibility
+- Optimized sidebar resize performance using RAF throttling and signals
+- Added audio player controls to episodes table with improved queue management
+- Implemented audio duration display and standalone recording creation capabilities
+- Extracted voice selection functionality into a reusable dropdown component
+- Added infinite scroll and chain job resource aggregation to jobs list
+
+## Cleanups
+- Migrated build system from Yarn to npm with enhanced error handling
+- Updated to Angular 21 with enforced inject() pattern and Apollo 4.x requirements
+- Fixed manage column positioning in watchlist table header
+- Added missing PulsesService and Apollo providers to jobs-list tests
+- Updated documentation for Material button guidelines and new job type handling
+
+
 # Changelog from v0.30.0 to v0.31.0
 
 This release focuses on significant improvements to the stock terminal interface, real-time job tracking capabilities, and valuation modeling features.
