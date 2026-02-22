@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
@@ -120,6 +121,7 @@ interface WatchlistColumnOption {
     MatAutocompleteModule,
     MatSlideToggleModule,
     MatTableModule,
+    MatSortModule,
     MatCheckboxModule,
     MatPaginatorModule,
     NgxEchartsDirective,
@@ -138,13 +140,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   // Watchlist table columns configuration
   watchlistColumns: WatchlistColumnOption[] = [
     { id: 'symbol', label: 'Symbol', selected: true },
-    { id: 'name', label: 'Name', selected: true },
+    { id: 'name', label: 'Name', selected: false }, // Hidden by default, shown as tooltip on symbol
     { id: 'exchange', label: 'Exchange', selected: false },
     { id: 'marketCap', label: 'Market Cap', selected: true },
     { id: 'sector', label: 'Sector', selected: false },
     { id: 'industry', label: 'Industry', selected: false },
   ];
-  displayedWatchlistColumns: string[] = ['actions', 'symbol', 'name', 'marketCap'];
+  displayedWatchlistColumns: string[] = ['actions', 'symbol', 'marketCap'];
 
   // Sidebar resize state
   sidebarWidth = signal(280); // Default width in pixels
@@ -412,9 +414,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  // Sort options for the symbol list
-  sortBy = signal<'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt' | null>('lastAccessedAt');
-  sortDirection = signal<'desc' | 'asc' | null>('asc'); // asc = oldest first for lastAccessedAt by default
+  // Sort options for the symbol list - null means use default sort for the watchlist type
+  sortBy = signal<'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt' | null>(null);
+  sortDirection = signal<'desc' | 'asc' | null>(null);
 
   // Helper to sort symbols by market cap (descending, nulls last)
   private sortByMarketCap(items: SymbolListItem[]): SymbolListItem[] {
@@ -459,28 +461,43 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     const sorted = [...items];
-    const multiplier = direction === 'asc' ? 1 : -1;
+    // For desc: largest/newest first (natural for these fields)
+    // For asc: smallest/oldest first (reversed)
+    const isDesc = direction === 'desc';
 
     switch (sort) {
       case 'marketCap':
         return sorted.sort((a, b) => {
-          const aVal = a.marketCap ?? 0;
-          const bVal = b.marketCap ?? 0;
-          return (bVal - aVal) * multiplier;
+          const aVal = a.marketCap;
+          const bVal = b.marketCap;
+          // Null/undefined values go to the bottom regardless of sort direction
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return 1;
+          if (bVal == null) return -1;
+          return isDesc ? bVal - aVal : aVal - bVal;
         });
       case 'accessCount':
         return sorted.sort((a, b) => {
-          const aVal = a.accessCount ?? 0;
-          const bVal = b.accessCount ?? 0;
-          return (bVal - aVal) * multiplier;
+          const aVal = a.accessCount;
+          const bVal = b.accessCount;
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return 1;
+          if (bVal == null) return -1;
+          return isDesc ? bVal - aVal : aVal - bVal;
         });
       case 'symbol':
-        return sorted.sort((a, b) => a.symbol.localeCompare(b.symbol) * multiplier);
+        return sorted.sort((a, b) => {
+          const cmp = a.symbol.localeCompare(b.symbol);
+          return isDesc ? -cmp : cmp;
+        });
       case 'lastAccessedAt':
         return sorted.sort((a, b) => {
           const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
           const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
-          return (bDate - aDate) * multiplier;
+          if (aDate === 0 && bDate === 0) return 0;
+          if (aDate === 0) return 1;
+          if (bDate === 0) return -1;
+          return isDesc ? bDate - aDate : aDate - bDate;
         });
       default:
         return items;
@@ -548,10 +565,43 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Apply sorting - read sortBy signal to trigger recomputation when it changes
-    this.sortBy();
-    return this.applySorting(items);
+    // Apply sorting - read both signals to trigger recomputation when either changes
+    const sortField = this.sortBy();
+    const sortDir = this.sortDirection();
+
+    // For system categories (sector/industry/exchange/assetType), the server
+    // already returns data sorted correctly. Don't sort in frontend.
+    // Just return items as-is - they're already sorted by the server.
+    if (this.isSystemCategory(watchlistId)) {
+      return items;
+    }
+
+    // For Recent and custom watchlists, apply local sorting
+    // If explicit sort is set, use applySorting
+    if (sortField && sortDir) {
+      return this.applySorting(items);
+    }
+
+    // Apply default sorts when no explicit sort is set
+    // For Recent and custom watchlists: default sort by lastAccessedAt desc (most recent first)
+    if (watchlistId === 'recent' || this.isCustomWatchlist(watchlistId)) {
+      return [...items].sort((a, b) => {
+        const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
+        const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
+        return bDate - aDate; // Most recent first (descending)
+      });
+    }
+
+    // Fallback - return items as-is
+    return items;
   });
+
+  /**
+   * Check if watchlist is a custom user watchlist (not recent, not system category)
+   */
+  private isCustomWatchlist(watchlistId: string): boolean {
+    return watchlistId !== 'recent' && !this.isSystemCategory(watchlistId);
+  }
 
   /**
    * Check if current watchlist allows adding symbols
@@ -569,15 +619,20 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   canRemoveFromWatchlist(): boolean {
     const id = this.selectedWatchlistId();
-    // Can't remove from system categories (sectors, industries, exchanges)
+    // Can't remove from system categories (sectors, industries, exchanges, asset types)
     return !this.isSystemCategory(id);
   }
 
   /**
-   * Check if watchlist is a system category
+   * Check if watchlist is a system category (read-only, not user-editable)
    */
   isSystemCategory(id: string): boolean {
-    return id.startsWith('sector:') || id.startsWith('industry:') || id.startsWith('exchange:');
+    return (
+      id.startsWith('sector:') ||
+      id.startsWith('industry:') ||
+      id.startsWith('exchange:') ||
+      id.startsWith('assetType:')
+    );
   }
 
   /**
@@ -617,6 +672,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     if (id.startsWith('exchange:')) {
       return id.replace('exchange:', '');
     }
+    if (id.startsWith('assetType:')) {
+      // Find the display name from assetTypeLists
+      const assetType = this.assetTypeLists().find((a) => a.id === id);
+      return assetType?.name || id.replace('assetType:', '');
+    }
 
     // Check search history
     const searchHistory = this.watchlistService.searchHistory();
@@ -652,6 +712,11 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
     if (id.startsWith('exchange:')) {
       return 'account_balance';
+    }
+    if (id.startsWith('assetType:')) {
+      // Find the icon from assetTypeLists
+      const assetType = this.assetTypeLists().find((a) => a.id === id);
+      return assetType?.icon || 'category';
     }
 
     const searchHistory = this.watchlistService.searchHistory();
@@ -947,6 +1012,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Load recent symbols with default sort (lastAccessedAt)
     this.subscriptions.add(this.watchlistService.loadRecentSymbols(30, 'lastAccessedAt').subscribe());
 
+    // Load search history (needed for removing symbols from recent)
+    this.subscriptions.add(this.watchlistService.loadSearchHistory().subscribe());
+
     // Load GICS sectors from backend
     this.subscriptions.add(this.watchlistService.loadGicsSectors().subscribe());
 
@@ -1050,6 +1118,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           chartLoading: this.chartLoading(),
           shouldHandleResult,
         });
+
+        // Refresh recent symbols list if viewing "recent" watchlist and a symbol was accessed
+        // This ensures the accessed symbol moves to the top of the list
+        if (result.success && resultSymbol && this.selectedWatchlistId() === 'recent') {
+          // Use current sort or default to lastAccessedAt
+          const sortField = this.sortBy() || 'lastAccessedAt';
+          this.watchlistService.loadRecentSymbols(30, sortField).subscribe();
+        }
 
         if (shouldHandleResult) {
           // CRITICAL: Always update the selected symbol if the result has one
@@ -1371,7 +1447,213 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Get tooltip for the sort menu button
+   */
+  getSortMenuTooltip(): string {
+    const sort = this.sortBy();
+    const direction = this.sortDirection();
+    if (sort === 'lastAccessedAt') {
+      return `Sorted by Most Recent (${direction === 'asc' ? 'oldest first' : 'newest first'})`;
+    }
+    if (sort === 'accessCount') {
+      return `Sorted by Most Viewed (${direction === 'asc' ? 'least viewed' : 'most viewed'})`;
+    }
+    return 'Sort Options';
+  }
+
+  /**
+   * Get icon for the sort menu button
+   */
+  getSortMenuIcon(): string {
+    const sort = this.sortBy();
+    if (sort === 'lastAccessedAt') {
+      return 'schedule';
+    }
+    if (sort === 'accessCount') {
+      return 'trending_up';
+    }
+    return 'sort';
+  }
+
+  /**
+   * Get tooltip for the combined column/sort menu button
+   */
+  getColumnMenuTooltip(): string {
+    const sort = this.sortBy();
+    const direction = this.sortDirection();
+    if (sort === 'lastAccessedAt') {
+      return `Columns & Sort (${direction === 'asc' ? 'oldest first' : 'newest first'})`;
+    }
+    if (sort === 'accessCount') {
+      return `Columns & Sort (${direction === 'asc' ? 'least viewed' : 'most viewed'})`;
+    }
+    return 'Columns & Sort';
+  }
+
+  /**
+   * Get icon for the combined column/sort menu button
+   */
+  getColumnMenuIcon(): string {
+    const sort = this.sortBy();
+    if (sort === 'lastAccessedAt') {
+      return 'schedule';
+    }
+    if (sort === 'accessCount') {
+      return 'trending_up';
+    }
+    return 'tune';
+  }
+
+  /**
+   * Get the active sort column for MatSort binding.
+   * Returns the column ID that should show the sort indicator.
+   */
+  getDefaultSortActive(): string {
+    const sortField = this.sortBy();
+    const watchlistId = this.selectedWatchlistId();
+
+    // If explicit sort is set and it's a visible column, return it
+    if (sortField === 'marketCap' || sortField === 'symbol') {
+      return sortField;
+    }
+
+    // For system categories (sector/industry/exchange), default to marketCap
+    if (this.isSystemCategory(watchlistId)) {
+      return 'marketCap';
+    }
+
+    // For recent and custom watchlists, no column header sort (they use special sorts)
+    return '';
+  }
+
+  /**
+   * Get the sort direction for MatSort binding.
+   */
+  getDefaultSortDirection(): 'asc' | 'desc' | '' {
+    const sortDir = this.sortDirection();
+    const sortField = this.sortBy();
+    const watchlistId = this.selectedWatchlistId();
+
+    // If explicit sort is set with direction, return it
+    if (sortDir && (sortField === 'marketCap' || sortField === 'symbol')) {
+      return sortDir;
+    }
+
+    // For system categories, default to desc (largest first)
+    if (this.isSystemCategory(watchlistId)) {
+      return 'desc';
+    }
+
+    return '';
+  }
+
+  /**
+   * Apply a special sort (lastAccessedAt or accessCount) that doesn't have a visible column
+   * Implements tri-state cycling: first click = desc, second = asc, third = clear
+   */
+  applySpecialSort(sort: 'lastAccessedAt' | 'accessCount'): void {
+    const currentSort = this.sortBy();
+    const currentDirection = this.sortDirection();
+
+    if (currentSort === sort) {
+      // Same sort clicked - cycle through desc → asc → off
+      if (currentDirection === 'desc') {
+        this.sortDirection.set('asc');
+      } else if (currentDirection === 'asc') {
+        this.sortBy.set(null);
+        this.sortDirection.set(null);
+      } else {
+        // Was null, start with desc (most recent/most viewed first)
+        this.sortDirection.set('desc');
+      }
+    } else {
+      // Different sort clicked - start with desc (most recent/most viewed first)
+      this.sortBy.set(sort);
+      this.sortDirection.set('desc');
+    }
+
+    this.reloadSortedData();
+  }
+
+  /**
+   * Clear the special sort (lastAccessedAt or accessCount)
+   */
+  clearSpecialSort(): void {
+    this.sortBy.set(null);
+    this.sortDirection.set(null);
+    this.reloadSortedData();
+  }
+
+  /**
+   * Handle MatSort table header sort change
+   * Maps column names to sort field names and handles direction
+   */
+  onTableSortChange(sort: Sort): void {
+    // Map column IDs to sort field names
+    const columnToSortField: Record<string, 'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt' | null> = {
+      symbol: 'symbol',
+      name: 'symbol', // Sort by symbol when sorting by name
+      marketCap: 'marketCap',
+      exchange: null, // Not sortable
+      sector: null, // Not sortable
+      industry: null, // Not sortable
+    };
+
+    const sortField = columnToSortField[sort.active];
+
+    if (!sort.direction || !sortField) {
+      // Sort cleared
+      this.sortBy.set(null);
+      this.sortDirection.set(null);
+    } else {
+      this.sortBy.set(sortField);
+      this.sortDirection.set(sort.direction as 'asc' | 'desc');
+    }
+
+    // Trigger data reload for system watchlists
+    this.reloadSortedData();
+  }
+
+  /**
+   * Reload data with current sort settings for system watchlists.
+   * For system categories, we reload from backend to get properly sorted data
+   * across the entire dataset (not just what's currently loaded).
+   */
+  private reloadSortedData(): void {
+    const effectiveSort = this.sortBy();
+    const effectiveDirection = this.sortDirection();
+    const watchlistId = this.selectedWatchlistId();
+
+    // CRITICAL: Reset pagination when sort changes
+    // Sort must happen on server BEFORE pagination, so we need to start from page 1
+    this.systemWatchlistPageIndex.set(0);
+    this.systemWatchlistCursor.set(null);
+    this.systemWatchlistCursors = [null];
+
+    // Default sort field and direction for system categories
+    const sortField = effectiveSort || 'marketCap';
+    const sortDir = effectiveDirection || 'desc';
+
+    if (watchlistId === 'recent') {
+      // For Recent, use lastAccessedAt as default when no explicit sort
+      const sortToUse = effectiveSort || 'lastAccessedAt';
+      this.subscriptions.add(this.watchlistService.loadRecentSymbols(30, sortToUse).subscribe());
+    } else if (watchlistId.startsWith('sector:')) {
+      const sectorName = watchlistId.replace('sector:', '');
+      this.loadCategorySectorSymbols(sectorName, sortField, sortDir);
+    } else if (watchlistId.startsWith('industry:')) {
+      const industryName = watchlistId.replace('industry:', '');
+      this.loadCategoryIndustrySymbols(industryName, sortField, sortDir);
+    } else if (watchlistId.startsWith('exchange:')) {
+      const exchangeName = watchlistId.replace('exchange:', '');
+      this.loadCategoryExchangeSymbols(exchangeName, sortField, sortDir);
+    }
+    // For custom watchlists, local sorting is already applied via computed
+  }
+
+  /**
    * Handle sort option change - implements tri-state cycling: asc → desc → off
+   * @deprecated Use onTableSortChange for table header sorting
    */
   onSortChange(sort: 'marketCap' | 'symbol' | 'accessCount' | 'lastAccessedAt'): void {
     const currentSort = this.sortBy();
@@ -1438,75 +1720,94 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     // Set default sort based on watchlist type
     if (newValue === 'recent') {
       // Recent watchlist: sort by most recently accessed by default
-      this.sortBy.set('lastAccessedAt');
+      // This is a "special" sort not shown in column headers
+      this.sortBy.set(null);
+      this.sortDirection.set(null);
     } else if (newValue.startsWith('sector:')) {
-      // Sector lists: sort by market cap by default
+      // Sector lists: sort by market cap desc by default
       this.sortBy.set('marketCap');
+      this.sortDirection.set('desc');
       const sectorName = newValue.replace('sector:', '');
-      this.loadCategorySectorSymbols(sectorName);
+      this.loadCategorySectorSymbols(sectorName, 'marketCap', 'desc');
     } else if (newValue.startsWith('industry:')) {
-      // Industry lists: sort by market cap by default
+      // Industry lists: sort by market cap desc by default
       this.sortBy.set('marketCap');
+      this.sortDirection.set('desc');
       const industryName = newValue.replace('industry:', '');
-      this.loadCategoryIndustrySymbols(industryName);
+      this.loadCategoryIndustrySymbols(industryName, 'marketCap', 'desc');
     } else if (newValue.startsWith('exchange:')) {
-      // Exchange lists: sort by market cap by default
+      // Exchange lists: sort by market cap desc by default
       this.sortBy.set('marketCap');
+      this.sortDirection.set('desc');
       const exchangeName = newValue.replace('exchange:', '');
-      this.loadCategoryExchangeSymbols(exchangeName);
+      this.loadCategoryExchangeSymbols(exchangeName, 'marketCap', 'desc');
     } else if (newValue.startsWith('assetType:')) {
-      // Asset type lists: sort by market cap by default
+      // Asset type lists: sort by market cap desc by default
       this.sortBy.set('marketCap');
+      this.sortDirection.set('desc');
       const assetTypeName = newValue.replace('assetType:', '');
       this.loadCategoryAssetTypeSymbols(assetTypeName);
     } else {
-      // Custom watchlists: keep current sort or default to lastAccessedAt
-      // (user may have set a preference)
+      // Custom watchlists: default to lastAccessedAt (most recent first)
+      this.sortBy.set(null);
+      this.sortDirection.set(null);
     }
   }
 
   /**
    * Load symbols for a specific sector from system catalog with pagination
    */
-  private loadCategorySectorSymbols(sector: string, orderBy = 'marketCap', cursor: string | null = null): void {
+  private loadCategorySectorSymbols(
+    sector: string,
+    orderBy = 'marketCap',
+    orderDirection = 'desc',
+    cursor: string | null = null,
+  ): void {
     this.loading.set(true);
     this.subscriptions.add(
-      this.watchlistService.loadCatalogSectorSymbols(sector, this.systemWatchlistPageSize, cursor, orderBy).subscribe({
-        next: (connection) => {
-          this.sectorSymbols.set(
-            connection.edges.map((edge) => ({
-              symbol: edge.node.symbol,
-              displayName: edge.node.displayName,
-              assetType: edge.node.assetType,
-              exchange: edge.node.exchange,
-              sector: edge.node.sector,
-              industry: edge.node.industry,
-              marketCap: edge.node.marketCap,
-            })),
-          );
-          this.systemWatchlistTotalCount.set(connection.totalCount);
-          this.systemWatchlistHasNextPage.set(connection.pageInfo.hasNextPage);
-          this.systemWatchlistHasPrevPage.set(connection.pageInfo.hasPreviousPage);
-          this.systemWatchlistCursor.set(connection.pageInfo.endCursor);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.sectorSymbols.set([]);
-          this.systemWatchlistTotalCount.set(0);
-          this.loading.set(false);
-        },
-      }),
+      this.watchlistService
+        .loadCatalogSectorSymbols(sector, this.systemWatchlistPageSize, cursor, orderBy, orderDirection)
+        .subscribe({
+          next: (connection) => {
+            this.sectorSymbols.set(
+              connection.edges.map((edge) => ({
+                symbol: edge.node.symbol,
+                displayName: edge.node.displayName,
+                assetType: edge.node.assetType,
+                exchange: edge.node.exchange,
+                sector: edge.node.sector,
+                industry: edge.node.industry,
+                marketCap: edge.node.marketCap,
+              })),
+            );
+            this.systemWatchlistTotalCount.set(connection.totalCount);
+            this.systemWatchlistHasNextPage.set(connection.pageInfo.hasNextPage);
+            this.systemWatchlistHasPrevPage.set(connection.pageInfo.hasPreviousPage);
+            this.systemWatchlistCursor.set(connection.pageInfo.endCursor);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.sectorSymbols.set([]);
+            this.systemWatchlistTotalCount.set(0);
+            this.loading.set(false);
+          },
+        }),
     );
   }
 
   /**
    * Load symbols for a specific industry from system catalog with pagination
    */
-  private loadCategoryIndustrySymbols(industry: string, orderBy = 'marketCap', cursor: string | null = null): void {
+  private loadCategoryIndustrySymbols(
+    industry: string,
+    orderBy = 'marketCap',
+    orderDirection = 'desc',
+    cursor: string | null = null,
+  ): void {
     this.loading.set(true);
     this.subscriptions.add(
       this.watchlistService
-        .loadCatalogIndustrySymbols(industry, this.systemWatchlistPageSize, cursor, orderBy)
+        .loadCatalogIndustrySymbols(industry, this.systemWatchlistPageSize, cursor, orderBy, orderDirection)
         .subscribe({
           next: (connection) => {
             this.industrySymbols.set(
@@ -1538,11 +1839,16 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Load symbols for a specific exchange from system catalog with pagination
    */
-  private loadCategoryExchangeSymbols(exchange: string, orderBy = 'marketCap', cursor: string | null = null): void {
+  private loadCategoryExchangeSymbols(
+    exchange: string,
+    orderBy = 'marketCap',
+    orderDirection = 'desc',
+    cursor: string | null = null,
+  ): void {
     this.loading.set(true);
     this.subscriptions.add(
       this.watchlistService
-        .loadCatalogExchangeSymbols(exchange, this.systemWatchlistPageSize, cursor, orderBy)
+        .loadCatalogExchangeSymbols(exchange, this.systemWatchlistPageSize, cursor, orderBy, orderDirection)
         .subscribe({
           next: (connection) => {
             this.exchangeSymbols.set(
@@ -1637,17 +1943,18 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   private reloadCurrentSystemWatchlist(cursor: string | null): void {
     const watchlistId = this.selectedWatchlistId();
-    const effectiveSort: string = this.sortBy() || 'marketCap';
+    const effectiveSort = this.sortBy() || 'marketCap';
+    const effectiveDirection = this.sortDirection() || 'desc';
 
     if (watchlistId.startsWith('sector:')) {
       const sectorName = watchlistId.replace('sector:', '');
-      this.loadCategorySectorSymbols(sectorName, effectiveSort, cursor);
+      this.loadCategorySectorSymbols(sectorName, effectiveSort, effectiveDirection, cursor);
     } else if (watchlistId.startsWith('industry:')) {
       const industryName = watchlistId.replace('industry:', '');
-      this.loadCategoryIndustrySymbols(industryName, effectiveSort, cursor);
+      this.loadCategoryIndustrySymbols(industryName, effectiveSort, effectiveDirection, cursor);
     } else if (watchlistId.startsWith('exchange:')) {
       const exchangeName = watchlistId.replace('exchange:', '');
-      this.loadCategoryExchangeSymbols(exchangeName, effectiveSort, cursor);
+      this.loadCategoryExchangeSymbols(exchangeName, effectiveSort, effectiveDirection, cursor);
     }
   }
 
@@ -1677,6 +1984,22 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // Subscribe to real-time updates for this symbol
     this.terminalService.subscribeSymbols([item.symbol]);
+
+    // Track symbol access by adding to watchlist (updates lastAccessedAt on backend)
+    // This ensures the symbol moves to the top of Recent list regardless of view
+    this.subscriptions.add(
+      this.watchlistService
+        .addToWatchlist(item.symbol, undefined, item.displayName, item.assetType, item.exchange)
+        .subscribe({
+          next: () => {
+            // Refresh recent list if viewing "recent" watchlist
+            if (this.selectedWatchlistId() === 'recent') {
+              const sortField = this.sortBy() || 'lastAccessedAt';
+              this.watchlistService.loadRecentSymbols(30, sortField).subscribe();
+            }
+          },
+        }),
+    );
 
     // Fetch initial quote data via GraphQL - normalize exchange (replace spaces with underscores)
     const normalizedExchange = item.exchange?.replace(/\s+/g, '_').toUpperCase();

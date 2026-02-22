@@ -34,7 +34,6 @@
 
 // Left Sidebar
 .symbol-sidebar {
-
   // Optimize for resize performance
   will-change: width;
 
@@ -144,18 +143,6 @@
   }
 }
 
-// Sort Options Bar - let mat-icon-button use default MD3 sizing
-.sort-options {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  padding: 4px 8px;
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-
-  background: var(--md-sys-color-surface-container);
-}
-
 // Table controls (column selector)
 .table-controls {
   display: flex;
@@ -165,7 +152,21 @@
 }
 
 .column-menu-item {
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 48px;
   padding: 0 16px;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  mat-checkbox {
+    width: 100%;
+  }
 }
 
 // Symbol Table
@@ -267,7 +268,7 @@
   }
 
   .actions-cell {
-    width: 40px;
+    width: 48px;
     padding: 0 4px;
   }
 
@@ -278,6 +279,16 @@
     &:hover {
       opacity: 1;
     }
+  }
+}
+
+// Active sort menu item indicator
+.active-sort {
+  background: var(--md-sys-color-primary-container);
+
+  .sort-direction {
+    margin-left: auto;
+    color: var(--md-sys-color-primary);
   }
 }
 
@@ -578,7 +589,6 @@
 
 // Main Chart Area
 .chart-main {
-
   // Isolate layout recalculations during resize
   contain: layout style;
   overflow: hidden;

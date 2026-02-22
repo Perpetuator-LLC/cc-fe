@@ -176,8 +176,20 @@ const GET_EXCHANGE_SYMBOLS = gql`
 
 // New Relay-style catalog queries with totalCount
 const GET_CATALOG_SECTOR_SYMBOLS = gql`
-  query GetCatalogSectorSymbols($sector: String!, $first: Int, $after: String, $orderBy: String) {
-    catalogSectorSymbols(sector: $sector, first: $first, after: $after, orderBy: $orderBy) {
+  query GetCatalogSectorSymbols(
+    $sector: String!
+    $first: Int
+    $after: String
+    $orderBy: String
+    $orderDirection: String
+  ) {
+    catalogSectorSymbols(
+      sector: $sector
+      first: $first
+      after: $after
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
       totalCount
       edges {
         cursor
@@ -202,8 +214,20 @@ const GET_CATALOG_SECTOR_SYMBOLS = gql`
 `;
 
 const GET_CATALOG_INDUSTRY_SYMBOLS = gql`
-  query GetCatalogIndustrySymbols($industry: String!, $first: Int, $after: String, $orderBy: String) {
-    catalogIndustrySymbols(industry: $industry, first: $first, after: $after, orderBy: $orderBy) {
+  query GetCatalogIndustrySymbols(
+    $industry: String!
+    $first: Int
+    $after: String
+    $orderBy: String
+    $orderDirection: String
+  ) {
+    catalogIndustrySymbols(
+      industry: $industry
+      first: $first
+      after: $after
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
       totalCount
       edges {
         cursor
@@ -228,8 +252,20 @@ const GET_CATALOG_INDUSTRY_SYMBOLS = gql`
 `;
 
 const GET_CATALOG_EXCHANGE_SYMBOLS = gql`
-  query GetCatalogExchangeSymbols($exchange: String!, $first: Int, $after: String, $orderBy: String) {
-    catalogExchangeSymbols(exchange: $exchange, first: $first, after: $after, orderBy: $orderBy) {
+  query GetCatalogExchangeSymbols(
+    $exchange: String!
+    $first: Int
+    $after: String
+    $orderBy: String
+    $orderDirection: String
+  ) {
+    catalogExchangeSymbols(
+      exchange: $exchange
+      first: $first
+      after: $after
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
       totalCount
       edges {
         cursor
@@ -794,18 +830,25 @@ export class WatchlistService {
   // ============================================================================
 
   /**
-   * Load sector symbols with Relay pagination and totalCount
+   * Load sector symbols with Relay pagination and totalCount.
+   *
+   * @param sector - Sector name to filter by
+   * @param first - Number of items to fetch
+   * @param after - Cursor for pagination
+   * @param orderBy - Field to sort by: 'marketCap', 'symbol', 'name'
+   * @param orderDirection - Sort direction: 'asc' or 'desc'
    */
   loadCatalogSectorSymbols(
     sector: string,
     first = 50,
     after: string | null = null,
     orderBy = 'marketCap',
+    orderDirection = 'desc',
   ): Observable<CatalogSymbolConnection> {
     return this.apollo
       .query<CatalogSectorSymbolsResponse>({
         query: GET_CATALOG_SECTOR_SYMBOLS,
-        variables: { sector, first, after, orderBy },
+        variables: { sector, first, after, orderBy, orderDirection },
         fetchPolicy: 'network-only',
       })
       .pipe(
@@ -821,18 +864,25 @@ export class WatchlistService {
   }
 
   /**
-   * Load industry symbols with Relay pagination and totalCount
+   * Load industry symbols with Relay pagination and totalCount.
+   *
+   * @param industry - Industry name to filter by
+   * @param first - Number of items to fetch
+   * @param after - Cursor for pagination
+   * @param orderBy - Field to sort by: 'marketCap', 'symbol', 'name'
+   * @param orderDirection - Sort direction: 'asc' or 'desc'
    */
   loadCatalogIndustrySymbols(
     industry: string,
     first = 50,
     after: string | null = null,
     orderBy = 'marketCap',
+    orderDirection = 'desc',
   ): Observable<CatalogSymbolConnection> {
     return this.apollo
       .query<CatalogIndustrySymbolsResponse>({
         query: GET_CATALOG_INDUSTRY_SYMBOLS,
-        variables: { industry, first, after, orderBy },
+        variables: { industry, first, after, orderBy, orderDirection },
         fetchPolicy: 'network-only',
       })
       .pipe(
@@ -848,18 +898,25 @@ export class WatchlistService {
   }
 
   /**
-   * Load exchange symbols with Relay pagination and totalCount
+   * Load exchange symbols with Relay pagination and totalCount.
+   *
+   * @param exchange - Exchange name to filter by
+   * @param first - Number of items to fetch
+   * @param after - Cursor for pagination
+   * @param orderBy - Field to sort by: 'marketCap', 'symbol', 'name'
+   * @param orderDirection - Sort direction: 'asc' or 'desc'
    */
   loadCatalogExchangeSymbols(
     exchange: string,
     first = 50,
     after: string | null = null,
     orderBy = 'marketCap',
+    orderDirection = 'desc',
   ): Observable<CatalogSymbolConnection> {
     return this.apollo
       .query<CatalogExchangeSymbolsResponse>({
         query: GET_CATALOG_EXCHANGE_SYMBOLS,
-        variables: { exchange, first, after, orderBy },
+        variables: { exchange, first, after, orderBy, orderDirection },
         fetchPolicy: 'network-only',
       })
       .pipe(
