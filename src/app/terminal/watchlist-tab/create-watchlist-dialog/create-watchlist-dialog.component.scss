@@ -1,0 +1,38 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+h2[mat-dialog-title] {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+}
+
+.watchlist-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 400px;
+
+  @include mixins.mobile() {
+    min-width: unset;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .symbols-field {
+    textarea {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+    }
+  }
+
+  .paste-btn {
+    align-self: flex-start;
+  }
+}

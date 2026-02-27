@@ -20,7 +20,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialog } from '@angular/material/dialog';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
+import { MessageService } from '../../message.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
@@ -58,6 +60,11 @@ import { DividendsViewComponent } from '../dividends-view/dividends-view.compone
 import { FundamentalsViewComponent } from '../fundamentals-view/fundamentals-view.component';
 import { ValuationViewComponent } from '../valuation-view/valuation-view.component';
 import { ChartHeaderComponent, ChartSettings } from '../chart-header/chart-header.component';
+import {
+  CreateWatchlistDialogComponent,
+  CreateWatchlistDialogData,
+  CreateWatchlistDialogResult,
+} from './create-watchlist-dialog/create-watchlist-dialog.component';
 
 // Register required ECharts components
 echarts.use([
@@ -412,6 +419,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   selectedStockListing = signal<StockListing | null>(null);
   private symbolSearchSubject = new Subject<string>();
 
+  // Selection mode for multi-select and export
+  selectionMode = signal(false);
+  selectedSymbols = signal<Set<string>>(new Set());
+
   private subscriptions = new Subscription();
 
   // Sort options for the symbol list - null means use default sort for the watchlist type
@@ -763,6 +774,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   private readonly dividendService = inject(DividendService);
   protected readonly dividendChartService = inject(DividendChartService);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  private readonly messageService = inject(MessageService);
 
   ngOnInit(): void {
     this.loadChartPreferences();
@@ -3398,6 +3411,212 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ============================================
+  // Selection Mode & Copy/Export Functionality
+  // ============================================
+
+  /**
+   * Toggle selection mode for multi-select
+   */
+  toggleSelectionMode(): void {
+    this.selectionMode.update((v) => !v);
+    if (!this.selectionMode()) {
+      // Clear selections when exiting selection mode
+      this.selectedSymbols.set(new Set());
+    }
+    // Update columns to show/hide select column
+    this.updateWatchlistColumns();
+  }
+
+  /**
+   * Toggle selection of a single symbol
+   */
+  toggleSymbolSelection(symbol: string, event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.selectedSymbols.update((current) => {
+      const newSet = new Set(current);
+      if (newSet.has(symbol)) {
+        newSet.delete(symbol);
+      } else {
+        newSet.add(symbol);
+      }
+      return newSet;
+    });
+  }
+
+  /**
+   * Check if a symbol is selected
+   */
+  isSymbolSelected(symbol: string): boolean {
+    return this.selectedSymbols().has(symbol);
+  }
+
+  /**
+   * Select all symbols in the current list
+   */
+  selectAllSymbols(): void {
+    const allSymbols = this.currentSymbols().map((s) => s.symbol);
+    this.selectedSymbols.set(new Set(allSymbols));
+  }
+
+  /**
+   * Clear all selections
+   */
+  clearSelection(): void {
+    this.selectedSymbols.set(new Set());
+  }
+
+  /**
+   * Get count of selected symbols
+   */
+  selectedCount(): number {
+    return this.selectedSymbols().size;
+  }
+
+  /**
+   * Copy selected symbols to clipboard
+   */
+  copySelectedSymbols(): void {
+    const symbols = Array.from(this.selectedSymbols());
+    if (symbols.length === 0) {
+      this.messageService.warning('No symbols selected');
+      return;
+    }
+
+    const text = symbols.join(', ');
+    navigator.clipboard.writeText(text).then(
+      () => {
+        this.messageService.success(`Copied ${symbols.length} symbol${symbols.length > 1 ? 's' : ''} to clipboard`);
+      },
+      (err) => {
+        this.messageService.error(`Failed to copy: ${err.message}`);
+      },
+    );
+  }
+
+  /**
+   * Copy all symbols in the current watchlist to clipboard
+   */
+  copyAllSymbols(): void {
+    const symbols = this.currentSymbols().map((s) => s.symbol);
+    if (symbols.length === 0) {
+      this.messageService.warning('No symbols to copy');
+      return;
+    }
+
+    const text = symbols.join(', ');
+    navigator.clipboard.writeText(text).then(
+      () => {
+        this.messageService.success(`Copied ${symbols.length} symbol${symbols.length > 1 ? 's' : ''} to clipboard`);
+      },
+      (err) => {
+        this.messageService.error(`Failed to copy: ${err.message}`);
+      },
+    );
+  }
+
+  /**
+   * Open create watchlist dialog
+   * @param prefilledSymbols Optional symbols to pre-fill in the dialog
+   */
+  openCreateWatchlistDialog(prefilledSymbols?: string[]): void {
+    const dialogRef = this.dialog.open(CreateWatchlistDialogComponent, {
+      width: '500px',
+      data: { symbols: prefilledSymbols } as CreateWatchlistDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: CreateWatchlistDialogResult | undefined) => {
+      if (result) {
+        this.createWatchlistWithSymbols(result);
+      }
+    });
+  }
+
+  /**
+   * Create a watchlist from dialog result, adding symbols sequentially
+   */
+  private createWatchlistWithSymbols(result: CreateWatchlistDialogResult): void {
+    this.subscriptions.add(
+      this.watchlistService.createWatchlist(result.name, result.description).subscribe({
+        next: (response) => {
+          if (response.success && response.watchlist) {
+            const watchlistId = response.watchlist.uuid;
+
+            if (result.symbols.length > 0) {
+              // Add symbols sequentially
+              this.addSymbolsToWatchlistSequentially(watchlistId, result.symbols, 0, () => {
+                const count = result.symbols.length;
+                const plural = count > 1 ? 's' : '';
+                this.messageService.success(`Created "${result.name}" with ${count} symbol${plural}`);
+                // Switch to the new watchlist
+                this.onWatchlistChange(watchlistId);
+              });
+            } else {
+              this.messageService.success(`Created watchlist "${result.name}"`);
+              this.onWatchlistChange(watchlistId);
+            }
+
+            // Exit selection mode if active
+            if (this.selectionMode()) {
+              this.toggleSelectionMode();
+            }
+          }
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to create watchlist: ${err.message}`);
+        },
+      }),
+    );
+  }
+
+  /**
+   * Add symbols to a watchlist one at a time
+   */
+  private addSymbolsToWatchlistSequentially(
+    watchlistId: string,
+    symbols: string[],
+    index: number,
+    onComplete: () => void,
+  ): void {
+    if (index >= symbols.length) {
+      onComplete();
+      return;
+    }
+
+    const symbol = symbols[index];
+    this.watchlistService.addToWatchlist(symbol, watchlistId).subscribe({
+      next: () => {
+        // Continue with next symbol
+        this.addSymbolsToWatchlistSequentially(watchlistId, symbols, index + 1, onComplete);
+      },
+      error: () => {
+        // Skip failed symbol, continue with next
+        this.addSymbolsToWatchlistSequentially(watchlistId, symbols, index + 1, onComplete);
+      },
+    });
+  }
+
+  /**
+   * Create new watchlist from selected symbols
+   */
+  createWatchlistFromSelection(): void {
+    const symbols = Array.from(this.selectedSymbols());
+    this.openCreateWatchlistDialog(symbols);
+  }
+
+  /**
+   * Handle keyboard shortcuts for copy (Ctrl+C)
+   */
+  onKeyDown(event: KeyboardEvent): void {
+    // Ctrl+C or Cmd+C to copy selected symbols
+    if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+      if (this.selectionMode() && this.selectedCount() > 0) {
+        event.preventDefault();
+        this.copySelectedSymbols();
+      }
+    }
+  }
+
   /**
    * Toggle add symbol form
    */
@@ -4402,7 +4621,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   updateWatchlistColumns(): void {
     const selectedColumns = this.watchlistColumns.filter((col) => col.selected).map((col) => col.id);
-    this.displayedWatchlistColumns = ['actions', ...selectedColumns];
+    // Include select column when in selection mode
+    if (this.selectionMode()) {
+      this.displayedWatchlistColumns = ['select', 'actions', ...selectedColumns];
+    } else {
+      this.displayedWatchlistColumns = ['actions', ...selectedColumns];
+    }
   }
 
   /**

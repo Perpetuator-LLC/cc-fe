@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
-<div class="watchlist-tab">
+<div class="watchlist-tab" (keydown)="onKeyDown($event)" tabindex="0">
   @if (loading()) {
     <div class="loading-state">
       <mat-spinner diameter="32" />
@@ -49,6 +49,14 @@
                 <button mat-menu-item (click)="openDuplicateDialog(watchlist)">
                   <mat-icon>content_copy</mat-icon>
                   <span>Duplicate</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="onWatchlistChange(watchlist.uuid); copyAllSymbols()"
+                  matTooltip="Copy all symbols to clipboard"
+                >
+                  <mat-icon>file_copy</mat-icon>
+                  <span>Export Symbols</span>
                 </button>
                 <mat-divider />
                 <button mat-menu-item (click)="deleteWatchlist(watchlist)" class="delete-action">
@@ -158,10 +166,52 @@
             }
           </mat-menu>
 
-          <button mat-icon-button matTooltip="Create Watchlist" (click)="toggleCreateForm()">
+          <button
+            mat-icon-button
+            matTooltip="Select symbols to copy/export"
+            (click)="toggleSelectionMode()"
+            [color]="selectionMode() ? 'primary' : undefined"
+          >
+            <mat-icon>{{ selectionMode() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Create Watchlist" (click)="openCreateWatchlistDialog()">
             <mat-icon>add</mat-icon>
           </button>
         </div>
+
+        <!-- Selection Mode Actions Bar -->
+        @if (selectionMode()) {
+          <div class="selection-actions">
+            <div class="selection-info">
+              <span>{{ selectedCount() }} selected</span>
+            </div>
+            <div class="selection-buttons">
+              <button mat-button (click)="selectAllSymbols()" [disabled]="currentSymbols().length === 0">
+                Select All
+              </button>
+              <button mat-button (click)="clearSelection()" [disabled]="selectedCount() === 0">Clear</button>
+              <button
+                mat-stroked-button
+                (click)="copySelectedSymbols()"
+                [disabled]="selectedCount() === 0"
+                matTooltip="Copy selected symbols (Ctrl+C)"
+              >
+                <mat-icon>content_copy</mat-icon>
+                Copy
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="createWatchlistFromSelection()"
+                [disabled]="selectedCount() === 0"
+                matTooltip="Create new watchlist with selected symbols"
+              >
+                <mat-icon>playlist_add</mat-icon>
+                New Watchlist
+              </button>
+            </div>
+          </div>
+        }
 
         <!-- Add Symbol Button (only for non-recent watchlists) -->
         @if (canAddToWatchlist() && !showAddSymbolForm()) {
@@ -320,6 +370,24 @@
                 </td>
               </ng-container>
 
+              <!-- Selection Column (only shown in selection mode) -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="select-cell">
+                  <mat-checkbox
+                    [checked]="selectedCount() > 0 && selectedCount() === currentSymbols().length"
+                    [indeterminate]="selectedCount() > 0 && selectedCount() < currentSymbols().length"
+                    (change)="$event.checked ? selectAllSymbols() : clearSelection()"
+                  />
+                </th>
+                <td mat-cell *matCellDef="let item" class="select-cell">
+                  <mat-checkbox
+                    [checked]="isSymbolSelected(item.symbol)"
+                    (change)="toggleSymbolSelection(item.symbol)"
+                    (click)="$event.stopPropagation()"
+                  />
+                </td>
+              </ng-container>
+
               <!-- Symbol Column -->
               <ng-container matColumnDef="symbol">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Symbol</th>
@@ -419,22 +487,6 @@
             }
           }
         </div>
-
-        <!-- Create Watchlist Form (inline) -->
-        @if (showCreateForm()) {
-          <div class="create-form">
-            <mat-form-field appearance="outline">
-              <mat-label>New Watchlist Name</mat-label>
-              <input matInput [(ngModel)]="newWatchlistName" placeholder="My Watchlist" />
-            </mat-form-field>
-            <div class="form-actions">
-              <button mat-button (click)="toggleCreateForm()">Cancel</button>
-              <button mat-flat-button color="primary" (click)="createWatchlist()" [disabled]="!newWatchlistName.trim()">
-                Create
-              </button>
-            </div>
-          </div>
-        }
       </div>
 
       <!-- Resize Handle -->

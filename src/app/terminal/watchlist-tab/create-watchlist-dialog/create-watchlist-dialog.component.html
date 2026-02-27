@@ -1,0 +1,56 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>
+  <mat-icon>playlist_add</mat-icon>
+  Create Watchlist
+</h2>
+<mat-dialog-content>
+  <form [formGroup]="watchlistForm" class="watchlist-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Watchlist Name</mat-label>
+      <input matInput formControlName="name" placeholder="My Tech Stocks" cdkFocusInitial />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description (optional)</mat-label>
+      <input matInput formControlName="description" placeholder="Tech stocks I'm watching" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width symbols-field">
+      <mat-label>Import Symbols (optional)</mat-label>
+      <textarea
+        matInput
+        formControlName="symbols"
+        rows="4"
+        placeholder="AAPL, MSFT, GOOGL&#10;NVDA TSLA AMZN&#10;&#10;Paste or type symbols separated by comma, space, or newline"
+      ></textarea>
+      <mat-hint>
+        @if (parsedSymbolCount > 0) {
+          {{ parsedSymbolCount }} symbol{{ parsedSymbolCount === 1 ? '' : 's' }} will be added
+        } @else {
+          Tip: Copy symbols from another watchlist and paste here
+        }
+      </mat-hint>
+    </mat-form-field>
+
+    <button
+      type="button"
+      mat-stroked-button
+      class="paste-btn"
+      (click)="onPasteSymbols()"
+      matTooltip="Paste symbols from clipboard"
+    >
+      <mat-icon>content_paste</mat-icon>
+      Paste from Clipboard
+    </button>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="!watchlistForm.valid">
+    @if (parsedSymbolCount > 0) {
+      Create with {{ parsedSymbolCount }} Symbol{{ parsedSymbolCount === 1 ? '' : 's' }}
+    } @else {
+      Create
+    }
+  </button>
+</mat-dialog-actions>

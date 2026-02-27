@@ -552,6 +552,41 @@
   }
 }
 
+// Selection Mode Actions Bar
+.selection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  background: var(--md-sys-color-primary-container);
+
+  .selection-info {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-primary-container);
+  }
+
+  .selection-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+}
+
+// Selection column cell
+.select-cell {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding: 0 4px;
+}
+
 // Add Symbol Button
 .add-symbol-btn-container {
   padding: 8px 12px;
