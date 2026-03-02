@@ -251,6 +251,61 @@
                 </mat-form-field>
               </mat-card-content>
             </mat-card>
+
+            <!-- Notifications Card -->
+            <mat-card class="notifications-card">
+              <mat-card-content>
+                <h3>
+                  <mat-icon>notifications</mat-icon>
+                  Notifications
+                </h3>
+                <p class="section-description">Get notified when your pulse is ready.</p>
+
+                <div class="notification-toggles">
+                  <!-- SMS Notification Toggle -->
+                  <div class="notification-toggle-row">
+                    <div class="toggle-info">
+                      <mat-icon>sms</mat-icon>
+                      <div class="toggle-text">
+                        <span class="toggle-label">SMS Notification</span>
+                        <span class="toggle-description">Receive a text message when your pulse is ready</span>
+                      </div>
+                    </div>
+                    <mat-slide-toggle
+                      formControlName="smsNotificationEnabled"
+                      [matTooltip]="
+                        !phoneVerified ? 'Verify your phone number in Settings to enable SMS notifications' : ''
+                      "
+                    />
+                  </div>
+                  @if (!loadingPreferences && !phoneVerified) {
+                    <div class="verify-prompt">
+                      <mat-icon>info</mat-icon>
+                      <span>Phone verification required for SMS notifications.</span>
+                      <a routerLink="/user" class="verify-link">Verify phone number</a>
+                    </div>
+                  }
+                  @if (loadingPreferences) {
+                    <div class="loading-preferences">
+                      <mat-spinner diameter="16" />
+                      <span>Loading preferences...</span>
+                    </div>
+                  }
+
+                  <!-- Email Notification Toggle -->
+                  <div class="notification-toggle-row">
+                    <div class="toggle-info">
+                      <mat-icon>email</mat-icon>
+                      <div class="toggle-text">
+                        <span class="toggle-label">Email Notification</span>
+                        <span class="toggle-description">Receive an email when your pulse is ready</span>
+                      </div>
+                    </div>
+                    <mat-slide-toggle formControlName="emailNotificationEnabled" />
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
           </form>
         </div>
       </mat-tab>
@@ -502,70 +557,7 @@
       <!-- Schedule Tab -->
       <mat-tab label="Schedule">
         <div class="tab-content">
-          <form [formGroup]="pulseForm">
-            <mat-card>
-              <mat-card-content>
-                <h3>Schedule & Delivery</h3>
-
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Frequency</mat-label>
-                  <mat-select formControlName="scheduleFrequency">
-                    @for (option of scheduleOptions; track option.value) {
-                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="half-width">
-                  <mat-label>Time</mat-label>
-                  <input matInput type="time" formControlName="scheduleTime" />
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="half-width">
-                  <mat-label>Timezone</mat-label>
-                  <input matInput formControlName="scheduleTimezone" />
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>News Lookback (hours)</mat-label>
-                  <input matInput type="number" formControlName="newsLookbackHours" />
-                  <mat-hint>How far back to search for news (1-168 hours)</mat-hint>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Delivery Method</mat-label>
-                  <mat-select formControlName="deliveryMethod">
-                    @for (option of deliveryOptions; track option.value) {
-                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-
-                <!-- SMS Notification Toggle -->
-                <div class="notification-setting">
-                  <mat-checkbox
-                    formControlName="smsNotificationEnabled"
-                    [matTooltip]="
-                      !phoneVerified
-                        ? 'Verify your phone number in Settings to enable SMS notifications'
-                        : 'Receive an SMS when your pulse is ready'
-                    "
-                  >
-                    Notify me via SMS when ready
-                  </mat-checkbox>
-                  @if (!loadingPreferences && !phoneVerified) {
-                    <a routerLink="/user" class="verify-link">
-                      <mat-icon>phone</mat-icon>
-                      Verify phone number
-                    </a>
-                  }
-                  @if (loadingPreferences) {
-                    <mat-spinner diameter="16" />
-                  }
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </form>
+          <app-schedule-list context="pulse" [pulseConfigUuid]="pulseConfig.uuid" />
         </div>
       </mat-tab>
 

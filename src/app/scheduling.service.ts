@@ -29,6 +29,7 @@ export interface Schedule {
   cronDayOfWeek?: string;
   cronDayOfMonth?: string;
   cronMonthOfYear?: string;
+  cronTimezone?: string;
   clockedTime?: string;
   solarEvent?: SolarEvent;
   solarLatitude?: number;
@@ -55,6 +56,7 @@ const GET_SCHEDULES = gql`
           cronDayOfWeek
           cronDayOfMonth
           cronMonthOfYear
+          cronTimezone
           clockedTime
           solarEvent
           solarLatitude
@@ -182,6 +184,7 @@ const UPDATE_SCHEDULE = gql`
         cronDayOfWeek
         cronDayOfMonth
         cronMonthOfYear
+        cronTimezone
         clockedTime
         solarEvent
         solarLatitude
@@ -209,7 +212,7 @@ const DELETE_SCHEDULE = gql`
   providedIn: 'root',
 })
 export class SchedulingService extends BaseService {
-  getSchedules() {
+  getSchedules(filters?: { podcastUuid?: string; pulseConfigUuid?: string; episodeUuid?: string }) {
     interface Response {
       schedules: RelayConnection<Schedule>;
     }
@@ -218,10 +221,36 @@ export class SchedulingService extends BaseService {
       query: GET_SCHEDULES,
       fetchPolicy: 'network-only',
     }).pipe(
-      map(({ schedules }) => ({
-        schedules: schedules.edges.map((edge) => edge.node),
-        pageInfo: schedules.pageInfo,
-      })),
+      map(({ schedules }) => {
+        let filteredSchedules = schedules.edges.map((edge) => edge.node);
+
+        // Client-side filtering if filters provided
+        if (filters) {
+          if (filters.podcastUuid) {
+            filteredSchedules = filteredSchedules.filter((s) => {
+              const args = s.args as Record<string, unknown> | undefined;
+              return args?.['podcast_uuid'] === filters.podcastUuid;
+            });
+          }
+          if (filters.pulseConfigUuid) {
+            filteredSchedules = filteredSchedules.filter((s) => {
+              const args = s.args as Record<string, unknown> | undefined;
+              return args?.['pulse_config_uuid'] === filters.pulseConfigUuid;
+            });
+          }
+          if (filters.episodeUuid) {
+            filteredSchedules = filteredSchedules.filter((s) => {
+              const args = s.args as Record<string, unknown> | undefined;
+              return args?.['episode_uuid'] === filters.episodeUuid;
+            });
+          }
+        }
+
+        return {
+          schedules: filteredSchedules,
+          pageInfo: schedules.pageInfo,
+        };
+      }),
     );
   }
 
@@ -272,26 +301,30 @@ export class SchedulingService extends BaseService {
       };
     }
 
+    // Build variables object, only including fields that are explicitly provided
+    // This prevents clearing args when just toggling enabled status
+    const variables: Record<string, unknown> = { scheduleUuid };
+
+    if (schedule.name !== undefined) variables['name'] = schedule.name;
+    if (schedule.jobKind !== undefined) variables['jobKind'] = schedule.jobKind;
+    if (schedule.scheduleType !== undefined) variables['scheduleType'] = schedule.scheduleType;
+    if (schedule.interval !== undefined) variables['interval'] = schedule.interval;
+    if (schedule.cronHour !== undefined) variables['cronHour'] = schedule.cronHour;
+    if (schedule.cronMinute !== undefined) variables['cronMinute'] = schedule.cronMinute;
+    if (schedule.cronDayOfWeek !== undefined) variables['cronDayOfWeek'] = schedule.cronDayOfWeek;
+    if (schedule.cronDayOfMonth !== undefined) variables['cronDayOfMonth'] = schedule.cronDayOfMonth;
+    if (schedule.cronMonthOfYear !== undefined) variables['cronMonthOfYear'] = schedule.cronMonthOfYear;
+    if (schedule.cronTimezone !== undefined) variables['cronTimezone'] = schedule.cronTimezone;
+    if (schedule.clockedTime !== undefined) variables['clockedTime'] = schedule.clockedTime;
+    if (schedule.solarEvent !== undefined) variables['solarEvent'] = schedule.solarEvent;
+    if (schedule.solarLatitude !== undefined) variables['solarLatitude'] = schedule.solarLatitude;
+    if (schedule.solarLongitude !== undefined) variables['solarLongitude'] = schedule.solarLongitude;
+    if (schedule.args !== undefined) variables['args'] = schedule.args;
+    if (schedule.enabled !== undefined) variables['enabled'] = schedule.enabled;
+
     return this.mutate<Response>({
       mutation: UPDATE_SCHEDULE,
-      variables: {
-        scheduleUuid,
-        name: schedule.name,
-        jobKind: schedule.jobKind,
-        scheduleType: schedule.scheduleType,
-        interval: schedule.interval,
-        cronHour: schedule.cronHour,
-        cronMinute: schedule.cronMinute,
-        cronDayOfWeek: schedule.cronDayOfWeek,
-        cronDayOfMonth: schedule.cronDayOfMonth,
-        cronMonthOfYear: schedule.cronMonthOfYear,
-        clockedTime: schedule.clockedTime,
-        solarEvent: schedule.solarEvent,
-        solarLatitude: schedule.solarLatitude,
-        solarLongitude: schedule.solarLongitude,
-        args: schedule.args ?? {},
-        enabled: schedule.enabled,
-      },
+      variables,
     }).pipe(
       map((data) => {
         if (!data.updateSchedule.success) {

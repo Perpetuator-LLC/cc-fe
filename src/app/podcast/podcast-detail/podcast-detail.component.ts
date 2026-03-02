@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -59,6 +59,7 @@ import {
   ImageHistoryDialogData,
 } from '../image-history-dialog/image-history-dialog.component';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
+import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -95,6 +96,7 @@ import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-select
     EpisodesTableComponent,
     RssFeedTableComponent,
     VoiceSelectorComponent,
+    ScheduleListComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -141,28 +143,29 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     'categories',
     'publishing',
     'rss-feeds',
+    'schedules',
     'danger-zone',
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private podcastsService: PodcastsService,
-    private teamService: TeamsService,
-    private router: Router,
-    private dialog: MatDialog,
-    private clipboard: Clipboard,
-    private voicesService: VoicesService,
-    protected userService: UserService,
-    private loadingService: LoadingService,
-    private newsService: NewsService,
-    private episodeService: EpisodeService,
-    private jobService: JobService,
-    private researchService: ResearchService,
-    protected shareService: ShareService,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly teamService = inject(TeamsService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  private readonly clipboard = inject(Clipboard);
+  private readonly voicesService = inject(VoicesService);
+  protected readonly userService = inject(UserService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly newsService = inject(NewsService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly jobService = inject(JobService);
+  private readonly researchService = inject(ResearchService);
+  protected readonly shareService = inject(ShareService);
+
+  constructor() {
     const uuidParam = this.route.snapshot.paramMap.get('uuid');
     if (!uuidParam) {
       throw new Error('Failed to get Podcast ID from route.');

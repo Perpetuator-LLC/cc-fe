@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -104,16 +104,16 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfig> impleme
   selectedActiveStatus: string | null = null;
   orderBy = '-updated_at';
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private pulsesService: PulsesService,
-    private dialog: MatDialog,
-    private jobService: JobService,
-    private loadingService: LoadingService,
-  ) {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly jobService = inject(JobService);
+  private readonly loadingService = inject(LoadingService);
+
+  constructor() {
     super();
 
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {

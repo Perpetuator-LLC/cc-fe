@@ -33,6 +33,11 @@ import { ToolbarService } from '../../layout/toolbar.service';
 import { LoadingService } from '../../layout/loading.service';
 import { ShareService } from '../../share.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
+import {
+  FriendlyScheduleDialogComponent,
+  FriendlyScheduleDialogData,
+} from '../../shared/scheduling/friendly-schedule-dialog/friendly-schedule-dialog.component';
+import { formatScheduleDescription, getJobKindLabel } from '../../shared/scheduling/schedule.utils';
 
 interface EditableFormValues {
   title: string;
@@ -317,16 +322,8 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       }),
     );
 
-    this.subscriptions.add(
-      this.schedulingService.getSchedulesForPodcast(this.episodeUuid).subscribe({
-        next: (schedules) => {
-          this.schedules = schedules;
-        },
-        error: (err) => {
-          this.messageService.error(`Failed to fetch schedules: ${err.message}`);
-        },
-      }),
-    );
+    // Load episode-specific schedules (not podcast-level schedules)
+    this.loadEpisodeSchedules();
   }
 
   private countWords(text: string): number {
@@ -528,24 +525,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
   // Scheduling methods
   getScheduleDescription(schedule: Schedule): string {
-    switch (schedule.scheduleType) {
-      case 'INTERVAL': {
-        const hours = Math.floor((schedule.interval || 0) / 3600);
-        const minutes = Math.floor(((schedule.interval || 0) % 3600) / 60);
-        return hours > 0 ? `Every ${hours}h ${minutes}m` : `Every ${minutes}m`;
-      }
-      case 'CRONTAB':
-        return `${schedule.cronHour}:${schedule.cronMinute} on ${schedule.cronDayOfWeek}`;
-
-      case 'CLOCKED':
-        return `Once at ${new Date(schedule.clockedTime || '').toLocaleString()}`;
-
-      case 'SOLAR':
-        return `At ${schedule.solarEvent} (${schedule.solarLatitude}, ${schedule.solarLongitude})`;
-
-      default:
-        return schedule.interval ? `Every ${schedule.interval}s` : 'Unknown';
-    }
+    return formatScheduleDescription(schedule);
   }
 
   toggleScheduleEnabled(schedule: Schedule, enabled: boolean): void {
@@ -567,10 +547,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   editSchedule(schedule: Schedule): void {
-    // Navigate to scheduling page or open edit dialog
-    // TODO: Implement edit schedule functionality
-    console.log('Edit schedule requested for:', schedule.name);
-    this.messageService.info('Edit schedule functionality coming soon');
+    this.openScheduleDialog(schedule);
   }
 
   deleteSchedule(schedule: Schedule): void {
@@ -600,12 +577,51 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   }
 
   createNewSchedule(): void {
-    // Navigate to scheduling page or open create dialog
-    this.messageService.info('Create schedule functionality coming soon');
+    this.openScheduleDialog();
+  }
+
+  private openScheduleDialog(schedule?: Schedule): void {
+    const data: FriendlyScheduleDialogData = {
+      schedule: schedule || null,
+      context: 'episode',
+      episodeUuid: this.episodeUuid,
+      episodeName: this.episodeForm.get('title')?.value || 'Untitled Episode',
+    };
+
+    const dialogRef = this.dialog.open(FriendlyScheduleDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.schedule) {
+        // Reload schedules
+        this.loadEpisodeSchedules();
+      }
+    });
+  }
+
+  private loadEpisodeSchedules(): void {
+    this.subscriptions.add(
+      this.schedulingService.getSchedules().subscribe({
+        next: ({ schedules }) => {
+          // Filter for schedules related to this episode
+          this.schedules = schedules.filter((s) => {
+            const args = s.args as Record<string, unknown> | undefined;
+            return args?.['episodeUuid'] === this.episodeUuid || args?.['episode_uuid'] === this.episodeUuid;
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load schedules:', err);
+        },
+      }),
+    );
   }
 
   formatJobKind(jobKind: string): string {
-    return jobKind.replace(/_/g, ' ');
+    return getJobKindLabel(jobKind);
   }
 
   // Version history methods

@@ -249,6 +249,32 @@
         font-size: 32px;
         color: var(--md-sys-color-primary);
       }
+
+      .header-badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .sms-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+
+        color: var(--md-sys-color-primary);
+
+        background-color: var(--md-sys-color-primary-container);
+
+        mat-icon {
+          width: 16px;
+          height: 16px;
+          font-size: 16px;
+        }
+      }
     }
 
     h4 {

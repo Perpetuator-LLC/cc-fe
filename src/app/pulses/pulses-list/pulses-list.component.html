@@ -183,9 +183,16 @@
               <mat-card-content>
                 <div class="pulse-card-header">
                   <mat-icon class="pulse-icon">vital_signs</mat-icon>
-                  <span class="status-badge" [class.enable]="config.isActive" [class.disable]="!config.isActive">
-                    {{ config.isActive ? 'Active' : 'Inactive' }}
-                  </span>
+                  <div class="header-badges">
+                    @if (config.smsNotificationEnabled) {
+                      <span class="sms-badge" matTooltip="SMS notification enabled">
+                        <mat-icon>sms</mat-icon>
+                      </span>
+                    }
+                    <span class="status-badge" [class.enable]="config.isActive" [class.disable]="!config.isActive">
+                      {{ config.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
                 </div>
                 <h4>{{ config.name }}</h4>
                 <p class="description">{{ config.description || 'No description' }}</p>

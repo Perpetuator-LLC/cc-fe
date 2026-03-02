@@ -143,6 +143,7 @@ export interface PulseConfig {
   // Delivery
   deliveryMethod: DeliveryMethod;
   smsNotificationEnabled: boolean; // SMS notification when pulse is ready
+  emailNotificationEnabled: boolean; // Email notification when pulse is ready
 
   // Schedule
   scheduleFrequency: ScheduleFrequency;

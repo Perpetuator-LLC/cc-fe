@@ -402,6 +402,9 @@ type Query {
 
     """Sort by: marketCap, symbol, name"""
     orderBy: String = "marketCap"
+
+    """Sort direction: asc, desc"""
+    orderDirection: String = "desc"
   ): CatalogSymbolConnection
 
   """
@@ -419,6 +422,9 @@ type Query {
 
     """Sort by: marketCap, symbol, name"""
     orderBy: String = "marketCap"
+
+    """Sort direction: asc, desc"""
+    orderDirection: String = "desc"
   ): CatalogSymbolConnection
 
   """
@@ -436,12 +442,17 @@ type Query {
 
     """Sort by: marketCap, symbol, name"""
     orderBy: String = "marketCap"
+
+    """Sort direction: asc, desc"""
+    orderDirection: String = "desc"
   ): CatalogSymbolConnection
 
-  """[DEPRECATED: Use sectorSymbols] Get all symbols in a sector"""
+  """[DEPRECATED: Use catalogSectorSymbols] Get all symbols in a sector"""
   allSectorSymbols(sector: String!, limit: Int = 100, orderBy: String = "marketCap"): [CatalogSymbolType]
 
-  """[DEPRECATED: Use industrySymbols] Get all symbols in an industry"""
+  """
+  [DEPRECATED: Use catalogIndustrySymbols] Get all symbols in an industry
+  """
   allIndustrySymbols(industry: String!, limit: Int = 100, orderBy: String = "marketCap"): [CatalogSymbolType]
   schedule(
     """The ID of the object"""
@@ -962,6 +973,12 @@ type ContentSourceType_ implements Node {
   uuid: UUID
   sourceDetail: String
   rssFeedUuid: UUID
+
+  """URL of the linked RSS feed"""
+  rssFeedUrl: String
+
+  """Name of the linked RSS feed"""
+  rssFeedName: String
   watchlistUuid: UUID
 }
 

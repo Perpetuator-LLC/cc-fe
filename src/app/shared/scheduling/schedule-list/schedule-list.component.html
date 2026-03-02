@@ -1,0 +1,98 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="schedule-list-container">
+  @if (loading) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="schedule-list-header">
+    <h3>Schedules</h3>
+    @if (canAddSchedule) {
+      <button mat-flat-button color="primary" (click)="createSchedule()">
+        <mat-icon>add</mat-icon>
+        <span>Add Schedule</span>
+      </button>
+    }
+  </div>
+
+  @if (filteredSchedules.length === 0 && !loading) {
+    <div class="empty-state">
+      <mat-icon>schedule</mat-icon>
+      <p>{{ emptyStateMessage }}</p>
+      @if (canAddSchedule) {
+        <button mat-stroked-button color="primary" (click)="createSchedule()">
+          <mat-icon>add</mat-icon>
+          <span>Create Your First Schedule</span>
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="schedule-cards">
+      @for (schedule of filteredSchedules; track schedule.uuid) {
+        <div class="schedule-card" [class.disabled]="!schedule.enabled">
+          <div class="schedule-card-content">
+            <div class="schedule-icon">
+              <mat-icon>{{ getJobIcon(schedule) }}</mat-icon>
+            </div>
+            <div class="schedule-info">
+              <div class="schedule-name">{{ schedule.name }}</div>
+              <div class="schedule-description">{{ getScheduleDescription(schedule) }}</div>
+              <!-- Resource chips for associated entities -->
+              <div class="schedule-resources">
+                @if (getPodcastInfo(schedule); as podcastInfo) {
+                  <button
+                    type="button"
+                    class="resource-link-podcast"
+                    (click)="navigateToPodcast($event, podcastInfo.uuid)"
+                  >
+                    <mat-icon>mic</mat-icon>
+                    {{ podcastInfo.name }}
+                  </button>
+                }
+                @if (getPulseInfo(schedule); as pulseInfo) {
+                  <button type="button" class="resource-link-pulse" (click)="navigateToPulse($event, pulseInfo.uuid)">
+                    <mat-icon>graphic_eq</mat-icon>
+                    {{ pulseInfo.name }}
+                  </button>
+                }
+                @if (getEpisodeInfo(schedule); as episodeInfo) {
+                  <button
+                    type="button"
+                    class="resource-link-episode"
+                    (click)="navigateToEpisode($event, episodeInfo.uuid)"
+                  >
+                    <mat-icon>podcasts</mat-icon>
+                    {{ episodeInfo.name }}
+                  </button>
+                }
+              </div>
+              <div class="schedule-next-run">
+                <mat-icon>update</mat-icon>
+                <span>{{ getNextRun(schedule) }}</span>
+              </div>
+            </div>
+            <div class="schedule-actions">
+              <mat-slide-toggle
+                [checked]="schedule.enabled"
+                (change)="toggleSchedule(schedule, $event.checked)"
+                [matTooltip]="schedule.enabled ? 'Pause schedule' : 'Enable schedule'"
+              />
+              <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #scheduleMenu="matMenu">
+                <button mat-menu-item (click)="editSchedule(schedule)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="deleteSchedule(schedule)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

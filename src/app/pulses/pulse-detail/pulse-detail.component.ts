@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -51,6 +52,7 @@ import {
 } from '../pulse-status.utils';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
+import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { UserService, UserPreferences } from '../../user/user.service';
 import { RouterLink } from '@angular/router';
 
@@ -73,6 +75,7 @@ import { RouterLink } from '@angular/router';
     MatIconButton,
     MatCardContent,
     MatCheckbox,
+    MatSlideToggle,
     MatTooltip,
     FormsModule,
     MatCard,
@@ -85,6 +88,7 @@ import { RouterLink } from '@angular/router';
     MatChipsModule,
     VoiceSelectorComponent,
     RouterLink,
+    ScheduleListComponent,
   ],
 })
 export class PulseDetailComponent implements OnInit, OnDestroy {
@@ -196,6 +200,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
       outroText: [''],
       deliveryMethod: ['in_app'],
       smsNotificationEnabled: [false],
+      emailNotificationEnabled: [false],
       scheduleFrequency: ['daily'],
       scheduleTime: ['07:00'],
       scheduleTimezone: ['America/New_York'],
@@ -254,6 +259,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
             outroText: config.outroText || '',
             deliveryMethod: config.deliveryMethod,
             smsNotificationEnabled: config.smsNotificationEnabled || false,
+            emailNotificationEnabled: config.emailNotificationEnabled || false,
             scheduleFrequency: config.scheduleFrequency,
             scheduleTime: config.scheduleTime || '07:00',
             scheduleTimezone: config.scheduleTimezone,

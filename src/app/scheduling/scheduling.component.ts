@@ -1,5 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -9,8 +10,14 @@ import { SchedulingService, Schedule, ScheduleType, SolarEvent } from '../schedu
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../layout/toolbar.service';
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
+import { PulsesService } from '../pulses/pulses.service';
+import { PulseConfig } from '../pulses/pulses.types';
+import { EpisodeService, Episode } from '../episode/episode.service';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
-import { CreateScheduleDialogComponent } from './create-schedule-dialog/create-schedule-dialog.component';
+import {
+  FriendlyScheduleDialogComponent,
+  FriendlyScheduleDialogData,
+} from '../shared/scheduling/friendly-schedule-dialog/friendly-schedule-dialog.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -19,6 +26,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { parseScheduleArgs } from '../utils/schedule';
 import { CommonModule } from '@angular/common';
+import { formatScheduleDescription, getJobKindLabel } from '../shared/scheduling/schedule.utils';
 
 @Component({
   selector: 'app-scheduling',
@@ -45,20 +53,32 @@ import { CommonModule } from '@angular/common';
 })
 export class SchedulingComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
+  private readonly schedulingService = inject(SchedulingService);
+  private readonly messageService = inject(MessageService);
+  private readonly toolbarService = inject(ToolbarService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly pulsesService = inject(PulsesService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+
   schedules: Schedule[] = [];
   podcasts: PodcastsResult[] = [];
+  pulseConfigs: PulseConfig[] = [];
+  episodes: Episode[] = [];
   dataSource = new MatTableDataSource<Schedule>(this.schedules);
-  displayedColumns: string[] = ['name', 'jobKind', 'scheduleType', 'interval', 'podcast', 'enabled', 'actions'];
+  displayedColumns: string[] = ['name', 'jobKind', 'scheduleType', 'resource', 'enabled', 'actions'];
   loading = false;
   loadingPodcasts = false;
+  loadingPulseConfigs = false;
+  loadingEpisodes = false;
 
+  // Job kinds that can be scheduled - used by the friendly dialog
   schedulableJobKinds = [
-    // 'FETCH_NEWS',
-    // 'CREATE_EPISODE',
-    // 'PUBLISH_EPISODE_AUDIO',
     'PUBLISH_LATEST_EPISODE_CHAIN',
     'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN',
-    // 'REFRESH_STOCK_LISTINGS',
+    'PUBLISH_PULSE_CHAIN',
+    'PUBLISH_EPISODE_AUDIO',
   ];
 
   scheduleTypes = Object.values(ScheduleType);
@@ -68,13 +88,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
-  constructor(
-    private schedulingService: SchedulingService,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private podcastsService: PodcastsService,
-    private dialog: MatDialog,
-  ) {
+  constructor() {
     if (window.location.hostname === 'localhost') {
       this.schedulableJobKinds.push('TEST_PRINT', 'TEST_RAISE');
     }
@@ -85,6 +99,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 
     this.loadSchedules();
     this.loadPodcasts();
+    this.loadPulseConfigs();
+    this.loadEpisodes();
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
   }
@@ -122,6 +138,39 @@ export class SchedulingComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.messageService.error(`Failed to load podcasts: ${err.message}`);
           this.loadingPodcasts = false;
+        },
+      }),
+    );
+  }
+
+  loadPulseConfigs() {
+    this.loadingPulseConfigs = true;
+    this.subscriptions.add(
+      this.pulsesService.getPulseConfigs().subscribe({
+        next: (response) => {
+          this.pulseConfigs = response.pulseConfigs;
+          this.loadingPulseConfigs = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load pulse configs: ${err.message}`);
+          this.loadingPulseConfigs = false;
+        },
+      }),
+    );
+  }
+
+  loadEpisodes() {
+    this.loadingEpisodes = true;
+    this.subscriptions.add(
+      // Load unpublished episodes (isLive: false), sorted by date descending
+      this.episodeService.getEpisodes(50, null, 'date', 'DESC', null, null, false).subscribe({
+        next: ({ episodes }) => {
+          this.episodes = episodes;
+          this.loadingEpisodes = false;
+        },
+        error: (err) => {
+          this.messageService.error(`Failed to load episodes: ${err.message}`);
+          this.loadingEpisodes = false;
         },
       }),
     );
@@ -176,17 +225,35 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 
   private openScheduleDialog(schedule?: Schedule) {
     try {
-      const dialogRef = this.dialog.open(CreateScheduleDialogComponent, {
-        width: '800px',
-        maxWidth: '90vw',
+      const podcasts: { uuid: string; name: string }[] = this.podcasts.map((p) => ({
+        uuid: p.uuid,
+        name: p.name ?? 'Unnamed Podcast',
+      }));
+
+      const pulseConfigs: { uuid: string; name: string }[] = this.pulseConfigs.map((p) => ({
+        uuid: p.uuid,
+        name: p.name,
+      }));
+
+      const episodes: { uuid: string; name: string; podcastName?: string }[] = this.episodes.map((e) => ({
+        uuid: e.uuid,
+        name: e.title || 'Untitled Episode',
+        podcastName: e.podcast?.name,
+      }));
+
+      const data: FriendlyScheduleDialogData = {
+        schedule: schedule || null,
+        context: 'all',
+        podcasts,
+        pulseConfigs,
+        episodes,
+      };
+
+      const dialogRef = this.dialog.open(FriendlyScheduleDialogComponent, {
+        width: '560px',
+        maxWidth: '95vw',
         disableClose: true,
-        data: {
-          schedule: schedule || null,
-          podcasts: this.podcasts || [],
-          schedulableJobKinds: this.schedulableJobKinds,
-          scheduleTypes: this.scheduleTypes,
-          solarEvents: this.solarEvents,
-        },
+        data,
       });
 
       dialogRef.afterClosed().subscribe((result) => {
@@ -211,27 +278,79 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   }
 
   getScheduleDescription(schedule: Schedule): string {
-    switch (schedule.scheduleType) {
-      case ScheduleType.INTERVAL: {
-        const hours = Math.floor((schedule.interval || 0) / 3600);
-        const minutes = Math.floor(((schedule.interval || 0) % 3600) / 60);
-        return hours > 0 ? `Every ${hours}h ${minutes}m` : `Every ${minutes}m`;
-      }
-      case ScheduleType.CRONTAB:
-        return `${schedule.cronHour}:${schedule.cronMinute} on ${schedule.cronDayOfWeek}`;
-
-      case ScheduleType.CLOCKED:
-        return `Once at ${new Date(schedule.clockedTime || '').toLocaleString()}`;
-
-      case ScheduleType.SOLAR:
-        return `At ${schedule.solarEvent} (${schedule.solarLatitude}, ${schedule.solarLongitude})`;
-
-      default:
-        return 'Unknown';
-    }
+    return formatScheduleDescription(schedule);
   }
 
   formatJobKind(jobKind: string): string {
-    return jobKind.replace(/_/g, ' ');
+    return getJobKindLabel(jobKind);
+  }
+
+  /**
+   * Get resource info for a schedule (podcast, pulse, or episode)
+   * Returns an object with type, name, uuid, and icon for chip display
+   */
+  getResourceInfo(
+    schedule: Schedule,
+  ): { type: 'podcast' | 'pulse' | 'episode' | null; name: string; uuid: string; icon: string } | null {
+    const parsedArgs = parseScheduleArgs(schedule.args);
+
+    // Check for episode
+    const episodeUuid = parsedArgs['episodeUuid'] as string | undefined;
+    if (episodeUuid) {
+      const episodeName = (parsedArgs['episodeName'] as string) || 'Unknown Episode';
+      const episode = this.episodes.find((e) => e.uuid === episodeUuid);
+      return {
+        type: 'episode',
+        name: episode?.title || episodeName,
+        uuid: episodeUuid,
+        icon: 'podcasts',
+      };
+    }
+
+    // Check for pulse
+    const pulseConfigUuid = parsedArgs['pulseConfigUuid'] as string | undefined;
+    if (pulseConfigUuid) {
+      const pulse = this.pulseConfigs.find((p) => p.uuid === pulseConfigUuid);
+      return {
+        type: 'pulse',
+        name: pulse?.name || 'Unknown Pulse',
+        uuid: pulseConfigUuid,
+        icon: 'graphic_eq',
+      };
+    }
+
+    // Check for podcast
+    const podcastUuid = parsedArgs['podcastUuid'] as string | undefined;
+    if (podcastUuid) {
+      const podcast = this.podcasts.find((p) => p.uuid === podcastUuid);
+      return {
+        type: 'podcast',
+        name: podcast?.name || 'Unknown Podcast',
+        uuid: podcastUuid,
+        icon: 'mic',
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Navigate to the resource detail page
+   */
+  navigateToResource(event: Event, resourceInfo: { type: 'podcast' | 'pulse' | 'episode' | null; uuid: string }): void {
+    event.stopPropagation();
+    if (!resourceInfo?.type) return;
+
+    switch (resourceInfo.type) {
+      case 'podcast':
+        this.router.navigate(['/media/podcasts', resourceInfo.uuid]);
+        break;
+      case 'pulse':
+        this.router.navigate(['/pulses', resourceInfo.uuid]);
+        break;
+      case 'episode':
+        this.router.navigate(['/media/episodes', resourceInfo.uuid]);
+        break;
+    }
   }
 }

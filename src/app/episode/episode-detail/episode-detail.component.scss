@@ -1040,6 +1040,37 @@
   }
 }
 
+// Episode published notice
+.published-notice {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  padding: 24px;
+  border-radius: 12px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  .success-icon {
+    @include icon-size(48px);
+
+    color: var(--md-extended-color-success-color);
+  }
+
+  .published-info {
+    h3 {
+      margin: 0 0 4px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    p {
+      margin: 0;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+}
+
 .schedule-actions-footer {
   margin-top: 16px;
   text-align: center;

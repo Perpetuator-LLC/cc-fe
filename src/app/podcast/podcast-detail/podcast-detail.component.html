@@ -638,6 +638,27 @@
         </mat-card-content>
       </mat-tab>
 
+      <!-- Schedules Tab -->
+      <mat-tab label="Schedules">
+        <mat-card-content class="schedules-tab-content">
+          <div class="schedules-intro">
+            <div class="schedules-intro-text">
+              <h3>Automated Publishing</h3>
+              <p>
+                Set up automatic episode generation and publishing. Your podcast will create new episodes on the
+                schedule you define.
+              </p>
+            </div>
+          </div>
+          <app-schedule-list
+            context="podcast"
+            [podcastUuid]="podcastUuid"
+            [podcasts]="[{ uuid: podcastUuid, name: podcastForm.get('name')?.value || '' }]"
+            emptyStateMessage="No schedules configured. Create a schedule to automatically generate and publish episodes."
+          />
+        </mat-card-content>
+      </mat-tab>
+
       <mat-tab label="Danger Zone">
         <mat-card-content>
           <h3>Danger Zone Settings</h3>

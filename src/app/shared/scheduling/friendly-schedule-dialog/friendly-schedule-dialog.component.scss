@@ -1,0 +1,381 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  min-width: 400px;
+  max-width: 500px;
+
+  @include mixins.mobile() {
+    min-width: 280px;
+  }
+}
+
+.full-width {
+  width: 100%;
+
+  &.locked {
+    opacity: 0.7;
+  }
+}
+
+// Job option in dropdown
+.job-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 4px 0;
+
+  mat-icon {
+    margin-top: 4px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .job-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .job-label {
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .job-description {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+}
+
+// Selected job in trigger
+.selected-job-trigger {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+}
+
+// Locked schedule type (for episode release)
+.locked-schedule-type {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+}
+
+// Section labels
+.section-label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Schedule type toggle
+.schedule-type-section {
+  margin: 8px 0;
+}
+
+.schedule-type-toggle {
+  width: 100%;
+
+  mat-button-toggle {
+    flex: 1;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Day pattern toggle
+.day-pattern-section {
+  margin-top: 8px;
+}
+
+.day-pattern-toggle {
+  flex-wrap: wrap;
+  width: 100%;
+
+  mat-button-toggle {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+// Custom days chips
+.custom-days-section {
+  margin-top: 12px;
+}
+
+.day-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.day-chip {
+  cursor: pointer;
+
+  min-width: 44px;
+  height: 36px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface);
+
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container);
+  }
+
+  &.selected {
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-primary);
+  }
+}
+
+// Time section
+.time-section,
+.datetime-section {
+  margin-top: 16px;
+}
+
+.time-input-row,
+.datetime-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  @include mixins.mobile() {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.date-field {
+  flex: 1.2;
+  min-width: 140px;
+}
+
+.time-field {
+  flex: 0.8;
+  min-width: 100px;
+}
+
+.time-input,
+.datetime-input {
+  flex: 1;
+
+  min-width: 120px;
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 4px;
+
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface);
+
+  &:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: none;
+  }
+}
+
+.timezone-select {
+  flex: 1.5;
+  min-width: 160px;
+}
+
+// Enabled section
+.enabled-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+
+  .toggle-label {
+    margin-right: 8px;
+    font-weight: 500;
+  }
+
+  .toggle-hint {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Recurring and one-time option containers
+.recurring-options,
+.one-time-options {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+// Podcast display for pre-selected podcast
+.podcast-display {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+
+  .podcast-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .podcast-label {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .podcast-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+}
+
+// Pulse display for pre-selected pulse
+.pulse-display {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+
+  .pulse-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .pulse-label {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .pulse-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+}
+
+// Episode display for episode context
+.episode-display {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  mat-icon {
+    color: var(--md-sys-color-primary);
+  }
+
+  .episode-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .episode-label {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .episode-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+  }
+}
+
+// Episode option in dropdown
+.episode-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .episode-title {
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .episode-podcast {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Spinning icon for loading state
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

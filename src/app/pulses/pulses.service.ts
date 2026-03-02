@@ -38,6 +38,7 @@ const PULSE_CONFIG_FRAGMENT = gql`
     outroText
     deliveryMethod
     smsNotificationEnabled
+    emailNotificationEnabled
     scheduleFrequency
     scheduleTime
     scheduleTimezone
@@ -453,6 +454,7 @@ export class PulsesService extends BaseService {
       outroText: string;
       deliveryMethod: DeliveryMethod;
       smsNotificationEnabled: boolean;
+      emailNotificationEnabled: boolean;
       scheduleFrequency: ScheduleFrequency;
       scheduleTime: string;
       scheduleTimezone: string;
@@ -477,6 +479,7 @@ export class PulsesService extends BaseService {
         $outroText: String
         $deliveryMethod: String
         $smsNotificationEnabled: Boolean
+        $emailNotificationEnabled: Boolean
         $scheduleFrequency: String
         $scheduleTime: String
         $scheduleTimezone: String
@@ -498,6 +501,7 @@ export class PulsesService extends BaseService {
           outroText: $outroText
           deliveryMethod: $deliveryMethod
           smsNotificationEnabled: $smsNotificationEnabled
+          emailNotificationEnabled: $emailNotificationEnabled
           scheduleFrequency: $scheduleFrequency
           scheduleTime: $scheduleTime
           scheduleTimezone: $scheduleTimezone

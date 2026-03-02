@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 .middle-card {
   padding-inline: 30px;
@@ -169,6 +169,10 @@
       color: var(--md-sys-color-on-surface-variant);
     }
   }
+}
+
+.no-resource {
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 // Top-level loading spinner (matching podcasts component)

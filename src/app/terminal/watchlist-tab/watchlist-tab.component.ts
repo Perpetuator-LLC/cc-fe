@@ -880,14 +880,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
               command = 'HP';
             }
 
-            // Only reload if something changed
+            // Only reload if something changed (case-insensitive symbol comparison)
             const viewChanged = command !== currentCommand;
-            const symbolChanged = symbol !== currentSymbol;
+            const symbolChanged = symbol?.toUpperCase() !== currentSymbol?.toUpperCase();
             const intervalChanged =
               command !== 'FINANCIALS' &&
               command !== 'FUNDAMENTALS' &&
               command !== 'DCF' &&
-              interval !== currentInterval;
+              interval?.toLowerCase() !== currentInterval?.toLowerCase();
 
             if (symbolChanged || intervalChanged || viewChanged) {
               console.log('[WatchlistTab] Route changed, reloading:', {
@@ -897,8 +897,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
                 view,
                 command,
               });
-              // Update interval if provided and not financials view
-              if (command !== 'FINANCIALS' && command !== 'FUNDAMENTALS' && interval && interval !== currentInterval) {
+              // Update interval if provided and not financials view (case-insensitive)
+              const intervalMismatch = interval && interval.toLowerCase() !== currentInterval?.toLowerCase();
+              if (command !== 'FINANCIALS' && command !== 'FUNDAMENTALS' && intervalMismatch) {
                 this.selectedInterval.set(interval);
               }
               // Update routing service state without updating URL (to avoid loop)
@@ -998,6 +999,9 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   selectStockListing(listing: StockListing): void {
     this.selectedStockListing.set(listing);
+    this.newSymbolInput = listing.symbol;
+    // Clear search results to close the autocomplete dropdown
+    this.symbolSearchResults.set([]);
     this.newSymbolInput = listing.symbol;
   }
 

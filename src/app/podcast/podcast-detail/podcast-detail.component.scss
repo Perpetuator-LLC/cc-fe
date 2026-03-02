@@ -1233,3 +1233,35 @@ mat-divider {
     width: 100%;
   }
 }
+
+// Schedules Tab
+.schedules-tab-content {
+  padding: 24px;
+}
+
+.schedules-intro {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 12px;
+
+  background: var(--md-sys-color-surface-container-lowest);
+
+  .schedules-intro-text {
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+}
