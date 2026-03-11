@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 
-export type MediaTab = 'pulses' | 'podcasts' | 'episodes' | 'news' | 'topics';
+export type MediaTab = 'pulses' | 'podcasts' | 'episodes' | 'news' | 'topics' | 'blogs' | 'socials';
 
 /**
  * Service to track user's last used media tab.
@@ -59,10 +59,12 @@ export class MediaTabPreferenceService {
     if (path.includes('/media/episodes')) return 'episodes';
     if (path.includes('/media/news')) return 'news';
     if (path.includes('/media/topics')) return 'topics';
+    if (path.includes('/media/blogs')) return 'blogs';
+    if (path.includes('/media/socials')) return 'socials';
     return null;
   }
 
   private isValidTab(value: string): value is MediaTab {
-    return ['pulses', 'podcasts', 'episodes', 'news', 'topics'].includes(value);
+    return ['pulses', 'podcasts', 'episodes', 'news', 'topics', 'blogs', 'socials'].includes(value);
   }
 }

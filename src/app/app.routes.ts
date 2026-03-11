@@ -174,6 +174,23 @@ export const routes: Routes = [
           import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
         title: 'Recording Detail',
       },
+      {
+        path: 'blogs',
+        loadComponent: () => import('./blogs/blogs-list/blogs-list.component').then((c) => c.BlogsListComponent),
+        title: 'Blogs',
+        data: {
+          icon: 'article',
+        },
+      },
+      {
+        path: 'socials',
+        loadComponent: () =>
+          import('./socials/socials-list/socials-list.component').then((c) => c.SocialsListComponent),
+        title: 'Socials',
+        data: {
+          icon: 'share',
+        },
+      },
     ],
   },
   {

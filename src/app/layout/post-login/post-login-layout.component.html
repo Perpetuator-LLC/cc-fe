@@ -116,6 +116,14 @@
             <mat-icon>science</mat-icon>
             <span class="website-title">Topics</span>
           </a>
+          <a [routerLink]="['/media/blogs']" class="header-logo s-link" routerLinkActive="active">
+            <mat-icon>article</mat-icon>
+            <span class="website-title">Blogs</span>
+          </a>
+          <a [routerLink]="['/media/socials']" class="header-logo s-link" routerLinkActive="active">
+            <mat-icon>share</mat-icon>
+            <span class="website-title">Socials</span>
+          </a>
           } @if (router.url.startsWith('/terminal')) {
           <a class="header-logo s-link" [routerLink]="['/terminal']" [queryParams]="{ tab: 'watchlists' }"
             [class.active]="terminalRoutingService.tab() === 'watchlists'">

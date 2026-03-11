@@ -1,0 +1,118 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>
+  @if (isEdit) {
+    Edit Social Post
+  } @else {
+    Create Social Post
+  }
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="broadcast-form">
+    <!-- Social Account Selection -->
+    @if (!isEdit) {
+      <mat-form-field appearance="outline">
+        <mat-label>Social Account</mat-label>
+        <mat-select formControlName="socialAccountUuid" required>
+          @if (loadingAccounts) {
+            <mat-option disabled>Loading accounts...</mat-option>
+          } @else if (socialAccounts.length === 0) {
+            <mat-option disabled>No accounts connected. Connect an account first.</mat-option>
+          } @else {
+            @for (account of socialAccounts; track account.id) {
+              <mat-option [value]="account.id">
+                <div class="account-option">
+                  <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+                  <span>{{ account.accountName }}</span>
+                  <span class="platform-name">{{ account.platform }}</span>
+                </div>
+              </mat-option>
+            }
+          }
+        </mat-select>
+        @if (form.get('socialAccountUuid')?.hasError('required') && form.get('socialAccountUuid')?.touched) {
+          <mat-error>Please select a social account</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <!-- Post Content -->
+    <mat-form-field appearance="outline" class="content-field">
+      <mat-label>Post Content</mat-label>
+      <textarea matInput formControlName="text" rows="6" placeholder="What would you like to share?" required></textarea>
+      @if (form.get('text')?.hasError('required') && form.get('text')?.touched) {
+        <mat-error>Post content is required</mat-error>
+      }
+      <mat-hint align="start">
+        @if (selectedPlatformLimit) {
+          {{ selectedPlatformLimit.name }} limit: {{ selectedPlatformLimit.maxLength }} characters
+        }
+      </mat-hint>
+      <mat-hint align="end" [class.over-limit]="isOverLimit()">
+        {{ getCharacterCount() }}
+        @if (selectedPlatformLimit) {
+          / {{ selectedPlatformLimit.maxLength }}
+        }
+      </mat-hint>
+    </mat-form-field>
+
+    <!-- Link URL -->
+    <mat-form-field appearance="outline">
+      <mat-label>Link URL (optional)</mat-label>
+      <input matInput formControlName="linkUrl" placeholder="https://..." />
+      <mat-icon matPrefix>link</mat-icon>
+    </mat-form-field>
+
+    <!-- Hashtags -->
+    <div class="hashtags-section">
+      <mat-form-field appearance="outline" class="hashtag-input">
+        <mat-label>Add Hashtag</mat-label>
+        <input matInput #hashtagInputRef placeholder="Enter hashtag"
+               (keyup.enter)="addHashtag(hashtagInputRef)" />
+        <button mat-icon-button matSuffix type="button" (click)="addHashtag(hashtagInputRef)">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-form-field>
+      @if (form.value.hashtags?.length > 0) {
+        <div class="hashtag-chips">
+          @for (tag of form.value.hashtags; track tag) {
+            <span class="hashtag-chip">
+              #{{ tag }}
+              <button type="button" class="remove-btn" (click)="removeHashtag(tag)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Schedule (optional) -->
+    <mat-form-field appearance="outline">
+      <mat-label>Schedule for (optional)</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="scheduledAt" />
+      <mat-datepicker-toggle matSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      <mat-hint>Leave empty to save as draft</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Cancel</button>
+  @if (loading) {
+    <button mat-flat-button color="primary" disabled>
+      <mat-spinner diameter="18" />
+      <span>Saving...</span>
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" type="button" (click)="onSave()"
+            [disabled]="form.invalid || loadingAccounts">
+      <mat-icon>save</mat-icon>
+      <span>{{ isEdit ? 'Update' : 'Create' }}</span>
+    </button>
+  }
+</mat-dialog-actions>
+
+
+

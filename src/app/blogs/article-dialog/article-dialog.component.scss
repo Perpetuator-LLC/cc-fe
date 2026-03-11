@@ -1,0 +1,26 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.article-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  min-width: 500px;
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  .content-field {
+    textarea {
+      min-height: 200px;
+      font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+    }
+  }
+}
+
+mat-dialog-content {
+  max-height: 70vh;
+}
+

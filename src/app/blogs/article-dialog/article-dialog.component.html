@@ -1,0 +1,101 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>
+  @if (isEdit) {
+    Edit Article
+  } @else {
+    Create Article
+  }
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="article-form">
+    <!-- Blog Selection (only for new articles) -->
+    @if (!isEdit) {
+      <mat-form-field appearance="outline">
+        <mat-label>Blog</mat-label>
+        <mat-select formControlName="blogUuid" required>
+          @if (loadingBlogs) {
+            <mat-option disabled>Loading blogs...</mat-option>
+          } @else if (blogs.length === 0) {
+            <mat-option disabled>No blogs available. Create a blog first.</mat-option>
+          } @else {
+            @for (blog of blogs; track blog.id) {
+              <mat-option [value]="blog.id">{{ blog.name }}</mat-option>
+            }
+          }
+        </mat-select>
+        @if (form.get('blogUuid')?.hasError('required') && form.get('blogUuid')?.touched) {
+          <mat-error>Please select a blog</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <!-- Title -->
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Article title" required />
+      @if (form.get('title')?.hasError('required') && form.get('title')?.touched) {
+        <mat-error>Title is required</mat-error>
+      }
+      @if (form.get('title')?.hasError('maxlength')) {
+        <mat-error>Title must be 200 characters or less</mat-error>
+      }
+      <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+    </mat-form-field>
+
+    <!-- Subtitle -->
+    <mat-form-field appearance="outline">
+      <mat-label>Subtitle</mat-label>
+      <input matInput formControlName="subtitle" placeholder="Optional subtitle" />
+      @if (form.get('subtitle')?.hasError('maxlength')) {
+        <mat-error>Subtitle must be 300 characters or less</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Slug -->
+    <mat-form-field appearance="outline">
+      <mat-label>Slug</mat-label>
+      <input matInput formControlName="slug" placeholder="url-friendly-slug" />
+      <button mat-icon-button matSuffix type="button" (click)="generateSlug()" matTooltip="Generate from title">
+        <mat-icon>auto_fix_high</mat-icon>
+      </button>
+      <mat-hint>URL-friendly identifier for the article</mat-hint>
+    </mat-form-field>
+
+    <!-- Description (SEO) -->
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="2" placeholder="Brief description for SEO"></textarea>
+      @if (form.get('description')?.hasError('maxlength')) {
+        <mat-error>Description must be 500 characters or less</mat-error>
+      }
+      <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/500</mat-hint>
+    </mat-form-field>
+
+    <!-- Content -->
+    <mat-form-field appearance="outline" class="content-field">
+      <mat-label>Content</mat-label>
+      <textarea matInput formControlName="content" rows="12" placeholder="Article content (Markdown supported)" required></textarea>
+      @if (form.get('content')?.hasError('required') && form.get('content')?.touched) {
+        <mat-error>Content is required</mat-error>
+      }
+      <mat-hint>Markdown formatting is supported</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Cancel</button>
+  @if (loading) {
+    <button mat-flat-button color="primary" disabled>
+      <mat-spinner diameter="18" />
+      <span>Saving...</span>
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" type="button" (click)="onSave()" [disabled]="form.invalid || loadingBlogs">
+      <mat-icon>save</mat-icon>
+      <span>{{ isEdit ? 'Update' : 'Create' }}</span>
+    </button>
+  }
+</mat-dialog-actions>
+
