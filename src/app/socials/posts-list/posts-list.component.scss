@@ -1,13 +1,13 @@
 /* Copyright (c) 2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
-.blogs-container {
+.posts-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 24px;
 }
 
-.blogs-card {
+.posts-card {
   margin: 16px;
   background: var(--md-sys-color-surface-container);
 
@@ -39,7 +39,7 @@
   }
 }
 
-.blogs-table-container {
+.posts-table-container {
   margin: 0 16px 16px;
   border-radius: 8px;
   background: var(--md-sys-color-surface);
@@ -48,30 +48,60 @@
     width: 100%;
   }
 
-  .blog-name {
+  .platform-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    mat-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+      color: var(--md-sys-color-primary);
+    }
+  }
+
+  .post-text {
+    max-width: 400px;
+
+    .hashtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+
+      .hashtag {
+        font-size: 12px;
+        color: var(--md-sys-color-primary);
+      }
+    }
+  }
+
+  .scheduled-date {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    color: var(--md-sys-color-on-surface-variant);
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+
+  .engagement-stats {
     display: flex;
     flex-direction: column;
     gap: 4px;
 
-    .blog-link {
-      font-weight: 500;
-      color: var(--md-sys-color-primary);
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
-    .blog-description {
+    span {
       font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
     }
   }
 
-  .published-count {
-    margin-left: 4px;
-    font-size: 12px;
+  .no-data {
     color: var(--md-sys-color-on-surface-variant);
   }
 }
@@ -95,9 +125,19 @@
     background: var(--md-sys-color-surface-container-high);
   }
 
-  &.status-archived {
-    color: var(--md-sys-color-on-surface-variant);
-    background: var(--md-sys-color-surface-container);
+  &.status-scheduled {
+    color: var(--md-sys-color-on-tertiary-container);
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  &.status-warning {
+    color: var(--md-extended-color-warning-on-color-container);
+    background: var(--md-extended-color-warning-color-container);
+  }
+
+  &.status-error {
+    color: var(--md-sys-color-on-error-container);
+    background: var(--md-sys-color-error-container);
   }
 }
 
@@ -138,11 +178,14 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
   margin-top: 16px;
+
+  text-align: left;
 
   .feature-item {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
     color: var(--md-sys-color-on-surface-variant);
 
@@ -155,8 +198,33 @@
   }
 }
 
+.platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+
+  margin-top: 8px;
+
+  .platform-badge {
+    padding: 4px 12px;
+    border-radius: 16px;
+
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: var(--md-sys-color-surface-container-high);
+  }
+}
+
 .action-buttons {
   display: flex;
   gap: 12px;
   margin-top: 16px;
+}
+
+.hint-text {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
 }

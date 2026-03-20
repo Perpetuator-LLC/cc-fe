@@ -1,165 +1,288 @@
 <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
-<div class="layout-container" [ngClass]="{
+<div
+  class="layout-container"
+  [ngClass]="{
     'after-login-layout': this.authService.isLoggedIn(),
     'before-login-layout': !this.authService.isLoggedIn(),
-  }">
+  }"
+>
   <!--  @if (this.authService.isLoggedIn()) {-->
   <header #afterHeader class="after-header" [ngClass]="{ showSidebar: showMobileSidebar }">
     <div class="sidebar after-login-sidebar">
       <a [routerLink]="['/home']" class="mat-link website-logo" routerLinkActive="active-link">
-        <img src="logo.svg" aria-label="Side nav toggle icon" alt="Capital Copilot" width="36" height="36"
-          matTooltip="Capital Copilot" />
+        <img
+          src="logo.svg"
+          aria-label="Side nav toggle icon"
+          alt="Capital Copilot"
+          width="36"
+          height="36"
+          matTooltip="Capital Copilot"
+        />
         <div class="route-title">Home</div>
       </a>
       <mat-nav-list [ngClass]="{ minimized: this.minimized }">
         <div class="keep-up">
           @for (item of rootRoutes; track item.path) {
-          @if (shouldShow(item)) {
-          <a class="mat-link" mat-list-item [routerLink]="item.path" routerLinkActive="active-link"
-            (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
-            #link="routerLinkActive" [activated]="link.isActive">
-            <div class="route-link">
-              @if (item.data && item.data['icon']) {
-              <mat-icon>{{ item.data['icon'] }}</mat-icon>
-              }
-              @if (!this.minimized) {
-              <div class="route-title">
-                {{ item.title }}
-              </div>
-              }
-            </div>
-          </a>
-          }
+            @if (shouldShow(item)) {
+              <a
+                class="mat-link"
+                mat-list-item
+                [routerLink]="item.path"
+                routerLinkActive="active-link"
+                (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
+                #link="routerLinkActive"
+                [activated]="link.isActive"
+              >
+                <div class="route-link">
+                  @if (item.data && item.data['icon']) {
+                    <mat-icon>{{ item.data['icon'] }}</mat-icon>
+                  }
+                  @if (!this.minimized) {
+                    <div class="route-title">
+                      {{ item.title }}
+                    </div>
+                  }
+                </div>
+              </a>
+            }
           }
         </div>
       </mat-nav-list>
-      <img class="openCollapseSidebar" src="/openSidebaricon.svg" alt="icon" (click)="toggleSecondSidebar()"
-        (keydown.enter)="toggleSecondSidebar()" (keydown.space)="toggleSecondSidebar()" tabindex="0"
-        [ngClass]="{ hidden: isSecondSidebarVisible }" />
+      <img
+        class="openCollapseSidebar"
+        src="/openSidebaricon.svg"
+        alt="icon"
+        (click)="toggleSecondSidebar()"
+        (keydown.enter)="toggleSecondSidebar()"
+        (keydown.space)="toggleSecondSidebar()"
+        tabindex="0"
+        [ngClass]="{ hidden: isSecondSidebarVisible }"
+      />
     </div>
     @if (showSecondSidebar && !isHomePage) {
-    <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
-      <div class="sidebar-content">
-        <div class="second-header">
-          @if (router.url.startsWith('/media/')) {
-          <h6>Media</h6>
-          } @if (router.url.startsWith('/terminal')) {
-          <h6>Finance</h6>
-          } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
-          <h6>Jobs</h6>
-          }
-          <svg class="collapseSecondSidebar" width="20" height="20" viewBox="0 0 20 20" fill="none"
-            xmlns="http://www.w3.org/2000/svg" (click)="toggleSecondSidebar()">
-            <path
-              d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
-              stroke="#ADADAD" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M12.5 11.6667L10.8333 10L12.5 8.33334" stroke="#ADADAD" stroke-width="1.4" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-          <svg class="collapseSecondSidebarMobile" width="20" height="20" viewBox="0 0 20 20" fill="none"
-            xmlns="http://www.w3.org/2000/svg" (click)="onHamburgerClick($event)">
-            <path
-              d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
-              stroke="#ADADAD" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M12.5 11.6667L10.8333 10L12.5 8.33334" stroke="#ADADAD" stroke-width="1.4" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        </div>
-        <div class="links">
-          @if (router.url.startsWith('/media/')) {
-          <!-- Media section links -->
-          <a [routerLink]="['/media/pulses']" class="header-logo s-link" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }">
-            <mat-icon>vital_signs</mat-icon>
-            <span class="website-title">Pulses</span>
-          </a>
-          <a [routerLink]="['/media/recordings']" class="header-logo s-link" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }">
-            <mat-icon>mic</mat-icon>
-            <span class="website-title">Recordings</span>
-          </a>
-          <a [routerLink]="['/media/podcasts']" class="header-logo s-link" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
+        <div class="sidebar-content">
+          <div class="second-header">
+            @if (router.url.startsWith('/media/')) {
+              <h6>Media</h6>
+            }
+            @if (router.url.startsWith('/terminal')) {
+              <h6>Finance</h6>
+            } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+              <h6>Jobs</h6>
+            }
+            <svg
+              class="collapseSecondSidebar"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              (click)="toggleSecondSidebar()"
+            >
               <path
-                d="M10.5 2.25H7.5C4.67175 2.25 3.25725 2.25 2.379 3.129C1.50075 4.008 1.5 5.42175 1.5 8.25C1.5 11.0782 1.5 12.4927 2.379 13.371C3.258 14.2492 4.67175 14.25 7.5 14.25H10.5C13.3282 14.25 14.7427 14.25 15.621 13.371C16.4992 12.492 16.5 11.0782 16.5 8.25C16.5 5.42175 16.5 4.00725 15.621 3.129C14.742 2.25075 13.3282 2.25 10.5 2.25Z"
-                stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
+                stroke="#ADADAD"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
               <path
-                d="M12.675 11.625C12.675 11.3067 12.8014 11.0015 13.0265 10.7765C13.2515 10.5514 13.5567 10.425 13.875 10.425M10.275 11.625C10.275 10.6702 10.6543 9.75455 11.3294 9.07942C12.0045 8.40428 12.9202 8.025 13.875 8.025M7.875 11.625C7.875 10.0337 8.50714 8.50758 9.63236 7.38236C10.7576 6.25714 12.2837 5.625 13.875 5.625M13.5 14.25L14.25 15.75M4.5 14.25L3.75 15.75"
-                stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                d="M12.5 11.6667L10.8333 10L12.5 8.33334"
+                stroke="#ADADAD"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <span class="website-title">Podcasts</span>
-          </a>
-          <a [routerLink]="['/media/episodes']" class="header-logo s-link" routerLinkActive="active">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g clip-path="url(#clip0_210_4590)">
-                <path
-                  d="M10.416 7.45096C11.2222 8.10871 11.625 8.43721 11.625 8.99971C11.625 9.56221 11.2222 9.89071 10.416 10.5485C10.1932 10.73 9.97275 10.901 9.7695 11.0435C9.59175 11.1687 9.39 11.2977 9.1815 11.4245C8.37675 11.9135 7.97475 12.158 7.614 11.8872C7.254 11.6172 7.221 11.0502 7.155 9.91621C7.137 9.59596 7.125 9.28171 7.125 8.99971C7.125 8.71771 7.137 8.40346 7.155 8.08321C7.221 6.94921 7.254 6.38296 7.614 6.11221C7.97475 5.84146 8.3775 6.08596 9.1815 6.57496C9.39 6.70171 9.59175 6.83071 9.7695 6.95596C9.972 7.09846 10.1932 7.26946 10.416 7.45096Z"
-                  stroke="white" stroke-width="1.5" />
-                <path
-                  d="M5.25 2.50351C6.38959 1.84405 7.68336 1.49784 9 1.50001C13.1422 1.50001 16.5 4.85776 16.5 9.00001C16.5 13.1423 13.1422 16.5 9 16.5C4.85775 16.5 1.5 13.1423 1.5 9.00001C1.5 7.63426 1.86525 6.35251 2.5035 5.25001"
-                  stroke="white" stroke-width="1.5" stroke-linecap="round" />
-              </g>
-              <defs>
-                <clipPath id="clip0_210_4590">
-                  <rect width="18" height="18" fill="white" />
-                </clipPath>
-              </defs>
+            <svg
+              class="collapseSecondSidebarMobile"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              (click)="onHamburgerClick($event)"
+            >
+              <path
+                d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
+                stroke="#ADADAD"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12.5 11.6667L10.8333 10L12.5 8.33334"
+                stroke="#ADADAD"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <span class="website-title">Episodes</span>
-          </a>
-          <a [routerLink]="['/media/news']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon> rss_feed</mat-icon>
-            <span class="website-title">News</span>
-          </a>
-          <a [routerLink]="['/media/topics']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon>science</mat-icon>
-            <span class="website-title">Topics</span>
-          </a>
-          <a [routerLink]="['/media/blogs']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon>article</mat-icon>
-            <span class="website-title">Blogs</span>
-          </a>
-          <a [routerLink]="['/media/socials']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon>share</mat-icon>
-            <span class="website-title">Socials</span>
-          </a>
-          } @if (router.url.startsWith('/terminal')) {
-          <a class="header-logo s-link" [routerLink]="['/terminal']" [queryParams]="{ tab: 'watchlists' }"
-            [class.active]="terminalRoutingService.tab() === 'watchlists'">
-            <mat-icon>visibility</mat-icon>
-            <span class="website-title">Watchlists</span>
-          </a>
-          <a class="header-logo s-link" style="opacity: 0.5; color: gray; cursor: not-allowed;"
-            matTooltip="Coming Soon">
-            <mat-icon>dashboard</mat-icon>
-            <span class="website-title">Dashboard</span>
-          </a>
-          <a class="header-logo s-link" [routerLink]="['/terminal']" [queryParams]="{ tab: 'history' }"
-            [class.active]="terminalRoutingService.tab() === 'history'">
-            <mat-icon>history</mat-icon>
-            <span class="website-title">History</span>
-          </a>
-          <a class="header-logo s-link" [routerLink]="['/terminal']" [queryParams]="{ tab: 'help' }"
-            [class.active]="terminalRoutingService.tab() === 'help'">
-            <mat-icon>help</mat-icon>
-            <span class="website-title">Help</span>
-          </a>
-
-          } @else if (router.url.startsWith('/jobs')) {
-          <!-- Jobs section links -->
-          <a [routerLink]="['/jobs/list']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon>work</mat-icon>
-            <span class="website-title">Jobs</span>
-          </a>
-          <a [routerLink]="['/jobs/scheduling']" class="header-logo s-link" routerLinkActive="active">
-            <mat-icon>schedule</mat-icon>
-            <span class="website-title">Scheduling</span>
-          </a>
-          }
+          </div>
+          <div class="links">
+            @if (router.url.startsWith('/media/')) {
+              <!-- Media section links -->
+              <a
+                [routerLink]="['/media/pulses']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>vital_signs</mat-icon>
+                <span class="website-title">Pulses</span>
+              </a>
+              <a
+                [routerLink]="['/media/recordings']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>mic</mat-icon>
+                <span class="website-title">Recordings</span>
+              </a>
+              <a
+                [routerLink]="['/media/podcasts']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M10.5 2.25H7.5C4.67175 2.25 3.25725 2.25 2.379 3.129C1.50075 4.008 1.5 5.42175 1.5 8.25C1.5 11.0782 1.5 12.4927 2.379 13.371C3.258 14.2492 4.67175 14.25 7.5 14.25H10.5C13.3282 14.25 14.7427 14.25 15.621 13.371C16.4992 12.492 16.5 11.0782 16.5 8.25C16.5 5.42175 16.5 4.00725 15.621 3.129C14.742 2.25075 13.3282 2.25 10.5 2.25Z"
+                    stroke="white"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M12.675 11.625C12.675 11.3067 12.8014 11.0015 13.0265 10.7765C13.2515 10.5514 13.5567 10.425 13.875 10.425M10.275 11.625C10.275 10.6702 10.6543 9.75455 11.3294 9.07942C12.0045 8.40428 12.9202 8.025 13.875 8.025M7.875 11.625C7.875 10.0337 8.50714 8.50758 9.63236 7.38236C10.7576 6.25714 12.2837 5.625 13.875 5.625M13.5 14.25L14.25 15.75M4.5 14.25L3.75 15.75"
+                    stroke="white"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <span class="website-title">Podcasts</span>
+              </a>
+              <a [routerLink]="['/media/episodes']" class="header-logo s-link" routerLinkActive="active">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clip-path="url(#clip0_210_4590)">
+                    <path
+                      d="M10.416 7.45096C11.2222 8.10871 11.625 8.43721 11.625 8.99971C11.625 9.56221 11.2222 9.89071 10.416 10.5485C10.1932 10.73 9.97275 10.901 9.7695 11.0435C9.59175 11.1687 9.39 11.2977 9.1815 11.4245C8.37675 11.9135 7.97475 12.158 7.614 11.8872C7.254 11.6172 7.221 11.0502 7.155 9.91621C7.137 9.59596 7.125 9.28171 7.125 8.99971C7.125 8.71771 7.137 8.40346 7.155 8.08321C7.221 6.94921 7.254 6.38296 7.614 6.11221C7.97475 5.84146 8.3775 6.08596 9.1815 6.57496C9.39 6.70171 9.59175 6.83071 9.7695 6.95596C9.972 7.09846 10.1932 7.26946 10.416 7.45096Z"
+                      stroke="white"
+                      stroke-width="1.5"
+                    />
+                    <path
+                      d="M5.25 2.50351C6.38959 1.84405 7.68336 1.49784 9 1.50001C13.1422 1.50001 16.5 4.85776 16.5 9.00001C16.5 13.1423 13.1422 16.5 9 16.5C4.85775 16.5 1.5 13.1423 1.5 9.00001C1.5 7.63426 1.86525 6.35251 2.5035 5.25001"
+                      stroke="white"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_210_4590">
+                      <rect width="18" height="18" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span class="website-title">Episodes</span>
+              </a>
+              <a [routerLink]="['/media/news']" class="header-logo s-link" routerLinkActive="active">
+                <mat-icon> rss_feed</mat-icon>
+                <span class="website-title">News</span>
+              </a>
+              <a [routerLink]="['/media/topics']" class="header-logo s-link" routerLinkActive="active">
+                <mat-icon>science</mat-icon>
+                <span class="website-title">Topics</span>
+              </a>
+              <a
+                [routerLink]="['/media/blogs']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>menu_book</mat-icon>
+                <span class="website-title">Blogs</span>
+              </a>
+              <a
+                [routerLink]="['/media/articles']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>article</mat-icon>
+                <span class="website-title">Articles</span>
+              </a>
+              <a
+                [routerLink]="['/media/socials']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>link</mat-icon>
+                <span class="website-title">Socials</span>
+              </a>
+              <a
+                [routerLink]="['/media/posts']"
+                class="header-logo s-link"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <mat-icon>campaign</mat-icon>
+                <span class="website-title">Posts</span>
+              </a>
+            }
+            @if (router.url.startsWith('/terminal')) {
+              <a
+                class="header-logo s-link"
+                [routerLink]="['/terminal']"
+                [queryParams]="{ tab: 'watchlists' }"
+                [class.active]="terminalRoutingService.tab() === 'watchlists'"
+              >
+                <mat-icon>visibility</mat-icon>
+                <span class="website-title">Watchlists</span>
+              </a>
+              <a
+                class="header-logo s-link"
+                style="opacity: 0.5; color: gray; cursor: not-allowed"
+                matTooltip="Coming Soon"
+              >
+                <mat-icon>dashboard</mat-icon>
+                <span class="website-title">Dashboard</span>
+              </a>
+              <a
+                class="header-logo s-link"
+                [routerLink]="['/terminal']"
+                [queryParams]="{ tab: 'history' }"
+                [class.active]="terminalRoutingService.tab() === 'history'"
+              >
+                <mat-icon>history</mat-icon>
+                <span class="website-title">History</span>
+              </a>
+              <a
+                class="header-logo s-link"
+                [routerLink]="['/terminal']"
+                [queryParams]="{ tab: 'help' }"
+                [class.active]="terminalRoutingService.tab() === 'help'"
+              >
+                <mat-icon>help</mat-icon>
+                <span class="website-title">Help</span>
+              </a>
+            } @else if (router.url.startsWith('/jobs')) {
+              <!-- Jobs section links -->
+              <a [routerLink]="['/jobs/list']" class="header-logo s-link" routerLinkActive="active">
+                <mat-icon>work</mat-icon>
+                <span class="website-title">Jobs</span>
+              </a>
+              <a [routerLink]="['/jobs/scheduling']" class="header-logo s-link" routerLinkActive="active">
+                <mat-icon>schedule</mat-icon>
+                <span class="website-title">Scheduling</span>
+              </a>
+            }
+          </div>
         </div>
       </div>
-    </div>
     }
   </header>
   <!--  } @else {-->
@@ -263,77 +386,81 @@
         </div>
         <div class="page-title-container">
           @if (pageBreadcrumb()) {
-          <span class="breadcrumb-text">{{ pageBreadcrumb() }}</span>
-          <span class="separator">&gt;</span>
+            <span class="breadcrumb-text">{{ pageBreadcrumb() }}</span>
+            <span class="separator">&gt;</span>
           }
           @if (pageIcon()) {
-          <mat-icon>{{ pageIcon() }}</mat-icon>
+            <mat-icon>{{ pageIcon() }}</mat-icon>
           }
           <span class="page-title-text">{{ pageTitle() }}</span>
         </div>
         @if (this.authService.isLoggedIn()) {
-        <span class="push-right">
-          <!-- Job Status Indicator -->
-          <app-job-status-indicator />
+          <span class="push-right">
+            <!-- Job Status Indicator -->
+            <app-job-status-indicator />
 
-          <a class="credit-btn" mat-button matTooltip="{{ this.userCredits | number: '1.0-0' }}"
-            [routerLink]="['/transactions']">
-            <mat-icon>account_balance_wallet</mat-icon>
-            <span>{{ shortCredits(this.userCredits) }} Credits</span>
-          </a>
-
-          <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
-            <mat-icon class="profile-icon">account_circle</mat-icon>
-            {{ this.userService.userDetails()?.username }}
-          </button>
-          <mat-menu #profileMenu="matMenu" class="profile-menu">
-            <div class="profile-header" mat-menu-item disabled>
-              <mat-icon class="profile-avatar-icon">account_circle</mat-icon>
-              <div class="profile-info">
-                <span class="profile-username">{{ this.userService.userDetails()?.username }}</span>
-                <span class="profile-email">{{ this.userService.userDetails()?.email }}</span>
-              </div>
-            </div>
-            <mat-divider />
-            <button mat-menu-item [routerLink]="['/profile']">
-              <mat-icon>settings</mat-icon>
-              <span>Account Settings</span>
-            </button>
-            <button mat-menu-item [routerLink]="['/orders']">
-              <mat-icon>paid</mat-icon>
-              <span>Orders</span>
-            </button>
-            <button class="transactions-btn" mat-menu-item [routerLink]="['/transactions']">
+            <a
+              class="credit-btn"
+              mat-button
+              matTooltip="{{ this.userCredits | number: '1.0-0' }}"
+              [routerLink]="['/transactions']"
+            >
               <mat-icon>account_balance_wallet</mat-icon>
-              <span>Transactions</span>
+              <span>{{ shortCredits(this.userCredits) }} Credits</span>
+            </a>
+
+            <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
+              <mat-icon class="profile-icon">account_circle</mat-icon>
+              {{ this.userService.userDetails()?.username }}
             </button>
-            <button mat-menu-item [routerLink]="['/affiliate']">
-              <mat-icon>share</mat-icon>
-              <span>Affiliate Dashboard</span>
-            </button>
-            <button mat-menu-item (click)="openRedeemGiftCodeDialog()">
-              <mat-icon>redeem</mat-icon>
-              <span>Redeem Gift Code</span>
-            </button>
-            <mat-divider />
-            <button mat-menu-item (click)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')">
-              <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-              <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
-            </button>
-            <mat-divider />
-            <button mat-menu-item (click)="logout()">
-              <mat-icon>logout</mat-icon>
-              <span>Logout</span>
-            </button>
-          </mat-menu>
-        </span>
+            <mat-menu #profileMenu="matMenu" class="profile-menu">
+              <div class="profile-header" mat-menu-item disabled>
+                <mat-icon class="profile-avatar-icon">account_circle</mat-icon>
+                <div class="profile-info">
+                  <span class="profile-username">{{ this.userService.userDetails()?.username }}</span>
+                  <span class="profile-email">{{ this.userService.userDetails()?.email }}</span>
+                </div>
+              </div>
+              <mat-divider />
+              <button mat-menu-item [routerLink]="['/profile']">
+                <mat-icon>settings</mat-icon>
+                <span>Account Settings</span>
+              </button>
+              <button mat-menu-item [routerLink]="['/orders']">
+                <mat-icon>paid</mat-icon>
+                <span>Orders</span>
+              </button>
+              <button class="transactions-btn" mat-menu-item [routerLink]="['/transactions']">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <span>Transactions</span>
+              </button>
+              <button mat-menu-item [routerLink]="['/affiliate']">
+                <mat-icon>share</mat-icon>
+                <span>Affiliate Dashboard</span>
+              </button>
+              <button mat-menu-item (click)="openRedeemGiftCodeDialog()">
+                <mat-icon>redeem</mat-icon>
+                <span>Redeem Gift Code</span>
+              </button>
+              <mat-divider />
+              <button mat-menu-item (click)="switchTheme(currentTheme() === 'dark' ? 'light' : 'dark')">
+                <mat-icon>{{ currentTheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+                <span>{{ currentTheme() === 'dark' ? 'Dark Mode' : 'Light Mode' }}</span>
+              </button>
+              <mat-divider />
+              <button mat-menu-item (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+              </button>
+            </mat-menu>
+          </span>
         }
       </div>
     </mat-toolbar>
     @if (loading()) {
-    <div class="layout-loading-spinner">
-      <mat-progress-bar mode="indeterminate" value="20" class="loading-indicator" />
-    </div>
+      <div class="layout-loading-spinner">
+        <mat-progress-bar mode="indeterminate" value="20" class="loading-indicator" />
+      </div>
     }
     <!-- Job status bar now moved to toolbar indicator - see app-job-status-indicator -->
     <!-- <app-job-status-bar /> -->

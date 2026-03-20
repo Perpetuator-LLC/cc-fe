@@ -3,17 +3,14 @@
   <mat-progress-bar mode="indeterminate" />
 }
 
-@if (!loading && broadcasts.length === 0) {
+@if (!loading && accounts.length === 0) {
   <div class="socials-container">
     <mat-card class="empty-state-card">
       <mat-card-content>
         <div class="empty-state-content">
-          <mat-icon class="feature-icon">share</mat-icon>
-          <h2>No Social Posts Yet</h2>
-          <p class="description">
-            Generate and manage social media posts from your podcast episodes.
-            Connect your social accounts to get started.
-          </p>
+          <mat-icon class="feature-icon">link</mat-icon>
+          <h2>No Social Accounts Connected</h2>
+          <p class="description">Connect your social media accounts to publish posts directly from your episodes.</p>
           <div class="features-list">
             <div class="feature-item">
               <mat-icon>auto_awesome</mat-icon>
@@ -21,7 +18,7 @@
             </div>
             <div class="feature-item">
               <mat-icon>schedule</mat-icon>
-              <span>Schedule posts for optimal engagement times</span>
+              <span>Schedule posts for optimal engagement</span>
             </div>
             <div class="feature-item">
               <mat-icon>analytics</mat-icon>
@@ -31,71 +28,56 @@
           <div class="platforms">
             <span class="platform-badge">Twitter/X</span>
             <span class="platform-badge">LinkedIn</span>
-            <span class="platform-badge">Facebook</span>
-            <span class="platform-badge">Instagram</span>
+            <span class="platform-badge">Mastodon</span>
+            <span class="platform-badge">Bluesky</span>
           </div>
           <div class="action-buttons">
-            <button mat-flat-button color="primary" (click)="createBroadcast()">
-              <mat-icon>add</mat-icon>
-              <span>Create Post</span>
-            </button>
-            <button mat-stroked-button [routerLink]="['/media/episodes']">
-              <mat-icon>auto_awesome</mat-icon>
-              <span>Generate from Episode</span>
+            <button mat-flat-button color="primary" (click)="connectAccount()">
+              <mat-icon>add_link</mat-icon>
+              <span>Connect Account</span>
             </button>
           </div>
-          <p class="hint-text">
-            Tip: Go to any episode and click "Generate Social Posts" to create content for multiple platforms.
-          </p>
         </div>
       </mat-card-content>
     </mat-card>
   </div>
 } @else if (!loading) {
-  <mat-card class="broadcasts-card">
+  <mat-card class="accounts-card">
     <mat-card-content class="content-header">
       <div class="title">
-        <h3>Social Posts</h3>
-        <span>{{ broadcasts.length }} posts</span>
+        <h3>Social Accounts</h3>
+        <span>{{ accounts.length }} connected</span>
       </div>
       <div class="actions">
-        <button mat-stroked-button [routerLink]="['/media/episodes']">
-          <mat-icon>auto_awesome</mat-icon>
-          <span>Generate from Episode</span>
-        </button>
-        <button mat-flat-button color="primary" (click)="createBroadcast()">
-          <mat-icon>add</mat-icon>
-          <span>New Post</span>
+        <button mat-flat-button color="primary" (click)="connectAccount()">
+          <mat-icon>add_link</mat-icon>
+          <span>Connect Account</span>
         </button>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <div class="broadcasts-table-container">
+  <div class="accounts-table-container">
     <table mat-table [dataSource]="dataSource">
       <!-- Platform Column -->
       <ng-container matColumnDef="platform">
         <th mat-header-cell *matHeaderCellDef>Platform</th>
-        <td mat-cell *matCellDef="let broadcast">
+        <td mat-cell *matCellDef="let account">
           <div class="platform-cell">
-            <mat-icon>{{ getPlatformIcon(broadcast.platform) }}</mat-icon>
-            <span>{{ broadcast.socialAccount?.accountName || broadcast.platform }}</span>
+            <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+            <span>{{ account.platform }}</span>
           </div>
         </td>
       </ng-container>
 
-      <!-- Text Column -->
-      <ng-container matColumnDef="text">
-        <th mat-header-cell *matHeaderCellDef>Content</th>
-        <td mat-cell *matCellDef="let broadcast">
-          <div class="broadcast-text">
-            {{ truncateText(broadcast.text) }}
-            @if (broadcast.hashtags?.length) {
-              <div class="hashtags">
-                @for (tag of broadcast.hashtags.slice(0, 3); track tag) {
-                  <span class="hashtag">#{{ tag }}</span>
-                }
-              </div>
+      <!-- Account Column -->
+      <ng-container matColumnDef="account">
+        <th mat-header-cell *matHeaderCellDef>Account</th>
+        <td mat-cell *matCellDef="let account">
+          <div class="account-info">
+            <span class="account-name">{{ account.accountName }}</span>
+            @if (account.platformUsername) {
+              <span class="account-username">&#64;{{ account.platformUsername }}</span>
             }
           </div>
         </td>
@@ -104,53 +86,35 @@
       <!-- Status Column -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let broadcast">
-          <span class="status-badge" [ngClass]="getStatusClass(broadcast.status)">
-            {{ broadcast.status }}
+        <td mat-cell *matCellDef="let account">
+          <span class="status-badge" [ngClass]="getStatusClass(account.status, account.isTokenExpired)">
+            @if (account.isTokenExpired) {
+              Token Expired
+            } @else {
+              {{ account.status }}
+            }
           </span>
         </td>
       </ng-container>
 
-      <!-- Date Column -->
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let broadcast">
-          @if (broadcast.publishedAt) {
-            {{ formatDate(broadcast.publishedAt) }}
-          } @else if (broadcast.scheduledAt) {
-            <span class="scheduled-date">
-              <mat-icon>schedule</mat-icon>
-              {{ formatDate(broadcast.scheduledAt) }}
-            </span>
-          } @else {
-            {{ formatDate(broadcast.createdAt) }}
-          }
+      <!-- Posts Column -->
+      <ng-container matColumnDef="posts">
+        <th mat-header-cell *matHeaderCellDef>Posts</th>
+        <td mat-cell *matCellDef="let account">
+          {{ account.broadcastCount || 0 }}
         </td>
       </ng-container>
 
-      <!-- Engagement Column -->
-      <ng-container matColumnDef="engagement">
-        <th mat-header-cell *matHeaderCellDef>Engagement</th>
-        <td mat-cell *matCellDef="let broadcast">
-          @if (broadcast.impressions || broadcast.engagements || broadcast.clicks) {
-            <div class="engagement-stats">
-              @if (broadcast.impressions) {
-                <span>{{ broadcast.impressions }} views</span>
-              }
-              @if (broadcast.engagements) {
-                <span>{{ broadcast.engagements }} engagements</span>
-              }
-            </div>
-          } @else {
-            <span class="no-data">-</span>
-          }
+      <!-- Last Used Column -->
+      <ng-container matColumnDef="lastUsed">
+        <th mat-header-cell *matHeaderCellDef>Last Used</th>
+        <td mat-cell *matCellDef="let account">
+          {{ formatDate(account.lastUsedAt) }}
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns" class="broadcast-row"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
 }
-
-

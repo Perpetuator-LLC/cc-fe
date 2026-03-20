@@ -9,11 +9,12 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { BlogsService, Blog } from '../blogs.service';
+import { BlogsService, Article } from '../blogs.service';
 import { MessageService } from '../../message.service';
+import { ArticleDialogComponent } from '../article-dialog/article-dialog.component';
 
 @Component({
-  selector: 'app-blogs-list',
+  selector: 'app-articles-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -24,39 +25,39 @@ import { MessageService } from '../../message.service';
     MatTableModule,
     RouterLink,
   ],
-  templateUrl: './blogs-list.component.html',
-  styleUrl: './blogs-list.component.scss',
+  templateUrl: './articles-list.component.html',
+  styleUrl: './articles-list.component.scss',
 })
-export class BlogsListComponent implements OnInit, OnDestroy {
+export class ArticlesListComponent implements OnInit, OnDestroy {
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
   private readonly dialog = inject(MatDialog);
   private subscriptions = new Subscription();
 
   loading = true;
-  blogs: Blog[] = [];
-  dataSource = new MatTableDataSource<Blog>([]);
-  displayedColumns = ['name', 'status', 'articles', 'views', 'updated'];
+  articles: Article[] = [];
+  dataSource = new MatTableDataSource<Article>([]);
+  displayedColumns = ['title', 'blog', 'status', 'date', 'views'];
 
   ngOnInit(): void {
-    this.loadBlogs();
+    this.loadArticles();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  loadBlogs(): void {
+  loadArticles(): void {
     this.loading = true;
     this.subscriptions.add(
-      this.blogsService.getBlogs().subscribe({
-        next: (blogs) => {
-          this.blogs = blogs;
-          this.dataSource.data = blogs;
+      this.blogsService.getArticles().subscribe({
+        next: (articles) => {
+          this.articles = articles;
+          this.dataSource.data = articles;
           this.loading = false;
         },
         error: (err) => {
-          this.messageService.error('Failed to load blogs: ' + err.message);
+          this.messageService.error('Failed to load articles: ' + err.message);
           this.loading = false;
         },
       }),
@@ -65,10 +66,12 @@ export class BlogsListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'ACTIVE':
+      case 'PUBLISHED':
         return 'status-success';
       case 'DRAFT':
         return 'status-draft';
+      case 'REVIEW':
+        return 'status-warning';
       case 'ARCHIVED':
         return 'status-archived';
       default:
@@ -76,9 +79,18 @@ export class BlogsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  createBlog(): void {
-    // TODO: Open create blog dialog
-    this.messageService.info('Create blog dialog coming soon');
+  createArticle(): void {
+    const dialogRef = this.dialog.open(ArticleDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {},
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadArticles();
+      }
+    });
   }
 
   formatDate(dateStr: string | null): string {

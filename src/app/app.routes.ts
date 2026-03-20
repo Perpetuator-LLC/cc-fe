@@ -179,8 +179,28 @@ export const routes: Routes = [
         loadComponent: () => import('./blogs/blogs-list/blogs-list.component').then((c) => c.BlogsListComponent),
         title: 'Blogs',
         data: {
+          icon: 'menu_book',
+        },
+      },
+      {
+        path: 'blogs/:uuid',
+        loadComponent: () => import('./blogs/blogs-list/blogs-list.component').then((c) => c.BlogsListComponent),
+        title: 'Blog Detail',
+      },
+      {
+        path: 'articles',
+        loadComponent: () =>
+          import('./blogs/articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
+        title: 'Articles',
+        data: {
           icon: 'article',
         },
+      },
+      {
+        path: 'articles/:uuid',
+        loadComponent: () =>
+          import('./blogs/articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
+        title: 'Article Detail',
       },
       {
         path: 'socials',
@@ -188,7 +208,15 @@ export const routes: Routes = [
           import('./socials/socials-list/socials-list.component').then((c) => c.SocialsListComponent),
         title: 'Socials',
         data: {
-          icon: 'share',
+          icon: 'link',
+        },
+      },
+      {
+        path: 'posts',
+        loadComponent: () => import('./socials/posts-list/posts-list.component').then((c) => c.PostsListComponent),
+        title: 'Posts',
+        data: {
+          icon: 'campaign',
         },
       },
     ],

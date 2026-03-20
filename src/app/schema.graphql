@@ -4480,6 +4480,7 @@ enum JobKind {
   VALIDATE_ARTICLE
   PUBLISH_ARTICLE
   GENERATE_ARTICLE_FROM_EPISODE
+  GENERATE_ARTICLE_FROM_SOURCE
   PUBLISH_ARTICLE_CHAIN
   GENERATE_BROADCAST
   PUBLISH_BROADCAST
@@ -5318,6 +5319,26 @@ type Mutation {
 
   """Mutation to delete an article."""
   deleteArticle(articleUuid: UUID!): DeleteArticle
+
+  """
+  Mutation to generate a blog article from source content (episode, pulse, news).
+  
+  Creates a background job to generate the article asynchronously.
+  The article is created in DRAFT status for user review before publishing.
+  """
+  generateArticleFromSource(
+    """Optional blog to associate the article with"""
+    blogUuid: UUID
+
+    """Source type: 'episode', 'pulse', or 'news'"""
+    sourceType: String!
+
+    """UUID of the source content"""
+    sourceUuid: UUID!
+
+    """Optional title override for the article"""
+    title: String
+  ): GenerateArticleFromSource
 
   """
   Non-authenticated mutation for recording traces from frontend or backend.
@@ -6530,6 +6551,19 @@ type UnpublishArticle {
 type DeleteArticle {
   success: Boolean
   message: String
+}
+
+"""
+Mutation to generate a blog article from source content (episode, pulse, news).
+
+Creates a background job to generate the article asynchronously.
+The article is created in DRAFT status for user review before publishing.
+"""
+type GenerateArticleFromSource {
+  success: Boolean
+  message: String
+  article: ArticleType
+  job: JobType
 }
 
 """

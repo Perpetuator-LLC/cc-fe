@@ -7,7 +7,7 @@
   padding: 24px;
 }
 
-.broadcasts-card {
+.accounts-card {
   margin: 16px;
   background: var(--md-sys-color-surface-container);
 
@@ -39,7 +39,7 @@
   }
 }
 
-.broadcasts-table-container {
+.accounts-table-container {
   margin: 0 16px 16px;
   border-radius: 8px;
   background: var(--md-sys-color-surface);
@@ -61,55 +61,18 @@
     }
   }
 
-  .broadcast-text {
-    max-width: 400px;
-
-    .hashtags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 4px;
-
-      .hashtag {
-        font-size: 12px;
-        color: var(--md-sys-color-primary);
-      }
-    }
-  }
-
-  .scheduled-date {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    color: var(--md-sys-color-on-surface-variant);
-
-    mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-    }
-  }
-
-  .engagement-stats {
+  .account-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
 
-    span {
+    .account-name {
+      font-weight: 500;
+    }
+
+    .account-username {
       font-size: 12px;
       color: var(--md-sys-color-on-surface-variant);
-    }
-  }
-
-  .no-data {
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  .broadcast-row {
-    cursor: pointer;
-
-    &:hover {
-      background: var(--md-sys-color-surface-container-low);
     }
   }
 }
@@ -128,24 +91,14 @@
     background: var(--md-extended-color-success-color-container);
   }
 
-  &.status-draft {
-    color: var(--md-sys-color-on-surface-variant);
-    background: var(--md-sys-color-surface-container-high);
-  }
-
-  &.status-scheduled {
-    color: var(--md-sys-color-on-tertiary-container);
-    background: var(--md-sys-color-tertiary-container);
+  &.status-error {
+    color: var(--md-sys-color-on-error-container);
+    background: var(--md-sys-color-error-container);
   }
 
   &.status-warning {
     color: var(--md-extended-color-warning-on-color-container);
     background: var(--md-extended-color-warning-color-container);
-  }
-
-  &.status-error {
-    color: var(--md-sys-color-on-error-container);
-    background: var(--md-sys-color-error-container);
   }
 }
 
@@ -216,7 +169,7 @@
 
   .platform-badge {
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: 16px;
 
     font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
@@ -228,12 +181,5 @@
 .action-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-}
-
-.hint-text {
   margin-top: 16px;
-  font-size: 12px;
-  color: var(--md-sys-color-on-surface-variant);
 }
-

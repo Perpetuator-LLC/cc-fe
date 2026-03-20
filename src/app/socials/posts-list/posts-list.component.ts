@@ -8,12 +8,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { SocialsService, SocialAccount } from '../socials.service';
+import { SocialsService, Broadcast } from '../socials.service';
 import { MessageService } from '../../message.service';
+import { BroadcastDialogComponent } from '../broadcast-dialog/broadcast-dialog.component';
 
 @Component({
-  selector: 'app-socials-list',
+  selector: 'app-posts-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,62 +25,66 @@ import { MessageService } from '../../message.service';
     MatProgressBarModule,
     MatTableModule,
     MatChipsModule,
+    RouterLink,
   ],
-  templateUrl: './socials-list.component.html',
-  styleUrl: './socials-list.component.scss',
+  templateUrl: './posts-list.component.html',
+  styleUrl: './posts-list.component.scss',
 })
-export class SocialsListComponent implements OnInit, OnDestroy {
+export class PostsListComponent implements OnInit, OnDestroy {
   private readonly socialsService = inject(SocialsService);
   private readonly messageService = inject(MessageService);
   private readonly dialog = inject(MatDialog);
   private subscriptions = new Subscription();
 
   loading = true;
-  accounts: SocialAccount[] = [];
-  dataSource = new MatTableDataSource<SocialAccount>([]);
-  displayedColumns = ['platform', 'account', 'status', 'posts', 'lastUsed'];
+  broadcasts: Broadcast[] = [];
+  dataSource = new MatTableDataSource<Broadcast>([]);
+  displayedColumns = ['platform', 'text', 'status', 'date', 'engagement'];
 
   ngOnInit(): void {
-    this.loadAccounts();
+    this.loadBroadcasts();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  loadAccounts(): void {
+  loadBroadcasts(): void {
     this.loading = true;
     this.subscriptions.add(
-      this.socialsService.getSocialAccounts().subscribe({
-        next: (accounts) => {
-          this.accounts = accounts;
-          this.dataSource.data = accounts;
+      this.socialsService.getBroadcasts().subscribe({
+        next: (broadcasts) => {
+          this.broadcasts = broadcasts;
+          this.dataSource.data = broadcasts;
           this.loading = false;
         },
         error: (err) => {
-          this.messageService.error('Failed to load social accounts: ' + err.message);
+          this.messageService.error('Failed to load posts: ' + err.message);
           this.loading = false;
         },
       }),
     );
   }
 
-  getStatusClass(status: string, isTokenExpired: boolean | null): string {
-    if (isTokenExpired) return 'status-error';
+  getStatusClass(status: string): string {
     switch (status) {
-      case 'ACTIVE':
+      case 'PUBLISHED':
         return 'status-success';
-      case 'EXPIRED':
-      case 'REVOKED':
-        return 'status-error';
-      case 'ERROR':
+      case 'DRAFT':
+        return 'status-draft';
+      case 'SCHEDULED':
+        return 'status-scheduled';
+      case 'QUEUED':
+      case 'PUBLISHING':
         return 'status-warning';
+      case 'FAILED':
+        return 'status-error';
       default:
         return '';
     }
   }
 
-  getPlatformIcon(platform: string): string {
+  getPlatformIcon(platform: string | null): string {
     switch (platform?.toUpperCase()) {
       case 'TWITTER':
         return 'share';
@@ -100,12 +106,26 @@ export class SocialsListComponent implements OnInit, OnDestroy {
   }
 
   formatDate(dateStr: string | null): string {
-    if (!dateStr) return 'Never';
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString();
   }
 
-  connectAccount(): void {
-    // TODO: Open connect social account dialog
-    this.messageService.info('Connect social account dialog coming soon');
+  truncateText(text: string, maxLength = 100): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  createBroadcast(): void {
+    const dialogRef = this.dialog.open(BroadcastDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {},
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadBroadcasts();
+      }
+    });
   }
 }
