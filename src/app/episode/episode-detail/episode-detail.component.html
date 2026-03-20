@@ -44,6 +44,15 @@ r
         <mat-divider vertical />
         <div class="action-buttons">
           <button
+            mat-stroked-button
+            (click)="openGenerateContentDialog()"
+            type="button"
+            matTooltip="Create a blog article or social post from this episode"
+          >
+            <mat-icon>auto_awesome</mat-icon>
+            Create Content
+          </button>
+          <button
             mat-flat-button
             color="primary"
             (click)="updateEpisode()"

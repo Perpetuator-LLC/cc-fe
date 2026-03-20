@@ -1,0 +1,158 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Create Content from Episode</h2>
+<mat-dialog-content>
+  <p class="dialog-description">Generate derivative content from "{{ data.episodeTitle }}"</p>
+
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex">
+    <!-- Social Post Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>share</mat-icon>
+        <span>Social Post</span>
+      </ng-template>
+
+      <div class="tab-content">
+        <p class="tab-description">Generate a social media post using AI based on your episode content.</p>
+
+        @if (loadingAccounts) {
+          <div class="loading-state">
+            <mat-spinner diameter="24" />
+            <span>Loading social accounts...</span>
+          </div>
+        } @else if (socialAccounts.length === 0) {
+          <div class="empty-state">
+            <mat-icon>link_off</mat-icon>
+            <p>No active social accounts found.</p>
+            <p class="hint">Connect a social account in Media → Social to get started.</p>
+          </div>
+        } @else {
+          <form [formGroup]="socialForm" class="content-form">
+            <mat-form-field>
+              <mat-label>Social Account</mat-label>
+              <mat-select formControlName="socialAccountUuid">
+                @for (account of socialAccounts; track account.id) {
+                  <mat-option [value]="account.id">
+                    <div class="account-option">
+                      <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+                      <span>{{ account.accountName }}</span>
+                      <span class="platform-badge">{{ account.platform }}</span>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            @if (getSelectedAccountTemplates().length > 0) {
+              <mat-form-field>
+                <mat-label>Template (Optional)</mat-label>
+                <mat-select formControlName="templateUuid">
+                  <mat-option value="">No template - AI generates freely</mat-option>
+                  @for (template of getSelectedAccountTemplates(); track template.id) {
+                    <mat-option [value]="template.id">{{ template.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+
+            <div class="info-note">
+              <mat-icon>info</mat-icon>
+              <span>AI will analyze your episode and generate an engaging social post for the selected platform.</span>
+            </div>
+          </form>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Blog Article Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>article</mat-icon>
+        <span>Blog Article</span>
+      </ng-template>
+
+      <div class="tab-content">
+        <p class="tab-description">Create a blog article using your episode content as a starting point.</p>
+
+        @if (loadingBlogs) {
+          <div class="loading-state">
+            <mat-spinner diameter="24" />
+            <span>Loading blogs...</span>
+          </div>
+        } @else if (blogs.length === 0) {
+          <div class="empty-state">
+            <mat-icon>edit_off</mat-icon>
+            <p>No blogs found.</p>
+            <p class="hint">Create a blog in Media → Blogs to get started.</p>
+          </div>
+        } @else {
+          <form [formGroup]="articleForm" class="content-form">
+            <mat-form-field>
+              <mat-label>Blog</mat-label>
+              <mat-select formControlName="blogUuid">
+                @for (blog of blogs; track blog.id) {
+                  <mat-option [value]="blog.id">{{ blog.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Article Title</mat-label>
+              <input matInput formControlName="title" placeholder="Enter article title" />
+            </mat-form-field>
+
+            <mat-form-field class="content-field">
+              <mat-label>Article Content</mat-label>
+              <textarea
+                matInput
+                formControlName="content"
+                rows="8"
+                placeholder="Enter or edit article content"
+              ></textarea>
+              <mat-hint>You can edit the content before creating the article</mat-hint>
+            </mat-form-field>
+          </form>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()">Cancel</button>
+
+  @if (selectedTabIndex === 0) {
+    @if (generatingSocial) {
+      <button mat-flat-button color="primary" disabled>
+        <mat-spinner diameter="18" />
+        <span>Generating...</span>
+      </button>
+    } @else {
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="generateSocialPost()"
+        [disabled]="socialForm.invalid || socialAccounts.length === 0"
+      >
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Generate Post</span>
+      </button>
+    }
+  } @else {
+    @if (creatingArticle) {
+      <button mat-flat-button color="primary" disabled>
+        <mat-spinner diameter="18" />
+        <span>Creating...</span>
+      </button>
+    } @else {
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="createArticle()"
+        [disabled]="articleForm.invalid || blogs.length === 0"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Create Article</span>
+      </button>
+    }
+  }
+</mat-dialog-actions>

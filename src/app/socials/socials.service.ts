@@ -15,23 +15,9 @@ export type SocialPlatform =
 
 export type SocialAccountStatus = 'ACTIVE' | 'EXPIRED' | 'REVOKED' | 'ERROR';
 
-export type BroadcastStatus =
-  | 'DRAFT'
-  | 'SCHEDULED'
-  | 'QUEUED'
-  | 'PUBLISHING'
-  | 'PUBLISHED'
-  | 'FAILED'
-  | 'DELETED';
+export type BroadcastStatus = 'DRAFT' | 'SCHEDULED' | 'QUEUED' | 'PUBLISHING' | 'PUBLISHED' | 'FAILED' | 'DELETED';
 
-export type BroadcastContentType =
-  | 'TEXT'
-  | 'IMAGE'
-  | 'VIDEO'
-  | 'CAROUSEL'
-  | 'STORY'
-  | 'REEL'
-  | 'LINK';
+export type BroadcastContentType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'CAROUSEL' | 'STORY' | 'REEL' | 'LINK';
 
 export interface SocialAccount {
   id: string;
@@ -79,6 +65,21 @@ export interface Broadcast {
   platform: string | null;
   sourceType: string | null;
   sourceUuid: string | null;
+}
+
+export interface BroadcastTemplate {
+  id: string;
+  name: string;
+  platform: SocialPlatform;
+  contentType: BroadcastContentType;
+  textTemplate: string;
+  defaultHashtags: string[];
+  useAiGeneration: boolean;
+  aiPrompt: string | null;
+  maxLength: number | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const SOCIAL_ACCOUNTS_QUERY = gql`
@@ -398,6 +399,25 @@ const DELETE_BROADCAST_MUTATION = gql`
   }
 `;
 
+const BROADCAST_TEMPLATES_QUERY = gql`
+  query BroadcastTemplates($teamUuid: UUID, $platform: String) {
+    broadcastTemplates(teamUuid: $teamUuid, platform: $platform) {
+      id
+      name
+      platform
+      contentType
+      textTemplate
+      defaultHashtags
+      useAiGeneration
+      aiPrompt
+      maxLength
+      isDefault
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 const GENERATE_BROADCAST_FROM_SOURCE_MUTATION = gql`
   mutation GenerateBroadcastFromSource(
     $socialAccountUuid: UUID!
@@ -442,11 +462,7 @@ export class SocialsService {
       .pipe(map((result) => result.data?.supportedPlatforms ?? []));
   }
 
-  getSocialAccounts(
-    teamUuid?: string,
-    platform?: string,
-    isActive?: boolean,
-  ): Observable<SocialAccount[]> {
+  getSocialAccounts(teamUuid?: string, platform?: string, isActive?: boolean): Observable<SocialAccount[]> {
     return this.apollo
       .query<{ socialAccounts: SocialAccount[] }>({
         query: SOCIAL_ACCOUNTS_QUERY,
@@ -473,11 +489,7 @@ export class SocialsService {
       );
   }
 
-  getBroadcasts(
-    socialAccountUuid?: string,
-    status?: string,
-    limit?: number,
-  ): Observable<Broadcast[]> {
+  getBroadcasts(socialAccountUuid?: string, status?: string, limit?: number): Observable<Broadcast[]> {
     return this.apollo
       .query<{ broadcasts: Broadcast[] }>({
         query: BROADCASTS_QUERY,
@@ -512,6 +524,16 @@ export class SocialsService {
         fetchPolicy: 'network-only',
       })
       .pipe(map((result) => result.data?.broadcastsForSource ?? []));
+  }
+
+  getBroadcastTemplates(teamUuid?: string, platform?: string): Observable<BroadcastTemplate[]> {
+    return this.apollo
+      .query<{ broadcastTemplates: BroadcastTemplate[] }>({
+        query: BROADCAST_TEMPLATES_QUERY,
+        variables: { teamUuid, platform },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(map((result) => result.data?.broadcastTemplates ?? []));
   }
 
   createSocialAccount(
@@ -586,9 +608,7 @@ export class SocialsService {
       );
   }
 
-  verifySocialAccount(
-    accountUuid: string,
-  ): Observable<{ success: boolean; job?: Job; message?: string }> {
+  verifySocialAccount(accountUuid: string): Observable<{ success: boolean; job?: Job; message?: string }> {
     return this.apollo
       .mutate<{
         verifySocialAccount: { success: boolean; job?: Job; message?: string };
@@ -662,9 +682,7 @@ export class SocialsService {
       );
   }
 
-  publishBroadcast(
-    broadcastUuid: string,
-  ): Observable<{ success: boolean; job?: Job; message?: string }> {
+  publishBroadcast(broadcastUuid: string): Observable<{ success: boolean; job?: Job; message?: string }> {
     return this.apollo
       .mutate<{ publishBroadcast: { success: boolean; job?: Job; message?: string } }>({
         mutation: PUBLISH_BROADCAST_MUTATION,
@@ -723,4 +741,3 @@ export class SocialsService {
       );
   }
 }
-

@@ -38,6 +38,10 @@ import {
   FriendlyScheduleDialogData,
 } from '../../shared/scheduling/friendly-schedule-dialog/friendly-schedule-dialog.component';
 import { formatScheduleDescription, getJobKindLabel } from '../../shared/scheduling/schedule.utils';
+import {
+  GenerateContentDialogComponent,
+  GenerateContentDialogData,
+} from '../generate-content-dialog/generate-content-dialog.component';
 
 interface EditableFormValues {
   title: string;
@@ -357,6 +361,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
 
     // Mark form as dirty to enable Update button, but don't auto-save
     this.episodeForm.markAsDirty();
+  }
+
+  openGenerateContentDialog(): void {
+    const dialogData: GenerateContentDialogData = {
+      episodeUuid: this.episodeUuid,
+      episodeTitle: this.episodeForm.get('title')?.value || '',
+      episodeContent: this.episodeForm.get('content')?.value || '',
+    };
+
+    this.dialog.open(GenerateContentDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
   }
 
   downloadAudio(): void {

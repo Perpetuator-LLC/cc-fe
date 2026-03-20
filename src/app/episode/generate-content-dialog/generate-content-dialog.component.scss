@@ -1,0 +1,125 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.dialog-description {
+  margin-bottom: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+mat-dialog-content {
+  min-width: 500px;
+  max-height: 70vh;
+}
+
+.tab-content {
+  padding: 16px 0;
+}
+
+.tab-description {
+  margin-bottom: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.loading-state {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  padding: 24px;
+
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+
+  padding: 24px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .hint {
+    font-size: 12px;
+  }
+}
+
+.content-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.account-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--md-sys-color-primary);
+  }
+
+  .platform-badge {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.info-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  padding: 12px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  mat-icon {
+    flex-shrink: 0;
+
+    width: 20px;
+    height: 20px;
+
+    font-size: 20px;
+    color: var(--md-sys-color-primary);
+  }
+}
+
+.content-field {
+  textarea {
+    min-height: 160px;
+  }
+}
+
+/* Tab styling handled via mat-tab-label template */
+
+mat-dialog-actions {
+  button {
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
+}
