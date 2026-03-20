@@ -164,20 +164,8 @@ const ARTICLE_QUERY = gql`
 `;
 
 const CREATE_BLOG_MUTATION = gql`
-  mutation CreateBlog(
-    $name: String!
-    $teamUuid: UUID!
-    $description: String
-    $slug: String
-    $tagline: String
-  ) {
-    createBlog(
-      name: $name
-      teamUuid: $teamUuid
-      description: $description
-      slug: $slug
-      tagline: $tagline
-    ) {
+  mutation CreateBlog($name: String!, $teamUuid: UUID!, $description: String, $slug: String, $tagline: String) {
+    createBlog(name: $name, teamUuid: $teamUuid, description: $description, slug: $slug, tagline: $tagline) {
       success
       message
       blog {
@@ -322,6 +310,35 @@ const DELETE_ARTICLE_MUTATION = gql`
     }
   }
 `;
+
+const GENERATE_ARTICLE_FROM_SOURCE_MUTATION = gql`
+  mutation GenerateArticleFromSource($sourceType: String!, $sourceUuid: UUID!, $title: String, $blogUuid: UUID) {
+    generateArticleFromSource(sourceType: $sourceType, sourceUuid: $sourceUuid, title: $title, blogUuid: $blogUuid) {
+      success
+      message
+      article {
+        id
+        title
+        slug
+        content
+        description
+        excerpt
+        status
+      }
+      job {
+        id
+        status
+      }
+    }
+  }
+`;
+
+export interface GenerateArticleFromSourceResponse {
+  success: boolean;
+  message?: string;
+  article?: Article;
+  job?: { id: string; status: string };
+}
 
 @Injectable({
   providedIn: 'root',
@@ -479,9 +496,7 @@ export class BlogsService {
       );
   }
 
-  publishArticle(
-    articleUuid: string,
-  ): Observable<{ success: boolean; article?: Article; errors?: string[] }> {
+  publishArticle(articleUuid: string): Observable<{ success: boolean; article?: Article; errors?: string[] }> {
     return this.apollo
       .mutate<{ publishArticle: { success: boolean; article?: Article; errors?: string[] } }>({
         mutation: PUBLISH_ARTICLE_MUTATION,
@@ -497,9 +512,7 @@ export class BlogsService {
       );
   }
 
-  unpublishArticle(
-    articleUuid: string,
-  ): Observable<{ success: boolean; article?: Article; errors?: string[] }> {
+  unpublishArticle(articleUuid: string): Observable<{ success: boolean; article?: Article; errors?: string[] }> {
     return this.apollo
       .mutate<{ unpublishArticle: { success: boolean; article?: Article; errors?: string[] } }>({
         mutation: UNPUBLISH_ARTICLE_MUTATION,
@@ -530,5 +543,24 @@ export class BlogsService {
         }),
       );
   }
-}
 
+  generateArticleFromSource(
+    sourceType: string,
+    sourceUuid: string,
+    options?: { title?: string; blogUuid?: string },
+  ): Observable<GenerateArticleFromSourceResponse> {
+    return this.apollo
+      .mutate<{ generateArticleFromSource: GenerateArticleFromSourceResponse }>({
+        mutation: GENERATE_ARTICLE_FROM_SOURCE_MUTATION,
+        variables: { sourceType, sourceUuid, ...options },
+      })
+      .pipe(
+        map((result) => {
+          if (!result.data?.generateArticleFromSource) {
+            throw new Error('Failed to generate article from source');
+          }
+          return result.data.generateArticleFromSource;
+        }),
+      );
+  }
+}

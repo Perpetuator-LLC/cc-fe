@@ -68,7 +68,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
   loadingAccounts = true;
   loadingBlogs = true;
   generatingSocial = false;
-  creatingArticle = false;
+  generatingArticle = false;
 
   selectedTabIndex = 0;
 
@@ -79,9 +79,8 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
     });
 
     this.articleForm = this.fb.group({
-      blogUuid: ['', Validators.required],
-      title: [this.data.episodeTitle, Validators.required],
-      content: [this.data.episodeContent, Validators.required],
+      blogUuid: [''],
+      title: [this.data.episodeTitle],
     });
   }
 
@@ -195,30 +194,47 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
     );
   }
 
-  createArticle(): void {
-    if (this.articleForm.invalid || this.creatingArticle) {
+  generateArticle(): void {
+    if (this.generatingArticle) {
       return;
     }
 
-    this.creatingArticle = true;
-    const { blogUuid, title, content } = this.articleForm.value;
+    this.generatingArticle = true;
+    const { blogUuid, title } = this.articleForm.value;
 
     this.subscriptions.add(
-      this.blogsService.createArticle(blogUuid, title, content).subscribe({
-        next: (result) => {
-          this.creatingArticle = false;
-          if (result.success) {
-            this.messageService.success('Article created successfully!');
-            this.dialogRef.close({ type: 'article', success: true } as GenerateContentDialogResult);
-          } else {
-            this.messageService.error('Failed to create article');
-          }
-        },
-        error: (err) => {
-          this.creatingArticle = false;
-          this.messageService.error(`Failed to create article: ${err.message}`);
-        },
-      }),
+      this.blogsService
+        .generateArticleFromSource('episode', this.data.episodeUuid, {
+          title: title || undefined,
+          blogUuid: blogUuid || undefined,
+        })
+        .subscribe({
+          next: (result) => {
+            this.generatingArticle = false;
+            if (result.success && result.job) {
+              // Track the job for async generation
+              this.jobService.addJob({
+                id: result.job.id,
+                uuid: result.job.id,
+                kind: 'GENERATE_ARTICLE_FROM_SOURCE',
+                status: result.job.status || 'RUNNING',
+                error: '',
+                result: null,
+                args: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              });
+              this.messageService.success('Article generation started!');
+              this.dialogRef.close({ type: 'article', success: true } as GenerateContentDialogResult);
+            } else {
+              this.messageService.error(result.message || 'Failed to generate article');
+            }
+          },
+          error: (err) => {
+            this.generatingArticle = false;
+            this.messageService.error(`Failed to generate article: ${err.message}`);
+          },
+        }),
     );
   }
 

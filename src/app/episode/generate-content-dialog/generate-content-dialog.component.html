@@ -71,45 +71,38 @@
       </ng-template>
 
       <div class="tab-content">
-        <p class="tab-description">Create a blog article using your episode content as a starting point.</p>
+        <p class="tab-description">Generate a blog article using AI based on your episode content.</p>
 
         @if (loadingBlogs) {
           <div class="loading-state">
             <mat-spinner diameter="24" />
             <span>Loading blogs...</span>
           </div>
-        } @else if (blogs.length === 0) {
-          <div class="empty-state">
-            <mat-icon>edit_off</mat-icon>
-            <p>No blogs found.</p>
-            <p class="hint">Create a blog in Media → Blogs to get started.</p>
-          </div>
         } @else {
           <form [formGroup]="articleForm" class="content-form">
-            <mat-form-field>
-              <mat-label>Blog</mat-label>
-              <mat-select formControlName="blogUuid">
-                @for (blog of blogs; track blog.id) {
-                  <mat-option [value]="blog.id">{{ blog.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+            @if (blogs.length > 0) {
+              <mat-form-field>
+                <mat-label>Blog (Optional)</mat-label>
+                <mat-select formControlName="blogUuid">
+                  <mat-option value="">No specific blog</mat-option>
+                  @for (blog of blogs; track blog.id) {
+                    <mat-option [value]="blog.id">{{ blog.name }}</mat-option>
+                  }
+                </mat-select>
+                <mat-hint>Optionally associate with an existing blog</mat-hint>
+              </mat-form-field>
+            }
 
             <mat-form-field>
-              <mat-label>Article Title</mat-label>
-              <input matInput formControlName="title" placeholder="Enter article title" />
+              <mat-label>Title Override (Optional)</mat-label>
+              <input matInput formControlName="title" placeholder="Leave blank to auto-generate" />
+              <mat-hint>AI will generate a title based on episode content if not provided</mat-hint>
             </mat-form-field>
 
-            <mat-form-field class="content-field">
-              <mat-label>Article Content</mat-label>
-              <textarea
-                matInput
-                formControlName="content"
-                rows="8"
-                placeholder="Enter or edit article content"
-              ></textarea>
-              <mat-hint>You can edit the content before creating the article</mat-hint>
-            </mat-form-field>
+            <div class="info-note">
+              <mat-icon>auto_awesome</mat-icon>
+              <span>AI will analyze your episode and generate a full blog article in DRAFT status for review.</span>
+            </div>
           </form>
         }
       </div>
@@ -138,20 +131,15 @@
       </button>
     }
   } @else {
-    @if (creatingArticle) {
+    @if (generatingArticle) {
       <button mat-flat-button color="primary" disabled>
         <mat-spinner diameter="18" />
-        <span>Creating...</span>
+        <span>Generating...</span>
       </button>
     } @else {
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="createArticle()"
-        [disabled]="articleForm.invalid || blogs.length === 0"
-      >
-        <mat-icon>add</mat-icon>
-        <span>Create Article</span>
+      <button mat-flat-button color="primary" (click)="generateArticle()">
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Generate Article</span>
       </button>
     }
   }
