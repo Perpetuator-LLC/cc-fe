@@ -45,6 +45,16 @@ export interface Article {
   readTimeMinutes: number | null;
   wordCount: number | null;
   isPublished: boolean | null;
+  // Source content tracking (BE103)
+  sourceContentType: 'episode' | 'pulse' | 'news' | null;
+  sourceContentUuid: string | null;
+  sourceEpisode: {
+    id: string;
+    title: string;
+    audioFile: string | null;
+    audioSeconds: number | null;
+    podcast: { id: string; name: string; slug: string | null };
+  } | null;
 }
 
 const BLOGS_QUERY = gql`
@@ -159,6 +169,19 @@ const ARTICLE_QUERY = gql`
       readTimeMinutes
       wordCount
       isPublished
+      sourceContentType
+      sourceContentUuid
+      sourceEpisode {
+        id
+        title
+        audioFile
+        audioSeconds
+        podcast {
+          id
+          name
+          slug
+        }
+      }
     }
   }
 `;
@@ -305,6 +328,15 @@ const UNPUBLISH_ARTICLE_MUTATION = gql`
 const DELETE_ARTICLE_MUTATION = gql`
   mutation DeleteArticle($articleUuid: UUID!) {
     deleteArticle(articleUuid: $articleUuid) {
+      success
+      message
+    }
+  }
+`;
+
+const DELETE_BLOG_MUTATION = gql`
+  mutation DeleteBlog($blogUuid: UUID!) {
+    deleteBlog(blogUuid: $blogUuid) {
       success
       message
     }
@@ -540,6 +572,22 @@ export class BlogsService {
             throw new Error('Failed to delete article');
           }
           return result.data.deleteArticle;
+        }),
+      );
+  }
+
+  deleteBlog(blogUuid: string): Observable<{ success: boolean; errors?: string[] }> {
+    return this.apollo
+      .mutate<{ deleteBlog: { success: boolean; errors?: string[] } }>({
+        mutation: DELETE_BLOG_MUTATION,
+        variables: { blogUuid },
+      })
+      .pipe(
+        map((result) => {
+          if (!result.data?.deleteBlog) {
+            throw new Error('Failed to delete blog');
+          }
+          return result.data.deleteBlog;
         }),
       );
   }

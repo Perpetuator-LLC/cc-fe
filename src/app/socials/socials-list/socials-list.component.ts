@@ -11,6 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { SocialsService, SocialAccount } from '../socials.service';
 import { MessageService } from '../../message.service';
+import { ConnectSocialDialogComponent } from '../connect-social-dialog/connect-social-dialog.component';
 
 @Component({
   selector: 'app-socials-list',
@@ -105,7 +106,15 @@ export class SocialsListComponent implements OnInit, OnDestroy {
   }
 
   connectAccount(): void {
-    // TODO: Open connect social account dialog
-    this.messageService.info('Connect social account dialog coming soon');
+    const dialogRef = this.dialog.open(ConnectSocialDialogComponent, {
+      width: '500px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.socialAccount) {
+        this.loadAccounts();
+      }
+    });
   }
 }

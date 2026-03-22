@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './jobs/job.service';
@@ -12,12 +12,10 @@ import { MessageService } from './message.service';
   providedIn: 'root',
 })
 export class JobDisplayService {
-  constructor(
-    private episodeService: EpisodeService,
-    private podcastsService: PodcastsService,
-    private researchService: ResearchService,
-    private messageService: MessageService,
-  ) {}
+  private readonly episodeService = inject(EpisodeService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly researchService = inject(ResearchService);
+  private readonly messageService = inject(MessageService);
 
   // Parse job result JSON safely - handles both string and object types
   parseJobResult(job: Job): JobResult | null {
@@ -126,6 +124,16 @@ export class JobDisplayService {
     return this.getPulseConfigUuid(job) != null;
   }
 
+  // Check if job has blog UUID (from args or result)
+  hasBlogUuid(job: Job): boolean {
+    return this.getBlogUuid(job) != null;
+  }
+
+  // Check if job has article UUID (from args or result)
+  hasArticleUuid(job: Job): boolean {
+    return this.getArticleUuid(job) != null;
+  }
+
   // Get podcast UUID from result or args (result takes precedence)
   getPodcastUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
@@ -159,6 +167,34 @@ export class JobDisplayService {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
     return (result?.['pulseConfigUuid'] as string) || (args?.['pulseConfigUuid'] as string) || null;
+  }
+
+  // Get blog UUID from result or args (result takes precedence)
+  getBlogUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['blogUuid'] as string) || (args?.['blogUuid'] as string) || null;
+  }
+
+  // Get blog name from args (for display before result is available)
+  getBlogName(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['blogName'] as string) || (args?.['blogName'] as string) || null;
+  }
+
+  // Get article UUID from result or args (result takes precedence)
+  getArticleUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['articleUuid'] as string) || (args?.['articleUuid'] as string) || null;
+  }
+
+  // Get article title from args (for display before result is available)
+  getArticleTitle(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['articleTitle'] as string) || (args?.['articleTitle'] as string) || null;
   }
 
   // Check if job has symbol/FQN (for stock-related jobs)

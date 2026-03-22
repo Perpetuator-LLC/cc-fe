@@ -1,0 +1,249 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (!blog) {
+  <div class="error-container">
+    <mat-icon>error</mat-icon>
+    <h2>Blog Not Found</h2>
+    <p>The requested blog could not be found.</p>
+    <button mat-flat-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Blogs</span>
+    </button>
+  </div>
+} @else {
+  <div class="blog-detail-page">
+    <!-- Header following podcast pattern -->
+    <div class="detail-header">
+      <div class="top-header">
+        <div class="title">
+          <h2>{{ blog.name }}</h2>
+          @if (blog.tagline) {
+            <p>{{ blog.tagline }}</p>
+          }
+        </div>
+        <div class="buttons">
+          <button
+            mat-flat-button
+            color="primary"
+            class="save-btn"
+            type="button"
+            (click)="saveBlog()"
+            [disabled]="!blogForm.dirty || !blogForm.valid || saving"
+          >
+            @if (saving) {
+              <mat-spinner diameter="18" />
+              <span>Saving...</span>
+            } @else {
+              <span>Save</span>
+            }
+          </button>
+        </div>
+      </div>
+      <div class="bottom-header">
+        <div class="status-summary">
+          <div class="status-item">
+            <span class="status-label">Live</span>
+            <span class="status-badge" [class.enable]="blog.enabled" [class.disable]="!blog.enabled">
+              {{ blog.enabled ? 'Live' : 'Disabled' }}
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Articles</span>
+            <span class="status-value">{{ blog.articleCount || 0 }}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Views</span>
+            <span class="status-value">{{ blog.viewCount || 0 }}</span>
+          </div>
+          @if (blog.latestArticleDate) {
+            <div class="status-item">
+              <span class="status-label">Last Published</span>
+              <span class="status-value">{{ formatDate(blog.latestArticleDate) }}</span>
+            </div>
+          }
+        </div>
+        <div class="action-buttons">
+          <button mat-flat-button color="accent" (click)="createArticle()">
+            <mat-icon>add</mat-icon>
+            <span>New Article</span>
+          </button>
+          <button mat-icon-button [matMenuTriggerFor]="blogMenu" matTooltip="More options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #blogMenu="matMenu">
+            <button mat-menu-item (click)="deleteBlog()">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Delete Blog</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Card with Tabs -->
+    <mat-card class="blog-card">
+      <mat-tab-group [(selectedIndex)]="selectedTabIndex">
+        <!-- Articles Tab -->
+        <mat-tab label="Articles">
+          <mat-card-content>
+            @if (articles.length === 0) {
+              <div class="empty-state">
+                <mat-icon>article</mat-icon>
+                <h3>No Articles Yet</h3>
+                <p>Create your first article to start publishing content.</p>
+                <button mat-flat-button color="primary" (click)="createArticle()">
+                  <mat-icon>add</mat-icon>
+                  <span>Create Article</span>
+                </button>
+              </div>
+            } @else {
+              <table mat-table [dataSource]="articlesDataSource" class="articles-table">
+                <!-- Title Column -->
+                <ng-container matColumnDef="title">
+                  <th mat-header-cell *matHeaderCellDef>Title</th>
+                  <td mat-cell *matCellDef="let article">
+                    <a [routerLink]="['/media/articles', article.id]" class="article-link">
+                      {{ article.title }}
+                    </a>
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let article">
+                    <span class="article-status" [ngClass]="getStatusClass(article.status)">
+                      {{ article.status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Views Column -->
+                <ng-container matColumnDef="views">
+                  <th mat-header-cell *matHeaderCellDef>Views</th>
+                  <td mat-cell *matCellDef="let article">{{ article.viewCount || 0 }}</td>
+                </ng-container>
+
+                <!-- Published Column -->
+                <ng-container matColumnDef="published">
+                  <th mat-header-cell *matHeaderCellDef>Published</th>
+                  <td mat-cell *matCellDef="let article">{{ formatDate(article.publishedAt) }}</td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let article">
+                    <button mat-icon-button matTooltip="View article" (click)="viewArticle(article)">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="articleColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: articleColumns" (click)="viewArticle(row)"></tr>
+              </table>
+            }
+          </mat-card-content>
+        </mat-tab>
+
+        <!-- Settings Tab -->
+        <mat-tab label="Settings">
+          <mat-card-content>
+            <form [formGroup]="blogForm">
+              <!-- Basic Information Section -->
+              <div class="settings-section">
+                <h3 class="section-title">Basic Information</h3>
+
+                <div class="member-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Blog Name</mat-label>
+                    <input matInput formControlName="name" required />
+                    @if (blogForm.get('name')?.invalid && blogForm.get('name')?.touched) {
+                      <mat-error>Blog name is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="member-row">
+                  <div class="enabled-checkbox">
+                    <mat-checkbox formControlName="enabled" matTooltip="Blog RSS feed is only readable when enabled.">
+                      Blog Enabled
+                    </mat-checkbox>
+                  </div>
+                  <div class="slug-input">
+                    <mat-form-field appearance="fill">
+                      <mat-label>Blog Slug</mat-label>
+                      <input matInput formControlName="slug" />
+                      @if (blogForm.get('enabled')?.value && !blogForm.get('slug')?.value) {
+                        <mat-error>Slug is required when blog is enabled</mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="member-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Tagline</mat-label>
+                    <input matInput formControlName="tagline" placeholder="A short catchy tagline" />
+                  </mat-form-field>
+                </div>
+
+                <div class="member-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Description</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="description"
+                      class="textarea-medium"
+                      placeholder="Describe your blog..."
+                    ></textarea>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- AI Generation Section -->
+              <div class="settings-section">
+                <h3 class="section-title">AI Generation</h3>
+                <div class="section-info">
+                  <p>
+                    <mat-icon>info</mat-icon>
+                    Custom instructions used when generating articles for this blog using AI.
+                  </p>
+                </div>
+
+                <div class="member-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Custom Prompt</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="prompt"
+                      class="textarea-prompt"
+                      placeholder="Custom instructions for AI article generation..."
+                    ></textarea>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- Danger Zone -->
+              <div class="settings-section danger-section">
+                <h3 class="section-title danger-zone">Danger Zone</h3>
+
+                <div class="member-row">
+                  <button mat-stroked-button color="warn" type="button" (click)="deleteBlog()">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete Blog</span>
+                  </button>
+                  <span class="danger-description"> Permanently delete this blog and all its articles. </span>
+                </div>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+}

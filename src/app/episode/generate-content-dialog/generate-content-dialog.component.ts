@@ -16,6 +16,7 @@ import { SocialAccount, SocialsService, BroadcastTemplate } from '../../socials/
 import { Blog, BlogsService } from '../../blogs/blogs.service';
 import { MessageService } from '../../message.service';
 import { JobService } from '../../jobs/job.service';
+import { UserSettingsService } from '../../shared/services/user-settings.service';
 
 export interface GenerateContentDialogData {
   episodeUuid: string;
@@ -55,6 +56,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
   private readonly jobService = inject(JobService);
+  private readonly userSettingsService = inject(UserSettingsService);
 
   private subscriptions = new Subscription();
 
@@ -101,6 +103,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
         next: (accounts) => {
           this.socialAccounts = accounts;
           this.loadingAccounts = false;
+          this.selectDefaultSocialAccount();
         },
         error: (err) => {
           this.messageService.error(`Failed to load social accounts: ${err.message}`);
@@ -110,6 +113,37 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Auto-select the last used social account, or the first one if only one exists
+   */
+  private selectDefaultSocialAccount(): void {
+    if (this.socialAccounts.length === 0) return;
+
+    // If only one account, select it automatically
+    if (this.socialAccounts.length === 1) {
+      this.socialForm.patchValue({ socialAccountUuid: this.socialAccounts[0].id });
+      return;
+    }
+
+    // Try to select last used account
+    this.subscriptions.add(
+      this.userSettingsService.getLastSocialAccountUuid().subscribe((lastAccountUuid) => {
+        if (lastAccountUuid && this.socialAccounts.some((a) => a.id === lastAccountUuid)) {
+          this.socialForm.patchValue({ socialAccountUuid: lastAccountUuid });
+        }
+      }),
+    );
+  }
+
+  /**
+   * Track social account selection for future auto-select
+   */
+  onSocialAccountSelected(accountUuid: string): void {
+    if (accountUuid) {
+      this.userSettingsService.setLastSocialAccountUuid(accountUuid);
+    }
+  }
+
   private loadBlogs(): void {
     this.loadingBlogs = true;
     this.subscriptions.add(
@@ -117,6 +151,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
         next: (blogs) => {
           this.blogs = blogs;
           this.loadingBlogs = false;
+          this.selectDefaultBlog();
         },
         error: (err) => {
           this.messageService.error(`Failed to load blogs: ${err.message}`);
@@ -124,6 +159,37 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Auto-select the last used blog, or the first blog if only one exists
+   */
+  private selectDefaultBlog(): void {
+    if (this.blogs.length === 0) return;
+
+    // If only one blog, select it automatically
+    if (this.blogs.length === 1) {
+      this.articleForm.patchValue({ blogUuid: this.blogs[0].id });
+      return;
+    }
+
+    // Try to select last used blog
+    this.subscriptions.add(
+      this.userSettingsService.getLastBlogUuid().subscribe((lastBlogUuid) => {
+        if (lastBlogUuid && this.blogs.some((b) => b.id === lastBlogUuid)) {
+          this.articleForm.patchValue({ blogUuid: lastBlogUuid });
+        }
+      }),
+    );
+  }
+
+  /**
+   * Track blog selection for future auto-select
+   */
+  onBlogSelected(blogUuid: string): void {
+    if (blogUuid) {
+      this.userSettingsService.setLastBlogUuid(blogUuid);
+    }
   }
 
   private loadTemplates(): void {

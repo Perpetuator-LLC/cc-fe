@@ -13,7 +13,7 @@
     @if (!isEdit) {
       <mat-form-field appearance="outline">
         <mat-label>Blog</mat-label>
-        <mat-select formControlName="blogUuid" required>
+        <mat-select formControlName="blogUuid" required (selectionChange)="onBlogSelected($event.value)">
           @if (loadingBlogs) {
             <mat-option disabled>Loading blogs...</mat-option>
           } @else if (blogs.length === 0) {
@@ -75,7 +75,13 @@
     <!-- Content -->
     <mat-form-field appearance="outline" class="content-field">
       <mat-label>Content</mat-label>
-      <textarea matInput formControlName="content" rows="12" placeholder="Article content (Markdown supported)" required></textarea>
+      <textarea
+        matInput
+        formControlName="content"
+        rows="12"
+        placeholder="Article content (Markdown supported)"
+        required
+      ></textarea>
       @if (form.get('content')?.hasError('required') && form.get('content')?.touched) {
         <mat-error>Content is required</mat-error>
       }
@@ -98,4 +104,3 @@
     </button>
   }
 </mat-dialog-actions>
-

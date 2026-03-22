@@ -263,7 +263,7 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
    */
   navigateToPulse(event: Event, pulseUuid: string) {
     event.stopPropagation();
-    this.router.navigate(['/pulses', pulseUuid]);
+    this.router.navigate(['/media/pulses', pulseUuid]);
   }
 
   toggleSchedule(schedule: Schedule, enabled: boolean) {

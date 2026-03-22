@@ -184,7 +184,7 @@ export const routes: Routes = [
       },
       {
         path: 'blogs/:uuid',
-        loadComponent: () => import('./blogs/blogs-list/blogs-list.component').then((c) => c.BlogsListComponent),
+        loadComponent: () => import('./blogs/blog-detail/blog-detail.component').then((c) => c.BlogDetailComponent),
         title: 'Blog Detail',
       },
       {
@@ -199,7 +199,7 @@ export const routes: Routes = [
       {
         path: 'articles/:uuid',
         loadComponent: () =>
-          import('./blogs/articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
+          import('./blogs/article-detail/article-detail.component').then((c) => c.ArticleDetailComponent),
         title: 'Article Detail',
       },
       {

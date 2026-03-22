@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BlogsService, Blog } from '../blogs.service';
 import { MessageService } from '../../message.service';
+import { CreateBlogDialogComponent } from '../create-blog-dialog/create-blog-dialog.component';
 
 @Component({
   selector: 'app-blogs-list',
@@ -77,8 +78,16 @@ export class BlogsListComponent implements OnInit, OnDestroy {
   }
 
   createBlog(): void {
-    // TODO: Open create blog dialog
-    this.messageService.info('Create blog dialog coming soon');
+    const dialogRef = this.dialog.open(CreateBlogDialogComponent, {
+      width: '500px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.blog) {
+        this.loadBlogs();
+      }
+    });
   }
 
   formatDate(dateStr: string | null): string {

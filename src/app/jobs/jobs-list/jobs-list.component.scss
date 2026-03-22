@@ -586,6 +586,14 @@
   &.pulse-tag {
     @include mixins.pulse-tag();
   }
+
+  &.blog-tag {
+    @include mixins.blog-tag();
+  }
+
+  &.article-tag {
+    @include mixins.article-tag();
+  }
 }
 
 // Chain group styles for grouped jobs

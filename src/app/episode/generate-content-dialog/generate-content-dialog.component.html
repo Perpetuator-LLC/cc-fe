@@ -29,7 +29,7 @@
           <form [formGroup]="socialForm" class="content-form">
             <mat-form-field>
               <mat-label>Social Account</mat-label>
-              <mat-select formControlName="socialAccountUuid">
+              <mat-select formControlName="socialAccountUuid" (selectionChange)="onSocialAccountSelected($event.value)">
                 @for (account of socialAccounts; track account.id) {
                   <mat-option [value]="account.id">
                     <div class="account-option">
@@ -83,7 +83,7 @@
             @if (blogs.length > 0) {
               <mat-form-field>
                 <mat-label>Blog (Optional)</mat-label>
-                <mat-select formControlName="blogUuid">
+                <mat-select formControlName="blogUuid" (selectionChange)="onBlogSelected($event.value)">
                   <mat-option value="">No specific blog</mat-option>
                   @for (blog of blogs; track blog.id) {
                     <mat-option [value]="blog.id">{{ blog.name }}</mat-option>
@@ -137,7 +137,7 @@
         <span>Generating...</span>
       </button>
     } @else {
-      <button mat-flat-button color="primary" (click)="generateArticle()">
+      <button mat-flat-button color="primary" (click)="generateArticle()" [disabled]="generatingArticle">
         <mat-icon>auto_awesome</mat-icon>
         <span>Generate Article</span>
       </button>

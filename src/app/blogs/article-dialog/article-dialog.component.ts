@@ -2,11 +2,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  MatDialogRef,
-  MatDialogModule,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { BlogsService, Blog, Article } from '../blogs.service';
 import { MessageService } from '../../message.service';
+import { UserSettingsService } from '../../shared/services/user-settings.service';
 
 export interface ArticleDialogData {
   article?: Article;
@@ -47,6 +44,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
   private readonly data = inject<ArticleDialogData>(MAT_DIALOG_DATA);
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
+  private readonly userSettingsService = inject(UserSettingsService);
   private subscriptions = new Subscription();
 
   form!: FormGroup;
@@ -84,6 +82,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
         next: (blogs) => {
           this.blogs = blogs;
           this.loadingBlogs = false;
+          this.selectDefaultBlog();
         },
         error: (err) => {
           this.messageService.error('Failed to load blogs: ' + err.message);
@@ -91,6 +90,41 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /**
+   * Auto-select blog based on: explicit param > last used > single blog fallback
+   */
+  private selectDefaultBlog(): void {
+    // If blog was already set via data (editing or explicit param), don't override
+    const currentBlogUuid = this.form.get('blogUuid')?.value;
+    if (currentBlogUuid) return;
+
+    // If only one blog, select it automatically
+    if (this.blogs.length === 1) {
+      this.form.patchValue({ blogUuid: this.blogs[0].id });
+      return;
+    }
+
+    // Try to select last used blog
+    if (this.blogs.length > 1) {
+      this.subscriptions.add(
+        this.userSettingsService.getLastBlogUuid().subscribe((lastBlogUuid) => {
+          if (lastBlogUuid && this.blogs.some((b) => b.id === lastBlogUuid)) {
+            this.form.patchValue({ blogUuid: lastBlogUuid });
+          }
+        }),
+      );
+    }
+  }
+
+  /**
+   * Track blog selection for future auto-select
+   */
+  onBlogSelected(blogUuid: string): void {
+    if (blogUuid) {
+      this.userSettingsService.setLastBlogUuid(blogUuid);
+    }
   }
 
   onCancel(): void {
@@ -174,5 +208,3 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
     }
   }
 }
-
-

@@ -2854,6 +2854,15 @@ type ArticleType {
   """URLs accessed during research (excludes source news URLs)"""
   researchUrls: JSONString!
 
+  """Episode this article was generated from (if any)"""
+  sourceEpisode: EpisodeType
+
+  """Type of source content: 'episode', 'pulse', 'news'"""
+  sourceContentType: String
+
+  """UUID of source content this article was generated from"""
+  sourceContentUuid: UUID
+
   """Primary author of this article"""
   author: UserDataExport
 
@@ -2972,6 +2981,9 @@ enum BlogsArticleVersionChangeTypeChoices {
 
   """Edited"""
   EDITED
+
+  """AI Generated"""
+  GENERATED
 
   """Published"""
   PUBLISHED
@@ -5305,6 +5317,9 @@ type Mutation {
   """Mutation to update a blog."""
   updateBlog(blogUuid: UUID!, description: String, enabled: Boolean, name: String, prompt: String, slug: String, status: String, tagline: String): UpdateBlog
 
+  """Mutation to delete a blog and all its articles."""
+  deleteBlog(blogUuid: UUID!): DeleteBlog
+
   """Mutation to create a new article."""
   createArticle(blogUuid: UUID!, content: String!, description: String, slug: String, subtitle: String, title: String!): CreateArticle
 
@@ -6517,6 +6532,12 @@ type UpdateBlog {
   success: Boolean
   message: String
   blog: BlogType
+}
+
+"""Mutation to delete a blog and all its articles."""
+type DeleteBlog {
+  success: Boolean
+  message: String
 }
 
 """Mutation to create a new article."""
