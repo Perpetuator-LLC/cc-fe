@@ -242,6 +242,18 @@
     @include mixins.topic-tag();
   }
 
+  &.pulse-tag {
+    @include mixins.pulse-tag();
+  }
+
+  &.blog-tag {
+    @include mixins.blog-tag();
+  }
+
+  &.article-tag {
+    @include mixins.article-tag();
+  }
+
   &.symbol-tag {
     @include mixins.stock-tag();
   }

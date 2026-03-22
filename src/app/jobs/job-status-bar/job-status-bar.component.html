@@ -29,7 +29,15 @@
             }
 
             <!-- Resources section - colored tags with icons -->
-            @if (hasPodcastUuid(job) || hasEpisodeUuid(job) || hasTopicUuid(job) || hasSymbol(job)) {
+            @if (
+              hasPodcastUuid(job) ||
+              hasEpisodeUuid(job) ||
+              hasTopicUuid(job) ||
+              hasSymbol(job) ||
+              hasPulseConfigUuid(job) ||
+              hasBlogUuid(job) ||
+              hasArticleUuid(job)
+            ) {
               <div class="job-section resources-section">
                 <div class="job-links">
                   @if (hasPodcastUuid(job)) {
@@ -66,6 +74,42 @@
                     >
                       <mat-icon>topic</mat-icon>
                       {{ getTopicName(job) }}
+                    </button>
+                  }
+                  @if (hasPulseConfigUuid(job)) {
+                    <button
+                      mat-flat-button
+                      class="resource-tag pulse-tag"
+                      [routerLink]="['/media/pulses', getPulseConfigUuid(job)]"
+                      matTooltip="Pulse"
+                      matTooltipPosition="above"
+                    >
+                      <mat-icon>vital_signs</mat-icon>
+                      {{ getPulseConfigName() }}
+                    </button>
+                  }
+                  @if (hasBlogUuid(job)) {
+                    <button
+                      mat-flat-button
+                      class="resource-tag blog-tag"
+                      [routerLink]="['/media/blogs', getBlogUuid(job)]"
+                      matTooltip="Blog"
+                      matTooltipPosition="above"
+                    >
+                      <mat-icon>menu_book</mat-icon>
+                      {{ getBlogName(job) }}
+                    </button>
+                  }
+                  @if (hasArticleUuid(job)) {
+                    <button
+                      mat-flat-button
+                      class="resource-tag article-tag"
+                      [routerLink]="['/media/articles', getArticleUuid(job)]"
+                      matTooltip="Article"
+                      matTooltipPosition="above"
+                    >
+                      <mat-icon>article</mat-icon>
+                      {{ getArticleTitle(job) }}
                     </button>
                   }
                   @if (hasSymbol(job)) {
