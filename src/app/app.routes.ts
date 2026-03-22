@@ -461,6 +461,29 @@ export const routes: Routes = [
     title: 'Episode',
   },
   {
+    path: 'blogs',
+    loadComponent: () =>
+      import('./browse/browse-blogs/browse-blogs.component').then((c) => c.BrowseBlogsComponent),
+    title: 'Browse Blogs',
+  },
+  {
+    path: 'blogs/:id',
+    loadComponent: () =>
+      import('./public-blog-page/public-blog-page.component').then((c) => c.PublicBlogPageComponent),
+    title: 'Blog',
+  },
+  {
+    path: 'articles',
+    redirectTo: 'blogs',
+    pathMatch: 'full',
+  },
+  {
+    path: 'articles/:id',
+    loadComponent: () =>
+      import('./public-article-page/public-article-page.component').then((c) => c.PublicArticlePageComponent),
+    title: 'Article',
+  },
+  {
     path: 'categories',
     loadComponent: () =>
       import('./public-categories/public-categories.component').then((c) => c.PublicCategoriesComponent),

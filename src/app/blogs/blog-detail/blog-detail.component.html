@@ -74,11 +74,25 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #blogMenu="matMenu">
+            @if (blog.enabled) {
+              <a mat-menu-item [href]="getShareRoute()" target="_blank">
+                <mat-icon>open_in_new</mat-icon>
+                <span>View Public Page</span>
+              </a>
+            }
             <button mat-menu-item (click)="deleteBlog()">
               <mat-icon color="warn">delete</mat-icon>
               <span>Delete Blog</span>
             </button>
           </mat-menu>
+          @if (blog.enabled) {
+            <app-share-buttons
+              [shareUrl]="getShareUrl()"
+              [title]="blog.name"
+              [description]="blog.description || undefined"
+              [compact]="true"
+            />
+          }
         </div>
       </div>
     </div>

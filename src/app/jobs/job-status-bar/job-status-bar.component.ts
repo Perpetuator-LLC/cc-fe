@@ -120,6 +120,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
               JobKind.GENERATE_PODCAST,
               JobKind.GENERATE_RESEARCH_TRANSCRIPT,
               JobKind.RESEARCH_TOPIC,
+              JobKind.GENERATE_ARTICLE_FROM_SOURCE,
+              JobKind.GENERATE_ARTICLE_FROM_EPISODE,
             ];
 
             if (handledByDisplayService.includes(jobKind)) {

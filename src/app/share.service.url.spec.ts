@@ -39,37 +39,43 @@ describe('ShareService URL Generation', () => {
   describe('buildPodcastRoute', () => {
     it('should build route with id and slug', () => {
       const route = service.buildPodcastRoute('123', 'My Podcast');
-      expect(route).toBe('/podcasts/123-my-podcast');
+      expect(route).toBe('/podcasts/my-podcast-123');
     });
 
     it('should work with UUID', () => {
       const uuid = '123e4567-e89b-12d3-a456-426614174000';
       const route = service.buildPodcastRoute(uuid, 'Tech Podcast');
-      expect(route).toBe(`/podcasts/${uuid}-tech-podcast`);
+      expect(route).toBe(`/podcasts/tech-podcast-${uuid}`);
     });
   });
 
   describe('buildEpisodeRoute', () => {
     it('should build route with id and slug', () => {
       const route = service.buildEpisodeRoute('456', 'Episode Title');
-      expect(route).toBe('/episodes/456-episode-title');
+      expect(route).toBe('/episodes/episode-title-456');
     });
   });
 
   describe('extractIdFromSlugParam', () => {
-    it('should extract numeric ID from slug param', () => {
+    it('should extract numeric ID from slug param (old format - id first)', () => {
       expect(service.extractIdFromSlugParam('123-my-podcast')).toBe('123');
     });
 
-    it('should extract UUID from slug param', () => {
+    it('should extract UUID from slug param (old format - uuid first)', () => {
       const uuid = '123e4567-e89b-12d3-a456-426614174000';
       const param = `${uuid}-my-podcast`;
       expect(service.extractIdFromSlugParam(param)).toBe(uuid);
     });
 
-    it('should handle UUID with long slug', () => {
+    it('should extract UUID from slug param (new format - uuid at end)', () => {
       const uuid = '123e4567-e89b-12d3-a456-426614174000';
-      const param = `${uuid}-the-ultimate-guide-to-machine-learning`;
+      const param = `my-podcast-${uuid}`;
+      expect(service.extractIdFromSlugParam(param)).toBe(uuid);
+    });
+
+    it('should handle UUID with long slug (new format)', () => {
+      const uuid = '123e4567-e89b-12d3-a456-426614174000';
+      const param = `the-ultimate-guide-to-machine-learning-${uuid}`;
       expect(service.extractIdFromSlugParam(param)).toBe(uuid);
     });
 
@@ -90,7 +96,7 @@ describe('ShareService URL Generation', () => {
   describe('buildPodcastUrl', () => {
     it('should build full URL with domain', () => {
       const url = service.buildPodcastUrl('123', 'My Podcast');
-      expect(url).toContain('/podcasts/123-my-podcast');
+      expect(url).toContain('/podcasts/my-podcast-123');
       expect(url).toMatch(/^https?:\/\//);
     });
   });
@@ -98,7 +104,7 @@ describe('ShareService URL Generation', () => {
   describe('buildEpisodeUrl', () => {
     it('should build full URL with domain', () => {
       const url = service.buildEpisodeUrl('456', 'Episode Title');
-      expect(url).toContain('/episodes/456-episode-title');
+      expect(url).toContain('/episodes/episode-title-456');
       expect(url).toMatch(/^https?:\/\//);
     });
   });

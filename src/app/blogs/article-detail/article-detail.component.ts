@@ -1,9 +1,11 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, SecurityContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subscription, debounceTime, filter, switchMap } from 'rxjs';
+import { marked } from 'marked';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +22,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { BlogsService, Article } from '../blogs.service';
 import { MessageService } from '../../message.service';
+import { ShareService } from '../../share.service';
+import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
@@ -42,6 +46,7 @@ import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmat
     MatTabsModule,
     MatCheckboxModule,
     CdkTextareaAutosize,
+    ShareButtonsComponent,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
@@ -51,8 +56,10 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
+  private readonly shareService = inject(ShareService);
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
+  private readonly sanitizer = inject(DomSanitizer);
   private subscriptions = new Subscription();
 
   loading = true;
@@ -291,5 +298,23 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return this.articleForm.dirty;
+  }
+
+  renderMarkdown(markdown: string | undefined | null): SafeHtml {
+    if (!markdown) return '';
+    const html = marked.parse(markdown, { async: false }) as string;
+    // Sanitize the HTML to prevent XSS
+    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, html) || '';
+    return this.sanitizer.bypassSecurityTrustHtml(sanitized);
+  }
+
+  getShareUrl(): string {
+    if (!this.article) return '';
+    return this.shareService.buildArticleUrl(this.article.id, this.article.title);
+  }
+
+  getShareRoute(): string {
+    if (!this.article) return '';
+    return this.shareService.buildArticleRoute(this.article.id, this.article.title);
   }
 }

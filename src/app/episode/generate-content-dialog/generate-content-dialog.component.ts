@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import { SocialAccount, SocialsService, BroadcastTemplate } from '../../socials/socials.service';
 import { Blog, BlogsService } from '../../blogs/blogs.service';
 import { MessageService } from '../../message.service';
-import { JobService } from '../../jobs/job.service';
 import { UserSettingsService } from '../../shared/services/user-settings.service';
 
 export interface GenerateContentDialogData {
@@ -55,7 +54,6 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
   private readonly socialsService = inject(SocialsService);
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
-  private readonly jobService = inject(JobService);
   private readonly userSettingsService = inject(UserSettingsService);
 
   private subscriptions = new Subscription();
@@ -234,18 +232,9 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
           next: (result) => {
             this.generatingSocial = false;
             if (result.success && result.job) {
-              // Construct a full Job object for the job service
-              this.jobService.addJob({
-                id: result.job.id,
-                uuid: result.job.id,
-                kind: 'GENERATE_BROADCAST',
-                status: result.job.status || 'RUNNING',
-                error: '',
-                result: null,
-                args: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              });
+              // Note: Do NOT call jobService.addJob() here as the backend will push the job via WebSocket
+              // Adding it manually causes duplicate jobs in the status bar
+              console.log(`[GenerateContentDialog] Social post generation job started: ${result.job.id}`);
               this.messageService.success('Social post generation started!');
               this.dialogRef.close({ type: 'social', success: true } as GenerateContentDialogResult);
             } else {
@@ -279,17 +268,9 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
             this.generatingArticle = false;
             if (result.success && result.job) {
               // Track the job for async generation
-              this.jobService.addJob({
-                id: result.job.id,
-                uuid: result.job.id,
-                kind: 'GENERATE_ARTICLE_FROM_SOURCE',
-                status: result.job.status || 'RUNNING',
-                error: '',
-                result: null,
-                args: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              });
+              // Note: Do NOT call jobService.addJob() here as the backend will push the job via WebSocket
+              // Adding it manually causes duplicate jobs in the status bar
+              console.log(`[GenerateContentDialog] Article generation job started: ${result.job.id}`);
               this.messageService.success('Article generation started!');
               this.dialogRef.close({ type: 'article', success: true } as GenerateContentDialogResult);
             } else {

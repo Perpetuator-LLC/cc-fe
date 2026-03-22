@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './jobs/job.service';
+import { BlogsService } from './blogs/blogs.service';
 import { EpisodeService } from './episode/episode.service';
 import { PodcastsService } from './podcast/podcasts.service';
 import { ResearchService } from './topics/research.service';
@@ -15,6 +16,7 @@ export class JobDisplayService {
   private readonly episodeService = inject(EpisodeService);
   private readonly podcastsService = inject(PodcastsService);
   private readonly researchService = inject(ResearchService);
+  private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
 
   // Parse job result JSON safely - handles both string and object types
@@ -268,6 +270,10 @@ export class JobDisplayService {
       case JobKind.RESEARCH_TOPIC:
         return this.handleResearchTopicCompletion(job);
 
+      case JobKind.GENERATE_ARTICLE_FROM_SOURCE:
+      case JobKind.GENERATE_ARTICLE_FROM_EPISODE:
+        return this.handleArticleGeneration(job);
+
       default:
         // For other job types, show a simple completion message
         this.messageService.success(`Job completed: ${job.kind}`);
@@ -389,6 +395,48 @@ export class JobDisplayService {
       catchError(() => {
         const topicUrl = `/media/topics/${topicUuid}`;
         this.messageService.success(`Research topic updated: <a href="${topicUrl}">View Topic</a>`, null, true);
+        return of(void 0);
+      }),
+    );
+  }
+
+  /**
+   * Handle article generation completion with links to both article and source episode
+   */
+  private handleArticleGeneration(job: Job): Observable<void> {
+    const articleUuid = this.getArticleUuid(job);
+    const episodeUuid = this.getEpisodeUuid(job);
+
+    if (!articleUuid) {
+      this.messageService.success('Article generated successfully');
+      return of(void 0);
+    }
+
+    // Fetch article and optionally episode
+    const article$ = this.blogsService.getArticle(articleUuid).pipe(catchError(() => of(null)));
+
+    const episode$ = episodeUuid
+      ? this.episodeService.getEpisodeById(episodeUuid).pipe(catchError(() => of(null)))
+      : of(null);
+
+    return forkJoin({ article: article$, episode: episode$ }).pipe(
+      map(({ article, episode }) => {
+        const articleUrl = `/media/articles/${articleUuid}`;
+        const articleTitle = article?.title === '' ? '(Blank)' : article?.title || 'Article';
+
+        let message = `Article created: <a href="${articleUrl}">${articleTitle}</a>`;
+
+        if (episode && episodeUuid) {
+          const episodeUrl = `/media/episodes/${episodeUuid}`;
+          const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
+          message += ` | From episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
+        }
+
+        this.messageService.success(message, null, true);
+      }),
+      catchError(() => {
+        const articleUrl = `/media/articles/${articleUuid}`;
+        this.messageService.success(`Article created: <a href="${articleUrl}">View Article</a>`, null, true);
         return of(void 0);
       }),
     );

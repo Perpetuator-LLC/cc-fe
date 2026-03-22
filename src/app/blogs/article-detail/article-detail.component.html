@@ -99,7 +99,21 @@
               <mat-icon color="warn">delete</mat-icon>
               <span>Delete Article</span>
             </button>
+            @if (article.status === 'PUBLISHED') {
+              <a mat-menu-item [href]="getShareRoute()" target="_blank">
+                <mat-icon>open_in_new</mat-icon>
+                <span>View Public Page</span>
+              </a>
+            }
           </mat-menu>
+          @if (article.status === 'PUBLISHED') {
+            <app-share-buttons
+              [shareUrl]="getShareUrl()"
+              [title]="article.title"
+              [description]="article.description || article.excerpt || undefined"
+              [compact]="true"
+            />
+          }
         </div>
       </div>
     </div>
@@ -227,7 +241,7 @@
                   <span>{{ article.readTimeMinutes }} min read</span>
                 }
               </div>
-              <div class="preview-content" [innerHTML]="articleForm.get('content')?.value"></div>
+              <div class="preview-content" [innerHTML]="renderMarkdown(articleForm.get('content')?.value)"></div>
             </div>
           </mat-card-content>
         </mat-tab>

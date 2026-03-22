@@ -21,6 +21,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { BlogsService, Blog, Article } from '../blogs.service';
 import { MessageService } from '../../message.service';
+import { ShareService } from '../../share.service';
+import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
@@ -44,6 +46,7 @@ import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmat
     MatMenuModule,
     MatTabsModule,
     MatCheckboxModule,
+    ShareButtonsComponent,
   ],
   templateUrl: './blog-detail.component.html',
   styleUrl: './blog-detail.component.scss',
@@ -53,6 +56,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly blogsService = inject(BlogsService);
   private readonly messageService = inject(MessageService);
+  private readonly shareService = inject(ShareService);
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private subscriptions = new Subscription();
@@ -235,5 +239,15 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/media/blogs']);
+  }
+
+  getShareUrl(): string {
+    if (!this.blog) return '';
+    return this.shareService.buildBlogUrl(this.blog.id, this.blog.name);
+  }
+
+  getShareRoute(): string {
+    if (!this.blog) return '';
+    return this.shareService.buildBlogRoute(this.blog.id, this.blog.name);
   }
 }
