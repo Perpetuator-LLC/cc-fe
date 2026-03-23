@@ -138,7 +138,7 @@ type Query {
   blogs(teamUuid: UUID): [BlogType]
   article(uuid: UUID!): ArticleType
   articleBySlug(blogSlug: String!, articleSlug: String!): ArticleType
-  articles(blogUuid: UUID, status: String, limit: Int): [ArticleType]
+  articles(blogUuid: UUID, status: String, sourceEpisodeUuid: UUID, limit: Int): [ArticleType]
   traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
   trace(id: UUID!): TraceType
 
@@ -2150,6 +2150,7 @@ type EpisodeType implements Node {
   isCurrentValidated: Boolean
   researchUrls: [String]
   topic: TopicType
+  generatedArticles: [GeneratedArticleSummaryType]
 }
 
 type NewsType implements Node {
@@ -2287,6 +2288,21 @@ type SourceType implements Node {
   """The ID of the object"""
   id: ID!
   uuid: UUID
+}
+
+"""
+Lightweight type for articles linked from an episode — avoids circular import with blogs.schema.
+"""
+type GeneratedArticleSummaryType {
+  id: UUID
+  title: String
+  slug: String
+  status: String
+  readTimeMinutes: Int
+  publishedAt: DateTime
+  blogId: UUID
+  blogName: String
+  blogSlug: String
 }
 
 """OrderNode is a GraphQL type that represents an order."""
