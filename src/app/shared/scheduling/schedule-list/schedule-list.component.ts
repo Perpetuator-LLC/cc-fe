@@ -58,6 +58,11 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
   @Input() podcastUuid?: string;
 
   /**
+   * Podcast name for display (when pre-selected)
+   */
+  @Input() podcastName?: string;
+
+  /**
    * Filter schedules by pulse config UUID
    */
   @Input() pulseConfigUuid?: string;
@@ -319,10 +324,14 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
   }
 
   private openScheduleDialog(schedule?: Schedule) {
+    // Resolve podcast name from input or podcasts array
+    const podcastName = this.podcastName || this.podcasts?.find((p) => p.uuid === this.podcastUuid)?.name;
+
     const data: FriendlyScheduleDialogData = {
       schedule: schedule || null,
       context: this.context,
       podcastUuid: this.podcastUuid,
+      podcastName,
       pulseConfigUuid: this.pulseConfigUuid,
       episodeUuid: this.episodeUuid,
       podcasts: this.podcasts,

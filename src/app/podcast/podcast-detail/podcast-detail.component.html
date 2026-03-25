@@ -653,6 +653,7 @@
           <app-schedule-list
             context="podcast"
             [podcastUuid]="podcastUuid"
+            [podcastName]="podcastForm.get('name')?.value || ''"
             [podcasts]="[{ uuid: podcastUuid, name: podcastForm.get('name')?.value || '' }]"
             emptyStateMessage="No schedules configured. Create a schedule to automatically generate and publish episodes."
           />

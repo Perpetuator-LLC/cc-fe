@@ -19,9 +19,9 @@
       <mat-icon>schedule</mat-icon>
       <p>{{ emptyStateMessage }}</p>
       @if (canAddSchedule) {
-        <button mat-stroked-button color="primary" (click)="createSchedule()">
+        <button mat-flat-button color="primary" (click)="createSchedule()">
           <mat-icon>add</mat-icon>
-          <span>Create Your First Schedule</span>
+          <span>Add Schedule</span>
         </button>
       }
     </div>
