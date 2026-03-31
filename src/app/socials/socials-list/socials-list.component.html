@@ -1,0 +1,120 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (loading) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (!loading && accounts.length === 0) {
+  <div class="socials-container">
+    <mat-card class="empty-state-card">
+      <mat-card-content>
+        <div class="empty-state-content">
+          <mat-icon class="feature-icon">link</mat-icon>
+          <h2>No Social Accounts Connected</h2>
+          <p class="description">Connect your social media accounts to publish posts directly from your episodes.</p>
+          <div class="features-list">
+            <div class="feature-item">
+              <mat-icon>auto_awesome</mat-icon>
+              <span>AI-generated posts tailored for each platform</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>schedule</mat-icon>
+              <span>Schedule posts for optimal engagement</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>analytics</mat-icon>
+              <span>Track performance across platforms</span>
+            </div>
+          </div>
+          <div class="platforms">
+            <span class="platform-badge">Twitter/X</span>
+            <span class="platform-badge">LinkedIn</span>
+            <span class="platform-badge">Mastodon</span>
+            <span class="platform-badge">Bluesky</span>
+          </div>
+          <div class="action-buttons">
+            <button mat-flat-button color="primary" (click)="connectAccount()">
+              <mat-icon>add_link</mat-icon>
+              <span>Connect Account</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+} @else if (!loading) {
+  <mat-card class="accounts-card">
+    <mat-card-content class="content-header">
+      <div class="title">
+        <h3>Social Accounts</h3>
+        <span>{{ accounts.length }} connected</span>
+      </div>
+      <div class="actions">
+        <button mat-flat-button color="primary" (click)="connectAccount()">
+          <mat-icon>add_link</mat-icon>
+          <span>Connect Account</span>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="accounts-table-container">
+    <table mat-table [dataSource]="dataSource">
+      <!-- Platform Column -->
+      <ng-container matColumnDef="platform">
+        <th mat-header-cell *matHeaderCellDef>Platform</th>
+        <td mat-cell *matCellDef="let account">
+          <div class="platform-cell">
+            <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+            <span>{{ account.platform }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Account Column -->
+      <ng-container matColumnDef="account">
+        <th mat-header-cell *matHeaderCellDef>Account</th>
+        <td mat-cell *matCellDef="let account">
+          <div class="account-info">
+            <span class="account-name">{{ account.accountName }}</span>
+            @if (account.platformUsername) {
+              <span class="account-username">&#64;{{ account.platformUsername }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let account">
+          <span class="status-badge" [ngClass]="getStatusClass(account.status, account.isTokenExpired)">
+            @if (account.isTokenExpired) {
+              Token Expired
+            } @else {
+              {{ account.status }}
+            }
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Posts Column -->
+      <ng-container matColumnDef="posts">
+        <th mat-header-cell *matHeaderCellDef>Posts</th>
+        <td mat-cell *matCellDef="let account">
+          {{ account.broadcastCount || 0 }}
+        </td>
+      </ng-container>
+
+      <!-- Last Used Column -->
+      <ng-container matColumnDef="lastUsed">
+        <th mat-header-cell *matHeaderCellDef>Last Used</th>
+        <td mat-cell *matCellDef="let account">
+          {{ formatDate(account.lastUsedAt) }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+}

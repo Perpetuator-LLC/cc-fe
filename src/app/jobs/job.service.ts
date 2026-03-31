@@ -54,6 +54,9 @@ export enum JobKind {
   // Recording job types
   CREATE_RECORDING = 'CREATE_RECORDING',
   GENERATE_TEXT_TO_SPEECH = 'GENERATE_TEXT_TO_SPEECH',
+  // Article/Blog job types
+  GENERATE_ARTICLE_FROM_EPISODE = 'GENERATE_ARTICLE_FROM_EPISODE',
+  GENERATE_ARTICLE_FROM_SOURCE = 'GENERATE_ARTICLE_FROM_SOURCE',
   // Test job types
   TEST_PRINT = 'TEST_PRINT',
   TEST_RAISE = 'TEST_RAISE',
@@ -149,6 +152,10 @@ export const stringToJobKind = (kind: string) => {
       return JobKind.CREATE_RECORDING;
     case 'GENERATE_TEXT_TO_SPEECH':
       return JobKind.GENERATE_TEXT_TO_SPEECH;
+    case 'GENERATE_ARTICLE_FROM_EPISODE':
+      return JobKind.GENERATE_ARTICLE_FROM_EPISODE;
+    case 'GENERATE_ARTICLE_FROM_SOURCE':
+      return JobKind.GENERATE_ARTICLE_FROM_SOURCE;
     case 'TEST_PRINT':
       return JobKind.TEST_PRINT;
     case 'TEST_RAISE':
@@ -248,6 +255,10 @@ export const kindToString = (kind: string) => {
       return 'Create Recording';
     case JobKind.GENERATE_TEXT_TO_SPEECH:
       return 'Generate Audio';
+    case JobKind.GENERATE_ARTICLE_FROM_EPISODE:
+      return 'Generate Article';
+    case JobKind.GENERATE_ARTICLE_FROM_SOURCE:
+      return 'Generate Article';
     case JobKind.TEST_PRINT:
       return 'Test Print';
     case JobKind.TEST_RAISE:
@@ -347,6 +358,10 @@ export const iconForJob = (kind: string): string => {
       return 'mic';
     case JobKind.GENERATE_TEXT_TO_SPEECH:
       return 'volume_up';
+    case JobKind.GENERATE_ARTICLE_FROM_EPISODE:
+      return 'article';
+    case JobKind.GENERATE_ARTICLE_FROM_SOURCE:
+      return 'article';
     case JobKind.TEST_RAISE:
       return 'bug_report';
     case JobKind.TEST_PRINT:
@@ -411,6 +426,13 @@ export interface JobArgs {
   symbol?: string;
   fqn?: string;
   interval?: string;
+  // Blog/Article generation
+  blogUuid?: string;
+  blogName?: string;
+  articleUuid?: string;
+  articleTitle?: string;
+  sourceType?: string;
+  sourceUuid?: string;
   [key: string]: unknown;
 }
 

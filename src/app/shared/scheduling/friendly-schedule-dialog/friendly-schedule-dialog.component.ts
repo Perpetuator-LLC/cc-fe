@@ -42,7 +42,8 @@ export interface FriendlyScheduleDialogData {
   podcastUuid?: string;
   pulseConfigUuid?: string;
   episodeUuid?: string;
-  // Episode name for display
+  // Entity names for display (when pre-selected)
+  podcastName?: string;
   episodeName?: string;
   // For podcast context, we need the list to choose from
   podcasts?: { uuid: string; name: string }[];
@@ -155,8 +156,15 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
   get selectedPodcastName(): string {
     const podcastUuid = this.scheduleForm?.get('podcastUuid')?.value || this.data.podcastUuid;
     if (!podcastUuid) return '';
+
+    // First check if it's from data (pre-selected)
+    if (this.data.podcastName && this.data.podcastUuid === podcastUuid) {
+      return this.data.podcastName;
+    }
+
+    // Otherwise find from podcasts list
     const podcast = this.data.podcasts?.find((p) => p.uuid === podcastUuid);
-    return podcast?.name || 'Selected Podcast';
+    return podcast?.name || '';
   }
 
   get showPulseSelect(): boolean {
@@ -214,6 +222,34 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
     return episode?.name || '';
   }
 
+  /**
+   * Generate a default schedule name based on job type and context.
+   * For episode release, includes the episode name to prevent duplicates.
+   * For podcast jobs, includes the podcast name.
+   */
+  private getDefaultScheduleName(jobKind: string): string {
+    const jobType = this.jobTypes.find((jt) => jt.value === jobKind);
+    if (!jobType) return '';
+
+    // For episode release, include the episode name
+    if (jobKind === 'PUBLISH_EPISODE_AUDIO') {
+      const episodeName = this.selectedEpisodeName;
+      if (episodeName) {
+        return `Release Episode: ${episodeName}`;
+      }
+    }
+
+    // For podcast jobs, include the podcast name
+    if (jobKind === 'PUBLISH_LATEST_EPISODE_CHAIN' || jobKind === 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN') {
+      const podcastName = this.selectedPodcastName;
+      if (podcastName) {
+        return `${jobType.label}: ${podcastName}`;
+      }
+    }
+
+    return jobType.label;
+  }
+
   get isRecurring(): boolean {
     return this.scheduleForm.get('scheduleType')?.value === 'recurring' && !this.isEpisodeRelease;
   }
@@ -265,14 +301,30 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
     // Generate default name and force one-time for episode release
     this.scheduleForm.get('jobKind')?.valueChanges.subscribe((jobKind) => {
       if (!this.isEditing) {
-        const jobType = this.jobTypes.find((jt) => jt.value === jobKind);
-        if (jobType) {
-          this.scheduleForm.patchValue({ name: jobType.label });
-        }
+        this.scheduleForm.patchValue({ name: this.getDefaultScheduleName(jobKind) });
       }
       // Force one-time for episode release
       if (jobKind === 'PUBLISH_EPISODE_AUDIO') {
         this.scheduleForm.patchValue({ scheduleType: 'one-time' });
+      }
+    });
+
+    // Update default name when episode selection changes
+    this.scheduleForm.get('episodeUuid')?.valueChanges.subscribe(() => {
+      const jobKind = this.scheduleForm.get('jobKind')?.value;
+      if (!this.isEditing && jobKind === 'PUBLISH_EPISODE_AUDIO') {
+        this.scheduleForm.patchValue({ name: this.getDefaultScheduleName(jobKind) });
+      }
+    });
+
+    // Update default name when podcast selection changes
+    this.scheduleForm.get('podcastUuid')?.valueChanges.subscribe(() => {
+      const jobKind = this.scheduleForm.get('jobKind')?.value;
+      if (
+        !this.isEditing &&
+        (jobKind === 'PUBLISH_LATEST_EPISODE_CHAIN' || jobKind === 'PUBLISH_RESEARCH_TOPIC_EPISODE_CHAIN')
+      ) {
+        this.scheduleForm.patchValue({ name: this.getDefaultScheduleName(jobKind) });
       }
     });
 
@@ -285,10 +337,7 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
 
     // Set initial name if not editing
     if (!this.isEditing && defaultJobKind) {
-      const jobType = this.jobTypes.find((jt) => jt.value === defaultJobKind);
-      if (jobType) {
-        this.scheduleForm.patchValue({ name: jobType.label });
-      }
+      this.scheduleForm.patchValue({ name: this.getDefaultScheduleName(defaultJobKind) });
     }
   }
 
@@ -437,7 +486,12 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
           },
           error: (err: { message: string }) => {
             this.saving = false;
-            this.messageService.error(`Failed to create schedule: ${err.message}`);
+            // Check for duplicate name error and provide cleaner message
+            if (err.message?.toLowerCase().includes('name') && err.message?.toLowerCase().includes('exist')) {
+              this.messageService.error('A schedule with this name already exists. Please choose a different name.');
+            } else {
+              this.messageService.error(`Failed to create schedule: ${err.message}`);
+            }
           },
         }),
       );

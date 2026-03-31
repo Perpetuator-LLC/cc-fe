@@ -1,0 +1,114 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (loading) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (!loading && blogs.length === 0) {
+  <div class="blogs-container">
+    <mat-card class="empty-state-card">
+      <mat-card-content>
+        <div class="empty-state-content">
+          <mat-icon class="feature-icon">menu_book</mat-icon>
+          <h2>No Blogs Yet</h2>
+          <p class="description">
+            Create a blog to organize and publish your articles. Each blog can have its own RSS feed and settings.
+          </p>
+          <div class="features-list">
+            <div class="feature-item">
+              <mat-icon>rss_feed</mat-icon>
+              <span>RSS feed for each blog</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>folder</mat-icon>
+              <span>Organize articles by topic</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>settings</mat-icon>
+              <span>Custom prompts for AI generation</span>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button mat-flat-button color="primary" (click)="createBlog()">
+              <mat-icon>add</mat-icon>
+              <span>Create Blog</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+} @else if (!loading) {
+  <mat-card class="blogs-card">
+    <mat-card-content class="content-header">
+      <div class="title">
+        <h3>Your Blogs</h3>
+        <span>{{ blogs.length }} blogs</span>
+      </div>
+      <div class="actions">
+        <button mat-flat-button color="primary" (click)="createBlog()">
+          <mat-icon>add</mat-icon>
+          <span>New Blog</span>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="blogs-table-container">
+    <table mat-table [dataSource]="dataSource">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let blog">
+          <div class="blog-name">
+            <a [routerLink]="['/media/blogs', blog.id]" class="blog-link">
+              {{ blog.name }}
+            </a>
+            @if (blog.description) {
+              <span class="blog-description">{{ blog.description }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let blog">
+          <span class="status-badge" [ngClass]="getStatusClass(blog.status)">
+            {{ blog.status }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Articles Column -->
+      <ng-container matColumnDef="articles">
+        <th mat-header-cell *matHeaderCellDef>Articles</th>
+        <td mat-cell *matCellDef="let blog">
+          {{ blog.articleCount || 0 }}
+          @if (blog.publishedArticleCount) {
+            <span class="published-count">({{ blog.publishedArticleCount }} published)</span>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Views Column -->
+      <ng-container matColumnDef="views">
+        <th mat-header-cell *matHeaderCellDef>Views</th>
+        <td mat-cell *matCellDef="let blog">
+          {{ blog.viewCount || 0 }}
+        </td>
+      </ng-container>
+
+      <!-- Updated Column -->
+      <ng-container matColumnDef="updated">
+        <th mat-header-cell *matHeaderCellDef>Last Updated</th>
+        <td mat-cell *matCellDef="let blog">
+          {{ formatDate(blog.latestArticleDate || blog.updatedAt) }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+}

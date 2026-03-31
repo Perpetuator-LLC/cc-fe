@@ -1,8 +1,9 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Job, JobResult, JobArgs, JobKind, stringToJobKind } from './jobs/job.service';
+import { BlogsService } from './blogs/blogs.service';
 import { EpisodeService } from './episode/episode.service';
 import { PodcastsService } from './podcast/podcasts.service';
 import { ResearchService } from './topics/research.service';
@@ -12,12 +13,11 @@ import { MessageService } from './message.service';
   providedIn: 'root',
 })
 export class JobDisplayService {
-  constructor(
-    private episodeService: EpisodeService,
-    private podcastsService: PodcastsService,
-    private researchService: ResearchService,
-    private messageService: MessageService,
-  ) {}
+  private readonly episodeService = inject(EpisodeService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly researchService = inject(ResearchService);
+  private readonly blogsService = inject(BlogsService);
+  private readonly messageService = inject(MessageService);
 
   // Parse job result JSON safely - handles both string and object types
   parseJobResult(job: Job): JobResult | null {
@@ -126,6 +126,16 @@ export class JobDisplayService {
     return this.getPulseConfigUuid(job) != null;
   }
 
+  // Check if job has blog UUID (from args or result)
+  hasBlogUuid(job: Job): boolean {
+    return this.getBlogUuid(job) != null;
+  }
+
+  // Check if job has article UUID (from args or result)
+  hasArticleUuid(job: Job): boolean {
+    return this.getArticleUuid(job) != null;
+  }
+
   // Get podcast UUID from result or args (result takes precedence)
   getPodcastUuid(job: Job): string | null {
     const result = this.parseJobResult(job);
@@ -159,6 +169,34 @@ export class JobDisplayService {
     const result = this.parseJobResult(job);
     const args = this.parseJobArgs(job);
     return (result?.['pulseConfigUuid'] as string) || (args?.['pulseConfigUuid'] as string) || null;
+  }
+
+  // Get blog UUID from result or args (result takes precedence)
+  getBlogUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['blogUuid'] as string) || (args?.['blogUuid'] as string) || null;
+  }
+
+  // Get blog name from args (for display before result is available)
+  getBlogName(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['blogName'] as string) || (args?.['blogName'] as string) || null;
+  }
+
+  // Get article UUID from result or args (result takes precedence)
+  getArticleUuid(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['articleUuid'] as string) || (args?.['articleUuid'] as string) || null;
+  }
+
+  // Get article title from args (for display before result is available)
+  getArticleTitle(job: Job): string | null {
+    const result = this.parseJobResult(job);
+    const args = this.parseJobArgs(job);
+    return (result?.['articleTitle'] as string) || (args?.['articleTitle'] as string) || null;
   }
 
   // Check if job has symbol/FQN (for stock-related jobs)
@@ -231,6 +269,10 @@ export class JobDisplayService {
 
       case JobKind.RESEARCH_TOPIC:
         return this.handleResearchTopicCompletion(job);
+
+      case JobKind.GENERATE_ARTICLE_FROM_SOURCE:
+      case JobKind.GENERATE_ARTICLE_FROM_EPISODE:
+        return this.handleArticleGeneration(job);
 
       default:
         // For other job types, show a simple completion message
@@ -353,6 +395,48 @@ export class JobDisplayService {
       catchError(() => {
         const topicUrl = `/media/topics/${topicUuid}`;
         this.messageService.success(`Research topic updated: <a href="${topicUrl}">View Topic</a>`, null, true);
+        return of(void 0);
+      }),
+    );
+  }
+
+  /**
+   * Handle article generation completion with links to both article and source episode
+   */
+  private handleArticleGeneration(job: Job): Observable<void> {
+    const articleUuid = this.getArticleUuid(job);
+    const episodeUuid = this.getEpisodeUuid(job);
+
+    if (!articleUuid) {
+      this.messageService.success('Article generated successfully');
+      return of(void 0);
+    }
+
+    // Fetch article and optionally episode
+    const article$ = this.blogsService.getArticle(articleUuid).pipe(catchError(() => of(null)));
+
+    const episode$ = episodeUuid
+      ? this.episodeService.getEpisodeById(episodeUuid).pipe(catchError(() => of(null)))
+      : of(null);
+
+    return forkJoin({ article: article$, episode: episode$ }).pipe(
+      map(({ article, episode }) => {
+        const articleUrl = `/media/articles/${articleUuid}`;
+        const articleTitle = article?.title === '' ? '(Blank)' : article?.title || 'Article';
+
+        let message = `Article created: <a href="${articleUrl}">${articleTitle}</a>`;
+
+        if (episode && episodeUuid) {
+          const episodeUrl = `/media/episodes/${episodeUuid}`;
+          const episodeTitle = episode.title === '' ? '(Blank)' : episode.title;
+          message += ` | From episode: <a href="${episodeUrl}">${episodeTitle}</a>`;
+        }
+
+        this.messageService.success(message, null, true);
+      }),
+      catchError(() => {
+        const articleUrl = `/media/articles/${articleUuid}`;
+        this.messageService.success(`Article created: <a href="${articleUrl}">View Article</a>`, null, true);
         return of(void 0);
       }),
     );

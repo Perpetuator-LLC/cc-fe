@@ -294,6 +294,7 @@ Then: `read_file logs/stylelint.log` to verify no errors before continuing.
 - **`notes/`** - Internal documentation, guides, and technical notes
 - **`docs/`** - Public-facing documentation only
 - **`logs/ai_edits/`** - AI session logs and change summaries
+- **`logs/ai_link/`** - **Backend communication documents** (feXXX_*.md for frontend requests, beXXX_*.md for backend responses). Use sequential numbering (check latest file to get next number). This is the primary channel for frontend↔backend API requests and bug reports.
 
 **📖 Complete Theme Guide:** See `notes/MD3_COMPREHENSIVE_THEME_GUIDE.md` for full documentation.
 

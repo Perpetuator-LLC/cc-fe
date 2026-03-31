@@ -1,0 +1,100 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="public-article-page">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50" />
+      <p>Loading article...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-container">
+      <mat-icon>error</mat-icon>
+      <h2>Article Not Found</h2>
+      <p>The article you're looking for doesn't exist or is not available.</p>
+      <button mat-raised-button routerLink="/blogs">Browse Blogs</button>
+    </div>
+  } @else if (articleData) {
+    <div class="breadcrumb">
+      <a routerLink="/blogs" mat-button>
+        <mat-icon>menu_book</mat-icon>
+        All Blogs
+      </a>
+      @if (articleData.blogId && articleData.blogName) {
+        <mat-icon>chevron_right</mat-icon>
+        <a [routerLink]="getBlogUrl()" mat-button>{{ articleData.blogName }}</a>
+      }
+      <mat-icon>chevron_right</mat-icon>
+      <span>{{ articleData.title }}</span>
+    </div>
+
+    <mat-card class="article-card">
+      <mat-card-header>
+        <div class="article-header">
+          <div class="article-info">
+            <h1>{{ articleData.title }}</h1>
+            @if (articleData.subtitle) {
+              <h2 class="subtitle">{{ articleData.subtitle }}</h2>
+            }
+            <p class="blog-name">
+              <a [routerLink]="getBlogUrl()">{{ articleData.blogName }}</a>
+            </p>
+            <div class="article-meta">
+              @if (articleData.publishedAt) {
+                <span class="meta-item">Published {{ formatDate(articleData.publishedAt) }}</span>
+              } @else {
+                <span class="meta-item">Created {{ formatDate(articleData.createdAt) }}</span>
+              }
+              @if (articleData.readTimeMinutes) {
+                <span class="meta-item">{{ articleData.readTimeMinutes }} min read</span>
+              }
+            </div>
+            <div class="stats">
+              <span class="stat">
+                <mat-icon>visibility</mat-icon>
+                {{ articleData.viewCount }} views
+              </span>
+              @if (articleData.isFeatured) {
+                <span class="stat featured">
+                  <mat-icon>star</mat-icon>
+                  Featured
+                </span>
+              }
+            </div>
+          </div>
+          <div class="article-actions">
+            <app-share-buttons
+              [shareUrl]="getShareUrl()"
+              [title]="articleData.title"
+              [description]="articleData.description || articleData.excerpt"
+            />
+            @if (isAuthenticated) {
+              <button mat-raised-button color="primary" [routerLink]="['/media/articles', articleId]">
+                <mat-icon>edit</mat-icon>
+                Manage Article
+              </button>
+            }
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (articleData.excerpt) {
+          <div class="excerpt">
+            <p>{{ articleData.excerpt }}</p>
+          </div>
+        }
+
+        @if (articleData.content) {
+          <div class="article-content" [innerHTML]="renderMarkdown(articleData.content)"></div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="back-to-blog">
+      <a [routerLink]="getBlogUrl()" mat-raised-button color="primary">
+        <mat-icon>arrow_back</mat-icon>
+        Back to {{ articleData.blogName }}
+      </a>
+    </div>
+  }
+</div>
+

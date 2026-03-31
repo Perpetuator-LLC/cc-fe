@@ -1,0 +1,123 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Connect Social Account</h2>
+
+<mat-dialog-content>
+  <p class="dialog-description">Connect a social media account to publish posts from your episodes.</p>
+
+  @if (loadingTeams) {
+    <div class="loading-state">
+      <mat-spinner diameter="24" />
+      <span>Loading teams...</span>
+    </div>
+  } @else if (teams.length === 0) {
+    <div class="empty-state">
+      <mat-icon>group_off</mat-icon>
+      <p>No teams found. Create a team first to connect social accounts.</p>
+    </div>
+  } @else {
+    <form [formGroup]="socialForm" class="social-form">
+      <mat-form-field>
+        <mat-label>Platform</mat-label>
+        <mat-select formControlName="platform">
+          @for (platform of platforms; track platform.value) {
+            <mat-option [value]="platform.value">
+              <div class="platform-option">
+                <mat-icon>{{ platform.icon }}</mat-icon>
+                <span>{{ platform.label }}</span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+        @if (socialForm.get('platform')?.hasError('required')) {
+          <mat-error>Please select a platform</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Team</mat-label>
+        <mat-select formControlName="teamUuid">
+          @for (team of teams; track team.uuid) {
+            <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+        @if (socialForm.get('teamUuid')?.hasError('required')) {
+          <mat-error>Please select a team</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Account Name</mat-label>
+        <input matInput formControlName="accountName" placeholder="Display name for this account" />
+        @if (socialForm.get('accountName')?.hasError('required')) {
+          <mat-error>Account name is required</mat-error>
+        }
+        @if (socialForm.get('accountName')?.hasError('minlength')) {
+          <mat-error>Name must be at least 2 characters</mat-error>
+        }
+        <mat-hint>A friendly name to identify this connection</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Username (Optional)</mat-label>
+        <input matInput formControlName="platformUsername" placeholder="@username" />
+        <mat-hint>Your handle on the platform</mat-hint>
+      </mat-form-field>
+
+      @if (getSelectedPlatform(); as platform) {
+        @if (platform.requiresApiKey) {
+          <div class="credentials-section">
+            <h4>API Credentials</h4>
+            <p class="hint-text">Get these from your {{ platform.label }} developer portal.</p>
+
+            <mat-form-field>
+              <mat-label>API Key</mat-label>
+              <input matInput formControlName="apiKey" type="password" />
+              @if (socialForm.get('apiKey')?.hasError('required')) {
+                <mat-error>API Key is required for {{ platform.label }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>API Secret</mat-label>
+              <input matInput formControlName="apiSecret" type="password" />
+              @if (socialForm.get('apiSecret')?.hasError('required')) {
+                <mat-error>API Secret is required for {{ platform.label }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        }
+
+        @if (platform.requiresToken) {
+          <mat-form-field>
+            <mat-label>Access Token</mat-label>
+            <input matInput formControlName="accessToken" type="password" />
+            @if (socialForm.get('accessToken')?.hasError('required')) {
+              <mat-error>Access token is required</mat-error>
+            }
+            <mat-hint>Your authorization token for posting</mat-hint>
+          </mat-form-field>
+        }
+      }
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()">Cancel</button>
+  @if (connecting) {
+    <button mat-flat-button color="primary" disabled>
+      <mat-spinner diameter="18" />
+      <span>Connecting...</span>
+    </button>
+  } @else {
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="connectAccount()"
+      [disabled]="socialForm.invalid || teams.length === 0"
+    >
+      <mat-icon>add_link</mat-icon>
+      <span>Connect Account</span>
+    </button>
+  }
+</mat-dialog-actions>

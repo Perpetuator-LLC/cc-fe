@@ -269,7 +269,9 @@
                         hasEpisodeUuid(item) ||
                         hasTopicUuid(item) ||
                         hasSymbol(item) ||
-                        hasPulseConfigUuid(item)
+                        hasPulseConfigUuid(item) ||
+                        hasBlogUuid(item) ||
+                        hasArticleUuid(item)
                       ) {
                         <div class="job-section">
                           <div class="job-links">
@@ -315,6 +317,28 @@
                               >
                                 <mat-icon>vital_signs</mat-icon>
                                 {{ getPulseConfigName(item) }}
+                              </button>
+                            }
+                            @if (hasBlogUuid(item)) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag blog-tag"
+                                [routerLink]="['/media/blogs', getBlogUuid(item)]"
+                                matTooltip="Blog"
+                              >
+                                <mat-icon>menu_book</mat-icon>
+                                {{ getBlogName(item) }}
+                              </button>
+                            }
+                            @if (hasArticleUuid(item)) {
+                              <button
+                                mat-flat-button
+                                class="resource-tag article-tag"
+                                [routerLink]="['/media/articles', getArticleUuid(item)]"
+                                matTooltip="Article"
+                              >
+                                <mat-icon>article</mat-icon>
+                                {{ getArticleTitle(item) }}
                               </button>
                             }
                             @if (hasSymbol(item)) {

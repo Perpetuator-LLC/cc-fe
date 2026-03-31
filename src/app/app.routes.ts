@@ -174,6 +174,51 @@ export const routes: Routes = [
           import('./pulses/recording-detail/recording-detail.component').then((c) => c.RecordingDetailComponent),
         title: 'Recording Detail',
       },
+      {
+        path: 'blogs',
+        loadComponent: () => import('./blogs/blogs-list/blogs-list.component').then((c) => c.BlogsListComponent),
+        title: 'Blogs',
+        data: {
+          icon: 'menu_book',
+        },
+      },
+      {
+        path: 'blogs/:uuid',
+        loadComponent: () => import('./blogs/blog-detail/blog-detail.component').then((c) => c.BlogDetailComponent),
+        title: 'Blog Detail',
+      },
+      {
+        path: 'articles',
+        loadComponent: () =>
+          import('./blogs/articles-list/articles-list.component').then((c) => c.ArticlesListComponent),
+        title: 'Articles',
+        data: {
+          icon: 'article',
+        },
+      },
+      {
+        path: 'articles/:uuid',
+        loadComponent: () =>
+          import('./blogs/article-detail/article-detail.component').then((c) => c.ArticleDetailComponent),
+        title: 'Article Detail',
+      },
+      {
+        path: 'socials',
+        loadComponent: () =>
+          import('./socials/socials-list/socials-list.component').then((c) => c.SocialsListComponent),
+        title: 'Socials',
+        data: {
+          icon: 'link',
+        },
+      },
+      {
+        path: 'posts',
+        loadComponent: () => import('./socials/posts-list/posts-list.component').then((c) => c.PostsListComponent),
+        title: 'Posts',
+        data: {
+          icon: 'campaign',
+        },
+      },
     ],
   },
   {
@@ -414,6 +459,29 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./public-episode-page/public-episode-page.component').then((c) => c.PublicEpisodePageComponent),
     title: 'Episode',
+  },
+  {
+    path: 'blogs',
+    loadComponent: () =>
+      import('./browse/browse-blogs/browse-blogs.component').then((c) => c.BrowseBlogsComponent),
+    title: 'Browse Blogs',
+  },
+  {
+    path: 'blogs/:id',
+    loadComponent: () =>
+      import('./public-blog-page/public-blog-page.component').then((c) => c.PublicBlogPageComponent),
+    title: 'Blog',
+  },
+  {
+    path: 'articles',
+    redirectTo: 'blogs',
+    pathMatch: 'full',
+  },
+  {
+    path: 'articles/:id',
+    loadComponent: () =>
+      import('./public-article-page/public-article-page.component').then((c) => c.PublicArticlePageComponent),
+    title: 'Article',
   },
   {
     path: 'categories',

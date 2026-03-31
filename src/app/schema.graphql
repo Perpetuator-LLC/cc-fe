@@ -123,6 +123,22 @@ type Query {
 
   """Get a single command history item by ID for lazy loading details"""
   commandHistoryItem(id: ID!): CommandExecutionType
+  socialAccount(uuid: UUID!): SocialAccountType
+  socialAccounts(teamUuid: UUID, platform: String, isActive: Boolean): [SocialAccountType]
+  broadcast(uuid: UUID!): BroadcastType
+  broadcasts(socialAccountUuid: UUID, status: String, limit: Int): [BroadcastType]
+  broadcastsForSource(sourceType: String!, sourceUuid: UUID!): [BroadcastType]
+  broadcastTemplate(uuid: UUID!): BroadcastTemplateType
+  broadcastTemplates(teamUuid: UUID, platform: String): [BroadcastTemplateType]
+  publishConfig(uuid: UUID!): PublishConfigType
+  publishConfigs(teamUuid: UUID, sourceType: String): [PublishConfigType]
+  supportedPlatforms: [String]
+  blog(uuid: UUID!): BlogType
+  blogBySlug(slug: String!): BlogType
+  blogs(teamUuid: UUID): [BlogType]
+  article(uuid: UUID!): ArticleType
+  articleBySlug(blogSlug: String!, articleSlug: String!): ArticleType
+  articles(blogUuid: UUID, status: String, sourceEpisodeUuid: UUID, limit: Int): [ArticleType]
   traces(kind: String, severity: String, functionName: String, limit: Int): [TraceType]
   trace(id: UUID!): TraceType
 
@@ -473,6 +489,9 @@ type Query {
     nameContains: String
     createdAfter: DateTime
     createdBefore: DateTime
+    podcastUuid: String
+    pulseConfigUuid: String
+    episodeUuid: String
 
     """Ordering"""
     orderBy: String
@@ -790,6 +809,9 @@ type PulseConfigType implements Node {
   Send SMS notification when a new recording is generated (requires verified phone number)
   """
   smsNotificationEnabled: Boolean!
+
+  """Send email notification when a new recording is generated"""
+  emailNotificationEnabled: Boolean!
 
   """How often to generate this pulse"""
   scheduleFrequency: PulsesPulseConfigScheduleFrequencyChoices!
@@ -1756,6 +1778,1242 @@ type AutocompleteSuggestionType {
   insert: String
 }
 
+"""GraphQL type for SocialAccount model."""
+type SocialAccountType {
+  """Unique identifier"""
+  id: UUID!
+
+  """Team that owns this account"""
+  team: TeamType!
+
+  """User who connected this account"""
+  createdBy: UserDataExport
+
+  """Social media platform"""
+  platform: SocialsSocialAccountPlatformChoices!
+
+  """Display name for this account (e.g., 'Company Page')"""
+  accountName: String!
+
+  """Username/handle on the platform"""
+  platformUsername: String
+
+  """Platform's page/business ID (for Facebook, etc.)"""
+  platformPageId: String
+
+  """URL to the profile/page"""
+  profileUrl: String
+
+  """URL to profile image"""
+  profileImageUrl: String
+
+  """Account status"""
+  status: SocialsSocialAccountStatusChoices!
+
+  """Last successful API verification"""
+  lastVerifiedAt: DateTime
+
+  """Last time a broadcast was published"""
+  lastUsedAt: DateTime
+
+  """Whether this account is enabled for publishing"""
+  isActive: Boolean!
+
+  """Automatically publish content when source is published"""
+  autoPublish: Boolean!
+
+  """Default hashtags to include in posts"""
+  defaultHashtags: JSONString!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  broadcastCount: Int
+  isTokenExpired: Boolean
+}
+
+type TeamType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """Team name (must be unique)"""
+  name: String!
+  uuid: UUID
+  members: [TeamMembershipType]
+  podcasts: [PodcastType!]
+}
+
+type TeamMembershipType {
+  user: PublicUserType
+  role: String
+}
+
+"""User type that only exposes public fields (username, uuid) - no email"""
+type PublicUserType implements Node {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+
+  """The user's affiliate profile if they have one"""
+  affiliateProfile: AffiliateProfileType
+}
+
+type AffiliateProfileType {
+  code: String!
+  brandImage: String
+  isActive: Boolean!
+
+  """Custom message displayed to user when not eligible"""
+  eligibilityMessage: String
+  eligibilityChangedAt: DateTime
+
+  """Stripe Connect Express account ID"""
+  stripeAccountId: String
+  stripeOnboardingCompleted: Boolean!
+  stripeChargesEnabled: Boolean!
+  stripePayoutsEnabled: Boolean!
+  stripeCountry: String
+  stripeDetailsSubmitted: Boolean!
+
+  """Custom headline message for affiliate landing page (max 200 chars)"""
+  customMessage: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  uuid: UUID
+  user: PublicUserType
+  brandImageUrl: String
+  eligibilityStatus: String
+}
+
+"""
+Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
+"""
+type PodcastType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """Podcast name (must be unique)"""
+  name: String!
+
+  """Opening spoken by the host at episode start"""
+  intro: String!
+
+  """Brand voice and style guidelines applied to all episode types"""
+  prompt: String!
+
+  """Guidelines for generating news-focused episodes"""
+  newsPrompt: String!
+
+  """
+  Target word count for news episodes (used to calculate token limits). Default: 450 words (~3 min)
+  """
+  newsTargetWords: Int!
+
+  """
+  How far back (in hours) to look for news articles. Default: 48 (2 days). Use 168 for weekly.
+  """
+  newsLookbackHours: Int!
+
+  """
+  Maximum news articles to include per episode. Default: 100. Set to 0 for no limit.
+  """
+  maxNewsArticles: Int!
+
+  """Guidelines for generating research-focused episodes"""
+  researchPrompt: String!
+
+  """
+  Target word count for research episodes (used to calculate token limits). Default: 1400 words (~10 min)
+  """
+  researchTargetWords: Int!
+
+  """Closing spoken by the host at episode end"""
+  outro: String!
+
+  """URL-friendly podcast identifier (e.g., 'my-podcast')"""
+  slug: String
+
+  """Whether this podcast is active and accessible"""
+  enabled: Boolean!
+
+  """Podcast description for RSS feed and public pages"""
+  description: String
+
+  """Podcast owner name for RSS feed"""
+  ownerName: String
+
+  """Podcast owner email for RSS feed"""
+  ownerEmail: String
+
+  """Podcast owner website URL"""
+  ownerLink: String
+
+  """Encrypted Telegram channel ID for publishing episodes"""
+  tgChannelId: String
+
+  """Last response from Telegram API"""
+  tgResponse: String
+  categories: GenericScalar
+
+  """Total public page views for this podcast"""
+  viewCount: Int!
+
+  """Publication date of most recent live episode"""
+  latestEpisodeDate: DateTime
+
+  """Creation date of most recent episode (including drafts)"""
+  latestInternalEpisodeDate: DateTime
+
+  """Last successful news fetch timestamp"""
+  lastNewsFetchedAt: DateTime
+
+  """When this podcast was created"""
+  createdAt: DateTime
+
+  """When this podcast was last modified"""
+  updatedAt: DateTime
+  uuid: UUID
+  rssFeeds: [RssFeedType]
+  team: TeamType
+  imageUrl: String
+  thumbnailUrl: String
+  url: String
+  voice: VoiceType
+  imageHistory: [PodcastImageType]
+}
+
+type RssFeedType implements Node {
+  """The ID of the object"""
+  id: ID!
+  url: String!
+
+  """Feed title/name"""
+  name: String
+
+  """Whether the RSS feed URL is reachable (not 404/timeout)"""
+  isReachable: Boolean!
+
+  """Whether the RSS feed content is valid and parsable"""
+  isParsable: Boolean!
+
+  """Last time we attempted to fetch this feed"""
+  lastFetchAttempt: DateTime
+
+  """Cached average articles per day (updated when feed is fetched)"""
+  articlesPerDay: Float!
+  uuid: UUID
+}
+
+"""
+Type for PodcastImage model - represents a historical or current podcast cover image.
+"""
+type PodcastImageType implements Node {
+  """The ID of the object"""
+  id: ID!
+
+  """How this image was created"""
+  source: ApiPodcastImageSourceChoices!
+
+  """AI prompt used to generate this image (if AI generated)"""
+  prompt: String
+
+  """Whether this is the currently active image for the podcast"""
+  isCurrent: Boolean!
+  createdAt: DateTime!
+  uuid: UUID
+  imageUrl: String
+  sourceDisplay: String
+}
+
+"""An enumeration."""
+enum ApiPodcastImageSourceChoices {
+  """AI Generated"""
+  AI_GENERATED
+
+  """Manual Upload"""
+  MANUAL_UPLOAD
+
+  """Reverted from History"""
+  REVERTED
+}
+
+"""User data export schema"""
+type UserDataExport {
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+
+  """Unique identifier for this user"""
+  id: UUID!
+
+  """User's email address (must be unique)"""
+  email: String!
+  uuid: UUID
+  jobs: [JobType!]
+  teams: [TeamType!]
+  podcasts: [PodcastType!]
+  episodes: [EpisodeType!]
+  orders: [OrderNode!]
+  transactions: [TransactionNode!]
+  settings: [UserSettingType!]
+}
+
+"""
+JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
+chain information, and related jobs.
+"""
+type JobType implements Node {
+  taskId: UUID
+  kind: String
+
+  """Job input parameters (auto-converted to camelCase)"""
+  args: GenericScalar
+  status: String
+  error: String
+
+  """Job output/result (auto-converted to camelCase)"""
+  result: GenericScalar
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """How the job was triggered: manual, schedule, chain, retry, downstream"""
+  triggerSource: String
+
+  """Debug metadata for failed job reproduction"""
+  metadata: GenericScalar
+  chainId: UUID
+  chainPosition: Int
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  cost: Int
+  parentJobUuid: UUID
+  childJobs: [JobType]
+
+  """All jobs in the same chain, ordered by position"""
+  chainJobs: [JobType]
+
+  """Total number of jobs in this chain"""
+  chainJobCount: Int
+}
+
+"""GraphQL type for Episode model."""
+type EpisodeType implements Node {
+  """Episode title"""
+  title: String!
+
+  """Episode description or summary"""
+  description: String!
+
+  """Episode creation date"""
+  date: DateTime!
+
+  """Generated or uploaded MP3 audio file"""
+  audioFile: String
+
+  """Duration of audio in seconds"""
+  audioSeconds: Int
+
+  """
+  Whether audio was manually uploaded (true) or generated from transcript (false)
+  """
+  audioIsCustomUpload: Boolean!
+
+  """Episode transcript or script content"""
+  content: String!
+
+  """Version number of the current episode state"""
+  currentVersionNumber: Int!
+  news: [NewsType]
+
+  """Podcast this episode belongs to"""
+  podcast: PodcastType!
+
+  """Whether this episode is published and publicly visible"""
+  isLive: Boolean!
+
+  """Publication date when episode went live"""
+  podcastDate: DateTime
+
+  """Date when episode was posted to Telegram"""
+  telegramDate: DateTime
+
+  """Global unique identifier for RSS feed"""
+  podcastEpisodeGuid: UUID!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  audioUrl: String
+  versions: [EpisodeVersionType]
+  isCurrentValidated: Boolean
+  researchUrls: [String]
+  topic: TopicType
+  generatedArticles: [GeneratedArticleSummaryType]
+}
+
+type NewsType implements Node {
+  """The ID of the object"""
+  id: ID!
+  title: String!
+  description: String!
+  url: String!
+  publishedAt: DateTime!
+  source: String!
+  summary: String!
+  content: String!
+  validatedSummary: String
+  validationConfidence: NewsNewsValidationConfidenceChoices
+
+  """Whether this news article URL is blocked from our robots/scrapers"""
+  blocked: Boolean!
+  categories: GenericScalar
+  tags: GenericScalar
+  uuid: UUID
+  rssFeeds: [RssFeedType]
+}
+
+"""An enumeration."""
+enum NewsNewsValidationConfidenceChoices {
+  """High"""
+  HIGH
+
+  """Medium"""
+  MEDIUM
+
+  """Low"""
+  LOW
+
+  """Unverified"""
+  UNVERIFIED
+}
+
+"""
+GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
+"""
+type EpisodeVersionType {
+  """Sequential version number (1, 2, 3, etc.)"""
+  versionNumber: Int!
+
+  """Episode title at this version"""
+  title: String!
+
+  """Episode description at this version"""
+  description: String!
+
+  """Episode transcript content at this version"""
+  content: String!
+
+  """Whether this version passed compliance validation"""
+  validatedCompliance: Boolean!
+
+  """Whether this version passed fact-checking validation"""
+  validatedFacts: Boolean!
+
+  """Whether this version meets length requirements"""
+  validatedLength: Boolean!
+
+  """Notes from validation process or AI adjustments"""
+  validationNotes: String
+
+  """Type of change that created this version"""
+  changeType: ApiEpisodeVersionChangeTypeChoices!
+
+  """Audio duration in seconds"""
+  audioSeconds: Int
+
+  """When this version was created"""
+  createdAt: DateTime!
+
+  """When this version was last updated (for autosave)"""
+  updatedAt: DateTime!
+  uuid: UUID
+  createdBy: PublicUserType
+  audioUrl: String
+}
+
+"""An enumeration."""
+enum ApiEpisodeVersionChangeTypeChoices {
+  """Created"""
+  CREATED
+
+  """Manually Edited"""
+  EDITED
+
+  """Autosaved"""
+  AUTOSAVED
+
+  """Regenerated"""
+  REGENERATED
+
+  """Restored"""
+  RESTORED
+
+  """Compliance Adjustment"""
+  COMPLIANCE_ADJUSTMENT
+
+  """Facts Adjustment"""
+  FACTS_ADJUSTMENT
+
+  """Length Adjustment"""
+  LENGTH_ADJUSTMENT
+}
+
+type TopicType implements Node {
+  podcast: PodcastType!
+  episode: EpisodeType
+  title: String!
+  description: String
+  researchContent: String
+  validatedContent: String
+  transcript: String
+  isUserCreated: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  sources: [SourceType]
+}
+
+type SourceType implements Node {
+  topic: TopicType!
+  title: String
+  url: String!
+  content: String
+  createdAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""
+Lightweight type for articles linked from an episode — avoids circular import with blogs.schema.
+"""
+type GeneratedArticleSummaryType {
+  id: UUID
+  title: String
+  slug: String
+  status: String
+  readTimeMinutes: Int
+  publishedAt: DateTime
+  blogId: UUID
+  blogName: String
+  blogSlug: String
+}
+
+"""OrderNode is a GraphQL type that represents an order."""
+type OrderNode implements Node {
+  """User who placed this order"""
+  user: UserDataExport
+
+  """Stripe checkout session ID"""
+  sessionId: String
+
+  """Order amount in cents (USD only)"""
+  amount: Int!
+
+  """Stripe receipt URL"""
+  receiptUrl: String
+
+  """Stripe checkout session URL"""
+  sessionUrl: String
+
+  """Order payment status"""
+  status: ApiOrderStatusChoices!
+
+  """Order description"""
+  description: String
+
+  """When this order was created"""
+  createdAt: DateTime!
+
+  """When this order was last updated"""
+  updatedAt: DateTime!
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum ApiOrderStatusChoices {
+  """Pending"""
+  PENDING
+
+  """Paid"""
+  PAID
+
+  """Canceled"""
+  CANCELED
+}
+
+"""TransactionNode is a GraphQL type that represents a transaction."""
+type TransactionNode implements Node {
+  """User this transaction belongs to"""
+  user: UserDataExport
+
+  """Type of transaction"""
+  transactionType: ApiTransactionTransactionTypeChoices!
+
+  """
+  Transaction description (e.g., 'Credit purchase', 'Episode generation')
+  """
+  description: String!
+
+  """Credits added (positive) or deducted (negative)"""
+  creditAmount: Int!
+
+  """When this transaction occurred"""
+  createdAt: DateTime!
+
+  """Job that triggered this transaction (if any)"""
+  job: JobType
+
+  """Order that created this transaction (if any)"""
+  order: OrderNode
+
+  """Command execution that triggered this transaction (if any)"""
+  commandExecution: CommandExecutionType
+
+  """Detailed breakdown of charges (e.g., tokens in/out, characters, etc.)"""
+  chargesBreakdown: JSONString
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+  balance: Int
+  transactionTypeDisplay: String
+}
+
+"""An enumeration."""
+enum ApiTransactionTransactionTypeChoices {
+  """Credit Purchase"""
+  PURCHASE
+
+  """Credit Deduction"""
+  DEDUCTION
+
+  """Bonus Credits"""
+  BONUS
+
+  """Refund"""
+  REFUND
+
+  """Command Execution"""
+  COMMAND
+
+  """Job Execution"""
+  JOB
+
+  """Manual Adjustment"""
+  ADJUSTMENT
+}
+
+type UserSettingType implements Node {
+  key: String
+  value: String
+
+  """The ID of the object"""
+  id: ID!
+  uuid: UUID
+}
+
+"""An enumeration."""
+enum SocialsSocialAccountPlatformChoices {
+  """Facebook"""
+  FACEBOOK
+
+  """Instagram"""
+  INSTAGRAM
+
+  """X (Twitter)"""
+  X
+
+  """TikTok"""
+  TIKTOK
+
+  """LinkedIn"""
+  LINKEDIN
+
+  """YouTube"""
+  YOUTUBE
+
+  """Threads"""
+  THREADS
+
+  """Bluesky"""
+  BLUESKY
+
+  """Mastodon"""
+  MASTODON
+}
+
+"""An enumeration."""
+enum SocialsSocialAccountStatusChoices {
+  """Pending Setup"""
+  PENDING
+
+  """Active"""
+  ACTIVE
+
+  """Token Expired"""
+  EXPIRED
+
+  """Access Revoked"""
+  REVOKED
+
+  """Error"""
+  ERROR
+}
+
+"""GraphQL type for Broadcast model."""
+type BroadcastType {
+  """Unique identifier"""
+  id: UUID!
+
+  """Social account to publish to"""
+  socialAccount: SocialAccountType!
+
+  """Type of post"""
+  contentType: SocialsBroadcastContentTypeChoices!
+
+  """Post text/caption"""
+  text: String!
+
+  """Whether text was AI-generated from source content"""
+  textGenerated: Boolean!
+
+  """Link to include in post"""
+  linkUrl: String
+
+  """Hashtags for this post"""
+  hashtags: JSONString!
+
+  """URLs of media to include (images, videos)"""
+  mediaUrls: JSONString!
+
+  """Thumbnail URL for video posts"""
+  thumbnailUrl: String
+
+  """Broadcast status"""
+  status: SocialsBroadcastStatusChoices!
+
+  """Scheduled publish time"""
+  scheduledAt: DateTime
+
+  """Actual publish time"""
+  publishedAt: DateTime
+
+  """Post ID returned by platform"""
+  platformPostId: String
+
+  """URL to the published post"""
+  platformUrl: String
+
+  """Error message if failed"""
+  errorMessage: String
+
+  """Number of publish attempts"""
+  retryCount: Int!
+
+  """View/impression count"""
+  impressions: Int
+
+  """Engagement count (likes, comments, etc.)"""
+  engagements: Int
+
+  """Link click count"""
+  clicks: Int
+
+  """When analytics were last fetched"""
+  analyticsUpdatedAt: DateTime
+
+  """User who created this broadcast"""
+  createdBy: UserDataExport
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  platform: String
+  sourceType: String
+  sourceUuid: UUID
+}
+
+"""An enumeration."""
+enum SocialsBroadcastContentTypeChoices {
+  """Text Only"""
+  TEXT
+
+  """Image Post"""
+  IMAGE
+
+  """Video Post"""
+  VIDEO
+
+  """Carousel/Multiple Images"""
+  CAROUSEL
+
+  """Story"""
+  STORY
+
+  """Reel/Short Video"""
+  REEL
+
+  """Link Share"""
+  LINK
+}
+
+"""An enumeration."""
+enum SocialsBroadcastStatusChoices {
+  """Draft"""
+  DRAFT
+
+  """Scheduled"""
+  SCHEDULED
+
+  """Queued for Publishing"""
+  QUEUED
+
+  """Publishing"""
+  PUBLISHING
+
+  """Published"""
+  PUBLISHED
+
+  """Failed"""
+  FAILED
+
+  """Deleted"""
+  DELETED
+}
+
+"""GraphQL type for BroadcastTemplate model."""
+type BroadcastTemplateType {
+  id: UUID!
+
+  """Team that owns this template"""
+  team: TeamType!
+
+  """Template name"""
+  name: String!
+
+  """Target platform"""
+  platform: SocialsBroadcastTemplatePlatformChoices!
+
+  """Type of post"""
+  contentType: SocialsBroadcastTemplateContentTypeChoices!
+
+  """
+  Template text with placeholders: {title}, {description}, {excerpt}, {url}, {hashtags}
+  """
+  textTemplate: String!
+
+  """Default hashtags"""
+  defaultHashtags: JSONString!
+
+  """Use AI to generate platform-optimized content"""
+  useAiGeneration: Boolean!
+
+  """Custom AI prompt for content generation (uses default if empty)"""
+  aiPrompt: String
+
+  """Maximum character count for generated text"""
+  maxLength: Int
+  isActive: Boolean!
+
+  """Use as default template for this platform"""
+  isDefault: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""An enumeration."""
+enum SocialsBroadcastTemplatePlatformChoices {
+  """Facebook"""
+  FACEBOOK
+
+  """Instagram"""
+  INSTAGRAM
+
+  """X (Twitter)"""
+  X
+
+  """TikTok"""
+  TIKTOK
+
+  """LinkedIn"""
+  LINKEDIN
+
+  """YouTube"""
+  YOUTUBE
+
+  """Threads"""
+  THREADS
+
+  """Bluesky"""
+  BLUESKY
+
+  """Mastodon"""
+  MASTODON
+}
+
+"""An enumeration."""
+enum SocialsBroadcastTemplateContentTypeChoices {
+  """Text Only"""
+  TEXT
+
+  """Image Post"""
+  IMAGE
+
+  """Video Post"""
+  VIDEO
+
+  """Carousel/Multiple Images"""
+  CAROUSEL
+
+  """Story"""
+  STORY
+
+  """Reel/Short Video"""
+  REEL
+
+  """Link Share"""
+  LINK
+}
+
+"""GraphQL type for PublishConfig model."""
+type PublishConfigType {
+  id: UUID!
+
+  """Team that owns this config"""
+  team: TeamType!
+
+  """Configuration name"""
+  name: String!
+
+  """Type of content to auto-publish"""
+  sourceType: SocialsPublishConfigSourceTypeChoices!
+
+  """Specific blog/podcast ID (null = all)"""
+  sourceId: UUID
+
+  """Social accounts to publish to"""
+  socialAccounts: [SocialAccountType!]!
+
+  """Template to use for generating broadcasts"""
+  template: BroadcastTemplateType
+
+  """Whether this config is active"""
+  isActive: Boolean!
+
+  """Publish immediately when source is published"""
+  publishImmediately: Boolean!
+
+  """
+  Minutes to delay after source publish (0 = immediate if publish_immediately)
+  """
+  delayMinutes: Int!
+
+  """Include images/media from source"""
+  includeMedia: Boolean!
+
+  """Include link to source"""
+  includeLink: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""An enumeration."""
+enum SocialsPublishConfigSourceTypeChoices {
+  """Blog Articles"""
+  BLOG
+
+  """Podcast Episodes"""
+  PODCAST
+
+  """Pulse Recordings"""
+  PULSE
+
+  """All Content"""
+  ALL
+}
+
+"""GraphQL type for Blog model."""
+type BlogType {
+  """Unique identifier for this blog"""
+  id: UUID!
+
+  """Blog name (must be unique)"""
+  name: String!
+
+  """URL-friendly blog identifier (e.g., 'my-blog')"""
+  slug: String
+
+  """Blog description for RSS and public pages"""
+  description: String
+
+  """Short blog tagline/subtitle"""
+  tagline: String
+
+  """Blog cover/logo image (JPEG/PNG, max 3000x3000)"""
+  image: String
+
+  """Auto-generated thumbnail (300x300)"""
+  thumbnail: String
+
+  """Brand voice and style guidelines for article generation"""
+  prompt: String!
+
+  """Team that owns this blog"""
+  team: TeamType!
+
+  """Blog owner name for RSS feed"""
+  ownerName: String
+
+  """Blog owner email for RSS feed"""
+  ownerEmail: String
+
+  """Blog owner website URL"""
+  ownerLink: String
+
+  """Blog status"""
+  status: BlogsBlogStatusChoices!
+
+  """Whether this blog is active and publicly accessible"""
+  enabled: Boolean!
+
+  """Global unique identifier for RSS feed"""
+  guid: UUID!
+
+  """Total public page views"""
+  viewCount: Int!
+
+  """Number of RSS feed requests"""
+  rssLoadCount: Int!
+
+  """Publication date of most recent published article"""
+  latestArticleDate: DateTime
+
+  """When this blog was created"""
+  createdAt: DateTime!
+
+  """When this blog was last modified"""
+  updatedAt: DateTime!
+
+  """Blog this article belongs to"""
+  articles: [ArticleType!]!
+  articleCount: Int
+  publishedArticleCount: Int
+}
+
+"""An enumeration."""
+enum BlogsBlogStatusChoices {
+  """Draft"""
+  DRAFT
+
+  """Active"""
+  ACTIVE
+
+  """Archived"""
+  ARCHIVED
+}
+
+"""GraphQL type for Article model."""
+type ArticleType {
+  """Unique identifier for this article"""
+  id: UUID!
+
+  """Blog this article belongs to"""
+  blog: BlogType!
+
+  """Article title"""
+  title: String!
+
+  """URL-friendly article identifier"""
+  slug: String
+
+  """Article subtitle or summary"""
+  subtitle: String
+
+  """Article meta description for SEO"""
+  description: String
+
+  """Article content in markdown format"""
+  content: String!
+
+  """Short excerpt for previews (auto-generated if empty)"""
+  excerpt: String
+
+  """Featured/hero image for the article"""
+  featuredImage: String
+
+  """Alt text for featured image"""
+  featuredImageAlt: String
+
+  """Caption for featured image"""
+  featuredImageCaption: String
+
+  """Article status"""
+  status: BlogsArticleStatusChoices!
+
+  """Whether to feature this article prominently"""
+  isFeatured: Boolean!
+
+  """Version number of the current article state"""
+  currentVersionNumber: Int!
+
+  """News articles used as sources"""
+  news(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, title: String, source: String, publishedAt: DateTime, blocked: Boolean, newsUuid: UUID, rssFeedUuid: UUID, titleContains: String, sourceContains: String, category: String, tagKind: String, tagValue: String, political: String, financialSentiment: String): NewsTypeConnection!
+
+  """URLs accessed during research (excludes source news URLs)"""
+  researchUrls: JSONString!
+
+  """Episode this article was generated from (if any)"""
+  sourceEpisode: EpisodeType
+
+  """Type of source content: 'episode', 'pulse', 'news'"""
+  sourceContentType: String
+
+  """UUID of source content this article was generated from"""
+  sourceContentUuid: UUID
+
+  """Primary author of this article"""
+  author: UserDataExport
+
+  """SEO meta title (max 70 chars)"""
+  metaTitle: String
+
+  """SEO keywords list"""
+  metaKeywords: JSONString!
+
+  """Canonical URL if republished elsewhere"""
+  canonicalUrl: String
+
+  """Global unique identifier for RSS feed"""
+  articleGuid: UUID!
+
+  """Article creation date"""
+  createdAt: DateTime!
+
+  """When article was last modified"""
+  updatedAt: DateTime!
+
+  """When article was published"""
+  publishedAt: DateTime
+
+  """Scheduled publication time (future)"""
+  scheduledPublishAt: DateTime
+
+  """Total page views"""
+  viewCount: Int!
+
+  """Estimated reading time in minutes"""
+  readTimeMinutes: Int
+  versions: [ArticleVersionType!]!
+  wordCount: Int
+  isPublished: Boolean
+}
+
+"""An enumeration."""
+enum BlogsArticleStatusChoices {
+  """Draft"""
+  DRAFT
+
+  """In Review"""
+  REVIEW
+
+  """Published"""
+  PUBLISHED
+
+  """Archived"""
+  ARCHIVED
+}
+
+type NewsTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [NewsTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Relay edge containing a `NewsType` and its cursor."""
+type NewsTypeEdge {
+  """The item at the end of the edge"""
+  node: NewsType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""GraphQL type for ArticleVersion model."""
+type ArticleVersionType {
+  id: UUID!
+  article: ArticleType!
+  versionNumber: Int!
+  title: String!
+  content: String!
+  description: String
+  changeType: BlogsArticleVersionChangeTypeChoices!
+  changedBy: UserDataExport
+
+  """Notes about this version change"""
+  notes: String
+  createdAt: DateTime!
+
+  """Content has been validated"""
+  validatedContent: Boolean!
+
+  """Facts have been verified"""
+  validatedFacts: Boolean!
+
+  """SEO has been checked"""
+  validatedSeo: Boolean!
+}
+
+"""An enumeration."""
+enum BlogsArticleVersionChangeTypeChoices {
+  """Created"""
+  CREATED
+
+  """Edited"""
+  EDITED
+
+  """AI Generated"""
+  GENERATED
+
+  """Published"""
+  PUBLISHED
+
+  """Unpublished"""
+  UNPUBLISHED
+
+  """Restored"""
+  RESTORED
+
+  """Regenerated"""
+  REGENERATED
+}
+
 type TraceType {
   id: UUID!
   createdAt: DateTime!
@@ -2023,582 +3281,6 @@ type EmailPreferenceType {
   marketingEmails: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-"""User data export schema"""
-type UserDataExport {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
-
-  """Unique identifier for this user"""
-  id: UUID!
-
-  """User's email address (must be unique)"""
-  email: String!
-  uuid: UUID
-  jobs: [JobType!]
-  teams: [TeamType!]
-  podcasts: [PodcastType!]
-  episodes: [EpisodeType!]
-  orders: [OrderNode!]
-  transactions: [TransactionNode!]
-  settings: [UserSettingType!]
-}
-
-"""
-JobType is a GraphQL type that represents a job in the system. It includes fields for the job's UUID, type, status,
-chain information, and related jobs.
-"""
-type JobType implements Node {
-  taskId: UUID
-  kind: String
-
-  """Job input parameters (auto-converted to camelCase)"""
-  args: GenericScalar
-  status: String
-  error: String
-
-  """Job output/result (auto-converted to camelCase)"""
-  result: GenericScalar
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """How the job was triggered: manual, schedule, chain, retry, downstream"""
-  triggerSource: String
-
-  """Debug metadata for failed job reproduction"""
-  metadata: GenericScalar
-  chainId: UUID
-  chainPosition: Int
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  cost: Int
-  parentJobUuid: UUID
-  childJobs: [JobType]
-
-  """All jobs in the same chain, ordered by position"""
-  chainJobs: [JobType]
-
-  """Total number of jobs in this chain"""
-  chainJobCount: Int
-}
-
-type TeamType implements Node {
-  """The ID of the object"""
-  id: ID!
-
-  """Team name (must be unique)"""
-  name: String!
-  uuid: UUID
-  members: [TeamMembershipType]
-  podcasts: [PodcastType!]
-}
-
-type TeamMembershipType {
-  user: PublicUserType
-  role: String
-}
-
-"""User type that only exposes public fields (username, uuid) - no email"""
-type PublicUserType implements Node {
-  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
-  username: String!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-
-  """The user's affiliate profile if they have one"""
-  affiliateProfile: AffiliateProfileType
-}
-
-type AffiliateProfileType {
-  code: String!
-  brandImage: String
-  isActive: Boolean!
-
-  """Custom message displayed to user when not eligible"""
-  eligibilityMessage: String
-  eligibilityChangedAt: DateTime
-
-  """Stripe Connect Express account ID"""
-  stripeAccountId: String
-  stripeOnboardingCompleted: Boolean!
-  stripeChargesEnabled: Boolean!
-  stripePayoutsEnabled: Boolean!
-  stripeCountry: String
-  stripeDetailsSubmitted: Boolean!
-
-  """Custom headline message for affiliate landing page (max 200 chars)"""
-  customMessage: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  uuid: UUID
-  user: PublicUserType
-  brandImageUrl: String
-  eligibilityStatus: String
-}
-
-"""
-Type for Podcast model. This is used to create a new podcast and to get the list of podcasts.
-"""
-type PodcastType implements Node {
-  """The ID of the object"""
-  id: ID!
-
-  """Podcast name (must be unique)"""
-  name: String!
-
-  """Opening spoken by the host at episode start"""
-  intro: String!
-
-  """Brand voice and style guidelines applied to all episode types"""
-  prompt: String!
-
-  """Guidelines for generating news-focused episodes"""
-  newsPrompt: String!
-
-  """
-  Target word count for news episodes (used to calculate token limits). Default: 450 words (~3 min)
-  """
-  newsTargetWords: Int!
-
-  """
-  How far back (in hours) to look for news articles. Default: 48 (2 days). Use 168 for weekly.
-  """
-  newsLookbackHours: Int!
-
-  """
-  Maximum news articles to include per episode. Default: 100. Set to 0 for no limit.
-  """
-  maxNewsArticles: Int!
-
-  """Guidelines for generating research-focused episodes"""
-  researchPrompt: String!
-
-  """
-  Target word count for research episodes (used to calculate token limits). Default: 1400 words (~10 min)
-  """
-  researchTargetWords: Int!
-
-  """Closing spoken by the host at episode end"""
-  outro: String!
-
-  """URL-friendly podcast identifier (e.g., 'my-podcast')"""
-  slug: String
-
-  """Whether this podcast is active and accessible"""
-  enabled: Boolean!
-
-  """Podcast description for RSS feed and public pages"""
-  description: String
-
-  """Podcast owner name for RSS feed"""
-  ownerName: String
-
-  """Podcast owner email for RSS feed"""
-  ownerEmail: String
-
-  """Podcast owner website URL"""
-  ownerLink: String
-
-  """Encrypted Telegram channel ID for publishing episodes"""
-  tgChannelId: String
-
-  """Last response from Telegram API"""
-  tgResponse: String
-  categories: GenericScalar
-
-  """Total public page views for this podcast"""
-  viewCount: Int!
-
-  """Publication date of most recent live episode"""
-  latestEpisodeDate: DateTime
-
-  """Creation date of most recent episode (including drafts)"""
-  latestInternalEpisodeDate: DateTime
-
-  """Last successful news fetch timestamp"""
-  lastNewsFetchedAt: DateTime
-
-  """When this podcast was created"""
-  createdAt: DateTime
-
-  """When this podcast was last modified"""
-  updatedAt: DateTime
-  uuid: UUID
-  rssFeeds: [RssFeedType]
-  team: TeamType
-  imageUrl: String
-  thumbnailUrl: String
-  url: String
-  voice: VoiceType
-  imageHistory: [PodcastImageType]
-}
-
-type RssFeedType implements Node {
-  """The ID of the object"""
-  id: ID!
-  url: String!
-
-  """Feed title/name"""
-  name: String
-
-  """Whether the RSS feed URL is reachable (not 404/timeout)"""
-  isReachable: Boolean!
-
-  """Whether the RSS feed content is valid and parsable"""
-  isParsable: Boolean!
-
-  """Last time we attempted to fetch this feed"""
-  lastFetchAttempt: DateTime
-
-  """Cached average articles per day (updated when feed is fetched)"""
-  articlesPerDay: Float!
-  uuid: UUID
-}
-
-"""
-Type for PodcastImage model - represents a historical or current podcast cover image.
-"""
-type PodcastImageType implements Node {
-  """The ID of the object"""
-  id: ID!
-
-  """How this image was created"""
-  source: ApiPodcastImageSourceChoices!
-
-  """AI prompt used to generate this image (if AI generated)"""
-  prompt: String
-
-  """Whether this is the currently active image for the podcast"""
-  isCurrent: Boolean!
-  createdAt: DateTime!
-  uuid: UUID
-  imageUrl: String
-  sourceDisplay: String
-}
-
-"""An enumeration."""
-enum ApiPodcastImageSourceChoices {
-  """AI Generated"""
-  AI_GENERATED
-
-  """Manual Upload"""
-  MANUAL_UPLOAD
-
-  """Reverted from History"""
-  REVERTED
-}
-
-"""GraphQL type for Episode model."""
-type EpisodeType implements Node {
-  """Episode title"""
-  title: String!
-
-  """Episode description or summary"""
-  description: String!
-
-  """Episode creation date"""
-  date: DateTime!
-
-  """Generated or uploaded MP3 audio file"""
-  audioFile: String
-
-  """Duration of audio in seconds"""
-  audioSeconds: Int
-
-  """
-  Whether audio was manually uploaded (true) or generated from transcript (false)
-  """
-  audioIsCustomUpload: Boolean!
-
-  """Episode transcript or script content"""
-  content: String!
-
-  """Version number of the current episode state"""
-  currentVersionNumber: Int!
-  news: [NewsType]
-
-  """Podcast this episode belongs to"""
-  podcast: PodcastType!
-
-  """Whether this episode is published and publicly visible"""
-  isLive: Boolean!
-
-  """Publication date when episode went live"""
-  podcastDate: DateTime
-
-  """Date when episode was posted to Telegram"""
-  telegramDate: DateTime
-
-  """Global unique identifier for RSS feed"""
-  podcastEpisodeGuid: UUID!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  audioUrl: String
-  versions: [EpisodeVersionType]
-  isCurrentValidated: Boolean
-  researchUrls: [String]
-  topic: TopicType
-}
-
-type NewsType implements Node {
-  """The ID of the object"""
-  id: ID!
-  title: String!
-  description: String!
-  url: String!
-  publishedAt: DateTime!
-  source: String!
-  summary: String!
-  content: String!
-  validatedSummary: String
-  validationConfidence: NewsNewsValidationConfidenceChoices
-
-  """Whether this news article URL is blocked from our robots/scrapers"""
-  blocked: Boolean!
-  categories: GenericScalar
-  tags: GenericScalar
-  uuid: UUID
-  rssFeeds: [RssFeedType]
-}
-
-"""An enumeration."""
-enum NewsNewsValidationConfidenceChoices {
-  """High"""
-  HIGH
-
-  """Medium"""
-  MEDIUM
-
-  """Low"""
-  LOW
-
-  """Unverified"""
-  UNVERIFIED
-}
-
-"""
-GraphQL type for EpisodeVersion model - represents a snapshot of an episode at a point in time.
-"""
-type EpisodeVersionType {
-  """Sequential version number (1, 2, 3, etc.)"""
-  versionNumber: Int!
-
-  """Episode title at this version"""
-  title: String!
-
-  """Episode description at this version"""
-  description: String!
-
-  """Episode transcript content at this version"""
-  content: String!
-
-  """Whether this version passed compliance validation"""
-  validatedCompliance: Boolean!
-
-  """Whether this version passed fact-checking validation"""
-  validatedFacts: Boolean!
-
-  """Whether this version meets length requirements"""
-  validatedLength: Boolean!
-
-  """Notes from validation process or AI adjustments"""
-  validationNotes: String
-
-  """Type of change that created this version"""
-  changeType: ApiEpisodeVersionChangeTypeChoices!
-
-  """Audio duration in seconds"""
-  audioSeconds: Int
-
-  """When this version was created"""
-  createdAt: DateTime!
-
-  """When this version was last updated (for autosave)"""
-  updatedAt: DateTime!
-  uuid: UUID
-  createdBy: PublicUserType
-  audioUrl: String
-}
-
-"""An enumeration."""
-enum ApiEpisodeVersionChangeTypeChoices {
-  """Created"""
-  CREATED
-
-  """Manually Edited"""
-  EDITED
-
-  """Autosaved"""
-  AUTOSAVED
-
-  """Regenerated"""
-  REGENERATED
-
-  """Restored"""
-  RESTORED
-
-  """Compliance Adjustment"""
-  COMPLIANCE_ADJUSTMENT
-
-  """Facts Adjustment"""
-  FACTS_ADJUSTMENT
-
-  """Length Adjustment"""
-  LENGTH_ADJUSTMENT
-}
-
-type TopicType implements Node {
-  podcast: PodcastType!
-  episode: EpisodeType
-  title: String!
-  description: String
-  researchContent: String
-  validatedContent: String
-  transcript: String
-  isUserCreated: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  sources: [SourceType]
-}
-
-type SourceType implements Node {
-  topic: TopicType!
-  title: String
-  url: String!
-  content: String
-  createdAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
-"""OrderNode is a GraphQL type that represents an order."""
-type OrderNode implements Node {
-  """User who placed this order"""
-  user: UserDataExport
-
-  """Stripe checkout session ID"""
-  sessionId: String
-
-  """Order amount in cents (USD only)"""
-  amount: Int!
-
-  """Stripe receipt URL"""
-  receiptUrl: String
-
-  """Stripe checkout session URL"""
-  sessionUrl: String
-
-  """Order payment status"""
-  status: ApiOrderStatusChoices!
-
-  """Order description"""
-  description: String
-
-  """When this order was created"""
-  createdAt: DateTime!
-
-  """When this order was last updated"""
-  updatedAt: DateTime!
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-}
-
-"""An enumeration."""
-enum ApiOrderStatusChoices {
-  """Pending"""
-  PENDING
-
-  """Paid"""
-  PAID
-
-  """Canceled"""
-  CANCELED
-}
-
-"""TransactionNode is a GraphQL type that represents a transaction."""
-type TransactionNode implements Node {
-  """User this transaction belongs to"""
-  user: UserDataExport
-
-  """Type of transaction"""
-  transactionType: ApiTransactionTransactionTypeChoices!
-
-  """
-  Transaction description (e.g., 'Credit purchase', 'Episode generation')
-  """
-  description: String!
-
-  """Credits added (positive) or deducted (negative)"""
-  creditAmount: Int!
-
-  """When this transaction occurred"""
-  createdAt: DateTime!
-
-  """Job that triggered this transaction (if any)"""
-  job: JobType
-
-  """Order that created this transaction (if any)"""
-  order: OrderNode
-
-  """Command execution that triggered this transaction (if any)"""
-  commandExecution: CommandExecutionType
-
-  """Detailed breakdown of charges (e.g., tokens in/out, characters, etc.)"""
-  chargesBreakdown: JSONString
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
-  balance: Int
-  transactionTypeDisplay: String
-}
-
-"""An enumeration."""
-enum ApiTransactionTransactionTypeChoices {
-  """Credit Purchase"""
-  PURCHASE
-
-  """Credit Deduction"""
-  DEDUCTION
-
-  """Bonus Credits"""
-  BONUS
-
-  """Refund"""
-  REFUND
-
-  """Command Execution"""
-  COMMAND
-
-  """Job Execution"""
-  JOB
-
-  """Manual Adjustment"""
-  ADJUSTMENT
-}
-
-type UserSettingType implements Node {
-  key: String
-  value: String
-
-  """The ID of the object"""
-  id: ID!
-  uuid: UUID
 }
 
 """GraphQL type for NewsletterSubscriber model."""
@@ -2898,23 +3580,6 @@ type TopicTypeConnection {
 
   """Contains the nodes in this connection."""
   edges: [TopicTypeEdge]!
-}
-
-"""
-The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
-"""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: String
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: String
 }
 
 """A Relay edge containing a `TopicType` and its cursor."""
@@ -3773,6 +4438,9 @@ type ScheduleType implements Node {
   """Cron month of year field"""
   cronMonthOfYear: String!
 
+  """Timezone for cron schedule (default: America/Denver)"""
+  cronTimezone: String!
+
   """One-time execution datetime"""
   clockedTime: DateTime
 
@@ -3836,6 +4504,19 @@ enum JobKind {
   GENERATE_PULSE_AUDIO
   DELIVER_PULSE
   PUBLISH_PULSE_CHAIN
+  CREATE_ARTICLE
+  VALIDATE_ARTICLE
+  PUBLISH_ARTICLE
+  GENERATE_ARTICLE_FROM_EPISODE
+  GENERATE_ARTICLE_FROM_SOURCE
+  PUBLISH_ARTICLE_CHAIN
+  GENERATE_BROADCAST
+  PUBLISH_BROADCAST
+  PUBLISH_BROADCAST_BATCH
+  REFRESH_SOCIAL_ANALYTICS
+  VERIFY_SOCIAL_ACCOUNT
+  PUBLISH_EPISODE_WITH_SOCIALS
+  PUBLISH_ARTICLE_WITH_SOCIALS
   TEST_RAISE
   TEST_PRINT
 }
@@ -4210,23 +4891,6 @@ type EpisodeTypeEdge {
   cursor: String!
 }
 
-type NewsTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [NewsTypeEdge]!
-}
-
-"""A Relay edge containing a `NewsType` and its cursor."""
-type NewsTypeEdge {
-  """The item at the end of the edge"""
-  node: NewsType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
 type JobTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -4367,6 +5031,9 @@ type Mutation {
     customInstructions: String
     deliveryMethod: String
     description: String
+
+    """Enable email notifications when new recordings are generated"""
+    emailNotificationEnabled: Boolean
     includeIntro: Boolean
     includeOutro: Boolean
     introText: String
@@ -4625,6 +5292,85 @@ type Mutation {
   """Sync registered commands to database."""
   syncCommandRegistry: SyncCommandRegistry
 
+  """Mutation to create a new social account."""
+  createSocialAccount(accessToken: String, accountName: String!, apiKey: String, apiSecret: String, platform: String!, platformUsername: String, refreshToken: String, teamUuid: UUID!): CreateSocialAccount
+
+  """Mutation to update a social account."""
+  updateSocialAccount(accountName: String, accountUuid: UUID!, autoPublish: Boolean, defaultHashtags: [String], isActive: Boolean, platformUsername: String): UpdateSocialAccount
+
+  """Mutation to delete a social account."""
+  deleteSocialAccount(accountUuid: UUID!): DeleteSocialAccount
+
+  """Mutation to verify social account credentials."""
+  verifySocialAccount(accountUuid: UUID!): VerifySocialAccount
+
+  """Mutation to create a new broadcast."""
+  createBroadcast(contentType: String, hashtags: [String], linkUrl: String, mediaUrls: [String], scheduledAt: DateTime, socialAccountUuid: UUID!, sourceType: String, sourceUuid: UUID, text: String!): CreateBroadcast
+
+  """Mutation to update a broadcast."""
+  updateBroadcast(broadcastUuid: UUID!, hashtags: [String], linkUrl: String, scheduledAt: DateTime, text: String): UpdateBroadcast
+
+  """Mutation to publish a broadcast immediately."""
+  publishBroadcast(broadcastUuid: UUID!): PublishBroadcast
+
+  """Mutation to delete a broadcast."""
+  deleteBroadcast(broadcastUuid: UUID!): DeleteBroadcast
+
+  """
+  Mutation to generate a broadcast from source content (Article, Episode, Pulse).
+  """
+  generateBroadcastFromSource(socialAccountUuid: UUID!, sourceType: String!, sourceUuid: UUID!, templateUuid: UUID): GenerateBroadcastFromSource
+
+  """Mutation to create a broadcast template."""
+  createBroadcastTemplate(aiPrompt: String, contentType: String, defaultHashtags: [String], isDefault: Boolean, maxLength: Int, name: String!, platform: String!, teamUuid: UUID!, textTemplate: String!, useAiGeneration: Boolean): CreateBroadcastTemplate
+
+  """Mutation to create a publish configuration."""
+  createPublishConfig(delayMinutes: Int, includeLink: Boolean, includeMedia: Boolean, name: String!, publishImmediately: Boolean, socialAccountUuids: [UUID]!, sourceId: UUID, sourceType: String!, teamUuid: UUID!, templateUuid: UUID): CreatePublishConfig
+
+  """Mutation to create a new blog."""
+  createBlog(description: String, name: String!, slug: String, tagline: String, teamUuid: UUID!): CreateBlog
+
+  """Mutation to update a blog."""
+  updateBlog(blogUuid: UUID!, description: String, enabled: Boolean, name: String, prompt: String, slug: String, status: String, tagline: String): UpdateBlog
+
+  """Mutation to delete a blog and all its articles."""
+  deleteBlog(blogUuid: UUID!): DeleteBlog
+
+  """Mutation to create a new article."""
+  createArticle(blogUuid: UUID!, content: String!, description: String, slug: String, subtitle: String, title: String!): CreateArticle
+
+  """Mutation to update an article."""
+  updateArticle(articleUuid: UUID!, content: String, description: String, excerpt: String, isFeatured: Boolean, slug: String, status: String, subtitle: String, title: String): UpdateArticle
+
+  """Mutation to publish an article."""
+  publishArticle(articleUuid: UUID!): PublishArticle
+
+  """Mutation to unpublish an article."""
+  unpublishArticle(articleUuid: UUID!): UnpublishArticle
+
+  """Mutation to delete an article."""
+  deleteArticle(articleUuid: UUID!): DeleteArticle
+
+  """
+  Mutation to generate a blog article from source content (episode, pulse, news).
+  
+  Creates a background job to generate the article asynchronously.
+  The article is created in DRAFT status for user review before publishing.
+  """
+  generateArticleFromSource(
+    """Optional blog to associate the article with"""
+    blogUuid: UUID
+
+    """Source type: 'episode', 'pulse', or 'news'"""
+    sourceType: String!
+
+    """UUID of the source content"""
+    sourceUuid: UUID!
+
+    """Optional title override for the article"""
+    title: String
+  ): GenerateArticleFromSource
+
   """
   Non-authenticated mutation for recording traces from frontend or backend.
   Use this to capture errors, analytics, and telemetry from any source.
@@ -4868,6 +5614,9 @@ type Mutation {
     """Cron month of year field (default: '*')"""
     cronMonthOfYear: String
 
+    """Timezone for cron schedule (default: 'America/Denver')"""
+    cronTimezone: String
+
     """Whether the schedule is enabled"""
     enabled: Boolean = true
 
@@ -4920,6 +5669,9 @@ type Mutation {
 
     """Cron month of year field"""
     cronMonthOfYear: String
+
+    """Timezone for cron schedule"""
+    cronTimezone: String
 
     """Whether the schedule is enabled"""
     enabled: Boolean
@@ -5705,6 +6457,150 @@ type SyncCommandRegistry {
   success: Boolean
   message: String
   syncedCount: Int
+}
+
+"""Mutation to create a new social account."""
+type CreateSocialAccount {
+  success: Boolean
+  message: String
+  socialAccount: SocialAccountType
+}
+
+"""Mutation to update a social account."""
+type UpdateSocialAccount {
+  success: Boolean
+  message: String
+  socialAccount: SocialAccountType
+}
+
+"""Mutation to delete a social account."""
+type DeleteSocialAccount {
+  success: Boolean
+  message: String
+}
+
+"""Mutation to verify social account credentials."""
+type VerifySocialAccount {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to create a new broadcast."""
+type CreateBroadcast {
+  success: Boolean
+  message: String
+  broadcast: BroadcastType
+}
+
+"""Mutation to update a broadcast."""
+type UpdateBroadcast {
+  success: Boolean
+  message: String
+  broadcast: BroadcastType
+}
+
+"""Mutation to publish a broadcast immediately."""
+type PublishBroadcast {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to delete a broadcast."""
+type DeleteBroadcast {
+  success: Boolean
+  message: String
+}
+
+"""
+Mutation to generate a broadcast from source content (Article, Episode, Pulse).
+"""
+type GenerateBroadcastFromSource {
+  success: Boolean
+  message: String
+  job: JobType
+}
+
+"""Mutation to create a broadcast template."""
+type CreateBroadcastTemplate {
+  success: Boolean
+  message: String
+  template: BroadcastTemplateType
+}
+
+"""Mutation to create a publish configuration."""
+type CreatePublishConfig {
+  success: Boolean
+  message: String
+  publishConfig: PublishConfigType
+}
+
+"""Mutation to create a new blog."""
+type CreateBlog {
+  success: Boolean
+  message: String
+  blog: BlogType
+}
+
+"""Mutation to update a blog."""
+type UpdateBlog {
+  success: Boolean
+  message: String
+  blog: BlogType
+}
+
+"""Mutation to delete a blog and all its articles."""
+type DeleteBlog {
+  success: Boolean
+  message: String
+}
+
+"""Mutation to create a new article."""
+type CreateArticle {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+"""Mutation to update an article."""
+type UpdateArticle {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+"""Mutation to publish an article."""
+type PublishArticle {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+"""Mutation to unpublish an article."""
+type UnpublishArticle {
+  success: Boolean
+  message: String
+  article: ArticleType
+}
+
+"""Mutation to delete an article."""
+type DeleteArticle {
+  success: Boolean
+  message: String
+}
+
+"""
+Mutation to generate a blog article from source content (episode, pulse, news).
+
+Creates a background job to generate the article asynchronously.
+The article is created in DRAFT status for user review before publishing.
+"""
+type GenerateArticleFromSource {
+  success: Boolean
+  message: String
+  article: ArticleType
+  job: JobType
 }
 
 """

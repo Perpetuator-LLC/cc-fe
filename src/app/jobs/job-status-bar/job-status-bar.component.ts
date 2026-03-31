@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { Subscription, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -63,19 +63,19 @@ interface Topic {
   styleUrl: './job-status-bar.component.scss',
 })
 export class JobStatusBarComponent implements OnInit, OnDestroy {
+  private readonly jobService = inject(JobService);
+  private readonly messageService = inject(MessageService);
+  private readonly jobDisplayService = inject(JobDisplayService);
+  private readonly podcastsService = inject(PodcastsService);
+  private readonly episodeService = inject(EpisodeService);
+  private readonly researchService = inject(ResearchService);
+  private readonly router = inject(Router);
+
   private subscriptions: Subscription = new Subscription();
   protected jobs: EnrichedJob[] = [];
   private processedJobCompletions = new Set<string>(); // Track processed job UUIDs to prevent duplicates
 
-  constructor(
-    private jobService: JobService,
-    private messageService: MessageService,
-    private jobDisplayService: JobDisplayService,
-    private podcastsService: PodcastsService,
-    private episodeService: EpisodeService,
-    private researchService: ResearchService,
-    private router: Router,
-  ) {
+  constructor() {
     toObservable(this.jobService.jobs).subscribe({
       next: (jobs) => {
         // Get transitions before updating this.jobs
@@ -120,6 +120,8 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
               JobKind.GENERATE_PODCAST,
               JobKind.GENERATE_RESEARCH_TRANSCRIPT,
               JobKind.RESEARCH_TOPIC,
+              JobKind.GENERATE_ARTICLE_FROM_SOURCE,
+              JobKind.GENERATE_ARTICLE_FROM_EPISODE,
             ];
 
             if (handledByDisplayService.includes(jobKind)) {
@@ -346,6 +348,45 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
 
   hasTopicUuid(job: Job): boolean {
     return this.jobDisplayService.hasTopicUuid(job);
+  }
+
+  // Pulse methods
+  hasPulseConfigUuid(job: Job): boolean {
+    return this.jobDisplayService.hasPulseConfigUuid(job);
+  }
+
+  getPulseConfigUuid(job: Job): string | null {
+    return this.jobDisplayService.getPulseConfigUuid(job);
+  }
+
+  getPulseConfigName(): string {
+    return 'Pulse';
+  }
+
+  // Blog methods
+  hasBlogUuid(job: Job): boolean {
+    return this.jobDisplayService.hasBlogUuid(job);
+  }
+
+  getBlogUuid(job: Job): string | null {
+    return this.jobDisplayService.getBlogUuid(job);
+  }
+
+  getBlogName(job: Job): string {
+    return this.jobDisplayService.getBlogName(job) || 'Blog';
+  }
+
+  // Article methods
+  hasArticleUuid(job: Job): boolean {
+    return this.jobDisplayService.hasArticleUuid(job);
+  }
+
+  getArticleUuid(job: Job): string | null {
+    return this.jobDisplayService.getArticleUuid(job);
+  }
+
+  getArticleTitle(job: Job): string {
+    return this.jobDisplayService.getArticleTitle(job) || 'Article';
   }
 
   // Symbol methods for stock-related jobs

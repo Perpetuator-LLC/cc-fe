@@ -651,6 +651,58 @@ body.light {
   }
 }
 
+// Blog tag - Surface/neutral (content container)
+.resource-link-blog {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 60%, transparent);
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+}
+
+// Article tag - Tertiary purple (content piece, similar to episodes)
+.resource-link-article {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-tertiary);
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 50%, transparent);
+  }
+}
+
+// Social connection tag - Primary blue (external platform)
+.resource-link-social {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-primary-container) 50%, transparent);
+  }
+}
+
+// Social post/broadcast tag - Secondary orange (outbound content)
+.resource-link-post {
+  @extend %resource-link-base;
+
+  border: 1px solid var(--md-sys-color-secondary);
+  color: var(--md-sys-color-secondary);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-secondary-container) 50%, transparent);
+  }
+}
+
 // ============================================================================
 // Showcase/Demo Page Layout Utilities
 // ============================================================================

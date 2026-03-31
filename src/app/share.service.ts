@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
 
@@ -27,56 +27,87 @@ export class ShareService {
 
   /**
    * Build relative route for podcast (for routerLink)
+   * Format: /podcasts/slug-uuid (UUID at end for friendlier URLs)
    */
   buildPodcastRoute(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `/podcasts/${id}-${slug}`;
+    return `/podcasts/${slug}-${id}`;
   }
 
   /**
    * Build relative route for episode (for routerLink)
+   * Format: /episodes/slug-uuid (UUID at end for friendlier URLs)
    */
   buildEpisodeRoute(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `/episodes/${id}-${slug}`;
+    return `/episodes/${slug}-${id}`;
+  }
+
+  /**
+   * Build relative route for blog (for routerLink)
+   * Format: /blogs/slug-uuid (UUID at end for friendlier URLs)
+   */
+  buildBlogRoute(id: string, title: string): string {
+    const slug = this.generateSlug(title);
+    return `/blogs/${slug}-${id}`;
+  }
+
+  /**
+   * Build relative route for article (for routerLink)
+   * Format: /articles/slug-uuid (UUID at end for friendlier URLs)
+   */
+  buildArticleRoute(id: string, title: string): string {
+    const slug = this.generateSlug(title);
+    return `/articles/${slug}-${id}`;
   }
 
   /**
    * Build SEO-friendly URL for podcast (full URL with domain)
+   * Format: /podcasts/slug-uuid (UUID at end for friendlier URLs)
    */
   buildPodcastUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/podcasts/${id}-${slug}`;
+    return `${environment.SITE_URL}/podcasts/${slug}-${id}`;
   }
 
   /**
    * Build SEO-friendly URL for episode (full URL with domain)
+   * Format: /episodes/slug-uuid (UUID at end for friendlier URLs)
    */
   buildEpisodeUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/episodes/${id}-${slug}`;
+    return `${environment.SITE_URL}/episodes/${slug}-${id}`;
   }
 
   /**
-   * Extract ID from URL parameter (handles "id-slug" or "uuid-slug" format)
-   * Supports both numeric IDs and UUIDs
+   * Build SEO-friendly URL for blog (full URL with domain)
+   * Format: /blogs/slug-uuid (UUID at end for friendlier URLs)
+   */
+  buildBlogUrl(id: string, title: string): string {
+    const slug = this.generateSlug(title);
+    return `${environment.SITE_URL}/blogs/${slug}-${id}`;
+  }
+
+  /**
+   * Build SEO-friendly URL for article (full URL with domain)
+   * Format: /articles/slug-uuid (UUID at end for friendlier URLs)
+   */
+  buildArticleUrl(id: string, title: string): string {
+    const slug = this.generateSlug(title);
+    return `${environment.SITE_URL}/articles/${slug}-${id}`;
+  }
+
+  /**
+   * Extract ID from URL parameter (handles "id-slug", "slug-id", or "slug-id-slug" formats)
+   * Supports both numeric IDs and UUIDs anywhere in the parameter
    */
   extractIdFromSlugParam(param: string): string {
-    // Check if this looks like a UUID (36 characters with hyphens in the right places)
+    // Try to find a UUID anywhere in the string
     // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-    if (param.length >= 36) {
-      const possibleUuid = param.substring(0, 36);
-      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (uuidPattern.test(possibleUuid)) {
-        return possibleUuid;
-      }
-    }
-
-    // Fallback: try regex approach for UUID
-    const uuidPattern = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+    const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
     const uuidMatch = param.match(uuidPattern);
     if (uuidMatch) {
-      return uuidMatch[1];
+      return uuidMatch[0];
     }
 
     // Not a UUID, extract numeric ID (first part before hyphen)

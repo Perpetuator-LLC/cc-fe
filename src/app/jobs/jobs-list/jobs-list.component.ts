@@ -898,6 +898,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
     return this.jobDisplayService.hasPulseConfigUuid(job);
   }
 
+  // Check if job has blog UUID (from args or result)
+  hasBlogUuid(job: Job): boolean {
+    return this.jobDisplayService.hasBlogUuid(job);
+  }
+
+  // Check if job has article UUID (from args or result)
+  hasArticleUuid(job: Job): boolean {
+    return this.jobDisplayService.hasArticleUuid(job);
+  }
+
   // Check if job result has news UUIDs
   hasNewsUuids(job: Job): boolean {
     return this.jobDisplayService.hasNewsUuids(job);
@@ -926,6 +936,26 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Get pulse config UUID from merged data
   getPulseConfigUuid(job: Job): string | null {
     return this.jobDisplayService.getPulseConfigUuid(job);
+  }
+
+  // Get blog UUID from merged data
+  getBlogUuid(job: Job): string | null {
+    return this.jobDisplayService.getBlogUuid(job);
+  }
+
+  // Get blog name from args/result
+  getBlogName(job: Job): string {
+    return this.jobDisplayService.getBlogName(job) || 'Blog';
+  }
+
+  // Get article UUID from merged data
+  getArticleUuid(job: Job): string | null {
+    return this.jobDisplayService.getArticleUuid(job);
+  }
+
+  // Get article title from args/result
+  getArticleTitle(job: Job): string {
+    return this.jobDisplayService.getArticleTitle(job) || 'Article';
   }
 
   // Check if job has symbol/FQN

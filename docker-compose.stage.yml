@@ -1,0 +1,39 @@
+# Copyright (c) 2024-2026 Perpetuator LLC
+#
+# Staging docker-compose for stage.capitalcopilot.io
+# Uses different container names and ports from production
+
+services:
+  frontend:
+    container_name: cc-fe-stage-angular
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4480:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - VIRTUAL_HOST=stage.capitalcopilot.io
+      - VIRTUAL_PATH=/
+      - LETSENCRYPT_HOST=stage.capitalcopilot.io
+      - LETSENCRYPT_EMAIL=admin@perpetuator.io
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - nginx-proxy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  nginx-proxy:
+    external: true

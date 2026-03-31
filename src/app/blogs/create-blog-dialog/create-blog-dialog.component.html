@@ -1,0 +1,68 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<h2 mat-dialog-title>Create New Blog</h2>
+
+<mat-dialog-content>
+  <p class="dialog-description">Create a blog to organize and publish your articles.</p>
+
+  @if (loadingTeams) {
+    <div class="loading-state">
+      <mat-spinner diameter="24" />
+      <span>Loading teams...</span>
+    </div>
+  } @else if (teams.length === 0) {
+    <div class="empty-state">
+      <mat-icon>group_off</mat-icon>
+      <p>No teams found. Create a team first to organize your blogs.</p>
+    </div>
+  } @else {
+    <form [formGroup]="blogForm" class="blog-form">
+      <mat-form-field>
+        <mat-label>Blog Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g., Tech Insights" />
+        @if (blogForm.get('name')?.hasError('required')) {
+          <mat-error>Blog name is required</mat-error>
+        }
+        @if (blogForm.get('name')?.hasError('minlength')) {
+          <mat-error>Name must be at least 3 characters</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Team</mat-label>
+        <mat-select formControlName="teamUuid">
+          @for (team of teams; track team.uuid) {
+            <mat-option [value]="team.uuid">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+        @if (blogForm.get('teamUuid')?.hasError('required')) {
+          <mat-error>Please select a team</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Description (Optional)</mat-label>
+        <textarea matInput formControlName="description" rows="3" placeholder="What is this blog about?"></textarea>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Tagline (Optional)</mat-label>
+        <input matInput formControlName="tagline" placeholder="A short catchy phrase" />
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="onCancel()">Cancel</button>
+  @if (creating) {
+    <button mat-flat-button color="primary" disabled>
+      <mat-spinner diameter="18" />
+      <span>Creating...</span>
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" (click)="createBlog()" [disabled]="blogForm.invalid || teams.length === 0">
+      <mat-icon>add</mat-icon>
+      <span>Create Blog</span>
+    </button>
+  }
+</mat-dialog-actions>

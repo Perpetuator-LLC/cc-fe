@@ -625,6 +625,58 @@
   }
 }
 
+@mixin blog-tag {
+  @include tag-button-base();
+
+  // Outlined style with warm surface tones for blogs
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 60%, transparent);
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+}
+
+@mixin article-tag {
+  @include tag-button-base();
+
+  // Outlined style with tertiary (purple-ish) for articles - similar to episodes
+  border: 1px solid var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-tertiary);
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 50%, transparent);
+  }
+}
+
+@mixin social-tag {
+  @include tag-button-base();
+
+  // Outlined style with primary for social connections
+  border: 1px solid var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-primary-container) 50%, transparent);
+  }
+}
+
+@mixin post-tag {
+  @include tag-button-base();
+
+  // Outlined style with secondary (orange) for social posts
+  border: 1px solid var(--md-sys-color-secondary);
+  color: var(--md-sys-color-secondary);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 30%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--md-sys-color-secondary-container) 50%, transparent);
+  }
+}
+
 // ============================================================================
 // Version Control Patterns (For episode-version-control.component)
 // ============================================================================

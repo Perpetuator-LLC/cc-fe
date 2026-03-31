@@ -43,6 +43,7 @@ export class SharedFooterComponent {
   // Quick links
   quickLinks: FooterLink[] = [
     { label: 'Browse Podcasts', route: '/podcasts' },
+    { label: 'Browse Blogs', route: '/blogs' },
     { label: 'Categories', route: '/categories' },
   ];
 
