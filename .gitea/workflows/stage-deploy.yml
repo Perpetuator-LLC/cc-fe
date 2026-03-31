@@ -1,0 +1,127 @@
+# Copyright (c) 2024-2026 Perpetuator LLC
+#
+# Deploy to staging environment on push to stage branch
+# Trigger: Push or merge to `stage` branch
+# Target: stage.capitalcopilot.io on lestrange
+
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - stage
+
+env:
+  STAGE_PATH: /mnt/storage1/stage.capitalcopilot.io
+  COMPOSE_PROJECT_NAME: cc-fe-stage
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITEA_TOKEN: ${{ gitea.token }}
+        run: |
+          # Debug: Show available variables (without exposing secrets)
+          echo "GITHUB_TOKEN length: ${#GITHUB_TOKEN}"
+          echo "GITEA_TOKEN length: ${#GITEA_TOKEN}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          
+          WORK_DIR="/tmp/cc-fe-stage-checkout"
+          
+          # Try GITHUB_TOKEN first, fall back to GITEA_TOKEN
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            TOKEN="${GITHUB_TOKEN}"
+            echo "Using GITHUB_TOKEN"
+          elif [ -n "${GITEA_TOKEN}" ]; then
+            TOKEN="${GITEA_TOKEN}"
+            echo "Using GITEA_TOKEN"
+          else
+            echo "ERROR: No token available"
+            exit 1
+          fi
+          
+          REPO_URL="https://oauth2:${TOKEN}@git.perpetuator.io/${{ github.repository }}.git"
+          BRANCH="${{ github.ref_name }}"
+          
+          rm -rf ${WORK_DIR}
+          git clone --depth 1 --branch ${BRANCH} ${REPO_URL} ${WORK_DIR}
+          
+          echo "Checkout complete"
+          ls -la ${WORK_DIR}
+
+      - name: Verify deployment path
+        run: |
+          echo "Deploying to: ${{ env.STAGE_PATH }}"
+          mkdir -p ${{ env.STAGE_PATH }}
+
+      - name: Sync code to deployment path
+        run: |
+          WORK_DIR="/tmp/cc-fe-stage-checkout"
+          /usr/bin/rsync -av --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            --exclude 'logs/*' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude '.vscode' \
+            --exclude '.idea' \
+            --exclude '*.log' \
+            ${WORK_DIR}/ ${{ env.STAGE_PATH }}/
+
+      - name: Build and deploy containers
+        working-directory: ${{ env.STAGE_PATH }}
+        run: |
+          # Use staging docker-compose file with explicit project name
+          COMPOSE_FILE="docker-compose.stage.yml"
+          PROJECT_NAME="cc-fe-stage"
+
+          # Build images with staging tag
+          /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} build --progress=plain
+
+          # Force stop and remove existing staging containers
+          /usr/bin/docker ps -a --filter "name=cc-fe-stage" --format "{{.ID}}" | xargs -r /usr/bin/docker rm -f || true
+
+          # Start new containers
+          /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} up -d
+
+      - name: Health check
+        run: |
+          # Wait for services to stabilize
+          sleep 15
+          
+          # Check Express SSR server health
+          if /usr/bin/curl -sf http://localhost:4480/ > /dev/null; then
+            echo "✅ Frontend is healthy"
+          else
+            echo "⚠️ Frontend health check failed (may need more time)"
+            # Wait a bit more and retry
+            sleep 15
+            if /usr/bin/curl -sf http://localhost:4480/ > /dev/null; then
+              echo "✅ Frontend is healthy (second attempt)"
+            else
+              echo "❌ Frontend health check failed"
+              /usr/bin/docker logs cc-fe-stage-angular --tail 50
+              exit 1
+            fi
+          fi
+
+      - name: Show deployment status
+        run: |
+          echo "=========================================="
+          echo "Staging Deployment Complete!"
+          echo "=========================================="
+          echo "URL: https://stage.capitalcopilot.io"
+          echo ""
+          echo "Container Status:"
+          /usr/bin/docker ps --filter "name=cc-fe-stage" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          echo "=========================================="
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf /tmp/cc-fe-stage-checkout
