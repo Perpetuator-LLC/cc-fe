@@ -17,7 +17,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: deploy-host
     steps:
       - name: Checkout code
         env:
@@ -118,7 +118,7 @@ jobs:
           echo "URL: https://stage.capitalcopilot.io"
           echo ""
           echo "Container Status:"
-          /usr/bin/docker ps --filter "name=cc-fe-stage" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          /usr/bin/docker ps --filter "name=cc-fe-stage" --format "table {{.Names}}	{{.Status}}	{{.Ports}}"
           echo "=========================================="
 
       - name: Cleanup
