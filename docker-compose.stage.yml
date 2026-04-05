@@ -12,7 +12,7 @@ services:
       args:
         BUILD_CONFIG: staging
     ports:
-      - "4480:80"
+      - "4481:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
