@@ -18,6 +18,8 @@ RUN yarn install --frozen-lockfile
 
 # Copy source and build with the specified configuration
 COPY . .
+# Create base environment file from sample (the real config is in environment.staging.ts or environment.production.ts)
+RUN cp src/environments/sample.environment.ts src/environments/environment.ts
 # Generate GraphQL docs (spectaql) - skip if it fails (Node 22 compat issue)
 RUN yarn docs:graphql || mkdir -p docs/graphql
 RUN npx ng build --configuration=${BUILD_CONFIG}
