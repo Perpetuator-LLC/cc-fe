@@ -7,15 +7,20 @@
 # Stage 1: Build the Angular app with SSR
 FROM node:22-alpine AS build
 
+# Build configuration: production (default) or staging
+ARG BUILD_CONFIG=production
+
 WORKDIR /app
 
 # Install dependencies first (better layer caching)
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Copy source and build
+# Copy source and build with the specified configuration
 COPY . .
-RUN yarn build:prod
+# Generate GraphQL docs (spectaql) - skip if it fails (Node 22 compat issue)
+RUN yarn docs:graphql || mkdir -p docs/graphql
+RUN npx ng build --configuration=${BUILD_CONFIG}
 
 # Stage 2: Production Node.js server for SSR
 FROM node:22-alpine AS production

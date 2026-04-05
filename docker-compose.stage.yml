@@ -9,6 +9,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BUILD_CONFIG: staging
     ports:
       - "4480:80"
     restart: unless-stopped
