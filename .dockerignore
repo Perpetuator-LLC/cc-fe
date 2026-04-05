@@ -67,8 +67,5 @@ Thumbs.db
 .eslintrc*
 .prettierrc*
 eslint.config.js
-tsconfig*.json
-angular.json
-spectaql-config.yml
 commitlint.config.js
 ecosystem.config.cjs
