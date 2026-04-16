@@ -74,6 +74,16 @@ jobs:
             --exclude '*.log' \
             ${WORK_DIR}/ ${{ env.STAGE_PATH }}/
 
+      - name: Generate environment from OpenBao
+        env:
+          VAULT_ADDR: https://vault.perpetuator.io
+          ROLE_ID_FILE: /etc/vault/vault-role-id
+          SECRET_ID_FILE: /etc/vault/vault-secret-id
+        run: |
+          cd ${{ env.STAGE_PATH }}
+          chmod +x scripts/generate-env-from-vault.sh
+          ./scripts/generate-env-from-vault.sh secret/services/cc-fe/staging
+
       - name: Build and deploy containers
         working-directory: ${{ env.STAGE_PATH }}
         run: |

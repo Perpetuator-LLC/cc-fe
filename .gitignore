@@ -3,6 +3,7 @@
 # Custom for this project
 /src/environments/environment.ts
 /src/environments/environment.prod.ts
+/src/environments/environment.staging.ts
 /logs/*
 # Prevent accidental additions of paths starting with ~/ (home directory references)
 ~/*
