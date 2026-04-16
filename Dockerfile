@@ -43,5 +43,9 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget -q --spider http://localhost:80/ || exit 1
 
+# Run as non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+USER appuser
+
 # Start the Node.js SSR server
 CMD ["node", "server/server.mjs"]

@@ -1,0 +1,16 @@
+# Copyright (c) 2024-2026 Perpetuator LLC
+# https://github.com/gitleaks/gitleaks
+title = "Secret Scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+  description = "Global allowlist"
+  paths = [
+    '''\.env\.example$''',
+    '''\.env\.j2$''',
+    '''docs/''',
+    '''logs/''',
+    '''tests/fixtures/''',
+  ]

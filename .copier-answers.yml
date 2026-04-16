@@ -1,0 +1,17 @@
+# Copyright (c) 2024-2026 Perpetuator LLC
+# Copier answers file — tracks this repo's relationship to the platform-service-template.
+# Do not edit manually. Run `copier update --trust` to pull template updates.
+# https://copier.readthedocs.io/
+
+_src_path: gh:perpetuator/mcp/platform-service-template
+_commit: HEAD
+
+project_name: cc-fe
+project_description: Capital Copilot Frontend — Angular 21 SSR with Material Design 3
+service_type: frontend
+language: typescript
+package_manager: yarn
+deploy_target: stage.capitalcopilot.io
+deploy_branch: stage
+container_port: 80
+host_port: 4481
