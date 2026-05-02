@@ -5,11 +5,11 @@ export NVM_DIR="$HOME/.nvm"
 # Use the Node version from .nvmrc
 nvm use
 
-# Dependency vulnerability scan — fails only on critical CVEs
-# (yarn audit exit codes are bitmasks of all severity levels, not just the threshold,
-#  so we check the output directly rather than relying on the exit code)
-if yarn audit 2>&1 | grep -q "^│ critical"; then
-  echo "❌ Critical CVEs found — run 'yarn audit' to see details. Push blocked."
+# Dependency vulnerability scan — fails only on high or critical CVEs
+# yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical), so we grep output instead
+AUDIT_OUTPUT=$(yarn audit 2>&1)
+if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
+  echo "❌ High or Critical CVEs found — run 'yarn audit' to see details. Push blocked."
   exit 1
 fi
 
