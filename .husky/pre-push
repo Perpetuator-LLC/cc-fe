@@ -5,9 +5,13 @@ export NVM_DIR="$HOME/.nvm"
 # Use the Node version from .nvmrc
 nvm use
 
-# Dependency vulnerability scan — fails on critical CVEs only
-# (high CVEs are checked in CI to avoid blocking on transitive dev tooling deps)
-yarn audit --audit-level=critical
+# Dependency vulnerability scan — fails only on critical CVEs
+# (yarn audit exit codes are bitmasks of all severity levels, not just the threshold,
+#  so we check the output directly rather than relying on the exit code)
+if yarn audit 2>&1 | grep -q "^│ critical"; then
+  echo "❌ Critical CVEs found — run 'yarn audit' to see details. Push blocked."
+  exit 1
+fi
 
 npm test
 
