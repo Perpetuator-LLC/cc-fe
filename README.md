@@ -40,6 +40,7 @@ Create `src/environments/environment.ts` with the following content:
 export const environment = {
   production: false,
   API_URL: 'https://stage-api.capitalcopilot.io',
+  SITE_URL: 'http://localhost:4200',
   OAUTH_ISSUER: 'https://stage-api.capitalcopilot.io',
   OAUTH_CLIENT_ID: 'BCZ0upsNuX9nZu0HxxYdpP6Fq1ZQGbICCuLzgDME',
   OAUTH_SCOPES: 'read write',

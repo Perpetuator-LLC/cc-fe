@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 export const environment = {
   production: false,
   API_URL: 'https://api.domain.io',
@@ -8,4 +8,6 @@ export const environment = {
   OAUTH_ISSUER: 'http://127.0.0.1:8000',
   OAUTH_CLIENT_ID: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   OAUTH_SCOPES: 'read write',
+  TEST_EMAIL: '',
+  TEST_PASSWORD: '',
 };
