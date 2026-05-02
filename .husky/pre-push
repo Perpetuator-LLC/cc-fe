@@ -5,5 +5,8 @@ export NVM_DIR="$HOME/.nvm"
 # Use the Node version from .nvmrc
 nvm use
 
+# Dependency vulnerability scan — fails on high/critical CVEs
+yarn audit --audit-level=high
+
 npm test
 

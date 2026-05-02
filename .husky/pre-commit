@@ -5,5 +5,12 @@ export NVM_DIR="$HOME/.nvm"
 # Use the Node version from .nvmrc
 nvm use
 
+# Secret scanning — requires: brew install gitleaks
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged -v
+else
+  echo "⚠️  gitleaks not found — secret scanning skipped. Run: brew install gitleaks"
+fi
+
 npx lint-staged
 

@@ -8,190 +8,153 @@
 
 ## 🚀 Quick Start
 
+You do **not** need to run the backend locally. All frontend development points at the shared staging API.
+
 ### Prerequisites
 
-- Node.js 22+ and yarn
-- Access to Capital Copilot backend API
+- **Node.js 22** (use [nvm](https://github.com/nvm-sh/nvm): `nvm install 22 && nvm use 22`)
+- **yarn** (`npm install -g yarn`)
+- **Python 3** with pip (for pre-commit hooks)
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Perpetuator-LLC/cc-fe.git
-   cd cc-fe
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   yarn install
-   ```
-
-3. **Configure environment:**
-   
-   Create `src/environments/environment.ts`:
-   ```typescript
-   export const environment = {
-     production: false,
-     API_URL: 'http://127.0.0.1:8000',
-     STRIPE_PUBLIC_KEY: 'pk_test_...',
-   };
-   ```
-
-4. **Start development server:**
-   ```bash
-   yarn start
-   ```
-   
-   Navigate to `http://localhost:4200/`
-
-### Build
+### One-time setup
 
 ```bash
-# Development build
-yarn build
+# 1. Clone and enter the repo
+git clone https://git.perpetuator.io/Perpetuator-LLC/cc-fe.git
+cd cc-fe
 
-# Production build
-yarn build --configuration=production
+# 2. Install Node dependencies (also installs Husky git hooks automatically)
+yarn install
+
+# 3. Install gitleaks for secret scanning (runs automatically on every commit)
+brew install gitleaks
+# Windows/Linux: https://github.com/gitleaks/gitleaks/releases
+
+# 4. Create your local environment file (gitignored — never committed)
 ```
 
-## 📚 Documentation
+Create `src/environments/environment.ts` with the following content:
 
-Comprehensive documentation is available in the [`notes/`](./notes/) directory:
-
-### Quick Links
-
-- **[Getting Started](./notes/development/FRONTEND_QUICK_START.md)** - Complete setup guide
-- **[Development](./notes/development/DEVELOPMENT.md)** - Development workflows and standards
-- **[MD3 Theme Guide](./notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md)** - Material Design 3 styling
-- **[Architecture](./notes/architecture/)** - System design and patterns
-
-### Documentation Structure
-
-```
-notes/
-├── architecture/        # System design and component architecture
-├── development/         # Development workflows and setup
-├── reference/          # Technical standards and guides
-├── integrations/       # OAuth, GraphQL, third-party services
-├── production/         # Deployment and operations
-└── product/            # Features, user stories, personas
+```typescript
+// src/environments/environment.ts
+export const environment = {
+  production: false,
+  API_URL: 'https://stage-api.capitalcopilot.io',
+  OAUTH_ISSUER: 'https://stage-api.capitalcopilot.io',
+  OAUTH_CLIENT_ID: 'BCZ0upsNuX9nZu0HxxYdpP6Fq1ZQGbICCuLzgDME',
+  OAUTH_SCOPES: 'read write',
+  STRIPE_PUBLIC_KEY: 'pk_test_REPLACE_ME',
+  TEST_EMAIL: '',
+  TEST_PASSWORD: '',
+};
 ```
 
-See [notes/README.md](./notes/README.md) for complete documentation index.
+> **`src/environments/environment.ts` is gitignored — you must create it yourself.**
+>
+> `OAUTH_CLIENT_ID` is a public identifier (it appears in OAuth redirect URLs in the browser) — safe to share.
+> `STRIPE_PUBLIC_KEY` is a test-mode publishable key — also public. Never commit passwords or private keys.
 
-## 🛠️ Key Technologies
+### Start the dev server
 
-- **Framework:** Angular 21.1 (Standalone Components)
-- **UI Library:** Angular Material 3 (MD3)
-- **State Management:** Apollo Client 4.x + RxJS
-- **GraphQL:** Apollo Angular 13.x
-- **TypeScript:** 5.9+
-- **Package Manager:** yarn
-- **Linting:** ESLint 9.x + Stylelint
+```bash
+yarn start
+# → http://localhost:4200
+```
 
-## 📋 Available Commands
+---
+
+## 📋 Common Commands
 
 ```bash
 # Development
-yarn start              # Start dev server (port 4200)
-yarn build              # Build for development
-yarn build:prod         # Build for production
+yarn start                    # Dev server on :4200
+yarn build                    # Development build
+yarn build:prod               # Production build (also generates API docs)
 
-# Code Quality
-yarn lint               # Run ESLint
-yarn lint:scss          # Run Stylelint
-yarn lint --fix         # Auto-fix ESLint issues
-yarn test               # Run unit tests
+# Code quality (run before pushing)
+yarn lint                     # ESLint
+yarn lint:scss                # Stylelint
+yarn test                     # Unit tests (headless, no watch)
 
-# Documentation
-yarn docs:graphql       # Generate GraphQL API docs
-
-# Utilities
-yarn analyze            # Analyze bundle size
+# GraphQL API docs (generated into docs/graphql/ — gitignored)
+yarn docs:graphql             # Build docs from schema
+open docs/graphql/index.html  # View in browser (macOS)
 ```
 
-## 🎨 Styling Standards
+---
 
-This project follows **Material Design 3** guidelines:
+## 🔒 Git Hooks
 
-- ✅ Use MD3 design tokens: `var(--md-sys-color-*)`
-- ✅ Use Material components: `<mat-button>`, `<mat-card>`
-- ✅ 4px grid spacing: 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64
-- ✅ 2px font-size grid: 10, 12, 14, 16, 18, 20, 22, 24
-- ✅ Use `inject()` for dependency injection (not constructor injection)
-- ❌ No inline templates/styles (enforced by ESLint)
-- ❌ No hardcoded colors (hex/rgba) - use MD3 tokens
-- ❌ No `::ng-deep` or `!important`
+Two hook systems run automatically:
 
-See [MD3_COMPREHENSIVE_THEME_GUIDE.md](./notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md) for details.
+| Hook | Trigger | What it checks |
+|------|---------|----------------|
+| **Husky** + lint-staged | every `git commit` | ESLint, Prettier, copyright headers on staged files |
+| **gitleaks** (via Husky) | every `git commit` | Secret scanning on staged files |
+| **yarn audit** (via Husky) | every `git push` | High/critical CVEs in dependencies |
 
-## 🧪 Testing
+Renovate also runs continuously and opens PRs to update vulnerable dependencies.
+
+If a commit is rejected, fix the flagged issues and try again.
+
+---
+
+## 📚 API Documentation
+
+GraphQL API docs are generated from `src/app/schema.graphql` using [SpectaQL](https://github.com/anvilco/spectaql):
 
 ```bash
-# Run all tests
-yarn test
-
-# Run specific test
-yarn test --include='**/my-component.spec.ts'
-
-# Watch mode
-yarn test --watch
+yarn docs:graphql
+open docs/graphql/index.html
 ```
+
+> The schema is **auto-generated from the backend** — do not edit it manually. When the backend adds new queries or mutations, pull the updated schema and regenerate docs.
+
+---
+
+## 🎨 Styling Standards (MD3)
+
+This project enforces **Material Design 3** via ESLint and Stylelint — violations will fail linting.
+
+| Rule | Detail |
+|------|--------|
+| Colors | `var(--md-sys-color-*)` tokens only — no hex, no `rgba()` |
+| Spacing | 4px grid: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64px |
+| Font sizes | 2px grid: 10, 12, 14, 16, 18, 20, 22, 24px |
+| Dependency injection | `inject()` only — constructor injection is linted out |
+| Templates / styles | External files only (`templateUrl` / `styleUrl`) |
+| Forbidden | `::ng-deep`, `!important`, inline `style="..."` |
+
+See [notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md](./notes/reference/MD3_COMPREHENSIVE_THEME_GUIDE.md) for the full guide.
+
+---
 
 ## 📦 Project Structure
 
 ```
-capital-copilot-fe/
+cc-fe/
 ├── src/
-│   ├── app/                 # Application code
-│   │   ├── components/      # Reusable components
-│   │   ├── services/        # Business logic services
-│   │   ├── guards/          # Route guards
-│   │   └── ...
-│   ├── assets/              # Static assets
-│   ├── styles/              # Global styles and themes
-│   └── environments/        # Environment configs
-├── public/                  # Public static files
-├── notes/                   # Documentation
-├── scripts/                 # Build and utility scripts
-└── logs/                    # Build and test logs
+│   ├── app/                 # Application code (components, services, guards)
+│   ├── styles/              # Global styles and MD3 theme
+│   └── environments/        # Environment configs (gitignored — create locally)
+├── docs/graphql/            # Generated API docs (gitignored — run yarn docs:graphql)
+├── notes/                   # Developer documentation
+├── scripts/                 # Build and test utilities
+└── logs/                    # Local build/lint logs (gitignored)
 ```
 
-## 🔐 Environment Configuration
+---
 
-### Development (`src/environments/environment.ts`)
+## 📖 Documentation
 
-```typescript
-export const environment = {
-  production: false,
-  API_URL: 'http://127.0.0.1:8000',
-  OAUTH_CLIENT_ID: 'your_dev_client_id',
-  STRIPE_PUBLIC_KEY: 'pk_test_...',
-};
-```
+- **[notes/README.md](./notes/README.md)** — Full documentation index
+- **[notes/development/](./notes/development/)** — Development workflows and setup
+- **[notes/architecture/](./notes/architecture/)** — System design and patterns
+- **[notes/integrations/](./notes/integrations/)** — OAuth, GraphQL, third-party services
+- **[CHANGELOG.md](./CHANGELOG.md)** — Release history
 
-### Production (`src/environments/environment.prod.ts`)
-
-```typescript
-export const environment = {
-  production: true,
-  API_URL: 'https://api.capitalcopilot.io',
-  OAUTH_CLIENT_ID: 'your_prod_client_id',
-  STRIPE_PUBLIC_KEY: 'pk_live_...',
-};
-```
-
-## 🚀 Deployment
-
-See [PRODUCTION.md](./notes/production/PRODUCTION.md) for deployment instructions.
+---
 
 ## 📄 License
 
 Copyright © 2025-2026 Perpetuator LLC. All rights reserved.
-
-## 🆘 Support
-
-- **Documentation:** [notes/README.md](./notes/README.md)
-- **Issues:** [GitHub Issues](https://github.com/yourusername/capital-copilot-fe/issues)
-- **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
-

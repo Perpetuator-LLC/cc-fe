@@ -17,8 +17,28 @@ env:
   COMPOSE_PROJECT_NAME: cc-fe-stage
 
 jobs:
+  audit:
+    runs-on: deploy-host
+    steps:
+      - name: Checkout code
+        env:
+          GITEA_TOKEN: ${{ gitea.token }}
+        run: |
+          WORK_DIR="/tmp/cc-fe-audit-checkout"
+          rm -rf ${WORK_DIR}
+          git clone --depth 1 --branch ${{ github.ref_name }} \
+            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
+            ${WORK_DIR}
+          cd ${WORK_DIR} && yarn install --frozen-lockfile
+
+      - name: Dependency vulnerability scan
+        run: |
+          cd /tmp/cc-fe-audit-checkout
+          yarn audit --audit-level=high
+
   deploy:
     runs-on: deploy-host
+    needs: audit
     steps:
       - name: Checkout code
         env:
