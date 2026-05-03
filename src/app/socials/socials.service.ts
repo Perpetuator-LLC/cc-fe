@@ -11,7 +11,8 @@ export type SocialPlatform =
   | 'TIKTOK'
   | 'YOUTUBE'
   | 'THREADS'
-  | 'BLUESKY';
+  | 'BLUESKY'
+  | 'TELEGRAM';
 
 export type SocialAccountStatus = 'ACTIVE' | 'EXPIRED' | 'REVOKED' | 'ERROR';
 
@@ -241,6 +242,7 @@ const CREATE_SOCIAL_ACCOUNT_MUTATION = gql`
     $refreshToken: String
     $apiKey: String
     $apiSecret: String
+    $channelId: String
   ) {
     createSocialAccount(
       teamUuid: $teamUuid
@@ -251,6 +253,7 @@ const CREATE_SOCIAL_ACCOUNT_MUTATION = gql`
       refreshToken: $refreshToken
       apiKey: $apiKey
       apiSecret: $apiSecret
+      channelId: $channelId
     ) {
       success
       message
@@ -546,6 +549,7 @@ export class SocialsService {
       refreshToken?: string;
       apiKey?: string;
       apiSecret?: string;
+      channelId?: string;
     },
   ): Observable<{ success: boolean; socialAccount?: SocialAccount; message?: string }> {
     return this.apollo

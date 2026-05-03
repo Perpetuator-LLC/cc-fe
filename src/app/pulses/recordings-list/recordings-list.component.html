@@ -116,7 +116,7 @@
               </div>
 
               <div class="recording-actions" (click)="$event.stopPropagation()">
-                @if (recording.audioUrl && recording.status === 'READY') {
+                @if (recording.audioUrl && (recording.status === 'READY' || recording.status === 'DELIVERED')) {
                   <button mat-flat-button color="primary" (click)="playRecording(recording)">
                     <mat-icon>play_arrow</mat-icon>
                     Play

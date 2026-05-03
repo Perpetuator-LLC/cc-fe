@@ -60,6 +60,7 @@ import {
 } from '../image-history-dialog/image-history-dialog.component';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -97,6 +98,7 @@ import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/sch
     RssFeedTableComponent,
     VoiceSelectorComponent,
     ScheduleListComponent,
+    MatRadioModule,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -135,6 +137,8 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
   protected creatingNewsEpisode = false;
   protected creatingResearchEpisode = false;
   protected generatingImage = false;
+  protected telegramMode: 'cc_bot' | 'custom_bot' = 'cc_bot';
+  protected readonly CC_BOT_USERNAME = '@capital_copilot_bot';
   private readonly tabNames = [
     'episodes',
     'settings',
@@ -224,6 +228,12 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         slugControl?.disable();
       }
       this.podcastForm.patchValue(podcast);
+      // Detect Telegram mode from loaded data
+      if (podcast.tgBotToken) {
+        this.telegramMode = 'custom_bot';
+      } else {
+        this.telegramMode = 'cc_bot';
+      }
     });
 
     this.subscriptions.add(
@@ -588,6 +598,13 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
         this.messageService.error(`Failed to refresh Telegram response: ${err.message}`);
       },
     });
+  }
+
+  onTelegramModeChange(mode: 'cc_bot' | 'custom_bot'): void {
+    this.telegramMode = mode;
+    if (mode === 'cc_bot') {
+      this.podcastForm.patchValue({ tgBotToken: null });
+    }
   }
 
   savePodcast() {

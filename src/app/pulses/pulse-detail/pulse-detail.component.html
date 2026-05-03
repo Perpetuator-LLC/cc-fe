@@ -62,7 +62,7 @@
               <span class="pulse-date">{{ formatTimeAgo(latestPulse.createdAt) }}</span>
             </div>
             <div class="latest-pulse-actions">
-              @if (latestPulse.audioUrl && latestPulse.status === 'READY') {
+              @if (latestPulse.audioUrl && (latestPulse.status === 'READY' || latestPulse.status === 'DELIVERED')) {
                 <button mat-flat-button color="primary" (click)="playPulse(latestPulse)">
                   <mat-icon>play_arrow</mat-icon>
                   Play
@@ -640,7 +640,7 @@
                       </div>
 
                       <div class="recording-actions" (click)="$event.stopPropagation()">
-                        @if (pulse.audioUrl && pulse.status === 'READY') {
+                        @if (pulse.audioUrl && (pulse.status === 'READY' || pulse.status === 'DELIVERED')) {
                           <button mat-flat-button color="primary" (click)="playPulse(pulse)">
                             <mat-icon>play_arrow</mat-icon>
                             Play

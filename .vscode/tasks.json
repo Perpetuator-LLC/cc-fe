@@ -37,6 +37,18 @@
           }
         }
       }
+    },
+    {
+      "label": "Chrome Debug (AI Console) - With Logging",
+      "type": "shell",
+      "command": "mkdir -p ${workspaceFolder}/logs/ai_link/browser && /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222 --user-data-dir=${workspaceFolder}/logs/ai_link/browser --enable-logging=stderr --v=1 http://localhost:4200/terminal 2>&1 | tee ${workspaceFolder}/logs/ai_link/browser/chrome_debug.log",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Launches Chrome with remote debugging and logs console output to logs/ai_link/browser/chrome_debug.log"
     }
   ]
 }

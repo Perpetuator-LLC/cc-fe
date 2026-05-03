@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
 import { Subscription } from 'rxjs';
 import { SocialsService, SocialPlatform } from '../socials.service';
 import { TeamsService } from '../../team/teams.service';
@@ -19,12 +20,16 @@ interface Team {
   name: string | null;
 }
 
+export type TelegramMode = 'cc_bot' | 'custom_bot';
+
 interface PlatformOption {
   value: SocialPlatform;
   label: string;
   icon: string;
   requiresApiKey: boolean;
   requiresToken: boolean;
+  requiresChannelId: boolean;
+  hasModes: boolean;
 }
 
 @Component({
@@ -40,6 +45,7 @@ interface PlatformOption {
     MatSelectModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatRadioModule,
   ],
   templateUrl: './connect-social-dialog.component.html',
   styleUrl: './connect-social-dialog.component.scss',
@@ -57,14 +63,74 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
   teams: Team[] = [];
   loadingTeams = true;
   connecting = false;
+  telegramMode: TelegramMode = 'cc_bot';
+
+  readonly CC_BOT_USERNAME = '@capital_copilot_bot';
 
   readonly platforms: PlatformOption[] = [
-    { value: 'TWITTER', label: 'Twitter / X', icon: 'share', requiresApiKey: true, requiresToken: true },
-    { value: 'LINKEDIN', label: 'LinkedIn', icon: 'work', requiresApiKey: false, requiresToken: true },
-    { value: 'BLUESKY', label: 'Bluesky', icon: 'cloud', requiresApiKey: false, requiresToken: true },
-    { value: 'THREADS', label: 'Threads', icon: 'forum', requiresApiKey: false, requiresToken: true },
-    { value: 'FACEBOOK', label: 'Facebook', icon: 'facebook', requiresApiKey: false, requiresToken: true },
-    { value: 'INSTAGRAM', label: 'Instagram', icon: 'photo_camera', requiresApiKey: false, requiresToken: true },
+    {
+      value: 'TELEGRAM',
+      label: 'Telegram',
+      icon: 'send',
+      requiresApiKey: false,
+      requiresToken: false,
+      requiresChannelId: true,
+      hasModes: true,
+    },
+    {
+      value: 'TWITTER',
+      label: 'Twitter / X',
+      icon: 'share',
+      requiresApiKey: true,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
+    {
+      value: 'LINKEDIN',
+      label: 'LinkedIn',
+      icon: 'work',
+      requiresApiKey: false,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
+    {
+      value: 'BLUESKY',
+      label: 'Bluesky',
+      icon: 'cloud',
+      requiresApiKey: false,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
+    {
+      value: 'THREADS',
+      label: 'Threads',
+      icon: 'forum',
+      requiresApiKey: false,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
+    {
+      value: 'FACEBOOK',
+      label: 'Facebook',
+      icon: 'facebook',
+      requiresApiKey: false,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
+    {
+      value: 'INSTAGRAM',
+      label: 'Instagram',
+      icon: 'photo_camera',
+      requiresApiKey: false,
+      requiresToken: true,
+      requiresChannelId: false,
+      hasModes: false,
+    },
   ];
 
   constructor() {
@@ -76,6 +142,7 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
       apiKey: [''],
       apiSecret: [''],
       accessToken: [''],
+      channelId: [''],
     });
 
     // Update validators based on platform selection
@@ -117,6 +184,12 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     const apiKeyControl = this.socialForm.get('apiKey');
     const apiSecretControl = this.socialForm.get('apiSecret');
     const accessTokenControl = this.socialForm.get('accessToken');
+    const channelIdControl = this.socialForm.get('channelId');
+
+    // Reset Telegram mode when switching platforms
+    if (platform === 'TELEGRAM') {
+      this.telegramMode = 'cc_bot';
+    }
 
     if (selectedPlatform?.requiresApiKey) {
       apiKeyControl?.setValidators([Validators.required]);
@@ -126,15 +199,38 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
       apiSecretControl?.clearValidators();
     }
 
-    if (selectedPlatform?.requiresToken) {
+    if (selectedPlatform?.requiresToken && !(platform === 'TELEGRAM' && this.telegramMode === 'cc_bot')) {
       accessTokenControl?.setValidators([Validators.required]);
     } else {
       accessTokenControl?.clearValidators();
     }
 
+    if (selectedPlatform?.requiresChannelId) {
+      channelIdControl?.setValidators([Validators.required]);
+    } else {
+      channelIdControl?.clearValidators();
+    }
+
     apiKeyControl?.updateValueAndValidity();
     apiSecretControl?.updateValueAndValidity();
     accessTokenControl?.updateValueAndValidity();
+    channelIdControl?.updateValueAndValidity();
+  }
+
+  onTelegramModeChange(mode: TelegramMode): void {
+    this.telegramMode = mode;
+    const accessTokenControl = this.socialForm.get('accessToken');
+    if (mode === 'cc_bot') {
+      accessTokenControl?.clearValidators();
+      accessTokenControl?.setValue('');
+    } else {
+      accessTokenControl?.setValidators([Validators.required]);
+    }
+    accessTokenControl?.updateValueAndValidity();
+  }
+
+  isTelegram(): boolean {
+    return this.socialForm.get('platform')?.value === 'TELEGRAM';
   }
 
   getSelectedPlatform(): PlatformOption | undefined {
@@ -147,7 +243,8 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     }
 
     this.connecting = true;
-    const { platform, teamUuid, accountName, platformUsername, apiKey, apiSecret, accessToken } = this.socialForm.value;
+    const { platform, teamUuid, accountName, platformUsername, apiKey, apiSecret, accessToken, channelId } =
+      this.socialForm.value;
 
     this.subscriptions.add(
       this.socialsService
@@ -156,6 +253,7 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
           apiKey: apiKey || undefined,
           apiSecret: apiSecret || undefined,
           accessToken: accessToken || undefined,
+          channelId: channelId || undefined,
         })
         .subscribe({
           next: (result) => {

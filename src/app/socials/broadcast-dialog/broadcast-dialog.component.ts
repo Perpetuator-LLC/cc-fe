@@ -2,11 +2,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  MatDialogRef,
-  MatDialogModule,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,6 +37,7 @@ const PLATFORM_LIMITS: Record<string, PlatformLimit> = {
   BLUESKY: { name: 'Bluesky', maxLength: 300 },
   MASTODON: { name: 'Mastodon', maxLength: 500 },
   THREADS: { name: 'Threads', maxLength: 500 },
+  TELEGRAM: { name: 'Telegram', maxLength: 4096 },
 };
 
 @Component({
@@ -90,10 +87,7 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
   private initForm(): void {
     const broadcast = this.data?.broadcast;
     this.form = this.fb.group({
-      socialAccountUuid: [
-        this.data?.socialAccountUuid || broadcast?.socialAccount?.id || '',
-        Validators.required,
-      ],
+      socialAccountUuid: [this.data?.socialAccountUuid || broadcast?.socialAccount?.id || '', Validators.required],
       text: [broadcast?.text || '', Validators.required],
       linkUrl: [broadcast?.linkUrl || ''],
       hashtags: [broadcast?.hashtags || []],
@@ -248,15 +242,10 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
         return 'groups';
       case 'TIKTOK':
         return 'music_note';
+      case 'TELEGRAM':
+        return 'send';
       default:
         return 'share';
     }
   }
 }
-
-
-
-
-
-
-

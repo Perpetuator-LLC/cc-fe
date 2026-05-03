@@ -100,6 +100,8 @@ export class PostsListComponent implements OnInit, OnDestroy {
         return 'cloud';
       case 'MASTODON':
         return 'public';
+      case 'TELEGRAM':
+        return 'send';
       default:
         return 'share';
     }

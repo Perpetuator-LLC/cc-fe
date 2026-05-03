@@ -15,6 +15,29 @@
       "request": "launch",
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html"
+    },
+    {
+      "name": "Chrome Debug (AI Console)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4200/terminal",
+      "userDataDir": "${workspaceFolder}/logs/ai_link/browser",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "--enable-logging=stderr",
+        "--v=1"
+      ],
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/src"
+    },
+    {
+      "name": "Chrome Debug (AI Console) - Attach",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:4200/terminal",
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/src"
     }
   ]
 }

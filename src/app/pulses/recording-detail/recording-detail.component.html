@@ -51,7 +51,7 @@
           </div>
 
           <div class="header-actions">
-            @if (recording.audioUrl && recording.status === 'READY') {
+            @if (recording.audioUrl && (recording.status === 'READY' || recording.status === 'DELIVERED')) {
               <button mat-flat-button color="primary" (click)="playRecording()">
                 <mat-icon>play_arrow</mat-icon>
                 Play

@@ -29,6 +29,98 @@
   }
 }
 
+.mode-section {
+  margin: 8px 0;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  h4 {
+    margin: 0 0 12px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mode-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mode-title {
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .mode-description {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.setup-instructions {
+  display: flex;
+  gap: 12px;
+
+  margin: 8px 0;
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  > mat-icon {
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
+  }
+
+  .instruction-title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    a {
+      color: var(--md-sys-color-primary);
+    }
+  }
+
+  .channel-id-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    a {
+      color: var(--md-sys-color-primary);
+    }
+
+    code {
+      padding: 0 4px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--md-sys-color-surface-container);
+    }
+  }
+}
+
 .credentials-section {
   margin: 8px 0;
   padding: 16px;
