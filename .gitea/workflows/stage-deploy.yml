@@ -34,7 +34,16 @@ jobs:
       - name: Dependency vulnerability scan
         run: |
           cd /tmp/cc-fe-audit-checkout
-          yarn audit --audit-level=high
+          # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical)
+          # --audit-level flag does NOT suppress the bitmask exit code in yarn v1
+          # Use grep-based detection instead to only block on high/critical CVEs
+          AUDIT_OUTPUT=$(yarn audit 2>&1) || true
+          echo "$AUDIT_OUTPUT"
+          if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
+            echo "❌ High or Critical CVEs found — deployment blocked."
+            exit 1
+          fi
+          echo "✅ No high or critical CVEs found."
 
   deploy:
     runs-on: deploy-host
