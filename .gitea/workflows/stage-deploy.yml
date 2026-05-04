@@ -3,6 +3,13 @@
 # Deploy to staging environment on push to stage branch
 # Trigger: Push or merge to `stage` branch
 # Target: stage.capitalcopilot.io on lestrange
+#
+# CI gate mirrors local pre-commit + pre-push hooks:
+#   audit  — CVE scan (mirrors pre-push: yarn audit, high/critical only)
+#   lint   — ESLint + stylelint + MD3 + unused SCSS + format check (mirrors lint-staged)
+#   test   — Full unit test suite (mirrors pre-push: npm test)
+#   deploy — Only runs when audit + lint + test all pass
+#   notify — Emails the commit author when any job fails
 
 name: Deploy to Staging
 
@@ -17,6 +24,11 @@ env:
   COMPOSE_PROJECT_NAME: cc-fe-stage
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Shared setup macro: clone repo + ensure yarn is available
+  # Re-used by audit, lint, and test jobs via separate work dirs
+  # ---------------------------------------------------------------------------
+
   audit:
     runs-on: deploy-host
     steps:
@@ -29,16 +41,13 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-          # Install yarn if not available on this runner
           command -v yarn || npm install -g yarn
 
       - name: Dependency vulnerability scan
         run: |
           cd /tmp/cc-fe-audit-checkout
-          # yarn audit only needs yarn.lock + package.json, no full install required
-          # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical)
-          # --audit-level flag does NOT suppress the bitmask exit code in yarn v1
-          # Use grep-based detection instead to only block on high/critical CVEs
+          # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical).
+          # --audit-level does NOT suppress the bitmask in yarn v1, so grep instead.
           AUDIT_OUTPUT=$(yarn audit 2>&1) || true
           echo "$AUDIT_OUTPUT"
           if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
@@ -47,9 +56,76 @@ jobs:
           fi
           echo "✅ No high or critical CVEs found."
 
+  lint:
+    runs-on: deploy-host
+    steps:
+      - name: Checkout code
+        env:
+          GITEA_TOKEN: ${{ gitea.token }}
+        run: |
+          WORK_DIR="/tmp/cc-fe-lint-checkout"
+          rm -rf ${WORK_DIR}
+          git clone --depth 1 --branch ${{ github.ref_name }} \
+            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
+            ${WORK_DIR}
+          command -v yarn || npm install -g yarn
+
+      - name: Install dependencies
+        run: |
+          cd /tmp/cc-fe-lint-checkout
+          yarn install --frozen-lockfile
+
+      - name: Lint (ESLint + stylelint + MD3 + format check)
+        run: |
+          cd /tmp/cc-fe-lint-checkout
+          # Mirrors lint-staged + yarn lint:all:
+          #   yarn lint          → ng lint (ESLint)
+          #   yarn lint:scss     → stylelint
+          #   yarn lint:md3      → MD3 compliance check
+          #   yarn lint:scss:unused:strict → unused SCSS check
+          #   yarn format:check  → Prettier format check
+          yarn lint:all
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf /tmp/cc-fe-lint-checkout
+
+  test:
+    runs-on: deploy-host
+    steps:
+      - name: Checkout code
+        env:
+          GITEA_TOKEN: ${{ gitea.token }}
+        run: |
+          WORK_DIR="/tmp/cc-fe-test-checkout"
+          rm -rf ${WORK_DIR}
+          git clone --depth 1 --branch ${{ github.ref_name }} \
+            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
+            ${WORK_DIR}
+          command -v yarn || npm install -g yarn
+
+      - name: Install dependencies
+        run: |
+          cd /tmp/cc-fe-test-checkout
+          yarn install --frozen-lockfile
+
+      - name: Run unit tests
+        env:
+          # CI=true makes Angular's default Karma config use ChromeHeadless
+          CI: "true"
+          # Disable Chrome sandbox for CI environments
+          CHROMIUM_FLAGS: "--no-sandbox --disable-gpu"
+        run: |
+          cd /tmp/cc-fe-test-checkout
+          yarn test
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf /tmp/cc-fe-test-checkout
+
   deploy:
     runs-on: deploy-host
-    needs: audit
+    needs: [audit, lint, test]
     steps:
       - name: Checkout code
         env:
@@ -167,3 +243,58 @@ jobs:
         if: always()
         run: |
           rm -rf /tmp/cc-fe-stage-checkout
+
+  # ---------------------------------------------------------------------------
+  # Notify the commit author by email when any job fails
+  # Requires: mailutils (apt install mailutils) or sendmail on deploy-host
+  # ---------------------------------------------------------------------------
+  notify:
+    runs-on: deploy-host
+    needs: [audit, lint, test, deploy]
+    if: failure()
+    steps:
+      - name: Send failure email
+        env:
+          GITEA_TOKEN: ${{ gitea.token }}
+          ACTOR: ${{ github.actor }}
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+          SERVER_URL: ${{ gitea.server_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Fetch the commit author's email from the Gitea API
+          AUTHOR_EMAIL=$(curl -sf \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            "${SERVER_URL}/api/v1/repos/${REPO}/git/commits/${COMMIT_SHA}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('commit',{}).get('author',{}).get('email',''))" 2>/dev/null || true)
+
+          if [ -z "${AUTHOR_EMAIL}" ]; then
+            echo "⚠️ Could not determine author email — skipping notification."
+            exit 0
+          fi
+
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          RUN_URL="${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}"
+          SUBJECT="❌ CI failed on ${BRANCH} (${SHORT_SHA})"
+          BODY="One or more CI checks failed for your commit on branch '${BRANCH}'.
+
+Commit:  ${SHORT_SHA}
+Author:  ${ACTOR}
+Run URL: ${RUN_URL}
+
+Failed jobs may include: audit (CVE scan), lint (ESLint/stylelint), test (unit tests), or deploy.
+
+Check the run URL above for details and fix the issues before the build can be promoted to staging."
+
+          if command -v sendmail &> /dev/null; then
+            printf "To: %s\nSubject: %s\n\n%s\n" "${AUTHOR_EMAIL}" "${SUBJECT}" "${BODY}" | sendmail "${AUTHOR_EMAIL}"
+            echo "✅ Failure notification sent to ${AUTHOR_EMAIL}"
+          elif command -v mail &> /dev/null; then
+            echo "${BODY}" | mail -s "${SUBJECT}" "${AUTHOR_EMAIL}"
+            echo "✅ Failure notification sent to ${AUTHOR_EMAIL}"
+          else
+            echo "⚠️ No mail transport available (install mailutils on deploy-host)."
+            echo "   Would have emailed: ${AUTHOR_EMAIL}"
+            echo "   Subject: ${SUBJECT}"
+          fi
