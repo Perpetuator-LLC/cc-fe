@@ -29,11 +29,13 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-          cd ${WORK_DIR} && yarn install --frozen-lockfile
+          # Install yarn if not available on this runner
+          command -v yarn || npm install -g yarn
 
       - name: Dependency vulnerability scan
         run: |
           cd /tmp/cc-fe-audit-checkout
+          # yarn audit only needs yarn.lock + package.json, no full install required
           # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical)
           # --audit-level flag does NOT suppress the bitmask exit code in yarn v1
           # Use grep-based detection instead to only block on high/critical CVEs
