@@ -25,8 +25,9 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Shared setup macro: clone repo + ensure yarn is available
-  # Re-used by audit, lint, and test jobs via separate work dirs
+  # All Node operations run inside Docker (node:22-alpine) because the
+  # deploy-host runner does not have node/npm/yarn in PATH.
+  # Docker (/usr/bin/docker) is always available on the runner.
   # ---------------------------------------------------------------------------
 
   audit:
@@ -41,20 +42,28 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-          command -v yarn || npm install -g yarn
 
       - name: Dependency vulnerability scan
         run: |
-          cd /tmp/cc-fe-audit-checkout
+          # Run yarn audit inside node:22-alpine (same image as Dockerfile build stage).
           # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical).
           # --audit-level does NOT suppress the bitmask in yarn v1, so grep instead.
-          AUDIT_OUTPUT=$(yarn audit 2>&1) || true
+          AUDIT_OUTPUT=$(/usr/bin/docker run --rm \
+            -v /tmp/cc-fe-audit-checkout:/app \
+            -w /app \
+            node:22-alpine \
+            sh -c 'yarn audit 2>&1' \
+          ) || true
           echo "$AUDIT_OUTPUT"
           if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
             echo "❌ High or Critical CVEs found — deployment blocked."
             exit 1
           fi
           echo "✅ No high or critical CVEs found."
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf /tmp/cc-fe-audit-checkout
 
   lint:
     runs-on: deploy-host
@@ -68,23 +77,20 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-          command -v yarn || npm install -g yarn
-
-      - name: Install dependencies
-        run: |
-          cd /tmp/cc-fe-lint-checkout
-          yarn install --frozen-lockfile
 
       - name: Lint (ESLint + stylelint + MD3 + format check)
         run: |
-          cd /tmp/cc-fe-lint-checkout
           # Mirrors lint-staged + yarn lint:all:
           #   yarn lint          → ng lint (ESLint)
           #   yarn lint:scss     → stylelint
           #   yarn lint:md3      → MD3 compliance check
           #   yarn lint:scss:unused:strict → unused SCSS check
           #   yarn format:check  → Prettier format check
-          yarn lint:all
+          /usr/bin/docker run --rm \
+            -v /tmp/cc-fe-lint-checkout:/app \
+            -w /app \
+            node:22-alpine \
+            sh -c 'yarn install --frozen-lockfile && yarn lint:all'
 
       - name: Cleanup
         if: always()
@@ -102,22 +108,23 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-          command -v yarn || npm install -g yarn
-
-      - name: Install dependencies
-        run: |
-          cd /tmp/cc-fe-test-checkout
-          yarn install --frozen-lockfile
 
       - name: Run unit tests
-        env:
-          # CI=true makes Angular's default Karma config use ChromeHeadless
-          CI: "true"
-          # Disable Chrome sandbox for CI environments
-          CHROMIUM_FLAGS: "--no-sandbox --disable-gpu"
         run: |
-          cd /tmp/cc-fe-test-checkout
-          yarn test
+          # Use node:22 (Debian) rather than alpine so Chromium can be installed.
+          # CI=true makes Angular/Karma use ChromeHeadless automatically.
+          # CHROMIUM_FLAGS is read by karma-chrome-launcher to add --no-sandbox
+          # and --disable-dev-shm-usage, required when running inside Docker.
+          /usr/bin/docker run --rm \
+            -v /tmp/cc-fe-test-checkout:/app \
+            -w /app \
+            -e CI=true \
+            -e CHROMIUM_FLAGS='--no-sandbox --disable-dev-shm-usage' \
+            node:22 \
+            sh -c 'apt-get update -qq && apt-get install -y -q chromium && \
+                   export CHROME_BIN=$(which chromium) && \
+                   yarn install --frozen-lockfile && \
+                   yarn test -- --browsers=ChromeHeadless --watch=false --progress=false'
 
       - name: Cleanup
         if: always()
