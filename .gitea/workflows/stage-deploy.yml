@@ -57,7 +57,7 @@ jobs:
           /usr/bin/docker create --name ${CNAME} \
             -w /app \
             node:22-alpine \
-            sh -c 'yarn audit 2>&1 || true'
+            sh -c 'npm install -g yarn --quiet 2>/dev/null; yarn audit 2>&1 || true'
 
           # docker cp goes through the Docker API — works even in DinD
           /usr/bin/docker cp /tmp/cc-fe-audit-checkout/. ${CNAME}:/app/
