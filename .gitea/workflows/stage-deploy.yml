@@ -325,15 +325,7 @@ jobs:
           SHORT_SHA="${COMMIT_SHA:0:7}"
           RUN_URL="${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}"
           SUBJECT="❌ CI failed on ${BRANCH} (${SHORT_SHA})"
-          BODY="One or more CI checks failed for your commit on branch '${BRANCH}'.
-
-Commit:  ${SHORT_SHA}
-Author:  ${ACTOR}
-Run URL: ${RUN_URL}
-
-Failed jobs may include: audit (CVE scan), lint (ESLint/stylelint), test (unit tests), or deploy.
-
-Check the run URL above for details and fix the issues before the build can be promoted to staging."
+          BODY=$(printf "One or more CI checks failed for your commit on branch '%s'.\n\nCommit:  %s\nAuthor:  %s\nRun URL: %s\n\nFailed jobs may include: audit (CVE scan), lint (ESLint/stylelint), test (unit tests), or deploy.\n\nCheck the run URL above for details and fix the issues before the build can be promoted to staging." "${BRANCH}" "${SHORT_SHA}" "${ACTOR}" "${RUN_URL}")
 
           if command -v sendmail &> /dev/null; then
             printf "To: %s\nSubject: %s\n\n%s\n" "${AUTHOR_EMAIL}" "${SUBJECT}" "${BODY}" | sendmail "${AUTHOR_EMAIL}"
