@@ -135,6 +135,12 @@ jobs:
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
+          # environment.ts is gitignored (loaded from OpenBao in staging builds).
+          # For unit tests, copy the sample stub so TypeScript can compile.
+          if [ ! -f "${WORK_DIR}/src/environments/environment.ts" ]; then
+            cp "${WORK_DIR}/src/environments/sample.environment.ts" \
+               "${WORK_DIR}/src/environments/environment.ts"
+          fi
 
       - name: Run unit tests
         run: |
