@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Injectable, OnDestroy, inject, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Client, createClient } from 'graphql-ws';
 import { Observable, Subject, Subscription } from 'rxjs';
@@ -43,7 +43,9 @@ export class GraphQLWsService implements OnDestroy {
   private disconnected$ = new Subject<void>();
   private error$ = new Subject<Error>();
 
-  constructor(private authService: AuthService) {
+  private readonly authService = inject(AuthService);
+
+  constructor() {
     // Auto-connect/disconnect based on auth state
     this.subscriptions.add(
       toObservable(this.authService.isLoggedIn).subscribe({

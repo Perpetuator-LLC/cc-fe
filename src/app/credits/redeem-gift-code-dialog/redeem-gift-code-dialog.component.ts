@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -42,6 +42,17 @@ import { MatIcon } from '@angular/material/icon';
   styleUrl: './redeem-gift-code-dialog.component.scss',
 })
 export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<RedeemGiftCodeDialogComponent>>(MatDialogRef);
+  data = inject<{
+    email: string;
+    permissions: string[];
+  }>(MAT_DIALOG_DATA);
+  private userService = inject(UserService);
+  private codeService = inject(CodeService);
+  private creditService = inject(CreditService);
+  private messageService = inject(MessageService);
+
   code = '';
   createCodeForm: FormGroup;
   codes: Code[] = [];
@@ -59,15 +70,9 @@ export class RedeemGiftCodeDialogComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) codesPaginator!: MatPaginator;
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<RedeemGiftCodeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { email: string; permissions: string[] },
-    private userService: UserService,
-    private codeService: CodeService,
-    private creditService: CreditService,
-    private messageService: MessageService,
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.permissions = data.permissions || [];
     this.createCodeForm = this.fb.group({
       code: ['', Validators.required],

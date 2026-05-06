@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,10 +23,8 @@ export class EligibilityBannerComponent implements OnInit, OnDestroy {
   checking = true;
   eligibility: AffiliateEligibility | null = null;
 
-  constructor(
-    private affiliateService: AffiliateService,
-    private router: Router,
-  ) {}
+  private readonly affiliateService = inject(AffiliateService);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.checkEligibility();

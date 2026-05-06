@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -108,41 +108,40 @@ export interface BlogsListResponse {
   providedIn: 'root',
 })
 export class PublicBlogHttpService {
-  private apiUrl = environment.API_URL;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.API_URL;
 
   getBlog(blogId: string, page = 1, perPage = 20): Observable<BlogResponse> {
     // Backend returns blog metadata and articles separately, so we need to combine them
     const blogRequest = this.http.get<PublicBlog>(`${this.apiUrl}/blogs/${blogId}/`);
 
-    let articleParams = new HttpParams()
-      .set('blog', blogId)
-      .set('limit', perPage.toString())
-      .set('sort', 'recent');
+    let articleParams = new HttpParams().set('blog', blogId).set('limit', perPage.toString()).set('sort', 'recent');
     if (page > 1) {
       articleParams = articleParams.set('offset', ((page - 1) * perPage).toString());
     }
     const articlesRequest = this.http.get<{ articles: PublicArticle[]; total: number; limit: number }>(
       `${this.apiUrl}/articles/`,
-      { params: articleParams }
+      { params: articleParams },
     );
 
     return forkJoin([blogRequest, articlesRequest]).pipe(
-      map(([blog, articlesResponse]): BlogResponse => ({
-        ...blog,
-        articles: articlesResponse.articles || [],
-        pagination: {
-          page,
-          perPage,
-          totalArticles: articlesResponse.total || 0,
-          totalPages: Math.ceil((articlesResponse.total || 0) / perPage),
-          hasNext: page * perPage < (articlesResponse.total || 0),
-          hasPrevious: page > 1,
-          nextPage: page * perPage < (articlesResponse.total || 0) ? page + 1 : undefined,
-          previousPage: page > 1 ? page - 1 : undefined,
-        },
-      }))
+      map(
+        ([blog, articlesResponse]): BlogResponse => ({
+          ...blog,
+          articles: articlesResponse.articles || [],
+          pagination: {
+            page,
+            perPage,
+            totalArticles: articlesResponse.total || 0,
+            totalPages: Math.ceil((articlesResponse.total || 0) / perPage),
+            hasNext: page * perPage < (articlesResponse.total || 0),
+            hasPrevious: page > 1,
+            nextPage: page * perPage < (articlesResponse.total || 0) ? page + 1 : undefined,
+            previousPage: page > 1 ? page - 1 : undefined,
+          },
+        }),
+      ),
     );
   }
 
@@ -189,4 +188,3 @@ export class PublicBlogHttpService {
     return this.http.get<{ articles: PublicArticle[]; total: number }>(`${this.apiUrl}/articles/`, { params });
   }
 }
-

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,17 +31,15 @@ export interface ApiKeyDetailDialogData {
   styleUrl: './api-key-detail-dialog.component.scss',
 })
 export class ApiKeyDetailDialogComponent implements OnInit, OnDestroy {
+  data = inject<ApiKeyDetailDialogData>(MAT_DIALOG_DATA);
+  private apiKeyService = inject(ApiKeyService);
+  private messageService = inject(MessageService);
+  private dialogRef = inject<MatDialogRef<ApiKeyDetailDialogComponent>>(MatDialogRef);
+
   loading = false;
   analytics: ApiKeyAnalytics | null = null;
   recentUsage: ApiKeyUsage[] = [];
   private subscriptions = new Subscription();
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ApiKeyDetailDialogData,
-    private apiKeyService: ApiKeyService,
-    private messageService: MessageService,
-    private dialogRef: MatDialogRef<ApiKeyDetailDialogComponent>,
-  ) {}
 
   ngOnInit(): void {
     this.loadAnalytics();

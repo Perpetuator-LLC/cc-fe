@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, forwardRef } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, forwardRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { PodcastsService } from '../podcasts.service';
@@ -30,6 +30,8 @@ interface CategoryOption {
   ],
 })
 export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAccessor {
+  private podcastsService = inject(PodcastsService);
+
   categoriesMap: Record<string, string[]> = {};
   categoryOptions: CategoryOption[] = [];
   value: Record<string, string[]> = {};
@@ -38,8 +40,6 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
   private onChange: (value: Record<string, string[]>) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
-
-  constructor(private podcastsService: PodcastsService) {}
 
   ngOnInit() {
     this.podcastsService.getPodcastCategories().subscribe((categories) => {

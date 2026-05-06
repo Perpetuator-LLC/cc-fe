@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -13,7 +13,7 @@ export interface NewsletterResponse {
   providedIn: 'root',
 })
 export class NewsletterHttpService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   subscribe(email: string): Observable<NewsletterResponse> {
     return this.http.post<NewsletterResponse>(`${environment.API_URL}/newsletter/subscribe/`, { email });

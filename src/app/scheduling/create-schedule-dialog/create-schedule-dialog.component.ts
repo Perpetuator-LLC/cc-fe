@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -51,6 +51,11 @@ export interface CreateScheduleDialogData {
   styleUrls: ['./create-schedule-dialog.component.scss'],
 })
 export class CreateScheduleDialogComponent implements OnDestroy {
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly schedulingService = inject(SchedulingService);
+  readonly dialogRef = inject<MatDialogRef<CreateScheduleDialogComponent>>(MatDialogRef);
+  readonly data = inject<CreateScheduleDialogData>(MAT_DIALOG_DATA);
   scheduleForm: FormGroup;
   private subscriptions = new Subscription();
   showAdvancedCron = false;
@@ -81,13 +86,7 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     return this.isEditing ? 'Update Schedule' : 'Create Schedule';
   }
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private schedulingService: SchedulingService,
-    public dialogRef: MatDialogRef<CreateScheduleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateScheduleDialogData,
-  ) {
+  constructor() {
     this.scheduleForm = this.fb.group({
       name: ['', Validators.required],
       jobKind: ['', Validators.required],

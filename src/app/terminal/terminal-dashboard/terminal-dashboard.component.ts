@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,6 +47,8 @@ interface GridsterDashboardItem extends GridsterItemConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalDashboardComponent implements OnInit, OnDestroy {
+  private terminalService = inject(TerminalService);
+
   options: GridsterConfig = {};
   panels: GridsterDashboardItem[] = [];
   hints: TerminalHints = {
@@ -57,8 +59,6 @@ export class TerminalDashboardComponent implements OnInit, OnDestroy {
     chartSuggestion: 'STOCK:NASDAQ:AAPL COMMAND:CHART',
   };
   private subscriptions = new Subscription();
-
-  constructor(private terminalService: TerminalService) {}
 
   ngOnInit(): void {
     this.initGridsterOptions();

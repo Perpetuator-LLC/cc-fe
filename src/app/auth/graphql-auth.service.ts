@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
@@ -28,11 +28,9 @@ import {
   providedIn: 'root',
 })
 export class GraphqlAuthService {
-  constructor(
-    private apollo: Apollo,
-    private messageService: MessageService,
-    private oauthService: OAuthService,
-  ) {}
+  private apollo = inject(Apollo);
+  private messageService = inject(MessageService);
+  private oauthService = inject(OAuthService);
 
   forgot(email: string): Observable<boolean> {
     this.messageService.clearMessages();

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -15,16 +15,14 @@ import { ToolbarService } from '../../layout/toolbar.service';
   styleUrl: './cancel-change-email.component.scss',
 })
 export class CancelChangeEmailComponent implements AfterViewInit, OnInit {
+  private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+
   changeStatus = '';
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-
-  constructor(
-    private route: ActivatedRoute,
-    private http: HttpClient,
-    private router: Router,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-  ) {}
 
   ngAfterViewInit() {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

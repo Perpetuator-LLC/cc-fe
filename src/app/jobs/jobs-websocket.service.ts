@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, timer } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -21,6 +21,8 @@ import { Job } from './job.service';
   providedIn: 'root',
 })
 export class JobsWebSocketService implements OnDestroy {
+  private authService = inject(AuthService);
+
   private ws: WebSocket | null = null;
   private subscriptions = new Subscription();
   private reconnectAttempts = 0;
@@ -47,23 +49,6 @@ export class JobsWebSocketService implements OnDestroy {
 
   private readonly jobFailedSubject = new Subject<Job>();
   readonly jobFailed$ = this.jobFailedSubject.asObservable();
-
-  constructor(private authService: AuthService) {
-    // NOTE: Disabled auto-connect to prevent dual WebSocket connections
-    // The TerminalWebSocketService now handles job messages via the unified connection
-    // Job messages are forwarded from TerminalWebSocketService.onJobMessage()
-    //
-    // To re-enable separate connection, uncomment the subscription below:
-    // this.subscriptions.add(
-    //   toObservable(this.authService.isLoggedIn).subscribe((isLoggedIn) => {
-    //     if (isLoggedIn) {
-    //       this.connect();
-    //     } else {
-    //       this.disconnect();
-    //     }
-    //   }),
-    // );
-  }
 
   ngOnDestroy(): void {
     this.disconnect();

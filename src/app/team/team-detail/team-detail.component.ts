@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -74,6 +74,15 @@ import { CreatePodcastDialogComponent } from '../../podcast/create-podcast-dialo
   ],
 })
 export class TeamDetailComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private teamsService = inject(TeamsService);
+  private toolbarService = inject(ToolbarService);
+  private dialog = inject(MatDialog);
+  private podcastsService = inject(PodcastsService);
+
   @ViewChild('teamNameInput') teamNameInput!: ElementRef<HTMLInputElement>;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -91,16 +100,7 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
 
   editingName = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private messageService: MessageService,
-    private teamsService: TeamsService,
-    private toolbarService: ToolbarService,
-    private dialog: MatDialog,
-    private podcastsService: PodcastsService,
-  ) {
+  constructor() {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
       throw new Error('Failed to get Team ID from route.');

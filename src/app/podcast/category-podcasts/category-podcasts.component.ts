@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -27,18 +27,16 @@ import { MessageService } from '../../message.service';
   styleUrl: './category-podcasts.component.scss',
 })
 export class CategoryPodcastsComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private publicPodcastService = inject(PublicPodcastHttpService);
+  private shareService = inject(ShareService);
+  private messageService = inject(MessageService);
+
   podcasts: PublicPodcast[] = [];
   loading = true;
   category = '';
   subcategory?: string;
   limit = 20;
-
-  constructor(
-    private route: ActivatedRoute,
-    private publicPodcastService: PublicPodcastHttpService,
-    private shareService: ShareService,
-    private messageService: MessageService,
-  ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {

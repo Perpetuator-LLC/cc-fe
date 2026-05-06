@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -19,6 +19,12 @@ import { MatCard } from '@angular/material/card';
   styleUrls: ['./new-team.component.scss'],
 })
 export class NewTeamComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private teamsService = inject(TeamsService);
+  private toolbarService = inject(ToolbarService);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   teamForm: FormGroup;
   // teamForm: FormGroup = this.fb.group({
@@ -29,13 +35,7 @@ export class NewTeamComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   nameError: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private messageService: MessageService,
-    private teamsService: TeamsService,
-    private toolbarService: ToolbarService,
-  ) {
+  constructor() {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9 ]+$/)]],

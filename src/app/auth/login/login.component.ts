@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, TemplateRef, ViewChild, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
@@ -46,6 +46,18 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {
+  private graphqlAuthService = inject(GraphqlAuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+  private themeService = inject(ThemeService);
+  private userService = inject(UserService);
+  private dialog = inject(MatDialog);
+  private affiliateService = inject(AffiliateService);
+  private affiliateStorageService = inject(AffiliateStorageService);
+  private policyGuardService = inject(PolicyGuardService);
+
   private subscription: Subscription | undefined;
   private affiliateCode: string | null = null;
   errorMessage: string | null = null;
@@ -60,19 +72,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   hidePassword = true;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
-  constructor(
-    private graphqlAuthService: GraphqlAuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-    private themeService: ThemeService,
-    private userService: UserService,
-    private dialog: MatDialog,
-    private affiliateService: AffiliateService,
-    private affiliateStorageService: AffiliateStorageService,
-    private policyGuardService: PolicyGuardService,
-  ) {
+  constructor() {
     const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
     const storedReturnUrl = this.affiliateStorageService.getReturnUrl();
 

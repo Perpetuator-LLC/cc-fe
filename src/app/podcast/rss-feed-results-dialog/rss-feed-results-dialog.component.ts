@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -34,10 +34,8 @@ export interface RssFeedResults {
   styleUrl: './rss-feed-results-dialog.component.scss',
 })
 export class RssFeedResultsDialogComponent {
-  constructor(
-    private dialogRef: MatDialogRef<RssFeedResultsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: RssFeedResults,
-  ) {}
+  private dialogRef = inject<MatDialogRef<RssFeedResultsDialogComponent>>(MatDialogRef);
+  data = inject<RssFeedResults>(MAT_DIALOG_DATA);
 
   onClose(): void {
     this.dialogRef.close();

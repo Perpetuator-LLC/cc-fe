@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,19 +29,19 @@ import { MessageService } from '../../message.service';
   styleUrls: ['./newsletter-dialog.component.scss'],
 })
 export class NewsletterDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<NewsletterDialogComponent>>(MatDialogRef);
+  private authService = inject(AuthService);
+  private userService = inject(UserService);
+  private newsletterHttpService = inject(NewsletterHttpService);
+  private messageService = inject(MessageService);
+
   newsletterForm: FormGroup;
   loading = false;
   isAuthenticated = false;
   private subscriptions = new Subscription();
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<NewsletterDialogComponent>,
-    private authService: AuthService,
-    private userService: UserService,
-    private newsletterHttpService: NewsletterHttpService,
-    private messageService: MessageService,
-  ) {
+  constructor() {
     this.isAuthenticated = this.authService.isLoggedIn();
 
     this.newsletterForm = this.fb.group({

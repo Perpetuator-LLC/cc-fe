@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UserTransaction, CreditService } from '../credit.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -61,6 +61,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './transactions-list.component.scss',
 })
 export class TransactionsListComponent implements OnInit, OnDestroy {
+  private creditService = inject(CreditService);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+  private loadingService = inject(LoadingService);
+
   private subscriptions: Subscription = new Subscription();
 
   // Table data
@@ -85,13 +90,6 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-
-  constructor(
-    private creditService: CreditService,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-    private loadingService: LoadingService,
-  ) {}
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

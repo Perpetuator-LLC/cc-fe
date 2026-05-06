@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,6 +37,10 @@ import mermaid from 'mermaid';
   styleUrls: ['./affiliate-graph.component.scss'],
 })
 export class AffiliateGraphComponent implements OnInit, OnDestroy {
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+  dialogRef = inject<MatDialogRef<AffiliateGraphComponent>>(MatDialogRef);
+
   @ViewChild('mermaidContainer', { static: false }) mermaidContainer: ElementRef<HTMLDivElement> | undefined;
 
   private subscriptions = new Subscription();
@@ -46,11 +50,7 @@ export class AffiliateGraphComponent implements OnInit, OnDestroy {
   error: string | null = null;
   zoomLevel = 100;
 
-  constructor(
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-    public dialogRef: MatDialogRef<AffiliateGraphComponent>,
-  ) {
+  constructor() {
     // Initialize Mermaid with minimal config - we'll apply theme at render time
     mermaid.initialize({
       startOnLoad: false,

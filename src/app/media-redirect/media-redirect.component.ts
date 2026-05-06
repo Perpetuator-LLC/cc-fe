@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MediaTabPreferenceService } from '../layout/media-tab-preference.service';
 
@@ -13,10 +13,8 @@ import { MediaTabPreferenceService } from '../layout/media-tab-preference.servic
   standalone: true,
 })
 export class MediaRedirectComponent implements OnInit {
-  constructor(
-    private router: Router,
-    private mediaTabPreferenceService: MediaTabPreferenceService,
-  ) {}
+  private router = inject(Router);
+  private mediaTabPreferenceService = inject(MediaTabPreferenceService);
 
   ngOnInit(): void {
     const preferredTab = this.mediaTabPreferenceService.getPreferredTab();

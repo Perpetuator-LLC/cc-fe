@@ -48,6 +48,8 @@ export interface HistorySearchResult {
   providedIn: 'root',
 })
 export class TerminalWebSocketService implements OnDestroy {
+  private authService = inject(AuthService);
+
   private client: Client | null = null;
   private subscriptions = new Subscription();
   private reconnectAttempts = 0;
@@ -78,7 +80,7 @@ export class TerminalWebSocketService implements OnDestroy {
   private jobCompleted$ = new Subject<Job>();
   private jobFailed$ = new Subject<Job>();
 
-  constructor(private authService: AuthService) {
+  constructor() {
     // Auto-connect/disconnect based on auth state
     this.subscriptions.add(
       toObservable(this.authService.isLoggedIn).subscribe({

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable, Injector } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { EMPTY, throwError } from 'rxjs';
@@ -12,17 +12,15 @@ import { TokenStorageService } from '../auth/token-storage.service';
   providedIn: 'root',
 })
 export class ErrorHandlerService {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private messageService = inject(MessageService);
+  private injector = inject(Injector);
+  private tokenStorage = inject(TokenStorageService);
+
   private traceService?: TraceService;
   private isHandlingAuthError = false;
   private authErrorResetTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private messageService: MessageService,
-    private injector: Injector,
-    private tokenStorage: TokenStorageService,
-  ) {}
 
   private getTraceService(): TraceService | null {
     try {

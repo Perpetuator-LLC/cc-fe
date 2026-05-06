@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
@@ -41,6 +41,12 @@ export interface AddAlertTriggerDialogData {
   styleUrl: './add-alert-trigger-dialog.component.scss',
 })
 export class AddAlertTriggerDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  private pulsesService = inject(PulsesService);
+  dialogRef = inject<MatDialogRef<AddAlertTriggerDialogComponent>>(MatDialogRef);
+  data = inject<AddAlertTriggerDialogData>(MAT_DIALOG_DATA);
+
   alertForm: FormGroup;
   private subscriptions = new Subscription();
   isSubmitting = false;
@@ -58,13 +64,7 @@ export class AddAlertTriggerDialogComponent implements OnDestroy {
     { value: 'fundamental_alert', label: 'Fundamental Alert', icon: 'assessment', available: false },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private pulsesService: PulsesService,
-    public dialogRef: MatDialogRef<AddAlertTriggerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AddAlertTriggerDialogData,
-  ) {
+  constructor() {
     this.alertForm = this.fb.group({
       alertType: ['breaking_news', Validators.required],
       cooldownMinutes: [30, [Validators.min(5), Validators.max(1440)]],

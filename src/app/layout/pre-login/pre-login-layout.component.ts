@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { RouterLink, RouterOutlet, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -29,16 +29,16 @@ import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-
   styleUrls: ['./pre-login-layout.component.scss'],
 })
 export class PreLoginLayoutComponent implements OnInit, OnDestroy {
+  private themeService = inject(ThemeService);
+  private router = inject(Router);
+
   protected currentTheme = this.themeService.theme;
   isHomePage = false;
   isLoginPage = false;
   isRegisterPage = false;
   private subscriptions = new Subscription();
 
-  constructor(
-    private themeService: ThemeService,
-    private router: Router,
-  ) {
+  constructor() {
     this.checkHomePage();
     this.checkLoginPage();
     this.checkRegisterPage();

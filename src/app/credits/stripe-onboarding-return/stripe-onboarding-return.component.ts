@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,17 +18,15 @@ import { MessageService } from '../../message.service';
   styleUrls: ['./stripe-onboarding-return.component.scss'],
 })
 export class StripeOnboardingReturnComponent implements OnInit, OnDestroy {
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+  private router = inject(Router);
+
   private subscriptions = new Subscription();
   loading = true;
   success = false;
   error: string | null = null;
   onboardingCompleted = false;
-
-  constructor(
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-    private router: Router,
-  ) {}
 
   ngOnInit(): void {
     this.refreshStripeStatus();

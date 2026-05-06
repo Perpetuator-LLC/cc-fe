@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
@@ -17,16 +17,16 @@ import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
   styleUrls: ['./create-team-dialog.component.scss'],
 })
 export class CreateTeamDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  private teamsService = inject(TeamsService);
+  dialogRef = inject<MatDialogRef<CreateTeamDialogComponent>>(MatDialogRef);
+
   teamForm: FormGroup;
   private subscriptions = new Subscription();
   nameError: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private teamsService: TeamsService,
-    public dialogRef: MatDialogRef<CreateTeamDialogComponent>,
-  ) {
+  constructor() {
     this.teamForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9 ]+$/)]],

@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { NgClass } from '@angular/common';
@@ -67,6 +67,18 @@ export interface SidePanelAccordianData {
   styleUrl: './news-list.component.scss',
 })
 export class NewsListComponent implements OnInit, OnDestroy {
+  private newsService = inject(NewsService);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private podcastsService = inject(PodcastsService);
+  protected userService = inject(UserService);
+  private jobService = inject(JobService);
+  private episodeService = inject(EpisodeService);
+  private sanitizer = inject(DomSanitizer);
+  private jobDisplayService = inject(JobDisplayService);
+  private loadingService = inject(LoadingService);
+  private recentlyUsedPodcastsService = inject(RecentlyUsedPodcastsService);
+
   private subscriptions: Subscription = new Subscription();
   news: NewsConnection | null = null;
   filteredNews: NewsResult[] = [];
@@ -94,19 +106,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   protected showMicroJobButtons = false;
 
-  constructor(
-    private newsService: NewsService,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private podcastsService: PodcastsService,
-    protected userService: UserService,
-    private jobService: JobService,
-    private episodeService: EpisodeService,
-    private sanitizer: DomSanitizer,
-    private jobDisplayService: JobDisplayService,
-    private loadingService: LoadingService,
-    private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
-  ) {
+  constructor() {
     this.subscriptions.add(
       toObservable(this.jobService.jobs).subscribe({
         next: (jobs) => {

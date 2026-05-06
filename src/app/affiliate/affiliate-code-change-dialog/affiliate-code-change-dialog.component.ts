@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -30,6 +30,11 @@ import { MessageService } from '../../message.service';
   styleUrls: ['./affiliate-code-change-dialog.component.scss'],
 })
 export class AffiliateCodeChangeDialogComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<AffiliateCodeChangeDialogComponent>>(MatDialogRef);
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+
   private subscriptions = new Subscription();
   private codeCheckSubject = new Subject<string>();
 
@@ -48,12 +53,7 @@ export class AffiliateCodeChangeDialogComponent implements OnInit, OnDestroy {
     requiresReview: boolean;
   } | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AffiliateCodeChangeDialogComponent>,
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-  ) {
+  constructor() {
     this.codeForm = this.fb.group({
       newCode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       reason: [''],

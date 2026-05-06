@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -31,6 +31,11 @@ import { MessageService } from '../../message.service';
   styleUrl: './create-api-key-dialog.component.scss',
 })
 export class CreateApiKeyDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private apiKeyService = inject(ApiKeyService);
+  private messageService = inject(MessageService);
+  private dialogRef = inject<MatDialogRef<CreateApiKeyDialogComponent>>(MatDialogRef);
+
   form: FormGroup;
   loading = false;
   createdKey: string | null = null;
@@ -38,12 +43,7 @@ export class CreateApiKeyDialogComponent implements OnDestroy {
   copied = false;
   private subscriptions = new Subscription();
 
-  constructor(
-    private fb: FormBuilder,
-    private apiKeyService: ApiKeyService,
-    private messageService: MessageService,
-    private dialogRef: MatDialogRef<CreateApiKeyDialogComponent>,
-  ) {
+  constructor() {
     this.form = this.fb.group({
       name: ['', Validators.required],
     });

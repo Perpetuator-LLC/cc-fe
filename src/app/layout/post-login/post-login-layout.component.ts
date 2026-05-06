@@ -62,6 +62,21 @@ import { TerminalRoutingService } from '../../terminal/terminal-routing.service'
   ],
 })
 export class PostLoginLayoutComponent implements OnInit {
+  protected themeService = inject(ThemeService);
+  protected authService = inject(AuthService);
+  protected pageTitleService = inject(PageTitleService);
+  protected router = inject(Router);
+  protected userService = inject(UserService);
+  private renderer = inject(Renderer2);
+  private creditService = inject(CreditService);
+  private jobService = inject(JobService);
+  private messageService = inject(MessageService);
+  private dialog = inject(MatDialog);
+  private fb = inject(FormBuilder);
+  private loadingService = inject(LoadingService);
+  private mediaTabPreferenceService = inject(MediaTabPreferenceService);
+  protected terminalRoutingService = inject(TerminalRoutingService);
+
   @ViewChild('drawer') drawer!: MatSidenav;
   protected loading = this.loadingService.loading;
   rootRoutes = routes.filter((r) => r.path && r.data?.['icon'] && !r.redirectTo);
@@ -88,22 +103,7 @@ export class PostLoginLayoutComponent implements OnInit {
 
   @ViewChild('afterHeader', { static: false, read: ElementRef }) afterHeaderRef!: ElementRef;
 
-  constructor(
-    protected themeService: ThemeService,
-    protected authService: AuthService,
-    protected pageTitleService: PageTitleService,
-    protected router: Router,
-    protected userService: UserService,
-    private renderer: Renderer2,
-    private creditService: CreditService,
-    private jobService: JobService,
-    private messageService: MessageService,
-    private dialog: MatDialog,
-    private fb: FormBuilder,
-    private loadingService: LoadingService,
-    private mediaTabPreferenceService: MediaTabPreferenceService,
-    protected terminalRoutingService: TerminalRoutingService,
-  ) {
+  constructor() {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
       email: [{ value: '' }],

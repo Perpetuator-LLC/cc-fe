@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -45,7 +45,7 @@ export class MediaActionsComponent {
   /** Emitted when play is triggered */
   @Output() played = new EventEmitter<AudioTrack>();
 
-  constructor(private audioPlayerService: AudioPlayerService) {}
+  private readonly audioPlayerService = inject(AudioPlayerService);
 
   get isCurrentTrack(): boolean {
     const current = this.audioPlayerService.track();

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { MatFormField } from '@angular/material/form-field';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
@@ -27,6 +27,8 @@ import { User } from '../../types';
   styleUrl: './user-autocomplete.component.scss',
 })
 export class UserAutocompleteComponent implements OnInit, OnChanges {
+  private teamsService = inject(TeamsService);
+
   searchControl = new FormControl();
   filteredUsers$: Observable<User[]> = new Observable<User[]>();
 
@@ -35,8 +37,6 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
   @Input() users!: User[];
   @Input() initialUser: User | undefined;
   @Input() disabled = false;
-
-  constructor(private teamsService: TeamsService) {}
 
   ngOnInit() {
     if (this.initialUser) {

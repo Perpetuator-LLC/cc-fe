@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Perpetuator LLC
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -42,16 +42,14 @@ export interface ImageHistoryDialogResult {
   styleUrl: './image-history-dialog.component.scss',
 })
 export class ImageHistoryDialogComponent implements OnInit {
+  private dialogRef = inject<MatDialogRef<ImageHistoryDialogComponent, ImageHistoryDialogResult>>(MatDialogRef);
+  data = inject<ImageHistoryDialogData>(MAT_DIALOG_DATA);
+  private podcastsService = inject(PodcastsService);
+  private messageService = inject(MessageService);
+
   loading = true;
   reverting = false;
   imageHistory: PodcastImageResult[] = [];
-
-  constructor(
-    private dialogRef: MatDialogRef<ImageHistoryDialogComponent, ImageHistoryDialogResult>,
-    @Inject(MAT_DIALOG_DATA) public data: ImageHistoryDialogData,
-    private podcastsService: PodcastsService,
-    private messageService: MessageService,
-  ) {}
 
   ngOnInit(): void {
     this.loadImageHistory();

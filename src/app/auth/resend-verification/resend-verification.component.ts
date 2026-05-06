@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { AfterViewInit, Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
@@ -28,18 +28,16 @@ import { MessageService } from '../../message.service';
   styleUrl: './resend-verification.component.scss',
 })
 export class ResendVerificationComponent implements AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+
   resendForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-
-  constructor(
-    private route: ActivatedRoute,
-    private authService: AuthService,
-    private router: Router,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-  ) {}
 
   ngAfterViewInit() {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

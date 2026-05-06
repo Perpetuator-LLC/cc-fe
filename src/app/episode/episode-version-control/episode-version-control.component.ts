@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
@@ -31,6 +31,8 @@ import { marked } from 'marked';
   styleUrls: ['./episode-version-control.component.scss'],
 })
 export class EpisodeVersionControlComponent {
+  private sanitizer = inject(DomSanitizer);
+
   @Input() currentVersionNumber: number | null = null;
   @Input() isCurrentVersionFullyValidated = false;
   @Input() currentVersionValidationTooltip = '';
@@ -47,8 +49,6 @@ export class EpisodeVersionControlComponent {
   @Output() versionSelect = new EventEmitter<number>();
   @Output() copyVersionContent = new EventEmitter<void>();
   @Output() restoreVersion = new EventEmitter<void>();
-
-  constructor(private sanitizer: DomSanitizer) {}
 
   markdownToHtml(markdown: string | null | undefined): SafeHtml {
     if (!markdown) return '';

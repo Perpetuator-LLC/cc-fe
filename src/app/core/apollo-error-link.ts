@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, inject } from '@angular/core';
 import { HttpLink } from 'apollo-angular/http';
 import { ApolloLink } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
@@ -9,10 +9,8 @@ import { TraceService } from '../traces/trace.service';
   providedIn: 'root',
 })
 export class ApolloErrorLinkFactory {
-  constructor(
-    private httpLink: HttpLink,
-    private traceService: TraceService,
-  ) {}
+  private readonly httpLink = inject(HttpLink);
+  private readonly traceService = inject(TraceService);
 
   createErrorLink(): ApolloLink {
     return onError(({ graphQLErrors, networkError, operation, forward }) => {

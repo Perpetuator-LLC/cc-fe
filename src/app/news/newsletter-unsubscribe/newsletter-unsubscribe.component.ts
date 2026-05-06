@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,14 +18,12 @@ type UnsubscribeState = 'loading' | 'success' | 'error' | 'not-found' | 'missing
   styleUrl: './newsletter-unsubscribe.component.scss',
 })
 export class NewsletterUnsubscribeComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private newsletterHttpService = inject(NewsletterHttpService);
+
   state: UnsubscribeState = 'loading';
   email: string | null = null;
   errorMessage = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private newsletterHttpService: NewsletterHttpService,
-  ) {}
 
   ngOnInit(): void {
     this.email = this.route.snapshot.queryParamMap.get('email');

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { AfterViewInit, Component, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { AfterViewInit, Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,20 +33,18 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   styleUrl: './forgot-password.component.scss',
 })
 export class ForgotPasswordComponent implements AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private formBuilder = inject(FormBuilder);
+  private graphqlAuthService = inject(GraphqlAuthService);
+  private router = inject(Router);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+
   forgotForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  isLoading = false; // Prevent double-submit
-
-  constructor(
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private graphqlAuthService: GraphqlAuthService,
-    private router: Router,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-  ) {}
+  isLoading = false;
 
   ngAfterViewInit() {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

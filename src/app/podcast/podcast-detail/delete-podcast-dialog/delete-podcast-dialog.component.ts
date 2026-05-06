@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -15,13 +15,17 @@ import { MatInputModule } from '@angular/material/input';
   styleUrls: ['./delete-podcast-dialog.component.scss'],
 })
 export class DeletePodcastDialogComponent {
+  dialogRef = inject<MatDialogRef<DeletePodcastDialogComponent>>(MatDialogRef);
+  data = inject<{
+    podcastName: string;
+  }>(MAT_DIALOG_DATA);
+
   deleteConfirmation = '';
   podcastName: string;
 
-  constructor(
-    public dialogRef: MatDialogRef<DeletePodcastDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { podcastName: string },
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.podcastName = data.podcastName;
   }
 

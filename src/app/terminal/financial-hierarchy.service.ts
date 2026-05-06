@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { Observable, of, catchError, map, tap } from 'rxjs';
 
@@ -151,7 +151,7 @@ export class FinancialHierarchyService {
   // Cached data
   hierarchyData = signal<FinancialHierarchyData | null>(null);
 
-  constructor(private apollo: Apollo) {}
+  private readonly apollo = inject(Apollo);
 
   /**
    * Load financial hierarchy for a symbol and report type

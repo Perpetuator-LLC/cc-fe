@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { Router, NavigationError } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { TraceService } from '../traces/trace.service';
@@ -8,16 +8,16 @@ import { TraceService } from '../traces/trace.service';
   providedIn: 'root',
 })
 export class RouterErrorTracker {
+  private router = inject(Router);
+  private injector = inject(Injector);
+
   private traceService?: TraceService;
 
   // Pattern to detect chunk loading failures
   private static readonly CHUNK_ERROR_PATTERN =
     /Loading chunk [\d]+ failed|Failed to fetch dynamically imported module|ChunkLoadError/;
 
-  constructor(
-    private router: Router,
-    private injector: Injector,
-  ) {
+  constructor() {
     this.initializeErrorTracking();
   }
 

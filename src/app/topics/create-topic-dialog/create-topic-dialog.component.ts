@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../../message.service';
@@ -41,17 +41,17 @@ export interface CreateTopicDialogData {
   styleUrl: './create-topic-dialog.component.scss',
 })
 export class CreateTopicDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  private researchService = inject(ResearchService);
+  dialogRef = inject<MatDialogRef<CreateTopicDialogComponent>>(MatDialogRef);
+  data = inject<CreateTopicDialogData>(MAT_DIALOG_DATA);
+
   topicForm: FormGroup;
   private subscriptions = new Subscription();
   isCreating = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService,
-    private researchService: ResearchService,
-    public dialogRef: MatDialogRef<CreateTopicDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateTopicDialogData,
-  ) {
+  constructor() {
     this.topicForm = this.fb.group({
       podcastUuid: ['', Validators.required],
       title: ['', Validators.required],

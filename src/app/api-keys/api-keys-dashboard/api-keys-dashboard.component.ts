@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -35,15 +35,13 @@ import {
   styleUrl: './api-keys-dashboard.component.scss',
 })
 export class ApiKeysDashboardComponent implements OnInit, OnDestroy {
+  private apiKeyService = inject(ApiKeyService);
+  private messageService = inject(MessageService);
+  private dialog = inject(MatDialog);
+
   apiKeys: ApiKey[] = [];
   loading = false;
   private subscriptions = new Subscription();
-
-  constructor(
-    private apiKeyService: ApiKeyService,
-    private messageService: MessageService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     this.loadApiKeys();

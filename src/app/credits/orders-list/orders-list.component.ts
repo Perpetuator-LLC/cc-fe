@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserOrder, CreditService } from '../credit.service';
@@ -81,6 +81,16 @@ import { MatChipsModule } from '@angular/material/chips';
   styleUrl: './orders-list.component.scss',
 })
 export class OrdersListComponent implements OnInit, OnDestroy {
+  protected creditService = inject(CreditService);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+  private paymentService = inject(PaymentService);
+  protected userService = inject(UserService);
+  protected authService = inject(AuthService);
+  private loadingService = inject(LoadingService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   private subscriptions: Subscription = new Subscription();
   orders: UserOrder[] = [];
   protected userCredits = 0;
@@ -107,17 +117,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     amount: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]),
   });
 
-  constructor(
-    protected creditService: CreditService,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-    private paymentService: PaymentService,
-    protected userService: UserService,
-    protected authService: AuthService,
-    private loadingService: LoadingService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {
+  constructor() {
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
         this.userCredits = credits;

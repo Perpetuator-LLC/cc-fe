@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Perpetuator LLC
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -31,14 +31,14 @@ export interface RegenerateImageDialogResult {
   styleUrl: './regenerate-image-dialog.component.scss',
 })
 export class RegenerateImageDialogComponent {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<RegenerateImageDialogComponent, RegenerateImageDialogResult>>(MatDialogRef);
+
   form: FormGroup;
 
   readonly styleSuggestions = ['minimalist', 'vintage', 'modern', 'tech-inspired', 'bold colors', 'abstract'];
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<RegenerateImageDialogComponent, RegenerateImageDialogResult>,
-  ) {
+  constructor() {
     this.form = this.fb.group({
       customPromptHint: [''],
     });

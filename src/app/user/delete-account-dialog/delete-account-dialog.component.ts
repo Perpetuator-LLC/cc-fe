@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -15,13 +15,17 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './delete-account-dialog.component.scss',
 })
 export class DeleteAccountDialogComponent {
+  dialogRef = inject<MatDialogRef<DeleteAccountDialogComponent>>(MatDialogRef);
+  data = inject<{
+    email: string;
+  }>(MAT_DIALOG_DATA);
+
   deleteConfirmation = '';
   email: string;
 
-  constructor(
-    public dialogRef: MatDialogRef<DeleteAccountDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { email: string },
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.email = data.email;
   }
 

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -29,16 +29,14 @@ import { MessageService } from '../../message.service';
   styleUrl: './browse-podcasts.component.scss',
 })
 export class BrowsePodcastsComponent implements OnInit {
+  private publicPodcastService = inject(PublicPodcastHttpService);
+  private shareService = inject(ShareService);
+  private messageService = inject(MessageService);
+
   podcasts: PublicPodcast[] = [];
   loading = true;
   sortBy: 'views' | 'recent' = 'views';
   limit = 20;
-
-  constructor(
-    private publicPodcastService: PublicPodcastHttpService,
-    private shareService: ShareService,
-    private messageService: MessageService,
-  ) {}
 
   ngOnInit(): void {
     this.loadPodcasts();

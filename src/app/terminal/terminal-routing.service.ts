@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Perpetuator LLC
 
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { BehaviorSubject, Observable, filter } from 'rxjs';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import {
   RouteInfo,
   TerminalState,
@@ -35,6 +35,8 @@ import {
   providedIn: 'root',
 })
 export class TerminalRoutingService {
+  private router = inject(Router);
+
   // =========================================================================
   // State Signals (Angular Signals for reactive UI)
   // =========================================================================
@@ -119,15 +121,11 @@ export class TerminalRoutingService {
   // Constructor
   // =========================================================================
 
-  constructor(
-    private router: Router,
-  ) {
+  constructor() {
     // Initial check
     this.checkUrl();
 
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.checkUrl();
     });
   }
@@ -142,7 +140,7 @@ export class TerminalRoutingService {
         this.applyRoute(route, { updateUrl: false, silent: true });
       } else {
         if (this.router.url.startsWith('/terminal')) {
-             this.resetInternal();
+          this.resetInternal();
         }
       }
     } catch (e) {
@@ -150,7 +148,6 @@ export class TerminalRoutingService {
     }
   }
 
- 
   private resetInternal(): void {
     const d = DEFAULT_TERMINAL_STATE;
     this.tab.set(d.tab);

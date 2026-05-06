@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { PostLoginLayoutComponent } from './layout/post-login/post-login-layout.component';
 import { CommonModule } from '@angular/common';
@@ -24,14 +24,11 @@ import { PolicyGuardService } from './policy/services/policy-guard.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  router = inject(Router);
+  private authService = inject(AuthService);
+  private policyGuardService = inject(PolicyGuardService);
+
   title = 'Capital Copilot';
-  constructor(
-    public router: Router,
-    private authService: AuthService,
-    private policyGuardService: PolicyGuardService,
-  ) {
-    // PolicyGuardService is injected to initialize policy checking on navigation
-  }
 
   get isLoginRoute(): boolean {
     // Routes that are always pre-login layout regardless of auth state

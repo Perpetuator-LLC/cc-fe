@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, AfterViewInit, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, AfterViewInit, OnInit, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -17,18 +17,16 @@ import { PolicyService, PolicyVersion } from '../services/policy.service';
   styleUrls: ['./cookie-policy.component.scss'],
 })
 export class CookiePolicyComponent implements OnInit, AfterViewInit, OnDestroy {
+  private toolbarService = inject(ToolbarService);
+  protected authService = inject(AuthService);
+  private policyService = inject(PolicyService);
+
   protected readonly Date = Date;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
   loading = true;
   policy: PolicyVersion | null = null;
   policyContent: SafeHtml | null = null;
-
-  constructor(
-    private toolbarService: ToolbarService,
-    protected authService: AuthService,
-    private policyService: PolicyService,
-  ) {}
 
   ngOnInit(): void {
     this.loadPolicy();

@@ -1,6 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -46,6 +46,11 @@ import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmat
   styleUrls: ['./affiliate-admin.component.scss'],
 })
 export class AffiliateAdminComponent implements OnInit, OnDestroy {
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+  private dialog = inject(MatDialog);
+  private userService = inject(UserService);
+
   private subscriptions = new Subscription();
 
   loading = true;
@@ -63,13 +68,6 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
   platformFinancialStats: PlatformFinancialStats | null = null;
   loadingFinancialStats = false;
   protected readonly Math = Math;
-
-  constructor(
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-    private dialog: MatDialog,
-    private userService: UserService,
-  ) {}
 
   ngOnInit(): void {
     this.loadAdminData();

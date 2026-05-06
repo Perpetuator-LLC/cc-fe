@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -30,22 +30,20 @@ import { PodcastsResult } from '../../podcast/podcasts.service';
   styleUrls: ['./episodes-list.component.scss'],
 })
 export class EpisodesListComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private podcastsService = inject(PodcastsService);
+  private dialog = inject(MatDialog);
+  private newsService = inject(NewsService);
+  private jobService = inject(JobService);
+  private researchService = inject(ResearchService);
+  private loadingService = inject(LoadingService);
+
   private subscriptions = new Subscription();
   topics: Topic[] = [];
   podcasts: PodcastsResult[] = [];
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-
-  constructor(
-    private router: Router,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private podcastsService: PodcastsService,
-    private dialog: MatDialog,
-    private newsService: NewsService,
-    private jobService: JobService,
-    private researchService: ResearchService,
-    private loadingService: LoadingService,
-  ) {}
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

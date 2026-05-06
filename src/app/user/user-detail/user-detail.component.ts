@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -53,6 +53,20 @@ import { MatTooltip } from '@angular/material/tooltip';
   styleUrls: ['./user-detail.component.scss'],
 })
 export class UserDetailComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  protected userService = inject(UserService);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  private teamService = inject(TeamsService);
+  protected creditService = inject(CreditService);
+  private codeService = inject(CodeService);
+  private loadingService = inject(LoadingService);
+  private affiliateService = inject(AffiliateService);
+
   emailChangePending: { newEmail: string } | null = null;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   userDetailForm: FormGroup;
@@ -76,21 +90,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
   sendingCode = false;
   verifyingPhone = false;
 
-  constructor(
-    private fb: FormBuilder,
-    protected userService: UserService,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private dialog: MatDialog,
-    private router: Router,
-    private route: ActivatedRoute,
-    private authService: AuthService,
-    private teamService: TeamsService,
-    protected creditService: CreditService,
-    private codeService: CodeService,
-    private loadingService: LoadingService,
-    private affiliateService: AffiliateService,
-  ) {
+  constructor() {
     this.userDetailForm = this.fb.group({
       username: ['', Validators.required],
       email: [{ value: '' }],

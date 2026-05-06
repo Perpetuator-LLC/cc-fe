@@ -1,6 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
@@ -32,6 +32,11 @@ import { MessageService } from '../../message.service';
   styleUrl: './refresh-voices-dialog.component.scss',
 })
 export class RefreshVoicesDialogComponent /*implements OnInit*/ {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<RefreshVoicesDialogComponent>>(MatDialogRef);
+  private voicesService = inject(VoicesService);
+  private messageService = inject(MessageService);
+
   refreshForm: FormGroup;
   voiceTiers = Object.values(VoiceTier); // Use VoiceTier enum
   loading = false;
@@ -46,12 +51,7 @@ export class RefreshVoicesDialogComponent /*implements OnInit*/ {
     [VoiceTier.REGULAR_LD]: 'OPENAI_GPT_4O_MINI_TTS',
   };
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<RefreshVoicesDialogComponent>,
-    private voicesService: VoicesService,
-    private messageService: MessageService, // Inject MessageService
-  ) {
+  constructor() {
     this.refreshForm = this.fb.group({
       forceMetadata: [false],
       forceSampleAudio: [false],

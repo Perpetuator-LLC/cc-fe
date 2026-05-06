@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -19,10 +19,8 @@ export interface ConfirmDeleteDialogData {
   styleUrl: './confirm-delete-dialog.component.scss',
 })
 export class ConfirmDeleteDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ConfirmDeleteDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDeleteDialogData,
-  ) {}
+  dialogRef = inject<MatDialogRef<ConfirmDeleteDialogComponent>>(MatDialogRef);
+  data = inject<ConfirmDeleteDialogData>(MAT_DIALOG_DATA);
 
   onCancel(): void {
     this.dialogRef.close(false);

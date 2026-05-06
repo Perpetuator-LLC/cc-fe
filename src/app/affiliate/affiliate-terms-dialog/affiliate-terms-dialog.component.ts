@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, OnDestroy, effect } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -21,6 +21,12 @@ import { AuthService } from '../../auth/auth.service';
   styleUrls: ['./affiliate-terms-dialog.component.scss'],
 })
 export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
+  private readonly dialogRef = inject<MatDialogRef<AffiliateTermsDialogComponent>>(MatDialogRef);
+  private readonly affiliateService = inject(AffiliateService);
+  private readonly messageService = inject(MessageService);
+  private readonly policyService = inject(PolicyService);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private subscriptions = new Subscription();
   loading = false;
   checkingEligibility = true;
@@ -29,14 +35,7 @@ export class AffiliateTermsDialogComponent implements OnInit, OnDestroy {
   policyContent: SafeHtml | null = null;
   loadingPolicy = true;
 
-  constructor(
-    private dialogRef: MatDialogRef<AffiliateTermsDialogComponent>,
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-    private policyService: PolicyService,
-    private router: Router,
-    private authService: AuthService,
-  ) {
+  constructor() {
     // Close dialog if user logs out - use effect to monitor signal
     effect(() => {
       const isLoggedIn = this.authService.isLoggedIn();

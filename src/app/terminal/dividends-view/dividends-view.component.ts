@@ -1,5 +1,14 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -39,6 +48,8 @@ import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DividendsViewComponent {
+  dividendChartService = inject(DividendChartService);
+
   /** Chart definitions for educational tooltips */
   protected readonly CHART_DEFINITIONS = CHART_DEFINITIONS;
 
@@ -63,8 +74,6 @@ export class DividendsViewComponent {
 
   /** Emitted when OCF toggle changes */
   @Output() ocfToggleChange = new EventEmitter<boolean>();
-
-  constructor(public dividendChartService: DividendChartService) {}
 
   toggleOperatingCashFlow(): void {
     const newValue = !this.showOperatingCashFlow();

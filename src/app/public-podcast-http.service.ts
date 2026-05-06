@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -107,9 +107,9 @@ export interface CategoryPodcastsResponse {
   providedIn: 'root',
 })
 export class PublicPodcastHttpService {
-  private apiUrl = environment.API_URL;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.API_URL;
 
   getPodcast(podcastId: string, page = 1, perPage = 20): Observable<PodcastResponse> {
     let params = new HttpParams();

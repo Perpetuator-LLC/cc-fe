@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -31,7 +31,7 @@ export interface AffiliateLandingData {
   providedIn: 'root',
 })
 export class AffiliateHttpService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * Get public affiliate landing page data

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { OAuthService } from '../oauth.service';
 import { CommonModule } from '@angular/common';
@@ -12,10 +12,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './auth-callback.component.scss',
 })
 export class AuthCallbackComponent implements OnInit {
-  constructor(
-    private authService: OAuthService,
-    private router: Router,
-  ) {}
+  private authService = inject(OAuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     // OAuth service handles the callback automatically

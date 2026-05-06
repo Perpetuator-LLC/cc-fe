@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -45,6 +45,15 @@ import { MatInputModule } from '@angular/material/input';
   styleUrls: ['./topic-detail.component.scss'],
 })
 export class TopicDetailComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private researchService = inject(ResearchService);
+  private jobService = inject(JobService);
+  private loadingService = inject(LoadingService);
+  private sanitizer = inject(DomSanitizer);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
   protected loading = false;
@@ -57,17 +66,6 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   isSaving = false;
   editTitle = '';
   editDescription = '';
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private researchService: ResearchService,
-    private jobService: JobService,
-    private loadingService: LoadingService,
-    private sanitizer: DomSanitizer,
-  ) {}
 
   ngOnInit(): void {
     this.messageService.clearMessages();

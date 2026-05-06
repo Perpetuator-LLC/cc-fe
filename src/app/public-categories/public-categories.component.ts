@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -26,13 +26,11 @@ import { MessageService } from '../message.service';
   styleUrl: './public-categories.component.scss',
 })
 export class PublicCategoriesComponent implements OnInit {
+  private publicPodcastService = inject(PublicPodcastHttpService);
+  private messageService = inject(MessageService);
+
   categories: { name: string; data: Category }[] = [];
   loading = true;
-
-  constructor(
-    private publicPodcastService: PublicPodcastHttpService,
-    private messageService: MessageService,
-  ) {}
 
   ngOnInit(): void {
     this.loadCategories();

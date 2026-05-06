@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable, of } from 'rxjs';
@@ -90,10 +90,12 @@ const RECORD_TRACE_MUTATION = gql`
   providedIn: 'root',
 })
 export class TraceService {
+  private apollo = inject(Apollo);
+
   private enabled = true;
   private debugMode = false;
 
-  constructor(private apollo: Apollo) {
+  constructor() {
     // Enable debug mode in development
     this.debugMode = !this.isProduction();
   }

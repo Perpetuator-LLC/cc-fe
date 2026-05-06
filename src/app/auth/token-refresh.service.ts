@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable, Injector } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -29,14 +29,12 @@ interface OAuth2TokenResponse {
   providedIn: 'root',
 })
 export class TokenRefreshService {
-  private traceService?: TraceService;
+  private http = inject(HttpClient);
+  private tokenStorage = inject(TokenStorageService);
+  private router = inject(Router);
+  private injector = inject(Injector);
 
-  constructor(
-    private http: HttpClient,
-    private tokenStorage: TokenStorageService,
-    private router: Router,
-    private injector: Injector,
-  ) {}
+  private traceService?: TraceService;
 
   private getTraceService(): TraceService | null {
     try {

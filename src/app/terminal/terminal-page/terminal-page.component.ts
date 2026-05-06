@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -18,7 +17,6 @@ import { WatchlistTabComponent } from '../watchlist-tab/watchlist-tab.component'
 import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
 import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
-import { TerminalTab } from '../terminal-routing.types';
 import { effect } from '@angular/core';
 
 @Component({
@@ -42,6 +40,8 @@ import { effect } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalPageComponent implements OnInit, OnDestroy {
+  protected terminalService = inject(TerminalService);
+
   private sanitizer = inject(DomSanitizer);
 
   historyLoading = signal(false);
@@ -56,7 +56,7 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected routingService = inject(TerminalRoutingService);
 
-  constructor(protected terminalService: TerminalService) {
+  constructor() {
     // Sync tab selection from routing service
     effect(() => {
       const tab = this.routingService.tab();
@@ -110,7 +110,6 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
-
 
   loadUserHistory(): void {
     this.historyLoading.set(true);

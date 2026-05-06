@@ -1,5 +1,15 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, Subscription } from 'rxjs';
@@ -41,6 +51,8 @@ import { Voice, VoicesService, VoiceTier, voiceToTier, tierToString } from '../.
   styleUrl: './voice-selector.component.scss',
 })
 export class VoiceSelectorComponent implements OnInit, OnDestroy {
+  private voicesService = inject(VoicesService);
+
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
 
   /** Currently selected voice UUID (single-select mode) */
@@ -83,8 +95,6 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
 
   // Preview
   currentPlayingVoice: Voice | null = null;
-
-  constructor(private voicesService: VoicesService) {}
 
   ngOnInit(): void {
     this.loadVoices();

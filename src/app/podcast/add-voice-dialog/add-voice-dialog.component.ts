@@ -1,6 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -27,15 +27,15 @@ import { MatSelectModule } from '@angular/material/select';
   ],
 })
 export class AddVoiceDialogComponent {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<AddVoiceDialogComponent>>(MatDialogRef);
+
   voiceForm: FormGroup;
   displayNameRequired = false;
   externalIdRequired = false;
   modelRequired = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddVoiceDialogComponent>,
-  ) {
+  constructor() {
     this.voiceForm = this.fb.group({
       externalId: ['', Validators.required],
       externalUserId: '',

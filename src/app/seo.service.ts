@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 export interface SeoConfig {
@@ -20,6 +20,9 @@ export interface SeoConfig {
   providedIn: 'root',
 })
 export class SeoService {
+  private meta = inject(Meta);
+  private titleService = inject(Title);
+
   private defaultConfig: SeoConfig = {
     title: 'Capital Copilot - AI-Powered Stock Market Terminal',
     description: 'Analyze stocks, track portfolios, and make smarter investment decisions ' + 'with AI-powered tools.',
@@ -28,11 +31,6 @@ export class SeoService {
     type: 'website',
     twitterCard: 'summary_large_image',
   };
-
-  constructor(
-    private meta: Meta,
-    private titleService: Title,
-  ) {}
 
   updateTags(config: SeoConfig): void {
     const finalConfig = { ...this.defaultConfig, ...config };

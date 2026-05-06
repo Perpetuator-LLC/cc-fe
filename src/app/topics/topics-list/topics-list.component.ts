@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -36,6 +36,14 @@ import { PageInfo } from '../../utils/relay';
   styleUrls: ['./topics-list.component.scss'],
 })
 export class TopicsListComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private messageService = inject(MessageService);
+  private researchService = inject(ResearchService);
+  private podcastsService = inject(PodcastsService);
+  private dialog = inject(MatDialog);
+  private loadingService = inject(LoadingService);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   private subscriptions = new Subscription();
   protected loading = false;
@@ -50,17 +58,7 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   pageIndex = 0;
   totalCount = 0;
   private pageInfo: PageInfo | null = null;
-  private cursorStack: (string | null)[] = [null]; // Stack of cursors for previous pages
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private researchService: ResearchService,
-    private podcastsService: PodcastsService,
-    private dialog: MatDialog,
-    private loadingService: LoadingService,
-  ) {}
+  private cursorStack: (string | null)[] = [null];
 
   ngOnInit(): void {
     this.messageService.clearMessages();

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnDestroy } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,18 +40,20 @@ export interface ConvertCreditsDialogData {
   styleUrls: ['./convert-credits-dialog.component.scss'],
 })
 export class ConvertCreditsDialogComponent implements OnDestroy {
+  private dialogRef = inject<MatDialogRef<ConvertCreditsDialogComponent>>(MatDialogRef);
+  data = inject<ConvertCreditsDialogData>(MAT_DIALOG_DATA);
+  private formBuilder = inject(FormBuilder);
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+
   private subscriptions = new Subscription();
   loading = false;
   convertForm: FormGroup;
   readonly MIN_CASH_PAYOUT = MIN_CASH_PAYOUT_CREDITS;
 
-  constructor(
-    private dialogRef: MatDialogRef<ConvertCreditsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConvertCreditsDialogData,
-    private formBuilder: FormBuilder,
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-  ) {
+  constructor() {
+    const data = this.data;
+
     const minAmount = this.data.type === 'cash' ? this.MIN_CASH_PAYOUT : 1;
     this.convertForm = this.formBuilder.group({
       amount: ['', [Validators.required, Validators.min(minAmount), Validators.max(data.availableBalance)]],

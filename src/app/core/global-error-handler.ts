@@ -1,16 +1,16 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { ErrorHandler, Injectable, Injector } from '@angular/core';
+import { ErrorHandler, Injectable, Injector, inject } from '@angular/core';
 import { TraceService } from '../traces/trace.service';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
+  private injector = inject(Injector);
+
   private traceService?: TraceService;
 
   // Pattern to detect chunk loading failures
   private static readonly CHUNK_ERROR_PATTERN =
     /Loading chunk [\d]+ failed|Failed to fetch dynamically imported module|ChunkLoadError/;
-
-  constructor(private injector: Injector) {}
 
   private getTraceService(): TraceService | null {
     try {

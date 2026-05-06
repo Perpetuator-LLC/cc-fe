@@ -10,7 +10,7 @@ import { PublicPodcastHttpService, PublicPodcast } from '../public-podcast-http.
 import { ShareService } from '../share.service';
 import { ToolbarService } from '../layout/toolbar.service';
 import { AuthService } from '../auth/auth.service';
-import { Component, AfterViewInit, ViewChild, TemplateRef, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, TemplateRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { DashboardService } from '../dashboard.service';
@@ -25,6 +25,14 @@ import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements AfterViewInit, OnInit {
+  private toolbarService = inject(ToolbarService);
+  protected authService = inject(AuthService);
+  private podcastsService = inject(PodcastsService);
+  private publicPodcastService = inject(PublicPodcastHttpService);
+  private dashboardService = inject(DashboardService);
+  protected shareService = inject(ShareService);
+  private dialog = inject(MatDialog);
+
   protected isLoggedIn = this.authService.isLoggedIn;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   siteStats: SiteStatistics | undefined;
@@ -34,16 +42,6 @@ export class HomeComponent implements AfterViewInit, OnInit {
   publicPodcasts: PublicPodcast[] = [];
   recentPodcasts: PublicPodcast[] = [];
   loadingRecentPodcasts = true;
-
-  constructor(
-    private toolbarService: ToolbarService,
-    protected authService: AuthService,
-    private podcastsService: PodcastsService,
-    private publicPodcastService: PublicPodcastHttpService,
-    private dashboardService: DashboardService,
-    protected shareService: ShareService,
-    private dialog: MatDialog,
-  ) {}
 
   openNewsletterDialog(): void {
     this.dialog.open(NewsletterDialogComponent, {

@@ -7,7 +7,7 @@ import {
   WritableSignal,
   OnDestroy,
   PLATFORM_ID,
-  Inject,
+  inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -21,6 +21,9 @@ export type Theme = 'light' | 'dark';
   providedIn: 'root',
 })
 export class ThemeService implements OnDestroy {
+  private userSettingService = inject(UserService);
+  private authService = inject(AuthService);
+
   private renderer: Renderer2;
   private subscriptions = new Subscription();
   private currentThemeSignal: WritableSignal<Theme> = signal('dark');
@@ -34,12 +37,10 @@ export class ThemeService implements OnDestroy {
     this.currentThemeSignal = theme;
   }
 
-  constructor(
-    rendererFactory: RendererFactory2,
-    private userSettingService: UserService,
-    private authService: AuthService,
-    @Inject(PLATFORM_ID) platformId: object,
-  ) {
+  constructor() {
+    const rendererFactory = inject(RendererFactory2);
+    const platformId = inject(PLATFORM_ID);
+
     this.isBrowser = isPlatformBrowser(platformId);
     this.renderer = rendererFactory.createRenderer(null, null);
     const localTheme = this.loadThemeFromLocalStorage();

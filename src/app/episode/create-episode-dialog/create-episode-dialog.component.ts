@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -38,13 +38,11 @@ export interface CreateEpisodeDialogResult {
   styleUrl: './create-episode-dialog.component.scss',
 })
 export class CreateEpisodeDialogComponent implements OnInit {
-  selectedPodcast: string | null = null;
+  dialogRef = inject<MatDialogRef<CreateEpisodeDialogComponent>>(MatDialogRef);
+  data = inject<CreateEpisodeDialogData>(MAT_DIALOG_DATA);
+  private recentlyUsedPodcastsService = inject(RecentlyUsedPodcastsService);
 
-  constructor(
-    public dialogRef: MatDialogRef<CreateEpisodeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateEpisodeDialogData,
-    private recentlyUsedPodcastsService: RecentlyUsedPodcastsService,
-  ) {}
+  selectedPodcast: string | null = null;
 
   ngOnInit(): void {
     // Sort podcasts by recently used

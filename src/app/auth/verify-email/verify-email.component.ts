@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GraphqlAuthService } from '../graphql-auth.service';
 
@@ -11,13 +11,11 @@ import { GraphqlAuthService } from '../graphql-auth.service';
   styleUrl: './verify-email.component.scss',
 })
 export class VerifyEmailComponent implements OnInit {
-  verificationStatus = '';
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private graphqlAuthService = inject(GraphqlAuthService);
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private graphqlAuthService: GraphqlAuthService,
-  ) {}
+  verificationStatus = '';
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');

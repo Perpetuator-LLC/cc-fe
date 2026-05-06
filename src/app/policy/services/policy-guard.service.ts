@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Injectable } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, switchMap, take, debounceTime, catchError, map } from 'rxjs/operators';
@@ -16,16 +16,16 @@ import {
   providedIn: 'root',
 })
 export class PolicyGuardService {
+  private policyService = inject(PolicyService);
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private cookieConsentService = inject(CookieConsentService);
+
   private dialogRef: MatDialogRef<PolicyAcceptanceDialogComponent> | null = null;
   private checkInProgress = false;
 
-  constructor(
-    private policyService: PolicyService,
-    private authService: AuthService,
-    private dialog: MatDialog,
-    private router: Router,
-    private cookieConsentService: CookieConsentService,
-  ) {
+  constructor() {
     // Check policies after navigation completes (debounced to prevent rapid checks)
     this.router.events
       .pipe(

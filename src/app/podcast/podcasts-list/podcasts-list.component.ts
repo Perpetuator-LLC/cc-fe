@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -86,6 +86,20 @@ export interface ColumnOption {
   styleUrls: ['./podcasts-list.component.scss'],
 })
 export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private podcastsService = inject(PodcastsService);
+  private dialog = inject(MatDialog);
+  private newsService = inject(NewsService);
+  private episodeService = inject(EpisodeService);
+  private jobService = inject(JobService);
+  private researchService = inject(ResearchService);
+  private jobDisplayService = inject(JobDisplayService);
+  private loadingService = inject(LoadingService);
+  private teamsService = inject(TeamsService);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
   @Input() podcasts: PodcastsResult[] = [];
@@ -117,21 +131,7 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
   selectedLiveStatus: string | null = null; // null = all, 'live' = enabled only, 'disabled' = disabled only
   orderBy = '-latest_internal_episode_date'; // Default sort by latest internal episode (all episodes), descending
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private podcastsService: PodcastsService,
-    private dialog: MatDialog,
-    private newsService: NewsService,
-    private episodeService: EpisodeService,
-    private jobService: JobService,
-    private researchService: ResearchService,
-    private jobDisplayService: JobDisplayService,
-    private loadingService: LoadingService,
-    private teamsService: TeamsService,
-  ) {
+  constructor() {
     super();
 
     this.searchTerm$.pipe(debounceTime(1000), distinctUntilChanged()).subscribe((term) => {

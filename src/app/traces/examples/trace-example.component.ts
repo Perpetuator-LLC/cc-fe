@@ -1,7 +1,7 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 // Example component showing trace integration usage
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,7 +21,7 @@ export class TraceExampleComponent implements OnInit {
   email = '';
   message = '';
 
-  constructor(private traceService: TraceService) {}
+  private readonly traceService = inject(TraceService);
 
   ngOnInit(): void {
     // Example: Track page views

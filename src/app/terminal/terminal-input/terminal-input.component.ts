@@ -65,10 +65,8 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
   private shouldScrollToBottom = false;
   private subscriptions = new Subscription();
 
-  constructor(
-    protected terminalService: TerminalService,
-    private messageService: MessageService,
-  ) {}
+  protected readonly terminalService = inject(TerminalService);
+  private readonly messageService = inject(MessageService);
 
   /**
    * Convert markdown text to safe HTML for rendering.

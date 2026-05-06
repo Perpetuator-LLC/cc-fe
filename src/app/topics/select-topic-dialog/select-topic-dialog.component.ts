@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -37,13 +37,11 @@ export interface SelectTopicDialogResult {
   styleUrl: './select-topic-dialog.component.scss',
 })
 export class SelectTopicDialogComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<SelectTopicDialogComponent>>(MatDialogRef);
+  data = inject<SelectTopicDialogData>(MAT_DIALOG_DATA);
+
   selectedTopicUuid: string | null = null;
   filteredTopics: Topic[] = [];
-
-  constructor(
-    public dialogRef: MatDialogRef<SelectTopicDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: SelectTopicDialogData,
-  ) {}
 
   ngOnInit(): void {
     // Filter topics for the selected podcast

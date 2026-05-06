@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -29,14 +29,13 @@ import { MatButton } from '@angular/material/button';
   styleUrl: './add-rss-feed-dialog.component.scss',
 })
 export class AddRssFeedDialogComponent {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<AddRssFeedDialogComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
   rssFeedForm: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddRssFeedDialogComponent>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
+  constructor() {
     this.rssFeedForm = this.fb.group({
       urls: ['', [Validators.required]],
     });

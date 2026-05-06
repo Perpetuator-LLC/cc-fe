@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +22,15 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./affiliate-landing.component.scss'],
 })
 export class AffiliateLandingComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private affiliateService = inject(AffiliateService);
+  private affiliateStorageService = inject(AffiliateStorageService);
+  private authService = inject(AuthService);
+  private messageService = inject(MessageService);
+  private traceService = inject(TraceService);
+  private seoService = inject(SeoService);
+
   private subscriptions = new Subscription();
 
   loading = true;
@@ -30,17 +39,6 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   hasExistingAffiliate = false;
   existingAffiliateUsername = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private affiliateService: AffiliateService,
-    private affiliateStorageService: AffiliateStorageService,
-    private authService: AuthService,
-    private messageService: MessageService,
-    private traceService: TraceService,
-    private seoService: SeoService,
-  ) {}
 
   ngOnInit(): void {
     this.isAuthenticated = this.authService.isLoggedIn();

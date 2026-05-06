@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, signal, WritableSignal, Injector } from '@angular/core';
+import { Injectable, signal, WritableSignal, Injector, inject } from '@angular/core';
 import { AuthConfig, OAuthService as AngularOAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
@@ -44,6 +44,12 @@ export interface OAuth2ErrorResponse {
   providedIn: 'root',
 })
 export class OAuthService {
+  private angularOAuthService = inject(AngularOAuthService);
+  private router = inject(Router);
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
+  private tokenStorage = inject(TokenStorageService);
+
   private currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
   public currentUser$: Observable<UserProfile | null> = this.currentUserSubject.asObservable();
   private loggedInSignal: WritableSignal<boolean> = signal(false);
@@ -69,16 +75,6 @@ export class OAuthService {
     skipIssuerCheck: true,
     oidc: false,
   };
-
-  constructor(
-    private angularOAuthService: AngularOAuthService,
-    private router: Router,
-    private http: HttpClient,
-    private injector: Injector,
-    private tokenStorage: TokenStorageService,
-  ) {
-    // Will be initialized on first use
-  }
 
   private getTraceService(): TraceService | null {
     try {

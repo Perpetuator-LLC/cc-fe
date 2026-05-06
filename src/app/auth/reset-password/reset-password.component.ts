@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from '../../message.service';
@@ -30,17 +30,17 @@ import { GraphqlAuthService } from '../graphql-auth.service';
   styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private graphqlAuthService = inject(GraphqlAuthService);
+
   resetPasswordForm: FormGroup;
   token: string | null = null;
   isSubmitting = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private router: Router,
-    private messageService: MessageService,
-    private graphqlAuthService: GraphqlAuthService,
-  ) {
+  constructor() {
     this.resetPasswordForm = this.fb.group(
       {
         newPassword: ['', [Validators.required, Validators.minLength(8)]],

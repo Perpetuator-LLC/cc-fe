@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject, OnInit, OnDestroy, effect } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, OnDestroy, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
@@ -25,20 +25,20 @@ export interface PolicyAcceptanceDialogData {
   styleUrl: './policy-acceptance-dialog.component.scss',
 })
 export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
+  dialogRef = inject<MatDialogRef<PolicyAcceptanceDialogComponent>>(MatDialogRef);
+  data = inject<PolicyAcceptanceDialogData>(MAT_DIALOG_DATA);
+  private policyService = inject(PolicyService);
+  private messageService = inject(MessageService);
+  private sanitizer = inject(DomSanitizer);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   acceptAll = false;
   accepting = false;
   error: string | null = null;
   private subscriptions = new Subscription();
 
-  constructor(
-    public dialogRef: MatDialogRef<PolicyAcceptanceDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: PolicyAcceptanceDialogData,
-    private policyService: PolicyService,
-    private messageService: MessageService,
-    private sanitizer: DomSanitizer,
-    private authService: AuthService,
-    private router: Router,
-  ) {
+  constructor() {
     // Close dialog if user logs out - use effect to monitor signal
     effect(() => {
       const isLoggedIn = this.authService.isLoggedIn();

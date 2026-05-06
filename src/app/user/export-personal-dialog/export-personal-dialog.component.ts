@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -18,17 +18,21 @@ import { TeamsService } from '../../team/teams.service';
   styleUrls: ['./export-personal-dialog.component.scss'],
 })
 export class ExportPersonalDialogComponent {
+  dialogRef = inject<MatDialogRef<ExportPersonalDialogComponent>>(MatDialogRef);
+  data = inject<{
+    password: string;
+  }>(MAT_DIALOG_DATA);
+  teamService = inject<TeamsService>(TeamsService);
+  messageService = inject<MessageService>(MessageService);
+
   exportConfirmation = '';
   password: string;
   private subscriptions = new Subscription();
   private downloadAnchor: HTMLAnchorElement | null = null;
 
-  constructor(
-    public dialogRef: MatDialogRef<ExportPersonalDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { password: string },
-    @Inject(TeamsService) public teamService: TeamsService,
-    @Inject(MessageService) public messageService: MessageService,
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.password = data.password;
   }
 

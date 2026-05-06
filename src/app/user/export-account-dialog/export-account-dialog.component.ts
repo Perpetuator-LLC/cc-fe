@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -15,12 +15,9 @@ import { MatInputModule } from '@angular/material/input';
   styleUrls: ['./export-account-dialog.component.scss'],
 })
 export class ExportAccountDialogComponent {
+  readonly dialogRef = inject<MatDialogRef<ExportAccountDialogComponent>>(MatDialogRef);
+  readonly data = inject<unknown>(MAT_DIALOG_DATA);
   exportConfirmation = '';
-
-  constructor(
-    public dialogRef: MatDialogRef<ExportAccountDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: unknown,
-  ) {}
 
   onCancel(): void {
     this.dialogRef.close(false);

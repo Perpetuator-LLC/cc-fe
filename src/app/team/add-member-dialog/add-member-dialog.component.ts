@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -40,17 +40,17 @@ export interface AddMemberDialogData {
   ],
 })
 export class AddMemberDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<AddMemberDialogComponent>>(MatDialogRef);
+  private teamsService = inject(TeamsService);
+  private messageService = inject(MessageService);
+  data = inject<AddMemberDialogData>(MAT_DIALOG_DATA);
+
   newUserForm: FormGroup;
   users: User[] = [];
   private subscriptions = new Subscription();
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddMemberDialogComponent>,
-    private teamsService: TeamsService,
-    private messageService: MessageService,
-    @Inject(MAT_DIALOG_DATA) public data: AddMemberDialogData,
-  ) {
+  constructor() {
     const userUuidControl = { value: '', disabled: false };
     const roleControl = ['', Validators.required];
 

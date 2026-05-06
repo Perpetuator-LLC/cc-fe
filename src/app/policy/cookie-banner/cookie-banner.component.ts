@@ -28,6 +28,10 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./cookie-banner.component.scss'],
 })
 export class CookieBannerComponent implements OnInit, OnDestroy {
+  private cookieConsentService = inject(CookieConsentService);
+  private policyService = inject(PolicyService);
+  private authService = inject(AuthService);
+
   private subscriptions = new Subscription();
   private serverCookiePolicyVersion: WritableSignal<string | null> = signal(null);
   private hasCheckedOnLogin = false; // Prevent repeated checks on login
@@ -64,11 +68,7 @@ export class CookieBannerComponent implements OnInit, OnDestroy {
 
   private cookiePolicyAccepted = signal(false);
 
-  constructor(
-    private cookieConsentService: CookieConsentService,
-    private policyService: PolicyService,
-    private authService: AuthService,
-  ) {
+  constructor() {
     const platformId = inject(PLATFORM_ID);
     this.isBrowser = isPlatformBrowser(platformId);
 

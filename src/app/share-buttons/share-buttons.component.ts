@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Input } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,9 @@ import { MessageService } from '../message.service';
   styleUrl: './share-buttons.component.scss',
 })
 export class ShareButtonsComponent {
+  private shareService = inject(ShareService);
+  private messageService = inject(MessageService);
+
   @Input() shareUrl!: string;
   @Input() title!: string;
   @Input() description?: string;
@@ -24,10 +27,7 @@ export class ShareButtonsComponent {
 
   protected canNativeShare = false;
 
-  constructor(
-    private shareService: ShareService,
-    private messageService: MessageService,
-  ) {
+  constructor() {
     this.canNativeShare = this.shareService.canNativeShare();
   }
 

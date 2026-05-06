@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnInit, ViewChild, TemplateRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
@@ -27,6 +27,9 @@ import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-
   styleUrl: './finance.component.scss',
 })
 export class FinanceComponent implements OnInit {
+  private toolbarService = inject(ToolbarService);
+  private dialog = inject(MatDialog);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
 
   currentSlide = 0;
@@ -53,11 +56,6 @@ export class FinanceComponent implements OnInit {
       image: '/assets/concept_recession.webp',
     },
   ];
-
-  constructor(
-    private toolbarService: ToolbarService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

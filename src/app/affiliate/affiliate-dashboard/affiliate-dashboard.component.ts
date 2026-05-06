@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -60,6 +60,14 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./affiliate-dashboard.component.scss'],
 })
 export class AffiliateDashboardComponent implements OnInit, OnDestroy {
+  private affiliateService = inject(AffiliateService);
+  private messageService = inject(MessageService);
+  private dialog = inject(MatDialog);
+  private clipboard = inject(Clipboard);
+  private userService = inject(UserService);
+  private router = inject(Router);
+  private policyService = inject(PolicyService);
+
   private subscriptions = new Subscription();
 
   loading = true;
@@ -83,16 +91,6 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   readonly MAX_FILE_SIZE = 1024 * 1024;
   readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-  constructor(
-    private affiliateService: AffiliateService,
-    private messageService: MessageService,
-    private dialog: MatDialog,
-    private clipboard: Clipboard,
-    private userService: UserService,
-    private router: Router,
-    private policyService: PolicyService,
-  ) {}
 
   ngOnInit(): void {
     this.checkEligibility();

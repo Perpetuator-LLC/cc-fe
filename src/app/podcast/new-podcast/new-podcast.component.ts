@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -35,6 +35,13 @@ import { MatSelect, MatOption, MatOptgroup } from '@angular/material/select';
   styleUrls: ['./new-podcast.component.scss'],
 })
 export class NewPodcastComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private podcastsService = inject(PodcastsService);
+  private teamsService = inject(TeamsService);
+  private toolbarService = inject(ToolbarService);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   podcastForm: FormGroup;
   private subscriptions = new Subscription();
@@ -43,14 +50,7 @@ export class NewPodcastComponent implements OnInit, OnDestroy {
   isLoadingTeams = true;
   teamNameLinked = true;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private messageService: MessageService,
-    private podcastsService: PodcastsService,
-    private teamsService: TeamsService,
-    private toolbarService: ToolbarService,
-  ) {
+  constructor() {
     this.podcastForm = this.fb.group({
       id: [{ value: '', disabled: true }],
       name: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9 ]+$/)]],

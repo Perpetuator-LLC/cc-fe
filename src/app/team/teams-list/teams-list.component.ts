@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
@@ -68,6 +68,12 @@ import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dia
   styleUrls: ['./teams-list.component.scss'],
 })
 export class TeamsListComponent implements OnInit, OnDestroy, AfterViewInit {
+  private router = inject(Router);
+  private messageService = inject(MessageService);
+  private toolbarService = inject(ToolbarService);
+  private teamsService = inject(TeamsService);
+  private dialog = inject(MatDialog);
+
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -78,14 +84,6 @@ export class TeamsListComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns: string[] = ['name', 'members', 'podcast', 'actions'];
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
-
-  constructor(
-    private router: Router,
-    private messageService: MessageService,
-    private toolbarService: ToolbarService,
-    private teamsService: TeamsService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     this.messageService.clearMessages();

@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -32,6 +32,15 @@ import { AudioPlayerService, AudioTrack } from '../shared/audio-player/audio-pla
   styleUrl: './public-podcast-page.component.scss',
 })
 export class PublicPodcastPageComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private publicPodcastService = inject(PublicPodcastHttpService);
+  private shareService = inject(ShareService);
+  private messageService = inject(MessageService);
+  private authService = inject(AuthService);
+  private seoService = inject(SeoService);
+  private audioPlayerService = inject(AudioPlayerService);
+
   podcastData: PodcastResponse | null = null;
   loading = true;
   error = false;
@@ -40,16 +49,7 @@ export class PublicPodcastPageComponent implements OnInit {
   perPage = 20;
   isAuthenticated = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private publicPodcastService: PublicPodcastHttpService,
-    private shareService: ShareService,
-    private messageService: MessageService,
-    private authService: AuthService,
-    private seoService: SeoService,
-    private audioPlayerService: AudioPlayerService,
-  ) {
+  constructor() {
     this.isAuthenticated = this.authService.isLoggedIn();
   }
 

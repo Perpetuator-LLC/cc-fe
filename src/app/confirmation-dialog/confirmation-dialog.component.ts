@@ -1,5 +1,5 @@
-// Copyright (c) 2025 Perpetuator LLC
-import { Component, Inject } from '@angular/core';
+// Copyright (c) 2025-2026 Perpetuator LLC
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -17,15 +17,12 @@ import { MatButton } from '@angular/material/button';
   styleUrl: './confirmation-dialog.component.scss',
 })
 export class ConfirmationDialogComponent {
-  constructor(
-    private dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      message: string;
-      title?: string;
-      hideActions?: boolean;
-    },
-  ) {}
+  private dialogRef = inject<MatDialogRef<ConfirmationDialogComponent>>(MatDialogRef);
+  data = inject<{
+    message: string;
+    title?: string;
+    hideActions?: boolean;
+  }>(MAT_DIALOG_DATA);
 
   onCancel(): void {
     this.dialogRef.close(false);

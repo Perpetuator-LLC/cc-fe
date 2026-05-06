@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -44,6 +44,15 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private graphqlAuthService = inject(GraphqlAuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toolbarService = inject(ToolbarService);
+  private messageService = inject(MessageService);
+  private affiliateService = inject(AffiliateService);
+  private affiliateStorageService = inject(AffiliateStorageService);
+
   private subscriptions = new Subscription();
   private affiliateCode: string | null = null;
   private returnUrl = '/home';
@@ -56,17 +65,6 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
     acceptTerms: [false as boolean, Validators.requiredTrue],
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-
-  constructor(
-    private fb: FormBuilder,
-    private graphqlAuthService: GraphqlAuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private toolbarService: ToolbarService,
-    private messageService: MessageService,
-    private affiliateService: AffiliateService,
-    private affiliateStorageService: AffiliateStorageService,
-  ) {}
 
   ngAfterViewInit() {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);

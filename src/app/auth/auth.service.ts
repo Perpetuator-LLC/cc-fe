@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable, WritableSignal } from '@angular/core';
+import { Injectable, WritableSignal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -24,11 +24,9 @@ export const AuthUrls = {
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(
-    private http: HttpClient,
-    private messageService: MessageService,
-    private oauthService: OAuthService,
-  ) {}
+  private http = inject(HttpClient);
+  private messageService = inject(MessageService);
+  private oauthService = inject(OAuthService);
 
   // Delegate all auth operations to OAuth service
   logout() {
