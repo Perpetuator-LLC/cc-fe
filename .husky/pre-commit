@@ -3,7 +3,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 # Use the Node version from .nvmrc
-nvm use
+if command -v nvm >/dev/null 2>&1; then
+  nvm use
+fi
 
 # Secret scanning — requires: brew install gitleaks
 if command -v gitleaks &> /dev/null; then
