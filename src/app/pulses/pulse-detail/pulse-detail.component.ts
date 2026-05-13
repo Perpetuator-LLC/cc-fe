@@ -530,7 +530,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
    * Calculate target words based on duration.
    * Uses voice-specific WPM from API, or defaults to 150.
    */
-  getTargetWords(): number {
+  get targetWords(): number {
     const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
     const wpm = this.pulseConfig?.wordsPerMinute || 150;
     return minutes * wpm;
