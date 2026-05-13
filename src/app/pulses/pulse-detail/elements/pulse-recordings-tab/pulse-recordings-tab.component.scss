@@ -42,91 +42,160 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.recordings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.recording-card {
-  cursor: pointer;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  padding: 16px;
+.recordings-table {
+  overflow: hidden;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
-
-  background: var(--md-sys-color-surface-container-low);
-
-  &:hover {
-    background: var(--md-sys-color-surface-container);
-  }
+  background: var(--md-sys-color-surface-container-lowest);
 }
 
-.recording-header {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.recording-title-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.recordings-table-header,
+.recording-row {
+  display: grid;
+  grid-template-columns: 40px minmax(280px, 1.8fr) 100px 60px 70px 96px 116px minmax(116px, auto);
+  column-gap: 20px;
   align-items: center;
 }
 
-.recording-number {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--md-sys-color-primary);
+.recordings-table-header {
+  min-width: 900px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.recording-row {
+  cursor: pointer;
+
+  min-width: 900px;
+  min-height: 67px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface-container-lowest);
+
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: -2px;
+  }
+}
+
+.recording-number,
+.recording-date,
+.recording-words {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.recording-title-cell {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  min-width: 0;
 }
 
 .recording-title {
-  font-weight: 600;
+  overflow: hidden;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.28;
   color: var(--md-sys-color-on-surface);
+  text-overflow: ellipsis;
+}
+
+.latest-badge {
+  flex: 0 0 auto;
+
+  padding: 4px 8px;
+  border: 1px solid var(--md-sys-color-primary);
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--md-sys-color-primary);
+  text-transform: uppercase;
 }
 
 .recording-date {
-  font-size: 12px;
-  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.25;
 }
 
-.recording-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-}
-
-.stat {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-
-  font-size: 12px;
-  color: var(--md-sys-color-on-surface-variant);
-
-  mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-  }
-
-  &.validated {
-    color: var(--md-extended-color-success-color);
-  }
+.recording-duration {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
 }
 
 .recording-actions {
   display: flex;
   gap: 8px;
   align-items: center;
-  align-self: flex-end;
+  justify-content: flex-end;
+
+  min-width: 0;
+
+  .play-button {
+    min-width: 72px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-primary-container);
+
+    background: var(--md-sys-color-primary-container);
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 4px;
+      font-size: 16px;
+    }
+  }
+
+  .more-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    color: var(--md-sys-color-on-surface-variant);
+
+    .mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      line-height: 18px;
+    }
+  }
 }
 
 .empty-state {
@@ -155,36 +224,88 @@
 
 .status-badge {
   display: inline-flex;
+  gap: 4px;
   align-items: center;
   justify-content: center;
 
-  padding: 4px 8px;
-  border-radius: 4px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
 
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  line-height: 1;
 
   &.status-success {
-    border: 1px solid var(--md-extended-color-success-color);
+    border: 0;
     color: var(--md-extended-color-success-color);
     background-color: var(--md-extended-color-success-color-container);
   }
 
   &.status-warning {
-    border: 1px solid var(--md-extended-color-warning-color);
+    border: 0;
     color: var(--md-extended-color-warning-color);
     background-color: var(--md-extended-color-warning-color-container);
   }
 
   &.status-error {
-    border: 1px solid var(--md-sys-color-error);
+    border: 0;
     color: var(--md-sys-color-error);
     background-color: var(--md-sys-color-error-container);
   }
 }
 
-.duration-hint {
-  margin-left: 8px;
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.validation-badge {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+
   font-size: 12px;
-  opacity: 0.8;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--md-extended-color-success-color);
+
+  background-color: var(--md-extended-color-success-color-container);
+
+  mat-icon {
+    width: 13px;
+    height: 12px;
+    font-size: 12px;
+  }
+
+  &.is-empty {
+    color: var(--md-sys-color-on-surface-variant);
+    background: transparent;
+  }
+}
+
+@media (width <= 1100px) {
+  .recordings-table {
+    overflow-x: auto;
+  }
+}
+
+@media (width <= 720px) {
+  .tab-content {
+    mat-card {
+      padding-inline: 0;
+    }
+  }
+
+  .recordings-header {
+    flex-direction: column;
+    gap: 12px;
+  }
 }

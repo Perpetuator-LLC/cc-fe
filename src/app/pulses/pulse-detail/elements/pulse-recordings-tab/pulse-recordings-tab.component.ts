@@ -11,7 +11,6 @@ import { PulseCanPlayPipe } from '../../pipes/pulse-can-play.pipe';
 import { PulseFormatSecondsPipe } from '../../pipes/pulse-format-seconds.pipe';
 import { PulseStatusClassPipe } from '../../pipes/pulse-status-class.pipe';
 import { PulseStatusTextPipe } from '../../pipes/pulse-status-text.pipe';
-import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
 
 @Component({
   selector: 'app-pulse-recordings-tab',
@@ -27,7 +26,6 @@ import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
     PulseFormatSecondsPipe,
     PulseStatusClassPipe,
     PulseStatusTextPipe,
-    PulseTimeAgoPipe,
   ],
   templateUrl: './pulse-recordings-tab.component.html',
   styleUrl: './pulse-recordings-tab.component.scss',

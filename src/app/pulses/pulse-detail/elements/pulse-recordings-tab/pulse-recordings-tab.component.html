@@ -29,68 +29,67 @@
           </p>
         </div>
       } @else {
-        <div class="recordings-list">
+        <div class="recordings-table" role="table" aria-label="Recordings">
+          <div class="recordings-table-header" role="row">
+            <span role="columnheader">#</span>
+            <span role="columnheader">Title</span>
+            <span role="columnheader">Date</span>
+            <span role="columnheader">Dur.</span>
+            <span role="columnheader">Words</span>
+            <span role="columnheader">Status</span>
+            <span role="columnheader">Validation</span>
+            <span role="columnheader" aria-label="Actions"></span>
+          </div>
+
           @for (pulse of pulses; track pulse.uuid; let i = $index) {
             <div
-              class="recording-card"
+              class="recording-row"
               role="button"
               tabindex="0"
               (click)="viewRecording.emit(pulse)"
               (keydown.enter)="openRecordingFromKeyboard($event, pulse)"
               (keydown.space)="openRecordingFromKeyboard($event, pulse)"
             >
-              <div class="recording-header">
-                <div class="recording-title-section">
-                  <span class="recording-number">#{{ pulses.length - i }}</span>
-                  <span class="recording-title">{{ pulse.title }}</span>
-                  <span class="recording-date">{{ pulse.createdAt | pulseTimeAgo }}</span>
-                </div>
-                <div class="recording-status">
-                  <span class="status-badge" [class]="pulse | pulseStatusClass">
-                    {{ pulse | pulseStatusText }}
-                  </span>
-                </div>
+              <span class="recording-number">{{ pulses.length - i }}</span>
+
+              <div class="recording-title-cell">
+                <span class="recording-title">{{ pulse.title }}</span>
+                @if (i === 0) {
+                  <span class="latest-badge">Latest</span>
+                }
               </div>
 
-              <div class="recording-stats">
-                <span class="stat">
-                  <mat-icon>timer</mat-icon>
-                  {{ pulse.audioDurationSeconds | pulseFormatSeconds }}
-                </span>
-                <span class="stat">
-                  <mat-icon>notes</mat-icon>
-                  {{ pulse.wordCount || 0 }} words
-                </span>
+              <span class="recording-date">{{ pulse.createdAt | date: 'MMM d, y' }}</span>
+              <span class="recording-duration">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
+              <span class="recording-words">{{ pulse.wordCount || 0 }}</span>
+
+              <span class="status-badge" [class]="pulse | pulseStatusClass">
+                <span class="badge-dot"></span>
+                {{ pulse | pulseStatusText }}
+              </span>
+
+              <span class="validation-badge" [class.is-empty]="!pulse.isValidated">
                 @if (pulse.isValidated) {
-                  <span class="stat validated">
-                    <mat-icon>verified</mat-icon>
-                    Validated
-                  </span>
+                  <mat-icon>check</mat-icon>
+                  Validated
+                } @else {
+                  -
                 }
-                @if (pulse.news && pulse.news.length > 0) {
-                  <span class="stat">
-                    <mat-icon>newspaper</mat-icon>
-                    {{ pulse.news.length }} news
-                  </span>
-                }
-                @if (pulse.researchUrls && pulse.researchUrls.length > 0) {
-                  <span class="stat">
-                    <mat-icon>link</mat-icon>
-                    {{ pulse.researchUrls.length }} URLs
-                  </span>
-                }
-              </div>
+              </span>
 
               <div class="recording-actions">
                 @if (pulse | pulseCanPlay) {
-                  <button mat-flat-button color="primary" (click)="emitCardAction($event, playPulse, pulse)">
+                  <button mat-flat-button class="play-button" (click)="emitCardAction($event, playPulse, pulse)">
                     <mat-icon>play_arrow</mat-icon>
                     Play
-                    @if (pulse.audioDurationSeconds) {
-                      <span class="duration-hint">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
-                    }
                   </button>
-                  <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
+                  <button
+                    mat-icon-button
+                    class="more-button"
+                    (click)="$event.stopPropagation()"
+                    [matMenuTriggerFor]="recordingMenu"
+                    matTooltip="More options"
+                  >
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #recordingMenu="matMenu">
