@@ -1,0 +1,190 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.tab-content {
+  padding: 16px 0;
+
+  mat-card {
+    margin-bottom: 16px;
+    padding-inline: 70px;
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+    box-shadow: none;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.recordings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 4px;
+  }
+}
+
+.recordings-description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.recordings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recording-card {
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-low);
+
+  &:hover {
+    background: var(--md-sys-color-surface-container);
+  }
+}
+
+.recording-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.recording-title-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.recording-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+}
+
+.recording-title {
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.recording-date {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.recording-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &.validated {
+    color: var(--md-extended-color-success-color);
+  }
+}
+
+.recording-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  align-self: flex-end;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+
+  padding: 48px 16px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    opacity: 0.5;
+  }
+
+  p {
+    max-width: 400px;
+    margin: 0;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  &.status-success {
+    border: 1px solid var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color);
+    background-color: var(--md-extended-color-success-color-container);
+  }
+
+  &.status-warning {
+    border: 1px solid var(--md-extended-color-warning-color);
+    color: var(--md-extended-color-warning-color);
+    background-color: var(--md-extended-color-warning-color-container);
+  }
+
+  &.status-error {
+    border: 1px solid var(--md-sys-color-error);
+    color: var(--md-sys-color-error);
+    background-color: var(--md-sys-color-error-container);
+  }
+}
+
+.duration-hint {
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+}

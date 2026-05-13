@@ -1,36 +1,22 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, debounceTime, filter, switchMap } from 'rxjs';
 import { MessageService } from '../../message.service';
 import { PulsesService } from '../pulses.service';
-import { PulseConfig, ContentSource, AlertTrigger, Pulse, DeliveryMethod, ScheduleFrequency } from '../pulses.types';
+import { PulseConfig, ContentSource, AlertTrigger, Pulse } from '../pulses.types';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { LoadingService } from '../../layout/loading.service';
 import { ShareService } from '../../share.service';
 import { JobService } from '../../jobs/job.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
 import { AddContentSourceDialogComponent } from '../add-content-source-dialog/add-content-source-dialog.component';
 import { AddAlertTriggerDialogComponent } from '../add-alert-trigger-dialog/add-alert-trigger-dialog.component';
 import {
@@ -44,17 +30,16 @@ import {
 import { AddRssFeedDialogComponent } from '../../podcast/add-rss-feed-dialog/add-rss-feed-dialog.component';
 import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
-import {
-  getStatusClass as pulseStatusClass,
-  getDisplayStatusText as pulseDisplayText,
-  formatSeconds as pulseFormatSeconds,
-  formatTimeAgo as pulseFormatTimeAgo,
-} from '../pulse-status.utils';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { UserService, UserPreferences } from '../../user/user.service';
-import { RouterLink } from '@angular/router';
+import { LatestPulseCardComponent } from './latest-pulse-card/latest-pulse-card.component';
+import { PulseAlertTriggersTabComponent } from './pulse-alert-triggers-tab/pulse-alert-triggers-tab.component';
+import { PulseContentSourcesTabComponent } from './pulse-content-sources-tab/pulse-content-sources-tab.component';
+import { PulseDetailHeaderComponent } from './pulse-detail-header/pulse-detail-header.component';
+import { PulseRecordingsTabComponent } from './pulse-recordings-tab/pulse-recordings-tab.component';
+import { PulseSettingsTabComponent } from './pulse-settings-tab/pulse-settings-tab.component';
 
 @Component({
   selector: 'app-pulse-detail',
@@ -64,31 +49,18 @@ import { RouterLink } from '@angular/router';
   imports: [
     CommonModule,
     MatProgressSpinner,
-    MatProgressBarModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatButton,
-    MatMenuModule,
-    MatButtonModule,
     MatIcon,
-    MatInputModule,
-    MatIconButton,
     MatCardContent,
-    MatCheckbox,
-    MatSlideToggle,
-    MatTooltip,
-    FormsModule,
     MatCard,
-    MatSelect,
-    MatOption,
     MatTabsModule,
-    CdkTextareaAutosize,
-    MatSliderModule,
-    MatTableModule,
-    MatChipsModule,
     VoiceSelectorComponent,
-    RouterLink,
     ScheduleListComponent,
+    LatestPulseCardComponent,
+    PulseAlertTriggersTabComponent,
+    PulseContentSourcesTabComponent,
+    PulseDetailHeaderComponent,
+    PulseRecordingsTabComponent,
+    PulseSettingsTabComponent,
   ],
 })
 export class PulseDetailComponent implements OnInit, OnDestroy {
@@ -142,19 +114,6 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     { value: 'conversational', label: 'Conversational' },
   ];
 
-  deliveryOptions: { value: DeliveryMethod; label: string }[] = [
-    { value: 'in_app', label: 'In-App Only' },
-    { value: 'email_link', label: 'Email' },
-    { value: 'sms_link', label: 'SMS (requires verified phone)' },
-  ];
-
-  scheduleOptions: { value: ScheduleFrequency; label: string }[] = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekdays', label: 'Weekdays (Mon-Fri)' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'once', label: 'One-time' },
-  ];
-
   private readonly tabNames = ['settings', 'content', 'alerts', 'voice', 'schedule', 'recordings'];
 
   // Content source columns
@@ -162,9 +121,6 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
   // Alert trigger columns
   alertTriggerColumns = ['alertType', 'details', 'isActive', 'actions'];
-
-  // Pulse history columns
-  pulseHistoryColumns = ['title', 'status', 'duration', 'createdAt', 'actions'];
 
   // Dependencies
   private readonly fb = inject(FormBuilder);
@@ -578,78 +534,6 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
     const wpm = this.pulseConfig?.wordsPerMinute || 150;
     return minutes * wpm;
-  }
-
-  /**
-   * Get the WPM being used (for display purposes)
-   */
-  getWordsPerMinute(): number {
-    return this.pulseConfig?.wordsPerMinute || 150;
-  }
-
-  formatDuration(value: number): string {
-    return `${value} min`;
-  }
-
-  formatSeconds(seconds: number): string {
-    return pulseFormatSeconds(seconds);
-  }
-
-  formatTimeAgo(dateString: string | null | undefined): string {
-    return pulseFormatTimeAgo(dateString);
-  }
-
-  getSourceTypeIcon(type: string): string {
-    switch (type) {
-      case 'rss_feed':
-        return 'rss_feed';
-      case 'search_term':
-        return 'search';
-      case 'watchlist':
-        return 'list';
-      case 'company':
-        return 'business';
-      default:
-        return 'source';
-    }
-  }
-
-  getSourceTypeLabel(type: string): string {
-    switch (type) {
-      case 'rss_feed':
-        return 'RSS Feed';
-      case 'search_term':
-        return 'Search Term';
-      case 'watchlist':
-        return 'Watchlist';
-      case 'company':
-        return 'Company';
-      default:
-        return type;
-    }
-  }
-
-  getAlertTypeIcon(type: string): string {
-    switch (type) {
-      case 'breaking_news':
-        return 'breaking_news';
-      case 'price_alert':
-        return 'trending_up';
-      case 'earnings':
-        return 'attach_money';
-      case 'sec_filing':
-        return 'description';
-      default:
-        return 'notifications';
-    }
-  }
-
-  getStatusClass(status: string, pulse?: Pulse): string {
-    return pulseStatusClass(status, pulse);
-  }
-
-  getDisplayStatusText(pulse: Pulse): string {
-    return pulseDisplayText(pulse);
   }
 
   playPulse(pulse: Pulse): void {

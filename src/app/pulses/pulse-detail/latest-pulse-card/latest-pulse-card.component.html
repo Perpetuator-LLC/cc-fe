@@ -1,0 +1,91 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-card class="latest-pulse-card">
+  <mat-card-content>
+    <div class="latest-pulse-header">
+      <div class="latest-pulse-info">
+        <h3>
+          <mat-icon>schedule</mat-icon>
+          Latest Recording
+        </h3>
+        <span class="pulse-title">{{ pulse.title }}</span>
+        <span class="pulse-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
+      </div>
+      <div class="latest-pulse-actions">
+        @if (canPlay) {
+          <button mat-flat-button color="primary" (click)="playPulse.emit(pulse)">
+            <mat-icon>play_arrow</mat-icon>
+            Play
+            @if (pulse.audioDurationSeconds) {
+              <span class="duration-hint">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+            }
+          </button>
+          <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #pulseMenu="matMenu">
+            <button mat-menu-item (click)="queueNext.emit(pulse)">
+              <mat-icon>queue_play_next</mat-icon>
+              <span>Play Next</span>
+            </button>
+            <button mat-menu-item (click)="queue.emit(pulse)">
+              <mat-icon>playlist_add</mat-icon>
+              <span>Add to Queue</span>
+            </button>
+          </mat-menu>
+        }
+        <button mat-button (click)="toggleTranscript.emit()">
+          <mat-icon>{{ showTranscript ? 'expand_less' : 'expand_more' }}</mat-icon>
+          {{ showTranscript ? 'Hide Transcript' : 'Show Transcript' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="pulse-stats">
+      <div class="stat-item">
+        <mat-icon>timer</mat-icon>
+        <span class="stat-value">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+        <span class="stat-label">Duration</span>
+      </div>
+      <div class="stat-item">
+        <mat-icon>notes</mat-icon>
+        <span class="stat-value">{{ pulse.wordCount || 0 }}</span>
+        <span class="stat-label">Words</span>
+      </div>
+      <div
+        class="stat-item"
+        [class.validated]="pulse.validatedCompliance"
+        [class.not-validated]="!pulse.validatedCompliance"
+      >
+        <mat-icon>gavel</mat-icon>
+        <span class="stat-value">{{ pulse.validatedCompliance ? 'Pass' : 'N/A' }}</span>
+        <span class="stat-label">Compliance</span>
+      </div>
+      <div class="stat-item" [class.validated]="pulse.validatedFacts" [class.not-validated]="!pulse.validatedFacts">
+        <mat-icon>fact_check</mat-icon>
+        <span class="stat-value">{{ pulse.validatedFacts ? 'Pass' : 'N/A' }}</span>
+        <span class="stat-label">Facts</span>
+      </div>
+      <div class="stat-item" [class.validated]="pulse.validatedLength" [class.not-validated]="!pulse.validatedLength">
+        <mat-icon>straighten</mat-icon>
+        <span class="stat-value">{{ pulse.validatedLength ? 'Pass' : 'N/A' }}</span>
+        <span class="stat-label">Length</span>
+      </div>
+      @if (pulse.status === 'FAILED') {
+        <div class="stat-item status-error">
+          <mat-icon>error</mat-icon>
+          <span class="stat-value">Failed</span>
+          <span class="stat-label" [matTooltip]="pulse.errorMessage || ''">{{
+            pulse.errorMessage || 'Unknown error'
+          }}</span>
+        </div>
+      }
+    </div>
+
+    @if (showTranscript && pulse.transcript) {
+      <div class="transcript-section">
+        <h4>Transcript</h4>
+        <div class="transcript-content">{{ pulse.transcript }}</div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

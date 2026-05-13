@@ -1,0 +1,75 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.pulse-header-card {
+  padding-inline: 14px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 0;
+
+  background-color: var(--md-sys-color-surface-container-low);
+  box-shadow: none;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  @media screen and (width <= 576px) {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+}
+
+.header-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.pulse-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+
+  background: var(--md-sys-color-primary-container);
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    color: var(--md-sys-color-on-primary-container);
+  }
+}
+
+.header-text {
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  button[mat-flat-button] {
+    mat-spinner {
+      display: inline-block;
+      margin-right: 8px;
+    }
+  }
+}

@@ -1,0 +1,35 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-card class="pulse-header-card">
+  <mat-card-content>
+    <div class="header-content">
+      <div class="header-info">
+        <div class="pulse-icon">
+          <mat-icon>vital_signs</mat-icon>
+        </div>
+        <div class="header-text">
+          <h1>{{ pulseConfig.name }}</h1>
+          <p>{{ pulseConfig.description || 'No description' }}</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-flat-button color="primary" (click)="generatePulse.emit()" [disabled]="generatingPulse">
+          @if (generatingPulse) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>play_arrow</mat-icon>
+          }
+          Generate Now
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="headerMenu" matTooltip="More actions">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #headerMenu="matMenu">
+          <button mat-menu-item (click)="deletePulseConfig.emit()">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Delete Configuration</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
