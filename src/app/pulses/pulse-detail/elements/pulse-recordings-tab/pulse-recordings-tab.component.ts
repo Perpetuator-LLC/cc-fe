@@ -6,13 +6,29 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { getDisplayStatusText, getStatusClass, formatSeconds, formatTimeAgo } from '../../pulse-status.utils';
-import { Pulse } from '../../pulses.types';
+import { Pulse } from '../../../pulses.types';
+import { PulseCanPlayPipe } from '../../pipes/pulse-can-play.pipe';
+import { PulseFormatSecondsPipe } from '../../pipes/pulse-format-seconds.pipe';
+import { PulseStatusClassPipe } from '../../pipes/pulse-status-class.pipe';
+import { PulseStatusTextPipe } from '../../pipes/pulse-status-text.pipe';
+import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
 
 @Component({
   selector: 'app-pulse-recordings-tab',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatMenuModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatMenuModule,
+    MatTooltipModule,
+    PulseCanPlayPipe,
+    PulseFormatSecondsPipe,
+    PulseStatusClassPipe,
+    PulseStatusTextPipe,
+    PulseTimeAgoPipe,
+  ],
   templateUrl: './pulse-recordings-tab.component.html',
   styleUrl: './pulse-recordings-tab.component.scss',
 })
@@ -24,26 +40,6 @@ export class PulseRecordingsTabComponent {
   @Output() playPulse = new EventEmitter<Pulse>();
   @Output() queueNext = new EventEmitter<Pulse>();
   @Output() queue = new EventEmitter<Pulse>();
-
-  canPlay(pulse: Pulse): boolean {
-    return Boolean(pulse.audioUrl && (pulse.status === 'READY' || pulse.status === 'DELIVERED'));
-  }
-
-  formatSeconds(seconds: number): string {
-    return formatSeconds(seconds);
-  }
-
-  formatTimeAgo(dateString: string | null | undefined): string {
-    return formatTimeAgo(dateString);
-  }
-
-  getStatusClass(status: string, pulse?: Pulse): string {
-    return getStatusClass(status, pulse);
-  }
-
-  getDisplayStatusText(pulse: Pulse): string {
-    return getDisplayStatusText(pulse);
-  }
 
   emitCardAction(event: MouseEvent, emitter: EventEmitter<Pulse>, pulse: Pulse): void {
     event.stopPropagation();

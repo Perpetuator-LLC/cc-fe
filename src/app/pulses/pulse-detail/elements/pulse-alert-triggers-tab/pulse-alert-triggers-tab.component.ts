@@ -7,7 +7,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AlertTrigger } from '../../pulses.types';
+import { AlertTrigger } from '../../../pulses.types';
+import { PulseAlertTypeIconPipe } from '../../pipes/pulse-alert-type-icon.pipe';
 
 @Component({
   selector: 'app-pulse-alert-triggers-tab',
@@ -20,6 +21,7 @@ import { AlertTrigger } from '../../pulses.types';
     MatIconModule,
     MatTableModule,
     MatTooltipModule,
+    PulseAlertTypeIconPipe,
   ],
   templateUrl: './pulse-alert-triggers-tab.component.html',
   styleUrl: './pulse-alert-triggers-tab.component.scss',
@@ -30,14 +32,4 @@ export class PulseAlertTriggersTabComponent {
 
   @Output() addAlertTrigger = new EventEmitter<void>();
   @Output() removeAlertTrigger = new EventEmitter<string>();
-
-  getAlertTypeIcon(type: string): string {
-    const icons: Record<string, string> = {
-      breaking_news: 'breaking_news',
-      price_alert: 'trending_up',
-      earnings: 'attach_money',
-      sec_filing: 'description',
-    };
-    return icons[type] ?? 'notifications';
-  }
 }

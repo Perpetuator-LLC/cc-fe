@@ -34,12 +34,12 @@ import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { UserService, UserPreferences } from '../../user/user.service';
-import { LatestPulseCardComponent } from './latest-pulse-card/latest-pulse-card.component';
-import { PulseAlertTriggersTabComponent } from './pulse-alert-triggers-tab/pulse-alert-triggers-tab.component';
-import { PulseContentSourcesTabComponent } from './pulse-content-sources-tab/pulse-content-sources-tab.component';
-import { PulseDetailHeaderComponent } from './pulse-detail-header/pulse-detail-header.component';
-import { PulseRecordingsTabComponent } from './pulse-recordings-tab/pulse-recordings-tab.component';
-import { PulseSettingsTabComponent } from './pulse-settings-tab/pulse-settings-tab.component';
+import { LatestPulseCardComponent } from './elements/latest-pulse-card/latest-pulse-card.component';
+import { PulseAlertTriggersTabComponent } from './elements/pulse-alert-triggers-tab/pulse-alert-triggers-tab.component';
+import { PulseContentSourcesTabComponent } from './elements/pulse-content-sources-tab/pulse-content-sources-tab.component';
+import { PulseDetailHeaderComponent } from './elements/pulse-detail-header/pulse-detail-header.component';
+import { PulseRecordingsTabComponent } from './elements/pulse-recordings-tab/pulse-recordings-tab.component';
+import { PulseSettingsTabComponent } from './elements/pulse-settings-tab/pulse-settings-tab.component';
 
 @Component({
   selector: 'app-pulse-detail',
@@ -523,17 +523,6 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
         );
       }
     });
-  }
-
-  // Helpers
-  /**
-   * Calculate target words based on duration.
-   * Uses voice-specific WPM from API, or defaults to 150.
-   */
-  get targetWords(): number {
-    const minutes = this.pulseForm.get('targetDurationMinutes')?.value || 0;
-    const wpm = this.pulseConfig?.wordsPerMinute || 150;
-    return minutes * wpm;
   }
 
   playPulse(pulse: Pulse): void {

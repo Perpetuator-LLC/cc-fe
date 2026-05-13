@@ -55,8 +55,8 @@
             <th mat-header-cell *matHeaderCellDef>Type</th>
             <td mat-cell *matCellDef="let source">
               <span class="source-type">
-                <mat-icon>{{ getSourceTypeIcon(source.sourceType) }}</mat-icon>
-                {{ getSourceTypeLabel(source.sourceType) }}
+                <mat-icon>{{ source.sourceType | pulseSourceTypeIcon }}</mat-icon>
+                {{ source.sourceType | pulseSourceTypeLabel }}
               </span>
             </td>
           </ng-container>

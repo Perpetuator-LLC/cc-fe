@@ -8,15 +8,15 @@
           Latest Recording
         </h3>
         <span class="pulse-title">{{ pulse.title }}</span>
-        <span class="pulse-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
+        <span class="pulse-date">{{ pulse.createdAt | pulseTimeAgo }}</span>
       </div>
       <div class="latest-pulse-actions">
-        @if (canPlay) {
+        @if (pulse | pulseCanPlay) {
           <button mat-flat-button color="primary" (click)="playPulse.emit(pulse)">
             <mat-icon>play_arrow</mat-icon>
             Play
             @if (pulse.audioDurationSeconds) {
-              <span class="duration-hint">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+              <span class="duration-hint">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
             }
           </button>
           <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
@@ -43,7 +43,7 @@
     <div class="pulse-stats">
       <div class="stat-item">
         <mat-icon>timer</mat-icon>
-        <span class="stat-value">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+        <span class="stat-value">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
         <span class="stat-label">Duration</span>
       </div>
       <div class="stat-item">

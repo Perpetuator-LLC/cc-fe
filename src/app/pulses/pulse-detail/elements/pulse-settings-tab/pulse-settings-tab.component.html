@@ -21,7 +21,10 @@
 
         <div class="duration-field">
           <span class="duration-label">
-            Target Duration: {{ pulseForm.get('targetDurationMinutes')?.value }} minutes (~{{ targetWords }} words)
+            Target Duration: {{ targetDurationMinutes }} minutes (~{{
+              targetDurationMinutes | pulseTargetWords: wordsPerMinute
+            }}
+            words)
           </span>
           <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
             <input matSliderThumb formControlName="targetDurationMinutes" />

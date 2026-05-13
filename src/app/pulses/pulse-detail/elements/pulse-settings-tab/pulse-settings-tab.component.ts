@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { PulseTargetWordsPipe } from '../../pipes/pulse-target-words.pipe';
 
 interface ToneOption {
   value: string;
@@ -40,6 +41,7 @@ interface ToneOption {
     MatSliderModule,
     MatSlideToggleModule,
     MatTooltipModule,
+    PulseTargetWordsPipe,
     ReactiveFormsModule,
     RouterLink,
   ],
@@ -49,7 +51,8 @@ interface ToneOption {
 export class PulseSettingsTabComponent {
   @Input({ required: true }) pulseForm!: FormGroup;
   @Input() toneOptions: ToneOption[] = [];
-  @Input() targetWords = 0;
+  @Input() targetDurationMinutes = 0;
+  @Input() wordsPerMinute = 150;
   @Input() loadingPreferences = false;
   @Input() phoneVerified = false;
 

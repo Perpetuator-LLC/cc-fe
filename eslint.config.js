@@ -20,7 +20,7 @@ module.exports = tseslint.config(
     processor: angular.processInlineTemplates,
     rules: {
       // 'object-curly-spacing': ['error', 'always'],
-      'max-len': ['error', { code: 120 }],
+      'max-len': ['error', { code: 120, ignorePattern: '^import\\s.+' }],
       // 'prettier/prettier': ['error', { printWidth: 120 }],
       '@angular-eslint/directive-selector': [
         'error',

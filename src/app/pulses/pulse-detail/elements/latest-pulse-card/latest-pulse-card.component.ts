@@ -6,13 +6,25 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Pulse } from '../../pulses.types';
-import { formatSeconds, formatTimeAgo } from '../../pulse-status.utils';
+import { Pulse } from '../../../pulses.types';
+import { PulseCanPlayPipe } from '../../pipes/pulse-can-play.pipe';
+import { PulseFormatSecondsPipe } from '../../pipes/pulse-format-seconds.pipe';
+import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
 
 @Component({
   selector: 'app-latest-pulse-card',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatMenuModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatMenuModule,
+    MatTooltipModule,
+    PulseCanPlayPipe,
+    PulseFormatSecondsPipe,
+    PulseTimeAgoPipe,
+  ],
   templateUrl: './latest-pulse-card.component.html',
   styleUrl: './latest-pulse-card.component.scss',
 })
@@ -24,16 +36,4 @@ export class LatestPulseCardComponent {
   @Output() queueNext = new EventEmitter<Pulse>();
   @Output() queue = new EventEmitter<Pulse>();
   @Output() toggleTranscript = new EventEmitter<void>();
-
-  get canPlay(): boolean {
-    return Boolean(this.pulse.audioUrl && (this.pulse.status === 'READY' || this.pulse.status === 'DELIVERED'));
-  }
-
-  formatSeconds(seconds: number): string {
-    return formatSeconds(seconds);
-  }
-
-  formatTimeAgo(dateString: string | null | undefined): string {
-    return formatTimeAgo(dateString);
-  }
 }

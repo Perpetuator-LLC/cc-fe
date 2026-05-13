@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PulseConfig } from '../../pulses.types';
+import { PulseConfig } from '../../../pulses.types';
 
 @Component({
   selector: 'app-pulse-detail-header',

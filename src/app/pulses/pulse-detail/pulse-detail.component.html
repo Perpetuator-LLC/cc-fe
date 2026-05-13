@@ -35,7 +35,8 @@
         <app-pulse-settings-tab
           [pulseForm]="pulseForm"
           [toneOptions]="toneOptions"
-          [targetWords]="targetWords"
+          [targetDurationMinutes]="pulseForm.controls['targetDurationMinutes'].value"
+          [wordsPerMinute]="pulseConfig.wordsPerMinute"
           [loadingPreferences]="loadingPreferences"
           [phoneVerified]="phoneVerified"
         />

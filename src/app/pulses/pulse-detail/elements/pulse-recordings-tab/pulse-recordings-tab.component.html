@@ -43,11 +43,11 @@
                 <div class="recording-title-section">
                   <span class="recording-number">#{{ pulses.length - i }}</span>
                   <span class="recording-title">{{ pulse.title }}</span>
-                  <span class="recording-date">{{ formatTimeAgo(pulse.createdAt) }}</span>
+                  <span class="recording-date">{{ pulse.createdAt | pulseTimeAgo }}</span>
                 </div>
                 <div class="recording-status">
-                  <span class="status-badge" [class]="getStatusClass(pulse.status, pulse)">
-                    {{ getDisplayStatusText(pulse) }}
+                  <span class="status-badge" [class]="pulse | pulseStatusClass">
+                    {{ pulse | pulseStatusText }}
                   </span>
                 </div>
               </div>
@@ -55,7 +55,7 @@
               <div class="recording-stats">
                 <span class="stat">
                   <mat-icon>timer</mat-icon>
-                  {{ formatSeconds(pulse.audioDurationSeconds) }}
+                  {{ pulse.audioDurationSeconds | pulseFormatSeconds }}
                 </span>
                 <span class="stat">
                   <mat-icon>notes</mat-icon>
@@ -82,12 +82,12 @@
               </div>
 
               <div class="recording-actions">
-                @if (canPlay(pulse)) {
+                @if (pulse | pulseCanPlay) {
                   <button mat-flat-button color="primary" (click)="emitCardAction($event, playPulse, pulse)">
                     <mat-icon>play_arrow</mat-icon>
                     Play
                     @if (pulse.audioDurationSeconds) {
-                      <span class="duration-hint">{{ formatSeconds(pulse.audioDurationSeconds) }}</span>
+                      <span class="duration-hint">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
                     }
                   </button>
                   <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">

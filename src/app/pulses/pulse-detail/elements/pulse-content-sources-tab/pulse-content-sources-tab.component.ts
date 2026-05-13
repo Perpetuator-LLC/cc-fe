@@ -6,12 +6,23 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ContentSource } from '../../pulses.types';
+import { ContentSource } from '../../../pulses.types';
+import { PulseSourceTypeIconPipe } from '../../pipes/pulse-source-type-icon.pipe';
+import { PulseSourceTypeLabelPipe } from '../../pipes/pulse-source-type-label.pipe';
 
 @Component({
   selector: 'app-pulse-content-sources-tab',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatTableModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatTableModule,
+    MatTooltipModule,
+    PulseSourceTypeIconPipe,
+    PulseSourceTypeLabelPipe,
+  ],
   templateUrl: './pulse-content-sources-tab.component.html',
   styleUrl: './pulse-content-sources-tab.component.scss',
 })
@@ -24,24 +35,4 @@ export class PulseContentSourcesTabComponent {
   @Output() addContentSource = new EventEmitter<void>();
   @Output() editContentSource = new EventEmitter<ContentSource>();
   @Output() removeContentSource = new EventEmitter<string>();
-
-  getSourceTypeIcon(type: string): string {
-    const icons: Record<string, string> = {
-      rss_feed: 'rss_feed',
-      search_term: 'search',
-      watchlist: 'list',
-      company: 'business',
-    };
-    return icons[type] ?? 'source';
-  }
-
-  getSourceTypeLabel(type: string): string {
-    const labels: Record<string, string> = {
-      rss_feed: 'RSS Feed',
-      search_term: 'Search Term',
-      watchlist: 'Watchlist',
-      company: 'Company',
-    };
-    return labels[type] ?? type;
-  }
 }
