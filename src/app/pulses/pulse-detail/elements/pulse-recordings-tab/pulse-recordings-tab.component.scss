@@ -68,7 +68,7 @@
   color: var(--md-sys-color-on-surface-variant);
   text-transform: uppercase;
 
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container-high);
 }
 
 .recording-row {
@@ -81,7 +81,7 @@
 
   color: var(--md-sys-color-on-surface);
 
-  background: var(--md-sys-color-surface-container-lowest);
+  background: var((--md-sys-color-surface-container-low));
 
   transition:
     background 0.18s ease,
