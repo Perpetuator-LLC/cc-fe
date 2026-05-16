@@ -117,7 +117,15 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     if (this.pulses.length === 0) return null;
     return this.pulses[0]; // Already sorted by createdAt desc
   }
+
+  // History (V3): all recordings except the latest, which is rendered in the hero
+  get historyRecordings(): Pulse[] {
+    return this.pulses.length > 1 ? this.pulses.slice(1) : [];
+  }
   showTranscript = false;
+
+  // Per-row expand state for V3 history list (keyed by pulse uuid)
+  private readonly expandedHistoryRows = new Set<string>();
 
   // Combined symbols from all content sources (company sources + resolved watchlists)
   // For now, only includes directly added company symbols
@@ -713,6 +721,41 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
 
   toggleTranscript(): void {
     this.showTranscript = !this.showTranscript;
+  }
+
+  // ==================== HISTORY LIST (V3) METHODS ====================
+
+  /**
+   * Whether a history row is currently expanded inline.
+   */
+  isExpanded(uuid: string): boolean {
+    return this.expandedHistoryRows.has(uuid);
+  }
+
+  /**
+   * Toggle inline expanded detail for a history row.
+   */
+  toggleExpanded(uuid: string): void {
+    if (this.expandedHistoryRows.has(uuid)) {
+      this.expandedHistoryRows.delete(uuid);
+    } else {
+      this.expandedHistoryRows.add(uuid);
+    }
+  }
+
+  /**
+   * Best-effort short label for a news item in the source chips.
+   */
+  getNewsSourceLabel(news: { source?: string; url?: string; title?: string }): string {
+    if (news?.source) return news.source;
+    if (news?.url) {
+      try {
+        return new URL(news.url).hostname.replace(/^www\./, '');
+      } catch {
+        return news.url;
+      }
+    }
+    return news?.title ?? 'Source';
   }
 
   // ==================== UPDATES (PULSE HISTORY) METHODS ====================
