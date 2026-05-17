@@ -104,4 +104,5 @@ aio/content/examples/.DS_Store
 *.scss.*
 
 # Claude Code auto-generated context (session-start hook)
-.claude
+.claude/
+!.claude/settings.json
