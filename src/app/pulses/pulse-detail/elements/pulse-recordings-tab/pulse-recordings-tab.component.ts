@@ -11,6 +11,7 @@ import { PulseCanPlayPipe } from '../../pipes/pulse-can-play.pipe';
 import { PulseFormatSecondsPipe } from '../../pipes/pulse-format-seconds.pipe';
 import { PulseStatusClassPipe } from '../../pipes/pulse-status-class.pipe';
 import { PulseStatusTextPipe } from '../../pipes/pulse-status-text.pipe';
+import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
 
 @Component({
   selector: 'app-pulse-recordings-tab',
@@ -26,6 +27,7 @@ import { PulseStatusTextPipe } from '../../pipes/pulse-status-text.pipe';
     PulseFormatSecondsPipe,
     PulseStatusClassPipe,
     PulseStatusTextPipe,
+    PulseTimeAgoPipe,
   ],
   templateUrl: './pulse-recordings-tab.component.html',
   styleUrl: './pulse-recordings-tab.component.scss',
@@ -39,6 +41,26 @@ export class PulseRecordingsTabComponent {
   @Output() queueNext = new EventEmitter<Pulse>();
   @Output() queue = new EventEmitter<Pulse>();
 
+  // V3: latest is shown in the hero above — history list excludes it.
+  get historyRecordings(): Pulse[] {
+    return this.pulses.length > 1 ? this.pulses.slice(1) : [];
+  }
+
+  // Per-row expand state, keyed by pulse uuid.
+  private readonly expandedRows = new Set<string>();
+
+  isExpanded(uuid: string): boolean {
+    return this.expandedRows.has(uuid);
+  }
+
+  toggleExpanded(uuid: string): void {
+    if (this.expandedRows.has(uuid)) {
+      this.expandedRows.delete(uuid);
+    } else {
+      this.expandedRows.add(uuid);
+    }
+  }
+
   emitCardAction(event: MouseEvent, emitter: EventEmitter<Pulse>, pulse: Pulse): void {
     event.stopPropagation();
     emitter.emit(pulse);
@@ -47,5 +69,17 @@ export class PulseRecordingsTabComponent {
   openRecordingFromKeyboard(event: Event, pulse: Pulse): void {
     event.preventDefault();
     this.viewRecording.emit(pulse);
+  }
+
+  getNewsSourceLabel(news: { source?: string; url?: string; title?: string }): string {
+    if (news?.source) return news.source;
+    if (news?.url) {
+      try {
+        return new URL(news.url).hostname.replace(/^www\./, '');
+      } catch {
+        return news.url;
+      }
+    }
+    return news?.title ?? 'Source';
   }
 }

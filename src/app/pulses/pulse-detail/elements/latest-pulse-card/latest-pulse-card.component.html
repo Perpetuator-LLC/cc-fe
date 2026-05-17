@@ -1,24 +1,69 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
-<mat-card class="latest-pulse-card">
+<mat-card class="latest-pulse-card latest-hero">
   <mat-card-content>
-    <div class="latest-pulse-header">
-      <div class="latest-pulse-info">
-        <h3>
-          <mat-icon>schedule</mat-icon>
-          Latest Recording
-        </h3>
-        <span class="pulse-title">{{ pulse.title }}</span>
-        <span class="pulse-date">{{ pulse.createdAt | pulseTimeAgo }}</span>
+    <!-- Eyebrow row -->
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-pill">Latest Recording</span>
+      <span class="hero-eyebrow-meta">{{ pulse.createdAt | pulseTimeAgo }}</span>
+      @if (pulse.status === 'FAILED') {
+        <span class="hero-error-badge" [matTooltip]="pulse.errorMessage || 'Unknown error'">
+          <mat-icon>error</mat-icon>
+          Failed
+        </span>
+      }
+    </div>
+
+    <!-- Main hero row: play, title+meta, actions -->
+    <div class="hero-main">
+      <!-- Big play button -->
+      <button
+        mat-fab
+        color="primary"
+        class="hero-play-fab"
+        [disabled]="!(pulse | pulseCanPlay)"
+        (click)="playPulse.emit(pulse)"
+        matTooltip="Play latest"
+      >
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+
+      <!-- Title + inline meta -->
+      <div class="hero-info">
+        <h2 class="hero-title">{{ pulse.title }}</h2>
+        <div class="hero-meta">
+          <span class="hero-meta-item">
+            <mat-icon>timer</mat-icon>
+            {{ pulse.audioDurationSeconds | pulseFormatSeconds }}
+          </span>
+          <span class="hero-meta-item">
+            <mat-icon>notes</mat-icon>
+            {{ pulse.wordCount || 0 }} words
+          </span>
+          @if (pulse.news && pulse.news.length > 0) {
+            <span class="hero-meta-item">
+              <mat-icon>newspaper</mat-icon>
+              {{ pulse.news.length }} sources
+            </span>
+          }
+          @if (pulse.isValidated) {
+            <span class="validated-pill" matTooltip="Compliance, facts and length all passed">
+              <mat-icon>verified</mat-icon>
+              Validated
+            </span>
+          }
+        </div>
       </div>
-      <div class="latest-pulse-actions">
+
+      <!-- Right-side action icon buttons -->
+      <div class="hero-actions">
+        <button
+          mat-icon-button
+          (click)="toggleTranscript.emit()"
+          [matTooltip]="showTranscript ? 'Hide transcript' : 'Show transcript'"
+        >
+          <mat-icon>description</mat-icon>
+        </button>
         @if (pulse | pulseCanPlay) {
-          <button mat-flat-button color="primary" (click)="playPulse.emit(pulse)">
-            <mat-icon>play_arrow</mat-icon>
-            Play
-            @if (pulse.audioDurationSeconds) {
-              <span class="duration-hint">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
-            }
-          </button>
           <button mat-icon-button [matMenuTriggerFor]="pulseMenu" matTooltip="More options">
             <mat-icon>more_vert</mat-icon>
           </button>
@@ -33,54 +78,50 @@
             </button>
           </mat-menu>
         }
-        <button mat-button (click)="toggleTranscript.emit()">
-          <mat-icon>{{ showTranscript ? 'expand_less' : 'expand_more' }}</mat-icon>
-          {{ showTranscript ? 'Hide Transcript' : 'Show Transcript' }}
-        </button>
       </div>
     </div>
 
-    <div class="pulse-stats">
-      <div class="stat-item">
-        <mat-icon>timer</mat-icon>
-        <span class="stat-value">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
-        <span class="stat-label">Duration</span>
-      </div>
-      <div class="stat-item">
-        <mat-icon>notes</mat-icon>
-        <span class="stat-value">{{ pulse.wordCount || 0 }}</span>
-        <span class="stat-label">Words</span>
-      </div>
+    <!-- Progress / duration bar -->
+    <div class="hero-progress">
+      <span class="hero-progress-time">0:00</span>
+      <div class="hero-progress-bar"><div class="hero-progress-fill"></div></div>
+      <span class="hero-progress-time hero-progress-time-end">
+        {{ pulse.audioDurationSeconds | pulseFormatSeconds }}
+      </span>
+    </div>
+
+    <!-- Validation breakdown (inline detail) -->
+    <div class="hero-validation">
       <div
-        class="stat-item"
+        class="hero-validation-item"
         [class.validated]="pulse.validatedCompliance"
         [class.not-validated]="!pulse.validatedCompliance"
       >
         <mat-icon>gavel</mat-icon>
-        <span class="stat-value">{{ pulse.validatedCompliance ? 'Pass' : 'N/A' }}</span>
-        <span class="stat-label">Compliance</span>
+        <span class="hero-validation-label">Compliance</span>
+        <span class="hero-validation-value">{{ pulse.validatedCompliance ? 'Pass' : 'N/A' }}</span>
       </div>
-      <div class="stat-item" [class.validated]="pulse.validatedFacts" [class.not-validated]="!pulse.validatedFacts">
+      <div
+        class="hero-validation-item"
+        [class.validated]="pulse.validatedFacts"
+        [class.not-validated]="!pulse.validatedFacts"
+      >
         <mat-icon>fact_check</mat-icon>
-        <span class="stat-value">{{ pulse.validatedFacts ? 'Pass' : 'N/A' }}</span>
-        <span class="stat-label">Facts</span>
+        <span class="hero-validation-label">Facts</span>
+        <span class="hero-validation-value">{{ pulse.validatedFacts ? 'Pass' : 'N/A' }}</span>
       </div>
-      <div class="stat-item" [class.validated]="pulse.validatedLength" [class.not-validated]="!pulse.validatedLength">
+      <div
+        class="hero-validation-item"
+        [class.validated]="pulse.validatedLength"
+        [class.not-validated]="!pulse.validatedLength"
+      >
         <mat-icon>straighten</mat-icon>
-        <span class="stat-value">{{ pulse.validatedLength ? 'Pass' : 'N/A' }}</span>
-        <span class="stat-label">Length</span>
+        <span class="hero-validation-label">Length</span>
+        <span class="hero-validation-value">{{ pulse.validatedLength ? 'Pass' : 'N/A' }}</span>
       </div>
-      @if (pulse.status === 'FAILED') {
-        <div class="stat-item status-error">
-          <mat-icon>error</mat-icon>
-          <span class="stat-value">Failed</span>
-          <span class="stat-label" [matTooltip]="pulse.errorMessage || ''">{{
-            pulse.errorMessage || 'Unknown error'
-          }}</span>
-        </div>
-      }
     </div>
 
+    <!-- Transcript -->
     @if (showTranscript && pulse.transcript) {
       <div class="transcript-section">
         <h4>Transcript</h4>
