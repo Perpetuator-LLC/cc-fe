@@ -20,9 +20,14 @@ name: PR Checks
 on:
   pull_request:
     branches:
+      # Long-term target: main is the new staging-equivalent.
       - main
       - 'release/**'
       - 'rc/**'
+      # Interim: keep checks active on PRs to the legacy stage branch
+      # during cutover. Remove this entry once main has fully replaced
+      # stage as the integration branch.
+      - stage
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
