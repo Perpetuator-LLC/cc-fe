@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 .affiliate-admin-container {
   max-width: 1400px;
@@ -179,7 +179,9 @@
 
   background: var(--md-sys-color-surface-container);
 
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-2px);
@@ -541,7 +543,8 @@
           background: var(--md-sys-color-warning);
         }
 
-        &.payouts-disabled, &.charges-disabled {
+        &.payouts-disabled,
+        &.charges-disabled {
           color: var(--md-sys-color-on-warning);
           background: var(--md-sys-color-warning);
         }
@@ -729,4 +732,3 @@
     font-size: 14px;
   }
 }
-

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="version-control-section">
   <mat-expansion-panel class="version-control-panel">
     <mat-expansion-panel-header>
@@ -10,9 +10,13 @@
         <span>
           Current: v{{ currentVersionNumber }}
           @if (isCurrentVersionFullyValidated) {
-            <mat-icon class="status-icon validated md3-icon-success" [matTooltip]="currentVersionValidationTooltip">verified</mat-icon>
+            <mat-icon class="status-icon validated md3-icon-success" [matTooltip]="currentVersionValidationTooltip"
+              >verified</mat-icon
+            >
           } @else {
-            <mat-icon class="status-icon unvalidated md3-icon-warning" [matTooltip]="currentVersionValidationTooltip">warning</mat-icon>
+            <mat-icon class="status-icon unvalidated md3-icon-warning" [matTooltip]="currentVersionValidationTooltip"
+              >warning</mat-icon
+            >
           }
         </span>
         @if (historyVersions.length > 0) {
@@ -31,7 +35,8 @@
           color="primary"
           type="button"
           (click)="onValidateEpisode()"
-          matTooltip="Run AI validation on current content">
+          matTooltip="Run AI validation on current content"
+        >
           <mat-icon>verified</mat-icon>
           Validate Episode
         </button>
@@ -40,7 +45,8 @@
           color="accent"
           type="button"
           (click)="onRegenerateEpisode()"
-          matTooltip="Regenerate episode content from source articles">
+          matTooltip="Regenerate episode content from source articles"
+        >
           <mat-icon>refresh</mat-icon>
           Regenerate Episode
         </button>
@@ -114,9 +120,13 @@
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
                       @if (isVersionFullyValidated(selectedVersion)) {
-                        <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(selectedVersion)">verified</mat-icon>
+                        <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(selectedVersion)"
+                          >verified</mat-icon
+                        >
                       } @else {
-                        <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(selectedVersion)">warning</mat-icon>
+                        <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(selectedVersion)"
+                          >warning</mat-icon
+                        >
                       }
                     </span>
                   </div>
@@ -133,9 +143,13 @@
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
                       @if (isVersionFullyValidated(version)) {
-                        <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getValidationTooltip(version)">verified</mat-icon>
+                        <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getValidationTooltip(version)"
+                          >verified</mat-icon
+                        >
                       } @else {
-                        <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="getValidationTooltip(version)">warning</mat-icon>
+                        <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="getValidationTooltip(version)"
+                          >warning</mat-icon
+                        >
                       }
                     </span>
                   </div>
@@ -151,7 +165,8 @@
               type="button"
               [disabled]="!selectedVersionNumber"
               (click)="onCopyVersionContent()"
-              matTooltip="Copy version content to clipboard">
+              matTooltip="Copy version content to clipboard"
+            >
               <mat-icon>content_copy</mat-icon>
               Copy
             </button>
@@ -161,7 +176,8 @@
               type="button"
               [disabled]="!selectedVersionNumber"
               (click)="onRestoreVersion()"
-              matTooltip="Restore this version as current">
+              matTooltip="Restore this version as current"
+            >
               <mat-icon>restore</mat-icon>
               Restore
             </button>
@@ -195,9 +211,7 @@
                   {{ selectedVersion.createdAt | date: 'short' }}
                 </span>
                 @if (selectedVersion.createdBy) {
-                  <span class="created-by">
-                    by {{ selectedVersion.createdBy.username }}
-                  </span>
+                  <span class="created-by"> by {{ selectedVersion.createdBy.username }} </span>
                 }
               </div>
             </div>
@@ -238,10 +252,12 @@
       } @else {
         <div class="no-history-message">
           <mat-icon>info</mat-icon>
-          <p>No previous versions yet. Version history will appear here as you validate, regenerate, or edit this episode.</p>
+          <p>
+            No previous versions yet. Version history will appear here as you validate, regenerate, or edit this
+            episode.
+          </p>
         </div>
       }
     </div>
   </mat-expansion-panel>
 </div>
-

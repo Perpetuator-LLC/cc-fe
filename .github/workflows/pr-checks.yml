@@ -75,13 +75,8 @@ jobs:
     name: Lint (ESLint + stylelint + MD3 + format)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft != true
-    # TEMPORARY: lint is advisory until the project-wide eslint debt is
-    # cleared. As of 2026-05, `yarn lint:all` reports ~70 errors across the
-    # codebase (a11y `click-events-have-key-events`, NgIf/NgFor remnants,
-    # inline-styles, `eqeqeq`, `max-len`). All pre-date the V3/recording
-    # refactor and exist on stage already (76 errors there). Flip
-    # `continue-on-error` back to false once we've driven errors to zero.
-    continue-on-error: true
+    # Lint is a hard gate — all 73 pre-existing errors were resolved in
+    # fix(lint) 174ec65. Any new ESLint/Stylelint error blocks the PR.
     steps:
       - name: Checkout
         uses: actions/checkout@v4

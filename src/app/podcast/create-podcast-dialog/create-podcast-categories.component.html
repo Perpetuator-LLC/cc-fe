@@ -1,30 +1,30 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="categories-container">
-    <mat-form-field appearance="fill" class="category-select">
-        <mat-label>Select Categories</mat-label>
-        <mat-select (selectionChange)="onCategorySelectionChange($event.value)" [value]="getSelectedValues()" multiple>
-            @for (option of categoryOptions; track option.value) {
-            @if (option.isParent) {
-            <mat-option [value]="option.value" class="parent-option">
-                <strong>{{ option.label }}</strong>
-            </mat-option>
-            } @else {
-            <mat-option [value]="option.value" class="subcategory-option">
-                &nbsp;&nbsp;&nbsp;&nbsp;{{ option.label }}
-            </mat-option>
-            }
-            }
-        </mat-select>
-    </mat-form-field>
-
-    <div class="selected-chips">
-        @for (category of getAllSelectedCategories(); track category) {
-        <mat-chip [removable]="true" (removed)="removeCategory(category)">
-            {{ category }}
-            <button matChipRemove>
-                <mat-icon>cancel</mat-icon>
-            </button>
-        </mat-chip>
+  <mat-form-field appearance="fill" class="category-select">
+    <mat-label>Select Categories</mat-label>
+    <mat-select (selectionChange)="onCategorySelectionChange($event.value)" [value]="getSelectedValues()" multiple>
+      @for (option of categoryOptions; track option.value) {
+        @if (option.isParent) {
+          <mat-option [value]="option.value" class="parent-option">
+            <strong>{{ option.label }}</strong>
+          </mat-option>
+        } @else {
+          <mat-option [value]="option.value" class="subcategory-option">
+            &nbsp;&nbsp;&nbsp;&nbsp;{{ option.label }}
+          </mat-option>
         }
-    </div>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="selected-chips">
+    @for (category of getAllSelectedCategories(); track category) {
+      <mat-chip [removable]="true" (removed)="removeCategory(category)">
+        {{ category }}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    }
+  </div>
 </div>

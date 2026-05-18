@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="affiliate-graph-dialog">
   <div class="dialog-header">
     <h2>
@@ -60,9 +60,7 @@
       <div class="error-container">
         <mat-icon>error_outline</mat-icon>
         <p>{{ error }}</p>
-        <button mat-raised-button color="primary" (click)="loadGraph()">
-          Try Again
-        </button>
+        <button mat-raised-button color="primary" (click)="loadGraph()">Try Again</button>
       </div>
     } @else if (graphData) {
       @if (format === 'mermaid') {
@@ -89,10 +87,8 @@
   <div class="dialog-footer">
     <p class="info-text">
       <mat-icon>info</mat-icon>
-      This top-down graph shows all affiliate relationships in the network.
-      Each node displays username, code, status, and referral count.
-      Hover over nodes to see UUID and click to select.
+      This top-down graph shows all affiliate relationships in the network. Each node displays username, code, status,
+      and referral count. Hover over nodes to see UUID and click to select.
     </p>
   </div>
 </div>
-

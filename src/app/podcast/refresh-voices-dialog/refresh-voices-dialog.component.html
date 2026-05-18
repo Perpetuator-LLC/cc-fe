@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <h1 mat-dialog-title>Refresh Voices</h1>
 <mat-dialog-content [formGroup]="refreshForm">
   <p>Select options to refresh voice data from providers.</p>
@@ -34,7 +34,5 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="onRefresh()" [disabled]="loading">
-    Refresh
-  </button>
+  <button mat-raised-button color="primary" (click)="onRefresh()" [disabled]="loading">Refresh</button>
 </mat-dialog-actions>

@@ -34,12 +34,7 @@
           <mat-card class="blog-card">
             <a [routerLink]="getBlogUrl(blog)" class="blog-link">
               @if (blog.imageUrl || blog.thumbnailUrl) {
-                <img
-                  mat-card-image
-                  [src]="blog.thumbnailUrl || blog.imageUrl"
-                  [alt]="blog.name"
-                  class="blog-image"
-                />
+                <img mat-card-image [src]="blog.thumbnailUrl || blog.imageUrl" [alt]="blog.name" class="blog-image" />
               } @else {
                 <div class="blog-image-placeholder">
                   <mat-icon>menu_book</mat-icon>
@@ -84,4 +79,3 @@
     }
   }
 </div>
-

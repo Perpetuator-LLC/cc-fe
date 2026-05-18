@@ -56,11 +56,7 @@
         </div>
       </div>
       <div class="blog-actions">
-        <app-share-buttons
-          [shareUrl]="getShareUrl()"
-          [title]="blogData.name"
-          [description]="blogData.description"
-        />
+        <app-share-buttons [shareUrl]="getShareUrl()" [title]="blogData.name" [description]="blogData.description" />
         @if (isAuthenticated) {
           <button mat-raised-button color="primary" [routerLink]="['/media/blogs', blogId]">
             <mat-icon>dashboard</mat-icon>
@@ -138,4 +134,3 @@
     </div>
   }
 </div>
-

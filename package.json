@@ -42,6 +42,7 @@
     "lint:md3:component": "node scripts/check-md3-compliance.js --checklist",
     "lint:scss:unused": "node scripts/check-unused-scss.js",
     "lint:scss:unused:strict": "node scripts/check-unused-scss.js --strict",
+    "format:check": "prettier --check \"src/**/*.{ts,js,html,scss}\"",
     "lint:all": "yarn lint && yarn lint:scss && yarn lint:md3 && yarn lint:scss:unused:strict && yarn format:check",
     "scss:track": "scripts/track-scss-size.sh",
     "css:analyze": "node scripts/analyze-css-size.js",

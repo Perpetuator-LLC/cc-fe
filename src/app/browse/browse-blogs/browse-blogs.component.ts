@@ -64,5 +64,3 @@ export class BrowseBlogsComponent implements OnInit {
     return this.shareService.buildBlogUrl(blog.id, blog.name);
   }
 }
-
-

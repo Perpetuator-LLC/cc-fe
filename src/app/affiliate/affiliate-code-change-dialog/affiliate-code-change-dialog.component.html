@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 
 <div class="affiliate-code-change-dialog">
   <h2 mat-dialog-title>Change Your Affiliate Code</h2>
@@ -16,10 +16,10 @@
           <mat-icon>schedule</mat-icon>
           <div class="pending-content">
             <strong>Code change pending review</strong>
-            <p>Requested code: <code>{{ pendingRequests[0].requestedCode }}</code></p>
-            <p class="pending-meta">
-              You'll receive an email when your request is processed.
+            <p>
+              Requested code: <code>{{ pendingRequests[0].requestedCode }}</code>
             </p>
+            <p class="pending-meta">You'll receive an email when your request is processed.</p>
           </div>
         </div>
       }
@@ -30,7 +30,9 @@
           <mat-icon>access_time</mat-icon>
           <div class="cooldown-content">
             <strong>Code change temporarily unavailable</strong>
-            <p>You can change your code in <strong>{{ daysUntilNextChange }}</strong> days.</p>
+            <p>
+              You can change your code in <strong>{{ daysUntilNextChange }}</strong> days.
+            </p>
             <p class="cooldown-info">Changes are allowed every 30 days to prevent abuse.</p>
           </div>
         </div>
@@ -39,13 +41,7 @@
         <form [formGroup]="codeForm" (ngSubmit)="onSubmit()">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>New Code</mat-label>
-            <input
-              matInput
-              formControlName="newCode"
-              placeholder="MY-BRAND-CODE"
-              maxlength="50"
-
-            />
+            <input matInput formControlName="newCode" placeholder="MY-BRAND-CODE" maxlength="50" />
             @if (checking) {
               <mat-spinner matSuffix diameter="20" />
             }
@@ -117,9 +113,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="submitting">
-      Cancel
-    </button>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">Cancel</button>
     @if (canChange && !loading) {
       <button
         mat-raised-button
@@ -137,4 +131,3 @@
     }
   </mat-dialog-actions>
 </div>
-

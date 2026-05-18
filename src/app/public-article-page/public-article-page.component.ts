@@ -120,4 +120,3 @@ export class PublicArticlePageComponent implements OnInit {
     });
   }
 }
-

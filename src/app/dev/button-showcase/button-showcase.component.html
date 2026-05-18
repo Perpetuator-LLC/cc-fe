@@ -1,10 +1,10 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="button-showcase">
   <header class="showcase-header">
     <h1>MD3 Button Showcase</h1>
     <p class="subtitle">
-      Angular Material Design 3 button variants with all color combinations.
-      Click any button to inspect its computed styles in the console.
+      Angular Material Design 3 button variants with all color combinations. Click any button to inspect its computed
+      styles in the console.
     </p>
   </header>
 
@@ -48,30 +48,18 @@
       </mat-card-header>
       <mat-card-content>
         <div class="legend-grid">
-          <div class="legend-item">
-            <strong>Filled</strong> → <code>mat-flat-button</code> + color class
-          </div>
+          <div class="legend-item"><strong>Filled</strong> → <code>mat-flat-button</code> + color class</div>
           <div class="legend-item">
             <strong>Tonal</strong> → <code>mat-flat-button</code> + <code>*-tonal</code> class
           </div>
           <div class="legend-item">
             <strong>Outlined</strong> → <code>mat-stroked-button</code> + <code>*-outlined</code> class
           </div>
-          <div class="legend-item">
-            <strong>Text</strong> → <code>mat-button</code> + <code>*-text</code> class
-          </div>
-          <div class="legend-item">
-            <strong>Elevated</strong> → <code>mat-raised-button</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>Icon</strong> → <code>mat-icon-button</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>FAB</strong> → <code>mat-fab</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>Mini FAB</strong> → <code>mat-mini-fab</code> + color class
-          </div>
+          <div class="legend-item"><strong>Text</strong> → <code>mat-button</code> + <code>*-text</code> class</div>
+          <div class="legend-item"><strong>Elevated</strong> → <code>mat-raised-button</code> + color class</div>
+          <div class="legend-item"><strong>Icon</strong> → <code>mat-icon-button</code> + color class</div>
+          <div class="legend-item"><strong>FAB</strong> → <code>mat-fab</code> + color class</div>
+          <div class="legend-item"><strong>Mini FAB</strong> → <code>mat-mini-fab</code> + color class</div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -211,7 +199,8 @@
                   <!-- Extended FAB (mat-fab extended) -->
                   @if (variant.id === 'extended-fab') {
                     <button
-                      mat-fab extended
+                      mat-fab
+                      extended
                       [class]="color.cssClass"
                       [disabled]="selectedState === 'disabled'"
                       (click)="inspectButton($event)"
@@ -299,4 +288,3 @@ console.table({{'{'}}
     </mat-card>
   </section>
 </div>
-
