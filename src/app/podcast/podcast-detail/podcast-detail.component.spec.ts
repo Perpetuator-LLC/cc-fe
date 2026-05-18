@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PodcastDetailComponent } from './podcast-detail.component';
 import { PodcastsService } from '../podcasts.service';
@@ -238,10 +238,10 @@ describe('PodcastDetailComponentComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // SKIPPED: These tests have complex MatDialog mocking requirements that need proper Angular Material testing infrastructure.
-  // The dialog tests require either NoopAnimationsModule with full MatDialogModule, or a complete mock
-  // that satisfies Angular Material's internal dialog lifecycle. This is a pre-existing test issue.
-  // TODO: Fix these tests by using MatDialogHarness from @angular/material/dialog/testing
+  // SKIPPED: These tests have complex MatDialog mocking requirements that need proper
+  // Angular Material testing infrastructure. The dialog tests require either
+  // NoopAnimationsModule with full MatDialogModule, or a complete mock that satisfies
+  // Angular Material's internal dialog lifecycle. This is a pre-existing test issue.
   xdescribe('deletePodcastDialog', () => {
     it('should pass dialog result to deletePodcast service, not component deleteConfirmation property', (done) => {
       const testPodcastName = 'Test Podcast Name';

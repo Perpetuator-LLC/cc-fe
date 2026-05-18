@@ -15,6 +15,10 @@
   flex-direction: column;
 
   min-height: 0;
+
+  app-watchlist-tab {
+    height: 100%;
+  }
 }
 
 // History tab

@@ -65,6 +65,8 @@
       <div
         mat-menu-item
         (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
         [class.disabled-option]="!isCurrentIntervalDailyOrLonger"
         [matTooltip]="
           isCurrentIntervalDailyOrLonger
@@ -85,6 +87,8 @@
       <div
         mat-menu-item
         (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
         [class.disabled-option]="!isIntradayInterval"
         [matTooltip]="
           isIntradayInterval
@@ -105,6 +109,8 @@
       <div
         mat-menu-item
         (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
         [class.disabled-option]="!isIntradayInterval"
         [matTooltip]="
           isIntradayInterval
@@ -125,7 +131,13 @@
       <div class="menu-section-label">Data</div>
 
       <!-- Volume Toggle -->
-      <div mat-menu-item (click)="$event.stopPropagation()" matTooltip="Show trading volume below the price chart">
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
+        matTooltip="Show trading volume below the price chart"
+      >
         <mat-slide-toggle [checked]="settings.showVolume" (change)="onSettingToggle('showVolume')">
           Volume
         </mat-slide-toggle>
@@ -135,6 +147,8 @@
       <div
         mat-menu-item
         (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
         [class.disabled-option]="!isCurrentIntervalDailyOrLonger"
         [matTooltip]="
           isCurrentIntervalDailyOrLonger
@@ -155,6 +169,8 @@
       <div
         mat-menu-item
         (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
         matTooltip="Show raw data including anomalies (large wicks from errant trades)"
       >
         <mat-slide-toggle [checked]="settings.showRawData" (change)="onSettingToggle('showRawData')">

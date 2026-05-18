@@ -65,6 +65,7 @@ import {
   CreateWatchlistDialogData,
   CreateWatchlistDialogResult,
 } from './create-watchlist-dialog/create-watchlist-dialog.component';
+import { DynamicStyleDirective } from '../../shared/dynamic-style.directive';
 
 // Register required ECharts components
 echarts.use([
@@ -137,6 +138,7 @@ interface WatchlistColumnOption {
     FundamentalsViewComponent,
     ValuationViewComponent,
     ChartHeaderComponent,
+    DynamicStyleDirective,
   ],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './watchlist-tab.component.html',

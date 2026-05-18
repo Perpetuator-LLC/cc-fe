@@ -5,6 +5,7 @@
     <div
       class="progress-container"
       (click)="onProgressClick($event)"
+      (keydown.enter)="onProgressClick($event)"
       role="slider"
       tabindex="0"
       [attr.aria-valuenow]="audioService.progress()"
@@ -12,7 +13,7 @@
       aria-valuemax="100"
       aria-label="Audio progress"
     >
-      <div class="progress-bar" [style.width.%]="audioService.progress()"></div>
+      <div class="progress-bar" [appDynamicStyle]="{ width: audioService.progress() + '%' }"></div>
       @if (audioService.isLoading()) {
         <mat-progress-bar mode="indeterminate" class="loading-bar" />
       }
@@ -20,7 +21,14 @@
 
     <div class="player-content">
       <!-- Track info -->
-      <div class="track-info" (click)="navigateToSource()" [class.clickable]="audioService.track()?.sourceRoute">
+      <div
+        class="track-info"
+        (click)="navigateToSource()"
+        (keydown.enter)="navigateToSource()"
+        tabindex="0"
+        role="button"
+        [class.clickable]="audioService.track()?.sourceRoute"
+      >
         <mat-icon class="type-icon">{{ getTypeIcon() }}</mat-icon>
         <div class="track-text">
           <span class="track-title">{{ audioService.track()?.title }}</span>
@@ -112,7 +120,13 @@
             <div class="playlist-section history-section">
               @for (track of getHistoryReversed(); track track.id) {
                 <div class="playlist-item history-item">
-                  <div class="playlist-item-content" (click)="playFromHistory(track)">
+                  <div
+                    class="playlist-item-content"
+                    (click)="playFromHistory(track)"
+                    (keydown.enter)="playFromHistory(track)"
+                    tabindex="0"
+                    role="button"
+                  >
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>
@@ -146,7 +160,13 @@
                 <div class="now-playing-indicator">
                   <mat-icon class="playing-icon">{{ audioService.isPlaying() ? 'equalizer' : 'play_arrow' }}</mat-icon>
                 </div>
-                <div class="playlist-item-content" (click)="navigateToTrack(currentTrack)">
+                <div
+                  class="playlist-item-content"
+                  (click)="navigateToTrack(currentTrack)"
+                  (keydown.enter)="navigateToTrack(currentTrack)"
+                  tabindex="0"
+                  role="button"
+                >
                   <mat-icon class="type-icon">{{
                     currentTrack.type === 'episode' ? 'podcasts' : 'vital_signs'
                   }}</mat-icon>
@@ -166,7 +186,13 @@
             <div class="playlist-section queue-section">
               @for (track of audioService.queue(); track track.id; let i = $index) {
                 <div class="playlist-item queue-item">
-                  <div class="playlist-item-content" (click)="playFromQueue(track.id)">
+                  <div
+                    class="playlist-item-content"
+                    (click)="playFromQueue(track.id)"
+                    (keydown.enter)="playFromQueue(track.id)"
+                    tabindex="0"
+                    role="button"
+                  >
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>

@@ -83,7 +83,13 @@
       } @else {
         <div class="recordings-grid">
           @for (recording of recordings; track recording.uuid) {
-            <div class="recording-card" (click)="viewRecording(recording)">
+            <div
+              class="recording-card"
+              (click)="viewRecording(recording)"
+              (keydown.enter)="viewRecording(recording)"
+              tabindex="0"
+              role="button"
+            >
               <div class="recording-header">
                 <div class="recording-title-section">
                   <span class="recording-title">{{ recording.title }}</span>
@@ -115,7 +121,13 @@
                 }
               </div>
 
-              <div class="recording-actions" (click)="$event.stopPropagation()">
+              <div
+                class="recording-actions"
+                (click)="$event.stopPropagation()"
+                (keydown.enter)="$event.stopPropagation()"
+                tabindex="0"
+                role="group"
+              >
                 @if (recording.audioUrl && (recording.status === 'READY' || recording.status === 'DELIVERED')) {
                   <button mat-flat-button color="primary" (click)="playRecording(recording)">
                     <mat-icon>play_arrow</mat-icon>

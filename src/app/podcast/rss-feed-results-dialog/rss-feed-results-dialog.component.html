@@ -1,25 +1,28 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <h2 mat-dialog-title>RSS Feed Import Results</h2>
 <mat-dialog-content>
-  <div *ngIf="data.successful.length > 0">
-    <mat-form-field appearance="fill">
-      <mat-label>Successfully Added ({{ data.successful.length }})</mat-label>
-      <textarea matInput [value]="getSuccessfulText()" rows="6" readonly></textarea>
-    </mat-form-field>
-  </div>
+  @if (data.successful.length > 0) {
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Successfully Added ({{ data.successful.length }})</mat-label>
+        <textarea matInput [value]="getSuccessfulText()" rows="6" readonly></textarea>
+      </mat-form-field>
+    </div>
+  }
 
-  <div *ngIf="data.failed.length > 0">
-    <mat-form-field appearance="fill">
-      <mat-label>Failed ({{ data.failed.length }})</mat-label>
-      <textarea matInput [value]="getFailedText()" rows="6" readonly></textarea>
-    </mat-form-field>
-  </div>
+  @if (data.failed.length > 0) {
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Failed ({{ data.failed.length }})</mat-label>
+        <textarea matInput [value]="getFailedText()" rows="6" readonly></textarea>
+      </mat-form-field>
+    </div>
+  }
 
-  <div *ngIf="data.successful.length === 0 && data.failed.length === 0">
-    No results to display.
-  </div>
+  @if (data.successful.length === 0 && data.failed.length === 0) {
+    <div>No results to display.</div>
+  }
 </mat-dialog-content>
 <mat-dialog-actions>
   <button mat-raised-button color="primary" (click)="onClose()">Close</button>
 </mat-dialog-actions>
-

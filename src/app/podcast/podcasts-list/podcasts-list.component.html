@@ -92,7 +92,13 @@
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>
-              <div class="sortable-header" (click)="onSortChange('name')">
+              <div
+                class="sortable-header"
+                (click)="onSortChange('name')"
+                (keydown.enter)="onSortChange('name')"
+                tabindex="0"
+                role="button"
+              >
                 <span>Podcast Name</span>
                 @if (getSortDirection('name')) {
                   <mat-icon>{{ getSortDirection('name') === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
@@ -142,7 +148,13 @@
           <!-- Latest Internal Episode Date Column -->
           <ng-container matColumnDef="latestInternalEpisodeDate">
             <th mat-header-cell *matHeaderCellDef>
-              <div class="sortable-header" (click)="onSortChange('latest_internal_episode_date')">
+              <div
+                class="sortable-header"
+                (click)="onSortChange('latest_internal_episode_date')"
+                (keydown.enter)="onSortChange('latest_internal_episode_date')"
+                tabindex="0"
+                role="button"
+              >
                 <span>Latest Episode</span>
                 @if (getSortDirection('latest_internal_episode_date')) {
                   <mat-icon>{{

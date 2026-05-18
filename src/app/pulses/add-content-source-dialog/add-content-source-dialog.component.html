@@ -128,7 +128,7 @@
             placeholder="Search by symbol or company name..."
             [matAutocomplete]="stockAutocomplete"
             (input)="onStockInputChange($event)"
-            [style.text-transform]="'uppercase'"
+            class="uppercase-input"
           />
           @if (isSearchingStocks) {
             <mat-spinner matSuffix diameter="20" />

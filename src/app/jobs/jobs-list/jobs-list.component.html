@@ -66,7 +66,13 @@
               @if (isChainGroup(item) && item.totalJobs > 1) {
                 <div class="timeline-item chain-group" [class.expanded]="isChainExpanded(item.chainId!)">
                   <!-- Chain Header (collapsed view) -->
-                  <div class="chain-header" (click)="toggleChainExpanded(item.chainId!)">
+                  <div
+                    class="chain-header"
+                    (click)="toggleChainExpanded(item.chainId!)"
+                    (keydown.enter)="toggleChainExpanded(item.chainId!)"
+                    tabindex="0"
+                    role="button"
+                  >
                     <div class="timeline-icon" [ngClass]="chainStatusClass(item.status)">
                       <mat-icon>{{ getChainIcon(item) }}</mat-icon>
                     </div>
@@ -96,7 +102,13 @@
                           item.resources.pulseConfigs.length > 0 ||
                           item.resources.symbols.length > 0
                         ) {
-                          <div class="chain-resources" (click)="$event.stopPropagation()">
+                          <div
+                            class="chain-resources"
+                            (click)="$event.stopPropagation()"
+                            (keydown.enter)="$event.stopPropagation()"
+                            tabindex="0"
+                            role="group"
+                          >
                             @for (podcast of item.resources.podcasts; track podcast.uuid) {
                               <button
                                 mat-flat-button
@@ -172,7 +184,7 @@
                             <div class="timeline-header">
                               <div class="timeline-left-content">
                                 <span class="timeline-title">{{ kindToString(chainJob.kind) }}</span>
-                                @if (chainJob.chainPosition != null) {
+                                @if (chainJob.chainPosition !== null && chainJob.chainPosition !== undefined) {
                                   <span class="chain-position-badge">Step {{ chainJob.chainPosition + 1 }}</span>
                                 }
                                 <span class="timeline-cost">

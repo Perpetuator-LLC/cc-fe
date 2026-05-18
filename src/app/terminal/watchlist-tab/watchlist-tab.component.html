@@ -8,7 +8,7 @@
   } @else {
     <div class="watchlist-layout">
       <!-- Left Sidebar: Symbol List -->
-      <div class="symbol-sidebar" [style.width.px]="sidebarWidth()">
+      <div class="symbol-sidebar" [appDynamicStyle]="{ width: sidebarWidth() + 'px' }">
         <!-- Watchlist Selector with Hierarchical Menu -->
         <div class="sidebar-header">
           <button mat-button [matMenuTriggerFor]="watchlistMenu" class="watchlist-selector-btn">
@@ -331,7 +331,13 @@
                     <!-- Column Selection Section -->
                     <div class="menu-section-label">Show Columns</div>
                     @for (column of watchlistColumns; track column.id) {
-                      <div class="column-menu-item" (click)="$event.stopPropagation()">
+                      <div
+                        class="column-menu-item"
+                        (click)="$event.stopPropagation()"
+                        (keydown.enter)="$event.stopPropagation()"
+                        tabindex="0"
+                        role="group"
+                      >
                         <mat-checkbox
                           [(ngModel)]="column.selected"
                           (change)="updateWatchlistColumns()"

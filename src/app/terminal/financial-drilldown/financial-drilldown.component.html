@@ -51,7 +51,7 @@
   <div class="tree-node" [class.has-children]="node.children?.length > 0" [class.expanded]="isExpanded(node.id)">
     <div
       class="node-row"
-      [style]="getIndentStyle(level)"
+      [ngClass]="'indent-' + level"
       (click)="node.children?.length > 0 ? toggleNode(node.id) : onNodeClick(node, $event)"
       (keydown.enter)="node.children?.length > 0 ? toggleNode(node.id) : onNodeClick(node, $event)"
       tabindex="0"

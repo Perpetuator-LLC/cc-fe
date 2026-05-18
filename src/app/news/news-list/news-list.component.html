@@ -279,7 +279,7 @@
         <div
           class="news-detail-section"
           [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
-          [style.width.px]="selectedNewsDetail ? detailPanelWidth : 0"
+          [appDynamicStyle]="{ width: (selectedNewsDetail ? detailPanelWidth : 0) + 'px' }"
         >
           <!-- Resize Handle -->
           @if (selectedNewsDetail) {

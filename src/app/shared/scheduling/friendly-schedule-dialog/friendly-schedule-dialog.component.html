@@ -120,14 +120,14 @@
 
     <!-- Schedule Type Toggle -->
     <div class="schedule-type-section">
-      <label class="section-label">Schedule Type</label>
+      <label class="section-label" for="schedule-type">Schedule Type</label>
       @if (isEpisodeRelease) {
         <div class="locked-schedule-type">
           <mat-icon>event</mat-icon>
           <span>One-Time (Episode releases are always one-time)</span>
         </div>
       } @else {
-        <mat-button-toggle-group formControlName="scheduleType" class="schedule-type-toggle">
+        <mat-button-toggle-group id="schedule-type" formControlName="scheduleType" class="schedule-type-toggle">
           <mat-button-toggle value="recurring">
             <mat-icon>repeat</mat-icon>
             <span>Recurring</span>
@@ -146,8 +146,8 @@
       <div class="recurring-options">
         <!-- Day Pattern Quick Select -->
         <div class="day-pattern-section">
-          <label class="section-label">Days</label>
-          <mat-button-toggle-group formControlName="dayPattern" class="day-pattern-toggle">
+          <label class="section-label" for="day-pattern">Days</label>
+          <mat-button-toggle-group id="day-pattern" formControlName="dayPattern" class="day-pattern-toggle">
             <mat-button-toggle value="daily">Every Day</mat-button-toggle>
             <mat-button-toggle value="weekdays">Weekdays</mat-button-toggle>
             <mat-button-toggle value="weekends">Weekends</mat-button-toggle>
@@ -175,9 +175,9 @@
 
         <!-- Time Selection -->
         <div class="time-section">
-          <label class="section-label">Time</label>
+          <label class="section-label" for="schedule-time">Time</label>
           <div class="time-input-row">
-            <input type="time" formControlName="time" class="time-input" />
+            <input id="schedule-time" type="time" formControlName="time" class="time-input" />
             <mat-form-field class="timezone-select">
               <mat-label>Timezone</mat-label>
               <mat-select formControlName="timezone">
@@ -193,11 +193,17 @@
       <!-- One-Time Schedule Options -->
       <div class="one-time-options">
         <div class="datetime-section">
-          <label class="section-label">Date and Time</label>
+          <label class="section-label" for="scheduled-date">Date and Time</label>
           <div class="datetime-input-row">
             <mat-form-field class="date-field">
               <mat-label>Date</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="scheduledDate" [min]="minDate" />
+              <input
+                id="scheduled-date"
+                matInput
+                [matDatepicker]="picker"
+                formControlName="scheduledDate"
+                [min]="minDate"
+              />
               <mat-datepicker-toggle matIconSuffix [for]="picker" />
               <mat-datepicker #picker />
             </mat-form-field>

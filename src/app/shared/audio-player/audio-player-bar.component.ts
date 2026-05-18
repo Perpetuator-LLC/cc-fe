@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { AudioPlayerService, AudioTrack } from './audio-player.service';
+import { DynamicStyleDirective } from '../dynamic-style.directive';
 
 const HISTORY_STORAGE_KEY = 'audio-player-history';
 const MAX_HISTORY_SIZE = 10;
@@ -28,6 +29,7 @@ const MAX_HISTORY_SIZE = 10;
     MatTooltipModule,
     MatProgressBarModule,
     MatMenuModule,
+    DynamicStyleDirective,
   ],
   templateUrl: './audio-player-bar.component.html',
   styleUrl: './audio-player-bar.component.scss',

@@ -84,7 +84,13 @@
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>
-              <div class="sortable-header" (click)="onSortChange('name')">
+              <div
+                class="sortable-header"
+                (click)="onSortChange('name')"
+                (keydown.enter)="onSortChange('name')"
+                tabindex="0"
+                role="button"
+              >
                 <span>Pulse Name</span>
                 @if (getSortDirection('name')) {
                   <mat-icon>{{ getSortDirection('name') === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
@@ -117,7 +123,13 @@
           <!-- Last Generated Column -->
           <ng-container matColumnDef="lastGeneratedAt">
             <th mat-header-cell *matHeaderCellDef>
-              <div class="sortable-header" (click)="onSortChange('last_generated_at')">
+              <div
+                class="sortable-header"
+                (click)="onSortChange('last_generated_at')"
+                (keydown.enter)="onSortChange('last_generated_at')"
+                tabindex="0"
+                role="button"
+              >
                 <span>Last Generated</span>
                 @if (getSortDirection('last_generated_at')) {
                   <mat-icon>{{

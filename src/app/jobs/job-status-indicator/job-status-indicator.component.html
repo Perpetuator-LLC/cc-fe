@@ -17,7 +17,13 @@
     </button>
 
     <mat-menu #jobMenu="matMenu" class="job-status-menu" xPosition="before">
-      <div class="job-menu-content" (click)="$event.stopPropagation()">
+      <div
+        class="job-menu-content"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
+        role="group"
+      >
         <app-job-status-bar [data]="{ title: 'Active Jobs', panelOpenState: false }" />
       </div>
     </mat-menu>

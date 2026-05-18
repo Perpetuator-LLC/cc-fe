@@ -42,14 +42,13 @@
       <div class="status-summary">
         <div class="status-item">
           <span class="status-label">Team</span>
-          <ng-container *ngIf="podcastForm.get('team')?.value?.name; else noTeamSelected">
+          @if (podcastForm.get('team')?.value?.name) {
             <a href="/team/{{ podcastForm.get('team')?.value?.uuid }}" class="status-value">
               {{ podcastForm.get('team')?.value?.name }}
             </a>
-          </ng-container>
-          <ng-template #noTeamSelected>
+          } @else {
             <span class="status-value">No team selected</span>
-          </ng-template>
+          }
         </div>
 
         <div class="status-item">
@@ -292,6 +291,9 @@
                         class="podcast-image-thumbnail icon-clickable"
                         loading="lazy"
                         (click)="viewFullImage()"
+                        (keydown.enter)="viewFullImage()"
+                        tabindex="0"
+                        role="button"
                         matTooltip="Click to view full size"
                       />
                     } @else {
