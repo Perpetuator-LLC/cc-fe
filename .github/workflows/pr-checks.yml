@@ -1,0 +1,146 @@
+# Copyright (c) 2026 Perpetuator LLC
+#
+# PR gate that mirrors the local pre-commit + pre-push hooks. Runs on every
+# pull request that targets `main` (the new always-green integration branch)
+# or a release-candidate branch (`release/*` / `rc/*`). Also runs on direct
+# pushes to `main` as a safety net in case branch protection is ever
+# bypassed.
+#
+# Jobs (all required for PR merge):
+#   audit  — CVE scan (mirrors pre-push: yarn audit, high/critical only)
+#   lint   — ESLint + stylelint + MD3 + unused SCSS + format check
+#            (mirrors lint-staged / pre-commit)
+#   test   — Full unit suite under headless Chromium (mirrors pre-push)
+#   build  — `ng build` to catch compile errors lint/test miss
+#
+# Deployment lives in .gitea/workflows/stage-deploy.yml and is unchanged.
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'release/**'
+      - 'rc/**'
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: pr-checks-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  audit:
+    name: Audit (high/critical CVE scan)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Yarn audit (block on high/critical only)
+        run: |
+          # yarn audit exit codes are bitmasks; grep is more reliable for gating.
+          set +e
+          AUDIT_OUTPUT=$(yarn audit 2>&1)
+          AUDIT_EXIT=$?
+          set -e
+          echo "$AUDIT_OUTPUT"
+          if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
+            echo "::error::High or Critical CVEs found — PR blocked."
+            exit 1
+          fi
+          echo "✅ No high or critical CVEs found."
+
+  lint:
+    name: Lint (ESLint + stylelint + MD3 + format)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint (all)
+        run: yarn lint:all
+
+  test:
+    name: Unit tests (headless Chrome)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Stub environment.ts (gitignored; OpenBao-populated in staging)
+        run: |
+          if [ ! -f src/environments/environment.ts ]; then
+            cp src/environments/sample.environment.ts src/environments/environment.ts
+          fi
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests
+        env:
+          CI: 'true'
+          CHROMIUM_FLAGS: '--no-sandbox --disable-dev-shm-usage'
+        # ubuntu-latest already has Chrome installed; Angular/Karma picks it up via CHROME_BIN.
+        run: |
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          echo "CHROME_BIN=$CHROME_BIN"
+          yarn test -- --browsers=ChromeHeadless --watch=false --progress=false
+
+  build:
+    name: Build (dev configuration)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Stub environment.ts
+        run: |
+          if [ ! -f src/environments/environment.ts ]; then
+            cp src/environments/sample.environment.ts src/environments/environment.ts
+          fi
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build (development)
+        run: yarn build -- --configuration=development
