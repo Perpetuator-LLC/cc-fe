@@ -30,12 +30,12 @@
     <!-- Key Metrics Cards -->
     @if (data) {
       <div class="dividend-metrics">
-        <app-kpi-card label="Current Price" [value]="'$' + data.metrics.currentPrice.toFixed(2)" />
+        <app-kpi-card label="Current Price" [value]="'$' + (data.metrics.currentPrice | toFixed: 2)" />
 
         @if (data.metrics.dividendYield !== null) {
           <app-kpi-card
             label="Dividend Yield"
-            [value]="data.metrics.dividendYield.toFixed(2) + '%'"
+            [value]="(data.metrics.dividendYield | toFixed: 2) + '%'"
             accent="primary"
             tooltip="Annual dividend per share divided by stock price"
           />
@@ -44,7 +44,7 @@
         @if (data.metrics.ttmPayoutRatio !== null) {
           <app-kpi-card
             label="Payout Ratio (TTM)"
-            [value]="data.metrics.ttmPayoutRatio.toFixed(1) + '%'"
+            [value]="(data.metrics.ttmPayoutRatio | toFixed: 1) + '%'"
             tooltip="Dividends as a percentage of net income over trailing 12 months"
           />
         }
@@ -52,7 +52,7 @@
         @if (data.metrics.ttmFcfPayoutRatio !== null) {
           <app-kpi-card
             label="FCF Payout (TTM)"
-            [value]="data.metrics.ttmFcfPayoutRatio.toFixed(1) + '%'"
+            [value]="(data.metrics.ttmFcfPayoutRatio | toFixed: 1) + '%'"
             tooltip="Dividends as a percentage of Free Cash Flow over trailing 12 months"
           />
         }
@@ -60,7 +60,9 @@
         @if (data.metrics.dividendCagr5Year !== null) {
           <app-kpi-card
             label="5Y Div CAGR"
-            [value]="(data.metrics.dividendCagr5Year > 0 ? '+' : '') + data.metrics.dividendCagr5Year.toFixed(1) + '%'"
+            [value]="
+              (data.metrics.dividendCagr5Year > 0 ? '+' : '') + (data.metrics.dividendCagr5Year | toFixed: 1) + '%'
+            "
             [changePercent]="data.metrics.dividendCagr5Year"
             tooltip="Compound Annual Growth Rate of dividends over 5 years"
           />
@@ -70,7 +72,7 @@
           <app-kpi-card
             label="10Y Div CAGR"
             [value]="
-              (data.metrics.dividendCagr10Year > 0 ? '+' : '') + data.metrics.dividendCagr10Year.toFixed(1) + '%'
+              (data.metrics.dividendCagr10Year > 0 ? '+' : '') + (data.metrics.dividendCagr10Year | toFixed: 1) + '%'
             "
             [changePercent]="data.metrics.dividendCagr10Year"
             tooltip="Compound Annual Growth Rate of dividends over 10 years"
@@ -80,7 +82,7 @@
         @if (data.metrics.fcfCagr5Year !== null) {
           <app-kpi-card
             label="5Y FCF CAGR"
-            [value]="(data.metrics.fcfCagr5Year > 0 ? '+' : '') + data.metrics.fcfCagr5Year.toFixed(1) + '%'"
+            [value]="(data.metrics.fcfCagr5Year > 0 ? '+' : '') + (data.metrics.fcfCagr5Year | toFixed: 1) + '%'"
             [changePercent]="data.metrics.fcfCagr5Year"
             tooltip="Compound Annual Growth Rate of Free Cash Flow over 5 years"
           />
@@ -89,7 +91,7 @@
         @if (data.metrics.fcfCagr10Year !== null) {
           <app-kpi-card
             label="10Y FCF CAGR"
-            [value]="(data.metrics.fcfCagr10Year > 0 ? '+' : '') + data.metrics.fcfCagr10Year.toFixed(1) + '%'"
+            [value]="(data.metrics.fcfCagr10Year > 0 ? '+' : '') + (data.metrics.fcfCagr10Year | toFixed: 1) + '%'"
             [changePercent]="data.metrics.fcfCagr10Year"
             tooltip="Compound Annual Growth Rate of Free Cash Flow over 10 years"
           />

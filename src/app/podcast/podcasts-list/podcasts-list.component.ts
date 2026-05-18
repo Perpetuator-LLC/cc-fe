@@ -41,6 +41,7 @@ import { LoadingService } from '../../layout/loading.service';
 import { TeamsService, TeamsResult } from '../../team/teams.service';
 import { MatSelectModule } from '@angular/material/select';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';
+import { StartsWithPipe } from '../../shared/pipes';
 
 export interface ColumnOption {
   id: string;
@@ -81,6 +82,7 @@ export interface ColumnOption {
     FormsModule,
     MatMenuItem,
     MatSelectModule,
+    StartsWithPipe,
   ],
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],

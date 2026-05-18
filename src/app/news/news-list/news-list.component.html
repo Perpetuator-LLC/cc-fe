@@ -362,7 +362,7 @@
                 <button mat-flat-button color="primary" type="button" (click)="processNews(selectedNewsDetail.uuid)">
                   Process News
                 </button>
-                @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
+                @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
                   <button
                     mat-stroked-button
                     color="primary"
@@ -390,7 +390,7 @@
                 }
                 <!-- Site Content section hidden - showing only Summary and Validated Summary -->
                 <!--
-                @if (userService.userDetails()?.permissions?.includes('api.change_news')) {
+                @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
                   <mat-divider></mat-divider>
                   <button
                     mat-flat-button

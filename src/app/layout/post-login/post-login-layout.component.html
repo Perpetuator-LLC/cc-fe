@@ -63,12 +63,12 @@
       <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
         <div class="sidebar-content">
           <div class="second-header">
-            @if (router.url.startsWith('/media/')) {
+            @if (router.url | startsWith: '/media/') {
               <h6>Media</h6>
             }
-            @if (router.url.startsWith('/terminal')) {
+            @if (router.url | startsWith: '/terminal') {
               <h6>Finance</h6>
-            } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+            } @else if ((router.url | startsWith: '/jobs') || (router.url | startsWith: '/scheduling')) {
               <h6>Jobs</h6>
             }
             <svg
@@ -129,7 +129,7 @@
             </svg>
           </div>
           <div class="links">
-            @if (router.url.startsWith('/media/')) {
+            @if (router.url | startsWith: '/media/') {
               <!-- Media section links -->
               <a
                 [routerLink]="['/media/pulses']"
@@ -241,7 +241,7 @@
                 <span class="website-title">Posts</span>
               </a>
             }
-            @if (router.url.startsWith('/terminal')) {
+            @if (router.url | startsWith: '/terminal') {
               <a
                 class="header-logo s-link"
                 [routerLink]="['/terminal']"
@@ -273,7 +273,7 @@
                 <mat-icon>help</mat-icon>
                 <span class="website-title">Help</span>
               </a>
-            } @else if (router.url.startsWith('/jobs')) {
+            } @else if (router.url | startsWith: '/jobs') {
               <!-- Jobs section links -->
               <a [routerLink]="['/jobs/list']" class="header-logo s-link" routerLinkActive="active">
                 <mat-icon>work</mat-icon>

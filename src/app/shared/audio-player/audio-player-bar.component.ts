@@ -72,6 +72,11 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
     this.audioService.seekToPercent(percent);
   }
 
+  seekByStep(stepPercent: number): void {
+    const current = this.audioService.progress();
+    this.audioService.seekToPercent(Math.max(0, Math.min(100, current + stepPercent)));
+  }
+
   navigateToSource(): void {
     const track = this.audioService.track();
     if (track?.sourceRoute) {

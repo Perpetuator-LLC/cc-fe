@@ -17,6 +17,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DynamicStyleDirective } from '../../shared/dynamic-style.directive';
+import { IncludesPipe } from '../../shared/pipes';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { MessageService } from '../../message.service';
@@ -64,6 +65,7 @@ export interface SidePanelAccordianData {
     MatOption,
     MatProgressBarModule,
     DynamicStyleDirective,
+    IncludesPipe,
   ],
   templateUrl: './news-list.component.html',
   styleUrl: './news-list.component.scss',

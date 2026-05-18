@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ToFixedPipe } from '../../shared/pipes';
 import { RssFeedResult } from '../podcasts.service';
 
 @Component({
@@ -19,6 +20,7 @@ import { RssFeedResult } from '../podcasts.service';
     MatTooltipModule,
     MatProgressSpinner,
     DatePipe,
+    ToFixedPipe,
   ],
   templateUrl: './rss-feed-table.component.html',
   styleUrls: ['./rss-feed-table.component.scss'],

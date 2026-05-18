@@ -67,14 +67,14 @@
           <span
             class="status-badge"
             [class.enable]="
-              podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')
+              podcastForm.get('tgResponse')?.value && (podcastForm.get('tgResponse')?.value | startsWith: 'Success.')
             "
             [class.disable]="
-              !podcastForm.get('tgResponse')?.value || !podcastForm.get('tgResponse')?.value.startsWith('Success.')
+              !podcastForm.get('tgResponse')?.value || !(podcastForm.get('tgResponse')?.value | startsWith: 'Success.')
             "
           >
             {{
-              podcastForm.get('tgResponse')?.value && podcastForm.get('tgResponse')?.value.startsWith('Success.')
+              podcastForm.get('tgResponse')?.value && (podcastForm.get('tgResponse')?.value | startsWith: 'Success.')
                 ? 'Connected'
                 : 'Disconnected'
             }}
@@ -503,7 +503,7 @@
             <button mat-raised-button class="add-voice-btn" color="accent" (click)="openAddVoiceDialog()" type="button">
               <mat-icon>add</mat-icon> Add Voice
             </button>
-            @if (this.userService.userDetails()?.permissions?.includes('api.add_voice')) {
+            @if (this.userService.userDetails()?.permissions | includes: 'api.add_voice') {
               <button mat-button (click)="openRefreshVoicesDialog()" type="button">Refresh Voices</button>
             }
           </div>

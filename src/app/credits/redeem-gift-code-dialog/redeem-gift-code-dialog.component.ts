@@ -18,6 +18,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { Subscription } from 'rxjs';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
+import { IncludesPipe } from '../../shared/pipes';
 
 @Component({
   selector: 'app-redeem-gift-code-dialog',
@@ -37,6 +38,7 @@ import { MatIcon } from '@angular/material/icon';
     MatButtonToggleGroup,
     MatButtonToggle,
     MatIcon,
+    IncludesPipe,
   ],
   templateUrl: './redeem-gift-code-dialog.component.html',
   styleUrl: './redeem-gift-code-dialog.component.scss',

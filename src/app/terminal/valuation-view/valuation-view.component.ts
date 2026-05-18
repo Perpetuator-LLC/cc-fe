@@ -16,6 +16,7 @@ import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
 import { FormulaDisplayComponent, FormulaVariable } from '../../shared/formula-display/formula-display.component';
 import { DCF_FORMULAS, DDM_FORMULAS } from '../../shared/formula-display/valuation-formulas';
 import { FinancialTableComponent, FinancialTableData } from '../shared/financial-table.component';
+import { ToFixedPipe } from '../../shared/pipes';
 
 /**
  * DCF valuation charts structure
@@ -66,6 +67,7 @@ export type ValuationDrillDown = 'summary' | 'historical' | 'projections' | 'sen
     KpiCardComponent,
     FormulaDisplayComponent,
     FinancialTableComponent,
+    ToFixedPipe,
   ],
   templateUrl: './valuation-view.component.html',
   styleUrl: './valuation-view.component.scss',

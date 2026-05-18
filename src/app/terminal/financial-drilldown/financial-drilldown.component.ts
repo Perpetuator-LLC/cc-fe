@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ToFixedPipe } from '../../shared/pipes';
 import { FinancialAlert, FinancialNode } from '../financial-hierarchy.service';
 
 /**
@@ -18,7 +19,7 @@ import { FinancialAlert, FinancialNode } from '../financial-hierarchy.service';
 @Component({
   selector: 'app-financial-drilldown',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, ToFixedPipe],
   templateUrl: './financial-drilldown.component.html',
   styleUrl: './financial-drilldown.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

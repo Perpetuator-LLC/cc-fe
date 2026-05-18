@@ -20,6 +20,7 @@ import { DividendChartService } from '../dividend-chart.service';
 import { KpiCardComponent } from '../shared/kpi-card/kpi-card.component';
 import { ChartInfoComponent } from '../../shared/chart-info/chart-info.component';
 import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
+import { ToFixedPipe } from '../../shared/pipes';
 
 /**
  * Dividends View Component
@@ -42,6 +43,7 @@ import { CHART_DEFINITIONS } from '../../shared/chart-info/chart-definitions';
     NgxEchartsDirective,
     KpiCardComponent,
     ChartInfoComponent,
+    ToFixedPipe,
   ],
   templateUrl: './dividends-view.component.html',
   styleUrl: './dividends-view.component.scss',

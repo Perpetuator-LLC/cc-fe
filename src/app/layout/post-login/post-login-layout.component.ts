@@ -34,6 +34,7 @@ import { LoadingService } from '../loading.service';
 import { MediaTabPreferenceService } from '../media-tab-preference.service';
 import { AudioPlayerBarComponent } from '../../shared/audio-player/audio-player-bar.component';
 import { TerminalRoutingService } from '../../terminal/terminal-routing.service';
+import { StartsWithPipe } from '../../shared/pipes';
 
 @Component({
   selector: 'app-post-login-layout',
@@ -59,6 +60,7 @@ import { TerminalRoutingService } from '../../terminal/terminal-routing.service'
     SharedFooterComponent,
     JobStatusIndicatorComponent,
     AudioPlayerBarComponent,
+    StartsWithPipe,
   ],
 })
 export class PostLoginLayoutComponent implements OnInit {
@@ -285,7 +287,7 @@ export class PostLoginLayoutComponent implements OnInit {
     });
   }
 
-  onHamburgerClick(event: MouseEvent) {
+  onHamburgerClick(event: Event) {
     event.stopPropagation();
     this.showMobileSidebar = !this.showMobileSidebar;
   }

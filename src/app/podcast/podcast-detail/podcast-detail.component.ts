@@ -61,6 +61,7 @@ import {
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { MatRadioModule } from '@angular/material/radio';
+import { IncludesPipe, StartsWithPipe } from '../../shared/pipes';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -99,6 +100,8 @@ import { MatRadioModule } from '@angular/material/radio';
     VoiceSelectorComponent,
     ScheduleListComponent,
     MatRadioModule,
+    StartsWithPipe,
+    IncludesPipe,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {

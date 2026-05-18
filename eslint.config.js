@@ -64,7 +64,13 @@ module.exports = tseslint.config(
       '@angular-eslint/template/prefer-self-closing-tags': 'warn',
       '@angular-eslint/template/conditional-complexity': ['warn', { maxComplexity: 3 }],
       '@angular-eslint/template/cyclomatic-complexity': ['warn', { maxComplexity: 10 }],
-      '@angular-eslint/template/no-call-expression': 'warn',
+      '@angular-eslint/template/no-call-expression': [
+        'warn',
+        {
+          // Reactive form methods are safe (pure lookups, not expensive computations)
+          allowList: ['get', 'getRawValue', 'hasError', 'getError'],
+        },
+      ],
     },
   },
 );

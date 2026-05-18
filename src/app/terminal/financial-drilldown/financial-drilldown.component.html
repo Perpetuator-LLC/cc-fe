@@ -88,7 +88,7 @@
 
       <!-- Percentage of Parent -->
       @if (node.percentageOfParent !== null && level > 0) {
-        <span class="node-percent">{{ node.percentageOfParent.toFixed(1) }}%</span>
+        <span class="node-percent">{{ node.percentageOfParent | toFixed: 1 }}%</span>
       } @else {
         <span class="node-percent placeholder">—</span>
       }

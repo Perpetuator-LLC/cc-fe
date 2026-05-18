@@ -5,7 +5,8 @@
     <div
       class="progress-container"
       (click)="onProgressClick($event)"
-      (keydown.enter)="onProgressClick($event)"
+      (keydown.arrowRight)="seekByStep(5)"
+      (keydown.arrowLeft)="seekByStep(-5)"
       role="slider"
       tabindex="0"
       [attr.aria-valuenow]="audioService.progress()"
