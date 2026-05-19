@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
 /**
  * Dead SCSS/CSS Detection Script
@@ -175,6 +175,16 @@ function isClassUsed(className, htmlContent, tsContent) {
     const dynamicClasses = ['error', 'warning', 'info', 'success', 'pending', 'active', 'inactive', 'disabled'];
     if (dynamicClasses.includes(className)) {
       return true;
+    }
+
+    // Detect string concatenation patterns like [ngClass]="'prefix-' + expr"
+    // If className starts with a prefix used in concatenation, treat it as dynamic
+    const concatPrefixRegex = /\[ngClass\]="'([a-zA-Z_-]+)-'\s*\+/g;
+    let concatMatch;
+    while ((concatMatch = concatPrefixRegex.exec(htmlContent)) !== null) {
+      if (className.startsWith(concatMatch[1] + '-')) {
+        return true;
+      }
     }
   }
 

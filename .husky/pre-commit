@@ -7,12 +7,14 @@ if printf '%s' "$added_lines" | grep -qFe "global['!']" -e "String.fromCharCode(
   exit 1
 fi
 
-# Load NVM in non-interactive shell
+# Load NVM in non-interactive shell (skip if using Volta or another manager)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Use the Node version from .nvmrc
-nvm use
+# Use the Node version from .nvmrc (only if nvm is available)
+if command -v nvm &> /dev/null; then
+  nvm use
+fi
 
 # Secret scanning — requires: brew install gitleaks
 if command -v gitleaks &> /dev/null; then
