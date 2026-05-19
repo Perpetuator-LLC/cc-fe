@@ -22,6 +22,8 @@ import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService, HistorySearchResult } from '../terminal-websocket.service';
 import { HistoryEntry, AutocompleteSuggestion, CommandHistoryItem } from '../terminal.types';
 import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
+import { TerminalHistoryPreviewComponent } from './history-preview/history-preview.component';
+import { TerminalAutocompleteComponent } from './autocomplete-dropdown/autocomplete-dropdown.component';
 
 /**
  * History entry with match highlighting info
@@ -51,7 +53,16 @@ export interface FqnChip {
 @Component({
   selector: 'app-terminal-bar',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressSpinnerModule, FqnChipComponent],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    FqnChipComponent,
+    TerminalHistoryPreviewComponent,
+    TerminalAutocompleteComponent,
+  ],
   templateUrl: './terminal-bar.component.html',
   styleUrl: './terminal-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -786,38 +797,6 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
    */
   selectSuggestion(suggestion: AutocompleteSuggestion): void {
     this.addChipFromSuggestion(suggestion);
-  }
-
-  getSuggestionIcon(suggestion: AutocompleteSuggestion): string {
-    switch (suggestion.type) {
-      case 'command':
-        return 'terminal';
-      case 'alias':
-        return 'label';
-      case 'symbol':
-      case 'stock':
-        return suggestion.assetType === 'ETF' ? 'analytics' : 'trending_up';
-      case 'crypto':
-        return 'currency_bitcoin';
-      case 'index':
-        return 'show_chart';
-      case 'forex':
-        return 'currency_exchange';
-      case 'recent':
-        return 'schedule';
-      case 'parameter':
-        return 'settings';
-      case 'example':
-        return 'lightbulb';
-      case 'history':
-        return 'history';
-      case 'history_ai':
-        return 'smart_toy';
-      case 'natural_language':
-        return 'chat';
-      default:
-        return 'chevron_right';
-    }
   }
 
   /**
