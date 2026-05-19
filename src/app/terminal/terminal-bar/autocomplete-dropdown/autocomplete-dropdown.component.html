@@ -17,7 +17,7 @@
       (mouseenter)="hoverIndex.emit(i)"
     >
       <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-        <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
+        <mat-icon>{{ suggestion | suggestionIcon }}</mat-icon>
       </span>
       <span class="suggestion-text">
         @if (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent') {
