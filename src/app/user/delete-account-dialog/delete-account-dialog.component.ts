@@ -15,10 +15,8 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './delete-account-dialog.component.scss',
 })
 export class DeleteAccountDialogComponent {
-  dialogRef = inject<MatDialogRef<DeleteAccountDialogComponent>>(MatDialogRef);
-  data = inject<{
-    email: string;
-  }>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject<MatDialogRef<DeleteAccountDialogComponent>>(MatDialogRef);
+  private readonly data = inject<{ email: string }>(MAT_DIALOG_DATA);
 
   deleteConfirmation = '';
   email: string;
