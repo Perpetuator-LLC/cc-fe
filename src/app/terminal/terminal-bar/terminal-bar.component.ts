@@ -298,7 +298,9 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
           // Empty input = show suggestions but don't select any
           const hasUserInput = this.currentInput().trim().length > 0;
           this.selectedSuggestionIndex.set(hasUserInput && sorted.length > 0 ? 0 : -1);
-          this.showSuggestions.set(sorted.length > 0);
+          if (this.isFocused()) {
+            this.showSuggestions.set(sorted.length > 0);
+          }
         }),
     );
 
@@ -407,6 +409,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.wsHistoryResults.set([]);
     this.showHistoryPreview.set(false);
     this.clearSuggestions();
+    this.commandInput?.nativeElement?.blur();
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -728,10 +731,9 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.clearSuggestions();
     this.focusInput();
 
-    // Trigger suggestions for next input
-    setTimeout(() => {
+    if (this.isFocused()) {
       this.updateSuggestions('');
-    }, 50);
+    }
   }
 
   /**
