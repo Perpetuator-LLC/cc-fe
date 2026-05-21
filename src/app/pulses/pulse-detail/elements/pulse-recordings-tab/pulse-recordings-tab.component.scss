@@ -90,7 +90,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 12px;
 
-  background: var(--md-sys-color-surface-container-lowest);
+  background: var(--md-sys-color-surface-container-low);
 }
 
 .history-row {
@@ -113,10 +113,10 @@
   cursor: pointer;
 
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
 
-  padding: 12px 16px;
+  padding: 16px 10px;
 
   transition: background-color 0.16s ease;
 
@@ -222,6 +222,10 @@
 }
 
 .history-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
   width: 32px;
   height: 32px;
 
@@ -378,7 +382,7 @@
   justify-content: center;
 
   width: fit-content;
-  padding: 4px 12px;
+  padding: 6px 12px;
   border-radius: 999px;
 
   font-size: 12px;
