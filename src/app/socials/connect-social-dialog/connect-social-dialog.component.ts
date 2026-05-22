@@ -146,9 +146,11 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     });
 
     // Update validators based on platform selection
-    this.socialForm.get('platform')?.valueChanges.subscribe((platform) => {
-      this.updateValidators(platform);
-    });
+    this.subscriptions.add(
+      this.socialForm.get('platform')!.valueChanges.subscribe((platform) => {
+        this.updateValidators(platform);
+      }),
+    );
   }
 
   ngOnInit(): void {
