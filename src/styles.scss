@@ -95,6 +95,11 @@ html {
   --md-sys-color-glass-surface: rgb(20 23 28 / 0.75);
   --md-sys-color-glass-surface-high: rgb(25 28 35 / 0.8);
   // stylelint-enable function-disallowed-list
+
+  --mat-slider-value-indicator-width: 32px;
+  --mat-slider-value-indicator-height: 32px;
+  --mat-slider-value-indicator-transform-origin: 0 32px;
+  --mat-slider-label-label-text-line-height: 1;
 }
 
 body {
