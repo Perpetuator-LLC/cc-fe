@@ -18,6 +18,11 @@
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
   }
+
+  button mat-icon {
+    display: inline-flex;
+    vertical-align: middle;
+  }
 }
 
 .empty-state {
@@ -34,7 +39,7 @@
 
   background: var(--md-sys-color-surface-container-lowest);
 
-  mat-icon {
+  > mat-icon {
     width: 48px;
     height: 48px;
     margin-bottom: 16px;
@@ -47,6 +52,11 @@
   p {
     margin: 0 0 16px;
     font-size: 14px;
+  }
+
+  button mat-icon {
+    display: inline-flex;
+    vertical-align: middle;
   }
 }
 
