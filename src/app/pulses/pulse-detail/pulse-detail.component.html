@@ -71,9 +71,7 @@
       </mat-tab>
 
       <mat-tab label="Schedule">
-        <div class="tab-content">
-          <app-schedule-list context="pulse" [pulseConfigUuid]="pulseConfig.uuid" />
-        </div>
+        <app-pulse-schedule-tab [pulseConfigUuid]="pulseConfig.uuid" />
       </mat-tab>
 
       <mat-tab label="Recordings">
