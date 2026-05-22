@@ -31,7 +31,7 @@ import { Job } from '../../jobs/job.service';
 import { Voice } from '../../podcast/voices.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 import { PulseVoiceTabComponent } from './elements/pulse-voice-tab/pulse-voice-tab.component';
-import { PulseScheduleTabComponent } from './elements/pulse-schedule-tab/pulse-schedule-tab.component';
+import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { UserService, UserPreferences } from '../../user/user.service';
 import { LatestPulseCardComponent } from './elements/latest-pulse-card/latest-pulse-card.component';
 import { PulseAlertTriggersTabComponent } from './elements/pulse-alert-triggers-tab/pulse-alert-triggers-tab.component';
@@ -51,7 +51,7 @@ import { PulseSettingsTabComponent } from './elements/pulse-settings-tab/pulse-s
     MatIcon,
     MatTabsModule,
     PulseVoiceTabComponent,
-    PulseScheduleTabComponent,
+    ScheduleListComponent,
     LatestPulseCardComponent,
     PulseAlertTriggersTabComponent,
     PulseContentSourcesTabComponent,
