@@ -10,6 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BlogsService, Article } from '../blogs.service';
+
+type ArticleDisplay = Article & { statusClass: string; formattedDate: string };
 import { MessageService } from '../../message.service';
 import { ArticleDialogComponent } from '../article-dialog/article-dialog.component';
 
@@ -35,8 +37,8 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
-  articles: Article[] = [];
-  dataSource = new MatTableDataSource<Article>([]);
+  articles: ArticleDisplay[] = [];
+  dataSource = new MatTableDataSource<ArticleDisplay>([]);
   displayedColumns = ['title', 'blog', 'status', 'date', 'views'];
 
   ngOnInit(): void {
@@ -52,8 +54,12 @@ export class ArticlesListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.blogsService.getArticles().subscribe({
         next: (articles) => {
-          this.articles = articles;
-          this.dataSource.data = articles;
+          this.articles = articles.map((a) => ({
+            ...a,
+            statusClass: this.getStatusClass(a.status),
+            formattedDate: this.formatDate(a.publishedAt || a.createdAt),
+          }));
+          this.dataSource.data = this.articles;
           this.loading = false;
         },
         error: (err) => {

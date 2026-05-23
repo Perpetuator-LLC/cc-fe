@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, inject, OnInit, ViewChild, ElementRef, Renderer2, HostListener } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ElementRef, Renderer2, HostListener, computed } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -82,6 +82,12 @@ export class PostLoginLayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
   protected loading = this.loadingService.loading;
   rootRoutes = routes.filter((r) => r.path && r.data?.['icon'] && !r.redirectTo);
+  /** Pre-filtered rootRoutes via shouldShow — computed signal so the template just iterates. */
+  readonly visibleRootRoutes = computed(() => {
+    // Touch isLoggedIn so the signal re-runs when login state changes.
+    void this.authService.isLoggedIn();
+    return this.rootRoutes.filter((r) => this.shouldShow(r));
+  });
   private breakpointObserver = inject(BreakpointObserver);
   protected currentTheme = this.themeService.theme;
   protected isLoggedIn = this.authService.isLoggedIn;
@@ -90,6 +96,8 @@ export class PostLoginLayoutComponent implements OnInit {
   private loggedOutRoutes = AuthGuard.getLoggedOutRoutes();
   private isMinimized = false;
   protected userCredits = 0;
+  /** Pre-formatted short credits string used in the chip. */
+  protected userCreditsShort = '0';
   userDetailForm: FormGroup;
   protected jobs: Job[] = [];
   itemTitle = '';
@@ -114,6 +122,7 @@ export class PostLoginLayoutComponent implements OnInit {
     toObservable(this.creditService.userCredits).subscribe({
       next: (credits) => {
         this.userCredits = credits;
+        this.userCreditsShort = this.shortCredits(credits);
       },
       error: (error) => {
         this.messageService.error(`Failed to load credits signal: ${error.message}`);

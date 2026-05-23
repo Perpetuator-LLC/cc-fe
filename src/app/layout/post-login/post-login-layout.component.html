@@ -22,29 +22,27 @@
       </a>
       <mat-nav-list [ngClass]="{ minimized: this.minimized }">
         <div class="keep-up">
-          @for (item of rootRoutes; track item.path) {
-            @if (shouldShow(item)) {
-              <a
-                class="mat-link"
-                mat-list-item
-                [routerLink]="item.path"
-                routerLinkActive="active-link"
-                (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
-                #link="routerLinkActive"
-                [activated]="link.isActive"
-              >
-                <div class="route-link">
-                  @if (item.data && item.data['icon']) {
-                    <mat-icon>{{ item.data['icon'] }}</mat-icon>
-                  }
-                  @if (!this.minimized) {
-                    <div class="route-title">
-                      {{ item.title }}
-                    </div>
-                  }
-                </div>
-              </a>
-            }
+          @for (item of visibleRootRoutes(); track item.path) {
+            <a
+              class="mat-link"
+              mat-list-item
+              [routerLink]="item.path"
+              routerLinkActive="active-link"
+              (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
+              #link="routerLinkActive"
+              [activated]="link.isActive"
+            >
+              <div class="route-link">
+                @if (item.data && item.data['icon']) {
+                  <mat-icon>{{ item.data['icon'] }}</mat-icon>
+                }
+                @if (!this.minimized) {
+                  <div class="route-title">
+                    {{ item.title }}
+                  </div>
+                }
+              </div>
+            </a>
           }
         </div>
       </mat-nav-list>
@@ -410,7 +408,7 @@
               [routerLink]="['/transactions']"
             >
               <mat-icon>account_balance_wallet</mat-icon>
-              <span>{{ shortCredits(this.userCredits) }} Credits</span>
+              <span>{{ userCreditsShort }} Credits</span>
             </a>
 
             <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">
