@@ -4,34 +4,34 @@
   <mat-form-field appearance="outline" class="interval-field" subscriptSizing="dynamic">
     <mat-label>Interval</mat-label>
     <mat-select [value]="selectedInterval" (selectionChange)="onIntervalChange($event.value)" [disabled]="chartLoading">
-      @for (interval of intervalOptions; track interval) {
-        <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+      @for (opt of intervalOptionsDisplay(); track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
 
   <!-- OHLC Data Display -->
-  @if (crosshairData; as ohlc) {
-    <span class="ohlc-date">{{ formatCrosshairDate(ohlc.date) }}</span>
+  @if (ohlcDisplay(); as ohlc) {
+    <span class="ohlc-date">{{ ohlc.formattedDate }}</span>
     <span class="ohlc-label">O</span>
     <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-      formatPrice(ohlc.open)
+      ohlc.formattedOpen
     }}</span>
     <span class="ohlc-label">H</span>
     <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-      formatPrice(ohlc.high)
+      ohlc.formattedHigh
     }}</span>
     <span class="ohlc-label">L</span>
     <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-      formatPrice(ohlc.low)
+      ohlc.formattedLow
     }}</span>
     <span class="ohlc-label">C</span>
     <span class="ohlc-value" [class.positive]="ohlc.isPositive" [class.negative]="!ohlc.isPositive">{{
-      formatPrice(ohlc.close)
+      ohlc.formattedClose
     }}</span>
     @if (ohlc.volume) {
       <span class="ohlc-label">Vol</span>
-      <span class="ohlc-value volume">{{ formatVolume(ohlc.volume) }}</span>
+      <span class="ohlc-value volume">{{ ohlc.formattedVolume }}</span>
     }
   } @else if (!chartError) {
     <span class="ohlc-hint">Hover on chart to see OHLC values</span>
