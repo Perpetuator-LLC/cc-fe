@@ -40,6 +40,8 @@ export class PublicBlogPageComponent implements OnInit {
   private readonly seoService = inject(SeoService);
 
   blogData: BlogResponse | null = null;
+  /** Pre-enriched articles for the template (url, shareUrl, formattedDate, excerpt per row). */
+  articlesDisplay: (PublicArticle & { url: string; shareUrl: string; formattedDate: string; excerpt: string })[] = [];
   loading = true;
   error = false;
   blogId = '';
@@ -71,6 +73,13 @@ export class PublicBlogPageComponent implements OnInit {
     this.publicBlogService.getBlog(this.blogId, this.currentPage, this.perPage).subscribe({
       next: (data) => {
         this.blogData = data;
+        this.articlesDisplay = (data.articles || []).map((a) => ({
+          ...a,
+          url: this.getArticleUrl(a.id, a.title),
+          shareUrl: this.getArticleShareUrl(a.id, a.title),
+          formattedDate: this.formatDate(a.publishedAt ?? a.createdAt),
+          excerpt: this.getExcerpt(a),
+        }));
         this.loading = false;
         this.updateSeoTags();
       },
@@ -95,9 +104,14 @@ export class PublicBlogPageComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  getShareUrl(): string {
+  get shareUrl(): string {
     if (!this.blogData) return '';
     return this.shareService.buildBlogUrl(this.blogData.id, this.blogData.name);
+  }
+
+  /** Backwards-compatible method kept for internal callers. */
+  getShareUrl(): string {
+    return this.shareUrl;
   }
 
   getArticleUrl(articleId: string, title: string): string {

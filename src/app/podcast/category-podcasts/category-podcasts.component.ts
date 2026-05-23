@@ -32,16 +32,26 @@ export class CategoryPodcastsComponent implements OnInit {
   private shareService = inject(ShareService);
   private messageService = inject(MessageService);
 
-  podcasts: PublicPodcast[] = [];
+  /**
+   * Enriched podcast list with pre-computed routerLink + share URL per row.
+   * Built when the API returns so the template avoids per-CD method calls.
+   */
+  podcasts: (PublicPodcast & { url: string; shareUrl: string })[] = [];
   loading = true;
   category = '';
   subcategory?: string;
+  decodedCategory = '';
+  decodedSubcategory = '';
+  pageTitle = '';
   limit = 20;
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.category = params['category'];
       this.subcategory = params['subcategory'];
+      this.decodedCategory = this.decodeCategory(this.category);
+      this.decodedSubcategory = this.subcategory ? this.decodeCategory(this.subcategory) : '';
+      this.pageTitle = this.subcategory ? `${this.decodedCategory} > ${this.decodedSubcategory}` : this.decodedCategory;
       this.loadPodcasts();
     });
   }
@@ -51,7 +61,11 @@ export class CategoryPodcastsComponent implements OnInit {
 
     this.publicPodcastService.getPodcastsByCategory(this.category, this.subcategory, this.limit).subscribe({
       next: (data) => {
-        this.podcasts = data.podcasts;
+        this.podcasts = data.podcasts.map((p) => ({
+          ...p,
+          url: this.getPodcastUrl(p),
+          shareUrl: this.getShareUrl(p),
+        }));
         this.loading = false;
       },
       error: (err) => {
