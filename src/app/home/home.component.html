@@ -194,11 +194,11 @@
                 <div class="stats">
                   <span class="stat">
                     <mat-icon>schedule</mat-icon>
-                    {{ formatTimeAgo(podcast.latestEpisodeDate) }}
+                    {{ podcast.formattedTimeAgo }}
                   </span>
                   <span class="stat">
                     <mat-icon>visibility</mat-icon>
-                    {{ formatViewCount(podcast.viewCount) }}
+                    {{ podcast.formattedViewCount }}
                   </span>
                 </div>
               </mat-card-content>
@@ -207,10 +207,7 @@
         } @else {
           @for (podcast of publicPodcasts; track podcast.id) {
             <mat-card class="podcast-card public-podcast-card">
-              <a
-                [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
-                class="podcast-link"
-              >
+              <a [routerLink]="['/podcasts', podcast.id + '-' + podcast.slug]" class="podcast-link">
                 @if (podcast.thumbnailUrl || podcast.imageUrl) {
                   <img
                     [src]="podcast.thumbnailUrl || podcast.imageUrl"
@@ -225,12 +222,12 @@
               </a>
               <mat-card-content>
                 <h3>
-                  <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
+                  <a [routerLink]="['/podcasts', podcast.id + '-' + podcast.slug]">
                     {{ podcast.name }}
                   </a>
                 </h3>
                 @if (podcast.description) {
-                  <p class="description">{{ truncateDescription(podcast.description) }}</p>
+                  <p class="description">{{ podcast.truncatedDescription }}</p>
                 }
                 @if (podcast.ownerName) {
                   <p class="owner">
@@ -300,10 +297,7 @@
         } @else if (recentPodcasts.length > 0) {
           @for (podcast of recentPodcasts; track podcast.id) {
             <mat-card class="podcast-card public-podcast-card">
-              <a
-                [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
-                class="podcast-link"
-              >
+              <a [routerLink]="['/podcasts', podcast.id + '-' + podcast.slug]" class="podcast-link">
                 @if (podcast.thumbnailUrl || podcast.imageUrl) {
                   <img
                     [src]="podcast.thumbnailUrl || podcast.imageUrl"
@@ -318,12 +312,12 @@
               </a>
               <mat-card-content>
                 <h3>
-                  <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
+                  <a [routerLink]="['/podcasts', podcast.id + '-' + podcast.slug]">
                     {{ podcast.name }}
                   </a>
                 </h3>
                 @if (podcast.description) {
-                  <p class="description">{{ truncateDescription(podcast.description) }}</p>
+                  <p class="description">{{ podcast.truncatedDescription }}</p>
                 }
                 @if (podcast.ownerName) {
                   <p class="owner">

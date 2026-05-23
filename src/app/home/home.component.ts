@@ -17,6 +17,19 @@ import { DashboardService } from '../dashboard.service';
 import { SiteStatistics } from '../interface';
 import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-dialog.component';
 
+/** Pre-computed display fields attached to each PublicPodcast row. */
+interface PublicPodcastDisplay extends PublicPodcast {
+  truncatedDescription: string;
+  formattedTimeAgo: string;
+  formattedViewCount: string;
+}
+
+/** Pre-computed display fields attached to each authenticated PodcastsResult row. */
+interface AuthPodcastDisplay extends PodcastsResult {
+  formattedTimeAgo: string;
+  formattedViewCount: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -38,10 +51,37 @@ export class HomeComponent implements AfterViewInit, OnInit {
   siteStats: SiteStatistics | undefined;
   loadingStats = true;
 
-  authPodcasts: PodcastsResult[] = [];
-  publicPodcasts: PublicPodcast[] = [];
-  recentPodcasts: PublicPodcast[] = [];
+  authPodcasts: AuthPodcastDisplay[] = [];
+  /**
+   * Pre-enriched public podcast lists used by the template. Each entry
+   * carries pre-built `slug`, `truncatedDescription`, `formattedTimeAgo`,
+   * and `formattedViewCount` so the template avoids per-tick method
+   * calls.
+   */
+  publicPodcasts: PublicPodcastDisplay[] = [];
+  recentPodcasts: PublicPodcastDisplay[] = [];
   loadingRecentPodcasts = true;
+
+  private enrichPublic(p: PublicPodcast): PublicPodcastDisplay {
+    return {
+      ...p,
+      truncatedDescription: this.truncateDescription(p.description ?? ''),
+      // `PublicPodcast.latestEpisodeDate` isn't part of the shared interface yet;
+      // fall back to `null` if the API doesn't return it.
+      formattedTimeAgo: this.formatTimeAgo(
+        (p as PublicPodcast & { latestEpisodeDate?: string | null }).latestEpisodeDate ?? null,
+      ),
+      formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+    };
+  }
+
+  private enrichAuth(p: PodcastsResult): AuthPodcastDisplay {
+    return {
+      ...p,
+      formattedTimeAgo: this.formatTimeAgo(p.latestEpisodeDate ?? null),
+      formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+    };
+  }
 
   openNewsletterDialog(): void {
     this.dialog.open(NewsletterDialogComponent, {
@@ -58,10 +98,10 @@ export class HomeComponent implements AfterViewInit, OnInit {
       }).subscribe({
         next: ({ stats, podcasts }) => {
           this.siteStats = stats;
-          this.authPodcasts = podcasts.podcasts;
+          this.authPodcasts = podcasts.podcasts.map((p) => this.enrichAuth(p));
           this.loadingStats = false;
         },
-        error: (error) => {
+        error: (error: unknown) => {
           console.error('[Home] Logged-in data loading error:', error);
           this.authPodcasts = [];
           this.loadingStats = false;
@@ -75,14 +115,14 @@ export class HomeComponent implements AfterViewInit, OnInit {
       }).subscribe({
         next: ({ stats, popular, recent }) => {
           this.siteStats = stats;
-          this.publicPodcasts = popular.podcasts;
+          this.publicPodcasts = popular.podcasts.map((p) => this.enrichPublic(p));
 
           // Filter out podcasts that are in the popular list
           const popularIds = new Set(this.publicPodcasts.map((p) => p.id));
           const filteredRecent = recent.podcasts.filter((p) => !popularIds.has(p.id));
 
           // Take the top 3 from filtered recent podcasts
-          this.recentPodcasts = filteredRecent.slice(0, 3);
+          this.recentPodcasts = filteredRecent.slice(0, 3).map((p) => this.enrichPublic(p));
 
           this.loadingStats = false;
           this.loadingRecentPodcasts = false;
