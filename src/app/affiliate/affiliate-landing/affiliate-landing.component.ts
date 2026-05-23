@@ -134,7 +134,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
     );
   }
 
-  getBrandImageUrl(): string | null {
+  get brandImageUrl(): string | null {
     if (!this.affiliateData?.brandImageUrl) return null;
     return this.affiliateData.brandImageUrl;
   }

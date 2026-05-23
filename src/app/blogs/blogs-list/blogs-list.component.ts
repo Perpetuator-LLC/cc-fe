@@ -10,6 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BlogsService, Blog } from '../blogs.service';
+
+type BlogDisplay = Blog & { statusClass: string; formattedLatestDate: string };
 import { MessageService } from '../../message.service';
 import { CreateBlogDialogComponent } from '../create-blog-dialog/create-blog-dialog.component';
 
@@ -35,8 +37,9 @@ export class BlogsListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
-  blogs: Blog[] = [];
-  dataSource = new MatTableDataSource<Blog>([]);
+  /** Blogs enriched with pre-built statusClass + formattedLatestDate per row. */
+  blogs: BlogDisplay[] = [];
+  dataSource = new MatTableDataSource<BlogDisplay>([]);
   displayedColumns = ['name', 'status', 'articles', 'views', 'updated'];
 
   ngOnInit(): void {
@@ -52,8 +55,12 @@ export class BlogsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.blogsService.getBlogs().subscribe({
         next: (blogs) => {
-          this.blogs = blogs;
-          this.dataSource.data = blogs;
+          this.blogs = blogs.map((b) => ({
+            ...b,
+            statusClass: this.getStatusClass(b.status),
+            formattedLatestDate: this.formatDate(b.latestArticleDate || b.updatedAt),
+          }));
+          this.dataSource.data = this.blogs;
           this.loading = false;
         },
         error: (err) => {

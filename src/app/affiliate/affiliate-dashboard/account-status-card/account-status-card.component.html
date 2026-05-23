@@ -1,0 +1,49 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<mat-card class="status-card">
+  <mat-card-content>
+    <div class="status-display">
+      @if (showEligibilityStatus) {
+        <div class="status-item">
+          <mat-icon [class]="display.profileStatusColor">
+            {{ display.profileStatusIcon }}
+          </mat-icon>
+          <div class="status-text">
+            <strong>Account Status:</strong>
+            <span class="status-label">{{ display.profileStatusLabel }}</span>
+          </div>
+        </div>
+      }
+
+      <div class="status-item">
+        <mat-icon [class]="networkStatusIconClass">
+          {{ networkStatusIcon }}
+        </mat-icon>
+        <div class="status-text">
+          <strong>Network Status:</strong>
+          <span class="status-label">{{ networkStatusLabel }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Network Joining Warning -->
+    @if (showNetworkWarning) {
+      <div
+        class="network-warning"
+        [class.suspended]="isSuspended"
+        [class.under-review]="isUnderReview"
+        [class.network-closed]="isNetworkClosed"
+      >
+        <mat-icon>{{ warningIcon }}</mat-icon>
+        <p>{{ display.networkMessage }}</p>
+      </div>
+    }
+
+    <!-- Eligibility Message from Admin -->
+    @if (profile.eligibilityMessage) {
+      <div class="eligibility-message-display">
+        <mat-icon>info</mat-icon>
+        <p>{{ profile.eligibilityMessage }}</p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

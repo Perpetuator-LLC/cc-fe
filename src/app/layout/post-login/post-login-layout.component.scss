@@ -795,6 +795,12 @@ mat-nav-list {
           background: var(--md-sys-color-surface-container-high);
         }
 
+        &.coming-soon {
+          cursor: not-allowed;
+          color: var(--md-sys-color-outline);
+          opacity: 0.5;
+        }
+
         &.sub-link {
           padding-left: 24px;
           font-size: 12px;

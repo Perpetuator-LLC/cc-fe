@@ -1,0 +1,71 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="chart-header">
+  <div class="chart-title">
+    <div>
+      @if (companyName) {
+        <span class="company-name" [matTooltip]="symbolInfoTooltip" matTooltipClass="quote-tooltip">{{
+          companyName
+        }}</span>
+      }
+      <span class="symbol-name" [matTooltip]="symbolInfoTooltip" matTooltipClass="quote-tooltip">{{
+        selectedSymbol
+      }}</span>
+    </div>
+    @if (showQuote) {
+      <div
+        class="quote-data"
+        [class.positive]="isPositiveChange"
+        [class.negative]="!isPositiveChange"
+        [matTooltip]="quoteTooltip"
+        matTooltipClass="quote-tooltip"
+      >
+        <span class="price">{{ quotePrice }}</span>
+        <span class="change">{{ quoteChange }}</span>
+        <span class="change-percent">({{ quoteChangePercent }})</span>
+      </div>
+    }
+    <!-- Symbol metadata chips - clickable to navigate to system watchlists -->
+    <div class="symbol-metadata">
+      @if (exchange) {
+        <button
+          class="metadata-chip exchange"
+          (click)="onMetadataClick('exchange', exchange)"
+          [matTooltip]="'View all ' + exchange + ' stocks'"
+        >
+          {{ exchange }}
+        </button>
+      }
+      @if (sector) {
+        <button
+          class="metadata-chip sector"
+          (click)="onMetadataClick('sector', sector)"
+          [matTooltip]="'View all ' + sector + ' stocks'"
+        >
+          {{ sector }}
+        </button>
+      }
+      @if (industry) {
+        <button
+          class="metadata-chip industry"
+          (click)="onMetadataClick('industry', industry)"
+          [matTooltip]="'View all ' + industry + ' stocks'"
+        >
+          {{ industry }}
+        </button>
+      }
+      @if (showMarketCap) {
+        <span class="metadata-chip market-cap" matTooltip="Market Capitalization">
+          {{ marketCap }}
+        </span>
+      }
+    </div>
+  </div>
+  <mat-button-toggle-group [value]="currentCommand" (change)="onViewToggleChange($event)" class="view-toggle-group">
+    @for (action of actions; track action.command) {
+      <mat-button-toggle [value]="action.command" [matTooltip]="action.label">
+        <mat-icon>{{ action.icon }}</mat-icon>
+        {{ action.label }}
+      </mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+</div>

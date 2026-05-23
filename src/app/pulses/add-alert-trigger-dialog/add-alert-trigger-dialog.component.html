@@ -26,7 +26,7 @@
       <!-- Breaking News Keywords -->
       @if (selectedType === 'breaking_news') {
         <div class="keywords-section">
-          <label>Keywords</label>
+          <label for="keyword-input">Keywords</label>
           <p class="hint">Add keywords that will trigger an alert when found in news headlines</p>
 
           <mat-form-field appearance="outline" class="full-width">
@@ -41,6 +41,7 @@
                 </mat-chip-row>
               }
               <input
+                id="keyword-input"
                 placeholder="Type and press Enter..."
                 [matChipInputFor]="chipGrid"
                 [matChipInputSeparatorKeyCodes]="separatorKeyCodes"

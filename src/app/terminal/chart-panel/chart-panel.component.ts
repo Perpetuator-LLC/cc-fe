@@ -75,7 +75,21 @@ echarts.use([
 })
 export class ChartPanelComponent implements OnChanges {
   @Input() chartOptions?: EChartsOption;
-  @Input() chartControls?: ChartControls;
+  private _chartControls?: ChartControls;
+  /** Pre-built dropdown rows for the template (label included so no per-CD method call). */
+  periodOptionsDisplay: { value: string; label: string }[] = [];
+  intervalOptionsDisplay: { value: string; label: string }[] = [];
+  @Input() set chartControls(value: ChartControls | undefined) {
+    this._chartControls = value;
+    this.periodOptionsDisplay = (value?.periodOptions ?? []).map((v) => ({ value: v, label: this.formatPeriod(v) }));
+    this.intervalOptionsDisplay = (value?.intervalOptions ?? []).map((v) => ({
+      value: v,
+      label: this.formatInterval(v),
+    }));
+  }
+  get chartControls(): ChartControls | undefined {
+    return this._chartControls;
+  }
   @Input() title = '';
   @Input() height = 400;
   @Input() showHeader = true;

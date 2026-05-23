@@ -54,13 +54,13 @@
           <div class="status-filter">
             <span class="filter-label">Filter by status:</span>
             <mat-chip-set aria-label="Status filter">
-              @for (status of availableStatuses; track status) {
+              @for (chip of statusChips; track chip.value) {
                 <mat-chip-option
-                  [selected]="isStatusSelected(status)"
-                  (click)="toggleStatusFilter(status)"
-                  [class]="status.toLowerCase()"
+                  [selected]="chip.selected"
+                  (click)="toggleStatusFilter(chip.value)"
+                  [class]="chip.lowerCase"
                 >
-                  {{ status }}
+                  {{ chip.value }}
                 </mat-chip-option>
               }
             </mat-chip-set>

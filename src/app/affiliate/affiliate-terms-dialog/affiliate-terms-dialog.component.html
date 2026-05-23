@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="terms-dialog">
   <h2 mat-dialog-title>Affiliate Program Terms and Conditions</h2>
 
@@ -16,8 +16,10 @@
             <div>
               <h3>Purchase Required</h3>
               <p>{{ eligibility.reason }}</p>
-              <p class="detail">To become an affiliate, you must first make a purchase on our platform.
-                This helps ensure our affiliate program is used by active members of our community.</p>
+              <p class="detail">
+                To become an affiliate, you must first make a purchase on our platform. This helps ensure our affiliate
+                program is used by active members of our community.
+              </p>
             </div>
           </div>
         } @else {
@@ -33,25 +35,27 @@
     } @else {
       <div class="terms-content">
         @if (loadingPolicy) {
-        <div class="loading-container">
-          <mat-spinner diameter="40" />
-          <p>Loading terms...</p>
-        </div>
+          <div class="loading-container">
+            <mat-spinner diameter="40" />
+            <p>Loading terms...</p>
+          </div>
         } @else if (policyContent) {
-        @if (policy) {
-        <div class="policy-meta">
-          <p><strong>Version:</strong> {{ policy.version }}</p>
-          <p><strong>Effective Date:</strong> {{ policy.effectiveDate | date }}</p>
-        </div>
-        }
-        <div [innerHTML]="policyContent"></div>
+          @if (policy) {
+            <div class="policy-meta">
+              <p><strong>Version:</strong> {{ policy.version }}</p>
+              <p><strong>Effective Date:</strong> {{ policy.effectiveDate | date }}</p>
+            </div>
+          }
+          <div [innerHTML]="policyContent"></div>
         } @else {
-        <div class="coming-soon-message">
-          <mat-icon class="coming-soon-icon">schedule</mat-icon>
-          <h3>Affiliate Program Terms Coming Soon</h3>
-          <p>We're finalizing the affiliate program terms and conditions. Please check back soon!</p>
-          <p class="contact-info">If you have questions, please <a href="mailto:support@capitalcopilot.com">contact support</a>.</p>
-        </div>
+          <div class="coming-soon-message">
+            <mat-icon class="coming-soon-icon">schedule</mat-icon>
+            <h3>Affiliate Program Terms Coming Soon</h3>
+            <p>We're finalizing the affiliate program terms and conditions. Please check back soon!</p>
+            <p class="contact-info">
+              If you have questions, please <a href="mailto:support@capitalcopilot.com">contact support</a>.
+            </p>
+          </div>
         }
       </div>
     }
@@ -79,4 +83,3 @@
     }
   </mat-dialog-actions>
 </div>
-

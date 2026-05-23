@@ -1,0 +1,143 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="tab-content">
+  @if (allSymbols.length > 0) {
+    <mat-card class="tickers-summary-card">
+      <mat-card-content>
+        <div class="tickers-summary">
+          <div class="tickers-header">
+            <mat-icon>trending_up</mat-icon>
+            <span>All Tracked Symbols ({{ allSymbols.length }})</span>
+          </div>
+          <div class="tickers-chips">
+            @for (symbol of allSymbols; track symbol) {
+              <span class="symbol-chip">{{ symbol }}</span>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-card>
+    <mat-card-content>
+      <div class="section-header">
+        <h3>Content Sources</h3>
+        <div class="section-actions">
+          <button mat-button (click)="addBulkRssFeeds.emit()" matTooltip="Add multiple RSS feeds at once">
+            <mat-icon>playlist_add</mat-icon>
+            Bulk Add RSS
+          </button>
+          <button mat-button color="primary" (click)="addContentSource.emit()">
+            <mat-icon>add</mat-icon>
+            Add Source
+          </button>
+        </div>
+      </div>
+
+      <p class="section-description">
+        Define what content to include in your pulse: RSS feeds, search terms, watchlists, or companies.
+      </p>
+
+      @if (contentSources.length === 0) {
+        <div class="empty-state">
+          <mat-icon>source</mat-icon>
+          <p>No content sources configured. Add sources to get news content in your pulse.</p>
+          <div class="source-type-hints">
+            <span><mat-icon>rss_feed</mat-icon> RSS Feeds - Add news feeds by URL</span>
+            <span><mat-icon>search</mat-icon> Search Terms - Keywords to search for</span>
+            <span><mat-icon>list</mat-icon> Watchlists - Monitor your watchlists for news</span>
+            <span><mat-icon>business</mat-icon> Companies - Track specific stock symbols</span>
+          </div>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="contentSources" class="sources-table">
+          <ng-container matColumnDef="sourceType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let source">
+              <span class="source-type">
+                <mat-icon>{{ source.sourceType | pulseSourceTypeIcon }}</mat-icon>
+                {{ source.sourceType | pulseSourceTypeLabel }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="sourceDetail">
+            <th mat-header-cell *matHeaderCellDef>Details</th>
+            <td mat-cell *matCellDef="let source">
+              <div class="source-detail">
+                @if (source.sourceType === 'rss_feed') {
+                  <a
+                    [href]="source.rssFeedUrl || source.rssUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rss-url"
+                  >
+                    {{ source.rssFeedName || source.sourceDetail || source.rssFeedUrl || source.rssUrl }}
+                  </a>
+                } @else if (source.sourceType === 'company') {
+                  <span class="symbol-badge">{{ source.symbol }}</span>
+                  {{ source.sourceDetail }}
+                } @else if (source.sourceType === 'search_term') {
+                  <div class="search-source-detail">
+                    <span class="search-term-original">{{ source.searchTermOriginal || source.searchTerm }}</span>
+                    @if (source.searchUserIntent) {
+                      <span class="search-intent" matTooltip="{{ source.searchUserIntent }}">
+                        <mat-icon>auto_awesome</mat-icon>
+                        {{ source.searchUserIntent | slice: 0 : 50
+                        }}{{ source.searchUserIntent.length > 50 ? '...' : '' }}
+                      </span>
+                    }
+                    <div class="search-type-indicators">
+                      @if (source.searchIsProduct) {
+                        <span class="type-indicator product">Product</span>
+                      }
+                      @if (source.searchIsNews) {
+                        <span class="type-indicator news">News</span>
+                      }
+                      @if (source.searchIsResearch) {
+                        <span class="type-indicator research">Research</span>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  {{ source.sourceDetail || 'N/A' }}
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="priority">
+            <th mat-header-cell *matHeaderCellDef>Priority</th>
+            <td mat-cell *matCellDef="let source">{{ source.priority }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Active</th>
+            <td mat-cell *matCellDef="let source">
+              <mat-icon [class.active]="source.isActive" [class.inactive]="!source.isActive">
+                {{ source.isActive ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let source">
+              @if (source.sourceType === 'search_term' || source.sourceType === 'company') {
+                <button mat-icon-button (click)="editContentSource.emit(source)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              }
+              <button mat-icon-button (click)="removeContentSource.emit(source.uuid)" matTooltip="Remove">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="contentSourceColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: contentSourceColumns"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

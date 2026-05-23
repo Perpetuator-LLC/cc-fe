@@ -1,0 +1,115 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="detail-header">
+  <div class="top-header">
+    <div class="title">
+      <h2>{{ podcastName }}</h2>
+    </div>
+    <div class="buttons">
+      @if (isLive) {
+        <app-share-buttons
+          [shareUrl]="publicShareUrl"
+          [title]="shareTitle"
+          [description]="podcastDescription"
+          [compact]="true"
+        />
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        class="save-btn"
+        type="button"
+        (click)="save.emit()"
+        [disabled]="saveDisabled"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+  <div class="bottom-header">
+    <div class="status-summary">
+      <div class="status-item">
+        <span class="status-label">Team</span>
+        @if (teamName) {
+          <a [href]="teamUrl" class="status-value">
+            {{ teamName }}
+          </a>
+        } @else {
+          <span class="status-value">No team selected</span>
+        }
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">Live</span>
+        <span class="status-badge" [class.enable]="isLive" [class.disable]="!isLive">
+          {{ liveLabel }}
+        </span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">Telegram Connection</span>
+        <span class="status-badge" [class.enable]="telegramConnected" [class.disable]="!telegramConnected">
+          {{ telegramLabel }}
+        </span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <span matTooltip="Creates an AI-generated episode using current news from your RSS feeds" class="button-wrapper">
+        <button
+          mat-flat-button
+          color="accent"
+          class="create-episode-button"
+          (click)="createNewsEpisode.emit()"
+          [disabled]="newsEpisodeDisabled"
+        >
+          @if (creatingNewsEpisode) {
+            <span class="news-episode-btn">
+              <mat-spinner diameter="18" />
+              <span>News Episode</span>
+            </span>
+          } @else {
+            <span class="news-episode-btn">
+              <mat-icon>newspaper</mat-icon>
+              <span>News Episode</span>
+            </span>
+          }
+        </button>
+      </span>
+      <span
+        matTooltip="Performs deep research on a topic aligned with your podcast's content prompts and creates an episode"
+        class="button-wrapper"
+      >
+        <button
+          mat-flat-button
+          color="accent"
+          class="create-episode-button research-button"
+          (click)="createResearchEpisode.emit()"
+          [disabled]="researchEpisodeDisabled"
+        >
+          @if (creatingResearchEpisode) {
+            <span class="research-btn">
+              <mat-spinner diameter="18" />
+              <span>Research Episode</span>
+            </span>
+          } @else {
+            <span class="research-btn">
+              <mat-icon>science</mat-icon>
+              <span>Research Episode</span>
+            </span>
+          }
+        </button>
+      </span>
+      <span matTooltip="Creates an empty episode that must be manually entered" class="button-wrapper">
+        <button
+          mat-button
+          class="blank-episode-button"
+          (click)="createBlankEpisode.emit()"
+          [disabled]="hasUnsavedChanges"
+        >
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Blank Episode</span>
+        </button>
+      </span>
+    </div>
+  </div>
+</div>

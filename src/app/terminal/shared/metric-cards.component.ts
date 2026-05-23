@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ToFixedPipe } from '../../shared/pipes';
 
 export interface MetricCardData {
   label: string;
@@ -14,12 +15,19 @@ export interface MetricCardData {
 @Component({
   selector: 'app-metric-cards',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ToFixedPipe],
   templateUrl: './metric-cards.component.html',
   styleUrl: './metric-cards.component.scss',
 })
 export class MetricCardsComponent {
-  @Input() metrics: MetricCardData[] = [];
+  /** Metrics enriched with pre-built formattedValue per row. */
+  private _metrics: (MetricCardData & { formattedValue: string })[] = [];
+  @Input() set metrics(value: MetricCardData[]) {
+    this._metrics = (value || []).map((m) => ({ ...m, formattedValue: this.formatValue(m) }));
+  }
+  get metrics(): (MetricCardData & { formattedValue: string })[] {
+    return this._metrics;
+  }
 
   formatValue(metric: MetricCardData): string {
     if (typeof metric.value === 'number') {

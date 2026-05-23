@@ -1,6 +1,8 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { JobStatusBarComponent } from './job-status-bar.component';
+// `EnrichedJob` (private to component) is structurally just `Job` + the
+// `display` block — the stub below satisfies its required fields.
 import { JobService, Job } from '../job.service';
 import { MessageService } from '../../message.service';
 import { JobDisplayService } from '../../job-display.service';
@@ -22,7 +24,42 @@ describe('JobStatusBarComponent', () => {
   let mockResearchService: jasmine.SpyObj<ResearchService>;
   let jobsSignal: ReturnType<typeof signal<Job[]>>;
 
-  const createMockJob = (overrides: Partial<Job> = {}): Job => ({
+  const STUB_DISPLAY = {
+    kindLabel: '',
+    statusLabel: '',
+    isRunning: false,
+    isFailedOrPending: false,
+    cleanMessage: '',
+    cleanError: '',
+    showMessage: false,
+    isMessageError: false,
+    symbolTooltip: '',
+    hasPodcast: false,
+    podcastUuid: null,
+    podcastName: 'Podcast',
+    hasEpisode: false,
+    episodeUuid: null,
+    episodeName: 'Episode',
+    hasTopic: false,
+    topicUuid: null,
+    topicName: 'Topic',
+    hasPulseConfig: false,
+    pulseConfigUuid: null,
+    pulseConfigName: 'Pulse',
+    hasBlog: false,
+    blogUuid: null,
+    blogName: 'Blog',
+    hasArticle: false,
+    articleUuid: null,
+    articleTitle: 'Article',
+    hasSymbol: false,
+    symbol: null,
+    hasAnyResource: false,
+    routerResources: [],
+    symbolResource: null,
+  };
+
+  const createMockJob = (overrides: Partial<Job> = {}) => ({
     id: '1',
     uuid: 'job-uuid-1',
     kind: 'CREATE_EPISODE',
@@ -33,6 +70,7 @@ describe('JobStatusBarComponent', () => {
     createdAt: '2025-11-06T10:00:00Z',
     updatedAt: '2025-11-06T10:00:00Z',
     cost: undefined,
+    display: { ...STUB_DISPLAY },
     ...overrides,
   });
 
@@ -54,9 +92,21 @@ describe('JobStatusBarComponent', () => {
       'hasPodcastUuid',
       'hasEpisodeUuid',
       'hasTopicUuid',
+      'hasPulseConfigUuid',
+      'hasBlogUuid',
+      'hasArticleUuid',
+      'hasSymbol',
       'getPodcastUuid',
       'getEpisodeUuid',
       'getTopicUuid',
+      'getPulseConfigUuid',
+      'getBlogUuid',
+      'getBlogName',
+      'getArticleUuid',
+      'getArticleTitle',
+      'getSymbol',
+      'getFqn',
+      'getInterval',
     ]);
     mockPodcastsService = jasmine.createSpyObj('PodcastsService', ['getPodcastById']);
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodeById']);
@@ -88,6 +138,18 @@ describe('JobStatusBarComponent', () => {
     mockJobDisplayService.getPodcastUuid.and.returnValue(null);
     mockJobDisplayService.getEpisodeUuid.and.returnValue(null);
     mockJobDisplayService.getTopicUuid.and.returnValue(null);
+    mockJobDisplayService.hasPulseConfigUuid.and.returnValue(false);
+    mockJobDisplayService.hasBlogUuid.and.returnValue(false);
+    mockJobDisplayService.hasArticleUuid.and.returnValue(false);
+    mockJobDisplayService.hasSymbol.and.returnValue(false);
+    mockJobDisplayService.getPulseConfigUuid.and.returnValue(null);
+    mockJobDisplayService.getBlogUuid.and.returnValue(null);
+    mockJobDisplayService.getBlogName.and.returnValue(null);
+    mockJobDisplayService.getArticleUuid.and.returnValue(null);
+    mockJobDisplayService.getArticleTitle.and.returnValue(null);
+    mockJobDisplayService.getSymbol.and.returnValue(null);
+    mockJobDisplayService.getFqn.and.returnValue(null);
+    mockJobDisplayService.getInterval.and.returnValue(null);
 
     await TestBed.configureTestingModule({
       imports: [JobStatusBarComponent],

@@ -1,65 +1,75 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="categories-grid-container">
   <div class="categories-list-card">
-    @for (parent of parentCategories; track parent) {
-    <div class="category-card">
-      <div class="parent-header">
-        <mat-checkbox [checked]="isParentSelected(parent)" (change)="toggleParentCategory(parent)"
-          (click)="$event.stopPropagation()" color="primary">
-          {{ parent }}
-          @if (isPending(parent)) {
-          <span class="pending-indicator">●</span>
-          }
-        </mat-checkbox>
-        <p>
-          Auto-curated content that keeps your audience engaged with relevant, timely coverage across this topic area.
-        </p>
-      </div>
-      <div class="parent-child-category">
-        @if (getSubcategories(parent).length > 0) {
-        <mat-form-field appearance="fill" class="subcategory-select">
-          <mat-label>Select Sub-categories</mat-label>
-          <mat-select (selectionChange)="onSubcategorySelectionChange(parent, $event.value)"
-            [value]="getSelectedSubcategories(parent)" multiple>
-            <mat-select-trigger />
-            <div class="heading-div">
-              <h3 class="category-heading">{{ parent }} Category</h3>
-              <mat-checkbox [checked]="areAllSubcategoriesSelected(parent)"
-                (change)="toggleSelectAllSubcategories(parent, $event.checked)" color="primary">
-                Select All
-              </mat-checkbox>
-            </div>
-            <div class="input-search-div">
-              <mat-icon matPrefix>search</mat-icon>
-              <input matInput placeholder="Search by category name" disabled="" />
-            </div>
-            @for (sub of getSubcategories(parent); track sub) {
-            <mat-option [value]="sub">
-              {{ sub }}
-              @if (isPending(parent, sub)) {
-              <span class="pending-indicator"> ●</span>
-              }
-            </mat-option>
+    @for (item of parentDisplay; track item.parent) {
+      <div class="category-card">
+        <div class="parent-header">
+          <mat-checkbox
+            [checked]="item.isSelected"
+            (change)="toggleParentCategory(item.parent)"
+            (click)="$event.stopPropagation()"
+            color="primary"
+          >
+            {{ item.parent }}
+            @if (item.isPending) {
+              <span class="pending-indicator">●</span>
             }
-          </mat-select>
-        </mat-form-field>
-        <div class="category-chip-list">
-          @for (sub of getSelectedSubcategories(parent); track sub) {
-          <mat-chip [removable]="true" (removed)="removeSubcategory(parent, sub)">
-            {{ sub }}
-            <button matChipRemove>
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
+          </mat-checkbox>
+          <p>
+            Auto-curated content that keeps your audience engaged with relevant, timely coverage across this topic area.
+          </p>
+        </div>
+        <div class="parent-child-category">
+          @if (item.hasSubcategories) {
+            <mat-form-field appearance="fill" class="subcategory-select">
+              <mat-label>Select Sub-categories</mat-label>
+              <mat-select
+                (selectionChange)="onSubcategorySelectionChange(item.parent, $event.value)"
+                [value]="item.selectedSubcategories"
+                multiple
+              >
+                <mat-select-trigger />
+                <div class="heading-div">
+                  <h3 class="category-heading">{{ item.parent }} Category</h3>
+                  <mat-checkbox
+                    [checked]="item.allSubcategoriesSelected"
+                    (change)="toggleSelectAllSubcategories(item.parent, $event.checked)"
+                    color="primary"
+                  >
+                    Select All
+                  </mat-checkbox>
+                </div>
+                <div class="input-search-div">
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input matInput placeholder="Search by category name" disabled="" />
+                </div>
+                @for (subItem of item.subDisplay; track subItem.sub) {
+                  <mat-option [value]="subItem.sub">
+                    {{ subItem.sub }}
+                    @if (subItem.isPending) {
+                      <span class="pending-indicator"> ●</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="category-chip-list">
+              @for (sub of item.selectedSubcategories; track sub) {
+                <mat-chip [removable]="true" (removed)="removeSubcategory(item.parent, sub)">
+                  {{ sub }}
+                  <button matChipRemove>
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+              }
+            </div>
+          } @else {
+            <div class="no-subcategories-message">No subcategories.</div>
           }
         </div>
-        } @else {
-        <div class="no-subcategories-message">No subcategories.</div>
-        }
       </div>
-    </div>
     } @empty {
-    <mat-list-item>Loading categories...</mat-list-item>
+      <mat-list-item>Loading categories...</mat-list-item>
     }
   </div>
 </div>

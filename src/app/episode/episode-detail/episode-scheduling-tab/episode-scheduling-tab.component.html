@@ -1,0 +1,86 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (isLive) {
+  <!-- Episode is already published -->
+  <div class="published-notice">
+    <mat-icon class="success-icon">check_circle</mat-icon>
+    <div class="published-info">
+      <h3>Episode Published</h3>
+      <p>This episode is already live and available to listeners.</p>
+    </div>
+  </div>
+} @else {
+  <!-- Episode is not published yet -->
+  <div class="title">
+    <h3>Schedule Publishing</h3>
+    @if (hasSchedules) {
+      <span>{{ scheduledCountLabel }}</span>
+    }
+  </div>
+
+  @if (hasSchedules) {
+    <div class="scheduling-grid">
+      @for (schedule of schedules; track schedule.uuid) {
+        <mat-card class="schedule-card">
+          <mat-card-header>
+            <div class="schedule-header">
+              <div class="schedule-info">
+                <h4>{{ schedule.name }}</h4>
+                <p class="schedule-type">Scheduled Release</p>
+              </div>
+              <div class="schedule-actions">
+                <mat-slide-toggle
+                  [checked]="schedule.enabled"
+                  (change)="onToggle(schedule, $event.checked)"
+                  color="primary"
+                />
+                <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #scheduleMenu="matMenu">
+                  <button mat-menu-item (click)="onEdit(schedule)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="onDelete(schedule)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="schedule-details">
+              <div class="schedule-timing">
+                <mat-icon>event</mat-icon>
+                <span>{{ schedule.descriptionText }}</span>
+              </div>
+              <div class="schedule-status">
+                <span class="status-badge" [ngClass]="schedule.statusBadgeClass">
+                  {{ schedule.statusLabel }}
+                </span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <div class="no-schedules">
+      <mat-card>
+        <mat-card-content>
+          <mat-icon>event</mat-icon>
+          <h4>No publishing time set</h4>
+          <p>Schedule a specific date and time to automatically publish this episode.</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <div class="schedule-actions-footer">
+    <button mat-flat-button color="primary" (click)="onCreate()">
+      <mat-icon>add</mat-icon>
+      {{ addButtonLabel }}
+    </button>
+  </div>
+}

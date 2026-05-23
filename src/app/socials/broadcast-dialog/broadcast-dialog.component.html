@@ -22,7 +22,7 @@
             @for (account of socialAccounts; track account.id) {
               <mat-option [value]="account.id">
                 <div class="account-option">
-                  <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+                  <mat-icon>{{ account.platformIcon }}</mat-icon>
                   <span>{{ account.accountName }}</span>
                   <span class="platform-name">{{ account.platform }}</span>
                 </div>
@@ -39,20 +39,19 @@
     <!-- Post Content -->
     <mat-form-field appearance="outline" class="content-field">
       <mat-label>Post Content</mat-label>
-      <textarea matInput formControlName="text" rows="6" placeholder="What would you like to share?" required></textarea>
+      <textarea
+        matInput
+        formControlName="text"
+        rows="6"
+        placeholder="What would you like to share?"
+        required
+      ></textarea>
       @if (form.get('text')?.hasError('required') && form.get('text')?.touched) {
         <mat-error>Post content is required</mat-error>
       }
-      <mat-hint align="start">
-        @if (selectedPlatformLimit) {
-          {{ selectedPlatformLimit.name }} limit: {{ selectedPlatformLimit.maxLength }} characters
-        }
-      </mat-hint>
-      <mat-hint align="end" [class.over-limit]="isOverLimit()">
-        {{ getCharacterCount() }}
-        @if (selectedPlatformLimit) {
-          / {{ selectedPlatformLimit.maxLength }}
-        }
+      <mat-hint align="start">{{ platformLimitHint }}</mat-hint>
+      <mat-hint align="end" [class.over-limit]="isOverLimit">
+        {{ characterCount }} {{ platformLimitCountSuffix }}
       </mat-hint>
     </mat-form-field>
 
@@ -67,8 +66,7 @@
     <div class="hashtags-section">
       <mat-form-field appearance="outline" class="hashtag-input">
         <mat-label>Add Hashtag</mat-label>
-        <input matInput #hashtagInputRef placeholder="Enter hashtag"
-               (keyup.enter)="addHashtag(hashtagInputRef)" />
+        <input matInput #hashtagInputRef placeholder="Enter hashtag" (keyup.enter)="addHashtag(hashtagInputRef)" />
         <button mat-icon-button matSuffix type="button" (click)="addHashtag(hashtagInputRef)">
           <mat-icon>add</mat-icon>
         </button>
@@ -100,19 +98,18 @@
 
 <mat-dialog-actions align="end">
   <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Cancel</button>
-  @if (loading) {
-    <button mat-flat-button color="primary" disabled>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="onSave()"
+    [disabled]="loading || form.invalid || loadingAccounts"
+  >
+    @if (loading) {
       <mat-spinner diameter="18" />
-      <span>Saving...</span>
-    </button>
-  } @else {
-    <button mat-flat-button color="primary" type="button" (click)="onSave()"
-            [disabled]="form.invalid || loadingAccounts">
+    } @else {
       <mat-icon>save</mat-icon>
-      <span>{{ isEdit ? 'Update' : 'Create' }}</span>
-    </button>
-  }
+    }
+    <span>{{ saveButtonLabel }}</span>
+  </button>
 </mat-dialog-actions>
-
-
-

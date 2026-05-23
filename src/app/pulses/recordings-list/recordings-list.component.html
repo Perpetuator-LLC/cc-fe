@@ -51,7 +51,7 @@
         </mat-form-field>
 
         <!-- Clear Filters -->
-        @if (hasActiveFilters()) {
+        @if (hasActiveFilters) {
           <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
             <mat-icon>clear</mat-icon>
             Clear
@@ -73,7 +73,7 @@
           <mat-icon>mic_off</mat-icon>
           <h3>No recordings found</h3>
           <p>
-            @if (hasActiveFilters()) {
+            @if (hasActiveFilters) {
               Try adjusting your filters to find recordings.
             } @else {
               Generate some recordings from your Pulses to see them here.
@@ -83,21 +83,27 @@
       } @else {
         <div class="recordings-grid">
           @for (recording of recordings; track recording.uuid) {
-            <div class="recording-card" (click)="viewRecording(recording)">
+            <div
+              class="recording-card"
+              (click)="viewRecording(recording)"
+              (keydown.enter)="viewRecording(recording)"
+              tabindex="0"
+              role="button"
+            >
               <div class="recording-header">
                 <div class="recording-title-section">
                   <span class="recording-title">{{ recording.title }}</span>
                   <span class="recording-config">{{ recording.configName }}</span>
                 </div>
-                <span class="status-badge" [class]="getStatusClass(recording.status, recording)">
-                  {{ getDisplayStatusText(recording) }}
+                <span class="status-badge" [class]="recording.statusClass">
+                  {{ recording.statusText }}
                 </span>
               </div>
 
               <div class="recording-meta">
                 <span class="meta-item">
                   <mat-icon>timer</mat-icon>
-                  {{ formatSeconds(recording.audioDurationSeconds) }}
+                  {{ recording.formattedDuration }}
                 </span>
                 <span class="meta-item">
                   <mat-icon>notes</mat-icon>
@@ -105,7 +111,7 @@
                 </span>
                 <span class="meta-item">
                   <mat-icon>schedule</mat-icon>
-                  {{ formatTimeAgo(recording.createdAt) }}
+                  {{ recording.formattedTimeAgo }}
                 </span>
                 @if (recording.isValidated) {
                   <span class="meta-item validated">
@@ -115,13 +121,19 @@
                 }
               </div>
 
-              <div class="recording-actions" (click)="$event.stopPropagation()">
+              <div
+                class="recording-actions"
+                (click)="$event.stopPropagation()"
+                (keydown.enter)="$event.stopPropagation()"
+                tabindex="0"
+                role="group"
+              >
                 @if (recording.audioUrl && (recording.status === 'READY' || recording.status === 'DELIVERED')) {
                   <button mat-flat-button color="primary" (click)="playRecording(recording)">
                     <mat-icon>play_arrow</mat-icon>
                     Play
                     @if (recording.audioDurationSeconds) {
-                      <span class="duration-hint">{{ formatSeconds(recording.audioDurationSeconds) }}</span>
+                      <span class="duration-hint">{{ recording.formattedDuration }}</span>
                     }
                   </button>
                   <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">

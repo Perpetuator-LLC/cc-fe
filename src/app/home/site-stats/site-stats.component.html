@@ -1,0 +1,86 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (loading) {
+  <div class="stats-section">
+    @for (item of skeletonItems; track item) {
+      <mat-card class="stat-card skeleton-card">
+        <mat-card-content>
+          <div class="skeleton-icon"></div>
+          <div class="skeleton-label"></div>
+          <div class="skeleton-value"></div>
+          <div class="skeleton-change"></div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+} @else if (stats) {
+  <!-- Actual Stats -->
+  <div class="stats-section">
+    <!-- First Row - Primary Stats with change indicators -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>podcasts</mat-icon>
+          <span class="stat-label">Total Podcasts</span>
+        </div>
+        <div class="stat-value">{{ stats.totalPodcasts }}</div>
+        <div class="stat-change positive">
+          <span>{{ stats.enabledPodcasts }}</span> enabled
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>library_music</mat-icon>
+          <span class="stat-label">Total Episodes</span>
+        </div>
+        <div class="stat-value">{{ stats.totalEpisodes }}</div>
+        <div class="stat-change positive">
+          <span>{{ stats.liveEpisodes }}</span> live
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>article</mat-icon>
+          <span class="stat-label">News Articles</span>
+        </div>
+        <div class="stat-value">{{ stats.totalNewsArticles }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Second Row - Additional Stats -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>voice_selection</mat-icon>
+          <span class="stat-label">Voices</span>
+        </div>
+        <div class="stat-value">{{ stats.totalVoices }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>newspaper</mat-icon>
+          <span class="stat-label">Summarized News</span>
+        </div>
+        <div class="stat-value">{{ stats.recentNewsProcessed }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-title">
+          <mat-icon>graphic_eq</mat-icon>
+          <span class="stat-label">Audio Published</span>
+        </div>
+        <div class="stat-value">{{ stats.totalAudioMinutesPublished | number: '1.0-0' }} min</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

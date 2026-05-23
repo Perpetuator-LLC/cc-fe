@@ -1,0 +1,101 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (showChartLoading) {
+  <div class="content-loading">
+    <mat-spinner diameter="40" />
+    <p>Loading {{ chartLoadingLabel }}...</p>
+  </div>
+} @else if (showChartArea) {
+  <!-- Chart area with loading indicator -->
+  <div class="chart-area">
+    @if (loadingMoreData) {
+      <div class="loading-more-bar">
+        <div class="progress-bar-indeterminate"></div>
+      </div>
+    } @else if (showNoMoreDataHint) {
+      <div class="no-more-data-hint">
+        <span>← No more {{ selectedIntervalFormatted }} data available. Switch to Daily for longer history.</span>
+      </div>
+    }
+    <div echarts [options]="chartOptions!" (chartInit)="onChartInit($any($event))" class="chart"></div>
+  </div>
+} @else if (showFundamentals) {
+  <app-fundamentals-view
+    [charts]="fundamentalsCharts"
+    [loading]="fundamentalsLoading"
+    [error]="fundamentalsError"
+    [isAnnual]="fundamentalsIsAnnual"
+    (periodToggle)="onPeriodToggle()"
+  />
+} @else if (showValuation) {
+  <app-valuation-view
+    [dcfData]="valuationData"
+    [ddmData]="ddmData"
+    [dcfCharts]="valuationCharts"
+    [ddmCharts]="ddmCharts"
+    [loading]="valuationLoading"
+    [error]="valuationError"
+    [historicalYears]="valuationHistoricalYears"
+    [model]="selectedValuationModel"
+    [livePrice]="valuationLivePrice"
+    (modelChange)="onValuationModelChange($event)"
+    (historicalYearsChange)="onValuationYearsChange($event)"
+  />
+} @else if (showDividends) {
+  <app-dividends-view
+    [data]="dividendData"
+    [charts]="dividendCharts"
+    [loading]="dividendLoading"
+    [error]="dividendError"
+    (ocfToggleChange)="onOcfToggleChange($event)"
+  />
+} @else if (showTableData) {
+  <div class="data-content">
+    @if (dataContent) {
+      <div class="data-message" [innerHTML]="dataContent"></div>
+    }
+    <app-data-table [data]="tableData!" [pageSize]="25" />
+  </div>
+} @else if (showDataContentOnly) {
+  <div class="data-content">
+    <div class="data-message" [innerHTML]="dataContent"></div>
+  </div>
+} @else if (showError) {
+  <div class="content-error">
+    <ng-container *ngTemplateOutlet="isChartErrorFetching ? fetchingTpl : errorTpl" />
+  </div>
+} @else if (showPlaceholder) {
+  <div class="content-placeholder">
+    <mat-icon>{{ contentPlaceholderIcon }}</mat-icon>
+    <p>Loading {{ currentCommand }} for {{ selectedSymbol }}...</p>
+  </div>
+}
+
+<ng-template #fetchingTpl>
+  <div class="loading-container">
+    <mat-spinner diameter="48" />
+    <p class="loading-message">{{ chartError }}</p>
+    @if (chartLoadingDetails) {
+      <p class="loading-details">{{ chartLoadingDetails }}</p>
+    }
+    @if (pendingJobInfo; as jobInfo) {
+      <div class="pending-job-info">
+        <span class="job-status">Waiting for data job to complete</span>
+        <a
+          class="job-link"
+          [routerLink]="['/jobs']"
+          [queryParams]="{ jobId: jobInfo.jobId }"
+          matTooltip="View job status"
+        >
+          <mat-icon>work</mat-icon>
+          <span class="job-id">{{ jobInfo.jobId | slice: 0 : 8 }}...</span>
+        </a>
+      </div>
+    }
+  </div>
+</ng-template>
+
+<ng-template #errorTpl>
+  <mat-icon>error_outline</mat-icon>
+  <p>{{ chartError }}</p>
+  <button mat-stroked-button (click)="onRetry()">Retry</button>
+</ng-template>

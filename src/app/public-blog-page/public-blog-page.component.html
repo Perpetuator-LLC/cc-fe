@@ -22,10 +22,8 @@
 
     <div class="blog-header">
       <div class="blog-info">
-        @if (blogData.thumbnailUrl) {
-          <img [src]="blogData.thumbnailUrl" [alt]="blogData.name" class="blog-image" />
-        } @else if (blogData.imageUrl) {
-          <img [src]="blogData.imageUrl" [alt]="blogData.name" class="blog-image" />
+        @if (blogImageUrl) {
+          <img [src]="blogImageUrl" [alt]="blogData.name" class="blog-image" />
         }
         <div class="blog-details">
           <h1>{{ blogData.name }}</h1>
@@ -56,11 +54,7 @@
         </div>
       </div>
       <div class="blog-actions">
-        <app-share-buttons
-          [shareUrl]="getShareUrl()"
-          [title]="blogData.name"
-          [description]="blogData.description"
-        />
+        <app-share-buttons [shareUrl]="shareUrl" [title]="blogData.name" [description]="blogData.description" />
         @if (isAuthenticated) {
           <button mat-raised-button color="primary" [routerLink]="['/media/blogs', blogId]">
             <mat-icon>dashboard</mat-icon>
@@ -76,13 +70,13 @@
         <p class="no-articles">No articles available yet.</p>
       } @else {
         <div class="articles-list">
-          @for (article of blogData.articles; track article.id) {
+          @for (article of articlesDisplay; track article.id) {
             <mat-card class="article-card">
               <mat-card-content>
                 <div class="article-header">
                   <div class="article-title-section">
                     <h3>
-                      <a [routerLink]="getArticleUrl(article.id, article.title)" class="article-title">
+                      <a [routerLink]="article.url" class="article-title">
                         {{ article.title }}
                       </a>
                     </h3>
@@ -91,29 +85,19 @@
                     }
                   </div>
                   <div class="article-meta">
-                    @if (article.publishedAt) {
-                      <span class="article-date">{{ formatDate(article.publishedAt) }}</span>
-                    }
-                    @if (article.readTimeMinutes) {
-                      <span class="read-time">{{ article.readTimeMinutes }} min read</span>
-                    }
-                    @if (article.isFeatured) {
-                      <span class="featured-badge">
-                        <mat-icon>star</mat-icon>
-                        Featured
-                      </span>
-                    }
+                    <span class="article-date" [hidden]="!article.formattedDate">{{ article.formattedDate }}</span>
+                    <span class="read-time" [hidden]="!article.readTimeText">{{ article.readTimeText }}</span>
+                    <span class="featured-badge" [hidden]="!article.isFeatured">
+                      <mat-icon>star</mat-icon>
+                      Featured
+                    </span>
                   </div>
                 </div>
-                @if (getExcerpt(article)) {
-                  <p class="article-excerpt">{{ getExcerpt(article) }}</p>
-                }
+                <p class="article-excerpt" [hidden]="!article.excerpt">{{ article.excerpt }}</p>
                 <div class="article-actions">
-                  <a [routerLink]="getArticleUrl(article.id, article.title)" mat-button color="primary">
-                    Read Article
-                  </a>
+                  <a [routerLink]="article.url" mat-button color="primary"> Read Article </a>
                   <app-share-buttons
-                    [shareUrl]="getArticleShareUrl(article.id, article.title)"
+                    [shareUrl]="article.shareUrl"
                     [title]="article.title"
                     [description]="article.description || article.excerpt"
                     [compact]="true"
@@ -138,4 +122,3 @@
     </div>
   }
 </div>
-

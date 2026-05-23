@@ -2,11 +2,15 @@
 <div class="formula-container">
   <div class="formula-header">
     <span class="formula-title">{{ title }}</span>
-    @if (description) {
-      <button type="button" class="info-button" [matTooltip]="description" matTooltipPosition="above">
-        <mat-icon>info_outline</mat-icon>
-      </button>
-    }
+    <button
+      type="button"
+      class="info-button"
+      [hidden]="!description"
+      [matTooltip]="description"
+      matTooltipPosition="above"
+    >
+      <mat-icon>info_outline</mat-icon>
+    </button>
   </div>
 
   <div class="formula-expression">
@@ -16,10 +20,10 @@
   <!-- Variable Legend with Tooltips and Hover Highlighting -->
   @if (variableDefinitions.length > 0) {
     <div class="variable-legend">
-      @for (def of variableDefinitions; track def.symbol) {
+      @for (def of variableDefinitionsDisplay(); track def.symbol) {
         <span
           class="legend-item"
-          [class.highlighted]="isHighlighted(def.symbol)"
+          [class.highlighted]="def.isHighlighted"
           [matTooltip]="def.definition"
           matTooltipPosition="above"
           (mouseenter)="onVariableHover(def.symbol)"
@@ -36,14 +40,10 @@
     <div class="calculation-steps">
       @for (step of calculationSteps; track step.expressionHtml) {
         <div class="calculation-step">
-          @if (step.label) {
-            <span class="step-label">{{ step.label }}</span>
-          }
+          <span class="step-label" [hidden]="!step.label">{{ step.label }}</span>
           <div class="step-expression">
             <span [innerHTML]="step.expressionHtml"></span>
-            @if (step.result) {
-              <span class="step-result">{{ step.result }}</span>
-            }
+            <span class="step-result" [hidden]="!step.result">{{ step.result }}</span>
           </div>
         </div>
       }
@@ -62,7 +62,7 @@
   @if (variables.length > 0) {
     <div class="formula-variables">
       <div class="variables-header">Where:</div>
-      @for (v of variables; track v.symbol) {
+      @for (v of variablesDisplay; track v.symbol) {
         <div class="variable-row">
           <span class="variable-symbol">{{ v.symbol }}</span>
           <span class="equals">=</span>
@@ -76,9 +76,9 @@
               [max]="v.max"
               (input)="onVariableChange(v.symbol, $event)"
             />
-            <span class="variable-unit">{{ getUnitForVariable(v) }}</span>
+            <span class="variable-unit">{{ v.unit }}</span>
           } @else {
-            <span class="variable-value">{{ formatVariableValue(v) }}</span>
+            <span class="variable-value">{{ v.displayValue }}</span>
           }
           <span class="variable-name">({{ v.name }})</span>
         </div>

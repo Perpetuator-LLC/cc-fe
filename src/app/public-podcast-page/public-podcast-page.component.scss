@@ -263,6 +263,12 @@
     white-space: nowrap;
   }
 
+  .duration:empty,
+  .description:empty,
+  .episode-description:empty {
+    display: none;
+  }
+
   // Flattened play button style
   .play-button {
     display: flex;

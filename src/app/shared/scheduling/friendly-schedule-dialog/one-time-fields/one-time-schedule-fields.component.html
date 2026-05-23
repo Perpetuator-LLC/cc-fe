@@ -1,0 +1,26 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="one-time-options" [formGroup]="form">
+  <div class="datetime-section">
+    <label class="section-label" for="scheduled-date">Date and Time</label>
+    <div class="datetime-input-row">
+      <mat-form-field class="date-field">
+        <mat-label>Date</mat-label>
+        <input id="scheduled-date" matInput [matDatepicker]="picker" formControlName="scheduledDate" [min]="minDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-datepicker #picker />
+      </mat-form-field>
+      <mat-form-field class="time-field">
+        <mat-label>Time</mat-label>
+        <input matInput type="time" formControlName="scheduledTime" />
+      </mat-form-field>
+      <mat-form-field class="timezone-select">
+        <mat-label>Timezone</mat-label>
+        <mat-select formControlName="timezone">
+          @for (tz of timezones; track tz.value) {
+            <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+</div>

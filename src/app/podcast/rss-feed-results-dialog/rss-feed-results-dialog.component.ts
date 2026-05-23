@@ -41,11 +41,11 @@ export class RssFeedResultsDialogComponent {
     this.dialogRef.close();
   }
 
-  getSuccessfulText(): string {
+  get successfulText(): string {
     return this.data.successful.join('\n');
   }
 
-  getFailedText(): string {
+  get failedText(): string {
     return this.data.failed.map((f) => `${f.url} - ${f.error}`).join('\n');
   }
 }

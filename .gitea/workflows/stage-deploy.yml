@@ -1,8 +1,14 @@
 # Copyright (c) 2024-2026 Perpetuator LLC
 #
-# Deploy to staging environment on push to stage branch
-# Trigger: Push or merge to `stage` branch
+# Deploy to staging environment on push to main branch
+# Trigger: Push or merge to `main` branch (the integration branch)
 # Target: stage.capitalcopilot.io on lestrange
+#
+# Note: the deployed environment is still called "stage" — only the
+# source branch changed from `stage` to `main` as part of the
+# main-as-integration cutover. Container names, env paths, and the
+# compose file keep their `stage` naming since that is the environment
+# identity, not the source branch.
 #
 # CI gate mirrors local pre-commit + pre-push hooks:
 #   audit  — CVE scan (mirrors pre-push: yarn audit, high/critical only)
@@ -16,7 +22,7 @@ name: Deploy to Staging
 on:
   push:
     branches:
-      - stage
+      - main
   workflow_dispatch:
 
 env:

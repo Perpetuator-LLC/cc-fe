@@ -26,7 +26,8 @@ export class MessageComponent implements OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  messages: MessageWithProgress[] = [];
+  /** Messages enriched with pre-computed boolean flags for the template. */
+  messages: (MessageWithProgress & { hasHtmlContent: boolean; showTimeoutProgress: boolean })[] = [];
   private timeoutIds = new Map<number, number>();
   private progressIntervalIds = new Map<number, number>();
   // Store timeout progress and start times separately so they persist through array updates
@@ -46,6 +47,8 @@ export class MessageComponent implements OnDestroy {
               ...message,
               timeoutProgress: existingProgress,
               timeoutStartTime: existingStartTime,
+              hasHtmlContent: this.hasHtmlContent(message),
+              showTimeoutProgress: this.shouldShowTimeoutProgress(message),
             };
           }
 
@@ -58,7 +61,11 @@ export class MessageComponent implements OnDestroy {
           this.timeoutProgressMap.set(message.timestamp, 100);
           this.timeoutStartTimeMap.set(message.timestamp, newMessage.timeoutStartTime!);
           this.setAutoDismiss(newMessage);
-          return newMessage;
+          return {
+            ...newMessage,
+            hasHtmlContent: this.hasHtmlContent(newMessage),
+            showTimeoutProgress: this.shouldShowTimeoutProgress(newMessage),
+          };
         });
       },
       error: (error) => {

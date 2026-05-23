@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 .affiliate-admin-container {
   max-width: 1400px;
@@ -179,7 +179,9 @@
 
   background: var(--md-sys-color-surface-container);
 
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-2px);
@@ -444,6 +446,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  &:empty {
+    display: none;
+  }
 }
 
 .searched-user-card {
@@ -493,6 +499,10 @@
       font-size: 14px;
       font-weight: 400;
       color: var(--md-sys-color-on-surface-variant);
+
+      &:empty {
+        display: none;
+      }
     }
 
     .user-status {
@@ -517,6 +527,10 @@
         width: 14px;
         height: 14px;
         font-size: 14px;
+
+        &:empty {
+          display: none;
+        }
       }
 
       &.affiliate-stripe-status {
@@ -541,7 +555,8 @@
           background: var(--md-sys-color-warning);
         }
 
-        &.payouts-disabled, &.charges-disabled {
+        &.payouts-disabled,
+        &.charges-disabled {
           color: var(--md-sys-color-on-warning);
           background: var(--md-sys-color-warning);
         }
@@ -729,4 +744,3 @@
     font-size: 14px;
   }
 }
-

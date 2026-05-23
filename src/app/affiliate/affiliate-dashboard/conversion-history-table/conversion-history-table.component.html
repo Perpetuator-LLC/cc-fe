@@ -1,0 +1,59 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (hasConversions) {
+  <table mat-table [dataSource]="conversions" class="history-table">
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let conversion">{{ conversion.formattedDate }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let conversion">
+        {{ conversion.typeDisplay }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef>Amount</th>
+      <td mat-cell *matCellDef="let conversion">{{ conversion.affiliateCreditAmount }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let conversion">
+        <span class="status-badge" [ngClass]="conversion.statusClass">{{ conversion.statusFormatted }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="details">
+      <th mat-header-cell *matHeaderCellDef>Details</th>
+      <td mat-cell *matCellDef="let conversion">
+        @switch (conversion.detailKind) {
+          @case ('rejected') {
+            <span class="rejection-reason" [matTooltip]="conversion.detailTooltip">
+              <mat-icon>info</mat-icon>
+              {{ conversion.rejectionExcerpt }}
+            </span>
+          }
+          @case ('completed') {
+            <span class="transfer-id" [matTooltip]="conversion.detailTooltip">
+              <mat-icon>check_circle</mat-icon>
+              Paid
+            </span>
+          }
+          @case ('under_review') {
+            <span class="under-review">Pending admin review</span>
+          }
+          @default {
+            <span class="no-details">&mdash;</span>
+          }
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+} @else {
+  <div class="no-data">No conversions yet</div>
+}

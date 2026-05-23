@@ -19,13 +19,9 @@
   } @else if (affiliateData) {
     <mat-card class="affiliate-card">
       <mat-card-content>
-        @if (getBrandImageUrl()) {
+        @if (brandImageUrl) {
           <div class="brand-image-container">
-            <img
-              [src]="getBrandImageUrl()"
-              [alt]="affiliateData.affiliateUsername + ' brand image'"
-              class="brand-image"
-            />
+            <img [src]="brandImageUrl" [alt]="affiliateData.affiliateUsername + ' brand image'" class="brand-image" />
           </div>
         }
 

@@ -15,11 +15,10 @@ import { MessageService } from '../../message.service';
 import { PodcastsService, RssFeedResult } from '../podcasts.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { TeamsResult, TeamsService } from '../../team/teams.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
-import { MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
+import { MatButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput, MatLabel } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,7 +45,6 @@ import { NewsService } from '../../news/news.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { Job, JobService } from '../../jobs/job.service';
 import { ResearchService } from '../../topics/research.service';
-import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
 import { ShareService } from '../../share.service';
 import { EpisodesTableComponent } from '../../episode/episodes-table/episodes-table.component';
 import { RssFeedTableComponent } from '../rss-feed-table/rss-feed-table.component';
@@ -61,6 +59,10 @@ import {
 import { VoiceSelectorComponent } from '../../shared/voice-selector/voice-selector.component';
 import { ScheduleListComponent } from '../../shared/scheduling/schedule-list/schedule-list.component';
 import { MatRadioModule } from '@angular/material/radio';
+import { IncludesPipe } from '../../shared/pipes';
+import { PodcastImageSectionComponent } from './podcast-image-section/podcast-image-section.component';
+import { PodcastTelegramSectionComponent } from './podcast-telegram-section/podcast-telegram-section.component';
+import { PodcastDetailHeaderComponent } from './podcast-detail-header/podcast-detail-header.component';
 
 @Component({
   selector: 'app-podcast-detail',
@@ -70,7 +72,6 @@ import { MatRadioModule } from '@angular/material/radio';
   imports: [
     CommonModule,
 
-    MatProgressSpinner,
     MatProgressBarModule,
     ReactiveFormsModule,
     MatFormField,
@@ -81,7 +82,6 @@ import { MatRadioModule } from '@angular/material/radio';
     MatIcon,
     MatLabel,
     MatInput,
-    MatIconButton,
     MatCardContent,
     MatFabButton,
     MatCheckbox,
@@ -93,12 +93,15 @@ import { MatRadioModule } from '@angular/material/radio';
     PodcastCategoriesComponent,
     MatTabsModule,
     CdkTextareaAutosize,
-    ShareButtonsComponent,
     EpisodesTableComponent,
     RssFeedTableComponent,
     VoiceSelectorComponent,
     ScheduleListComponent,
     MatRadioModule,
+    IncludesPipe,
+    PodcastImageSectionComponent,
+    PodcastTelegramSectionComponent,
+    PodcastDetailHeaderComponent,
   ],
 })
 export class PodcastDetailComponent implements OnInit, OnDestroy {
@@ -1325,18 +1328,18 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  hasUnsavedChanges(): boolean {
+  get hasUnsavedChanges(): boolean {
     return this.podcastForm.dirty;
   }
 
   getEpisodeCreationButtonTooltip(): string {
-    if (this.hasUnsavedChanges()) {
+    if (this.hasUnsavedChanges) {
       return 'Please save your changes before creating an episode';
     }
     return 'Create a new episode';
   }
 
-  getPublicShareUrl(): string {
+  get publicShareUrl(): string {
     const podcast = this.podcastForm.getRawValue();
     if (!podcast.uuid || !podcast.name) {
       return '';
@@ -1344,8 +1347,27 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     return this.shareService.buildPodcastUrl(podcast.uuid, podcast.name);
   }
 
-  getPodcastDescription(): string {
+  get podcastDescription(): string {
     const podcast = this.podcastForm.getRawValue();
     return podcast.description || podcast.prompt || '';
+  }
+
+  /** Pre-computed target-words errors for the two fields rendered in the template. */
+  get newsTargetWordsError(): string | null {
+    return this.getTargetWordsError('newsTargetWords');
+  }
+  get researchTargetWordsError(): string | null {
+    return this.getTargetWordsError('researchTargetWords');
+  }
+
+  /** True when the podcast has either a thumbnail or full image set. */
+  get hasPodcastImage(): boolean {
+    return !!(this.thumbnailUrl || this.imageUrl);
+  }
+
+  /** True when the Telegram connection check returned a Success response. */
+  get telegramConnected(): boolean {
+    const response: string | null | undefined = this.podcastForm.get('tgResponse')?.value;
+    return !!response && response.startsWith('Success.');
   }
 }

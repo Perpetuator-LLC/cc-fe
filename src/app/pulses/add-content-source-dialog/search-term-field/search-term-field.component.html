@@ -1,0 +1,12 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-form-field appearance="outline" class="full-width" [formGroup]="form">
+  <mat-label>Search Term</mat-label>
+  <input matInput formControlName="searchTerm" placeholder="e.g., artificial intelligence" />
+  <mat-hint>Keywords to search for in news</mat-hint>
+  @if (hasRequiredError) {
+    <mat-error>Search term is required</mat-error>
+  }
+  @if (hasMinLengthError) {
+    <mat-error>Search term must be at least 2 characters</mat-error>
+  }
+</mat-form-field>

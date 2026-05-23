@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 .category-podcasts {
@@ -147,7 +147,9 @@
       border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 8px;
 
-      transition: box-shadow 0.3s, transform 0.2s;
+      transition:
+        box-shadow 0.3s,
+        transform 0.2s;
 
       &:hover {
         transform: translateY(-2px);

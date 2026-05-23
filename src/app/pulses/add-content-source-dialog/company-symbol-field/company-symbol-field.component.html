@@ -1,0 +1,46 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-form-field appearance="outline" class="full-width" [formGroup]="form">
+  <mat-label>Company Symbol</mat-label>
+  <input
+    matInput
+    formControlName="symbol"
+    placeholder="Search by symbol or company name..."
+    [matAutocomplete]="stockAutocomplete"
+    (input)="onInput($event)"
+    class="uppercase-input"
+  />
+  @if (isSearchingStocks) {
+    <mat-spinner matSuffix diameter="20" />
+  }
+  <mat-autocomplete
+    #stockAutocomplete="matAutocomplete"
+    [displayWith]="displayStock"
+    (optionSelected)="onOptionSelected($event)"
+  >
+    @for (stock of stockSuggestions; track stock.symbol) {
+      <mat-option [value]="stock">
+        <div class="stock-option">
+          <span class="stock-symbol">{{ stock.symbol }}</span>
+          <span class="stock-name">{{ stock.name }}</span>
+        </div>
+      </mat-option>
+    }
+    @if (noSuggestions) {
+      <mat-option disabled>
+        <span class="no-results">Type to search for a company</span>
+      </mat-option>
+    }
+  </mat-autocomplete>
+  <mat-hint>
+    Search by ticker symbol or company name
+    @if (selectedStock) {
+      <span class="selected-hint">Selected: {{ selectedStock.name }}</span>
+    }
+  </mat-hint>
+  @if (hasRequiredError) {
+    <mat-error>Symbol is required</mat-error>
+  }
+  @if (hasPatternError) {
+    <mat-error>Enter a valid ticker symbol (1-5 uppercase letters)</mat-error>
+  }
+</mat-form-field>

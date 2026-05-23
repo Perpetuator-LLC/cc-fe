@@ -1,0 +1,120 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div
+  class="news-detail-section"
+  [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
+  [appDynamicStyle]="widthStyle"
+>
+  <!-- Resize Handle -->
+  @if (selectedNewsDetail) {
+    <div class="resize-handle" (mousedown)="onResizeStartHandler($event)" [class.resizing]="isResizing"></div>
+  }
+  <div class="news-details">
+    @if (selectedNewsDetail) {
+      <div>
+        <div class="description-title">
+          <div class="cross-icon">
+            <span tabindex="0" (click)="onCloseHandler()" (keydown.enter)="onCloseHandler()">
+              <mat-icon>close_small</mat-icon>
+            </span>
+          </div>
+          <div class="title">
+            <a
+              [href]="selectedNewsDetail.url"
+              target="_blank"
+              [matTooltip]="sourceTooltip"
+              matTooltipPosition="above"
+              class="external-link"
+            >
+              {{ selectedNewsDetail.title }}
+            </a>
+          </div>
+          <div class="source">
+            <mat-icon>graphic_eq</mat-icon>
+            <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
+          </div>
+          <a [href]="selectedNewsDetail.url" target="_blank" [matTooltip]="sourceTooltip" matTooltipPosition="above">
+            <button mat-raised-button color="primary" type="button" class="read-btn">
+              Read More <mat-icon>arrow_right</mat-icon>
+            </button>
+          </a>
+        </div>
+
+        <!-- Categories Display -->
+        @if (hasCategories) {
+          <div class="metadata-section">
+            <h3>Categories</h3>
+            <div class="categories-container">
+              @for (category of selectedNewsDetail.categories; track category) {
+                <span class="category-badge">{{ category }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Tags Display -->
+        @if (hasTags) {
+          <div class="metadata-section">
+            <h3>Metadata Tags</h3>
+            <div class="tags-container">
+              @for (tag of selectedNewsDisplay?.tags ?? []; track tag.kind + tag.value) {
+                <span class="news-tag" [ngClass]="tag.class" [matTooltip]="tag.kind + ': ' + tag.value">
+                  {{ tag.label }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <mat-divider />
+        <h3>RSS Description</h3>
+        <p class="news-description" [innerHTML]="selectedNewsDetail.description || 'No description provided'"></p>
+        <mat-divider />
+        <h3>AI Summary</h3>
+        <button mat-flat-button color="primary" type="button" (click)="onProcessNews(selectedNewsDetail.uuid)">
+          Process News
+        </button>
+        @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="onRegenerateSummary(selectedNewsDetail.uuid)"
+            class="regenerate-summary-btn"
+          >
+            {{ regenerateButtonLabel }}enerate Summary (Force)
+          </button>
+        }
+        <p class="" [innerHTML]="selectedNewsDisplay?.summaryHtml || 'No news summary available'"></p>
+        <mat-divider />
+        <h3>Validated Summary</h3>
+        @if (selectedNewsDetail.validatedSummary) {
+          <p class="" [innerHTML]="selectedNewsDisplay?.validatedSummaryHtml"></p>
+        } @else {
+          <p class="">News not (yet) validated.</p>
+        }
+        <!-- Site Content section hidden - showing only Summary and Validated Summary -->
+        <!--
+        @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
+          <mat-divider></mat-divider>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="extractNews([selectedNewsDetail.uuid])"
+          >
+            Extract News
+          </button>
+          <h3>Site Content</h3>
+          @if (selectedNewsDetail.content) {
+            <p class="" [innerHTML]="selectedNewsDisplay?.contentHtml"></p>
+          } @else {
+            <p class="">No news content available</p>
+          }
+        }
+        -->
+      </div>
+    } @else {
+      <p>Select a news item to see details.</p>
+    }
+  </div>
+</div>

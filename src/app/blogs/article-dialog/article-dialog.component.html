@@ -1,11 +1,5 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
-<h2 mat-dialog-title>
-  @if (isEdit) {
-    Edit Article
-  } @else {
-    Create Article
-  }
-</h2>
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="article-form">
@@ -92,15 +86,18 @@
 
 <mat-dialog-actions align="end">
   <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Cancel</button>
-  @if (loading) {
-    <button mat-flat-button color="primary" disabled>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="onSave()"
+    [disabled]="loading || form.invalid || loadingBlogs"
+  >
+    @if (loading) {
       <mat-spinner diameter="18" />
-      <span>Saving...</span>
-    </button>
-  } @else {
-    <button mat-flat-button color="primary" type="button" (click)="onSave()" [disabled]="form.invalid || loadingBlogs">
+    } @else {
       <mat-icon>save</mat-icon>
-      <span>{{ isEdit ? 'Update' : 'Create' }}</span>
-    </button>
-  }
+    }
+    <span>{{ saveButtonLabel }}</span>
+  </button>
 </mat-dialog-actions>

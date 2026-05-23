@@ -1,6 +1,6 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,11 +16,26 @@ import { forkJoin } from 'rxjs';
 import { DashboardService } from '../dashboard.service';
 import { SiteStatistics } from '../interface';
 import { NewsletterDialogComponent } from '../news/newsletter-dialog/newsletter-dialog.component';
+import { PodcastCardAuthComponent, AuthPodcastDisplay } from './podcast-card-auth/podcast-card-auth.component';
+import { PodcastCardPublicComponent, PublicPodcastDisplay } from './podcast-card-public/podcast-card-public.component';
+import { SiteStatsComponent } from './site-stats/site-stats.component';
+import { RecentEpisodesSectionComponent } from './recent-episodes-section/recent-episodes-section.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatCard, MatCardContent, MatButton, MatAnchor, RouterLink, MatIcon],
+  imports: [
+    CommonModule,
+    MatCard,
+    MatCardContent,
+    MatButton,
+    RouterLink,
+    MatIcon,
+    PodcastCardAuthComponent,
+    PodcastCardPublicComponent,
+    SiteStatsComponent,
+    RecentEpisodesSectionComponent,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -35,13 +50,61 @@ export class HomeComponent implements AfterViewInit, OnInit {
 
   protected isLoggedIn = this.authService.isLoggedIn;
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
-  siteStats: SiteStatistics | undefined;
+  siteStats: SiteStatistics | null = null;
   loadingStats = true;
+  readonly podcastSkeletonItems = [1, 2, 3];
 
-  authPodcasts: PodcastsResult[] = [];
-  publicPodcasts: PublicPodcast[] = [];
-  recentPodcasts: PublicPodcast[] = [];
+  /** Pre-computed: which "no podcasts" empty-state message to show. */
+  get noPodcastsMessage(): string {
+    return this.isLoggedIn() ? 'No podcasts yet. Create your first podcast!' : 'No podcasts available.';
+  }
+
+  /** Pre-computed: which podcasts section title to show. */
+  get podcastsSectionTitle(): string {
+    return this.isLoggedIn() ? 'Recent Podcasts' : 'Popular Podcasts';
+  }
+
+  /** Pre-computed: where "View all" should route. */
+  get viewAllLink(): string {
+    return this.isLoggedIn() ? '/media/podcasts' : '/podcasts';
+  }
+
+  /** Pre-computed: are there any podcasts to show in the current podcasts section. */
+  get hasPodcastsToShow(): boolean {
+    return this.isLoggedIn() ? this.authPodcasts.length > 0 : this.publicPodcasts.length > 0;
+  }
+
+  authPodcasts: AuthPodcastDisplay[] = [];
+  /**
+   * Pre-enriched public podcast lists used by the template. Each entry
+   * carries pre-built `slug`, `truncatedDescription`, `formattedTimeAgo`,
+   * and `formattedViewCount` so the template avoids per-tick method
+   * calls.
+   */
+  publicPodcasts: PublicPodcastDisplay[] = [];
+  recentPodcasts: PublicPodcastDisplay[] = [];
   loadingRecentPodcasts = true;
+
+  private enrichPublic(p: PublicPodcast): PublicPodcastDisplay {
+    return {
+      ...p,
+      truncatedDescription: this.truncateDescription(p.description ?? ''),
+      // `PublicPodcast.latestEpisodeDate` isn't part of the shared interface yet;
+      // fall back to `null` if the API doesn't return it.
+      formattedTimeAgo: this.formatTimeAgo(
+        (p as PublicPodcast & { latestEpisodeDate?: string | null }).latestEpisodeDate ?? null,
+      ),
+      formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+    };
+  }
+
+  private enrichAuth(p: PodcastsResult): AuthPodcastDisplay {
+    return {
+      ...p,
+      formattedTimeAgo: this.formatTimeAgo(p.latestEpisodeDate ?? null),
+      formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+    };
+  }
 
   openNewsletterDialog(): void {
     this.dialog.open(NewsletterDialogComponent, {
@@ -58,10 +121,10 @@ export class HomeComponent implements AfterViewInit, OnInit {
       }).subscribe({
         next: ({ stats, podcasts }) => {
           this.siteStats = stats;
-          this.authPodcasts = podcasts.podcasts;
+          this.authPodcasts = podcasts.podcasts.map((p) => this.enrichAuth(p));
           this.loadingStats = false;
         },
-        error: (error) => {
+        error: (error: unknown) => {
           console.error('[Home] Logged-in data loading error:', error);
           this.authPodcasts = [];
           this.loadingStats = false;
@@ -75,14 +138,14 @@ export class HomeComponent implements AfterViewInit, OnInit {
       }).subscribe({
         next: ({ stats, popular, recent }) => {
           this.siteStats = stats;
-          this.publicPodcasts = popular.podcasts;
+          this.publicPodcasts = popular.podcasts.map((p) => this.enrichPublic(p));
 
           // Filter out podcasts that are in the popular list
           const popularIds = new Set(this.publicPodcasts.map((p) => p.id));
           const filteredRecent = recent.podcasts.filter((p) => !popularIds.has(p.id));
 
           // Take the top 3 from filtered recent podcasts
-          this.recentPodcasts = filteredRecent.slice(0, 3);
+          this.recentPodcasts = filteredRecent.slice(0, 3).map((p) => this.enrichPublic(p));
 
           this.loadingStats = false;
           this.loadingRecentPodcasts = false;

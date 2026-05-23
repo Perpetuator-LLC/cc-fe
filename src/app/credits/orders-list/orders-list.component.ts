@@ -105,6 +105,21 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   // Status filter - default to PAID and PENDING, hide CANCELED
   statusFilter = new FormControl<string[]>(['PAID', 'PENDING']);
   availableStatuses = ['PAID', 'PENDING', 'CANCELED'];
+  /** Pre-built status chips for the filter — `value` + lowercase class + selected flag. */
+  statusChips: { value: string; lowerCase: string; selected: boolean }[] = [
+    { value: 'PAID', lowerCase: 'paid', selected: false },
+    { value: 'PENDING', lowerCase: 'pending', selected: false },
+    { value: 'CANCELED', lowerCase: 'canceled', selected: false },
+  ];
+
+  private refreshStatusChips(): void {
+    const selected = (this.statusFilter.value || []) as string[];
+    this.statusChips = this.availableStatuses.map((value) => ({
+      value,
+      lowerCase: value.toLowerCase(),
+      selected: selected.includes(value),
+    }));
+  }
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -240,6 +255,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       // Add to filter
       this.statusFilter.setValue([...currentFilters, status]);
     }
+    this.refreshStatusChips();
   }
 
   isStatusSelected(status: string): boolean {

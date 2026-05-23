@@ -1,10 +1,10 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="button-showcase">
   <header class="showcase-header">
     <h1>MD3 Button Showcase</h1>
     <p class="subtitle">
-      Angular Material Design 3 button variants with all color combinations.
-      Click any button to inspect its computed styles in the console.
+      Angular Material Design 3 button variants with all color combinations. Click any button to inspect its computed
+      styles in the console.
     </p>
   </header>
 
@@ -48,30 +48,18 @@
       </mat-card-header>
       <mat-card-content>
         <div class="legend-grid">
-          <div class="legend-item">
-            <strong>Filled</strong> → <code>mat-flat-button</code> + color class
-          </div>
+          <div class="legend-item"><strong>Filled</strong> → <code>mat-flat-button</code> + color class</div>
           <div class="legend-item">
             <strong>Tonal</strong> → <code>mat-flat-button</code> + <code>*-tonal</code> class
           </div>
           <div class="legend-item">
             <strong>Outlined</strong> → <code>mat-stroked-button</code> + <code>*-outlined</code> class
           </div>
-          <div class="legend-item">
-            <strong>Text</strong> → <code>mat-button</code> + <code>*-text</code> class
-          </div>
-          <div class="legend-item">
-            <strong>Elevated</strong> → <code>mat-raised-button</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>Icon</strong> → <code>mat-icon-button</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>FAB</strong> → <code>mat-fab</code> + color class
-          </div>
-          <div class="legend-item">
-            <strong>Mini FAB</strong> → <code>mat-mini-fab</code> + color class
-          </div>
+          <div class="legend-item"><strong>Text</strong> → <code>mat-button</code> + <code>*-text</code> class</div>
+          <div class="legend-item"><strong>Elevated</strong> → <code>mat-raised-button</code> + color class</div>
+          <div class="legend-item"><strong>Icon</strong> → <code>mat-icon-button</code> + color class</div>
+          <div class="legend-item"><strong>FAB</strong> → <code>mat-fab</code> + color class</div>
+          <div class="legend-item"><strong>Mini FAB</strong> → <code>mat-mini-fab</code> + color class</div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -103,125 +91,12 @@
             </td>
             @for (color of visibleColors; track color.id) {
               <td class="button-cell">
-                <div class="button-wrapper">
-                  <!-- Filled Button (mat-flat-button) -->
-                  @if (variant.id === 'filled') {
-                    <button
-                      mat-flat-button
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
-                    >
-                      Button
-                    </button>
-                  }
-
-                  <!-- Tonal Button (mat-flat-button + *-tonal) -->
-                  @if (variant.id === 'tonal') {
-                    <button
-                      mat-flat-button
-                      [class]="color.cssClass + '-tonal'"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-tonal'"
-                    >
-                      Tonal
-                    </button>
-                  }
-
-                  <!-- Outlined Button (mat-stroked-button + *-outlined) -->
-                  @if (variant.id === 'outlined') {
-                    <button
-                      mat-stroked-button
-                      [class]="color.cssClass + '-outlined'"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-outlined'"
-                    >
-                      Outlined
-                    </button>
-                  }
-
-                  <!-- Text Button (mat-button + *-text) -->
-                  @if (variant.id === 'text') {
-                    <button
-                      mat-button
-                      [class]="color.cssClass + '-text'"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass + '-text'"
-                    >
-                      Text
-                    </button>
-                  }
-
-                  <!-- Elevated Button (mat-raised-button) -->
-                  @if (variant.id === 'elevated') {
-                    <button
-                      mat-raised-button
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
-                    >
-                      Elevated
-                    </button>
-                  }
-
-                  <!-- Icon Button (mat-icon-button) -->
-                  @if (variant.id === 'icon') {
-                    <button
-                      mat-icon-button
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
-                    >
-                      <mat-icon>favorite</mat-icon>
-                    </button>
-                  }
-
-                  <!-- FAB (mat-fab) -->
-                  @if (variant.id === 'fab') {
-                    <button
-                      mat-fab
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
-                    >
-                      <mat-icon>add</mat-icon>
-                    </button>
-                  }
-
-                  <!-- Mini FAB (mat-mini-fab) -->
-                  @if (variant.id === 'mini-fab') {
-                    <button
-                      mat-mini-fab
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' + ' + color.cssClass"
-                    >
-                      <mat-icon>add</mat-icon>
-                    </button>
-                  }
-
-                  <!-- Extended FAB (mat-fab extended) -->
-                  @if (variant.id === 'extended-fab') {
-                    <button
-                      mat-fab extended
-                      [class]="color.cssClass"
-                      [disabled]="selectedState === 'disabled'"
-                      (click)="inspectButton($event)"
-                      [matTooltip]="variant.directive + ' extended + ' + color.cssClass"
-                    >
-                      <mat-icon>edit</mat-icon>
-                      Create
-                    </button>
-                  }
-                </div>
+                <app-button-cell
+                  [variantId]="variant.id"
+                  [directive]="variant.directive"
+                  [cssClass]="color.cssClass"
+                  [disabled]="selectedState === 'disabled'"
+                />
               </td>
             }
           </tr>
@@ -299,4 +174,3 @@ console.table({{'{'}}
     </mat-card>
   </section>
 </div>
-

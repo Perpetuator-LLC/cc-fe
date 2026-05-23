@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 @if (shouldDisplay) {
   <div class="eligibility-banner" [class.blocking]="blockInteraction">
     <div class="banner-content">
@@ -9,8 +9,10 @@
           <div class="message-content">
             <h3>Purchase Required</h3>
             <p>{{ eligibility?.reason }}</p>
-            <p class="detail">To access affiliate features, you must first make a purchase on our platform.
-              This helps ensure our affiliate program is used by active members of our community.</p>
+            <p class="detail">
+              To access affiliate features, you must first make a purchase on our platform. This helps ensure our
+              affiliate program is used by active members of our community.
+            </p>
             @if (showPurchaseButton) {
               <button mat-raised-button color="primary" (click)="onPurchase()">
                 <mat-icon>shopping_cart</mat-icon>
@@ -33,4 +35,3 @@
     </div>
   </div>
 }
-

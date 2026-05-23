@@ -49,7 +49,8 @@ export class ImageHistoryDialogComponent implements OnInit {
 
   loading = true;
   reverting = false;
-  imageHistory: PodcastImageResult[] = [];
+  /** Images enriched with source icon + formatted date per row. */
+  imageHistory: (PodcastImageResult & { sourceIcon: string; formattedDate: string })[] = [];
 
   ngOnInit(): void {
     this.loadImageHistory();
@@ -59,7 +60,11 @@ export class ImageHistoryDialogComponent implements OnInit {
     this.loading = true;
     this.podcastsService.getPodcastImageHistory(this.data.podcastUuid).subscribe({
       next: (history) => {
-        this.imageHistory = history;
+        this.imageHistory = history.map((h) => ({
+          ...h,
+          sourceIcon: this.getSourceIcon(h.source),
+          formattedDate: this.formatDate(h.createdAt),
+        }));
         this.loading = false;
       },
       error: (error) => {

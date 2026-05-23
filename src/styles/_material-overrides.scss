@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 
 // ============================================================================
 // MD3 Material Component Override Mixins
@@ -350,7 +350,7 @@
 
 /// Success badge
 @mixin badge-success {
-  @include badge-base ();
+  @include badge-base();
 
   color: var(--md-extended-color-success-on-color);
   background: var(--md-extended-color-success-color);
@@ -358,7 +358,7 @@
 
 /// Error badge
 @mixin badge-error {
-  @include badge-base ();
+  @include badge-base();
 
   color: var(--md-sys-color-on-error);
   background: var(--md-sys-color-error);
@@ -366,7 +366,7 @@
 
 /// Warning badge
 @mixin badge-warning {
-  @include badge-base ();
+  @include badge-base();
 
   color: var(--md-extended-color-warning-on-color);
   background: var(--md-extended-color-warning-color);
@@ -374,7 +374,7 @@
 
 /// Info badge
 @mixin badge-info {
-  @include badge-base ();
+  @include badge-base();
 
   color: var(--md-extended-color-info-on-color);
   background: var(--md-extended-color-info-color);
@@ -453,4 +453,3 @@
 @mixin smooth-transition($properties: all, $duration: 0.2s) {
   transition: $properties $duration ease;
 }
-

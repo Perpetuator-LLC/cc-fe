@@ -136,6 +136,11 @@ export class FqnChipComponent {
     return this.type || FqnUtils.getType(this.fqn);
   }
 
+  /** Pre-computed aria-label string to keep the template expression simple. */
+  get ariaLabel(): string {
+    return `Token: ${this.computedDisplay} (${this.fqn})`;
+  }
+
   onClick(): void {
     if (!this.removable) {
       this.clicked.emit(this.fqn);

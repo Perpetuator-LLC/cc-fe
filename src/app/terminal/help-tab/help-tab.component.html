@@ -1,0 +1,43 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="help-tab">
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="24" />
+    </div>
+  } @else {
+    @if (help.overview) {
+      <div class="help-overview" [innerHTML]="overviewHtml"></div>
+    }
+
+    <div class="help-sections">
+      @for (category of helpDisplay; track category.name) {
+        <div class="help-category">
+          <h3>{{ category.name }}</h3>
+          <div class="command-list">
+            @for (cmd of category.commands; track cmd.name) {
+              <div class="command-item">
+                <div class="command-name">
+                  <code>{{ cmd.name }}</code>
+                  @if (cmd.aliasesText) {
+                    <span class="aliases">(aliases: {{ cmd.aliasesText }})</span>
+                  }
+                </div>
+                <div class="command-description">{{ cmd.description }}</div>
+                @if (cmd.exampleUsage) {
+                  <div class="command-usage">
+                    Usage: <code>{{ cmd.exampleUsage }}</code>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="help-footer">
+      <mat-icon>info</mat-icon>
+      <span>{{ help.aiNote }}</span>
+    </div>
+  }
+</div>

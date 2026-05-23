@@ -30,7 +30,7 @@
           <td mat-cell *matCellDef="let schedule">
             <div class="schedule-name">
               <strong>{{ schedule.name }}</strong>
-              <div class="schedule-description">{{ getScheduleDescription(schedule) }}</div>
+              <div class="schedule-description">{{ schedule.description }}</div>
             </div>
           </td>
         </ng-container>
@@ -39,7 +39,7 @@
         <ng-container matColumnDef="jobKind">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Job Type</th>
           <td mat-cell *matCellDef="let schedule">
-            <span class="job-kind-chip">{{ formatJobKind(schedule.jobKind) }}</span>
+            <span class="job-kind-chip">{{ schedule.jobKindLabel }}</span>
           </td>
         </ng-container>
 
@@ -55,7 +55,7 @@
         <ng-container matColumnDef="resource">
           <th mat-header-cell *matHeaderCellDef>Resource</th>
           <td mat-cell *matCellDef="let schedule">
-            @if (getResourceInfo(schedule); as resource) {
+            @if (schedule.resourceInfo; as resource) {
               <button
                 type="button"
                 class="resource-link-{{ resource.type }}"

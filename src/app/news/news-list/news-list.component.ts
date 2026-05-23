@@ -1,17 +1,13 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DatePipe } from '@angular/common';
 import { NgClass } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatList, MatListItem } from '@angular/material/list';
-import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatDivider } from '@angular/material/divider';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +24,9 @@ import { JobDisplayService } from '../../job-display.service';
 import { LoadingService } from '../../layout/loading.service';
 import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
 import { NewsConnection, NewsResult, NewsService } from '../news.service';
+import { NewsDetailPanelComponent } from './news-detail-panel/news-detail-panel.component';
+import { SelectPodcastFormComponent } from './select-podcast-form/select-podcast-form.component';
+import { NewsResultsComponent } from './news-results/news-results.component';
 
 // export interface News {
 //   results: NewsResult[];
@@ -42,26 +41,22 @@ export interface SidePanelAccordianData {
   selector: 'app-news',
   standalone: true,
   imports: [
-    DatePipe,
     NgClass,
     MatFormField,
     MatLabel,
     MatIconModule,
-    MatList,
-    MatListItem,
     MatCard,
-    MatCardHeader,
-    MatCheckbox,
     MatCardContent,
     MatInput,
-
     MatButton,
     MatProgressSpinner,
     MatTooltip,
-    MatDivider,
     MatSelect,
     MatOption,
     MatProgressBarModule,
+    NewsDetailPanelComponent,
+    SelectPodcastFormComponent,
+    NewsResultsComponent,
   ],
   templateUrl: './news-list.component.html',
   styleUrl: './news-list.component.scss',
@@ -82,7 +77,13 @@ export class NewsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   news: NewsConnection | null = null;
   filteredNews: NewsResult[] = [];
+  /** Mirror of filteredNews with `selected` pre-computed for the template. */
+  filteredNewsDisplay: { news: NewsResult; selected: boolean }[] = [];
   selectedNews = new Set<NewsResult>();
+
+  private rebuildFilteredNewsDisplay(): void {
+    this.filteredNewsDisplay = this.filteredNews.map((n) => ({ news: n, selected: this.selectedNews.has(n) }));
+  }
   podcasts: PodcastsResult[] = [];
   selectedPodcastUuid: string | null = null;
   selectedRssFeedUuid: string | null = null;
@@ -90,6 +91,36 @@ export class NewsListComponent implements OnInit, OnDestroy {
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
   selectedNewsDetail: NewsResult | null = null;
+  /**
+   * Pre-rendered display strings derived from `selectedNewsDetail`.
+   * Updated in selectNews / clearSelectedNewsDetail so the template
+   * doesn't call markdownToHtml or getTag* per CD tick.
+   */
+  selectedNewsDisplay: {
+    summaryHtml: SafeHtml | null;
+    validatedSummaryHtml: SafeHtml | null;
+    contentHtml: SafeHtml | null;
+    tags: { kind: string; value: string; label: string; class: string }[];
+  } | null = null;
+
+  private rebuildSelectedNewsDisplay(): void {
+    const n = this.selectedNewsDetail;
+    if (!n) {
+      this.selectedNewsDisplay = null;
+      return;
+    }
+    this.selectedNewsDisplay = {
+      summaryHtml: n.summary ? this.markdownToHtml(n.summary) : null,
+      validatedSummaryHtml: n.validatedSummary ? this.markdownToHtml(n.validatedSummary) : null,
+      contentHtml: n.content ? this.markdownToHtml(n.content) : null,
+      tags: (n.tags || []).map((t) => ({
+        kind: t.kind,
+        value: t.value,
+        label: this.getTagLabel(t.kind, t.value),
+        class: this.getTagClass(t.kind, t.value),
+      })),
+    };
+  }
   newsFetched = false;
   loadingNews = false;
   totalNewsCount = 0;
@@ -99,6 +130,59 @@ export class NewsListComponent implements OnInit, OnDestroy {
   isResizing = false;
   private resizeStartX = 0;
   private resizeStartWidth = 0;
+
+  /**
+   * Pre-computed label for the "select all" checkbox. Reduces the
+   * ternary's conditional-complexity score in the template.
+   */
+  get selectAllLabel(): string {
+    return this.allFilteredSelected ? 'Unselect all' : 'Select all';
+  }
+
+  /** Pre-computed: all filtered rows are currently selected (and there is at least one). */
+  get allFilteredSelected(): boolean {
+    return this.selectedNews.size === this.filteredNews.length && this.filteredNews.length > 0;
+  }
+
+  /** Pre-computed: at least one but not all filtered rows are selected. */
+  get someFilteredSelected(): boolean {
+    return this.selectedNews.size > 0 && this.selectedNews.size < this.filteredNews.length;
+  }
+
+  /** Pre-computed: whether the dataset has any news loaded (used in @empty branch). */
+  get hasAnyNewsLoaded(): boolean {
+    return (this.news?.edges?.length ?? 0) > 0;
+  }
+
+  /** Pre-computed: top-level UI mode for the news list area. */
+  get newsListMode(): 'list' | 'noNews' | 'noPodcast' | 'hidden' {
+    if (this.selectedPodcastUuid === null) return 'noPodcast';
+    if (this.loadingNews) return 'hidden';
+    if (this.news) return 'list';
+    return 'noNews';
+  }
+
+  /** Pre-computed: should we show the "no RSS feeds configured" hint. */
+  get showNoRssFeedsHint(): boolean {
+    return this.rssFeeds.length === 0 && this.selectedPodcastUuid !== null && this.newsFetched;
+  }
+
+  /** Pre-computed: disabled state for the create-episode action buttons. */
+  get noNewsSelected(): boolean {
+    return this.selectedNews.size === 0;
+  }
+
+  /**
+   * Pre-computed: message to display in the `@for ... @empty` slot when the
+   * filtered list is empty. Returns null when nothing should render
+   * (e.g. while news is still loading).
+   */
+  get emptyNewsMessage(): string | null {
+    if (this.loadingNews) return null;
+    return this.hasAnyNewsLoaded
+      ? 'No news episodes match the filter criteria.'
+      : 'No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the "Time" range.';
+  }
 
   // Local cache to track fetch timestamps for podcasts (prevents duplicate fetches before backend updates)
   private localFetchTimestamps = new Map<string, Date>();
@@ -134,6 +218,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
+    this.rebuildFilteredNewsDisplay();
 
     // Load podcast history first
     this.subscriptions.add(
@@ -211,8 +296,10 @@ export class NewsListComponent implements OnInit, OnDestroy {
   onPodcastChange() {
     this.news = null;
     this.filteredNews = [];
+    this.filteredNewsDisplay = [];
     this.selectedNews.clear();
     this.selectedNewsDetail = null;
+    this.selectedNewsDisplay = null;
     this.selectedRssFeedUuid = null;
     this.rssFeeds = [];
 
@@ -526,6 +613,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
             this.filteredNews = this.news.edges.map((edge) => edge.node);
             this.reapplySelection(selectedNewsIds);
             this.applyFilter(null);
+            this.rebuildFilteredNewsDisplay();
             this.newsFetched = true;
             this.loadingNews = false;
             this.loadingService.hide();
@@ -559,6 +647,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
     if (!filterValue) {
       this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
+      this.rebuildFilteredNewsDisplay();
       return;
     }
 
@@ -593,14 +682,17 @@ export class NewsListComponent implements OnInit, OnDestroy {
           news.source.toLowerCase().includes(lowerCaseFilter),
       );
     }
+    this.rebuildFilteredNewsDisplay();
   }
 
   selectAll() {
     this.selectedNews = new Set(this.filteredNews);
+    this.rebuildFilteredNewsDisplay();
   }
 
   unselectAll() {
     this.selectedNews.clear();
+    this.rebuildFilteredNewsDisplay();
   }
 
   toggleSelectAll() {
@@ -617,6 +709,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
     } else {
       this.selectedNews.add(news);
     }
+    this.rebuildFilteredNewsDisplay();
   }
 
   isSelected(news: NewsResult): boolean {
@@ -625,6 +718,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
   selectNews(news: NewsResult) {
     this.selectedNewsDetail = news;
+    this.rebuildSelectedNewsDisplay();
     // Ensure detail panel width doesn't exceed constraints
     const maxWidth = window.innerWidth * 0.8;
     if (this.detailPanelWidth > maxWidth) {
@@ -634,6 +728,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
   clearSelectedNewsDetail() {
     this.selectedNewsDetail = null;
+    this.selectedNewsDisplay = null;
   }
 
   ngOnDestroy() {

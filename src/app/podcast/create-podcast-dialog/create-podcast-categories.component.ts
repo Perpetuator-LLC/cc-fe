@@ -73,6 +73,7 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
 
   writeValue(obj: Record<string, string[]> | null): void {
     this.value = obj || {};
+    this.rebuildSelectedDisplay();
   }
 
   registerOnChange(fn: (value: Record<string, string[]>) => void): void {
@@ -83,9 +84,27 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
     this.onTouched = fn;
   }
 
+  /** Pre-computed selected values + display labels. Rebuilt on every model update. */
+  selectedValues: string[] = [];
+  allSelectedCategories: string[] = [];
+
+  private rebuildSelectedDisplay(): void {
+    const values: string[] = [];
+    const labels: string[] = [];
+    Object.keys(this.value).forEach((parent) => {
+      this.value[parent]?.forEach((sub) => {
+        values.push(`sub:${parent}:${sub}`);
+        labels.push(`${parent} > ${sub}`);
+      });
+    });
+    this.selectedValues = values;
+    this.allSelectedCategories = labels;
+  }
+
   private updateModel() {
     this.onChange(this.value);
     this.onTouched();
+    this.rebuildSelectedDisplay();
   }
 
   getSelectedValues(): string[] {
