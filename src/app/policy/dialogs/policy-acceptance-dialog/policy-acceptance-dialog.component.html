@@ -13,17 +13,17 @@
     }
   </div>
 
-  @for (policy of data.policies; track policy.id) {
+  @for (item of policiesDisplay; track item.policy.id) {
     <div class="policy-section">
-      <h3>{{ getPolicyTitle(policy.policyType) }}</h3>
+      <h3>{{ item.title }}</h3>
       <p class="policy-meta">
-        Version {{ policy.version }}
-        @if (policy.effectiveDate) {
-          - Effective {{ formatDate(policy.effectiveDate) }}
+        Version {{ item.policy.version }}
+        @if (item.policy.effectiveDate) {
+          - Effective {{ item.formattedEffectiveDate }}
         }
       </p>
 
-      <div class="policy-content" [innerHTML]="renderPolicyContent(policy)"></div>
+      <div class="policy-content" [innerHTML]="item.contentHtml"></div>
     </div>
   }
 

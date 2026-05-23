@@ -69,7 +69,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   // Table data
-  transactions: UserTransaction[] = [];
+  /** Transactions enriched with pre-built display strings per row. */
+  transactions: (UserTransaction & { iconName: string; infoText: string; chargesBreakdownTooltip: string })[] = [];
   displayedColumns: string[] = ['createdAt', 'type', 'info', 'creditAmount', 'balance'];
 
   // Sorting
@@ -153,7 +154,12 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
             console.log('[Transactions] Received', response.transactions.length, 'items');
             console.log('[Transactions] pageInfo:', response.pageInfo);
 
-            this.transactions = response.transactions;
+            this.transactions = response.transactions.map((t) => ({
+              ...t,
+              iconName: this.getTransactionIcon(t),
+              infoText: this.getTransactionInfo(t),
+              chargesBreakdownTooltip: this.getChargesBreakdownTooltip(t),
+            }));
 
             // Store cursor for next page
             if (response.pageInfo.endCursor) {

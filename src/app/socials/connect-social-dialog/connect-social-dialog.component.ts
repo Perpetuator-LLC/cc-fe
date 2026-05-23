@@ -231,11 +231,11 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     accessTokenControl?.updateValueAndValidity();
   }
 
-  isTelegram(): boolean {
+  get isTelegram(): boolean {
     return this.socialForm.get('platform')?.value === 'TELEGRAM';
   }
 
-  getSelectedPlatform(): PlatformOption | undefined {
+  get selectedPlatform(): PlatformOption | undefined {
     return this.platforms.find((p) => p.value === this.socialForm.get('platform')?.value);
   }
 

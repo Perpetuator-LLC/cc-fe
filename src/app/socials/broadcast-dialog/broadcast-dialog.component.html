@@ -22,7 +22,7 @@
             @for (account of socialAccounts; track account.id) {
               <mat-option [value]="account.id">
                 <div class="account-option">
-                  <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+                  <mat-icon>{{ account.platformIcon }}</mat-icon>
                   <span>{{ account.accountName }}</span>
                   <span class="platform-name">{{ account.platform }}</span>
                 </div>
@@ -54,8 +54,8 @@
           {{ selectedPlatformLimit.name }} limit: {{ selectedPlatformLimit.maxLength }} characters
         }
       </mat-hint>
-      <mat-hint align="end" [class.over-limit]="isOverLimit()">
-        {{ getCharacterCount() }}
+      <mat-hint align="end" [class.over-limit]="isOverLimit">
+        {{ characterCount }}
         @if (selectedPlatformLimit) {
           / {{ selectedPlatformLimit.maxLength }}
         }

@@ -57,7 +57,7 @@
         <mat-hint>A friendly name to identify this connection</mat-hint>
       </mat-form-field>
 
-      @if (getSelectedPlatform(); as platform) {
+      @if (selectedPlatform; as platform) {
         @if (platform.hasModes) {
           <!-- Telegram mode selection -->
           <div class="mode-section">
@@ -78,7 +78,7 @@
             </mat-radio-group>
           </div>
 
-          @if (isTelegram() && telegramMode === 'cc_bot') {
+          @if (isTelegram && telegramMode === 'cc_bot') {
             <div class="setup-instructions">
               <mat-icon>info</mat-icon>
               <div>
@@ -101,7 +101,7 @@
             </div>
           }
 
-          @if (isTelegram() && telegramMode === 'custom_bot') {
+          @if (isTelegram && telegramMode === 'custom_bot') {
             <div class="setup-instructions">
               <mat-icon>info</mat-icon>
               <div>

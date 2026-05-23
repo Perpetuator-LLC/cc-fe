@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
 <div class="cagr-comparison">
-  @for (item of items; track item.label) {
+  @for (item of itemsDisplay; track item.label) {
     <div class="cagr-row" [title]="item.tooltip || ''">
       <span class="cagr-label">{{ item.label }}</span>
       <div class="cagr-values">
@@ -12,7 +12,7 @@
             [class.negative]="item.cagr5Year && item.cagr5Year < 0"
             [class.na]="item.cagr5Year === null"
           >
-            {{ formatCagr(item.cagr5Year) }}
+            {{ item.cagr5YearFormatted }}
           </span>
         </div>
         <div class="cagr-item">
@@ -23,7 +23,7 @@
             [class.negative]="item.cagr10Year && item.cagr10Year < 0"
             [class.na]="item.cagr10Year === null"
           >
-            {{ formatCagr(item.cagr10Year) }}
+            {{ item.cagr10YearFormatted }}
           </span>
         </div>
         @if (showTrendIndicator && item.cagr5Year !== null && item.cagr10Year !== null) {
@@ -32,7 +32,7 @@
             [class.improving]="item.cagr5Year > item.cagr10Year"
             [class.declining]="item.cagr5Year < item.cagr10Year"
           >
-            {{ getTrendIcon(item) }}
+            {{ item.trendIcon }}
           </mat-icon>
         }
       </div>

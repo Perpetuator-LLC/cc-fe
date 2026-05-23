@@ -196,14 +196,14 @@ export class AffiliateCodeChangeDialogComponent implements OnInit, OnDestroy {
     return code && code.length >= 3 && code.length <= 50;
   }
 
-  getValidationIcon(): string {
+  get validationIcon(): string {
     if (!this.availabilityStatus?.checked) {
       return '';
     }
     return this.availabilityStatus.available ? 'check_circle' : 'error';
   }
 
-  getValidationClass(): string {
+  get validationClass(): string {
     if (!this.availabilityStatus?.checked) {
       return '';
     }

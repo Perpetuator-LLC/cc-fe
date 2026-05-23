@@ -46,8 +46,8 @@
               <mat-spinner matSuffix diameter="20" />
             }
             @if (availabilityStatus?.checked && !checking) {
-              <mat-icon matSuffix [class]="getValidationClass()">
-                {{ getValidationIcon() }}
+              <mat-icon matSuffix [class]="validationClass">
+                {{ validationIcon }}
               </mat-icon>
             }
             @if (codeForm.get('newCode')?.hasError('required') && codeForm.get('newCode')?.touched) {
@@ -63,7 +63,7 @@
 
           <!-- Availability Status -->
           @if (availabilityStatus?.checked && !checking) {
-            <div class="availability-status" [class]="getValidationClass()">
+            <div class="availability-status" [class]="validationClass">
               @if (availabilityStatus?.available) {
                 @if (availabilityStatus?.requiresReview) {
                   <div class="status-message warning">
