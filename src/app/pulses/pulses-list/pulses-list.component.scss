@@ -171,6 +171,10 @@
     background: var(--md-sys-color-surface-container-low);
   }
 
+  .mat-column-lastGeneratedAt {
+    min-width: 160px;
+  }
+
   .pulse-name {
     display: flex;
     gap: 8px;
