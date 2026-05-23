@@ -95,14 +95,12 @@
                 <span class="status-badge" [class.live]="episode.isLive" [class.not-live]="!episode.isLive">
                   {{ episode.isLive ? 'Live' : 'Draft' }}
                 </span>
-                @if (isEpisodeFullyValidated(episode)) {
-                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getEpisodeValidationTooltip(episode)"
+                @if (episode.display.isFullyValidated) {
+                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="episode.display.validationTooltip"
                     >verified</mat-icon
                   >
                 } @else {
-                  <mat-icon
-                    class="unvalidated-icon md3-icon-warning"
-                    [matTooltip]="getEpisodeValidationTooltip(episode)"
+                  <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="episode.display.validationTooltip"
                     >warning</mat-icon
                   >
                 }
@@ -122,12 +120,12 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
-                @if (hasAudio(episode)) {
+                @if (episode.display.hasAudio) {
                   <button mat-menu-item (click)="playEpisode(episode)">
                     <mat-icon>play_arrow</mat-icon>
                     <span>Play</span>
                     @if (episode.audioSeconds) {
-                      <span class="duration-hint">{{ formatDuration(episode.audioSeconds) }}</span>
+                      <span class="duration-hint">{{ episode.display.formattedDuration }}</span>
                     }
                   </button>
                   <button mat-menu-item (click)="playEpisodeNext(episode)">
@@ -191,12 +189,12 @@
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #podcastActionsMenu="matMenu" class="actionMenu">
-                      @if (hasAudio(episode)) {
+                      @if (episode.display.hasAudio) {
                         <button mat-menu-item (click)="playEpisode(episode)">
                           <mat-icon>play_arrow</mat-icon>
                           <span>Play</span>
                           @if (episode.audioSeconds) {
-                            <span class="duration-hint">{{ formatDuration(episode.audioSeconds) }}</span>
+                            <span class="duration-hint">{{ episode.display.formattedDuration }}</span>
                           }
                         </button>
                         <button mat-menu-item (click)="playEpisodeNext(episode)">
@@ -228,14 +226,12 @@
                 <span class="status-badge" [class.live]="episode.isLive" [class.not-live]="!episode.isLive">
                   {{ episode.isLive ? 'Live' : 'Draft' }}
                 </span>
-                @if (isEpisodeFullyValidated(episode)) {
-                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getEpisodeValidationTooltip(episode)"
+                @if (episode.display.isFullyValidated) {
+                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="episode.display.validationTooltip"
                     >verified</mat-icon
                   >
                 } @else {
-                  <mat-icon
-                    class="unvalidated-icon md3-icon-warning"
-                    [matTooltip]="getEpisodeValidationTooltip(episode)"
+                  <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="episode.display.validationTooltip"
                     >warning</mat-icon
                   >
                 }
