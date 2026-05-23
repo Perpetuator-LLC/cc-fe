@@ -160,6 +160,66 @@ body {
     }
   }
 
+  // Material component global overrides
+  // Using body prefix for higher specificity to avoid !important
+  .mat-mdc-form-field {
+    font-size: 14px;
+  }
+
+  .mat-mdc-notch-piece {
+    border: 0;
+  }
+
+  .mdc-line-ripple::before,
+  .mdc-line-ripple::after {
+    border: 0;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 48px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 8px;
+  }
+
+  .mat-mdc-text-field-wrapper:has(.mat-mdc-form-field-textarea-control) {
+    height: auto;
+  }
+
+  .team-name-input .mat-mdc-text-field-wrapper {
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+  }
+
+  .status-filter-compact .mat-mdc-form-field-infix {
+    padding-top: 12px;
+  }
+
+  .mat-mdc-paginator-page-size .mat-mdc-form-field-infix {
+    padding-top: 12px;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 20px;
+  }
+
+  .mdc-floating-label {
+    top: 24px;
+  }
+
+  .mat-mdc-select {
+    font-size: 14px;
+  }
+
+  .actionMenu {
+    min-width: 192px;
+  }
+
+  .team-tab-group .mat-mdc-tab.mdc-tab {
+    flex-grow: 0;
+  }
+
   // Terminal page tab group - fill available height
   .content-tabs {
     .mat-mdc-tab-body-wrapper {
@@ -916,16 +976,6 @@ body .toolbar-container {
 // Global button border radius - smaller corners for all Material buttons
 // Uses all MDC custom properties to ensure proper override
 :root {
-  // Form field sizing overrides (Material recommended approach)
-  @include mat.form-field-overrides(
-    (
-      container-height: 48px,
-      container-vertical-padding: 12px,
-      filled-with-label-container-padding-top: 20px,
-      filled-with-label-container-padding-bottom: 0,
-    )
-  );
-
   // MDC button shape tokens
   --mdc-filled-button-container-shape: 8px;
   --mdc-outlined-button-container-shape: 8px;
@@ -1862,10 +1912,6 @@ html body {
     font-size: 14px;
   }
 
-  .mat-mdc-form-field:has(mat-hint) {
-    margin-bottom: 14px;
-  }
-
   .mat-mdc-notch-piece {
     border: 0;
   }
@@ -1876,6 +1922,7 @@ html body {
   }
 
   .mat-mdc-text-field-wrapper.mdc-text-field {
+    height: 48px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
   }
@@ -1906,13 +1953,22 @@ html body {
     }
 
     .mat-mdc-paginator-page-size-select {
-      // controls the spacing between the number and the carrot
       width: 52px;
+
+      // width: 50px; i want 50
     }
 
     .mat-mdc-form-field .mat-mdc-form-field-infix {
       padding: 0;
     }
+  }
+
+  .mat-mdc-form-field .mat-mdc-form-field-infix {
+    padding-top: 20px;
+  }
+
+  .mdc-floating-label.mat-mdc-floating-label {
+    top: 24px;
   }
 
   .mat-mdc-select.mat-mdc-select {
