@@ -75,8 +75,8 @@
           <div class="info-row">
             <span class="info-label">Change Type:</span>
             <span class="info-value change-type-value">
-              <mat-icon>{{ getChangeTypeIcon(currentVersionChangeType) }}</mat-icon>
-              {{ getChangeTypeLabel(currentVersionChangeType) }}
+              <mat-icon>{{ currentChangeTypeIcon }}</mat-icon>
+              {{ currentChangeTypeLabel }}
             </span>
           </div>
         }
@@ -114,17 +114,17 @@
                   <div class="version-option">
                     <span class="version-number">Version {{ selectedVersion.versionNumber }}</span>
                     <span class="version-meta">
-                      <mat-icon class="version-icon">{{ getChangeTypeIcon(selectedVersion.changeType) }}</mat-icon>
-                      {{ getChangeTypeLabel(selectedVersion.changeType) }}
-                      @if (hasAudio(selectedVersion)) {
+                      <mat-icon class="version-icon">{{ selectedVersion.display.changeTypeIcon }}</mat-icon>
+                      {{ selectedVersion.display.changeTypeLabel }}
+                      @if (selectedVersion.display.hasAudio) {
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
-                      @if (isVersionFullyValidated(selectedVersion)) {
-                        <mat-icon class="validated-icon" [matTooltip]="getValidationTooltip(selectedVersion)"
+                      @if (selectedVersion.display.isFullyValidated) {
+                        <mat-icon class="validated-icon" [matTooltip]="selectedVersion.display.validationTooltip"
                           >verified</mat-icon
                         >
                       } @else {
-                        <mat-icon class="unvalidated-icon" [matTooltip]="getValidationTooltip(selectedVersion)"
+                        <mat-icon class="unvalidated-icon" [matTooltip]="selectedVersion.display.validationTooltip"
                           >warning</mat-icon
                         >
                       }
@@ -137,17 +137,21 @@
                   <div class="version-option">
                     <span class="version-number">Version {{ version.versionNumber }}</span>
                     <span class="version-meta">
-                      <mat-icon class="version-icon">{{ getChangeTypeIcon(version.changeType) }}</mat-icon>
-                      {{ getChangeTypeLabel(version.changeType) }}
-                      @if (hasAudio(version)) {
+                      <mat-icon class="version-icon">{{ version.display.changeTypeIcon }}</mat-icon>
+                      {{ version.display.changeTypeLabel }}
+                      @if (version.display.hasAudio) {
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
-                      @if (isVersionFullyValidated(version)) {
-                        <mat-icon class="validated-icon md3-icon-success" [matTooltip]="getValidationTooltip(version)"
+                      @if (version.display.isFullyValidated) {
+                        <mat-icon
+                          class="validated-icon md3-icon-success"
+                          [matTooltip]="version.display.validationTooltip"
                           >verified</mat-icon
                         >
                       } @else {
-                        <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="getValidationTooltip(version)"
+                        <mat-icon
+                          class="unvalidated-icon md3-icon-warning"
+                          [matTooltip]="version.display.validationTooltip"
                           >warning</mat-icon
                         >
                       }
@@ -190,13 +194,13 @@
             <div class="version-header">
               <h5>
                 Version {{ selectedVersion.versionNumber }}
-                @if (isVersionFullyValidated(selectedVersion)) {
-                  <span class="validated-badge" [matTooltip]="getValidationTooltip(selectedVersion)">
+                @if (selectedVersion.display.isFullyValidated) {
+                  <span class="validated-badge" [matTooltip]="selectedVersion.display.validationTooltip">
                     <mat-icon>verified</mat-icon>
                     Validated
                   </span>
                 } @else {
-                  <span class="unvalidated-badge" [matTooltip]="getValidationTooltip(selectedVersion)">
+                  <span class="unvalidated-badge" [matTooltip]="selectedVersion.display.validationTooltip">
                     <mat-icon>warning</mat-icon>
                     Not Validated
                   </span>
@@ -204,8 +208,8 @@
               </h5>
               <div class="version-metadata">
                 <span class="change-type">
-                  <mat-icon>{{ getChangeTypeIcon(selectedVersion.changeType) }}</mat-icon>
-                  {{ getChangeTypeLabel(selectedVersion.changeType) }}
+                  <mat-icon>{{ selectedVersion.display.changeTypeIcon }}</mat-icon>
+                  {{ selectedVersion.display.changeTypeLabel }}
                 </span>
                 <span class="created-date">
                   {{ selectedVersion.createdAt | date: 'short' }}
@@ -219,11 +223,11 @@
             <div class="version-stats">
               <div class="stat-item">
                 <span class="stat-label">Word Count</span>
-                <span class="stat-value">{{ getVersionWordCount(selectedVersion) }}</span>
+                <span class="stat-value">{{ selectedVersion.display.wordCount }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Character Count</span>
-                <span class="stat-value">{{ getVersionCharCount(selectedVersion) }}</span>
+                <span class="stat-value">{{ selectedVersion.display.charCount }}</span>
               </div>
             </div>
 
@@ -239,7 +243,7 @@
             @if (selectedVersion.validationNotes) {
               <div class="validation-notes">
                 <mat-icon>note</mat-icon>
-                <span [innerHTML]="markdownToHtml(selectedVersion.validationNotes)"></span>
+                <span [innerHTML]="selectedVersionNotesHtml"></span>
               </div>
             }
 

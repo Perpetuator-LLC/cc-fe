@@ -12,6 +12,19 @@ import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { EpisodeVersion } from '../episode.service';
 import { marked } from 'marked';
 
+/** Pre-computed display state attached to each version. */
+interface VersionDisplay {
+  changeTypeIcon: string;
+  changeTypeLabel: string;
+  isFullyValidated: boolean;
+  validationTooltip: string;
+  hasAudio: boolean;
+  wordCount: number;
+  charCount: number;
+}
+
+type VersionWithDisplay = EpisodeVersion & { display: VersionDisplay };
+
 @Component({
   selector: 'app-episode-version-control',
   standalone: true,
@@ -36,19 +49,77 @@ export class EpisodeVersionControlComponent {
   @Input() currentVersionNumber: number | null = null;
   @Input() isCurrentVersionFullyValidated = false;
   @Input() currentVersionValidationTooltip = '';
-  @Input() historyVersions: EpisodeVersion[] = [];
-  @Input() currentVersionChangeType: string | null = null;
+
+  /** History versions enriched with pre-computed display fields. */
+  private _historyVersions: VersionWithDisplay[] = [];
+  @Input() set historyVersions(versions: EpisodeVersion[]) {
+    this._historyVersions = (versions || []).map((v) => this.enrichVersion(v));
+  }
+  get historyVersions(): VersionWithDisplay[] {
+    return this._historyVersions;
+  }
+
+  @Input() set currentVersionChangeType(value: string | null) {
+    this._currentChangeType = value;
+    this.currentChangeTypeIcon = this.getChangeTypeIcon(value);
+    this.currentChangeTypeLabel = this.getChangeTypeLabel(value);
+  }
+  get currentVersionChangeType(): string | null {
+    return this._currentChangeType;
+  }
+  private _currentChangeType: string | null = null;
+  /** Pre-computed icon for current-version change type. */
+  currentChangeTypeIcon = 'help_outline';
+  /** Pre-computed label for current-version change type. */
+  currentChangeTypeLabel = 'Unknown';
+
   @Input() currentVersionCreator: string | null = null;
   @Input() currentVersionCreatedAt: string | null = null;
   @Input() currentVersionValidationNotes: SafeHtml | null = null;
   @Input() selectedVersionNumber: number | null = null;
-  @Input() selectedVersion: EpisodeVersion | null = null;
+
+  /** Selected version enriched with display fields + parsed markdown notes. */
+  private _selectedVersion: VersionWithDisplay | null = null;
+  selectedVersionNotesHtml: SafeHtml | null = null;
+  @Input() set selectedVersion(v: EpisodeVersion | null) {
+    this._selectedVersion = v ? this.enrichVersion(v) : null;
+    this.selectedVersionNotesHtml = v?.validationNotes ? this.markdownToHtml(v.validationNotes) : null;
+  }
+  get selectedVersion(): VersionWithDisplay | null {
+    return this._selectedVersion;
+  }
 
   @Output() validateEpisode = new EventEmitter<void>();
   @Output() regenerateEpisode = new EventEmitter<void>();
   @Output() versionSelect = new EventEmitter<number>();
   @Output() copyVersionContent = new EventEmitter<void>();
   @Output() restoreVersion = new EventEmitter<void>();
+
+  /** Build a `VersionWithDisplay` by attaching pre-computed display state. */
+  private enrichVersion(v: EpisodeVersion): VersionWithDisplay {
+    return {
+      ...v,
+      display: {
+        changeTypeIcon: this.getChangeTypeIcon(v.changeType),
+        changeTypeLabel: this.getChangeTypeLabel(v.changeType),
+        isFullyValidated: !!(v.validatedCompliance && v.validatedFacts && v.validatedLength),
+        validationTooltip: this.buildValidationTooltip(v),
+        hasAudio: !!(v.audioUrl && v.audioUrl.trim()),
+        wordCount: v.content ? v.content.split(/\s+/).filter(Boolean).length : 0,
+        charCount: v.content ? v.content.length : 0,
+      },
+    };
+  }
+
+  private buildValidationTooltip(version: EpisodeVersion): string {
+    const parts: string[] = [];
+    parts.push(`Facts: ${version.validatedFacts ? '✓' : '✗'}`);
+    parts.push(`Length: ${version.validatedLength ? '✓' : '✗'}`);
+    parts.push(`Compliance: ${version.validatedCompliance ? '✓' : '✗'}`);
+    const status =
+      version.validatedCompliance && version.validatedFacts && version.validatedLength ? 'Validated' : 'Not Validated';
+    return `${status}\n - ${parts.join('\n - ')}`;
+  }
 
   markdownToHtml(markdown: string | null | undefined): SafeHtml {
     if (!markdown) return '';
