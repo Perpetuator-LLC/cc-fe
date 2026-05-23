@@ -97,7 +97,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
-  schedules: Schedule[] = [];
+  private _schedules: (Schedule & { descriptionText: string })[] = [];
+  /** Setter enriches schedules with a pre-computed descriptionText for template binding. */
+  set schedules(value: Schedule[]) {
+    this._schedules = (value || []).map((s) => ({ ...s, descriptionText: formatScheduleDescription(s) }));
+  }
+  get schedules(): (Schedule & { descriptionText: string })[] {
+    return this._schedules;
+  }
   isGridView = false;
   selectedVersionNumber: number | null = null;
   selectedVersion: EpisodeVersion | null = null;
@@ -352,7 +359,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   onIsLiveChange(isLive: boolean) {
     // Only prevent SETTING episode as live (checking the box) without audio
     // Allow UNSETTING (unchecking) even without audio
-    if (isLive && !this.hasAnyVersionWithAudio()) {
+    if (isLive && !this.hasAnyVersionWithAudio) {
       this.messageService.warning('Cannot set episode as live without audio. Please generate audio first.');
       // Revert the checkbox to unchecked
       this.episodeForm.patchValue({ isLive: false }, { emitEvent: false });
@@ -869,7 +876,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return version.validatedCompliance && version.validatedFacts && version.validatedLength;
   }
 
-  isCurrentVersionFullyValidated(): boolean {
+  get isCurrentVersionFullyValidated(): boolean {
     const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
     const versions = this.episodeForm.get('versions')?.value;
     if (!currentVersionNumber || !versions || versions.length === 0) return false;
@@ -880,7 +887,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.isVersionFullyValidated(currentVersion);
   }
 
-  getCurrentVersionValidationTooltip(): string {
+  get currentVersionValidationTooltip(): string {
     const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
     const versions = this.episodeForm.get('versions')?.value;
     if (!currentVersionNumber || !versions || versions.length === 0) return 'No version information';
@@ -968,7 +975,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
    * Check if the episode is saved as live (not just the form checkbox)
    * Used for showing share buttons - only show when actually published
    */
-  public isSavedAsLive(): boolean {
+  public get isSavedAsLive(): boolean {
     // If we have saved form values, use those (most accurate)
     if (this.initialFormValues) {
       return this.initialFormValues.isLive;
@@ -1010,7 +1017,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  isGenerateAudioDisabled(): boolean {
+  get isGenerateAudioDisabled(): boolean {
     // Allow generation if:
     // - No audio exists, OR
     // - Audio is a custom upload (user can override it)
@@ -1022,14 +1029,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.audioSrc !== null && !this.audioIsCustomUpload;
   }
 
-  getUpdateButtonTooltip(): string {
+  get updateButtonTooltip(): string {
     if (this.hasUnsavedChanges) {
       return 'Save your changes';
     }
     return 'No changes to save';
   }
 
-  getGenerateAudioTooltip(): string {
+  get generateAudioTooltip(): string {
     if (this.hasUnsavedChanges) {
       return 'You have unsaved changes. Please save before generating audio';
     }
@@ -1042,11 +1049,11 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return 'Generate audio for this episode';
   }
 
-  hasCurrentVersionAudio(): boolean {
+  get hasCurrentVersionAudio(): boolean {
     return this.audioSrc !== null;
   }
 
-  hasLiveAudioFromDifferentVersion(): boolean {
+  get hasLiveAudioFromDifferentVersion(): boolean {
     // This method determines if we should show a separate "Live on RSS Feed" audio player
     // We only show it when the published audio is different from the current version's audio
 
@@ -1074,7 +1081,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  getLiveAudioVersionText(): string {
+  get liveAudioVersionText(): string {
     if (this.liveAudioVersionNumber !== null) {
       return `Version ${this.liveAudioVersionNumber}`;
     }
@@ -1085,12 +1092,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
    * Checks if ANY version of the episode has audio
    * Used to determine if the "Live" checkbox should be shown
    */
-  hasAnyVersionWithAudio(): boolean {
+  get hasAnyVersionWithAudio(): boolean {
     const versions = this.episodeForm.get('versions')?.value || [];
     return versions.some((version: EpisodeVersion) => version.audioUrl !== null && version.audioUrl !== undefined);
   }
 
-  getPublicShareUrl(): string {
+  get publicShareUrl(): string {
     const episode = this.episodeForm.getRawValue();
     if (!episode.uuid || !episode.title) {
       return '';
@@ -1098,9 +1105,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.shareService.buildEpisodeUrl(episode.uuid, episode.title);
   }
 
-  getEpisodeDescription(): string {
+  get episodeDescription(): string {
     const episode = this.episodeForm.getRawValue();
     return episode.description || '';
+  }
+
+  /** Pre-formatted duration for the current audioSeconds value. */
+  get formattedAudioDuration(): string {
+    return this.formatDuration(this.audioSeconds);
+  }
+
+  /** Pre-rendered HTML for current-version validation notes. */
+  get currentVersionValidationNotesHtml(): SafeHtml | null {
+    return this.currentVersionValidationNotes ? this.markdownToHtml(this.currentVersionValidationNotes) : null;
   }
 
   /**

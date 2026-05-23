@@ -19,7 +19,7 @@
         <h2>{{ episodeForm.get('title')?.value || 'N/A' }}</h2>
       </div>
       <div class="header-actions">
-        @if (hasAnyVersionWithAudio() || episodeForm.get('isLive')?.value) {
+        @if (hasAnyVersionWithAudio || episodeForm.get('isLive')?.value) {
           <div class="publish-toggle">
             <mat-checkbox
               formControlName="isLive"
@@ -30,12 +30,12 @@
             </mat-checkbox>
           </div>
         }
-        @if (isSavedAsLive()) {
+        @if (isSavedAsLive) {
           <mat-divider vertical />
           <app-share-buttons
-            [shareUrl]="getPublicShareUrl()"
+            [shareUrl]="publicShareUrl"
             [title]="episodeForm.get('title')?.value || ''"
-            [description]="getEpisodeDescription()"
+            [description]="episodeDescription"
             [compact]="true"
           />
         }
@@ -56,7 +56,7 @@
             (click)="updateEpisode()"
             type="button"
             [disabled]="!hasUnsavedChanges"
-            [matTooltip]="getUpdateButtonTooltip()"
+            [matTooltip]="updateButtonTooltip"
           >
             <mat-icon>save</mat-icon>
             Save
@@ -161,14 +161,14 @@
                     (change)="onAudioFileSelected($event)"
                     class="display-none"
                   />
-                  <span [matTooltip]="getGenerateAudioTooltip()" class="button-wrapper">
+                  <span [matTooltip]="generateAudioTooltip" class="button-wrapper">
                     <button
                       mat-raised-button
                       color="accent"
                       type="button"
                       class="episode-control"
                       (click)="generateAudio()"
-                      [disabled]="isGenerateAudioDisabled()"
+                      [disabled]="isGenerateAudioDisabled"
                     >
                       <mat-icon>text_to_speech</mat-icon>
                       Generate Audio
@@ -177,7 +177,7 @@
                 </div>
               </div>
               <div class="audio-card">
-                @if (hasCurrentVersionAudio()) {
+                @if (hasCurrentVersionAudio) {
                   <div class="audio-section">
                     <div class="audio-label">
                       Current Version Audio:
@@ -195,7 +195,7 @@
                         <mat-icon>play_arrow</mat-icon>
                         <span>Play</span>
                         @if (audioSeconds) {
-                          <span class="duration-hint">{{ formatDuration(audioSeconds) }}</span>
+                          <span class="duration-hint">{{ formattedAudioDuration }}</span>
                         }
                       </button>
                       <button mat-icon-button [matMenuTriggerFor]="currentAudioMenu" matTooltip="More options">
@@ -225,33 +225,29 @@
                   </div>
                 }
 
-                @if (hasLiveAudioFromDifferentVersion()) {
+                @if (hasLiveAudioFromDifferentVersion) {
                   <div class="live-audio-section">
                     <div class="live-audio-label">
                       <mat-icon class="live-icon">radio_button_checked</mat-icon>
-                      <span>Live on RSS Feed ({{ getLiveAudioVersionText() }}):</span>
+                      <span>Live on RSS Feed ({{ liveAudioVersionText }}):</span>
                     </div>
                     <div class="audio-controls">
-                      <button
-                        mat-flat-button
-                        color="accent"
-                        (click)="playInPlayer(liveAudioSrc, getLiveAudioVersionText())"
-                      >
+                      <button mat-flat-button color="accent" (click)="playInPlayer(liveAudioSrc, liveAudioVersionText)">
                         <mat-icon>play_arrow</mat-icon>
                         <span>Play Live Version</span>
                         @if (audioSeconds) {
-                          <span class="duration-hint">{{ formatDuration(audioSeconds) }}</span>
+                          <span class="duration-hint">{{ formattedAudioDuration }}</span>
                         }
                       </button>
                       <button mat-icon-button [matMenuTriggerFor]="liveAudioMenu" matTooltip="More options">
                         <mat-icon>more_vert</mat-icon>
                       </button>
                       <mat-menu #liveAudioMenu="matMenu">
-                        <button mat-menu-item (click)="addToQueueNext(liveAudioSrc, getLiveAudioVersionText())">
+                        <button mat-menu-item (click)="addToQueueNext(liveAudioSrc, liveAudioVersionText)">
                           <mat-icon>queue_play_next</mat-icon>
                           <span>Play Next</span>
                         </button>
-                        <button mat-menu-item (click)="addToQueue(liveAudioSrc, getLiveAudioVersionText())">
+                        <button mat-menu-item (click)="addToQueue(liveAudioSrc, liveAudioVersionText)">
                           <mat-icon>playlist_add</mat-icon>
                           <span>Add to Queue</span>
                         </button>
@@ -296,15 +292,13 @@
               <!-- Version Control & Actions Section - Always visible in expansion panel -->
               <app-episode-version-control
                 [currentVersionNumber]="episodeForm.get('currentVersionNumber')?.value"
-                [isCurrentVersionFullyValidated]="isCurrentVersionFullyValidated()"
-                [currentVersionValidationTooltip]="getCurrentVersionValidationTooltip()"
+                [isCurrentVersionFullyValidated]="isCurrentVersionFullyValidated"
+                [currentVersionValidationTooltip]="currentVersionValidationTooltip"
                 [historyVersions]="historyVersions"
                 [currentVersionChangeType]="currentVersionChangeType"
                 [currentVersionCreator]="currentVersionCreator"
                 [currentVersionCreatedAt]="currentVersionCreatedAt"
-                [currentVersionValidationNotes]="
-                  currentVersionValidationNotes ? markdownToHtml(currentVersionValidationNotes) : null
-                "
+                [currentVersionValidationNotes]="currentVersionValidationNotesHtml"
                 [selectedVersionNumber]="selectedVersionNumber"
                 [selectedVersion]="selectedVersion"
                 (validateEpisode)="validateEpisode()"
@@ -589,7 +583,7 @@
                         <div class="schedule-details">
                           <div class="schedule-timing">
                             <mat-icon>event</mat-icon>
-                            <span>{{ getScheduleDescription(schedule) }}</span>
+                            <span>{{ schedule.descriptionText }}</span>
                           </div>
                           <div class="schedule-status">
                             <span class="status-badge" [ngClass]="schedule.enabled ? 'enabled' : 'disabled'">
