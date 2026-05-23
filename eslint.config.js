@@ -78,8 +78,17 @@ module.exports = tseslint.config(
           // Also allow any name that matches a signal-typed member anywhere
           // under src/app — catches service-exposed signals like
           // `audioService.queueLength()` where the receiver isn't the
-          // component itself.
+          // component itself. Used as a fallback when type-checker mode is
+          // unavailable.
           projectSignalScanRoot: 'src/app',
+          // Use the TS type-checker for accurate signal detection — catches
+          // aliased signals (`x = svc.sig`), getter-returning-signals, and
+          // inherited signals. One-time cost to build the Program; cached
+          // for the lint process.
+          useTypeChecker: {
+            tsconfig: 'tsconfig.app.json',
+            projectScan: true,
+          },
         },
       ],
     },

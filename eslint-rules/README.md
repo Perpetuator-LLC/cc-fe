@@ -33,22 +33,46 @@ It also keeps upstream behavior for:
 **Per-file caching:** parsed signal-name sets are cached by file mtime, so
 re-runs are cheap.
 
+**Optional: TypeScript type-checker mode.** Enable `useTypeChecker` to use
+the TS type-checker for resolution. This catches cases pure-syntactic
+detection misses:
+
+- **Aliased signals:** `protected isLoggedIn = this.auth.isLoggedIn;` — type
+  inferred as `Signal<boolean>`, so allowed.
+- **Getter returning a signal:** `get userHistory(): WritableSignal<T> { ... }`.
+- **Inherited signals** from base classes.
+- **Service-exposed signals** in property chains like
+  `audioService.queueLength()` (via the `projectScan` union).
+
+The type-checker correctly identifies `Signal<T>` — which TypeScript
+represents internally as a _callable intersection_ with no top-level symbol
+named `Signal` — by inspecting the formatted type string first, then falling
+back to symbol/base-type walks.
+
 **Config example:**
 
 ```js
 'cc-local/template-no-call-expression-strict': [
-  'error',
+  'warn',
   {
     allowList: ['get', 'getRawValue', 'hasError', 'getError'],
     extraAllowedNames: ['trackByX'], // force-allow without companion-file check
+    projectSignalScanRoot: 'src/app', // syntactic fallback for cross-file
+    useTypeChecker: {
+      tsconfig: 'tsconfig.app.json',
+      projectScan: true, // build a project-wide signal-name union
+    },
   },
 ],
 ```
 
+**Performance:** the TS Program is built lazily on first use and cached for
+the lint process. In this repo, `yarn lint` runs in ~5s with type-checker
+mode on (vs ~4s without). Subsequent files inside the same lint run pay
+no extra cost.
+
 **Caveats:**
 
-- Only looks at the **first** companion `.ts` file (same basename, same dir).
-  Inherited signals from base classes are not detected. Add them to
-  `extraAllowedNames` if needed.
-- Getters that return signals are _not_ auto-detected (templates almost
-  always access getters without parens anyway).
+- Without `useTypeChecker`, only looks at the **first** companion `.ts` file
+  (same basename, same dir). Inherited / aliased / getter-returning signals
+  are not detected — enable type-checker mode for those.
