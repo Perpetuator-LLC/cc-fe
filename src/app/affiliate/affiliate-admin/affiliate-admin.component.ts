@@ -26,6 +26,18 @@ import { MessageService } from '../../message.service';
 import { UserService } from '../../user/user.service';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 
+/**
+ * Status badge descriptor used by the user-search list. Pre-computed in
+ * `enrichUser` so the template can render an arbitrary number of badges with a
+ * single `@for` loop instead of nesting `@if` branches per badge type.
+ */
+interface UserStatusBadge {
+  icon: string;
+  label: string;
+  classes: string;
+  tooltip?: string;
+}
+
 /** Pre-computed display state attached to each row in the user search list. */
 interface AffiliateUserDisplay extends AffiliateUserSearchResult {
   stripeStatus: { icon: string; label: string; cssClass: string; tooltip: string };
@@ -35,6 +47,25 @@ interface AffiliateUserDisplay extends AffiliateUserSearchResult {
   networkLabel: 'Accepting' | 'Closed';
   networkButtonIcon: 'group_remove' | 'group_add';
   networkButtonLabel: 'Close Network' | 'Open Network';
+  /**
+   * Flat list of badges rendered next to the username. Combines stripe status,
+   * eligibility status, network status and the "not in program" badge so the
+   * template needs only one `@for` rather than multiple nested `@if` blocks.
+   */
+  statusBadges: UserStatusBadge[];
+  /**
+   * Pre-computed disabled flag for the "Restrict Account" button, derived from
+   * the user's eligibility status. Lets the template combine it with the
+   * shared `updatingUserEligibility` flag using a single `||`.
+   */
+  restrictDisabled: boolean;
+  /**
+   * Pre-computed disabled flag for the "Restore" button, true when the
+   * account is already active.
+   */
+  restoreDisabled: boolean;
+  /** Pre-computed tooltip for the network-toggle button. */
+  networkButtonTooltip: string;
 }
 
 /** Pre-computed display state attached to each row in the payout request list. */
@@ -665,16 +696,76 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
    */
   private enrichUser(u: AffiliateUserSearchResult): AffiliateUserDisplay {
     const isActive = u.isActive ?? true;
+    const stripeStatus = this.computeStripeStatus(u);
+    const statusIcon = this.statusIconFor(u.eligibilityStatus);
+    const statusLabel = this.statusLabelFor(u.eligibilityStatus);
+    const networkIcon: 'group' | 'group_remove' = isActive ? 'group' : 'group_remove';
+    const networkLabel: 'Accepting' | 'Closed' = isActive ? 'Accepting' : 'Closed';
     return {
       ...u,
-      stripeStatus: this.computeStripeStatus(u),
-      statusIcon: this.statusIconFor(u.eligibilityStatus),
-      statusLabel: this.statusLabelFor(u.eligibilityStatus),
-      networkIcon: isActive ? 'group' : 'group_remove',
-      networkLabel: isActive ? 'Accepting' : 'Closed',
+      stripeStatus,
+      statusIcon,
+      statusLabel,
+      networkIcon,
+      networkLabel,
       networkButtonIcon: isActive ? 'group_remove' : 'group_add',
       networkButtonLabel: isActive ? 'Close Network' : 'Open Network',
+      statusBadges: this.buildStatusBadges(u, stripeStatus, statusIcon, statusLabel, networkIcon, networkLabel),
+      restrictDisabled: u.eligibilityStatus === 'suspended' || u.eligibilityStatus === 'under_review',
+      restoreDisabled: u.eligibilityStatus === 'active',
+      networkButtonTooltip: isActive ? 'Close network (prevent new sign-ups)' : 'Open network (allow new sign-ups)',
     };
+  }
+
+  /**
+   * Flatten the per-user status into the badge list the template iterates
+   * over. When the user is not enrolled we emit only the "Not in program"
+   * badge; otherwise we emit one badge per signal that has a value.
+   */
+  private buildStatusBadges(
+    u: AffiliateUserSearchResult,
+    stripeStatus: { icon: string; label: string; cssClass: string; tooltip: string },
+    statusIcon: string,
+    statusLabel: string,
+    networkIcon: 'group' | 'group_remove',
+    networkLabel: 'Accepting' | 'Closed',
+  ): UserStatusBadge[] {
+    // Note: 'badge' class is used dynamically below; literal kept for SCSS usage scanner.
+    const BADGE = 'badge';
+    if (!u.hasAffiliateProfile) {
+      return [{ icon: '', label: 'Not in program', classes: `${BADGE} no-profile` }];
+    }
+    const badges: UserStatusBadge[] = [
+      {
+        icon: stripeStatus.icon,
+        label: stripeStatus.label,
+        classes: `badge affiliate-stripe-status ${stripeStatus.cssClass}`,
+        tooltip: stripeStatus.tooltip,
+      },
+    ];
+    if (u.eligibilityStatus) {
+      const statusModifier =
+        u.eligibilityStatus === 'active'
+          ? 'active'
+          : u.eligibilityStatus === 'suspended'
+            ? 'suspended'
+            : u.eligibilityStatus === 'under_review'
+              ? 'under-review'
+              : '';
+      badges.push({
+        icon: statusIcon,
+        label: statusLabel,
+        classes: `badge status-badge ${statusModifier}`.trim(),
+      });
+    }
+    if (u.isActive !== undefined) {
+      badges.push({
+        icon: networkIcon,
+        label: networkLabel,
+        classes: `badge network-badge ${u.isActive ? 'network-open' : 'network-closed'}`,
+      });
+    }
+    return badges;
   }
 
   private statusIconFor(status?: string | null): string {

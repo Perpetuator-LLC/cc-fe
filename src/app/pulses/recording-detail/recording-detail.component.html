@@ -111,24 +111,16 @@
                     <span>Length</span>
                   </div>
                 </div>
-                @if (recording.validationNotes) {
-                  <div class="validation-notes"><strong>Notes:</strong> {{ recording.validationNotes }}</div>
-                }
+                <div class="validation-notes" [hidden]="!recording.validationNotes">
+                  <strong>Notes:</strong> {{ recording.validationNotes }}
+                </div>
               </div>
 
-              <!-- Summary -->
-              @if (recording.summary) {
-                <div class="section">
-                  <h3>Summary</h3>
-                  <p class="summary-text">{{ recording.summary }}</p>
-                </div>
-              }
-
-              <!-- Error Message -->
-              @if (recording.status === 'FAILED' && recording.errorMessage) {
-                <div class="section error-section">
-                  <h3>Error</h3>
-                  <p class="error-message">{{ recording.errorMessage }}</p>
+              <!-- Optional sections (Summary, Error) -->
+              @for (section of optionalOverviewSections; track section.title) {
+                <div [class]="section.sectionClass">
+                  <h3>{{ section.title }}</h3>
+                  <p [class]="section.bodyClass">{{ section.body }}</p>
                 </div>
               }
 
@@ -136,40 +128,12 @@
               <div class="section">
                 <h3>Details</h3>
                 <div class="metadata-grid">
-                  <div class="metadata-item">
-                    <span class="label">Generated</span>
-                    <span class="value">{{ recording.generatedAt | date: 'medium' }}</span>
-                  </div>
-                  <div class="metadata-item">
-                    <span class="label">Duration</span>
-                    <span class="value">{{ recordingDisplay?.formattedDuration }}</span>
-                  </div>
-                  <div class="metadata-item">
-                    <span class="label">Word Count</span>
-                    <span class="value">{{ recording.wordCount }}</span>
-                  </div>
-                  <div class="metadata-item">
-                    <span class="label">Trigger</span>
-                    <span class="value">{{ recording.isScheduled ? 'Scheduled' : 'Manual' }}</span>
-                  </div>
-                  @if (recording.wasConverted !== undefined) {
+                  @for (row of metadataRows; track row.label) {
                     <div class="metadata-item">
-                      <span class="label">Text Converted</span>
-                      <span class="value">{{ recording.wasConverted ? 'Yes (AI cleaned)' : 'No (verbatim)' }}</span>
+                      <span class="label">{{ row.label }}</span>
+                      <span class="value">{{ row.value }}</span>
                     </div>
                   }
-                  @if (recording.deliveredAt) {
-                    <div class="metadata-item">
-                      <span class="label">Delivered</span>
-                      <span class="value"
-                        >{{ recording.deliveredAt | date: 'medium' }} via {{ recording.deliveryMethod }}</span
-                      >
-                    </div>
-                  }
-                  <div class="metadata-item">
-                    <span class="label">Play Count</span>
-                    <span class="value">{{ recording.playCount }}</span>
-                  </div>
                 </div>
               </div>
             </mat-card-content>

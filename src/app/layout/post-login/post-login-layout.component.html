@@ -387,13 +387,9 @@
           <img height="36" src="/logo.svg" alt="logo" />
         </div>
         <div class="page-title-container">
-          @if (pageBreadcrumb()) {
-            <span class="breadcrumb-text">{{ pageBreadcrumb() }}</span>
-            <span class="separator">&gt;</span>
-          }
-          @if (pageIcon()) {
-            <mat-icon>{{ pageIcon() }}</mat-icon>
-          }
+          <span class="breadcrumb-text" [hidden]="!pageBreadcrumb()">{{ pageBreadcrumb() }}</span>
+          <span class="separator" [hidden]="!pageBreadcrumb()">&gt;</span>
+          <mat-icon [hidden]="!pageIcon()">{{ pageIcon() }}</mat-icon>
           <span class="page-title-text">{{ pageTitle() }}</span>
         </div>
         @if (this.authService.isLoggedIn()) {

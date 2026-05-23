@@ -1,0 +1,82 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<ng-container [formGroup]="form">
+  <!-- Podcast Selection (when relevant job type is selected) -->
+  @if (showPodcastSelect) {
+    <mat-form-field class="full-width">
+      <mat-label>Podcast</mat-label>
+      <mat-select formControlName="podcastUuid">
+        <mat-option value="">Select a podcast</mat-option>
+        @for (podcast of podcasts; track podcast.uuid) {
+          <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
+  <!-- Podcast Display (when podcast is pre-selected/locked) -->
+  @if (showPodcastDisplay) {
+    <div class="podcast-display">
+      <mat-icon>podcasts</mat-icon>
+      <div class="podcast-info">
+        <span class="podcast-label">Podcast</span>
+        <span class="podcast-name">{{ selectedPodcastName }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Pulse Config Selection (when relevant job type is selected) -->
+  @if (showPulseSelect) {
+    <mat-form-field class="full-width">
+      <mat-label>Pulse Configuration</mat-label>
+      <mat-select formControlName="pulseConfigUuid">
+        <mat-option value="">Select a pulse config</mat-option>
+        @for (config of pulseConfigs; track config.uuid) {
+          <mat-option [value]="config.uuid">{{ config.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
+  <!-- Pulse Display (when pulse is pre-selected/locked) -->
+  @if (showPulseDisplay) {
+    <div class="pulse-display">
+      <mat-icon>graphic_eq</mat-icon>
+      <div class="pulse-info">
+        <span class="pulse-label">Pulse</span>
+        <span class="pulse-name">{{ selectedPulseName }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Episode Selection (when selecting episode to release from Jobs > Schedule) -->
+  @if (showEpisodeSelect) {
+    <mat-form-field class="full-width">
+      <mat-label>Episode to Publish</mat-label>
+      <mat-select formControlName="episodeUuid">
+        <mat-option value="">Select an episode</mat-option>
+        @for (episode of episodes; track episode.uuid) {
+          <mat-option [value]="episode.uuid">
+            <div class="episode-option">
+              <span class="episode-title">{{ episode.name }}</span>
+              @if (episode.podcastName) {
+                <span class="episode-podcast">{{ episode.podcastName }}</span>
+              }
+            </div>
+          </mat-option>
+        }
+      </mat-select>
+      <mat-hint>Select an unpublished episode to schedule for release</mat-hint>
+    </mat-form-field>
+  }
+
+  <!-- Episode Display (when in episode context with pre-selected episode) -->
+  @if (showEpisodeDisplay) {
+    <div class="episode-display">
+      <mat-icon>podcasts</mat-icon>
+      <div class="episode-info">
+        <span class="episode-label">Episode to publish</span>
+        <span class="episode-name">{{ episodeName }}</span>
+      </div>
+    </div>
+  }
+</ng-container>

@@ -75,6 +75,24 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
   isEdit = false;
   selectedPlatformLimit: PlatformLimit | null = null;
 
+  /** Pre-computed label for the primary save button. */
+  get saveButtonLabel(): string {
+    if (this.loading) return 'Saving...';
+    return this.isEdit ? 'Update' : 'Create';
+  }
+
+  /** Hint text shown under the post-content textarea, blank when no platform selected. */
+  get platformLimitHint(): string {
+    const limit = this.selectedPlatformLimit;
+    return limit ? `${limit.name} limit: ${limit.maxLength} characters` : '';
+  }
+
+  /** Character-count suffix shown next to the count, blank when no platform. */
+  get platformLimitCountSuffix(): string {
+    const limit = this.selectedPlatformLimit;
+    return limit ? `/ ${limit.maxLength}` : '';
+  }
+
   ngOnInit(): void {
     this.isEdit = !!this.data?.broadcast;
     this.initForm();

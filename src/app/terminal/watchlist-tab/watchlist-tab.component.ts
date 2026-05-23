@@ -5,25 +5,19 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule, Sort } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { PageEvent } from '@angular/material/paginator';
+import { provideEchartsCore } from 'ngx-echarts';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, filter, take, skip } from 'rxjs';
 import { MessageService } from '../../message.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts/core';
 import { LineChart, BarChart, CandlestickChart } from 'echarts/charts';
@@ -46,7 +40,6 @@ import { TerminalWebSocketService } from '../terminal-websocket.service';
 import { ChartDataService, ChartCandle, PageInfo, ChartInterval, ChartDataResult } from '../chart-data.service';
 import { ChartConfigService } from '../chart-config.service';
 import { CommandResult, ChartResultData, ChartControls, TableData, SymbolUpdate } from '../terminal.types';
-import { DataTableComponent } from '../data-table/data-table.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
 import { RouteInfo } from '../terminal-routing.types';
 import { JobsWebSocketService } from '../../jobs/jobs-websocket.service';
@@ -57,10 +50,11 @@ import { ValuationService, DCFAnalysisData, DDMAnalysisData } from '../valuation
 import { DividendService, DividendAnalysisData } from '../dividend.service';
 import { DividendChartService } from '../dividend-chart.service';
 import { ValuationChartService } from '../valuation-chart.service';
-import { DividendsViewComponent } from '../dividends-view/dividends-view.component';
-import { FundamentalsViewComponent } from '../fundamentals-view/fundamentals-view.component';
-import { ValuationViewComponent } from '../valuation-view/valuation-view.component';
 import { ChartHeaderComponent, ChartSettings } from '../chart-header/chart-header.component';
+import { WatchlistSelectorComponent } from './watchlist-selector/watchlist-selector.component';
+import { SymbolTableComponent } from './symbol-table/symbol-table.component';
+import { WatchlistChartHeaderComponent } from './watchlist-chart-header/watchlist-chart-header.component';
+import { WatchlistChartContentComponent } from './watchlist-chart-content/watchlist-chart-content.component';
 import {
   CreateWatchlistDialogComponent,
   CreateWatchlistDialogData,
@@ -130,29 +124,19 @@ interface WatchlistDisplay extends Watchlist {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     MatIconModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    MatMenuModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatDividerModule,
     MatAutocompleteModule,
-    MatSlideToggleModule,
-    MatTableModule,
-    MatSortModule,
     MatCheckboxModule,
-    MatPaginatorModule,
-    NgxEchartsDirective,
-    DataTableComponent,
-    DividendsViewComponent,
-    FundamentalsViewComponent,
-    ValuationViewComponent,
     ChartHeaderComponent,
+    WatchlistSelectorComponent,
+    SymbolTableComponent,
+    WatchlistChartHeaderComponent,
+    WatchlistChartContentComponent,
     DynamicStyleDirective,
   ],
   providers: [provideEchartsCore({ echarts })],
@@ -656,6 +640,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   isSelectedSystemCategory = computed<boolean>(() => this.isSystemCategory(this.selectedWatchlistId()));
 
   /**
+   * Whether the symbol-table's system-watchlist paginator should render.
+   * Combines isSelectedSystemCategory and a positive totalCount into one signal
+   * so the parent template doesn't need a multi-clause boolean binding.
+   */
+  showSystemWatchlistPaginator = computed<boolean>(
+    () => this.isSelectedSystemCategory() && this.systemWatchlistTotalCount() > 0,
+  );
+
+  /**
    * Check if watchlist is a system category (read-only, not user-editable)
    */
   isSystemCategory(id: string): boolean {
@@ -764,6 +757,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     return 'list';
   });
+
+  /**
+   * Count of symbols in the Recent watchlist; passed to the watchlist-selector
+   * sub-component so its template doesn't need to drill into the service.
+   */
+  recentSymbolCount = computed<number>(() => (this.watchlistService.recentSymbols() || []).length);
 
   /**
    * Check if industries list is available from backend
@@ -1559,6 +1558,25 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       return 'trending_up';
     }
     return 'tune';
+  });
+
+  /** Whether the column-menu button should render with primary color (active special sort). */
+  columnMenuColorPrimary = computed<boolean>(() => {
+    const sort = this.sortBy();
+    return sort === 'lastAccessedAt' || sort === 'accessCount';
+  });
+
+  /**
+   * Special sort field ('lastAccessedAt' | 'accessCount') if currently active,
+   * otherwise null. Used by the symbol-table sub-component to render its
+   * sort-direction indicator and active-state styling.
+   */
+  specialSortField = computed<'lastAccessedAt' | 'accessCount' | null>(() => {
+    const sort = this.sortBy();
+    if (sort === 'lastAccessedAt' || sort === 'accessCount') {
+      return sort;
+    }
+    return null;
   });
 
   /**
@@ -3556,6 +3574,15 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Switch to a watchlist by uuid and then copy all of its symbols.
+   * Used by the watchlist-selector sub-component's Export action.
+   */
+  onSelectorExport(uuid: string): void {
+    this.onWatchlistChange(uuid);
+    this.copyAllSymbols();
+  }
+
+  /**
    * Open create watchlist dialog
    * @param prefilledSymbols Optional symbols to pre-fill in the dialog
    */
@@ -4361,6 +4388,87 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   /** Whether the active chart error message indicates an in-progress data fetch. */
   isChartErrorFetching = computed<boolean>(() => this.isDataFetchingMessage(this.chartError()));
+
+  /** Resolved company/display name to show above the symbol in the chart header (empty if none). */
+  chartHeaderCompanyName = computed<string>(() => {
+    const quote = this.quoteData();
+    if (quote?.name) {
+      return quote.name;
+    }
+    const item = this.selectedItem();
+    return item?.displayName ?? '';
+  });
+
+  /** Exchange chip value for the chart header (empty if none). */
+  chartHeaderExchange = computed<string>(() => this.selectedItem()?.exchange ?? '');
+
+  /** Sector chip value for the chart header (empty if none). */
+  chartHeaderSector = computed<string>(() => this.selectedItem()?.sector ?? '');
+
+  /** Industry chip value for the chart header (empty if none). */
+  chartHeaderIndustry = computed<string>(() => this.selectedItem()?.industry ?? '');
+
+  /** Whether the market-cap chip should render in the chart header. */
+  chartHeaderShowMarketCap = computed<boolean>(() => (this.selectedItem()?.marketCap ?? 0) > 0);
+
+  /** Whether the live quote row should render in the chart header. */
+  chartHeaderShowQuote = computed<boolean>(() => this.quoteData() !== null);
+
+  /** Whether the active command is a chart command (GP or CHART). */
+  isChartLikeCommand = computed<boolean>(() => {
+    const cmd = this.currentCommand();
+    return cmd === 'GP' || cmd === 'CHART';
+  });
+
+  /** Loading label shown in the chart loading state: 'chart' for chart commands, 'data' otherwise. */
+  chartLoadingLabel = computed<string>(() => (this.isChartLikeCommand() ? 'chart' : 'data'));
+
+  /** Icon for the content-placeholder fallback. */
+  contentPlaceholderIcon = computed<string>(() => (this.isChartLikeCommand() ? 'insert_chart' : 'info'));
+
+  /** Live price input for the valuation view, or null when no live quote is available. */
+  valuationLivePrice = computed<number | null>(() => this.quoteData()?.price ?? null);
+
+  // ============================================================================
+  // chart-content visibility booleans (pre-computed; passed to the
+  // watchlist-chart-content sub-component to keep its template simple).
+  // ============================================================================
+
+  /** Show the chart-area (chart canvas) block. */
+  contentShowChartArea = computed<boolean>(
+    () => !this.chartLoading() && this.chartOptions() !== null && this.isChartLikeCommand(),
+  );
+
+  /** Show the table-data (HP) block. */
+  contentShowTableData = computed<boolean>(() => {
+    if (this.chartLoading() || this.contentShowChartArea()) return false;
+    if (this.showFundamentals() || this.showValuation() || this.showDividends()) return false;
+    return this.tableData() !== null;
+  });
+
+  /** Show the data-content-only (DES) block. */
+  contentShowDataContentOnly = computed<boolean>(() => {
+    if (this.chartLoading() || this.contentShowChartArea()) return false;
+    if (this.showFundamentals() || this.showValuation() || this.showDividends()) return false;
+    if (this.tableData() !== null) return false;
+    return this.dataContent() !== null;
+  });
+
+  /** Show the error block. */
+  contentShowError = computed<boolean>(() => {
+    if (this.chartLoading() || this.contentShowChartArea()) return false;
+    if (this.showFundamentals() || this.showValuation() || this.showDividends()) return false;
+    if (this.tableData() !== null || this.dataContent() !== null) return false;
+    return this.chartError() !== null;
+  });
+
+  /** Show the fallback content-placeholder. */
+  contentShowPlaceholder = computed<boolean>(() => {
+    if (this.chartLoading() || this.contentShowChartArea()) return false;
+    if (this.showFundamentals() || this.showValuation() || this.showDividends()) return false;
+    if (this.tableData() !== null || this.dataContent() !== null) return false;
+    return this.chartError() === null;
+  });
 
   /**
    * Format date for OHLC display (human-friendly with time)

@@ -4,144 +4,42 @@
 
   <div class="input-wrapper" #inputWrapper>
     <!-- Rolodex-style history preview: shows loading, empty, or upcoming items -->
-    @if (showHistoryPreview() && !showSuggestions()) {
-      <!-- eslint-disable-next-line @angular-eslint/template/no-inline-styles -- Dynamic positioning required for fixed overlay -->
-      <div
-        class="history-preview-dropdown rolodex"
-        [style.position]="historyDropdownStyle()['position']"
-        [style.bottom]="historyDropdownStyle()['bottom']"
-        [style.left]="historyDropdownStyle()['left']"
-        [style.width]="historyDropdownStyle()['width']"
-      >
-        @if (historyLoading()) {
-          <!-- Loading state -->
-          <div class="history-status loading">
-            <mat-spinner diameter="16" />
-            <span>Loading history...</span>
-          </div>
-        } @else if (historyEmpty() && selectedHistoryIndex() < 0) {
-          <!-- Empty state - no history found -->
-          <div class="history-status empty">
-            <mat-icon>history</mat-icon>
-            <span>No command history</span>
-          </div>
-        } @else if (upcomingHistoryItems().length === 0 && selectedHistoryIndex() >= 0) {
-          <!-- At oldest item -->
-          <div class="history-status end-of-history">
-            <mat-icon>first_page</mat-icon>
-            <span>End of history ({{ historyTotalCount() }} total)</span>
-          </div>
-        } @else {
-          <!-- Show upcoming items -->
-          @for (entry of upcomingHistoryItems(); track entry.item.id || $index; let i = $index) {
-            <div
-              class="history-item upcoming"
-              [class.faded]="i < upcomingHistoryItems().length - 1"
-              (click)="selectHistoryEntry(entry)"
-              (keydown.enter)="selectHistoryEntry(entry)"
-              tabindex="0"
-              role="option"
-              [attr.aria-selected]="false"
-            >
-              <!-- When searching, show raw text with highlighting -->
-              @if (historySearchTerm() && entry.matchText) {
-                <span class="history-raw-text">
-                  <span class="before-match">{{ entry.beforeMatch }}</span
-                  ><mark class="match-highlight">{{ entry.matchText }}</mark
-                  ><span class="after-match">{{ entry.afterMatch }}</span>
-                </span>
-              } @else {
-                <!-- Normal view: show chips -->
-                @for (token of entry.tokens; track token.fqn) {
-                  <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="history-chip" />
-                }
-              }
-            </div>
-          }
-          <div class="history-hint compact">
-            <mat-icon>keyboard_arrow_up</mat-icon>
-            @if (historyRemainingCount() > 0) {
-              <span>{{ historyRemainingCount() }} more</span>
-            } @else {
-              <span>{{ upcomingHistoryItems().length }} more</span>
-            }
-          </div>
-        }
-      </div>
+    @if (historyDropdownVisible()) {
+      <app-history-preview
+        [historyLoading]="historyLoading()"
+        [historyEmpty]="historyEmpty()"
+        [selectedHistoryIndex]="selectedHistoryIndex()"
+        [historyTotalCount]="historyTotalCount()"
+        [historyRemainingCount]="historyRemainingCount()"
+        [historySearchTerm]="historySearchTerm()"
+        [upcomingHistoryItems]="upcomingHistoryItems()"
+        [dropdownStyle]="historyDropdownStyle()"
+        (historyEntrySelected)="selectHistoryEntry($event)"
+      />
     }
 
     <!-- Autocomplete dropdown -->
-    @if (suggestions().length > 0 && showSuggestions()) {
-      <div class="autocomplete-dropdown">
-        <div class="autocomplete-hint">
-          <span class="hint-keys">
-            <kbd>↓</kbd><kbd>↑</kbd> navigate <kbd>Tab</kbd> select <kbd>Enter</kbd> execute
-          </span>
-        </div>
-        @for (suggestion of suggestionsDisplay(); track suggestion.fqn || suggestion.display; let i = $index) {
-          <div
-            class="suggestion-item"
-            [class.selected]="i === selectedSuggestionIndex()"
-            [class.ai-suggestion]="suggestion.isAiInterpreted"
-            [class.ambiguous]="suggestion.isAmbiguous"
-            tabindex="0"
-            role="option"
-            [attr.aria-selected]="i === selectedSuggestionIndex()"
-            (click)="selectSuggestion(suggestion)"
-            (keydown.enter)="selectSuggestion(suggestion)"
-            (mouseenter)="selectedSuggestionIndex.set(i)"
-          >
-            <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-              <mat-icon>{{ suggestion.icon }}</mat-icon>
-            </span>
-            <span class="suggestion-text">
-              @if (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent') {
-                {{ suggestion.symbol || suggestion.display }}
-                @if (suggestion.name) {
-                  <span class="suggestion-name">- {{ suggestion.name }}</span>
-                }
-              } @else {
-                {{ suggestion.display }}
-              }
-            </span>
-            @if (suggestion.displaySecondary || suggestion.description) {
-              <span class="suggestion-desc">{{ suggestion.displaySecondary || suggestion.description }}</span>
-            }
-            @if (
-              suggestion.exchange &&
-              (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent')
-            ) {
-              <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
-            }
-            @if (suggestion.assetType && (suggestion.type === 'symbol' || suggestion.type === 'stock')) {
-              <span class="suggestion-asset-type">{{ suggestion.assetType }}</span>
-            }
-            @if (suggestion.category) {
-              <span class="suggestion-category">{{ suggestion.category }}</span>
-            }
-            @if (suggestion.aliasFor) {
-              <span class="suggestion-alias">→ {{ suggestion.aliasFor }}</span>
-            }
-            @if (suggestion.isAiInterpreted) {
-              <span class="ai-badge">AI</span>
-            }
-          </div>
-        }
-      </div>
+    @if (suggestionsDropdownVisible()) {
+      <app-command-suggestions
+        [suggestions]="suggestionsDisplay()"
+        [selectedSuggestionIndex]="selectedSuggestionIndex()"
+        (suggestionSelected)="selectSuggestion($event)"
+        (suggestionHovered)="selectedSuggestionIndex.set($event)"
+      />
     }
 
     <!-- Command input -->
     <div class="input-container">
       <span class="prompt">&gt;</span>
-      @if (isProcessing() && lastEntry(); as last) {
+      @if (isProcessing()) {
         <!-- Show the executing command as chips while processing -->
         @for (token of lastCommandTokens(); track token.fqn) {
           <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
         }
         <mat-spinner diameter="18" />
       } @else {
-        <!-- Show last command chips when unfocused and no user content -->
         @if (showLastCommand()) {
+          <!-- Show last command chips when unfocused and no user content -->
           @for (token of lastCommandTokens(); track token.fqn) {
             <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="last-command" />
           }
@@ -166,12 +64,12 @@
           (keydown)="onKeyDown($event)"
           (focus)="onInputFocus()"
           (blur)="onInputBlur()"
-          [placeholder]="showLastCommand() ? '' : chips().length > 0 ? '' : 'Type a command or ask a question...'"
+          [placeholder]="inputPlaceholder()"
           [class.transparent-input]="showLastCommand()"
           autocomplete="off"
           spellcheck="false"
         />
-        @if ((currentInput() || chips().length > 0) && !showLastCommand()) {
+        @if (sendButtonVisible()) {
           <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
             <mat-icon>send</mat-icon>
           </button>
@@ -181,17 +79,15 @@
   </div>
 
   <!-- Status indicator -->
-  @if (lastEntry(); as last) {
-    @if (!isProcessing() && last.result) {
-      <mat-icon
-        class="status-icon"
-        [class.success]="last.result.success"
-        [class.error]="!last.result.success"
-        [matTooltip]="last.result.success ? 'Success' : 'Error'"
-      >
-        {{ last.result.success ? 'check_circle' : 'error' }}
-      </mat-icon>
-    }
+  @if (statusInfo(); as status) {
+    <mat-icon
+      class="status-icon"
+      [class.success]="status.success"
+      [class.error]="!status.success"
+      [matTooltip]="status.tooltip"
+    >
+      {{ status.icon }}
+    </mat-icon>
   }
 
   <div class="shortcut-hints">

@@ -14,8 +14,14 @@ interface EnrichedNode extends FinancialNode {
   changeClass: string;
   hasMaIndicator: boolean;
   hasSignificantChange: boolean;
+  /** Indicators rendered next to the node name; pre-flattened for a single @for. */
+  indicators: { icon: string; cssClass: string; tooltip: string }[];
   hasChildren: boolean;
   isExpanded: boolean;
+  /** Pre-computed expand icon, defaults to '' when there are no children. */
+  expandIcon: string;
+  /** Pre-formatted percentage-of-parent (or '—' placeholder). */
+  formattedPercent: string;
   enrichedChildren: EnrichedNode[];
 }
 
@@ -72,20 +78,39 @@ export class FinancialDrilldownComponent {
     const root = this._root();
     if (!root) return null;
     const expanded = this.expandedNodes();
-    return this.enrichNode(root, expanded);
+    return this.enrichNode(root, expanded, 0);
   });
 
-  private enrichNode(node: FinancialNode, expanded: Set<string>): EnrichedNode {
+  private enrichNode(node: FinancialNode, expanded: Set<string>, level: number): EnrichedNode {
+    const hasChildren = (node.children?.length ?? 0) > 0;
+    const isExpanded = expanded.has(node.id);
+    const hasMa = this.hasMaIndicator(node);
+    const hasSig = this.hasSignificantChange(node);
+    const indicators: { icon: string; cssClass: string; tooltip: string }[] = [];
+    if (hasMa) {
+      indicators.push({ icon: 'merge_type', cssClass: 'indicator ma-indicator', tooltip: 'M&A Activity Detected' });
+    }
+    if (hasSig) {
+      indicators.push({
+        icon: 'trending_up',
+        cssClass: 'indicator change-indicator',
+        tooltip: 'Significant YoY Change',
+      });
+    }
+    const showPercent = node.percentageOfParent !== null && level > 0;
     return {
       ...node,
       formattedValue: this.formatValue(node.value),
       formattedChange: this.formatChange(node.yoyChange),
       changeClass: this.getChangeClass(node.yoyChange),
-      hasMaIndicator: this.hasMaIndicator(node),
-      hasSignificantChange: this.hasSignificantChange(node),
-      hasChildren: (node.children?.length ?? 0) > 0,
-      isExpanded: expanded.has(node.id),
-      enrichedChildren: (node.children ?? []).map((c) => this.enrichNode(c, expanded)),
+      hasMaIndicator: hasMa,
+      hasSignificantChange: hasSig,
+      indicators,
+      hasChildren,
+      isExpanded,
+      expandIcon: hasChildren ? (isExpanded ? 'expand_more' : 'chevron_right') : '',
+      formattedPercent: showPercent ? `${(node.percentageOfParent ?? 0).toFixed(1)}%` : '—',
+      enrichedChildren: (node.children ?? []).map((c) => this.enrichNode(c, expanded, level + 1)),
     };
   }
 

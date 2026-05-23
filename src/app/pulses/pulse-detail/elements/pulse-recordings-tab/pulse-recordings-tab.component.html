@@ -8,13 +8,7 @@
             <h3>History</h3>
             <span class="history-count">{{ historyRecordings.length }}</span>
           </div>
-          <p class="recordings-description">
-            @if (historyRecordings.length > 0) {
-              Previous recordings from this pulse.
-            } @else {
-              Each recording is a generated audio file. Auto-generated from your content sources, or create your own.
-            }
-          </p>
+          <p class="recordings-description">{{ historyDescription }}</p>
         </div>
         <button
           mat-flat-button
@@ -56,7 +50,7 @@
                 <span class="history-row-number">#{{ historyRecordings.length - i }}</span>
 
                 <!-- Play pill -->
-                @if (pulse | pulseCanPlay) {
+                @if (pulse.canPlay) {
                   <button
                     class="history-play-pill"
                     mat-flat-button
@@ -65,8 +59,8 @@
                   >
                     <mat-icon>play_arrow</mat-icon>
                     Play
-                    @if (pulse.audioDurationSeconds) {
-                      <span class="duration-hint">{{ pulse.audioDurationSeconds | pulseFormatSeconds }}</span>
+                    @if (pulse.playDurationText) {
+                      <span class="duration-hint">{{ pulse.playDurationText }}</span>
                     }
                   </button>
                 } @else {
@@ -74,12 +68,10 @@
                     class="history-play-pill placeholder"
                     mat-stroked-button
                     disabled
-                    [matTooltip]="pulse.status === 'FAILED' ? pulse.errorMessage || 'Failed' : 'Not ready'"
+                    [matTooltip]="pulse.placeholderTooltip"
                   >
-                    <mat-icon>{{ pulse.status === 'FAILED' ? 'error' : 'hourglass_empty' }}</mat-icon>
-                    <span class="duration-hint">
-                      {{ (pulse.audioDurationSeconds | pulseFormatSeconds) || '—' }}
-                    </span>
+                    <mat-icon>{{ pulse.placeholderIcon }}</mat-icon>
+                    <span class="duration-hint">{{ pulse.placeholderDurationText }}</span>
                   </button>
                 }
 
@@ -89,14 +81,10 @@
                   <div class="history-meta">
                     <span>{{ pulse.createdAt | pulseTimeAgo }}</span>
                     <span class="history-meta-sep">·</span>
-                    <span>{{ pulse.wordCount || 0 }} words</span>
-                    @if (pulse.news && pulse.news.length > 0) {
+                    <span>{{ pulse.wordCountText }}</span>
+                    @for (part of pulse.metaParts; track part) {
                       <span class="history-meta-sep">·</span>
-                      <span>{{ pulse.news.length }} news</span>
-                    }
-                    @if (pulse.researchUrls && pulse.researchUrls.length > 0) {
-                      <span class="history-meta-sep">·</span>
-                      <span>{{ pulse.researchUrls.length }} URLs</span>
+                      <span>{{ part }}</span>
                     }
                   </div>
                 </div>
@@ -117,7 +105,7 @@
 
                 <!-- Inline icon actions -->
                 <div class="history-row-actions">
-                  @if (pulse | pulseCanPlay) {
+                  @if (pulse.canPlay) {
                     <button
                       mat-icon-button
                       class="more-button"
@@ -169,65 +157,34 @@
                   <div class="history-detail-block">
                     <div class="history-detail-label">Validation</div>
                     <div class="history-detail-rows">
-                      <div
-                        class="history-detail-check"
-                        [class.validated]="pulse.validatedCompliance"
-                        [class.not-validated]="!pulse.validatedCompliance"
-                      >
-                        <span>Compliance</span>
-                        <span class="history-detail-check-value">
-                          <mat-icon>{{ pulse.validatedCompliance ? 'check' : 'remove' }}</mat-icon>
-                          {{ pulse.validatedCompliance ? 'Pass' : 'N/A' }}
-                        </span>
-                      </div>
-                      <div
-                        class="history-detail-check"
-                        [class.validated]="pulse.validatedFacts"
-                        [class.not-validated]="!pulse.validatedFacts"
-                      >
-                        <span>Facts</span>
-                        <span class="history-detail-check-value">
-                          <mat-icon>{{ pulse.validatedFacts ? 'check' : 'remove' }}</mat-icon>
-                          {{ pulse.validatedFacts ? 'Pass' : 'N/A' }}
-                        </span>
-                      </div>
-                      <div
-                        class="history-detail-check"
-                        [class.validated]="pulse.validatedLength"
-                        [class.not-validated]="!pulse.validatedLength"
-                      >
-                        <span>Length</span>
-                        <span class="history-detail-check-value">
-                          <mat-icon>{{ pulse.validatedLength ? 'check' : 'remove' }}</mat-icon>
-                          {{ pulse.validatedLength ? 'Pass' : 'N/A' }}
-                        </span>
-                      </div>
+                      @for (row of pulse.validationRows; track row.label) {
+                        <div
+                          class="history-detail-check"
+                          [class.validated]="row.pass"
+                          [class.not-validated]="!row.pass"
+                        >
+                          <span>{{ row.label }}</span>
+                          <span class="history-detail-check-value">
+                            <mat-icon>{{ row.icon }}</mat-icon>
+                            {{ row.value }}
+                          </span>
+                        </div>
+                      }
                     </div>
                   </div>
 
                   <div class="history-detail-block">
                     <div class="history-detail-label">Transcript preview</div>
                     <div class="history-detail-transcript">
-                      @if (pulse.transcript) {
-                        {{ pulse.transcript | slice: 0 : 240 }}{{ pulse.transcript.length > 240 ? '…' : '' }}
-                      } @else {
-                        <span class="history-detail-empty">No transcript available.</span>
-                      }
+                      <span [class]="pulse.transcriptClass">{{ pulse.transcriptText }}</span>
                     </div>
                   </div>
 
                   <div class="history-detail-block">
                     <div class="history-detail-label">Sources</div>
                     <div class="history-detail-sources">
-                      @if (pulse.topNews.length > 0) {
-                        @for (n of pulse.topNews; track $index) {
-                          <span class="history-source-chip">{{ n.source }}</span>
-                        }
-                        @if (pulse.extraNewsCount > 0) {
-                          <span class="history-source-chip more">+{{ pulse.extraNewsCount }} more</span>
-                        }
-                      } @else {
-                        <span class="history-detail-empty">No sources recorded.</span>
+                      @for (item of pulse.sourceItems; track $index) {
+                        <span [class]="item.chipClass">{{ item.label }}</span>
                       }
                     </div>
                   </div>

@@ -1,0 +1,214 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<!-- Currency Warning Banner for DDM - show when trading and reporting currencies differ -->
+@if (showCurrencyWarning()) {
+  <div class="currency-warning">
+    <mat-icon>info</mat-icon>
+    <span>{{ ddmData?.currencyNote }}</span>
+  </div>
+}
+
+@if (ddmData && drillDown === 'summary') {
+  <!-- DDM Summary View -->
+  <div class="valuation-summary">
+    <div class="valuation-metrics">
+      <app-kpi-card [label]="priceLabel()" [value]="'$' + (displayPrice() | toFixed: 2)" [accent]="priceAccent()" />
+      <app-kpi-card
+        label="Intrinsic Value"
+        [value]="'$' + (ddmData.intrinsicValue | toFixed: 2)"
+        [changePercent]="displayUpside()"
+        accent="primary"
+        [tooltip]="CHART_DEFINITIONS.intrinsicValue.description"
+      />
+      <app-kpi-card
+        label="Dividend Yield"
+        [value]="(ddmData.currentDividendYield | toFixed: 2) + '%'"
+        [tooltip]="CHART_DEFINITIONS.dividendYield.description"
+      />
+      <app-kpi-card label="Cost of Equity" [value]="(ddmData.costOfEquity | toFixed: 1) + '%'" />
+      <app-kpi-card
+        label="Margin of Safety"
+        [value]="(ddmData.marginOfSafety | toFixed: 1) + '%'"
+        [tooltip]="CHART_DEFINITIONS.marginOfSafety.description"
+      />
+      <app-kpi-card label="Model Type" [value]="modelTypeLabel()" [tooltip]="ddmData.modelDescription" />
+    </div>
+    <!-- DDM Charts -->
+    <div class="valuation-charts-grid">
+      @if (ddmCharts?.valuation) {
+        <div class="valuation-chart">
+          <div echarts [options]="ddmCharts!.valuation" class="valuation-echart"></div>
+        </div>
+      }
+      @if (ddmCharts?.breakdown) {
+        <div class="valuation-chart">
+          <div echarts [options]="ddmCharts!.breakdown" class="valuation-echart"></div>
+        </div>
+      }
+    </div>
+  </div>
+} @else if (ddmData && drillDown === 'historical') {
+  <!-- DDM Historical View: Dividend history -->
+  <div class="valuation-historical">
+    <div class="historical-header">
+      <span class="section-title">Dividend History</span>
+    </div>
+    <div class="historical-stats">
+      <app-kpi-card
+        label="Current Dividend"
+        [value]="'$' + (ddmData.currentDividendPerShare | toFixed: 2)"
+        tooltip="Annual dividend per share"
+      />
+      <app-kpi-card
+        label="Dividend CAGR"
+        [value]="(ddmData.historicalGrowthRate | toFixed: 1) + '%'"
+        tooltip="Compound annual growth rate of dividends"
+      />
+      <app-kpi-card label="Years of Data" [value]="yearsOfData()" tooltip="Number of years with dividend data" />
+      <app-kpi-card
+        label="Payout Ratio"
+        [value]="(ddmData.payoutRatio | toFixed: 1) + '%'"
+        tooltip="Percentage of earnings paid as dividends"
+      />
+      <app-kpi-card
+        label="Sustainability"
+        [value]="(ddmData.dividendSustainabilityScore | toFixed: 0) + '/100'"
+        tooltip="Score indicating dividend sustainability (higher is better)"
+      />
+    </div>
+    @if (ddmCharts?.dividendProjection) {
+      <div class="valuation-chart-full">
+        <div echarts [options]="ddmCharts!.dividendProjection!" class="valuation-echart-large"></div>
+      </div>
+    }
+  </div>
+} @else if (ddmData && drillDown === 'projections') {
+  <!-- DDM Projections View: Projected dividends -->
+  <div class="valuation-projections">
+    @if (ddmCharts?.dividendProjection) {
+      <div class="valuation-chart-full">
+        <div echarts [options]="ddmCharts!.dividendProjection!" class="valuation-echart-full"></div>
+      </div>
+    }
+    <!-- Projected Dividends Table -->
+    <app-financial-table [data]="ddmProjectionTableData()" title="Projected Dividends" />
+  </div>
+} @else if (drillDown === 'sensitivity') {
+  <!-- DDM Sensitivity View: Not applicable for DDM -->
+  <div class="no-data-message">
+    <mat-icon>info</mat-icon>
+    <p>Sensitivity analysis is not available for the Dividend Discount Model.</p>
+    <p class="hint">
+      DDM valuations are primarily sensitive to cost of equity and dividend growth rate assumptions, which can be
+      adjusted in the Methodology view.
+    </p>
+  </div>
+} @else if (ddmData && drillDown === 'methodology') {
+  <!-- DDM Methodology View -->
+  <div class="valuation-methodology">
+    <div class="methodology-section">
+      <h4>Model Parameters</h4>
+      <div class="assumptions-grid">
+        <div class="assumption">
+          <span class="label">Model Type</span>
+          <span class="value">{{ modelTypeLabel() }}</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Current Dividend/Share</span>
+          <span class="value">${{ ddmData.currentDividendPerShare | toFixed: 2 }}</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Cost of Equity</span>
+          <span class="value">{{ ddmData.costOfEquity | toFixed: 2 }}%</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Terminal Growth Rate</span>
+          <span class="value">{{ ddmData.terminalGrowthRate | toFixed: 2 }}%</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Historical Growth Rate</span>
+          <span class="value">{{ ddmData.historicalGrowthRate | toFixed: 2 }}%</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Payout Ratio</span>
+          <span class="value">{{ ddmData.payoutRatio | toFixed: 1 }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculated Values -->
+    <div class="methodology-section">
+      <h4>Calculated Values</h4>
+      <div class="assumptions-grid">
+        <div class="assumption">
+          <span class="label">PV of Dividends</span>
+          <span class="value">${{ ddmData.presentValueDividends | toFixed: 2 }}</span>
+        </div>
+        <div class="assumption">
+          <span class="label">PV of Terminal Value</span>
+          <span class="value">${{ ddmData.presentValueTerminal | toFixed: 2 }}</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Terminal Value</span>
+          <span class="value">${{ ddmData.terminalValue | toFixed: 2 }}</span>
+        </div>
+        <div class="assumption">
+          <span class="label">Intrinsic Value</span>
+          <span class="value">${{ ddmData.intrinsicValue | toFixed: 2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DDM Formula based on model type -->
+    @switch (ddmData.modelType) {
+      @case ('gordon') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.gordonGrowth.title"
+          [description]="DDM_FORMULAS.gordonGrowth.description"
+          [formulaHtml]="DDM_FORMULAS.gordonGrowth.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.gordonGrowth.variableDefinitions"
+          [variables]="ddmVariables()"
+          [calculationSteps]="gordonGrowthSteps()"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + (ddmData.intrinsicValue | toFixed: 2)"
+        />
+      }
+      @case ('two_stage') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.twoStage.title"
+          [description]="DDM_FORMULAS.twoStage.description"
+          [formulaHtml]="DDM_FORMULAS.twoStage.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.twoStage.variableDefinitions"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + (ddmData.intrinsicValue | toFixed: 2)"
+        />
+      }
+      @case ('h_model') {
+        <app-formula-display
+          [title]="DDM_FORMULAS.hModel.title"
+          [description]="DDM_FORMULAS.hModel.description"
+          [formulaHtml]="DDM_FORMULAS.hModel.formulaHtml"
+          [variableDefinitions]="DDM_FORMULAS.hModel.variableDefinitions"
+          resultLabel="Intrinsic Value"
+          [resultValue]="'$' + (ddmData.intrinsicValue | toFixed: 2)"
+        />
+      }
+    }
+
+    <!-- Intrinsic Value Formula -->
+    <app-formula-display
+      [title]="DDM_FORMULAS.intrinsicValue.title"
+      [description]="DDM_FORMULAS.intrinsicValue.description"
+      [formulaHtml]="DDM_FORMULAS.intrinsicValue.formulaHtml"
+      [variableDefinitions]="DDM_FORMULAS.intrinsicValue.variableDefinitions"
+      [calculationSteps]="ddmIntrinsicValueSteps()"
+      resultLabel="Intrinsic Value"
+      [resultValue]="'$' + (ddmData.intrinsicValue | toFixed: 2)"
+    />
+
+    <!-- Model Description -->
+    <div class="methodology-section">
+      <h4>Model Description</h4>
+      <p class="model-description">{{ ddmData.modelDescription }}</p>
+    </div>
+  </div>
+}

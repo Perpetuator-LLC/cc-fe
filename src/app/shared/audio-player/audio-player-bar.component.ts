@@ -55,6 +55,14 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
   /** Pre-formatted current-time / duration strings. */
   readonly currentTimeText = computed(() => this.audioService.formatTime(this.audioService.currentTime()));
   readonly durationText = computed(() => this.audioService.formatTime(this.audioService.duration()));
+  /** Icon for the play/pause toggle button. */
+  readonly playToggleIcon = computed(() => (this.audioService.isPlaying() ? 'pause_circle' : 'play_circle'));
+  /** Icon for the volume button, reacting to muted state and volume level. */
+  readonly volumeIcon = computed(() => {
+    if (this.audioService.isMuted() || this.audioService.volume() === 0) return 'volume_off';
+    if (this.audioService.volume() < 0.5) return 'volume_down';
+    return 'volume_up';
+  });
   private previousTrackForHistory: AudioTrack | null = null;
   private shouldScrollToBottom = false;
   private skipNextHistoryUpdate = false; // Flag to prevent effect from re-adding track when playing from history

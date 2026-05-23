@@ -57,20 +57,14 @@
       tabindex="0"
     >
       <!-- Expand/Collapse Icon -->
-      @if (node.hasChildren) {
-        <mat-icon class="expand-icon">{{ node.isExpanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
-      } @else {
-        <span class="expand-placeholder"></span>
-      }
+      <mat-icon class="expand-icon" [hidden]="!node.hasChildren">{{ node.expandIcon }}</mat-icon>
+      <span class="expand-placeholder" [hidden]="node.hasChildren"></span>
 
       <!-- Node Name with Indicators -->
       <span class="node-name">
         {{ node.name }}
-        @if (node.hasMaIndicator) {
-          <mat-icon class="indicator ma-indicator" matTooltip="M&A Activity Detected">merge_type</mat-icon>
-        }
-        @if (node.hasSignificantChange) {
-          <mat-icon class="indicator change-indicator" matTooltip="Significant YoY Change">trending_up</mat-icon>
+        @for (ind of node.indicators; track ind.icon) {
+          <mat-icon [class]="ind.cssClass" [matTooltip]="ind.tooltip">{{ ind.icon }}</mat-icon>
         }
       </span>
 
@@ -78,20 +72,10 @@
       <span class="node-value">{{ node.formattedValue }}</span>
 
       <!-- YoY Change -->
-      @if (node.yoyChange !== null) {
-        <span class="node-change" [class]="node.changeClass">
-          {{ node.formattedChange }}
-        </span>
-      } @else {
-        <span class="node-change placeholder">—</span>
-      }
+      <span class="node-change" [class]="node.changeClass">{{ node.formattedChange || '—' }}</span>
 
       <!-- Percentage of Parent -->
-      @if (node.percentageOfParent !== null && level > 0) {
-        <span class="node-percent">{{ node.percentageOfParent | toFixed: 1 }}%</span>
-      } @else {
-        <span class="node-percent placeholder">—</span>
-      }
+      <span class="node-percent" [class.placeholder]="node.formattedPercent === '—'">{{ node.formattedPercent }}</span>
 
       <!-- Drill-down Button -->
       <button

@@ -100,9 +100,7 @@
                 role="button"
               >
                 <span>Podcast Name</span>
-                @if (sortDirectionName) {
-                  <mat-icon>{{ sortDirectionName === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                }
+                <mat-icon [hidden]="!sortIconName">{{ sortIconName }}</mat-icon>
               </div>
             </th>
             <td mat-cell *matCellDef="let podcast">
@@ -156,9 +154,7 @@
                 role="button"
               >
                 <span>Latest Episode</span>
-                @if (sortDirectionLatestEpisode) {
-                  <mat-icon>{{ sortDirectionLatestEpisode === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                }
+                <mat-icon [hidden]="!sortIconLatestEpisode">{{ sortIconLatestEpisode }}</mat-icon>
               </div>
             </th>
             <td mat-cell *matCellDef="let podcast">
@@ -178,9 +174,7 @@
                 (keydown.space)="onSortChange('created_at')"
               >
                 <span>Created</span>
-                @if (sortDirectionCreatedAt) {
-                  <mat-icon>{{ sortDirectionCreatedAt === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                }
+                <mat-icon [hidden]="!sortIconCreatedAt">{{ sortIconCreatedAt }}</mat-icon>
               </div>
             </th>
             <td mat-cell *matCellDef="let podcast">
@@ -292,9 +286,7 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
-      }
-
-      @if (isGridView) {
+      } @else {
         <div class="podcasts-grid">
           @for (podcast of dataSource.data; track podcast.uuid) {
             <mat-card class="podcast-card">

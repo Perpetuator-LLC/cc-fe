@@ -22,149 +22,42 @@
 
       <!-- RSS Feed URL with Autocomplete -->
       @if (selectedType === 'rss_feed') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>RSS Feed URL or Name</mat-label>
-          <input
-            matInput
-            formControlName="rssUrl"
-            placeholder="Search existing feeds or enter a URL..."
-            [matAutocomplete]="rssAutocomplete"
-            (input)="onRssInputChange($event)"
-          />
-          @if (isSearchingRssFeeds) {
-            <mat-spinner matSuffix diameter="20" />
-          }
-          <mat-autocomplete
-            #rssAutocomplete="matAutocomplete"
-            [displayWith]="displayRssFeed"
-            (optionSelected)="selectRssFeed($event.option.value)"
-            [autoSelectActiveOption]="false"
-          >
-            @for (feed of rssFeedSuggestions; track feed.uuid) {
-              <mat-option [value]="feed" [matTooltip]="feed.url" matTooltipPosition="after">
-                <div class="rss-option">
-                  <span class="rss-name">{{ feed.name || 'Unnamed Feed' }}</span>
-                  <span class="rss-meta">
-                    @if (feed.articlesPerDay > 0) {
-                      <span class="articles-per-day">~{{ feed.articlesPerDay | number: '1.0-1' }}/day</span>
-                    }
-                    @if (!feed.isReachable || !feed.isParsable) {
-                      <mat-icon class="warning-icon" matTooltip="Feed may have issues">warning</mat-icon>
-                    }
-                  </span>
-                </div>
-              </mat-option>
-            }
-            @if (rssFeedSuggestions.length === 0 && !isSearchingRssFeeds) {
-              <mat-option disabled>
-                <span class="no-results">No matching feeds. Enter a URL to add a new one.</span>
-              </mat-option>
-            }
-          </mat-autocomplete>
-          <mat-hint>
-            Search existing feeds by name/URL, or enter a new feed URL.
-            @if (selectedRssFeed) {
-              <span class="selected-hint">Selected: {{ selectedRssFeed.name || selectedRssFeed.url }}</span>
-            }
-          </mat-hint>
-          @if (sourceForm.get('rssUrl')?.hasError('required')) {
-            <mat-error>RSS URL is required</mat-error>
-          }
-          @if (sourceForm.get('rssUrl')?.hasError('pattern')) {
-            <mat-error>Please enter a valid URL</mat-error>
-          }
-        </mat-form-field>
+        <app-rss-feed-field
+          [form]="sourceForm"
+          [rssFeedSuggestions]="rssFeedSuggestions"
+          [isSearchingRssFeeds]="isSearchingRssFeeds"
+          [selectedRssFeed]="selectedRssFeed"
+          [displayRssFeed]="displayRssFeed"
+          (rssInputChange)="onRssInputChange($event)"
+          (rssFeedSelected)="selectRssFeed($event)"
+        />
       }
 
       <!-- Search Term -->
       @if (selectedType === 'search_term') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Search Term</mat-label>
-          <input matInput formControlName="searchTerm" placeholder="e.g., artificial intelligence" />
-          <mat-hint>Keywords to search for in news</mat-hint>
-          @if (sourceForm.get('searchTerm')?.hasError('required')) {
-            <mat-error>Search term is required</mat-error>
-          }
-          @if (sourceForm.get('searchTerm')?.hasError('minlength')) {
-            <mat-error>Search term must be at least 2 characters</mat-error>
-          }
-        </mat-form-field>
+        <app-search-term-field [form]="sourceForm" />
       }
 
       <!-- Watchlist Picker -->
       @if (selectedType === 'watchlist') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Watchlist</mat-label>
-          <mat-select formControlName="watchlistUuid" [disabled]="isLoadingWatchlists">
-            @if (isLoadingWatchlists) {
-              <mat-option disabled> <mat-icon>autorenew</mat-icon> Loading watchlists... </mat-option>
-            }
-            @for (watchlist of watchlists; track watchlist.uuid) {
-              <mat-option [value]="watchlist.uuid">
-                {{ watchlist.name }}
-                @if (watchlist.itemCount) {
-                  <span class="watchlist-count">({{ watchlist.itemCount }} symbols)</span>
-                }
-              </mat-option>
-            }
-            @if (!isLoadingWatchlists && watchlists.length === 0) {
-              <mat-option disabled>No watchlists found</mat-option>
-            }
-          </mat-select>
-          <mat-hint>Select a watchlist to monitor for news</mat-hint>
-          @if (sourceForm.get('watchlistUuid')?.hasError('required')) {
-            <mat-error>Watchlist is required</mat-error>
-          }
-        </mat-form-field>
+        <app-watchlist-field
+          [form]="sourceForm"
+          [watchlists]="watchlists"
+          [isLoadingWatchlists]="isLoadingWatchlists"
+        />
       }
 
       <!-- Company Symbol with Autocomplete -->
       @if (selectedType === 'company') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Company Symbol</mat-label>
-          <input
-            matInput
-            formControlName="symbol"
-            placeholder="Search by symbol or company name..."
-            [matAutocomplete]="stockAutocomplete"
-            (input)="onStockInputChange($event)"
-            class="uppercase-input"
-          />
-          @if (isSearchingStocks) {
-            <mat-spinner matSuffix diameter="20" />
-          }
-          <mat-autocomplete
-            #stockAutocomplete="matAutocomplete"
-            [displayWith]="displayStock"
-            (optionSelected)="selectStock($event.option.value)"
-          >
-            @for (stock of stockSuggestions; track stock.symbol) {
-              <mat-option [value]="stock">
-                <div class="stock-option">
-                  <span class="stock-symbol">{{ stock.symbol }}</span>
-                  <span class="stock-name">{{ stock.name }}</span>
-                </div>
-              </mat-option>
-            }
-            @if (stockSuggestions.length === 0 && !isSearchingStocks) {
-              <mat-option disabled>
-                <span class="no-results">Type to search for a company</span>
-              </mat-option>
-            }
-          </mat-autocomplete>
-          <mat-hint>
-            Search by ticker symbol or company name
-            @if (selectedStock) {
-              <span class="selected-hint">Selected: {{ selectedStock.name }}</span>
-            }
-          </mat-hint>
-          @if (sourceForm.get('symbol')?.hasError('required')) {
-            <mat-error>Symbol is required</mat-error>
-          }
-          @if (sourceForm.get('symbol')?.hasError('pattern')) {
-            <mat-error>Enter a valid ticker symbol (1-5 uppercase letters)</mat-error>
-          }
-        </mat-form-field>
+        <app-company-symbol-field
+          [form]="sourceForm"
+          [stockSuggestions]="stockSuggestions"
+          [isSearchingStocks]="isSearchingStocks"
+          [selectedStock]="selectedStock"
+          [displayStock]="displayStock"
+          (stockInputChange)="onStockInputChange($event)"
+          (stockSelected)="selectStock($event)"
+        />
       }
 
       <!-- Custom Instructions -->
@@ -190,7 +83,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="sourceForm.invalid || isSubmitting">
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="submitDisabled">
       @if (isSubmitting) {
         <mat-spinner diameter="20" />
       } @else {

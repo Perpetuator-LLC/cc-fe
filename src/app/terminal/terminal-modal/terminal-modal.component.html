@@ -100,40 +100,29 @@
 
   <div class="modal-footer">
     <div class="input-wrapper">
-      @if (suggestions.length > 0 && showSuggestions) {
-        <div class="autocomplete-dropdown">
-          @for (suggestion of suggestions; track suggestion.text; let i = $index) {
-            <div
-              class="suggestion-item"
-              [class.selected]="i === selectedSuggestionIndex"
-              [class.ai-suggestion]="suggestion.isAiInterpreted"
-              tabindex="0"
-              role="option"
-              [attr.aria-selected]="i === selectedSuggestionIndex"
-              (click)="selectSuggestion(suggestion)"
-              (keydown.enter)="selectSuggestion(suggestion)"
-              (mouseenter)="selectedSuggestionIndex = i"
-            >
-              <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-                <mat-icon>{{ suggestion.icon }}</mat-icon>
-              </span>
-              <span class="suggestion-text">{{ suggestion.display }}</span>
-              @if (suggestion.description) {
-                <span class="suggestion-desc">{{ suggestion.description }}</span>
-              }
-              @if (suggestion.exchange) {
-                <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
-              }
-              @if (suggestion.category) {
-                <span class="suggestion-category">{{ suggestion.category }}</span>
-              }
-              @if (suggestion.isAiInterpreted) {
-                <span class="ai-badge">AI</span>
-              }
-            </div>
-          }
-        </div>
-      }
+      <div class="autocomplete-dropdown" [hidden]="!autocompleteVisible">
+        @for (suggestion of suggestions; track suggestion.text; let i = $index) {
+          <div
+            class="suggestion-item"
+            [class.selected]="i === selectedSuggestionIndex"
+            [class.ai-suggestion]="suggestion.isAiInterpreted"
+            tabindex="0"
+            role="option"
+            [attr.aria-selected]="i === selectedSuggestionIndex"
+            (click)="selectSuggestion(suggestion)"
+            (keydown.enter)="selectSuggestion(suggestion)"
+            (mouseenter)="selectedSuggestionIndex = i"
+          >
+            <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+              <mat-icon>{{ suggestion.icon }}</mat-icon>
+            </span>
+            <span class="suggestion-text">{{ suggestion.display }}</span>
+            @for (meta of suggestion.metaItems; track meta.cls) {
+              <span [class]="meta.cls">{{ meta.text }}</span>
+            }
+          </div>
+        }
+      </div>
       <div class="input-container">
         <span class="prompt">&gt;</span>
         <input

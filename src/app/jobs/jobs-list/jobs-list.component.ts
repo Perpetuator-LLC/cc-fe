@@ -13,27 +13,26 @@ import {
   iconForJob,
 } from '../job.service';
 import { JobsWebSocketService } from '../jobs-websocket.service';
-import { DatePipe, DecimalPipe, NgClass, UpperCasePipe } from '@angular/common';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MessageService } from '../../message.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { EpisodeService } from '../../episode/episode.service';
 import { JobDisplayService } from '../../job-display.service';
 import { ResearchService, Topic } from '../../topics/research.service';
 import { PulsesService } from '../../pulses/pulses.service';
 import { PulseConfig } from '../../pulses/pulses.types';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { LoadingService } from '../../layout/loading.service';
+import { JobsListEmptyComponent } from './jobs-list-empty/jobs-list-empty.component';
+import { JobsListFilterComponent } from './jobs-list-filter/jobs-list-filter.component';
+import { JobsListChainComponent } from './jobs-list-chain/jobs-list-chain.component';
+import { JobsListItemComponent } from './jobs-list-item/jobs-list-item.component';
 
 /**
  * Pre-computed display state for an EnrichedJob. Built once per job in
@@ -134,22 +133,16 @@ interface Episode {
   selector: 'app-jobs-list',
   standalone: true,
   imports: [
-    MatTooltipModule,
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    DatePipe,
-    DecimalPipe,
-    UpperCasePipe,
     MatIcon,
-    MatIconButton,
-    MatButton,
-    NgClass,
-    RouterLink,
-    MatSelectModule,
-    MatFormFieldModule,
     MatProgressSpinnerModule,
     MatProgressBarModule,
+    JobsListEmptyComponent,
+    JobsListFilterComponent,
+    JobsListChainComponent,
+    JobsListItemComponent,
   ],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',

@@ -2,11 +2,15 @@
 <div class="formula-container">
   <div class="formula-header">
     <span class="formula-title">{{ title }}</span>
-    @if (description) {
-      <button type="button" class="info-button" [matTooltip]="description" matTooltipPosition="above">
-        <mat-icon>info_outline</mat-icon>
-      </button>
-    }
+    <button
+      type="button"
+      class="info-button"
+      [hidden]="!description"
+      [matTooltip]="description"
+      matTooltipPosition="above"
+    >
+      <mat-icon>info_outline</mat-icon>
+    </button>
   </div>
 
   <div class="formula-expression">
@@ -36,14 +40,10 @@
     <div class="calculation-steps">
       @for (step of calculationSteps; track step.expressionHtml) {
         <div class="calculation-step">
-          @if (step.label) {
-            <span class="step-label">{{ step.label }}</span>
-          }
+          <span class="step-label" [hidden]="!step.label">{{ step.label }}</span>
           <div class="step-expression">
             <span [innerHTML]="step.expressionHtml"></span>
-            @if (step.result) {
-              <span class="step-result">{{ step.result }}</span>
-            }
+            <span class="step-result" [hidden]="!step.result">{{ step.result }}</span>
           </div>
         </div>
       }

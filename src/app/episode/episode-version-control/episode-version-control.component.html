@@ -9,20 +9,12 @@
       <mat-panel-description>
         <span>
           Current: v{{ currentVersionNumber }}
-          @if (isCurrentVersionFullyValidated) {
-            <mat-icon class="status-icon validated md3-icon-success" [matTooltip]="currentVersionValidationTooltip"
-              >verified</mat-icon
-            >
-          } @else {
-            <mat-icon class="status-icon unvalidated md3-icon-warning" [matTooltip]="currentVersionValidationTooltip"
-              >warning</mat-icon
-            >
-          }
+          <mat-icon [class]="currentValidationStatusIconClass" [matTooltip]="currentVersionValidationTooltip">{{
+            currentValidationIcon
+          }}</mat-icon>
         </span>
-        @if (historyVersions.length > 0) {
-          <span class="history-count">
-            • {{ historyVersions.length }} previous version{{ historyVersions.length !== 1 ? 's' : '' }}
-          </span>
+        @if (hasHistory) {
+          <span class="history-count"> • {{ previousVersionsLabel }} </span>
         }
       </mat-panel-description>
     </mat-expansion-panel-header>
@@ -58,17 +50,10 @@
           <span class="info-label">Current Version:</span>
           <span class="info-value">
             Version {{ currentVersionNumber }}
-            @if (isCurrentVersionFullyValidated) {
-              <span class="validated-badge md3-badge-success" [matTooltip]="currentVersionValidationTooltip">
-                <mat-icon class="md3-icon-success">verified</mat-icon>
-                Validated
-              </span>
-            } @else {
-              <span class="unvalidated-badge md3-badge-warning" [matTooltip]="currentVersionValidationTooltip">
-                <mat-icon class="md3-icon-warning">warning</mat-icon>
-                Not Validated
-              </span>
-            }
+            <span [class]="currentValidationBadgeClass" [matTooltip]="currentVersionValidationTooltip">
+              <mat-icon [class]="currentValidationBadgeIconClass">{{ currentValidationIcon }}</mat-icon>
+              {{ currentValidationLabel }}
+            </span>
           </span>
         </div>
         @if (currentVersionChangeType) {
@@ -101,7 +86,7 @@
       </div>
 
       <!-- Version History -->
-      @if (historyVersions.length > 0) {
+      @if (hasHistory) {
         <div class="version-history-divider"></div>
         <h4 class="section-heading">Version History</h4>
 
@@ -119,15 +104,11 @@
                       @if (selectedVersion.display.hasAudio) {
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
-                      @if (selectedVersion.display.isFullyValidated) {
-                        <mat-icon class="validated-icon" [matTooltip]="selectedVersion.display.validationTooltip"
-                          >verified</mat-icon
-                        >
-                      } @else {
-                        <mat-icon class="unvalidated-icon" [matTooltip]="selectedVersion.display.validationTooltip"
-                          >warning</mat-icon
-                        >
-                      }
+                      <mat-icon
+                        [class]="selectedVersion.display.validationIconClass"
+                        [matTooltip]="selectedVersion.display.validationTooltip"
+                        >{{ selectedVersion.display.validationIcon }}</mat-icon
+                      >
                     </span>
                   </div>
                 }
@@ -142,19 +123,11 @@
                       @if (version.display.hasAudio) {
                         <mat-icon class="audio-icon" matTooltip="Has audio">volume_up</mat-icon>
                       }
-                      @if (version.display.isFullyValidated) {
-                        <mat-icon
-                          class="validated-icon md3-icon-success"
-                          [matTooltip]="version.display.validationTooltip"
-                          >verified</mat-icon
-                        >
-                      } @else {
-                        <mat-icon
-                          class="unvalidated-icon md3-icon-warning"
-                          [matTooltip]="version.display.validationTooltip"
-                          >warning</mat-icon
-                        >
-                      }
+                      <mat-icon
+                        [class]="version.display.validationIconClass"
+                        [matTooltip]="version.display.validationTooltip"
+                        >{{ version.display.validationIcon }}</mat-icon
+                      >
                     </span>
                   </div>
                 </mat-option>
@@ -189,70 +162,7 @@
         </div>
 
         <!-- Selected Version Details -->
-        @if (selectedVersion) {
-          <div class="selected-version-info">
-            <div class="version-header">
-              <h5>
-                Version {{ selectedVersion.versionNumber }}
-                @if (selectedVersion.display.isFullyValidated) {
-                  <span class="validated-badge" [matTooltip]="selectedVersion.display.validationTooltip">
-                    <mat-icon>verified</mat-icon>
-                    Validated
-                  </span>
-                } @else {
-                  <span class="unvalidated-badge" [matTooltip]="selectedVersion.display.validationTooltip">
-                    <mat-icon>warning</mat-icon>
-                    Not Validated
-                  </span>
-                }
-              </h5>
-              <div class="version-metadata">
-                <span class="change-type">
-                  <mat-icon>{{ selectedVersion.display.changeTypeIcon }}</mat-icon>
-                  {{ selectedVersion.display.changeTypeLabel }}
-                </span>
-                <span class="created-date">
-                  {{ selectedVersion.createdAt | date: 'short' }}
-                </span>
-                @if (selectedVersion.createdBy) {
-                  <span class="created-by"> by {{ selectedVersion.createdBy.username }} </span>
-                }
-              </div>
-            </div>
-
-            <div class="version-stats">
-              <div class="stat-item">
-                <span class="stat-label">Word Count</span>
-                <span class="stat-value">{{ selectedVersion.display.wordCount }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Character Count</span>
-                <span class="stat-value">{{ selectedVersion.display.charCount }}</span>
-              </div>
-            </div>
-
-            <div class="version-audio">
-              <span class="info-label">Audio:</span>
-              @if (selectedVersion.audioUrl) {
-                <audio controls [src]="selectedVersion.audioUrl"></audio>
-              } @else {
-                <span class="no-audio">No audio file for this version</span>
-              }
-            </div>
-
-            @if (selectedVersion.validationNotes) {
-              <div class="validation-notes">
-                <mat-icon>note</mat-icon>
-                <span [innerHTML]="selectedVersionNotesHtml"></span>
-              </div>
-            }
-
-            <mat-form-field class="full-width version-content-field">
-              <mat-label>Version {{ selectedVersion.versionNumber }} Content (Read-Only)</mat-label>
-              <textarea matInput [value]="selectedVersion.content" readonly rows="20"></textarea>
-            </mat-form-field>
-          </div>
-        }
+        <app-version-details [version]="selectedVersion" [notesHtml]="selectedVersionNotesHtml" />
       } @else {
         <div class="no-history-message">
           <mat-icon>info</mat-icon>

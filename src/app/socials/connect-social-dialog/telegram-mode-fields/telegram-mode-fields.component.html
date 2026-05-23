@@ -1,0 +1,71 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<ng-container [formGroup]="socialForm">
+  <div class="mode-section">
+    <h4>Integration Mode</h4>
+    <mat-radio-group [value]="telegramMode" (change)="handleTelegramModeChange($event)">
+      <mat-radio-button value="cc_bot">
+        <div class="mode-label">
+          <span class="mode-title">Capital Copilot Bot</span>
+          <span class="mode-description">Use our bot — just add it to your channel</span>
+        </div>
+      </mat-radio-button>
+      <mat-radio-button value="custom_bot">
+        <div class="mode-label">
+          <span class="mode-title">Custom Bot</span>
+          <span class="mode-description">Use your own Telegram bot token</span>
+        </div>
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  @if (isCcBotMode) {
+    <div class="setup-instructions">
+      <mat-icon>info</mat-icon>
+      <div>
+        <p class="instruction-title">Add our bot to your Telegram channel:</p>
+        <ol>
+          <li>Open your Telegram channel settings</li>
+          <li>Go to <strong>Administrators</strong> &rarr; <strong>Add Admin</strong></li>
+          <li>
+            Search for <strong>{{ ccBotUsername }}</strong>
+          </li>
+          <li>Grant <strong>Post Messages</strong> permission</li>
+          <li>Enter the Channel ID below</li>
+        </ol>
+        <p class="channel-id-hint">
+          Find your Channel ID at
+          <a href="https://web.telegram.org" target="_blank" rel="noopener">web.telegram.org</a>
+          — it's the number in the URL when viewing your channel (e.g. <code>-2123456789</code>).
+        </p>
+      </div>
+    </div>
+  }
+
+  @if (isCustomBotMode) {
+    <div class="setup-instructions">
+      <mat-icon>info</mat-icon>
+      <div>
+        <p class="instruction-title">Set up your own Telegram bot:</p>
+        <ol>
+          <li>
+            <a href="https://core.telegram.org/bots#6-botfather" target="_blank" rel="noopener"
+              >Create a bot with BotFather</a
+            >
+          </li>
+          <li>Copy the Bot Token provided by BotFather</li>
+          <li>Add your bot to your channel as an admin with <strong>Post Messages</strong> permission</li>
+          <li>Enter the Bot Token and Channel ID below</li>
+        </ol>
+      </div>
+    </div>
+
+    <mat-form-field>
+      <mat-label>Bot Token</mat-label>
+      <input matInput formControlName="accessToken" type="password" placeholder="123456789:ABCDEF..." />
+      @if (socialForm.get('accessToken')?.hasError('required')) {
+        <mat-error>Bot Token is required for custom bot mode</mat-error>
+      }
+      <mat-hint>The token from BotFather</mat-hint>
+    </mat-form-field>
+  }
+</ng-container>

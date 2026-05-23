@@ -32,88 +32,28 @@
             @if (job.display.hasAnyResource) {
               <div class="job-section resources-section">
                 <div class="job-links">
-                  @if (job.display.hasPodcast) {
+                  @for (resource of job.display.routerResources; track resource.cssClass) {
                     <button
                       mat-flat-button
-                      class="resource-tag podcast-tag"
-                      [routerLink]="['/media/podcasts', job.display.podcastUuid]"
-                      matTooltip="Podcast"
+                      class="resource-tag {{ resource.cssClass }}"
+                      [routerLink]="resource.routerLink"
+                      [matTooltip]="resource.tooltip"
                       matTooltipPosition="above"
                     >
-                      <mat-icon>mic</mat-icon>
-                      {{ job.display.podcastName }}
+                      <mat-icon>{{ resource.icon }}</mat-icon>
+                      {{ resource.label }}
                     </button>
                   }
-                  @if (job.display.hasEpisode) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag episode-tag"
-                      [routerLink]="['/media/episodes', job.display.episodeUuid]"
-                      matTooltip="Episode"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>podcasts</mat-icon>
-                      {{ job.display.episodeName }}
-                    </button>
-                  }
-                  @if (job.display.hasTopic) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag topic-tag"
-                      [routerLink]="['/media/topics', job.display.topicUuid]"
-                      matTooltip="Topic"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>topic</mat-icon>
-                      {{ job.display.topicName }}
-                    </button>
-                  }
-                  @if (job.display.hasPulseConfig) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag pulse-tag"
-                      [routerLink]="['/media/pulses', job.display.pulseConfigUuid]"
-                      matTooltip="Pulse"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>vital_signs</mat-icon>
-                      {{ job.display.pulseConfigName }}
-                    </button>
-                  }
-                  @if (job.display.hasBlog) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag blog-tag"
-                      [routerLink]="['/media/blogs', job.display.blogUuid]"
-                      matTooltip="Blog"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>menu_book</mat-icon>
-                      {{ job.display.blogName }}
-                    </button>
-                  }
-                  @if (job.display.hasArticle) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag article-tag"
-                      [routerLink]="['/media/articles', job.display.articleUuid]"
-                      matTooltip="Article"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>article</mat-icon>
-                      {{ job.display.articleTitle }}
-                    </button>
-                  }
-                  @if (job.display.hasSymbol) {
+                  @if (job.display.symbolResource) {
                     <button
                       mat-stroked-button
-                      class="resource-tag symbol-tag"
+                      class="resource-tag {{ job.display.symbolResource.cssClass }}"
                       (click)="navigateToSymbol(job)"
-                      [matTooltip]="job.display.symbolTooltip"
+                      [matTooltip]="job.display.symbolResource.tooltip"
                       matTooltipPosition="above"
                     >
-                      <mat-icon>show_chart</mat-icon>
-                      {{ job.display.symbol }}
+                      <mat-icon>{{ job.display.symbolResource.icon }}</mat-icon>
+                      {{ job.display.symbolResource.label }}
                     </button>
                   }
                 </div>

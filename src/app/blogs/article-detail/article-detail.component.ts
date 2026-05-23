@@ -303,6 +303,33 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
     return this.renderMarkdown(this.articleForm.get('content')?.value);
   }
 
+  /** Subtitle form value, or empty string. Empty hides the preview `<h2>`. */
+  get previewSubtitle(): string {
+    return this.articleForm.get('subtitle')?.value || '';
+  }
+
+  /** Router path to the article's blog, or empty path when no blog. */
+  get blogLinkPath(): string[] {
+    return this.article?.blog ? ['/media/blogs', this.article.blog.id] : [];
+  }
+
+  /**
+   * Pre-computed meta items for the preview pane (blog name, created
+   * date, read time, with bullet separators only between present items).
+   * Eliminates per-tick `@if`s in the template.
+   */
+  get previewMetaItems(): { label: string; isSeparator: boolean }[] {
+    const items: { label: string; isSeparator: boolean }[] = [];
+    const push = (label: string) => {
+      if (items.length > 0) items.push({ label: '•', isSeparator: true });
+      items.push({ label, isSeparator: false });
+    };
+    if (this.article?.blog) push(this.article.blog.name);
+    push(this.articleCreatedAt);
+    if (this.article?.readTimeMinutes) push(`${this.article.readTimeMinutes} min read`);
+    return items;
+  }
+
   getStatusClass(status: string): string {
     switch (status) {
       case 'PUBLISHED':

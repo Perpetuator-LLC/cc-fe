@@ -45,46 +45,30 @@
             @if (checking) {
               <mat-spinner matSuffix diameter="20" />
             }
-            @if (availabilityStatus?.checked && !checking) {
+            @if (availabilityVisible) {
               <mat-icon matSuffix [class]="validationClass">
                 {{ validationIcon }}
               </mat-icon>
             }
-            @if (codeForm.get('newCode')?.hasError('required') && codeForm.get('newCode')?.touched) {
-              <mat-error>Code is required</mat-error>
-            }
-            @if (codeForm.get('newCode')?.hasError('minlength')) {
-              <mat-error>Code must be at least 3 characters</mat-error>
-            }
-            @if (codeForm.get('newCode')?.hasError('maxlength')) {
-              <mat-error>Code cannot exceed 50 characters</mat-error>
+            @if (newCodeErrorMessage) {
+              <mat-error>{{ newCodeErrorMessage }}</mat-error>
             }
           </mat-form-field>
 
           <!-- Availability Status -->
-          @if (availabilityStatus?.checked && !checking) {
+          @if (availabilityState) {
             <div class="availability-status" [class]="validationClass">
-              @if (availabilityStatus?.available) {
-                @if (availabilityStatus?.requiresReview) {
-                  <div class="status-message warning">
-                    <mat-icon>warning</mat-icon>
-                    <div>
-                      <strong>Available (requires admin review)</strong>
-                      <p>Premium keywords require manual approval</p>
-                    </div>
+              <div class="status-message {{ availabilityState }}">
+                <mat-icon>{{ availabilityIcon }}</mat-icon>
+                @if (availabilitySubtext) {
+                  <div>
+                    <strong>{{ availabilityHeading }}</strong>
+                    <p>{{ availabilitySubtext }}</p>
                   </div>
                 } @else {
-                  <div class="status-message success">
-                    <mat-icon>check_circle</mat-icon>
-                    <strong>{{ availabilityStatus?.message }}</strong>
-                  </div>
+                  <strong>{{ availabilityHeading }}</strong>
                 }
-              } @else {
-                <div class="status-message error">
-                  <mat-icon>error</mat-icon>
-                  <strong>{{ availabilityStatus?.message }}</strong>
-                </div>
-              }
+              </div>
             </div>
           }
 
@@ -114,7 +98,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()" [disabled]="submitting">Cancel</button>
-    @if (canChange && !loading) {
+    @if (canShowSubmit) {
       <button
         mat-raised-button
         color="primary"
@@ -123,10 +107,8 @@
       >
         @if (submitting) {
           <mat-spinner diameter="20" class="inline-spinner" />
-          Requesting...
-        } @else {
-          Request Change
         }
+        {{ submitButtonLabel }}
       </button>
     }
   </mat-dialog-actions>

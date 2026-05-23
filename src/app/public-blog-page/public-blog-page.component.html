@@ -22,10 +22,8 @@
 
     <div class="blog-header">
       <div class="blog-info">
-        @if (blogData.thumbnailUrl) {
-          <img [src]="blogData.thumbnailUrl" [alt]="blogData.name" class="blog-image" />
-        } @else if (blogData.imageUrl) {
-          <img [src]="blogData.imageUrl" [alt]="blogData.name" class="blog-image" />
+        @if (blogImageUrl) {
+          <img [src]="blogImageUrl" [alt]="blogData.name" class="blog-image" />
         }
         <div class="blog-details">
           <h1>{{ blogData.name }}</h1>
@@ -87,23 +85,15 @@
                     }
                   </div>
                   <div class="article-meta">
-                    @if (article.publishedAt) {
-                      <span class="article-date">{{ article.formattedDate }}</span>
-                    }
-                    @if (article.readTimeMinutes) {
-                      <span class="read-time">{{ article.readTimeMinutes }} min read</span>
-                    }
-                    @if (article.isFeatured) {
-                      <span class="featured-badge">
-                        <mat-icon>star</mat-icon>
-                        Featured
-                      </span>
-                    }
+                    <span class="article-date" [hidden]="!article.formattedDate">{{ article.formattedDate }}</span>
+                    <span class="read-time" [hidden]="!article.readTimeText">{{ article.readTimeText }}</span>
+                    <span class="featured-badge" [hidden]="!article.isFeatured">
+                      <mat-icon>star</mat-icon>
+                      Featured
+                    </span>
                   </div>
                 </div>
-                @if (article.excerpt) {
-                  <p class="article-excerpt">{{ article.excerpt }}</p>
-                }
+                <p class="article-excerpt" [hidden]="!article.excerpt">{{ article.excerpt }}</p>
                 <div class="article-actions">
                   <a [routerLink]="article.url" mat-button color="primary"> Read Article </a>
                   <app-share-buttons

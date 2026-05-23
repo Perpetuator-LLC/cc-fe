@@ -7,34 +7,12 @@
   <div class="middle-card">
     <div class="jobs-container">
       <div class="timeline">
-        <!-- Status Filter in upper right corner -->
-        <div class="filter-container-top-right">
-          <mat-form-field appearance="outline" class="status-filter-compact">
-            <mat-select
-              [value]="statusFilter"
-              (selectionChange)="onStatusFilterChange($event.value)"
-              placeholder="All Statuses"
-            >
-              @for (option of statusOptions; track option.value) {
-                <mat-option [value]="option.value">{{ option.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <div class="empty-state">
-          <div class="empty-state-content">
-            <mat-icon class="empty-state-icon">work_off</mat-icon>
-            <h3 class="empty-state-title">No Jobs Found</h3>
-            <p class="empty-state-message">
-              @if (statusFilter) {
-                No jobs found with status "{{ statusFilterLabel }}". Try changing the filter or create a new job.
-              } @else {
-                No jobs have been created yet. Jobs will appear here once you start running processes.
-              }
-            </p>
-          </div>
-        </div>
+        <app-jobs-list-filter
+          [statusFilter]="statusFilter"
+          [statusOptions]="statusOptions"
+          (statusFilterChange)="onStatusFilterChange($event)"
+        />
+        <app-jobs-list-empty [statusFilter]="statusFilter" [statusFilterLabel]="statusFilterLabel" />
       </div>
     </div>
   </div>
@@ -42,385 +20,51 @@
   <div class="middle-card">
     <div class="jobs-container">
       <div class="timeline">
-        <!-- Status Filter in upper right corner -->
-        <div class="filter-container-top-right">
-          <mat-form-field appearance="outline" class="status-filter-compact">
-            <mat-select
-              [value]="statusFilter"
-              (selectionChange)="onStatusFilterChange($event.value)"
-              placeholder="All Statuses"
-            >
-              @for (option of statusOptions; track option.value) {
-                <mat-option [value]="option.value">{{ option.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <app-jobs-list-filter
+          [statusFilter]="statusFilter"
+          [statusOptions]="statusOptions"
+          (statusFilterChange)="onStatusFilterChange($event)"
+        />
 
         @for (group of groupedJobs; track group.label) {
           <div class="timeline-date-title">{{ group.label }}</div>
           <div class="timeline-spacing">
             @for (item of group.items; track item.isChainGroup ? item.chainId : item.uuid) {
-              <!-- Chain Group (multiple jobs with same chainId) -->
               @if (item.isChainGroup && item.totalJobs > 1) {
-                <div class="timeline-item chain-group" [class.expanded]="item.expanded">
-                  <!-- Chain Header (collapsed view) -->
-                  <div
-                    class="chain-header"
-                    (click)="toggleChainExpanded(item.chainId!)"
-                    (keydown.enter)="toggleChainExpanded(item.chainId!)"
-                    tabindex="0"
-                    role="button"
-                  >
-                    <div class="timeline-icon" [ngClass]="item.display.statusClass">
-                      <mat-icon>{{ item.display.icon }}</mat-icon>
-                    </div>
-                    <div class="chain-content">
-                      <div class="chain-summary">
-                        <div class="chain-title-row">
-                          <mat-icon class="expand-icon">{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-                          <span class="chain-title">{{ item.display.title }}</span>
-                          <span class="chain-progress-badge">{{ item.completedJobs }}/{{ item.totalJobs }}</span>
-                        </div>
-                        <div class="chain-meta">
-                          <span class="chain-cost">
-                            <mat-icon>payments</mat-icon>
-                            {{ item.totalCost | number: '1.0-0' }} Credits
-                          </span>
-                          <span class="chain-date">
-                            Updated {{ item.updatedAt | date: 'EEE dd MMM, h:mm a' : 'local' }}
-                          </span>
-                        </div>
-                        <!-- Chain Resources (aggregated from all jobs) -->
-                        @if (item.display.hasResources) {
-                          <div
-                            class="chain-resources"
-                            (click)="$event.stopPropagation()"
-                            (keydown.enter)="$event.stopPropagation()"
-                            tabindex="0"
-                            role="group"
-                          >
-                            @for (podcast of item.resources.podcasts; track podcast.uuid) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag podcast-tag"
-                                [routerLink]="['/media/podcasts', podcast.uuid]"
-                                matTooltip="Podcast"
-                              >
-                                <mat-icon>mic</mat-icon>
-                                {{ podcast.name }}
-                              </button>
-                            }
-                            @for (episode of item.resources.episodes; track episode.uuid) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag episode-tag"
-                                [routerLink]="['/media/episodes', episode.uuid]"
-                                matTooltip="Episode"
-                              >
-                                <mat-icon>podcasts</mat-icon>
-                                {{ episode.name }}
-                              </button>
-                            }
-                            @for (topic of item.resources.topics; track topic.uuid) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag topic-tag"
-                                [routerLink]="['/media/topics', topic.uuid]"
-                                matTooltip="Topic"
-                              >
-                                <mat-icon>topic</mat-icon>
-                                {{ topic.name }}
-                              </button>
-                            }
-                            @for (pulse of item.resources.pulseConfigs; track pulse.uuid) {
-                              <button
-                                type="button"
-                                class="resource-link-pulse"
-                                [routerLink]="['/media/pulses', pulse.uuid]"
-                                matTooltip="Pulse"
-                              >
-                                <mat-icon>vital_signs</mat-icon>
-                                {{ pulse.name }}
-                              </button>
-                            }
-                            @for (symbolInfo of item.resources.symbols; track symbolInfo.symbol) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag symbol-tag"
-                                (click)="navigateToSymbol(symbolInfo.job)"
-                                [matTooltip]="symbolInfo.tooltip"
-                              >
-                                <mat-icon>show_chart</mat-icon>
-                                {{ symbolInfo.symbol }}
-                              </button>
-                            }
-                          </div>
-                        }
-                      </div>
-                      <span class="timeline-status" [ngClass]="item.display.statusClass">
-                        {{ item.status | uppercase }}
-                      </span>
-                    </div>
-                  </div>
-                  <!-- Expanded Chain Jobs -->
-                  @if (item.expanded) {
-                    <div class="chain-jobs">
-                      @for (chainJob of item.jobs; track chainJob.uuid) {
-                        <div class="timeline-item chain-child">
-                          <div class="timeline-icon" [ngClass]="chainJob.display.statusClass">
-                            <mat-icon>{{ chainJob.display.iconName }}</mat-icon>
-                          </div>
-                          <div class="timeline-content">
-                            <div class="timeline-header">
-                              <div class="timeline-left-content">
-                                <span class="timeline-title">{{ chainJob.display.kindLabel }}</span>
-                                @if (chainJob.chainPosition !== null && chainJob.chainPosition !== undefined) {
-                                  <span class="chain-position-badge">Step {{ chainJob.chainPosition + 1 }}</span>
-                                }
-                                <span class="timeline-cost">
-                                  <mat-icon>payments</mat-icon>
-                                  {{ chainJob.cost | number: '1.0-0' }}
-                                </span>
-                              </div>
-                              <span class="timeline-status" [ngClass]="chainJob.display.statusClass">
-                                {{ chainJob.status | uppercase }}
-                              </span>
-                            </div>
-                            @if (chainJob.error) {
-                              <div class="error-message">{{ chainJob.display.cleanError }}</div>
-                            }
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
+                <app-jobs-list-chain
+                  [item]="item"
+                  (toggleExpanded)="toggleChainExpanded($event)"
+                  (symbolClick)="navigateToSymbol($event)"
+                />
               } @else {
-                <!-- Standalone Job or Single-job Chain -->
-                @if (item.isChainGroup) {
-                  <!-- Single-job chain -->
-                  <div class="timeline-item">
-                    <div class="timeline-icon" [ngClass]="item.jobs[0].display.statusClass">
-                      <mat-icon>{{ item.jobs[0].display.iconName }}</mat-icon>
-                    </div>
-                    <div class="timeline-content">
-                      <div class="timeline-header">
-                        <div class="timeline-left-content">
-                          <span class="timeline-title">{{ item.jobs[0].display.kindLabel }}</span>
-                          <div class="timeline-meta desktop">
-                            <span class="timeline-cost">
-                              <mat-icon>payments</mat-icon>
-                              {{ item.jobs[0].cost | number: '1.0-0' }} Credits
-                            </span>
-                            <span class="timeline-date">
-                              Updated {{ item.jobs[0].updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
-                            </span>
-                          </div>
-                        </div>
-                        <span class="timeline-status" [ngClass]="item.jobs[0].display.statusClass">
-                          {{ item.jobs[0].status | uppercase }}
-                        </span>
-                      </div>
-                      @if (item.jobs[0].error) {
-                        <div class="job-section">
-                          <div class="error-message">{{ item.jobs[0].display.cleanError }}</div>
-                        </div>
-                      } @else {
-                        <div class="job-section">
-                          <div class="message-text">{{ item.jobs[0].display.cleanMessage }}</div>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                } @else {
-                  <!-- Standalone job (no chainId) -->
-                  <div class="timeline-item">
-                    <div class="timeline-icon" [ngClass]="item.display.statusClass">
-                      <mat-icon>{{ item.display.iconName }}</mat-icon>
-                    </div>
-                    <div class="timeline-content">
-                      <div class="timeline-header">
-                        <div class="timeline-left-content">
-                          <span class="timeline-title">{{ item.display.kindLabel }}</span>
-                          <div class="timeline-meta desktop">
-                            <span class="timeline-cost">
-                              <mat-icon>payments</mat-icon>
-                              {{ item.cost | number: '1.0-0' }} Credits
-                            </span>
-                            <span class="timeline-date">
-                              Updated {{ item.updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
-                            </span>
-                          </div>
-                        </div>
-                        <span class="timeline-status" [ngClass]="item.display.statusClass">
-                          {{ item.status | uppercase }}
-                        </span>
-                      </div>
-                      @if (item.error) {
-                        <div class="job-section">
-                          <div class="error-message">{{ item.display.cleanError }}</div>
-                        </div>
-                      } @else {
-                        <div class="job-section">
-                          <div class="message-text">{{ item.display.cleanMessage }}</div>
-                        </div>
-                      }
-                      <!-- Resources section for standalone jobs -->
-                      @if (
-                        item.display.hasPodcast ||
-                        item.display.hasEpisode ||
-                        item.display.hasTopic ||
-                        item.display.hasSymbol ||
-                        item.display.hasPulseConfig ||
-                        item.display.hasBlog ||
-                        item.display.hasArticle
-                      ) {
-                        <div class="job-section">
-                          <div class="job-links">
-                            @if (item.display.hasPodcast) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag podcast-tag"
-                                [routerLink]="['/media/podcasts', item.display.podcastUuid]"
-                                matTooltip="Podcast"
-                              >
-                                <mat-icon>mic</mat-icon>
-                                {{ item.display.podcastName }}
-                              </button>
-                            }
-                            @if (item.display.hasEpisode) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag episode-tag"
-                                [routerLink]="['/media/episodes', item.display.episodeUuid]"
-                                matTooltip="Episode"
-                              >
-                                <mat-icon>podcasts</mat-icon>
-                                {{ item.display.episodeName }}
-                              </button>
-                            }
-                            @if (item.display.hasTopic) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag topic-tag"
-                                [routerLink]="['/media/topics', item.display.topicUuid]"
-                                matTooltip="Topic"
-                              >
-                                <mat-icon>topic</mat-icon>
-                                {{ item.display.topicName }}
-                              </button>
-                            }
-                            @if (item.display.hasPulseConfig) {
-                              <button
-                                type="button"
-                                class="resource-link-pulse"
-                                [routerLink]="['/media/pulses', item.display.pulseConfigUuid]"
-                                matTooltip="Pulse"
-                              >
-                                <mat-icon>vital_signs</mat-icon>
-                                {{ item.display.pulseConfigName }}
-                              </button>
-                            }
-                            @if (item.display.hasBlog) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag blog-tag"
-                                [routerLink]="['/media/blogs', item.display.blogUuid]"
-                                matTooltip="Blog"
-                              >
-                                <mat-icon>menu_book</mat-icon>
-                                {{ item.display.blogName }}
-                              </button>
-                            }
-                            @if (item.display.hasArticle) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag article-tag"
-                                [routerLink]="['/media/articles', item.display.articleUuid]"
-                                matTooltip="Article"
-                              >
-                                <mat-icon>article</mat-icon>
-                                {{ item.display.articleTitle }}
-                              </button>
-                            }
-                            @if (item.display.hasSymbol) {
-                              <button
-                                mat-flat-button
-                                class="resource-tag symbol-tag"
-                                (click)="navigateToSymbol(item)"
-                                [matTooltip]="item.display.symbolTooltip"
-                              >
-                                <mat-icon>show_chart</mat-icon>
-                                {{ item.display.symbol }}
-                              </button>
-                            }
-                          </div>
-                        </div>
-                      }
-                      <!-- Action buttons for failed/pending jobs -->
-                      @if (item.display.isFailedOrPending) {
-                        <div class="timeline-actions">
-                          <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(item.uuid)">
-                            <mat-icon>refresh</mat-icon>
-                          </button>
-                          <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="deleteJob(item.uuid)">
-                            <mat-icon>delete</mat-icon>
-                          </button>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
+                <app-jobs-list-item
+                  [item]="item"
+                  (retry)="retryJob($event)"
+                  (delete)="deleteJob($event)"
+                  (symbolClick)="navigateToSymbol($event)"
+                />
               }
             }
           </div>
         }
 
-        <!-- Empty state when no jobs match the filter (only show when not loading) -->
-        @if (groupedJobs.length === 0 && !isInitialLoading) {
-          <div class="empty-state">
-            <div class="empty-state-content">
-              <mat-icon class="empty-state-icon">work_off</mat-icon>
-              <h3 class="empty-state-title">No Jobs Found</h3>
-              <p class="empty-state-message">
-                @if (statusFilter) {
-                  No jobs found with status "{{ statusFilterLabel }}". Try changing the filter or create a new job.
-                } @else {
-                  No jobs have been created yet. Jobs will appear here once you start running processes.
-                }
-              </p>
-            </div>
-          </div>
-        }
-      </div>
-
-      <!-- Infinite scroll sentinel and loading indicator -->
-      @if (groupedJobs.length > 0) {
+        <!-- Infinite scroll sentinel and loading indicator -->
         <div class="infinite-scroll-container">
-          <!-- Sentinel element for IntersectionObserver - always rendered when hasNextPage -->
           @if (hasNextPage) {
             <div #scrollSentinel class="scroll-sentinel"></div>
+            @if (!isLoadingMore) {
+              <button mat-stroked-button class="load-more-btn" (click)="loadMoreJobs()">Load More Jobs</button>
+            }
           }
-          <!-- Loading indicator when fetching more jobs -->
-          @if (isLoadingMore) {
-            <div class="loading-more-indicator">
-              <mat-progress-spinner diameter="32" mode="indeterminate" />
-              <span>Loading more jobs...</span>
-            </div>
-          }
-          <!-- Load More button as fallback -->
-          @if (hasNextPage && !isLoadingMore) {
-            <button mat-stroked-button class="load-more-btn" (click)="loadMoreJobs()">Load More Jobs</button>
-          }
-          <!-- End of list indicator -->
-          @if (!hasNextPage && !isLoadingMore) {
-            <div class="end-of-list">
-              <span>All jobs loaded</span>
-            </div>
-          }
+          <div class="loading-more-indicator" [hidden]="!isLoadingMore">
+            <mat-progress-spinner diameter="32" mode="indeterminate" />
+            <span>Loading more jobs...</span>
+          </div>
+          <div class="end-of-list" [hidden]="hasNextPage || isLoadingMore">
+            <span>All jobs loaded</span>
+          </div>
         </div>
-      }
+      </div>
     </div>
   </div>
 }

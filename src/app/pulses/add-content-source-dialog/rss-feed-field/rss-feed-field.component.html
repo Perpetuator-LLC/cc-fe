@@ -1,0 +1,53 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-form-field appearance="outline" class="full-width" [formGroup]="form">
+  <mat-label>RSS Feed URL or Name</mat-label>
+  <input
+    matInput
+    formControlName="rssUrl"
+    placeholder="Search existing feeds or enter a URL..."
+    [matAutocomplete]="rssAutocomplete"
+    (input)="onInput($event)"
+  />
+  @if (isSearchingRssFeeds) {
+    <mat-spinner matSuffix diameter="20" />
+  }
+  <mat-autocomplete
+    #rssAutocomplete="matAutocomplete"
+    [displayWith]="displayRssFeed"
+    (optionSelected)="onOptionSelected($event)"
+    [autoSelectActiveOption]="false"
+  >
+    @for (feed of rssFeedSuggestions; track feed.uuid) {
+      <mat-option [value]="feed" [matTooltip]="feed.url" matTooltipPosition="after">
+        <div class="rss-option">
+          <span class="rss-name">{{ feed.name || 'Unnamed Feed' }}</span>
+          <span class="rss-meta">
+            @if (feed.articlesPerDay > 0) {
+              <span class="articles-per-day">~{{ feed.articlesPerDay | number: '1.0-1' }}/day</span>
+            }
+            @if (feed.hasIssue) {
+              <mat-icon class="warning-icon" matTooltip="Feed may have issues">warning</mat-icon>
+            }
+          </span>
+        </div>
+      </mat-option>
+    }
+    @if (noSuggestions) {
+      <mat-option disabled>
+        <span class="no-results">No matching feeds. Enter a URL to add a new one.</span>
+      </mat-option>
+    }
+  </mat-autocomplete>
+  <mat-hint>
+    Search existing feeds by name/URL, or enter a new feed URL.
+    @if (selectedRssFeed) {
+      <span class="selected-hint">Selected: {{ selectedHintText }}</span>
+    }
+  </mat-hint>
+  @if (hasRequiredError) {
+    <mat-error>RSS URL is required</mat-error>
+  }
+  @if (hasPatternError) {
+    <mat-error>Please enter a valid URL</mat-error>
+  }
+</mat-form-field>

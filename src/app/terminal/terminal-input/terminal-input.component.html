@@ -133,11 +133,8 @@
       [disabled]="!inputTrimmed || isLoading || !isConnected"
       matTooltip="Execute command"
     >
-      @if (isLoading) {
-        <mat-spinner diameter="20" />
-      } @else {
-        <mat-icon>send</mat-icon>
-      }
+      <mat-spinner diameter="20" [hidden]="!isLoading" />
+      <mat-icon [hidden]="isLoading">send</mat-icon>
     </button>
   </div>
 </div>

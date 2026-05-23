@@ -46,6 +46,10 @@ interface EpisodeDisplay {
   formattedDuration: string;
   isFullyValidated: boolean;
   validationTooltip: string;
+  /** Pre-computed material icon name for the validation badge. */
+  validationIcon: string;
+  /** Pre-computed CSS class for the validation badge icon. */
+  validationIconClass: string;
 }
 
 interface EpisodeWithDisplay extends Episode {
@@ -280,13 +284,16 @@ export class EpisodesTableComponent
 
   /** Build an EpisodeWithDisplay by attaching pre-computed display state. */
   private toEpisodeWithDisplay(episode: Episode): EpisodeWithDisplay {
+    const isFullyValidated = this.isEpisodeFullyValidated(episode);
     return {
       ...episode,
       display: {
         hasAudio: !!episode.audioUrl,
         formattedDuration: this.formatDuration(episode.audioSeconds),
-        isFullyValidated: this.isEpisodeFullyValidated(episode),
+        isFullyValidated,
         validationTooltip: this.getEpisodeValidationTooltip(episode),
+        validationIcon: isFullyValidated ? 'verified' : 'warning',
+        validationIconClass: isFullyValidated ? 'validated-icon md3-icon-success' : 'unvalidated-icon md3-icon-warning',
       },
     };
   }

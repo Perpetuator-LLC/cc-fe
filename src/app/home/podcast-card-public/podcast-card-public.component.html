@@ -1,0 +1,45 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<mat-card class="podcast-card public-podcast-card">
+  <a [routerLink]="routerLinkPath" class="podcast-link">
+    @if (displayImage) {
+      <img [src]="displayImage" alt="{{ podcast.name }}" class="podcast-image" />
+    } @else {
+      <div class="podcast-placeholder">
+        <mat-icon>podcasts</mat-icon>
+      </div>
+    }
+  </a>
+  <mat-card-content>
+    <h3>
+      <a [routerLink]="routerLinkPath">
+        {{ podcast.name }}
+      </a>
+    </h3>
+    @if (podcast.description) {
+      <p class="description">{{ podcast.truncatedDescription }}</p>
+    }
+    @if (podcast.ownerName) {
+      <p class="owner">
+        By
+        @if (podcast.ownerLink) {
+          <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
+        } @else {
+          {{ podcast.ownerName }}
+        }
+      </p>
+    }
+    <div class="stats">
+      @if (podcast.viewCount !== undefined) {
+        <span class="stat">
+          <mat-icon>visibility</mat-icon>
+          {{ podcast.viewCount }} views
+        </span>
+      } @else if (showMissingViewsPlaceholder) {
+        <span class="stat placeholder">
+          <mat-icon>visibility</mat-icon>
+          (No views data)
+        </span>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

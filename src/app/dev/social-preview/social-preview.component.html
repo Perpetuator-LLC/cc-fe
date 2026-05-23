@@ -20,14 +20,9 @@
           <mat-icon matSuffix>link</mat-icon>
         </mat-form-field>
         <button mat-flat-button color="primary" (click)="fetchPreview()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <mat-spinner diameter="20" />
-          } @else {
-            <ng-container>
-              <mat-icon>search</mat-icon>
-              Check Preview
-            </ng-container>
-          }
+          <mat-spinner diameter="20" [hidden]="!isLoading()" />
+          <mat-icon [hidden]="isLoading()">search</mat-icon>
+          <span [hidden]="isLoading()">Check Preview</span>
         </button>
       </div>
 

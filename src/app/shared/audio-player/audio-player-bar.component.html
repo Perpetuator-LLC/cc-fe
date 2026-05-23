@@ -33,9 +33,9 @@
         <mat-icon class="type-icon">{{ typeIcon() }}</mat-icon>
         <div class="track-text">
           <span class="track-title">{{ audioService.track()?.title }}</span>
-          @if (audioService.track()?.subtitle) {
-            <span class="track-subtitle">{{ audioService.track()?.subtitle }}</span>
-          }
+          <span class="track-subtitle" [hidden]="!audioService.track()?.subtitle">{{
+            audioService.track()?.subtitle
+          }}</span>
         </div>
       </div>
 
@@ -50,11 +50,7 @@
         </button>
 
         <button mat-icon-button class="play-button" (click)="audioService.togglePlay()">
-          @if (audioService.isPlaying()) {
-            <mat-icon>pause_circle</mat-icon>
-          } @else {
-            <mat-icon>play_circle</mat-icon>
-          }
+          <mat-icon>{{ playToggleIcon() }}</mat-icon>
         </button>
 
         <button mat-icon-button (click)="audioService.skipForward(15)" matTooltip="Forward 15s">
@@ -92,13 +88,7 @@
           (click)="audioService.toggleMute()"
           [matTooltip]="audioService.isMuted() ? 'Unmute' : 'Mute'"
         >
-          @if (audioService.isMuted() || audioService.volume() === 0) {
-            <mat-icon>volume_off</mat-icon>
-          } @else if (audioService.volume() < 0.5) {
-            <mat-icon>volume_down</mat-icon>
-          } @else {
-            <mat-icon>volume_up</mat-icon>
-          }
+          <mat-icon>{{ volumeIcon() }}</mat-icon>
         </button>
 
         <button mat-icon-button (click)="audioService.stop()" matTooltip="Close player">
@@ -131,9 +121,7 @@
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>
-                      @if (track.subtitle) {
-                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
-                      }
+                      <span class="playlist-item-subtitle" [hidden]="!track.subtitle">{{ track.subtitle }}</span>
                     </div>
                   </div>
                   <button mat-icon-button [matMenuTriggerFor]="historyMenu" (click)="$event.stopPropagation()">
@@ -173,9 +161,9 @@
                   }}</mat-icon>
                   <div class="playlist-item-text">
                     <span class="playlist-item-title">{{ currentTrack.title }}</span>
-                    @if (currentTrack.subtitle) {
-                      <span class="playlist-item-subtitle">{{ currentTrack.subtitle }}</span>
-                    }
+                    <span class="playlist-item-subtitle" [hidden]="!currentTrack.subtitle">{{
+                      currentTrack.subtitle
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -197,9 +185,7 @@
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>
-                      @if (track.subtitle) {
-                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
-                      }
+                      <span class="playlist-item-subtitle" [hidden]="!track.subtitle">{{ track.subtitle }}</span>
                     </div>
                   </div>
                   <button mat-icon-button [matMenuTriggerFor]="queueMenu" (click)="$event.stopPropagation()">

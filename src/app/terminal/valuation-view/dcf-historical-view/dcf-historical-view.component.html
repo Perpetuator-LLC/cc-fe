@@ -1,0 +1,55 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<!-- Historical Valuation View: P/E, P/B, P/S trends over time -->
+<div class="valuation-historical">
+  <!-- Historical header with years selector -->
+  <div class="historical-header">
+    <span class="section-title">Historical Valuation Analysis</span>
+    <mat-form-field appearance="outline" class="years-field" subscriptSizing="dynamic">
+      <mat-label>Period</mat-label>
+      <mat-select [value]="historicalYears" (selectionChange)="historicalYearsChange.emit($event.value)">
+        <mat-option [value]="5">5 Years</mat-option>
+        <mat-option [value]="10">10 Years</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <!-- KPI Stats at top - uses period-specific calculations -->
+  @if (hasHistorical()) {
+    <div class="historical-stats">
+      <app-kpi-card
+        label="Current P/E"
+        [value]="stats().currentPe"
+        accent="primary"
+        [tooltip]="CHART_DEFINITIONS.peRatio.description"
+      />
+      <app-kpi-card [label]="periodLabelPe()" [value]="stats().avgPe" />
+      <app-kpi-card label="P/E Range" [value]="stats().peRangeLabel" />
+      <app-kpi-card
+        [label]="periodLabelPb()"
+        [value]="stats().avgPb"
+        [tooltip]="CHART_DEFINITIONS.pbRatio.description"
+      />
+      <app-kpi-card
+        [label]="periodLabelPs()"
+        [value]="stats().avgPs"
+        [tooltip]="CHART_DEFINITIONS.psRatio.description"
+      />
+    </div>
+  }
+  <!-- Charts below KPIs -->
+  @if (dcfCharts?.historicalValuation) {
+    <div class="valuation-chart-full">
+      <div echarts [options]="dcfCharts!.historicalValuation!" class="valuation-echart-large"></div>
+    </div>
+  }
+  @if (dcfCharts?.priceVsValuation) {
+    <div class="valuation-chart-full">
+      <div echarts [options]="dcfCharts!.priceVsValuation!" class="valuation-echart-large"></div>
+    </div>
+  }
+  @if (!hasHistorical()) {
+    <div class="no-data-message">
+      <mat-icon>info</mat-icon>
+      <p>Historical valuation data not available for this symbol.</p>
+    </div>
+  }
+</div>

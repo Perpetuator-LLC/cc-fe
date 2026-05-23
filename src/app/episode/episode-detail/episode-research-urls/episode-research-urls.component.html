@@ -1,0 +1,25 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="title">
+  <h3>Research URLs</h3>
+  <span>{{ countLabel }}</span>
+</div>
+<p class="description">URLs accessed during episode validation and fact-checking.</p>
+
+@if (hasUrls) {
+  <div class="research-urls-list">
+    @for (url of urls; track url; let i = $index) {
+      <div class="research-url-item">
+        <span class="url-number">{{ i + 1 }}</span>
+        <a [href]="url" target="_blank" rel="noopener noreferrer" class="research-url">
+          {{ url }}
+        </a>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="no-data">
+    <mat-icon>search</mat-icon>
+    <p>No research URLs recorded for this episode</p>
+  </div>
+}

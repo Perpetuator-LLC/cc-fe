@@ -62,8 +62,8 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   currentCommand = '';
   /** Trim cache so the template can read `commandTrimmed` instead of calling `currentCommand.trim()`. */
   commandTrimmed = '';
-  /** Suggestions enriched with pre-computed icon. */
-  suggestions: (AutocompleteSuggestion & { icon: string })[] = [];
+  /** Suggestions enriched with pre-computed icon and metaItems (collapses 4 `@if` blocks into 1 `@for`). */
+  suggestions: (AutocompleteSuggestion & { icon: string; metaItems: { text: string; cls: string }[] })[] = [];
   selectedSuggestionIndex = -1;
   showSuggestions = false;
   hints: TerminalHints = {
@@ -87,6 +87,12 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     return hist.length > 0 && (hist[hist.length - 1].isLoading ?? false);
   }
 
+  /** True when the autocomplete dropdown should be visible. Pre-computed so the
+   *  template can use a single `[hidden]` binding instead of an `@if` block. */
+  get autocompleteVisible(): boolean {
+    return this.showSuggestions && this.suggestions.length > 0;
+  }
+
   /**
    * Enriched history list for the template — each entry carries pre-computed
    * `isFetching`, `hasChart`, `hasTable`, `chartControls`, `messageHtml`.
@@ -105,6 +111,19 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
 
   /** Pre-rendered empty-state HTML for the hints message. */
   emptyStateHtml: SafeHtml = '';
+
+  /**
+   * Build the meta-item list for a suggestion (description, exchange, category, AI badge).
+   * Returned in render order so the template can iterate with a single `@for`.
+   */
+  private getSuggestionMetaItems(suggestion: AutocompleteSuggestion): { text: string; cls: string }[] {
+    const items: { text: string; cls: string }[] = [];
+    if (suggestion.description) items.push({ text: suggestion.description, cls: 'suggestion-desc' });
+    if (suggestion.exchange) items.push({ text: suggestion.exchange, cls: 'suggestion-exchange' });
+    if (suggestion.category) items.push({ text: suggestion.category, cls: 'suggestion-category' });
+    if (suggestion.isAiInterpreted) items.push({ text: 'AI', cls: 'ai-badge' });
+    return items;
+  }
 
   /**
    * Get the icon name for a suggestion type
@@ -296,15 +315,21 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     this.subscriptions.add(
       this.terminalService.fetchAutocompleteSuggestions(input, 10).subscribe({
         next: (suggestions) => {
-          this.suggestions = suggestions.map((s) => ({ ...s, icon: this.getSuggestionIcon(s) }));
+          this.suggestions = suggestions.map((s) => ({
+            ...s,
+            icon: this.getSuggestionIcon(s),
+            metaItems: this.getSuggestionMetaItems(s),
+          }));
           this.selectedSuggestionIndex = -1;
           this.showSuggestions = suggestions.length > 0;
         },
         error: () => {
           // Fallback to local suggestions on error
-          this.suggestions = this.terminalService
-            .getAutocompleteSuggestions(input, 10)
-            .map((s) => ({ ...s, icon: this.getSuggestionIcon(s) }));
+          this.suggestions = this.terminalService.getAutocompleteSuggestions(input, 10).map((s) => ({
+            ...s,
+            icon: this.getSuggestionIcon(s),
+            metaItems: this.getSuggestionMetaItems(s),
+          }));
           this.selectedSuggestionIndex = -1;
           this.showSuggestions = this.suggestions.length > 0;
         },

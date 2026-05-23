@@ -6,57 +6,14 @@
 </ng-template>
 
 @if (!newsFetched) {
-  <div class="before-select-podcast">
-    <div class="news-before-container">
-      <h3>Pick a Podcast to Start Generating Fresh News</h3>
-      <p>
-        Get the latest headlines and insights auto-matched to your podcast. Ready to turn today's news into a fresh
-        episode?
-      </p>
-      <div class="before-select-right-podcasts">
-        <div class="fields">
-          <div class="podcast-field-wrapper">
-            <mat-form-field class="podcast-select-field">
-              <mat-label>Select Podcast</mat-label>
-              <mat-select
-                [(value)]="selectedPodcastUuid"
-                (selectionChange)="onPodcastChange()"
-                [disabled]="loadingPodcasts"
-              >
-                @if (loadingPodcasts) {
-                  <mat-option disabled> Loading podcasts... </mat-option>
-                }
-                @for (podcast of podcasts; track podcast.uuid) {
-                  <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-            @if (loadingPodcasts) {
-              <mat-spinner diameter="20" class="podcast-loading-spinner" />
-            }
-          </div>
-          <mat-form-field class="time-select-field">
-            <mat-label>Time</mat-label>
-            <mat-select [(value)]="selectedHours" (selectionChange)="onPodcastChange()">
-              <mat-option [value]="12">12 Hours</mat-option>
-              <mat-option [value]="24">24 Hours</mat-option>
-              <mat-option [value]="7 * 24">1 Week</mat-option>
-              <mat-option [value]="14 * 24">2 Weeks</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="fetchNews()"
-          [disabled]="selectedPodcastUuid === null"
-        >
-          Fetch News
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-news-select-podcast-form
+    [podcasts]="podcasts"
+    [(selectedPodcastUuid)]="selectedPodcastUuid"
+    [(selectedHours)]="selectedHours"
+    [loadingPodcasts]="loadingPodcasts"
+    (podcastChange)="onPodcastChange()"
+    (fetchNews)="fetchNews()"
+  />
 }
 @if (newsFetched) {
   <div class="after-select-podcast">
@@ -105,7 +62,7 @@
                 }
               </mat-select>
             </mat-form-field>
-          } @else if (selectedPodcastUuid && newsFetched) {
+          } @else if (showNoRssFeedsHint) {
             <div class="no-rss-feeds-message" matTooltip="Add RSS feeds to this podcast to enable filtering by source">
               <mat-icon class="warning-icon">info</mat-icon>
               <span>No RSS feeds configured</span>
@@ -130,14 +87,12 @@
             >
               <input
                 type="checkbox"
-                [checked]="selectedNews.size === filteredNews.length && filteredNews.length > 0"
-                [indeterminate]="selectedNews.size > 0 && selectedNews.size < filteredNews.length"
+                [checked]="allFilteredSelected"
+                [indeterminate]="someFilteredSelected"
                 (change)="toggleSelectAll()"
               />
               <span class="custom-checkbox"></span>
-              <span class="select-label">{{
-                selectedNews.size === filteredNews.length && filteredNews.length > 0 ? 'Unselect all' : 'Select all'
-              }}</span>
+              <span class="select-label">{{ selectAllLabel }}</span>
             </label>
           </div>
           <button
@@ -145,7 +100,7 @@
             class="btn-secondary"
             type="button"
             (click)="createEpisodeAudioChainFromSelected()"
-            [disabled]="selectedNews.size === 0"
+            [disabled]="noNewsSelected"
             matTooltip="Creates episode with full audio generation from selected news"
           >
             <mat-icon>graphic_eq</mat-icon>
@@ -156,7 +111,7 @@
             class="btn-secondary-outlined"
             type="button"
             (click)="createEpisodeChainFromSelected()"
-            [disabled]="selectedNews.size === 0"
+            [disabled]="noNewsSelected"
             matTooltip="Creates an AI-generated episode using selected news articles"
           >
             <mat-icon>newspaper</mat-icon>
@@ -188,222 +143,26 @@
             </div>
           </div>
           <div class="news-container">
-            @if (selectedPodcastUuid !== null && news && !loadingNews) {
-              <div class="news-container">
-                <mat-list>
-                  @for (item of filteredNewsDisplay; track item.news.url) {
-                    @let news = item.news;
-                    <mat-list-item class="news-item">
-                      <div class="news-card" tabindex="0" (click)="selectNews(news)" (keydown.enter)="selectNews(news)">
-                        <mat-checkbox
-                          (click)="$event.stopPropagation(); toggleSelection(news)"
-                          [checked]="item.selected"
-                        />
-                        <div class="news-card-wrapper" [ngClass]="{ newsSelected: selectedNewsDetail === news }">
-                          <div class="news-content">
-                            <div class="news-header">
-                              <div class="title">
-                                <a
-                                  [href]="news.url"
-                                  target="_blank"
-                                  (click)="$event.stopPropagation()"
-                                  [matTooltip]="'Opens ' + news.source + ' in new tab'"
-                                  matTooltipPosition="above"
-                                  class="external-link"
-                                >
-                                  {{ news.title }}
-                                </a>
-                                @if (news.blocked) {
-                                  <span
-                                    class="blocked-badge"
-                                    matTooltip="This article is blocked from our robots/scrapers"
-                                  >
-                                    <mat-icon>block</mat-icon>
-                                    Blocked
-                                  </span>
-                                }
-                              </div>
-                              <div class="source">
-                                <mat-icon>graphic_eq</mat-icon>
-                                <p><strong>Source:</strong> {{ news.source }}</p>
-                              </div>
-                            </div>
-                            <div class="date">
-                              <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
-                                {{ news.publishedAt | date: 'short' }}
-                              </span>
-                              <div class="next-btn">
-                                <span>&gt; </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </mat-list-item>
-                  } @empty {
-                    @if (!loadingNews) {
-                      <mat-card>
-                        <mat-card-header>
-                          <p>
-                            @if (news.edges.length) {
-                              No news episodes match the filter criteria.
-                            } @else {
-                              No news episodes exist, perhaps try "Fetch News" to get the latest updates or change the
-                              "Time" range.
-                            }
-                          </p>
-                        </mat-card-header>
-                      </mat-card>
-                    }
-                  }
-                </mat-list>
-              </div>
-            } @else if (selectedPodcastUuid !== null && !news && !loadingNews) {
-              <mat-list>
-                <mat-card>
-                  <mat-card-header>
-                    <p>No news found. Try "Fetch News" to get the latest updates.</p>
-                  </mat-card-header>
-                </mat-card>
-              </mat-list>
-            } @else if (selectedPodcastUuid === null) {
-              <mat-list>
-                <mat-card>
-                  <mat-card-header>
-                    <p>Select a podcast to view news.</p>
-                  </mat-card-header>
-                </mat-card>
-              </mat-list>
-            }
+            <app-news-results
+              [mode]="newsListMode"
+              [items]="filteredNewsDisplay"
+              [emptyMessage]="emptyNewsMessage"
+              [activeNews]="selectedNewsDetail"
+              (selectNews)="selectNews($event)"
+              (toggleSelection)="toggleSelection($event)"
+            />
           </div>
         </div>
-        <div
-          class="news-detail-section"
-          [ngClass]="{ newsDetailSelectedSection: selectedNewsDetail }"
-          [appDynamicStyle]="{ width: (selectedNewsDetail ? detailPanelWidth : 0) + 'px' }"
-        >
-          <!-- Resize Handle -->
-          @if (selectedNewsDetail) {
-            <div class="resize-handle" (mousedown)="onResizeStart($event)" [class.resizing]="isResizing"></div>
-          }
-          <div class="news-details">
-            @if (selectedNewsDetail) {
-              <div>
-                <div class="description-title">
-                  <div class="cross-icon">
-                    <span tabindex="0" (click)="clearSelectedNewsDetail()" (keydown.enter)="clearSelectedNewsDetail()">
-                      <mat-icon>close_small</mat-icon>
-                    </span>
-                  </div>
-                  <div class="title">
-                    <a
-                      [href]="selectedNewsDetail.url"
-                      target="_blank"
-                      [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
-                      matTooltipPosition="above"
-                      class="external-link"
-                    >
-                      {{ selectedNewsDetail.title }}
-                    </a>
-                  </div>
-                  <div class="source">
-                    <mat-icon>graphic_eq</mat-icon>
-                    <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
-                  </div>
-                  <a
-                    [href]="selectedNewsDetail.url"
-                    target="_blank"
-                    [matTooltip]="'Opens ' + selectedNewsDetail.source + ' in new tab'"
-                    matTooltipPosition="above"
-                  >
-                    <button mat-raised-button color="primary" type="button" class="read-btn">
-                      Read More <mat-icon>arrow_right</mat-icon>
-                    </button>
-                  </a>
-                </div>
-
-                <!-- Categories Display -->
-                @if (selectedNewsDetail.categories && selectedNewsDetail.categories.length > 0) {
-                  <div class="metadata-section">
-                    <h3>Categories</h3>
-                    <div class="categories-container">
-                      @for (category of selectedNewsDetail.categories; track category) {
-                        <span class="category-badge">{{ category }}</span>
-                      }
-                    </div>
-                  </div>
-                }
-
-                <!-- Tags Display -->
-                @if (selectedNewsDetail.tags && selectedNewsDetail.tags.length > 0) {
-                  <div class="metadata-section">
-                    <h3>Metadata Tags</h3>
-                    <div class="tags-container">
-                      @for (tag of selectedNewsDisplay?.tags ?? []; track tag.kind + tag.value) {
-                        <span class="news-tag" [ngClass]="tag.class" [matTooltip]="tag.kind + ': ' + tag.value">
-                          {{ tag.label }}
-                        </span>
-                      }
-                    </div>
-                  </div>
-                }
-
-                <mat-divider />
-                <h3>RSS Description</h3>
-                <p
-                  class="news-description"
-                  [innerHTML]="selectedNewsDetail.description || 'No description provided'"
-                ></p>
-                <mat-divider />
-                <h3>AI Summary</h3>
-                <button mat-flat-button color="primary" type="button" (click)="processNews(selectedNewsDetail.uuid)">
-                  Process News
-                </button>
-                @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
-                  <button
-                    mat-stroked-button
-                    color="primary"
-                    type="button"
-                    (click)="regenerateSummary(selectedNewsDetail.uuid)"
-                    class="regenerate-summary-btn"
-                  >
-                    {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary (Force)
-                  </button>
-                }
-                <p class="" [innerHTML]="selectedNewsDisplay?.summaryHtml || 'No news summary available'"></p>
-                <mat-divider />
-                <h3>Validated Summary</h3>
-                @if (selectedNewsDetail.validatedSummary) {
-                  <p class="" [innerHTML]="selectedNewsDisplay?.validatedSummaryHtml"></p>
-                } @else {
-                  <p class="">News not (yet) validated.</p>
-                }
-                <!-- Site Content section hidden - showing only Summary and Validated Summary -->
-                <!--
-                @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
-                  <mat-divider></mat-divider>
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="button"
-                    (click)="extractNews([selectedNewsDetail.uuid])"
-                  >
-                    Extract News
-                  </button>
-                  <h3>Site Content</h3>
-                  @if (selectedNewsDetail.content) {
-                    <p class="" [innerHTML]="selectedNewsDisplay?.contentHtml"></p>
-                  } @else {
-                    <p class="">No news content available</p>
-                  }
-                }
-                -->
-              </div>
-            } @else {
-              <p>Select a news item to see details.</p>
-            }
-          </div>
-        </div>
+        <app-news-detail-panel
+          [selectedNewsDetail]="selectedNewsDetail"
+          [selectedNewsDisplay]="selectedNewsDisplay"
+          [detailPanelWidth]="detailPanelWidth"
+          [isResizing]="isResizing"
+          (closePanel)="clearSelectedNewsDetail()"
+          (resizeStart)="onResizeStart($event)"
+          (processNews)="processNews($event)"
+          (regenerateSummary)="regenerateSummary($event)"
+        />
       </div>
     </div>
   </div>

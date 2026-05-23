@@ -17,6 +17,8 @@ import { FormulaDisplayComponent, FormulaVariable } from '../../shared/formula-d
 import { DCF_FORMULAS, DDM_FORMULAS } from '../../shared/formula-display/valuation-formulas';
 import { FinancialTableComponent, FinancialTableData } from '../shared/financial-table.component';
 import { ToFixedPipe } from '../../shared/pipes';
+import { DdmViewComponent } from './ddm-view/ddm-view.component';
+import { DcfHistoricalViewComponent } from './dcf-historical-view/dcf-historical-view.component';
 
 /**
  * DCF valuation charts structure
@@ -68,6 +70,8 @@ export type ValuationDrillDown = 'summary' | 'historical' | 'projections' | 'sen
     FormulaDisplayComponent,
     FinancialTableComponent,
     ToFixedPipe,
+    DdmViewComponent,
+    DcfHistoricalViewComponent,
   ],
   templateUrl: './valuation-view.component.html',
   styleUrl: './valuation-view.component.scss',
@@ -209,6 +213,18 @@ export class ValuationViewComponent {
   /** Pre-computed upsides for templates. */
   readonly dcfDisplayUpside = computed(() => this.getDisplayUpside('dcf'));
   readonly ddmDisplayUpside = computed(() => this.getDisplayUpside('ddm'));
+
+  /** Pre-computed price label for the DCF current-price KPI card. */
+  readonly dcfPriceLabel = computed(() => (this.isUsingLivePrice() ? 'Current Price (Live)' : 'Current Price'));
+
+  /** Pre-computed accent for the DCF current-price KPI card. */
+  readonly dcfPriceAccent = computed<'success' | 'none'>(() => (this.isUsingLivePrice() ? 'success' : 'none'));
+
+  /** True when the DCF currency-warning banner should render. */
+  readonly showDcfCurrencyWarning = computed(() => {
+    const data = this._dcfData();
+    return this.selectedModel() === 'dcf' && !!data?.currencyNote && data.tradingCurrency !== data.reportingCurrency;
+  });
 
   /**
    * Format DDM model type to friendly display name. Pure function — kept for

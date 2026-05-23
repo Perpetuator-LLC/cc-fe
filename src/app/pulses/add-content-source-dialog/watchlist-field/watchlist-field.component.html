@@ -1,0 +1,24 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-form-field appearance="outline" class="full-width" [formGroup]="form">
+  <mat-label>Watchlist</mat-label>
+  <mat-select formControlName="watchlistUuid" [disabled]="isLoadingWatchlists">
+    @if (isLoadingWatchlists) {
+      <mat-option disabled> <mat-icon>autorenew</mat-icon> Loading watchlists... </mat-option>
+    }
+    @for (watchlist of watchlists; track watchlist.uuid) {
+      <mat-option [value]="watchlist.uuid">
+        {{ watchlist.name }}
+        @if (watchlist.itemCount) {
+          <span class="watchlist-count">({{ watchlist.itemCount }} symbols)</span>
+        }
+      </mat-option>
+    }
+    @if (hasNoWatchlists) {
+      <mat-option disabled>No watchlists found</mat-option>
+    }
+  </mat-select>
+  <mat-hint>Select a watchlist to monitor for news</mat-hint>
+  @if (hasRequiredError) {
+    <mat-error>Watchlist is required</mat-error>
+  }
+</mat-form-field>

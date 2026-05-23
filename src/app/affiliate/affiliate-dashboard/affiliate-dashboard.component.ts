@@ -35,24 +35,26 @@ import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dia
 import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
+import { StripeStatusCardComponent } from './stripe-status-card/stripe-status-card.component';
+import { BrandImageCardComponent } from './brand-image-card/brand-image-card.component';
+import {
+  ConversionHistoryTableComponent,
+  ConversionDetailKind,
+  ConversionDisplayRow,
+} from './conversion-history-table/conversion-history-table.component';
+import {
+  EarningsHistoryTableComponent,
+  CreditDisplayRow,
+} from './earnings-history-table/earnings-history-table.component';
+import { AccountStatusCardComponent, AccountStatusDisplay } from './account-status-card/account-status-card.component';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { environment } from '../../../environments/environment';
 
 /** Pre-computed display state attached to each conversion row. */
-interface ConversionDisplay extends AffiliateConversion {
-  formattedDate: string;
-  typeDisplay: 'Credits' | 'Cash';
-  statusFormatted: string;
-  statusClass: string;
-  targetDollars: string;
-  rejectionExcerpt: string;
-}
+type ConversionDisplay = ConversionDisplayRow;
 
 /** Pre-computed display state attached to each credit row. */
-interface CreditDisplay extends AffiliateCredit {
-  formattedDate: string;
-  tierDescription: 'Tier 1 (10%)' | 'Tier 2 (5%)';
-}
+type CreditDisplay = CreditDisplayRow;
 
 /** Single-state derived display object for the dashboard header / hero area. */
 interface DashboardDisplay {
@@ -86,6 +88,11 @@ interface DashboardDisplay {
     MatFormFieldModule,
     FormsModule,
     ShareButtonsComponent,
+    StripeStatusCardComponent,
+    BrandImageCardComponent,
+    ConversionHistoryTableComponent,
+    EarningsHistoryTableComponent,
+    AccountStatusCardComponent,
   ],
   templateUrl: './affiliate-dashboard.component.html',
   styleUrls: ['./affiliate-dashboard.component.scss'],
@@ -169,6 +176,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   private enrichConversion(c: AffiliateConversion): ConversionDisplay {
     const rawReason = c.rejectionReason || '';
     const excerpt = rawReason.length > 30 ? rawReason.substring(0, 30) + '...' : rawReason;
+    const { detailKind, detailTooltip } = this.computeConversionDetail(c);
     return {
       ...c,
       formattedDate: new Date(c.createdAt).toLocaleDateString(),
@@ -177,7 +185,26 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       statusClass: c.status.replace(/_/g, '-'),
       targetDollars: AffiliateConversionUtils.centsToDollars(c.targetAmount),
       rejectionExcerpt: excerpt,
+      detailKind,
+      detailTooltip,
     };
+  }
+
+  /** Pick which detail-cell variant to render for a conversion row. */
+  private computeConversionDetail(c: AffiliateConversion): {
+    detailKind: ConversionDetailKind;
+    detailTooltip: string;
+  } {
+    if (c.status === 'rejected' && c.rejectionReason) {
+      return { detailKind: 'rejected', detailTooltip: c.rejectionReason };
+    }
+    if (c.status === 'completed' && c.stripeTransferId) {
+      return { detailKind: 'completed', detailTooltip: `Stripe Transfer ID: ${c.stripeTransferId}` };
+    }
+    if (c.status === 'under_review') {
+      return { detailKind: 'under_review', detailTooltip: '' };
+    }
+    return { detailKind: 'none', detailTooltip: '' };
   }
 
   /** Enrich an AffiliateCredit with pre-computed display fields. */
@@ -186,6 +213,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       ...c,
       formattedDate: new Date(c.createdAt).toLocaleDateString(),
       tierDescription: c.tier === 1 ? 'Tier 1 (10%)' : 'Tier 2 (5%)',
+      fromLabel: c.sourceUser?.username || 'System',
     };
   }
 
@@ -413,6 +441,26 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
         userDetails?.permissions?.includes('affiliates.change_affiliatecreditconversion')) ??
       false
     );
+  }
+
+  /** Show the account-status card when profile has a non-active eligibility status or the network is closed. */
+  get showAccountStatusCard(): boolean {
+    const profile = this.profile;
+    if (!profile) return false;
+    const status = profile.eligibilityStatus;
+    const hasBlockingStatus = !!status && status !== 'active';
+    return hasBlockingStatus || !profile.isActive;
+  }
+
+  /** Subset of dashboardDisplay consumed by the account-status sub-component. */
+  get accountStatusDisplay(): AccountStatusDisplay {
+    return {
+      profileStatusIcon: this.dashboardDisplay.profileStatusIcon,
+      profileStatusColor: this.dashboardDisplay.profileStatusColor,
+      profileStatusLabel: this.dashboardDisplay.profileStatusLabel,
+      isNetworkJoinable: this.dashboardDisplay.isNetworkJoinable,
+      networkMessage: this.dashboardDisplay.networkMessage,
+    };
   }
 
   navigateToPurchase(): void {

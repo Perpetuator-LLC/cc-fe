@@ -2,20 +2,16 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { Subscription } from 'rxjs';
 import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
 import { TerminalBarComponent } from '../terminal-bar/terminal-bar.component';
 import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashboard.component';
 import { WatchlistTabComponent } from '../watchlist-tab/watchlist-tab.component';
+import { HistoryTabComponent } from '../history-tab/history-tab.component';
+import { HelpTabComponent, HelpCategoryDisplay } from '../help-tab/help-tab.component';
 import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
-import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
+import { FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
 
 @Component({
@@ -23,16 +19,11 @@ import { TerminalRoutingService } from '../terminal-routing.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    MatExpansionModule,
     TerminalBarComponent,
     TerminalDashboardComponent,
     WatchlistTabComponent,
-    FqnChipComponent,
+    HistoryTabComponent,
+    HelpTabComponent,
   ],
   templateUrl: './terminal-page.component.html',
   styleUrl: './terminal-page.component.scss',
@@ -69,10 +60,7 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     aiNote: 'You can also type natural language questions and our AI will interpret them for you.',
   };
   /** Help categories enriched with pre-joined alias strings per command. */
-  helpDisplay: {
-    name: string;
-    commands: { name: string; description?: string; aliases?: string[]; exampleUsage?: string; aliasesText: string }[];
-  }[] = [];
+  helpDisplay: HelpCategoryDisplay[] = [];
   private subscriptions = new Subscription();
   protected routingService = inject(TerminalRoutingService);
 

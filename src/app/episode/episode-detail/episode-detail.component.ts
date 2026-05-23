@@ -3,10 +3,10 @@ import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener, inj
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
@@ -20,12 +20,22 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog/confirm-delete-dialog.component';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { EpisodeVersionControlComponent } from '../episode-version-control/episode-version-control.component';
+import {
+  EpisodeReferencedNewsComponent,
+  NewsItemDisplay,
+} from './episode-referenced-news/episode-referenced-news.component';
+import { EpisodeResearchUrlsComponent } from './episode-research-urls/episode-research-urls.component';
+import {
+  EpisodeSchedulingTabComponent,
+  ScheduleDisplay,
+  ScheduleToggleEvent,
+} from './episode-scheduling-tab/episode-scheduling-tab.component';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
+import { NewsResult } from '../../news/news.service';
 import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { Schedule, SchedulingService } from '../../scheduling.service';
 import { MessageService } from '../../message.service';
@@ -61,7 +71,6 @@ interface EditableFormValues {
     MatLabel,
     MatFormField,
     DatePipe,
-    NgClass,
     MatTooltip,
     MatButton,
     MatIconButton,
@@ -71,15 +80,16 @@ interface EditableFormValues {
     MatDivider,
     ReactiveFormsModule,
     RouterLink,
-    MatCardHeader,
     MatTabsModule,
     MatExpansionModule,
     MatSelectModule,
-    MatSlideToggle,
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
     EpisodeVersionControlComponent,
+    EpisodeReferencedNewsComponent,
+    EpisodeResearchUrlsComponent,
+    EpisodeSchedulingTabComponent,
     ShareButtonsComponent,
   ],
   templateUrl: './episode-detail.component.html',
@@ -97,12 +107,21 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
-  private _schedules: (Schedule & { descriptionText: string })[] = [];
-  /** Setter enriches schedules with a pre-computed descriptionText for template binding. */
+  private _schedules: ScheduleDisplay[] = [];
+  /** Setter enriches schedules with pre-computed display data for the template. */
   set schedules(value: Schedule[]) {
-    this._schedules = (value || []).map((s) => ({ ...s, descriptionText: formatScheduleDescription(s) }));
+    this._schedules = (value || []).map((s) => ({
+      ...s,
+      descriptionText: formatScheduleDescription(s),
+      statusBadgeClass: s.enabled ? 'enabled' : 'disabled',
+      statusLabel: s.enabled ? 'Scheduled' : 'Paused',
+    }));
   }
-  get schedules(): (Schedule & { descriptionText: string })[] {
+  get schedules(): ScheduleDisplay[] {
+    return this._schedules;
+  }
+  /** Alias used by the scheduling sub-component template. */
+  get scheduleDisplays(): ScheduleDisplay[] {
     return this._schedules;
   }
   isGridView = false;
@@ -557,17 +576,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
         next: () => {
           this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
-          // Update local schedule state
-          const index = this.schedules.findIndex((s) => s.uuid === schedule.uuid);
-          if (index !== -1) {
-            this.schedules[index] = { ...this.schedules[index], enabled };
-          }
+          // Update local schedule state (re-runs the schedules setter to refresh display fields)
+          this.schedules = this.schedules.map((s) => (s.uuid === schedule.uuid ? { ...s, enabled } : s));
         },
         error: (err) => {
           this.messageService.error(`Failed to update schedule: ${err.message}`);
         },
       }),
     );
+  }
+
+  /** Output handler that adapts ScheduleToggleEvent to the existing toggle method. */
+  onScheduleToggle(event: ScheduleToggleEvent): void {
+    this.toggleScheduleEnabled(event.schedule, event.enabled);
   }
 
   editSchedule(schedule: Schedule): void {
@@ -1118,6 +1139,38 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   /** Pre-rendered HTML for current-version validation notes. */
   get currentVersionValidationNotesHtml(): SafeHtml | null {
     return this.currentVersionValidationNotes ? this.markdownToHtml(this.currentVersionValidationNotes) : null;
+  }
+
+  /** Pre-computed news rows with derived display flags for the referenced-news sub-component. */
+  get newsDisplays(): NewsItemDisplay[] {
+    const items: NewsResult[] = this.episodeForm.get('news')?.value || [];
+    return items.map((n) => ({
+      ...n,
+      hasFeeds: !!n.rssFeeds && n.rssFeeds.length > 0,
+      feedDisplays: (n.rssFeeds || []).map((f) => ({
+        id: f.id,
+        name: f.name || f.url,
+        url: f.url,
+        isReachable: f.isReachable,
+        isParsable: f.isParsable,
+        reachIcon: f.isReachable ? 'cloud_done' : 'cloud_off',
+        reachClass: f.isReachable ? 'status-success' : 'status-error',
+        reachTooltip: f.isReachable ? 'Reachable' : 'Unreachable',
+        parseIcon: f.isParsable ? 'check_circle' : 'error',
+        parseClass: f.isParsable ? 'status-success' : 'status-error',
+        parseTooltip: f.isParsable ? 'Parsable' : 'Parse Error',
+      })),
+    }));
+  }
+
+  /** Research URLs from the form, defaulted to empty array. */
+  get researchUrls(): string[] {
+    return this.episodeForm.get('researchUrls')?.value || [];
+  }
+
+  /** Boolean reflecting the form's isLive value, for the scheduling sub-component. */
+  get isLiveForScheduling(): boolean {
+    return !!this.episodeForm.get('isLive')?.value;
   }
 
   /**

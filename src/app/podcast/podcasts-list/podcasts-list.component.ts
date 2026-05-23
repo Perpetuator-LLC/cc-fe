@@ -388,6 +388,27 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastWithDisplay
   get sortDirectionCreatedAt(): 'asc' | 'desc' | null {
     return this.getSortDirection('created_at');
   }
+
+  /**
+   * Pre-computed sort-arrow icon names per column. Empty string means no
+   * arrow; the template uses `[hidden]` on the `<mat-icon>` so it stays
+   * out of the template-cyclomatic-complexity budget.
+   */
+  get sortIconName(): string {
+    return this.sortIconFor(this.sortDirectionName);
+  }
+  get sortIconLatestEpisode(): string {
+    return this.sortIconFor(this.sortDirectionLatestEpisode);
+  }
+  get sortIconCreatedAt(): string {
+    return this.sortIconFor(this.sortDirectionCreatedAt);
+  }
+
+  private sortIconFor(dir: 'asc' | 'desc' | null): string {
+    if (dir === 'asc') return 'arrow_upward';
+    if (dir === 'desc') return 'arrow_downward';
+    return '';
+  }
   /** Pre-computed column-selected flag for the one column read in the template. */
   get isTgChannelIdColumnSelected(): boolean {
     return this.isColumnSelected('tgChannelId');

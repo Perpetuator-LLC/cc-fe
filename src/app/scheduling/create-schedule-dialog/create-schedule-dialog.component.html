@@ -6,9 +6,7 @@
       <mat-form-field class="full-width">
         <mat-label>Schedule Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter schedule name" required />
-        @if (scheduleForm.get('name')?.invalid && scheduleForm.get('name')?.touched) {
-          <mat-error>Schedule name is required</mat-error>
-        }
+        <mat-error>Schedule name is required</mat-error>
       </mat-form-field>
     </div>
 
@@ -20,9 +18,7 @@
             <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
           }
         </mat-select>
-        @if (scheduleForm.get('jobKind')?.invalid && scheduleForm.get('jobKind')?.touched) {
-          <mat-error>Job type is required</mat-error>
-        }
+        <mat-error>Job type is required</mat-error>
       </mat-form-field>
 
       <mat-form-field>

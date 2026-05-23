@@ -95,15 +95,11 @@
                 <span class="status-badge" [class.live]="episode.isLive" [class.not-live]="!episode.isLive">
                   {{ episode.isLive ? 'Live' : 'Draft' }}
                 </span>
-                @if (episode.display.isFullyValidated) {
-                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="episode.display.validationTooltip"
-                    >verified</mat-icon
-                  >
-                } @else {
-                  <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="episode.display.validationTooltip"
-                    >warning</mat-icon
-                  >
-                }
+                <mat-icon
+                  [class]="episode.display.validationIconClass"
+                  [matTooltip]="episode.display.validationTooltip"
+                  >{{ episode.display.validationIcon }}</mat-icon
+                >
               </div>
             </td>
           </ng-container>
@@ -124,9 +120,9 @@
                   <button mat-menu-item (click)="playEpisode(episode)">
                     <mat-icon>play_arrow</mat-icon>
                     <span>Play</span>
-                    @if (episode.audioSeconds) {
-                      <span class="duration-hint">{{ episode.display.formattedDuration }}</span>
-                    }
+                    <span class="duration-hint" [hidden]="!episode.audioSeconds">{{
+                      episode.display.formattedDuration
+                    }}</span>
                   </button>
                   <button mat-menu-item (click)="playEpisodeNext(episode)">
                     <mat-icon>queue_play_next</mat-icon>
@@ -163,9 +159,7 @@
           (page)="onPageChange($event)"
         />
       </div>
-    }
-
-    @if (isGridView) {
+    } @else {
       <div class="podcasts-grid">
         @for (episode of dataSource.data; track episode.uuid) {
           <mat-card class="podcast-card">
@@ -193,9 +187,9 @@
                         <button mat-menu-item (click)="playEpisode(episode)">
                           <mat-icon>play_arrow</mat-icon>
                           <span>Play</span>
-                          @if (episode.audioSeconds) {
-                            <span class="duration-hint">{{ episode.display.formattedDuration }}</span>
-                          }
+                          <span class="duration-hint" [hidden]="!episode.audioSeconds">{{
+                            episode.display.formattedDuration
+                          }}</span>
                         </button>
                         <button mat-menu-item (click)="playEpisodeNext(episode)">
                           <mat-icon>queue_play_next</mat-icon>
@@ -226,22 +220,20 @@
                 <span class="status-badge" [class.live]="episode.isLive" [class.not-live]="!episode.isLive">
                   {{ episode.isLive ? 'Live' : 'Draft' }}
                 </span>
-                @if (episode.display.isFullyValidated) {
-                  <mat-icon class="validated-icon md3-icon-success" [matTooltip]="episode.display.validationTooltip"
-                    >verified</mat-icon
-                  >
-                } @else {
-                  <mat-icon class="unvalidated-icon md3-icon-warning" [matTooltip]="episode.display.validationTooltip"
-                    >warning</mat-icon
-                  >
-                }
+                <mat-icon
+                  [class]="episode.display.validationIconClass"
+                  [matTooltip]="episode.display.validationTooltip"
+                  >{{ episode.display.validationIcon }}</mat-icon
+                >
               </div>
-              @if (showPodcastColumn) {
-                <a [routerLink]="['/media/podcasts', episode.podcast.uuid]" class="podcast-name">
-                  <mat-icon>graphic_eq</mat-icon>
-                  {{ episode.podcast.name }}
-                </a>
-              }
+              <a
+                [routerLink]="['/media/podcasts', episode.podcast.uuid]"
+                class="podcast-name"
+                [hidden]="!showPodcastColumn"
+              >
+                <mat-icon>graphic_eq</mat-icon>
+                {{ episode.podcast.name }}
+              </a>
             </div>
           </mat-card>
         }

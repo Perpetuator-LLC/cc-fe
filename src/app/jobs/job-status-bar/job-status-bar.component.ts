@@ -28,6 +28,24 @@ import { EpisodeService } from '../../episode/episode.service';
 import { ResearchService } from '../../topics/research.service';
 
 /**
+ * One displayable resource tag for a job (podcast, episode, topic, etc).
+ * Pre-computed so the template renders a single `@for` over `resources`
+ * rather than a chain of `@if`s.
+ */
+interface JobResource {
+  /** css modifier class on the resource button, e.g. 'podcast-tag'. */
+  cssClass: string;
+  /** Material icon name to render inside the button. */
+  icon: string;
+  /** Visible label text. */
+  label: string;
+  /** Tooltip text shown on hover. */
+  tooltip: string;
+  /** Router link target. `null` when the tag uses a click action instead. */
+  routerLink: string[] | null;
+}
+
+/**
  * Pre-computed display state for a job. Computed once per enrichment so
  * the template can read static property accesses instead of calling
  * methods on every change-detection tick.
@@ -63,6 +81,10 @@ interface JobDisplay {
   hasSymbol: boolean;
   symbol: string | null;
   hasAnyResource: boolean;
+  /** All routable resource tags (podcast/episode/topic/pulse/blog/article) for `@for`. */
+  routerResources: JobResource[];
+  /** The (optional) symbol tag — separate because it uses a click action, not a routerLink. */
+  symbolResource: JobResource | null;
 }
 
 interface EnrichedJob extends Job {
@@ -363,6 +385,85 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
     const hasBlog = jds.hasBlogUuid(job);
     const hasArticle = jds.hasArticleUuid(job);
     const hasSymbol = jds.hasSymbol(job);
+    const podcastUuid = jds.getPodcastUuid(job);
+    const episodeUuid = jds.getEpisodeUuid(job);
+    const topicUuid = jds.getTopicUuid(job);
+    const pulseConfigUuid = jds.getPulseConfigUuid(job);
+    const blogUuid = jds.getBlogUuid(job);
+    const articleUuid = jds.getArticleUuid(job);
+    const symbol = jds.getSymbol(job);
+    const podcastName = extras.podcastName || 'Podcast';
+    const episodeName = extras.episodeName || 'Episode';
+    const topicName = extras.topicName || 'Topic';
+    const blogName = jds.getBlogName(job) || 'Blog';
+    const articleTitle = jds.getArticleTitle(job) || 'Article';
+    const symbolTooltip = this.computeSymbolTooltip(job);
+
+    const routerResources: JobResource[] = [];
+    if (hasPodcast) {
+      routerResources.push({
+        cssClass: 'podcast-tag',
+        icon: 'mic',
+        label: podcastName,
+        tooltip: 'Podcast',
+        routerLink: ['/media/podcasts', podcastUuid ?? ''],
+      });
+    }
+    if (hasEpisode) {
+      routerResources.push({
+        cssClass: 'episode-tag',
+        icon: 'podcasts',
+        label: episodeName,
+        tooltip: 'Episode',
+        routerLink: ['/media/episodes', episodeUuid ?? ''],
+      });
+    }
+    if (hasTopic) {
+      routerResources.push({
+        cssClass: 'topic-tag',
+        icon: 'topic',
+        label: topicName,
+        tooltip: 'Topic',
+        routerLink: ['/media/topics', topicUuid ?? ''],
+      });
+    }
+    if (hasPulseConfig) {
+      routerResources.push({
+        cssClass: 'pulse-tag',
+        icon: 'vital_signs',
+        label: 'Pulse',
+        tooltip: 'Pulse',
+        routerLink: ['/media/pulses', pulseConfigUuid ?? ''],
+      });
+    }
+    if (hasBlog) {
+      routerResources.push({
+        cssClass: 'blog-tag',
+        icon: 'menu_book',
+        label: blogName,
+        tooltip: 'Blog',
+        routerLink: ['/media/blogs', blogUuid ?? ''],
+      });
+    }
+    if (hasArticle) {
+      routerResources.push({
+        cssClass: 'article-tag',
+        icon: 'article',
+        label: articleTitle,
+        tooltip: 'Article',
+        routerLink: ['/media/articles', articleUuid ?? ''],
+      });
+    }
+    const symbolResource: JobResource | null = hasSymbol
+      ? {
+          cssClass: 'symbol-tag',
+          icon: 'show_chart',
+          label: symbol ?? '',
+          tooltip: symbolTooltip,
+          routerLink: null,
+        }
+      : null;
+
     return {
       kindLabel: kindToString(job.kind),
       statusLabel: statusToString(job.status),
@@ -372,28 +473,30 @@ export class JobStatusBarComponent implements OnInit, OnDestroy {
       cleanError,
       showMessage,
       isMessageError,
-      symbolTooltip: this.computeSymbolTooltip(job),
+      symbolTooltip,
       hasPodcast,
-      podcastUuid: jds.getPodcastUuid(job),
-      podcastName: extras.podcastName || 'Podcast',
+      podcastUuid,
+      podcastName,
       hasEpisode,
-      episodeUuid: jds.getEpisodeUuid(job),
-      episodeName: extras.episodeName || 'Episode',
+      episodeUuid,
+      episodeName,
       hasTopic,
-      topicUuid: jds.getTopicUuid(job),
-      topicName: extras.topicName || 'Topic',
+      topicUuid,
+      topicName,
       hasPulseConfig,
-      pulseConfigUuid: jds.getPulseConfigUuid(job),
+      pulseConfigUuid,
       pulseConfigName: 'Pulse',
       hasBlog,
-      blogUuid: jds.getBlogUuid(job),
-      blogName: jds.getBlogName(job) || 'Blog',
+      blogUuid,
+      blogName,
       hasArticle,
-      articleUuid: jds.getArticleUuid(job),
-      articleTitle: jds.getArticleTitle(job) || 'Article',
+      articleUuid,
+      articleTitle,
       hasSymbol,
-      symbol: jds.getSymbol(job),
+      symbol,
       hasAnyResource: hasPodcast || hasEpisode || hasTopic || hasPulseConfig || hasBlog || hasArticle || hasSymbol,
+      routerResources,
+      symbolResource,
     };
   }
 

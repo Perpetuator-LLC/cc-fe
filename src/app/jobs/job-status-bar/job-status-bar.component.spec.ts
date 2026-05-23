@@ -55,6 +55,8 @@ describe('JobStatusBarComponent', () => {
     hasSymbol: false,
     symbol: null,
     hasAnyResource: false,
+    routerResources: [],
+    symbolResource: null,
   };
 
   const createMockJob = (overrides: Partial<Job> = {}) => ({

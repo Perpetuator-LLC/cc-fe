@@ -206,11 +206,10 @@
                   (click)="toggleAffiliateProgramEnabled()"
                   [disabled]="updatingProgramSettings"
                 >
-                  @if (updatingProgramSettings) {
-                    <mat-spinner diameter="20" />
-                  } @else {
-                    <mat-icon>{{ programSettings.isEnabled ? 'block' : 'check_circle' }}</mat-icon>
-                  }
+                  <mat-spinner diameter="20" [hidden]="!updatingProgramSettings" />
+                  <mat-icon [hidden]="updatingProgramSettings">{{
+                    programSettings.isEnabled ? 'block' : 'check_circle'
+                  }}</mat-icon>
                   {{ programSettings.isEnabled ? 'Disable' : 'Enable' }}
                 </button>
               </div>
@@ -230,108 +229,68 @@
                 <mat-icon matSuffix>search</mat-icon>
               </mat-form-field>
               <button mat-raised-button color="primary" (click)="searchUser()" [disabled]="searchingUser">
-                @if (searchingUser) {
-                  <mat-spinner diameter="20" />
-                } @else {
-                  Search
-                }
+                <mat-spinner diameter="20" [hidden]="!searchingUser" />
+                <span [hidden]="searchingUser">Search</span>
               </button>
             </div>
 
-            @if (searchedUsers.length > 0) {
-              <div class="searched-users-list">
-                @for (user of searchedUsers; track user.uuid) {
-                  <div class="searched-user-card">
-                    <div class="user-info">
-                      <mat-icon>person</mat-icon>
-                      <div>
-                        <div class="username-row">
-                          <strong>{{ user.username }}</strong>
-                          @if (user.affiliateCode) {
-                            <span class="affiliate-code">{{ user.affiliateCode }}</span>
-                          }
-                        </div>
-                        <span class="user-status">
-                          @if (user.hasAffiliateProfile) {
-                            <span
-                              class="badge affiliate-stripe-status"
-                              [class]="user.stripeStatus.cssClass"
-                              [matTooltip]="user.stripeStatus.tooltip"
-                            >
-                              <mat-icon>{{ user.stripeStatus.icon }}</mat-icon>
-                              {{ user.stripeStatus.label }}
-                            </span>
-                            @if (user.eligibilityStatus) {
-                              <span
-                                class="badge status-badge"
-                                [class.active]="user.eligibilityStatus === 'active'"
-                                [class.suspended]="user.eligibilityStatus === 'suspended'"
-                                [class.under-review]="user.eligibilityStatus === 'under_review'"
-                              >
-                                <mat-icon>{{ user.statusIcon }}</mat-icon>
-                                {{ user.statusLabel }}
-                              </span>
-                            }
-                            @if (user.isActive !== undefined) {
-                              <span
-                                class="badge network-badge"
-                                [class.network-open]="user.isActive"
-                                [class.network-closed]="!user.isActive"
-                              >
-                                <mat-icon>{{ user.networkIcon }}</mat-icon>
-                                {{ user.networkLabel }}
-                              </span>
-                            }
-                          } @else {
-                            <span class="badge no-profile">Not in program</span>
-                          }
-                        </span>
+            <div class="searched-users-list">
+              @for (user of searchedUsers; track user.uuid) {
+                <div class="searched-user-card">
+                  <div class="user-info">
+                    <mat-icon>person</mat-icon>
+                    <div>
+                      <div class="username-row">
+                        <strong>{{ user.username }}</strong>
+                        <span class="affiliate-code">{{ user.affiliateCode }}</span>
                       </div>
+                      <span class="user-status">
+                        @for (badge of user.statusBadges; track badge.label) {
+                          <span [class]="badge.classes" [matTooltip]="badge.tooltip || ''">
+                            <mat-icon>{{ badge.icon }}</mat-icon>
+                            {{ badge.label }}
+                          </span>
+                        }
+                      </span>
                     </div>
-                    @if (user.hasAffiliateProfile) {
-                      <div class="user-actions">
-                        <button
-                          mat-raised-button
-                          color="warn"
-                          (click)="lockUserAccount(user.uuid, user.username)"
-                          [disabled]="
-                            updatingUserEligibility ||
-                            user.eligibilityStatus === 'suspended' ||
-                            user.eligibilityStatus === 'under_review'
-                          "
-                          matTooltip="Suspend or place account under review"
-                        >
-                          <mat-icon>lock</mat-icon>
-                          Restrict Account
-                        </button>
-                        <button
-                          mat-raised-button
-                          color="primary"
-                          (click)="restoreUserAccount(user.uuid, user.username)"
-                          [disabled]="updatingUserEligibility || user.eligibilityStatus === 'active'"
-                          matTooltip="Restore user's affiliate account"
-                        >
-                          <mat-icon>lock_open</mat-icon>
-                          Restore
-                        </button>
-                        <button
-                          mat-raised-button
-                          [color]="user.isActive ? 'accent' : 'primary'"
-                          (click)="toggleNetworkStatus(user.uuid, user.username, user.isActive ?? true)"
-                          [disabled]="updatingUserEligibility"
-                          [matTooltip]="
-                            user.isActive ? 'Close network (prevent new sign-ups)' : 'Open network (allow new sign-ups)'
-                          "
-                        >
-                          <mat-icon>{{ user.networkButtonIcon }}</mat-icon>
-                          {{ user.networkButtonLabel }}
-                        </button>
-                      </div>
-                    }
                   </div>
-                }
-              </div>
-            }
+                  @if (user.hasAffiliateProfile) {
+                    <div class="user-actions">
+                      <button
+                        mat-raised-button
+                        color="warn"
+                        (click)="lockUserAccount(user.uuid, user.username)"
+                        [disabled]="updatingUserEligibility || user.restrictDisabled"
+                        matTooltip="Suspend or place account under review"
+                      >
+                        <mat-icon>lock</mat-icon>
+                        Restrict Account
+                      </button>
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="restoreUserAccount(user.uuid, user.username)"
+                        [disabled]="updatingUserEligibility || user.restoreDisabled"
+                        matTooltip="Restore user's affiliate account"
+                      >
+                        <mat-icon>lock_open</mat-icon>
+                        Restore
+                      </button>
+                      <button
+                        mat-raised-button
+                        [color]="user.isActive ? 'accent' : 'primary'"
+                        (click)="toggleNetworkStatus(user.uuid, user.username, user.isActive ?? true)"
+                        [disabled]="updatingUserEligibility"
+                        [matTooltip]="user.networkButtonTooltip"
+                      >
+                        <mat-icon>{{ user.networkButtonIcon }}</mat-icon>
+                        {{ user.networkButtonLabel }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           </div>
         }
 
@@ -411,80 +370,78 @@
               Pending Cash Payout Requests
             </h2>
 
-            @if (loadingPayoutRequests) {
-              <div class="loading-container-small">
-                <mat-spinner diameter="30" />
-                <span>Loading requests...</span>
-              </div>
-            } @else if (pendingPayoutRequests.length === 0) {
-              <div class="no-data-small">No pending payout requests</div>
-            } @else {
-              <div class="requests-table">
-                <table mat-table [dataSource]="pendingPayoutRequests" class="compact-table">
-                  <ng-container matColumnDef="affiliate">
-                    <th mat-header-cell *matHeaderCellDef>Affiliate</th>
-                    <td mat-cell *matCellDef="let payout">
-                      <div class="affiliate-info">
-                        <strong>{{ payout.affiliate.username }}</strong>
-                        <small>ID: {{ payout.affiliate.uuid }}</small>
-                      </div>
-                    </td>
-                  </ng-container>
+            <div class="loading-container-small" [hidden]="!loadingPayoutRequests">
+              <mat-spinner diameter="30" />
+              <span>Loading requests...</span>
+            </div>
+            <div class="no-data-small" [hidden]="loadingPayoutRequests || pendingPayoutRequests.length > 0">
+              No pending payout requests
+            </div>
+            <div class="requests-table" [hidden]="loadingPayoutRequests || pendingPayoutRequests.length === 0">
+              <table mat-table [dataSource]="pendingPayoutRequests" class="compact-table">
+                <ng-container matColumnDef="affiliate">
+                  <th mat-header-cell *matHeaderCellDef>Affiliate</th>
+                  <td mat-cell *matCellDef="let payout">
+                    <div class="affiliate-info">
+                      <strong>{{ payout.affiliate.username }}</strong>
+                      <small>ID: {{ payout.affiliate.uuid }}</small>
+                    </div>
+                  </td>
+                </ng-container>
 
-                  <ng-container matColumnDef="amount">
-                    <th mat-header-cell *matHeaderCellDef>Amount</th>
-                    <td mat-cell *matCellDef="let payout">
-                      <div class="amount-info">
-                        <div>{{ payout.formattedCredits }} credits</div>
-                        <div class="usd-amount">${{ payout.formattedDollars }} USD</div>
-                      </div>
-                    </td>
-                  </ng-container>
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let payout">
+                    <div class="amount-info">
+                      <div>{{ payout.formattedCredits }} credits</div>
+                      <div class="usd-amount">${{ payout.formattedDollars }} USD</div>
+                    </div>
+                  </td>
+                </ng-container>
 
-                  <ng-container matColumnDef="requested">
-                    <th mat-header-cell *matHeaderCellDef>Requested</th>
-                    <td mat-cell *matCellDef="let payout">
-                      {{ payout.formattedDate }}
-                    </td>
-                  </ng-container>
+                <ng-container matColumnDef="requested">
+                  <th mat-header-cell *matHeaderCellDef>Requested</th>
+                  <td mat-cell *matCellDef="let payout">
+                    {{ payout.formattedDate }}
+                  </td>
+                </ng-container>
 
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let payout">
-                      <div class="action-buttons-inline">
-                        <button
-                          mat-icon-button
-                          color="primary"
-                          (click)="viewPayoutDetails(payout.uuid)"
-                          matTooltip="View Details"
-                        >
-                          <mat-icon>visibility</mat-icon>
-                        </button>
-                        <button
-                          mat-icon-button
-                          color="accent"
-                          (click)="approvePayoutRequest(payout.uuid)"
-                          matTooltip="Approve"
-                        >
-                          <mat-icon>check</mat-icon>
-                        </button>
-                        <button
-                          mat-icon-button
-                          color="warn"
-                          (click)="rejectPayoutRequest(payout.uuid)"
-                          matTooltip="Reject"
-                        >
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </div>
-                    </td>
-                  </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let payout">
+                    <div class="action-buttons-inline">
+                      <button
+                        mat-icon-button
+                        color="primary"
+                        (click)="viewPayoutDetails(payout.uuid)"
+                        matTooltip="View Details"
+                      >
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        color="accent"
+                        (click)="approvePayoutRequest(payout.uuid)"
+                        matTooltip="Approve"
+                      >
+                        <mat-icon>check</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        (click)="rejectPayoutRequest(payout.uuid)"
+                        matTooltip="Reject"
+                      >
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
 
-                  <tr mat-header-row *matHeaderRowDef="['affiliate', 'amount', 'requested', 'actions']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['affiliate', 'amount', 'requested', 'actions']"></tr>
-                </table>
-              </div>
-            }
+                <tr mat-header-row *matHeaderRowDef="['affiliate', 'amount', 'requested', 'actions']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['affiliate', 'amount', 'requested', 'actions']"></tr>
+              </table>
+            </div>
           </div>
         }
       </mat-card-content>

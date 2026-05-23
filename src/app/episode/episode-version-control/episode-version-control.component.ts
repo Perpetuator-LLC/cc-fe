@@ -7,10 +7,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatInput } from '@angular/material/input';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { EpisodeVersion } from '../episode.service';
 import { marked } from 'marked';
+import { VersionDetailsComponent } from './version-details/version-details.component';
 
 /** Pre-computed display state attached to each version. */
 interface VersionDisplay {
@@ -18,6 +18,14 @@ interface VersionDisplay {
   changeTypeLabel: string;
   isFullyValidated: boolean;
   validationTooltip: string;
+  /** 'verified' when validated, 'warning' when not. */
+  validationIcon: string;
+  /** Composite CSS class for the inline validation mat-icon. */
+  validationIconClass: string;
+  /** Composite CSS class for the validation badge span. */
+  validationBadgeClass: string;
+  /** Human label: 'Validated' or 'Not Validated'. */
+  validationLabel: string;
   hasAudio: boolean;
   wordCount: number;
   charCount: number;
@@ -38,7 +46,7 @@ type VersionWithDisplay = EpisodeVersion & { display: VersionDisplay };
     MatFormField,
     MatLabel,
     MatSelectModule,
-    MatInput,
+    VersionDetailsComponent,
   ],
   templateUrl: './episode-version-control.component.html',
   styleUrls: ['./episode-version-control.component.scss'],
@@ -47,7 +55,37 @@ export class EpisodeVersionControlComponent {
   private sanitizer = inject(DomSanitizer);
 
   @Input() currentVersionNumber: number | null = null;
-  @Input() isCurrentVersionFullyValidated = false;
+  private _isCurrentVersionFullyValidated = false;
+  @Input() set isCurrentVersionFullyValidated(v: boolean) {
+    this._isCurrentVersionFullyValidated = v;
+  }
+  get isCurrentVersionFullyValidated(): boolean {
+    return this._isCurrentVersionFullyValidated;
+  }
+  /** Icon name shown next to the current version number. */
+  get currentValidationIcon(): string {
+    return this._isCurrentVersionFullyValidated ? 'verified' : 'warning';
+  }
+  /** CSS class for the small status icon in the header. */
+  get currentValidationStatusIconClass(): string {
+    return this._isCurrentVersionFullyValidated
+      ? 'status-icon validated md3-icon-success'
+      : 'status-icon unvalidated md3-icon-warning';
+  }
+  /** CSS class for the validation badge under the info row. */
+  get currentValidationBadgeClass(): string {
+    return this._isCurrentVersionFullyValidated
+      ? 'validated-badge md3-badge-success'
+      : 'unvalidated-badge md3-badge-warning';
+  }
+  /** CSS class for the icon inside the validation badge. */
+  get currentValidationBadgeIconClass(): string {
+    return this._isCurrentVersionFullyValidated ? 'md3-icon-success' : 'md3-icon-warning';
+  }
+  /** Label inside the validation badge. */
+  get currentValidationLabel(): string {
+    return this._isCurrentVersionFullyValidated ? 'Validated' : 'Not Validated';
+  }
   @Input() currentVersionValidationTooltip = '';
 
   /** History versions enriched with pre-computed display fields. */
@@ -57,6 +95,15 @@ export class EpisodeVersionControlComponent {
   }
   get historyVersions(): VersionWithDisplay[] {
     return this._historyVersions;
+  }
+  /** Pre-built history-count label, e.g. '3 previous versions' or '1 previous version'. */
+  get previousVersionsLabel(): string {
+    const n = this._historyVersions.length;
+    return `${n} previous version${n !== 1 ? 's' : ''}`;
+  }
+  /** True iff there's any version history to render. */
+  get hasHistory(): boolean {
+    return this._historyVersions.length > 0;
   }
 
   @Input() set currentVersionChangeType(value: string | null) {
@@ -97,13 +144,18 @@ export class EpisodeVersionControlComponent {
 
   /** Build a `VersionWithDisplay` by attaching pre-computed display state. */
   private enrichVersion(v: EpisodeVersion): VersionWithDisplay {
+    const isFullyValidated = !!(v.validatedCompliance && v.validatedFacts && v.validatedLength);
     return {
       ...v,
       display: {
         changeTypeIcon: this.getChangeTypeIcon(v.changeType),
         changeTypeLabel: this.getChangeTypeLabel(v.changeType),
-        isFullyValidated: !!(v.validatedCompliance && v.validatedFacts && v.validatedLength),
+        isFullyValidated,
         validationTooltip: this.buildValidationTooltip(v),
+        validationIcon: isFullyValidated ? 'verified' : 'warning',
+        validationIconClass: isFullyValidated ? 'validated-icon md3-icon-success' : 'unvalidated-icon md3-icon-warning',
+        validationBadgeClass: isFullyValidated ? 'validated-badge' : 'unvalidated-badge',
+        validationLabel: isFullyValidated ? 'Validated' : 'Not Validated',
         hasAudio: !!(v.audioUrl && v.audioUrl.trim()),
         wordCount: v.content ? v.content.split(/\s+/).filter(Boolean).length : 0,
         charCount: v.content ? v.content.length : 0,

@@ -209,4 +209,75 @@ export class AffiliateCodeChangeDialogComponent implements OnInit, OnDestroy {
     }
     return this.availabilityStatus.available ? 'success' : 'error';
   }
+
+  /** True when an availability check has completed and we're not currently re-checking. */
+  get availabilityVisible(): boolean {
+    return !!this.availabilityStatus?.checked && !this.checking;
+  }
+
+  /** Tri-state describing the availability outcome for the inline badge. */
+  get availabilityState(): 'success' | 'warning' | 'error' | null {
+    if (!this.availabilityVisible || !this.availabilityStatus) {
+      return null;
+    }
+    if (!this.availabilityStatus.available) {
+      return 'error';
+    }
+    return this.availabilityStatus.requiresReview ? 'warning' : 'success';
+  }
+
+  /** Material icon name for the availability badge. */
+  get availabilityIcon(): string {
+    switch (this.availabilityState) {
+      case 'warning':
+        return 'warning';
+      case 'success':
+        return 'check_circle';
+      case 'error':
+        return 'error';
+      default:
+        return '';
+    }
+  }
+
+  /** Primary heading text for the availability badge. */
+  get availabilityHeading(): string {
+    if (this.availabilityState === 'warning') {
+      return 'Available (requires admin review)';
+    }
+    return this.availabilityStatus?.message ?? '';
+  }
+
+  /** Secondary helper text shown only for the warning state. */
+  get availabilitySubtext(): string {
+    return this.availabilityState === 'warning' ? 'Premium keywords require manual approval' : '';
+  }
+
+  /** The first applicable error message for the newCode input, or '' if none. */
+  get newCodeErrorMessage(): string {
+    const control = this.codeForm.get('newCode');
+    if (!control) {
+      return '';
+    }
+    if (control.hasError('required') && control.touched) {
+      return 'Code is required';
+    }
+    if (control.hasError('minlength')) {
+      return 'Code must be at least 3 characters';
+    }
+    if (control.hasError('maxlength')) {
+      return 'Code cannot exceed 50 characters';
+    }
+    return '';
+  }
+
+  /** True when the primary submit button should be rendered. */
+  get canShowSubmit(): boolean {
+    return this.canChange && !this.loading;
+  }
+
+  /** Label shown on the submit button (changes while submitting). */
+  get submitButtonLabel(): string {
+    return this.submitting ? 'Requesting...' : 'Request Change';
+  }
 }

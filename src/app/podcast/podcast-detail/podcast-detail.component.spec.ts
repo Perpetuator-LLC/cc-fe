@@ -100,10 +100,11 @@ describe('PodcastDetailComponentComponent', () => {
     mockEpisodeService = jasmine.createSpyObj('EpisodeService', ['getEpisodes']);
     mockJobService = jasmine.createSpyObj('JobService', ['addJob']);
     mockResearchService = jasmine.createSpyObj('ResearchService', ['createResearchChain']);
-    mockShareService = jasmine.createSpyObj('ShareService', ['extractIdFromSlugParam']);
+    mockShareService = jasmine.createSpyObj('ShareService', ['extractIdFromSlugParam', 'buildPodcastUrl']);
 
     // Make extractIdFromSlugParam return the test UUID
     mockShareService.extractIdFromSlugParam.and.returnValue('test-podcast-uuid');
+    mockShareService.buildPodcastUrl.and.returnValue('https://example.com/p/test-podcast-uuid');
 
     mockSchedulingService = jasmine.createSpyObj('SchedulingService', ['getSchedules']);
     mockSchedulingService.getSchedules.and.returnValue(

@@ -49,16 +49,9 @@
       @if (form.get('text')?.hasError('required') && form.get('text')?.touched) {
         <mat-error>Post content is required</mat-error>
       }
-      <mat-hint align="start">
-        @if (selectedPlatformLimit) {
-          {{ selectedPlatformLimit.name }} limit: {{ selectedPlatformLimit.maxLength }} characters
-        }
-      </mat-hint>
+      <mat-hint align="start">{{ platformLimitHint }}</mat-hint>
       <mat-hint align="end" [class.over-limit]="isOverLimit">
-        {{ characterCount }}
-        @if (selectedPlatformLimit) {
-          / {{ selectedPlatformLimit.maxLength }}
-        }
+        {{ characterCount }} {{ platformLimitCountSuffix }}
       </mat-hint>
     </mat-form-field>
 
@@ -105,21 +98,18 @@
 
 <mat-dialog-actions align="end">
   <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Cancel</button>
-  @if (loading) {
-    <button mat-flat-button color="primary" disabled>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="onSave()"
+    [disabled]="loading || form.invalid || loadingAccounts"
+  >
+    @if (loading) {
       <mat-spinner diameter="18" />
-      <span>Saving...</span>
-    </button>
-  } @else {
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="onSave()"
-      [disabled]="form.invalid || loadingAccounts"
-    >
+    } @else {
       <mat-icon>save</mat-icon>
-      <span>{{ isEdit ? 'Update' : 'Create' }}</span>
-    </button>
-  }
+    }
+    <span>{{ saveButtonLabel }}</span>
+  </button>
 </mat-dialog-actions>

@@ -1,0 +1,82 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (display) {
+  <div class="job-links">
+    @if (display.hasPodcast) {
+      <button
+        mat-flat-button
+        class="resource-tag podcast-tag"
+        [routerLink]="['/media/podcasts', display.podcastUuid]"
+        matTooltip="Podcast"
+      >
+        <mat-icon>mic</mat-icon>
+        {{ display.podcastName }}
+      </button>
+    }
+    @if (display.hasEpisode) {
+      <button
+        mat-flat-button
+        class="resource-tag episode-tag"
+        [routerLink]="['/media/episodes', display.episodeUuid]"
+        matTooltip="Episode"
+      >
+        <mat-icon>podcasts</mat-icon>
+        {{ display.episodeName }}
+      </button>
+    }
+    @if (display.hasTopic) {
+      <button
+        mat-flat-button
+        class="resource-tag topic-tag"
+        [routerLink]="['/media/topics', display.topicUuid]"
+        matTooltip="Topic"
+      >
+        <mat-icon>topic</mat-icon>
+        {{ display.topicName }}
+      </button>
+    }
+    @if (display.hasPulseConfig) {
+      <button
+        type="button"
+        class="resource-link-pulse"
+        [routerLink]="['/media/pulses', display.pulseConfigUuid]"
+        matTooltip="Pulse"
+      >
+        <mat-icon>vital_signs</mat-icon>
+        {{ display.pulseConfigName }}
+      </button>
+    }
+    @if (display.hasBlog) {
+      <button
+        mat-flat-button
+        class="resource-tag blog-tag"
+        [routerLink]="['/media/blogs', display.blogUuid]"
+        matTooltip="Blog"
+      >
+        <mat-icon>menu_book</mat-icon>
+        {{ display.blogName }}
+      </button>
+    }
+    @if (display.hasArticle) {
+      <button
+        mat-flat-button
+        class="resource-tag article-tag"
+        [routerLink]="['/media/articles', display.articleUuid]"
+        matTooltip="Article"
+      >
+        <mat-icon>article</mat-icon>
+        {{ display.articleTitle }}
+      </button>
+    }
+    @if (display.hasSymbol) {
+      <button
+        mat-flat-button
+        class="resource-tag symbol-tag"
+        (click)="onSymbolClick()"
+        [matTooltip]="display.symbolTooltip"
+      >
+        <mat-icon>show_chart</mat-icon>
+        {{ display.symbol }}
+      </button>
+    }
+  </div>
+}

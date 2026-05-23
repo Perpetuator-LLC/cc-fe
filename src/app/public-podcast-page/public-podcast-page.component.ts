@@ -53,6 +53,16 @@ export class PublicPodcastPageComponent implements OnInit {
     formattedDate: string;
     formattedDuration: string;
   })[] = [];
+  /**
+   * Pre-computed flat list of category badges (header + subcategories) so the
+   * template can render them with a single `@for` instead of nested loops.
+   */
+  categoriesDisplay: { key: string; subcategory?: string; route: (string | undefined)[]; label: string }[] = [];
+  /**
+   * Pre-computed list of optional load-count stats so the template can render
+   * them with a single `@for` instead of three sibling `@if` blocks.
+   */
+  optionalLoadStats: { icon: string; label: string }[] = [];
   loading = true;
   error = false;
   podcastId = '';
@@ -109,6 +119,8 @@ export class PublicPodcastPageComponent implements OnInit {
           formattedDate: this.formatDate(ep.date),
           formattedDuration: this.formatDuration(ep.duration),
         }));
+        this.categoriesDisplay = this.buildCategoriesDisplay(data.categories);
+        this.optionalLoadStats = this.buildOptionalLoadStats(data);
         this.loading = false;
         this.updateSeoTags();
       },
@@ -137,6 +149,64 @@ export class PublicPodcastPageComponent implements OnInit {
   get shareUrl(): string {
     if (!this.podcastData) return '';
     return this.shareService.buildPodcastUrl(this.podcastData.id, this.podcastData.name);
+  }
+
+  /**
+   * Preferred podcast cover image (thumbnail when available, otherwise the
+   * full-size image). Empty string when neither is present.
+   * Exposed as a getter so the template renders a single `@if` instead of
+   * `@if/@else if` on two separate URL fields.
+   */
+  get podcastImage(): string {
+    return this.podcastData?.thumbnailUrl || this.podcastData?.imageUrl || '';
+  }
+
+  /** Whether the paginator should be shown. Avoids an inline boolean expression in the template. */
+  get showPaginator(): boolean {
+    return (this.podcastData?.pagination.totalPages ?? 0) > 1;
+  }
+
+  /**
+   * Flatten the categories map into a single list of badge descriptors so the
+   * template can render headers and subcategories with one `@for` instead of
+   * a nested loop.
+   */
+  private buildCategoriesDisplay(
+    categories: Record<string, string[]> | null | undefined,
+  ): { key: string; subcategory?: string; route: (string | undefined)[]; label: string }[] {
+    if (!categories) return [];
+    const result: { key: string; subcategory?: string; route: (string | undefined)[]; label: string }[] = [];
+    for (const key of Object.keys(categories)) {
+      result.push({ key, route: ['/categories', key], label: key });
+      for (const subcategory of categories[key] || []) {
+        result.push({
+          key,
+          subcategory,
+          route: ['/categories', key, subcategory],
+          label: subcategory,
+        });
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Build the list of optional load-count stats so the template renders them
+   * via a single `@for` rather than three sibling `@if` blocks. Stats with
+   * undefined counts are simply omitted.
+   */
+  private buildOptionalLoadStats(data: PodcastResponse): { icon: string; label: string }[] {
+    const stats: { icon: string; label: string }[] = [];
+    if (data.rssLoadCount !== undefined) {
+      stats.push({ icon: 'rss_feed', label: `${data.rssLoadCount} RSS loads` });
+    }
+    if (data.imageLoadCount !== undefined) {
+      stats.push({ icon: 'image', label: `${data.imageLoadCount} image loads` });
+    }
+    if (data.thumbnailLoadCount !== undefined) {
+      stats.push({ icon: 'photo', label: `${data.thumbnailLoadCount} thumbnail loads` });
+    }
+    return stats;
   }
 
   /** Backwards-compatible method kept for the internal updateSeoTags caller. */
