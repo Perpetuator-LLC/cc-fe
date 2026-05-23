@@ -23,6 +23,31 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { Voice, VoicesService, VoiceTier, voiceToTier, tierToString } from '../../podcast/voices.service';
 
+/** Pre-computed display state for a voice tier toggle button. */
+interface TierOption {
+  tier: VoiceTier;
+  label: string;
+  icon: string;
+  selected: boolean;
+}
+
+/** Pre-computed display state for a voice card. */
+interface VoiceDisplay {
+  voice: Voice;
+  displayName: string;
+  wpm: number | null;
+  creditsLabel: string | null;
+  selected: boolean;
+}
+
+/** Pre-computed display state for a tier group. */
+interface VoiceGroup {
+  tier: VoiceTier;
+  label: string;
+  icon: string;
+  voices: VoiceDisplay[];
+}
+
 /**
  * Shared voice selector component for podcasts and pulses.
  * Features:
@@ -90,6 +115,12 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
   ];
   selectedTiers = new Set<VoiceTier>(this.allTiers);
 
+  /** Pre-computed tier-toggle button data — rebuilt on selection change. */
+  tierOptions: TierOption[] = [];
+
+  /** Pre-computed grouped voice list — rebuilt by applyFilters / selection change. */
+  voiceGroups: VoiceGroup[] = [];
+
   // Search
   searchControl = new FormControl('');
 
@@ -151,6 +182,46 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
       if (tierOrder !== 0) return tierOrder;
       return this.getVoiceDisplayName(a).localeCompare(this.getVoiceDisplayName(b));
     });
+
+    this.rebuildDisplays();
+  }
+
+  /**
+   * Rebuild `tierOptions` and `voiceGroups` from current state. Cheaper to
+   * call than to compute display values from method calls in the template
+   * on every change-detection tick.
+   */
+  private rebuildDisplays(): void {
+    this.tierOptions = this.allTiers.map((tier) => ({
+      tier,
+      label: tierToString(tier),
+      icon: this.getTierIcon(tier),
+      selected: this.selectedTiers.has(tier),
+    }));
+
+    const groups: VoiceGroup[] = [];
+    for (const tier of this.allTiers) {
+      if (!this.selectedTiers.has(tier)) continue;
+      const voicesInTier = this.filteredVoices.filter((v) => voiceToTier(v) === tier);
+      if (voicesInTier.length === 0) continue;
+      groups.push({
+        tier,
+        label: tierToString(tier),
+        icon: this.getTierIcon(tier),
+        voices: voicesInTier.map((voice) => this.toVoiceDisplay(voice)),
+      });
+    }
+    this.voiceGroups = groups;
+  }
+
+  private toVoiceDisplay(voice: Voice): VoiceDisplay {
+    return {
+      voice,
+      displayName: this.getVoiceDisplayName(voice),
+      wpm: this.getVoiceWpm(voice),
+      creditsLabel: this.formatCreditsPerWord(voice),
+      selected: this.isVoiceSelected(voice),
+    };
   }
 
   toggleTier(tier: VoiceTier): void {
@@ -217,6 +288,7 @@ export class VoiceSelectorComponent implements OnInit, OnDestroy {
       this.selectedVoiceUuid = voice.uuid;
       this.voiceSelected.emit(voice);
     }
+    this.rebuildDisplays();
   }
 
   // Display helpers
