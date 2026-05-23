@@ -150,33 +150,29 @@
             <tbody>
               <tr>
                 <td class="metric-name">Free Cash Flow</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td>{{ dividendChartService.formatCurrency(year.freeCashFlow) }}</td>
+                @for (year of enrichedYearlyData(); track year.year) {
+                  <td>{{ year.formattedFreeCashFlow }}</td>
                 }
               </tr>
               <tr>
                 <td class="metric-name">Dividends Paid</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td>{{ dividendChartService.formatCurrency(year.dividendPayout ? -year.dividendPayout : null) }}</td>
+                @for (year of enrichedYearlyData(); track year.year) {
+                  <td>{{ year.formattedDividendsPaid }}</td>
                 }
               </tr>
               <tr>
                 <td class="metric-name">FCF Payout Ratio</td>
-                @for (year of data.yearlyData; track year.year) {
+                @for (year of enrichedYearlyData(); track year.year) {
                   <td [class.warning]="year.fcfPayoutRatio && year.fcfPayoutRatio > 0.8">
-                    {{ dividendChartService.formatPercent(year.fcfPayoutRatio ? year.fcfPayoutRatio * 100 : null) }}
+                    {{ year.formattedFcfPayoutRatio }}
                   </td>
                 }
               </tr>
               <tr>
                 <td class="metric-name">Net Income Payout</td>
-                @for (year of data.yearlyData; track year.year) {
+                @for (year of enrichedYearlyData(); track year.year) {
                   <td [class.warning]="year.netIncomePayoutRatio && year.netIncomePayoutRatio > 0.8">
-                    {{
-                      dividendChartService.formatPercent(
-                        year.netIncomePayoutRatio ? year.netIncomePayoutRatio * 100 : null
-                      )
-                    }}
+                    {{ year.formattedNetIncomePayoutRatio }}
                   </td>
                 }
               </tr>

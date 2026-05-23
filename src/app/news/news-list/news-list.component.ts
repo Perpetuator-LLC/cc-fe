@@ -86,7 +86,13 @@ export class NewsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   news: NewsConnection | null = null;
   filteredNews: NewsResult[] = [];
+  /** Mirror of filteredNews with `selected` pre-computed for the template. */
+  filteredNewsDisplay: { news: NewsResult; selected: boolean }[] = [];
   selectedNews = new Set<NewsResult>();
+
+  private rebuildFilteredNewsDisplay(): void {
+    this.filteredNewsDisplay = this.filteredNews.map((n) => ({ news: n, selected: this.selectedNews.has(n) }));
+  }
   podcasts: PodcastsResult[] = [];
   selectedPodcastUuid: string | null = null;
   selectedRssFeedUuid: string | null = null;
@@ -94,6 +100,36 @@ export class NewsListComponent implements OnInit, OnDestroy {
   filterTarget: HTMLInputElement | null = null;
   jobs: Job[] = [];
   selectedNewsDetail: NewsResult | null = null;
+  /**
+   * Pre-rendered display strings derived from `selectedNewsDetail`.
+   * Updated in selectNews / clearSelectedNewsDetail so the template
+   * doesn't call markdownToHtml or getTag* per CD tick.
+   */
+  selectedNewsDisplay: {
+    summaryHtml: SafeHtml | null;
+    validatedSummaryHtml: SafeHtml | null;
+    contentHtml: SafeHtml | null;
+    tags: { kind: string; value: string; label: string; class: string }[];
+  } | null = null;
+
+  private rebuildSelectedNewsDisplay(): void {
+    const n = this.selectedNewsDetail;
+    if (!n) {
+      this.selectedNewsDisplay = null;
+      return;
+    }
+    this.selectedNewsDisplay = {
+      summaryHtml: n.summary ? this.markdownToHtml(n.summary) : null,
+      validatedSummaryHtml: n.validatedSummary ? this.markdownToHtml(n.validatedSummary) : null,
+      contentHtml: n.content ? this.markdownToHtml(n.content) : null,
+      tags: (n.tags || []).map((t) => ({
+        kind: t.kind,
+        value: t.value,
+        label: this.getTagLabel(t.kind, t.value),
+        class: this.getTagClass(t.kind, t.value),
+      })),
+    };
+  }
   newsFetched = false;
   loadingNews = false;
   totalNewsCount = 0;
@@ -138,6 +174,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.toolbarService.setToolbarTemplate(this.toolbarTemplate);
     this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
+    this.rebuildFilteredNewsDisplay();
 
     // Load podcast history first
     this.subscriptions.add(
@@ -215,8 +252,10 @@ export class NewsListComponent implements OnInit, OnDestroy {
   onPodcastChange() {
     this.news = null;
     this.filteredNews = [];
+    this.filteredNewsDisplay = [];
     this.selectedNews.clear();
     this.selectedNewsDetail = null;
+    this.selectedNewsDisplay = null;
     this.selectedRssFeedUuid = null;
     this.rssFeeds = [];
 
@@ -530,6 +569,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
             this.filteredNews = this.news.edges.map((edge) => edge.node);
             this.reapplySelection(selectedNewsIds);
             this.applyFilter(null);
+            this.rebuildFilteredNewsDisplay();
             this.newsFetched = true;
             this.loadingNews = false;
             this.loadingService.hide();
@@ -563,6 +603,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
     if (!filterValue) {
       this.filteredNews = this.news?.edges.map((edge) => edge.node) || [];
+      this.rebuildFilteredNewsDisplay();
       return;
     }
 
@@ -597,14 +638,17 @@ export class NewsListComponent implements OnInit, OnDestroy {
           news.source.toLowerCase().includes(lowerCaseFilter),
       );
     }
+    this.rebuildFilteredNewsDisplay();
   }
 
   selectAll() {
     this.selectedNews = new Set(this.filteredNews);
+    this.rebuildFilteredNewsDisplay();
   }
 
   unselectAll() {
     this.selectedNews.clear();
+    this.rebuildFilteredNewsDisplay();
   }
 
   toggleSelectAll() {
@@ -621,6 +665,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
     } else {
       this.selectedNews.add(news);
     }
+    this.rebuildFilteredNewsDisplay();
   }
 
   isSelected(news: NewsResult): boolean {
@@ -629,6 +674,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
   selectNews(news: NewsResult) {
     this.selectedNewsDetail = news;
+    this.rebuildSelectedNewsDisplay();
     // Ensure detail panel width doesn't exceed constraints
     const maxWidth = window.innerWidth * 0.8;
     if (this.detailPanelWidth > maxWidth) {
@@ -638,6 +684,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
 
   clearSelectedNewsDetail() {
     this.selectedNewsDetail = null;
+    this.selectedNewsDisplay = null;
   }
 
   ngOnDestroy() {

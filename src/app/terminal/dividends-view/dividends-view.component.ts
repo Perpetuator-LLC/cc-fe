@@ -56,7 +56,36 @@ export class DividendsViewComponent {
   protected readonly CHART_DEFINITIONS = CHART_DEFINITIONS;
 
   /** Dividend analysis data from service */
-  @Input() data: DividendAnalysisData | null = null;
+  private _data = signal<DividendAnalysisData | null>(null);
+  @Input() set data(value: DividendAnalysisData | null) {
+    this._data.set(value);
+  }
+  get data(): DividendAnalysisData | null {
+    return this._data();
+  }
+
+  /**
+   * Pre-enriched yearly data with formatted currency / percent strings so
+   * the table can read property access instead of calling formatters per
+   * change-detection tick.
+   */
+  readonly enrichedYearlyData = computed(() => {
+    const data = this._data();
+    if (!data) return [];
+    return data.yearlyData.map((year) => ({
+      ...year,
+      formattedFreeCashFlow: this.dividendChartService.formatCurrency(year.freeCashFlow),
+      formattedDividendsPaid: this.dividendChartService.formatCurrency(
+        year.dividendPayout ? -year.dividendPayout : null,
+      ),
+      formattedFcfPayoutRatio: this.dividendChartService.formatPercent(
+        year.fcfPayoutRatio ? year.fcfPayoutRatio * 100 : null,
+      ),
+      formattedNetIncomePayoutRatio: this.dividendChartService.formatPercent(
+        year.netIncomePayoutRatio ? year.netIncomePayoutRatio * 100 : null,
+      ),
+    }));
+  });
 
   /** Pre-built ECharts options for dividend charts */
   @Input() charts: {

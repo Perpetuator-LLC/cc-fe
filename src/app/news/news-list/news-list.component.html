@@ -191,12 +191,13 @@
             @if (selectedPodcastUuid !== null && news && !loadingNews) {
               <div class="news-container">
                 <mat-list>
-                  @for (news of filteredNews; track news.url) {
+                  @for (item of filteredNewsDisplay; track item.news.url) {
+                    @let news = item.news;
                     <mat-list-item class="news-item">
                       <div class="news-card" tabindex="0" (click)="selectNews(news)" (keydown.enter)="selectNews(news)">
                         <mat-checkbox
                           (click)="$event.stopPropagation(); toggleSelection(news)"
-                          [checked]="isSelected(news)"
+                          [checked]="item.selected"
                         />
                         <div class="news-card-wrapper" [ngClass]="{ newsSelected: selectedNewsDetail === news }">
                           <div class="news-content">
@@ -338,13 +339,9 @@
                   <div class="metadata-section">
                     <h3>Metadata Tags</h3>
                     <div class="tags-container">
-                      @for (tag of selectedNewsDetail.tags; track tag.kind + tag.value) {
-                        <span
-                          class="news-tag"
-                          [ngClass]="getTagClass(tag.kind, tag.value)"
-                          [matTooltip]="tag.kind + ': ' + tag.value"
-                        >
-                          {{ getTagLabel(tag.kind, tag.value) }}
+                      @for (tag of selectedNewsDisplay?.tags ?? []; track tag.kind + tag.value) {
+                        <span class="news-tag" [ngClass]="tag.class" [matTooltip]="tag.kind + ': ' + tag.value">
+                          {{ tag.label }}
                         </span>
                       }
                     </div>
@@ -373,18 +370,11 @@
                     {{ selectedNewsDetail.summary.length > 0 ? 'Reg' : 'G' }}enerate Summary (Force)
                   </button>
                 }
-                <p
-                  class=""
-                  [innerHTML]="
-                    selectedNewsDetail.summary
-                      ? markdownToHtml(selectedNewsDetail.summary)
-                      : 'No news summary available'
-                  "
-                ></p>
+                <p class="" [innerHTML]="selectedNewsDisplay?.summaryHtml || 'No news summary available'"></p>
                 <mat-divider />
                 <h3>Validated Summary</h3>
                 @if (selectedNewsDetail.validatedSummary) {
-                  <p class="" [innerHTML]="markdownToHtml(selectedNewsDetail.validatedSummary)"></p>
+                  <p class="" [innerHTML]="selectedNewsDisplay?.validatedSummaryHtml"></p>
                 } @else {
                   <p class="">News not (yet) validated.</p>
                 }
@@ -402,7 +392,7 @@
                   </button>
                   <h3>Site Content</h3>
                   @if (selectedNewsDetail.content) {
-                    <p class="" [innerHTML]="markdownToHtml(selectedNewsDetail.content)"></p>
+                    <p class="" [innerHTML]="selectedNewsDisplay?.contentHtml"></p>
                   } @else {
                     <p class="">No news content available</p>
                   }
