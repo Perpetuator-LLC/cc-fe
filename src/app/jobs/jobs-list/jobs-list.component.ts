@@ -13,7 +13,7 @@ import {
   iconForJob,
 } from '../job.service';
 import { JobsWebSocketService } from '../jobs-websocket.service';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass, UpperCasePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { MatIcon } from '@angular/material/icon';
@@ -35,11 +35,51 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { LoadingService } from '../../layout/loading.service';
 
+/**
+ * Pre-computed display state for an EnrichedJob. Built once per job in
+ * `enrichJobsWithNames` so the template can read static property accesses
+ * instead of calling methods on every change-detection tick.
+ */
+interface JobDisplay {
+  iconName: string;
+  statusClass: string;
+  kindLabel: string;
+  cleanMessage: string;
+  cleanError: string;
+  isFailedOrPending: boolean;
+  symbolTooltip: string;
+  // Resource flags + UUIDs/names (mirrors JobDisplayService getters)
+  hasPodcast: boolean;
+  podcastUuid: string | null;
+  podcastName: string;
+  hasEpisode: boolean;
+  episodeUuid: string | null;
+  episodeName: string;
+  hasTopic: boolean;
+  topicUuid: string | null;
+  topicName: string;
+  hasPulseConfig: boolean;
+  pulseConfigUuid: string | null;
+  pulseConfigName: string;
+  hasBlog: boolean;
+  blogUuid: string | null;
+  blogName: string;
+  hasArticle: boolean;
+  articleUuid: string | null;
+  articleTitle: string;
+  hasSymbol: boolean;
+  symbol: string | null;
+}
+
 interface EnrichedJob extends Job {
   podcastName?: string;
   episodeName?: string;
   topicName?: string;
   pulseConfigName?: string;
+  /** Pre-computed display state. Set during enrichment. */
+  display: JobDisplay;
+  /** Discriminator for the timeline union (standalone job branch). */
+  isChainGroup: false;
 }
 
 /** Aggregated resources from all jobs in a chain */
@@ -48,11 +88,21 @@ interface ChainResources {
   episodes: { uuid: string; name: string }[];
   topics: { uuid: string; name: string }[];
   pulseConfigs: { uuid: string; name: string }[];
-  symbols: { symbol: string; job: EnrichedJob }[];
+  symbols: { symbol: string; job: EnrichedJob; tooltip: string }[];
+}
+
+/** Pre-computed display state for a JobChainGroup. */
+interface ChainDisplay {
+  title: string;
+  icon: string;
+  statusClass: string;
+  hasResources: boolean;
 }
 
 /** Represents a group of jobs in a chain, or a single standalone job */
 interface JobChainGroup {
+  /** Discriminator for the timeline union (chain branch). */
+  isChainGroup: true;
   chainId: string | null;
   jobs: EnrichedJob[];
   expanded: boolean;
@@ -68,7 +118,12 @@ interface JobChainGroup {
   updatedAt: string;
   // Pre-computed resources
   resources: ChainResources;
+  /** Pre-computed display state. */
+  display: ChainDisplay;
 }
+
+/** Discriminated union used for the timeline items array. */
+type TimelineItem = EnrichedJob | JobChainGroup;
 
 interface Episode {
   uuid: string;
@@ -85,6 +140,7 @@ interface Episode {
     MatSortModule,
     DatePipe,
     DecimalPipe,
+    UpperCasePipe,
     MatIcon,
     MatIconButton,
     MatButton,
@@ -113,8 +169,19 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription = new Subscription();
   private intersectionObserver: IntersectionObserver | null = null;
-  jobs: EnrichedJob[] = [];
-  dataSource = new MatTableDataSource<EnrichedJob>(this.jobs);
+  private _jobs: EnrichedJob[] = [];
+  /**
+   * Setter rebuilds `groupedJobs` so the template always renders fresh
+   * pre-computed display state without needing a CD-tick recomputation.
+   */
+  get jobs(): EnrichedJob[] {
+    return this._jobs;
+  }
+  set jobs(value: EnrichedJob[]) {
+    this._jobs = value;
+    this.rebuildGroupedJobs();
+  }
+  dataSource = new MatTableDataSource<EnrichedJob>([]);
   displayedColumns: string[] = ['kind', 'message', 'cost', 'createdAt', 'updatedAt', 'status'];
   totalJobs = 0;
   pageSize = 10;
@@ -129,6 +196,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   // New status filter property
   statusFilter: string | null = null;
+  /** Pre-computed label for the current `statusFilter`. Updated whenever the filter changes. */
+  statusFilterLabel = '';
 
   // Track which job chains are expanded
   expandedChains = new Set<string>();
@@ -240,7 +309,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         .catch((error) => {
           console.warn('Failed to enrich updated job:', error);
           const updatedJobs = [...this.jobs];
-          updatedJobs[existingIndex] = { ...job };
+          updatedJobs[existingIndex] = this.toEnrichedJob(job);
           this.jobs = updatedJobs;
           this.dataSource.data = this.jobs;
         });
@@ -254,7 +323,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         })
         .catch((error) => {
           console.warn('Failed to enrich new job:', error);
-          this.jobs = [{ ...job }, ...this.jobs];
+          this.jobs = [this.toEnrichedJob(job), ...this.jobs];
           this.dataSource.data = this.jobs;
           this.totalJobs++;
         });
@@ -297,7 +366,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
             })
             .catch((error) => {
               this.messageService.error('Failed to enrich jobs with names: ' + error.toString());
-              this.jobs = jobs.map((job) => ({ ...job }));
+              this.jobs = jobs.map((job) => this.toEnrichedJob(job));
               this.dataSource.data = this.jobs;
               this.hasNextPage = jobs.length >= requestCount;
               this.totalJobs = jobs.length;
@@ -377,9 +446,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
       queries.push(this.fetchPulseConfigNames(Array.from(pulseConfigUuids)));
     }
 
-    // If no UUIDs to fetch, return jobs as-is
+    // If no UUIDs to fetch, return jobs with empty enrichment + computed display.
     if (queries.length === 0) {
-      return jobs.map((job) => ({ ...job }));
+      return jobs.map((job) => this.toEnrichedJob(job));
     }
 
     try {
@@ -423,36 +492,136 @@ export class JobsListComponent implements OnInit, OnDestroy {
         );
       }
 
-      // Enrich jobs with the fetched names
+      // Enrich jobs with the fetched names + pre-computed display state.
       return jobs.map((job) => {
-        const enrichedJob: EnrichedJob = { ...job };
         const podcastUuid = this.jobDisplayService.getPodcastUuid(job);
         const episodeUuid = this.jobDisplayService.getEpisodeUuid(job);
         const topicUuid = this.jobDisplayService.getTopicUuid(job);
-        const pulseConfigUuid = this.getPulseConfigUuid(job);
+        const pulseConfigUuid = this.jobDisplayService.getPulseConfigUuid(job);
 
+        const extras: Partial<EnrichedJob> = {};
         if (podcastUuid && podcastNameMap.has(podcastUuid)) {
-          enrichedJob.podcastName = podcastNameMap.get(podcastUuid);
+          extras.podcastName = podcastNameMap.get(podcastUuid);
         }
-
         if (episodeUuid && episodeNameMap.has(episodeUuid)) {
-          enrichedJob.episodeName = episodeNameMap.get(episodeUuid);
+          extras.episodeName = episodeNameMap.get(episodeUuid);
         }
-
         if (topicUuid && topicNameMap.has(topicUuid)) {
-          enrichedJob.topicName = topicNameMap.get(topicUuid);
+          extras.topicName = topicNameMap.get(topicUuid);
         }
-
         if (pulseConfigUuid && pulseConfigNameMap.has(pulseConfigUuid)) {
-          enrichedJob.pulseConfigName = pulseConfigNameMap.get(pulseConfigUuid);
+          extras.pulseConfigName = pulseConfigNameMap.get(pulseConfigUuid);
         }
 
-        return enrichedJob;
+        return this.toEnrichedJob(job, extras);
       });
     } catch (error) {
       console.warn('Failed to fetch podcast/episode/topic/pulse names:', error);
-      return jobs.map((job) => ({ ...job }));
+      return jobs.map((job) => this.toEnrichedJob(job));
     }
+  }
+
+  /**
+   * Build an EnrichedJob from a raw Job by attaching optional enrichment
+   * fields and computing the static `display` block once. Called from
+   * `enrichJobsWithNames` and the websocket update path.
+   */
+  private toEnrichedJob(job: Job, extras: Partial<EnrichedJob> = {}): EnrichedJob {
+    return {
+      ...job,
+      ...extras,
+      isChainGroup: false,
+      display: this.buildJobDisplay(job, extras),
+    };
+  }
+
+  /** Compute all derived display state for a single job. */
+  private buildJobDisplay(job: Job, extras: Partial<EnrichedJob> = {}): JobDisplay {
+    const jds = this.jobDisplayService;
+    const jobStatus = stringToJobStatus(job.status);
+    return {
+      iconName: iconForJob(job.kind),
+      statusClass: this.statusClassFor(job.status),
+      kindLabel: kindToString(job.kind),
+      cleanMessage: this.computeCleanJobMessage(job),
+      cleanError: this.computeCleanErrorMessage(job.error || ''),
+      isFailedOrPending: jobStatus === JobStatus.FAILED || jobStatus === JobStatus.PENDING,
+      symbolTooltip: this.computeSymbolTooltip(job),
+      hasPodcast: jds.hasPodcastUuid(job),
+      podcastUuid: jds.getPodcastUuid(job),
+      podcastName: extras.podcastName || 'Podcast',
+      hasEpisode: jds.hasEpisodeUuid(job),
+      episodeUuid: jds.getEpisodeUuid(job),
+      episodeName: extras.episodeName || 'Episode',
+      hasTopic: jds.hasTopicUuid(job),
+      topicUuid: jds.getTopicUuid(job),
+      topicName: extras.topicName || 'Topic',
+      hasPulseConfig: jds.hasPulseConfigUuid(job),
+      pulseConfigUuid: jds.getPulseConfigUuid(job),
+      pulseConfigName: extras.pulseConfigName || 'Pulse',
+      hasBlog: jds.hasBlogUuid(job),
+      blogUuid: jds.getBlogUuid(job),
+      blogName: jds.getBlogName(job) || 'Blog',
+      hasArticle: jds.hasArticleUuid(job),
+      articleUuid: jds.getArticleUuid(job),
+      articleTitle: jds.getArticleTitle(job) || 'Article',
+      hasSymbol: jds.hasSymbol(job),
+      symbol: jds.getSymbol(job),
+    };
+  }
+
+  private statusClassFor(status: string): string {
+    switch (stringToJobStatus(status)) {
+      case JobStatus.PENDING:
+        return 'job-pending';
+      case JobStatus.RUNNING:
+        return 'job-running';
+      case JobStatus.COMPLETED:
+        return 'job-success';
+      case JobStatus.FAILED:
+        return 'job-failed';
+      default:
+        return '';
+    }
+  }
+
+  private chainStatusClassFor(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'job-success';
+      case 'running':
+        return 'job-running';
+      case 'failed':
+        return 'job-failed';
+      default:
+        return 'job-pending';
+    }
+  }
+
+  /** Pure version (no service access) of getCleanErrorMessage. */
+  private computeCleanErrorMessage(errorMessage: string): string {
+    if (!errorMessage) return '';
+    return errorMessage.replace(/^(Error:|ERROR:|error:)\s*/i, '').trim();
+  }
+
+  /** Pure version (no service access) of getCleanJobMessage. */
+  private computeCleanJobMessage(job: Job): string {
+    const message = this.jobDisplayService.getJobMessage(job);
+    if (this.isErrorMessage(message)) {
+      return this.computeCleanErrorMessage(message);
+    }
+    return message;
+  }
+
+  /** Pure version of getSymbolTooltip. */
+  private computeSymbolTooltip(job: Job): string {
+    const fqn = this.jobDisplayService.getFqn(job);
+    const interval = this.jobDisplayService.getInterval(job);
+    const parts: string[] = [];
+    if (fqn) parts.push(`FQN: ${fqn}`);
+    if (interval) parts.push(`Interval: ${interval}`);
+    parts.push('Click to view chart');
+    return parts.join('\n');
   }
 
   // Fetch multiple podcast names efficiently
@@ -541,7 +710,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
       this.jobService.retryJobs([uuid]).subscribe({
         next: (data) => {
           // console.log('retryJob success:', data);
-          this.jobs = [...data.jobs, ...this.jobs.filter((job) => job.uuid !== uuid)];
+          this.jobs = [
+            ...data.jobs.map((job) => this.toEnrichedJob(job)),
+            ...this.jobs.filter((job) => job.uuid !== uuid),
+          ];
           this.dataSource.data = this.jobs;
         },
         error: (err: { message: string }) => {
@@ -557,12 +729,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
   // Method to handle status filter change
   onStatusFilterChange(newStatus: string | null): void {
     this.statusFilter = newStatus;
+    this.statusFilterLabel = this.getStatusLabel(newStatus);
     this.isInitialLoading = true; // Show loading when filter changes
     this.loadJobs(); // Reload jobs with new filter
   }
 
-  // Get status label for display
-  getStatusLabel(status: string): string {
+  /** Resolve a status code into its human label. Called from the filter setter, never from templates. */
+  private getStatusLabel(status: string | null): string {
     const option = this.statusOptions.find((opt) => opt.value === status);
     return option ? option.label : 'Unknown';
   }
@@ -574,6 +747,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
     } else {
       this.expandedChains.add(chainId);
     }
+    // Rebuild so `display.expanded` reflects the new state.
+    this.rebuildGroupedJobs();
   }
 
   // Check if a chain is expanded
@@ -609,24 +784,54 @@ export class JobsListComponent implements OnInit, OnDestroy {
     // Pre-compute resources from all jobs
     const resources = this.computeChainResources(sortedJobs);
 
+    const firstJobKind = sortedJobs[0]?.kind || '';
+    const lastJobKind = sortedJobs[sortedJobs.length - 1]?.kind || '';
+    const totalJobs = sortedJobs.length;
+    const display: ChainDisplay = {
+      title: this.computeChainTitle(firstJobKind, lastJobKind, totalJobs),
+      icon: iconForJob(firstJobKind),
+      statusClass: this.chainStatusClassFor(status),
+      hasResources:
+        resources.podcasts.length > 0 ||
+        resources.episodes.length > 0 ||
+        resources.topics.length > 0 ||
+        resources.pulseConfigs.length > 0 ||
+        resources.symbols.length > 0,
+    };
+
     return {
+      isChainGroup: true,
       chainId,
       jobs: sortedJobs,
       expanded: chainId ? this.expandedChains.has(chainId) : true,
       totalCost,
-      totalJobs: sortedJobs.length,
+      totalJobs,
       completedJobs,
       failedJobs,
       status,
-      firstJobKind: sortedJobs[0]?.kind || '',
-      lastJobKind: sortedJobs[sortedJobs.length - 1]?.kind || '',
+      firstJobKind,
+      lastJobKind,
       createdAt: sortedJobs[0]?.createdAt || '',
       updatedAt: sortedJobs.reduce(
         (latest, job) => (new Date(job.updatedAt) > new Date(latest) ? job.updatedAt : latest),
         sortedJobs[0]?.updatedAt || '',
       ),
       resources,
+      display,
     };
+  }
+
+  /** Pure title computation extracted from getChainTitle for pre-computing. */
+  private computeChainTitle(firstJobKind: string, lastJobKind: string, totalJobs: number): string {
+    if (totalJobs === 1) {
+      return kindToString(firstJobKind);
+    }
+    const firstKind = kindToString(firstJobKind);
+    const lastKind = kindToString(lastJobKind);
+    if (firstKind === lastKind) {
+      return `${firstKind} (${totalJobs} jobs)`;
+    }
+    return `${firstKind} → ${lastKind}`;
   }
 
   // Compute aggregated resources from chain jobs
@@ -669,12 +874,28 @@ export class JobsListComponent implements OnInit, OnDestroy {
       episodes: Array.from(episodes.entries()).map(([uuid, name]) => ({ uuid, name })),
       topics: Array.from(topics.entries()).map(([uuid, name]) => ({ uuid, name })),
       pulseConfigs: Array.from(pulseConfigs.entries()).map(([uuid, name]) => ({ uuid, name })),
-      symbols: Array.from(symbols.entries()).map(([symbol, job]) => ({ symbol, job })),
+      symbols: Array.from(symbols.entries()).map(([symbol, job]) => ({
+        symbol,
+        job,
+        tooltip: this.computeSymbolTooltip(job),
+      })),
     };
   }
 
+  /** Cached output of buildGroupedJobs — rebuilt only when jobs/filter/expansion changes. */
+  groupedJobs: { label: string; items: TimelineItem[] }[] = [];
+
+  /**
+   * Rebuild the `groupedJobs` cache. Call this from any code path that
+   * changes the inputs: data load, websocket update, filter change, or
+   * chain expand/collapse.
+   */
+  private rebuildGroupedJobs(): void {
+    this.groupedJobs = this.buildGroupedJobs();
+  }
+
   // Group jobs by date, then by chain for timeline view
-  get groupedJobs(): { label: string; items: (JobChainGroup | EnrichedJob)[] }[] {
+  private buildGroupedJobs(): { label: string; items: TimelineItem[] }[] {
     if (!this.jobs) return [];
 
     let filteredJobs = this.jobs;
@@ -684,7 +905,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
       filteredJobs = this.jobs.filter((job) => stringToJobStatus(job.status) === stringToJobStatus(this.statusFilter!));
     }
 
-    const groups: { label: string; items: (JobChainGroup | EnrichedJob)[] }[] = [];
+    const groups: { label: string; items: TimelineItem[] }[] = [];
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
@@ -773,7 +994,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         });
 
         // Create items array with chain groups and standalone jobs
-        const items: (JobChainGroup | EnrichedJob)[] = [];
+        const items: TimelineItem[] = [];
 
         // Add chain groups
         chainGroups.forEach((jobs, chainId) => {
@@ -786,11 +1007,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
         });
 
         // Sort items by updatedAt (most recent first)
-        items.sort((a, b) => {
-          const aDate = 'updatedAt' in a ? a.updatedAt : (a as JobChainGroup).updatedAt;
-          const bDate = 'updatedAt' in b ? b.updatedAt : (b as JobChainGroup).updatedAt;
-          return new Date(bDate).getTime() - new Date(aDate).getTime();
-        });
+        items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
         groups.push({
           label: dateLabel(dateKey),

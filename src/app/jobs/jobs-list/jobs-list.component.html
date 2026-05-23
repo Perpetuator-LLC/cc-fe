@@ -28,8 +28,7 @@
             <h3 class="empty-state-title">No Jobs Found</h3>
             <p class="empty-state-message">
               @if (statusFilter) {
-                No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new
-                job.
+                No jobs found with status "{{ statusFilterLabel }}". Try changing the filter or create a new job.
               } @else {
                 No jobs have been created yet. Jobs will appear here once you start running processes.
               }
@@ -61,10 +60,10 @@
         @for (group of groupedJobs; track group.label) {
           <div class="timeline-date-title">{{ group.label }}</div>
           <div class="timeline-spacing">
-            @for (item of group.items; track isChainGroup(item) ? item.chainId : item.uuid) {
+            @for (item of group.items; track item.isChainGroup ? item.chainId : item.uuid) {
               <!-- Chain Group (multiple jobs with same chainId) -->
-              @if (isChainGroup(item) && item.totalJobs > 1) {
-                <div class="timeline-item chain-group" [class.expanded]="isChainExpanded(item.chainId!)">
+              @if (item.isChainGroup && item.totalJobs > 1) {
+                <div class="timeline-item chain-group" [class.expanded]="item.expanded">
                   <!-- Chain Header (collapsed view) -->
                   <div
                     class="chain-header"
@@ -73,16 +72,14 @@
                     tabindex="0"
                     role="button"
                   >
-                    <div class="timeline-icon" [ngClass]="chainStatusClass(item.status)">
-                      <mat-icon>{{ getChainIcon(item) }}</mat-icon>
+                    <div class="timeline-icon" [ngClass]="item.display.statusClass">
+                      <mat-icon>{{ item.display.icon }}</mat-icon>
                     </div>
                     <div class="chain-content">
                       <div class="chain-summary">
                         <div class="chain-title-row">
-                          <mat-icon class="expand-icon">{{
-                            isChainExpanded(item.chainId!) ? 'expand_less' : 'expand_more'
-                          }}</mat-icon>
-                          <span class="chain-title">{{ getChainTitle(item) }}</span>
+                          <mat-icon class="expand-icon">{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                          <span class="chain-title">{{ item.display.title }}</span>
                           <span class="chain-progress-badge">{{ item.completedJobs }}/{{ item.totalJobs }}</span>
                         </div>
                         <div class="chain-meta">
@@ -95,13 +92,7 @@
                           </span>
                         </div>
                         <!-- Chain Resources (aggregated from all jobs) -->
-                        @if (
-                          item.resources.podcasts.length > 0 ||
-                          item.resources.episodes.length > 0 ||
-                          item.resources.topics.length > 0 ||
-                          item.resources.pulseConfigs.length > 0 ||
-                          item.resources.symbols.length > 0
-                        ) {
+                        @if (item.display.hasResources) {
                           <div
                             class="chain-resources"
                             (click)="$event.stopPropagation()"
@@ -158,7 +149,7 @@
                                 mat-flat-button
                                 class="resource-tag symbol-tag"
                                 (click)="navigateToSymbol(symbolInfo.job)"
-                                [matTooltip]="getSymbolTooltip(symbolInfo.job)"
+                                [matTooltip]="symbolInfo.tooltip"
                               >
                                 <mat-icon>show_chart</mat-icon>
                                 {{ symbolInfo.symbol }}
@@ -167,23 +158,23 @@
                           </div>
                         }
                       </div>
-                      <span class="timeline-status" [ngClass]="chainStatusClass(item.status)">
-                        {{ item.status.toUpperCase() }}
+                      <span class="timeline-status" [ngClass]="item.display.statusClass">
+                        {{ item.status | uppercase }}
                       </span>
                     </div>
                   </div>
                   <!-- Expanded Chain Jobs -->
-                  @if (isChainExpanded(item.chainId!)) {
+                  @if (item.expanded) {
                     <div class="chain-jobs">
                       @for (chainJob of item.jobs; track chainJob.uuid) {
                         <div class="timeline-item chain-child">
-                          <div class="timeline-icon" [ngClass]="statusClass(chainJob.status)">
-                            <mat-icon>{{ iconForJob(chainJob.kind) }}</mat-icon>
+                          <div class="timeline-icon" [ngClass]="chainJob.display.statusClass">
+                            <mat-icon>{{ chainJob.display.iconName }}</mat-icon>
                           </div>
                           <div class="timeline-content">
                             <div class="timeline-header">
                               <div class="timeline-left-content">
-                                <span class="timeline-title">{{ kindToString(chainJob.kind) }}</span>
+                                <span class="timeline-title">{{ chainJob.display.kindLabel }}</span>
                                 @if (chainJob.chainPosition !== null && chainJob.chainPosition !== undefined) {
                                   <span class="chain-position-badge">Step {{ chainJob.chainPosition + 1 }}</span>
                                 }
@@ -192,12 +183,12 @@
                                   {{ chainJob.cost | number: '1.0-0' }}
                                 </span>
                               </div>
-                              <span class="timeline-status" [ngClass]="statusClass(chainJob.status)">
-                                {{ chainJob.status.toUpperCase() }}
+                              <span class="timeline-status" [ngClass]="chainJob.display.statusClass">
+                                {{ chainJob.status | uppercase }}
                               </span>
                             </div>
                             @if (chainJob.error) {
-                              <div class="error-message">{{ getCleanErrorMessage(chainJob.error) }}</div>
+                              <div class="error-message">{{ chainJob.display.cleanError }}</div>
                             }
                           </div>
                         </div>
@@ -207,16 +198,16 @@
                 </div>
               } @else {
                 <!-- Standalone Job or Single-job Chain -->
-                @if (isChainGroup(item)) {
+                @if (item.isChainGroup) {
                   <!-- Single-job chain -->
                   <div class="timeline-item">
-                    <div class="timeline-icon" [ngClass]="statusClass(item.jobs[0].status)">
-                      <mat-icon>{{ iconForJob(item.jobs[0].kind) }}</mat-icon>
+                    <div class="timeline-icon" [ngClass]="item.jobs[0].display.statusClass">
+                      <mat-icon>{{ item.jobs[0].display.iconName }}</mat-icon>
                     </div>
                     <div class="timeline-content">
                       <div class="timeline-header">
                         <div class="timeline-left-content">
-                          <span class="timeline-title">{{ kindToString(item.jobs[0].kind) }}</span>
+                          <span class="timeline-title">{{ item.jobs[0].display.kindLabel }}</span>
                           <div class="timeline-meta desktop">
                             <span class="timeline-cost">
                               <mat-icon>payments</mat-icon>
@@ -227,17 +218,17 @@
                             </span>
                           </div>
                         </div>
-                        <span class="timeline-status" [ngClass]="statusClass(item.jobs[0].status)">
-                          {{ item.jobs[0].status.toUpperCase() }}
+                        <span class="timeline-status" [ngClass]="item.jobs[0].display.statusClass">
+                          {{ item.jobs[0].status | uppercase }}
                         </span>
                       </div>
                       @if (item.jobs[0].error) {
                         <div class="job-section">
-                          <div class="error-message">{{ getCleanErrorMessage(item.jobs[0].error) }}</div>
+                          <div class="error-message">{{ item.jobs[0].display.cleanError }}</div>
                         </div>
                       } @else {
                         <div class="job-section">
-                          <div class="message-text">{{ getCleanJobMessage(item.jobs[0]) }}</div>
+                          <div class="message-text">{{ item.jobs[0].display.cleanMessage }}</div>
                         </div>
                       }
                     </div>
@@ -245,13 +236,13 @@
                 } @else {
                   <!-- Standalone job (no chainId) -->
                   <div class="timeline-item">
-                    <div class="timeline-icon" [ngClass]="statusClass(item.status)">
-                      <mat-icon>{{ iconForJob(item.kind) }}</mat-icon>
+                    <div class="timeline-icon" [ngClass]="item.display.statusClass">
+                      <mat-icon>{{ item.display.iconName }}</mat-icon>
                     </div>
                     <div class="timeline-content">
                       <div class="timeline-header">
                         <div class="timeline-left-content">
-                          <span class="timeline-title">{{ kindToString(item.kind) }}</span>
+                          <span class="timeline-title">{{ item.display.kindLabel }}</span>
                           <div class="timeline-meta desktop">
                             <span class="timeline-cost">
                               <mat-icon>payments</mat-icon>
@@ -262,116 +253,113 @@
                             </span>
                           </div>
                         </div>
-                        <span class="timeline-status" [ngClass]="statusClass(item.status)">
-                          {{ item.status.toUpperCase() }}
+                        <span class="timeline-status" [ngClass]="item.display.statusClass">
+                          {{ item.status | uppercase }}
                         </span>
                       </div>
                       @if (item.error) {
                         <div class="job-section">
-                          <div class="error-message">{{ getCleanErrorMessage(item.error) }}</div>
+                          <div class="error-message">{{ item.display.cleanError }}</div>
                         </div>
                       } @else {
                         <div class="job-section">
-                          <div class="message-text">{{ getCleanJobMessage(item) }}</div>
+                          <div class="message-text">{{ item.display.cleanMessage }}</div>
                         </div>
                       }
                       <!-- Resources section for standalone jobs -->
                       @if (
-                        hasPodcastUuid(item) ||
-                        hasEpisodeUuid(item) ||
-                        hasTopicUuid(item) ||
-                        hasSymbol(item) ||
-                        hasPulseConfigUuid(item) ||
-                        hasBlogUuid(item) ||
-                        hasArticleUuid(item)
+                        item.display.hasPodcast ||
+                        item.display.hasEpisode ||
+                        item.display.hasTopic ||
+                        item.display.hasSymbol ||
+                        item.display.hasPulseConfig ||
+                        item.display.hasBlog ||
+                        item.display.hasArticle
                       ) {
                         <div class="job-section">
                           <div class="job-links">
-                            @if (hasPodcastUuid(item)) {
+                            @if (item.display.hasPodcast) {
                               <button
                                 mat-flat-button
                                 class="resource-tag podcast-tag"
-                                [routerLink]="['/media/podcasts', getPodcastUuid(item)]"
+                                [routerLink]="['/media/podcasts', item.display.podcastUuid]"
                                 matTooltip="Podcast"
                               >
                                 <mat-icon>mic</mat-icon>
-                                {{ getPodcastName(item) }}
+                                {{ item.display.podcastName }}
                               </button>
                             }
-                            @if (hasEpisodeUuid(item)) {
+                            @if (item.display.hasEpisode) {
                               <button
                                 mat-flat-button
                                 class="resource-tag episode-tag"
-                                [routerLink]="['/media/episodes', getEpisodeUuid(item)]"
+                                [routerLink]="['/media/episodes', item.display.episodeUuid]"
                                 matTooltip="Episode"
                               >
                                 <mat-icon>podcasts</mat-icon>
-                                {{ getEpisodeName(item) }}
+                                {{ item.display.episodeName }}
                               </button>
                             }
-                            @if (hasTopicUuid(item)) {
+                            @if (item.display.hasTopic) {
                               <button
                                 mat-flat-button
                                 class="resource-tag topic-tag"
-                                [routerLink]="['/media/topics', getTopicUuid(item)]"
+                                [routerLink]="['/media/topics', item.display.topicUuid]"
                                 matTooltip="Topic"
                               >
                                 <mat-icon>topic</mat-icon>
-                                {{ getTopicName(item) }}
+                                {{ item.display.topicName }}
                               </button>
                             }
-                            @if (hasPulseConfigUuid(item)) {
+                            @if (item.display.hasPulseConfig) {
                               <button
                                 type="button"
                                 class="resource-link-pulse"
-                                [routerLink]="['/media/pulses', getPulseConfigUuid(item)]"
+                                [routerLink]="['/media/pulses', item.display.pulseConfigUuid]"
                                 matTooltip="Pulse"
                               >
                                 <mat-icon>vital_signs</mat-icon>
-                                {{ getPulseConfigName(item) }}
+                                {{ item.display.pulseConfigName }}
                               </button>
                             }
-                            @if (hasBlogUuid(item)) {
+                            @if (item.display.hasBlog) {
                               <button
                                 mat-flat-button
                                 class="resource-tag blog-tag"
-                                [routerLink]="['/media/blogs', getBlogUuid(item)]"
+                                [routerLink]="['/media/blogs', item.display.blogUuid]"
                                 matTooltip="Blog"
                               >
                                 <mat-icon>menu_book</mat-icon>
-                                {{ getBlogName(item) }}
+                                {{ item.display.blogName }}
                               </button>
                             }
-                            @if (hasArticleUuid(item)) {
+                            @if (item.display.hasArticle) {
                               <button
                                 mat-flat-button
                                 class="resource-tag article-tag"
-                                [routerLink]="['/media/articles', getArticleUuid(item)]"
+                                [routerLink]="['/media/articles', item.display.articleUuid]"
                                 matTooltip="Article"
                               >
                                 <mat-icon>article</mat-icon>
-                                {{ getArticleTitle(item) }}
+                                {{ item.display.articleTitle }}
                               </button>
                             }
-                            @if (hasSymbol(item)) {
+                            @if (item.display.hasSymbol) {
                               <button
                                 mat-flat-button
                                 class="resource-tag symbol-tag"
                                 (click)="navigateToSymbol(item)"
-                                [matTooltip]="getSymbolTooltip(item)"
+                                [matTooltip]="item.display.symbolTooltip"
                               >
                                 <mat-icon>show_chart</mat-icon>
-                                {{ getSymbol(item) }}
+                                {{ item.display.symbol }}
                               </button>
                             }
                           </div>
                         </div>
                       }
                       <!-- Action buttons for failed/pending jobs -->
-                      @if (
-                        stringToJobStatus(item.status) === JobStatus.FAILED ||
-                        stringToJobStatus(item.status) === JobStatus.PENDING
-                      ) {
+                      @if (item.display.isFailedOrPending) {
                         <div class="timeline-actions">
                           <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retryJob(item.uuid)">
                             <mat-icon>refresh</mat-icon>
@@ -397,8 +385,7 @@
               <h3 class="empty-state-title">No Jobs Found</h3>
               <p class="empty-state-message">
                 @if (statusFilter) {
-                  No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a
-                  new job.
+                  No jobs found with status "{{ statusFilterLabel }}". Try changing the filter or create a new job.
                 } @else {
                   No jobs have been created yet. Jobs will appear here once you start running processes.
                 }
