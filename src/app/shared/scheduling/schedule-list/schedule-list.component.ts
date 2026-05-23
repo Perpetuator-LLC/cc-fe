@@ -19,7 +19,17 @@ import {
   FriendlyScheduleDialogData,
 } from '../friendly-schedule-dialog/friendly-schedule-dialog.component';
 import { ScheduleContext } from '../schedule.types';
-import { formatScheduleDescription, getJobKindIcon, getJobKindLabel, getNextRunDisplay } from '../schedule.utils';
+import {
+  cronDayToSelectedDays,
+  cronToTime,
+  detectDayPattern,
+  formatScheduleDescription,
+  getJobKindIcon,
+  getJobKindLabel,
+  getNextRunDisplay,
+} from '../schedule.utils';
+import { DAYS_OF_WEEK, DayOfWeek } from '../schedule.types';
+import { ScheduleType } from '../../../scheduling.service';
 import { parseScheduleArgs } from '../../../utils/schedule';
 
 /** Pre-computed display fields attached to each schedule row. */
@@ -378,6 +388,43 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
         this.loadSchedules();
       }
     });
+  }
+
+  readonly daysOfWeek = DAYS_OF_WEEK;
+
+  isCrontabSchedule(schedule: Schedule): boolean {
+    return schedule.scheduleType === ScheduleType.CRONTAB;
+  }
+
+  getScheduleDays(schedule: Schedule): DayOfWeek[] {
+    return cronDayToSelectedDays(schedule.cronDayOfWeek || '*');
+  }
+
+  isDayActive(schedule: Schedule, dayValue: number): boolean {
+    return this.getScheduleDays(schedule).includes(dayValue as DayOfWeek);
+  }
+
+  getScheduleTime(schedule: Schedule): string {
+    const time = cronToTime(schedule.cronHour || '9', schedule.cronMinute || '0');
+    const [h, m] = time.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${m.toString().padStart(2, '0')} ${period}`;
+  }
+
+  getDayPatternLabel(schedule: Schedule): string {
+    const days = this.getScheduleDays(schedule);
+    const pattern = detectDayPattern(days);
+    switch (pattern) {
+      case 'daily':
+        return 'Daily';
+      case 'weekdays':
+        return 'Weekdays';
+      case 'weekends':
+        return 'Weekends';
+      default:
+        return days.map((d) => DAYS_OF_WEEK[d].short).join(', ');
+    }
   }
 
   ngOnDestroy() {
