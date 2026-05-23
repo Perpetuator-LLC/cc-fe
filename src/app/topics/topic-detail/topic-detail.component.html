@@ -54,7 +54,7 @@
           }
           <span class="meta-item">
             <mat-icon>calendar_today</mat-icon>
-            {{ formatDate(topic.createdAt) }}
+            {{ topicDisplay?.formattedCreatedAt }}
           </span>
           <span class="meta-item">
             <mat-icon>link</mat-icon>
@@ -128,7 +128,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="content-section">
-                <div class="content-text" [innerHTML]="markdownToHtml(topic.validatedContent)"></div>
+                <div class="content-text" [innerHTML]="topicDisplay?.validatedContentHtml"></div>
               </div>
             </mat-card-content>
           </mat-card>
@@ -146,7 +146,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="content-section">
-                <div class="content-text" [innerHTML]="markdownToHtml(topic.researchContent)"></div>
+                <div class="content-text" [innerHTML]="topicDisplay?.researchContentHtml"></div>
               </div>
             </mat-card-content>
           </mat-card>
@@ -164,7 +164,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="sources-list">
-                @for (source of topic.sources; track source.uuid) {
+                @for (source of topicDisplay?.sources ?? []; track source.uuid) {
                   <div class="source-item">
                     <div class="source-header">
                       @if (source.title) {
@@ -174,7 +174,7 @@
                         {{ source.url }}
                         <mat-icon>open_in_new</mat-icon>
                       </a>
-                      <span class="source-date">{{ formatDate(source.createdAt) }}</span>
+                      <span class="source-date">{{ source.formattedDate }}</span>
                     </div>
                     @if (source.content) {
                       <div class="source-content">

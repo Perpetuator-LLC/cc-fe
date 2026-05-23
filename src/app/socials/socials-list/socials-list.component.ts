@@ -13,6 +13,8 @@ import { SocialsService, SocialAccount } from '../socials.service';
 import { MessageService } from '../../message.service';
 import { ConnectSocialDialogComponent } from '../connect-social-dialog/connect-social-dialog.component';
 
+type AccountDisplay = SocialAccount & { platformIcon: string; statusClass: string; formattedLastUsed: string };
+
 @Component({
   selector: 'app-socials-list',
   standalone: true,
@@ -35,8 +37,9 @@ export class SocialsListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
-  accounts: SocialAccount[] = [];
-  dataSource = new MatTableDataSource<SocialAccount>([]);
+  /** Accounts enriched with pre-computed icon / status class / formatted date per row. */
+  accounts: AccountDisplay[] = [];
+  dataSource = new MatTableDataSource<AccountDisplay>([]);
   displayedColumns = ['platform', 'account', 'status', 'posts', 'lastUsed'];
 
   ngOnInit(): void {
@@ -52,8 +55,13 @@ export class SocialsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.socialsService.getSocialAccounts().subscribe({
         next: (accounts) => {
-          this.accounts = accounts;
-          this.dataSource.data = accounts;
+          this.accounts = accounts.map((a) => ({
+            ...a,
+            platformIcon: this.getPlatformIcon(a.platform),
+            statusClass: this.getStatusClass(a.status, a.isTokenExpired ?? null),
+            formattedLastUsed: this.formatDate(a.lastUsedAt),
+          }));
+          this.dataSource.data = this.accounts;
           this.loading = false;
         },
         error: (err) => {
