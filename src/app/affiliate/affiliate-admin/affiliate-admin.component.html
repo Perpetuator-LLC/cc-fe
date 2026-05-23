@@ -50,22 +50,16 @@
                   <div class="stat-body">
                     <div class="stat-main">
                       <span class="stat-label">Total Balance:</span>
-                      <span class="stat-value primary"
-                        >${{ formatCentsAsDollars(platformFinancialStats.stripeTotalBalanceCents) }}</span
-                      >
+                      <span class="stat-value primary">${{ financialDisplay?.stripeTotalDollars }}</span>
                     </div>
                     <div class="stat-breakdown">
                       <div class="stat-item">
                         <span class="stat-sublabel">Available:</span>
-                        <span class="stat-subvalue"
-                          >${{ formatCentsAsDollars(platformFinancialStats.stripeAvailableBalanceCents) }}</span
-                        >
+                        <span class="stat-subvalue">${{ financialDisplay?.stripeAvailableDollars }}</span>
                       </div>
                       <div class="stat-item">
                         <span class="stat-sublabel">Pending:</span>
-                        <span class="stat-subvalue"
-                          >${{ formatCentsAsDollars(platformFinancialStats.stripePendingBalanceCents) }}</span
-                        >
+                        <span class="stat-subvalue">${{ financialDisplay?.stripePendingDollars }}</span>
                       </div>
                     </div>
                     <div class="stat-meta">
@@ -88,9 +82,7 @@
                   <div class="stat-body">
                     <div class="stat-main">
                       <span class="stat-label">Total Liability:</span>
-                      <span class="stat-value warning"
-                        >${{ formatCentsAsDollars(platformFinancialStats.totalAffiliateCreditsCents) }}</span
-                      >
+                      <span class="stat-value warning">${{ financialDisplay?.totalCreditsLiabilityDollars }}</span>
                     </div>
                     <div class="stat-breakdown">
                       <div class="stat-item">
@@ -99,9 +91,7 @@
                       </div>
                       <div class="stat-item">
                         <span class="stat-sublabel">Pending Conversions:</span>
-                        <span class="stat-subvalue"
-                          >${{ formatCentsAsDollars(platformFinancialStats.pendingConversionCents) }}</span
-                        >
+                        <span class="stat-subvalue">${{ financialDisplay?.pendingConversionDollars }}</span>
                       </div>
                     </div>
                     <div class="stat-info">
@@ -118,59 +108,42 @@
                 <!-- Financial Difference -->
                 <div
                   class="stat-card financial-difference"
-                  [class.surplus]="getFinancialDifference() > 0"
-                  [class.deficit]="getFinancialDifference() < 0"
+                  [class.surplus]="financialDisplay?.isSurplus"
+                  [class.deficit]="financialDisplay?.isDeficit"
                 >
                   <div class="stat-header">
-                    <mat-icon>{{
-                      getFinancialDifference() > 0
-                        ? 'trending_up'
-                        : getFinancialDifference() < 0
-                          ? 'trending_down'
-                          : 'horizontal_rule'
-                    }}</mat-icon>
+                    <mat-icon>{{ financialDisplay?.differenceTrendIcon }}</mat-icon>
                     <h3>Balance vs. Liability</h3>
                   </div>
                   <div class="stat-body">
                     <div class="stat-main">
-                      <span class="stat-label">{{
-                        getFinancialDifference() > 0
-                          ? 'Surplus:'
-                          : getFinancialDifference() < 0
-                            ? 'Deficit:'
-                            : 'Difference:'
-                      }}</span>
+                      <span class="stat-label">{{ financialDisplay?.differenceLabel }}</span>
                       <span
                         class="stat-value"
-                        [class.positive]="getFinancialDifference() > 0"
-                        [class.negative]="getFinancialDifference() < 0"
+                        [class.positive]="financialDisplay?.isSurplus"
+                        [class.negative]="financialDisplay?.isDeficit"
                       >
-                        {{ getFinancialDifference() > 0 ? '+' : '' }}${{
-                          formatCentsAsDollars(Math.abs(getFinancialDifference()))
-                        }}
+                        {{ financialDisplay?.differenceSignPrefix }}${{ financialDisplay?.differenceAbsDollars }}
                       </span>
                     </div>
                     <div class="stat-breakdown">
                       <div class="stat-item">
                         <span class="stat-sublabel">Available Buffer:</span>
-                        <span class="stat-subvalue"
-                          >${{ formatCentsAsDollars(platformFinancialStats.availablePayoutBufferCents) }}</span
-                        >
+                        <span class="stat-subvalue">${{ financialDisplay?.availableBufferDollars }}</span>
                       </div>
                     </div>
                     <div class="stat-status">
-                      <mat-icon [class.success]="isFinancialHealthGood()" [class.error]="!isFinancialHealthGood()">
-                        {{ isFinancialHealthGood() ? 'check_circle' : 'warning' }}
+                      <mat-icon
+                        [class.success]="financialDisplay?.isHealthy"
+                        [class.error]="!financialDisplay?.isHealthy"
+                      >
+                        {{ financialDisplay?.healthIcon }}
                       </mat-icon>
                       <span
-                        [class.success-text]="isFinancialHealthGood()"
-                        [class.error-text]="!isFinancialHealthGood()"
+                        [class.success-text]="financialDisplay?.isHealthy"
+                        [class.error-text]="!financialDisplay?.isHealthy"
                       >
-                        {{
-                          isFinancialHealthGood()
-                            ? 'Can cover all outstanding credits'
-                            : 'Insufficient funds to cover all credits'
-                        }}
+                        {{ financialDisplay?.healthMessage }}
                       </span>
                     </div>
                   </div>
@@ -282,11 +255,11 @@
                           @if (user.hasAffiliateProfile) {
                             <span
                               class="badge affiliate-stripe-status"
-                              [class]="getStripeStatus(user).cssClass"
-                              [matTooltip]="getStripeStatus(user).tooltip"
+                              [class]="user.stripeStatus.cssClass"
+                              [matTooltip]="user.stripeStatus.tooltip"
                             >
-                              <mat-icon>{{ getStripeStatus(user).icon }}</mat-icon>
-                              {{ getStripeStatus(user).label }}
+                              <mat-icon>{{ user.stripeStatus.icon }}</mat-icon>
+                              {{ user.stripeStatus.label }}
                             </span>
                             @if (user.eligibilityStatus) {
                               <span
@@ -295,8 +268,8 @@
                                 [class.suspended]="user.eligibilityStatus === 'suspended'"
                                 [class.under-review]="user.eligibilityStatus === 'under_review'"
                               >
-                                <mat-icon>{{ getStatusIcon(user.eligibilityStatus) }}</mat-icon>
-                                {{ getStatusLabel(user.eligibilityStatus) }}
+                                <mat-icon>{{ user.statusIcon }}</mat-icon>
+                                {{ user.statusLabel }}
                               </span>
                             }
                             @if (user.isActive !== undefined) {
@@ -305,8 +278,8 @@
                                 [class.network-open]="user.isActive"
                                 [class.network-closed]="!user.isActive"
                               >
-                                <mat-icon>{{ user.isActive ? 'group' : 'group_remove' }}</mat-icon>
-                                {{ user.isActive ? 'Accepting' : 'Closed' }}
+                                <mat-icon>{{ user.networkIcon }}</mat-icon>
+                                {{ user.networkLabel }}
                               </span>
                             }
                           } @else {
@@ -350,8 +323,8 @@
                             user.isActive ? 'Close network (prevent new sign-ups)' : 'Open network (allow new sign-ups)'
                           "
                         >
-                          <mat-icon>{{ user.isActive ? 'group_remove' : 'group_add' }}</mat-icon>
-                          {{ user.isActive ? 'Close Network' : 'Open Network' }}
+                          <mat-icon>{{ user.networkButtonIcon }}</mat-icon>
+                          {{ user.networkButtonLabel }}
                         </button>
                       </div>
                     }
@@ -462,8 +435,8 @@
                     <th mat-header-cell *matHeaderCellDef>Amount</th>
                     <td mat-cell *matCellDef="let payout">
                       <div class="amount-info">
-                        <div>{{ payout.affiliateCreditAmount.toLocaleString() }} credits</div>
-                        <div class="usd-amount">${{ centsToDollars(payout.targetAmount) }} USD</div>
+                        <div>{{ payout.formattedCredits }} credits</div>
+                        <div class="usd-amount">${{ payout.formattedDollars }} USD</div>
                       </div>
                     </td>
                   </ng-container>
@@ -471,7 +444,7 @@
                   <ng-container matColumnDef="requested">
                     <th mat-header-cell *matHeaderCellDef>Requested</th>
                     <td mat-cell *matCellDef="let payout">
-                      {{ formatDate(payout.createdAt) }}
+                      {{ payout.formattedDate }}
                     </td>
                   </ng-container>
 

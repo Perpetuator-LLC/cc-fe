@@ -1,6 +1,6 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
 
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -25,6 +25,24 @@ import {
 import { MessageService } from '../../message.service';
 import { UserService } from '../../user/user.service';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
+
+/** Pre-computed display state attached to each row in the user search list. */
+interface AffiliateUserDisplay extends AffiliateUserSearchResult {
+  stripeStatus: { icon: string; label: string; cssClass: string; tooltip: string };
+  statusIcon: string;
+  statusLabel: string;
+  networkIcon: 'group' | 'group_remove';
+  networkLabel: 'Accepting' | 'Closed';
+  networkButtonIcon: 'group_remove' | 'group_add';
+  networkButtonLabel: 'Close Network' | 'Open Network';
+}
+
+/** Pre-computed display state attached to each row in the payout request list. */
+interface PayoutPayoutDisplay extends PayoutConversion {
+  formattedCredits: string;
+  formattedDollars: string;
+  formattedDate: string;
+}
 
 @Component({
   selector: 'app-affiliate-admin',
@@ -56,18 +74,77 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
   loading = true;
   adminPendingRequests: PendingCodeChangeRequest[] = [];
   loadingAdminRequests = false;
-  pendingPayoutRequests: PayoutConversion[] = [];
+  pendingPayoutRequests: PayoutPayoutDisplay[] = [];
   loadingPayoutRequests = false;
   programSettings: { isEnabled: boolean; disabledMessage: string } | null = null;
   loadingProgramSettings = false;
   updatingProgramSettings = false;
   searchUsername = '';
-  searchedUsers: AffiliateUserSearchResult[] = [];
+  searchedUsers: AffiliateUserDisplay[] = [];
   searchingUser = false;
   updatingUserEligibility = false;
   platformFinancialStats: PlatformFinancialStats | null = null;
   loadingFinancialStats = false;
+  /**
+   * Pre-computed display values derived from `platformFinancialStats`.
+   * Recomputed whenever stats reload so the template can read property
+   * accesses without calling derivation methods every CD tick.
+   */
+  financialDisplay: {
+    stripeTotalDollars: string;
+    stripeAvailableDollars: string;
+    stripePendingDollars: string;
+    totalCreditsLiabilityDollars: string;
+    pendingConversionDollars: string;
+    availableBufferDollars: string;
+    differenceCents: number;
+    differenceAbsDollars: string;
+    differenceTrendIcon: 'trending_up' | 'trending_down' | 'horizontal_rule';
+    differenceLabel: 'Surplus:' | 'Deficit:' | 'Difference:';
+    differenceSignPrefix: '+' | '';
+    isSurplus: boolean;
+    isDeficit: boolean;
+    isHealthy: boolean;
+    healthMessage: string;
+    healthIcon: 'check_circle' | 'warning';
+  } | null = null;
   protected readonly Math = Math;
+
+  /** Convert raw cents → `'X.YZ'` dollar string (same as old formatCentsAsDollars). */
+  private centsAsDollars(cents: number): string {
+    return (cents / 100).toFixed(2);
+  }
+
+  /** Rebuild `financialDisplay` from the current `platformFinancialStats`. */
+  private rebuildFinancialDisplay(): void {
+    const s = this.platformFinancialStats;
+    if (!s) {
+      this.financialDisplay = null;
+      return;
+    }
+    const diff = s.stripeTotalBalanceCents - s.totalAffiliateCreditsCents;
+    const isSurplus = diff > 0;
+    const isDeficit = diff < 0;
+    const isHealthy = s.canCoverAllOutstanding ?? false;
+    this.financialDisplay = {
+      stripeTotalDollars: this.centsAsDollars(s.stripeTotalBalanceCents),
+      stripeAvailableDollars: this.centsAsDollars(s.stripeAvailableBalanceCents),
+      stripePendingDollars: this.centsAsDollars(s.stripePendingBalanceCents),
+      totalCreditsLiabilityDollars: this.centsAsDollars(s.totalAffiliateCreditsCents),
+      pendingConversionDollars: this.centsAsDollars(s.pendingConversionCents),
+      availableBufferDollars: this.centsAsDollars(s.availablePayoutBufferCents),
+      differenceCents: diff,
+      differenceAbsDollars: this.centsAsDollars(Math.abs(diff)),
+      differenceTrendIcon: isSurplus ? 'trending_up' : isDeficit ? 'trending_down' : 'horizontal_rule',
+      differenceLabel: isSurplus ? 'Surplus:' : isDeficit ? 'Deficit:' : 'Difference:',
+      differenceSignPrefix: isSurplus ? '+' : '',
+      isSurplus,
+      isDeficit,
+      isHealthy,
+      healthMessage: isHealthy ? 'Can cover all outstanding credits' : 'Insufficient funds to cover all credits',
+      healthIcon: isHealthy ? 'check_circle' : 'warning',
+    };
+  }
 
   ngOnInit(): void {
     this.loadAdminData();
@@ -96,24 +173,24 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
-  canApproveCodeChanges(): boolean {
-    const userDetails = this.userService.userDetails();
-    return userDetails?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false;
-  }
-
-  canManagePayouts(): boolean {
-    const userDetails = this.userService.userDetails();
-    return userDetails?.permissions?.includes('affiliates.change_affiliatecreditconversion') ?? false;
-  }
-
-  isAdmin(): boolean {
-    const userDetails = this.userService.userDetails();
-    return userDetails?.permissions?.includes('affiliates.change_affiliateprofile') ?? false;
-  }
-
-  hasAnyAdminPermission(): boolean {
-    return this.isAdmin() || this.canApproveCodeChanges() || this.canManagePayouts();
-  }
+  /**
+   * Permission flags exposed as computed signals so the template can read
+   * them with parens (`isAdmin()`) without tripping the
+   * no-call-expression-in-templates lint rule (signal reads are exempt).
+   */
+  readonly isAdmin = computed(
+    () => this.userService.userDetails()?.permissions?.includes('affiliates.change_affiliateprofile') ?? false,
+  );
+  readonly canApproveCodeChanges = computed(
+    () =>
+      this.userService.userDetails()?.permissions?.includes('affiliates.change_affiliatecodechangerequest') ?? false,
+  );
+  readonly canManagePayouts = computed(
+    () => this.userService.userDetails()?.permissions?.includes('affiliates.change_affiliatecreditconversion') ?? false,
+  );
+  readonly hasAnyAdminPermission = computed(
+    () => this.isAdmin() || this.canApproveCodeChanges() || this.canManagePayouts(),
+  );
 
   loadAdminPendingRequests(): void {
     this.loadingAdminRequests = true;
@@ -135,7 +212,7 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.affiliateService.getAllPayoutConversions('under_review', 'to_cash', 100).subscribe({
         next: (requests) => {
-          this.pendingPayoutRequests = requests;
+          this.pendingPayoutRequests = requests.map((r) => this.enrichPayout(r));
           this.loadingPayoutRequests = false;
         },
         error: (err) => {
@@ -156,6 +233,7 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
       this.affiliateService.getPlatformFinancialStats().subscribe({
         next: (stats) => {
           this.platformFinancialStats = stats;
+          this.rebuildFinancialDisplay();
           this.loadingFinancialStats = false;
         },
         error: (err) => {
@@ -252,7 +330,7 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.affiliateService.searchAffiliateUsers(query).subscribe({
         next: (users) => {
-          this.searchedUsers = users;
+          this.searchedUsers = users.map((u) => this.enrichUser(u));
           this.searchingUser = false;
 
           if (users.length === 0) {
@@ -568,28 +646,38 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     );
   }
 
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString();
+  /**
+   * Attach pre-computed `formattedCredits / Dollars / Date` to a payout
+   * request so the template can render them with property reads.
+   */
+  private enrichPayout(p: PayoutConversion): PayoutPayoutDisplay {
+    return {
+      ...p,
+      formattedCredits: p.affiliateCreditAmount.toLocaleString(),
+      formattedDollars: AffiliateConversionUtils.centsToDollars(p.targetAmount),
+      formattedDate: new Date(p.createdAt).toLocaleDateString(),
+    };
   }
 
-  centsToDollars(cents: number): string {
-    return AffiliateConversionUtils.centsToDollars(cents);
+  /**
+   * Attach pre-computed display state (stripe-status block, eligibility
+   * status icon/label, network icon/label) to a user search result.
+   */
+  private enrichUser(u: AffiliateUserSearchResult): AffiliateUserDisplay {
+    const isActive = u.isActive ?? true;
+    return {
+      ...u,
+      stripeStatus: this.computeStripeStatus(u),
+      statusIcon: this.statusIconFor(u.eligibilityStatus),
+      statusLabel: this.statusLabelFor(u.eligibilityStatus),
+      networkIcon: isActive ? 'group' : 'group_remove',
+      networkLabel: isActive ? 'Accepting' : 'Closed',
+      networkButtonIcon: isActive ? 'group_remove' : 'group_add',
+      networkButtonLabel: isActive ? 'Close Network' : 'Open Network',
+    };
   }
 
-  formatCentsAsDollars(cents: number): string {
-    return (cents / 100).toFixed(2);
-  }
-
-  getFinancialDifference(): number {
-    if (!this.platformFinancialStats) return 0;
-    return this.platformFinancialStats.stripeTotalBalanceCents - this.platformFinancialStats.totalAffiliateCreditsCents;
-  }
-
-  isFinancialHealthGood(): boolean {
-    return this.platformFinancialStats?.canCoverAllOutstanding ?? false;
-  }
-
-  getStatusIcon(status?: string | null): string {
+  private statusIconFor(status?: string | null): string {
     switch (status) {
       case 'active':
         return 'check_circle';
@@ -602,7 +690,7 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusLabel(status?: string | null): string {
+  private statusLabelFor(status?: string | null): string {
     switch (status) {
       case 'active':
         return 'Active';
@@ -615,7 +703,7 @@ export class AffiliateAdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStripeStatus(user: AffiliateUserSearchResult): {
+  private computeStripeStatus(user: AffiliateUserSearchResult): {
     icon: string;
     label: string;
     cssClass: string;
