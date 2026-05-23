@@ -30,7 +30,7 @@
         role="button"
         [class.clickable]="audioService.track()?.sourceRoute"
       >
-        <mat-icon class="type-icon">{{ getTypeIcon() }}</mat-icon>
+        <mat-icon class="type-icon">{{ typeIcon() }}</mat-icon>
         <div class="track-text">
           <span class="track-title">{{ audioService.track()?.title }}</span>
           @if (audioService.track()?.subtitle) {
@@ -41,7 +41,7 @@
 
       <!-- Controls -->
       <div class="player-controls">
-        <button mat-icon-button (click)="previousTrack()" matTooltip="Previous track" [disabled]="!hasPreviousTrack()">
+        <button mat-icon-button (click)="previousTrack()" matTooltip="Previous track" [disabled]="!hasPreviousTrack">
           <mat-icon>skip_previous</mat-icon>
         </button>
 
@@ -68,9 +68,9 @@
 
       <!-- Time display -->
       <div class="time-display">
-        <span class="current-time">{{ audioService.formatTime(audioService.currentTime()) }}</span>
+        <span class="current-time">{{ currentTimeText() }}</span>
         <span class="separator">/</span>
-        <span class="duration">{{ audioService.formatTime(audioService.duration()) }}</span>
+        <span class="duration">{{ durationText() }}</span>
       </div>
 
       <!-- Volume & close -->
@@ -119,7 +119,7 @@
           <!-- History Section (oldest at top) -->
           @if (history.length > 0) {
             <div class="playlist-section history-section">
-              @for (track of getHistoryReversed(); track track.id) {
+              @for (track of historyReversed; track track.id) {
                 <div class="playlist-item history-item">
                   <div
                     class="playlist-item-content"

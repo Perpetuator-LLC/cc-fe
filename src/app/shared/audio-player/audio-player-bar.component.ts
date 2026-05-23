@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, inject, effect, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, effect, ViewChild, ElementRef, AfterViewChecked, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -42,6 +42,19 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
 
   showQueue = false;
   history: AudioTrack[] = [];
+  /** Reverse-ordered history for display (oldest first). Recomputed on every history mutation. */
+  historyReversed: AudioTrack[] = [];
+  /**
+   * Pre-computed icon for the current track. Computed signal so it re-runs
+   * when the audio service track signal changes.
+   */
+  readonly typeIcon = computed(() => {
+    const track = this.audioService.track();
+    return track?.type === 'pulse' ? 'vital_signs' : 'podcasts';
+  });
+  /** Pre-formatted current-time / duration strings. */
+  readonly currentTimeText = computed(() => this.audioService.formatTime(this.audioService.currentTime()));
+  readonly durationText = computed(() => this.audioService.formatTime(this.audioService.duration()));
   private previousTrackForHistory: AudioTrack | null = null;
   private shouldScrollToBottom = false;
   private skipNextHistoryUpdate = false; // Flag to prevent effect from re-adding track when playing from history
@@ -119,13 +132,13 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
     if (this.history.length > 0) {
       const lastTrack = this.history[0];
       // Remove from history and play
-      this.history = this.history.slice(1);
+      this.setHistory(this.history.slice(1));
       this.saveHistory();
       this.audioService.play(lastTrack);
     }
   }
 
-  hasPreviousTrack(): boolean {
+  get hasPreviousTrack(): boolean {
     return this.history.length > 0;
   }
 
@@ -222,7 +235,7 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
 
     // Remove the clicked track and all tracks before it (more recent) from history
     // Keep only the tracks that were played before the clicked track (older)
-    this.history = this.history.slice(clickedIndex + 1);
+    this.setHistory(this.history.slice(clickedIndex + 1));
     this.saveHistory();
 
     // Skip the next history update from the effect - we've already handled the history
@@ -246,32 +259,39 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
 
   // Remove a specific track from history
   removeFromHistory(trackId: string): void {
-    this.history = this.history.filter((t) => t.id !== trackId);
+    this.setHistory(this.history.filter((t) => t.id !== trackId));
     this.saveHistory();
   }
 
   // Clear both history and queue
   clearAll(): void {
-    this.history = [];
+    this.setHistory([]);
     this.saveHistory();
     this.audioService.clearQueue();
+  }
+
+  /** Set `history` and refresh the reversed-for-display cache atomically. */
+  private setHistory(next: AudioTrack[]): void {
+    this.history = next;
+    this.historyReversed = [...next].reverse();
   }
 
   // History Management
   private addToHistory(track: AudioTrack): void {
     // Remove if already in history
-    this.history = this.history.filter((t) => t.id !== track.id);
+    let next = this.history.filter((t) => t.id !== track.id);
     // Add to front
-    this.history.unshift(track);
+    next = [track, ...next];
     // Limit size
-    if (this.history.length > MAX_HISTORY_SIZE) {
-      this.history = this.history.slice(0, MAX_HISTORY_SIZE);
+    if (next.length > MAX_HISTORY_SIZE) {
+      next = next.slice(0, MAX_HISTORY_SIZE);
     }
+    this.setHistory(next);
     this.saveHistory();
   }
 
   clearHistory(): void {
-    this.history = [];
+    this.setHistory([]);
     this.saveHistory();
   }
 
@@ -280,7 +300,7 @@ export class AudioPlayerBarComponent implements AfterViewChecked {
     try {
       const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
       if (stored) {
-        this.history = JSON.parse(stored);
+        this.setHistory(JSON.parse(stored));
       }
     } catch (e) {
       console.warn('[AudioPlayerBar] Failed to load history:', e);
