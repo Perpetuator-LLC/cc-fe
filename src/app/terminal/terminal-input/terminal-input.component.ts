@@ -7,6 +7,7 @@ import {
   ViewChild,
   AfterViewChecked,
   ChangeDetectionStrategy,
+  computed,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -55,6 +56,10 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
   private sanitizer = inject(DomSanitizer);
 
   currentInput = '';
+  /** Trim cache — set by onInputChange so the template uses property access. */
+  inputTrimmed = '';
+  /** Pre-rendered empty-state markdown. */
+  emptyStateHtml: SafeHtml = '';
   hints: TerminalHints = {
     quickExamples: ['STOCK:NASDAQ:AAPL COMMAND:HP', 'COMMAND:HELP'],
     placeholderText: 'Enter command...',
@@ -81,6 +86,7 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     this.subscriptions.add(
       this.terminalService.loadTerminalHints().subscribe((hints) => {
         this.hints = hints;
+        this.emptyStateHtml = this.markdownToHtml(hints.emptyStateMessage);
       }),
     );
 
@@ -90,6 +96,9 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
         this.messageService.error(`Terminal: ${error}`);
       }),
     );
+
+    // Seed emptyStateHtml from defaults until backend hints arrive.
+    this.emptyStateHtml = this.markdownToHtml(this.hints.emptyStateMessage);
   }
 
   ngOnDestroy(): void {
@@ -106,6 +115,49 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
   get history(): HistoryEntry[] {
     return this.terminalService.history();
   }
+
+  /**
+   * Pre-computed signals for the template — read as property access /
+   * signal calls (both allowed by the lint rule) instead of methods.
+   */
+  readonly connectionIcon = computed(() => {
+    switch (this.terminalService.connectionState()) {
+      case 'connected':
+        return 'cloud_done';
+      case 'connecting':
+      case 'reconnecting':
+        return 'cloud_sync';
+      case 'disconnected':
+        return 'cloud_off';
+      default:
+        return 'cloud_off';
+    }
+  });
+
+  readonly connectionTooltip = computed(() => {
+    switch (this.terminalService.connectionState()) {
+      case 'connected':
+        return 'Connected to terminal';
+      case 'connecting':
+        return 'Connecting...';
+      case 'reconnecting':
+        return 'Reconnecting...';
+      case 'disconnected':
+        return 'Disconnected';
+      default:
+        return 'Unknown status';
+    }
+  });
+
+  readonly historyDisplay = computed(() =>
+    this.terminalService.history().map((entry) => ({
+      entry,
+      isFetching: this.isFetching(entry),
+      fetchingMessage: this.getFetchingMessage(entry),
+      chartControls: this.getChartControls(entry.result),
+      messageHtml: entry.result?.message ? this.markdownToHtml(entry.result.message) : null,
+    })),
+  );
 
   get connectionState(): TerminalConnectionState {
     return this.terminalService.connectionState();
@@ -150,6 +202,7 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     try {
       this.terminalService.execute(this.currentInput);
       this.currentInput = '';
+      this.inputTrimmed = '';
       this.shouldScrollToBottom = true;
     } catch (error) {
       console.error('Failed to execute command:', error);
@@ -160,15 +213,18 @@ export class TerminalInputComponent implements OnInit, OnDestroy, AfterViewCheck
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       this.currentInput = this.terminalService.navigateHistory(-1);
+      this.inputTrimmed = this.currentInput.trim();
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       this.currentInput = this.terminalService.navigateHistory(1);
+      this.inputTrimmed = this.currentInput.trim();
     } else if (event.key === 'Enter') {
       this.executeCommand();
     }
   }
 
   onInputChange(): void {
+    this.inputTrimmed = this.currentInput.trim();
     this.terminalService.resetHistoryIndex();
   }
 

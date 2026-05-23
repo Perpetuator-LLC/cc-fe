@@ -7,6 +7,7 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  computed,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -59,7 +60,10 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   protected terminalService = inject(TerminalService);
 
   currentCommand = '';
-  suggestions: AutocompleteSuggestion[] = [];
+  /** Trim cache so the template can read `commandTrimmed` instead of calling `currentCommand.trim()`. */
+  commandTrimmed = '';
+  /** Suggestions enriched with pre-computed icon. */
+  suggestions: (AutocompleteSuggestion & { icon: string })[] = [];
   selectedSuggestionIndex = -1;
   showSuggestions = false;
   hints: TerminalHints = {
@@ -82,6 +86,25 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     const hist = this.history;
     return hist.length > 0 && (hist[hist.length - 1].isLoading ?? false);
   }
+
+  /**
+   * Enriched history list for the template — each entry carries pre-computed
+   * `isFetching`, `hasChart`, `hasTable`, `chartControls`, `messageHtml`.
+   * Recomputed whenever the terminal-service history signal changes.
+   */
+  readonly historyDisplay = computed(() => {
+    return this.terminalService.history().map((entry) => ({
+      entry,
+      isFetching: this.isFetching(entry),
+      hasChart: this.hasChart(entry),
+      hasTable: this.hasTable(entry),
+      chartControls: this.getChartControls(entry.result),
+      messageHtml: entry.result?.message ? this.markdownToHtml(entry.result.message) : null,
+    }));
+  });
+
+  /** Pre-rendered empty-state HTML for the hints message. */
+  emptyStateHtml: SafeHtml = '';
 
   /**
    * Get the icon name for a suggestion type
@@ -124,8 +147,13 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     this.subscriptions.add(
       this.terminalService.loadTerminalHints().subscribe((hints) => {
         this.hints = hints;
+        this.emptyStateHtml = this.markdownToHtml(hints.emptyStateMessage);
       }),
     );
+
+    // Seed emptyStateHtml from the default hints object so the template has
+    // something to render even before the backend response arrives.
+    this.emptyStateHtml = this.markdownToHtml(this.hints.emptyStateMessage);
 
     // Load user command history for up/down arrow navigation
     this.subscriptions.add(this.terminalService.loadCommandHistory(100).subscribe());
@@ -165,6 +193,7 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.terminalService.execute(command);
     this.currentCommand = '';
+    this.commandTrimmed = '';
     this.historyIndex = -1;
     this.clearSuggestions();
     setTimeout(() => {
@@ -234,6 +263,7 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   onInputChange(): void {
+    this.commandTrimmed = this.currentCommand.trim();
     this.inputSubject.next(this.currentCommand);
     this.historyIndex = -1; // Reset history navigation when typing
   }
@@ -256,6 +286,7 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
 
   selectSuggestion(suggestion: AutocompleteSuggestion): void {
     this.currentCommand = suggestion.insert || suggestion.fqn || suggestion.text || suggestion.display || '';
+    this.commandTrimmed = this.currentCommand.trim();
     this.clearSuggestions();
     this.focusInput();
   }
@@ -265,13 +296,15 @@ export class TerminalModalComponent implements OnInit, OnDestroy, AfterViewInit 
     this.subscriptions.add(
       this.terminalService.fetchAutocompleteSuggestions(input, 10).subscribe({
         next: (suggestions) => {
-          this.suggestions = suggestions;
+          this.suggestions = suggestions.map((s) => ({ ...s, icon: this.getSuggestionIcon(s) }));
           this.selectedSuggestionIndex = -1;
           this.showSuggestions = suggestions.length > 0;
         },
         error: () => {
           // Fallback to local suggestions on error
-          this.suggestions = this.terminalService.getAutocompleteSuggestions(input, 10);
+          this.suggestions = this.terminalService
+            .getAutocompleteSuggestions(input, 10)
+            .map((s) => ({ ...s, icon: this.getSuggestionIcon(s) }));
           this.selectedSuggestionIndex = -1;
           this.showSuggestions = this.suggestions.length > 0;
         },
