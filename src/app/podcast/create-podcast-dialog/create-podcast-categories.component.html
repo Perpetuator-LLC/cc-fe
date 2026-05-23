@@ -2,7 +2,7 @@
 <div class="categories-container">
   <mat-form-field appearance="fill" class="category-select">
     <mat-label>Select Categories</mat-label>
-    <mat-select (selectionChange)="onCategorySelectionChange($event.value)" [value]="getSelectedValues()" multiple>
+    <mat-select (selectionChange)="onCategorySelectionChange($event.value)" [value]="selectedValues" multiple>
       @for (option of categoryOptions; track option.value) {
         @if (option.isParent) {
           <mat-option [value]="option.value" class="parent-option">
@@ -18,7 +18,7 @@
   </mat-form-field>
 
   <div class="selected-chips">
-    @for (category of getAllSelectedCategories(); track category) {
+    @for (category of allSelectedCategories; track category) {
       <mat-chip [removable]="true" (removed)="removeCategory(category)">
         {{ category }}
         <button matChipRemove>

@@ -5,7 +5,7 @@
     <div>
       <mat-form-field appearance="fill">
         <mat-label>Successfully Added ({{ data.successful.length }})</mat-label>
-        <textarea matInput [value]="getSuccessfulText()" rows="6" readonly></textarea>
+        <textarea matInput [value]="successfulText" rows="6" readonly></textarea>
       </mat-form-field>
     </div>
   }
@@ -14,7 +14,7 @@
     <div>
       <mat-form-field appearance="fill">
         <mat-label>Failed ({{ data.failed.length }})</mat-label>
-        <textarea matInput [value]="getFailedText()" rows="6" readonly></textarea>
+        <textarea matInput [value]="failedText" rows="6" readonly></textarea>
       </mat-form-field>
     </div>
   }
