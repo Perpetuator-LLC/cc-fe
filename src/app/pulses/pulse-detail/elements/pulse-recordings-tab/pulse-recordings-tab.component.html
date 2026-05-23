@@ -43,7 +43,7 @@
       } @else {
         <div class="history-list" role="list" aria-label="Recording history">
           @for (pulse of historyRecordings; track pulse.uuid; let i = $index) {
-            <div class="history-row" [class.expanded]="isExpanded(pulse.uuid)" role="listitem">
+            <div class="history-row" [class.expanded]="pulse.expanded" role="listitem">
               <!-- Compact header row -->
               <div
                 class="history-row-main"
@@ -156,15 +156,15 @@
                     mat-icon-button
                     class="history-expand-btn"
                     (click)="$event.stopPropagation(); toggleExpanded(pulse.uuid)"
-                    [matTooltip]="isExpanded(pulse.uuid) ? 'Collapse' : 'Expand'"
+                    [matTooltip]="pulse.expandTooltip"
                   >
-                    <mat-icon>{{ isExpanded(pulse.uuid) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    <mat-icon>{{ pulse.expandIcon }}</mat-icon>
                   </button>
                 </div>
               </div>
 
               <!-- Expanded detail -->
-              @if (isExpanded(pulse.uuid)) {
+              @if (pulse.expanded) {
                 <div class="history-row-detail">
                   <div class="history-detail-block">
                     <div class="history-detail-label">Validation</div>
@@ -219,12 +219,12 @@
                   <div class="history-detail-block">
                     <div class="history-detail-label">Sources</div>
                     <div class="history-detail-sources">
-                      @if (pulse.news && pulse.news.length > 0) {
-                        @for (n of pulse.news | slice: 0 : 6; track $index) {
-                          <span class="history-source-chip">{{ getNewsSourceLabel(n) }}</span>
+                      @if (pulse.topNews.length > 0) {
+                        @for (n of pulse.topNews; track $index) {
+                          <span class="history-source-chip">{{ n.source }}</span>
                         }
-                        @if (pulse.news.length > 6) {
-                          <span class="history-source-chip more">+{{ pulse.news.length - 6 }} more</span>
+                        @if (pulse.extraNewsCount > 0) {
+                          <span class="history-source-chip more">+{{ pulse.extraNewsCount }} more</span>
                         }
                       } @else {
                         <span class="history-detail-empty">No sources recorded.</span>

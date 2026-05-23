@@ -31,12 +31,12 @@
                 </span>
               }
               <div class="header-meta">
-                <span class="status-badge" [class]="getStatusClass(recording.status)">
-                  {{ getDisplayStatusText() }}
+                <span class="status-badge" [class]="recordingDisplay?.statusClass">
+                  {{ recordingDisplay?.statusText }}
                 </span>
                 <span class="meta-item">
                   <mat-icon>timer</mat-icon>
-                  {{ formatSeconds(recording.audioDurationSeconds) }}
+                  {{ recordingDisplay?.formattedDuration }}
                 </span>
                 <span class="meta-item">
                   <mat-icon>notes</mat-icon>
@@ -142,7 +142,7 @@
                   </div>
                   <div class="metadata-item">
                     <span class="label">Duration</span>
-                    <span class="value">{{ formatSeconds(recording.audioDurationSeconds) }}</span>
+                    <span class="value">{{ recordingDisplay?.formattedDuration }}</span>
                   </div>
                   <div class="metadata-item">
                     <span class="label">Word Count</span>

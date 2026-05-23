@@ -32,7 +32,7 @@
       <div class="blogs-grid">
         @for (blog of blogs; track blog.id) {
           <mat-card class="blog-card">
-            <a [routerLink]="getBlogUrl(blog)" class="blog-link">
+            <a [routerLink]="blog.url" class="blog-link">
               @if (blog.imageUrl || blog.thumbnailUrl) {
                 <img mat-card-image [src]="blog.thumbnailUrl || blog.imageUrl" [alt]="blog.name" class="blog-image" />
               } @else {
@@ -43,7 +43,7 @@
             </a>
             <mat-card-content>
               <h3>
-                <a [routerLink]="getBlogUrl(blog)">{{ blog.name }}</a>
+                <a [routerLink]="blog.url">{{ blog.name }}</a>
               </h3>
               @if (blog.description) {
                 <p class="description">{{ blog.description }}</p>
@@ -65,9 +65,9 @@
               </div>
             </mat-card-content>
             <mat-card-actions>
-              <a [routerLink]="getBlogUrl(blog)" mat-button color="primary">View Blog</a>
+              <a [routerLink]="blog.url" mat-button color="primary">View Blog</a>
               <app-share-buttons
-                [shareUrl]="getShareUrl(blog)"
+                [shareUrl]="blog.shareUrl"
                 [title]="blog.name"
                 [description]="blog.description"
                 [compact]="true"

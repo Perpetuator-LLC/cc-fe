@@ -46,7 +46,7 @@
       <div class="podcasts-grid">
         @for (podcast of podcasts; track podcast.id) {
           <mat-card class="podcast-card">
-            <a [routerLink]="getPodcastUrl(podcast)" class="podcast-link">
+            <a [routerLink]="podcast.url" class="podcast-link">
               @if (podcast.imageUrl) {
                 <img mat-card-image [src]="podcast.imageUrl" [alt]="podcast.name" class="podcast-image" />
               } @else {
@@ -57,7 +57,7 @@
             </a>
             <mat-card-content>
               <h3>
-                <a [routerLink]="getPodcastUrl(podcast)">{{ podcast.name }}</a>
+                <a [routerLink]="podcast.url">{{ podcast.name }}</a>
               </h3>
               @if (podcast.description) {
                 <p class="description">{{ podcast.description }}</p>
@@ -79,9 +79,9 @@
               </div>
             </mat-card-content>
             <mat-card-actions>
-              <a [routerLink]="getPodcastUrl(podcast)" mat-button color="primary">View Podcast</a>
+              <a [routerLink]="podcast.url" mat-button color="primary">View Podcast</a>
               <app-share-buttons
-                [shareUrl]="getShareUrl(podcast)"
+                [shareUrl]="podcast.shareUrl"
                 [title]="podcast.name"
                 [description]="podcast.description"
                 [compact]="true"

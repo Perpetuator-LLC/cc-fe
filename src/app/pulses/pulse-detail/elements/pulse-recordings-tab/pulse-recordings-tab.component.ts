@@ -33,7 +33,14 @@ import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
   styleUrl: './pulse-recordings-tab.component.scss',
 })
 export class PulseRecordingsTabComponent {
-  @Input() pulses: Pulse[] = [];
+  private _pulses: Pulse[] = [];
+  @Input() set pulses(value: Pulse[]) {
+    this._pulses = value || [];
+    this.rebuildHistory();
+  }
+  get pulses(): Pulse[] {
+    return this._pulses;
+  }
 
   @Output() createRecording = new EventEmitter<void>();
   @Output() viewRecording = new EventEmitter<Pulse>();
@@ -41,13 +48,37 @@ export class PulseRecordingsTabComponent {
   @Output() queueNext = new EventEmitter<Pulse>();
   @Output() queue = new EventEmitter<Pulse>();
 
-  // V3: latest is shown in the hero above — history list excludes it.
-  get historyRecordings(): Pulse[] {
-    return this.pulses.length > 1 ? this.pulses.slice(1) : [];
-  }
+  /**
+   * V3: latest is shown in the hero above — history list excludes it.
+   * Each entry is enriched with the per-row expand state and pre-built
+   * `topNews` source labels so the template avoids method calls per CD tick.
+   */
+  historyRecordings: (Pulse & {
+    expanded: boolean;
+    expandIcon: 'expand_less' | 'expand_more';
+    expandTooltip: 'Collapse' | 'Expand';
+    topNews: { source: string }[];
+    extraNewsCount: number;
+  })[] = [];
 
   // Per-row expand state, keyed by pulse uuid.
   private readonly expandedRows = new Set<string>();
+
+  private rebuildHistory(): void {
+    const tail = this._pulses.length > 1 ? this._pulses.slice(1) : [];
+    this.historyRecordings = tail.map((pulse) => {
+      const expanded = this.expandedRows.has(pulse.uuid);
+      const news = pulse.news ?? [];
+      return {
+        ...pulse,
+        expanded,
+        expandIcon: expanded ? 'expand_less' : 'expand_more',
+        expandTooltip: expanded ? 'Collapse' : 'Expand',
+        topNews: news.slice(0, 6).map((n) => ({ source: this.getNewsSourceLabel(n) })),
+        extraNewsCount: Math.max(0, news.length - 6),
+      };
+    });
+  }
 
   isExpanded(uuid: string): boolean {
     return this.expandedRows.has(uuid);
@@ -59,6 +90,7 @@ export class PulseRecordingsTabComponent {
     } else {
       this.expandedRows.add(uuid);
     }
+    this.rebuildHistory();
   }
 
   emitCardAction(event: MouseEvent, emitter: EventEmitter<Pulse>, pulse: Pulse): void {

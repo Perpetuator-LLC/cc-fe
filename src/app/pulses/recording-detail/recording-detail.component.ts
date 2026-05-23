@@ -60,6 +60,22 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
   protected pulseConfigUuid: string | null = null;
 
   recording: Pulse | null = null;
+  /** Pre-computed display strings for the loaded recording. */
+  recordingDisplay: {
+    statusClass: string;
+    statusText: string;
+    formattedDuration: string;
+  } | null = null;
+
+  private rebuildRecordingDisplay(): void {
+    this.recordingDisplay = this.recording
+      ? {
+          statusClass: this.getStatusClass(this.recording.status),
+          statusText: this.getDisplayStatusText(),
+          formattedDuration: this.formatSeconds(this.recording.audioDurationSeconds),
+        }
+      : null;
+  }
   selectedTabIndex = 0;
 
   private readonly tabNames = ['overview', 'transcript', 'research', 'news', 'urls'];
@@ -100,6 +116,7 @@ export class RecordingDetailComponent implements OnInit, OnDestroy {
       this.pulsesService.getPulse(this.recordingUuid).subscribe({
         next: (pulse) => {
           this.recording = pulse;
+          this.rebuildRecordingDisplay();
           this.pageTitleService.setTitle(pulse.title || 'Recording');
           // Use configUuid from the recording if not already set from route
           if (!this.pulseConfigUuid && pulse.configUuid) {
