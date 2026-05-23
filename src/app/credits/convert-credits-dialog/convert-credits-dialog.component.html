@@ -1,14 +1,14 @@
 <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="convert-dialog">
-  <h2 mat-dialog-title>{{ getTitle() }}</h2>
+  <h2 mat-dialog-title>{{ title }}</h2>
 
   <mat-dialog-content>
-    <p class="description">{{ getDescription() }}</p>
+    <p class="description">{{ description }}</p>
 
-    @if (data.type === 'cash' && !canRequestPayout()) {
+    @if (data.type === 'cash' && !canRequestPayout) {
       <div class="error-message">
         <mat-icon>error</mat-icon>
-        <p>{{ getStripeRequirementMessage() }}</p>
+        <p>{{ stripeRequirementMessage }}</p>
       </div>
     }
 
@@ -23,9 +23,9 @@
           [min]="data.type === 'cash' ? MIN_CASH_PAYOUT : 1"
         />
         <mat-hint
-          >Available: {{ data.availableBalance.toLocaleString() }} credits
+          >Available: {{ availableBalanceFormatted }} credits
           @if (data.type === 'cash') {
-            (Min: {{ MIN_CASH_PAYOUT.toLocaleString() }} = ${{ creditsToDollars(MIN_CASH_PAYOUT) }})
+            (Min: {{ MIN_CASH_PAYOUT_FORMATTED }} = ${{ MIN_CASH_PAYOUT_DOLLARS }})
           }
         </mat-hint>
         @if (convertForm.get('amount')?.hasError('required')) {
@@ -39,18 +39,18 @@
         }
       </mat-form-field>
 
-      @if (data.type === 'cash' && hasValidConversionAmount()) {
+      @if (data.type === 'cash' && hasValidConversionAmount) {
         <div class="conversion-display">
           <mat-icon>monetization_on</mat-icon>
           <div class="conversion-text">
             <span class="label">Cash Amount:</span>
-            <span class="amount">${{ getConversionAmount() }} USD</span>
+            <span class="amount">${{ conversionAmount }} USD</span>
           </div>
         </div>
       }
     </form>
 
-    @if (data.type === 'cash' && canRequestPayout()) {
+    @if (data.type === 'cash' && canRequestPayout) {
       <div class="info-message">
         <mat-icon>info</mat-icon>
         <p>
@@ -70,7 +70,7 @@
         mat-raised-button
         color="primary"
         (click)="onSubmit()"
-        [disabled]="convertForm.invalid || (data.type === 'cash' && !canRequestPayout())"
+        [disabled]="convertForm.invalid || (data.type === 'cash' && !canRequestPayout)"
       >
         {{ data.type === 'credits' ? 'Convert' : 'Request Payout' }}
       </button>
