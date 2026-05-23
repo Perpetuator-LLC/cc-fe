@@ -1328,18 +1328,18 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  hasUnsavedChanges(): boolean {
+  get hasUnsavedChanges(): boolean {
     return this.podcastForm.dirty;
   }
 
   getEpisodeCreationButtonTooltip(): string {
-    if (this.hasUnsavedChanges()) {
+    if (this.hasUnsavedChanges) {
       return 'Please save your changes before creating an episode';
     }
     return 'Create a new episode';
   }
 
-  getPublicShareUrl(): string {
+  get publicShareUrl(): string {
     const podcast = this.podcastForm.getRawValue();
     if (!podcast.uuid || !podcast.name) {
       return '';
@@ -1347,8 +1347,16 @@ export class PodcastDetailComponent implements OnInit, OnDestroy {
     return this.shareService.buildPodcastUrl(podcast.uuid, podcast.name);
   }
 
-  getPodcastDescription(): string {
+  get podcastDescription(): string {
     const podcast = this.podcastForm.getRawValue();
     return podcast.description || podcast.prompt || '';
+  }
+
+  /** Pre-computed target-words errors for the two fields rendered in the template. */
+  get newsTargetWordsError(): string | null {
+    return this.getTargetWordsError('newsTargetWords');
+  }
+  get researchTargetWordsError(): string | null {
+    return this.getTargetWordsError('researchTargetWords');
   }
 }

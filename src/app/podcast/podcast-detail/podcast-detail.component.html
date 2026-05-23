@@ -20,9 +20,9 @@
       <div class="buttons">
         @if (podcastForm.get('enabled')?.value) {
           <app-share-buttons
-            [shareUrl]="getPublicShareUrl()"
+            [shareUrl]="publicShareUrl"
             [title]="podcastForm.get('name')?.value || ''"
-            [description]="getPodcastDescription()"
+            [description]="podcastDescription"
             [compact]="true"
           />
         }
@@ -92,7 +92,7 @@
             color="accent"
             class="create-episode-button"
             (click)="createNewsEpisode()"
-            [disabled]="hasUnsavedChanges() || creatingNewsEpisode"
+            [disabled]="hasUnsavedChanges || creatingNewsEpisode"
           >
             @if (creatingNewsEpisode) {
               <span class="news-episode-btn">
@@ -116,7 +116,7 @@
             color="accent"
             class="create-episode-button research-button"
             (click)="createResearchEpisode()"
-            [disabled]="hasUnsavedChanges() || creatingResearchEpisode"
+            [disabled]="hasUnsavedChanges || creatingResearchEpisode"
           >
             @if (creatingResearchEpisode) {
               <span class="research-btn">
@@ -132,12 +132,7 @@
           </button>
         </span>
         <span matTooltip="Creates an empty episode that must be manually entered" class="button-wrapper">
-          <button
-            mat-button
-            class="blank-episode-button"
-            (click)="createBlankEpisode()"
-            [disabled]="hasUnsavedChanges()"
-          >
+          <button mat-button class="blank-episode-button" (click)="createBlankEpisode()" [disabled]="hasUnsavedChanges">
             <mat-icon>add_circle_outline</mat-icon>
             <span>Blank Episode</span>
           </button>
@@ -437,8 +432,8 @@
                   placeholder="Enter target word count for news episodes"
                   min="50"
                 />
-                @if (getTargetWordsError('newsTargetWords')) {
-                  <mat-error>{{ getTargetWordsError('newsTargetWords') }}</mat-error>
+                @if (newsTargetWordsError) {
+                  <mat-error>{{ newsTargetWordsError }}</mat-error>
                 }
                 <mat-hint>Target word count for news episodes (~450 words ≈ 3 minutes)</mat-hint>
               </mat-form-field>
@@ -466,8 +461,8 @@
                   placeholder="Enter target word count for research episodes"
                   min="50"
                 />
-                @if (getTargetWordsError('researchTargetWords')) {
-                  <mat-error>{{ getTargetWordsError('researchTargetWords') }}</mat-error>
+                @if (researchTargetWordsError) {
+                  <mat-error>{{ researchTargetWordsError }}</mat-error>
                 }
                 <mat-hint>Target word count for research episodes (~1400 words ≈ 10 minutes)</mat-hint>
               </mat-form-field>
