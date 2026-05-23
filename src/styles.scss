@@ -166,6 +166,10 @@ body {
     font-size: 14px;
   }
 
+  .mat-mdc-form-field:has(mat-hint) {
+    margin-bottom: 14px;
+  }
+
   .mat-mdc-notch-piece {
     border: 0;
   }
