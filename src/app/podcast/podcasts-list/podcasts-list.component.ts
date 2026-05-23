@@ -49,6 +49,14 @@ export interface ColumnOption {
   selected: boolean;
 }
 
+/** Pre-computed display fields attached to each podcast row. */
+interface PodcastDisplay {
+  formattedViewCount: string;
+  formattedLatestEpisode: string;
+  formattedCreatedAt: string;
+}
+type PodcastWithDisplay = PodcastsResult & PodcastDisplay;
+
 @Component({
   selector: 'app-podcasts-list',
   standalone: true,
@@ -87,7 +95,7 @@ export interface ColumnOption {
   templateUrl: './podcasts-list.component.html',
   styleUrls: ['./podcasts-list.component.scss'],
 })
-export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> implements OnInit, OnDestroy {
+export class PodcastsListComponent extends RelayPaginatorBase<PodcastWithDisplay> implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
@@ -104,7 +112,27 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
 
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
-  @Input() podcasts: PodcastsResult[] = [];
+  /**
+   * Enriched podcast row with pre-computed display strings so the template
+   * can read them as property access instead of calling formatters every
+   * change-detection tick.
+   */
+  private _podcasts: PodcastWithDisplay[] = [];
+  @Input() set podcasts(value: PodcastsResult[]) {
+    this._podcasts = (value || []).map((p) => this.enrichPodcast(p));
+  }
+  get podcasts(): PodcastWithDisplay[] {
+    return this._podcasts;
+  }
+
+  private enrichPodcast(p: PodcastsResult): PodcastWithDisplay {
+    return {
+      ...p,
+      formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+      formattedLatestEpisode: this.formatTimeAgo(p.latestInternalEpisodeDate ?? null),
+      formattedCreatedAt: this.formatTimeAgo(p.createdAt ?? null),
+    };
+  }
   protected loading = false;
   // dataSource, paginator, cursors, pageSize, totalItems inherited from RelayPaginatorBase
   displayedColumns: string[] = ['name', 'team', 'latestInternalEpisodeDate', 'enabled', 'createEpisode', 'actions'];
@@ -348,6 +376,21 @@ export class PodcastsListComponent extends RelayPaginatorBase<PodcastsResult> im
     if (this.orderBy === field) return 'asc';
     if (this.orderBy === `-${field}`) return 'desc';
     return null;
+  }
+
+  /** Pre-computed sort direction getters for the specific columns used in the template. */
+  get sortDirectionName(): 'asc' | 'desc' | null {
+    return this.getSortDirection('name');
+  }
+  get sortDirectionLatestEpisode(): 'asc' | 'desc' | null {
+    return this.getSortDirection('latest_internal_episode_date');
+  }
+  get sortDirectionCreatedAt(): 'asc' | 'desc' | null {
+    return this.getSortDirection('created_at');
+  }
+  /** Pre-computed column-selected flag for the one column read in the template. */
+  get isTgChannelIdColumnSelected(): boolean {
+    return this.isColumnSelected('tgChannelId');
   }
 
   toggleView(isGrid: boolean) {

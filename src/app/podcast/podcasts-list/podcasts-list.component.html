@@ -100,8 +100,8 @@
                 role="button"
               >
                 <span>Podcast Name</span>
-                @if (getSortDirection('name')) {
-                  <mat-icon>{{ getSortDirection('name') === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                @if (sortDirectionName) {
+                  <mat-icon>{{ sortDirectionName === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 }
               </div>
             </th>
@@ -123,7 +123,7 @@
                   <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-name-link">
                     {{ podcast.name }}
                   </a>
-                  <span>{{ formatViewCount(podcast.viewCount) }}</span>
+                  <span>{{ podcast.formattedViewCount }}</span>
                 </div>
               </div>
             </td>
@@ -156,15 +156,13 @@
                 role="button"
               >
                 <span>Latest Episode</span>
-                @if (getSortDirection('latest_internal_episode_date')) {
-                  <mat-icon>{{
-                    getSortDirection('latest_internal_episode_date') === 'asc' ? 'arrow_upward' : 'arrow_downward'
-                  }}</mat-icon>
+                @if (sortDirectionLatestEpisode) {
+                  <mat-icon>{{ sortDirectionLatestEpisode === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 }
               </div>
             </th>
             <td mat-cell *matCellDef="let podcast">
-              {{ formatTimeAgo(podcast.latestInternalEpisodeDate) }}
+              {{ podcast.formattedLatestEpisode }}
             </td>
           </ng-container>
 
@@ -180,15 +178,13 @@
                 (keydown.space)="onSortChange('created_at')"
               >
                 <span>Created</span>
-                @if (getSortDirection('created_at')) {
-                  <mat-icon>{{
-                    getSortDirection('created_at') === 'asc' ? 'arrow_upward' : 'arrow_downward'
-                  }}</mat-icon>
+                @if (sortDirectionCreatedAt) {
+                  <mat-icon>{{ sortDirectionCreatedAt === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 }
               </div>
             </th>
             <td mat-cell *matCellDef="let podcast">
-              {{ formatTimeAgo(podcast.createdAt) }}
+              {{ podcast.formattedCreatedAt }}
             </td>
           </ng-container>
 
@@ -376,12 +372,12 @@
                 </div>
               </mat-card-header>
               <div class="chip-header">
-                @if (isColumnSelected('tgChannelId')) {
+                @if (isTgChannelIdColumnSelected) {
                   <span class="chip"
                     ><img src="/telegram.svg" alt="telegram" /> {{ podcast?.tgChannelId || '1002282842326' }}</span
                   >
                 }
-                <span class="days">{{ formatViewCount(podcast.viewCount) }}</span>
+                <span class="days">{{ podcast.formattedViewCount }}</span>
               </div>
               <div class="bottom-header">
                 <span class="chip">+4 More</span>
