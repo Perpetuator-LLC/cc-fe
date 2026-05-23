@@ -47,9 +47,9 @@
           @if (podcastData.categories) {
             <div class="categories">
               @for (category of podcastData.categories | keyvalue; track category.key) {
-                <a [routerLink]="getCategoryUrl(category.key)" class="category-badge">{{ category.key }}</a>
+                <a [routerLink]="['/categories', category.key]" class="category-badge">{{ category.key }}</a>
                 @for (subcategory of category.value; track subcategory) {
-                  <a [routerLink]="getCategoryUrl(category.key, subcategory)" class="category-badge subcategory">
+                  <a [routerLink]="['/categories', category.key, subcategory]" class="category-badge subcategory">
                     {{ subcategory }}
                   </a>
                 }
@@ -87,11 +87,7 @@
         </div>
       </div>
       <div class="podcast-actions">
-        <app-share-buttons
-          [shareUrl]="getShareUrl()"
-          [title]="podcastData.name"
-          [description]="podcastData.description"
-        />
+        <app-share-buttons [shareUrl]="shareUrl" [title]="podcastData.name" [description]="podcastData.description" />
         @if (isAuthenticated) {
           <button mat-raised-button color="primary" [routerLink]="['/media/podcasts', podcastId]">
             <mat-icon>dashboard</mat-icon>
@@ -103,20 +99,20 @@
 
     <div class="episodes-section">
       <h2>Episodes</h2>
-      @if (podcastData.episodes.length === 0) {
+      @if (episodesDisplay.length === 0) {
         <p class="no-episodes">No episodes available yet.</p>
       } @else {
         <div class="episodes-list">
-          @for (episode of podcastData.episodes; track episode.id) {
+          @for (episode of episodesDisplay; track episode.id) {
             <mat-card class="episode-card">
               <mat-card-content>
                 <div class="episode-header">
                   <h3>
-                    <a [routerLink]="getEpisodeUrl(episode.id, episode.title)" class="episode-title">
+                    <a [routerLink]="episode.url" class="episode-title">
                       {{ episode.title }}
                     </a>
                   </h3>
-                  <span class="episode-date">{{ formatDate(episode.date) }}</span>
+                  <span class="episode-date">{{ episode.formattedDate }}</span>
                 </div>
                 @if (episode.description) {
                   <p class="episode-description">{{ episode.description }}</p>
@@ -127,15 +123,13 @@
                     Play
                   </button>
                   @if (episode.duration) {
-                    <span class="duration">{{ formatDuration(episode.duration) }}</span>
+                    <span class="duration">{{ episode.formattedDuration }}</span>
                   }
                 </div>
                 <div class="episode-actions">
-                  <a [routerLink]="getEpisodeUrl(episode.id, episode.title)" mat-button color="primary">
-                    View Details
-                  </a>
+                  <a [routerLink]="episode.url" mat-button color="primary"> View Details </a>
                   <app-share-buttons
-                    [shareUrl]="getEpisodeShareUrl(episode.id, episode.title)"
+                    [shareUrl]="episode.shareUrl"
                     [title]="episode.title"
                     [description]="episode.description"
                     [compact]="true"

@@ -42,6 +42,17 @@ export class PublicPodcastPageComponent implements OnInit {
   private audioPlayerService = inject(AudioPlayerService);
 
   podcastData: PodcastResponse | null = null;
+  /**
+   * Pre-enriched episode list cached so the template can read per-episode
+   * display strings as property access (`episode.formattedDate` etc.) instead
+   * of calling formatters on every change-detection tick.
+   */
+  episodesDisplay: (PublicEpisode & {
+    url: string;
+    shareUrl: string;
+    formattedDate: string;
+    formattedDuration: string;
+  })[] = [];
   loading = true;
   error = false;
   podcastId = '';
@@ -91,6 +102,13 @@ export class PublicPodcastPageComponent implements OnInit {
     this.publicPodcastService.getPodcast(this.podcastId, this.currentPage, this.perPage).subscribe({
       next: (data) => {
         this.podcastData = data;
+        this.episodesDisplay = (data.episodes || []).map((ep) => ({
+          ...ep,
+          url: this.getEpisodeUrl(ep.id, ep.title),
+          shareUrl: this.getEpisodeShareUrl(ep.id, ep.title),
+          formattedDate: this.formatDate(ep.date),
+          formattedDuration: this.formatDuration(ep.duration),
+        }));
         this.loading = false;
         this.updateSeoTags();
       },
@@ -115,9 +133,15 @@ export class PublicPodcastPageComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  getShareUrl(): string {
+  /** Public share URL for the podcast itself. Getter so template reads it as property access. */
+  get shareUrl(): string {
     if (!this.podcastData) return '';
     return this.shareService.buildPodcastUrl(this.podcastData.id, this.podcastData.name);
+  }
+
+  /** Backwards-compatible method kept for the internal updateSeoTags caller. */
+  getShareUrl(): string {
+    return this.shareUrl;
   }
 
   getEpisodeUrl(episodeId: string, title: string): string {
