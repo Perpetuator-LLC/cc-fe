@@ -1,11 +1,28 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToFixedPipe } from '../../shared/pipes';
 import { FinancialAlert, FinancialNode } from '../financial-hierarchy.service';
+
+/** Pre-computed display state attached to each tree node. */
+interface EnrichedNode extends FinancialNode {
+  formattedValue: string;
+  formattedChange: string;
+  changeClass: string;
+  hasMaIndicator: boolean;
+  hasSignificantChange: boolean;
+  hasChildren: boolean;
+  isExpanded: boolean;
+  enrichedChildren: EnrichedNode[];
+}
+
+/** Pre-computed display state for an alert row. */
+interface EnrichedAlert extends FinancialAlert {
+  alertClass: string;
+}
 
 /**
  * Component for displaying hierarchical financial data with drill-down
@@ -25,11 +42,52 @@ import { FinancialAlert, FinancialNode } from '../financial-hierarchy.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FinancialDrilldownComponent {
-  @Input() root: FinancialNode | null = null;
-  @Input() alerts: FinancialAlert[] = [];
+  private _root = signal<FinancialNode | null>(null);
+  @Input() set root(value: FinancialNode | null) {
+    this._root.set(value);
+  }
+  get root(): FinancialNode | null {
+    return this._root();
+  }
+
+  private _alerts = signal<FinancialAlert[]>([]);
+  @Input() set alerts(value: FinancialAlert[]) {
+    this._alerts.set(value || []);
+  }
+  get alerts(): FinancialAlert[] {
+    return this._alerts();
+  }
+
   @Input() loading = false;
   @Input() error: string | null = null;
   @Input() fiscalDate: string | null = null;
+
+  /** Pre-enriched alerts for the template (alertClass per row). */
+  readonly enrichedAlerts = computed<EnrichedAlert[]>(() =>
+    this._alerts().map((a) => ({ ...a, alertClass: this.getAlertClass(a) })),
+  );
+
+  /** Pre-enriched tree for the template — recomputed when root or expansion changes. */
+  readonly enrichedRoot = computed<EnrichedNode | null>(() => {
+    const root = this._root();
+    if (!root) return null;
+    const expanded = this.expandedNodes();
+    return this.enrichNode(root, expanded);
+  });
+
+  private enrichNode(node: FinancialNode, expanded: Set<string>): EnrichedNode {
+    return {
+      ...node,
+      formattedValue: this.formatValue(node.value),
+      formattedChange: this.formatChange(node.yoyChange),
+      changeClass: this.getChangeClass(node.yoyChange),
+      hasMaIndicator: this.hasMaIndicator(node),
+      hasSignificantChange: this.hasSignificantChange(node),
+      hasChildren: (node.children?.length ?? 0) > 0,
+      isExpanded: expanded.has(node.id),
+      enrichedChildren: (node.children ?? []).map((c) => this.enrichNode(c, expanded)),
+    };
+  }
 
   @Output() nodeClick = new EventEmitter<FinancialNode>();
 
