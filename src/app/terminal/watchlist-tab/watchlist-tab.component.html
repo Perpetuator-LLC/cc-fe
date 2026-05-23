@@ -12,8 +12,8 @@
         <!-- Watchlist Selector with Hierarchical Menu -->
         <div class="sidebar-header">
           <button mat-button [matMenuTriggerFor]="watchlistMenu" class="watchlist-selector-btn">
-            <mat-icon>{{ getSelectedWatchlistIcon() }}</mat-icon>
-            <span class="watchlist-name">{{ getSelectedWatchlistName() }}</span>
+            <mat-icon>{{ selectedWatchlistIcon() }}</mat-icon>
+            <span class="watchlist-name">{{ selectedWatchlistName() }}</span>
             <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
           </button>
           <mat-menu #watchlistMenu="matMenu" class="watchlist-menu">
@@ -28,13 +28,13 @@
               <mat-icon>schedule</mat-icon>
               <span>Recent ({{ (watchlistService.recentSymbols() || []).length }})</span>
             </div>
-            @for (watchlist of watchlistService.customWatchlists(); track watchlist.uuid) {
+            @for (watchlist of customWatchlistsDisplay(); track watchlist.uuid) {
               <button
                 mat-menu-item
                 [matMenuTriggerFor]="watchlistActionsMenu"
                 [class.active]="selectedWatchlistId() === watchlist.uuid"
               >
-                <mat-icon>{{ getWatchlistIcon(watchlist.watchlistType) }}</mat-icon>
+                <mat-icon>{{ watchlist.icon }}</mat-icon>
                 <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
               </button>
               <mat-menu #watchlistActionsMenu="matMenu">
@@ -255,7 +255,7 @@
             </mat-form-field>
             <div class="form-actions">
               <button mat-button (click)="toggleAddSymbolForm()">Cancel</button>
-              <button mat-flat-button color="primary" (click)="addSymbol()" [disabled]="!newSymbolInput.trim()">
+              <button mat-flat-button color="primary" (click)="addSymbol()" [disabled]="!newSymbolInputTrimmed">
                 Add
               </button>
             </div>
@@ -264,7 +264,7 @@
 
         <!-- Symbol Table -->
         <div class="symbol-table-container">
-          @if (currentSymbols().length === 0) {
+          @if (currentSymbolsDisplay().length === 0) {
             <div class="empty-list">
               <mat-icon>inbox</mat-icon>
               <p>No symbols yet</p>
@@ -273,10 +273,10 @@
           } @else {
             <table
               mat-table
-              [dataSource]="currentSymbols()"
+              [dataSource]="currentSymbolsDisplay()"
               matSort
-              [matSortActive]="getDefaultSortActive()"
-              [matSortDirection]="getDefaultSortDirection()"
+              [matSortActive]="defaultSortActive()"
+              [matSortDirection]="defaultSortDirection()"
               (matSortChange)="onTableSortChange($event)"
               class="symbol-table"
             >
@@ -287,10 +287,10 @@
                   <button
                     mat-icon-button
                     [matMenuTriggerFor]="columnMenu"
-                    [matTooltip]="getColumnMenuTooltip()"
+                    [matTooltip]="columnMenuTooltip()"
                     [color]="sortBy() === 'lastAccessedAt' || sortBy() === 'accessCount' ? 'primary' : undefined"
                   >
-                    <mat-icon>{{ getColumnMenuIcon() }}</mat-icon>
+                    <mat-icon>{{ columnMenuIcon() }}</mat-icon>
                   </button>
                   <mat-menu #columnMenu="matMenu">
                     <!-- Sort Options Section -->
@@ -359,7 +359,7 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #symbolMenu="matMenu">
-                    @for (action of getSymbolActions(); track action.command) {
+                    @for (action of symbolActions; track action.command) {
                       <button mat-menu-item (click)="runCommand(item.symbol, action.command)">
                         <mat-icon>{{ action.icon }}</mat-icon>
                         <span>{{ action.label }}</span>
@@ -380,14 +380,14 @@
               <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="select-cell">
                   <mat-checkbox
-                    [checked]="selectedCount() > 0 && selectedCount() === currentSymbols().length"
-                    [indeterminate]="selectedCount() > 0 && selectedCount() < currentSymbols().length"
+                    [checked]="selectedCount() > 0 && selectedCount() === currentSymbolsDisplay().length"
+                    [indeterminate]="selectedCount() > 0 && selectedCount() < currentSymbolsDisplay().length"
                     (change)="$event.checked ? selectAllSymbols() : clearSelection()"
                   />
                 </th>
                 <td mat-cell *matCellDef="let item" class="select-cell">
                   <mat-checkbox
-                    [checked]="isSymbolSelected(item.symbol)"
+                    [checked]="item.isSelected"
                     (change)="toggleSymbolSelection(item.symbol)"
                     (click)="$event.stopPropagation()"
                   />
@@ -432,7 +432,7 @@
               <ng-container matColumnDef="marketCap">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">Mkt Cap</th>
                 <td mat-cell *matCellDef="let item" class="market-cap-cell">
-                  {{ item.marketCap ? formatMarketCap(item.marketCap) : '-' }}
+                  {{ item.formattedMarketCap }}
                 </td>
               </ng-container>
 
@@ -480,7 +480,7 @@
             </table>
 
             <!-- Paginator for system watchlists (sectors, industries, exchanges) -->
-            @if (isSystemCategory(selectedWatchlistId()) && systemWatchlistTotalCount() > 0) {
+            @if (isSelectedSystemCategory() && systemWatchlistTotalCount() > 0) {
               <mat-paginator
                 [length]="systemWatchlistTotalCount()"
                 [pageSize]="systemWatchlistPageSize"
@@ -512,25 +512,25 @@
             <div class="chart-title">
               <div>
                 @if (quoteData()?.name || selectedItem()?.displayName; as companyName) {
-                  <span class="company-name" [matTooltip]="getSymbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
+                  <span class="company-name" [matTooltip]="symbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
                     companyName
                   }}</span>
                 }
-                <span class="symbol-name" [matTooltip]="getSymbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
+                <span class="symbol-name" [matTooltip]="symbolInfoTooltip()" matTooltipClass="quote-tooltip">{{
                   selectedSymbol()
                 }}</span>
               </div>
-              @if (quoteData(); as quote) {
+              @if (quoteData()) {
                 <div
                   class="quote-data"
                   [class.positive]="isPositiveChange()"
                   [class.negative]="!isPositiveChange()"
-                  [matTooltip]="getQuoteTooltip(quote)"
+                  [matTooltip]="currentQuoteTooltip()"
                   matTooltipClass="quote-tooltip"
                 >
-                  <span class="price">{{ formatPrice(quote.price) }}</span>
-                  <span class="change">{{ formatChange(quote.change) }}</span>
-                  <span class="change-percent">({{ formatChangePercent(quote.changePercent) }})</span>
+                  <span class="price">{{ currentQuotePriceFormatted() }}</span>
+                  <span class="change">{{ currentQuoteChangeFormatted() }}</span>
+                  <span class="change-percent">({{ currentQuoteChangePercentFormatted() }})</span>
                 </div>
               }
               <!-- Symbol metadata chips - clickable to navigate to system watchlists -->
@@ -562,9 +562,9 @@
                     {{ industry }}
                   </button>
                 }
-                @if (selectedItem()?.marketCap; as marketCap) {
+                @if (selectedItem()?.marketCap) {
                   <span class="metadata-chip market-cap" matTooltip="Market Capitalization">
-                    {{ formatMarketCap(marketCap) }}
+                    {{ selectedItemMarketCapFormatted() }}
                   </span>
                 }
               </div>
@@ -574,7 +574,7 @@
               (change)="onViewToggleChange($event)"
               class="view-toggle-group"
             >
-              @for (action of getSymbolActions(); track action.command) {
+              @for (action of symbolActions; track action.command) {
                 <mat-button-toggle [value]="action.command" [matTooltip]="action.label">
                   <mat-icon>{{ action.icon }}</mat-icon>
                   {{ action.label }}
@@ -618,7 +618,7 @@
                 } @else if (showNoMoreDataHint()) {
                   <div class="no-more-data-hint">
                     <span
-                      >← No more {{ formatInterval(selectedInterval()) }} data available. Switch to Daily for longer
+                      >← No more {{ selectedIntervalFormatted() }} data available. Switch to Daily for longer
                       history.</span
                     >
                   </div>
@@ -673,7 +673,7 @@
               </div>
             } @else if (chartError()) {
               <div class="content-error">
-                @if (isDataFetchingMessage(chartError())) {
+                @if (isChartErrorFetching()) {
                   <!-- Show loading state when data is being fetched -->
                   <div class="loading-container">
                     <mat-spinner diameter="48" />

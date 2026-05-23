@@ -40,6 +40,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { marked } from 'marked';
 import { WatchlistService, StockListing } from '../watchlist.service';
+import { Watchlist } from '../terminal.types';
 import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService } from '../terminal-websocket.service';
 import { ChartDataService, ChartCandle, PageInfo, ChartInterval, ChartDataResult } from '../chart-data.service';
@@ -107,6 +108,20 @@ interface WatchlistColumnOption {
   id: string;
   label: string;
   selected: boolean;
+}
+
+/** Symbol list item augmented with template-friendly display fields. */
+interface SymbolDisplay extends SymbolListItem {
+  /** Pre-formatted market cap string for table display. */
+  formattedMarketCap: string;
+  /** Whether this symbol is part of the current multi-select. */
+  isSelected: boolean;
+}
+
+/** Custom watchlist augmented with the menu icon name. */
+interface WatchlistDisplay extends Watchlist {
+  /** Material icon name for menu display. */
+  icon: string;
 }
 
 @Component({
@@ -416,6 +431,8 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
   // Add symbol form with autocomplete
   newSymbolInput = '';
+  /** Cached trimmed value of {@link newSymbolInput} to keep templates allocation-free. */
+  newSymbolInputTrimmed = '';
   showAddSymbolForm = signal(false);
   symbolSearchResults = signal<StockListing[]>([]);
   selectedStockListing = signal<StockListing | null>(null);
@@ -630,11 +647,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Check if current watchlist allows removing symbols
    * System categories are read-only
    */
-  canRemoveFromWatchlist(): boolean {
-    const id = this.selectedWatchlistId();
-    // Can't remove from system categories (sectors, industries, exchanges, asset types)
-    return !this.isSystemCategory(id);
-  }
+  canRemoveFromWatchlist = computed<boolean>(() => !this.isSystemCategory(this.selectedWatchlistId()));
+
+  /**
+   * Whether the currently selected watchlist is a system category.
+   * Computed mirror of {@link isSystemCategory} for template use.
+   */
+  isSelectedSystemCategory = computed<boolean>(() => this.isSystemCategory(this.selectedWatchlistId()));
 
   /**
    * Check if watchlist is a system category (read-only, not user-editable)
@@ -668,7 +687,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Get the display name for the currently selected watchlist
    */
-  getSelectedWatchlistName(): string {
+  selectedWatchlistName = computed<string>(() => {
     const id = this.selectedWatchlistId();
 
     if (id === 'recent') {
@@ -705,12 +724,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     return 'Select Watchlist';
-  }
+  });
 
   /**
    * Get the icon for the currently selected watchlist
    */
-  getSelectedWatchlistIcon(): string {
+  selectedWatchlistIcon = computed<string>(() => {
     const id = this.selectedWatchlistId();
 
     if (id === 'recent') {
@@ -744,21 +763,38 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     return 'list';
-  }
+  });
 
   /**
    * Check if industries list is available from backend
    */
-  hasIndustries(): boolean {
-    return (this.watchlistService.gicsIndustries()?.length ?? 0) > 0;
-  }
+  hasIndustries = computed<boolean>(() => (this.watchlistService.gicsIndustries()?.length ?? 0) > 0);
 
   /**
    * Check if exchanges list is available from backend
    */
-  hasExchanges(): boolean {
-    return (this.watchlistService.exchanges()?.length ?? 0) > 0;
-  }
+  hasExchanges = computed<boolean>(() => (this.watchlistService.exchanges()?.length ?? 0) > 0);
+
+  /**
+   * Custom watchlists augmented with display icon for the watchlist menu.
+   */
+  customWatchlistsDisplay = computed<WatchlistDisplay[]>(() => {
+    const watchlists = this.watchlistService.customWatchlists() || [];
+    return watchlists.map((wl) => ({ ...wl, icon: this.getWatchlistIcon(wl.watchlistType) }));
+  });
+
+  /**
+   * Current symbols augmented with template-friendly display fields per row.
+   */
+  currentSymbolsDisplay = computed<SymbolDisplay[]>(() => {
+    const items = this.currentSymbols();
+    const selected = this.selectedSymbols();
+    return items.map((item) => ({
+      ...item,
+      formattedMarketCap: item.marketCap ? this.formatMarketCap(item.marketCap) : '-',
+      isSelected: selected.has(item.symbol),
+    }));
+  });
 
   // Dependency injection via inject()
   protected readonly watchlistService = inject(WatchlistService);
@@ -992,6 +1028,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    */
   onSymbolInputChange(value: string): void {
     this.newSymbolInput = value;
+    this.newSymbolInputTrimmed = value.trim();
     this.selectedStockListing.set(null);
     this.symbolSearchSubject.next(value);
   }
@@ -1002,6 +1039,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   selectStockListing(listing: StockListing): void {
     this.selectedStockListing.set(listing);
     this.newSymbolInput = listing.symbol;
+    this.newSymbolInputTrimmed = listing.symbol.trim();
     // Clear search results to close the autocomplete dropdown
     this.symbolSearchResults.set([]);
     this.newSymbolInput = listing.symbol;
@@ -1497,7 +1535,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Get tooltip for the combined column/sort menu button
    */
-  getColumnMenuTooltip(): string {
+  columnMenuTooltip = computed<string>(() => {
     const sort = this.sortBy();
     const direction = this.sortDirection();
     if (sort === 'lastAccessedAt') {
@@ -1507,12 +1545,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       return `Columns & Sort (${direction === 'asc' ? 'least viewed' : 'most viewed'})`;
     }
     return 'Columns & Sort';
-  }
+  });
 
   /**
    * Get icon for the combined column/sort menu button
    */
-  getColumnMenuIcon(): string {
+  columnMenuIcon = computed<string>(() => {
     const sort = this.sortBy();
     if (sort === 'lastAccessedAt') {
       return 'schedule';
@@ -1521,13 +1559,13 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
       return 'trending_up';
     }
     return 'tune';
-  }
+  });
 
   /**
    * Get the active sort column for MatSort binding.
    * Returns the column ID that should show the sort indicator.
    */
-  getDefaultSortActive(): string {
+  defaultSortActive = computed<string>(() => {
     const sortField = this.sortBy();
     const watchlistId = this.selectedWatchlistId();
 
@@ -1543,12 +1581,12 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
     // For recent and custom watchlists, no column header sort (they use special sorts)
     return '';
-  }
+  });
 
   /**
    * Get the sort direction for MatSort binding.
    */
-  getDefaultSortDirection(): 'asc' | 'desc' | '' {
+  defaultSortDirection = computed<'asc' | 'desc' | ''>(() => {
     const sortDir = this.sortDirection();
     const sortField = this.sortBy();
     const watchlistId = this.selectedWatchlistId();
@@ -1564,7 +1602,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     }
 
     return '';
-  }
+  });
 
   /**
    * Apply a special sort (lastAccessedAt or accessCount) that doesn't have a visible column
@@ -3319,16 +3357,14 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Quick actions menu for a symbol
    * Note: QUOTE removed since price info is displayed at the top of the chart area
    */
-  getSymbolActions(): { icon: string; label: string; command: string }[] {
-    return [
-      { icon: 'show_chart', label: 'Chart', command: 'CHART' },
-      { icon: 'account_balance', label: 'Financials', command: 'FINANCIALS' },
-      { icon: 'analytics', label: 'Valuation', command: 'DCF' },
-      { icon: 'payments', label: 'Dividends', command: 'DIVIDENDS' },
-      { icon: 'table_chart', label: 'Table', command: 'HP' },
-      { icon: 'info', label: 'Info', command: 'DES' },
-    ];
-  }
+  readonly symbolActions: readonly { icon: string; label: string; command: string }[] = [
+    { icon: 'show_chart', label: 'Chart', command: 'CHART' },
+    { icon: 'account_balance', label: 'Financials', command: 'FINANCIALS' },
+    { icon: 'analytics', label: 'Valuation', command: 'DCF' },
+    { icon: 'payments', label: 'Dividends', command: 'DIVIDENDS' },
+    { icon: 'table_chart', label: 'Table', command: 'HP' },
+    { icon: 'info', label: 'Info', command: 'DES' },
+  ];
 
   /**
    * Toggle create watchlist form
@@ -3451,7 +3487,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if a symbol is selected
+   * Check if a symbol is selected (also exposed per-row via {@link currentSymbolsDisplay}).
    */
   isSymbolSelected(symbol: string): boolean {
     return this.selectedSymbols().has(symbol);
@@ -3475,9 +3511,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Get count of selected symbols
    */
-  selectedCount(): number {
-    return this.selectedSymbols().size;
-  }
+  selectedCount = computed<number>(() => this.selectedSymbols().size);
 
   /**
    * Copy selected symbols to clipboard
@@ -3630,6 +3664,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     this.showAddSymbolForm.update((v) => !v);
     if (!this.showAddSymbolForm()) {
       this.newSymbolInput = '';
+      this.newSymbolInputTrimmed = '';
       this.selectedStockListing.set(null);
       this.symbolSearchResults.set([]);
     }
@@ -4289,10 +4324,43 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Check if quote change is positive
    */
-  isPositiveChange(): boolean {
+  isPositiveChange = computed<boolean>(() => (this.quoteData()?.change ?? 0) >= 0);
+
+  /** Formatted price string for the current quote (empty when no data). */
+  currentQuotePriceFormatted = computed<string>(() => {
     const quote = this.quoteData();
-    return (quote?.change ?? 0) >= 0;
-  }
+    return quote ? this.formatPrice(quote.price) : '';
+  });
+
+  /** Formatted change string for the current quote. */
+  currentQuoteChangeFormatted = computed<string>(() => {
+    const quote = this.quoteData();
+    return quote ? this.formatChange(quote.change) : '';
+  });
+
+  /** Formatted percent-change string for the current quote. */
+  currentQuoteChangePercentFormatted = computed<string>(() => {
+    const quote = this.quoteData();
+    return quote ? this.formatChangePercent(quote.changePercent) : '';
+  });
+
+  /** Multi-line tooltip describing the current quote. */
+  currentQuoteTooltip = computed<string>(() => {
+    const quote = this.quoteData();
+    return quote ? this.getQuoteTooltip(quote) : '';
+  });
+
+  /** Formatted market cap for the currently selected list item (chip in chart header). */
+  selectedItemMarketCapFormatted = computed<string>(() => {
+    const cap = this.selectedItem()?.marketCap;
+    return cap ? this.formatMarketCap(cap) : '';
+  });
+
+  /** Human-friendly label for the currently selected chart interval. */
+  selectedIntervalFormatted = computed<string>(() => this.formatInterval(this.selectedInterval()));
+
+  /** Whether the active chart error message indicates an in-progress data fetch. */
+  isChartErrorFetching = computed<boolean>(() => this.isDataFetchingMessage(this.chartError()));
 
   /**
    * Format date for OHLC display (human-friendly with time)
@@ -4558,7 +4626,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
   /**
    * Get a formatted tooltip string for symbol/company info
    */
-  getSymbolInfoTooltip(): string {
+  symbolInfoTooltip = computed<string>(() => {
     const item = this.selectedItem();
     const quote = this.quoteData();
     const lines: string[] = [];
@@ -4592,7 +4660,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
     lines.push('Click "Info" button for full company details');
 
     return lines.join('\n');
-  }
+  });
 
   /**
    * Get a compact tooltip for a watchlist symbol item
