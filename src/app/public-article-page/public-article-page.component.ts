@@ -40,6 +40,13 @@ export class PublicArticlePageComponent implements OnInit {
   private readonly sanitizer = inject(DomSanitizer);
 
   articleData: ArticleResponse | null = null;
+  /** Pre-computed display strings populated when the article loads. */
+  articleDisplay: {
+    blogUrl: string;
+    shareUrl: string;
+    publishedAt: string;
+    contentHtml: SafeHtml;
+  } | null = null;
   loading = true;
   error = false;
   articleId = '';
@@ -62,6 +69,12 @@ export class PublicArticlePageComponent implements OnInit {
     this.publicBlogService.getArticle(this.articleId).subscribe({
       next: (data) => {
         this.articleData = data;
+        this.articleDisplay = {
+          blogUrl: this.getBlogUrl(),
+          shareUrl: this.getShareUrl(),
+          publishedAt: this.formatDate(data.publishedAt ?? data.createdAt),
+          contentHtml: this.renderMarkdown(data.content),
+        };
         this.loading = false;
         this.updateSeoTags();
       },

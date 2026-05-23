@@ -20,7 +20,7 @@
       </a>
       @if (articleData.blogId && articleData.blogName) {
         <mat-icon>chevron_right</mat-icon>
-        <a [routerLink]="getBlogUrl()" mat-button>{{ articleData.blogName }}</a>
+        <a [routerLink]="articleDisplay?.blogUrl" mat-button>{{ articleData.blogName }}</a>
       }
       <mat-icon>chevron_right</mat-icon>
       <span>{{ articleData.title }}</span>
@@ -35,13 +35,13 @@
               <h2 class="subtitle">{{ articleData.subtitle }}</h2>
             }
             <p class="blog-name">
-              <a [routerLink]="getBlogUrl()">{{ articleData.blogName }}</a>
+              <a [routerLink]="articleDisplay?.blogUrl">{{ articleData.blogName }}</a>
             </p>
             <div class="article-meta">
               @if (articleData.publishedAt) {
-                <span class="meta-item">Published {{ formatDate(articleData.publishedAt) }}</span>
+                <span class="meta-item">Published {{ articleDisplay?.publishedAt }}</span>
               } @else {
-                <span class="meta-item">Created {{ formatDate(articleData.createdAt) }}</span>
+                <span class="meta-item">Created {{ articleDisplay?.publishedAt }}</span>
               }
               @if (articleData.readTimeMinutes) {
                 <span class="meta-item">{{ articleData.readTimeMinutes }} min read</span>
@@ -62,7 +62,7 @@
           </div>
           <div class="article-actions">
             <app-share-buttons
-              [shareUrl]="getShareUrl()"
+              [shareUrl]="articleDisplay?.shareUrl ?? ''"
               [title]="articleData.title"
               [description]="articleData.description || articleData.excerpt"
             />
@@ -84,13 +84,13 @@
         }
 
         @if (articleData.content) {
-          <div class="article-content" [innerHTML]="renderMarkdown(articleData.content)"></div>
+          <div class="article-content" [innerHTML]="articleDisplay?.contentHtml"></div>
         }
       </mat-card-content>
     </mat-card>
 
     <div class="back-to-blog">
-      <a [routerLink]="getBlogUrl()" mat-raised-button color="primary">
+      <a [routerLink]="articleDisplay?.blogUrl" mat-raised-button color="primary">
         <mat-icon>arrow_back</mat-icon>
         Back to {{ articleData.blogName }}
       </a>
