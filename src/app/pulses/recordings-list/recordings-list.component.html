@@ -51,7 +51,7 @@
         </mat-form-field>
 
         <!-- Clear Filters -->
-        @if (hasActiveFilters()) {
+        @if (hasActiveFilters) {
           <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
             <mat-icon>clear</mat-icon>
             Clear
@@ -73,7 +73,7 @@
           <mat-icon>mic_off</mat-icon>
           <h3>No recordings found</h3>
           <p>
-            @if (hasActiveFilters()) {
+            @if (hasActiveFilters) {
               Try adjusting your filters to find recordings.
             } @else {
               Generate some recordings from your Pulses to see them here.
@@ -95,15 +95,15 @@
                   <span class="recording-title">{{ recording.title }}</span>
                   <span class="recording-config">{{ recording.configName }}</span>
                 </div>
-                <span class="status-badge" [class]="getStatusClass(recording.status, recording)">
-                  {{ getDisplayStatusText(recording) }}
+                <span class="status-badge" [class]="recording.statusClass">
+                  {{ recording.statusText }}
                 </span>
               </div>
 
               <div class="recording-meta">
                 <span class="meta-item">
                   <mat-icon>timer</mat-icon>
-                  {{ formatSeconds(recording.audioDurationSeconds) }}
+                  {{ recording.formattedDuration }}
                 </span>
                 <span class="meta-item">
                   <mat-icon>notes</mat-icon>
@@ -111,7 +111,7 @@
                 </span>
                 <span class="meta-item">
                   <mat-icon>schedule</mat-icon>
-                  {{ formatTimeAgo(recording.createdAt) }}
+                  {{ recording.formattedTimeAgo }}
                 </span>
                 @if (recording.isValidated) {
                   <span class="meta-item validated">
@@ -133,7 +133,7 @@
                     <mat-icon>play_arrow</mat-icon>
                     Play
                     @if (recording.audioDurationSeconds) {
-                      <span class="duration-hint">{{ formatSeconds(recording.audioDurationSeconds) }}</span>
+                      <span class="duration-hint">{{ recording.formattedDuration }}</span>
                     }
                   </button>
                   <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">

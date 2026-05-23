@@ -27,23 +27,55 @@ export interface AgentAction {
   styleUrl: './agent-actions-list.component.scss',
 })
 export class AgentActionsListComponent {
-  @Input() agentActionsJson: string | null = null;
   @Input() showHeader = true;
 
-  get agentActions(): AgentAction[] {
-    if (!this.agentActionsJson) return [];
+  /**
+   * Parsed + enriched agent actions for the template. Setter on the JSON
+   * input parses once and pre-computes per-row display strings so the
+   * template reads property access instead of method calls.
+   */
+  agentActions: (AgentAction & {
+    icon: string;
+    formattedToolName: string;
+    statusClass: string;
+    argsDisplay: string;
+    topItems: NonNullable<AgentAction['items']>;
+    extraItemCount: number;
+  })[] = [];
+
+  private _agentActionsJson: string | null = null;
+  @Input() set agentActionsJson(value: string | null) {
+    this._agentActionsJson = value;
+    this.agentActions = this.parseAndEnrich(value);
+  }
+  get agentActionsJson(): string | null {
+    return this._agentActionsJson;
+  }
+
+  private parseAndEnrich(json: string | null): AgentActionsListComponent['agentActions'] {
+    if (!json) return [];
     try {
-      let parsed = JSON.parse(this.agentActionsJson);
+      let parsed = JSON.parse(json);
       // Handle double-encoded JSON from backend (JSONString field)
       if (typeof parsed === 'string') {
         parsed = JSON.parse(parsed);
       }
-      // Ensure we have an array
       if (!Array.isArray(parsed)) {
         console.warn('[AgentActions] Expected array, got:', typeof parsed);
         return [];
       }
-      return parsed;
+      return (parsed as AgentAction[]).map((a) => {
+        const items = a.items ?? [];
+        return {
+          ...a,
+          icon: this.getActionIcon(a),
+          formattedToolName: this.formatToolName(a.tool),
+          statusClass: this.getStatusClass(a.status),
+          argsDisplay: this.getArgsDisplay(a.args),
+          topItems: items.slice(0, 3),
+          extraItemCount: Math.max(0, items.length - 3),
+        };
+      });
     } catch (e) {
       console.error('[AgentActions] Failed to parse:', e);
       return [];
