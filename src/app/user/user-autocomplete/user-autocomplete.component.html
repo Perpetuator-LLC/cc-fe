@@ -9,7 +9,7 @@
     placeholder="Type at least 3 characters to search"
   />
   <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-    @if (searchControl.value && searchControl.value.length < 3 && isString(searchControl.value)) {
+    @if (searchControl.value && searchControl.value.length < 3 && isSearchControlValueString) {
       <mat-option disabled>Type at least 3 characters to search</mat-option>
     } @else if ((filteredUsers$ | async)?.length === 0) {
       <mat-option disabled>No users found</mat-option>

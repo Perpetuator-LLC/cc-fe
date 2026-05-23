@@ -22,7 +22,7 @@
   <ng-container matColumnDef="status">
     <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
     <mat-cell *matCellDef="let feed">
-      <div class="rss-status-badges" [matTooltip]="getTooltipText(feed)">
+      <div class="rss-status-badges" [matTooltip]="feed.tooltipText">
         <span
           class="rss-status-badge"
           [class.status-success]="feed.isReachable"

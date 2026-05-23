@@ -78,7 +78,7 @@
             <kbd>↓</kbd><kbd>↑</kbd> navigate <kbd>Tab</kbd> select <kbd>Enter</kbd> execute
           </span>
         </div>
-        @for (suggestion of suggestions(); track suggestion.fqn || suggestion.display; let i = $index) {
+        @for (suggestion of suggestionsDisplay(); track suggestion.fqn || suggestion.display; let i = $index) {
           <div
             class="suggestion-item"
             [class.selected]="i === selectedSuggestionIndex()"
@@ -92,7 +92,7 @@
             (mouseenter)="selectedSuggestionIndex.set(i)"
           >
             <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-              <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
+              <mat-icon>{{ suggestion.icon }}</mat-icon>
             </span>
             <span class="suggestion-text">
               @if (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent') {

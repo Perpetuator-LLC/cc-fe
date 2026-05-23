@@ -78,6 +78,10 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   chips = signal<FqnChip[]>([]); // Completed FQN tokens as chips
   currentInput = signal(''); // Current text being typed (not yet a chip)
   suggestions = signal<AutocompleteSuggestion[]>([]);
+  /** Suggestions with pre-computed icon for the template. */
+  readonly suggestionsDisplay = computed(() =>
+    this.suggestions().map((s) => ({ ...s, icon: this.getSuggestionIcon(s) })),
+  );
   selectedSuggestionIndex = signal(-1);
   showSuggestions = signal(false);
   userNavigatedSuggestions = signal(false); // True if user used arrow keys to navigate

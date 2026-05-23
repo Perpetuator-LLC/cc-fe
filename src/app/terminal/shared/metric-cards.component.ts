@@ -20,7 +20,14 @@ export interface MetricCardData {
   styleUrl: './metric-cards.component.scss',
 })
 export class MetricCardsComponent {
-  @Input() metrics: MetricCardData[] = [];
+  /** Metrics enriched with pre-built formattedValue per row. */
+  private _metrics: (MetricCardData & { formattedValue: string })[] = [];
+  @Input() set metrics(value: MetricCardData[]) {
+    this._metrics = (value || []).map((m) => ({ ...m, formattedValue: this.formatValue(m) }));
+  }
+  get metrics(): (MetricCardData & { formattedValue: string })[] {
+    return this._metrics;
+  }
 
   formatValue(metric: MetricCardData): string {
     if (typeof metric.value === 'number') {

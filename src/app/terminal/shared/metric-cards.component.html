@@ -8,7 +8,7 @@
         [class.positive]="metric.change && metric.change > 0"
         [class.negative]="metric.change && metric.change < 0"
       >
-        {{ formatValue(metric) }}
+        {{ metric.formattedValue }}
       </span>
       @if (metric.change !== undefined) {
         <span class="metric-change" [class.positive]="metric.change > 0" [class.negative]="metric.change < 0">

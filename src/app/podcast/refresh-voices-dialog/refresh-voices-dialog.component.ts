@@ -39,6 +39,11 @@ export class RefreshVoicesDialogComponent /*implements OnInit*/ {
 
   refreshForm: FormGroup;
   voiceTiers = Object.values(VoiceTier); // Use VoiceTier enum
+  /** Pre-computed tier label pairs for the template dropdown. */
+  voiceTierOptions: { value: VoiceTier; label: string }[] = Object.values(VoiceTier).map((tier) => ({
+    value: tier,
+    label: tierToString(tier),
+  }));
   loading = false;
   tierToString = tierToString; // Make helper function available in template
 

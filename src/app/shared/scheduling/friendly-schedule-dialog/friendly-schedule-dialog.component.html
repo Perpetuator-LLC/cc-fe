@@ -159,13 +159,8 @@
         @if (showDaySelector) {
           <div class="custom-days-section">
             <div class="day-chips">
-              @for (day of daysOfWeek; track day.value) {
-                <button
-                  type="button"
-                  class="day-chip"
-                  [class.selected]="isDaySelected(day.value)"
-                  (click)="toggleDay(day.value)"
-                >
+              @for (day of daysOfWeekDisplay; track day.value) {
+                <button type="button" class="day-chip" [class.selected]="day.selected" (click)="toggleDay(day.value)">
                   {{ day.short }}
                 </button>
               }

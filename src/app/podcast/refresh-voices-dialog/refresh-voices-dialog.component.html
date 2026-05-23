@@ -10,8 +10,8 @@
   <mat-form-field appearance="fill">
     <mat-label>Filter by Models (Optional)</mat-label>
     <mat-select formControlName="models" multiple>
-      @for (tier of voiceTiers; track tier) {
-        <mat-option [value]="tier">{{ tierToString(tier) }}</mat-option>
+      @for (opt of voiceTierOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
       }
     </mat-select>
     <mat-hint>If none selected, applies to all models.</mat-hint>
