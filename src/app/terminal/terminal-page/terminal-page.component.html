@@ -36,7 +36,8 @@
             </div>
           } @else {
             <mat-accordion class="history-accordion" multi>
-              @for (entry of terminalService.userHistory(); track entry.id; let i = $index) {
+              @for (item of enrichedHistory(); track item.entry.id; let i = $index) {
+                @let entry = item.entry;
                 <mat-expansion-panel
                   [expanded]="i === 0"
                   [class.error]="entry.status === 'FAILED'"
@@ -48,7 +49,7 @@
                     <mat-panel-title>
                       <span class="command-prompt">&gt;</span>
                       <div class="command-chips">
-                        @for (token of getCommandTokens(entry); track token.fqn) {
+                        @for (token of item.tokens; track token.fqn) {
                           <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
                         }
                       </div>
@@ -81,7 +82,7 @@
                         [class.success]="entry.status === 'COMPLETED'"
                         [class.error]="entry.status === 'FAILED'"
                         [class.loading]="entry.status === 'RUNNING' || entry.status === 'PENDING'"
-                        >{{ getStatusIcon(entry.status) }}</mat-icon
+                        >{{ item.statusIcon }}</mat-icon
                       >
                     </mat-panel-description>
                   </mat-expansion-panel-header>
@@ -113,8 +114,8 @@
                           <span>{{ entry.aiReasoning }}</span>
                         </div>
                       }
-                      @if (getResultMessage(entry)) {
-                        <div class="result-message">{{ getResultMessage(entry) }}</div>
+                      @if (item.resultMessage) {
+                        <div class="result-message">{{ item.resultMessage }}</div>
                       }
                     }
                   </div>
@@ -146,11 +147,11 @@
             </div>
           } @else {
             @if (help.overview) {
-              <div class="help-overview" [innerHTML]="markdownToHtml(help.overview)"></div>
+              <div class="help-overview" [innerHTML]="helpOverviewHtml"></div>
             }
 
             <div class="help-sections">
-              @for (category of help.categories; track category.name) {
+              @for (category of helpDisplay; track category.name) {
                 <div class="help-category">
                   <h3>{{ category.name }}</h3>
                   <div class="command-list">
@@ -159,7 +160,7 @@
                         <div class="command-name">
                           <code>{{ cmd.name }}</code>
                           @if (cmd.aliases && cmd.aliases.length > 0) {
-                            <span class="aliases">(aliases: {{ cmd.aliases.join(', ') }})</span>
+                            <span class="aliases">(aliases: {{ cmd.aliasesText }})</span>
                           }
                         </div>
                         <div class="command-description">{{ cmd.description }}</div>
