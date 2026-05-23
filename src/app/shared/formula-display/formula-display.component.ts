@@ -70,11 +70,40 @@ export class FormulaDisplayComponent {
   @Input() title = '';
   @Input() description = '';
   @Input() formulaHtml = '';
-  @Input() variables: FormulaVariable[] = [];
+  /** Variables enriched with pre-computed display string + unit per row. */
+  variablesDisplay: (FormulaVariable & { displayValue: string; unit: string })[] = [];
+  private _variables: FormulaVariable[] = [];
+  @Input() set variables(value: FormulaVariable[]) {
+    this._variables = value || [];
+    this.variablesDisplay = this._variables.map((v) => ({
+      ...v,
+      displayValue: this.formatVariableValue(v),
+      unit: this.getUnitForVariable(v),
+    }));
+  }
+  get variables(): FormulaVariable[] {
+    return this._variables;
+  }
   /** Calculation steps showing the work (optional) */
   @Input() calculationSteps: CalculationStep[] = [];
   /** Variable definitions explaining what each symbol means */
-  @Input() variableDefinitions: VariableDefinition[] = [];
+  private _variableDefinitions = signal<VariableDefinition[]>([]);
+  @Input() set variableDefinitions(value: VariableDefinition[]) {
+    this._variableDefinitions.set(value || []);
+  }
+  get variableDefinitions(): VariableDefinition[] {
+    return this._variableDefinitions();
+  }
+
+  /** Enriched definitions with pre-computed `isHighlighted` flag (depends on hoveredVariable). */
+  readonly variableDefinitionsDisplay = computed(() => {
+    const hovered = this.hoveredVariable();
+    const hoveredClean = hovered ? hovered.replace(/<[^>]*>/g, '') : '';
+    return this._variableDefinitions().map((def) => ({
+      ...def,
+      isHighlighted: hoveredClean ? def.symbol.replace(/<[^>]*>/g, '') === hoveredClean : false,
+    }));
+  });
   /** Final result variable name and value (e.g., "WACC = 9.2%") */
   @Input() resultLabel = '';
   @Input() resultValue = '';

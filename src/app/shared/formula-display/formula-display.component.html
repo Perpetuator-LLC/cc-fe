@@ -16,10 +16,10 @@
   <!-- Variable Legend with Tooltips and Hover Highlighting -->
   @if (variableDefinitions.length > 0) {
     <div class="variable-legend">
-      @for (def of variableDefinitions; track def.symbol) {
+      @for (def of variableDefinitionsDisplay(); track def.symbol) {
         <span
           class="legend-item"
-          [class.highlighted]="isHighlighted(def.symbol)"
+          [class.highlighted]="def.isHighlighted"
           [matTooltip]="def.definition"
           matTooltipPosition="above"
           (mouseenter)="onVariableHover(def.symbol)"
@@ -62,7 +62,7 @@
   @if (variables.length > 0) {
     <div class="formula-variables">
       <div class="variables-header">Where:</div>
-      @for (v of variables; track v.symbol) {
+      @for (v of variablesDisplay; track v.symbol) {
         <div class="variable-row">
           <span class="variable-symbol">{{ v.symbol }}</span>
           <span class="equals">=</span>
@@ -76,9 +76,9 @@
               [max]="v.max"
               (input)="onVariableChange(v.symbol, $event)"
             />
-            <span class="variable-unit">{{ getUnitForVariable(v) }}</span>
+            <span class="variable-unit">{{ v.unit }}</span>
           } @else {
-            <span class="variable-value">{{ formatVariableValue(v) }}</span>
+            <span class="variable-value">{{ v.displayValue }}</span>
           }
           <span class="variable-name">({{ v.name }})</span>
         </div>

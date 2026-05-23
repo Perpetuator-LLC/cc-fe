@@ -129,7 +129,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   /**
    * Check if error is about unverified email
    */
-  isEmailNotVerified(): boolean {
+  get isEmailNotVerified(): boolean {
     return this.errorMessage?.toLowerCase().includes('not verified') || false;
   }
 
