@@ -179,12 +179,6 @@ body {
     border: 0;
   }
 
-  .mat-mdc-text-field-wrapper {
-    height: 48px;
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
-  }
-
   .mat-mdc-text-field-wrapper:has(.mat-mdc-form-field-textarea-control) {
     height: auto;
   }
@@ -202,14 +196,6 @@ body {
 
   .mat-mdc-paginator-page-size .mat-mdc-form-field-infix {
     padding-top: 12px;
-  }
-
-  .mat-mdc-form-field-infix {
-    padding-top: 20px;
-  }
-
-  .mdc-floating-label {
-    top: 24px;
   }
 
   .mat-mdc-select {
@@ -1926,7 +1912,7 @@ html body {
   }
 
   .mat-mdc-text-field-wrapper.mdc-text-field {
-    height: 48px;
+    // height: 48px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
   }
@@ -1964,14 +1950,6 @@ html body {
     .mat-mdc-form-field .mat-mdc-form-field-infix {
       padding: 0;
     }
-  }
-
-  .mat-mdc-form-field .mat-mdc-form-field-infix {
-    padding-top: 20px;
-  }
-
-  .mdc-floating-label.mat-mdc-floating-label {
-    top: 24px;
   }
 
   .mat-mdc-select.mat-mdc-select {
