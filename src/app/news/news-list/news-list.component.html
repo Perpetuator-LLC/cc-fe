@@ -78,22 +78,14 @@
             </mat-select>
           </mat-form-field>
           <div class="select-btn desktop">
-            <label
-              class="custom-select-all"
-              (click)="toggleSelectAll()"
-              tabindex="0"
-              (keydown.enter)="toggleSelectAll()"
-              (keydown.space)="toggleSelectAll()"
+            <mat-checkbox
+              class="select-all-checkbox"
+              [checked]="allFilteredSelected"
+              [indeterminate]="someFilteredSelected"
+              (change)="toggleSelectAll()"
             >
-              <input
-                type="checkbox"
-                [checked]="allFilteredSelected"
-                [indeterminate]="someFilteredSelected"
-                (change)="toggleSelectAll()"
-              />
-              <span class="custom-checkbox"></span>
-              <span class="select-label">{{ selectAllLabel }}</span>
-            </label>
+              {{ selectAllLabel }}
+            </mat-checkbox>
           </div>
           <button
             mat-flat-button

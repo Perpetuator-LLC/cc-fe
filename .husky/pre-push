@@ -19,7 +19,7 @@ fi
 # lint-staged only sees staged files, so these catch issues introduced via
 # --no-verify, partial staging, or cross-file regressions (e.g. an SCSS class
 # becoming unused because its consumer was deleted in a different file).
-yarn lint:md3
+yarn lint:md3 --strict
 yarn lint:scss:unused:strict
 
 npm test

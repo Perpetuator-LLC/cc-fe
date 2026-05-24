@@ -68,13 +68,15 @@
     ],
     "*.html": [
       "prettier --write",
-      "yarn check-copyright --fix"
+      "yarn check-copyright --fix",
+      "node scripts/check-md3-compliance.js --strict --files"
     ],
     "*.scss": [
       "prettier --write",
       "stylelint --fix --allow-empty-input",
       "yarn check-copyright --fix",
-      "node scripts/check-unused-scss.js --strict --files"
+      "node scripts/check-unused-scss.js --strict --files",
+      "node scripts/check-md3-compliance.js --strict --files"
     ]
   },
   "private": true,
