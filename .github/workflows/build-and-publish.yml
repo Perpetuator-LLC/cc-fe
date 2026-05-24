@@ -129,6 +129,48 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Kick off the Gitea staging deploy as soon as the image is published
+      # on main. This replaces relying on Gitea's mirror-sync to fire push
+      # events (which it doesn't, by default).
+      #
+      # Why not a separate GitHub webhook? Calling from inside this workflow
+      # guarantees the deploy ONLY runs after a successful image push —
+      # no race condition with the GHCR upload, no need for a wait-for-image
+      # poll in the Gitea side.
+      #
+      # Requires the GitHub repo secret GITEA_DISPATCH_TOKEN — a Gitea API
+      # token with at least the "write:repository" scope. Create at:
+      #   git.perpetuator.io → Settings → Applications → Generate New Token
+      # Then add to GitHub: Settings → Secrets and variables → Actions →
+      # New repository secret → Name: GITEA_DISPATCH_TOKEN.
+      - name: Trigger Gitea deploy workflow
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        env:
+          GITEA_DISPATCH_TOKEN: ${{ secrets.GITEA_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "${GITEA_DISPATCH_TOKEN}" ]; then
+            echo "::warning::GITEA_DISPATCH_TOKEN secret not set — skipping Gitea dispatch."
+            echo "Add the secret in repo Settings → Secrets and variables → Actions."
+            echo "Deploy must be triggered manually from Gitea Actions UI for this commit."
+            exit 0
+          fi
+          response=$(curl -sf -w "\n%{http_code}" -X POST \
+            -H "Authorization: token ${GITEA_DISPATCH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"ref":"main","inputs":{}}' \
+            "https://git.perpetuator.io/api/v1/repos/perpetuator/cc-fe/actions/workflows/stage-deploy.yml/dispatches" \
+            ) || {
+              echo "::error::Gitea dispatch failed. Check token scope (write:repository) and workflow filename."
+              exit 1
+            }
+          http_code=$(echo "$response" | tail -n1)
+          if [ "$http_code" != "204" ] && [ "$http_code" != "200" ]; then
+            echo "::error::Unexpected Gitea response HTTP $http_code"
+            echo "$response" | head -n -1
+            exit 1
+          fi
+          echo "✅ Gitea stage-deploy dispatched for ref main"
+
       - name: Summary
         if: always()
         run: |
