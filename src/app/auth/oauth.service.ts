@@ -4,7 +4,7 @@ import { AuthConfig, OAuthService as AngularOAuthService } from 'angular-oauth2-
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 import { HttpClient } from '@angular/common/http';
 import { TraceService } from '../traces/trace.service';
 import { TokenStorageService } from './token-storage.service';
@@ -49,6 +49,7 @@ export class OAuthService {
   private http = inject(HttpClient);
   private injector = inject(Injector);
   private tokenStorage = inject(TokenStorageService);
+  private appConfig = inject(AppConfigService);
 
   private currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
   public currentUser$: Observable<UserProfile | null> = this.currentUserSubject.asObservable();
@@ -56,25 +57,33 @@ export class OAuthService {
   private initialized = false;
   private traceService?: TraceService; // Lazy-loaded to avoid circular dependency with Apollo
 
-  private authConfig: AuthConfig = {
-    issuer: environment.OAUTH_ISSUER,
-    loginUrl: `${environment.OAUTH_ISSUER}/o/authorize/`,
-    tokenEndpoint: `${environment.OAUTH_ISSUER}/o/token/`,
-    userinfoEndpoint: `${environment.OAUTH_ISSUER}/o/userinfo/`,
+  /**
+   * Build the angular-oauth2-oidc AuthConfig from runtime config.
+   * Must be a method (not a field initializer) because AppConfig isn't
+   * loaded until APP_INITIALIZER for AppConfigService resolves.
+   */
+  private buildAuthConfig(): AuthConfig {
+    const config = this.appConfig.config;
+    return {
+      issuer: config.OAUTH_ISSUER,
+      loginUrl: `${config.OAUTH_ISSUER}/o/authorize/`,
+      tokenEndpoint: `${config.OAUTH_ISSUER}/o/token/`,
+      userinfoEndpoint: `${config.OAUTH_ISSUER}/o/userinfo/`,
 
-    clientId: environment.OAUTH_CLIENT_ID,
+      clientId: config.OAUTH_CLIENT_ID,
 
-    redirectUri: `${environment.SITE_URL}/auth/callback`,
+      redirectUri: `${config.SITE_URL}/auth/callback`,
 
-    responseType: 'code',
-    scope: environment.OAUTH_SCOPES,
+      responseType: 'code',
+      scope: config.OAUTH_SCOPES,
 
-    requireHttps: environment.production,
-    showDebugInformation: !environment.production,
+      requireHttps: config.production,
+      showDebugInformation: !config.production,
 
-    skipIssuerCheck: true,
-    oidc: false,
-  };
+      skipIssuerCheck: true,
+      oidc: false,
+    };
+  }
 
   private getTraceService(): TraceService | null {
     try {
@@ -100,7 +109,7 @@ export class OAuthService {
 
   private configureOAuth(): void {
     // Just configure OAuth, don't load discovery document yet to avoid HTTP requests
-    this.angularOAuthService.configure(this.authConfig);
+    this.angularOAuthService.configure(this.buildAuthConfig());
 
     // Subscribe to OAuth events
     this.angularOAuthService.events.subscribe((event) => {
@@ -133,17 +142,18 @@ export class OAuthService {
    */
   loginWithPassword(username: string, password: string): Observable<boolean> {
     this.ensureInitialized();
+    const config = this.appConfig.config;
 
     const body = new URLSearchParams({
       grant_type: 'password',
       username: username,
       password: password,
-      client_id: environment.OAUTH_CLIENT_ID,
-      scope: environment.OAUTH_SCOPES,
+      client_id: config.OAUTH_CLIENT_ID,
+      scope: config.OAUTH_SCOPES,
     });
 
     return this.http
-      .post<OAuth2TokenResponse>(`${environment.OAUTH_ISSUER}/o/token/`, body.toString(), {
+      .post<OAuth2TokenResponse>(`${config.OAUTH_ISSUER}/o/token/`, body.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -337,14 +347,15 @@ export class OAuthService {
    * Refresh access token using OAuth2 refresh token grant
    */
   private refreshAccessToken(refreshToken: string): Observable<void> {
+    const config = this.appConfig.config;
     const body = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-      client_id: environment.OAUTH_CLIENT_ID,
+      client_id: config.OAUTH_CLIENT_ID,
     });
 
     return this.http
-      .post<OAuth2TokenResponse>(`${environment.OAUTH_ISSUER}/o/token/`, body.toString(), {
+      .post<OAuth2TokenResponse>(`${config.OAUTH_ISSUER}/o/token/`, body.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

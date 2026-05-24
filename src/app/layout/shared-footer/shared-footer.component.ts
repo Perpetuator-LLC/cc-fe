@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 import { AuthService } from '../../auth/auth.service';
 
 interface FooterLink {
@@ -26,12 +26,13 @@ interface FooterLink {
 })
 export class SharedFooterComponent {
   private authService = inject(AuthService);
+  private appConfig = inject(AppConfigService);
 
   /** When true, shows only the copyright bar. When false, shows full footer with links. */
   @Input() compactMode = false;
 
   currentYear = new Date().getFullYear();
-  isDev = !environment.production;
+  isDev = !this.appConfig.config.production;
 
   // Main footer links
   legalLinks: FooterLink[] = [

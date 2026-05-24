@@ -2,7 +2,7 @@
 import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 import { MessageService } from '../../message.service';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { ToolbarService } from '../../layout/toolbar.service';
@@ -20,6 +20,7 @@ export class ChangeEmailComponent implements AfterViewInit, OnInit {
   private router = inject(Router);
   private toolbarService = inject(ToolbarService);
   private messageService = inject(MessageService);
+  private appConfig = inject(AppConfigService);
 
   changeStatus = '';
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
@@ -38,7 +39,7 @@ export class ChangeEmailComponent implements AfterViewInit, OnInit {
   }
 
   changeEmail(token: string): void {
-    const url = environment.API_URL + '/change-email/';
+    const url = this.appConfig.config.API_URL + '/change-email/';
 
     this.http.post(url, { token }).subscribe({
       next: (response) => {

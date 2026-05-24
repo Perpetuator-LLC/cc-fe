@@ -5,6 +5,9 @@
 [![Angular](https://img.shields.io/badge/Angular-21.1-red)](https://angular.io/)
 [![Material Design](https://img.shields.io/badge/Material-MD3-blue)](https://m3.material.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Open-source Angular frontend for [Capital Copilot](https://capitalcopilot.io). MIT-licensed — fork it, modify it, run your own instance, or build a different frontend for the same backend. See [CONTRIBUTING.md](./CONTRIBUTING.md) to contribute back.
 
 ## 🚀 Quick Start
 
@@ -156,6 +159,48 @@ cc-fe/
 
 ---
 
+## 🐳 Docker Self-Hosting
+
+Run your own instance against any Capital Copilot-compatible backend. The image is environment-agnostic — all config comes from `CC_FE_*` env vars at container start.
+
+```bash
+docker run -d -p 4000:80 \
+  -e CC_FE_API_URL=https://your-api.example.com \
+  -e CC_FE_SITE_URL=https://your-frontend.example.com \
+  -e CC_FE_STRIPE_PUBLIC_KEY=pk_live_xxx \
+  -e CC_FE_OAUTH_ISSUER=https://your-api.example.com \
+  -e CC_FE_OAUTH_CLIENT_ID=your-client-id \
+  -e CC_FE_OAUTH_SCOPES='read write' \
+  ghcr.io/perpetuator-llc/cc-fe:latest
+```
+
+### Runtime environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CC_FE_API_URL` | ✅ | Backend API base URL (no trailing slash). Used for GraphQL, REST, and WebSocket. |
+| `CC_FE_SITE_URL` | ✅ | Public frontend URL. Used for share links and OAuth redirect URI. |
+| `CC_FE_OAUTH_ISSUER` | ⚠️ | OAuth2 issuer URL. Empty disables login. |
+| `CC_FE_OAUTH_CLIENT_ID` | ⚠️ | OAuth2 client ID. Empty disables login. |
+| `CC_FE_OAUTH_SCOPES` | optional | OAuth2 scopes (default: `read write`). |
+| `CC_FE_STRIPE_PUBLIC_KEY` | ⚠️ | Stripe publishable key. Empty disables payment flows. |
+| `CC_FE_PRODUCTION` | optional | `true` (default) or `false`. Controls dev affordances. |
+| `PORT` | optional | Server port (default: `80` inside container). |
+
+The container fails fast at start if `CC_FE_API_URL` or `CC_FE_SITE_URL` is missing.
+
+### Image tags
+
+- `ghcr.io/perpetuator-llc/cc-fe:latest` — latest build from `main`
+- `ghcr.io/perpetuator-llc/cc-fe:sha-XXXXXXX` — pinned to a specific commit
+- `ghcr.io/perpetuator-llc/cc-fe:1.2.3` — semver tags (when a release is cut)
+
+See [`docs/deployment.md`](./docs/deployment.md) for the full deployment architecture (GHCR publishing, Gitea mirror, OpenBao integration).
+
+---
+
 ## 📄 License
 
-Copyright © 2025-2026 Perpetuator LLC. All rights reserved.
+[MIT](./LICENSE) © 2024-2026 Perpetuator LLC
+
+The frontend is open source. The backend API it talks to is closed source and proprietary — `OAUTH_CLIENT_ID` and the API URL determine which backend instance the frontend uses.

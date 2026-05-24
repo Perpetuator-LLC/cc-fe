@@ -7,7 +7,7 @@ import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { MessageService } from '../../message.service';
 import { ThemeService } from '../../layout/theme.service';
@@ -46,6 +46,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {
+  private appConfig = inject(AppConfigService);
   private graphqlAuthService = inject(GraphqlAuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -64,9 +65,11 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   loading = false;
 
   loginForm = new FormGroup({
-    // TODO: Add validation equivalent to back-end
-    password: new FormControl(environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]),
-    email: new FormControl(environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]),
+    password: new FormControl(this.appConfig.config.TEST_PASSWORD ?? '', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
+    email: new FormControl(this.appConfig.config.TEST_EMAIL ?? '', [Validators.required, Validators.email]),
   });
   returnUrl = '';
   hidePassword = true;

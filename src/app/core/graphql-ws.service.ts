@@ -3,7 +3,7 @@ import { Injectable, OnDestroy, inject, signal, WritableSignal } from '@angular/
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Client, createClient } from 'graphql-ws';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from './app-config.service';
 import { AuthService } from '../auth/auth.service';
 
 export type GraphQLWsConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -44,6 +44,7 @@ export class GraphQLWsService implements OnDestroy {
   private error$ = new Subject<Error>();
 
   private readonly authService = inject(AuthService);
+  private readonly appConfig = inject(AppConfigService);
 
   constructor() {
     // Auto-connect/disconnect based on auth state
@@ -253,7 +254,7 @@ export class GraphQLWsService implements OnDestroy {
   // ============================================================================
 
   private buildWebSocketUrl(): string {
-    const apiUrl = environment.API_URL;
+    const apiUrl = this.appConfig.config.API_URL;
     const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = apiUrl.replace(/^https?:\/\//, '');
     return `${wsProtocol}://${wsHost}/ws/graphql/`;

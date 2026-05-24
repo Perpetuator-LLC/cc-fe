@@ -2,7 +2,7 @@
 import { Injectable, OnDestroy, signal, WritableSignal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, timer } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 import { AuthService } from '../auth/auth.service';
 import { Job } from './job.service';
 
@@ -22,6 +22,7 @@ import { Job } from './job.service';
 })
 export class JobsWebSocketService implements OnDestroy {
   private authService = inject(AuthService);
+  private appConfig = inject(AppConfigService);
 
   private ws: WebSocket | null = null;
   private subscriptions = new Subscription();
@@ -70,8 +71,9 @@ export class JobsWebSocketService implements OnDestroy {
       return;
     }
 
-    const wsProtocol = environment.API_URL.startsWith('https') ? 'wss' : 'ws';
-    const host = environment.API_URL.replace(/^https?:\/\//, '');
+    const apiUrl = this.appConfig.config.API_URL;
+    const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
+    const host = apiUrl.replace(/^https?:\/\//, '');
     const url = `${wsProtocol}://${host}/ws/graphql/`;
 
     console.log('[JobsWS] Connecting to GraphQL WebSocket...', { url });
