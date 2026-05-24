@@ -61,6 +61,9 @@ export class CreateScheduleDialogComponent implements OnDestroy {
   showAdvancedCron = false;
   selectedPreset = '';
   userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  /** Pre-computed dropdown options for the template. */
+  jobKindOptions: { value: string; label: string }[] = [];
+  solarEventOptions: { value: string; label: string }[] = [];
 
   crontabPresets = [
     { value: 'daily_9am', label: 'Daily at 9:00 AM' },
@@ -109,6 +112,17 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     if (this.data.schedule) {
       this.loadScheduleData(this.data.schedule);
     }
+
+    // Pre-compute dropdown labels so the template avoids formatJobKind /
+    // formatSolarEvent calls per change-detection tick.
+    this.jobKindOptions = (this.data.schedulableJobKinds || []).map((value) => ({
+      value,
+      label: this.formatJobKind(value),
+    }));
+    this.solarEventOptions = (this.data.solarEvents || []).map((value) => ({
+      value,
+      label: this.formatSolarEvent(value),
+    }));
   }
 
   private loadScheduleData(schedule: Schedule) {
@@ -226,6 +240,24 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     this.showAdvancedCron = !this.showAdvancedCron;
   }
 
+  /**
+   * Display getters exposed to the template instead of method calls. The
+   * underlying compute logic stays as private methods so other internal
+   * callers can still use them.
+   */
+  get userTimezoneLabel(): string {
+    return this.userTimezone;
+  }
+  get utcTimeDisplay(): string {
+    return this.computeUtcTimeDisplay();
+  }
+  get cronPreview(): string {
+    return this.computeCronPreview();
+  }
+  get cronExpression(): string {
+    return this.computeCronExpression();
+  }
+
   getUserTimezone(): string {
     return this.userTimezone;
   }
@@ -242,7 +274,7 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     this.selectedPreset = '';
   }
 
-  getUtcTimeDisplay(): string {
+  private computeUtcTimeDisplay(): string {
     const cronHour = this.scheduleForm.get('cronHour')?.value;
     const cronMinute = this.scheduleForm.get('cronMinute')?.value;
 
@@ -376,7 +408,7 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     };
   }
 
-  getCronPreview(): string {
+  private computeCronPreview(): string {
     const minute = this.scheduleForm.get('cronMinute')?.value || '*';
     const hour = this.scheduleForm.get('cronHour')?.value || '*';
     const dayOfWeek = this.scheduleForm.get('cronDayOfWeek')?.value || '*';
@@ -413,7 +445,7 @@ export class CreateScheduleDialogComponent implements OnDestroy {
     return description + ' (UTC time)';
   }
 
-  getCronExpression(): string {
+  private computeCronExpression(): string {
     const minute = this.scheduleForm.get('cronMinute')?.value || '*';
     const hour = this.scheduleForm.get('cronHour')?.value || '*';
     const dayOfMonth = this.scheduleForm.get('cronDayOfMonth')?.value || '*';

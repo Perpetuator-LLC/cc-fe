@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Perpetuator LLC
+#
+# Build, scan, and (conditionally) publish the cc-fe Docker image to GHCR.
+#
+# Triggers:
+#   - pull_request to main    → build + Trivy scan only (NO push to GHCR)
+#                               This validates the image builds and is secure
+#                               before merge, without polluting the registry
+#                               with per-PR artifacts.
+#   - push to main            → build + scan + publish :latest + :sha-<hash>
+#   - tag matching v*         → also publishes semver tags (e.g. :1.2.3)
+#   - workflow_dispatch       → manual trigger; pushes only when run on
+#                               main/tag (not on feature branches).
+#
+# Trivy gate: build fails on CRITICAL or HIGH severity CVEs with a known
+# fix available. Unfixed issues are ignored (can't act on them until
+# upstream patches).
+#
+# Why scan PRs without publishing: an unpublished image still produces a
+# Trivy report in the Actions logs/PR checks, so reviewers can see the
+# scan result without having a half-baked image floating around GHCR.
+
+name: Build, Scan & Publish Docker Image
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: read
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: build-and-publish-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-scan-publish:
+    name: Build, Trivy scan, push to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Only log in to GHCR when we're going to push. PRs don't need it
+      # since they only build locally.
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Lowercased to satisfy GHCR's namespace rules.
+          flavor: |
+            latest=auto
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build image (load locally for scanning)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resolve scan target tag
+        id: scan-target
+        run: |
+          # Use the SHA tag — guaranteed to exist regardless of trigger.
+          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE_LOWER=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=${IMAGE_LOWER}:sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: ${{ steps.scan-target.outputs.image }}
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          vuln-type: os,library
+          # Documented exclusions live here. Each entry must have a comment
+          # explaining the false-positive rationale or compensating control.
+          trivyignores: .trivyignore
+
+      # Push only for branch pushes to main, tag pushes, or manual dispatch.
+      # PRs intentionally skip this — the build + scan are the validation;
+      # the actual image only lands in GHCR when the PR merges to main.
+      - name: Push to GHCR
+        if: github.event_name != 'pull_request' && success()
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Build & Publish Summary"
+            echo ""
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "**Mode:** PR validation (build + Trivy scan only — no GHCR push)"
+            else
+              echo "**Mode:** Publish (image pushed to GHCR)"
+            fi
+            echo ""
+            echo "**Image tags:**"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo ""
+            echo "**Trivy scan target:** \`${{ steps.scan-target.outputs.image }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

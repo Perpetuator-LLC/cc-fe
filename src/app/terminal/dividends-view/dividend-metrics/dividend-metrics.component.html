@@ -1,0 +1,67 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (metrics) {
+  <div class="dividend-metrics">
+    <app-kpi-card label="Current Price" [value]="metrics.currentPrice" />
+
+    @if (metrics.dividendYield) {
+      <app-kpi-card
+        label="Dividend Yield"
+        [value]="metrics.dividendYield"
+        accent="primary"
+        tooltip="Annual dividend per share divided by stock price"
+      />
+    }
+
+    @if (metrics.ttmPayoutRatio) {
+      <app-kpi-card
+        label="Payout Ratio (TTM)"
+        [value]="metrics.ttmPayoutRatio"
+        tooltip="Dividends as a percentage of net income over trailing 12 months"
+      />
+    }
+
+    @if (metrics.ttmFcfPayoutRatio) {
+      <app-kpi-card
+        label="FCF Payout (TTM)"
+        [value]="metrics.ttmFcfPayoutRatio"
+        tooltip="Dividends as a percentage of Free Cash Flow over trailing 12 months"
+      />
+    }
+
+    @if (metrics.dividendCagr5Year) {
+      <app-kpi-card
+        label="5Y Div CAGR"
+        [value]="metrics.dividendCagr5Year"
+        [changePercent]="metrics.dividendCagr5YearValue"
+        tooltip="Compound Annual Growth Rate of dividends over 5 years"
+      />
+    }
+
+    @if (metrics.dividendCagr10Year) {
+      <app-kpi-card
+        label="10Y Div CAGR"
+        [value]="metrics.dividendCagr10Year"
+        [changePercent]="metrics.dividendCagr10YearValue"
+        tooltip="Compound Annual Growth Rate of dividends over 10 years"
+      />
+    }
+
+    @if (metrics.fcfCagr5Year) {
+      <app-kpi-card
+        label="5Y FCF CAGR"
+        [value]="metrics.fcfCagr5Year"
+        [changePercent]="metrics.fcfCagr5YearValue"
+        tooltip="Compound Annual Growth Rate of Free Cash Flow over 5 years"
+      />
+    }
+
+    @if (metrics.fcfCagr10Year) {
+      <app-kpi-card
+        label="10Y FCF CAGR"
+        [value]="metrics.fcfCagr10Year"
+        [changePercent]="metrics.fcfCagr10YearValue"
+        tooltip="Compound Annual Growth Rate of Free Cash Flow over 10 years"
+      />
+    }
+  </div>
+}

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule, FormArray, FormGroup, FormControl } from '@angular/forms';
 import { EpisodeDetailComponent } from './episode-detail.component';
@@ -97,12 +97,12 @@ describe('EpisodeDetailComponent', () => {
    * 4. UI should clearly show when live audio differs from current version audio
    */
 
-  describe('hasCurrentVersionAudio()', () => {
+  describe('hasCurrentVersionAudio', () => {
     it('should return true when current version has audio', () => {
       // REASON: Current version audio exists and should be playable
       component.audioSrc = 'https://example.com/audio.mp3';
 
-      expect(component.hasCurrentVersionAudio()).toBe(true);
+      expect(component.hasCurrentVersionAudio).toBe(true);
     });
 
     it('should return false when current version has no audio', () => {
@@ -110,11 +110,11 @@ describe('EpisodeDetailComponent', () => {
       // or audio has never been generated for this version
       component.audioSrc = null;
 
-      expect(component.hasCurrentVersionAudio()).toBe(false);
+      expect(component.hasCurrentVersionAudio).toBe(false);
     });
   });
 
-  describe('hasLiveAudioFromDifferentVersion()', () => {
+  describe('hasLiveAudioFromDifferentVersion', () => {
     beforeEach(() => {
       // Setup form with isLive control
       component.episodeForm = new FormBuilder().group({
@@ -128,7 +128,7 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v2.mp3';
       component.liveAudioSrc = 'https://example.com/v1.mp3';
 
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
     });
 
     it('should return false when episode is live but has no live audio', () => {
@@ -138,7 +138,7 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = null;
       component.liveAudioSrc = null;
 
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
     });
 
     it('should return false when current audio matches live audio', () => {
@@ -148,7 +148,7 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v2.mp3';
       component.liveAudioSrc = 'https://example.com/v2.mp3';
 
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
     });
 
     it('should return true when episode is live with different live audio', () => {
@@ -158,7 +158,7 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = 'https://example.com/v2.mp3';
       component.liveAudioSrc = 'https://example.com/v1.mp3';
 
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
     });
 
     it('should return true when current version has no audio but live audio exists', () => {
@@ -169,23 +169,23 @@ describe('EpisodeDetailComponent', () => {
       component.audioSrc = null; // Current version has no audio
       component.liveAudioSrc = 'https://example.com/v1.mp3'; // Previous version audio still live
 
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
     });
   });
 
-  describe('getLiveAudioVersionText()', () => {
+  describe('liveAudioVersionText', () => {
     it('should return version number when available', () => {
       // REASON: Be specific about which version the live audio came from
       component.liveAudioVersionNumber = 5;
 
-      expect(component.getLiveAudioVersionText()).toBe('Version 5');
+      expect(component.liveAudioVersionText).toBe('Version 5');
     });
 
     it('should return "Previous version" when version number is not available', () => {
       // REASON: Fallback when we know there's live audio but don't know which version
       component.liveAudioVersionNumber = null;
 
-      expect(component.getLiveAudioVersionText()).toBe('Previous version');
+      expect(component.liveAudioVersionText).toBe('Previous version');
     });
   });
 
@@ -335,7 +335,7 @@ describe('EpisodeDetailComponent', () => {
       component.liveAudioSrc = null;
       const versionsArray = component.episodeForm.get('versions') as FormArray;
       versionsArray.clear();
-      expect(component.hasCurrentVersionAudio()).toBe(false);
+      expect(component.hasCurrentVersionAudio).toBe(false);
 
       // Step 2: Generate audio for current version
       component.audioSrc = 'https://example.com/v1.mp3';
@@ -344,7 +344,7 @@ describe('EpisodeDetailComponent', () => {
           audioUrl: new FormControl('https://example.com/v1.mp3'),
         }),
       );
-      expect(component.hasCurrentVersionAudio()).toBe(true);
+      expect(component.hasCurrentVersionAudio).toBe(true);
 
       // Step 3: Set episode live (should succeed)
       component.onIsLiveChange(true);
@@ -362,8 +362,8 @@ describe('EpisodeDetailComponent', () => {
       expect(component.shouldWarnAboutLiveEdit()).toBe(true);
 
       // After edit, audio becomes out of sync, but still shows current audio
-      expect(component.hasCurrentVersionAudio()).toBe(true);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false); // Same audio
+      expect(component.hasCurrentVersionAudio).toBe(true);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false); // Same audio
     });
 
     it('Scenario 3: Editing transcript of live episode (audio clears)', () => {
@@ -382,9 +382,9 @@ describe('EpisodeDetailComponent', () => {
       expect(component.shouldWarnAboutLiveEdit()).toBe(false);
 
       // Should show previous version is still live
-      expect(component.hasCurrentVersionAudio()).toBe(false);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
-      expect(component.getLiveAudioVersionText()).toBe('Previous version');
+      expect(component.hasCurrentVersionAudio).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
+      expect(component.liveAudioVersionText).toBe('Previous version');
 
       // User can still uncheck isLive
       component.onIsLiveChange(false);
@@ -398,14 +398,14 @@ describe('EpisodeDetailComponent', () => {
       component.liveAudioSrc = 'https://example.com/v2.mp3';
 
       // Should show both audio versions
-      expect(component.hasCurrentVersionAudio()).toBe(true);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
+      expect(component.hasCurrentVersionAudio).toBe(true);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
 
       // After restore, audio should update
       component.audioSrc = 'https://example.com/v2.mp3';
 
       // Now they match, should only show current
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
     });
 
     /**
@@ -438,8 +438,8 @@ describe('EpisodeDetailComponent', () => {
       component.liveAudioVersionNumber = null;
 
       // BEFORE RESTORE: Current version has audio
-      expect(component.hasCurrentVersionAudio()).toBe(true);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasCurrentVersionAudio).toBe(true);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
 
       // SIMULATE RESTORE: User restores version 2 (which has no audio in current state, but v2 had audio)
       // This simulates what happens in the restoreVersion() method
@@ -491,15 +491,15 @@ describe('EpisodeDetailComponent', () => {
 
       // AFTER RESTORE: Verify the live audio tracking is correct
       expect(component.audioSrc).toBe(null); // Current version has no audio
-      expect(component.hasCurrentVersionAudio()).toBe(false);
+      expect(component.hasCurrentVersionAudio).toBe(false);
 
       // CRITICAL ASSERTION: Live audio section should show (with version 2's audio)
       expect(component.liveAudioSrc).toBe('https://example.com/v2.mp3');
       expect(component.liveAudioVersionNumber).toBe(2);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
-      expect(component.getLiveAudioVersionText()).toBe('Version 2');
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
+      expect(component.liveAudioVersionText).toBe('Version 2');
 
-      // WITHOUT THE FIX: liveAudioSrc would be null and hasLiveAudioFromDifferentVersion() would return false
+      // WITHOUT THE FIX: liveAudioSrc would be null and hasLiveAudioFromDifferentVersion would return false
       // WITH THE FIX: liveAudioSrc finds version 2's audio and UI shows it immediately
     });
 
@@ -511,8 +511,8 @@ describe('EpisodeDetailComponent', () => {
       component.liveAudioVersionNumber = 2;
 
       // Should show live audio from different version
-      expect(component.hasCurrentVersionAudio()).toBe(false);
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(true);
+      expect(component.hasCurrentVersionAudio).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(true);
 
       // SIMULATE RESTORE to version 2 (which has audio)
       const mockResponse = {
@@ -552,11 +552,11 @@ describe('EpisodeDetailComponent', () => {
 
       // AFTER RESTORE: Current version now has audio that matches live audio
       expect(component.audioSrc).toBe('https://example.com/v2.mp3');
-      expect(component.hasCurrentVersionAudio()).toBe(true);
+      expect(component.hasCurrentVersionAudio).toBe(true);
       expect(component.liveAudioSrc).toBe('https://example.com/v2.mp3');
 
       // Should NOT show live audio section (current matches live)
-      expect(component.hasLiveAudioFromDifferentVersion()).toBe(false);
+      expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
     });
   });
 });

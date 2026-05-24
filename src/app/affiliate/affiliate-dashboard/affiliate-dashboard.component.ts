@@ -26,17 +26,50 @@ import {
 } from '../affiliate.service';
 import { MessageService } from '../../message.service';
 import { UserService } from '../../user/user.service';
-// eslint-disable-next-line max-len
+
 import { PolicyAcceptanceDialogComponent } from '../../policy/dialogs/policy-acceptance-dialog/policy-acceptance-dialog.component';
 import { PolicyService, ActivePoliciesResult } from '../../policy/services/policy.service';
 import { ConvertCreditsDialogComponent } from '../../credits/convert-credits-dialog/convert-credits-dialog.component';
-// eslint-disable-next-line max-len
+
 import { AffiliateCodeChangeDialogComponent } from '../affiliate-code-change-dialog/affiliate-code-change-dialog.component';
 import { AffiliateGraphComponent } from '../affiliate-graph/affiliate-graph.component';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
+import { StripeStatusCardComponent } from './stripe-status-card/stripe-status-card.component';
+import { BrandImageCardComponent } from './brand-image-card/brand-image-card.component';
+import {
+  ConversionHistoryTableComponent,
+  ConversionDetailKind,
+  ConversionDisplayRow,
+} from './conversion-history-table/conversion-history-table.component';
+import {
+  EarningsHistoryTableComponent,
+  CreditDisplayRow,
+} from './earnings-history-table/earnings-history-table.component';
+import { AccountStatusCardComponent, AccountStatusDisplay } from './account-status-card/account-status-card.component';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
+
+/** Pre-computed display state attached to each conversion row. */
+type ConversionDisplay = ConversionDisplayRow;
+
+/** Pre-computed display state attached to each credit row. */
+type CreditDisplay = CreditDisplayRow;
+
+/** Single-state derived display object for the dashboard header / hero area. */
+interface DashboardDisplay {
+  affiliateLink: string;
+  defaultMessage: string;
+  availableBalance: number;
+  availableBalanceFormatted: string;
+  totalCreditsFormatted: string;
+  totalCreditsShort: string;
+  profileStatusIcon: string;
+  profileStatusColor: string;
+  profileStatusLabel: string;
+  isNetworkJoinable: boolean;
+  networkMessage: string;
+}
 
 @Component({
   selector: 'app-affiliate-dashboard',
@@ -55,6 +88,11 @@ import { environment } from '../../../environments/environment';
     MatFormFieldModule,
     FormsModule,
     ShareButtonsComponent,
+    StripeStatusCardComponent,
+    BrandImageCardComponent,
+    ConversionHistoryTableComponent,
+    EarningsHistoryTableComponent,
+    AccountStatusCardComponent,
   ],
   templateUrl: './affiliate-dashboard.component.html',
   styleUrls: ['./affiliate-dashboard.component.scss'],
@@ -67,6 +105,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private router = inject(Router);
   private policyService = inject(PolicyService);
+  private appConfig = inject(AppConfigService);
 
   private subscriptions = new Subscription();
 
@@ -75,10 +114,148 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   eligibility: AffiliateEligibility | null = null;
   profile: AffiliateProfile | null = null;
   stats: AffiliateStats | null = null;
-  credits: AffiliateCredit[] = [];
-  conversions: AffiliateConversion[] = [];
+  credits: CreditDisplay[] = [];
+  conversions: ConversionDisplay[] = [];
   pendingCodeChangeRequest: AffiliateCodeChangeRequest | null = null;
+  /** Pre-formatted requestedAt for the pending request banner. */
+  pendingRequestFormattedDate = '';
   protected readonly Math = Math;
+
+  /** Pre-computed display state for the dashboard header. Rebuilt whenever data changes. */
+  dashboardDisplay: DashboardDisplay = this.emptyDashboardDisplay();
+  /** Pre-computed `customMessageInput !== profile.customMessage`. Updated by onCustomMessageInput / save. */
+  customMessageChanged = false;
+
+  private emptyDashboardDisplay(): DashboardDisplay {
+    return {
+      affiliateLink: '',
+      defaultMessage: '',
+      availableBalance: 0,
+      availableBalanceFormatted: '0',
+      totalCreditsFormatted: '0',
+      totalCreditsShort: '0',
+      profileStatusIcon: 'help_outline',
+      profileStatusColor: '',
+      profileStatusLabel: 'Unknown',
+      isNetworkJoinable: false,
+      networkMessage: '',
+    };
+  }
+
+  /** Rebuild all derived display state from current `profile`, `stats`, `conversions`, `credits`. */
+  private rebuildDashboardDisplay(): void {
+    const profile = this.profile;
+    const stats = this.stats;
+    const availableBalance = stats
+      ? stats.totalAffiliateCredits -
+        this.conversions.filter((c) => c.status === 'completed').reduce((s, c) => s + c.affiliateCreditAmount, 0)
+      : 0;
+    const totalCredits = stats?.totalAffiliateCredits ?? 0;
+    this.dashboardDisplay = {
+      affiliateLink: profile?.code ? `${this.appConfig.config.SITE_URL}/a/${profile.code}` : '',
+      defaultMessage: `Join ${profile?.user?.username || 'our'}'s Network`,
+      availableBalance,
+      availableBalanceFormatted: availableBalance.toLocaleString(),
+      totalCreditsFormatted: totalCredits.toLocaleString(),
+      totalCreditsShort: this.shortCredits(totalCredits),
+      profileStatusIcon: this.statusIconFor(profile?.eligibilityStatus),
+      profileStatusColor: this.statusColorFor(profile?.eligibilityStatus),
+      profileStatusLabel: this.statusLabelFor(profile?.eligibilityStatus),
+      isNetworkJoinable: this.isNetworkJoinable(profile),
+      networkMessage: this.getNetworkJoiningMessage(profile),
+    };
+    this.recomputeCustomMessageChanged();
+  }
+
+  private recomputeCustomMessageChanged(): void {
+    const currentSaved = this.profile?.customMessage || '';
+    const currentInput = this.customMessageInput?.trim() || '';
+    this.customMessageChanged = currentInput !== currentSaved;
+  }
+
+  /** Enrich an AffiliateConversion with pre-computed display fields. */
+  private enrichConversion(c: AffiliateConversion): ConversionDisplay {
+    const rawReason = c.rejectionReason || '';
+    const excerpt = rawReason.length > 30 ? rawReason.substring(0, 30) + '...' : rawReason;
+    const { detailKind, detailTooltip } = this.computeConversionDetail(c);
+    return {
+      ...c,
+      formattedDate: new Date(c.createdAt).toLocaleDateString(),
+      typeDisplay: c.conversionType === 'to_credits' ? 'Credits' : 'Cash',
+      statusFormatted: c.status.replace(/_/g, ' ').toUpperCase(),
+      statusClass: c.status.replace(/_/g, '-'),
+      targetDollars: AffiliateConversionUtils.centsToDollars(c.targetAmount),
+      rejectionExcerpt: excerpt,
+      detailKind,
+      detailTooltip,
+    };
+  }
+
+  /** Pick which detail-cell variant to render for a conversion row. */
+  private computeConversionDetail(c: AffiliateConversion): {
+    detailKind: ConversionDetailKind;
+    detailTooltip: string;
+  } {
+    if (c.status === 'rejected' && c.rejectionReason) {
+      return { detailKind: 'rejected', detailTooltip: c.rejectionReason };
+    }
+    if (c.status === 'completed' && c.stripeTransferId) {
+      return { detailKind: 'completed', detailTooltip: `Stripe Transfer ID: ${c.stripeTransferId}` };
+    }
+    if (c.status === 'under_review') {
+      return { detailKind: 'under_review', detailTooltip: '' };
+    }
+    return { detailKind: 'none', detailTooltip: '' };
+  }
+
+  /** Enrich an AffiliateCredit with pre-computed display fields. */
+  private enrichCredit(c: AffiliateCredit): CreditDisplay {
+    return {
+      ...c,
+      formattedDate: new Date(c.createdAt).toLocaleDateString(),
+      tierDescription: c.tier === 1 ? 'Tier 1 (10%)' : 'Tier 2 (5%)',
+      fromLabel: c.sourceUser?.username || 'System',
+    };
+  }
+
+  private statusIconFor(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'check_circle';
+      case 'suspended':
+        return 'block';
+      case 'under_review':
+        return 'pending';
+      default:
+        return 'help_outline';
+    }
+  }
+
+  private statusColorFor(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'status-active';
+      case 'suspended':
+        return 'status-suspended';
+      case 'under_review':
+        return 'status-under-review';
+      default:
+        return '';
+    }
+  }
+
+  private statusLabelFor(status?: string | null): string {
+    switch (status) {
+      case 'active':
+        return 'Active';
+      case 'suspended':
+        return 'Suspended';
+      case 'under_review':
+        return 'Under Review';
+      default:
+        return 'Unknown';
+    }
+  }
 
   creditsDisplayedColumns: string[] = ['date', 'from', 'type', 'amount'];
   conversionsDisplayedColumns: string[] = ['date', 'type', 'amount', 'status', 'details'];
@@ -240,9 +417,13 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
           this.profile = profile;
           this.customMessageInput = profile?.customMessage || '';
           this.stats = stats;
-          this.credits = credits;
-          this.conversions = conversions;
+          this.credits = credits.map((c) => this.enrichCredit(c));
+          this.conversions = conversions.map((c) => this.enrichConversion(c));
           this.pendingCodeChangeRequest = codeChangeRequests.find((r) => r.status === 'pending') || null;
+          this.pendingRequestFormattedDate = this.pendingCodeChangeRequest
+            ? new Date(this.pendingCodeChangeRequest.requestedAt).toLocaleDateString()
+            : '';
+          this.rebuildDashboardDisplay();
           this.loading = false;
         },
         error: (err) => {
@@ -263,6 +444,26 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
+  /** Show the account-status card when profile has a non-active eligibility status or the network is closed. */
+  get showAccountStatusCard(): boolean {
+    const profile = this.profile;
+    if (!profile) return false;
+    const status = profile.eligibilityStatus;
+    const hasBlockingStatus = !!status && status !== 'active';
+    return hasBlockingStatus || !profile.isActive;
+  }
+
+  /** Subset of dashboardDisplay consumed by the account-status sub-component. */
+  get accountStatusDisplay(): AccountStatusDisplay {
+    return {
+      profileStatusIcon: this.dashboardDisplay.profileStatusIcon,
+      profileStatusColor: this.dashboardDisplay.profileStatusColor,
+      profileStatusLabel: this.dashboardDisplay.profileStatusLabel,
+      isNetworkJoinable: this.dashboardDisplay.isNetworkJoinable,
+      networkMessage: this.dashboardDisplay.networkMessage,
+    };
+  }
+
   navigateToPurchase(): void {
     this.router.navigate(['/orders']);
   }
@@ -273,7 +474,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
   getAffiliateLink(): string {
     if (!this.profile?.code) return '';
-    return `${environment.SITE_URL}/a/${this.profile.code}`;
+    return `${this.appConfig.config.SITE_URL}/a/${this.profile.code}`;
   }
 
   getDefaultMessage(): string {
@@ -286,6 +487,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   onCustomMessageInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.customMessageInput = input.value;
+    this.recomputeCustomMessageChanged();
   }
 
   /**
@@ -312,6 +514,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
           if (response.affiliateProfile) {
             this.profile = { ...this.profile!, ...response.affiliateProfile };
             this.customMessageInput = response.affiliateProfile.customMessage || '';
+            this.rebuildDashboardDisplay();
           }
           this.messageService.success('Landing page message updated!');
           this.savingCustomMessage = false;
@@ -555,6 +758,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
           this.messageService.success('Brand image updated successfully!');
           if (response.affiliateProfile) {
             this.profile = response.affiliateProfile;
+            this.rebuildDashboardDisplay();
           }
           this.imagePreview = null;
         },
@@ -588,6 +792,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
               this.messageService.success('Brand image deleted successfully!');
               if (response.affiliateProfile) {
                 this.profile = response.affiliateProfile;
+                this.rebuildDashboardDisplay();
               }
             },
             error: (err) => {

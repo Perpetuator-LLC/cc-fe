@@ -6,9 +6,7 @@
       <mat-form-field class="full-width">
         <mat-label>Schedule Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter schedule name" required />
-        @if (scheduleForm.get('name')?.invalid && scheduleForm.get('name')?.touched) {
-          <mat-error>Schedule name is required</mat-error>
-        }
+        <mat-error>Schedule name is required</mat-error>
       </mat-form-field>
     </div>
 
@@ -16,13 +14,11 @@
       <mat-form-field>
         <mat-label>Job Type</mat-label>
         <mat-select formControlName="jobKind" required>
-          @for (jobKind of data.schedulableJobKinds; track jobKind) {
-            <mat-option [value]="jobKind">{{ formatJobKind(jobKind) }}</mat-option>
+          @for (opt of jobKindOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
           }
         </mat-select>
-        @if (scheduleForm.get('jobKind')?.invalid && scheduleForm.get('jobKind')?.touched) {
-          <mat-error>Job type is required</mat-error>
-        }
+        <mat-error>Job type is required</mat-error>
       </mat-form-field>
 
       <mat-form-field>
@@ -82,11 +78,11 @@
               (change)="onLocalTimeChange()"
               placeholder="09:00"
             />
-            <mat-hint>Will run at {{ getUtcTimeDisplay() }} UTC</mat-hint>
+            <mat-hint>Will run at {{ utcTimeDisplay }} UTC</mat-hint>
           </mat-form-field>
           <div class="timezone-info">
-            <mat-icon matTooltip="Your timezone: {{ getUserTimezone() }}">info</mat-icon>
-            <span>{{ getUserTimezone() }}</span>
+            <mat-icon matTooltip="Your timezone: {{ userTimezoneLabel }}">info</mat-icon>
+            <span>{{ userTimezoneLabel }}</span>
           </div>
         </div>
 
@@ -141,8 +137,8 @@
           <mat-card>
             <mat-card-content>
               <h4>Schedule Preview</h4>
-              <p class="preview-text">{{ getCronPreview() }}</p>
-              <p class="cron-expression">Cron: {{ getCronExpression() }}</p>
+              <p class="preview-text">{{ cronPreview }}</p>
+              <p class="cron-expression">Cron: {{ cronExpression }}</p>
             </mat-card-content>
           </mat-card>
         </div>
@@ -170,8 +166,8 @@
         <mat-form-field>
           <mat-label>Solar Event</mat-label>
           <mat-select formControlName="solarEvent">
-            @for (event of data.solarEvents; track event) {
-              <mat-option [value]="event">{{ formatSolarEvent(event) }}</mat-option>
+            @for (opt of solarEventOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

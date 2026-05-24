@@ -1,0 +1,161 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+:host {
+  display: contents;
+}
+
+// ADR currency warning banner
+.currency-warning {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  color: var(--md-extended-color-warning-on-color-container);
+
+  background: var(--md-extended-color-warning-color-container);
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--md-extended-color-warning-color);
+  }
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px;
+
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  p {
+    max-width: 400px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.valuation-summary,
+.valuation-historical,
+.valuation-projections,
+.valuation-methodology {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historical-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.valuation-metrics,
+.historical-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.valuation-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @include mixins.mobile() {
+    grid-template-columns: 1fr;
+  }
+}
+
+.valuation-chart {
+  min-height: 280px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.valuation-echart {
+  width: 100%;
+  min-height: 250px;
+}
+
+.valuation-chart-full {
+  min-height: 350px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.valuation-echart-large,
+.valuation-echart-full {
+  width: 100%;
+  min-height: 300px;
+}
+
+.methodology-section {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .model-description {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.assumptions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.assumption {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+
+  padding: 8px 12px;
+  border-radius: 4px;
+
+  background: var(--md-sys-color-surface-container-high);
+
+  .label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .value {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+  }
+}

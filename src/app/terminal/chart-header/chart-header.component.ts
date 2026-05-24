@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Perpetuator LLC
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -62,13 +62,29 @@ export interface ChartSettings {
 })
 export class ChartHeaderComponent {
   /** Available interval options */
-  @Input() intervalOptions: string[] = [];
+  private _intervalOptions = signal<string[]>([]);
+  @Input() set intervalOptions(value: string[]) {
+    this._intervalOptions.set(value || []);
+  }
+  get intervalOptions(): string[] {
+    return this._intervalOptions();
+  }
+  /** Pre-computed { value, label } pairs for the interval dropdown. */
+  readonly intervalOptionsDisplay = computed(() =>
+    this._intervalOptions().map((value) => ({ value, label: this.formatInterval(value) })),
+  );
 
   /** Currently selected interval */
   @Input() selectedInterval = 'daily';
 
   /** Crosshair OHLC data */
-  @Input() crosshairData: CrosshairData | null = null;
+  private _crosshairData = signal<CrosshairData | null>(null);
+  @Input() set crosshairData(value: CrosshairData | null) {
+    this._crosshairData.set(value);
+  }
+  get crosshairData(): CrosshairData | null {
+    return this._crosshairData();
+  }
 
   /** Chart loading state */
   @Input() chartLoading = false;
@@ -91,7 +107,31 @@ export class ChartHeaderComponent {
   @Input() isCurrentIntervalDailyOrLonger = true;
 
   /** Whether current interval is intraday */
-  @Input() isIntradayInterval = false;
+  private _isIntradayInterval = signal(false);
+  @Input() set isIntradayInterval(value: boolean) {
+    this._isIntradayInterval.set(value);
+  }
+  get isIntradayInterval(): boolean {
+    return this._isIntradayInterval();
+  }
+
+  /**
+   * Pre-formatted OHLC display strings for the crosshair row. Recomputed
+   * when crosshairData or isIntradayInterval change.
+   */
+  readonly ohlcDisplay = computed(() => {
+    const ohlc = this._crosshairData();
+    if (!ohlc) return null;
+    return {
+      ...ohlc,
+      formattedDate: this.formatCrosshairDate(ohlc.date),
+      formattedOpen: this.formatPrice(ohlc.open),
+      formattedHigh: this.formatPrice(ohlc.high),
+      formattedLow: this.formatPrice(ohlc.low),
+      formattedClose: this.formatPrice(ohlc.close),
+      formattedVolume: ohlc.volume !== undefined ? this.formatVolume(ohlc.volume) : '',
+    };
+  });
 
   /** Emitted when interval changes */
   @Output() intervalChange = new EventEmitter<string>();

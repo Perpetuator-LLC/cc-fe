@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 @use 'styles/mixins' as mixins;
 
 mat-card {
@@ -6,12 +6,12 @@ mat-card {
   margin: 24px auto;
 
   mat-card-content {
-    @include mixins.flex-column ();
+    @include mixins.flex-column();
 
     gap: 16px;
 
     form {
-      @include mixins.flex-column ();
+      @include mixins.flex-column();
 
       gap: 16px;
 
@@ -27,4 +27,3 @@ mat-card {
     }
   }
 }
-

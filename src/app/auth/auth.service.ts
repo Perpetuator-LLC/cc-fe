@@ -3,7 +3,7 @@ import { Injectable, WritableSignal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 import { MessageService } from '../message.service';
 import { OAuthService } from './oauth.service';
 
@@ -15,11 +15,6 @@ export interface RegisterResponse {
   detail?: string;
 }
 
-export const AuthUrls = {
-  forgot: environment.API_URL + '/auth/password/reset/',
-  resend: environment.API_URL + '/auth/registration/resend-email/',
-};
-
 @Injectable({
   providedIn: 'root',
 })
@@ -27,6 +22,17 @@ export class AuthService {
   private http = inject(HttpClient);
   private messageService = inject(MessageService);
   private oauthService = inject(OAuthService);
+  private appConfig = inject(AppConfigService);
+
+  /** Lazily-resolved auth endpoint URLs — must be a getter because the
+   *  AppConfig isn't available at module load time. */
+  private get authUrls() {
+    const apiUrl = this.appConfig.config.API_URL;
+    return {
+      forgot: apiUrl + '/auth/password/reset/',
+      resend: apiUrl + '/auth/registration/resend-email/',
+    };
+  }
 
   // Delegate all auth operations to OAuth service
   logout() {
@@ -53,7 +59,7 @@ export class AuthService {
   // Legacy HTTP endpoints - kept for forgot password and resend verification
   forgot(email: string): Observable<RegisterResponse | null> {
     this.messageService.clearMessages();
-    return this.http.post<RegisterResponse>(AuthUrls.forgot, { email }).pipe(
+    return this.http.post<RegisterResponse>(this.authUrls.forgot, { email }).pipe(
       tap((response) => {
         this.messageService.addMessage({
           type: 'info',
@@ -77,7 +83,7 @@ export class AuthService {
 
   resend(email: string): Observable<null> {
     this.messageService.clearMessages();
-    return this.http.post<null>(AuthUrls.resend, { email }).pipe(
+    return this.http.post<null>(this.authUrls.resend, { email }).pipe(
       tap((response: null) => {
         console.debug('Resend verification response:', response);
       }),

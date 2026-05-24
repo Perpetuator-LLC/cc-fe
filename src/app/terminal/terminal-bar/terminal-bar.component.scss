@@ -189,6 +189,387 @@
   background: var(--md-sys-color-surface-container-highest);
 }
 
+.autocomplete-dropdown {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 8px);
+  left: 0;
+
+  overflow-y: auto;
+
+  width: 100%;
+  max-height: 320px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 4px 16px var(--md-sys-color-shadow);
+}
+
+.suggestion-item {
+  cursor: pointer;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+
+  transition: background 0.15s;
+
+  &:hover,
+  &.selected {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  &.ai-suggestion {
+    border-left: 2px solid var(--md-sys-color-tertiary);
+  }
+}
+
+.suggestion-icon {
+  flex-shrink: 0;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: inherit;
+  }
+}
+
+.suggestion-icon.type-command {
+  color: var(--md-sys-color-primary);
+}
+
+.suggestion-icon.type-symbol,
+.suggestion-icon.type-stock {
+  color: var(--md-extended-color-success-color);
+}
+
+.suggestion-icon.type-history,
+.suggestion-icon.type-recent {
+  color: var(--md-sys-color-secondary);
+}
+
+.suggestion-text {
+  overflow: hidden;
+  flex: 1;
+
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .suggestion-name {
+    margin-left: 4px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.suggestion-desc {
+  overflow: hidden;
+  flex-shrink: 1;
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-exchange,
+.suggestion-category,
+.suggestion-asset-type {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.suggestion-exchange {
+  color: var(--md-sys-color-on-tertiary-container);
+  background: var(--md-sys-color-tertiary-container);
+}
+
+.suggestion-category {
+  color: var(--md-sys-color-on-primary-container);
+  background: var(--md-sys-color-primary-container);
+}
+
+.suggestion-asset-type {
+  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-secondary-container);
+}
+
+.suggestion-alias {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.ai-badge {
+  flex-shrink: 0;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-tertiary);
+
+  background: var(--md-sys-color-tertiary);
+}
+
+// History preview dropdown - floats ABOVE the input
+// Uses fixed positioning via ngStyle to escape overflow constraints
+.history-preview-dropdown {
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  max-height: 200px;
+  padding: 8px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 -4px 16px var(--md-sys-color-shadow);
+
+  // Rolodex style - cleaner, more compact
+  &.rolodex {
+    gap: 0;
+
+    padding: 4px 8px;
+    border-bottom: none;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    .history-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      // Fading effect for items further from current selection
+      &.faded {
+        opacity: 0.5;
+      }
+
+      &.upcoming:last-of-type {
+        // Most recent upcoming item - full opacity
+        opacity: 0.8;
+      }
+    }
+
+    .history-hint.compact {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+
+      padding: 2px 0;
+
+      font-size: 10px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 12px;
+        height: 12px;
+        font-size: 12px;
+      }
+    }
+
+    // Status states: loading, empty, end-of-history
+    .history-status {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+
+      padding: 8px;
+
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      &.loading {
+        mat-spinner {
+          margin-right: 4px;
+        }
+      }
+
+      &.empty {
+        font-style: italic;
+      }
+
+      &.end-of-history {
+        padding: 4px 8px;
+        border-top: 1px dashed var(--md-sys-color-outline-variant);
+        font-size: 10px;
+
+        mat-icon {
+          width: 12px;
+          height: 12px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+.history-hint {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+
+  .hint-keys {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 10px;
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 4px;
+
+      font-family: system-ui, sans-serif;
+      font-size: 10px;
+
+      background: var(--md-sys-color-surface-container-highest);
+    }
+  }
+}
+
+.history-item {
+  cursor: pointer;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+
+  padding: 8px;
+  border-radius: 4px;
+
+  transition: background 0.15s;
+
+  &:hover,
+  &.selected {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  &.selected {
+    padding-left: 8px;
+    border-left: 2px solid var(--md-sys-color-primary);
+  }
+
+  .history-chip {
+    // Slightly smaller chips in history preview
+    transform: scale(0.9);
+  }
+
+  .history-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+// Match highlight for substring search
+.match-highlight {
+  padding: 0 4px;
+  border-radius: 4px;
+
+  font-weight: 600;
+  color: var(--md-sys-color-on-tertiary-container);
+
+  background: var(--md-sys-color-tertiary-container);
+}
+
+// Raw text display for history with search highlighting
+.history-raw-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface);
+
+  .before-match,
+  .after-match {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+// Autocomplete keyboard hints
+.autocomplete-hint {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .hint-keys {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    font-size: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 16px;
+      height: 16px;
+      margin-right: 4px;
+      padding: 0 4px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 4px;
+
+      font-family: system-ui, sans-serif;
+      font-size: 10px;
+
+      background: var(--md-sys-color-surface-container-highest);
+    }
+  }
+}
+
+.suggestion-item.ambiguous {
+  border-left: 2px solid var(--md-sys-color-error);
+}
+
 .terminal-bar .status-icon {
   flex-shrink: 0;
   width: 20px;
@@ -226,12 +607,12 @@
 
     min-width: 20px;
     height: 20px;
-    padding: 0 6px;
+    padding: 0 8px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 4px;
 
     font-family: system-ui, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
 
     background: var(--md-sys-color-surface-container-highest);

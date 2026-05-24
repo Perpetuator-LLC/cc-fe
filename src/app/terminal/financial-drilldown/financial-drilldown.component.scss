@@ -144,6 +144,12 @@
 
   padding: 8px 12px;
 
+  @for $i from 0 through 10 {
+    &.indent-#{$i} {
+      padding-left: #{$i * 20}px;
+    }
+  }
+
   transition: background-color 0.15s ease;
 
   &:hover {

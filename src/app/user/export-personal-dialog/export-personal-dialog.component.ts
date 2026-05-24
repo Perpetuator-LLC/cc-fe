@@ -18,12 +18,10 @@ import { TeamsService } from '../../team/teams.service';
   styleUrls: ['./export-personal-dialog.component.scss'],
 })
 export class ExportPersonalDialogComponent {
-  dialogRef = inject<MatDialogRef<ExportPersonalDialogComponent>>(MatDialogRef);
-  data = inject<{
-    password: string;
-  }>(MAT_DIALOG_DATA);
-  teamService = inject<TeamsService>(TeamsService);
-  messageService = inject<MessageService>(MessageService);
+  private readonly dialogRef = inject<MatDialogRef<ExportPersonalDialogComponent>>(MatDialogRef);
+  private readonly data = inject<{ password: string }>(MAT_DIALOG_DATA);
+  private readonly teamService = inject(TeamsService);
+  private readonly messageService = inject(MessageService);
 
   exportConfirmation = '';
   password: string;

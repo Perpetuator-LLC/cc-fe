@@ -1,46 +1,45 @@
 <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
-<!-- eslint-disable @angular-eslint/template/no-call-expression -->
 <div class="terminal-bar">
   <mat-icon class="terminal-icon">terminal</mat-icon>
 
   <div class="input-wrapper" #inputWrapper>
     <!-- Rolodex-style history preview: shows loading, empty, or upcoming items -->
-    @if (showHistoryPreview() && !showSuggestions()) {
-      <app-terminal-history-preview
+    @if (historyDropdownVisible()) {
+      <app-history-preview
         [historyLoading]="historyLoading()"
         [historyEmpty]="historyEmpty()"
         [selectedHistoryIndex]="selectedHistoryIndex()"
         [historyTotalCount]="historyTotalCount()"
+        [historyRemainingCount]="historyRemainingCount()"
         [historySearchTerm]="historySearchTerm()"
         [upcomingHistoryItems]="upcomingHistoryItems()"
-        [historyRemainingCount]="historyRemainingCount()"
         [dropdownStyle]="historyDropdownStyle()"
-        (selectEntry)="selectHistoryEntry($event)"
+        (historyEntrySelected)="selectHistoryEntry($event)"
       />
     }
 
     <!-- Autocomplete dropdown -->
-    @if (suggestions().length > 0 && showSuggestions()) {
-      <app-terminal-autocomplete
-        [suggestions]="suggestions()"
-        [selectedIndex]="selectedSuggestionIndex()"
-        (selectSuggestion)="selectSuggestion($event)"
-        (hoverIndex)="selectedSuggestionIndex.set($event)"
+    @if (suggestionsDropdownVisible()) {
+      <app-command-suggestions
+        [suggestions]="suggestionsDisplay()"
+        [selectedSuggestionIndex]="selectedSuggestionIndex()"
+        (suggestionSelected)="selectSuggestion($event)"
+        (suggestionHovered)="selectedSuggestionIndex.set($event)"
       />
     }
 
     <!-- Command input -->
     <div class="input-container">
       <span class="prompt">&gt;</span>
-      @if (isProcessing() && lastEntry(); as last) {
+      @if (isProcessing()) {
         <!-- Show the executing command as chips while processing -->
         @for (token of lastCommandTokens(); track token.fqn) {
           <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" />
         }
         <mat-spinner diameter="18" />
       } @else {
-        <!-- Show last command chips when unfocused and no user content -->
         @if (showLastCommand()) {
+          <!-- Show last command chips when unfocused and no user content -->
           @for (token of lastCommandTokens(); track token.fqn) {
             <app-fqn-chip [fqn]="token.fqn" [display]="token.display" [type]="token.type" class="last-command" />
           }
@@ -60,17 +59,18 @@
         <input
           #commandInput
           type="text"
+          class="command-input"
           [value]="currentInput()"
           (input)="onInputChange($event)"
           (keydown)="onKeyDown($event)"
           (focus)="onInputFocus()"
           (blur)="onInputBlur()"
-          [placeholder]="showLastCommand() ? '' : chips().length > 0 ? '' : 'Type a command or ask a question...'"
+          [placeholder]="inputPlaceholder()"
           [class.transparent-input]="showLastCommand()"
           autocomplete="off"
           spellcheck="false"
         />
-        @if ((currentInput() || chips().length > 0) && !showLastCommand()) {
+        @if (sendButtonVisible()) {
           <button mat-icon-button class="send-btn" (click)="onSubmit()" matTooltip="Execute">
             <mat-icon>send</mat-icon>
           </button>
@@ -80,17 +80,15 @@
   </div>
 
   <!-- Status indicator -->
-  @if (lastEntry(); as last) {
-    @if (!isProcessing() && last.result) {
-      <mat-icon
-        class="status-icon"
-        [class.success]="last.result.success"
-        [class.error]="!last.result.success"
-        [matTooltip]="last.result.success ? 'Success' : 'Error'"
-      >
-        {{ last.result.success ? 'check_circle' : 'error' }}
-      </mat-icon>
-    }
+  @if (statusInfo(); as status) {
+    <mat-icon
+      class="status-icon"
+      [class.success]="status.success"
+      [class.error]="!status.success"
+      [matTooltip]="status.tooltip"
+    >
+      {{ status.icon }}
+    </mat-icon>
   }
 
   <div class="shortcut-hints">

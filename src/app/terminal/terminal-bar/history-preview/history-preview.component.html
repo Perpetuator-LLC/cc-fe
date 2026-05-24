@@ -8,32 +8,36 @@
   [style.width]="dropdownStyle['width']"
 >
   @if (historyLoading) {
+    <!-- Loading state -->
     <div class="history-status loading">
       <mat-spinner diameter="16" />
       <span>Loading history...</span>
     </div>
-  } @else if (historyEmpty && selectedHistoryIndex < 0) {
+  } @else if (showEmptyState) {
+    <!-- Empty state - no history found -->
     <div class="history-status empty">
       <mat-icon>history</mat-icon>
       <span>No command history</span>
     </div>
-  } @else if (upcomingHistoryItems.length === 0 && selectedHistoryIndex >= 0) {
+  } @else if (showEndOfHistory) {
+    <!-- At oldest item -->
     <div class="history-status end-of-history">
       <mat-icon>first_page</mat-icon>
       <span>End of history ({{ historyTotalCount }} total)</span>
     </div>
   } @else {
+    <!-- Show upcoming items -->
     @for (entry of upcomingHistoryItems; track entry.item.id || $index; let i = $index) {
       <div
         class="history-item upcoming"
         [class.faded]="i < upcomingHistoryItems.length - 1"
-        (click)="selectEntry.emit(entry)"
-        (keydown.enter)="selectEntry.emit(entry)"
+        (click)="selectEntry(entry)"
+        (keydown.enter)="selectEntry(entry)"
         tabindex="0"
         role="option"
         [attr.aria-selected]="false"
       >
-        @if (historySearchTerm && entry.matchText) {
+        @if (entry.matchText) {
           <span class="history-raw-text">
             <span class="before-match">{{ entry.beforeMatch }}</span
             ><mark class="match-highlight">{{ entry.matchText }}</mark
@@ -48,11 +52,7 @@
     }
     <div class="history-hint compact">
       <mat-icon>keyboard_arrow_up</mat-icon>
-      @if (historyRemainingCount > 0) {
-        <span>{{ historyRemainingCount }} more</span>
-      } @else {
-        <span>{{ upcomingHistoryItems.length }} more</span>
-      }
+      <span>{{ remainingHintText }}</span>
     </div>
   }
 </div>

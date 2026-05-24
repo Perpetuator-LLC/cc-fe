@@ -37,9 +37,7 @@
           </mat-form-field>
         } @else {
           <h1>{{ topic.title }}</h1>
-          @if (topic.description) {
-            <p class="description">{{ topic.description }}</p>
-          }
+          <p class="description" [hidden]="!topic.description">{{ topic.description }}</p>
         }
         <div class="metadata">
           <a [routerLink]="['/media/podcasts', topic.podcast.uuid]" class="resource-tag podcast-tag">
@@ -54,7 +52,7 @@
           }
           <span class="meta-item">
             <mat-icon>calendar_today</mat-icon>
-            {{ formatDate(topic.createdAt) }}
+            {{ topicDisplay?.formattedCreatedAt }}
           </span>
           <span class="meta-item">
             <mat-icon>link</mat-icon>
@@ -72,11 +70,8 @@
         @if (isEditing) {
           <button mat-button (click)="cancelEditing()" [disabled]="isSaving">Cancel</button>
           <button mat-flat-button color="primary" (click)="saveChanges()" [disabled]="isSaving">
-            @if (isSaving) {
-              <mat-progress-spinner diameter="20" mode="indeterminate" />
-            } @else {
-              <mat-icon>save</mat-icon>
-            }
+            <mat-progress-spinner diameter="20" mode="indeterminate" [hidden]="!isSaving" />
+            <mat-icon [hidden]="isSaving">save</mat-icon>
             Save
           </button>
         } @else {
@@ -87,11 +82,8 @@
             [disabled]="isGeneratingResearch"
             class="generate-button"
           >
-            @if (isGeneratingResearch) {
-              <mat-progress-spinner diameter="20" mode="indeterminate" />
-            } @else {
-              <mat-icon>auto_awesome</mat-icon>
-            }
+            <mat-progress-spinner diameter="20" mode="indeterminate" [hidden]="!isGeneratingResearch" />
+            <mat-icon [hidden]="isGeneratingResearch">auto_awesome</mat-icon>
             Generate Research
           </button>
         }
@@ -128,7 +120,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="content-section">
-                <div class="content-text" [innerHTML]="markdownToHtml(topic.validatedContent)"></div>
+                <div class="content-text" [innerHTML]="topicDisplay?.validatedContentHtml"></div>
               </div>
             </mat-card-content>
           </mat-card>
@@ -146,7 +138,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="content-section">
-                <div class="content-text" [innerHTML]="markdownToHtml(topic.researchContent)"></div>
+                <div class="content-text" [innerHTML]="topicDisplay?.researchContentHtml"></div>
               </div>
             </mat-card-content>
           </mat-card>
@@ -164,23 +156,19 @@
             </mat-card-header>
             <mat-card-content>
               <div class="sources-list">
-                @for (source of topic.sources; track source.uuid) {
+                @for (source of topicDisplay?.sources ?? []; track source.uuid) {
                   <div class="source-item">
                     <div class="source-header">
-                      @if (source.title) {
-                        <h4>{{ source.title }}</h4>
-                      }
+                      <h4 [hidden]="!source.title">{{ source.title }}</h4>
                       <a [href]="source.url" target="_blank" rel="noopener noreferrer" class="source-link">
                         {{ source.url }}
                         <mat-icon>open_in_new</mat-icon>
                       </a>
-                      <span class="source-date">{{ formatDate(source.createdAt) }}</span>
+                      <span class="source-date">{{ source.formattedDate }}</span>
                     </div>
-                    @if (source.content) {
-                      <div class="source-content">
-                        <p>{{ source.content }}</p>
-                      </div>
-                    }
+                    <div class="source-content" [hidden]="!source.content">
+                      <p>{{ source.content }}</p>
+                    </div>
                   </div>
                 }
               </div>

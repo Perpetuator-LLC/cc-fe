@@ -91,9 +91,7 @@
                   <mat-label>Phone Number</mat-label>
                   <input matInput formControlName="phoneNumber" placeholder="+1234567890" />
                   <mat-hint>Include country code (e.g., +1 for US)</mat-hint>
-                  @if (phoneVerificationForm.get('phoneNumber')?.hasError('pattern')) {
-                    <mat-error>Invalid phone number format. Use +1234567890</mat-error>
-                  }
+                  <mat-error>Invalid phone number format. Use +1234567890</mat-error>
                 </mat-form-field>
 
                 <div class="phone-actions">
@@ -179,11 +177,7 @@
                     autocomplete="new-password"
                     required
                   />
-                  @if (
-                    changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched
-                  ) {
-                    <mat-error>Password is required and must be at least 8 characters long.</mat-error>
-                  }
+                  <mat-error>Password is required and must be at least 8 characters long.</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="fill">

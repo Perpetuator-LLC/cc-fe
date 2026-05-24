@@ -2,7 +2,7 @@
 
 .gift-page-wrapper {
   position: relative;
-  padding: 0 30px;
+  padding: 0 32px;
 
   .gift-container {
     max-width: 1140px;
@@ -12,7 +12,7 @@
       display: flex;
       justify-content: space-between;
       margin-top: 48px;
-      margin-bottom: 34px;
+      margin-bottom: 36px;
 
       .title {
         h3 {
@@ -42,9 +42,9 @@
 
         p {
           margin: 0;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
 
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 500;
           color: var(--md-sys-color-on-surface-variant);
         }
@@ -138,7 +138,7 @@
       }
 
       span {
-        margin-left: 10px;
+        margin-left: 12px;
         padding: 8px;
         border-radius: 8px;
 

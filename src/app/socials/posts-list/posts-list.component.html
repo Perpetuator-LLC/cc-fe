@@ -76,7 +76,7 @@
         <th mat-header-cell *matHeaderCellDef>Platform</th>
         <td mat-cell *matCellDef="let broadcast">
           <div class="platform-cell">
-            <mat-icon>{{ getPlatformIcon(broadcast.platform) }}</mat-icon>
+            <mat-icon>{{ broadcast.platformIcon }}</mat-icon>
             <span>{{ broadcast.socialAccount?.accountName || broadcast.platform }}</span>
           </div>
         </td>
@@ -87,10 +87,10 @@
         <th mat-header-cell *matHeaderCellDef>Content</th>
         <td mat-cell *matCellDef="let broadcast">
           <div class="post-text">
-            {{ truncateText(broadcast.text) }}
+            {{ broadcast.truncatedText }}
             @if (broadcast.hashtags?.length) {
               <div class="hashtags">
-                @for (tag of broadcast.hashtags.slice(0, 3); track tag) {
+                @for (tag of broadcast.topHashtags; track tag) {
                   <span class="hashtag">#{{ tag }}</span>
                 }
               </div>
@@ -103,7 +103,7 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let broadcast">
-          <span class="status-badge" [ngClass]="getStatusClass(broadcast.status)">
+          <span class="status-badge" [ngClass]="broadcast.statusClass">
             {{ broadcast.status }}
           </span>
         </td>
@@ -114,14 +114,14 @@
         <th mat-header-cell *matHeaderCellDef>Date</th>
         <td mat-cell *matCellDef="let broadcast">
           @if (broadcast.publishedAt) {
-            {{ formatDate(broadcast.publishedAt) }}
+            {{ broadcast.formattedPublishedAt }}
           } @else if (broadcast.scheduledAt) {
             <span class="scheduled-date">
               <mat-icon>schedule</mat-icon>
-              {{ formatDate(broadcast.scheduledAt) }}
+              {{ broadcast.formattedScheduledAt }}
             </span>
           } @else {
-            {{ formatDate(broadcast.createdAt) }}
+            {{ broadcast.formattedCreatedAt }}
           }
         </td>
       </ng-container>

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="category-podcasts">
   <div class="breadcrumb">
     <a routerLink="/categories" mat-button>
@@ -7,18 +7,18 @@
     </a>
     <mat-icon>chevron_right</mat-icon>
     @if (subcategory) {
-      <a [routerLink]="'/categories/' + category" mat-button>{{ decodeCategory(category) }}</a>
+      <a [routerLink]="'/categories/' + category" mat-button>{{ decodedCategory }}</a>
       <mat-icon>chevron_right</mat-icon>
-      <span>{{ decodeCategory(subcategory) }}</span>
+      <span>{{ decodedSubcategory }}</span>
     } @else {
-      <span>{{ decodeCategory(category) }}</span>
+      <span>{{ decodedCategory }}</span>
     }
   </div>
 
   <div class="header">
     <h1>
       <mat-icon>podcasts</mat-icon>
-      {{ getPageTitle() }}
+      {{ pageTitle }}
     </h1>
     <p>Podcasts in this category</p>
   </div>
@@ -49,7 +49,7 @@
       <div class="podcasts-grid">
         @for (podcast of podcasts; track podcast.id) {
           <mat-card class="podcast-card">
-            <a [routerLink]="getPodcastUrl(podcast)" class="podcast-link">
+            <a [routerLink]="podcast.url" class="podcast-link">
               @if (podcast.imageUrl) {
                 <img mat-card-image [src]="podcast.imageUrl" [alt]="podcast.name" class="podcast-image" />
               } @else {
@@ -60,7 +60,7 @@
             </a>
             <mat-card-content>
               <h3>
-                <a [routerLink]="getPodcastUrl(podcast)">{{ podcast.name }}</a>
+                <a [routerLink]="podcast.url">{{ podcast.name }}</a>
               </h3>
               @if (podcast.description) {
                 <p class="description">{{ podcast.description }}</p>
@@ -83,9 +83,9 @@
               </div>
             </mat-card-content>
             <mat-card-actions>
-              <a [routerLink]="getPodcastUrl(podcast)" mat-button color="primary">View Podcast</a>
+              <a [routerLink]="podcast.url" mat-button color="primary">View Podcast</a>
               <app-share-buttons
-                [shareUrl]="getShareUrl(podcast)"
+                [shareUrl]="podcast.shareUrl"
                 [title]="podcast.name"
                 [description]="podcast.description"
                 [compact]="true"
@@ -97,4 +97,3 @@
     }
   }
 </div>
-

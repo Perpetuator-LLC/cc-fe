@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 
 interface SocialMetaTags {
   title: string | null;
@@ -59,6 +59,7 @@ interface PreviewResult {
 export class SocialPreviewComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly appConfig = inject(AppConfigService);
 
   urlInput = '';
   loading = signal(false);
@@ -70,13 +71,32 @@ export class SocialPreviewComponent implements OnInit {
   errorMessage = computed(() => this.error());
   previewResult = computed(() => this.result());
 
-  // Preset URLs for quick testing (uses environment SITE_URL)
-  readonly siteUrl = environment.SITE_URL;
+  /**
+   * Pre-computed display strings for the preview cards so the template
+   * reads property access instead of calling getImageUrl/truncateText
+   * for every section on every change-detection tick.
+   */
+  previewDisplay = computed(() => {
+    const res = this.result();
+    if (!res) return null;
+    const ogDescOrTagsDesc = res.tags.og.description || res.tags.description;
+    const twDescOrFallback = res.tags.twitter.description || res.tags.og.description || res.tags.description;
+    return {
+      ogImageUrl: this.getImageUrl(res.tags.og.image, res.url),
+      twitterImageUrl: this.getImageUrl(res.tags.twitter.image, res.url),
+      ogDescriptionShort: this.truncateText(ogDescOrTagsDesc, 100),
+      ogDescriptionMedium: this.truncateText(ogDescOrTagsDesc, 150),
+      twitterDescriptionShort: this.truncateText(twDescOrFallback, 100),
+    };
+  });
+
+  // Preset URLs for quick testing (uses runtime SITE_URL)
+  readonly siteUrl = this.appConfig.config.SITE_URL;
   readonly presetUrls = [
-    { label: 'Home', url: `${environment.SITE_URL}/` },
-    { label: 'Affiliate (HUMN)', url: `${environment.SITE_URL}/a/HUMN` },
-    { label: 'Login', url: `${environment.SITE_URL}/login` },
-    { label: 'Register', url: `${environment.SITE_URL}/register` },
+    { label: 'Home', url: `${this.siteUrl}/` },
+    { label: 'Affiliate (HUMN)', url: `${this.siteUrl}/a/HUMN` },
+    { label: 'Login', url: `${this.siteUrl}/login` },
+    { label: 'Register', url: `${this.siteUrl}/register` },
   ];
 
   ngOnInit(): void {

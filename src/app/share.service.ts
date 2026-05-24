@@ -1,6 +1,6 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Injectable } from '@angular/core';
-import { environment } from '../environments/environment';
+import { Injectable, inject } from '@angular/core';
+import { AppConfigService } from './core/app-config.service';
 
 export interface ShareConfig {
   url: string;
@@ -12,6 +12,11 @@ export interface ShareConfig {
   providedIn: 'root',
 })
 export class ShareService {
+  private appConfig = inject(AppConfigService);
+
+  private get siteUrl(): string {
+    return this.appConfig.config.SITE_URL;
+  }
   /**
    * Generate a slug from a title
    */
@@ -67,7 +72,7 @@ export class ShareService {
    */
   buildPodcastUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/podcasts/${slug}-${id}`;
+    return `${this.siteUrl}/podcasts/${slug}-${id}`;
   }
 
   /**
@@ -76,7 +81,7 @@ export class ShareService {
    */
   buildEpisodeUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/episodes/${slug}-${id}`;
+    return `${this.siteUrl}/episodes/${slug}-${id}`;
   }
 
   /**
@@ -85,7 +90,7 @@ export class ShareService {
    */
   buildBlogUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/blogs/${slug}-${id}`;
+    return `${this.siteUrl}/blogs/${slug}-${id}`;
   }
 
   /**
@@ -94,7 +99,7 @@ export class ShareService {
    */
   buildArticleUrl(id: string, title: string): string {
     const slug = this.generateSlug(title);
-    return `${environment.SITE_URL}/articles/${slug}-${id}`;
+    return `${this.siteUrl}/articles/${slug}-${id}`;
   }
 
   /**

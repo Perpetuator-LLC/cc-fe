@@ -20,7 +20,7 @@
       </a>
       @if (episodeData.podcastId && episodeData.podcastName) {
         <mat-icon>chevron_right</mat-icon>
-        <a [routerLink]="getPodcastUrl()" mat-button>{{ episodeData.podcastName }}</a>
+        <a [routerLink]="podcastUrl" mat-button>{{ episodeData.podcastName }}</a>
       }
       <mat-icon>chevron_right</mat-icon>
       <span>{{ episodeData.title }}</span>
@@ -32,9 +32,9 @@
           <div class="episode-info">
             <h1>{{ episodeData.title }}</h1>
             <p class="podcast-name">
-              <a [routerLink]="getPodcastUrl()">{{ episodeData.podcastName }}</a>
+              <a [routerLink]="podcastUrl">{{ episodeData.podcastName }}</a>
             </p>
-            <p class="episode-date">Published {{ formatDate(episodeData.date) }}</p>
+            <p class="episode-date">Published {{ publishedDate }}</p>
             <div class="stats">
               <span class="stat">
                 <mat-icon>visibility</mat-icon>
@@ -50,7 +50,7 @@
           </div>
           <div class="episode-actions">
             <app-share-buttons
-              [shareUrl]="getShareUrl()"
+              [shareUrl]="shareUrl"
               [title]="episodeData.title"
               [description]="episodeData.description"
             />
@@ -80,7 +80,7 @@
               Play Episode
             </button>
             @if (episodeData.duration) {
-              <span class="duration">Duration: {{ formatDuration(episodeData.duration) }}</span>
+              <span class="duration">Duration: {{ formattedDuration }}</span>
             }
           </div>
         </div>
@@ -111,7 +111,7 @@
     </mat-card>
 
     <div class="back-to-podcast">
-      <a [routerLink]="getPodcastUrl()" mat-raised-button color="primary">
+      <a [routerLink]="podcastUrl" mat-raised-button color="primary">
         <mat-icon>arrow_back</mat-icon>
         Back to {{ episodeData.podcastName }}
       </a>

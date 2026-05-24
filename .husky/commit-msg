@@ -1,9 +1,9 @@
-# Load NVM in non-interactive shell (skip if using Volta or another manager)
+# Load NVM in non-interactive shell
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Use the Node version from .nvmrc (only if nvm is available)
-if command -v nvm &> /dev/null; then
+# Use the Node version from .nvmrc
+if command -v nvm >/dev/null 2>&1; then
   nvm use
 fi
 

@@ -1,0 +1,20 @@
+# Trivy CVE exclusions for cc-fe.
+#
+# Add entries sparingly. Each entry MUST have a comment explaining:
+#   1. Why this CVE doesn't apply to our build (false positive justification).
+#   2. What we'd need to change to remove the entry.
+#
+# Format: <CVE-ID> followed by a blank line, comments above only.
+# An optional ` exp:YYYY-MM-DD` suffix sets an auto-expiry.
+
+# ----- picomatch ReDoS via crafted extglob patterns -----
+# Status: false positive on declarative metadata.
+# yarn.lock pins picomatch to 4.0.4 (see "resolutions" in package.json),
+# and yarn install verifies this. Trivy still flags 4.0.3 because some
+# transitive dep's package.json declares "^4.0.3" as its requirement
+# string in dist/<app>/server/package.json — but at install time, yarn's
+# resolution wins and only 4.0.4 is actually installed. The vulnerable
+# 4.0.3 code is never present at runtime.
+# Remove when: every transitive dep that declares "^4.0.3" publishes a
+# new version declaring "^4.0.4" (track via Renovate PRs).
+CVE-2026-33671

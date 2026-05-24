@@ -1,0 +1,48 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (hasRows) {
+  <div class="dividend-table-container">
+    <h4>Annual Dividend Data</h4>
+    <div class="dividend-table-scroll">
+      <table class="dividend-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            @for (row of rows; track row.year) {
+              <th>{{ row.year }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="metric-name">Free Cash Flow</td>
+            @for (row of rows; track row.year) {
+              <td>{{ row.formattedFreeCashFlow }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="metric-name">Dividends Paid</td>
+            @for (row of rows; track row.year) {
+              <td>{{ row.formattedDividendsPaid }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="metric-name">FCF Payout Ratio</td>
+            @for (row of rows; track row.year) {
+              <td [class.warning]="row.fcfPayoutWarning">
+                {{ row.formattedFcfPayoutRatio }}
+              </td>
+            }
+          </tr>
+          <tr>
+            <td class="metric-name">Net Income Payout</td>
+            @for (row of rows; track row.year) {
+              <td [class.warning]="row.netIncomePayoutWarning">
+                {{ row.formattedNetIncomePayoutRatio }}
+              </td>
+            }
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

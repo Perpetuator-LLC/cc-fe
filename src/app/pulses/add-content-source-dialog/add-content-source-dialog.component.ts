@@ -19,13 +19,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { WatchlistService } from '../../terminal/watchlist.service';
 import { Watchlist } from '../../terminal/terminal.types';
 import { Apollo, gql } from 'apollo-angular';
-
-// Stock autocomplete result type
-interface StockAutocompleteResult {
-  symbol: string;
-  name: string;
-  display: string;
-}
+import { RssFeedFieldComponent, RssFeedSuggestion } from './rss-feed-field/rss-feed-field.component';
+import { SearchTermFieldComponent } from './search-term-field/search-term-field.component';
+import { WatchlistFieldComponent } from './watchlist-field/watchlist-field.component';
+import {
+  CompanySymbolFieldComponent,
+  StockAutocompleteResult,
+} from './company-symbol-field/company-symbol-field.component';
 
 export interface AddContentSourceDialogData {
   pulseConfigUuid: string;
@@ -47,6 +47,10 @@ export interface AddContentSourceDialogData {
     MatIcon,
     MatAutocompleteModule,
     MatTooltipModule,
+    RssFeedFieldComponent,
+    SearchTermFieldComponent,
+    WatchlistFieldComponent,
+    CompanySymbolFieldComponent,
   ],
   templateUrl: './add-content-source-dialog.component.html',
   styleUrl: './add-content-source-dialog.component.scss',
@@ -58,7 +62,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
 
   // RSS Feed autocomplete
   rssSearchQuery$ = new Subject<string>();
-  rssFeedSuggestions: RssFeed[] = [];
+  rssFeedSuggestions: RssFeedSuggestion[] = [];
   isSearchingRssFeeds = false;
   selectedRssFeed: RssFeed | null = null;
 
@@ -129,7 +133,7 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
         )
         .subscribe({
           next: (feeds) => {
-            this.rssFeedSuggestions = feeds.slice(0, 20); // Limit for display
+            this.rssFeedSuggestions = this.enrichRssFeeds(feeds).slice(0, 20); // Limit for display
             this.isSearchingRssFeeds = false;
           },
           error: (err) => {
@@ -168,13 +172,18 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
     );
   }
 
+  /** Pre-compute display flags for RSS feed suggestions. */
+  private enrichRssFeeds(feeds: RssFeed[]): RssFeedSuggestion[] {
+    return (feeds || []).map((f) => ({ ...f, hasIssue: !f.isReachable || !f.isParsable }));
+  }
+
   /** Load initial RSS feeds list */
   private loadInitialFeeds(): void {
     this.isSearchingRssFeeds = true;
     this.subscriptions.add(
       this.pulsesService.getAllRssFeeds().subscribe({
         next: (feeds) => {
-          this.rssFeedSuggestions = feeds.slice(0, 20);
+          this.rssFeedSuggestions = this.enrichRssFeeds(feeds).slice(0, 20);
           this.isSearchingRssFeeds = false;
         },
         error: (err) => {
@@ -268,6 +277,10 @@ export class AddContentSourceDialogComponent implements OnInit, OnDestroy {
 
   get selectedType(): ContentSourceType {
     return this.sourceForm.get('sourceType')?.value;
+  }
+
+  get submitDisabled(): boolean {
+    return this.sourceForm.invalid || this.isSubmitting;
   }
 
   onSubmit(): void {

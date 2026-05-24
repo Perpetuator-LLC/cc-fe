@@ -91,6 +91,11 @@ export class UserAutocompleteComponent implements OnInit, OnChanges {
     return typeof value === 'string';
   }
 
+  /** Pre-computed `typeof searchControl.value === 'string'` for the template. */
+  get isSearchControlValueString(): boolean {
+    return typeof this.searchControl.value === 'string';
+  }
+
   private _filterUsers(value: string | User): User[] {
     if (typeof value !== 'string') {
       return this.users;

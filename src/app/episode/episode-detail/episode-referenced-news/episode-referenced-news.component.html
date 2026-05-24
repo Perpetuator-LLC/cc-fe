@@ -1,0 +1,140 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="view-toggles">
+  <div class="title">
+    <h3>Referenced News</h3>
+    <span>{{ countLabel }}</span>
+  </div>
+  <div class="view-btn-container">
+    <button mat-icon-button type="button" class="view-btn" (click)="onToggleView(true)" [class.active]="isGridView">
+      <mat-icon>grid_on</mat-icon>
+    </button>
+    <button mat-icon-button type="button" class="view-btn" (click)="onToggleView(false)" [class.active]="!isGridView">
+      <mat-icon>list_alt</mat-icon>
+    </button>
+  </div>
+</div>
+@if (isGridView) {
+  <div class="related-grid">
+    @for (referencedNews of news; track referencedNews.id) {
+      <mat-card class="related-card">
+        <mat-card-header>
+          <div class="grid-header">
+            <div class="grid-header-name">
+              <div class="news-title-wrapper">
+                <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                  {{ referencedNews.title }}
+                </a>
+                @if (referencedNews.blocked) {
+                  <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                    <mat-icon>block</mat-icon>
+                    Blocked
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        </mat-card-header>
+
+        <div class="news-meta">
+          @if (referencedNews.hasFeeds) {
+            <div class="rss-feeds-list">
+              <mat-icon>rss_feed</mat-icon>
+              <div class="rss-feeds-items">
+                @for (feed of referencedNews.feedDisplays; track feed.id) {
+                  <div class="rss-feed-badge-item">
+                    <span class="rss-feed-name">{{ feed.name }}</span>
+                    <div class="rss-feed-status-mini">
+                      <span class="status-icon" [class]="feed.reachClass" [matTooltip]="feed.reachTooltip">
+                        <mat-icon>{{ feed.reachIcon }}</mat-icon>
+                      </span>
+                      <span class="status-icon" [class]="feed.parseClass" [matTooltip]="feed.parseTooltip">
+                        <mat-icon>{{ feed.parseIcon }}</mat-icon>
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <div class="date">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
+          </div>
+        </div>
+      </mat-card>
+    } @empty {
+      <div class="no-related">
+        <p>No referenced news articles found.</p>
+      </div>
+    }
+  </div>
+}
+
+@if (!isGridView) {
+  <div class="related-table">
+    <table class="news-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>RSS Feed</th>
+          <th>Published</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (referencedNews of news; track referencedNews.id) {
+          <tr>
+            <td>
+              <div class="news-title-cell">
+                <a href="{{ referencedNews.url }}" target="_blank" class="podcast-name-link">
+                  {{ referencedNews.title }}
+                </a>
+                @if (referencedNews.blocked) {
+                  <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                    <mat-icon>block</mat-icon>
+                    Blocked
+                  </span>
+                }
+              </div>
+            </td>
+            <td>
+              @if (referencedNews.hasFeeds) {
+                <div class="rss-feed-cell">
+                  @for (feed of referencedNews.feedDisplays; track feed.id) {
+                    <div class="rss-feed-row">
+                      <mat-icon>rss_feed</mat-icon>
+                      <span class="feed-name" [matTooltip]="feed.url">
+                        {{ feed.name }}
+                      </span>
+                      <div class="feed-status-icons">
+                        <span class="status-icon-small" [class]="feed.reachClass" [matTooltip]="feed.reachTooltip">
+                          <mat-icon>{{ feed.reachIcon }}</mat-icon>
+                        </span>
+                        <span class="status-icon-small" [class]="feed.parseClass" [matTooltip]="feed.parseTooltip">
+                          <mat-icon>{{ feed.parseIcon }}</mat-icon>
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <span class="no-data">—</span>
+              }
+            </td>
+            <td>
+              <div class="date-cell">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ referencedNews.publishedAt | date: 'short' }}</span>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="no-related">
+              <p>No referenced news articles found.</p>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

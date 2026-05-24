@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 
 export interface NewsletterResponse {
   success: boolean;
@@ -14,12 +14,13 @@ export interface NewsletterResponse {
 })
 export class NewsletterHttpService {
   private http = inject(HttpClient);
+  private appConfig = inject(AppConfigService);
 
   subscribe(email: string): Observable<NewsletterResponse> {
-    return this.http.post<NewsletterResponse>(`${environment.API_URL}/newsletter/subscribe/`, { email });
+    return this.http.post<NewsletterResponse>(`${this.appConfig.config.API_URL}/newsletter/subscribe/`, { email });
   }
 
   unsubscribe(email: string): Observable<NewsletterResponse> {
-    return this.http.post<NewsletterResponse>(`${environment.API_URL}/newsletter/unsubscribe/`, { email });
+    return this.http.post<NewsletterResponse>(`${this.appConfig.config.API_URL}/newsletter/unsubscribe/`, { email });
   }
 }

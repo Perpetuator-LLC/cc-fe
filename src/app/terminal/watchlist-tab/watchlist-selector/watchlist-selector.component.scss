@@ -1,0 +1,47 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2025-2026 Perpetuator LLC
+:host {
+  display: block;
+}
+
+.sidebar-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .watchlist-selector-btn {
+    flex: 1;
+    justify-content: flex-start;
+    min-width: 0;
+
+    .watchlist-name {
+      overflow: hidden;
+      flex: 1;
+
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropdown-icon {
+      margin-left: auto;
+    }
+  }
+}
+
+.menu-section-label {
+  padding: 8px 16px 4px;
+
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.delete-action {
+  color: var(--md-sys-color-error);
+}

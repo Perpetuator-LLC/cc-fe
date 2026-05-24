@@ -127,7 +127,6 @@
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
-
       margin-bottom: 12px;
 
       .meta-item {
@@ -158,10 +157,6 @@
 
         &.featured {
           color: var(--md-extended-color-warning-color);
-
-          mat-icon {
-            color: var(--md-extended-color-warning-color);
-          }
         }
       }
     }
@@ -173,21 +168,27 @@
     align-items: center;
 
     @media screen and (width <= 768px) {
-      width: 100%;
       justify-content: flex-start;
+      width: 100%;
     }
   }
+}
+
+.stat.featured mat-icon {
+  color: var(--md-extended-color-warning-color);
 }
 
 .excerpt {
   margin-bottom: 24px;
   padding: 16px;
   border-left: 4px solid var(--md-sys-color-primary);
-  background: var(--md-sys-color-surface-container-high);
   border-radius: 0 8px 8px 0;
+
+  background: var(--md-sys-color-surface-container-high);
 
   p {
     margin: 0;
+
     font-size: 16px;
     font-style: italic;
     line-height: 1.6;
@@ -251,8 +252,9 @@
     margin: 16px 0;
     padding: 12px 16px;
     border-left: 4px solid var(--md-sys-color-primary);
-    background: var(--md-sys-color-surface-container-high);
     border-radius: 0 8px 8px 0;
+
+    background: var(--md-sys-color-surface-container-high);
 
     p {
       margin: 0;
@@ -261,11 +263,13 @@
   }
 
   pre {
+    overflow-x: auto;
+
     margin: 16px 0;
     padding: 16px;
-    overflow-x: auto;
-    background: var(--md-sys-color-surface-container-highest);
     border-radius: 8px;
+
+    background: var(--md-sys-color-surface-container-highest);
 
     code {
       font-family: 'Fira Code', 'JetBrains Mono', monospace;
@@ -274,11 +278,13 @@
   }
 
   code {
-    padding: 2px 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+
     font-family: 'Fira Code', 'JetBrains Mono', monospace;
     font-size: 14px;
+
     background: var(--md-sys-color-surface-container-high);
-    border-radius: 4px;
   }
 
   img {
@@ -295,9 +301,9 @@
   }
 
   table {
+    border-collapse: collapse;
     width: 100%;
     margin: 16px 0;
-    border-collapse: collapse;
 
     th,
     td {
@@ -307,8 +313,8 @@
     }
 
     th {
-      background: var(--md-sys-color-surface-container-high);
       font-weight: 600;
+      background: var(--md-sys-color-surface-container-high);
     }
   }
 }
@@ -317,4 +323,3 @@
   margin-top: 24px;
   text-align: center;
 }
-

@@ -1,0 +1,73 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="tab-content">
+  <mat-card>
+    <mat-card-content>
+      <div class="section-header">
+        <h3>Alert Triggers</h3>
+        <button mat-button color="primary" (click)="addAlertTrigger.emit()">
+          <mat-icon>add</mat-icon>
+          Add Alert
+        </button>
+      </div>
+
+      <p class="section-description">
+        Configure alerts to trigger immediate pulse generation for breaking news or other events.
+      </p>
+
+      @if (alertTriggers.length === 0) {
+        <div class="empty-state">
+          <mat-icon>notifications_off</mat-icon>
+          <p>No alert triggers configured. Alerts will generate pulses when specific conditions are met.</p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="alertTriggers" class="alerts-table">
+          <ng-container matColumnDef="alertType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let trigger">
+              <span class="alert-type">
+                <mat-icon>{{ trigger.alertType | pulseAlertTypeIcon }}</mat-icon>
+                {{ trigger.alertType | titlecase }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="details">
+            <th mat-header-cell *matHeaderCellDef>Details</th>
+            <td mat-cell *matCellDef="let trigger">
+              @if (trigger.keywords?.length) {
+                <mat-chip-set>
+                  @for (keyword of trigger.keywords; track keyword) {
+                    <mat-chip>{{ keyword }}</mat-chip>
+                  }
+                </mat-chip-set>
+              } @else if (trigger.symbol) {
+                {{ trigger.symbol }} - {{ trigger.priceDirection }} {{ trigger.priceThreshold }}
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Active</th>
+            <td mat-cell *matCellDef="let trigger">
+              <mat-icon [class.active]="trigger.isActive">
+                {{ trigger.isActive ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let trigger">
+              <button mat-icon-button (click)="removeAlertTrigger.emit(trigger.uuid)" matTooltip="Remove">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="alertTriggerColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: alertTriggerColumns"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,48 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="recurring-options" [formGroup]="form">
+  <!-- Day Pattern Quick Select -->
+  <div class="day-pattern-section">
+    <label class="section-label" for="day-pattern">Days</label>
+    <mat-button-toggle-group id="day-pattern" formControlName="dayPattern" class="day-pattern-toggle">
+      <mat-button-toggle value="daily">Every Day</mat-button-toggle>
+      <mat-button-toggle value="weekdays">Weekdays</mat-button-toggle>
+      <mat-button-toggle value="weekends">Weekends</mat-button-toggle>
+      <mat-button-toggle value="custom">Custom</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <!-- Custom Day Selection -->
+  @if (showDaySelector) {
+    <div class="custom-days-section">
+      <div class="day-chips">
+        @for (day of daysOfWeekDisplay; track day.value) {
+          <button
+            mat-button
+            type="button"
+            class="day-chip"
+            [class.selected]="day.selected"
+            (click)="onToggleDay(day.value)"
+          >
+            {{ day.short }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Time Selection -->
+  <div class="time-section">
+    <label class="section-label" for="schedule-time">Time</label>
+    <div class="time-input-row">
+      <input id="schedule-time" type="time" formControlName="time" class="time-input" />
+      <mat-form-field class="timezone-select">
+        <mat-label>Timezone</mat-label>
+        <mat-select formControlName="timezone">
+          @for (tz of timezones; track tz.value) {
+            <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+</div>

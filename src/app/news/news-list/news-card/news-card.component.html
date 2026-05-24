@@ -1,0 +1,42 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<mat-list-item class="news-item">
+  <div class="news-card" tabindex="0" (click)="onCardClick()" (keydown.enter)="onCardClick()">
+    <mat-checkbox (click)="onCheckboxClick($event)" [checked]="selected" />
+    <div class="news-card-wrapper" [ngClass]="{ newsSelected: isActive }">
+      <div class="news-content">
+        <div class="news-header">
+          <div class="title">
+            <a
+              [href]="news.url"
+              target="_blank"
+              (click)="$event.stopPropagation()"
+              [matTooltip]="sourceTooltip"
+              matTooltipPosition="above"
+              class="external-link"
+            >
+              {{ news.title }}
+            </a>
+            @if (news.blocked) {
+              <span class="blocked-badge" matTooltip="This article is blocked from our robots/scrapers">
+                <mat-icon>block</mat-icon>
+                Blocked
+              </span>
+            }
+          </div>
+          <div class="source">
+            <mat-icon>graphic_eq</mat-icon>
+            <p><strong>Source:</strong> {{ news.source }}</p>
+          </div>
+        </div>
+        <div class="date">
+          <span [matTooltip]="news.publishedAt | date: 'z'" matTooltipPosition="above">
+            {{ news.publishedAt | date: 'short' }}
+          </span>
+          <div class="next-btn">
+            <span>&gt; </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-list-item>

@@ -1,0 +1,117 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<form [formGroup]="podcastForm">
+  <!-- Mode Selection -->
+  <div class="tg-mode-section">
+    <h4>Telegram Integration Mode</h4>
+    <mat-radio-group [value]="telegramMode" (change)="telegramModeChange.emit($event.value)">
+      <mat-radio-button value="cc_bot">
+        <div class="tg-mode-label">
+          <span class="tg-mode-title">Capital Copilot Bot</span>
+          <span class="tg-mode-description">Use our bot — just add it to your channel</span>
+        </div>
+      </mat-radio-button>
+      <mat-radio-button value="custom_bot">
+        <div class="tg-mode-label">
+          <span class="tg-mode-title">Custom Bot</span>
+          <span class="tg-mode-description">Use your own Telegram bot token</span>
+        </div>
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  <!-- CC Bot Instructions -->
+  @if (isCcBotMode) {
+    <div class="tg-instructions">
+      <mat-icon>info</mat-icon>
+      <div>
+        <p class="tg-instructions-title">Add our bot to your Telegram channel:</p>
+        <ol>
+          <li>Open your Telegram channel settings</li>
+          <li>Go to <strong>Administrators</strong> &rarr; <strong>Add Admin</strong></li>
+          <li>
+            Search for <strong>{{ ccBotUsername }}</strong>
+          </li>
+          <li>Grant <strong>Post Messages</strong> permission only</li>
+          <li>Enter the Channel ID below</li>
+        </ol>
+        <p class="tg-channel-hint">
+          Find your Channel ID at
+          <a href="https://web.telegram.org" target="_blank" rel="noopener">web.telegram.org</a>
+          — it's the number in the URL when viewing your channel (e.g. <code>-2123456789</code>).
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Custom Bot Instructions -->
+  @if (isCustomBotMode) {
+    <div class="tg-instructions">
+      <mat-icon>info</mat-icon>
+      <div>
+        <p class="tg-instructions-title">Set up your own Telegram bot:</p>
+        <ol>
+          <li>
+            <a href="https://core.telegram.org/bots#6-botfather" target="_blank" rel="noopener"
+              >Create a bot with BotFather</a
+            >
+          </li>
+          <li>Copy the Bot Token provided by BotFather</li>
+          <li>Add your bot to your channel as an admin with <strong>Post Messages</strong> permission</li>
+          <li>Enter the Bot Token and Channel ID below</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="member-row">
+        <mat-form-field
+          appearance="fill"
+          matTooltip="Bot Token is not readable for security reasons. To update it, just provide it."
+        >
+          <mat-label>Telegram Bot Token</mat-label>
+          <input matInput formControlName="tgBotToken" />
+        </mat-form-field>
+      </div>
+    </div>
+  }
+
+  <div class="form-group">
+    <div class="member-row">
+      <mat-form-field
+        appearance="fill"
+        matTooltip="Channel IDs must prefix '-100', if it is not provided it will be automatically added."
+      >
+        <mat-label>Telegram Channel ID</mat-label>
+        <input matInput formControlName="tgChannelId" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Telegram Response (read-only output) -->
+  @if (tgResponseValue) {
+    <div class="tg-response">
+      <div class="tg-response-header">
+        <mat-icon>terminal</mat-icon>
+        <span>Telegram Response</span>
+      </div>
+      <pre class="tg-response-output">{{ tgResponseValue }}</pre>
+    </div>
+  }
+
+  <div class="member-row">
+    <div class="url-btn-div">
+      <button
+        class="url-btn"
+        mat-fab
+        color="primary"
+        type="button"
+        extended
+        (click)="refreshTelegramConnection.emit()"
+        matTooltip="Test the Telegram connection with your current settings."
+      >
+        <mat-icon>refresh</mat-icon>
+        Test Connection
+      </button>
+    </div>
+  </div>
+</form>

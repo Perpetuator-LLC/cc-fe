@@ -22,33 +22,11 @@ import { TerminalService } from '../terminal.service';
 import { TerminalWebSocketService, HistorySearchResult } from '../terminal-websocket.service';
 import { HistoryEntry, AutocompleteSuggestion, CommandHistoryItem } from '../terminal.types';
 import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
-import { TerminalHistoryPreviewComponent } from './history-preview/history-preview.component';
-import { TerminalAutocompleteComponent } from './autocomplete-dropdown/autocomplete-dropdown.component';
+import { MatchedHistoryEntry, FqnChip } from './terminal-bar.types';
+import { HistoryPreviewComponent } from './history-preview/history-preview.component';
+import { CommandSuggestionsComponent, DisplaySuggestion } from './command-suggestions/command-suggestions.component';
 
-/**
- * History entry with match highlighting info
- */
-export interface MatchedHistoryEntry {
-  item: CommandHistoryItem;
-  tokens: FqnToken[];
-  matchedText?: string;
-  matchStart?: number;
-  matchEnd?: number;
-  // Pre-computed parts to avoid substring() calls in template
-  beforeMatch?: string;
-  matchText?: string;
-  afterMatch?: string;
-}
-
-/**
- * Represents a completed FQN token displayed as a chip
- * @deprecated Use FqnToken from shared component instead
- */
-export interface FqnChip {
-  fqn: string; // Full FQN: "STOCK:NASDAQ:AAPL" or "COMMAND:CHART"
-  display: string; // Display text: "AAPL" or "CHART"
-  type: 'stock' | 'command' | 'crypto' | 'index' | 'forex' | 'parameter';
-}
+export { MatchedHistoryEntry, FqnChip };
 
 @Component({
   selector: 'app-terminal-bar',
@@ -60,8 +38,8 @@ export interface FqnChip {
     MatTooltipModule,
     MatProgressSpinnerModule,
     FqnChipComponent,
-    TerminalHistoryPreviewComponent,
-    TerminalAutocompleteComponent,
+    HistoryPreviewComponent,
+    CommandSuggestionsComponent,
   ],
   templateUrl: './terminal-bar.component.html',
   styleUrl: './terminal-bar.component.scss',
@@ -89,6 +67,27 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   chips = signal<FqnChip[]>([]); // Completed FQN tokens as chips
   currentInput = signal(''); // Current text being typed (not yet a chip)
   suggestions = signal<AutocompleteSuggestion[]>([]);
+  /** Suggestions with pre-computed display fields so the template has no conditionals. */
+  readonly suggestionsDisplay = computed<DisplaySuggestion[]>(() =>
+    this.suggestions().map((s) => {
+      const isSymbolLike = s.type === 'symbol' || s.type === 'stock' || s.type === 'recent';
+      const isSymbolOrStock = s.type === 'symbol' || s.type === 'stock';
+      const primaryText = isSymbolLike ? s.symbol || s.display : s.display;
+      const secondaryText = isSymbolLike && s.name ? `- ${s.name}` : '';
+      const descriptionText = s.displaySecondary || s.description || '';
+      const exchangeText = isSymbolLike && s.exchange ? s.exchange : '';
+      const assetTypeText = isSymbolOrStock && s.assetType ? s.assetType : '';
+      return {
+        ...s,
+        icon: this.getSuggestionIcon(s),
+        primaryText,
+        secondaryText,
+        descriptionText,
+        exchangeText,
+        assetTypeText,
+      };
+    }),
+  );
   selectedSuggestionIndex = signal(-1);
   showSuggestions = signal(false);
   userNavigatedSuggestions = signal(false); // True if user used arrow keys to navigate
@@ -256,6 +255,35 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
   isProcessing = computed(() => {
     const last = this.lastEntry();
     return last?.isLoading ?? false;
+  });
+
+  /** Whether the history rolodex dropdown is visible. */
+  readonly historyDropdownVisible = computed(() => this.showHistoryPreview() && !this.showSuggestions());
+
+  /** Whether the autocomplete suggestions dropdown is visible. */
+  readonly suggestionsDropdownVisible = computed(() => this.suggestions().length > 0 && this.showSuggestions());
+
+  /** Status indicator metadata (icon + tooltip text); null when nothing to show. */
+  readonly statusInfo = computed<{ icon: string; tooltip: string; success: boolean } | null>(() => {
+    const last = this.lastEntry();
+    if (!last || !last.result || this.isProcessing()) return null;
+    const success = last.result.success;
+    return {
+      icon: success ? 'check_circle' : 'error',
+      tooltip: success ? 'Success' : 'Error',
+      success,
+    };
+  });
+
+  /** Whether the send button is visible (active input with no last-command preview). */
+  readonly sendButtonVisible = computed(
+    () => (this.currentInput().length > 0 || this.chips().length > 0) && !this.showLastCommand(),
+  );
+
+  /** Placeholder text for the input. */
+  readonly inputPlaceholder = computed(() => {
+    if (this.showLastCommand() || this.chips().length > 0) return '';
+    return 'Type a command or ask a question...';
   });
 
   ngOnInit(): void {

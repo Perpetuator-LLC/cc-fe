@@ -74,7 +74,7 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let blog">
-          <span class="status-badge" [ngClass]="getStatusClass(blog.status)">
+          <span class="status-badge" [ngClass]="blog.statusClass">
             {{ blog.status }}
           </span>
         </td>
@@ -103,7 +103,7 @@
       <ng-container matColumnDef="updated">
         <th mat-header-cell *matHeaderCellDef>Last Updated</th>
         <td mat-cell *matCellDef="let blog">
-          {{ formatDate(blog.latestArticleDate || blog.updatedAt) }}
+          {{ blog.formattedLatestDate }}
         </td>
       </ng-container>
 

@@ -509,7 +509,7 @@ mat-divider {
         height: 28px;
         min-height: 28px;
         max-height: 28px;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
         margin-inline: auto;
         padding-inline: 16px;
         border: 1px solid var(--md-sys-color-outline-variant);
@@ -527,7 +527,7 @@ mat-divider {
       }
 
       .desc {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 400;
         color: var(--md-sys-color-on-surface-variant);
       }
@@ -903,7 +903,7 @@ mat-divider {
 
   .rss-feed-url {
     font-family: monospace;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
     word-break: break-all;
   }
@@ -1133,7 +1133,7 @@ mat-divider {
   }
 
   .desc {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
     text-align: center;
   }

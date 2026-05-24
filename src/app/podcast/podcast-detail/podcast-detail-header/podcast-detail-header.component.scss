@@ -1,0 +1,228 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2025-2026 Perpetuator LLC
+:host {
+  display: block;
+}
+
+.button-wrapper {
+  display: inline-block;
+
+  @media screen and (width <= 576px) {
+    width: 100%;
+  }
+}
+
+.detail-header {
+  margin-bottom: 40px;
+
+  .top-header {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 28px;
+
+    .title {
+      h2 {
+        margin-top: 0;
+        margin-bottom: 12px;
+
+        font-size: 32px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    @media screen and (width <= 900px) {
+      flex-direction: column;
+    }
+  }
+
+  .status-summary {
+    display: flex;
+    gap: 64px;
+
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .status-label {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      .status-value {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface);
+        text-decoration: none;
+      }
+
+      .enable {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 90px;
+        height: 16px;
+        padding: 4px 8px;
+        border: 1px solid var(--md-extended-color-success-color);
+        border-radius: 4px;
+
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--md-extended-color-success-color);
+
+        background-color: var(--md-extended-color-success-color-container);
+      }
+
+      .disable {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 90px;
+        height: 16px;
+        padding: 4px 8px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 4px;
+
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface-variant);
+
+        background-color: var(--md-sys-color-surface-container-high);
+      }
+    }
+
+    @media screen and (width <= 900px) {
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+    align-items: center;
+
+    margin-left: auto;
+
+    @media screen and (width <= 900px) {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+}
+
+.bottom-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+
+  @media screen and (width <= 900px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.action-buttons .create-episode-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+
+  min-width: fit-content;
+  padding: 8px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-weight: 600;
+  color: var(--md-sys-color-on-secondary);
+  white-space: nowrap;
+
+  background: var(--md-sys-color-secondary);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    font-size: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  .news-episode-btn {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &.research-button {
+    color: var(--md-sys-color-on-tertiary);
+    background-color: var(--md-sys-color-tertiary);
+
+    .research-btn {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  @media screen and (width <= 900px) {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.action-buttons .blank-episode-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+
+  min-width: fit-content;
+  padding: 8px 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+
+  background: transparent;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  @media screen and (width <= 900px) {
+    justify-content: center;
+    width: 100%;
+  }
+}

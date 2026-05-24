@@ -31,15 +31,16 @@
         <div class="schedule-card" [class.disabled]="!schedule.enabled">
           <div class="schedule-card-content">
             <div class="schedule-icon">
-              <mat-icon>{{ getJobIcon(schedule) }}</mat-icon>
+              <mat-icon>{{ schedule.icon }}</mat-icon>
             </div>
             <div class="schedule-info">
               <div class="schedule-name">{{ schedule.name }}</div>
-              <div class="schedule-description">{{ getScheduleDescription(schedule) }}</div>
+              <div class="schedule-description">{{ schedule.description }}</div>
               <!-- Resource chips for associated entities -->
               <div class="schedule-resources">
-                @if (getPodcastInfo(schedule); as podcastInfo) {
+                @if (schedule.podcastInfo; as podcastInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-podcast"
                     (click)="navigateToPodcast($event, podcastInfo.uuid)"
@@ -48,14 +49,20 @@
                     {{ podcastInfo.name }}
                   </button>
                 }
-                @if (getPulseInfo(schedule); as pulseInfo) {
-                  <button type="button" class="resource-link-pulse" (click)="navigateToPulse($event, pulseInfo.uuid)">
+                @if (schedule.pulseInfo; as pulseInfo) {
+                  <button
+                    mat-button
+                    type="button"
+                    class="resource-link-pulse"
+                    (click)="navigateToPulse($event, pulseInfo.uuid)"
+                  >
                     <mat-icon>graphic_eq</mat-icon>
                     {{ pulseInfo.name }}
                   </button>
                 }
-                @if (getEpisodeInfo(schedule); as episodeInfo) {
+                @if (schedule.episodeInfo; as episodeInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-episode"
                     (click)="navigateToEpisode($event, episodeInfo.uuid)"
@@ -67,7 +74,7 @@
               </div>
               <div class="schedule-next-run">
                 <mat-icon>update</mat-icon>
-                <span>{{ getNextRun(schedule) }}</span>
+                <span>{{ schedule.nextRun }}</span>
               </div>
             </div>
             <div class="schedule-actions">

@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 
 /**
  * PUBLIC Affiliate HTTP Service
@@ -32,12 +32,13 @@ export interface AffiliateLandingData {
 })
 export class AffiliateHttpService {
   private http = inject(HttpClient);
+  private appConfig = inject(AppConfigService);
 
   /**
    * Get public affiliate landing page data
    * @deprecated Use AffiliateService.getAffiliateLanding() instead - migrated to GraphQL
    */
   getAffiliateLanding(code: string): Observable<AffiliateLandingData> {
-    return this.http.get<AffiliateLandingData>(`${environment.API_URL}/a/${code}/`);
+    return this.http.get<AffiliateLandingData>(`${this.appConfig.config.API_URL}/a/${code}/`);
   }
 }

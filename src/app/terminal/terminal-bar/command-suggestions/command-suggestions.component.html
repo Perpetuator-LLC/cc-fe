@@ -1,0 +1,48 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="autocomplete-dropdown">
+  <div class="autocomplete-hint">
+    <span class="hint-keys"> <kbd>↓</kbd><kbd>↑</kbd> navigate <kbd>Tab</kbd> select <kbd>Enter</kbd> execute </span>
+  </div>
+  @for (suggestion of suggestions; track suggestion.fqn || suggestion.display; let i = $index) {
+    <div
+      class="suggestion-item"
+      [class.selected]="i === selectedSuggestionIndex"
+      [class.ai-suggestion]="suggestion.isAiInterpreted"
+      [class.ambiguous]="suggestion.isAmbiguous"
+      tabindex="0"
+      role="option"
+      [attr.aria-selected]="i === selectedSuggestionIndex"
+      (click)="selectSuggestion(suggestion)"
+      (keydown.enter)="selectSuggestion(suggestion)"
+      (mouseenter)="setSelectedIndex(i)"
+    >
+      <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+        <mat-icon>{{ suggestion.icon }}</mat-icon>
+      </span>
+      <span class="suggestion-text">
+        {{ suggestion.primaryText }}
+        @if (suggestion.secondaryText) {
+          <span class="suggestion-name">{{ suggestion.secondaryText }}</span>
+        }
+      </span>
+      @if (suggestion.descriptionText) {
+        <span class="suggestion-desc">{{ suggestion.descriptionText }}</span>
+      }
+      @if (suggestion.exchangeText) {
+        <span class="suggestion-exchange">{{ suggestion.exchangeText }}</span>
+      }
+      @if (suggestion.assetTypeText) {
+        <span class="suggestion-asset-type">{{ suggestion.assetTypeText }}</span>
+      }
+      @if (suggestion.category) {
+        <span class="suggestion-category">{{ suggestion.category }}</span>
+      }
+      @if (suggestion.aliasFor) {
+        <span class="suggestion-alias">→ {{ suggestion.aliasFor }}</span>
+      }
+      @if (suggestion.isAiInterpreted) {
+        <span class="ai-badge">AI</span>
+      }
+    </div>
+  }
+</div>

@@ -70,7 +70,9 @@
       border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 8px;
 
-      transition: box-shadow 0.3s, transform 0.2s;
+      transition:
+        box-shadow 0.3s,
+        transform 0.2s;
 
       &:hover {
         transform: translateY(-2px);
@@ -147,8 +149,8 @@
     .description {
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
 
       margin: 0 0 8px;
 
@@ -184,4 +186,3 @@
     }
   }
 }
-

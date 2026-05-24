@@ -92,7 +92,8 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
   protected supportedRoles: string[] = ['reader', 'editor', 'publisher', 'owner'];
   private teamUuid: string;
   protected deleteConfirmation = '';
-  protected podcasts: PodcastsResult[] = [];
+  /** Podcasts enriched with pre-built formatTimeAgo + formatViewCount per row. */
+  protected podcasts: (PodcastsResult & { formattedTimeAgo: string; formattedViewCount: string })[] = [];
   protected podcastsDisplayedColumns: string[] = ['name', 'categories', 'enabled', 'actions'];
   protected loadingPodcasts = false;
   pageSize = 10;
@@ -130,7 +131,14 @@ export class TeamDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.podcastsService.getPodcastsByTeamId(this.teamUuid).subscribe({
         next: (podcasts: RelayConnection<PodcastsResult>) => {
-          this.podcasts = podcasts.edges.map((edge) => edge.node);
+          this.podcasts = podcasts.edges.map((edge) => {
+            const p = edge.node;
+            return {
+              ...p,
+              formattedTimeAgo: this.formatTimeAgo(p.latestEpisodeDate ?? null),
+              formattedViewCount: this.formatViewCount(p.viewCount ?? 0),
+            };
+          });
           this.loadingPodcasts = false;
         },
         error: (err) => {

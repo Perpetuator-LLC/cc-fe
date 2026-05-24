@@ -1,0 +1,207 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2025-2026 Perpetuator LLC
+@use 'styles/mixins' as mixins;
+
+:host {
+  display: contents;
+}
+
+.menu-section-label {
+  padding: 8px 16px 4px;
+
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.column-menu-item {
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 48px;
+  padding: 0 16px;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  mat-checkbox {
+    width: 100%;
+  }
+}
+
+.symbol-table-container {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.symbol-table {
+  width: 100%;
+
+  tr.mat-mdc-row {
+    height: 36px;
+  }
+
+  tr.mat-mdc-header-row {
+    height: 32px;
+  }
+
+  tr.mat-mdc-row.selected {
+    background: var(--md-sys-color-primary-container);
+  }
+
+  tr.mat-mdc-row:hover:not(.selected) {
+    cursor: pointer;
+    background: var(--md-sys-color-surface-container);
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .symbol-cell .symbol-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+  }
+
+  .name-cell {
+    overflow: hidden;
+    max-width: 120px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .market-cap-cell {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+  }
+
+  .exchange-chip {
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-tertiary-container);
+    text-transform: uppercase;
+
+    background: var(--md-sys-color-tertiary-container);
+  }
+
+  .sector-cell,
+  .industry-cell {
+    overflow: hidden;
+    max-width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .metadata-link {
+    cursor: pointer;
+
+    padding: 2px 4px;
+    border: none;
+    border-radius: 4px;
+
+    font-size: 10px;
+    color: var(--md-sys-color-primary);
+
+    background: transparent;
+
+    &:hover {
+      background: var(--md-sys-color-primary-container);
+    }
+  }
+
+  .actions-cell {
+    width: 48px;
+    padding: 0 4px;
+  }
+
+  td.actions-cell button {
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.active-sort {
+  background: var(--md-sys-color-primary-container);
+
+  .sort-direction {
+    margin-left: auto;
+    color: var(--md-sys-color-primary);
+  }
+}
+
+// Inactive special-sort menu items: keep the trailing direction-icon slot reserved
+// (so menu items don't shift horizontally) but make the icon invisible.
+.sort-direction.hidden-icon {
+  visibility: hidden;
+}
+
+.empty-list {
+  @include mixins.flex-column();
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px 16px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+
+    font-size: 40px;
+
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0 0 4px;
+    font-weight: 500;
+  }
+
+  span {
+    font-size: 12px;
+  }
+
+  code {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--md-sys-color-surface-container);
+  }
+}
+
+.select-cell {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding: 0 4px;
+}
+
+.delete-action {
+  color: var(--md-sys-color-error);
+}

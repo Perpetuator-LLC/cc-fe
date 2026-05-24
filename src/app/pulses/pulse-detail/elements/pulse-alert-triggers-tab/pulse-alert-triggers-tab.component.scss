@@ -1,0 +1,98 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+.tab-content {
+  padding: 16px 0;
+
+  mat-card {
+    margin-bottom: 16px;
+    padding-inline: 16px;
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+    box-shadow: none;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-description {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+
+  padding: 48px 16px;
+
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    opacity: 0.5;
+  }
+
+  p {
+    max-width: 400px;
+    margin: 0;
+  }
+}
+
+.alerts-table {
+  width: 100%;
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  .mat-mdc-row:hover {
+    background-color: var(--md-sys-color-surface-container);
+  }
+
+  .mat-mdc-cell {
+    color: var(--md-sys-color-on-surface);
+  }
+}
+
+.alert-type {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+}
+
+.alerts-table mat-icon.active {
+  color: var(--md-extended-color-success-color);
+}

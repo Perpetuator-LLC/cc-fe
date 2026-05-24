@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <div class="onboarding-return-container">
   @if (loading) {
     <mat-card class="status-card">
@@ -18,9 +18,7 @@
           <h2>Setup Complete!</h2>
           <p>Your Stripe account has been successfully connected.</p>
           <p class="redirect-message">Redirecting you to your affiliate dashboard...</p>
-          <button mat-raised-button color="primary" (click)="navigateToDashboard()">
-            Go to Dashboard Now
-          </button>
+          <button mat-raised-button color="primary" (click)="navigateToDashboard()">Go to Dashboard Now</button>
         </div>
       </mat-card-content>
     </mat-card>
@@ -47,4 +45,3 @@
     </mat-card>
   }
 </div>
-

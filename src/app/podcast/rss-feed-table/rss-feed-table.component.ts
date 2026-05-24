@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ToFixedPipe } from '../../shared/pipes';
 import { RssFeedResult } from '../podcasts.service';
 
 @Component({
@@ -19,12 +20,20 @@ import { RssFeedResult } from '../podcasts.service';
     MatTooltipModule,
     MatProgressSpinner,
     DatePipe,
+    ToFixedPipe,
   ],
   templateUrl: './rss-feed-table.component.html',
   styleUrls: ['./rss-feed-table.component.scss'],
 })
 export class RssFeedTableComponent implements OnInit {
-  @Input() dataSource: RssFeedResult[] = [];
+  /** Data enriched with pre-built tooltipText per row. */
+  private _dataSource: (RssFeedResult & { tooltipText: string })[] = [];
+  @Input() set dataSource(value: RssFeedResult[]) {
+    this._dataSource = (value || []).map((f) => ({ ...f, tooltipText: this.getTooltipText(f) }));
+  }
+  get dataSource(): (RssFeedResult & { tooltipText: string })[] {
+    return this._dataSource;
+  }
   @Input() showActions = false;
   @Input() loading = false;
   @Output() deleteFeed = new EventEmitter<string>();

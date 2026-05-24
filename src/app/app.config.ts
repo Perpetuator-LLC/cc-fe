@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   APP_INITIALIZER,
   ApplicationConfig,
@@ -23,6 +23,7 @@ import { GlobalErrorHandler } from './core/global-error-handler';
 import { RouterErrorTracker } from './core/router-error-tracker';
 import { AppTitleStrategy } from './layout/app-title.strategy';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { AppConfigService } from './core/app-config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,6 +40,14 @@ export const appConfig: ApplicationConfig = {
     {
       provide: ErrorHandler,
       useClass: GlobalErrorHandler,
+    },
+    // Runtime config MUST resolve before any other service consumes it.
+    // APP_INITIALIZERs that return a Promise block bootstrap until they settle.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (configService: AppConfigService) => () => configService.init(),
+      deps: [AppConfigService],
+      multi: true,
     },
     {
       provide: APP_INITIALIZER,
