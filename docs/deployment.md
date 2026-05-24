@@ -180,13 +180,16 @@ The script prompts for a vault token (or uses an existing `vault login` session)
 
 ### Rolling back
 
-To pin to a specific image tag, edit `docker-compose.stage.yml` on lestrange and change the `image:` line:
+`docker-compose.stage.yml`'s `image:` line is templated: `ghcr.io/perpetuator-llc/cc-fe:${IMAGE_TAG:-latest}`. The deploy pipeline always sets `IMAGE_TAG=sha-<commit>` so each release is pinned to a specific image — no `:latest` race. Rollback is one command:
 
-```yaml
-image: ghcr.io/perpetuator-llc/cc-fe:sha-abc1234  # or :v1.2.3
+```bash
+# On lestrange, in /mnt/storage1/stage.capitalcopilot.io/
+IMAGE_TAG=sha-abc1234 docker compose -p cc-fe-stage -f docker-compose.stage.yml up -d
 ```
 
-Then `docker compose -p cc-fe-stage -f docker-compose.stage.yml up -d` to apply.
+Replace `sha-abc1234` with whichever previous build you want to revert to (`docker images ghcr.io/perpetuator-llc/cc-fe` shows what's available locally; GHCR has the full history).
+
+`IMAGE_TAG` is environment-scoped to the `up -d` invocation — the next pipeline-driven deploy will set its own SHA and roll forward automatically. Edit nothing on disk.
 
 ### Tagged releases
 
