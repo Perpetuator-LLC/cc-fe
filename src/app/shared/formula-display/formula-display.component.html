@@ -3,6 +3,7 @@
   <div class="formula-header">
     <span class="formula-title">{{ title }}</span>
     <button
+      mat-icon-button
       type="button"
       class="info-button"
       [hidden]="!description"
@@ -67,6 +68,7 @@
           <span class="variable-symbol">{{ v.symbol }}</span>
           <span class="equals">=</span>
           @if (v.editable && editMode()) {
+            <!-- md3-ignore: custom variable input -->
             <input
               type="number"
               class="variable-input"

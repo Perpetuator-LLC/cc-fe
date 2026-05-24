@@ -5,10 +5,10 @@
     <span>{{ countLabel }}</span>
   </div>
   <div class="view-btn-container">
-    <button type="button" class="view-btn" (click)="onToggleView(true)" [class.active]="isGridView">
+    <button mat-icon-button type="button" class="view-btn" (click)="onToggleView(true)" [class.active]="isGridView">
       <mat-icon>grid_on</mat-icon>
     </button>
-    <button type="button" class="view-btn" (click)="onToggleView(false)" [class.active]="!isGridView">
+    <button mat-icon-button type="button" class="view-btn" (click)="onToggleView(false)" [class.active]="!isGridView">
       <mat-icon>list_alt</mat-icon>
     </button>
   </div>

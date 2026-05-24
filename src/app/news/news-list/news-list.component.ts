@@ -9,6 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -54,6 +55,7 @@ export interface SidePanelAccordianData {
     MatSelect,
     MatOption,
     MatProgressBarModule,
+    MatCheckboxModule,
     NewsDetailPanelComponent,
     SelectPodcastFormComponent,
     NewsResultsComponent,

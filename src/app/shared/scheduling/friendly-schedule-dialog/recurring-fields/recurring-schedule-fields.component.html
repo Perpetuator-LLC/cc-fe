@@ -16,6 +16,7 @@
     <div class="custom-days-section">
       <div class="day-chips">
         @for (day of daysOfWeekDisplay; track day.value) {
+          <!-- md3-ignore: custom toggle chip -->
           <button type="button" class="day-chip" [class.selected]="day.selected" (click)="onToggleDay(day.value)">
             {{ day.short }}
           </button>
@@ -26,9 +27,11 @@
 
   <!-- Time Selection -->
   <div class="time-section">
-    <label class="section-label" for="schedule-time">Time</label>
     <div class="time-input-row">
-      <input id="schedule-time" type="time" formControlName="time" class="time-input" />
+      <mat-form-field class="time-field">
+        <mat-label>Time</mat-label>
+        <input matInput id="schedule-time" type="time" formControlName="time" />
+      </mat-form-field>
       <mat-form-field class="timezone-select">
         <mat-label>Timezone</mat-label>
         <mat-select formControlName="timezone">

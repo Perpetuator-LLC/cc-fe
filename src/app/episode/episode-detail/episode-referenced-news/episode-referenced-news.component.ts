@@ -4,6 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatCard, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
 import { NewsResult } from '../../../news/news.service';
 
 /** Pre-computed display state for an RSS feed in the news view. */
@@ -31,7 +32,7 @@ export interface NewsItemDisplay extends NewsResult {
   selector: 'app-episode-referenced-news',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, DatePipe, MatCard, MatCardHeader, MatIcon, MatTooltip],
+  imports: [CommonModule, DatePipe, MatCard, MatCardHeader, MatIcon, MatTooltip, MatIconButton],
   templateUrl: './episode-referenced-news.component.html',
   styleUrl: './episode-referenced-news.component.scss',
 })

@@ -50,7 +50,7 @@
 
   height: 100%;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
+  border-radius: 12px;
 
   background: var(--md-sys-color-surface-container);
 }
@@ -64,7 +64,7 @@
 
   padding: 8px 8px 8px 16px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px 8px 0 0;
+  border-radius: 12px 12px 0 0;
 
   background: var(--md-sys-color-surface-container-high);
 
@@ -134,7 +134,7 @@
 
     code {
       padding: 4px 8px;
-      border-radius: 4px;
+      border-radius: 8px;
       background: var(--md-sys-color-surface-container-high);
     }
   }

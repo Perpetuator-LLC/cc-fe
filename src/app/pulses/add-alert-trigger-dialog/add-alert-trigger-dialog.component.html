@@ -35,11 +35,13 @@
               @for (keyword of keywords; track keyword) {
                 <mat-chip-row (removed)="removeKeyword(keyword)">
                   {{ keyword }}
+                  <!-- md3-ignore: matChipRemove is Material -->
                   <button matChipRemove>
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-chip-row>
               }
+              <!-- md3-ignore: mat-chip-grid input -->
               <input
                 id="keyword-input"
                 placeholder="Type and press Enter..."

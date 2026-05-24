@@ -27,7 +27,7 @@
   .category {
     padding: 16px;
     border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--md-sys-color-surface-container);
 
     h4 {
@@ -50,7 +50,7 @@
 
         code {
           padding: 2px 6px;
-          border-radius: 4px;
+          border-radius: 8px;
 
           font-weight: 600;
           color: var(--md-sys-color-primary);
@@ -68,7 +68,7 @@
 
     margin-top: 24px;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
 
     background: var(--md-extended-color-info-color-container);
 

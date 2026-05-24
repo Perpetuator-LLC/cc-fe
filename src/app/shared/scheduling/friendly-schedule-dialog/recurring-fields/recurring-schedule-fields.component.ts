@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { DayOfWeek } from '../../schedule.types';
 import { COMMON_TIMEZONES } from '../../schedule.types';
@@ -17,7 +18,7 @@ export interface DayDisplay {
 @Component({
   selector: 'app-recurring-schedule-fields',
   standalone: true,
-  imports: [ReactiveFormsModule, MatButtonToggleModule, MatFormFieldModule, MatSelectModule],
+  imports: [ReactiveFormsModule, MatButtonToggleModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './recurring-schedule-fields.component.html',
   styleUrls: ['./recurring-schedule-fields.component.scss'],
 })

@@ -50,6 +50,7 @@
   background-color: var(--md-sys-color-surface);
 
   /* stylelint-disable selector-pseudo-element-disallowed-list, selector-pseudo-element-no-unknown -- Required for styling dynamic HTML content from innerHTML */
+  /* md3-ignore: Required for styling dynamic HTML content from innerHTML binding */
   ::ng-deep {
     h1,
     h2,

@@ -3,6 +3,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 /**
  * Accent color options for the left border
@@ -18,7 +19,7 @@ export type KpiAccent = 'primary' | 'secondary' | 'success' | 'warning' | 'error
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [CommonModule, MatTooltipModule, MatIconModule],
+  imports: [CommonModule, MatTooltipModule, MatIconModule, MatButtonModule],
   templateUrl: './kpi-card.component.html',
   styleUrl: './kpi-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

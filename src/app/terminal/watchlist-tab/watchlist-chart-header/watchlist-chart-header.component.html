@@ -28,6 +28,7 @@
     <div class="symbol-metadata">
       @if (exchange) {
         <button
+          mat-button
           class="metadata-chip exchange"
           (click)="onMetadataClick('exchange', exchange)"
           [matTooltip]="'View all ' + exchange + ' stocks'"
@@ -37,6 +38,7 @@
       }
       @if (sector) {
         <button
+          mat-button
           class="metadata-chip sector"
           (click)="onMetadataClick('sector', sector)"
           [matTooltip]="'View all ' + sector + ' stocks'"
@@ -46,6 +48,7 @@
       }
       @if (industry) {
         <button
+          mat-button
           class="metadata-chip industry"
           (click)="onMetadataClick('industry', industry)"
           [matTooltip]="'View all ' + industry + ' stocks'"

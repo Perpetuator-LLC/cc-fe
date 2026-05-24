@@ -15,5 +15,8 @@ if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
   exit 1
 fi
 
+# MD3 compliance check — catches Material Design 3 violations before push
+yarn lint:md3 --strict
+
 npm test
 

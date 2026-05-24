@@ -36,6 +36,7 @@
     }
     @if (display.hasPulseConfig) {
       <button
+        mat-flat-button
         type="button"
         class="resource-link-pulse"
         [routerLink]="['/media/pulses', display.pulseConfigUuid]"

@@ -61,91 +61,85 @@ function checkFile(filePath, fileContent, isTemplate = false) {
 
   if (isTemplate) {
     // Check for inline styles
-    const inlineStyleMatches = fileContent.match(PATTERNS.inlineStyles);
-    if (inlineStyleMatches) {
+    const inlineStyleLines = findLineNumbers(fileContent, PATTERNS.inlineStyles);
+    if (inlineStyleLines.length > 0) {
       results.errors.push({
         rule: 'no-inline-styles',
-        message: `Found ${inlineStyleMatches.length} inline style(s). Use component SCSS or Material component variants.`,
-        lines: findLineNumbers(fileContent, PATTERNS.inlineStyles),
+        message: `Found ${inlineStyleLines.length} inline style(s). Use component SCSS or Material component variants.`,
+        lines: inlineStyleLines,
       });
     }
 
     // Check for generic buttons (should use Material variants)
-    const genericButtonMatches = fileContent.match(PATTERNS.genericButton);
-    if (genericButtonMatches) {
+    const genericButtonLines = findLineNumbers(fileContent, PATTERNS.genericButton);
+    if (genericButtonLines.length > 0) {
       results.warnings.push({
         rule: 'use-material-buttons',
-        message: `Found ${genericButtonMatches.length} generic button(s). Consider using Material button variants (mat-button, mat-flat-button, mat-raised-button).`,
-        lines: findLineNumbers(fileContent, PATTERNS.genericButton),
+        message: `Found ${genericButtonLines.length} generic button(s). Consider using Material button variants (mat-button, mat-flat-button, mat-raised-button).`,
+        lines: genericButtonLines,
       });
     }
 
     // Check for generic inputs (should use matInput)
-    const genericInputMatches = fileContent.match(PATTERNS.genericInput);
-    if (genericInputMatches) {
+    const genericInputLines = findLineNumbers(fileContent, PATTERNS.genericInput);
+    if (genericInputLines.length > 0) {
       results.warnings.push({
         rule: 'use-material-inputs',
-        message: `Found ${genericInputMatches.length} generic input(s). Use matInput directive with mat-form-field.`,
-        lines: findLineNumbers(fileContent, PATTERNS.genericInput),
+        message: `Found ${genericInputLines.length} generic input(s). Use matInput directive with mat-form-field.`,
+        lines: genericInputLines,
       });
     }
   } else {
     // SCSS checks
 
     // Check for ::ng-deep
-    const ngDeepMatches = fileContent.match(PATTERNS.ngDeepSelector);
-    if (ngDeepMatches) {
+    const ngDeepLines = findLineNumbers(fileContent, PATTERNS.ngDeepSelector);
+    if (ngDeepLines.length > 0) {
       results.errors.push({
         rule: 'no-ng-deep',
-        message: `Found ${ngDeepMatches.length} ::ng-deep selector(s). This is deprecated. Use CSS custom properties or target Material classes directly.`,
-        lines: findLineNumbers(fileContent, PATTERNS.ngDeepSelector),
+        message: `Found ${ngDeepLines.length} ::ng-deep selector(s). This is deprecated. Use CSS custom properties or target Material classes directly.`,
+        lines: ngDeepLines,
       });
     }
 
     // Check for hardcoded px values (should use 4px grid)
-    const hardcodedPxMatches = fileContent.match(PATTERNS.hardcodedPx);
-    if (hardcodedPxMatches) {
-      const nonGridValues = hardcodedPxMatches.filter((match) => {
-        const value = parseInt(match.match(/[0-9]+/)[0]);
-        return value !== 0 && value % 4 !== 0 && value > 4;
+    const spacingLines = findInvalidSpacingLines(fileContent);
+    if (spacingLines.length > 0) {
+      results.warnings.push({
+        rule: 'use-4px-grid',
+        message: `Found ${spacingLines.length} spacing value(s) not on 4px grid. Use MD3 grid: 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64.`,
+        lines: spacingLines,
       });
-
-      if (nonGridValues.length > 0) {
-        results.warnings.push({
-          rule: 'use-4px-grid',
-          message: `Found ${nonGridValues.length} spacing value(s) not on 4px grid. Use MD3 grid: 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64.`,
-          lines: findLineNumbers(fileContent, PATTERNS.hardcodedPx),
-        });
-      }
     }
 
     // Check for hardcoded colors (should use design tokens)
-    const hardcodedColorMatches = fileContent.match(PATTERNS.hardcodedColors);
-    if (hardcodedColorMatches) {
+    const hardcodedColorLines = findLineNumbers(fileContent, PATTERNS.hardcodedColors);
+    if (hardcodedColorLines.length > 0) {
       results.warnings.push({
         rule: 'use-design-tokens',
-        message: `Found ${hardcodedColorMatches.length} hardcoded color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
-        lines: findLineNumbers(fileContent, PATTERNS.hardcodedColors),
+        message: `Found ${hardcodedColorLines.length} hardcoded color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
+        lines: hardcodedColorLines,
       });
     }
 
     // Check for rgb/rgba colors
-    const rgbMatches = fileContent.match(PATTERNS.rgbColors);
-    if (rgbMatches) {
+    const rgbLines = findLineNumbers(fileContent, PATTERNS.rgbColors);
+    if (rgbLines.length > 0) {
       results.warnings.push({
         rule: 'use-design-tokens',
-        message: `Found ${rgbMatches.length} rgb/rgba color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
-        lines: findLineNumbers(fileContent, PATTERNS.rgbColors),
+        message: `Found ${rgbLines.length} rgb/rgba color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
+        lines: rgbLines,
       });
     }
 
-    // Check for hardcoded border-radius
-    const hardcodedRadiusMatches = fileContent.match(PATTERNS.hardcodedRadius);
-    if (hardcodedRadiusMatches) {
+    // Check for hardcoded border-radius (allow MD3 values: 4px, 8px, 12px, 16px, 999px)
+    const validMd3Radii = [0, 4, 8, 12, 16, 999];
+    const invalidRadiusLines = findInvalidBorderRadiusLines(fileContent, validMd3Radii);
+    if (invalidRadiusLines.length > 0) {
       results.warnings.push({
         rule: 'use-standard-radius',
-        message: `Found ${hardcodedRadiusMatches.length} hardcoded border-radius value(s). Use MD3 values: 4px, 8px, 12px, 16px, or 999px (round).`,
-        lines: findLineNumbers(fileContent, PATTERNS.hardcodedRadius),
+        message: `Found ${invalidRadiusLines.length} hardcoded border-radius value(s). Use MD3 values: 4px, 8px, 12px, 16px, or 999px (round).`,
+        lines: invalidRadiusLines,
       });
     }
   }
@@ -158,8 +152,69 @@ function findLineNumbers(content, pattern) {
   const matches = [];
 
   lines.forEach((line, index) => {
+    // Skip if previous line contains md3-ignore comment
+    if (index > 0 && lines[index - 1].includes('md3-ignore')) {
+      return;
+    }
+    // Skip if current line contains md3-ignore comment
+    if (line.includes('md3-ignore')) {
+      return;
+    }
     if (line.match(pattern)) {
       matches.push(index + 1);
+    }
+  });
+
+  return matches;
+}
+
+function findInvalidBorderRadiusLines(content, validValues) {
+  const lines = content.split('\n');
+  const matches = [];
+  const radiusPattern = /border-radius\s*:\s*([0-9]+)px/;
+
+  lines.forEach((line, index) => {
+    // Skip if previous line contains md3-ignore comment
+    if (index > 0 && lines[index - 1].includes('md3-ignore')) {
+      return;
+    }
+    // Skip if current line contains md3-ignore comment
+    if (line.includes('md3-ignore')) {
+      return;
+    }
+    const match = line.match(radiusPattern);
+    if (match) {
+      const value = parseInt(match[1]);
+      if (!validValues.includes(value)) {
+        matches.push(index + 1);
+      }
+    }
+  });
+
+  return matches;
+}
+
+function findInvalidSpacingLines(content) {
+  const lines = content.split('\n');
+  const matches = [];
+  const spacingPattern = /(?:margin|padding|gap|top|left|right|bottom)\s*:\s*(?!0\s|var\().*?([0-9]+)px/;
+
+  lines.forEach((line, index) => {
+    // Skip if previous line contains md3-ignore comment
+    if (index > 0 && lines[index - 1].includes('md3-ignore')) {
+      return;
+    }
+    // Skip if current line contains md3-ignore comment
+    if (line.includes('md3-ignore')) {
+      return;
+    }
+    const match = line.match(spacingPattern);
+    if (match) {
+      const value = parseInt(match[1]);
+      // Check if value is on 4px grid (or is 0)
+      if (value !== 0 && value % 4 !== 0 && value > 4) {
+        matches.push(index + 1);
+      }
     }
   });
 
@@ -250,12 +305,63 @@ function formatChecklistForMarkdown(checklist) {
 // Main execution
 if (require.main === module) {
   const args = process.argv.slice(2);
+  const strictMode = args.includes('--strict');
+  const filesIndex = args.indexOf('--files');
+
+  let hasErrors = false;
+  let hasWarnings = false;
+
+  function printResults(file, results) {
+    if (results.errors.length > 0 || results.warnings.length > 0) {
+      console.log(`\n📄 ${file}`);
+      results.errors.forEach((err) => {
+        console.log(`  ❌ ERROR: ${err.message}`);
+        if (err.lines.length > 0) {
+          console.log(`     Lines: ${err.lines.join(', ')}`);
+        }
+      });
+      results.warnings.forEach((warn) => {
+        console.log(`  ⚠️  WARNING: ${warn.message}`);
+        if (warn.lines.length > 0) {
+          console.log(`     Lines: ${warn.lines.join(', ')}`);
+        }
+      });
+      if (results.errors.length > 0) hasErrors = true;
+      if (results.warnings.length > 0) hasWarnings = true;
+    }
+  }
 
   if (args.includes('--checklist') && args[1]) {
     // Generate checklist for a specific component
     const componentPath = args[1];
     const checklist = generateChecklistReport(componentPath);
     console.log(formatChecklistForMarkdown(checklist));
+  } else if (filesIndex !== -1) {
+    // Check specific files (for lint-staged)
+    const files = args.slice(filesIndex + 1).filter(f => !f.startsWith('--'));
+
+    if (files.length === 0) {
+      console.log('No files specified for --files mode');
+      process.exit(0);
+    }
+
+    files.forEach((file) => {
+      if (!fs.existsSync(file)) return;
+
+      const content = fs.readFileSync(file, 'utf-8');
+      const isTemplate = file.endsWith('.html');
+      const results = checkFile(file, content, isTemplate);
+      printResults(file, results);
+    });
+
+    if (hasErrors || hasWarnings) {
+      console.log('');
+    }
+
+    // In strict mode, exit with error if there are errors (not warnings)
+    if (strictMode && hasErrors) {
+      process.exit(1);
+    }
   } else {
     // Run full scan
     console.log('🔍 MD3 Compliance Checker\n');
@@ -266,22 +372,7 @@ if (require.main === module) {
     templateFiles.forEach((file) => {
       const content = fs.readFileSync(file, 'utf-8');
       const results = checkFile(file, content, true);
-
-      if (results.errors.length > 0 || results.warnings.length > 0) {
-        console.log(`\n📄 ${file}`);
-        results.errors.forEach((err) => {
-          console.log(`  ❌ ERROR: ${err.message}`);
-          if (err.lines.length > 0) {
-            console.log(`     Lines: ${err.lines.join(', ')}`);
-          }
-        });
-        results.warnings.forEach((warn) => {
-          console.log(`  ⚠️  WARNING: ${warn.message}`);
-          if (warn.lines.length > 0) {
-            console.log(`     Lines: ${warn.lines.join(', ')}`);
-          }
-        });
-      }
+      printResults(file, results);
     });
 
     // Scan all component SCSS
@@ -289,25 +380,15 @@ if (require.main === module) {
     scssFiles.forEach((file) => {
       const content = fs.readFileSync(file, 'utf-8');
       const results = checkFile(file, content, false);
-
-      if (results.errors.length > 0 || results.warnings.length > 0) {
-        console.log(`\n📄 ${file}`);
-        results.errors.forEach((err) => {
-          console.log(`  ❌ ERROR: ${err.message}`);
-          if (err.lines.length > 0) {
-            console.log(`     Lines: ${err.lines.join(', ')}`);
-          }
-        });
-        results.warnings.forEach((warn) => {
-          console.log(`  ⚠️  WARNING: ${warn.message}`);
-          if (warn.lines.length > 0) {
-            console.log(`     Lines: ${warn.lines.join(', ')}`);
-          }
-        });
-      }
+      printResults(file, results);
     });
 
     console.log('\n✨ Scan complete!\n');
+
+    // In strict mode, exit with error if there are errors (not warnings)
+    if (strictMode && hasErrors) {
+      process.exit(1);
+    }
   }
 }
 

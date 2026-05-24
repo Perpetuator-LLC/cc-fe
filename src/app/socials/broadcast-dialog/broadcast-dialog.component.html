@@ -76,7 +76,7 @@
           @for (tag of form.value.hashtags; track tag) {
             <span class="hashtag-chip">
               #{{ tag }}
-              <button type="button" class="remove-btn" (click)="removeHashtag(tag)">
+              <button mat-icon-button type="button" class="remove-btn" (click)="removeHashtag(tag)">
                 <mat-icon>close</mat-icon>
               </button>
             </span>
