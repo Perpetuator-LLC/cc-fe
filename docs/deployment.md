@@ -104,31 +104,36 @@ GitHub Actions calls Gitea's `workflow_dispatch` API to trigger the deploy after
 
 If the secret is missing, the workflow emits a warning rather than failing — deploys just need to be triggered manually from the Gitea Actions UI until the secret is added.
 
-### 2. GHCR Authentication on Lestrange
+### 2. GHCR Authentication for the Gitea Runner
 
-While the cc-fe GHCR package is private, the Gitea deploy runner on lestrange needs Docker auth to pull from GHCR.
+While the cc-fe GHCR package is private, the Gitea runner needs Docker auth to pull from GHCR.
 
-1. **Create a GitHub PAT** with `read:packages` scope only (no other permissions):
+**Important — DinD isolation:** the Gitea runner on lestrange uses an isolated Docker-in-Docker daemon (see `infra/ansible/playbooks/gitea-runner.yml` in the `mcp` repo). The host's `/root/.docker/config.json` is NOT mounted into the runner. Logging in on the host with `docker login ghcr.io` therefore has NO effect on what the workflow can pull. The runner needs its own credentials, provided via a Gitea secret consumed by `docker login` inside the workflow.
+
+**One-time setup:**
+
+1. **Create a GitHub classic PAT** with `read:packages` scope only:
    - GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → **Generate new token (classic)**
-   - **Note**: `lestrange GHCR pull`
-   - **Expiration**: 1 year (or no expiration if you accept the risk)
-   - **Scopes**: just `read:packages`
-   - Click **Generate token** and save it.
+   - **Note**: `Gitea runner GHCR pull`
+   - **Expiration**: 1 year (set a calendar reminder to rotate before it expires)
+   - **Scopes**: ONLY check `read:packages` — nothing else
+   - Click **Generate token** and copy it (shown once).
 
-2. **On lestrange, as the user the Gitea runner runs as** (likely `root` or a `deploy` user — check with `ps aux | grep act_runner`):
-   ```bash
-   echo "ghp_YOUR_TOKEN_HERE" | docker login ghcr.io -u perpetuator-llc --password-stdin
-   ```
-   This writes `~/.docker/config.json` with the credentials.
+   > Fine-grained PATs do not yet support GHCR for organization-owned packages. Use a classic PAT.
 
-3. **Verify** (after the first `build-and-publish.yml` run completes on GitHub):
-   ```bash
-   docker pull ghcr.io/perpetuator-llc/cc-fe:latest
-   ```
-   Should succeed without prompting.
+2. **Add it as a Gitea repo secret** (in Gitea, at the cc-fe-gh mirror repo):
+   - **Repo Settings** → **Actions** → **Secrets** → **Add Secret**
+   - **Name**: `GHCR_PULL_TOKEN`
+   - **Value**: (paste the PAT)
 
-4. **After the repo is made public (Phase 5)**, you can also make the GHCR package public so no auth is needed for pulls:
-   - GitHub → Your profile → Packages → cc-fe → **Package settings** → **Change visibility** → **Public**
+3. **Verify** by triggering the deploy workflow — the "Login to GHCR" step should print `✅ Authenticated to GHCR` and the subsequent pull step should succeed.
+
+**(Optional) Make the package public** to skip auth entirely:
+
+Since cc-fe is MIT-licensed and intended to be FOSS, the container can be public too:
+
+- GitHub → your org **Packages** → `cc-fe` → **Package settings** (right sidebar) → scroll to **Danger Zone** → **Change visibility** → **Public**
+- After that the `GHCR_PULL_TOKEN` step is harmless but unnecessary; you can delete it (and the secret) when convenient.
    - At that point, you can `docker logout ghcr.io` on lestrange and pulls will still work anonymously.
 
 ### 3. OpenBao Secrets
