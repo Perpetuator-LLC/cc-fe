@@ -916,6 +916,14 @@ body .toolbar-container {
 // Global button border radius - smaller corners for all Material buttons
 // Uses all MDC custom properties to ensure proper override
 :root {
+  // Form field sizing overrides (Material recommended approach)
+  @include mat.form-field-overrides(
+    (
+      container-height: 48px,
+      container-vertical-padding: 12px,
+    )
+  );
+
   // MDC button shape tokens
   --mdc-filled-button-container-shape: 8px;
   --mdc-outlined-button-container-shape: 8px;
