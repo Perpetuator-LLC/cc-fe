@@ -49,6 +49,8 @@ sample.env
 # Development scripts and tools
 scripts/
 *.sh
+# … but allow the container entrypoint, which IS needed by the build.
+!docker-entrypoint.sh
 
 # Temporary files
 tmp/

@@ -48,7 +48,7 @@ import {
 } from './earnings-history-table/earnings-history-table.component';
 import { AccountStatusCardComponent, AccountStatusDisplay } from './account-status-card/account-status-card.component';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 
 /** Pre-computed display state attached to each conversion row. */
 type ConversionDisplay = ConversionDisplayRow;
@@ -105,6 +105,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private router = inject(Router);
   private policyService = inject(PolicyService);
+  private appConfig = inject(AppConfigService);
 
   private subscriptions = new Subscription();
 
@@ -151,7 +152,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
       : 0;
     const totalCredits = stats?.totalAffiliateCredits ?? 0;
     this.dashboardDisplay = {
-      affiliateLink: profile?.code ? `${environment.SITE_URL}/a/${profile.code}` : '',
+      affiliateLink: profile?.code ? `${this.appConfig.config.SITE_URL}/a/${profile.code}` : '',
       defaultMessage: `Join ${profile?.user?.username || 'our'}'s Network`,
       availableBalance,
       availableBalanceFormatted: availableBalance.toLocaleString(),
@@ -473,7 +474,7 @@ export class AffiliateDashboardComponent implements OnInit, OnDestroy {
 
   getAffiliateLink(): string {
     if (!this.profile?.code) return '';
-    return `${environment.SITE_URL}/a/${this.profile.code}`;
+    return `${this.appConfig.config.SITE_URL}/a/${this.profile.code}`;
   }
 
   getDefaultMessage(): string {

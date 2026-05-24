@@ -12,7 +12,7 @@ import { AuthService } from '../../auth/auth.service';
 import { MessageService } from '../../message.service';
 import { TraceService } from '../../traces/trace.service';
 import { SeoService } from '../../seo.service';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 
 @Component({
   selector: 'app-affiliate-landing',
@@ -30,6 +30,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private traceService = inject(TraceService);
   private seoService = inject(SeoService);
+  private appConfig = inject(AppConfigService);
 
   private subscriptions = new Subscription();
 
@@ -142,7 +143,7 @@ export class AffiliateLandingComponent implements OnInit, OnDestroy {
   private updateSeoTags(code: string): void {
     if (!this.affiliateData) return;
 
-    const shareUrl = `${environment.SITE_URL}/a/${code}`;
+    const shareUrl = `${this.appConfig.config.SITE_URL}/a/${code}`;
 
     // Use customMessage if available, otherwise fall back to default
     const title = this.affiliateData.customMessage

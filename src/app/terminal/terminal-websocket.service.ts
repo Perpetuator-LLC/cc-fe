@@ -3,7 +3,7 @@ import { Injectable, OnDestroy, signal, WritableSignal, inject, Injector } from 
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, Subscription } from 'rxjs';
 import { createClient, Client } from 'graphql-ws';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 import { AuthService } from '../auth/auth.service';
 import {
   CommandProgress,
@@ -49,6 +49,7 @@ export interface HistorySearchResult {
 })
 export class TerminalWebSocketService implements OnDestroy {
   private authService = inject(AuthService);
+  private appConfig = inject(AppConfigService);
 
   private client: Client | null = null;
   private subscriptions = new Subscription();
@@ -534,7 +535,7 @@ export class TerminalWebSocketService implements OnDestroy {
   // ============================================================================
 
   private buildWebSocketUrl(): string {
-    const apiUrl = environment.API_URL;
+    const apiUrl = this.appConfig.config.API_URL;
     const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = apiUrl.replace(/^https?:\/\//, '');
     // Use the unified GraphQL WebSocket endpoint

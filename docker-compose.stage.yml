@@ -1,28 +1,43 @@
 # Copyright (c) 2024-2026 Perpetuator LLC
 #
-# Staging docker-compose for stage.capitalcopilot.io
-# Uses different container names and ports from production
+# Staging docker-compose for stage.capitalcopilot.io.
+#
+# Image: pulled from GHCR (built by .github/workflows/build-and-publish.yml
+# on push to main). No local build on lestrange.
+#
+# Runtime configuration: the container itself fetches CC_FE_* secrets from
+# OpenBao at startup. Lestrange's AppRole credential files are mounted
+# read-only into the container; docker-entrypoint.sh uses them to authenticate,
+# fetches the secrets, exports them as env vars, revokes the token, then
+# exec's the SSR server. No .env.stage on disk, no secrets in `docker inspect`.
 
 services:
   frontend:
     container_name: cc-fe-stage-angular
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        BUILD_CONFIG: staging
+    image: ghcr.io/perpetuator-llc/cc-fe:latest
+    pull_policy: always
     ports:
       - "4481:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - PORT=80
+      # Tells docker-entrypoint.sh to fetch CC_FE_* from OpenBao at startup.
+      # Without these two vars, the entrypoint would expect CC_FE_* directly.
+      - VAULT_ADDR=https://vault.perpetuator.io
+      - VAULT_PATH=secret/services/cc-fe/staging
+      # nginx-proxy + LE companion read these to provision the TLS cert and
+      # route traffic. They are NOT secrets.
       - VIRTUAL_HOST=stage.capitalcopilot.io
       - VIRTUAL_PATH=/
       - LETSENCRYPT_HOST=stage.capitalcopilot.io
       - LETSENCRYPT_EMAIL=admin@perpetuator.io
+    volumes:
+      # AppRole creds mounted read-only — the container uses these to
+      # log in to OpenBao at startup, then revokes its own token.
+      - /etc/vault:/etc/vault:ro
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -2,7 +2,7 @@
 import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -44,6 +44,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
+  private appConfig = inject(AppConfigService);
   private fb = inject(FormBuilder);
   private graphqlAuthService = inject(GraphqlAuthService);
   private router = inject(Router);
@@ -60,8 +61,8 @@ export class RegisterComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = false;
 
   registerForm = this.fb.group({
-    email: [environment.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
-    password: [environment.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]],
+    email: [this.appConfig.config.TEST_EMAIL ?? '', [Validators.required, Validators.email]],
+    password: [this.appConfig.config.TEST_PASSWORD ?? '', [Validators.required, Validators.minLength(6)]],
     acceptTerms: [false as boolean, Validators.requiredTrue],
   });
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;

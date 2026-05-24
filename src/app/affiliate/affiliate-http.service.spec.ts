@@ -1,18 +1,34 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AffiliateHttpService, AffiliateLandingData } from './affiliate-http.service';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
+import { AppConfig } from '../core/app-config';
+
+const TEST_CONFIG: AppConfig = {
+  production: false,
+  API_URL: 'https://test-api.example.com',
+  SITE_URL: 'http://localhost:4200',
+  STRIPE_PUBLIC_KEY: 'pk_test_dummy',
+  OAUTH_ISSUER: 'https://test-api.example.com',
+  OAUTH_CLIENT_ID: 'test-client',
+  OAUTH_SCOPES: 'read write',
+  TEST_EMAIL: '',
+  TEST_PASSWORD: '',
+};
 
 describe('AffiliateHttpService', () => {
   let service: AffiliateHttpService;
   let httpMock: HttpTestingController;
+  const apiUrl = TEST_CONFIG.API_URL;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [AffiliateHttpService],
     });
+    // Seed config before any consumer reads it.
+    TestBed.inject(AppConfigService).setConfig(TEST_CONFIG);
     service = TestBed.inject(AffiliateHttpService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -41,7 +57,7 @@ describe('AffiliateHttpService', () => {
         expect(data.brand_image_url).toBe('https://example.com/image.jpg');
       });
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
       expect(req.request.method).toBe('GET');
       expect(req.request.headers.has('Authorization')).toBe(false);
 
@@ -66,7 +82,7 @@ describe('AffiliateHttpService', () => {
         expect(data.brand_image_url).toBeNull();
       });
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
       req.flush(mockResponse);
     });
 
@@ -82,7 +98,7 @@ describe('AffiliateHttpService', () => {
         expect(data.brand_image_url).toBeNull();
       });
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
       req.flush(mockResponse);
     });
 
@@ -99,13 +115,13 @@ describe('AffiliateHttpService', () => {
         },
       });
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
       req.flush(mockError, { status: 500, statusText: 'Internal Server Error' });
     });
 
     it('should construct correct URL for affiliate landing endpoint', () => {
       const mockCode = 'XYZ789';
-      const expectedUrl = `${environment.API_URL}/a/${mockCode}/`;
+      const expectedUrl = `${apiUrl}/a/${mockCode}/`;
 
       service.getAffiliateLanding(mockCode).subscribe();
 
@@ -125,7 +141,7 @@ describe('AffiliateHttpService', () => {
 
       service.getAffiliateLanding(mockCode).subscribe();
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
 
       expect(req.request.headers.has('Authorization')).toBe(false);
       expect(req.request.headers.has('X-CSRFToken')).toBe(false);
@@ -152,7 +168,7 @@ describe('AffiliateHttpService', () => {
         expect(data.brand_image_url).toBeTruthy();
       });
 
-      const req = httpMock.expectOne(`${environment.API_URL}/a/${mockCode}/`);
+      const req = httpMock.expectOne(`${apiUrl}/a/${mockCode}/`);
       req.flush(mockResponse);
     });
   });

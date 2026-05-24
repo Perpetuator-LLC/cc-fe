@@ -4,7 +4,7 @@ import { ResolveFn, ActivatedRouteSnapshot } from '@angular/router';
 import { catchError, of, tap } from 'rxjs';
 import { AffiliateService, AffiliateLanding } from '../affiliate.service';
 import { SeoService } from '../../seo.service';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/app-config.service';
 
 /**
  * Route resolver for affiliate landing page
@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 export const affiliateLandingResolver: ResolveFn<AffiliateLanding | null> = (route: ActivatedRouteSnapshot) => {
   const affiliateService = inject(AffiliateService);
   const seoService = inject(SeoService);
+  const appConfig = inject(AppConfigService);
   const code = route.paramMap.get('code');
 
   if (!code) {
@@ -23,7 +24,7 @@ export const affiliateLandingResolver: ResolveFn<AffiliateLanding | null> = (rou
     tap((data) => {
       if (data) {
         // Set SEO tags during resolve so SSR renders them
-        const shareUrl = `${environment.SITE_URL}/a/${code}`;
+        const shareUrl = `${appConfig.config.SITE_URL}/a/${code}`;
 
         // Use customMessage if available, otherwise fall back to default
         const title = data.customMessage

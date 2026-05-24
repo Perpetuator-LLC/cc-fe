@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { AppConfigService } from '../core/app-config.service';
 import { TokenStorageService } from './token-storage.service';
 import { TraceService } from '../traces/trace.service';
 
@@ -33,6 +33,7 @@ export class TokenRefreshService {
   private tokenStorage = inject(TokenStorageService);
   private router = inject(Router);
   private injector = inject(Injector);
+  private appConfig = inject(AppConfigService);
 
   private traceService?: TraceService;
 
@@ -54,14 +55,15 @@ export class TokenRefreshService {
    * @returns Observable<boolean> - true if refresh was successful
    */
   refreshToken(refreshToken: string): Observable<boolean> {
+    const config = this.appConfig.config;
     const body = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-      client_id: environment.OAUTH_CLIENT_ID,
+      client_id: config.OAUTH_CLIENT_ID,
     });
 
     return this.http
-      .post<OAuth2TokenResponse>(`${environment.OAUTH_ISSUER}/o/token/`, body.toString(), {
+      .post<OAuth2TokenResponse>(`${config.OAUTH_ISSUER}/o/token/`, body.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
