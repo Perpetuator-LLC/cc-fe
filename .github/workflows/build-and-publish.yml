@@ -1,0 +1,119 @@
+# Copyright (c) 2026 Perpetuator LLC
+#
+# Build, scan, and publish the cc-fe Docker image to GitHub Container Registry.
+#
+# Triggers:
+#   - push to main           → builds and publishes :latest + :sha-<hash>
+#   - tag matching v*         → also publishes the semver tag (e.g. :1.2.3)
+#   - workflow_dispatch       → manual trigger for ad-hoc rebuilds
+#
+# Trivy gate: the build fails on CRITICAL or HIGH severity CVEs with a
+# known fix available. Unfixed issues are ignored (we can't act on them
+# until the upstream package patches).
+
+name: Build, Scan & Publish Docker Image
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: build-and-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-scan-publish:
+    name: Build, Trivy scan, push to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Lowercased to satisfy GHCR's namespace rules.
+          flavor: |
+            latest=auto
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build image (load into local Docker for scanning)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resolve scan target tag
+        id: scan-target
+        run: |
+          # Use the SHA tag — guaranteed to exist regardless of branch/tag triggers.
+          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE_LOWER=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=${IMAGE_LOWER}:sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ steps.scan-target.outputs.image }}
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          vuln-type: os,library
+
+      - name: Push to GHCR
+        if: success()
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Build & Publish Summary"
+            echo ""
+            echo "**Image tags published:**"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo ""
+            echo "**Trivy scan target:** \`${{ steps.scan-target.outputs.image }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
