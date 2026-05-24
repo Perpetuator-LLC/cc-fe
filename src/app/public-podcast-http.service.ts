@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../environments/environment';
+import { AppConfigService } from './core/app-config.service';
 
 export interface PublicEpisode {
   id: string;
@@ -108,8 +108,11 @@ export interface CategoryPodcastsResponse {
 })
 export class PublicPodcastHttpService {
   private http = inject(HttpClient);
+  private appConfig = inject(AppConfigService);
 
-  private apiUrl = environment.API_URL;
+  private get apiUrl(): string {
+    return this.appConfig.config.API_URL;
+  }
 
   getPodcast(podcastId: string, page = 1, perPage = 20): Observable<PodcastResponse> {
     let params = new HttpParams();

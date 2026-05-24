@@ -11,32 +11,46 @@ import { ErrorLink } from '@apollo/client/link/error';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { createClient, Client } from 'graphql-ws';
 import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
 import { TokenStorageService } from './auth/token-storage.service';
 import { TokenRefreshService } from './auth/token-refresh.service';
+import { AppConfigService } from './core/app-config.service';
 import { cachePolicyRegistry } from './cache-policies';
 import { firstValueFrom } from 'rxjs';
 
-const uri = environment.API_URL + '/graphql/';
-
-// WebSocket URL for GraphQL subscriptions and real-time operations
-function getWebSocketUrl(): string {
-  const wsProtocol = environment.API_URL.startsWith('https') ? 'wss' : 'ws';
-  const wsHost = environment.API_URL.replace(/^https?:\/\//, '');
+/**
+ * Build the WebSocket URL for GraphQL subscriptions from the runtime API URL.
+ *
+ * Pulled out of module scope so it reads from the runtime config — which is
+ * only guaranteed to be loaded once `apolloOptionsFactory` runs (after
+ * APP_INITIALIZER for AppConfigService resolves).
+ */
+function buildWebSocketUrl(apiUrl: string): string {
+  const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
+  const wsHost = apiUrl.replace(/^https?:\/\//, '');
   return `${wsProtocol}://${wsHost}/ws/graphql/`;
 }
 
 // Shared WebSocket client instance for GraphQL operations
 let wsClient: Client | null = null;
+let wsClientUrl: string | null = null;
 
 /**
  * Get the shared GraphQL WebSocket client
- * Creates client on first call, reuses existing instance
+ * Creates client on first call, reuses existing instance.
+ *
+ * The URL must be passed in by the caller — it comes from AppConfigService
+ * and isn't available at module load time.
  */
-export function getGraphQLWsClient(tokenStorage: TokenStorageService): Client {
+export function getGraphQLWsClient(tokenStorage: TokenStorageService, url: string): Client {
+  // If URL changed (e.g. test reconfiguration), dispose the old client.
+  if (wsClient && wsClientUrl !== url) {
+    wsClient.dispose();
+    wsClient = null;
+  }
   if (!wsClient) {
+    wsClientUrl = url;
     wsClient = createClient({
-      url: getWebSocketUrl(),
+      url,
       connectionParams: () => {
         const token = tokenStorage.getAccessToken();
         return token ? { authorization: `Bearer ${token}` } : {};
@@ -69,6 +83,7 @@ export function disconnectGraphQLWs(): void {
   if (wsClient) {
     wsClient.dispose();
     wsClient = null;
+    wsClientUrl = null;
     console.debug('[GraphQL-WS] Disconnected and disposed');
   }
 }
@@ -85,12 +100,19 @@ let refreshPromise: Promise<string | null> | null = null;
  * - Sends credentials: 'include' for logged_in cookie (cross-subdomain)
  * - Backend validates the Bearer token, NOT the cookie
  * - Automatically refreshes token when expired or about to expire
+ *
+ * Runtime config: API_URL is read from AppConfigService inside this factory,
+ * NOT at module load time, so the value reflects the runtime environment.
  */
 export function apolloOptionsFactory(): ApolloClient.Options {
   const tokenStorage = inject(TokenStorageService);
   const tokenRefreshService = inject(TokenRefreshService);
+  const appConfig = inject(AppConfigService);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);
+
+  const apiUrl = appConfig.config.API_URL;
+  const uri = apiUrl + '/graphql/';
 
   /**
    * Refresh the token and return the new access token
@@ -256,8 +278,9 @@ export function apolloOptionsFactory(): ApolloClient.Options {
 
   if (isBrowser) {
     // WebSocket link for subscriptions and real-time operations
-    const wsClient = getGraphQLWsClient(tokenStorage);
-    const wsLink = new GraphQLWsLink(wsClient);
+    const wsUrl = buildWebSocketUrl(apiUrl);
+    const browserWsClient = getGraphQLWsClient(tokenStorage, wsUrl);
+    const wsLink = new GraphQLWsLink(browserWsClient);
 
     // Split link: use WebSocket for subscriptions, HTTP for queries/mutations
     finalLink = split(

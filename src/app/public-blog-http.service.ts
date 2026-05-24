@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../environments/environment';
+import { AppConfigService } from './core/app-config.service';
 
 export interface PublicArticle {
   id: string;
@@ -109,8 +109,11 @@ export interface BlogsListResponse {
 })
 export class PublicBlogHttpService {
   private http = inject(HttpClient);
+  private appConfig = inject(AppConfigService);
 
-  private apiUrl = environment.API_URL;
+  private get apiUrl(): string {
+    return this.appConfig.config.API_URL;
+  }
 
   getBlog(blogId: string, page = 1, perPage = 20): Observable<BlogResponse> {
     // Backend returns blog metadata and articles separately, so we need to combine them
