@@ -160,56 +160,6 @@ body {
     }
   }
 
-  // Material component global overrides
-  // Using body prefix for higher specificity to avoid !important
-  .mat-mdc-form-field {
-    font-size: 14px;
-  }
-
-  .mat-mdc-form-field:has(mat-hint) {
-    margin-bottom: 14px;
-  }
-
-  .mat-mdc-notch-piece {
-    border: 0;
-  }
-
-  .mdc-line-ripple::before,
-  .mdc-line-ripple::after {
-    border: 0;
-  }
-
-  .mat-mdc-text-field-wrapper:has(.mat-mdc-form-field-textarea-control) {
-    height: auto;
-  }
-
-  .team-name-input .mat-mdc-text-field-wrapper {
-    height: auto;
-    border: 0;
-    border-radius: 0;
-    background-color: transparent;
-  }
-
-  .status-filter-compact .mat-mdc-form-field-infix {
-    padding-top: 12px;
-  }
-
-  .mat-mdc-paginator-page-size .mat-mdc-form-field-infix {
-    padding-top: 12px;
-  }
-
-  .mat-mdc-select {
-    font-size: 14px;
-  }
-
-  .actionMenu {
-    min-width: 192px;
-  }
-
-  .team-tab-group .mat-mdc-tab.mdc-tab {
-    flex-grow: 0;
-  }
-
   // Terminal page tab group - fill available height
   .content-tabs {
     .mat-mdc-tab-body-wrapper {
@@ -1902,6 +1852,10 @@ html body {
     font-size: 14px;
   }
 
+  .mat-mdc-form-field:has(mat-hint) {
+    margin-bottom: 14px;
+  }
+
   .mat-mdc-notch-piece {
     border: 0;
   }
@@ -1912,7 +1866,6 @@ html body {
   }
 
   .mat-mdc-text-field-wrapper.mdc-text-field {
-    // height: 48px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 8px;
   }
