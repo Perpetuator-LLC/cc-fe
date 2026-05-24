@@ -1,19 +1,33 @@
 # Copyright (c) 2026 Perpetuator LLC
 #
-# Build, scan, and publish the cc-fe Docker image to GitHub Container Registry.
+# Build, scan, and (conditionally) publish the cc-fe Docker image to GHCR.
 #
 # Triggers:
-#   - push to main           → builds and publishes :latest + :sha-<hash>
-#   - tag matching v*         → also publishes the semver tag (e.g. :1.2.3)
-#   - workflow_dispatch       → manual trigger for ad-hoc rebuilds
+#   - pull_request to main    → build + Trivy scan only (NO push to GHCR)
+#                               This validates the image builds and is secure
+#                               before merge, without polluting the registry
+#                               with per-PR artifacts.
+#   - push to main            → build + scan + publish :latest + :sha-<hash>
+#   - tag matching v*         → also publishes semver tags (e.g. :1.2.3)
+#   - workflow_dispatch       → manual trigger; pushes only when run on
+#                               main/tag (not on feature branches).
 #
-# Trivy gate: the build fails on CRITICAL or HIGH severity CVEs with a
-# known fix available. Unfixed issues are ignored (we can't act on them
-# until the upstream package patches).
+# Trivy gate: build fails on CRITICAL or HIGH severity CVEs with a known
+# fix available. Unfixed issues are ignored (can't act on them until
+# upstream patches).
+#
+# Why scan PRs without publishing: an unpublished image still produces a
+# Trivy report in the Actions logs/PR checks, so reviewers can see the
+# scan result without having a half-baked image floating around GHCR.
 
 name: Build, Scan & Publish Docker Image
 
 on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
   push:
     branches: [main]
     tags: ['v*']
@@ -22,6 +36,7 @@ on:
 permissions:
   contents: read
   packages: write
+  pull-requests: read
 
 env:
   REGISTRY: ghcr.io
@@ -29,7 +44,7 @@ env:
 
 concurrency:
   group: build-and-publish-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build-scan-publish:
@@ -42,7 +57,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Only log in to GHCR when we're going to push. PRs don't need it
+      # since they only build locally.
       - name: Login to GHCR
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -60,11 +78,12 @@ jobs:
           tags: |
             type=sha,prefix=sha-,format=short
             type=ref,event=branch
+            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build image (load into local Docker for scanning)
+      - name: Build image (load locally for scanning)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -78,7 +97,7 @@ jobs:
       - name: Resolve scan target tag
         id: scan-target
         run: |
-          # Use the SHA tag — guaranteed to exist regardless of branch/tag triggers.
+          # Use the SHA tag — guaranteed to exist regardless of trigger.
           SHORT_SHA="${GITHUB_SHA::7}"
           IMAGE_LOWER=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           echo "image=${IMAGE_LOWER}:sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
@@ -93,8 +112,11 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
 
+      # Push only for branch pushes to main, tag pushes, or manual dispatch.
+      # PRs intentionally skip this — the build + scan are the validation;
+      # the actual image only lands in GHCR when the PR merges to main.
       - name: Push to GHCR
-        if: success()
+        if: github.event_name != 'pull_request' && success()
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -110,7 +132,13 @@ jobs:
           {
             echo "## Build & Publish Summary"
             echo ""
-            echo "**Image tags published:**"
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "**Mode:** PR validation (build + Trivy scan only — no GHCR push)"
+            else
+              echo "**Mode:** Publish (image pushed to GHCR)"
+            fi
+            echo ""
+            echo "**Image tags:**"
             echo '```'
             echo "${{ steps.meta.outputs.tags }}"
             echo '```'
