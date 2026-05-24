@@ -198,7 +198,7 @@ export class PulsesService extends BaseService {
       fetchPolicy: 'network-only',
     }).pipe(
       map((data) => ({
-        pulseConfigs: data.pulseConfigs.edges.map((e) => e.node),
+        pulseConfigs: data.pulseConfigs.edges.map((e) => this.parsePulseConfig(e.node)),
         pageInfo: data.pulseConfigs.pageInfo,
         totalCount: data.pulseConfigs.totalCount,
       })),
@@ -226,7 +226,7 @@ export class PulsesService extends BaseService {
       query: GQL,
       variables: { uuid },
       fetchPolicy: 'network-only',
-    }).pipe(map((data) => data.pulseConfig));
+    }).pipe(map((data) => this.parsePulseConfig(data.pulseConfig)));
   }
 
   /**
@@ -382,7 +382,10 @@ export class PulsesService extends BaseService {
         if (!data.createPulseConfig.success) {
           throw new Error(data.createPulseConfig.message);
         }
-        return data.createPulseConfig;
+        return {
+          ...data.createPulseConfig,
+          pulseConfig: this.parsePulseConfig(data.createPulseConfig.pulseConfig),
+        };
       }),
     );
   }
@@ -533,7 +536,10 @@ export class PulsesService extends BaseService {
         if (!data.updatePulseConfig.success) {
           throw new Error(data.updatePulseConfig.message);
         }
-        return data.updatePulseConfig;
+        return {
+          ...data.updatePulseConfig,
+          pulseConfig: this.parsePulseConfig(data.updatePulseConfig.pulseConfig),
+        };
       }),
     );
   }
@@ -824,7 +830,10 @@ export class PulsesService extends BaseService {
         if (!data.addAlertTrigger.success) {
           throw new Error(data.addAlertTrigger.message);
         }
-        return data.addAlertTrigger;
+        return {
+          ...data.addAlertTrigger,
+          alertTrigger: this.parseAlertTrigger(data.addAlertTrigger.alertTrigger),
+        };
       }),
     );
   }
@@ -1143,5 +1152,25 @@ export class PulsesService extends BaseService {
       variables: { onlyValid },
       fetchPolicy: 'cache-first', // Cache for performance
     }).pipe(map((data) => data.rssFeedsList || []));
+  }
+
+  /** Parse JSONString fields (e.g. keywords) on an AlertTrigger into real arrays. */
+  private parseAlertTrigger(trigger: AlertTrigger): AlertTrigger {
+    if (typeof trigger.keywords === 'string') {
+      try {
+        return { ...trigger, keywords: JSON.parse(trigger.keywords as string) };
+      } catch {
+        return { ...trigger, keywords: [] };
+      }
+    }
+    return trigger;
+  }
+
+  /** Parse JSONString fields on all alert triggers within a PulseConfig. */
+  private parsePulseConfig(config: PulseConfig): PulseConfig {
+    if (config.alertTriggers?.length) {
+      return { ...config, alertTriggers: config.alertTriggers.map((t) => this.parseAlertTrigger(t)) };
+    }
+    return config;
   }
 }
