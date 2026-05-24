@@ -108,30 +108,32 @@ jobs:
           #
           # Retry loop handles the GHCR propagation race: the
           # build-and-publish.yml workflow on GitHub dispatches us within
-          # milliseconds of completing the push, but GHCR's CDN can take
-          # 10-30s to make a freshly-pushed manifest globally queryable.
-          # Without retry, ~1 in 3 deploys would land in that window and
-          # see "manifest unknown" even though the push succeeded.
+          # ~4s of completing the push, but GHCR's CDN propagation is
+          # variable. Observed in production: sometimes ready within
+          # seconds, sometimes >60s, occasionally needing several minutes.
+          # When the auto-deploy fails, a manual re-run a few minutes
+          # later always works — so we retry up to 5 minutes total
+          # (30 attempts × 10s) to cover the slowest tail. Each
+          # individual `docker pull` is fast on failure so the cost of
+          # a high retry count is small.
           #
-          # 6 attempts × 10s = 60s total tolerance, which has covered
-          # every propagation delay observed so far.
-          #
-          # Side benefit: pull populates the local image cache, so the next
-          # smoke test step's `docker run` and the final `docker compose pull`
-          # are both fast (no re-download).
+          # Side benefit: pull populates the local image cache, so the
+          # next smoke test step's `docker run` and the final
+          # `docker compose pull` are both fast (no re-download).
           IMAGE="${{ steps.target.outputs.image }}"
-          for attempt in 1 2 3 4 5 6; do
+          MAX_ATTEMPTS=30
+          for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
             if /usr/bin/docker pull "${IMAGE}"; then
-              echo "✅ Image pulled successfully (attempt ${attempt})"
+              echo "✅ Image pulled successfully (attempt ${attempt}/${MAX_ATTEMPTS})"
               exit 0
             fi
-            if [ "${attempt}" -lt 6 ]; then
-              echo "⏳ Pull failed (attempt ${attempt}/6). Likely registry propagation — retrying in 10s..."
+            if [ "${attempt}" -lt "${MAX_ATTEMPTS}" ]; then
+              echo "⏳ Pull failed (attempt ${attempt}/${MAX_ATTEMPTS}). Likely registry propagation — retrying in 10s..."
               sleep 10
             fi
           done
-          echo "❌ Failed to pull ${IMAGE} after 6 attempts (~60s)."
-          echo "   This is beyond normal GHCR propagation. Check:"
+          echo "❌ Failed to pull ${IMAGE} after ${MAX_ATTEMPTS} attempts (~5 min)."
+          echo "   This is beyond observed GHCR propagation. Check:"
           echo "   - GitHub Actions build for this commit:"
           echo "     https://github.com/Perpetuator-LLC/cc-fe/commit/${{ github.sha }}/checks"
           echo "   - The GHCR package page for the sha-XXX tag:"
