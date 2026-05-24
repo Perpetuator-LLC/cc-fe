@@ -67,6 +67,8 @@
   align-items: center;
 
   button[mat-flat-button] {
+    white-space: nowrap;
+
     mat-spinner {
       display: inline-block;
       margin-right: 8px;
