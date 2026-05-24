@@ -61,7 +61,8 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
   socialForm: FormGroup;
   articleForm: FormGroup;
 
-  socialAccounts: SocialAccount[] = [];
+  /** Accounts enriched with pre-built platformIcon per row. */
+  socialAccounts: (SocialAccount & { platformIcon: string })[] = [];
   templates: BroadcastTemplate[] = [];
   blogs: Blog[] = [];
 
@@ -99,7 +100,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.socialsService.getSocialAccounts(undefined, undefined, true).subscribe({
         next: (accounts) => {
-          this.socialAccounts = accounts;
+          this.socialAccounts = accounts.map((a) => ({ ...a, platformIcon: this.getPlatformIcon(a.platform) }));
           this.loadingAccounts = false;
           this.selectDefaultSocialAccount();
         },
@@ -289,7 +290,7 @@ export class GenerateContentDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
-  getSelectedAccountTemplates(): BroadcastTemplate[] {
+  get selectedAccountTemplates(): BroadcastTemplate[] {
     const selectedAccount = this.socialAccounts.find((a) => a.id === this.socialForm.value.socialAccountUuid);
     if (!selectedAccount) return [];
     return this.templates.filter((t) => t.platform === selectedAccount.platform);

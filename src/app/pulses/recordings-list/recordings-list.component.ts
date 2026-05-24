@@ -65,7 +65,16 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   // Data
-  recordings: Pulse[] = [];
+  /**
+   * Enriched recordings with pre-computed display strings for the template.
+   * Built on every load so the template avoids per-CD method calls.
+   */
+  recordings: (Pulse & {
+    statusClass: string;
+    statusText: string;
+    formattedDuration: string;
+    formattedTimeAgo: string;
+  })[] = [];
   pulseConfigs: PulseConfig[] = [];
   loading = true;
   totalCount = 0;
@@ -201,7 +210,13 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.pulsesService.getPulses(configUuid, status, search, this.pageSize, this.currentCursor).subscribe({
         next: (response) => {
-          this.recordings = response.pulses;
+          this.recordings = response.pulses.map((r) => ({
+            ...r,
+            statusClass: this.getStatusClass(r.status, r),
+            statusText: this.getDisplayStatusText(r),
+            formattedDuration: this.formatSeconds(r.audioDurationSeconds),
+            formattedTimeAgo: this.formatTimeAgo(r.createdAt),
+          }));
           this.totalCount = response.totalCount;
 
           // Store cursor for next page
@@ -321,7 +336,7 @@ export class RecordingsListComponent implements OnInit, OnDestroy {
     this.statusControl.setValue(null);
   }
 
-  hasActiveFilters(): boolean {
+  get hasActiveFilters(): boolean {
     return !!(this.searchControl.value || this.pulseConfigControl.value || this.statusControl.value);
   }
 }

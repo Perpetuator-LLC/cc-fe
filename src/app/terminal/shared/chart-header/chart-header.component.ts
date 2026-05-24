@@ -49,7 +49,16 @@ export class ChartHeaderComponent {
   @Input() industry?: string;
 
   /** Market capitalization */
-  @Input() marketCap?: number;
+  private _marketCap?: number;
+  /** Pre-formatted market cap string for the template. */
+  formattedMarketCap = '';
+  @Input() set marketCap(value: number | undefined) {
+    this._marketCap = value;
+    this.formattedMarketCap = value !== undefined ? this.formatMarketCap(value) : '';
+  }
+  get marketCap(): number | undefined {
+    return this._marketCap;
+  }
 
   /** Emitted when sector chip clicked */
   @Output() sectorClick = new EventEmitter<string>();

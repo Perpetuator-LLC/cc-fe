@@ -66,7 +66,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   blogUuid = '';
   blog: Blog | null = null;
   articles: Article[] = [];
-  articlesDataSource = new MatTableDataSource<Article>([]);
+  articlesDataSource = new MatTableDataSource<Article & { statusClass: string; formattedPublishedAt: string }>([]);
   articleColumns = ['title', 'status', 'views', 'published', 'actions'];
 
   blogForm!: FormGroup;
@@ -89,7 +89,8 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
           next: (blog) => {
             this.blog = blog;
             this.articles = blog.articles || [];
-            this.articlesDataSource.data = this.articles;
+            this.articlesDisplay = this.buildArticlesDisplay(this.articles);
+            this.articlesDataSource.data = this.articlesDisplay;
             this.patchForm(blog);
             this.loading = false;
           },
@@ -170,6 +171,32 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
           },
         }),
     );
+  }
+
+  /** Pre-computed display strings backed by the loaded blog + articles. */
+  get blogLatestArticleDate(): string {
+    return this.formatDate(this.blog?.latestArticleDate ?? null);
+  }
+
+  get shareUrl(): string {
+    if (!this.blog) return '';
+    return this.shareService.buildBlogUrl(this.blog.id, this.blog.name);
+  }
+
+  get shareRoute(): string {
+    if (!this.blog) return '';
+    return this.shareService.buildBlogRoute(this.blog.id, this.blog.name);
+  }
+
+  /** Articles enriched with pre-computed display fields for the table. */
+  articlesDisplay: (Article & { statusClass: string; formattedPublishedAt: string })[] = [];
+
+  private buildArticlesDisplay(articles: Article[]): typeof this.articlesDisplay {
+    return articles.map((a) => ({
+      ...a,
+      statusClass: this.getStatusClass(a.status),
+      formattedPublishedAt: this.formatDate(a.publishedAt),
+    }));
   }
 
   getStatusClass(status: string): string {

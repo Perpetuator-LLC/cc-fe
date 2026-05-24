@@ -17,19 +17,19 @@
 } @else {
   <div class="actions-timeline">
     @for (action of agentActions; track $index) {
-      <div class="action-item" [class]="getStatusClass(action.status)">
+      <div class="action-item" [class]="action.statusClass">
         <div class="action-icon">
-          <mat-icon>{{ getActionIcon(action) }}</mat-icon>
+          <mat-icon>{{ action.icon }}</mat-icon>
         </div>
         <div class="action-content">
           <div class="action-header">
-            <span class="tool-name">{{ formatToolName(action.tool) }}</span>
-            <span class="status-badge" [class]="getStatusClass(action.status)">
+            <span class="tool-name">{{ action.formattedToolName }}</span>
+            <span class="status-badge" [class]="action.statusClass">
               {{ action.status === 'no_results' ? 'No Results' : (action.status || 'unknown' | titlecase) }}
             </span>
           </div>
-          @if (getArgsDisplay(action.args)) {
-            <div class="action-args">{{ getArgsDisplay(action.args) }}</div>
+          @if (action.argsDisplay) {
+            <div class="action-args">{{ action.argsDisplay }}</div>
           }
           @if (action.result_summary) {
             <div class="action-result">{{ action.result_summary }}</div>
@@ -39,7 +39,7 @@
           }
           @if (action.items && action.items.length > 0) {
             <div class="action-items">
-              @for (item of action.items.slice(0, 3); track $index) {
+              @for (item of action.topItems; track $index) {
                 <div class="item">
                   @if (item.url) {
                     <a [href]="item.url" target="_blank" rel="noopener noreferrer">
@@ -50,8 +50,8 @@
                   }
                 </div>
               }
-              @if (action.items.length > 3) {
-                <div class="more-items">+{{ action.items.length - 3 }} more</div>
+              @if (action.extraItemCount > 0) {
+                <div class="more-items">+{{ action.extraItemCount }} more</div>
               }
             </div>
           }

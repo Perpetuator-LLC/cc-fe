@@ -58,6 +58,38 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   protected loading = false;
   topic: Topic | null = null;
+  /** Pre-rendered display strings for the loaded topic. */
+  topicDisplay: {
+    formattedCreatedAt: string;
+    validatedContentHtml: SafeHtml;
+    researchContentHtml: SafeHtml;
+    sources: {
+      uuid: string;
+      createdAt: string;
+      formattedDate: string;
+      url: string;
+      title?: string | null;
+      content?: string | null;
+    }[];
+  } | null = null;
+
+  private rebuildTopicDisplay(): void {
+    const t = this.topic;
+    if (!t) {
+      this.topicDisplay = null;
+      return;
+    }
+    this.topicDisplay = {
+      formattedCreatedAt: this.formatDate(t.createdAt),
+      validatedContentHtml: this.markdownToHtml(t.validatedContent ?? ''),
+      researchContentHtml: this.markdownToHtml(t.researchContent ?? ''),
+      sources: (t.sources ?? []).map((s) => ({
+        ...s,
+        formattedDate: this.formatDate(s.createdAt),
+      })),
+    };
+  }
+
   topicUuid: string | null = null;
   isGeneratingResearch = false;
 
@@ -95,6 +127,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
         next: (topic) => {
           this.messageService.clearMessages();
           this.topic = topic;
+          this.rebuildTopicDisplay();
           this.loading = false;
           this.loadingService.hide();
         },
@@ -212,6 +245,7 @@ export class TopicDetailComponent implements OnInit, OnDestroy {
           this.messageService.success('Topic updated successfully');
           if (response.topic) {
             this.topic = { ...this.topic!, ...response.topic };
+            this.rebuildTopicDisplay();
           }
           this.isEditing = false;
           this.isSaving = false;

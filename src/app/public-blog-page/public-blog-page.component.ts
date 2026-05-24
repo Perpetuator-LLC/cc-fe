@@ -40,6 +40,19 @@ export class PublicBlogPageComponent implements OnInit {
   private readonly seoService = inject(SeoService);
 
   blogData: BlogResponse | null = null;
+  /**
+   * Pre-enriched articles for the template. `readTimeText` is pre-formatted
+   * (empty string when no read time) so the template can use
+   * `[hidden]="!readTimeText"` instead of an `@if` — needed to keep the
+   * template's cyclomatic complexity under the lint limit.
+   */
+  articlesDisplay: (PublicArticle & {
+    url: string;
+    shareUrl: string;
+    formattedDate: string;
+    excerpt: string;
+    readTimeText: string;
+  })[] = [];
   loading = true;
   error = false;
   blogId = '';
@@ -71,6 +84,14 @@ export class PublicBlogPageComponent implements OnInit {
     this.publicBlogService.getBlog(this.blogId, this.currentPage, this.perPage).subscribe({
       next: (data) => {
         this.blogData = data;
+        this.articlesDisplay = (data.articles || []).map((a) => ({
+          ...a,
+          url: this.getArticleUrl(a.id, a.title),
+          shareUrl: this.getArticleShareUrl(a.id, a.title),
+          formattedDate: a.publishedAt ? this.formatDate(a.publishedAt ?? a.createdAt) : '',
+          excerpt: this.getExcerpt(a),
+          readTimeText: a.readTimeMinutes ? `${a.readTimeMinutes} min read` : '',
+        }));
         this.loading = false;
         this.updateSeoTags();
       },
@@ -95,9 +116,19 @@ export class PublicBlogPageComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  getShareUrl(): string {
+  get shareUrl(): string {
     if (!this.blogData) return '';
     return this.shareService.buildBlogUrl(this.blogData.id, this.blogData.name);
+  }
+
+  /** Preferred blog image: thumbnail if present, otherwise the full image. */
+  get blogImageUrl(): string {
+    return this.blogData?.thumbnailUrl || this.blogData?.imageUrl || '';
+  }
+
+  /** Backwards-compatible method kept for internal callers. */
+  getShareUrl(): string {
+    return this.shareUrl;
   }
 
   getArticleUrl(articleId: string, title: string): string {
@@ -140,4 +171,3 @@ export class PublicBlogPageComponent implements OnInit {
     });
   }
 }
-

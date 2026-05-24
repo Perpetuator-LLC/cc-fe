@@ -462,14 +462,12 @@ export const routes: Routes = [
   },
   {
     path: 'blogs',
-    loadComponent: () =>
-      import('./browse/browse-blogs/browse-blogs.component').then((c) => c.BrowseBlogsComponent),
+    loadComponent: () => import('./browse/browse-blogs/browse-blogs.component').then((c) => c.BrowseBlogsComponent),
     title: 'Browse Blogs',
   },
   {
     path: 'blogs/:id',
-    loadComponent: () =>
-      import('./public-blog-page/public-blog-page.component').then((c) => c.PublicBlogPageComponent),
+    loadComponent: () => import('./public-blog-page/public-blog-page.component').then((c) => c.PublicBlogPageComponent),
     title: 'Blog',
   },
   {

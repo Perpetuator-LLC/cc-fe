@@ -15,6 +15,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { Subscription } from 'rxjs';
+import { ScheduleEntityFieldsComponent } from './entity-fields/schedule-entity-fields.component';
+import { RecurringScheduleFieldsComponent } from './recurring-fields/recurring-schedule-fields.component';
+import { OneTimeScheduleFieldsComponent } from './one-time-fields/one-time-schedule-fields.component';
 import { Schedule, SchedulingService } from '../../../scheduling.service';
 import { MessageService } from '../../../message.service';
 import {
@@ -71,6 +74,9 @@ export interface FriendlyScheduleDialogData {
     MatButtonToggleModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    ScheduleEntityFieldsComponent,
+    RecurringScheduleFieldsComponent,
+    OneTimeScheduleFieldsComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './friendly-schedule-dialog.component.html',
@@ -88,6 +94,14 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
   scheduleForm: FormGroup;
   jobTypes: FriendlyJobType[] = [];
   daysOfWeek = DAYS_OF_WEEK;
+  /** Pre-built day chips for the template, with `selected` pre-computed. Rebuilt on toggleDay. */
+  daysOfWeekDisplay: (typeof DAYS_OF_WEEK)[number] extends { value: infer V; short: infer S }
+    ? { value: V; short: S; selected: boolean }[]
+    : never = DAYS_OF_WEEK.map((d) => ({ ...d, selected: false }));
+
+  private refreshDaysOfWeekDisplay(): void {
+    this.daysOfWeekDisplay = this.daysOfWeek.map((d) => ({ ...d, selected: this.isDaySelected(d.value) }));
+  }
   timezones = COMMON_TIMEZONES;
   userTimezone = getUserTimezone();
 
@@ -258,6 +272,17 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
     return this.isRecurring && this.scheduleForm.get('dayPattern')?.value === 'custom';
   }
 
+  /** True iff the schedule-name field shows its error state. */
+  get nameHasError(): boolean {
+    const ctl = this.scheduleForm?.get('name');
+    return !!(ctl?.invalid && ctl?.touched);
+  }
+
+  /** True iff the locked-episode banner should render (pre-selected episode). */
+  get showEpisodeDisplay(): boolean {
+    return !!(this.data.episodeUuid && this.data.episodeName);
+  }
+
   constructor() {
     this.jobTypes = getJobTypesForContext(this.data.context);
 
@@ -389,6 +414,7 @@ export class FriendlyScheduleDialogComponent implements OnDestroy {
       selectedDays,
       dayPattern: 'custom',
     });
+    this.refreshDaysOfWeekDisplay();
   }
 
   isDaySelected(day: DayOfWeek): boolean {

@@ -61,7 +61,7 @@
           @if (blog.latestArticleDate) {
             <div class="status-item">
               <span class="status-label">Last Published</span>
-              <span class="status-value">{{ formatDate(blog.latestArticleDate) }}</span>
+              <span class="status-value">{{ blogLatestArticleDate }}</span>
             </div>
           }
         </div>
@@ -75,7 +75,7 @@
           </button>
           <mat-menu #blogMenu="matMenu">
             @if (blog.enabled) {
-              <a mat-menu-item [href]="getShareRoute()" target="_blank">
+              <a mat-menu-item [href]="shareRoute" target="_blank">
                 <mat-icon>open_in_new</mat-icon>
                 <span>View Public Page</span>
               </a>
@@ -87,7 +87,7 @@
           </mat-menu>
           @if (blog.enabled) {
             <app-share-buttons
-              [shareUrl]="getShareUrl()"
+              [shareUrl]="shareUrl"
               [title]="blog.name"
               [description]="blog.description || undefined"
               [compact]="true"
@@ -129,7 +129,7 @@
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>
                   <td mat-cell *matCellDef="let article">
-                    <span class="article-status" [ngClass]="getStatusClass(article.status)">
+                    <span class="article-status" [ngClass]="article.statusClass">
                       {{ article.status }}
                     </span>
                   </td>
@@ -144,7 +144,7 @@
                 <!-- Published Column -->
                 <ng-container matColumnDef="published">
                   <th mat-header-cell *matHeaderCellDef>Published</th>
-                  <td mat-cell *matCellDef="let article">{{ formatDate(article.publishedAt) }}</td>
+                  <td mat-cell *matCellDef="let article">{{ article.formattedPublishedAt }}</td>
                 </ng-container>
 
                 <!-- Actions Column -->

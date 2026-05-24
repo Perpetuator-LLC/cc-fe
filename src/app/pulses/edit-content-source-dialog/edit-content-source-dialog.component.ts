@@ -162,6 +162,46 @@ export class EditContentSourceDialogComponent implements OnInit, OnDestroy {
     this.form.get('symbol')?.setValue(stock.symbol);
   }
 
+  /** True when an existing optimization payload is present on the source. */
+  get hasOptimization(): boolean {
+    const src = this.data.source;
+    return !!src.searchUserIntent || src.searchTerm !== src.searchTermOriginal;
+  }
+
+  /** Non-empty list of extraction focuses, or an empty array. */
+  get extractionFocuses(): readonly string[] {
+    return this.data.source.searchExtractionFocus ?? [];
+  }
+
+  /** Simple label/value rows shown above the extraction-chip row. */
+  get optimizationRows(): readonly { label: string; value: string; cls: string }[] {
+    const src = this.data.source;
+    const rows: { label: string; value: string; cls: string }[] = [];
+    if (src.searchTerm && src.searchTerm !== src.searchTermOriginal) {
+      rows.push({ label: 'Optimized query:', value: src.searchTerm, cls: 'value optimized-query' });
+    }
+    if (src.searchUserIntent) {
+      rows.push({ label: 'Intent:', value: src.searchUserIntent, cls: 'value' });
+    }
+    return rows;
+  }
+
+  /** Search type badges to render (label + class), pre-computed for the template. */
+  get searchTypeBadges(): readonly { label: string; cls: string }[] {
+    const src = this.data.source;
+    const badges: { label: string; cls: string }[] = [];
+    if (src.searchIsProduct) {
+      badges.push({ label: 'Product Search', cls: 'product' });
+    }
+    if (src.searchIsNews) {
+      badges.push({ label: 'News Search', cls: 'news' });
+    }
+    if (src.searchIsResearch) {
+      badges.push({ label: 'Research', cls: 'research' });
+    }
+    return badges;
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }

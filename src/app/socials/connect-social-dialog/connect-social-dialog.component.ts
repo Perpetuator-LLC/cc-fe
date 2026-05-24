@@ -14,23 +14,18 @@ import { Subscription } from 'rxjs';
 import { SocialsService, SocialPlatform } from '../socials.service';
 import { TeamsService } from '../../team/teams.service';
 import { MessageService } from '../../message.service';
+import {
+  PlatformAuthFieldsComponent,
+  PlatformOption,
+  TelegramMode,
+} from './platform-auth-fields/platform-auth-fields.component';
 
 interface Team {
   uuid: string;
   name: string | null;
 }
 
-export type TelegramMode = 'cc_bot' | 'custom_bot';
-
-interface PlatformOption {
-  value: SocialPlatform;
-  label: string;
-  icon: string;
-  requiresApiKey: boolean;
-  requiresToken: boolean;
-  requiresChannelId: boolean;
-  hasModes: boolean;
-}
+export { TelegramMode };
 
 @Component({
   selector: 'app-connect-social-dialog',
@@ -46,6 +41,7 @@ interface PlatformOption {
     MatIconModule,
     MatProgressSpinnerModule,
     MatRadioModule,
+    PlatformAuthFieldsComponent,
   ],
   templateUrl: './connect-social-dialog.component.html',
   styleUrl: './connect-social-dialog.component.scss',
@@ -146,9 +142,11 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     });
 
     // Update validators based on platform selection
-    this.socialForm.get('platform')?.valueChanges.subscribe((platform) => {
-      this.updateValidators(platform);
-    });
+    this.subscriptions.add(
+      this.socialForm.get('platform')!.valueChanges.subscribe((platform) => {
+        this.updateValidators(platform);
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -229,12 +227,26 @@ export class ConnectSocialDialogComponent implements OnInit, OnDestroy {
     accessTokenControl?.updateValueAndValidity();
   }
 
-  isTelegram(): boolean {
+  get isTelegram(): boolean {
     return this.socialForm.get('platform')?.value === 'TELEGRAM';
   }
 
-  getSelectedPlatform(): PlatformOption | undefined {
+  get selectedPlatform(): PlatformOption | undefined {
     return this.platforms.find((p) => p.value === this.socialForm.get('platform')?.value);
+  }
+
+  /** Pre-computed error message for the account-name field; null when valid. */
+  get accountNameError(): string | null {
+    const control = this.socialForm.get('accountName');
+    if (!control) return null;
+    if (control.hasError('required')) return 'Account name is required';
+    if (control.hasError('minlength')) return 'Name must be at least 2 characters';
+    return null;
+  }
+
+  /** Pre-computed disabled state for the connect-account button. */
+  get connectButtonDisabled(): boolean {
+    return this.connecting || this.socialForm.invalid || this.teams.length === 0;
   }
 
   connectAccount(): void {

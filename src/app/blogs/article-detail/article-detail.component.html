@@ -20,11 +20,9 @@
       <div class="top-header">
         <div class="title">
           <h2>{{ article.title }}</h2>
-          @if (article.blog) {
-            <p>
-              <a [routerLink]="['/media/blogs', article.blog.id]">{{ article.blog.name }}</a>
-            </p>
-          }
+          <p [hidden]="!article.blog">
+            <a [routerLink]="blogLinkPath">{{ article.blog?.name }}</a>
+          </p>
         </div>
         <div class="buttons">
           <button
@@ -48,7 +46,7 @@
         <div class="status-summary">
           <div class="status-item">
             <span class="status-label">Status</span>
-            <span class="status-badge" [ngClass]="getStatusClass(article.status)">
+            <span class="status-badge" [ngClass]="articleStatusClass">
               {{ article.status }}
             </span>
           </div>
@@ -60,12 +58,10 @@
             <span class="status-label">Read Time</span>
             <span class="status-value">{{ article.readTimeMinutes || '-' }} min</span>
           </div>
-          @if (article.publishedAt) {
-            <div class="status-item">
-              <span class="status-label">Published</span>
-              <span class="status-value">{{ formatDate(article.publishedAt) }}</span>
-            </div>
-          }
+          <div class="status-item" [hidden]="!article.publishedAt">
+            <span class="status-label">Published</span>
+            <span class="status-value">{{ articlePublishedAt }}</span>
+          </div>
         </div>
         <div class="action-buttons">
           @if (article.status !== 'PUBLISHED') {
@@ -73,7 +69,7 @@
               mat-flat-button
               color="accent"
               (click)="publishArticle()"
-              [disabled]="hasUnsavedChanges() || publishing"
+              [disabled]="hasUnsavedChangesGetter || publishing"
             >
               @if (publishing) {
                 <mat-spinner diameter="18" />
@@ -100,7 +96,7 @@
               <span>Delete Article</span>
             </button>
             @if (article.status === 'PUBLISHED') {
-              <a mat-menu-item [href]="getShareRoute()" target="_blank">
+              <a mat-menu-item [href]="shareRoute" target="_blank">
                 <mat-icon>open_in_new</mat-icon>
                 <span>View Public Page</span>
               </a>
@@ -108,7 +104,7 @@
           </mat-menu>
           @if (article.status === 'PUBLISHED') {
             <app-share-buttons
-              [shareUrl]="getShareUrl()"
+              [shareUrl]="shareUrl"
               [title]="article.title"
               [description]="article.description || article.excerpt || undefined"
               [compact]="true"
@@ -227,21 +223,13 @@
           <mat-card-content>
             <div class="article-preview">
               <h1>{{ articleForm.get('title')?.value }}</h1>
-              @if (articleForm.get('subtitle')?.value) {
-                <h2 class="subtitle">{{ articleForm.get('subtitle')?.value }}</h2>
-              }
+              <h2 class="subtitle" [hidden]="!previewSubtitle">{{ previewSubtitle }}</h2>
               <div class="preview-meta">
-                @if (article.blog) {
-                  <span>{{ article.blog.name }}</span>
-                }
-                <span>•</span>
-                <span>{{ formatDate(article.createdAt) }}</span>
-                @if (article.readTimeMinutes) {
-                  <span>•</span>
-                  <span>{{ article.readTimeMinutes }} min read</span>
+                @for (item of previewMetaItems; track $index) {
+                  <span>{{ item.label }}</span>
                 }
               </div>
-              <div class="preview-content" [innerHTML]="renderMarkdown(articleForm.get('content')?.value)"></div>
+              <div class="preview-content" [innerHTML]="previewHtml"></div>
             </div>
           </mat-card-content>
         </mat-tab>

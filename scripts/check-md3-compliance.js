@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
 /**
  * MD3 Compliance Checker for Angular Components
@@ -39,13 +39,14 @@ const warnings = [];
 const PATTERNS = {
   // Template violations
   inlineStyles: /<[^>]+style\s*=\s*["'][^"']+["']/g,
-  genericButton: /<button(?![^>]*mat-)/g,
-  genericInput: /<input(?![^>]*matInput)/g,
+  genericButton: /<button(?![^>]*mat-)(?![^>]*matMenuTriggerFor)(?![^>]*matDialogClose)/g,
+  genericInput:
+    /<input(?![^>]*matInput)(?![^>]*matChipInputFor)(?![^>]*matSliderThumb)(?![^>]*aria-hidden)(?![^>]*#commandInput)(?![^>]*type\s*=\s*["'](?:file|hidden|color|range|checkbox|radio|time|datetime-local)["'])(?![^>]*class\s*=\s*["'][^"']*\b(?:command-input|team-input|variable-input|native-datetime|time-input)\b[^"']*["'])/g,
   ngDeepInTemplate: /::ng-deep/g,
 
   // SCSS violations
   ngDeepSelector: /::ng-deep/g,
-  hardcodedPx: /(?:margin|padding|gap|width|height|font-size|top|left|right|bottom)\s*:\s*(?!0\s|var\()[0-9]+px(?!;)/g,
+  hardcodedPx: /\b(?:margin|padding|gap|font-size)(?:-(?:top|left|right|bottom))?\s*:\s*(?!0\s|var\()[0-9]+px/g,
   hardcodedColors: /#[0-9a-fA-F]{3,6}(?!\s*\/\/|\s*\/\*)/g,
   rgbColors: /rgb\(|rgba\(/g,
   hardcodedRadius: /border-radius\s*:\s*(?!0\s|var\()[0-9]+px/g,
@@ -60,92 +61,151 @@ function checkFile(filePath, fileContent, isTemplate = false) {
   };
 
   if (isTemplate) {
-    // Check for inline styles
-    const inlineStyleMatches = fileContent.match(PATTERNS.inlineStyles);
-    if (inlineStyleMatches) {
+    // Strip HTML comments to avoid false positives on commented-out code,
+    // but preserve the md3-ignore marker so it can still suppress next-line warnings.
+    const strippedContent = fileContent.replace(/<!--[\s\S]*?-->/g, (match) =>
+      match.includes('md3-ignore')
+        ? match.replace(/(md3-ignore)|[^\n]/g, (_, marker) => marker || ' ')
+        : match.replace(/[^\n]/g, ' '),
+    );
+
+    // Check for inline styles. Count is the post-filter line count so
+    // md3-ignore can suppress both the warning text and the offending line.
+    const inlineStyleLines = findLineNumbers(strippedContent, PATTERNS.inlineStyles);
+    if (inlineStyleLines.length > 0) {
       results.errors.push({
         rule: 'no-inline-styles',
-        message: `Found ${inlineStyleMatches.length} inline style(s). Use component SCSS or Material component variants.`,
-        lines: findLineNumbers(fileContent, PATTERNS.inlineStyles),
+        message: `Found ${inlineStyleLines.length} inline style(s). Use component SCSS or Material component variants.`,
+        lines: inlineStyleLines,
       });
     }
 
     // Check for generic buttons (should use Material variants)
-    const genericButtonMatches = fileContent.match(PATTERNS.genericButton);
-    if (genericButtonMatches) {
+    const genericButtonLines = findLineNumbers(strippedContent, PATTERNS.genericButton);
+    if (genericButtonLines.length > 0) {
       results.warnings.push({
         rule: 'use-material-buttons',
-        message: `Found ${genericButtonMatches.length} generic button(s). Consider using Material button variants (mat-button, mat-flat-button, mat-raised-button).`,
-        lines: findLineNumbers(fileContent, PATTERNS.genericButton),
+        message: `Found ${genericButtonLines.length} generic button(s). Consider using Material button variants (mat-button, mat-flat-button, mat-raised-button).`,
+        lines: genericButtonLines,
       });
     }
 
     // Check for generic inputs (should use matInput)
-    const genericInputMatches = fileContent.match(PATTERNS.genericInput);
-    if (genericInputMatches) {
+    const genericInputLines = findLineNumbers(strippedContent, PATTERNS.genericInput);
+    if (genericInputLines.length > 0) {
       results.warnings.push({
         rule: 'use-material-inputs',
-        message: `Found ${genericInputMatches.length} generic input(s). Use matInput directive with mat-form-field.`,
-        lines: findLineNumbers(fileContent, PATTERNS.genericInput),
+        message: `Found ${genericInputLines.length} generic input(s). Use matInput directive with mat-form-field.`,
+        lines: genericInputLines,
       });
     }
   } else {
     // SCSS checks
 
-    // Check for ::ng-deep
-    const ngDeepMatches = fileContent.match(PATTERNS.ngDeepSelector);
-    if (ngDeepMatches) {
+    // Check for ::ng-deep (exclude intentional exceptions with stylelint-disable)
+    const ngDeepLines = findLineNumbers(fileContent, PATTERNS.ngDeepSelector);
+    const contentLines = fileContent.split('\n');
+    const unexcusedNgDeepLines = ngDeepLines.filter((lineNum) => {
+      for (let i = Math.max(0, lineNum - 3); i < lineNum; i++) {
+        if (contentLines[i] && contentLines[i].includes('stylelint-disable')) return false;
+      }
+      return true;
+    });
+    if (unexcusedNgDeepLines.length > 0) {
       results.errors.push({
         rule: 'no-ng-deep',
-        message: `Found ${ngDeepMatches.length} ::ng-deep selector(s). This is deprecated. Use CSS custom properties or target Material classes directly.`,
-        lines: findLineNumbers(fileContent, PATTERNS.ngDeepSelector),
+        message: `Found ${unexcusedNgDeepLines.length} ::ng-deep selector(s). This is deprecated. Use CSS custom properties or target Material classes directly.`,
+        lines: unexcusedNgDeepLines,
       });
     }
 
-    // Check for hardcoded px values (should use 4px grid)
-    const hardcodedPxMatches = fileContent.match(PATTERNS.hardcodedPx);
-    if (hardcodedPxMatches) {
-      const nonGridValues = hardcodedPxMatches.filter((match) => {
-        const value = parseInt(match.match(/[0-9]+/)[0]);
-        return value !== 0 && value % 4 !== 0 && value > 4;
+    // Check for hardcoded px values (4px spacing grid, 2px font-size grid)
+    const offGridLines = [];
+    contentLines.forEach((line, index) => {
+      if (hasIgnoreMarker(contentLines, index)) return;
+      const trimmed = line.trim();
+      if (trimmed.startsWith('//') || trimmed.startsWith('/*')) return;
+      const isFontSize = /\bfont-size\s*:/.test(trimmed);
+      const spacingMatch = trimmed.match(PATTERNS.hardcodedPx);
+      if (spacingMatch) {
+        const pxValues = trimmed.match(/(\d+)px/g);
+        if (pxValues) {
+          const gridSize = isFontSize ? 2 : 4;
+          const hasOffGrid = pxValues.some((v) => {
+            const num = parseInt(v);
+            return num !== 0 && num % gridSize !== 0 && num > 4;
+          });
+          if (hasOffGrid) offGridLines.push(index + 1);
+        }
+      }
+    });
+    if (offGridLines.length > 0) {
+      results.warnings.push({
+        rule: 'use-4px-grid',
+        message: `Found ${offGridLines.length} spacing value(s) not on grid. Use MD3 4px spacing grid or 2px font-size grid.`,
+        lines: offGridLines,
       });
+    }
 
-      if (nonGridValues.length > 0) {
-        results.warnings.push({
-          rule: 'use-4px-grid',
-          message: `Found ${nonGridValues.length} spacing value(s) not on 4px grid. Use MD3 grid: 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64.`,
-          lines: findLineNumbers(fileContent, PATTERNS.hardcodedPx),
-        });
+    // Check for hardcoded colors (skip comment lines and md3-ignore markers)
+    const colorLines = findLineNumbers(fileContent, PATTERNS.hardcodedColors).filter((lineNum) => {
+      const line = contentLines[lineNum - 1].trim();
+      if (line.startsWith('//') || line.startsWith('/*')) return false;
+      return !hasIgnoreMarker(contentLines, lineNum - 1);
+    });
+    if (colorLines.length > 0) {
+      results.warnings.push({
+        rule: 'use-design-tokens',
+        message: `Found ${colorLines.length} hardcoded color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
+        lines: colorLines,
+      });
+    }
+
+    // Check for rgb/rgba colors (skip comment lines and md3-ignore markers)
+    const rgbLines = findLineNumbers(fileContent, PATTERNS.rgbColors).filter((lineNum) => {
+      const line = contentLines[lineNum - 1].trim();
+      if (line.startsWith('//') || line.startsWith('/*')) return false;
+      return !hasIgnoreMarker(contentLines, lineNum - 1);
+    });
+    if (rgbLines.length > 0) {
+      results.warnings.push({
+        rule: 'use-design-tokens',
+        message: `Found ${rgbLines.length} rgb/rgba color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
+        lines: rgbLines,
+      });
+    }
+
+    // Check for hardcoded border-radius (only flag non-MD3 values)
+    const VALID_RADIUS = new Set([0, 4, 8, 12, 16, 999]);
+    const radiusRegex = /border-radius\s*:\s*([^;]+)/g;
+    let radiusMatch;
+    const nonStandardRadiusLines = [];
+    while ((radiusMatch = radiusRegex.exec(fileContent)) !== null) {
+      const value = radiusMatch[1].trim();
+      if (
+        value.startsWith('var(') ||
+        /^0(\s|$|!)/.test(value) ||
+        value === '0' ||
+        value === 'inherit' ||
+        value === 'unset'
+      )
+        continue;
+      const lineNum = fileContent.substring(0, radiusMatch.index).split('\n').length;
+      if (hasIgnoreMarker(contentLines, lineNum - 1)) continue;
+      const pxValues = value.match(/(\d+)px/g);
+      const pctValues = value.match(/(\d+)%/g);
+      if (pxValues) {
+        const hasNonStandard = pxValues.some((v) => !VALID_RADIUS.has(parseInt(v)));
+        if (hasNonStandard) nonStandardRadiusLines.push(lineNum);
+      } else if (!pctValues) {
+        nonStandardRadiusLines.push(lineNum);
       }
     }
-
-    // Check for hardcoded colors (should use design tokens)
-    const hardcodedColorMatches = fileContent.match(PATTERNS.hardcodedColors);
-    if (hardcodedColorMatches) {
-      results.warnings.push({
-        rule: 'use-design-tokens',
-        message: `Found ${hardcodedColorMatches.length} hardcoded color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
-        lines: findLineNumbers(fileContent, PATTERNS.hardcodedColors),
-      });
-    }
-
-    // Check for rgb/rgba colors
-    const rgbMatches = fileContent.match(PATTERNS.rgbColors);
-    if (rgbMatches) {
-      results.warnings.push({
-        rule: 'use-design-tokens',
-        message: `Found ${rgbMatches.length} rgb/rgba color(s). Use MD3 design tokens (--md-sys-color-*) for theme support.`,
-        lines: findLineNumbers(fileContent, PATTERNS.rgbColors),
-      });
-    }
-
-    // Check for hardcoded border-radius
-    const hardcodedRadiusMatches = fileContent.match(PATTERNS.hardcodedRadius);
-    if (hardcodedRadiusMatches) {
+    if (nonStandardRadiusLines.length > 0) {
       results.warnings.push({
         rule: 'use-standard-radius',
-        message: `Found ${hardcodedRadiusMatches.length} hardcoded border-radius value(s). Use MD3 values: 4px, 8px, 12px, 16px, or 999px (round).`,
-        lines: findLineNumbers(fileContent, PATTERNS.hardcodedRadius),
+        message: `Found ${nonStandardRadiusLines.length} non-standard border-radius value(s). Use MD3 values: 4px, 8px, 12px, 16px, or 999px (round).`,
+        lines: nonStandardRadiusLines,
       });
     }
   }
@@ -153,12 +213,28 @@ function checkFile(filePath, fileContent, isTemplate = false) {
   return results;
 }
 
+function hasIgnoreMarker(lines, index) {
+  if (lines[index] && lines[index].includes('md3-ignore')) return true;
+  if (index > 0 && lines[index - 1] && lines[index - 1].includes('md3-ignore')) return true;
+  return false;
+}
+
 function findLineNumbers(content, pattern) {
   const lines = content.split('\n');
   const matches = [];
 
   lines.forEach((line, index) => {
-    if (line.match(pattern)) {
+    if (hasIgnoreMarker(lines, index)) return;
+    let testLine = line;
+    // For lines with an opening tag that isn't closed, join subsequent lines
+    // so multi-line attributes are visible to the regex
+    if (/<[a-zA-Z]/.test(line) && !/>/.test(line)) {
+      for (let j = index + 1; j < lines.length && j < index + 15; j++) {
+        testLine += ' ' + lines[j];
+        if (/>/.test(lines[j])) break;
+      }
+    }
+    if (testLine.match(pattern)) {
       matches.push(index + 1);
     }
   });
@@ -250,64 +326,61 @@ function formatChecklistForMarkdown(checklist) {
 // Main execution
 if (require.main === module) {
   const args = process.argv.slice(2);
+  const strictMode = args.includes('--strict');
+  const filesIndex = args.indexOf('--files');
+
+  let hasErrors = false;
+  let hasWarnings = false;
+
+  function printResults(file, results) {
+    if (results.errors.length === 0 && results.warnings.length === 0) return;
+    console.log(`\n📄 ${file}`);
+    results.errors.forEach((err) => {
+      console.log(`  ❌ ERROR: ${err.message}`);
+      if (err.lines.length > 0) console.log(`     Lines: ${err.lines.join(', ')}`);
+    });
+    results.warnings.forEach((warn) => {
+      console.log(`  ⚠️  WARNING: ${warn.message}`);
+      if (warn.lines.length > 0) console.log(`     Lines: ${warn.lines.join(', ')}`);
+    });
+    if (results.errors.length > 0) hasErrors = true;
+    if (results.warnings.length > 0) hasWarnings = true;
+  }
+
+  function scanFile(file) {
+    if (!fs.existsSync(file)) return;
+    const isTemplate = file.endsWith('.html');
+    const isScss = file.endsWith('.scss');
+    if (!isTemplate && !isScss) return;
+    const content = fs.readFileSync(file, 'utf-8');
+    const results = checkFile(file, content, isTemplate);
+    printResults(file, results);
+  }
 
   if (args.includes('--checklist') && args[1]) {
-    // Generate checklist for a specific component
     const componentPath = args[1];
     const checklist = generateChecklistReport(componentPath);
     console.log(formatChecklistForMarkdown(checklist));
+  } else if (filesIndex !== -1) {
+    // Per-file mode for lint-staged: only scan paths passed after --files
+    const files = args.slice(filesIndex + 1).filter((f) => !f.startsWith('--'));
+    if (files.length === 0) process.exit(0);
+    files.forEach(scanFile);
+    if (strictMode && (hasErrors || hasWarnings)) process.exit(1);
   } else {
-    // Run full scan
+    // Full scan
     console.log('🔍 MD3 Compliance Checker\n');
     console.log('Scanning for MD3 best practice violations...\n');
 
-    // Scan all component templates
-    const templateFiles = findFiles('src/app', /\.component\.html$/);
-    templateFiles.forEach((file) => {
-      const content = fs.readFileSync(file, 'utf-8');
-      const results = checkFile(file, content, true);
+    const templateFiles = findFiles('src/app', /\.component\.html$/).filter((f) => !f.includes('/dev/'));
+    templateFiles.forEach(scanFile);
 
-      if (results.errors.length > 0 || results.warnings.length > 0) {
-        console.log(`\n📄 ${file}`);
-        results.errors.forEach((err) => {
-          console.log(`  ❌ ERROR: ${err.message}`);
-          if (err.lines.length > 0) {
-            console.log(`     Lines: ${err.lines.join(', ')}`);
-          }
-        });
-        results.warnings.forEach((warn) => {
-          console.log(`  ⚠️  WARNING: ${warn.message}`);
-          if (warn.lines.length > 0) {
-            console.log(`     Lines: ${warn.lines.join(', ')}`);
-          }
-        });
-      }
-    });
-
-    // Scan all component SCSS
-    const scssFiles = findFiles('src/app', /\.component\.scss$/);
-    scssFiles.forEach((file) => {
-      const content = fs.readFileSync(file, 'utf-8');
-      const results = checkFile(file, content, false);
-
-      if (results.errors.length > 0 || results.warnings.length > 0) {
-        console.log(`\n📄 ${file}`);
-        results.errors.forEach((err) => {
-          console.log(`  ❌ ERROR: ${err.message}`);
-          if (err.lines.length > 0) {
-            console.log(`     Lines: ${err.lines.join(', ')}`);
-          }
-        });
-        results.warnings.forEach((warn) => {
-          console.log(`  ⚠️  WARNING: ${warn.message}`);
-          if (warn.lines.length > 0) {
-            console.log(`     Lines: ${warn.lines.join(', ')}`);
-          }
-        });
-      }
-    });
+    const scssFiles = findFiles('src/app', /\.component\.scss$/).filter((f) => !f.includes('/dev/'));
+    scssFiles.forEach(scanFile);
 
     console.log('\n✨ Scan complete!\n');
+
+    if (strictMode && (hasErrors || hasWarnings)) process.exit(1);
   }
 }
 

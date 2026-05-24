@@ -1,5 +1,5 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
-<mat-card class="codes" [ngClass]="{ 'admin-view': permissions.includes('api.add_bonuscode') }">
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<mat-card class="codes" [ngClass]="{ 'admin-view': (permissions | includes: 'api.add_bonuscode') }">
   <mat-card-header>
     <div>
       <mat-card-title>Redeem Gift Code</mat-card-title>
@@ -28,7 +28,7 @@
       </button>
     </div>
 
-    @if (permissions.includes('api.add_bonuscode')) {
+    @if (permissions | includes: 'api.add_bonuscode') {
       <div class="admin-section">
         <h3 class="admin-title">Admin: Bonus Code Management</h3>
         <form [formGroup]="createCodeForm" (ngSubmit)="createCode()">
@@ -115,4 +115,3 @@
     }
   </mat-card-content>
 </mat-card>
-

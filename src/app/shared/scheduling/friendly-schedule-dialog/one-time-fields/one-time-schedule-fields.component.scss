@@ -1,0 +1,54 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+:host {
+  display: contents;
+}
+
+.one-time-options {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.section-label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.datetime-section {
+  margin-top: 16px;
+}
+
+.datetime-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  @include mixins.mobile() {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.date-field {
+  flex: 1.2;
+  min-width: 140px;
+}
+
+.time-field {
+  flex: 0.8;
+  min-width: 100px;
+}
+
+.timezone-select {
+  flex: 1.5;
+  min-width: 160px;
+}

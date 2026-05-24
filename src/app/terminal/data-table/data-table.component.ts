@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import {
   Component,
   Input,
@@ -42,7 +42,13 @@ export class DataTableComponent implements OnChanges, AfterViewInit {
   @Input() pageSizeOptions = [5, 10, 25, 50];
 
   displayedColumns: string[] = [];
-  dataSource = new MatTableDataSource<Record<string, unknown>>([]);
+  /**
+   * Each row stores both the raw values (for sorting) plus a `_formatted`
+   * map of column → formatted string, so the template can read the
+   * formatted cell as property access instead of calling getCellValue
+   * on every change-detection tick.
+   */
+  dataSource = new MatTableDataSource<Record<string, unknown> & { _formatted: Record<string, string> }>([]);
   title = '';
   totalRows = 0;
 
@@ -89,23 +95,36 @@ export class DataTableComponent implements OnChanges, AfterViewInit {
         return obj;
       });
 
-      this.dataSource.data = rowData;
+      this.dataSource.data = rowData.map((row) => this.withFormattedCells(row));
     } else if (Array.isArray(this.data)) {
       // Handle array of objects
       if (this.data.length > 0) {
         this.displayedColumns = Object.keys(this.data[0] as object);
-        this.dataSource.data = this.data as Record<string, unknown>[];
+        this.dataSource.data = (this.data as Record<string, unknown>[]).map((row) => this.withFormattedCells(row));
         this.totalRows = this.data.length;
       }
     } else if (typeof this.data === 'object') {
       // Handle single object - display as key-value pairs
       this.displayedColumns = ['key', 'value'];
-      this.dataSource.data = Object.entries(this.data).map(([key, value]) => ({
-        key,
-        value: this.formatValue(value),
-      }));
+      this.dataSource.data = Object.entries(this.data).map(([key, value]) =>
+        this.withFormattedCells({
+          key,
+          value: this.formatValue(value),
+        }),
+      );
       this.totalRows = this.dataSource.data.length;
     }
+  }
+
+  /** Build a `_formatted` map for the current row using the active displayedColumns. */
+  private withFormattedCells(
+    row: Record<string, unknown>,
+  ): Record<string, unknown> & { _formatted: Record<string, string> } {
+    const _formatted: Record<string, string> = {};
+    for (const col of this.displayedColumns) {
+      _formatted[col] = this.formatValue(row[col]);
+    }
+    return { ...row, _formatted };
   }
 
   private isTableData(data: unknown): data is TableData {

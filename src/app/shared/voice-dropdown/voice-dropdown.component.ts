@@ -57,9 +57,12 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
   private readonly voicesService = inject(VoicesService);
   private subscriptions = new Subscription();
 
-  voices: Voice[] = [];
+  /** Voices enriched with pre-computed display name + tier label per row. */
+  voices: (Voice & { displayLabel: string; tierLabel: string })[] = [];
   loadingVoices = false;
   playingVoiceUuid: string | null = null;
+  /** Display name of the currently selected voice. */
+  selectedVoiceName = '';
 
   ngOnInit(): void {
     this.loadVoices();
@@ -75,13 +78,17 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.voicesService.getVoices(undefined, true).subscribe({
         next: (response) => {
-          this.voices = response.voices;
           // Sort by tier then name (Regular HD first)
-          this.voices.sort((a, b) => {
+          const sorted = [...response.voices].sort((a, b) => {
             const tierOrder = this.getTierOrder(voiceToTier(a)) - this.getTierOrder(voiceToTier(b));
             if (tierOrder !== 0) return tierOrder;
             return this.getDisplayName(a).localeCompare(this.getDisplayName(b));
           });
+          this.voices = sorted.map((v) => ({
+            ...v,
+            displayLabel: this.getDisplayName(v),
+            tierLabel: this.getTierLabel(v),
+          }));
           this.loadingVoices = false;
 
           // Auto-select first voice if none is selected
@@ -89,6 +96,7 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
             this.selectedVoiceUuid = this.voices[0].uuid;
             this.voiceSelected.emit(this.voices[0]);
           }
+          this.refreshSelectedVoiceName();
         },
         error: () => {
           this.loadingVoices = false;
@@ -111,8 +119,15 @@ export class VoiceDropdownComponent implements OnInit, OnDestroy {
   onSelectionChange(voiceUuid: string): void {
     const voice = this.voices.find((v) => v.uuid === voiceUuid);
     if (voice) {
+      this.selectedVoiceUuid = voiceUuid;
+      this.refreshSelectedVoiceName();
       this.voiceSelected.emit(voice);
     }
+  }
+
+  private refreshSelectedVoiceName(): void {
+    const voice = this.voices.find((v) => v.uuid === this.selectedVoiceUuid);
+    this.selectedVoiceName = voice?.displayLabel ?? '';
   }
 
   getDisplayName(voice: Voice): string {

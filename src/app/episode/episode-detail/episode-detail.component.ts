@@ -3,10 +3,10 @@ import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, HostListener, inj
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Episode, EpisodeService, EpisodeVersion } from '../episode.service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
@@ -20,12 +20,22 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog/confirm-delete-dialog.component';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { EpisodeVersionControlComponent } from '../episode-version-control/episode-version-control.component';
+import {
+  EpisodeReferencedNewsComponent,
+  NewsItemDisplay,
+} from './episode-referenced-news/episode-referenced-news.component';
+import { EpisodeResearchUrlsComponent } from './episode-research-urls/episode-research-urls.component';
+import {
+  EpisodeSchedulingTabComponent,
+  ScheduleDisplay,
+  ScheduleToggleEvent,
+} from './episode-scheduling-tab/episode-scheduling-tab.component';
 import { ShareButtonsComponent } from '../../share-buttons/share-buttons.component';
+import { NewsResult } from '../../news/news.service';
 import { Job, JobKind, JobService, JobStatus, stringToJobKind } from '../../jobs/job.service';
 import { Schedule, SchedulingService } from '../../scheduling.service';
 import { MessageService } from '../../message.service';
@@ -61,7 +71,6 @@ interface EditableFormValues {
     MatLabel,
     MatFormField,
     DatePipe,
-    NgClass,
     MatTooltip,
     MatButton,
     MatIconButton,
@@ -71,15 +80,16 @@ interface EditableFormValues {
     MatDivider,
     ReactiveFormsModule,
     RouterLink,
-    MatCardHeader,
     MatTabsModule,
     MatExpansionModule,
     MatSelectModule,
-    MatSlideToggle,
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
     EpisodeVersionControlComponent,
+    EpisodeReferencedNewsComponent,
+    EpisodeResearchUrlsComponent,
+    EpisodeSchedulingTabComponent,
     ShareButtonsComponent,
   ],
   templateUrl: './episode-detail.component.html',
@@ -97,7 +107,23 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   wordCount = 0;
   charCount = 0;
   jobs: Job[] = [];
-  schedules: Schedule[] = [];
+  private _schedules: ScheduleDisplay[] = [];
+  /** Setter enriches schedules with pre-computed display data for the template. */
+  set schedules(value: Schedule[]) {
+    this._schedules = (value || []).map((s) => ({
+      ...s,
+      descriptionText: formatScheduleDescription(s),
+      statusBadgeClass: s.enabled ? 'enabled' : 'disabled',
+      statusLabel: s.enabled ? 'Scheduled' : 'Paused',
+    }));
+  }
+  get schedules(): ScheduleDisplay[] {
+    return this._schedules;
+  }
+  /** Alias used by the scheduling sub-component template. */
+  get scheduleDisplays(): ScheduleDisplay[] {
+    return this._schedules;
+  }
   isGridView = false;
   selectedVersionNumber: number | null = null;
   selectedVersion: EpisodeVersion | null = null;
@@ -352,7 +378,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
   onIsLiveChange(isLive: boolean) {
     // Only prevent SETTING episode as live (checking the box) without audio
     // Allow UNSETTING (unchecking) even without audio
-    if (isLive && !this.hasAnyVersionWithAudio()) {
+    if (isLive && !this.hasAnyVersionWithAudio) {
       this.messageService.warning('Cannot set episode as live without audio. Please generate audio first.');
       // Revert the checkbox to unchecked
       this.episodeForm.patchValue({ isLive: false }, { emitEvent: false });
@@ -550,17 +576,19 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
       this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
         next: () => {
           this.messageService.success(`Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
-          // Update local schedule state
-          const index = this.schedules.findIndex((s) => s.uuid === schedule.uuid);
-          if (index !== -1) {
-            this.schedules[index] = { ...this.schedules[index], enabled };
-          }
+          // Update local schedule state (re-runs the schedules setter to refresh display fields)
+          this.schedules = this.schedules.map((s) => (s.uuid === schedule.uuid ? { ...s, enabled } : s));
         },
         error: (err) => {
           this.messageService.error(`Failed to update schedule: ${err.message}`);
         },
       }),
     );
+  }
+
+  /** Output handler that adapts ScheduleToggleEvent to the existing toggle method. */
+  onScheduleToggle(event: ScheduleToggleEvent): void {
+    this.toggleScheduleEnabled(event.schedule, event.enabled);
   }
 
   editSchedule(schedule: Schedule): void {
@@ -869,7 +897,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return version.validatedCompliance && version.validatedFacts && version.validatedLength;
   }
 
-  isCurrentVersionFullyValidated(): boolean {
+  get isCurrentVersionFullyValidated(): boolean {
     const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
     const versions = this.episodeForm.get('versions')?.value;
     if (!currentVersionNumber || !versions || versions.length === 0) return false;
@@ -880,7 +908,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.isVersionFullyValidated(currentVersion);
   }
 
-  getCurrentVersionValidationTooltip(): string {
+  get currentVersionValidationTooltip(): string {
     const currentVersionNumber = this.episodeForm.get('currentVersionNumber')?.value;
     const versions = this.episodeForm.get('versions')?.value;
     if (!currentVersionNumber || !versions || versions.length === 0) return 'No version information';
@@ -968,7 +996,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
    * Check if the episode is saved as live (not just the form checkbox)
    * Used for showing share buttons - only show when actually published
    */
-  public isSavedAsLive(): boolean {
+  public get isSavedAsLive(): boolean {
     // If we have saved form values, use those (most accurate)
     if (this.initialFormValues) {
       return this.initialFormValues.isLive;
@@ -1010,7 +1038,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  isGenerateAudioDisabled(): boolean {
+  get isGenerateAudioDisabled(): boolean {
     // Allow generation if:
     // - No audio exists, OR
     // - Audio is a custom upload (user can override it)
@@ -1022,14 +1050,14 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.audioSrc !== null && !this.audioIsCustomUpload;
   }
 
-  getUpdateButtonTooltip(): string {
+  get updateButtonTooltip(): string {
     if (this.hasUnsavedChanges) {
       return 'Save your changes';
     }
     return 'No changes to save';
   }
 
-  getGenerateAudioTooltip(): string {
+  get generateAudioTooltip(): string {
     if (this.hasUnsavedChanges) {
       return 'You have unsaved changes. Please save before generating audio';
     }
@@ -1042,11 +1070,11 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return 'Generate audio for this episode';
   }
 
-  hasCurrentVersionAudio(): boolean {
+  get hasCurrentVersionAudio(): boolean {
     return this.audioSrc !== null;
   }
 
-  hasLiveAudioFromDifferentVersion(): boolean {
+  get hasLiveAudioFromDifferentVersion(): boolean {
     // This method determines if we should show a separate "Live on RSS Feed" audio player
     // We only show it when the published audio is different from the current version's audio
 
@@ -1074,7 +1102,7 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  getLiveAudioVersionText(): string {
+  get liveAudioVersionText(): string {
     if (this.liveAudioVersionNumber !== null) {
       return `Version ${this.liveAudioVersionNumber}`;
     }
@@ -1085,12 +1113,12 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
    * Checks if ANY version of the episode has audio
    * Used to determine if the "Live" checkbox should be shown
    */
-  hasAnyVersionWithAudio(): boolean {
+  get hasAnyVersionWithAudio(): boolean {
     const versions = this.episodeForm.get('versions')?.value || [];
     return versions.some((version: EpisodeVersion) => version.audioUrl !== null && version.audioUrl !== undefined);
   }
 
-  getPublicShareUrl(): string {
+  get publicShareUrl(): string {
     const episode = this.episodeForm.getRawValue();
     if (!episode.uuid || !episode.title) {
       return '';
@@ -1098,9 +1126,51 @@ export class EpisodeDetailComponent implements OnInit, OnDestroy {
     return this.shareService.buildEpisodeUrl(episode.uuid, episode.title);
   }
 
-  getEpisodeDescription(): string {
+  get episodeDescription(): string {
     const episode = this.episodeForm.getRawValue();
     return episode.description || '';
+  }
+
+  /** Pre-formatted duration for the current audioSeconds value. */
+  get formattedAudioDuration(): string {
+    return this.formatDuration(this.audioSeconds);
+  }
+
+  /** Pre-rendered HTML for current-version validation notes. */
+  get currentVersionValidationNotesHtml(): SafeHtml | null {
+    return this.currentVersionValidationNotes ? this.markdownToHtml(this.currentVersionValidationNotes) : null;
+  }
+
+  /** Pre-computed news rows with derived display flags for the referenced-news sub-component. */
+  get newsDisplays(): NewsItemDisplay[] {
+    const items: NewsResult[] = this.episodeForm.get('news')?.value || [];
+    return items.map((n) => ({
+      ...n,
+      hasFeeds: !!n.rssFeeds && n.rssFeeds.length > 0,
+      feedDisplays: (n.rssFeeds || []).map((f) => ({
+        id: f.id,
+        name: f.name || f.url,
+        url: f.url,
+        isReachable: f.isReachable,
+        isParsable: f.isParsable,
+        reachIcon: f.isReachable ? 'cloud_done' : 'cloud_off',
+        reachClass: f.isReachable ? 'status-success' : 'status-error',
+        reachTooltip: f.isReachable ? 'Reachable' : 'Unreachable',
+        parseIcon: f.isParsable ? 'check_circle' : 'error',
+        parseClass: f.isParsable ? 'status-success' : 'status-error',
+        parseTooltip: f.isParsable ? 'Parsable' : 'Parse Error',
+      })),
+    }));
+  }
+
+  /** Research URLs from the form, defaulted to empty array. */
+  get researchUrls(): string[] {
+    return this.episodeForm.get('researchUrls')?.value || [];
+  }
+
+  /** Boolean reflecting the form's isLive value, for the scheduling sub-component. */
+  get isLiveForScheduling(): boolean {
+    return !!this.episodeForm.get('isLive')?.value;
   }
 
   /**

@@ -7,8 +7,8 @@
         <mat-form-field appearance="outline" class="control-field">
           <mat-label>Period</mat-label>
           <mat-select [(ngModel)]="selectedPeriod" (selectionChange)="onPeriodChange()" [disabled]="isLoading">
-            @for (period of chartControls.periodOptions; track period) {
-              <mat-option [value]="period">{{ formatPeriod(period) }}</mat-option>
+            @for (opt of periodOptionsDisplay; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -16,8 +16,8 @@
         <mat-form-field appearance="outline" class="control-field">
           <mat-label>Interval</mat-label>
           <mat-select [(ngModel)]="selectedInterval" (selectionChange)="onIntervalChange()" [disabled]="isLoading">
-            @for (interval of chartControls.intervalOptions; track interval) {
-              <mat-option [value]="interval">{{ formatInterval(interval) }}</mat-option>
+            @for (opt of intervalOptionsDisplay; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

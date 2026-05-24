@@ -22,29 +22,27 @@
       </a>
       <mat-nav-list [ngClass]="{ minimized: this.minimized }">
         <div class="keep-up">
-          @for (item of rootRoutes; track item.path) {
-            @if (shouldShow(item)) {
-              <a
-                class="mat-link"
-                mat-list-item
-                [routerLink]="item.path"
-                routerLinkActive="active-link"
-                (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
-                #link="routerLinkActive"
-                [activated]="link.isActive"
-              >
-                <div class="route-link">
-                  @if (item.data && item.data['icon']) {
-                    <mat-icon>{{ item.data['icon'] }}</mat-icon>
-                  }
-                  @if (!this.minimized) {
-                    <div class="route-title">
-                      {{ item.title }}
-                    </div>
-                  }
-                </div>
-              </a>
-            }
+          @for (item of visibleRootRoutes(); track item.path) {
+            <a
+              class="mat-link"
+              mat-list-item
+              [routerLink]="item.path"
+              routerLinkActive="active-link"
+              (click)="getTitlePath((item.title ?? '').toString()); handleClick($event, item.path)"
+              #link="routerLinkActive"
+              [activated]="link.isActive"
+            >
+              <div class="route-link">
+                @if (item.data && item.data['icon']) {
+                  <mat-icon>{{ item.data['icon'] }}</mat-icon>
+                }
+                @if (!this.minimized) {
+                  <div class="route-title">
+                    {{ item.title }}
+                  </div>
+                }
+              </div>
+            </a>
           }
         </div>
       </mat-nav-list>
@@ -63,12 +61,12 @@
       <div class="second-sidebar" [ngClass]="{ hidden: !isSecondSidebarVisible }">
         <div class="sidebar-content">
           <div class="second-header">
-            @if (router.url.startsWith('/media/')) {
+            @if (router.url | startsWith: '/media/') {
               <h6>Media</h6>
             }
-            @if (router.url.startsWith('/terminal')) {
+            @if (router.url | startsWith: '/terminal') {
               <h6>Finance</h6>
-            } @else if (router.url.startsWith('/jobs') || router.url.startsWith('/scheduling')) {
+            } @else if ((router.url | startsWith: '/jobs') || (router.url | startsWith: '/scheduling')) {
               <h6>Jobs</h6>
             }
             <svg
@@ -79,6 +77,10 @@
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               (click)="toggleSecondSidebar()"
+              (keydown.enter)="toggleSecondSidebar()"
+              tabindex="0"
+              role="button"
+              aria-label="Toggle second sidebar"
             >
               <path
                 d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
@@ -103,6 +105,10 @@
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               (click)="onHamburgerClick($event)"
+              (keydown.enter)="onHamburgerClick($event)"
+              tabindex="0"
+              role="button"
+              aria-label="Toggle mobile sidebar"
             >
               <path
                 d="M7.49984 16.6667L7.49984 3.33334M16.6665 15C16.6665 15.442 16.4909 15.866 16.1783 16.1785C15.8658 16.4911 15.4419 16.6667 14.9998 16.6667L4.99984 16.6667C4.55781 16.6667 4.13389 16.4911 3.82133 16.1785C3.50877 15.866 3.33317 15.442 3.33317 15L3.33317 5.00001C3.33317 4.55798 3.50876 4.13406 3.82133 3.8215C4.13389 3.50893 4.55781 3.33334 4.99984 3.33334L14.9998 3.33334C15.4419 3.33334 15.8658 3.50893 16.1783 3.82149C16.4909 4.13406 16.6665 4.55798 16.6665 5.00001L16.6665 15Z"
@@ -121,7 +127,7 @@
             </svg>
           </div>
           <div class="links">
-            @if (router.url.startsWith('/media/')) {
+            @if (router.url | startsWith: '/media/') {
               <!-- Media section links -->
               <a
                 [routerLink]="['/media/pulses']"
@@ -233,7 +239,7 @@
                 <span class="website-title">Posts</span>
               </a>
             }
-            @if (router.url.startsWith('/terminal')) {
+            @if (router.url | startsWith: '/terminal') {
               <a
                 class="header-logo s-link"
                 [routerLink]="['/terminal']"
@@ -243,11 +249,7 @@
                 <mat-icon>visibility</mat-icon>
                 <span class="website-title">Watchlists</span>
               </a>
-              <a
-                class="header-logo s-link"
-                style="opacity: 0.5; color: gray; cursor: not-allowed"
-                matTooltip="Coming Soon"
-              >
+              <a class="header-logo s-link coming-soon" matTooltip="Coming Soon">
                 <mat-icon>dashboard</mat-icon>
                 <span class="website-title">Dashboard</span>
               </a>
@@ -269,7 +271,7 @@
                 <mat-icon>help</mat-icon>
                 <span class="website-title">Help</span>
               </a>
-            } @else if (router.url.startsWith('/jobs')) {
+            } @else if (router.url | startsWith: '/jobs') {
               <!-- Jobs section links -->
               <a [routerLink]="['/jobs/list']" class="header-logo s-link" routerLinkActive="active">
                 <mat-icon>work</mat-icon>
@@ -385,13 +387,9 @@
           <img height="36" src="/logo.svg" alt="logo" />
         </div>
         <div class="page-title-container">
-          @if (pageBreadcrumb()) {
-            <span class="breadcrumb-text">{{ pageBreadcrumb() }}</span>
-            <span class="separator">&gt;</span>
-          }
-          @if (pageIcon()) {
-            <mat-icon>{{ pageIcon() }}</mat-icon>
-          }
+          <span class="breadcrumb-text" [hidden]="!pageBreadcrumb()">{{ pageBreadcrumb() }}</span>
+          <span class="separator" [hidden]="!pageBreadcrumb()">&gt;</span>
+          <mat-icon [hidden]="!pageIcon()">{{ pageIcon() }}</mat-icon>
           <span class="page-title-text">{{ pageTitle() }}</span>
         </div>
         @if (this.authService.isLoggedIn()) {
@@ -406,7 +404,7 @@
               [routerLink]="['/transactions']"
             >
               <mat-icon>account_balance_wallet</mat-icon>
-              <span>{{ shortCredits(this.userCredits) }} Credits</span>
+              <span>{{ userCreditsShort }} Credits</span>
             </a>
 
             <button class="profile-btn" mat-button [matMenuTriggerFor]="profileMenu">

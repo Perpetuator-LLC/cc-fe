@@ -1,0 +1,138 @@
+/* Copyright (c) 2025-2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+@mixin version-audio-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .info-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  audio {
+    width: 100%;
+    max-width: 500px;
+    height: 40px;
+  }
+
+  .no-audio {
+    display: inline-block;
+
+    padding: 8px;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-style: italic;
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: var(--md-sys-color-surface-container);
+  }
+}
+
+@mixin validation-notes-style {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  padding: 12px;
+  border: 1px solid var(--md-sys-color-secondary);
+  border-radius: 8px;
+
+  font-size: 14px;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+
+  background: color-mix(in srgb, var(--md-sys-color-secondary) 10%, transparent);
+
+  mat-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--md-sys-color-secondary);
+
+    @include mixins.icon-size(20px);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.selected-version-info {
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-high);
+
+  .version-header {
+    margin-bottom: 16px;
+
+    h5 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      margin: 0 0 8px;
+
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .version-metadata {
+      @include mixins.version-header-metadata();
+    }
+  }
+
+  .version-stats {
+    @include mixins.stats-container();
+  }
+
+  .version-audio {
+    @include version-audio-player();
+
+    margin-bottom: 16px;
+  }
+
+  .validation-notes {
+    @include validation-notes-style();
+
+    margin-bottom: 16px;
+  }
+
+  .version-content-field {
+    textarea {
+      cursor: not-allowed;
+
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.5;
+
+      opacity: 0.95;
+      background: var(--md-sys-color-surface-container);
+    }
+  }
+}
+
+.stat-item {
+  @include mixins.version-stat-item();
+}
+
+.validated-badge {
+  @include mixins.status-success();
+}
+
+.unvalidated-badge {
+  @include mixins.status-warning();
+}
+
+.version-metadata > span mat-icon {
+  @include mixins.icon-size(16px);
+}
+
+.full-width {
+  width: 100%;
+}

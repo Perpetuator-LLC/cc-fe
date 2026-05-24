@@ -50,6 +50,11 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   loading = false;
   convertForm: FormGroup;
   readonly MIN_CASH_PAYOUT = MIN_CASH_PAYOUT_CREDITS;
+  /** Pre-computed display values for static template bindings. */
+  readonly MIN_CASH_PAYOUT_FORMATTED = MIN_CASH_PAYOUT_CREDITS.toLocaleString();
+  readonly MIN_CASH_PAYOUT_DOLLARS = AffiliateConversionUtils.creditsToDollars(MIN_CASH_PAYOUT_CREDITS);
+  /** Available balance pre-formatted with thousands separators. */
+  readonly availableBalanceFormatted: string;
 
   constructor() {
     const data = this.data;
@@ -58,6 +63,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     this.convertForm = this.formBuilder.group({
       amount: ['', [Validators.required, Validators.min(minAmount), Validators.max(data.availableBalance)]],
     });
+    this.availableBalanceFormatted = data.availableBalance.toLocaleString();
   }
 
   ngOnDestroy(): void {
@@ -74,7 +80,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   /**
    * Get the current conversion amount based on form input
    */
-  getConversionAmount(): string {
+  get conversionAmount(): string {
     const amount = this.convertForm.get('amount')?.value;
     if (!amount || isNaN(amount) || amount <= 0) {
       return '0.00';
@@ -85,12 +91,12 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
   /**
    * Check if the conversion amount is valid for display
    */
-  hasValidConversionAmount(): boolean {
+  get hasValidConversionAmount(): boolean {
     const amount = this.convertForm.get('amount')?.value;
     return !!(amount && !isNaN(amount) && amount > 0);
   }
 
-  canRequestPayout(): boolean {
+  get canRequestPayout(): boolean {
     if (this.data.type !== 'cash') return true;
 
     const profile = this.data.affiliateProfile;
@@ -99,7 +105,7 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     return !!(profile.stripeOnboardingCompleted && profile.stripePayoutsEnabled && profile.stripeCountry === 'US');
   }
 
-  getStripeRequirementMessage(): string | null {
+  get stripeRequirementMessage(): string | null {
     if (this.data.type !== 'cash') return null;
 
     const profile = this.data.affiliateProfile;
@@ -124,11 +130,11 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     return null;
   }
 
-  getTitle(): string {
+  get title(): string {
     return this.data.type === 'credits' ? 'Convert to Credits' : 'Request Cash Payout';
   }
 
-  getDescription(): string {
+  get description(): string {
     if (this.data.type === 'credits') {
       return 'Convert your affiliate credits to regular platform credits that you can use for any service.';
     }
@@ -145,8 +151,8 @@ export class ConvertCreditsDialogComponent implements OnDestroy {
     if (this.convertForm.invalid) return;
 
     // Additional validation for cash payouts
-    if (this.data.type === 'cash' && !this.canRequestPayout()) {
-      const message = this.getStripeRequirementMessage();
+    if (this.data.type === 'cash' && !this.canRequestPayout) {
+      const message = this.stripeRequirementMessage;
       if (message) {
         this.messageService.error(message);
         return;

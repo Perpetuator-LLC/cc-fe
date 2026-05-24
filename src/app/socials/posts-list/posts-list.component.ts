@@ -14,6 +14,17 @@ import { SocialsService, Broadcast } from '../socials.service';
 import { MessageService } from '../../message.service';
 import { BroadcastDialogComponent } from '../broadcast-dialog/broadcast-dialog.component';
 
+/** Pre-computed display fields attached to each broadcast row. */
+interface BroadcastDisplay extends Broadcast {
+  platformIcon: string;
+  truncatedText: string;
+  statusClass: string;
+  formattedPublishedAt: string;
+  formattedScheduledAt: string;
+  formattedCreatedAt: string;
+  topHashtags: string[];
+}
+
 @Component({
   selector: 'app-posts-list',
   standalone: true,
@@ -37,9 +48,23 @@ export class PostsListComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   loading = true;
-  broadcasts: Broadcast[] = [];
-  dataSource = new MatTableDataSource<Broadcast>([]);
+  /** Broadcasts enriched with pre-computed display fields for the template. */
+  broadcasts: BroadcastDisplay[] = [];
+  dataSource = new MatTableDataSource<BroadcastDisplay>([]);
   displayedColumns = ['platform', 'text', 'status', 'date', 'engagement'];
+
+  private enrich(b: Broadcast): BroadcastDisplay {
+    return {
+      ...b,
+      platformIcon: this.getPlatformIcon(b.platform),
+      truncatedText: this.truncateText(b.text),
+      statusClass: this.getStatusClass(b.status),
+      formattedPublishedAt: this.formatDate(b.publishedAt),
+      formattedScheduledAt: this.formatDate(b.scheduledAt),
+      formattedCreatedAt: this.formatDate(b.createdAt),
+      topHashtags: (b.hashtags ?? []).slice(0, 3),
+    };
+  }
 
   ngOnInit(): void {
     this.loadBroadcasts();
@@ -54,8 +79,8 @@ export class PostsListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.socialsService.getBroadcasts().subscribe({
         next: (broadcasts) => {
-          this.broadcasts = broadcasts;
-          this.dataSource.data = broadcasts;
+          this.broadcasts = broadcasts.map((b) => this.enrich(b));
+          this.dataSource.data = this.broadcasts;
           this.loading = false;
         },
         error: (err) => {

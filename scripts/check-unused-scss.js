@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 
 /**
  * Dead SCSS/CSS Detection Script
@@ -193,26 +193,72 @@ function isClassUsed(className, htmlContent, tsContent) {
 }
 
 /**
+ * Collect HTML content from child component templates in subdirectories.
+ * Child components using `display: contents` on :host allow the parent's
+ * scoped styles to reach their inner DOM, so their class usage counts.
+ */
+function collectChildTemplateContent(componentDir) {
+  let content = '';
+  const subdirs = [];
+
+  try {
+    for (const entry of fs.readdirSync(componentDir)) {
+      const fullPath = path.join(componentDir, entry);
+      if (fs.statSync(fullPath).isDirectory()) {
+        subdirs.push(fullPath);
+      }
+    }
+  } catch {
+    return content;
+  }
+
+  for (const subdir of subdirs) {
+    try {
+      for (const file of fs.readdirSync(subdir)) {
+        if (file.endsWith('.component.html')) {
+          content += '\n' + fs.readFileSync(path.join(subdir, file), 'utf-8');
+        }
+      }
+    } catch {
+      // skip inaccessible subdirs
+    }
+  }
+
+  return content;
+}
+
+/**
  * Analyze a single component for unused styles
  */
 function analyzeComponent(component) {
   const scssContent = fs.readFileSync(component.scss, 'utf-8');
   const htmlContent = fs.readFileSync(component.html, 'utf-8');
   const tsContent = fs.existsSync(component.ts) ? fs.readFileSync(component.ts, 'utf-8') : '';
+  const childHtmlContent = collectChildTemplateContent(component.dir);
+  const allHtmlContent = htmlContent + childHtmlContent;
 
   const definedClasses = extractCSSClasses(scssContent);
   const unusedClasses = [];
+
+  const hasDynamicClassBinding =
+    /\[class\]\s*=\s*"/.test(allHtmlContent) || /\[attr\.class\]\s*=\s*"/.test(allHtmlContent);
 
   for (const className of definedClasses) {
     // Also check if it's a nested selector used within the component
     const isNestedOrPseudo = scssContent.includes(`&.${className}`) || scssContent.includes(`&:${className}`);
 
-    if (!isClassUsed(className, htmlContent, tsContent) && !isNestedOrPseudo) {
+    if (!isClassUsed(className, allHtmlContent, tsContent) && !isNestedOrPseudo) {
       // Additional check: is it used as a host class or global?
       const isHostClass = scssContent.includes(`:host(.${className})`);
       const isGlobalImport = scssContent.includes(`@use`) && scssContent.includes(className);
 
-      if (!isHostClass && !isGlobalImport) {
+      // Check for dynamic [class]="expr" bindings where the class name is set from TS
+      const isDynamicClass =
+        hasDynamicClassBinding &&
+        tsContent &&
+        new RegExp(`['"\`][^'"\`]*\\b${className}\\b[^'"\`]*['"\`]`).test(tsContent);
+
+      if (!isHostClass && !isGlobalImport && !isDynamicClass) {
         unusedClasses.push(className);
       }
     }

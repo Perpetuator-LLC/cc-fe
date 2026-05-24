@@ -303,7 +303,7 @@
   }
 
   .audio-border {
-    margin-bottom: 30px;
+    margin-bottom: 32px;
     padding-top: 16px;
     border-top: 1px solid var(--md-sys-color-outline-variant);
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -348,7 +348,7 @@
       align-items: flex-start;
 
       .view-btn-container {
-        margin-top: 10px;
+        margin-top: 12px;
         margin-left: auto;
       }
     }
@@ -580,7 +580,7 @@
         border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
         border-radius: 8px;
 
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 500;
         color: var(--md-sys-color-error);
         white-space: nowrap;

@@ -1,0 +1,115 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+:host {
+  display: contents;
+}
+
+.recurring-options {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.section-label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.day-pattern-section {
+  margin-top: 8px;
+}
+
+.day-pattern-toggle {
+  flex-wrap: wrap;
+  width: 100%;
+
+  mat-button-toggle {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+.custom-days-section {
+  margin-top: 12px;
+}
+
+.day-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.day-chip {
+  cursor: pointer;
+
+  min-width: 44px;
+  height: 36px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface);
+
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--md-sys-color-surface-container);
+  }
+
+  &.selected {
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-primary);
+  }
+}
+
+.time-section {
+  margin-top: 16px;
+}
+
+.time-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  @include mixins.mobile() {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.time-input {
+  flex: 1;
+
+  min-width: 120px;
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 4px;
+
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+
+  background: var(--md-sys-color-surface);
+
+  &:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: none;
+  }
+}
+
+.timezone-select {
+  flex: 1.5;
+  min-width: 160px;
+}

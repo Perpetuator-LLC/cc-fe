@@ -22,68 +22,73 @@
         <div class="empty-state">
           <mat-icon>psychology</mat-icon>
           <p>Type a command or ask a question</p>
-          <span class="examples" [innerHTML]="markdownToHtml(hints.emptyStateMessage)"></span>
+          <span class="examples" [innerHTML]="emptyStateHtml"></span>
         </div>
       } @else {
-        @for (item of history; track item.id ?? $index) {
-          <div class="history-item" [class.error]="item.result && !item.result.success">
+        @for (h of historyDisplay(); track h.entry.id ?? $index) {
+          <div class="history-item" [class.error]="h.entry.result && !h.entry.result.success">
             <div class="command-line">
               <span class="prompt">&gt;</span>
               <span
                 class="command"
                 tabindex="0"
                 role="button"
-                (click)="rerunCommand(item.input)"
-                (keydown.enter)="rerunCommand(item.input)"
+                (click)="rerunCommand(h.entry.input)"
+                (keydown.enter)="rerunCommand(h.entry.input)"
                 matTooltip="Click to rerun"
-                >{{ item.input }}</span
+                >{{ h.entry.input }}</span
               >
-              <span class="timestamp">{{ item.timestamp | date: 'HH:mm:ss' }}</span>
-              <button mat-icon-button class="copy-btn" matTooltip="Copy command" (click)="copyToClipboard(item.input)">
+              <span class="timestamp">{{ h.entry.timestamp | date: 'HH:mm:ss' }}</span>
+              <button
+                mat-icon-button
+                class="copy-btn"
+                matTooltip="Copy command"
+                (click)="copyToClipboard(h.entry.input)"
+              >
                 <mat-icon>content_copy</mat-icon>
               </button>
-              @if (item.result) {
+              @if (h.entry.result) {
                 <mat-icon
                   class="status-icon"
-                  [class.success]="item.result.success"
-                  [class.error]="!item.result.success"
+                  [class.success]="h.entry.result.success"
+                  [class.error]="!h.entry.result.success"
                 >
-                  {{ item.result.success ? 'check_circle' : 'error' }}
+                  {{ h.entry.result.success ? 'check_circle' : 'error' }}
                 </mat-icon>
               }
             </div>
-            @if (item.isLoading || isFetching(item)) {
+            @if (h.entry.isLoading || h.isFetching) {
               <div class="processing">
                 <mat-spinner diameter="16" />
-                <span>{{ isFetching(item) ? 'Fetching data...' : 'Processing...' }}</span>
+                <span>{{ h.isFetching ? 'Fetching data...' : 'Processing...' }}</span>
               </div>
-            } @else if (item.result) {
+            } @else if (h.entry.result) {
               <div class="output">
-                @if (item.result.message) {
-                  <div class="message" [class.error]="!item.result.success">
-                    <span class="message-content" [innerHTML]="markdownToHtml(item.result.message)"></span>
+                @if (h.entry.result.message) {
+                  <div class="message" [class.error]="!h.entry.result.success">
+                    <span class="message-content" [innerHTML]="h.messageHtml"></span>
                     <button
                       mat-icon-button
                       class="copy-btn"
                       matTooltip="Copy result"
-                      (click)="copyResultToClipboard(item)"
+                      (click)="copyResultToClipboard(h.entry)"
                     >
                       <mat-icon>content_copy</mat-icon>
                     </button>
                   </div>
                 }
-                @if (hasChart(item)) {
+                @if (h.hasChart) {
                   <app-chart-panel
-                    [chartOptions]="item.result.chartOptions!"
-                    [chartControls]="getChartControls(item.result)"
-                    [dataPoints]="item.result.metadata?.['dataPoints'] || 0"
+                    [chartOptions]="h.entry.result.chartOptions!"
+                    [chartControls]="h.chartControls"
+                    [dataPoints]="h.entry.result.metadata?.['dataPoints'] || 0"
                     [height]="400"
                     [showHeader]="false"
                     (executeCommand)="onChartCommand($event)"
                   />
                 }
-                @if (hasTable(item)) {
-                  <app-data-table [data]="$any(item.result.data)" />
+                @if (h.hasTable) {
+                  <app-data-table [data]="$any(h.entry.result.data)" />
                 }
               </div>
             }
@@ -95,45 +100,35 @@
 
   <div class="modal-footer">
     <div class="input-wrapper">
-      @if (suggestions.length > 0 && showSuggestions) {
-        <div class="autocomplete-dropdown">
-          @for (suggestion of suggestions; track suggestion.text; let i = $index) {
-            <div
-              class="suggestion-item"
-              [class.selected]="i === selectedSuggestionIndex"
-              [class.ai-suggestion]="suggestion.isAiInterpreted"
-              tabindex="0"
-              role="option"
-              [attr.aria-selected]="i === selectedSuggestionIndex"
-              (click)="selectSuggestion(suggestion)"
-              (keydown.enter)="selectSuggestion(suggestion)"
-              (mouseenter)="selectedSuggestionIndex = i"
-            >
-              <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
-                <mat-icon>{{ getSuggestionIcon(suggestion) }}</mat-icon>
-              </span>
-              <span class="suggestion-text">{{ suggestion.display }}</span>
-              @if (suggestion.description) {
-                <span class="suggestion-desc">{{ suggestion.description }}</span>
-              }
-              @if (suggestion.exchange) {
-                <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
-              }
-              @if (suggestion.category) {
-                <span class="suggestion-category">{{ suggestion.category }}</span>
-              }
-              @if (suggestion.isAiInterpreted) {
-                <span class="ai-badge">AI</span>
-              }
-            </div>
-          }
-        </div>
-      }
+      <div class="autocomplete-dropdown" [hidden]="!autocompleteVisible">
+        @for (suggestion of suggestions; track suggestion.text; let i = $index) {
+          <div
+            class="suggestion-item"
+            [class.selected]="i === selectedSuggestionIndex"
+            [class.ai-suggestion]="suggestion.isAiInterpreted"
+            tabindex="0"
+            role="option"
+            [attr.aria-selected]="i === selectedSuggestionIndex"
+            (click)="selectSuggestion(suggestion)"
+            (keydown.enter)="selectSuggestion(suggestion)"
+            (mouseenter)="selectedSuggestionIndex = i"
+          >
+            <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+              <mat-icon>{{ suggestion.icon }}</mat-icon>
+            </span>
+            <span class="suggestion-text">{{ suggestion.display }}</span>
+            @for (meta of suggestion.metaItems; track meta.cls) {
+              <span [class]="meta.cls">{{ meta.text }}</span>
+            }
+          </div>
+        }
+      </div>
       <div class="input-container">
         <span class="prompt">&gt;</span>
         <input
           #commandInput
           type="text"
+          class="command-input"
           [(ngModel)]="currentCommand"
           (input)="onInputChange()"
           (keydown)="onKeyDown($event)"
@@ -147,7 +142,7 @@
         @if (isProcessing) {
           <mat-spinner diameter="20" />
         } @else {
-          <button mat-icon-button (click)="onSubmit()" [disabled]="!currentCommand.trim()">
+          <button mat-icon-button (click)="onSubmit()" [disabled]="!commandTrimmed">
             <mat-icon>send</mat-icon>
           </button>
         }

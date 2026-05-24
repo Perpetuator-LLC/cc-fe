@@ -1,0 +1,121 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="button-wrapper">
+  <!-- Filled Button (mat-flat-button) -->
+  @if (variantId === 'filled') {
+    <button
+      mat-flat-button
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass"
+    >
+      Button
+    </button>
+  }
+
+  <!-- Tonal Button (mat-flat-button + *-tonal) -->
+  @if (variantId === 'tonal') {
+    <button
+      mat-flat-button
+      [class]="cssClass + '-tonal'"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass + '-tonal'"
+    >
+      Tonal
+    </button>
+  }
+
+  <!-- Outlined Button (mat-stroked-button + *-outlined) -->
+  @if (variantId === 'outlined') {
+    <button
+      mat-stroked-button
+      [class]="cssClass + '-outlined'"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass + '-outlined'"
+    >
+      Outlined
+    </button>
+  }
+
+  <!-- Text Button (mat-button + *-text) -->
+  @if (variantId === 'text') {
+    <button
+      mat-button
+      [class]="cssClass + '-text'"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass + '-text'"
+    >
+      Text
+    </button>
+  }
+
+  <!-- Elevated Button (mat-raised-button) -->
+  @if (variantId === 'elevated') {
+    <button
+      mat-raised-button
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass"
+    >
+      Elevated
+    </button>
+  }
+
+  <!-- Icon Button (mat-icon-button) -->
+  @if (variantId === 'icon') {
+    <button
+      mat-icon-button
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass"
+    >
+      <mat-icon>favorite</mat-icon>
+    </button>
+  }
+
+  <!-- FAB (mat-fab) -->
+  @if (variantId === 'fab') {
+    <button
+      mat-fab
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+
+  <!-- Mini FAB (mat-mini-fab) -->
+  @if (variantId === 'mini-fab') {
+    <button
+      mat-mini-fab
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' + ' + cssClass"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+
+  <!-- Extended FAB (mat-fab extended) -->
+  @if (variantId === 'extended-fab') {
+    <button
+      mat-fab
+      extended
+      [class]="cssClass"
+      [disabled]="disabled"
+      (click)="inspect($event)"
+      [matTooltip]="directive + ' extended + ' + cssClass"
+    >
+      <mat-icon>edit</mat-icon>
+      Create
+    </button>
+  }
+</div>

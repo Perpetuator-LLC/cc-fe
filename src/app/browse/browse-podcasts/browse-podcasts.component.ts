@@ -33,7 +33,8 @@ export class BrowsePodcastsComponent implements OnInit {
   private shareService = inject(ShareService);
   private messageService = inject(MessageService);
 
-  podcasts: PublicPodcast[] = [];
+  /** Pre-enriched podcasts with url + shareUrl per row. */
+  podcasts: (PublicPodcast & { url: string; shareUrl: string })[] = [];
   loading = true;
   sortBy: 'views' | 'recent' = 'views';
   limit = 20;
@@ -47,7 +48,11 @@ export class BrowsePodcastsComponent implements OnInit {
 
     this.publicPodcastService.getPodcasts(this.limit, this.sortBy).subscribe({
       next: (data) => {
-        this.podcasts = data.podcasts;
+        this.podcasts = data.podcasts.map((p) => ({
+          ...p,
+          url: this.getPodcastUrl(p),
+          shareUrl: this.getShareUrl(p),
+        }));
         this.loading = false;
       },
       error: (err) => {

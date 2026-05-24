@@ -7,7 +7,7 @@
     <mat-form-field class="full-width">
       <mat-label>Schedule Name</mat-label>
       <input matInput formControlName="name" placeholder="e.g., Daily Morning Update" />
-      @if (scheduleForm.get('name')?.invalid && scheduleForm.get('name')?.touched) {
+      @if (nameHasError) {
         <mat-error>Name is required</mat-error>
       }
     </mat-form-field>
@@ -38,96 +38,33 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Podcast Selection (when relevant job type is selected) -->
-    @if (showPodcastSelect) {
-      <mat-form-field class="full-width">
-        <mat-label>Podcast</mat-label>
-        <mat-select formControlName="podcastUuid">
-          <mat-option value="">Select a podcast</mat-option>
-          @for (podcast of data.podcasts; track podcast.uuid) {
-            <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    }
-
-    <!-- Podcast Display (when podcast is pre-selected/locked) -->
-    @if (showPodcastDisplay) {
-      <div class="podcast-display">
-        <mat-icon>podcasts</mat-icon>
-        <div class="podcast-info">
-          <span class="podcast-label">Podcast</span>
-          <span class="podcast-name">{{ selectedPodcastName }}</span>
-        </div>
-      </div>
-    }
-
-    <!-- Pulse Config Selection (when relevant job type is selected) -->
-    @if (showPulseSelect) {
-      <mat-form-field class="full-width">
-        <mat-label>Pulse Configuration</mat-label>
-        <mat-select formControlName="pulseConfigUuid">
-          <mat-option value="">Select a pulse config</mat-option>
-          @for (config of data.pulseConfigs; track config.uuid) {
-            <mat-option [value]="config.uuid">{{ config.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    }
-
-    <!-- Pulse Display (when pulse is pre-selected/locked) -->
-    @if (showPulseDisplay) {
-      <div class="pulse-display">
-        <mat-icon>graphic_eq</mat-icon>
-        <div class="pulse-info">
-          <span class="pulse-label">Pulse</span>
-          <span class="pulse-name">{{ selectedPulseName }}</span>
-        </div>
-      </div>
-    }
-
-    <!-- Episode Selection (when selecting episode to release from Jobs > Schedule) -->
-    @if (showEpisodeSelect) {
-      <mat-form-field class="full-width">
-        <mat-label>Episode to Publish</mat-label>
-        <mat-select formControlName="episodeUuid">
-          <mat-option value="">Select an episode</mat-option>
-          @for (episode of data.episodes; track episode.uuid) {
-            <mat-option [value]="episode.uuid">
-              <div class="episode-option">
-                <span class="episode-title">{{ episode.name }}</span>
-                @if (episode.podcastName) {
-                  <span class="episode-podcast">{{ episode.podcastName }}</span>
-                }
-              </div>
-            </mat-option>
-          }
-        </mat-select>
-        <mat-hint>Select an unpublished episode to schedule for release</mat-hint>
-      </mat-form-field>
-    }
-
-    <!-- Episode Display (when in episode context with pre-selected episode) -->
-    @if (data.episodeUuid && data.episodeName) {
-      <div class="episode-display">
-        <mat-icon>podcasts</mat-icon>
-        <div class="episode-info">
-          <span class="episode-label">Episode to publish</span>
-          <span class="episode-name">{{ data.episodeName }}</span>
-        </div>
-      </div>
-    }
+    <!-- Entity selection / display (podcast / pulse / episode) -->
+    <app-schedule-entity-fields
+      [form]="scheduleForm"
+      [showPodcastSelect]="showPodcastSelect"
+      [showPodcastDisplay]="showPodcastDisplay"
+      [podcasts]="data.podcasts"
+      [selectedPodcastName]="selectedPodcastName"
+      [showPulseSelect]="showPulseSelect"
+      [showPulseDisplay]="showPulseDisplay"
+      [pulseConfigs]="data.pulseConfigs"
+      [selectedPulseName]="selectedPulseName"
+      [showEpisodeSelect]="showEpisodeSelect"
+      [showEpisodeDisplay]="showEpisodeDisplay"
+      [episodes]="data.episodes"
+      [episodeName]="data.episodeName"
+    />
 
     <!-- Schedule Type Toggle -->
     <div class="schedule-type-section">
-      <label class="section-label">Schedule Type</label>
+      <label class="section-label" for="schedule-type">Schedule Type</label>
       @if (isEpisodeRelease) {
         <div class="locked-schedule-type">
           <mat-icon>event</mat-icon>
           <span>One-Time (Episode releases are always one-time)</span>
         </div>
       } @else {
-        <mat-button-toggle-group formControlName="scheduleType" class="schedule-type-toggle">
+        <mat-button-toggle-group id="schedule-type" formControlName="scheduleType" class="schedule-type-toggle">
           <mat-button-toggle value="recurring">
             <mat-icon>repeat</mat-icon>
             <span>Recurring</span>
@@ -142,80 +79,15 @@
 
     <!-- Schedule Options: Recurring or One-Time -->
     @if (isRecurring) {
-      <!-- Recurring Schedule Options -->
-      <div class="recurring-options">
-        <!-- Day Pattern Quick Select -->
-        <div class="day-pattern-section">
-          <label class="section-label">Days</label>
-          <mat-button-toggle-group formControlName="dayPattern" class="day-pattern-toggle">
-            <mat-button-toggle value="daily">Every Day</mat-button-toggle>
-            <mat-button-toggle value="weekdays">Weekdays</mat-button-toggle>
-            <mat-button-toggle value="weekends">Weekends</mat-button-toggle>
-            <mat-button-toggle value="custom">Custom</mat-button-toggle>
-          </mat-button-toggle-group>
-        </div>
-
-        <!-- Custom Day Selection -->
-        @if (showDaySelector) {
-          <div class="custom-days-section">
-            <div class="day-chips">
-              @for (day of daysOfWeek; track day.value) {
-                <button
-                  type="button"
-                  class="day-chip"
-                  [class.selected]="isDaySelected(day.value)"
-                  (click)="toggleDay(day.value)"
-                >
-                  {{ day.short }}
-                </button>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Time Selection -->
-        <div class="time-section">
-          <label class="section-label">Time</label>
-          <div class="time-input-row">
-            <input type="time" formControlName="time" class="time-input" />
-            <mat-form-field class="timezone-select">
-              <mat-label>Timezone</mat-label>
-              <mat-select formControlName="timezone">
-                @for (tz of timezones; track tz.value) {
-                  <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
+      <app-recurring-schedule-fields
+        [form]="scheduleForm"
+        [showDaySelector]="showDaySelector"
+        [daysOfWeekDisplay]="daysOfWeekDisplay"
+        [timezones]="timezones"
+        (dayToggle)="toggleDay($event)"
+      />
     } @else {
-      <!-- One-Time Schedule Options -->
-      <div class="one-time-options">
-        <div class="datetime-section">
-          <label class="section-label">Date and Time</label>
-          <div class="datetime-input-row">
-            <mat-form-field class="date-field">
-              <mat-label>Date</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="scheduledDate" [min]="minDate" />
-              <mat-datepicker-toggle matIconSuffix [for]="picker" />
-              <mat-datepicker #picker />
-            </mat-form-field>
-            <mat-form-field class="time-field">
-              <mat-label>Time</mat-label>
-              <input matInput type="time" formControlName="scheduledTime" />
-            </mat-form-field>
-            <mat-form-field class="timezone-select">
-              <mat-label>Timezone</mat-label>
-              <mat-select formControlName="timezone">
-                @for (tz of timezones; track tz.value) {
-                  <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
+      <app-one-time-schedule-fields [form]="scheduleForm" [minDate]="minDate" [timezones]="timezones" />
     }
 
     <!-- Enabled Toggle -->

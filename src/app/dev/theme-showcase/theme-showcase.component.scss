@@ -140,7 +140,7 @@ app-button-showcase {
   }
 
   code {
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
 
     font-family: 'Roboto Mono', monospace;
@@ -164,7 +164,7 @@ app-button-showcase {
   border-top: 1px solid var(--md-sys-color-outline-variant);
 
   code {
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
 
     font-family: 'Roboto Mono', monospace;
@@ -196,11 +196,11 @@ app-button-showcase {
     code {
       flex-shrink: 0;
 
-      padding: 2px 6px;
+      padding: 2px 8px;
       border-radius: 4px;
 
       font-family: 'Roboto Mono', monospace;
-      font-size: 11px;
+      font-size: 12px;
 
       background: var(--md-sys-color-surface-container-highest);
     }

@@ -6,122 +6,54 @@
         <mat-expansion-panel class="job-panel {{ job.status }}" [expanded]="data.panelOpenState">
           <mat-expansion-panel-header>
             <span mat-panel-title class="job-panel-title">
-              <span class="job-kind">{{ kindToString(job.kind) }}</span>
-              <span class="job-status-badge {{ job.status }}">{{ statusToString(job.status) }}</span>
+              <span class="job-kind">{{ job.display.kindLabel }}</span>
+              <span class="job-status-badge {{ job.status }}">{{ job.display.statusLabel }}</span>
             </span>
-            @if (stringToJobStatus(job.status) === JobStatus.RUNNING) {
+            @if (job.display.isRunning) {
               <mat-progress-bar mode="indeterminate" class="job-progress" />
             }
           </mat-expansion-panel-header>
 
           <div class="job-content">
             @if (job.error) {
-              <p class="error">{{ getCleanErrorMessage(job.error) }}</p>
+              <p class="error">{{ job.display.cleanError }}</p>
             }
 
             <!-- Job message section - only show if not duplicate of error -->
-            @if (!job.error || getCleanErrorMessage(job.error) !== getCleanJobMessage(job)) {
+            @if (job.display.showMessage) {
               <div class="job-section">
-                <div class="message-text" [ngClass]="{ 'error-message': isErrorMessage(getJobMessage(job)) }">
-                  {{ getCleanJobMessage(job) }}
+                <div class="message-text" [ngClass]="{ 'error-message': job.display.isMessageError }">
+                  {{ job.display.cleanMessage }}
                 </div>
               </div>
             }
 
             <!-- Resources section - colored tags with icons -->
-            @if (
-              hasPodcastUuid(job) ||
-              hasEpisodeUuid(job) ||
-              hasTopicUuid(job) ||
-              hasSymbol(job) ||
-              hasPulseConfigUuid(job) ||
-              hasBlogUuid(job) ||
-              hasArticleUuid(job)
-            ) {
+            @if (job.display.hasAnyResource) {
               <div class="job-section resources-section">
                 <div class="job-links">
-                  @if (hasPodcastUuid(job)) {
+                  @for (resource of job.display.routerResources; track resource.cssClass) {
                     <button
                       mat-flat-button
-                      class="resource-tag podcast-tag"
-                      [routerLink]="['/media/podcasts', getPodcastUuid(job)]"
-                      matTooltip="Podcast"
+                      class="resource-tag {{ resource.cssClass }}"
+                      [routerLink]="resource.routerLink"
+                      [matTooltip]="resource.tooltip"
                       matTooltipPosition="above"
                     >
-                      <mat-icon>mic</mat-icon>
-                      {{ getPodcastName(job) }}
+                      <mat-icon>{{ resource.icon }}</mat-icon>
+                      {{ resource.label }}
                     </button>
                   }
-                  @if (hasEpisodeUuid(job)) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag episode-tag"
-                      [routerLink]="['/media/episodes', getEpisodeUuid(job)]"
-                      matTooltip="Episode"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>podcasts</mat-icon>
-                      {{ getEpisodeName(job) }}
-                    </button>
-                  }
-                  @if (hasTopicUuid(job)) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag topic-tag"
-                      [routerLink]="['/media/topics', getTopicUuid(job)]"
-                      matTooltip="Topic"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>topic</mat-icon>
-                      {{ getTopicName(job) }}
-                    </button>
-                  }
-                  @if (hasPulseConfigUuid(job)) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag pulse-tag"
-                      [routerLink]="['/media/pulses', getPulseConfigUuid(job)]"
-                      matTooltip="Pulse"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>vital_signs</mat-icon>
-                      {{ getPulseConfigName() }}
-                    </button>
-                  }
-                  @if (hasBlogUuid(job)) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag blog-tag"
-                      [routerLink]="['/media/blogs', getBlogUuid(job)]"
-                      matTooltip="Blog"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>menu_book</mat-icon>
-                      {{ getBlogName(job) }}
-                    </button>
-                  }
-                  @if (hasArticleUuid(job)) {
-                    <button
-                      mat-flat-button
-                      class="resource-tag article-tag"
-                      [routerLink]="['/media/articles', getArticleUuid(job)]"
-                      matTooltip="Article"
-                      matTooltipPosition="above"
-                    >
-                      <mat-icon>article</mat-icon>
-                      {{ getArticleTitle(job) }}
-                    </button>
-                  }
-                  @if (hasSymbol(job)) {
+                  @if (job.display.symbolResource) {
                     <button
                       mat-stroked-button
-                      class="resource-tag symbol-tag"
+                      class="resource-tag {{ job.display.symbolResource.cssClass }}"
                       (click)="navigateToSymbol(job)"
-                      [matTooltip]="getSymbolTooltip(job)"
+                      [matTooltip]="job.display.symbolResource.tooltip"
                       matTooltipPosition="above"
                     >
-                      <mat-icon>show_chart</mat-icon>
-                      {{ getSymbol(job) }}
+                      <mat-icon>{{ job.display.symbolResource.icon }}</mat-icon>
+                      {{ job.display.symbolResource.label }}
                     </button>
                   }
                 </div>
@@ -135,10 +67,7 @@
                 <span class="timestamp-text">Updated: {{ job.updatedAt | date: 'short' }}</span>
               </div>
 
-              @if (
-                stringToJobStatus(job.status) === JobStatus.FAILED ||
-                stringToJobStatus(job.status) === JobStatus.PENDING
-              ) {
+              @if (job.display.isFailedOrPending) {
                 <div class="job-actions">
                   <button
                     mat-icon-button
