@@ -29,7 +29,11 @@ services:
       # Tells docker-entrypoint.sh to fetch CC_FE_* from OpenBao at startup.
       # Without these two vars, the entrypoint would expect CC_FE_* directly.
       - VAULT_ADDR=https://vault.perpetuator.io
-      - VAULT_PATH=secret/services/cc-fe/staging
+      # KV v2 API path includes "data/" between the mount and the secret name.
+      # CLI users write `bao kv get secret/services/cc-fe/staging`, but the
+      # HTTP API requires `secret/data/services/cc-fe/staging` — and the
+      # entrypoint hits the API directly with curl, not via the CLI.
+      - VAULT_PATH=secret/data/services/cc-fe/staging
       # AppRole credentials for the container to authenticate to OpenBao.
       # Passed through from the deploy environment (deploy workflow sets
       # them from Gitea secrets; ad-hoc `docker compose up` can set them
