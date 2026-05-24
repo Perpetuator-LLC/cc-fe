@@ -71,6 +71,33 @@ jobs:
             /tmp/cc-fe-stage-checkout/docker-compose.stage.yml \
             ${{ env.STAGE_PATH }}/docker-compose.stage.yml
 
+      # The Gitea runner uses Docker-in-Docker (DinD) with its own isolated
+      # daemon — the host's /root/.docker/config.json is NOT mounted in.
+      # So `docker login` on the host has no effect here; we must auth the
+      # runner's DinD daemon directly, every job.
+      #
+      # Requires the Gitea repo secret GHCR_PULL_TOKEN — a classic GitHub PAT
+      # with `read:packages` scope only (fine-grained PATs don't yet support
+      # GHCR for org packages). Create at:
+      #   github.com → Settings → Developer settings → Tokens (classic)
+      # Then add to Gitea: Repo Settings → Actions → Secrets → New Secret
+      #   Name:  GHCR_PULL_TOKEN
+      #   Value: (the PAT)
+      - name: Login to GHCR (runner's DinD daemon)
+        env:
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        run: |
+          if [ -z "${GHCR_PULL_TOKEN}" ]; then
+            echo "::error::GHCR_PULL_TOKEN secret not set in Gitea."
+            echo "Create a GitHub classic PAT with read:packages scope, then add it as"
+            echo "a Gitea repo secret named GHCR_PULL_TOKEN."
+            echo "See docs/deployment.md for full instructions."
+            exit 1
+          fi
+          echo "${GHCR_PULL_TOKEN}" | /usr/bin/docker login ghcr.io \
+            -u perpetuator-llc --password-stdin >/dev/null
+          echo "✅ Authenticated to GHCR"
+
       - name: Pull image (verifies it exists AND warms cache for smoke test)
         run: |
           # Using docker pull instead of docker manifest inspect because
@@ -186,6 +213,10 @@ jobs:
         run: |
           rm -rf /tmp/cc-fe-stage-checkout
           /usr/bin/docker rm -f cc-fe-smoke-${{ github.run_id }} 2>/dev/null || true
+          # Scrub GHCR credentials from the runner's docker config.
+          # Job containers are ephemeral anyway, but this keeps the runner's
+          # /root/.docker/config.json clean if anything is mounted/persistent.
+          /usr/bin/docker logout ghcr.io >/dev/null 2>&1 || true
 
   # ---------------------------------------------------------------------------
   # Notify the commit author by email when the deploy fails.
