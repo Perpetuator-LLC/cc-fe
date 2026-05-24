@@ -103,7 +103,7 @@ jobs:
           echo "image=${IMAGE_LOWER}:sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ${{ steps.scan-target.outputs.image }}
           format: table
