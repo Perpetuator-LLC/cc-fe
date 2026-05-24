@@ -71,15 +71,24 @@ jobs:
             /tmp/cc-fe-stage-checkout/docker-compose.stage.yml \
             ${{ env.STAGE_PATH }}/docker-compose.stage.yml
 
-      - name: Verify image manifest exists in GHCR
+      - name: Pull image (verifies it exists AND warms cache for smoke test)
         run: |
-          if ! /usr/bin/docker manifest inspect "${{ steps.target.outputs.image }}" >/dev/null 2>&1; then
-            echo "❌ Image ${{ steps.target.outputs.image }} not found in GHCR."
-            echo "   Check GitHub Actions for the build-and-publish run for this commit:"
-            echo "   https://github.com/${{ github.repository }}/actions"
+          # Using docker pull instead of docker manifest inspect because
+          # `manifest inspect` is an experimental command whose availability
+          # and behavior varies across Docker versions/registries — it has
+          # been observed to return "no such manifest" for tags that
+          # `docker pull` successfully retrieves.
+          #
+          # Side benefit: pull populates the local image cache, so the next
+          # smoke test step's `docker run` and the final `docker compose pull`
+          # are both fast (no re-download).
+          if ! /usr/bin/docker pull "${{ steps.target.outputs.image }}"; then
+            echo "❌ Failed to pull ${{ steps.target.outputs.image }} from GHCR."
+            echo "   Check the GitHub Actions build for this commit:"
+            echo "   https://github.com/Perpetuator-LLC/cc-fe/commit/${{ github.sha }}/checks"
             exit 1
           fi
-          echo "✅ Image manifest confirmed at GHCR"
+          echo "✅ Image pulled successfully"
 
       - name: Smoke test (verify image boots and serves /health)
         run: |
@@ -119,16 +128,25 @@ jobs:
 
           /usr/bin/docker rm -f ${SMOKE_NAME} 2>/dev/null || true
 
-      - name: Pull image and (re)start container
+      - name: (Re)start container at the verified SHA
         working-directory: ${{ env.STAGE_PATH }}
+        env:
+          # Pin the deployed image to the SHA we just verified and smoke-tested.
+          # docker-compose.stage.yml's `image:` line is templated with
+          # ${IMAGE_TAG:-latest}, so this env var deterministically selects
+          # what gets deployed. If we left it as :latest, a concurrent newer
+          # build could race in and we'd deploy something we never verified.
+          IMAGE_TAG: sha-${{ steps.target.outputs.short_sha }}
         run: |
           COMPOSE_FILE="docker-compose.stage.yml"
           PROJECT_NAME="cc-fe-stage"
 
-          # Pull explicitly so registry failures surface BEFORE tearing down the running container.
+          # Image is already in local cache from the verify step above, so
+          # docker compose pull is a no-op — but we still run it to catch any
+          # mid-deploy registry interruption before tearing down the container.
           /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} pull
 
-          # docker compose up -d does a graceful recreate; no need to docker rm -f first.
+          # Graceful recreate; no need to docker rm -f first.
           /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} up -d --remove-orphans
 
       - name: Post-deploy health check
