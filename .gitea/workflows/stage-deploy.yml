@@ -1,39 +1,37 @@
 # Copyright (c) 2024-2026 Perpetuator LLC
 #
-# Deploy to staging environment on push to main branch.
-# Trigger: Push or merge to `main` branch (the integration branch)
-# Target: stage.capitalcopilot.io on lestrange
+# Deploy a pre-built cc-fe image to stage.capitalcopilot.io on lestrange.
 #
-# Architecture (pull-based deploy from GHCR):
-#   1. GitHub Actions builds the cc-fe Docker image and pushes to
-#      ghcr.io/perpetuator-llc/cc-fe (see .github/workflows/build-and-publish.yml).
-#   2. Gitea mirrors the GitHub repo, so push to main on GitHub triggers
-#      this workflow shortly after the sync.
-#   3. This workflow runs audit/lint/test as gates, then deploys by
-#      pulling the freshly-published GHCR image (no local build).
-#   4. Runtime config is generated from OpenBao into .env.stage and loaded
-#      by docker-compose into the container at start.
+# Triggered by:
+#   - workflow_dispatch from .github/workflows/build-and-publish.yml after a
+#     successful GHCR push on main (the normal auto-deploy path)
+#   - Manual dispatch from the Gitea Actions UI (recovery / re-deploy)
+#   - push to main (defense in depth — if dispatch is somehow missed, mirror
+#     sync will eventually fire; in practice this rarely triggers because
+#     Gitea Actions doesn't usually fire push events on mirror sync)
 #
-# Note: the deployed environment is still called "stage" — only the
-# source branch changed from `stage` to `main` as part of the
-# main-as-integration cutover. Container names, env paths, and the
-# compose file keep their `stage` naming since that is the environment
-# identity, not the source branch.
+# What this workflow does NOT do (and why):
+#   - No audit / lint / test. Those run on GitHub Actions before merge AND
+#     again on the post-merge build. The image being deployed was built
+#     FROM the exact code that passed those checks — re-running here would
+#     add 5-10 min to every deploy with no new signal.
 #
-# CI gate mirrors local pre-commit + pre-push hooks:
-#   audit  — CVE scan (yarn audit, high/critical only)
-#   lint   — ESLint + stylelint + MD3 + unused SCSS + format check
-#   test   — Full unit test suite
-#   deploy — Pull GHCR image, refresh OpenBao secrets, restart container
-#   notify — Emails the commit author when any job fails
+# What this workflow DOES verify:
+#   - Image manifest exists at the expected SHA tag (catches a missing
+#     GHCR push, e.g. registry hiccup)
+#   - Smoke test: image starts cleanly with dummy config and serves /health
+#     (catches a broken entrypoint, missing curl/jq, etc. BEFORE we
+#     swap the running container)
+#   - Final health check post-swap (catches mis-mounted vault creds,
+#     OpenBao path missing keys, etc.)
 
 name: Deploy to Staging
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 env:
   STAGE_PATH: /mnt/storage1/stage.capitalcopilot.io
@@ -41,197 +39,85 @@ env:
   GHCR_IMAGE: ghcr.io/perpetuator-llc/cc-fe
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # All Node operations run inside Docker (node:22-alpine / node:22) because
-  # the deploy-host runner does not have node/npm/yarn in PATH.
-  #
-  # IMPORTANT: We use "docker create + docker cp + docker wait" instead of
-  # "docker run -v" because if the act runner itself runs inside Docker
-  # (DinD), volume bind-mounts reference the runner container's /tmp paths,
-  # which are invisible to the host Docker daemon — resulting in empty /app.
-  # "docker cp" transfers files through the Docker API and always works.
-  # ---------------------------------------------------------------------------
-
-  audit:
-    runs-on: deploy-host
-    steps:
-      - name: Checkout code
-        env:
-          GITEA_TOKEN: ${{ gitea.token }}
-        run: |
-          WORK_DIR="/tmp/cc-fe-audit-checkout"
-          rm -rf ${WORK_DIR}
-          git clone --depth 1 --branch ${{ github.ref_name }} \
-            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
-            ${WORK_DIR}
-
-      - name: Dependency vulnerability scan
-        run: |
-          # yarn audit exit codes are bitmasks — grep for high/critical instead.
-          CNAME="cc-fe-audit-${{ github.run_id }}"
-          /usr/bin/docker rm -f ${CNAME} 2>/dev/null || true
-
-          /usr/bin/docker create --name ${CNAME} \
-            -w /app \
-            node:22-alpine \
-            sh -c 'npm install -g yarn --quiet 2>/dev/null; yarn audit 2>&1 || true'
-
-          # docker cp goes through the Docker API — works even in DinD
-          /usr/bin/docker cp /tmp/cc-fe-audit-checkout/. ${CNAME}:/app/
-
-          /usr/bin/docker start ${CNAME}
-          /usr/bin/docker wait ${CNAME}
-          AUDIT_OUTPUT=$(/usr/bin/docker logs ${CNAME} 2>&1)
-          /usr/bin/docker rm ${CNAME} || true
-
-          echo "$AUDIT_OUTPUT"
-          if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
-            echo "❌ High or Critical CVEs found — deployment blocked."
-            exit 1
-          fi
-          echo "✅ No high or critical CVEs found."
-
-      - name: Cleanup
-        if: always()
-        run: |
-          /usr/bin/docker rm -f cc-fe-audit-${{ github.run_id }} 2>/dev/null || true
-          rm -rf /tmp/cc-fe-audit-checkout
-
-  lint:
-    runs-on: deploy-host
-    steps:
-      - name: Checkout code
-        env:
-          GITEA_TOKEN: ${{ gitea.token }}
-        run: |
-          WORK_DIR="/tmp/cc-fe-lint-checkout"
-          rm -rf ${WORK_DIR}
-          git clone --depth 1 --branch ${{ github.ref_name }} \
-            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
-            ${WORK_DIR}
-
-      - name: Lint (ESLint + stylelint + MD3 + format check)
-        run: |
-          # Mirrors lint-staged + yarn lint:all:
-          #   yarn lint          → ng lint (ESLint)
-          #   yarn lint:scss     → stylelint
-          #   yarn lint:md3      → MD3 compliance check
-          #   yarn lint:scss:unused:strict → unused SCSS check
-          #   yarn format:check  → Prettier format check
-          CNAME="cc-fe-lint-${{ github.run_id }}"
-          /usr/bin/docker rm -f ${CNAME} 2>/dev/null || true
-
-          /usr/bin/docker create --name ${CNAME} \
-            -w /app \
-            node:22-alpine \
-            sh -c 'npm install -g yarn --quiet 2>/dev/null; yarn install --frozen-lockfile && yarn lint:all'
-
-          /usr/bin/docker cp /tmp/cc-fe-lint-checkout/. ${CNAME}:/app/
-
-          /usr/bin/docker start ${CNAME}
-          EXIT_CODE=$(/usr/bin/docker wait ${CNAME})
-          /usr/bin/docker logs ${CNAME} 2>&1
-          /usr/bin/docker rm ${CNAME} || true
-          exit ${EXIT_CODE}
-
-      - name: Cleanup
-        if: always()
-        run: |
-          /usr/bin/docker rm -f cc-fe-lint-${{ github.run_id }} 2>/dev/null || true
-          rm -rf /tmp/cc-fe-lint-checkout
-
-  test:
-    runs-on: deploy-host
-    steps:
-      - name: Checkout code
-        env:
-          GITEA_TOKEN: ${{ gitea.token }}
-        run: |
-          WORK_DIR="/tmp/cc-fe-test-checkout"
-          rm -rf ${WORK_DIR}
-          git clone --depth 1 --branch ${{ github.ref_name }} \
-            https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
-            ${WORK_DIR}
-          # environment.ts is gitignored (loaded from OpenBao in staging builds).
-          # For unit tests, copy the sample stub so TypeScript can compile.
-          if [ ! -f "${WORK_DIR}/src/environments/environment.ts" ]; then
-            cp "${WORK_DIR}/src/environments/sample.environment.ts" \
-               "${WORK_DIR}/src/environments/environment.ts"
-          fi
-
-      - name: Run unit tests
-        run: |
-          # node:22 (Debian) so Chromium can be installed via apt.
-          # CI=true  → Angular/Karma selects ChromeHeadless automatically.
-          # CHROMIUM_FLAGS → karma-chrome-launcher adds --no-sandbox etc.
-          # --shm-size=2g  → prevents Chrome from crashing on /dev/shm limits.
-          CNAME="cc-fe-test-${{ github.run_id }}"
-          /usr/bin/docker rm -f ${CNAME} 2>/dev/null || true
-
-          /usr/bin/docker create --name ${CNAME} \
-            -w /app \
-            -e CI=true \
-            -e CHROMIUM_FLAGS='--no-sandbox --disable-dev-shm-usage' \
-            --shm-size=2g \
-            node:22 \
-            sh -c 'apt-get update -qq && apt-get install -y -q chromium && \
-                   export CHROME_BIN=$(which chromium) && \
-                   npm install -g yarn --quiet 2>/dev/null; \
-                   yarn install --frozen-lockfile && \
-                   yarn test -- --browsers=ChromeHeadless --watch=false --progress=false'
-
-          /usr/bin/docker cp /tmp/cc-fe-test-checkout/. ${CNAME}:/app/
-
-          /usr/bin/docker start ${CNAME}
-          EXIT_CODE=$(/usr/bin/docker wait ${CNAME})
-          /usr/bin/docker logs ${CNAME} 2>&1
-          /usr/bin/docker rm ${CNAME} || true
-          exit ${EXIT_CODE}
-
-      - name: Cleanup
-        if: always()
-        run: |
-          /usr/bin/docker rm -f cc-fe-test-${{ github.run_id }} 2>/dev/null || true
-          rm -rf /tmp/cc-fe-test-checkout
-
   deploy:
     runs-on: deploy-host
-    needs: [audit, lint, test]
     steps:
-      - name: Checkout deploy artifacts (compose file only)
+      - name: Resolve target image tag
+        id: target
+        run: |
+          # Use the SHA tag to pin to the exact commit being deployed.
+          # This guarantees we deploy what GitHub built — not a moving
+          # :latest that could race with a newer push.
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          IMAGE="${{ env.GHCR_IMAGE }}:sha-${SHORT_SHA}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Target image: ${IMAGE}"
+
+      - name: Checkout compose file
         env:
           GITEA_TOKEN: ${{ gitea.token }}
         run: |
-          # The container fetches its own runtime config from OpenBao at
-          # startup — so we don't need scripts/ or any source code on disk
-          # for the deploy. Only the compose file.
           WORK_DIR="/tmp/cc-fe-stage-checkout"
           rm -rf ${WORK_DIR}
           git clone --depth 1 --branch ${{ github.ref_name }} \
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
-
-      - name: Verify deployment path
-        run: |
-          echo "Deploying to: ${{ env.STAGE_PATH }}"
-          mkdir -p ${{ env.STAGE_PATH }}
 
       - name: Sync compose file to deploy path
         run: |
-          WORK_DIR="/tmp/cc-fe-stage-checkout"
+          mkdir -p ${{ env.STAGE_PATH }}
           /usr/bin/rsync -av \
-            ${WORK_DIR}/docker-compose.stage.yml \
+            /tmp/cc-fe-stage-checkout/docker-compose.stage.yml \
             ${{ env.STAGE_PATH }}/docker-compose.stage.yml
 
-      # NOTE: no more wait-for-GHCR loop here. This workflow is now
-      # triggered by GitHub Actions only AFTER the image is successfully
-      # pushed to GHCR (see .github/workflows/build-and-publish.yml step
-      # "Trigger Gitea deploy workflow"). The image is guaranteed to exist
-      # by the time we get here.
-      #
-      # If you trigger this workflow manually via workflow_dispatch on a
-      # commit whose GitHub build hasn't completed yet, `docker compose
-      # pull` below will fail clearly — no need for a defensive poll.
+      - name: Verify image manifest exists in GHCR
+        run: |
+          if ! /usr/bin/docker manifest inspect "${{ steps.target.outputs.image }}" >/dev/null 2>&1; then
+            echo "❌ Image ${{ steps.target.outputs.image }} not found in GHCR."
+            echo "   Check GitHub Actions for the build-and-publish run for this commit:"
+            echo "   https://github.com/${{ github.repository }}/actions"
+            exit 1
+          fi
+          echo "✅ Image manifest confirmed at GHCR"
+
+      - name: Smoke test (verify image boots and serves /health)
+        run: |
+          # Run the image in isolation with placeholder env vars (no Vault,
+          # no real backend) just to confirm the entrypoint executes cleanly
+          # and the Express server starts. Doesn't validate config correctness.
+          SMOKE_NAME="cc-fe-smoke-${{ github.run_id }}"
+          /usr/bin/docker rm -f ${SMOKE_NAME} 2>/dev/null || true
+
+          /usr/bin/docker run -d --name ${SMOKE_NAME} \
+            -e CC_FE_API_URL=https://smoke-test.invalid \
+            -e CC_FE_SITE_URL=https://smoke-test.invalid \
+            -e CC_FE_OAUTH_ISSUER=https://smoke-test.invalid \
+            -e CC_FE_OAUTH_CLIENT_ID=smoke-test \
+            -e CC_FE_OAUTH_SCOPES='read write' \
+            -e CC_FE_STRIPE_PUBLIC_KEY=pk_test_smoke \
+            "${{ steps.target.outputs.image }}" >/dev/null
+
+          # Give the SSR server up to 30s to bind to port 80.
+          HEALTHY=false
+          for i in $(seq 1 30); do
+            if /usr/bin/docker exec ${SMOKE_NAME} wget -q --spider http://localhost:80/health 2>/dev/null; then
+              HEALTHY=true
+              echo "✅ Smoke test passed (image boots and serves /health) after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+          if [ "$HEALTHY" != "true" ]; then
+            echo "❌ Smoke test FAILED — image didn't serve /health within 30s"
+            echo "Container logs:"
+            /usr/bin/docker logs ${SMOKE_NAME} --tail 80
+            /usr/bin/docker rm -f ${SMOKE_NAME} 2>/dev/null || true
+            exit 1
+          fi
+
+          /usr/bin/docker rm -f ${SMOKE_NAME} 2>/dev/null || true
 
       - name: Pull image and (re)start container
         working-directory: ${{ env.STAGE_PATH }}
@@ -239,57 +125,57 @@ jobs:
           COMPOSE_FILE="docker-compose.stage.yml"
           PROJECT_NAME="cc-fe-stage"
 
-          # Pull explicitly so failures surface before tearing down the running container.
+          # Pull explicitly so registry failures surface BEFORE tearing down the running container.
           /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} pull
 
           # docker compose up -d does a graceful recreate; no need to docker rm -f first.
           /usr/bin/docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} up -d --remove-orphans
 
-      - name: Health check
+      - name: Post-deploy health check
         run: |
-          # Wait for services to stabilize
-          sleep 15
+          # Wait briefly for the new container to bind to its host port.
+          sleep 10
 
-          # Check Express SSR server health
-          if /usr/bin/curl -sf http://localhost:4481/health > /dev/null; then
-            echo "✅ Frontend is healthy"
-          else
-            echo "⚠️ Frontend health check failed (may need more time)"
-            sleep 15
+          for i in 1 2 3; do
             if /usr/bin/curl -sf http://localhost:4481/health > /dev/null; then
-              echo "✅ Frontend is healthy (second attempt)"
-            else
-              echo "❌ Frontend health check failed"
-              /usr/bin/docker logs cc-fe-stage-angular --tail 50
-              exit 1
+              echo "✅ stage.capitalcopilot.io is healthy"
+              exit 0
             fi
-          fi
+            echo "  attempt $i — waiting 10s for the new container..."
+            sleep 10
+          done
+
+          echo "❌ Frontend health check failed after the new container deployed."
+          /usr/bin/docker logs cc-fe-stage-angular --tail 80
+          exit 1
 
       - name: Show deployment status
+        if: always()
         run: |
           echo "=========================================="
-          echo "Staging Deployment Complete!"
+          echo "Staging Deployment"
           echo "=========================================="
-          echo "URL: https://stage.capitalcopilot.io"
+          echo "URL:    https://stage.capitalcopilot.io"
+          echo "Image:  ${{ steps.target.outputs.image }}"
+          echo "Commit: ${{ github.sha }}"
           echo ""
-          echo "Container Status:"
-          /usr/bin/docker ps --filter "name=cc-fe-stage" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-          echo ""
-          echo "Image: $(/usr/bin/docker inspect cc-fe-stage-angular --format '{{.Image}}')"
+          /usr/bin/docker ps --filter "name=cc-fe-stage" \
+            --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Image}}"
           echo "=========================================="
 
       - name: Cleanup
         if: always()
         run: |
           rm -rf /tmp/cc-fe-stage-checkout
+          /usr/bin/docker rm -f cc-fe-smoke-${{ github.run_id }} 2>/dev/null || true
 
   # ---------------------------------------------------------------------------
-  # Notify the commit author by email when any job fails
-  # Requires: mailutils (apt install mailutils) or sendmail on deploy-host
+  # Notify the commit author by email when the deploy fails.
+  # Requires: mailutils (apt install mailutils) or sendmail on deploy-host.
   # ---------------------------------------------------------------------------
   notify:
     runs-on: deploy-host
-    needs: [audit, lint, test, deploy]
+    needs: [deploy]
     if: failure()
     steps:
       - name: Send failure email
@@ -315,8 +201,8 @@ jobs:
 
           SHORT_SHA="${COMMIT_SHA:0:7}"
           RUN_URL="${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}"
-          SUBJECT="❌ CI failed on ${BRANCH} (${SHORT_SHA})"
-          BODY=$(printf "One or more CI checks failed for your commit on branch '%s'.\n\nCommit:  %s\nAuthor:  %s\nRun URL: %s\n\nFailed jobs may include: audit (CVE scan), lint (ESLint/stylelint), test (unit tests), or deploy.\n\nCheck the run URL above for details and fix the issues before the build can be promoted to staging." "${BRANCH}" "${SHORT_SHA}" "${ACTOR}" "${RUN_URL}")
+          SUBJECT="❌ Stage deploy failed on ${BRANCH} (${SHORT_SHA})"
+          BODY=$(printf "The stage deploy failed for your commit on branch '%s'.\n\nCommit:  %s\nAuthor:  %s\nRun URL: %s\n\nLikely causes: image not yet published, smoke test failure (broken entrypoint), or post-deploy health check failure (vault creds, OpenBao path).\n\nCheck the run URL above for details." "${BRANCH}" "${SHORT_SHA}" "${ACTOR}" "${RUN_URL}")
 
           if command -v sendmail &> /dev/null; then
             printf "To: %s\nSubject: %s\n\n%s\n" "${AUTHOR_EMAIL}" "${SUBJECT}" "${BODY}" | sendmail "${AUTHOR_EMAIL}"
