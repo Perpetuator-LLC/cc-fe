@@ -10,13 +10,18 @@
 #       Entrypoint validates them and starts the server.
 #
 #  2. OpenBao/Vault fetch (production with HashiCorp Vault or OpenBao):
-#       Set VAULT_ADDR and VAULT_PATH. Auth via either:
-#         - VAULT_TOKEN env var (e.g. injected by vault-agent), OR
-#         - AppRole files mounted at /etc/vault/vault-role-id and
-#           /etc/vault/vault-secret-id (default — host can mount its
-#           AppRole creds read-only into the container).
-#       Entrypoint fetches secrets at startup, exports them as CC_FE_*,
-#       then revokes the token (best-effort) and execs the server. The
+#       Set VAULT_ADDR and VAULT_PATH. Authenticate via any ONE of:
+#         a. VAULT_TOKEN env var (e.g. injected by vault-agent sidecar)
+#         b. VAULT_ROLE_ID + VAULT_SECRET_ID env vars (AppRole login —
+#            CI/Gitea-secrets pattern; preferred when /etc/vault can't
+#            be mounted, e.g. Docker-in-Docker runners)
+#         c. AppRole files mounted at /etc/vault/vault-role-id and
+#            /etc/vault/vault-secret-id (legacy; works when the host
+#            can bind-mount its AppRole creds read-only into the
+#            container — does not work inside DinD)
+#       Lookup order is a → b → c. Entrypoint exchanges to a short-lived
+#       token, fetches the secret payload, exports values as CC_FE_*,
+#       revokes the token (best-effort), and execs the server. The
 #       secrets never touch disk inside or outside the container.
 #
 # Mode 2 wins when both are set — Vault values overwrite any direct env vars.
@@ -30,26 +35,35 @@ SECRET_ID_FILE="${SECRET_ID_FILE:-/etc/vault/vault-secret-id}"
 if [ -n "${VAULT_ADDR:-}" ] && [ -n "${VAULT_PATH:-}" ]; then
   echo "[entrypoint] Fetching runtime config from ${VAULT_ADDR}/${VAULT_PATH}"
 
-  # Get a token: prefer caller-provided VAULT_TOKEN, else AppRole login.
+  # Get a token from the first available source:
+  #   a. VAULT_TOKEN  (use as-is)
+  #   b. VAULT_ROLE_ID + VAULT_SECRET_ID env vars  (AppRole login)
+  #   c. AppRole files at $ROLE_ID_FILE / $SECRET_ID_FILE  (legacy, fails in DinD)
   if [ -z "${VAULT_TOKEN:-}" ]; then
-    if [ -f "$ROLE_ID_FILE" ] && [ -f "$SECRET_ID_FILE" ]; then
+    if [ -n "${VAULT_ROLE_ID:-}" ] && [ -n "${VAULT_SECRET_ID:-}" ]; then
+      _role_id="$VAULT_ROLE_ID"
+      _secret_id="$VAULT_SECRET_ID"
+    elif [ -f "$ROLE_ID_FILE" ] && [ -f "$SECRET_ID_FILE" ]; then
       _role_id=$(cat "$ROLE_ID_FILE")
       _secret_id=$(cat "$SECRET_ID_FILE")
-      VAULT_TOKEN=$(curl -sf "$VAULT_ADDR/v1/auth/approle/login" \
-        -H 'Content-Type: application/json' \
-        -d "$(printf '{"role_id":"%s","secret_id":"%s"}' "$_role_id" "$_secret_id")" \
-        | jq -r '.auth.client_token') || {
-          echo "[entrypoint] ERROR: AppRole login failed against $VAULT_ADDR" >&2
-          exit 1
-        }
-      unset _role_id _secret_id
     else
       echo "[entrypoint] ERROR: VAULT_ADDR set but no auth available." >&2
-      echo "[entrypoint] Provide VAULT_TOKEN env var, or mount AppRole files at:" >&2
-      echo "[entrypoint]   $ROLE_ID_FILE" >&2
-      echo "[entrypoint]   $SECRET_ID_FILE" >&2
+      echo "[entrypoint] Provide one of:" >&2
+      echo "[entrypoint]   - VAULT_TOKEN env var" >&2
+      echo "[entrypoint]   - VAULT_ROLE_ID + VAULT_SECRET_ID env vars (AppRole)" >&2
+      echo "[entrypoint]   - AppRole files at $ROLE_ID_FILE and $SECRET_ID_FILE" >&2
       exit 1
     fi
+
+    VAULT_TOKEN=$(curl -sf "$VAULT_ADDR/v1/auth/approle/login" \
+      -H 'Content-Type: application/json' \
+      -d "$(printf '{"role_id":"%s","secret_id":"%s"}' "$_role_id" "$_secret_id")" \
+      | jq -r '.auth.client_token') || {
+        echo "[entrypoint] ERROR: AppRole login failed against $VAULT_ADDR" >&2
+        unset _role_id _secret_id
+        exit 1
+      }
+    unset _role_id _secret_id
   fi
 
   if [ -z "${VAULT_TOKEN:-}" ] || [ "$VAULT_TOKEN" = "null" ]; then

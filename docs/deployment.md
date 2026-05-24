@@ -159,12 +159,25 @@ The script prompts for a vault token (or uses an existing `vault login` session)
 
 **Update later** by running the same script again — `vault kv put` replaces the entire payload, so make sure to enter every value (or use `vault kv patch` for incremental updates).
 
-**AppRole credentials on lestrange** (for the container to authenticate at startup):
+**AppRole credentials — provided via Gitea secrets** (NOT mounted from `/etc/vault`):
 
-- `/etc/vault/vault-role-id` (mode 600, readable by the docker user)
-- `/etc/vault/vault-secret-id` (same)
+The Gitea runner uses Docker-in-Docker (see `infra/ansible/playbooks/gitea-runner.yml` in the `mcp` repo). The host's `/etc/vault` directory is invisible to the runner's DinD daemon — and therefore invisible to the deployed container. So we provide AppRole credentials as Gitea secrets that the deploy workflow passes through as env vars.
 
-`docker-compose.stage.yml` mounts `/etc/vault` read-only into the container; `docker-entrypoint.sh` reads the AppRole files, exchanges them for a short-lived token, fetches `secret/services/cc-fe/staging`, exports the values as `CC_FE_*` env vars, and revokes the token. The secrets are never on the container filesystem and never appear in `docker inspect`.
+**One-time setup:**
+
+1. **Obtain AppRole credentials** for the `cc-fe-staging` role from OpenBao (or whatever role is authorized to read `secret/services/cc-fe/staging`). If you don't have one provisioned, see the OpenBao admin in the `mcp` repo's playbooks.
+
+2. **Add them as Gitea repo secrets** at `git.perpetuator.io/perpetuator/cc-fe-gh` → Settings → Actions → Secrets:
+   - **Name**: `VAULT_ROLE_ID` — value: the role_id (typically a UUID, not very sensitive)
+   - **Name**: `VAULT_SECRET_ID` — value: the secret_id (treat as sensitive; rotate via OpenBao admin)
+
+3. The deploy workflow reads both, passes them to `docker compose up -d` as env vars, which are forwarded to the container. The container's entrypoint uses them once to fetch a short-lived OpenBao token, fetches the `CC_FE_*` config, then revokes the token. Credentials never persist on container disk.
+
+`docker-entrypoint.sh` accepts AppRole creds from any of three sources (first available wins):
+
+1. `VAULT_TOKEN` env var (e.g. from a vault-agent sidecar)
+2. `VAULT_ROLE_ID` + `VAULT_SECRET_ID` env vars ← **CI / Gitea-secrets pattern, what staging uses**
+3. `/etc/vault/vault-role-id` + `/etc/vault/vault-secret-id` files (works for non-DinD deploys that bind-mount the host's `/etc/vault`)
 
 > **Existing `scripts/generate-env-from-vault-runtime.sh`** is kept as a debugging tool — useful for verifying OpenBao access from lestrange without spinning up the container. It writes a dotenv file you can `cat`; just delete the file afterward. The deploy pipeline does NOT use it.
 
