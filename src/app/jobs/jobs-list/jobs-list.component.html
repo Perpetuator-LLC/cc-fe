@@ -7,12 +7,35 @@
   <div class="middle-card">
     <div class="jobs-container">
       <div class="timeline">
-        <app-jobs-list-filter
-          [statusFilter]="statusFilter"
-          [statusOptions]="statusOptions"
-          (statusFilterChange)="onStatusFilterChange($event)"
-        />
-        <app-jobs-list-empty [statusFilter]="statusFilter" [statusFilterLabel]="statusFilterLabel" />
+        <!-- Status Filter in upper right corner -->
+        <div class="filter-container-top-right">
+          <mat-form-field appearance="outline" class="status-filter-compact">
+            <mat-select
+              [value]="statusFilter"
+              (selectionChange)="onStatusFilterChange($event.value)"
+              placeholder="All Statuses"
+            >
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-state-content">
+            <mat-icon class="empty-state-icon">work_off</mat-icon>
+            <h3 class="empty-state-title">No Jobs Found</h3>
+            <p class="empty-state-message">
+              @if (statusFilter) {
+                No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a new
+                job.
+              } @else {
+                No jobs have been created yet. Jobs will appear here once you start running processes.
+              }
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -20,51 +43,67 @@
   <div class="middle-card">
     <div class="jobs-container">
       <div class="timeline">
-        <app-jobs-list-filter
-          [statusFilter]="statusFilter"
-          [statusOptions]="statusOptions"
-          (statusFilterChange)="onStatusFilterChange($event)"
-        />
+        <!-- Status Filter in upper right corner -->
+        <div class="filter-container-top-right">
+          <mat-form-field appearance="outline" class="status-filter-compact">
+            <mat-select
+              [value]="statusFilter"
+              (selectionChange)="onStatusFilterChange($event.value)"
+              placeholder="All Statuses"
+            >
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         @for (group of groupedJobs; track group.label) {
           <div class="timeline-date-title">{{ group.label }}</div>
           <div class="timeline-spacing">
-            @for (item of group.items; track item.isChainGroup ? item.chainId : item.uuid) {
-              @if (item.isChainGroup && item.totalJobs > 1) {
-                <app-jobs-list-chain
-                  [item]="item"
+            @for (item of group.items; track isChainGroup(item) ? item.chainId : item.uuid) {
+              @if (isChainGroup(item) && item.totalJobs > 1) {
+                <app-job-chain-group
+                  [chain]="item"
+                  [expanded]="isChainExpanded(item.chainId!)"
                   (toggleExpanded)="toggleChainExpanded($event)"
-                  (symbolClick)="navigateToSymbol($event)"
                 />
+              } @else if (isChainGroup(item)) {
+                <app-job-single-chain-item [job]="item.jobs[0]" />
               } @else {
-                <app-jobs-list-item
-                  [item]="item"
-                  (retry)="retryJob($event)"
-                  (delete)="deleteJob($event)"
-                  (symbolClick)="navigateToSymbol($event)"
-                />
+                <app-job-standalone-item [item]="item" (retry)="retryJob($event)" (delete)="deleteJob($event)" />
               }
             }
           </div>
         }
 
-        <!-- Infinite scroll sentinel and loading indicator -->
-        <div class="infinite-scroll-container">
-          @if (hasNextPage) {
-            <div #scrollSentinel class="scroll-sentinel"></div>
-            @if (!isLoadingMore) {
-              <button mat-stroked-button class="load-more-btn" (click)="loadMoreJobs()">Load More Jobs</button>
-            }
-          }
-          <div class="loading-more-indicator" [hidden]="!isLoadingMore">
-            <mat-progress-spinner diameter="32" mode="indeterminate" />
-            <span>Loading more jobs...</span>
+        <!-- Empty state when no jobs match the filter (only show when not loading) -->
+        @if (groupedJobs.length === 0 && !isInitialLoading) {
+          <div class="empty-state">
+            <div class="empty-state-content">
+              <mat-icon class="empty-state-icon">work_off</mat-icon>
+              <h3 class="empty-state-title">No Jobs Found</h3>
+              <p class="empty-state-message">
+                @if (statusFilter) {
+                  No jobs found with status "{{ getStatusLabel(statusFilter) }}". Try changing the filter or create a
+                  new job.
+                } @else {
+                  No jobs have been created yet. Jobs will appear here once you start running processes.
+                }
+              </p>
+            </div>
           </div>
-          <div class="end-of-list" [hidden]="hasNextPage || isLoadingMore">
-            <span>All jobs loaded</span>
-          </div>
-        </div>
+        }
       </div>
+
+      <!-- Infinite scroll sentinel and loading indicator -->
+      @if (groupedJobs.length > 0) {
+        <app-job-infinite-scroll
+          [hasNextPage]="hasNextPage"
+          [isLoadingMore]="isLoadingMore"
+          (loadMore)="loadMoreJobs()"
+        />
+      }
     </div>
   </div>
 }

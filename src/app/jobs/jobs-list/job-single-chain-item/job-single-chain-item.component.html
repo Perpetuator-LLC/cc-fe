@@ -1,0 +1,32 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="timeline-item">
+  <div class="timeline-icon" [ngClass]="statusClass(job().status)">
+    <mat-icon>{{ iconForJob(job().kind) }}</mat-icon>
+  </div>
+  <div class="timeline-content">
+    <div class="timeline-header">
+      <div class="timeline-left-content">
+        <span class="timeline-title">{{ kindToString(job().kind) }}</span>
+        <div class="timeline-meta desktop">
+          <span class="timeline-cost">
+            <mat-icon>payments</mat-icon>
+            {{ job().cost | number: '1.0-0' }} Credits
+          </span>
+          <span class="timeline-date"> Updated {{ job().updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }} </span>
+        </div>
+      </div>
+      <span class="timeline-status" [ngClass]="statusClass(job().status)">
+        {{ job().status.toUpperCase() }}
+      </span>
+    </div>
+    @if (job().error) {
+      <div class="job-section">
+        <div class="error-message">{{ getCleanErrorMessage(job().error) }}</div>
+      </div>
+    } @else {
+      <div class="job-section">
+        <div class="message-text">{{ getCleanJobMessage(job()) }}</div>
+      </div>
+    }
+  </div>
+</div>

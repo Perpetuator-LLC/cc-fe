@@ -1,0 +1,138 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="timeline-item chain-group" [class.expanded]="expanded()">
+  <!-- Chain Header (collapsed view) -->
+  <div
+    class="chain-header"
+    (click)="onToggleExpanded()"
+    (keydown.enter)="onToggleExpanded()"
+    tabindex="0"
+    role="button"
+  >
+    <div class="timeline-icon" [ngClass]="chainStatusClass(chain().status)">
+      <mat-icon>{{ getChainIcon(chain()) }}</mat-icon>
+    </div>
+    <div class="chain-content">
+      <div class="chain-summary">
+        <div class="chain-title-row">
+          <mat-icon class="expand-icon">{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          <span class="chain-title">{{ getChainTitle(chain()) }}</span>
+          <span class="chain-progress-badge">{{ chain().completedJobs }}/{{ chain().totalJobs }}</span>
+        </div>
+        <div class="chain-meta">
+          <span class="chain-cost">
+            <mat-icon>payments</mat-icon>
+            {{ chain().totalCost | number: '1.0-0' }} Credits
+          </span>
+          <span class="chain-date"> Updated {{ chain().updatedAt | date: 'EEE dd MMM, h:mm a' : 'local' }} </span>
+        </div>
+        <!-- Chain Resources (aggregated from all jobs) -->
+        @if (
+          chain().resources.podcasts.length > 0 ||
+          chain().resources.episodes.length > 0 ||
+          chain().resources.topics.length > 0 ||
+          chain().resources.pulseConfigs.length > 0 ||
+          chain().resources.symbols.length > 0
+        ) {
+          <div
+            class="chain-resources"
+            (click)="$event.stopPropagation()"
+            (keydown.enter)="$event.stopPropagation()"
+            tabindex="0"
+            role="group"
+          >
+            @for (podcast of chain().resources.podcasts; track podcast.uuid) {
+              <button
+                mat-flat-button
+                class="resource-tag podcast-tag"
+                [routerLink]="['/media/podcasts', podcast.uuid]"
+                matTooltip="Podcast"
+              >
+                <mat-icon>mic</mat-icon>
+                {{ podcast.name }}
+              </button>
+            }
+            @for (episode of chain().resources.episodes; track episode.uuid) {
+              <button
+                mat-flat-button
+                class="resource-tag episode-tag"
+                [routerLink]="['/media/episodes', episode.uuid]"
+                matTooltip="Episode"
+              >
+                <mat-icon>podcasts</mat-icon>
+                {{ episode.name }}
+              </button>
+            }
+            @for (topic of chain().resources.topics; track topic.uuid) {
+              <button
+                mat-flat-button
+                class="resource-tag topic-tag"
+                [routerLink]="['/media/topics', topic.uuid]"
+                matTooltip="Topic"
+              >
+                <mat-icon>topic</mat-icon>
+                {{ topic.name }}
+              </button>
+            }
+            @for (pulse of chain().resources.pulseConfigs; track pulse.uuid) {
+              <button
+                type="button"
+                class="resource-link-pulse"
+                [routerLink]="['/media/pulses', pulse.uuid]"
+                matTooltip="Pulse"
+              >
+                <mat-icon>vital_signs</mat-icon>
+                {{ pulse.name }}
+              </button>
+            }
+            @for (symbolInfo of chain().resources.symbols; track symbolInfo.symbol) {
+              <button
+                mat-flat-button
+                class="resource-tag symbol-tag"
+                (click)="navigateToSymbol(symbolInfo.job)"
+                [matTooltip]="getSymbolTooltip(symbolInfo.job)"
+              >
+                <mat-icon>show_chart</mat-icon>
+                {{ symbolInfo.symbol }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <span class="timeline-status" [ngClass]="chainStatusClass(chain().status)">
+        {{ chain().status.toUpperCase() }}
+      </span>
+    </div>
+  </div>
+  <!-- Expanded Chain Jobs -->
+  @if (expanded()) {
+    <div class="chain-jobs">
+      @for (chainJob of chain().jobs; track chainJob.uuid) {
+        <div class="timeline-item chain-child">
+          <div class="timeline-icon" [ngClass]="statusClass(chainJob.status)">
+            <mat-icon>{{ iconForJob(chainJob.kind) }}</mat-icon>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="timeline-left-content">
+                <span class="timeline-title">{{ kindToString(chainJob.kind) }}</span>
+                @if (chainJob.chainPosition !== null && chainJob.chainPosition !== undefined) {
+                  <span class="chain-position-badge">Step {{ chainJob.chainPosition + 1 }}</span>
+                }
+                <span class="timeline-cost">
+                  <mat-icon>payments</mat-icon>
+                  {{ chainJob.cost | number: '1.0-0' }}
+                </span>
+              </div>
+              <span class="timeline-status" [ngClass]="statusClass(chainJob.status)">
+                {{ chainJob.status.toUpperCase() }}
+              </span>
+            </div>
+            @if (chainJob.error) {
+              <div class="error-message">{{ getCleanErrorMessage(chainJob.error) }}</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

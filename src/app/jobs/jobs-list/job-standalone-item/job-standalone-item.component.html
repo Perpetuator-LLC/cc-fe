@@ -1,0 +1,139 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="timeline-item">
+  <div class="timeline-icon" [ngClass]="statusClass(item().status)">
+    <mat-icon>{{ iconForJob(item().kind) }}</mat-icon>
+  </div>
+  <div class="timeline-content">
+    <div class="timeline-header">
+      <div class="timeline-left-content">
+        <span class="timeline-title">{{ kindToString(item().kind) }}</span>
+        <div class="timeline-meta desktop">
+          <span class="timeline-cost">
+            <mat-icon>payments</mat-icon>
+            {{ item().cost | number: '1.0-0' }} Credits
+          </span>
+          <span class="timeline-date">
+            Updated {{ item().updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }}
+          </span>
+        </div>
+      </div>
+      <span class="timeline-status" [ngClass]="statusClass(item().status)">
+        {{ item().status.toUpperCase() }}
+      </span>
+    </div>
+    @if (item().error) {
+      <div class="job-section">
+        <div class="error-message">{{ getCleanErrorMessage(item().error) }}</div>
+      </div>
+    } @else {
+      <div class="job-section">
+        <div class="message-text">{{ getCleanJobMessage(item()) }}</div>
+      </div>
+    }
+    <!-- Resources section -->
+    @if (
+      hasPodcastUuid(item()) ||
+      hasEpisodeUuid(item()) ||
+      hasTopicUuid(item()) ||
+      hasSymbol(item()) ||
+      hasPulseConfigUuid(item()) ||
+      hasBlogUuid(item()) ||
+      hasArticleUuid(item())
+    ) {
+      <div class="job-section">
+        <div class="job-links">
+          @if (hasPodcastUuid(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag podcast-tag"
+              [routerLink]="['/media/podcasts', getPodcastUuid(item())]"
+              matTooltip="Podcast"
+            >
+              <mat-icon>mic</mat-icon>
+              {{ getPodcastName(item()) }}
+            </button>
+          }
+          @if (hasEpisodeUuid(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag episode-tag"
+              [routerLink]="['/media/episodes', getEpisodeUuid(item())]"
+              matTooltip="Episode"
+            >
+              <mat-icon>podcasts</mat-icon>
+              {{ getEpisodeName(item()) }}
+            </button>
+          }
+          @if (hasTopicUuid(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag topic-tag"
+              [routerLink]="['/media/topics', getTopicUuid(item())]"
+              matTooltip="Topic"
+            >
+              <mat-icon>topic</mat-icon>
+              {{ getTopicName(item()) }}
+            </button>
+          }
+          @if (hasPulseConfigUuid(item())) {
+            <button
+              type="button"
+              class="resource-link-pulse"
+              [routerLink]="['/media/pulses', getPulseConfigUuid(item())]"
+              matTooltip="Pulse"
+            >
+              <mat-icon>vital_signs</mat-icon>
+              {{ getPulseConfigName(item()) }}
+            </button>
+          }
+          @if (hasBlogUuid(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag blog-tag"
+              [routerLink]="['/media/blogs', getBlogUuid(item())]"
+              matTooltip="Blog"
+            >
+              <mat-icon>menu_book</mat-icon>
+              {{ getBlogName(item()) }}
+            </button>
+          }
+          @if (hasArticleUuid(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag article-tag"
+              [routerLink]="['/media/articles', getArticleUuid(item())]"
+              matTooltip="Article"
+            >
+              <mat-icon>article</mat-icon>
+              {{ getArticleTitle(item()) }}
+            </button>
+          }
+          @if (hasSymbol(item())) {
+            <button
+              mat-flat-button
+              class="resource-tag symbol-tag"
+              (click)="navigateToSymbol(item())"
+              [matTooltip]="getSymbolTooltip(item())"
+            >
+              <mat-icon>show_chart</mat-icon>
+              {{ getSymbol(item()) }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+    <!-- Action buttons for failed/pending jobs -->
+    @if (
+      stringToJobStatus(item().status) === JobStatus.FAILED || stringToJobStatus(item().status) === JobStatus.PENDING
+    ) {
+      <div class="timeline-actions">
+        <button mat-icon-button color="primary" matTooltip="Retry Job" (click)="retry.emit(item().uuid)">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Delete Job" (click)="delete.emit(item().uuid)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+</div>
