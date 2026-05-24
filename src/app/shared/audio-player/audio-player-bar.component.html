@@ -5,6 +5,8 @@
     <div
       class="progress-container"
       (click)="onProgressClick($event)"
+      (keydown.arrowRight)="seekByStep(5)"
+      (keydown.arrowLeft)="seekByStep(-5)"
       role="slider"
       tabindex="0"
       [attr.aria-valuenow]="audioService.progress()"
@@ -12,7 +14,7 @@
       aria-valuemax="100"
       aria-label="Audio progress"
     >
-      <div class="progress-bar" [style.width.%]="audioService.progress()"></div>
+      <div class="progress-bar" [appDynamicStyle]="{ width: audioService.progress() + '%' }"></div>
       @if (audioService.isLoading()) {
         <mat-progress-bar mode="indeterminate" class="loading-bar" />
       }
@@ -20,19 +22,26 @@
 
     <div class="player-content">
       <!-- Track info -->
-      <div class="track-info" (click)="navigateToSource()" [class.clickable]="audioService.track()?.sourceRoute">
-        <mat-icon class="type-icon">{{ getTypeIcon() }}</mat-icon>
+      <div
+        class="track-info"
+        (click)="navigateToSource()"
+        (keydown.enter)="navigateToSource()"
+        tabindex="0"
+        role="button"
+        [class.clickable]="audioService.track()?.sourceRoute"
+      >
+        <mat-icon class="type-icon">{{ typeIcon() }}</mat-icon>
         <div class="track-text">
           <span class="track-title">{{ audioService.track()?.title }}</span>
-          @if (audioService.track()?.subtitle) {
-            <span class="track-subtitle">{{ audioService.track()?.subtitle }}</span>
-          }
+          <span class="track-subtitle" [hidden]="!audioService.track()?.subtitle">{{
+            audioService.track()?.subtitle
+          }}</span>
         </div>
       </div>
 
       <!-- Controls -->
       <div class="player-controls">
-        <button mat-icon-button (click)="previousTrack()" matTooltip="Previous track" [disabled]="!hasPreviousTrack()">
+        <button mat-icon-button (click)="previousTrack()" matTooltip="Previous track" [disabled]="!hasPreviousTrack">
           <mat-icon>skip_previous</mat-icon>
         </button>
 
@@ -41,11 +50,7 @@
         </button>
 
         <button mat-icon-button class="play-button" (click)="audioService.togglePlay()">
-          @if (audioService.isPlaying()) {
-            <mat-icon>pause_circle</mat-icon>
-          } @else {
-            <mat-icon>play_circle</mat-icon>
-          }
+          <mat-icon>{{ playToggleIcon() }}</mat-icon>
         </button>
 
         <button mat-icon-button (click)="audioService.skipForward(15)" matTooltip="Forward 15s">
@@ -59,9 +64,9 @@
 
       <!-- Time display -->
       <div class="time-display">
-        <span class="current-time">{{ audioService.formatTime(audioService.currentTime()) }}</span>
+        <span class="current-time">{{ currentTimeText() }}</span>
         <span class="separator">/</span>
-        <span class="duration">{{ audioService.formatTime(audioService.duration()) }}</span>
+        <span class="duration">{{ durationText() }}</span>
       </div>
 
       <!-- Volume & close -->
@@ -83,13 +88,7 @@
           (click)="audioService.toggleMute()"
           [matTooltip]="audioService.isMuted() ? 'Unmute' : 'Mute'"
         >
-          @if (audioService.isMuted() || audioService.volume() === 0) {
-            <mat-icon>volume_off</mat-icon>
-          } @else if (audioService.volume() < 0.5) {
-            <mat-icon>volume_down</mat-icon>
-          } @else {
-            <mat-icon>volume_up</mat-icon>
-          }
+          <mat-icon>{{ volumeIcon() }}</mat-icon>
         </button>
 
         <button mat-icon-button (click)="audioService.stop()" matTooltip="Close player">
@@ -110,15 +109,19 @@
           <!-- History Section (oldest at top) -->
           @if (history.length > 0) {
             <div class="playlist-section history-section">
-              @for (track of getHistoryReversed(); track track.id) {
+              @for (track of historyReversed; track track.id) {
                 <div class="playlist-item history-item">
-                  <div class="playlist-item-content" (click)="playFromHistory(track)">
+                  <div
+                    class="playlist-item-content"
+                    (click)="playFromHistory(track)"
+                    (keydown.enter)="playFromHistory(track)"
+                    tabindex="0"
+                    role="button"
+                  >
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>
-                      @if (track.subtitle) {
-                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
-                      }
+                      <span class="playlist-item-subtitle" [hidden]="!track.subtitle">{{ track.subtitle }}</span>
                     </div>
                   </div>
                   <button mat-icon-button [matMenuTriggerFor]="historyMenu" (click)="$event.stopPropagation()">
@@ -146,15 +149,21 @@
                 <div class="now-playing-indicator">
                   <mat-icon class="playing-icon">{{ audioService.isPlaying() ? 'equalizer' : 'play_arrow' }}</mat-icon>
                 </div>
-                <div class="playlist-item-content" (click)="navigateToTrack(currentTrack)">
+                <div
+                  class="playlist-item-content"
+                  (click)="navigateToTrack(currentTrack)"
+                  (keydown.enter)="navigateToTrack(currentTrack)"
+                  tabindex="0"
+                  role="button"
+                >
                   <mat-icon class="type-icon">{{
                     currentTrack.type === 'episode' ? 'podcasts' : 'vital_signs'
                   }}</mat-icon>
                   <div class="playlist-item-text">
                     <span class="playlist-item-title">{{ currentTrack.title }}</span>
-                    @if (currentTrack.subtitle) {
-                      <span class="playlist-item-subtitle">{{ currentTrack.subtitle }}</span>
-                    }
+                    <span class="playlist-item-subtitle" [hidden]="!currentTrack.subtitle">{{
+                      currentTrack.subtitle
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -166,13 +175,17 @@
             <div class="playlist-section queue-section">
               @for (track of audioService.queue(); track track.id; let i = $index) {
                 <div class="playlist-item queue-item">
-                  <div class="playlist-item-content" (click)="playFromQueue(track.id)">
+                  <div
+                    class="playlist-item-content"
+                    (click)="playFromQueue(track.id)"
+                    (keydown.enter)="playFromQueue(track.id)"
+                    tabindex="0"
+                    role="button"
+                  >
                     <mat-icon class="type-icon">{{ track.type === 'episode' ? 'podcasts' : 'vital_signs' }}</mat-icon>
                     <div class="playlist-item-text">
                       <span class="playlist-item-title">{{ track.title }}</span>
-                      @if (track.subtitle) {
-                        <span class="playlist-item-subtitle">{{ track.subtitle }}</span>
-                      }
+                      <span class="playlist-item-subtitle" [hidden]="!track.subtitle">{{ track.subtitle }}</span>
                     </div>
                   </div>
                   <button mat-icon-button [matMenuTriggerFor]="queueMenu" (click)="$event.stopPropagation()">

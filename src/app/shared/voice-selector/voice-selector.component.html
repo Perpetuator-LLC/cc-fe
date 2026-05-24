@@ -14,16 +14,16 @@
     <!-- Tier Toggle Buttons -->
     <div class="tier-toggles">
       <span class="tier-label">Tiers:</span>
-      @for (tier of allTiers; track tier) {
+      @for (option of tierOptions; track option.tier) {
         <button
           mat-button
-          [class.selected]="isTierSelected(tier)"
-          (click)="toggleTier(tier)"
-          [matTooltip]="getTierLabel(tier)"
+          [class.selected]="option.selected"
+          (click)="toggleTier(option.tier)"
+          [matTooltip]="option.label"
           class="tier-toggle"
         >
-          <mat-icon>{{ getTierIcon(tier) }}</mat-icon>
-          {{ getTierLabel(tier) }}
+          <mat-icon>{{ option.icon }}</mat-icon>
+          {{ option.label }}
         </button>
       }
       <button mat-button class="select-all-btn" (click)="selectAllTiers()" matTooltip="Select all tiers">All</button>
@@ -45,43 +45,41 @@
     </div>
   } @else {
     <!-- Voices Grouped by Tier -->
-    @for (group of getVoicesGroupedByTier(); track group.tier) {
+    @for (group of voiceGroups; track group.tier) {
       <div class="tier-section">
         <div class="tier-header">
-          <mat-icon>{{ getTierIcon(group.tier) }}</mat-icon>
+          <mat-icon>{{ group.icon }}</mat-icon>
           <span class="tier-name">{{ group.label }}</span>
           <span class="tier-count">({{ group.voices.length }})</span>
         </div>
 
         <div class="voice-grid">
-          @for (voice of group.voices; track voice.uuid) {
+          @for (item of group.voices; track item.voice.uuid) {
             <div
               class="voice-card"
-              [class.selected]="isVoiceSelected(voice)"
-              (click)="selectVoice(voice)"
-              (keydown.enter)="selectVoice(voice)"
-              (keydown.space)="selectVoice(voice)"
+              [class.selected]="item.selected"
+              (click)="selectVoice(item.voice)"
+              (keydown.enter)="selectVoice(item.voice)"
+              (keydown.space)="selectVoice(item.voice)"
               tabindex="0"
               role="button"
-              [attr.aria-pressed]="isVoiceSelected(voice)"
-              [attr.aria-label]="'Select voice: ' + getVoiceDisplayName(voice)"
+              [attr.aria-pressed]="item.selected"
+              [attr.aria-label]="'Select voice: ' + item.displayName"
             >
               <div class="voice-header">
-                <span class="voice-name">{{ getVoiceDisplayName(voice) }}</span>
-                @if (isVoiceSelected(voice)) {
+                <span class="voice-name">{{ item.displayName }}</span>
+                @if (item.selected) {
                   <mat-icon class="selected-icon">check_circle</mat-icon>
                 }
               </div>
 
               <div class="voice-meta">
-                @if (getVoiceWpm(voice)) {
-                  <span class="voice-wpm" matTooltip="Words per minute speaking rate">
-                    {{ getVoiceWpm(voice) }} wpm
-                  </span>
+                @if (item.wpm) {
+                  <span class="voice-wpm" matTooltip="Words per minute speaking rate"> {{ item.wpm }} wpm </span>
                 }
-                @if (formatCreditsPerWord(voice)) {
+                @if (item.creditsLabel) {
                   <span class="voice-cost" matTooltip="Cost per 1000 words">
-                    {{ formatCreditsPerWord(voice) }}
+                    {{ item.creditsLabel }}
                   </span>
                 }
               </div>
@@ -90,14 +88,14 @@
                 <button
                   mat-icon-button
                   type="button"
-                  [disabled]="!voice.sampleUrl"
-                  (mouseenter)="voice.sampleUrl && playPreview(voice, $event)"
+                  [disabled]="!item.voice.sampleUrl"
+                  (mouseenter)="item.voice.sampleUrl && playPreview(item.voice, $event)"
                   (mouseleave)="stopPreview()"
                   (click)="$event.stopPropagation()"
                   matTooltip="Preview voice"
                   class="preview-btn"
                 >
-                  @if (currentPlayingVoice?.uuid === voice.uuid) {
+                  @if (currentPlayingVoice?.uuid === item.voice.uuid) {
                     <mat-icon>volume_up</mat-icon>
                   } @else {
                     <mat-icon>play_circle</mat-icon>

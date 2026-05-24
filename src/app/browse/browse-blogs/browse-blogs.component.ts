@@ -31,7 +31,8 @@ export class BrowseBlogsComponent implements OnInit {
   private readonly shareService = inject(ShareService);
   private readonly messageService = inject(MessageService);
 
-  blogs: PublicBlog[] = [];
+  /** Pre-enriched blogs with url + shareUrl per row. */
+  blogs: (PublicBlog & { url: string; shareUrl: string })[] = [];
   loading = true;
   limit = 20;
 
@@ -45,7 +46,11 @@ export class BrowseBlogsComponent implements OnInit {
     this.publicBlogService.getBlogs(this.limit).subscribe({
       next: (data) => {
         console.log('[BrowseBlogs] API response:', data);
-        this.blogs = data.blogs;
+        this.blogs = data.blogs.map((b) => ({
+          ...b,
+          url: this.getBlogUrl(b),
+          shareUrl: this.getShareUrl(b),
+        }));
         this.loading = false;
       },
       error: (err) => {
@@ -64,5 +69,3 @@ export class BrowseBlogsComponent implements OnInit {
     return this.shareService.buildBlogUrl(blog.id, blog.name);
   }
 }
-
-

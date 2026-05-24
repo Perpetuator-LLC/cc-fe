@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
+import { ButtonCellComponent } from './button-cell.component';
 
 /**
  * MD3 Button Variants as defined by Material Design 3
@@ -52,6 +53,7 @@ interface ButtonState {
     MatSelectModule,
     MatFormFieldModule,
     FormsModule,
+    ButtonCellComponent,
   ],
   templateUrl: './button-showcase.component.html',
   styleUrls: ['./button-showcase.component.scss'],

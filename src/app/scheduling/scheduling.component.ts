@@ -7,6 +7,9 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { SchedulingService, Schedule, ScheduleType, SolarEvent } from '../scheduling.service';
+
+type ResourceInfo = { type: 'podcast' | 'pulse' | 'episode' | null; name: string; uuid: string; icon: string } | null;
+type ScheduleDisplay = Schedule & { description: string; jobKindLabel: string; resourceInfo: ResourceInfo };
 import { MessageService } from '../message.service';
 import { ToolbarService } from '../layout/toolbar.service';
 import { PodcastsService, PodcastsResult } from '../podcast/podcasts.service';
@@ -62,11 +65,21 @@ export class SchedulingComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
-  schedules: Schedule[] = [];
+  /** Schedules enriched with pre-built display fields for the template. */
+  schedules: ScheduleDisplay[] = [];
   podcasts: PodcastsResult[] = [];
   pulseConfigs: PulseConfig[] = [];
   episodes: Episode[] = [];
-  dataSource = new MatTableDataSource<Schedule>(this.schedules);
+  dataSource = new MatTableDataSource<ScheduleDisplay>([]);
+
+  private enrichSchedule(s: Schedule): ScheduleDisplay {
+    return {
+      ...s,
+      description: this.getScheduleDescription(s),
+      jobKindLabel: this.formatJobKind(s.jobKind),
+      resourceInfo: this.getResourceInfo(s),
+    };
+  }
   displayedColumns: string[] = ['name', 'jobKind', 'scheduleType', 'resource', 'enabled', 'actions'];
   loading = false;
   loadingPodcasts = false;
@@ -115,8 +128,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.schedulingService.getSchedules().subscribe({
         next: ({ schedules }) => {
-          this.schedules = schedules;
-          this.dataSource.data = schedules;
+          this.schedules = schedules.map((s) => this.enrichSchedule(s));
+          this.dataSource.data = this.schedules;
           this.loading = false;
         },
         error: (err) => {

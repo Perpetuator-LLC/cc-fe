@@ -1,0 +1,45 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2026 Perpetuator LLC
+:host {
+  display: block;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.uppercase-input {
+  text-transform: uppercase;
+}
+
+.stock-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+
+  .stock-symbol {
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+  }
+
+  .stock-name {
+    overflow: hidden;
+    flex: 1;
+
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.no-results {
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.selected-hint {
+  font-weight: 500;
+  color: var(--md-sys-color-primary);
+}

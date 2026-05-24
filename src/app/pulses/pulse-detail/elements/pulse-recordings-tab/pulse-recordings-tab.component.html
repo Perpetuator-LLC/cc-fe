@@ -1,0 +1,199 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="tab-content">
+  <mat-card>
+    <mat-card-content>
+      <div class="recordings-header history-header">
+        <div class="history-title-block">
+          <div class="history-title-row">
+            <h3>History</h3>
+            <span class="history-count">{{ historyRecordings.length }}</span>
+          </div>
+          <p class="recordings-description">{{ historyDescription }}</p>
+        </div>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="createRecording.emit()"
+          matTooltip="Create a recording from your own text"
+        >
+          <mat-icon>add</mat-icon>
+          Create Recording
+        </button>
+      </div>
+
+      @if (pulses.length === 0) {
+        <div class="empty-state">
+          <mat-icon>mic</mat-icon>
+          <p>
+            No recordings yet. Click "Generate Now" to create from your content sources, or "Create Recording" to add
+            your own text.
+          </p>
+        </div>
+      } @else if (historyRecordings.length === 0) {
+        <div class="empty-state subtle">
+          <mat-icon>history</mat-icon>
+          <p>No previous recordings yet — your latest is shown above.</p>
+        </div>
+      } @else {
+        <div class="history-list" role="list" aria-label="Recording history">
+          @for (pulse of historyRecordings; track pulse.uuid; let i = $index) {
+            <div class="history-row" [class.expanded]="pulse.expanded" role="listitem">
+              <!-- Compact header row -->
+              <div
+                class="history-row-main"
+                role="button"
+                tabindex="0"
+                (click)="viewRecording.emit(pulse)"
+                (keydown.enter)="openRecordingFromKeyboard($event, pulse)"
+                (keydown.space)="openRecordingFromKeyboard($event, pulse)"
+              >
+                <span class="history-row-number">#{{ historyRecordings.length - i }}</span>
+
+                <!-- Play pill -->
+                @if (pulse.canPlay) {
+                  <button
+                    class="history-play-pill"
+                    mat-flat-button
+                    color="primary"
+                    (click)="emitCardAction($event, playPulse, pulse)"
+                  >
+                    <mat-icon>play_arrow</mat-icon>
+                    Play
+                    @if (pulse.playDurationText) {
+                      <span class="duration-hint">{{ pulse.playDurationText }}</span>
+                    }
+                  </button>
+                } @else {
+                  <button
+                    class="history-play-pill placeholder"
+                    mat-stroked-button
+                    disabled
+                    [matTooltip]="pulse.placeholderTooltip"
+                  >
+                    <mat-icon>{{ pulse.placeholderIcon }}</mat-icon>
+                    <span class="duration-hint">{{ pulse.placeholderDurationText }}</span>
+                  </button>
+                }
+
+                <!-- Title + meta -->
+                <div class="history-info">
+                  <div class="history-title">{{ pulse.title }}</div>
+                  <div class="history-meta">
+                    <span>{{ pulse.createdAt | pulseTimeAgo }}</span>
+                    <span class="history-meta-sep">·</span>
+                    <span>{{ pulse.wordCountText }}</span>
+                    @for (part of pulse.metaParts; track part) {
+                      <span class="history-meta-sep">·</span>
+                      <span>{{ part }}</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Status badge -->
+                <span class="status-badge" [class]="pulse | pulseStatusClass">
+                  <span class="badge-dot"></span>
+                  {{ pulse | pulseStatusText }}
+                </span>
+
+                <!-- Validated badge (compact) -->
+                @if (pulse.isValidated) {
+                  <span class="validated-pill compact" matTooltip="Compliance, facts and length all passed">
+                    <mat-icon>verified</mat-icon>
+                    <span class="validated-pill-label">Validated</span>
+                  </span>
+                }
+
+                <!-- Inline icon actions -->
+                <div class="history-row-actions">
+                  @if (pulse.canPlay) {
+                    <button
+                      mat-icon-button
+                      class="more-button"
+                      (click)="$event.stopPropagation()"
+                      [matMenuTriggerFor]="historyRowMenu"
+                      matTooltip="More options"
+                    >
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #historyRowMenu="matMenu">
+                      <button mat-menu-item (click)="emitCardAction($event, queueNext, pulse)">
+                        <mat-icon>queue_play_next</mat-icon>
+                        <span>Play Next</span>
+                      </button>
+                      <button mat-menu-item (click)="emitCardAction($event, queue, pulse)">
+                        <mat-icon>playlist_add</mat-icon>
+                        <span>Add to Queue</span>
+                      </button>
+                      <button mat-menu-item (click)="emitCardAction($event, viewRecording, pulse)">
+                        <mat-icon>info</mat-icon>
+                        <span>View Details</span>
+                      </button>
+                    </mat-menu>
+                  } @else {
+                    <button
+                      mat-icon-button
+                      (click)="emitCardAction($event, viewRecording, pulse)"
+                      matTooltip="View details"
+                    >
+                      <mat-icon>info</mat-icon>
+                    </button>
+                  }
+
+                  <!-- Expand chevron -->
+                  <button
+                    mat-icon-button
+                    class="history-expand-btn"
+                    (click)="$event.stopPropagation(); toggleExpanded(pulse.uuid)"
+                    [matTooltip]="pulse.expandTooltip"
+                  >
+                    <mat-icon>{{ pulse.expandIcon }}</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Expanded detail -->
+              @if (pulse.expanded) {
+                <div class="history-row-detail">
+                  <div class="history-detail-block">
+                    <div class="history-detail-label">Validation</div>
+                    <div class="history-detail-rows">
+                      @for (row of pulse.validationRows; track row.label) {
+                        <div
+                          class="history-detail-check"
+                          [class.validated]="row.pass"
+                          [class.not-validated]="!row.pass"
+                        >
+                          <span>{{ row.label }}</span>
+                          <span class="history-detail-check-value">
+                            <mat-icon>{{ row.icon }}</mat-icon>
+                            {{ row.value }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="history-detail-block">
+                    <div class="history-detail-label">Transcript preview</div>
+                    <div class="history-detail-transcript">
+                      <span [class]="pulse.transcriptClass">{{ pulse.transcriptText }}</span>
+                    </div>
+                  </div>
+
+                  <div class="history-detail-block">
+                    <div class="history-detail-label">Sources</div>
+                    <div class="history-detail-sources">
+                      @for (item of pulse.sourceItems; track $index) {
+                        <span [class]="item.chipClass">{{ item.label }}</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

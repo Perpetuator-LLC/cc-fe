@@ -205,7 +205,7 @@ describe('WatchlistTabComponent', () => {
     });
 
     it('should return symbol actions with proper commands', () => {
-      const actions = component.getSymbolActions();
+      const actions = component.symbolActions;
       expect(actions.length).toBe(6);
       expect(actions[0].command).toBe('CHART');
       expect(actions[1].command).toBe('FINANCIALS');

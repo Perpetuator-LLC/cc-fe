@@ -70,6 +70,25 @@ export class SocialPreviewComponent implements OnInit {
   errorMessage = computed(() => this.error());
   previewResult = computed(() => this.result());
 
+  /**
+   * Pre-computed display strings for the preview cards so the template
+   * reads property access instead of calling getImageUrl/truncateText
+   * for every section on every change-detection tick.
+   */
+  previewDisplay = computed(() => {
+    const res = this.result();
+    if (!res) return null;
+    const ogDescOrTagsDesc = res.tags.og.description || res.tags.description;
+    const twDescOrFallback = res.tags.twitter.description || res.tags.og.description || res.tags.description;
+    return {
+      ogImageUrl: this.getImageUrl(res.tags.og.image, res.url),
+      twitterImageUrl: this.getImageUrl(res.tags.twitter.image, res.url),
+      ogDescriptionShort: this.truncateText(ogDescOrTagsDesc, 100),
+      ogDescriptionMedium: this.truncateText(ogDescOrTagsDesc, 150),
+      twitterDescriptionShort: this.truncateText(twDescOrFallback, 100),
+    };
+  });
+
   // Preset URLs for quick testing (uses environment SITE_URL)
   readonly siteUrl = environment.SITE_URL;
   readonly presetUrls = [

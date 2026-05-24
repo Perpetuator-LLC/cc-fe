@@ -1,0 +1,148 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="tab-content">
+  <form [formGroup]="pulseForm">
+    <mat-card>
+      <mat-card-content>
+        <h3>Basic Settings</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pulse Name</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" cdkTextareaAutosize></textarea>
+        </mat-form-field>
+
+        <div class="checkbox-row">
+          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+        </div>
+
+        <div class="duration-field">
+          <span class="duration-label">
+            Target Duration: {{ targetDurationMinutes }} minutes (~{{
+              targetDurationMinutes | pulseTargetWords: wordsPerMinute
+            }}
+            words)
+          </span>
+          <mat-slider min="1" max="10" step="1" discrete [displayWith]="formatDuration">
+            <input matSliderThumb formControlName="targetDurationMinutes" />
+          </mat-slider>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tone</mat-label>
+          <mat-select formControlName="tone">
+            @for (option of toneOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="checkbox-row">
+          <mat-checkbox formControlName="includeIntro">Include Introduction</mat-checkbox>
+          <mat-checkbox formControlName="includeOutro">Include Closing</mat-checkbox>
+        </div>
+
+        @if (pulseForm.get('includeIntro')?.value) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Introduction Text</mat-label>
+            <textarea
+              matInput
+              formControlName="introText"
+              cdkTextareaAutosize
+              placeholder="e.g., Good morning! Here's your market pulse for today..."
+            ></textarea>
+            <mat-hint>Custom greeting spoken at the start of each pulse</mat-hint>
+          </mat-form-field>
+        }
+
+        @if (pulseForm.get('includeOutro')?.value) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Closing Text</mat-label>
+            <textarea
+              matInput
+              formControlName="outroText"
+              cdkTextareaAutosize
+              placeholder="e.g., That's your market pulse. Have a great trading day!"
+            ></textarea>
+            <mat-hint>Custom closing spoken at the end of each pulse</mat-hint>
+          </mat-form-field>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <h3>Custom Instructions (Optional)</h3>
+        <p class="section-description">
+          Add preferences for your pulse content. Examples: "Focus on tech stocks", "Skip politics", "Include market
+          sentiment analysis".
+        </p>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Custom Instructions</mat-label>
+          <textarea
+            matInput
+            formControlName="customInstructions"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="5"
+            cdkAutosizeMaxRows="20"
+            placeholder="e.g., Focus on earnings news, Skip cryptocurrency..."
+          ></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="notifications-card">
+      <mat-card-content>
+        <h3>
+          <mat-icon>notifications</mat-icon>
+          Notifications
+        </h3>
+        <p class="section-description">Get notified when your pulse is ready.</p>
+
+        <div class="notification-toggles">
+          <div class="notification-toggle-row">
+            <div class="toggle-info">
+              <mat-icon>sms</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-label">SMS Notification</span>
+                <span class="toggle-description">Receive a text message when your pulse is ready</span>
+              </div>
+            </div>
+            <mat-slide-toggle
+              formControlName="smsNotificationEnabled"
+              [matTooltip]="!phoneVerified ? 'Verify your phone number in Settings to enable SMS notifications' : ''"
+            />
+          </div>
+          @if (!loadingPreferences && !phoneVerified) {
+            <div class="verify-prompt">
+              <mat-icon>info</mat-icon>
+              <span>Phone verification required for SMS notifications.</span>
+              <a routerLink="/user" class="verify-link">Verify phone number</a>
+            </div>
+          }
+          @if (loadingPreferences) {
+            <div class="loading-preferences">
+              <mat-spinner diameter="16" />
+              <span>Loading preferences...</span>
+            </div>
+          }
+
+          <div class="notification-toggle-row">
+            <div class="toggle-info">
+              <mat-icon>email</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-label">Email Notification</span>
+                <span class="toggle-description">Receive an email when your pulse is ready</span>
+              </div>
+            </div>
+            <mat-slide-toggle formControlName="emailNotificationEnabled" />
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </form>
+</div>

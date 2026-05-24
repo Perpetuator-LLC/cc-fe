@@ -5,7 +5,7 @@
   <div class="message-container">
     @for (message of messages; track message.timestamp) {
       <mat-card class="message-card">
-        @if (message.dismissible || hasHtmlContent(message)) {
+        @if (message.dismissible || message.hasHtmlContent) {
           <button class="close-button" mat-icon-button (click)="removeMessage(message.timestamp)" aria-label="Close">
             <mat-icon>close</mat-icon>
           </button>
@@ -40,7 +40,7 @@
             </div>
           </div>
         </mat-card-content>
-        @if (shouldShowTimeoutProgress(message)) {
+        @if (message.showTimeoutProgress) {
           <mat-progress-bar class="timeout-progress" mode="determinate" [value]="message.timeoutProgress || 100" />
         }
       </mat-card>

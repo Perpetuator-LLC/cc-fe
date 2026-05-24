@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <span
   class="fqn-chip"
   [class.chip-stock]="computedType === 'stock'"
@@ -12,7 +12,7 @@
   [matTooltip]="fqn"
   tabindex="0"
   role="button"
-  [attr.aria-label]="'Token: ' + computedDisplay + ' (' + fqn + ')'"
+  [attr.aria-label]="ariaLabel"
   (click)="onClick()"
   (keydown.enter)="onClick()"
   (keydown.space)="onClick()"

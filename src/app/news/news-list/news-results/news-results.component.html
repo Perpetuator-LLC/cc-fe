@@ -1,0 +1,44 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@switch (mode) {
+  @case ('list') {
+    <div class="news-container">
+      <mat-list>
+        @for (item of items; track item.news.url) {
+          <app-news-card
+            [news]="item.news"
+            [selected]="item.selected"
+            [isActive]="activeNews === item.news"
+            (cardClick)="selectNews.emit(item.news)"
+            (toggleSelection)="toggleSelection.emit(item.news)"
+          />
+        } @empty {
+          @if (emptyMessage) {
+            <mat-card>
+              <mat-card-header>
+                <p>{{ emptyMessage }}</p>
+              </mat-card-header>
+            </mat-card>
+          }
+        }
+      </mat-list>
+    </div>
+  }
+  @case ('noNews') {
+    <mat-list>
+      <mat-card>
+        <mat-card-header>
+          <p>No news found. Try "Fetch News" to get the latest updates.</p>
+        </mat-card-header>
+      </mat-card>
+    </mat-list>
+  }
+  @case ('noPodcast') {
+    <mat-list>
+      <mat-card>
+        <mat-card-header>
+          <p>Select a podcast to view news.</p>
+        </mat-card-header>
+      </mat-card>
+    </mat-list>
+  }
+}

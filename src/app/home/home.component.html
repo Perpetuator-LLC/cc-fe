@@ -146,13 +146,13 @@
   <!-- Recent Podcasts Section -->
   <div class="recent-podcasts-section">
     <div class="section-header">
-      <h3 class="section-title">{{ isLoggedIn() ? 'Recent Podcasts' : 'Popular Podcasts' }}</h3>
-      <a class="view-all-link" [routerLink]="isLoggedIn() ? '/media/podcasts' : '/podcasts'">View all</a>
+      <h3 class="section-title">{{ podcastsSectionTitle }}</h3>
+      <a class="view-all-link" [routerLink]="viewAllLink">View all</a>
     </div>
     <div class="podcasts-grid">
       @if (loadingStats) {
         <!-- Skeleton Loading Cards -->
-        @for (item of [1, 2, 3]; track item) {
+        @for (item of podcastSkeletonItems; track item) {
           <mat-card class="podcast-card skeleton-podcast-card">
             <div class="skeleton-image"></div>
             <mat-card-content>
@@ -166,96 +166,21 @@
             </mat-card-content>
           </mat-card>
         }
-      } @else if ((isLoggedIn() && authPodcasts.length > 0) || (!isLoggedIn() && publicPodcasts.length > 0)) {
+      } @else if (hasPodcastsToShow) {
         @if (isLoggedIn()) {
-          <mat-card class="podcast-card" *ngFor="let podcast of authPodcasts">
-            <a [routerLink]="['/media/podcasts', podcast.uuid]" class="podcast-link">
-              @if (podcast.thumbnailUrl) {
-                <img [src]="podcast.thumbnailUrl" alt="{{ podcast.name }}" class="podcast-image" />
-              } @else {
-                <div class="podcast-placeholder">
-                  <mat-icon>podcasts</mat-icon>
-                </div>
-              }
-            </a>
-            <mat-card-content>
-              <div class="status-badge" [class.enabled]="podcast.enabled" [class.disabled]="!podcast.enabled">
-                {{ podcast.enabled ? 'Enabled' : 'Disabled' }}
-              </div>
-              <h3>
-                <a [routerLink]="['/media/podcasts', podcast.uuid]">{{ podcast.name }}</a>
-              </h3>
-              @if (podcast.team && podcast.team.name) {
-                <p class="team">Team: {{ podcast.team.name }}</p>
-              } @else {
-                <p class="team placeholder">(No Team)</p>
-              }
-              <div class="stats">
-                <span class="stat">
-                  <mat-icon>schedule</mat-icon>
-                  {{ formatTimeAgo(podcast.latestEpisodeDate) }}
-                </span>
-                <span class="stat">
-                  <mat-icon>visibility</mat-icon>
-                  {{ formatViewCount(podcast.viewCount) }}
-                </span>
-              </div>
-            </mat-card-content>
-          </mat-card>
+          @for (podcast of authPodcasts; track podcast.uuid) {
+            <app-home-podcast-card-auth [podcast]="podcast" />
+          }
         } @else {
-          <mat-card class="podcast-card public-podcast-card" *ngFor="let podcast of publicPodcasts">
-            <a
-              [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
-              class="podcast-link"
-            >
-              @if (podcast.thumbnailUrl || podcast.imageUrl) {
-                <img [src]="podcast.thumbnailUrl || podcast.imageUrl" alt="{{ podcast.name }}" class="podcast-image" />
-              } @else {
-                <div class="podcast-placeholder">
-                  <mat-icon>podcasts</mat-icon>
-                </div>
-              }
-            </a>
-            <mat-card-content>
-              <h3>
-                <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
-                  {{ podcast.name }}
-                </a>
-              </h3>
-              @if (podcast.description) {
-                <p class="description">{{ truncateDescription(podcast.description) }}</p>
-              }
-              @if (podcast.ownerName) {
-                <p class="owner">
-                  By
-                  @if (podcast.ownerLink) {
-                    <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{ podcast.ownerName }}</a>
-                  } @else {
-                    {{ podcast.ownerName }}
-                  }
-                </p>
-              }
-              <div class="stats">
-                @if (podcast.viewCount !== undefined) {
-                  <span class="stat">
-                    <mat-icon>visibility</mat-icon>
-                    {{ podcast.viewCount }} views
-                  </span>
-                } @else {
-                  <span class="stat placeholder">
-                    <mat-icon>visibility</mat-icon>
-                    (No views data)
-                  </span>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
+          @for (podcast of publicPodcasts; track podcast.id) {
+            <app-home-podcast-card-public [podcast]="podcast" [showMissingViewsPlaceholder]="true" />
+          }
         }
       } @else {
         <!-- Empty State -->
         <div class="empty-podcasts-state">
           <mat-icon>podcasts</mat-icon>
-          <p>{{ isLoggedIn() ? 'No podcasts yet. Create your first podcast!' : 'No podcasts available.' }}</p>
+          <p>{{ noPodcastsMessage }}</p>
           @if (isLoggedIn()) {
             <a routerLink="/media/podcasts/new" mat-raised-button color="primary">Create Podcast</a>
           }
@@ -266,87 +191,7 @@
 
   <!-- Recent Episodes Section (only for non-logged-in users) -->
   @if (!isLoggedIn()) {
-    <div class="recent-podcasts-section">
-      <div class="section-header">
-        <h3 class="section-title">Recent Episodes</h3>
-        <a class="view-all-link" routerLink="/podcasts">View all</a>
-      </div>
-      <div class="podcasts-grid">
-        @if (loadingRecentPodcasts) {
-          <!-- Loading Skeleton -->
-          @for (i of [1, 2, 3]; track i) {
-            <mat-card class="podcast-card skeleton-podcast-card">
-              <div class="skeleton-image"></div>
-              <mat-card-content>
-                <div class="skeleton-title"></div>
-                <div class="skeleton-text"></div>
-                <div class="skeleton-text short"></div>
-                <div class="skeleton-stats">
-                  <div class="skeleton-stat"></div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          }
-        } @else if (recentPodcasts.length > 0) {
-          @for (podcast of recentPodcasts; track podcast.id) {
-            <mat-card class="podcast-card public-podcast-card">
-              <a
-                [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]"
-                class="podcast-link"
-              >
-                @if (podcast.thumbnailUrl || podcast.imageUrl) {
-                  <img
-                    [src]="podcast.thumbnailUrl || podcast.imageUrl"
-                    alt="{{ podcast.name }}"
-                    class="podcast-image"
-                  />
-                } @else {
-                  <div class="podcast-placeholder">
-                    <mat-icon>podcasts</mat-icon>
-                  </div>
-                }
-              </a>
-              <mat-card-content>
-                <h3>
-                  <a [routerLink]="['/podcasts', podcast.id + '-' + shareService.generateSlug(podcast.name)]">
-                    {{ podcast.name }}
-                  </a>
-                </h3>
-                @if (podcast.description) {
-                  <p class="description">{{ truncateDescription(podcast.description) }}</p>
-                }
-                @if (podcast.ownerName) {
-                  <p class="owner">
-                    By
-                    @if (podcast.ownerLink) {
-                      <a [href]="podcast.ownerLink" target="_blank" rel="noopener noreferrer">{{
-                        podcast.ownerName
-                      }}</a>
-                    } @else {
-                      {{ podcast.ownerName }}
-                    }
-                  </p>
-                }
-                <div class="stats">
-                  @if (podcast.viewCount !== undefined) {
-                    <span class="stat">
-                      <mat-icon>visibility</mat-icon>
-                      {{ podcast.viewCount }} views
-                    </span>
-                  }
-                </div>
-              </mat-card-content>
-            </mat-card>
-          }
-        } @else {
-          <!-- Empty State -->
-          <div class="empty-podcasts-state">
-            <mat-icon>schedule</mat-icon>
-            <p>No recent episodes available.</p>
-          </div>
-        }
-      </div>
-    </div>
+    <app-home-recent-episodes-section [loading]="loadingRecentPodcasts" [podcasts]="recentPodcasts" />
   }
 
   <!-- Stats Section -->
@@ -355,89 +200,5 @@
       <h3 class="section-title">Stats</h3>
     </div>
   </div>
-  @if (loadingStats) {
-    <div class="stats-section">
-      @for (item of [1, 2, 3, 4, 5, 6]; track item) {
-        <mat-card class="stat-card skeleton-card">
-          <mat-card-content>
-            <div class="skeleton-icon"></div>
-            <div class="skeleton-label"></div>
-            <div class="skeleton-value"></div>
-            <div class="skeleton-change"></div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  } @else if (siteStats) {
-    <!-- Actual Stats -->
-    <div class="stats-section">
-      <!-- First Row - Primary Stats with change indicators -->
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>podcasts</mat-icon>
-            <span class="stat-label">Total Podcasts</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalPodcasts }}</div>
-          <div class="stat-change positive">
-            <span>{{ siteStats.enabledPodcasts }}</span> enabled
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>library_music</mat-icon>
-            <span class="stat-label">Total Episodes</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalEpisodes }}</div>
-          <div class="stat-change positive">
-            <span>{{ siteStats.liveEpisodes }}</span> live
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>article</mat-icon>
-            <span class="stat-label">News Articles</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalNewsArticles }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Second Row - Additional Stats -->
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>voice_selection</mat-icon>
-            <span class="stat-label">Voices</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalVoices }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>newspaper</mat-icon>
-            <span class="stat-label">Summarized News</span>
-          </div>
-          <div class="stat-value">{{ siteStats.recentNewsProcessed }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-title">
-            <mat-icon>graphic_eq</mat-icon>
-            <span class="stat-label">Audio Published</span>
-          </div>
-          <div class="stat-value">{{ siteStats.totalAudioMinutesPublished | number: '1.0-0' }} min</div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  }
+  <app-home-site-stats [loading]="loadingStats" [stats]="siteStats" />
 </div>

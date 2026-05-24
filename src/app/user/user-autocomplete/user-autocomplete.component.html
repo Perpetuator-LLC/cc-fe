@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <mat-form-field appearance="fill">
   <mat-label>Users</mat-label>
   <input
@@ -6,9 +6,10 @@
     matInput
     [formControl]="searchControl"
     [matAutocomplete]="auto"
-    placeholder="Type at least 3 characters to search">
+    placeholder="Type at least 3 characters to search"
+  />
   <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-    @if (searchControl.value && searchControl.value.length < 3 && isString(searchControl.value)) {
+    @if (searchControl.value && searchControl.value.length < 3 && isSearchControlValueString) {
       <mat-option disabled>Type at least 3 characters to search</mat-option>
     } @else if ((filteredUsers$ | async)?.length === 0) {
       <mat-option disabled>No users found</mat-option>

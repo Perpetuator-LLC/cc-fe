@@ -20,14 +20,9 @@
           <mat-icon matSuffix>link</mat-icon>
         </mat-form-field>
         <button mat-flat-button color="primary" (click)="fetchPreview()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <mat-spinner diameter="20" />
-          } @else {
-            <ng-container>
-              <mat-icon>search</mat-icon>
-              Check Preview
-            </ng-container>
-          }
+          <mat-spinner diameter="20" [hidden]="!isLoading()" />
+          <mat-icon [hidden]="isLoading()">search</mat-icon>
+          <span [hidden]="isLoading()">Check Preview</span>
         </button>
       </div>
 
@@ -54,6 +49,7 @@
 
   <!-- Results Section -->
   @if (previewResult(); as res) {
+    @let pd = previewDisplay()!;
     <div class="results-section">
       <!-- Validation Status -->
       <mat-card class="validation-card" [class.has-warnings]="res.warnings.length > 0">
@@ -171,14 +167,14 @@
             <div class="facebook-preview">
               @if (res.tags.og.image) {
                 <div class="fb-image">
-                  <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                  <img [src]="pd.ogImageUrl" alt="Preview image" class="preview-img" />
                 </div>
               }
               <div class="fb-content">
                 <div class="fb-domain">{{ res.tags.og.site_name || 'capitalcopilot.io' }}</div>
                 <div class="fb-title">{{ res.tags.og.title || res.tags.title || 'No title' }}</div>
                 <div class="fb-description">
-                  {{ truncateText(res.tags.og.description || res.tags.description, 100) || 'No description' }}
+                  {{ pd.ogDescriptionShort || 'No description' }}
                 </div>
               </div>
             </div>
@@ -195,13 +191,13 @@
             <div class="twitter-preview" [class.summary-large]="res.tags.twitter.card === 'summary_large_image'">
               @if (res.tags.twitter.image && res.tags.twitter.card === 'summary_large_image') {
                 <div class="tw-image large">
-                  <img [src]="getImageUrl(res.tags.twitter.image, res.url)" alt="Preview image" class="preview-img" />
+                  <img [src]="pd.twitterImageUrl" alt="Preview image" class="preview-img" />
                 </div>
               }
               <div class="tw-content">
                 @if (res.tags.twitter.image && res.tags.twitter.card !== 'summary_large_image') {
                   <div class="tw-image small">
-                    <img [src]="getImageUrl(res.tags.twitter.image, res.url)" alt="Preview image" class="preview-img" />
+                    <img [src]="pd.twitterImageUrl" alt="Preview image" class="preview-img" />
                   </div>
                 }
                 <div class="tw-text">
@@ -209,12 +205,7 @@
                     {{ res.tags.twitter.title || res.tags.og.title || res.tags.title || 'No title' }}
                   </div>
                   <div class="tw-description">
-                    {{
-                      truncateText(
-                        res.tags.twitter.description || res.tags.og.description || res.tags.description,
-                        100
-                      ) || 'No description'
-                    }}
+                    {{ pd.twitterDescriptionShort || 'No description' }}
                   </div>
                   <div class="tw-domain">
                     <mat-icon>link</mat-icon>
@@ -236,7 +227,7 @@
             <div class="linkedin-preview">
               @if (res.tags.og.image) {
                 <div class="li-image">
-                  <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                  <img [src]="pd.ogImageUrl" alt="Preview image" class="preview-img" />
                 </div>
               }
               <div class="li-content">
@@ -260,11 +251,11 @@
                 <div class="slack-site">{{ res.tags.og.site_name || 'Capital Copilot' }}</div>
                 <div class="slack-title">{{ res.tags.og.title || res.tags.title || 'No title' }}</div>
                 <div class="slack-description">
-                  {{ truncateText(res.tags.og.description || res.tags.description, 150) || 'No description' }}
+                  {{ pd.ogDescriptionMedium || 'No description' }}
                 </div>
                 @if (res.tags.og.image) {
                   <div class="slack-image">
-                    <img [src]="getImageUrl(res.tags.og.image, res.url)" alt="Preview image" class="preview-img" />
+                    <img [src]="pd.ogImageUrl" alt="Preview image" class="preview-img" />
                   </div>
                 }
               </div>

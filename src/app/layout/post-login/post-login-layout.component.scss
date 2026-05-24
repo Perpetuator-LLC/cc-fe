@@ -59,7 +59,7 @@ mat-sidenav-content mat-toolbar {
 
 .main-header {
   height: auto;
-  padding: 50px 70px;
+  padding: 52px 72px;
 
   .header-container {
     display: flex;
@@ -76,7 +76,7 @@ mat-sidenav-content mat-toolbar {
 
     .header-logo {
       display: flex;
-      gap: 4px; // MD3 4px grid: 5px → 4px
+      gap: 4px; // MD3 4px grid: 4px → 4px
       align-items: center;
 
       color: var(--md-sys-color-on-surface);
@@ -256,7 +256,7 @@ mat-sidenav-content mat-toolbar {
 
 .filter {
   padding-top: 16px;
-  padding-left: 10px;
+  padding-left: 12px;
 }
 
 mat-nav-list {
@@ -283,7 +283,7 @@ mat-nav-list {
 .sidenav {
   width: auto;
   max-width: 100%;
-  padding: 0 5px;
+  padding: 0 4px;
   /* Ensure it doesn't exceed the viewport width */
 }
 
@@ -311,7 +311,7 @@ mat-nav-list {
   p {
     margin-inline: auto;
 
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 400;
     line-height: 16px;
     color: var(--md-sys-color-on-surface-variant);
@@ -431,7 +431,7 @@ mat-nav-list {
   }
 
   .theme-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
   }
@@ -481,7 +481,7 @@ mat-nav-list {
   align-items: center;
   justify-content: space-between;
 
-  padding: 64px 70px;
+  padding: 64px 72px;
 
   font-family: Sarabun, sans-serif;
   font-size: 16px;
@@ -603,7 +603,7 @@ mat-nav-list {
 
     width: 90%;
     margin: 0 auto;
-    padding-top: 50px;
+    padding-top: 52px;
     border: 0;
 
     background: transparent;
@@ -641,7 +641,7 @@ mat-nav-list {
 
     .keep-up {
       display: flex;
-      gap: 32px; // MD3 4px grid: 30px → 32px
+      gap: 32px; // MD3 4px grid: 32px → 32px
       align-items: center;
     }
 
@@ -679,7 +679,7 @@ mat-nav-list {
       width: 142px;
       min-width: 142px;
       height: 48px;
-      border-radius: 48px; // MD3 4px grid: 50px → 48px
+      border-radius: 999px;
 
       font-family: Sarabun, serif;
       font-size: 16px;
@@ -795,6 +795,12 @@ mat-nav-list {
           background: var(--md-sys-color-surface-container-high);
         }
 
+        &.coming-soon {
+          cursor: not-allowed;
+          color: var(--md-sys-color-outline);
+          opacity: 0.5;
+        }
+
         &.sub-link {
           padding-left: 24px;
           font-size: 12px;
@@ -812,7 +818,7 @@ mat-nav-list {
       }
 
       .links {
-        margin-top: 32px; // MD3 4px grid: 30px → 32px
+        margin-top: 32px; // MD3 4px grid: 32px → 32px
         color: var(--md-sys-color-on-surface);
       }
     }

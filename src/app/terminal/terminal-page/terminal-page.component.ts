@@ -1,39 +1,29 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { Subscription } from 'rxjs';
 import { marked } from 'marked';
 import { TerminalService } from '../terminal.service';
 import { TerminalBarComponent } from '../terminal-bar/terminal-bar.component';
 import { TerminalDashboardComponent } from '../terminal-dashboard/terminal-dashboard.component';
 import { WatchlistTabComponent } from '../watchlist-tab/watchlist-tab.component';
+import { HistoryTabComponent } from '../history-tab/history-tab.component';
+import { HelpTabComponent, HelpCategoryDisplay } from '../help-tab/help-tab.component';
 import { CommandHistoryItem, TerminalHelp } from '../terminal.types';
-import { FqnChipComponent, FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
+import { FqnToken, FqnUtils } from '../../shared/fqn-chip/fqn-chip.component';
 import { TerminalRoutingService } from '../terminal-routing.service';
-import { effect } from '@angular/core';
 
 @Component({
   selector: 'app-terminal-page',
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    MatExpansionModule,
     TerminalBarComponent,
     TerminalDashboardComponent,
     WatchlistTabComponent,
-    FqnChipComponent,
+    HistoryTabComponent,
+    HelpTabComponent,
   ],
   templateUrl: './terminal-page.component.html',
   styleUrl: './terminal-page.component.scss',
@@ -46,6 +36,22 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
 
   historyLoading = signal(false);
   helpLoading = signal(false);
+  /** Pre-rendered help overview markdown. Updated whenever help loads. */
+  helpOverviewHtml: SafeHtml = '';
+
+  /**
+   * Enriched user-history entries — each row carries pre-built tokens /
+   * status icon / result message so the template avoids per-CD method
+   * calls. Re-runs whenever userHistory() signal changes.
+   */
+  readonly enrichedHistory = computed(() =>
+    this.terminalService.userHistory().map((entry) => ({
+      entry,
+      tokens: this.getCommandTokens(entry),
+      statusIcon: this.getStatusIcon(entry.status),
+      resultMessage: this.getResultMessage(entry),
+    })),
+  );
   /** When true, show all command executions. When false (default), deduplicate by command. */
   showDuplicates = signal(false);
   help: TerminalHelp = {
@@ -53,6 +59,8 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
     categories: [],
     aiNote: 'You can also type natural language questions and our AI will interpret them for you.',
   };
+  /** Help categories enriched with pre-joined alias strings per command. */
+  helpDisplay: HelpCategoryDisplay[] = [];
   private subscriptions = new Subscription();
   protected routingService = inject(TerminalRoutingService);
 
@@ -98,6 +106,14 @@ export class TerminalPageComponent implements OnInit, OnDestroy {
       this.terminalService.loadTerminalHelp().subscribe({
         next: (help) => {
           this.help = help;
+          this.helpOverviewHtml = this.markdownToHtml(help.overview ?? '');
+          this.helpDisplay = (help.categories ?? []).map((cat) => ({
+            ...cat,
+            commands: (cat.commands ?? []).map((cmd) => ({
+              ...cmd,
+              aliasesText: (cmd.aliases ?? []).join(', '),
+            })),
+          }));
           this.helpLoading.set(false);
         },
         error: () => {

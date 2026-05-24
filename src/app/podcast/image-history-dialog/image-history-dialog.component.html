@@ -21,13 +21,13 @@
           </div>
           <div class="image-info">
             <div class="source-badge">
-              <mat-icon>{{ getSourceIcon(image.source) }}</mat-icon>
+              <mat-icon>{{ image.sourceIcon }}</mat-icon>
               <span>{{ image.sourceDisplay }}</span>
               @if (image.isCurrent) {
                 <span class="current-badge">Current</span>
               }
             </div>
-            <div class="date">{{ formatDate(image.createdAt) }}</div>
+            <div class="date">{{ image.formattedDate }}</div>
             @if (image.prompt) {
               <div class="prompt" matTooltip="{{ image.prompt }}">
                 <mat-icon>lightbulb</mat-icon>

@@ -15,7 +15,7 @@
         </mat-checkbox>
 
         <!-- Show existing optimization info if available -->
-        @if (data.source.searchUserIntent || data.source.searchTerm !== data.source.searchTermOriginal) {
+        @if (hasOptimization) {
           <mat-expansion-panel class="optimization-panel">
             <mat-expansion-panel-header>
               <mat-panel-title>
@@ -25,25 +25,18 @@
             </mat-expansion-panel-header>
 
             <div class="optimization-content">
-              @if (data.source.searchTerm && data.source.searchTerm !== data.source.searchTermOriginal) {
+              @for (row of optimizationRows; track row.label) {
                 <div class="optimization-row">
-                  <span class="label">Optimized query:</span>
-                  <span class="value optimized-query">{{ data.source.searchTerm }}</span>
+                  <span class="label">{{ row.label }}</span>
+                  <span [class]="row.cls">{{ row.value }}</span>
                 </div>
               }
 
-              @if (data.source.searchUserIntent) {
-                <div class="optimization-row">
-                  <span class="label">Intent:</span>
-                  <span class="value">{{ data.source.searchUserIntent }}</span>
-                </div>
-              }
-
-              @if (data.source.searchExtractionFocus && data.source.searchExtractionFocus.length > 0) {
+              @if (extractionFocuses.length > 0) {
                 <div class="optimization-row">
                   <span class="label">Looking for:</span>
                   <div class="extraction-chips">
-                    @for (focus of data.source.searchExtractionFocus; track focus) {
+                    @for (focus of extractionFocuses; track focus) {
                       <span class="extraction-chip">{{ focus }}</span>
                     }
                   </div>
@@ -51,14 +44,8 @@
               }
 
               <div class="search-type-badges">
-                @if (data.source.searchIsProduct) {
-                  <span class="type-badge product">Product Search</span>
-                }
-                @if (data.source.searchIsNews) {
-                  <span class="type-badge news">News Search</span>
-                }
-                @if (data.source.searchIsResearch) {
-                  <span class="type-badge research">Research</span>
+                @for (badge of searchTypeBadges; track badge.cls) {
+                  <span class="type-badge {{ badge.cls }}">{{ badge.label }}</span>
                 }
               </div>
             </div>
@@ -72,7 +59,7 @@
             matInput
             formControlName="symbol"
             placeholder="e.g., AAPL"
-            style="text-transform: uppercase"
+            class="uppercase-input"
             [matAutocomplete]="stockAuto"
             (input)="onStockInputChange($event)"
           />

@@ -11,177 +11,67 @@
     </mat-slide-toggle>
   </div>
 
-  @if (loading) {
-    <div class="content-loading">
-      <mat-spinner diameter="40" />
-      <p>Loading dividend analysis...</p>
-    </div>
-  } @else if (error && !charts) {
-    <div class="chart-error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error }}</p>
-    </div>
-  } @else if (!charts) {
-    <div class="no-data-message">
-      <mat-icon>info</mat-icon>
-      <p>No dividend data available for this symbol.</p>
-    </div>
-  } @else {
-    <!-- Key Metrics Cards -->
-    @if (data) {
-      <div class="dividend-metrics">
-        <app-kpi-card label="Current Price" [value]="'$' + data.metrics.currentPrice.toFixed(2)" />
-
-        @if (data.metrics.dividendYield !== null) {
-          <app-kpi-card
-            label="Dividend Yield"
-            [value]="data.metrics.dividendYield.toFixed(2) + '%'"
-            accent="primary"
-            tooltip="Annual dividend per share divided by stock price"
-          />
-        }
-
-        @if (data.metrics.ttmPayoutRatio !== null) {
-          <app-kpi-card
-            label="Payout Ratio (TTM)"
-            [value]="data.metrics.ttmPayoutRatio.toFixed(1) + '%'"
-            tooltip="Dividends as a percentage of net income over trailing 12 months"
-          />
-        }
-
-        @if (data.metrics.ttmFcfPayoutRatio !== null) {
-          <app-kpi-card
-            label="FCF Payout (TTM)"
-            [value]="data.metrics.ttmFcfPayoutRatio.toFixed(1) + '%'"
-            tooltip="Dividends as a percentage of Free Cash Flow over trailing 12 months"
-          />
-        }
-
-        @if (data.metrics.dividendCagr5Year !== null) {
-          <app-kpi-card
-            label="5Y Div CAGR"
-            [value]="(data.metrics.dividendCagr5Year > 0 ? '+' : '') + data.metrics.dividendCagr5Year.toFixed(1) + '%'"
-            [changePercent]="data.metrics.dividendCagr5Year"
-            tooltip="Compound Annual Growth Rate of dividends over 5 years"
-          />
-        }
-
-        @if (data.metrics.dividendCagr10Year !== null) {
-          <app-kpi-card
-            label="10Y Div CAGR"
-            [value]="
-              (data.metrics.dividendCagr10Year > 0 ? '+' : '') + data.metrics.dividendCagr10Year.toFixed(1) + '%'
-            "
-            [changePercent]="data.metrics.dividendCagr10Year"
-            tooltip="Compound Annual Growth Rate of dividends over 10 years"
-          />
-        }
-
-        @if (data.metrics.fcfCagr5Year !== null) {
-          <app-kpi-card
-            label="5Y FCF CAGR"
-            [value]="(data.metrics.fcfCagr5Year > 0 ? '+' : '') + data.metrics.fcfCagr5Year.toFixed(1) + '%'"
-            [changePercent]="data.metrics.fcfCagr5Year"
-            tooltip="Compound Annual Growth Rate of Free Cash Flow over 5 years"
-          />
-        }
-
-        @if (data.metrics.fcfCagr10Year !== null) {
-          <app-kpi-card
-            label="10Y FCF CAGR"
-            [value]="(data.metrics.fcfCagr10Year > 0 ? '+' : '') + data.metrics.fcfCagr10Year.toFixed(1) + '%'"
-            [changePercent]="data.metrics.fcfCagr10Year"
-            tooltip="Compound Annual Growth Rate of Free Cash Flow over 10 years"
-          />
-        }
+  @switch (viewState) {
+    @case ('loading') {
+      <div class="content-loading">
+        <mat-spinner diameter="40" />
+        <p>Loading dividend analysis...</p>
       </div>
     }
+    @case ('error') {
+      <div class="chart-error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error }}</p>
+      </div>
+    }
+    @case ('empty') {
+      <div class="no-data-message">
+        <mat-icon>info</mat-icon>
+        <p>No dividend data available for this symbol.</p>
+      </div>
+    }
+    @case ('ready') {
+      <!-- Key Metrics Cards -->
+      <app-dividend-metrics [metrics]="formattedMetrics()" />
 
-    <!-- Charts Grid -->
-    <div class="dividend-charts-grid">
-      <div class="dividend-chart">
-        <div class="chart-title-row">
-          <app-chart-info
-            [tooltip]="
-              CHART_DEFINITIONS.yearlyDividendsChart.title + ': ' + CHART_DEFINITIONS.yearlyDividendsChart.description
-            "
-          />
+      <!-- Charts Grid -->
+      <div class="dividend-charts-grid">
+        <div class="dividend-chart">
+          <div class="chart-title-row">
+            <app-chart-info
+              [tooltip]="
+                CHART_DEFINITIONS.yearlyDividendsChart.title + ': ' + CHART_DEFINITIONS.yearlyDividendsChart.description
+              "
+            />
+          </div>
+          <div echarts [options]="charts!.yearlyDividends" class="dividend-echart"></div>
         </div>
-        <div echarts [options]="charts.yearlyDividends" class="dividend-echart"></div>
-      </div>
-      <div class="dividend-chart">
-        <div class="chart-title-row">
-          <app-chart-info
-            [tooltip]="CHART_DEFINITIONS.payoutRatioChart.title + ': ' + CHART_DEFINITIONS.payoutRatioChart.description"
-          />
+        <div class="dividend-chart">
+          <div class="chart-title-row">
+            <app-chart-info
+              [tooltip]="
+                CHART_DEFINITIONS.payoutRatioChart.title + ': ' + CHART_DEFINITIONS.payoutRatioChart.description
+              "
+            />
+          </div>
+          <div echarts [options]="charts!.payoutRatio" class="dividend-echart"></div>
         </div>
-        <div echarts [options]="charts.payoutRatio" class="dividend-echart"></div>
-      </div>
-      <div class="dividend-chart full-width">
-        <div class="chart-title-row">
-          <app-chart-info
-            [tooltip]="
-              CHART_DEFINITIONS.cashFlowComparisonChart.title +
-              ': ' +
-              CHART_DEFINITIONS.cashFlowComparisonChart.description
-            "
-          />
+        <div class="dividend-chart full-width">
+          <div class="chart-title-row">
+            <app-chart-info
+              [tooltip]="
+                CHART_DEFINITIONS.cashFlowComparisonChart.title +
+                ': ' +
+                CHART_DEFINITIONS.cashFlowComparisonChart.description
+              "
+            />
+          </div>
+          <div echarts [options]="charts!.cashFlowComparison" class="dividend-echart"></div>
         </div>
-        <div echarts [options]="charts.cashFlowComparison" class="dividend-echart"></div>
       </div>
-    </div>
 
-    <!-- Data Table -->
-    @if (data) {
-      <div class="dividend-table-container">
-        <h4>Annual Dividend Data</h4>
-        <div class="dividend-table-scroll">
-          <table class="dividend-table">
-            <thead>
-              <tr>
-                <th>Metric</th>
-                @for (year of data.yearlyData; track year.year) {
-                  <th>{{ year.year }}</th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="metric-name">Free Cash Flow</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td>{{ dividendChartService.formatCurrency(year.freeCashFlow) }}</td>
-                }
-              </tr>
-              <tr>
-                <td class="metric-name">Dividends Paid</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td>{{ dividendChartService.formatCurrency(year.dividendPayout ? -year.dividendPayout : null) }}</td>
-                }
-              </tr>
-              <tr>
-                <td class="metric-name">FCF Payout Ratio</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td [class.warning]="year.fcfPayoutRatio && year.fcfPayoutRatio > 0.8">
-                    {{ dividendChartService.formatPercent(year.fcfPayoutRatio ? year.fcfPayoutRatio * 100 : null) }}
-                  </td>
-                }
-              </tr>
-              <tr>
-                <td class="metric-name">Net Income Payout</td>
-                @for (year of data.yearlyData; track year.year) {
-                  <td [class.warning]="year.netIncomePayoutRatio && year.netIncomePayoutRatio > 0.8">
-                    {{
-                      dividendChartService.formatPercent(
-                        year.netIncomePayoutRatio ? year.netIncomePayoutRatio * 100 : null
-                      )
-                    }}
-                  </td>
-                }
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Data Table -->
+      <app-dividend-data-table [rows]="enrichedYearlyData()" />
     }
   }
 </div>

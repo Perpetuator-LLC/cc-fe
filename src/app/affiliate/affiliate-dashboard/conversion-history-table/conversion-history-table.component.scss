@@ -1,0 +1,67 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2025-2026 Perpetuator LLC
+:host {
+  display: block;
+}
+
+.history-table {
+  width: 100%;
+  background-color: var(--md-sys-color-surface-container-low);
+
+  th {
+    padding: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+
+    background: var(--md-sys-color-surface-container);
+  }
+
+  td {
+    padding: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface);
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 16px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  &.completed {
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-success);
+  }
+
+  &.pending,
+  &.under-review {
+    color: var(--md-sys-color-surface-container-high);
+    background: var(--md-sys-color-warning);
+  }
+
+  &.failed,
+  &.rejected {
+    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-error);
+  }
+}
+
+.no-data {
+  padding: 40px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}

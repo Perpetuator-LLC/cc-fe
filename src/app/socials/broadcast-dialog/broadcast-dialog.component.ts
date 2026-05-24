@@ -68,11 +68,30 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   form!: FormGroup;
-  socialAccounts: SocialAccount[] = [];
+  /** Accounts enriched with pre-computed platformIcon for the dropdown. */
+  socialAccounts: (SocialAccount & { platformIcon: string })[] = [];
   loading = false;
   loadingAccounts = true;
   isEdit = false;
   selectedPlatformLimit: PlatformLimit | null = null;
+
+  /** Pre-computed label for the primary save button. */
+  get saveButtonLabel(): string {
+    if (this.loading) return 'Saving...';
+    return this.isEdit ? 'Update' : 'Create';
+  }
+
+  /** Hint text shown under the post-content textarea, blank when no platform selected. */
+  get platformLimitHint(): string {
+    const limit = this.selectedPlatformLimit;
+    return limit ? `${limit.name} limit: ${limit.maxLength} characters` : '';
+  }
+
+  /** Character-count suffix shown next to the count, blank when no platform. */
+  get platformLimitCountSuffix(): string {
+    const limit = this.selectedPlatformLimit;
+    return limit ? `/ ${limit.maxLength}` : '';
+  }
 
   ngOnInit(): void {
     this.isEdit = !!this.data?.broadcast;
@@ -105,7 +124,7 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.socialsService.getSocialAccounts(undefined, undefined, true).subscribe({
         next: (accounts) => {
-          this.socialAccounts = accounts;
+          this.socialAccounts = accounts.map((a) => ({ ...a, platformIcon: this.getPlatformIcon(a.platform) }));
           this.loadingAccounts = false;
           // Set initial platform limit if account is selected
           const selectedUuid = this.form.get('socialAccountUuid')?.value;
@@ -214,13 +233,13 @@ export class BroadcastDialogComponent implements OnInit, OnDestroy {
     this.form.patchValue({ hashtags });
   }
 
-  getCharacterCount(): number {
+  get characterCount(): number {
     return this.form.get('text')?.value?.length || 0;
   }
 
-  isOverLimit(): boolean {
+  get isOverLimit(): boolean {
     if (!this.selectedPlatformLimit) return false;
-    return this.getCharacterCount() > this.selectedPlatformLimit.maxLength;
+    return this.characterCount > this.selectedPlatformLimit.maxLength;
   }
 
   getPlatformIcon(platform: string | undefined): string {

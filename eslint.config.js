@@ -4,6 +4,7 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const eslintPluginPrettier = require('eslint-plugin-prettier');
+const ccLocal = require('./eslint-rules');
 
 module.exports = tseslint.config(
   {
@@ -20,7 +21,7 @@ module.exports = tseslint.config(
     processor: angular.processInlineTemplates,
     rules: {
       // 'object-curly-spacing': ['error', 'always'],
-      'max-len': ['error', { code: 120 }],
+      'max-len': ['error', { code: 120, ignorePattern: '^import\\s.+' }],
       // 'prettier/prettier': ['error', { printWidth: 120 }],
       '@angular-eslint/directive-selector': [
         'error',
@@ -51,6 +52,9 @@ module.exports = tseslint.config(
   {
     files: ['**/*.html'],
     extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    plugins: {
+      'cc-local': ccLocal,
+    },
     rules: {
       // MD3 Best Practices - Template Rules
       '@angular-eslint/template/no-inline-styles': [
@@ -64,7 +68,29 @@ module.exports = tseslint.config(
       '@angular-eslint/template/prefer-self-closing-tags': 'warn',
       '@angular-eslint/template/conditional-complexity': ['warn', { maxComplexity: 3 }],
       '@angular-eslint/template/cyclomatic-complexity': ['warn', { maxComplexity: 10 }],
-      '@angular-eslint/template/no-call-expression': 'warn',
+      // Upstream rule disabled in favor of our signal-aware version below.
+      '@angular-eslint/template/no-call-expression': 'off',
+      'cc-local/template-no-call-expression-strict': [
+        'warn',
+        {
+          // Reactive form methods are safe (pure lookups, not expensive computations)
+          allowList: ['get', 'getRawValue', 'hasError', 'getError'],
+          // Also allow any name that matches a signal-typed member anywhere
+          // under src/app — catches service-exposed signals like
+          // `audioService.queueLength()` where the receiver isn't the
+          // component itself. Used as a fallback when type-checker mode is
+          // unavailable.
+          projectSignalScanRoot: 'src/app',
+          // Use the TS type-checker for accurate signal detection — catches
+          // aliased signals (`x = svc.sig`), getter-returning-signals, and
+          // inherited signals. One-time cost to build the Program; cached
+          // for the lint process.
+          useTypeChecker: {
+            tsconfig: 'tsconfig.app.json',
+            projectScan: true,
+          },
+        },
+      ],
     },
   },
 );

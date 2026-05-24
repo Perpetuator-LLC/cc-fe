@@ -29,7 +29,17 @@ export class PublicCategoriesComponent implements OnInit {
   private publicPodcastService = inject(PublicPodcastHttpService);
   private messageService = inject(MessageService);
 
-  categories: { name: string; data: Category }[] = [];
+  /**
+   * Categories enriched with pre-computed display values per row +
+   * subcategory list so the template avoids method calls per CD tick.
+   */
+  categories: {
+    name: string;
+    data: Category;
+    decodedName: string;
+    url: string;
+    subcategoryItems: { name: string; decoded: string; url: string }[];
+  }[] = [];
   loading = true;
 
   ngOnInit(): void {
@@ -41,6 +51,16 @@ export class PublicCategoriesComponent implements OnInit {
 
     this.publicPodcastService.getCategories().subscribe({
       next: (data) => {
+        const enrich = (raw: { name: string; data: Category }) => ({
+          ...raw,
+          decodedName: this.decodeCategory(raw.name),
+          url: this.getCategoryUrl(raw.name),
+          subcategoryItems: (raw.data.subcategories || []).map((sub) => ({
+            name: sub,
+            decoded: this.decodeCategory(sub),
+            url: this.getSubcategoryUrl(raw.name, sub),
+          })),
+        });
         // Handle both object and array responses
         const categoriesData = data.categories;
 
@@ -49,14 +69,16 @@ export class PublicCategoriesComponent implements OnInit {
           if (categoriesData.length > 0 && typeof categoriesData[0] === 'string') {
             // Array of strings - convert to Category objects
             const stringArray = categoriesData as string[];
-            this.categories = stringArray.map((categoryName) => ({
-              name: categoryName,
-              data: {
+            this.categories = stringArray.map((categoryName) =>
+              enrich({
                 name: categoryName,
-                subcategories: [],
-                podcastCount: 0,
-              },
-            }));
+                data: {
+                  name: categoryName,
+                  subcategories: [],
+                  podcastCount: 0,
+                },
+              }),
+            );
           } else {
             // Array of Category objects
             const categoryArray = categoriesData as Category[];
@@ -66,27 +88,26 @@ export class PublicCategoriesComponent implements OnInit {
               const categoryName =
                 (typeof asRecord['category'] === 'string' ? asRecord['category'] : category.name) ||
                 `Category ${index}`;
-              return {
+              return enrich({
                 name: categoryName,
                 data: {
                   name: categoryName,
                   subcategories: category.subcategories || [],
                   podcastCount: category.podcastCount || 0,
                 },
-              };
+              });
             });
           }
         } else if (typeof categoriesData === 'object') {
           // If it's an object, use the key as the name
           // console.log('Processing as object, keys:', Object.keys(categoriesData));
           const categoryObject = categoriesData as Record<string, Category>;
-          this.categories = Object.entries(categoryObject).map(([name, category]) => {
-            // console.log(`Category key: ${name}`, 'value:', category);
-            return {
+          this.categories = Object.entries(categoryObject).map(([name, category]) =>
+            enrich({
               name: name,
               data: category,
-            };
-          });
+            }),
+          );
         } else {
           console.error('Unexpected categories data format:', typeof categoriesData);
           this.categories = [];

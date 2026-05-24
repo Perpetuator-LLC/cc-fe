@@ -1,0 +1,159 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="sidebar-header">
+  <button mat-button [matMenuTriggerFor]="watchlistMenu" class="watchlist-selector-btn">
+    <mat-icon>{{ selectedWatchlistIcon }}</mat-icon>
+    <span class="watchlist-name">{{ selectedWatchlistName }}</span>
+    <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+  </button>
+  <mat-menu #watchlistMenu="matMenu" class="watchlist-menu">
+    <!-- Recent -->
+    <div
+      mat-menu-item
+      (click)="onWatchlistChange('recent')"
+      (keydown.enter)="onWatchlistChange('recent')"
+      tabindex="0"
+      [class.active]="selectedWatchlistId === 'recent'"
+    >
+      <mat-icon>schedule</mat-icon>
+      <span>Recent ({{ recentSymbolCount }})</span>
+    </div>
+
+    <!-- Custom watchlists -->
+    @for (watchlist of customWatchlists; track watchlist.uuid) {
+      <button
+        mat-menu-item
+        [matMenuTriggerFor]="watchlistActionsMenu"
+        [class.active]="selectedWatchlistId === watchlist.uuid"
+      >
+        <mat-icon>{{ watchlist.icon }}</mat-icon>
+        <span>{{ watchlist.name }} ({{ watchlist.itemCount }})</span>
+      </button>
+      <mat-menu #watchlistActionsMenu="matMenu">
+        <button mat-menu-item (click)="onWatchlistChange(watchlist.uuid)">
+          <mat-icon>visibility</mat-icon>
+          <span>View</span>
+        </button>
+        <button mat-menu-item (click)="onRename(watchlist)">
+          <mat-icon>edit</mat-icon>
+          <span>Rename</span>
+        </button>
+        <button mat-menu-item (click)="onDuplicate(watchlist)">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="onExport(watchlist.uuid)" matTooltip="Copy all symbols to clipboard">
+          <mat-icon>file_copy</mat-icon>
+          <span>Export Symbols</span>
+        </button>
+        <mat-divider />
+        <button mat-menu-item (click)="onDelete(watchlist)" class="delete-action">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    }
+
+    <!-- Categories Section -->
+    <mat-divider />
+    <div class="menu-section-label">Categories</div>
+
+    <button mat-menu-item [matMenuTriggerFor]="sectorsMenu">
+      <mat-icon>category</mat-icon>
+      <span>Sectors</span>
+    </button>
+
+    <button mat-menu-item [matMenuTriggerFor]="industriesMenu" [disabled]="!hasIndustries">
+      <mat-icon>business</mat-icon>
+      <span>Industries</span>
+    </button>
+
+    <button mat-menu-item [matMenuTriggerFor]="exchangesMenu" [disabled]="!hasExchanges">
+      <mat-icon>account_balance</mat-icon>
+      <span>Exchanges</span>
+    </button>
+
+    <button mat-menu-item [matMenuTriggerFor]="assetTypesMenu">
+      <mat-icon>pie_chart</mat-icon>
+      <span>Asset Types</span>
+    </button>
+  </mat-menu>
+
+  <!-- Nested Sectors Menu -->
+  <mat-menu #sectorsMenu="matMenu" class="category-submenu">
+    @if (sectorLists.length === 0) {
+      <button mat-menu-item disabled>
+        <span>Loading sectors...</span>
+      </button>
+    } @else {
+      @for (sector of sectorLists; track sector.id) {
+        <button mat-menu-item (click)="onWatchlistChange(sector.id)" [class.active]="selectedWatchlistId === sector.id">
+          <span>{{ sector.name }}</span>
+        </button>
+      }
+    }
+  </mat-menu>
+
+  <!-- Nested Industries Menu -->
+  <mat-menu #industriesMenu="matMenu" class="category-submenu">
+    @if (industryLists.length === 0) {
+      <button mat-menu-item disabled>
+        <span>Loading industries...</span>
+      </button>
+    } @else {
+      @for (industry of industryLists; track industry.id) {
+        <button
+          mat-menu-item
+          (click)="onWatchlistChange(industry.id)"
+          [class.active]="selectedWatchlistId === industry.id"
+        >
+          <span>{{ industry.name }}</span>
+        </button>
+      }
+    }
+  </mat-menu>
+
+  <!-- Nested Exchanges Menu -->
+  <mat-menu #exchangesMenu="matMenu" class="category-submenu">
+    @if (exchangeLists.length === 0) {
+      <button mat-menu-item disabled>
+        <span>Loading exchanges...</span>
+      </button>
+    } @else {
+      @for (exchange of exchangeLists; track exchange.id) {
+        <button
+          mat-menu-item
+          (click)="onWatchlistChange(exchange.id)"
+          [class.active]="selectedWatchlistId === exchange.id"
+        >
+          <span>{{ exchange.name }}</span>
+        </button>
+      }
+    }
+  </mat-menu>
+
+  <!-- Nested Asset Types Menu -->
+  <mat-menu #assetTypesMenu="matMenu" class="category-submenu">
+    @for (assetType of assetTypeLists; track assetType.id) {
+      <button
+        mat-menu-item
+        (click)="onWatchlistChange(assetType.id)"
+        [class.active]="selectedWatchlistId === assetType.id"
+      >
+        <mat-icon>{{ assetType.icon }}</mat-icon>
+        <span>{{ assetType.name }}</span>
+      </button>
+    }
+  </mat-menu>
+
+  <button
+    mat-icon-button
+    matTooltip="Select symbols to copy/export"
+    (click)="onToggleSelectionMode()"
+    [color]="selectionMode ? 'primary' : undefined"
+  >
+    <mat-icon>{{ selectionMode ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+  </button>
+  <button mat-icon-button matTooltip="Create Watchlist" (click)="onCreateWatchlist()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

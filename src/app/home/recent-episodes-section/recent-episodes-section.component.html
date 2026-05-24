@@ -1,0 +1,35 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="recent-podcasts-section">
+  <div class="section-header">
+    <h3 class="section-title">Recent Episodes</h3>
+    <a class="view-all-link" routerLink="/podcasts">View all</a>
+  </div>
+  <div class="podcasts-grid">
+    @if (loading) {
+      <!-- Loading Skeleton -->
+      @for (i of skeletonItems; track i) {
+        <mat-card class="podcast-card skeleton-podcast-card">
+          <div class="skeleton-image"></div>
+          <mat-card-content>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+            <div class="skeleton-stats">
+              <div class="skeleton-stat"></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    } @else if (hasRecent) {
+      @for (podcast of podcasts; track podcast.id) {
+        <app-home-podcast-card-public [podcast]="podcast" />
+      }
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-podcasts-state">
+        <mat-icon>schedule</mat-icon>
+        <p>No recent episodes available.</p>
+      </div>
+    }
+  </div>
+</div>

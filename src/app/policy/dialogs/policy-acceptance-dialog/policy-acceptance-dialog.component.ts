@@ -38,6 +38,14 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
   error: string | null = null;
   private subscriptions = new Subscription();
 
+  /** Pre-enriched policies for the template: title + formatted effective date + rendered content per row. */
+  policiesDisplay: {
+    policy: PolicyVersion;
+    title: string;
+    formattedEffectiveDate: string;
+    contentHtml: SafeHtml;
+  }[] = [];
+
   constructor() {
     // Close dialog if user logs out - use effect to monitor signal
     effect(() => {
@@ -54,6 +62,14 @@ export class PolicyAcceptanceDialogComponent implements OnInit, OnDestroy {
     if (!this.data.canCancel) {
       this.dialogRef.disableClose = true;
     }
+    // Pre-enrich each policy with display strings so the template doesn't
+    // call getPolicyTitle / formatDate / renderPolicyContent per CD tick.
+    this.policiesDisplay = (this.data.policies ?? []).map((policy) => ({
+      policy,
+      title: this.getPolicyTitle(policy.policyType),
+      formattedEffectiveDate: policy.effectiveDate ? this.formatDate(policy.effectiveDate) : '',
+      contentHtml: this.renderPolicyContent(policy),
+    }));
   }
 
   ngOnDestroy(): void {

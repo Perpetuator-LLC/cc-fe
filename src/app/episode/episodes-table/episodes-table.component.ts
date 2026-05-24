@@ -40,6 +40,22 @@ import { MessageService } from '../../message.service';
 import { LoadingService } from '../../layout/loading.service';
 import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-player.service';
 
+/** Pre-computed display state attached to each row. */
+interface EpisodeDisplay {
+  hasAudio: boolean;
+  formattedDuration: string;
+  isFullyValidated: boolean;
+  validationTooltip: string;
+  /** Pre-computed material icon name for the validation badge. */
+  validationIcon: string;
+  /** Pre-computed CSS class for the validation badge icon. */
+  validationIconClass: string;
+}
+
+interface EpisodeWithDisplay extends Episode {
+  display: EpisodeDisplay;
+}
+
 @Component({
   selector: 'app-episodes-table',
   standalone: true,
@@ -80,7 +96,10 @@ import { AudioPlayerService, AudioTrack } from '../../shared/audio-player/audio-
   templateUrl: './episodes-table.component.html',
   styleUrls: ['./episodes-table.component.scss'],
 })
-export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implements OnInit, OnDestroy, AfterViewInit {
+export class EpisodesTableComponent
+  extends RelayPaginatorBase<EpisodeWithDisplay>
+  implements OnInit, OnDestroy, AfterViewInit
+{
   @Input() podcastUuid: string | null = null;
   @Input() showPodcastColumn = true;
   @Input() showSearchAndFilters = true;
@@ -96,7 +115,7 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
   private readonly loadingService = inject(LoadingService);
   private readonly audioPlayerService = inject(AudioPlayerService);
 
-  episodes: Episode[] = [];
+  episodes: EpisodeWithDisplay[] = [];
   displayedColumns: string[] = ['title', 'podcast', 'status', 'actions'];
   totalEpisodes = 0;
   sortDirection = 'DESC';
@@ -179,7 +198,7 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
         .getEpisodes(pageSize, cursor, this.sortActive, this.sortDirection, podcastFilter, searchTerm, isLiveFilter)
         .subscribe({
           next: ({ episodes, pageInfo }) => {
-            this.episodes = episodes;
+            this.episodes = episodes.map((e) => this.toEpisodeWithDisplay(e));
             this.handlePageData(this.episodes, pageInfo, pageIndex);
             this.totalEpisodes = this.totalItems;
 
@@ -261,6 +280,22 @@ export class EpisodesTableComponent extends RelayPaginatorBase<Episode> implemen
         );
       }
     });
+  }
+
+  /** Build an EpisodeWithDisplay by attaching pre-computed display state. */
+  private toEpisodeWithDisplay(episode: Episode): EpisodeWithDisplay {
+    const isFullyValidated = this.isEpisodeFullyValidated(episode);
+    return {
+      ...episode,
+      display: {
+        hasAudio: !!episode.audioUrl,
+        formattedDuration: this.formatDuration(episode.audioSeconds),
+        isFullyValidated,
+        validationTooltip: this.getEpisodeValidationTooltip(episode),
+        validationIcon: isFullyValidated ? 'verified' : 'warning',
+        validationIconClass: isFullyValidated ? 'validated-icon md3-icon-success' : 'unvalidated-icon md3-icon-warning',
+      },
+    };
   }
 
   isEpisodeFullyValidated(episode: Episode): boolean {

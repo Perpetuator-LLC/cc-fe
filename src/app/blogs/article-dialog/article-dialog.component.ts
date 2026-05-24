@@ -53,6 +53,17 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
   loadingBlogs = true;
   isEdit = false;
 
+  /** Pre-computed label for the primary save button. */
+  get saveButtonLabel(): string {
+    if (this.loading) return 'Saving...';
+    return this.isEdit ? 'Update' : 'Create';
+  }
+
+  /** Dialog title text. */
+  get dialogTitle(): string {
+    return this.isEdit ? 'Edit Article' : 'Create Article';
+  }
+
   ngOnInit(): void {
     this.isEdit = !!this.data?.article;
     this.initForm();

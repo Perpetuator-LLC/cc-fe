@@ -1,0 +1,172 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+// Copyright (c) 2025-2026 Perpetuator LLC
+:host {
+  display: block;
+}
+
+.stripe-status-card {
+  margin-bottom: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  &.incomplete {
+    border-color: var(--md-sys-color-warning);
+  }
+
+  h2 {
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .stripe-status {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+
+    padding: 16px;
+    border-radius: 8px;
+
+    mat-icon:first-child {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
+    }
+
+    .status-content {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      p {
+        margin: 0 0 16px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      button {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+
+        padding: 8px 16px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 8px;
+
+        font-weight: 600;
+        white-space: nowrap;
+      }
+    }
+
+    &.not-setup {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface-container);
+
+      mat-icon {
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+
+    &.incomplete {
+      border: 1px solid var(--md-sys-color-warning);
+      background: var(--md-extended-color-warning-color-container);
+
+      mat-icon {
+        color: var(--md-sys-color-warning);
+      }
+    }
+
+    &.complete {
+      border: 1px solid var(--md-sys-color-success);
+      background: var(--md-extended-color-success-color-container);
+
+      mat-icon {
+        color: var(--md-sys-color-success);
+      }
+    }
+  }
+
+  .stripe-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .detail-item {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
+
+      .label {
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      .value {
+        color: var(--md-sys-color-on-surface-variant);
+
+        &.enabled {
+          font-weight: 600;
+          color: var(--md-sys-color-success);
+        }
+
+        &.disabled {
+          font-weight: 600;
+          color: var(--md-sys-color-error);
+        }
+      }
+    }
+  }
+}
+
+@media (width <= 576px) {
+  .stripe-status-card {
+    .stripe-status {
+      flex-direction: column;
+
+      mat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 40px;
+      }
+
+      .status-content {
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+
+  button {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 8px;
+    align-items: center;
+
+    white-space: nowrap;
+  }
+
+  @media (width <= 576px) {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}

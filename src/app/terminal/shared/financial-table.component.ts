@@ -17,6 +17,17 @@ export interface FinancialTableData {
   rows: FinancialTableRow[];
 }
 
+/** Pre-built cell display for the template. */
+interface FinancialCellDisplay {
+  formatted: string;
+  highlight: boolean;
+  negative: boolean;
+}
+interface FinancialRowDisplay {
+  label: string;
+  cells: FinancialCellDisplay[];
+}
+
 @Component({
   selector: 'app-financial-table',
   standalone: true,
@@ -25,7 +36,23 @@ export interface FinancialTableData {
   styleUrl: './financial-table.component.scss',
 })
 export class FinancialTableComponent {
-  @Input() data: FinancialTableData = { years: [], rows: [] };
+  /** Enriched rows with pre-built cell display per cell. */
+  rowsDisplay: FinancialRowDisplay[] = [];
+  private _data: FinancialTableData = { years: [], rows: [] };
+  @Input() set data(value: FinancialTableData) {
+    this._data = value || { years: [], rows: [] };
+    this.rowsDisplay = this._data.rows.map((row) => ({
+      label: row.label,
+      cells: row.values.map((value) => ({
+        formatted: this.formatValue(row, value),
+        highlight: this.shouldHighlight(row, value),
+        negative: !!row.highlightNegative && value !== null && value < 0,
+      })),
+    }));
+  }
+  get data(): FinancialTableData {
+    return this._data;
+  }
   @Input() title?: string;
 
   formatValue(row: FinancialTableRow, value: number | null): string {

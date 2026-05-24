@@ -22,6 +22,18 @@ import { ScheduleContext } from '../schedule.types';
 import { formatScheduleDescription, getJobKindIcon, getJobKindLabel, getNextRunDisplay } from '../schedule.utils';
 import { parseScheduleArgs } from '../../../utils/schedule';
 
+/** Pre-computed display fields attached to each schedule row. */
+interface ScheduleDisplay {
+  icon: string;
+  jobLabel: string;
+  description: string;
+  nextRun: string;
+  episodeInfo: { uuid: string; name: string } | null;
+  podcastInfo: { uuid: string; name: string } | null;
+  pulseInfo: { uuid: string; name: string } | null;
+}
+type ScheduleWithDisplay = Schedule & ScheduleDisplay;
+
 @Component({
   selector: 'app-schedule-list',
   standalone: true,
@@ -98,8 +110,9 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
   @Output() schedulesChanged = new EventEmitter<Schedule[]>();
 
   schedules: Schedule[] = [];
-  filteredSchedules: Schedule[] = [];
-  dataSource = new MatTableDataSource<Schedule>([]);
+  /** Filtered schedules enriched with pre-computed display fields. */
+  filteredSchedules: ScheduleWithDisplay[] = [];
+  dataSource = new MatTableDataSource<ScheduleWithDisplay>([]);
   loading = false;
 
   displayedColumns: string[] = ['icon', 'name', 'description', 'nextRun', 'enabled', 'actions'];
@@ -145,8 +158,21 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
     );
   }
 
+  private enrichSchedule(s: Schedule): ScheduleWithDisplay {
+    return {
+      ...s,
+      icon: this.getJobIcon(s),
+      jobLabel: this.getJobLabel(s),
+      description: this.getScheduleDescription(s),
+      nextRun: this.getNextRun(s),
+      episodeInfo: this.getEpisodeInfo(s),
+      podcastInfo: this.getPodcastInfo(s),
+      pulseInfo: this.getPulseInfo(s),
+    };
+  }
+
   private applyFilter() {
-    this.filteredSchedules = this.schedules.filter((schedule) => {
+    const filtered = this.schedules.filter((schedule) => {
       const args = parseScheduleArgs(schedule.args);
 
       // Filter by podcast
@@ -179,8 +205,9 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
       return true;
     });
 
+    this.filteredSchedules = filtered.map((s) => this.enrichSchedule(s));
     this.dataSource.data = this.filteredSchedules;
-    this.schedulesChanged.emit(this.filteredSchedules);
+    this.schedulesChanged.emit(filtered);
   }
 
   getScheduleDescription(schedule: Schedule): string {
@@ -276,10 +303,11 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
       this.schedulingService.updateSchedule(schedule.uuid, { enabled }).subscribe({
         next: () => {
           this.messageService.success(`Schedule ${enabled ? 'enabled' : 'paused'}`);
-          // Update local state
+          // Update local state — re-enrich the row so display fields stay in sync.
           const index = this.filteredSchedules.findIndex((s) => s.uuid === schedule.uuid);
           if (index !== -1) {
-            this.filteredSchedules[index] = { ...this.filteredSchedules[index], enabled };
+            const updated = { ...this.filteredSchedules[index], enabled };
+            this.filteredSchedules[index] = this.enrichSchedule(updated);
             this.dataSource.data = [...this.filteredSchedules];
           }
         },

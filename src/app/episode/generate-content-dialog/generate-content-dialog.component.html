@@ -33,7 +33,7 @@
                 @for (account of socialAccounts; track account.id) {
                   <mat-option [value]="account.id">
                     <div class="account-option">
-                      <mat-icon>{{ getPlatformIcon(account.platform) }}</mat-icon>
+                      <mat-icon>{{ account.platformIcon }}</mat-icon>
                       <span>{{ account.accountName }}</span>
                       <span class="platform-badge">{{ account.platform }}</span>
                     </div>
@@ -42,12 +42,12 @@
               </mat-select>
             </mat-form-field>
 
-            @if (getSelectedAccountTemplates().length > 0) {
+            @if (selectedAccountTemplates.length > 0) {
               <mat-form-field>
                 <mat-label>Template (Optional)</mat-label>
                 <mat-select formControlName="templateUuid">
                   <mat-option value="">No template - AI generates freely</mat-option>
-                  @for (template of getSelectedAccountTemplates(); track template.id) {
+                  @for (template of selectedAccountTemplates; track template.id) {
                     <mat-option [value]="template.id">{{ template.name }}</mat-option>
                   }
                 </mat-select>

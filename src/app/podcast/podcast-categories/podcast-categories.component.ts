@@ -10,8 +10,21 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconButton } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+
+/** Pre-computed display state for a parent category row. */
+interface ParentDisplay {
+  parent: string;
+  isSelected: boolean;
+  isPending: boolean;
+  subcategories: string[];
+  selectedSubcategories: string[];
+  allSubcategoriesSelected: boolean;
+  hasSubcategories: boolean;
+  subDisplay: { sub: string; isPending: boolean }[];
+}
 
 @Component({
   selector: 'app-podcast-categories',
@@ -24,6 +37,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatFormFieldModule,
     MatSelectModule,
     MatChipsModule,
+    MatIconButton,
     MatIconModule,
   ],
   templateUrl: './podcast-categories.component.html',
@@ -42,7 +56,23 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
   categoriesMap: Record<string, string[]> = {};
   parentCategories: string[] = [];
   value: Record<string, string[]> = {};
-  @Input() pendingCategories: Record<string, string[]> = {};
+
+  private _pendingCategories: Record<string, string[]> = {};
+  @Input() set pendingCategories(value: Record<string, string[]>) {
+    this._pendingCategories = value || {};
+    this.rebuildParentDisplay();
+  }
+  get pendingCategories(): Record<string, string[]> {
+    return this._pendingCategories;
+  }
+
+  /**
+   * Pre-built display data for the template. Rebuilt whenever value /
+   * pendingCategories / categoriesMap change so the template can read
+   * property accesses instead of calling derivation methods per
+   * change-detection tick.
+   */
+  parentDisplay: ParentDisplay[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange: (value: Record<string, string[]>) => void = () => {};
@@ -53,28 +83,56 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
     this.podcastsService.getPodcastCategories().subscribe((categories) => {
       this.categoriesMap = categories;
       this.parentCategories = Object.keys(this.categoriesMap);
+      this.rebuildParentDisplay();
     });
+  }
+
+  /** Compose the `parentDisplay` array from current state. */
+  private rebuildParentDisplay(): void {
+    this.parentDisplay = this.parentCategories.map((parent) => {
+      const subs = this.categoriesMap[parent] || [];
+      const selectedSubs = this.value[parent] || [];
+      const isSelected = parent in this.value;
+      return {
+        parent,
+        isSelected,
+        isPending: this.computeParentPending(parent, isSelected),
+        subcategories: subs,
+        selectedSubcategories: selectedSubs,
+        allSubcategoriesSelected: subs.length > 0 && subs.every((s) => selectedSubs.includes(s)),
+        hasSubcategories: subs.length > 0,
+        subDisplay: subs.map((sub) => ({
+          sub,
+          isPending: this.computeSubPending(parent, sub, selectedSubs.includes(sub)),
+        })),
+      };
+    });
+  }
+
+  private computeParentPending(parent: string, isCurrentlySelected: boolean): boolean {
+    const wasSubmittedSelected = !!this._pendingCategories[parent];
+    return isCurrentlySelected !== wasSubmittedSelected;
+  }
+
+  private computeSubPending(parent: string, sub: string, isCurrentlySelected: boolean): boolean {
+    if (!this._pendingCategories[parent]) return false;
+    const wasSubmittedSelected = this._pendingCategories[parent]?.includes(sub);
+    return isCurrentlySelected !== wasSubmittedSelected;
   }
 
   isPending(parent: string, sub?: string): boolean {
     if (sub) {
-      // Only check subcategory pending state if the parent is currently selected
-      if (!this.pendingCategories[parent]) {
-        return false;
-      }
+      if (!this._pendingCategories[parent]) return false;
       const isCurrentlySelected = this.isSubSelected(parent, sub);
-      const wasSubmittedSelected = this.pendingCategories[parent]?.includes(sub);
-      return isCurrentlySelected !== wasSubmittedSelected;
-    } else {
-      // Check if parent category is pending
-      const isCurrentlySelected = this.isParentSelected(parent);
-      const wasSubmittedSelected = !!this.pendingCategories[parent];
+      const wasSubmittedSelected = this._pendingCategories[parent]?.includes(sub);
       return isCurrentlySelected !== wasSubmittedSelected;
     }
+    return this.computeParentPending(parent, this.isParentSelected(parent));
   }
 
   writeValue(obj: Record<string, string[]> | null): void {
     this.value = obj || {};
+    this.rebuildParentDisplay();
   }
 
   registerOnChange(fn: (value: Record<string, string[]>) => void): void {
@@ -88,6 +146,7 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
   private updateModel() {
     this.onChange(this.value);
     this.onTouched();
+    this.rebuildParentDisplay();
   }
 
   isParentSelected(parent: string): boolean {
@@ -111,14 +170,6 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
 
     newValue[parent] = selectedSubs;
 
-    // If a parent has no selected subcategories but is still in the value object,
-    // you might want to decide if it should be removed.
-    // For now, we'll keep it to signify the parent itself is "checked".
-    // If you want to deselect the parent when all subs are deselected, you'd add:
-    // if (newValue[parent].length === 0) {
-    //   delete newValue[parent];
-    // }
-
     this.value = newValue;
     this.updateModel();
   }
@@ -128,11 +179,7 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
     this.onSubcategorySelectionChange(parent, selectedSubs);
   }
 
-  // Update the event type from 'Event' to 'MatCheckboxChange'
   toggleParentCategory(parent: string) {
-    // Note: We don't actually need to use event.checked here because
-    // the logic correctly toggles based on the *current* state before the change.
-    // We determine the *new* state based on `isParentSelected(parent)`.
     const newValue = { ...this.value };
     if (this.isParentSelected(parent)) {
       delete newValue[parent]; // Deselect parent and all subs
@@ -147,14 +194,12 @@ export class PodcastCategoriesComponent implements OnInit, ControlValueAccessor 
     return this.categoriesMap[parent] || [];
   }
 
-  // Returns true if all subcategories for the parent are selected
   areAllSubcategoriesSelected(parent: string): boolean {
     const subcategories = this.getSubcategories(parent);
     const selected = this.getSelectedSubcategories(parent);
     return subcategories.length > 0 && subcategories.every((sub) => selected.includes(sub));
   }
 
-  // Selects or deselects all subcategories for the parent
   toggleSelectAllSubcategories(parent: string, checked: boolean): void {
     const subcategories = this.getSubcategories(parent);
     const newValue = { ...this.value };

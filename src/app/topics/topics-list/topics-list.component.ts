@@ -47,9 +47,12 @@ export class TopicsListComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   private subscriptions = new Subscription();
   protected loading = false;
-  dataSource = new MatTableDataSource<Topic>([]);
+  dataSource = new MatTableDataSource<Topic & { formattedCreatedAt: string; statusClass: string; statusText: string }>(
+    [],
+  );
   displayedColumns: string[] = ['title', 'podcast', 'created', 'status'];
-  topics: Topic[] = [];
+  /** Topics enriched with pre-computed display state. */
+  topics: (Topic & { formattedCreatedAt: string; statusClass: string; statusText: string })[] = [];
   podcasts: PodcastsResult[] = [];
   private shouldOpenCreateDialog = false;
 
@@ -113,7 +116,12 @@ export class TopicsListComponent implements OnInit, OnDestroy {
       this.researchService.getTopics(undefined, this.pageSize, after).subscribe({
         next: (response: GetTopicsResult) => {
           this.messageService.clearMessages();
-          this.topics = response.topics;
+          this.topics = response.topics.map((t) => ({
+            ...t,
+            formattedCreatedAt: this.formatDate(t.createdAt),
+            statusClass: this.getStatusClass(t),
+            statusText: this.getTopicStatus(t),
+          }));
           this.pageInfo = response.pageInfo;
           this.dataSource = new MatTableDataSource(this.topics);
           // Estimate total count based on current page and hasNextPage

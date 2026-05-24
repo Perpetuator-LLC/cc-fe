@@ -44,6 +44,13 @@ export interface ColumnOption {
   selected: boolean;
 }
 
+/** Pre-computed display fields attached to each pulse row. */
+interface PulseDisplay {
+  formattedSchedule: string;
+  formattedLastGenerated: string;
+}
+type PulseConfigWithDisplay = PulseConfig & PulseDisplay;
+
 @Component({
   selector: 'app-pulses-list',
   standalone: true,
@@ -79,10 +86,21 @@ export interface ColumnOption {
   templateUrl: './pulses-list.component.html',
   styleUrls: ['./pulses-list.component.scss'],
 })
-export class PulsesListComponent extends RelayPaginatorBase<PulseConfig> implements OnInit, OnDestroy {
+export class PulsesListComponent extends RelayPaginatorBase<PulseConfigWithDisplay> implements OnInit, OnDestroy {
   @ViewChild('toolbarTemplate', { static: true }) toolbarTemplate!: TemplateRef<never>;
   private subscriptions = new Subscription();
-  pulseConfigs: PulseConfig[] = [];
+  private _pulseConfigs: PulseConfigWithDisplay[] = [];
+  /** Setter enriches each PulseConfig with pre-computed display strings. */
+  set pulseConfigs(value: PulseConfig[]) {
+    this._pulseConfigs = (value || []).map((c) => ({
+      ...c,
+      formattedSchedule: this.formatSchedule(c),
+      formattedLastGenerated: this.formatTimeAgo(c.lastGeneratedAt),
+    }));
+  }
+  get pulseConfigs(): PulseConfigWithDisplay[] {
+    return this._pulseConfigs;
+  }
   protected loading = false;
   displayedColumns: string[] = ['name', 'schedule', 'lastGeneratedAt', 'isActive', 'generate', 'actions'];
   isGridView = false;
@@ -296,6 +314,14 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfig> impleme
     if (this.orderBy === field) return 'asc';
     if (this.orderBy === `-${field}`) return 'desc';
     return null;
+  }
+
+  /** Pre-computed sort direction getters used by the template (no-arg property access). */
+  get sortDirectionName(): 'asc' | 'desc' | null {
+    return this.getSortDirection('name');
+  }
+  get sortDirectionLastGenerated(): 'asc' | 'desc' | null {
+    return this.getSortDirection('last_generated_at');
   }
 
   toggleView(isGrid: boolean) {

@@ -5,6 +5,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { PodcastsService } from '../podcasts.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconButton } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -18,7 +19,7 @@ interface CategoryOption {
 @Component({
   selector: 'app-create-podcast-categories',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatChipsModule, MatIconModule],
+  imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatChipsModule, MatIconButton, MatIconModule],
   templateUrl: './create-podcast-categories.component.html',
   styleUrl: './create-podcast-categories.component.scss',
   providers: [
@@ -73,6 +74,7 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
 
   writeValue(obj: Record<string, string[]> | null): void {
     this.value = obj || {};
+    this.rebuildSelectedDisplay();
   }
 
   registerOnChange(fn: (value: Record<string, string[]>) => void): void {
@@ -83,9 +85,27 @@ export class CreatePodcastCategoriesComponent implements OnInit, ControlValueAcc
     this.onTouched = fn;
   }
 
+  /** Pre-computed selected values + display labels. Rebuilt on every model update. */
+  selectedValues: string[] = [];
+  allSelectedCategories: string[] = [];
+
+  private rebuildSelectedDisplay(): void {
+    const values: string[] = [];
+    const labels: string[] = [];
+    Object.keys(this.value).forEach((parent) => {
+      this.value[parent]?.forEach((sub) => {
+        values.push(`sub:${parent}:${sub}`);
+        labels.push(`${parent} > ${sub}`);
+      });
+    });
+    this.selectedValues = values;
+    this.allSelectedCategories = labels;
+  }
+
   private updateModel() {
     this.onChange(this.value);
     this.onTouched();
+    this.rebuildSelectedDisplay();
   }
 
   getSelectedValues(): string[] {

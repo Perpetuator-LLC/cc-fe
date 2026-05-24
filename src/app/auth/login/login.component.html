@@ -27,7 +27,7 @@
       </mat-card-header>
       <mat-card-content>
         <!-- Email Not Verified Alert (Special Case) -->
-        @if (isEmailNotVerified()) {
+        @if (isEmailNotVerified) {
           <div class="alert alert-warning" role="alert">
             <div class="alert-header">
               <mat-icon>warning</mat-icon>
@@ -45,7 +45,7 @@
         }
 
         <!-- Generic Error Alert -->
-        @if (errorMessage && !isEmailNotVerified()) {
+        @if (errorMessage && !isEmailNotVerified) {
           <div class="alert alert-error" role="alert">
             <div class="alert-header">
               <mat-icon>error</mat-icon>

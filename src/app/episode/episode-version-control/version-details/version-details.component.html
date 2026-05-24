@@ -1,0 +1,58 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+@if (version) {
+  <div class="selected-version-info">
+    <div class="version-header">
+      <h5>
+        Version {{ version.versionNumber }}
+        <span [class]="version.display.validationBadgeClass" [matTooltip]="version.display.validationTooltip">
+          <mat-icon>{{ version.display.validationIcon }}</mat-icon>
+          {{ version.display.validationLabel }}
+        </span>
+      </h5>
+      <div class="version-metadata">
+        <span class="change-type">
+          <mat-icon>{{ version.display.changeTypeIcon }}</mat-icon>
+          {{ version.display.changeTypeLabel }}
+        </span>
+        <span class="created-date">
+          {{ version.createdAt | date: 'short' }}
+        </span>
+        @if (version.createdBy) {
+          <span class="created-by"> by {{ version.createdBy.username }} </span>
+        }
+      </div>
+    </div>
+
+    <div class="version-stats">
+      <div class="stat-item">
+        <span class="stat-label">Word Count</span>
+        <span class="stat-value">{{ version.display.wordCount }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Character Count</span>
+        <span class="stat-value">{{ version.display.charCount }}</span>
+      </div>
+    </div>
+
+    <div class="version-audio">
+      <span class="info-label">Audio:</span>
+      @if (hasAudio) {
+        <audio controls [src]="version.audioUrl"></audio>
+      } @else {
+        <span class="no-audio">No audio file for this version</span>
+      }
+    </div>
+
+    @if (version.validationNotes) {
+      <div class="validation-notes">
+        <mat-icon>note</mat-icon>
+        <span [innerHTML]="notesHtml"></span>
+      </div>
+    }
+
+    <mat-form-field class="full-width version-content-field">
+      <mat-label>Version {{ version.versionNumber }} Content (Read-Only)</mat-label>
+      <textarea matInput [value]="version.content" readonly rows="20"></textarea>
+    </mat-form-field>
+  </div>
+}

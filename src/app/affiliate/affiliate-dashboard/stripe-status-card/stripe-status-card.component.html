@@ -1,0 +1,69 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<mat-card class="stripe-status-card" [class.incomplete]="!profile.stripeOnboardingCompleted">
+  <mat-card-content>
+    <h2>Payment Account Status</h2>
+    @if (!profile.stripeAccountId) {
+      <div class="stripe-status not-setup">
+        <mat-icon>account_balance</mat-icon>
+        <div class="status-content">
+          <h3>Stripe Account Required</h3>
+          <p>
+            To receive cash payouts, you need to create a Stripe Connect account. This ensures secure and compliant
+            payments.
+          </p>
+          <button mat-raised-button color="primary" (click)="startOnboarding.emit()">
+            <mat-icon>add_circle</mat-icon>
+            Setup Payment Account
+          </button>
+        </div>
+      </div>
+    } @else if (!profile.stripeOnboardingCompleted) {
+      <div class="stripe-status incomplete">
+        <mat-icon>pending</mat-icon>
+        <div class="status-content">
+          <h3>Setup Incomplete</h3>
+          <p>Your Stripe account setup is not complete. Please finish the onboarding process to enable cash payouts.</p>
+          <div class="button-group">
+            <button mat-raised-button color="accent" (click)="continueOnboarding.emit()">
+              <mat-icon>arrow_forward</mat-icon>
+              Continue Setup
+            </button>
+            <button mat-stroked-button (click)="skipSetup.emit()">
+              <mat-icon>home</mat-icon>
+              Skip for Now
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="stripe-status complete">
+        <mat-icon>check_circle</mat-icon>
+        <div class="status-content">
+          <h3>Payment Account Active</h3>
+          <div class="stripe-details">
+            @if (profile.stripeCountry) {
+              <div class="detail-item">
+                <span class="label">Country:</span>
+                <span class="value">{{ profile.stripeCountry }}</span>
+              </div>
+            }
+            <div class="detail-item">
+              <span class="label">Payouts:</span>
+              <span
+                class="value"
+                [class.enabled]="profile.stripePayoutsEnabled"
+                [class.disabled]="!profile.stripePayoutsEnabled"
+              >
+                {{ payoutsLabel }}
+              </span>
+            </div>
+          </div>
+          <button mat-raised-button (click)="openDashboard.emit()">
+            <mat-icon>open_in_new</mat-icon>
+            View Stripe Dashboard
+          </button>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
