@@ -106,16 +106,37 @@ jobs:
           # been observed to return "no such manifest" for tags that
           # `docker pull` successfully retrieves.
           #
+          # Retry loop handles the GHCR propagation race: the
+          # build-and-publish.yml workflow on GitHub dispatches us within
+          # milliseconds of completing the push, but GHCR's CDN can take
+          # 10-30s to make a freshly-pushed manifest globally queryable.
+          # Without retry, ~1 in 3 deploys would land in that window and
+          # see "manifest unknown" even though the push succeeded.
+          #
+          # 6 attempts × 10s = 60s total tolerance, which has covered
+          # every propagation delay observed so far.
+          #
           # Side benefit: pull populates the local image cache, so the next
           # smoke test step's `docker run` and the final `docker compose pull`
           # are both fast (no re-download).
-          if ! /usr/bin/docker pull "${{ steps.target.outputs.image }}"; then
-            echo "❌ Failed to pull ${{ steps.target.outputs.image }} from GHCR."
-            echo "   Check the GitHub Actions build for this commit:"
-            echo "   https://github.com/Perpetuator-LLC/cc-fe/commit/${{ github.sha }}/checks"
-            exit 1
-          fi
-          echo "✅ Image pulled successfully"
+          IMAGE="${{ steps.target.outputs.image }}"
+          for attempt in 1 2 3 4 5 6; do
+            if /usr/bin/docker pull "${IMAGE}"; then
+              echo "✅ Image pulled successfully (attempt ${attempt})"
+              exit 0
+            fi
+            if [ "${attempt}" -lt 6 ]; then
+              echo "⏳ Pull failed (attempt ${attempt}/6). Likely registry propagation — retrying in 10s..."
+              sleep 10
+            fi
+          done
+          echo "❌ Failed to pull ${IMAGE} after 6 attempts (~60s)."
+          echo "   This is beyond normal GHCR propagation. Check:"
+          echo "   - GitHub Actions build for this commit:"
+          echo "     https://github.com/Perpetuator-LLC/cc-fe/commit/${{ github.sha }}/checks"
+          echo "   - The GHCR package page for the sha-XXX tag:"
+          echo "     https://github.com/Perpetuator-LLC/cc-fe/pkgs/container/cc-fe"
+          exit 1
 
       - name: Smoke test (verify image boots and serves /health)
         run: |
