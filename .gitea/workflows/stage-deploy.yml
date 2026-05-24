@@ -198,13 +198,13 @@ jobs:
     runs-on: deploy-host
     needs: [audit, lint, test]
     steps:
-      - name: Checkout code (for deploy scripts + compose file)
+      - name: Checkout deploy artifacts (compose file only)
         env:
           GITEA_TOKEN: ${{ gitea.token }}
         run: |
-          # We still need the repo on disk for docker-compose.stage.yml and
-          # scripts/generate-env-from-vault-runtime.sh. The application code
-          # itself is no longer built here — the image comes from GHCR.
+          # The container fetches its own runtime config from OpenBao at
+          # startup — so we don't need scripts/ or any source code on disk
+          # for the deploy. Only the compose file.
           WORK_DIR="/tmp/cc-fe-stage-checkout"
           rm -rf ${WORK_DIR}
           git clone --depth 1 --branch ${{ github.ref_name }} \
@@ -216,28 +216,12 @@ jobs:
           echo "Deploying to: ${{ env.STAGE_PATH }}"
           mkdir -p ${{ env.STAGE_PATH }}
 
-      - name: Sync deploy artifacts (compose file + scripts)
+      - name: Sync compose file to deploy path
         run: |
           WORK_DIR="/tmp/cc-fe-stage-checkout"
-          # Only sync the files needed at deploy-time — not the entire source tree.
           /usr/bin/rsync -av \
             ${WORK_DIR}/docker-compose.stage.yml \
             ${{ env.STAGE_PATH }}/docker-compose.stage.yml
-          /usr/bin/rsync -av --delete \
-            ${WORK_DIR}/scripts/ \
-            ${{ env.STAGE_PATH }}/scripts/
-
-      - name: Generate runtime config from OpenBao
-        env:
-          VAULT_ADDR: https://vault.perpetuator.io
-          ROLE_ID_FILE: /etc/vault/vault-role-id
-          SECRET_ID_FILE: /etc/vault/vault-secret-id
-        run: |
-          cd ${{ env.STAGE_PATH }}
-          chmod +x scripts/generate-env-from-vault-runtime.sh
-          ./scripts/generate-env-from-vault-runtime.sh \
-            secret/services/cc-fe/staging \
-            .env.stage
 
       - name: Wait for GHCR image (handles race with GitHub Actions)
         run: |

@@ -33,10 +33,16 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
+# curl + jq are used by docker-entrypoint.sh to fetch runtime config from
+# OpenBao/Vault when VAULT_ADDR is set. wget stays for the healthcheck.
+# --no-cache keeps the layer small (no apk cache file written).
+RUN apk add --no-cache curl jq
+
 # Copy only the built output (Express server is self-contained)
 COPY --from=build /app/dist/capital-copilot-fe ./
 
-# Entrypoint script validates required env vars before starting the server.
+# Entrypoint either fetches CC_FE_* from OpenBao (if VAULT_ADDR is set) or
+# validates pre-set CC_FE_* env vars, then exec's the SSR server.
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

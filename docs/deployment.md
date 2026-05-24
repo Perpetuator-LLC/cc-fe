@@ -2,16 +2,16 @@
 
 ## Overview
 
-cc-fe uses a **pull-based deployment** model:
+cc-fe uses a **pull-based deployment** with **secrets fetched at container startup** — never written to disk on the host:
 
 1. **GitHub** is the source of truth and the public FOSS repo.
 2. **GitHub Actions** builds the Docker image, scans it with Trivy, and pushes to **GHCR** (`ghcr.io/perpetuator-llc/cc-fe`).
 3. **Gitea** mirrors the GitHub repo (pull mirror, syncs every few minutes or on webhook).
 4. **Gitea Actions** triggers `.gitea/workflows/stage-deploy.yml` on push to `main`, which:
    - Runs audit/lint/test gates
-   - Generates runtime config from OpenBao into `.env.stage`
    - Waits for the GHCR image (polls for the SHA tag)
    - Pulls the image and `docker compose up -d`
+5. **The container itself** fetches `CC_FE_*` secrets from OpenBao at startup using AppRole credentials mounted read-only from `/etc/vault/`. Secrets are exported as env vars in-process, the AppRole token is revoked, and the SSR server starts. No `.env.stage` ever touches disk.
 
 ```
 GitHub push to main
@@ -30,11 +30,19 @@ GitHub push to main
         │
         └─→ stage-deploy.yml
               ├─→ audit / lint / test (gates)
-              ├─→ generate-env-from-vault-runtime.sh → .env.stage
+              ├─→ rsync docker-compose.stage.yml to deploy path
               ├─→ wait for GHCR sha-XXX tag (10 min timeout)
               ├─→ docker compose pull
               ├─→ docker compose up -d
-              └─→ health check
+              │      │
+              │      └─→ container starts → docker-entrypoint.sh:
+              │            ├─→ AppRole login (reads /etc/vault/* from
+              │            │    host, mounted ro into container)
+              │            ├─→ GET secret/services/cc-fe/staging
+              │            ├─→ export CC_FE_* env vars
+              │            ├─→ revoke vault token
+              │            └─→ exec node server/server.mjs
+              └─→ health check on /health
 ```
 
 ---
@@ -103,26 +111,35 @@ While the cc-fe GHCR package is private, the Gitea deploy runner on lestrange ne
 
 ### 3. OpenBao Secrets
 
-The OpenBao secret path used by the deploy script is `secret/services/cc-fe/staging`. It must contain these keys:
+The container reads its runtime config from `secret/services/cc-fe/staging` (KV v2). The path must contain these six keys:
+
+| Key | Example value |
+|---|---|
+| `api_url` | `https://stage-api.capitalcopilot.io` |
+| `site_url` | `https://stage.capitalcopilot.io` |
+| `oauth_issuer` | `https://stage-api.capitalcopilot.io` |
+| `oauth_client_id` | (your OAuth2 client ID) |
+| `oauth_scopes` | `read write` |
+| `stripe_public_key` | `pk_test_…` or `pk_live_…` |
+
+**Seed the path interactively from your workstation:**
 
 ```bash
-vault kv put secret/services/cc-fe/staging \
-  api_url=https://stage-api.capitalcopilot.io \
-  site_url=https://stage.capitalcopilot.io \
-  stripe_public_key=pk_test_xxx \
-  oauth_issuer=https://stage-api.capitalcopilot.io \
-  oauth_client_id=YOUR_CLIENT_ID \
-  oauth_scopes='read write'
+./scripts/seed-vault-staging.sh
 ```
 
-The deploy script (`scripts/generate-env-from-vault-runtime.sh`) reads these and writes `.env.stage` (a dotenv file) on lestrange, which `docker-compose.stage.yml` loads into the container.
+The script prompts for a vault token (or uses an existing `vault login` session), then for each value. Sensitive values use `read -rs` (no echo, no shell history), and writes go via STDIN to `vault kv put` (never argv). Run it once per environment.
 
-AppRole credentials for the deploy host already live at:
+**Update later** by running the same script again — `vault kv put` replaces the entire payload, so make sure to enter every value (or use `vault kv patch` for incremental updates).
 
-- `/etc/vault/vault-role-id`
-- `/etc/vault/vault-secret-id`
+**AppRole credentials on lestrange** (for the container to authenticate at startup):
 
-(No change from the existing setup.)
+- `/etc/vault/vault-role-id` (mode 600, readable by the docker user)
+- `/etc/vault/vault-secret-id` (same)
+
+`docker-compose.stage.yml` mounts `/etc/vault` read-only into the container; `docker-entrypoint.sh` reads the AppRole files, exchanges them for a short-lived token, fetches `secret/services/cc-fe/staging`, exports the values as `CC_FE_*` env vars, and revokes the token. The secrets are never on the container filesystem and never appear in `docker inspect`.
+
+> **Existing `scripts/generate-env-from-vault-runtime.sh`** is kept as a debugging tool — useful for verifying OpenBao access from lestrange without spinning up the container. It writes a dotenv file you can `cat`; just delete the file afterward. The deploy pipeline does NOT use it.
 
 ---
 
