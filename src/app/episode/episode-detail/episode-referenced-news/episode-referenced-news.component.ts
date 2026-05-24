@@ -2,6 +2,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatCard, MatCardHeader } from '@angular/material/card';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { NewsResult } from '../../../news/news.service';
@@ -31,7 +32,7 @@ export interface NewsItemDisplay extends NewsResult {
   selector: 'app-episode-referenced-news',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, DatePipe, MatCard, MatCardHeader, MatIcon, MatTooltip],
+  imports: [CommonModule, DatePipe, MatCard, MatCardHeader, MatIconButton, MatIcon, MatTooltip],
   templateUrl: './episode-referenced-news.component.html',
   styleUrl: './episode-referenced-news.component.scss',
 })

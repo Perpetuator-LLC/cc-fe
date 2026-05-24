@@ -59,7 +59,7 @@
 
     min-height: 40px;
     padding-top: 0;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     padding-inline: 30px;
 
     .select-right-podcasts {
@@ -316,7 +316,7 @@
       padding-left: 16px;
 
       span {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 400;
         color: var(--md-sys-color-on-surface-variant);
         white-space: nowrap;
@@ -432,7 +432,7 @@
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    padding: 16px 30px 40px;
+    padding: 16px 32px 40px;
     padding-left: 36px;
     border-left: 1px solid var(--md-sys-color-outline-variant);
 
@@ -556,7 +556,7 @@
 
       p {
         margin: 0;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 400;
         color: var(--md-sys-color-on-surface-variant);
 
@@ -613,7 +613,7 @@
 
     @media screen and (width <= 576px) {
       width: 100%;
-      padding: 4px 6px;
+      padding: 4px 8px;
       border: 1px solid var(--md-sys-color-outline-variant);
       border-radius: 8px;
     }
@@ -724,7 +724,7 @@
     }
 
     .before-select-right-podcasts {
-      margin-top: 30px;
+      margin-top: 32px;
       text-align: center;
 
       .fields {
@@ -917,11 +917,11 @@
 .category-badge {
   display: inline-block;
 
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
   white-space: nowrap;
@@ -939,7 +939,7 @@
   display: inline-flex;
   align-items: center;
 
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
 
   font-size: 12px;
@@ -1044,7 +1044,7 @@
   .category-badge,
   .news-tag {
     padding: 4px 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 

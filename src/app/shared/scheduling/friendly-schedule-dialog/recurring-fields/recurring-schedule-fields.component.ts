@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -17,7 +18,7 @@ export interface DayDisplay {
 @Component({
   selector: 'app-recurring-schedule-fields',
   standalone: true,
-  imports: [ReactiveFormsModule, MatButtonToggleModule, MatFormFieldModule, MatSelectModule],
+  imports: [ReactiveFormsModule, MatButton, MatButtonToggleModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './recurring-schedule-fields.component.html',
   styleUrls: ['./recurring-schedule-fields.component.scss'],
 })

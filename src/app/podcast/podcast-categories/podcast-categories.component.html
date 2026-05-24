@@ -57,7 +57,7 @@
               @for (sub of item.selectedSubcategories; track sub) {
                 <mat-chip [removable]="true" (removed)="removeSubcategory(item.parent, sub)">
                   {{ sub }}
-                  <button matChipRemove>
+                  <button mat-icon-button matChipRemove>
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-chip>

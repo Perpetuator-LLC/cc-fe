@@ -16,7 +16,7 @@
   gap: 16px;
   align-items: center;
 
-  margin-top: 50px;
+  margin-top: 52px;
 
   p {
     font-size: 16px;
@@ -26,7 +26,7 @@
 
 .no-permission-card {
   max-width: 600px;
-  margin: 50px auto;
+  margin: 52px auto;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
@@ -79,7 +79,7 @@
 }
 
 .admin-header {
-  margin-bottom: 30px;
+  margin-bottom: 32px;
   padding-bottom: 16px;
   border-bottom: 2px solid var(--md-sys-color-outline-variant);
 
@@ -241,7 +241,7 @@
       justify-content: space-between;
 
       .stat-label {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
         color: var(--md-sys-color-on-surface-variant);
       }
@@ -287,7 +287,7 @@
         }
 
         .stat-subvalue {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 600;
           color: var(--md-sys-color-on-surface);
         }
@@ -313,7 +313,7 @@
       }
 
       span {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--md-sys-color-on-surface-variant);
       }
     }
@@ -519,7 +519,7 @@
       padding: 4px 8px;
       border-radius: 12px;
 
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
 
@@ -637,7 +637,7 @@
     padding: 12px 16px;
     border-bottom: 2px solid var(--md-sys-color-outline-variant);
 
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
 
@@ -702,7 +702,7 @@
   }
 
   .usd-amount {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--md-sys-color-success);
   }

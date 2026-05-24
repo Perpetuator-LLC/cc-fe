@@ -21,7 +21,7 @@
     @for (category of allSelectedCategories; track category) {
       <mat-chip [removable]="true" (removed)="removeCategory(category)">
         {{ category }}
-        <button matChipRemove>
+        <button mat-icon-button matChipRemove>
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip>

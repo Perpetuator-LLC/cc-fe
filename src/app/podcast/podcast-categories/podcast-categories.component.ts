@@ -10,6 +10,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconButton } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -36,6 +37,7 @@ interface ParentDisplay {
     MatFormFieldModule,
     MatSelectModule,
     MatChipsModule,
+    MatIconButton,
     MatIconModule,
   ],
   templateUrl: './podcast-categories.component.html',

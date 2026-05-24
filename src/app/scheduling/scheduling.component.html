@@ -57,6 +57,7 @@
           <td mat-cell *matCellDef="let schedule">
             @if (schedule.resourceInfo; as resource) {
               <button
+                mat-button
                 type="button"
                 class="resource-link-{{ resource.type }}"
                 (click)="navigateToResource($event, resource)"

@@ -285,7 +285,7 @@
 .suggestion-asset-type {
   flex-shrink: 0;
 
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
 
   font-size: 10px;
@@ -317,7 +317,7 @@
 .ai-badge {
   flex-shrink: 0;
 
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
 
   font-size: 10px;
@@ -439,7 +439,7 @@
   padding-bottom: 4px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 
-  font-size: 11px;
+  font-size: 12px;
   color: var(--md-sys-color-on-surface-variant);
 
   mat-icon {
@@ -481,7 +481,7 @@
   gap: 4px;
   align-items: center;
 
-  padding: 6px 8px;
+  padding: 8px;
   border-radius: 4px;
 
   transition: background 0.15s;
@@ -492,7 +492,7 @@
   }
 
   &.selected {
-    padding-left: 6px;
+    padding-left: 8px;
     border-left: 2px solid var(--md-sys-color-primary);
   }
 
@@ -607,12 +607,12 @@
 
     min-width: 20px;
     height: 20px;
-    padding: 0 6px;
+    padding: 0 8px;
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 4px;
 
     font-family: system-ui, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
 
     background: var(--md-sys-color-surface-container-highest);

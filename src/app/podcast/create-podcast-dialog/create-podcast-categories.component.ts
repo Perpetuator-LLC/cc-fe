@@ -5,6 +5,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { PodcastsService } from '../podcasts.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconButton } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -18,7 +19,7 @@ interface CategoryOption {
 @Component({
   selector: 'app-create-podcast-categories',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatChipsModule, MatIconModule],
+  imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatChipsModule, MatIconButton, MatIconModule],
   templateUrl: './create-podcast-categories.component.html',
   styleUrl: './create-podcast-categories.component.scss',
   providers: [

@@ -63,11 +63,11 @@
     gap: 8px;
     align-items: center;
 
-    font-size: 13px;
+    font-size: 14px;
     color: var(--md-sys-color-on-surface);
 
     code {
-      padding: 2px 6px;
+      padding: 2px 8px;
       border-radius: 4px;
 
       font-family: 'Roboto Mono', monospace;
@@ -124,14 +124,14 @@
 
     .color-name {
       display: block;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface);
     }
 
     .color-desc {
       display: block;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 400;
       color: var(--md-sys-color-on-surface-variant);
     }
@@ -172,17 +172,17 @@
       }
 
       code {
-        padding: 2px 6px;
+        padding: 2px 8px;
         border-radius: 4px;
 
         font-family: 'Roboto Mono', monospace;
-        font-size: 11px;
+        font-size: 12px;
 
         background: var(--md-sys-color-surface-container-highest);
       }
 
       small {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--md-sys-color-on-surface-variant);
       }
     }
@@ -231,7 +231,7 @@
       margin-bottom: 8px;
 
       code {
-        padding: 2px 6px;
+        padding: 2px 8px;
         border-radius: 4px;
 
         font-family: 'Roboto Mono', monospace;
@@ -263,7 +263,7 @@
     border-radius: 8px;
 
     font-family: 'Roboto Mono', monospace;
-    font-size: 13px;
+    font-size: 14px;
     /* stylelint-disable-next-line declaration-property-value-disallowed-list */
     line-height: 1.5;
 
