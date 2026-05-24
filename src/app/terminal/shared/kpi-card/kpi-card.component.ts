@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -18,7 +19,7 @@ export type KpiAccent = 'primary' | 'secondary' | 'success' | 'warning' | 'error
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [CommonModule, MatTooltipModule, MatIconModule],
+  imports: [CommonModule, MatIconButton, MatTooltipModule, MatIconModule],
   templateUrl: './kpi-card.component.html',
   styleUrl: './kpi-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

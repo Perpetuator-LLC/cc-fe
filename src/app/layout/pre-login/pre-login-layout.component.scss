@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Perpetuator LLC */
+/* Copyright (c) 2025-2026 Perpetuator LLC */
 .pre-login-layout {
   display: flex;
   flex-direction: column;
@@ -186,7 +186,7 @@
 
     width: 90%;
     margin: 0 auto;
-    padding-top: 50px;
+    padding-top: 52px;
     border: 0;
 
     background: transparent;
@@ -201,7 +201,7 @@
       // MD3 4px grid: 48px = 12 * 4px for navigation pill horizontal padding
       padding: 16px 48px; // 48px pill shape padding (12 * 4px)
       /* stylelint-disable-next-line declaration-property-value-disallowed-list */
-      border-radius: 9999px; // Pill shape (effectively infinite radius)
+      border-radius: 999px;
 
       background: radial-gradient(
         100% 100% at 0% 0%,
@@ -255,7 +255,7 @@
       width: 142px;
       min-width: 142px;
       height: 48px;
-      border-radius: 48px; // MD3 grid: pill shape
+      border-radius: 999px;
 
       font-family: Sarabun, sans-serif;
       font-size: 16px;

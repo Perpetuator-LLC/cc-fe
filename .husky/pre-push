@@ -15,5 +15,12 @@ if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
   exit 1
 fi
 
+# Project-wide lint checks that aren't covered by lint-staged in pre-commit.
+# lint-staged only sees staged files, so these catch issues introduced via
+# --no-verify, partial staging, or cross-file regressions (e.g. an SCSS class
+# becoming unused because its consumer was deleted in a different file).
+yarn lint:md3
+yarn lint:scss:unused:strict
+
 npm test
 

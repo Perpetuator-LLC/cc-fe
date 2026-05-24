@@ -40,6 +40,7 @@
               <div class="schedule-resources">
                 @if (schedule.podcastInfo; as podcastInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-podcast"
                     (click)="navigateToPodcast($event, podcastInfo.uuid)"
@@ -49,13 +50,19 @@
                   </button>
                 }
                 @if (schedule.pulseInfo; as pulseInfo) {
-                  <button type="button" class="resource-link-pulse" (click)="navigateToPulse($event, pulseInfo.uuid)">
+                  <button
+                    mat-button
+                    type="button"
+                    class="resource-link-pulse"
+                    (click)="navigateToPulse($event, pulseInfo.uuid)"
+                  >
                     <mat-icon>graphic_eq</mat-icon>
                     {{ pulseInfo.name }}
                   </button>
                 }
                 @if (schedule.episodeInfo; as episodeInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-episode"
                     (click)="navigateToEpisode($event, episodeInfo.uuid)"

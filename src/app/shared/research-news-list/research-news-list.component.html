@@ -9,10 +9,22 @@
       <span class="count">{{ news.length }} articles</span>
     </div>
     <div class="view-toggles">
-      <button type="button" class="view-btn" (click)="toggleView(true)" [class.active]="viewMode === 'grid'">
+      <button
+        mat-icon-button
+        type="button"
+        class="view-btn"
+        (click)="toggleView(true)"
+        [class.active]="viewMode === 'grid'"
+      >
         <mat-icon>grid_on</mat-icon>
       </button>
-      <button type="button" class="view-btn" (click)="toggleView(false)" [class.active]="viewMode === 'list'">
+      <button
+        mat-icon-button
+        type="button"
+        class="view-btn"
+        (click)="toggleView(false)"
+        [class.active]="viewMode === 'list'"
+      >
         <mat-icon>list_alt</mat-icon>
       </button>
     </div>

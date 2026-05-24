@@ -40,7 +40,13 @@
     </button>
   }
   @for (pulse of resources.pulseConfigs; track pulse.uuid) {
-    <button type="button" class="resource-link-pulse" [routerLink]="['/media/pulses', pulse.uuid]" matTooltip="Pulse">
+    <button
+      mat-flat-button
+      type="button"
+      class="resource-link-pulse"
+      [routerLink]="['/media/pulses', pulse.uuid]"
+      matTooltip="Pulse"
+    >
       <mat-icon>vital_signs</mat-icon>
       {{ pulse.name }}
     </button>

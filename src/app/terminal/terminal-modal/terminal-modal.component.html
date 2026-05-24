@@ -128,6 +128,7 @@
         <input
           #commandInput
           type="text"
+          class="command-input"
           [(ngModel)]="currentCommand"
           (input)="onInputChange()"
           (keydown)="onKeyDown($event)"

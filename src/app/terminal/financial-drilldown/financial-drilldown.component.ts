@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Perpetuator LLC
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { MatIconButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -42,7 +43,7 @@ interface EnrichedAlert extends FinancialAlert {
 @Component({
   selector: 'app-financial-drilldown',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, ToFixedPipe],
+  imports: [CommonModule, MatIconButton, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, ToFixedPipe],
   templateUrl: './financial-drilldown.component.html',
   styleUrl: './financial-drilldown.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
