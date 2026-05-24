@@ -111,6 +111,9 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           vuln-type: os,library
+          # Documented exclusions live here. Each entry must have a comment
+          # explaining the false-positive rationale or compensating control.
+          trivyignores: .trivyignore
 
       # Push only for branch pushes to main, tag pushes, or manual dispatch.
       # PRs intentionally skip this — the build + scan are the validation;
