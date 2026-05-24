@@ -14,7 +14,11 @@
 services:
   frontend:
     container_name: cc-fe-stage-angular
-    image: ghcr.io/perpetuator-llc/cc-fe:latest
+    # IMAGE_TAG defaults to :latest for ad-hoc local runs (e.g. `docker compose up`
+    # on a fresh checkout). The deploy pipeline sets IMAGE_TAG=sha-<commit> so we
+    # deploy the exact image we just verified, and so rollback is one variable
+    # away (`IMAGE_TAG=sha-<old> docker compose up -d`).
+    image: ghcr.io/perpetuator-llc/cc-fe:${IMAGE_TAG:-latest}
     pull_policy: always
     ports:
       - "4481:80"
