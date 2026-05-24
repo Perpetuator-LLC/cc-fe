@@ -185,9 +185,27 @@ jobs:
           # what gets deployed. If we left it as :latest, a concurrent newer
           # build could race in and we'd deploy something we never verified.
           IMAGE_TAG: sha-${{ steps.target.outputs.short_sha }}
+          # AppRole creds passed through to the container so its entrypoint
+          # can authenticate to OpenBao and pull CC_FE_* config at startup.
+          # The runner's DinD doesn't have /etc/vault from the host, so
+          # we can't bind-mount the credential files — env vars instead.
+          # Required Gitea secrets: VAULT_ROLE_ID, VAULT_SECRET_ID
+          # (see docs/deployment.md for setup).
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
         run: |
           COMPOSE_FILE="docker-compose.stage.yml"
           PROJECT_NAME="cc-fe-stage"
+
+          # Validate the AppRole secrets exist before touching the container.
+          # Without these the container would crash-loop on startup, so
+          # better to fail the deploy with a clear error here.
+          if [ -z "${VAULT_ROLE_ID}" ] || [ -z "${VAULT_SECRET_ID}" ]; then
+            echo "::error::VAULT_ROLE_ID and/or VAULT_SECRET_ID Gitea secrets are not set."
+            echo "Add them in the Gitea repo Settings → Actions → Secrets."
+            echo "See docs/deployment.md for instructions."
+            exit 1
+          fi
 
           # Image is already in local cache from the verify step above, so
           # docker compose pull is a no-op — but we still run it to catch any

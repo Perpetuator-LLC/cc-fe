@@ -30,16 +30,25 @@ services:
       # Without these two vars, the entrypoint would expect CC_FE_* directly.
       - VAULT_ADDR=https://vault.perpetuator.io
       - VAULT_PATH=secret/services/cc-fe/staging
+      # AppRole credentials for the container to authenticate to OpenBao.
+      # Passed through from the deploy environment (deploy workflow sets
+      # them from Gitea secrets; ad-hoc `docker compose up` can set them
+      # via shell exports or a sibling .env file). The container uses
+      # them ONCE at startup to exchange for a short-lived token, then
+      # immediately revokes the token. Values never persist on disk.
+      #
+      # NOTE: we used to mount /etc/vault from the host instead, but the
+      # Gitea runner is Docker-in-Docker — the deployed container runs
+      # inside DinD, where the host's /etc/vault is invisible. Env-var
+      # passthrough works regardless of runtime environment.
+      - VAULT_ROLE_ID=${VAULT_ROLE_ID}
+      - VAULT_SECRET_ID=${VAULT_SECRET_ID}
       # nginx-proxy + LE companion read these to provision the TLS cert and
       # route traffic. They are NOT secrets.
       - VIRTUAL_HOST=stage.capitalcopilot.io
       - VIRTUAL_PATH=/
       - LETSENCRYPT_HOST=stage.capitalcopilot.io
       - LETSENCRYPT_EMAIL=admin@perpetuator.io
-    volumes:
-      # AppRole creds mounted read-only — the container uses these to
-      # log in to OpenBao at startup, then revokes its own token.
-      - /etc/vault:/etc/vault:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
       interval: 30s
